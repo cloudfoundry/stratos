@@ -33,7 +33,7 @@ describe('EditSpaceQuotaStepComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EditSpaceQuotaStepComponent);

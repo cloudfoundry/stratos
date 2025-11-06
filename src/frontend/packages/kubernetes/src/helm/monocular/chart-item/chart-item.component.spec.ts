@@ -16,9 +16,9 @@ describe('Component: ChartItem', () => {
     TestBed.configureTestingModule({
       imports: [
         HttpClientTestingModule,
-        createBasicStoreModule()
+        createBasicStoreModule(),
+        ChartItemComponent
       ],
-      declarations: [ChartItemComponent],
       providers: [
         HttpClient,
         ConfigService,

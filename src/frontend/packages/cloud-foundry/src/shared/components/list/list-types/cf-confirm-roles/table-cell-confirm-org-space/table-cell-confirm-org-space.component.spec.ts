@@ -12,10 +12,10 @@ describe('TableCellConfirmOrgSpaceComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        NoopAnimationsModule
+        NoopAnimationsModule,
+        TableCellConfirmOrgSpaceComponent
       ],
       declarations: [
-        TableCellConfirmOrgSpaceComponent,
         AppChipsComponent
       ]
     })

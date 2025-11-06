@@ -13,7 +13,7 @@ describe('NoContentMessageComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(NoContentMessageComponent);

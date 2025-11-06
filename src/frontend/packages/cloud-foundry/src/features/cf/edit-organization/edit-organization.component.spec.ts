@@ -29,7 +29,7 @@ describe('EditOrganizationComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EditOrganizationComponent);

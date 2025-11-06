@@ -17,7 +17,7 @@ describe('CreateSpaceQuotaStepComponent', () => {
       providers: [PaginationMonitorFactory]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CreateSpaceQuotaStepComponent);

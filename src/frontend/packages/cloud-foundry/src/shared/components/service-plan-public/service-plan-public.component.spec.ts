@@ -33,7 +33,7 @@ describe('ServicePlanPublicComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServicePlanPublicComponent);

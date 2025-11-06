@@ -29,7 +29,7 @@ describe('CloudFoundryOrganizationUsersComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryOrganizationUsersComponent);

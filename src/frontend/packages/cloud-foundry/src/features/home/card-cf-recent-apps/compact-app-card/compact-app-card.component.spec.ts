@@ -30,7 +30,7 @@ describe('CompactAppCardComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CompactAppCardComponent);

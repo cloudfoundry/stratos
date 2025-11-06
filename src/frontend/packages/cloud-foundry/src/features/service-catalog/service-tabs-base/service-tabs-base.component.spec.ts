@@ -26,7 +26,7 @@ describe('ServiceTabsBaseComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServiceTabsBaseComponent);

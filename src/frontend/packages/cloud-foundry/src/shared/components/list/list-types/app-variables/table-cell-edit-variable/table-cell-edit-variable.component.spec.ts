@@ -11,9 +11,7 @@ describe('TableCellEditVariableComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TableCellEditVariableComponent,
-      imports: [
-      ]
+      imports: [TableCellEditVariableComponent]
     })
       .compileComponents();
 

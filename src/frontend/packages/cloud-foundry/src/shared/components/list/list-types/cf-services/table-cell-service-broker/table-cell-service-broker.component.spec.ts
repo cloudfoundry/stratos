@@ -9,7 +9,7 @@ describe('TableCellServiceBrokerComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [TableCellServiceBrokerComponent]
+      imports: [TableCellServiceBrokerComponent]
     })
       .compileComponents();
 

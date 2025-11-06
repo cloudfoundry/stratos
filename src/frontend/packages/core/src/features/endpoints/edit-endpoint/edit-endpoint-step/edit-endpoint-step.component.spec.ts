@@ -35,7 +35,7 @@ describe('EditEndpointStepComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EditEndpointStepComponent);

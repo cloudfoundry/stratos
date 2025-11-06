@@ -14,9 +14,9 @@ describe('CatalogTabComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
-        ...HelmBaseTestModules
+        ...HelmBaseTestModules,
+        CatalogTabComponent
       ],
-      declarations: [CatalogTabComponent],
       providers: [
         { provide: ChartsService, useValue: new MockChartService() },
         { provide: ActivatedRoute, useValue: {
@@ -26,7 +26,7 @@ describe('CatalogTabComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CatalogTabComponent);

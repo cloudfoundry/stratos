@@ -27,7 +27,7 @@ describe('CfEndpointsMissingComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CfEndpointsMissingComponent);

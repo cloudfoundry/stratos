@@ -37,7 +37,7 @@ describe('LogViewerComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TestHostComponent);

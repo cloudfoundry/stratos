@@ -22,7 +22,7 @@ describe('DomainMismatchComponent', () => {
     
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(DomainMismatchComponent);

@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { CreatePagination } from '../../actions/pagination.actions';
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
 import { PaginationState } from '../../types/pagination.types';

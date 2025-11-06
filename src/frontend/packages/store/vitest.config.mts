@@ -7,9 +7,24 @@ export default defineConfig({
   test: {
     root: join(__dirname),
     name: 'store',
-    globals: true,
+    globals: false, // Recommended for Angular 20 + Vitest 4 (avoid global namespace pollution)
     environment: 'jsdom',
-    pool: 'forks', // Required for Angular 20 + Vitest 4 ESM module resolution
+    // Fork pool with single-fork mode for complete test isolation and Angular TestBed stability
+    pool: 'forks',
+    poolOptions: {
+      forks: {
+        singleFork: true, // Single process: ensures TestBed state reset between test files
+        isolate: true, // Isolate environments for complete cleanup
+      },
+    },
+    server: {
+      deps: {
+        inline: [
+          '@angular/compiler', // Required for Angular compilation in worker processes
+          '@analogjs/vitest-angular/setup-snapshots', // AnalogJS snapshot support
+        ],
+      },
+    },
     setupFiles: [join(__dirname, 'src/test-setup.ts')],
     include: ['src/**/*.spec.ts'],
     exclude: ['node_modules', 'dist', 'out-tsc', '**/test-e2e/**', '**/e2e/**'],
@@ -21,8 +36,8 @@ export default defineConfig({
       exclude: ['src/**/*.spec.ts', 'src/test-setup.ts', 'src/**/*.d.ts'],
     },
     reporters: ['default'], // join(__dirname, '../../../../build/vitest-stratos-reporter.ts')],
-    testTimeout: 10000,
-    hookTimeout: 10000,
+    testTimeout: 15000, // Increased for Angular TestBed initialization with zoneless detection
+    hookTimeout: 15000, // Increased for beforeAll/afterAll hooks
   },
   resolve: {
     alias: {

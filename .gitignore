@@ -165,3 +165,4 @@ test-results/
 secrets.yaml
 node_modules
 *.darwin
+test-framework

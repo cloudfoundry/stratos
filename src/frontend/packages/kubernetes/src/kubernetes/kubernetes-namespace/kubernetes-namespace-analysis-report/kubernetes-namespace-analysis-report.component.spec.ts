@@ -18,11 +18,13 @@ describe('KubernetesNamespaceAnalysisReportComponent', () => {
   let fixture: ComponentFixture<KubernetesNamespaceAnalysisReportComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      declarations: [KubernetesNamespaceAnalysisReportComponent, AnalysisReportSelectorComponent, AnalysisReportViewerComponent],
-      imports: [
+    TestBed.configureTestingModule({imports: [
         KubernetesBaseTestModules,
         MDAppModule
+      ,
+        KubernetesNamespaceAnalysisReportComponent,
+        AnalysisReportSelectorComponent,
+        AnalysisReportViewerComponent
       ],
       providers: [
         KubernetesAnalysisService,

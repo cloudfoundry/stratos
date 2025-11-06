@@ -17,8 +17,11 @@ describe('CfBuildpackCardComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [CfBuildpackCardComponent, ...MetadataCardTestComponents, BooleanIndicatorComponent],
-      imports: generateCfBaseTestModulesNoShared(),
+      declarations: [CfBuildpackCardComponent, ...MetadataCardTestComponents],
+      imports: [
+        ...generateCfBaseTestModulesNoShared(),
+        BooleanIndicatorComponent
+      ],
       providers: [
         EntityMonitorFactory
       ]

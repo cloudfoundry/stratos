@@ -14,7 +14,7 @@ describe('UserAvatarComponent', () => {
       ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(UserAvatarComponent);

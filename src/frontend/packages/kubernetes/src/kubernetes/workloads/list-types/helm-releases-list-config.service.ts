@@ -2,10 +2,10 @@ import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { ITableColumn } from 'src/frontend/packages/core/src/shared/components/list/list-table/table.types';
+import { ITableColumn } from '@stratosui/core';
 import {
   TableCellEndpointNameComponent,
-} from 'src/frontend/packages/core/src/shared/components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
+} from '@stratosui/core';
 import {
   IListConfig,
   IListMultiFilterConfig,
@@ -13,8 +13,8 @@ import {
   IGlobalListAction,
   IMultiListAction,
   IListAction,
-} from 'src/frontend/packages/core/src/shared/components/list/list.component.types';
-import { AppState } from 'src/frontend/packages/store/src/app-state';
+} from '@stratosui/core';
+import { AppState } from '@stratosui/store';
 import { filter, map } from 'rxjs/operators';
 
 import { ListView } from '../../../../../store/src/actions/list.actions';
@@ -69,7 +69,7 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
       headerCell: () => 'Namespace',
       cellDefinition: {
         valuePath: 'namespace',
-        getLink: row => `/kubernetes/${row.endpointId}/namespaces/${row.namespace}`
+        getLink: (row: HelmRelease) => `/kubernetes/${row.endpointId}/namespaces/${row.namespace}`
       },
       sort: {
         type: 'sort',
@@ -82,7 +82,7 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
       columnId: 'status',
       headerCell: () => 'Status',
       cellDefinition: {
-        getValue: row => row.status.charAt(0).toUpperCase() + row.status.substring(1)
+        getValue: (row: HelmRelease) => row.status.charAt(0).toUpperCase() + row.status.substring(1)
       },
       sort: {
         type: 'sort',
@@ -108,7 +108,7 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
       columnId: 'last_Deployed',
       headerCell: () => 'Last Deployed',
       cellDefinition: {
-        getValue: (row) => `${this.datePipe.transform(row.info.last_deployed, 'medium')}`
+        getValue: (row: HelmRelease) => `${this.datePipe.transform(row.info.last_deployed, 'medium')}`
       },
       sort: {
         type: 'sort',

@@ -11,8 +11,10 @@ describe('NodePodCountComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [NodePodCountComponent],
-      imports: KubernetesBaseTestModules,
+      imports: [
+        NodePodCountComponent,
+        ...KubernetesBaseTestModules
+      ],
       providers: [KubeBaseGuidMock, KubernetesEndpointService]
     })
       .compileComponents();

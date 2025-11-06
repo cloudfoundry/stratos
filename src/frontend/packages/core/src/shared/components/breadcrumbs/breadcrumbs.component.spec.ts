@@ -32,7 +32,7 @@ describe('BreadcrumbsComponent', () => {
       }]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     breadcrumbs = [

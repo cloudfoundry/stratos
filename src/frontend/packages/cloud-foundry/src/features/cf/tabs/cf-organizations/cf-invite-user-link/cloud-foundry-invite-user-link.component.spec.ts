@@ -20,7 +20,7 @@ describe('CloudFoundryInviteUserLinkComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryInviteUserLinkComponent);

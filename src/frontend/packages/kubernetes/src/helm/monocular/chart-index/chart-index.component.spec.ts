@@ -28,8 +28,7 @@ export class MockChartService {
 describe('Component: ChartIndex', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [],
-      declarations: [
+      imports: [
         ChartIndexComponent,
         ChartListComponent,
         ChartItemComponent,

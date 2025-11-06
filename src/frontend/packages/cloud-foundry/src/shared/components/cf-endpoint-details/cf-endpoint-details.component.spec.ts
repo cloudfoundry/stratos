@@ -18,7 +18,7 @@ describe('CfEndpointDetailsComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CfEndpointDetailsComponent);

@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 /**
  * Example tests demonstrating selector usage in zoneless mode
  *

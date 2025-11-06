@@ -12,9 +12,9 @@ describe('KubernetesSummaryTabComponent', () => {
   let fixture: ComponentFixture<KubernetesSummaryTabComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      declarations: [KubernetesSummaryTabComponent],
-      imports: [...KubernetesBaseTestModules],
+    TestBed.configureTestingModule({imports: [...KubernetesBaseTestModules,
+        KubernetesSummaryTabComponent
+      ],
       providers: [
         KubernetesEndpointService,
         KubeBaseGuidMock,

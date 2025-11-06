@@ -120,11 +120,19 @@ dev-backend:
 	@echo "✅ API endpoints: /pp/* and /api/*"
 	@echo "✅ Local admin user: admin/admin"
 	@echo ""
-	@if [ ! -f src/jetstream/jetstream ]; then \
-		echo "⚠️  Backend binary not found. Building first..."; \
-		$(MAKE) -s build-backend; \
+	@if [ "$$(uname)" = "Darwin" ]; then \
+		if [ ! -f src/jetstream/jetstream.darwin ]; then \
+			echo "⚠️  Backend binary not found. Building first..."; \
+			$(MAKE) -s build-backend; \
+		fi; \
+		cd src/jetstream && ./jetstream.darwin; \
+	else \
+		if [ ! -f src/jetstream/jetstream ]; then \
+			echo "⚠️  Backend binary not found. Building first..."; \
+			$(MAKE) -s build-backend; \
+		fi; \
+		cd src/jetstream && ./jetstream; \
 	fi
-	cd src/jetstream && ./jetstream
 
 # Full build and start (for convenience)
 dev-full-build: build-backend
@@ -166,7 +174,7 @@ clean-dev:
 	@echo "Cleaning development artifacts..."
 	rm -rf dist/
 	rm -rf .angular/
-	rm -rf src/jetstream/jetstream
+	rm -rf src/jetstream/jetstream src/jetstream/jetstream.darwin
 	@echo "✅ Development artifacts cleaned"
 
 # Run unit tests (Vitest)

@@ -18,7 +18,7 @@ describe('CardNumberMetricComponent', () => {
       ],
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CardNumberMetricComponent);

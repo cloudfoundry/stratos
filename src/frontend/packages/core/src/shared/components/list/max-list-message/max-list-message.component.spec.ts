@@ -20,7 +20,7 @@ describe('MaxListMessageComponent', () => {
       ],
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(MaxListMessageComponent);

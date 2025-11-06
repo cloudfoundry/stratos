@@ -45,7 +45,7 @@ describe('SelectPlanStepComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SelectPlanStepComponent);

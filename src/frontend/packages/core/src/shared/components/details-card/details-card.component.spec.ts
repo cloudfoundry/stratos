@@ -20,7 +20,7 @@ describe('DetailsCardComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(DetailsCardComponent);

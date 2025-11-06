@@ -10,8 +10,8 @@ describe('AnalysisInfoCardComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ AnalysisInfoCardComponent ],
       imports: [
+        AnalysisInfoCardComponent,
         HttpClientTestingModule,
       ]
     })

@@ -14,8 +14,11 @@ describe('KubernetesNodeConditionCardComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [KubernetesNodeConditionCardComponent, KubernetesNodeConditionComponent],
-      imports: KubernetesBaseTestModules,
+      imports: [
+        KubernetesNodeConditionCardComponent,
+        KubernetesNodeConditionComponent,
+        ...KubernetesBaseTestModules
+      ],
       providers: [BaseKubeGuid, KubernetesEndpointService, KubernetesNodeService]
     })
       .compileComponents();

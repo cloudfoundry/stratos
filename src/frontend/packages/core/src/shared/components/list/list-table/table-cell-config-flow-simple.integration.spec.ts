@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 /**
  * Integration tests for table cell config flow - simplified version
  * Tests verify that cellConfig (both object and function forms) properly flows through rendering chain

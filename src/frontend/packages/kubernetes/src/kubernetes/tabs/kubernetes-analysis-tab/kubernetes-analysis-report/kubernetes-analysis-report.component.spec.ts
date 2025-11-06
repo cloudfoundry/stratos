@@ -15,11 +15,12 @@ describe('KubernetesAnalysisReportComponent', () => {
   let fixture: ComponentFixture<KubernetesAnalysisReportComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      declarations: [KubernetesAnalysisReportComponent, AnalysisReportViewerComponent],
-      imports: [
+    TestBed.configureTestingModule({imports: [
         KubernetesBaseTestModules,
         CoreModule,
+      ,
+        KubernetesAnalysisReportComponent,
+        AnalysisReportViewerComponent
       ],
       providers: [
         KubernetesAnalysisService,

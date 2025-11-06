@@ -12,7 +12,7 @@ describe('DefaultEndpointHomeComponentComponent', () => {
       imports: [ DefaultEndpointHomeComponent ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(DefaultEndpointHomeComponent);

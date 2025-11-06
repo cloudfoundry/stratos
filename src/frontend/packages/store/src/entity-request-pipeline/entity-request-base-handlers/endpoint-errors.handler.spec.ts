@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { Action } from '@ngrx/store';
 
 import { SendEventAction } from '../../actions/internal-events.actions';

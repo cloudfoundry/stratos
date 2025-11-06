@@ -12,7 +12,7 @@ describe('CardStatusComponent', () => {
       imports: [ CardStatusComponent ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CardStatusComponent);

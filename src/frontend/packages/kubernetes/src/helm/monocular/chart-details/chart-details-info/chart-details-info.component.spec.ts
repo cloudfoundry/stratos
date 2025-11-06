@@ -8,18 +8,17 @@ import { ChartDetailsInfoComponent } from './chart-details-info.component';
 
 
 describe('Component: ChartDetailsInfo', () => {
-  beforeEach(
-    () => {
-      TestBed.configureTestingModule({
-        declarations: [ChartDetailsInfoComponent],
-        imports: [],
+  beforeEach(async () => {
+      await TestBed.configureTestingModule({
+        imports: [ChartDetailsInfoComponent],
         providers: [
           { provide: ChartsService, useValue: new MockChartService() },
         ],
         schemas: [NO_ERRORS_SCHEMA]
       }).compileComponents();
-    })
-  );
+  });
+
+
   it('should create an instance', () => {
     const component = TestBed.createComponent(ChartDetailsInfoComponent);
     expect(component).toBeTruthy();

@@ -20,7 +20,7 @@ describe('ServiceInstanceLastOpComponent', () => {
       imports: [...BaseTestModulesNoShared]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServiceInstanceLastOpComponent);

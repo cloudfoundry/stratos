@@ -12,7 +12,7 @@ describe('TileGridComponent', () => {
       imports: [ TileGridComponent ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TileGridComponent);

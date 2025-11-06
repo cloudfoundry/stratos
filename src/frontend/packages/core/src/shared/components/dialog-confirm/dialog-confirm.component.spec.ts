@@ -40,7 +40,7 @@ describe('DialogConfirmComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(DialogConfirmComponent);

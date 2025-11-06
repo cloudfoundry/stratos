@@ -16,7 +16,7 @@ describe('CardBooleanMetricComponent', () => {
       ],
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CardBooleanMetricComponent);

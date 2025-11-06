@@ -18,7 +18,7 @@ describe('AddSpaceQuotaComponent', () => {
       providers: [TabNavService]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AddSpaceQuotaComponent);

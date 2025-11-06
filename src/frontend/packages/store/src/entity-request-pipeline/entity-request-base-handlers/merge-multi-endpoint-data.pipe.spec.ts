@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { NormalizedResponse } from '../../types/api.types';
 import { multiEndpointResponseMergePipe } from './merge-multi-endpoint-data.pipe';
 

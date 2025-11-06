@@ -32,7 +32,7 @@ describe('HomePageEndpointCardComponent', () => {
     
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(HomePageEndpointCardComponent);

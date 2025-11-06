@@ -79,7 +79,7 @@ describe('CloudFoundryCellSummaryComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryCellSummaryComponent);

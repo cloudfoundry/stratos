@@ -21,7 +21,7 @@ describe('CloudFoundrySpaceAppsComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundrySpaceAppsComponent);

@@ -24,7 +24,7 @@ describe('AppChipsComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AppChipsComponent);

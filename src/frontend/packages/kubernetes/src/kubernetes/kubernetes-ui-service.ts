@@ -1,5 +1,5 @@
 import { Injectable, Type } from '@angular/core';
-import { ISimpleListConfig } from 'src/frontend/packages/core/src/shared/components/list/list.component.types';
+import { ISimpleListConfig } from '@stratosui/core';
 
 import { PreviewableComponent } from '../../../core/src/shared/previewable-component';
 

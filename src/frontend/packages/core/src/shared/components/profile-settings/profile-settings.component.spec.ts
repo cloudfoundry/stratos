@@ -16,7 +16,7 @@ describe('ProfileSettingsComponent', () => {
       ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ProfileSettingsComponent);

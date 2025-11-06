@@ -21,7 +21,7 @@ describe('MonocularTabBaseComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(MonocularTabBaseComponent);

@@ -12,8 +12,10 @@ describe('HelmReleaseCardComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [HelmReleaseCardComponent],
-      imports: KubernetesBaseTestModules,
+      imports: [
+        HelmReleaseCardComponent,
+        ...KubernetesBaseTestModules
+      ],
       providers: [
         DatePipe,
       ]

@@ -12,7 +12,7 @@ describe('DesktopLoginComponent', () => {
       declarations: [ DesktopLoginComponent ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(DesktopLoginComponent);

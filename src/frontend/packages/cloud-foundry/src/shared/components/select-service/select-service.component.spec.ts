@@ -95,7 +95,7 @@ describe('SelectServiceComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SelectServiceComponent);

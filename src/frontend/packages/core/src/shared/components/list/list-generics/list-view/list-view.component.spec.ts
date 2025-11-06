@@ -23,7 +23,7 @@ describe('ListViewComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ListViewComponent);

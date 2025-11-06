@@ -36,7 +36,7 @@ describe('ServiceCatalogPageComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServiceCatalogPageComponent);

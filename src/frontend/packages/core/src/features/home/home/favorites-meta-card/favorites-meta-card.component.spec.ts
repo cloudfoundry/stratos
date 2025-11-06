@@ -13,7 +13,7 @@ describe('FavoritesMetaCardComponent', () => {
       imports: [...BaseTestModules],
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(FavoritesMetaCardComponent);

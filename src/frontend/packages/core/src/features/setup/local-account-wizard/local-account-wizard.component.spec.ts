@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createEmptyStoreModule } from '@stratosui/store/testing';
+import { createEmptyStoreModule } from "../test-framework/core-test.helper";
 
 import { CoreModule } from '../../../core/core.module';
 import { MDAppModule } from '../../../core/md.module';
@@ -38,7 +38,7 @@ describe('LocalAccountWizardComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(LocalAccountWizardComponent);

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ISimpleListConfig } from 'src/frontend/packages/core/src/shared/components/list/list.component.types';
+import { ISimpleListConfig } from '@stratosui/core';
 
 interface KubernetesListConfig {
   [name: string]: ISimpleListConfig<any>;

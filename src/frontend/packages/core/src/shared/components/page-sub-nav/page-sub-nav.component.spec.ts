@@ -18,7 +18,7 @@ describe('PageSubNavComponent', () => {
       providers: [TabNavService]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(PageSubNavComponent);

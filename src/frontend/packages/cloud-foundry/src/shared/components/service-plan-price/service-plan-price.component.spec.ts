@@ -21,7 +21,7 @@ describe('ServicePlanPriceComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServicePlanPriceComponent);

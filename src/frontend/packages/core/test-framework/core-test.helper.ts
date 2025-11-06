@@ -4,7 +4,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 import { EntityCatalogHelper, EntityCatalogHelpers, appReducers } from '@stratosui/store';
-import { createBasicStoreModule } from '@stratosui/store/testing';
+import { createBasicStoreModule } from '../../store/testing/src/store-test-helper';
 
 import { CoreModule } from '../src/core/core.module';
 import { CurrentUserPermissionsService } from '../src/core/permissions/current-user-permissions.service';
@@ -71,3 +71,8 @@ export const BaseTestModules = [...BaseTestModulesNoShared, SharedModule];
 export const MetadataCardTestComponents = [MetaCardComponent, MetaCardItemComponent,
   MetaCardKeyComponent, ApplicationStateIconPipe, ApplicationStateIconComponent,
   MetaCardTitleComponent, CardStatusComponent, MetaCardValueComponent, MultilineTitleComponent];
+
+// Re-export store testing utilities to resolve @stratosui/store/testing imports
+export { createBasicStoreModule, createEmptyStoreModule, createEntityStore, createEntityStoreState, populateStoreWithTestEndpoint } from '../../store/testing/src/store-test-helper';
+export { StoreTestingModule } from '../../store/testing/src/store-test.module';
+export { STORE_TEST_PROVIDERS } from '../../store/src/testing/store-test-providers';

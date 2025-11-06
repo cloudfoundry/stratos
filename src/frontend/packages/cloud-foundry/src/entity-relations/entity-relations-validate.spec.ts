@@ -1,7 +1,7 @@
 import { inject, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { Store } from '@ngrx/store';
-import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '@stratosui/store/testing';
+import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from "../../test-framework/cloud-foundry-endpoint-service.helper";
 
 import { environment } from '../../../core/src/environments/environment';
 import { SetInitialParams } from '../../../store/src/actions/pagination.actions';

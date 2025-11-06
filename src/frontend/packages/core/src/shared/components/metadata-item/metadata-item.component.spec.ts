@@ -18,7 +18,7 @@ describe('MetadataItemComponent', () => {
       ],
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(MetadataItemComponent);

@@ -21,7 +21,7 @@ describe('CloudFoundrySpaceRoutesComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundrySpaceRoutesComponent);

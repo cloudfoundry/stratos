@@ -11,7 +11,7 @@ describe('TableCellAutoscalerEventStatusComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [TableCellAutoscalerEventStatusComponent, TableCellAutoscalerEventStatusIconPipe]
+      imports: [TableCellAutoscalerEventStatusComponent, TableCellAutoscalerEventStatusIconPipe]
     })
       .compileComponents();
   });

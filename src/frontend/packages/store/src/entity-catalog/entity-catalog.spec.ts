@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach } from 'vitest';
 import { EntitySchema } from '../helpers/entity-schema';
 import { endpointEntityType, stratosEntityFactory } from '../helpers/stratos-entity-factory';
 import { TestEntityCatalog } from './entity-catalog';

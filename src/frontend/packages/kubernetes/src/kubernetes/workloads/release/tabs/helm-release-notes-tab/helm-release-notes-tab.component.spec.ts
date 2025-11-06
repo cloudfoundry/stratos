@@ -12,11 +12,9 @@ describe('HelmReleaseNotesTabComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         ...KubernetesBaseTestModules
-      ],
-      declarations: [
+      ,
         HelmReleaseNotesTabComponent
-      ],
-      providers: [
+      ]providers: [
         ...HelmReleaseProviders
       ]
     })

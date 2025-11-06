@@ -14,13 +14,13 @@ describe('TableCellSelectComponent', () => {
     TestBed.configureTestingModule({
       
       imports: [
-        CoreModule,,
+        CoreModule,
         TableCellSelectComponent
       ]
     
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellSelectComponent);

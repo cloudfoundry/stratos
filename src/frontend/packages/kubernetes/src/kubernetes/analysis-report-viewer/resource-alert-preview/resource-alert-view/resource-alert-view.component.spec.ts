@@ -12,11 +12,11 @@ describe('ResourceAlertViewComponent', () => {
   let fixture: ComponentFixture<ResourceAlertViewComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      declarations: [ResourceAlertViewComponent],
-      imports: [
+    TestBed.configureTestingModule({imports: [
         KubernetesBaseTestModules,
         MDAppModule
+      ,
+        ResourceAlertViewComponent
       ],
       providers: [
         KubernetesAnalysisService,

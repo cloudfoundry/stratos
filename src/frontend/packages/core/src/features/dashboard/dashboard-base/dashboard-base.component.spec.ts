@@ -51,7 +51,7 @@ describe('DashboardBaseComponent', () => {
     
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(DashboardBaseComponent);

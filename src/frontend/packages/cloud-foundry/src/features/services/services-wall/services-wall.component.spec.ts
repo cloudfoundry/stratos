@@ -28,7 +28,7 @@ describe('ServicesWallComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServicesWallComponent);

@@ -34,7 +34,7 @@ describe('CardCfSpaceDetailsComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CardCfSpaceDetailsComponent);

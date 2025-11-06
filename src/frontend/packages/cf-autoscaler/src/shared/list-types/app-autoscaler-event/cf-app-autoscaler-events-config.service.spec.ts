@@ -4,7 +4,7 @@ import { HttpTestingController } from '@angular/common/http/testing';
 import { inject, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createEmptyStoreModule } from '@stratosui/store/testing';
+import { createEmptyStoreModule } from "../../../test-framework/cf-autoscaler-test.helper";
 
 import {
   generateTestApplicationServiceProvider,

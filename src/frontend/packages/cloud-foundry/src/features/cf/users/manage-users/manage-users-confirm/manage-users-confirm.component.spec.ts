@@ -34,7 +34,7 @@ describe('UsersRolesConfirmComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(UsersRolesConfirmComponent);

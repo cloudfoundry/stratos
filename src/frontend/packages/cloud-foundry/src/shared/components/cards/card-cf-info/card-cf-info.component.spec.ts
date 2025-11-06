@@ -19,24 +19,22 @@ import { CardCfInfoComponent } from './card-cf-info.component';
 describe('CardCfInfoComponent', () => {
   let component: CardCfInfoComponent;
   let fixture: ComponentFixture<CardCfInfoComponent>;
-  beforeEach(
-    () => {
-      TestBed.configureTestingModule({
-        declarations: [
+  beforeEach(async () => {
+      await TestBed.configureTestingModule({
+        imports: [
+          ...generateCfBaseTestModulesNoShared(),
           CardCfInfoComponent,
           MetadataItemComponent,
           BooleanIndicatorComponent,
           CopyToClipboardComponent
         ],
-        imports: generateCfBaseTestModulesNoShared(),
         providers: [
           generateTestCfEndpointService(),
           UserInviteService,
           ConfirmationDialogService
         ]
       }).compileComponents();
-    })
-  );
+    });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CardCfInfoComponent);

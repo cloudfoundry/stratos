@@ -35,7 +35,7 @@ describe('CloudFoundryEventsListComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryEventsListComponent);

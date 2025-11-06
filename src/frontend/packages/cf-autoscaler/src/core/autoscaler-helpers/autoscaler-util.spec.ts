@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import {
   isEqual, buildLegendData, shiftArray
 } from './autoscaler-util';

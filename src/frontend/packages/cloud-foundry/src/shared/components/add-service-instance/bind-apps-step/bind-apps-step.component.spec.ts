@@ -33,7 +33,7 @@ describe('BindAppsStepComponent', () => {
 
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(BindAppsStepComponent);

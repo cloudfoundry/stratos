@@ -22,14 +22,15 @@ describe('KubernetesNodeSummaryComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [KubernetesNodeSummaryComponent,
+      imports: [
+        KubernetesNodeSummaryComponent,
         KubernetesNodeConditionComponent,
         KubernetesNodeConditionCardComponent,
         KubernetesNodeSummaryCardComponent,
         KubernetesNodeInfoCardComponent,
         KubernetesNodeTagsCardComponent,
+        ...KubernetesBaseTestModules
       ],
-      imports: KubernetesBaseTestModules,
       providers: [BaseKubeGuid, KubernetesEndpointService, KubernetesNodeService]
     })
       .compileComponents();

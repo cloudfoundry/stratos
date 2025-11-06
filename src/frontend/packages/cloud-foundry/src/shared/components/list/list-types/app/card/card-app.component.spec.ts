@@ -21,9 +21,7 @@ describe('CardAppComponent', () => {
       imports: [
         CardAppComponent,
         RunningInstancesComponent,
-        CfOrgSpaceLinksComponent
-      ,
-      imports: [
+        CfOrgSpaceLinksComponent,
         ...generateCfStoreModules(),
         RouterTestingModule,
         SharedModule

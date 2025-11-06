@@ -30,7 +30,7 @@ describe('StratosTitleComponent', () => {
       ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(StratosTitleComponent);

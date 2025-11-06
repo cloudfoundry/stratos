@@ -16,7 +16,7 @@ describe('EntityListViewComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EntityListViewComponent);

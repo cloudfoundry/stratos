@@ -15,7 +15,7 @@ describe('TokenEndpointComponent', () => {
       
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TokenEndpointComponent);

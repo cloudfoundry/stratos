@@ -15,8 +15,11 @@ describe('TableCellFeatureFlagStateComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [TableCellFeatureFlagStateComponent, BooleanIndicatorComponent],
-      imports: generateCfBaseTestModulesNoShared()
+      declarations: [TableCellFeatureFlagStateComponent],
+      imports: [
+        ...generateCfBaseTestModulesNoShared(),
+        BooleanIndicatorComponent
+      ]
     })
       .compileComponents();
 

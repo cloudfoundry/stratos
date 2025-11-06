@@ -15,11 +15,12 @@ describe('KubernetesAnalysisTabComponent', () => {
   let fixture: ComponentFixture<KubernetesAnalysisTabComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      declarations: [KubernetesAnalysisTabComponent, AnalysisReportViewerComponent],
-      imports: [
+    TestBed.configureTestingModule({imports: [
         KubernetesBaseTestModules,
         MDAppModule
+      ,
+        KubernetesAnalysisTabComponent,
+        AnalysisReportViewerComponent
       ],
       providers: [
         KubernetesAnalysisService,

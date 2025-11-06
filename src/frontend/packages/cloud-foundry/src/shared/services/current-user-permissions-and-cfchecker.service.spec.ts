@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '@stratosui/store/testing';
+import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from "../../test-framework/cloud-foundry-endpoint-service.helper";
 import { first, tap } from 'rxjs/operators';
 
 import { PermissionConfig } from '../../../../core/src/core/permissions/current-user-permissions.config';

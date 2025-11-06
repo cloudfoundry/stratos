@@ -5,7 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { gitRepositoryUrlValidator, normalizeUrl } from '../../../../../core/src/shared/validators';
 import {
   CreateEndpointHelperComponent,
-} from 'src/frontend/packages/core/src/features/endpoints/create-endpoint/create-endpoint-helper';
+} from '@stratosui/core';
 import { Observable, Subscription } from 'rxjs';
 import { filter, first, map, pairwise } from 'rxjs/operators';
 

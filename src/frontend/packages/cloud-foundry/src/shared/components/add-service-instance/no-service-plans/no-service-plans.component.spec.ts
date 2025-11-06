@@ -12,7 +12,7 @@ describe('NoServicePlansComponent', () => {
       declarations: [ NoServicePlansComponent ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(NoServicePlansComponent);

@@ -10,9 +10,10 @@ describe('KubernetesNodePressureComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [KubernetesNodePressureComponent],
-      imports: BaseTestModules
-    })
+      imports: [
+        KubernetesNodePressureComponent,
+        ...BaseTestModules
+      ]})
       .compileComponents();
   });
 

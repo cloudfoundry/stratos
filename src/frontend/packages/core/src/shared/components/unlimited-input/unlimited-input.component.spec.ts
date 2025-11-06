@@ -44,7 +44,7 @@ describe('UnlimitedInputComponent', () => {
       ],
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(WrapperComponent);

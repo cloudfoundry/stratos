@@ -1,10 +1,10 @@
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { TailwindDialogRef, MAT_DIALOG_DATA } from '@stratosui/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from '@stratosui/store/testing';
+import { createBasicStoreModule } from "../test-framework/core-test.helper";
 
 import { CoreTestingModule } from '../../../test-framework/core-test.modules';
 import { SharedModule } from '../../shared/shared.module';
@@ -42,7 +42,7 @@ describe('LogOutDialogComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(LogOutDialogComponent);
@@ -56,7 +56,8 @@ describe('LogOutDialogComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should navigate after countdown', fakeAsync(() => {
+  it('should navigate after countdown', async () => {
+    vi.useFakeTimers();
     const spy = vi.spyOn(router, 'navigate');
 
     component.data = {
@@ -67,10 +68,11 @@ describe('LogOutDialogComponent', () => {
     component.ngOnInit();
 
     expect(spy).not.toHaveBeenCalled();
-    tick(1500);
+    await vi.advanceTimersByTimeAsync(1500);
     expect(spy).toHaveBeenCalled();
     expect(spy).toHaveBeenCalledWith(['/login/logout']);
-  }));
+    vi.useRealTimers();
+  });
 
   afterEach(() => {
     fixture.destroy();

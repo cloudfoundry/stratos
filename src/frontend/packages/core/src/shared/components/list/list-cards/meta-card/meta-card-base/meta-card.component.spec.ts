@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
-import { createBasicStoreModule } from '@stratosui/store/testing';
+import { createBasicStoreModule } from "../test-framework/core-test.helper";
 import { Observable, of } from 'rxjs';
 
 import { EntitySchema } from '../../../../../../../../store/src/helpers/entity-schema';

@@ -2,6 +2,19 @@
   "name": "@stratosui/store",
   "version": "0.0.1",
   "repository": "https://github.com/cloudfoundry/stratos",
+  "main": "src/public-api.ts",
+  "exports": {
+    ".": {
+      "import": "./src/public-api.ts",
+      "types": "./src/public-api.ts",
+      "default": "./src/public-api.ts"
+    },
+    "./testing": {
+      "import": "./testing/index.ts",
+      "types": "./testing/index.ts",
+      "default": "./testing/index.ts"
+    }
+  },
   "peerDependencies": {
     "@angular/common": "20.3.9",
     "@angular/core": "20.3.9"

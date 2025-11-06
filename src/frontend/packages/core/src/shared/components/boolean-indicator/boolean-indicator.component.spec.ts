@@ -15,7 +15,7 @@ describe('BooleanIndicatorComponent', () => {
       imports: [BooleanIndicatorComponent, CoreModule, NoopAnimationsModule]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(BooleanIndicatorComponent);

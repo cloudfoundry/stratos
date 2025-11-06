@@ -45,7 +45,7 @@ describe('CardCfRecentAppsComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CardCfRecentAppsComponent);

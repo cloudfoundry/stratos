@@ -14,9 +14,9 @@ describe('ReleasesTabComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         ...KubernetesBaseTestModules
-      ],
-      declarations: [HelmReleasesTabComponent],
-      providers: [
+      ,
+        HelmReleasesTabComponent
+      ]providers: [
         DatePipe,
         HelmReleaseHelperService,
         TabNavService

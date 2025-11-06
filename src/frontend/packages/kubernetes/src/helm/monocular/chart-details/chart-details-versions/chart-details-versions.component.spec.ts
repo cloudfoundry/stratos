@@ -13,12 +13,15 @@ describe('ChartDetailsVersionsComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ChartDetailsVersionsComponent, PanelComponent],
-      imports: [RouterTestingModule],
+      imports: [
+        RouterTestingModule,
+        ChartDetailsVersionsComponent,
+        PanelComponent
+      ],
       providers: [{ provide: ChartsService, useValue: new MockChartService() }]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ChartDetailsVersionsComponent);

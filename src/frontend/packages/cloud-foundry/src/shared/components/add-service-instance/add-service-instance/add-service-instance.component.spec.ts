@@ -143,7 +143,7 @@ describe('AddServiceInstanceComponent', () => {
 
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AddServiceInstanceComponent);

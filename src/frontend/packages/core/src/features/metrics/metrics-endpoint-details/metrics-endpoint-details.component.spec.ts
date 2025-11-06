@@ -24,7 +24,7 @@ describe('MetricsEndpointDetailsComponent', () => {
       providers: [ MetricsService ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(MetricsEndpointDetailsComponent);

@@ -11,8 +11,10 @@ describe('KubeNamespacePodCountComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [KubeNamespacePodCountComponent],
-      imports: KubernetesBaseTestModules,
+      imports: [
+        KubeNamespacePodCountComponent,
+        ...KubernetesBaseTestModules
+      ],
       providers: [KubeBaseGuidMock, KubernetesEndpointService]
     })
       .compileComponents();

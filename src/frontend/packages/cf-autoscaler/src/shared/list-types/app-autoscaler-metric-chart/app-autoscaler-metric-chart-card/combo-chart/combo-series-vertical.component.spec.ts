@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createEmptyStoreModule } from '@stratosui/store/testing';
+import { createEmptyStoreModule } from "../../../../test-framework/cf-autoscaler-test.helper";
 import { BaseChartDirective } from 'ng2-charts';
 
 import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';

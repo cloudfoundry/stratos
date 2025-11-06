@@ -18,7 +18,7 @@ describe('ExtensionButtonsComponent', () => {
     
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ExtensionButtonsComponent);

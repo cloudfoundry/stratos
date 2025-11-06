@@ -11,12 +11,12 @@ describe('KubernetesSATokenAuthFormComponent', () => {
   let fixture: ComponentFixture<KubernetesSATokenAuthFormComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      declarations: [KubernetesSATokenAuthFormComponent],
-      imports: [
+    TestBed.configureTestingModule({imports: [
         MDAppModule,
         SharedModule,
         NoopAnimationsModule
+      ,
+        KubernetesSATokenAuthFormComponent
       ]
     })
       .compileComponents();

@@ -49,7 +49,7 @@ describe('CardCfOrgUserDetailsComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CardCfOrgUserDetailsComponent);

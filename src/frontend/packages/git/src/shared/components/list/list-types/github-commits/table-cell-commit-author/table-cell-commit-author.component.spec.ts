@@ -18,7 +18,7 @@ describe('TableCellCommitAuthorComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellCommitAuthorComponent);

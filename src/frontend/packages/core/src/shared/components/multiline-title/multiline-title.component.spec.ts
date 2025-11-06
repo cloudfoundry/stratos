@@ -12,7 +12,7 @@ describe('MultilineTitleComponent', () => {
       imports: [ MultilineTitleComponent ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(MultilineTitleComponent);

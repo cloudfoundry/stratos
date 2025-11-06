@@ -22,7 +22,7 @@ describe('CfOrgSpaceLinksComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     service = jasmine.createSpyObj<CfOrgSpaceLabelService>('CfOrgSpaceLabelService', [

@@ -19,12 +19,12 @@ describe('KubernetesNodeMetricsComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
+      imports: [
         KubernetesNodeMetricsComponent,
         KubernetesNodeMetricStatsCardComponent,
-        KubernetesNodeSimpleMetricComponent
+        KubernetesNodeSimpleMetricComponent,
+        ...KubernetesBaseTestModules
       ],
-      imports: KubernetesBaseTestModules,
       providers: [BaseKubeGuid, KubernetesEndpointService, KubernetesNodeService]
     })
       .compileComponents();

@@ -12,8 +12,10 @@ describe('KubernetesNodeLinkComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [KubernetesNodeLinkComponent],
-      imports: KubernetesBaseTestModules,
+      imports: [
+        KubernetesNodeLinkComponent,
+        ...KubernetesBaseTestModules
+      ],
       providers: [KubernetesEndpointService, BaseKubeGuid]
     })
       .compileComponents();

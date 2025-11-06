@@ -11,12 +11,12 @@ describe('KubernetesAWSAuthFormComponent', () => {
   let fixture: ComponentFixture<KubernetesAWSAuthFormComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      declarations: [KubernetesAWSAuthFormComponent],
-      imports: [
+    TestBed.configureTestingModule({imports: [
         MDAppModule,
         SharedModule,
         NoopAnimationsModule
+      ,
+        KubernetesAWSAuthFormComponent
       ]
     })
       .compileComponents();

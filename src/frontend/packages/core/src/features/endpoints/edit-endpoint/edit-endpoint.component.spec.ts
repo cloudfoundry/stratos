@@ -44,7 +44,7 @@ describe('EditEndpointComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EditEndpointComponent);

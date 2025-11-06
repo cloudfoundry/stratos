@@ -21,7 +21,7 @@ describe('UsageGaugeComponent', () => {
       ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(UsageGaugeComponent);

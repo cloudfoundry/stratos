@@ -12,7 +12,7 @@ describe('IntroScreenComponent', () => {
       imports: [IntroScreenComponent]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(IntroScreenComponent);

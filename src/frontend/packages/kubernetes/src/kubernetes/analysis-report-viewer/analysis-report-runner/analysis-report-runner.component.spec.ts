@@ -13,11 +13,11 @@ describe('AnalysisReportRunnerComponent', () => {
   let fixture: ComponentFixture<AnalysisReportRunnerComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      declarations: [AnalysisReportRunnerComponent],
-      imports: [
+    TestBed.configureTestingModule({imports: [
         SharedModule,
         KubernetesBaseTestModules,
+      ,
+        AnalysisReportRunnerComponent
       ],
       providers: [
         KubernetesAnalysisService,

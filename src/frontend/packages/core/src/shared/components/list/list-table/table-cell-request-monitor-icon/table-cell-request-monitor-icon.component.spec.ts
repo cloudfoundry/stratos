@@ -17,7 +17,7 @@ describe('TableCellRequestMonitorIconComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellRequestMonitorIconComponent);

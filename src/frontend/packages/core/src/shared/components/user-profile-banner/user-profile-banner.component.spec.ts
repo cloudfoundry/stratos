@@ -16,7 +16,7 @@ describe('UserProfileBannerComponent', () => {
       ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(UserProfileBannerComponent);

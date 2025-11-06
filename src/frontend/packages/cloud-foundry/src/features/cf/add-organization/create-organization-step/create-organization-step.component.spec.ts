@@ -16,7 +16,7 @@ describe('CreateOrganizationStepComponent', () => {
       providers: [PaginationMonitorFactory]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CreateOrganizationStepComponent);

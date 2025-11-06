@@ -18,7 +18,7 @@ describe('AcmeSupportInfoComponent', () => {
       ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AcmeSupportInfoComponent);

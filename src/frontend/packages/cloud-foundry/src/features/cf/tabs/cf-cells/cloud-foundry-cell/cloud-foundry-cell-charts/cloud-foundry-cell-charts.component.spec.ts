@@ -22,7 +22,7 @@ describe('CloudFoundryCellChartsComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryCellChartsComponent);

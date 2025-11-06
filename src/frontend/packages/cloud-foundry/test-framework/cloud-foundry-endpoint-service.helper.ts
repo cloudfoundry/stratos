@@ -3,7 +3,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Store, StoreModule } from '@ngrx/store';
-import { testSCFEndpointGuid } from '@stratosui/store/testing';
+import { testSCFEndpointGuid } from '../../store/testing/src/store-test-helper';
 
 import { CoreModule } from '../../core/src/core/core.module';
 import { SharedModule } from '../../core/src/shared/shared.module';
@@ -197,3 +197,8 @@ export function generateCfBaseTestModules() {
     SharedModule,
   ];
 }
+
+// Re-export store testing utilities to resolve @stratosui/store/testing imports
+export { createBasicStoreModule, createEmptyStoreModule, createEntityStore, createEntityStoreState, populateStoreWithTestEndpoint } from '../../store/testing/src/store-test-helper';
+export { StoreTestingModule } from '../../store/testing/src/store-test.module';
+export { STORE_TEST_PROVIDERS } from '../../store/src/testing/store-test-providers';

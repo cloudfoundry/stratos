@@ -31,7 +31,7 @@ describe('CreateApplicationStep1Component', () => {
       }]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CreateApplicationStep1Component);

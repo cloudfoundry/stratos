@@ -12,7 +12,7 @@ describe('EnumerateComponent', () => {
       imports: [ EnumerateComponent ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EnumerateComponent);

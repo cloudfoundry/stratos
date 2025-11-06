@@ -16,7 +16,7 @@ describe('CloudFoundryFeatureFlagsComponent', () => {
       providers: [ActiveRouteCfOrgSpace]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryFeatureFlagsComponent);

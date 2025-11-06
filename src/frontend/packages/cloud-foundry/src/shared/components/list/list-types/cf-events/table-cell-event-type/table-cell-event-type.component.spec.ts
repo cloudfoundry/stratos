@@ -10,7 +10,7 @@ describe('TableCellEventTypeComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [TableCellEventTypeComponent]
+      imports: [TableCellEventTypeComponent]
     })
       .compileComponents();
 

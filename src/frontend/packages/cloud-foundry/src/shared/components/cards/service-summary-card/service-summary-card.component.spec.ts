@@ -34,7 +34,7 @@ describe('ServiceSummaryCardComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServiceSummaryCardComponent);

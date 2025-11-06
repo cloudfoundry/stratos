@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
-import { testSCFEndpointGuid } from '@stratosui/store/testing';
+import { testSCFEndpointGuid } from "../../test-framework/cloud-foundry-endpoint-service.helper";
 
 import { CF_GUID } from '../../../../../../../core/src/shared/entity.tokens';
 import { SharedModule } from '../../../../../../../core/src/shared/shared.module';

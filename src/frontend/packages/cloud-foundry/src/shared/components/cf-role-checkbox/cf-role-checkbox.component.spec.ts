@@ -34,7 +34,7 @@ describe('CfRoleCheckboxComponent', () => {
       declarations: [CfRoleCheckboxComponent]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CfRoleCheckboxComponent);

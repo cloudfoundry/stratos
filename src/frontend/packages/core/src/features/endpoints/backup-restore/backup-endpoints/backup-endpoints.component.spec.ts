@@ -24,7 +24,7 @@ describe('BackupEndpointsComponent', () => {
     
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(BackupEndpointsComponent);

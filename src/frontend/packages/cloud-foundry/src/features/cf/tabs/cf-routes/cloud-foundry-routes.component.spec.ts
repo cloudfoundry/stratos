@@ -30,7 +30,7 @@ describe('CloudFoundryRoutesComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryRoutesComponent);

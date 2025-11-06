@@ -57,7 +57,7 @@ describe('CardAppUptimeComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CardAppUptimeComponent);

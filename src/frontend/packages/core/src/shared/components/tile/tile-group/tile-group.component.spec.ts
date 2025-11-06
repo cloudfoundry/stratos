@@ -12,7 +12,7 @@ describe('TileGroupComponent', () => {
       imports: [ TileGroupComponent ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TileGroupComponent);

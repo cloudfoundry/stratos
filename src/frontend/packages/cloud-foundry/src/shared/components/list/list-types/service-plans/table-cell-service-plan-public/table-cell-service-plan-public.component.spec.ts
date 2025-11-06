@@ -17,9 +17,7 @@ describe('TableCellAServicePlanPublicComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         TableCellAServicePlanPublicComponent,
-        ServicePlanPublicComponent
-      ,
-      imports: [
+        ServicePlanPublicComponent,
         StoreModule,
         generateCfStoreModules()
       ],

@@ -19,7 +19,7 @@ describe('CloudFoundryOrganizationsComponent', () => {
       imports: generateCfBaseTestModules()
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryOrganizationsComponent);

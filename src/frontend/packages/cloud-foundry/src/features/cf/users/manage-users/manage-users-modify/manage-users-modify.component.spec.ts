@@ -38,7 +38,7 @@ describe('UsersRolesModifyComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(UsersRolesModifyComponent);

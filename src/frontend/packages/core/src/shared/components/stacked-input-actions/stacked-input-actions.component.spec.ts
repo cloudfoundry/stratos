@@ -21,7 +21,7 @@ describe('StackedInputActionsComponent', () => {
       ],
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(StackedInputActionsComponent);

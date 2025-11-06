@@ -22,7 +22,7 @@ describe('AppTabExtensionComponent', () => {
       ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AppTabExtensionComponent);

@@ -16,7 +16,7 @@ describe('CardProgressOverlayComponent', () => {
       ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CardProgressOverlayComponent);

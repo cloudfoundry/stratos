@@ -34,7 +34,7 @@ describe('SetupWelcomeComponent', () => {
       providers: [TabNavService]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SetupWelcomeComponent);

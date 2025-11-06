@@ -31,7 +31,7 @@ describe('EditSpaceComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EditSpaceComponent);

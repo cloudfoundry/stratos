@@ -1,6 +1,6 @@
 import { Injectable, NgZone } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { ITableColumn } from 'src/frontend/packages/core/src/shared/components/list/list-table/table.types';
+import { ITableColumn } from '@stratosui/core';
 import {
   IListAction,
   IListConfig,
@@ -8,9 +8,9 @@ import {
   ListViewTypes,
   IGlobalListAction,
   IMultiListAction,
-} from 'src/frontend/packages/core/src/shared/components/list/list.component.types';
+} from '@stratosui/core';
 import { formatDistance } from 'date-fns';
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
 import { ListView } from '../../../../store/src/actions/list.actions';
 import { AppState } from '../../../../store/src/public-api';
@@ -107,11 +107,11 @@ export class AnalysisReportsListConfig implements IListConfig<AnalysisReport> {
   }
 
   private listActionDelete: IListAction<AnalysisReport> = {
-    action: (item) => this.analysisService.delete(item.endpoint, item),
+    action: (item: AnalysisReport) => this.analysisService.delete(item.endpoint, item),
     label: 'Delete',
     icon: 'delete',
     description: ``,
-    createEnabled: row$ => of(true)
+    createEnabled: (row$: Observable<AnalysisReport>) => of(true)
   };
 
   private singleActions = [

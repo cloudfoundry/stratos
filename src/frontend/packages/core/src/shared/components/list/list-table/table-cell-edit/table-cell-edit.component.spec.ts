@@ -19,7 +19,7 @@ describe('TableCellEditComponent', () => {
     
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellEditComponent);

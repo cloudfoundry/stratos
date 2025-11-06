@@ -9,7 +9,7 @@ describe('KubernetesNodeSimpleMetricComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ KubernetesNodeSimpleMetricComponent ]
+      imports: [ KubernetesNodeSimpleMetricComponent ]
     })
     .compileComponents();
   });

@@ -12,11 +12,11 @@ describe('PopeyeReportViewerComponent', () => {
   let fixture: ComponentFixture<PopeyeReportViewerComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      declarations: [PopeyeReportViewerComponent],
-      imports: [
+    TestBed.configureTestingModule({imports: [
         KubernetesBaseTestModules,
         MDAppModule
+      ,
+        PopeyeReportViewerComponent
       ],
       providers: [
         KubernetesAnalysisService,

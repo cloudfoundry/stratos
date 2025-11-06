@@ -11,7 +11,21 @@ export { getDefaultPaginationEntityState } from './reducers/pagination-reducer/p
 export { SessionDataEndpoint } from './types/auth.types';
 export { getDefaultRolesRequestState } from './types/current-user-roles.types';
 export { BaseEntityValues } from './types/entity.types';
-export { WrapperRequestActionSuccess } from './types/request.types';
+export {
+  APISuccessOrFailedAction,
+  EntityRequestAction,
+  ICFAction,
+  InternalEndpointError,
+  IFailedRequestAction,
+  IStartRequestAction,
+  ISuccessRequestAction,
+  IUpdateRequestAction,
+  RequestAction,
+  SingleEntityAction,
+  StartRequestAction,
+  WrapperRequestActionFailed,
+  WrapperRequestActionSuccess,
+} from './types/request.types';
 
 export { flattenPagination, PaginationFlattener } from './helpers/paginated-request-helpers';
 
@@ -58,6 +72,7 @@ export { CATALOGUE_ENTITIES, EntityCatalogFeatureModule, EntityCatalogModule } f
 export { EntityServiceFactory } from './entity-service-factory.service';
 export { MetricsAPIAction, MetricsAPITargets, MetricsStratosAction } from './actions/metrics-api.actions';
 export { ListFilter, ListPagination, ListSort, ListView, SetListViewAction } from './actions/list.actions';
+export { getActions } from './actions/action.helper';
 export { AppStoreModule } from './store.module';
 export { getAPIRequestDataState, selectEntity } from './selectors/api.selectors';
 export { AuthState, selectSessionData } from './reducers/auth.reducer';
@@ -95,6 +110,7 @@ export { TestEntityCatalog, entityCatalog } from './entity-catalog/entity-catalo
 export { InternalEventSeverity, InternalEventState } from './types/internal-events.types';
 export {
   AddParams,
+  ClearPaginationOfEntity,
   ClearPaginationOfType,
   CreatePagination,
   IgnorePaginationMaxedState,
@@ -119,7 +135,9 @@ export { IRouterNavPayload, RouterNav } from './actions/router.actions';
 export { PaginationMonitorFactory } from './monitors/pagination-monitor.factory';
 export { EndpointAuthTypeConfig, EndpointType, IAuthForm, IEndpointAuthComponent } from './extension-types';
 export {
+  connectedEndpointsOfTypesSelector,
   endpointEntitiesSelector,
+  endpointOfTypeSelector,
   endpointStatusSelector,
   endpointsEntityRequestDataSelector,
 } from './selectors/endpoint.selectors';
@@ -136,6 +154,22 @@ export { getFullEndpointApiUrl } from './endpoint-utils';
 export { PaginatedAction, PaginationClientFilter, PaginationEntityState, PaginationParam } from './types/pagination.types';
 export { MAX_RECENT_COUNT } from './reducers/current-user-roles-reducer/recently-visited.reducer.helpers';
 export { ActionState, RequestInfoState, getDefaultActionState, rootUpdatingKey } from './reducers/api-request-reducer/types';
+export {
+  ApiRequestTypes,
+  completeApiRequest,
+  createRequestStateFromResponse,
+  failApiRequest,
+  getActionFromString,
+  getEntityRequestState,
+  getFailApiRequestActions,
+  getRequestTypeFromMethod,
+  mergeInnerObject,
+  mergeObject,
+  mergeUpdatingState,
+  modifyRequestWithRequestType,
+  setEntityRequestState,
+  startApiRequest,
+} from './reducers/api-request-reducer/request-helpers';
 export { GetCurrentUsersRelations } from './actions/permissions.actions';
 export { EndpointModel, EndpointState, SystemSharedUserGuid } from './types/endpoint.types';
 export { stratosEntityCatalog } from './stratos-entity-catalog';
@@ -145,7 +179,7 @@ export {
   getCurrentUserStratosHasScope,
   getCurrentUserStratosRole,
 } from './selectors/current-user-role.selectors';
-export { APIKeysEnabled, SessionData } from './types/auth.types';
+export { APIKeysEnabled, SessionData, UserEndpointsEnabled } from './types/auth.types';
 export { RouterRedirect } from './reducers/routing.reducer';
 export { LocalAdminSetupData, UAASetupState } from './types/uaa-setup.types';
 export { GetAllApiKeys } from './actions/apiKey.actions';

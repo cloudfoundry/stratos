@@ -10,9 +10,10 @@ describe('ConditionCellComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ConditionCellComponent],
-      imports: BaseTestModules
-    })
+      imports: [
+        ConditionCellComponent,
+        ...BaseTestModules
+      ]})
       .compileComponents();
   });
 

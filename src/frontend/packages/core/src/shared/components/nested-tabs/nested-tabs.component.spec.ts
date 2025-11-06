@@ -16,7 +16,7 @@ describe('NestedTabsComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(NestedTabsComponent);

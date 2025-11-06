@@ -10,9 +10,10 @@ describe('KubernetesNodeMetricsChartComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [KubernetesNodeMetricsChartComponent],
-      imports: KubernetesBaseTestModules
-    })
+      imports: [
+        KubernetesNodeMetricsChartComponent,
+        ...KubernetesBaseTestModules
+      ]})
       .compileComponents();
   });
 

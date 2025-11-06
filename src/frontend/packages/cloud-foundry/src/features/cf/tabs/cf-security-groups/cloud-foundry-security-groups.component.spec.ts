@@ -16,7 +16,7 @@ describe('CloudFoundrySecurityGroupsComponent', () => {
       providers: [ActiveRouteCfOrgSpace]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundrySecurityGroupsComponent);

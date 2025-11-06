@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 
 import { ResourceAlertPreviewComponent } from './resource-alert-preview.component';
 import { ResourceAlertViewComponent } from './resource-alert-view/resource-alert-view.component';
-import { SidePanelService } from 'src/frontend/packages/core/src/shared/services/side-panel.service';
+import { SidePanelService } from '@stratosui/core';
 import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
 
 describe('ResourceAlertPreviewComponent', () => {
@@ -11,10 +11,11 @@ describe('ResourceAlertPreviewComponent', () => {
   let fixture: ComponentFixture<ResourceAlertPreviewComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      declarations: [ ResourceAlertPreviewComponent, ResourceAlertViewComponent ],
-      imports: [
+    TestBed.configureTestingModule({imports: [
         KubernetesBaseTestModules,
+      ,
+        ResourceAlertPreviewComponent,
+        ResourceAlertViewComponent
       ],
       providers: [
         SidePanelService,

@@ -10,7 +10,7 @@ describe('KubernetesPodStatusComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
+      imports: [
         KubernetesPodStatusComponent
       ]
     })

@@ -15,13 +15,11 @@ describe('MonocularChartCardComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
+      imports: [
+        ...BaseTestModulesNoShared,
         MonocularChartCardComponent,
         ChartItemComponent,
         ListItemComponent
-      ],
-      imports: [
-        ...BaseTestModulesNoShared,
       ],
       providers: [
         ChartsService,
@@ -29,7 +27,7 @@ describe('MonocularChartCardComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(MonocularChartCardComponent);

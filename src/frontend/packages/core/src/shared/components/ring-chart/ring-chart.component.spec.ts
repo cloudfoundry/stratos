@@ -18,7 +18,7 @@ describe('RingChartComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(RingChartComponent);

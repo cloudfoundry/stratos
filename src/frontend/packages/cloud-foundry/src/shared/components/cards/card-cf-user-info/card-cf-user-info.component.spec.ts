@@ -12,15 +12,17 @@ import { CopyToClipboardComponent } from '../../../../../../core/src/shared/comp
 describe('CardCfUserInfoComponent', () => {
   let component: CardCfUserInfoComponent;
   let fixture: ComponentFixture<CardCfUserInfoComponent>;
-  beforeEach(
-    () => {
-      TestBed.configureTestingModule({
-        declarations: [CardCfUserInfoComponent, MetadataItemComponent, CopyToClipboardComponent, CardCfUserInfoComponent],
-        imports: generateCfBaseTestModulesNoShared(),
+  beforeEach(async () => {
+      await TestBed.configureTestingModule({
+        imports: [
+          ...generateCfBaseTestModulesNoShared(),
+          CardCfUserInfoComponent,
+          MetadataItemComponent,
+          CopyToClipboardComponent
+        ],
         providers: [generateTestCfEndpointService()]
       }).compileComponents();
-    })
-  );
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CardCfUserInfoComponent);

@@ -22,7 +22,7 @@ describe('TableCellSidePanelComponent', () => {
     
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellSidePanelComponent);

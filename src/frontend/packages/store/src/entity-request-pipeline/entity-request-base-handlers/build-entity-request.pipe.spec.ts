@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { buildRequestEntityPipe } from './build-entity-request.pipe';
 import { HttpRequest } from '@angular/common/http';
 

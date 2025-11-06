@@ -18,7 +18,7 @@ describe('CloudFoundrySpaceUserServiceInstancesComponent', () => {
       providers: [getCfSpaceServiceMock, DatePipe, ServiceActionHelperService]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundrySpaceUserServiceInstancesComponent);

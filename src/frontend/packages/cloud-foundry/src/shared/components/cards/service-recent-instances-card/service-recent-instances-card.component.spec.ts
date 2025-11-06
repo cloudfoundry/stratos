@@ -30,7 +30,7 @@ describe('ServiceRecentInstancesCardComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServiceRecentInstancesCardComponent);

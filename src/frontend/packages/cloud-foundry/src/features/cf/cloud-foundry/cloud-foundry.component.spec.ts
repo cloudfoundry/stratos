@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { populateStoreWithTestEndpoint } from '@stratosui/store/testing';
+import { populateStoreWithTestEndpoint } from "../../test-framework/cloud-foundry-endpoint-service.helper";
 
 import { TabNavService } from '../../../../../core/src/tab-nav.service';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
@@ -15,9 +15,8 @@ describe('CloudFoundryComponent', () => {
   let component: CloudFoundryComponent;
   let fixture: ComponentFixture<CloudFoundryComponent>;
 
-  beforeEach(
-    () => {
-      TestBed.configureTestingModule({
+  beforeEach(async () => {
+      await TestBed.configureTestingModule({
         declarations: [
           CloudFoundryComponent,
           CfEndpointsMissingComponent
@@ -31,8 +30,7 @@ describe('CloudFoundryComponent', () => {
       }).compileComponents();
 
       populateStoreWithTestEndpoint();
-    })
-  );
+    });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryComponent);

@@ -60,5 +60,5 @@ describe('TableCellServiceInstanceAppsAttachedComponent', () => {
 
   it('should create'(() => {
     expect(component).toBeTruthy();
-  }));
+  });
 });

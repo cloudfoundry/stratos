@@ -16,9 +16,9 @@ describe('TableCellConfirmRoleAddRemComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         MDAppModule,
+        TableCellConfirmRoleAddRemComponent
       ],
       declarations: [
-        TableCellConfirmRoleAddRemComponent,
         BooleanIndicatorComponent
       ]
     })

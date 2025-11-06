@@ -18,7 +18,7 @@ describe('CloudFoundryQuotasComponent', () => {
       imports: [...CFBaseTestModules]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryQuotasComponent);

@@ -1,10 +1,10 @@
 import { Injectable, OnDestroy, signal, WritableSignal, computed, Injector, inject, runInInjectionContext } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { safeUnsubscribe } from 'src/frontend/packages/core/src/core/utils.service';
-import { AppState } from 'src/frontend/packages/store/src/app-state';
-import { connectedEndpointsOfTypesSelector } from 'src/frontend/packages/store/src/selectors/endpoint.selectors';
-import { EndpointModel } from 'src/frontend/packages/store/src/types/endpoint.types';
+import { safeUnsubscribe } from '@stratosui/core';
+import { AppState } from '@stratosui/store';
+import { connectedEndpointsOfTypesSelector } from '@stratosui/store';
+import { EndpointModel } from '@stratosui/store';
 import { Observable, Subscription } from 'rxjs';
 import {
   distinctUntilChanged,

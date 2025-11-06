@@ -14,7 +14,7 @@ describe('ServiceIconComponent', () => {
       imports: generateCfBaseTestModulesNoShared()
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServiceIconComponent);

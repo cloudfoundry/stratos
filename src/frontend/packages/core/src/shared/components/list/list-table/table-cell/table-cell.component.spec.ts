@@ -53,7 +53,7 @@ describe('TableCellComponent', () => {
     
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellComponent);

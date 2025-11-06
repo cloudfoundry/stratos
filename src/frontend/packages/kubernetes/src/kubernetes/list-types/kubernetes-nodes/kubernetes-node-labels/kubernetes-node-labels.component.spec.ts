@@ -10,9 +10,10 @@ describe('KubernetesNodeLabelsComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [KubernetesNodeLabelsComponent],
-      imports: BaseTestModules
-    })
+      imports: [
+        KubernetesNodeLabelsComponent,
+        ...BaseTestModules
+      ]})
       .compileComponents();
   });
 

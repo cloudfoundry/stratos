@@ -29,7 +29,7 @@ describe('ApiKeysPageComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ApiKeysPageComponent);

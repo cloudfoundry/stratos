@@ -16,15 +16,17 @@ describe('CliCommandComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [CliCommandComponent, CodeBlockComponent, CopyToClipboardComponent],
       imports: [
         ...generateCfStoreModules(),
         MDAppModule,
         CoreModule,
+        CliCommandComponent,
+        CodeBlockComponent,
+        CopyToClipboardComponent
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CliCommandComponent);

@@ -13,9 +13,9 @@ describe('KubeConfigTableCertComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         ...KubernetesBaseTestModules
-      ],
-      declarations: [KubeConfigTableCertComponent],
-      providers: [
+      ,
+        KubeConfigTableCertComponent
+      ]providers: [
         KubeConfigHelper
       ]
     })

@@ -22,7 +22,7 @@ describe('TableCellExpanderComponent', () => {
     
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellExpanderComponent);

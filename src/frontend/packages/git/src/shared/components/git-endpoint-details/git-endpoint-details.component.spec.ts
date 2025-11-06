@@ -18,7 +18,7 @@ describe('GitEndpointDetailsComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(GitEndpointDetailsComponent);

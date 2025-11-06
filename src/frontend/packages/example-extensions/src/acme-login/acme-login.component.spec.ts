@@ -27,7 +27,7 @@ describe('AcmeLoginComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AcmeLoginComponent);

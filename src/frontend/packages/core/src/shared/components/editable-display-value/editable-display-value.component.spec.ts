@@ -14,7 +14,7 @@ describe('EditableDisplayValueComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EditableDisplayValueComponent);

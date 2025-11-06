@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { BehaviorSubject, of } from 'rxjs';
-import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { STORE_TEST_PROVIDERS } from "../test-framework/core-test.helper";
 
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { IFavoriteMetadata, UserFavorite } from '../../../../store/src/types/user-favorites.types';
@@ -32,7 +32,7 @@ describe('EntityFavoriteStarComponent', () => {
       ],
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EntityFavoriteStarComponent);

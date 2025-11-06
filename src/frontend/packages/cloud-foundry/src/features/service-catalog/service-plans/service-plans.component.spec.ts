@@ -23,7 +23,7 @@ describe('ServicePlansComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServicePlansComponent);

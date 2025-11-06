@@ -8,8 +8,13 @@ export class TableCellStatusDirective implements OnChanges {
 
   @Input() appTableCellStatus!: string;
 
-  private el = inject(ElementRef);
-  private renderer = inject(Renderer2);
+  private readonly el: ElementRef;
+  private readonly renderer: Renderer2;
+
+  constructor(el: ElementRef, renderer: Renderer2) {
+    this.el = el;
+    this.renderer = renderer;
+  }
 
   ngOnChanges(changes: SimpleChanges) {
     const change = changes.appTableCellStatus;

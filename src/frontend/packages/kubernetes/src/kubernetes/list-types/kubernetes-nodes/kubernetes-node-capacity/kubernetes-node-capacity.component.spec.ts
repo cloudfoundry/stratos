@@ -10,9 +10,10 @@ describe('KubernetesNodeCapacityComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [KubernetesNodeCapacityComponent],
-      imports: BaseTestModules
-    })
+      imports: [
+        KubernetesNodeCapacityComponent,
+        ...BaseTestModules
+      ]})
       .compileComponents();
   });
 

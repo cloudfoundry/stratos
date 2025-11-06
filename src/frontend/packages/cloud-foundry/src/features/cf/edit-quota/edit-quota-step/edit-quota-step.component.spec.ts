@@ -31,7 +31,7 @@ describe('EditQuotaStepComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EditQuotaStepComponent);

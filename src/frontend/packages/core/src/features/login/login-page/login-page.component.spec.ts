@@ -31,7 +31,7 @@ describe('LoginPageComponent', () => {
     
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(LoginPageComponent);

@@ -9,11 +9,11 @@ describe('StratosTitleComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-    declarations: [StratosTitleComponent],
-    teardown: { destroyAfterEach: false }
-})
-    .compileComponents();
-  }));
+      declarations: [StratosTitleComponent],
+      teardown: { destroyAfterEach: false }
+    })
+      .compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(StratosTitleComponent);

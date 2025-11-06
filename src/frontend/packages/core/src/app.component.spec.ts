@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from "../test-framework/core-test.helper";
 
 import { CoreTestingModule } from '../test-framework/core-test.modules';
 import { AppComponent } from './app.component';

@@ -3,7 +3,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from '@stratosui/store/testing';
+import { createBasicStoreModule } from "../test-framework/core-test.helper";
 
 import { CoreModule } from '../../../core/core.module';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
@@ -34,7 +34,7 @@ describe('EulaPageComponent', () => {
     
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EulaPageComponent);

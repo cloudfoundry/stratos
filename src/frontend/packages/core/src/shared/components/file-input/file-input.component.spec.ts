@@ -16,7 +16,7 @@ describe('FileInputComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(FileInputComponent);

@@ -29,7 +29,7 @@ describe('DetachAppsComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(DetachAppsComponent);

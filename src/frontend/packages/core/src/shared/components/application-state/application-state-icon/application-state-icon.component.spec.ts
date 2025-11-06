@@ -14,7 +14,7 @@ describe('ApplicationStateIconComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ApplicationStateIconComponent);

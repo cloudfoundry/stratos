@@ -18,7 +18,7 @@ describe('CFHomeCardComponent', () => {
       ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CFHomeCardComponent);

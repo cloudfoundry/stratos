@@ -11,9 +11,10 @@ describe('KubernetesPodTagsComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [KubernetesPodTagsComponent],
-      imports: KubernetesBaseTestModules
-    })
+      imports: [
+        KubernetesPodTagsComponent,
+        ...KubernetesBaseTestModules
+      ]})
       .compileComponents();
   });
 

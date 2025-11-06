@@ -15,7 +15,7 @@ describe('FavoritesSidePanelComponent', () => {
       
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(FavoritesSidePanelComponent);

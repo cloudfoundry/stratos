@@ -19,7 +19,7 @@ describe('AddSpaceComponent', () => {
       providers: [TabNavService]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AddSpaceComponent);

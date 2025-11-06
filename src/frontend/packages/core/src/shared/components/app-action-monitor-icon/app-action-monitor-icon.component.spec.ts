@@ -17,7 +17,7 @@ describe('AppActionMonitorIconComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AppActionMonitorIconComponent);

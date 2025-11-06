@@ -60,7 +60,7 @@ describe('UsersRolesComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(UsersRolesComponent);

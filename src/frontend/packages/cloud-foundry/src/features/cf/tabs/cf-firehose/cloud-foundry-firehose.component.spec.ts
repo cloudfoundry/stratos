@@ -11,15 +11,13 @@ describe('CloudFoundryFirehoseComponent', () => {
   let component: CloudFoundryFirehoseComponent;
   let fixture: ComponentFixture<CloudFoundryFirehoseComponent>;
 
-  beforeEach(
-    () => {
-      TestBed.configureTestingModule({
+  beforeEach(async () => {
+      await TestBed.configureTestingModule({
         declarations: [CloudFoundryFirehoseComponent],
         imports: generateCfBaseTestModules(),
         providers: [...generateTestCfEndpointServiceProvider()]
       }).compileComponents();
-    })
-  );
+    });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryFirehoseComponent);

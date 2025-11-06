@@ -18,7 +18,7 @@ describe('CloudFoundryCellAppsComponent', () => {
       imports: generateCfBaseTestModules(),
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryCellAppsComponent);

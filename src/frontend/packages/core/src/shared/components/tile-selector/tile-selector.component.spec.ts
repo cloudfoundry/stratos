@@ -17,7 +17,7 @@ describe('TileSelectorComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TileSelectorComponent);

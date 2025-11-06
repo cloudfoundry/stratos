@@ -34,7 +34,7 @@ describe('ManageUsersSetUsernamesComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ManageUsersSetUsernamesComponent);

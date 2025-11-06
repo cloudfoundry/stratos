@@ -15,7 +15,7 @@ describe('ShowHideButtonComponent', () => {
       
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ShowHideButtonComponent);

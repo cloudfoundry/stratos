@@ -12,12 +12,10 @@ describe('KubeServiceCardComponent', () => {
   let fixture: ComponentFixture<KubeServiceCardComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      declarations: [
+    TestBed.configureTestingModule({imports: [...KubernetesBaseTestModules,
         KubeServiceCardComponent,
-        KubernetesServicePortsComponent,
+        KubernetesServicePortsComponent
       ],
-      imports: [...KubernetesBaseTestModules],
     })
       .compileComponents();
   });

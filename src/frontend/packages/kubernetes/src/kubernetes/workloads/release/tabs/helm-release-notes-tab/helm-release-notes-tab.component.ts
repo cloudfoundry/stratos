@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import {Component, inject, ChangeDetectionStrategy } from '@angular/core';
-import { AnsiColors } from 'src/frontend/packages/core/src/shared/components/log-viewer/ansi-colors';
+import { AnsiColors } from '@stratosui/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 

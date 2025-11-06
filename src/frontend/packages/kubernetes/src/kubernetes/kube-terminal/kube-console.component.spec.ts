@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from '@stratosui/store/testing';
+import { createBasicStoreModule } from "../../../test-framework/kubernetes-test.helper";
 
 import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
 import { ApplicationServiceMock } from '../../../../cloud-foundry/test-framework/application-service-helper';
@@ -15,13 +15,13 @@ describe('KubeConsoleComponent', () => {
   let fixture: ComponentFixture<KubeConsoleComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      declarations: [KubeConsoleComponent],
-      imports: [
+    TestBed.configureTestingModule({imports: [
         CoreModule,
         SharedModule,
         RouterTestingModule,
         createBasicStoreModule()
+      ,
+        KubeConsoleComponent
       ],
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },

@@ -9,7 +9,7 @@ describe('KubernetesServicePortsComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [KubernetesServicePortsComponent]
+      imports: [KubernetesServicePortsComponent]
     })
       .compileComponents();
   });

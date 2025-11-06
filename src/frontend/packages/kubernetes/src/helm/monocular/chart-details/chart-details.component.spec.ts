@@ -27,16 +27,13 @@ describe('ChartDetailsComponent', () => {
   let component: ChartDetailsComponent;
   let fixture: ComponentFixture<ChartDetailsComponent>;
 
-  beforeEach(
-    () => {
-      TestBed.configureTestingModule({
+  beforeEach(async () => {
+      await TestBed.configureTestingModule({
         imports: [
           BrowserModule,
           RouterTestingModule,
           HttpClientModule,
-          ...BaseTestModulesNoShared
-        ],
-        declarations: [
+          ...BaseTestModulesNoShared,
           ChartDetailsComponent,
           ChartDetailsVersionsComponent,
           ChartDetailsInfoComponent,
@@ -56,8 +53,7 @@ describe('ChartDetailsComponent', () => {
           PaginationMonitorFactory,
         ]
       }).compileComponents();
-    })
-  );
+    });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ChartDetailsComponent);

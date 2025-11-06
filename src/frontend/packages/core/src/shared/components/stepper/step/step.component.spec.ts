@@ -15,7 +15,7 @@ describe('StepComponent', () => {
       
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(StepComponent);

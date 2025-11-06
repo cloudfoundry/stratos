@@ -12,7 +12,7 @@ describe('PageSubNavSectionComponent', () => {
       imports: [ PageSubNavSectionComponent ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(PageSubNavSectionComponent);

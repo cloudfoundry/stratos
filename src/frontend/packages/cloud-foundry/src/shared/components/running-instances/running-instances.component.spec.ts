@@ -22,7 +22,7 @@ describe('RunningInstancesComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(RunningInstancesComponent);

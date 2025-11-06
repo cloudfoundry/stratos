@@ -1,7 +1,7 @@
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { createBasicStoreModule } from '@stratosui/store/testing';
+import { createBasicStoreModule } from "../test-framework/core-test.helper";
 import { of } from 'rxjs';
 
 import { EntitySchema } from '../../../../../store/src/helpers/entity-schema';
@@ -44,7 +44,7 @@ describe('LoadingPageComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(LoadingPageComponent);
@@ -86,18 +86,20 @@ describe('LoadingPageComponent', () => {
       expect(progressBar).toBeTruthy();
     });
 
-    it('should hide progress bar when is done', fakeAsync(() => {
+    it('should hide progress bar when is done', async () => {
+      vi.useFakeTimers();
       let progressBar = element.querySelector('mat-progress-bar');
       expect(progressBar).toBeTruthy();
 
       component.isDeleting = of(false);
       fixture.detectChanges();
 
-      tick(250);
+      await vi.advanceTimersByTimeAsync(250);
 
       progressBar = element.querySelector('mat-progress-bar');
       expect(progressBar).toBeFalsy();
-    }));
+      vi.useRealTimers();
+    });
   });
 
   describe('when loading', () => {
@@ -116,17 +118,19 @@ describe('LoadingPageComponent', () => {
       expect(progressBar).toBeTruthy();
     });
 
-    it('should hide progress bar when is done', fakeAsync(() => {
+    it('should hide progress bar when is done', async () => {
+      vi.useFakeTimers();
       let progressBar = element.querySelector('mat-progress-bar');
       expect(progressBar).toBeTruthy();
 
       component.isLoading = of(false);
       fixture.detectChanges();
 
-      tick(250);
+      await vi.advanceTimersByTimeAsync(250);
 
       progressBar = element.querySelector('mat-progress-bar');
       expect(progressBar).toBeFalsy();
-    }));
+      vi.useRealTimers();
+    });
   });
 });

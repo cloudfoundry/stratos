@@ -12,9 +12,9 @@ describe('KubeConfigSelectionComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         ...KubernetesBaseTestModules
-      ],
-      declarations: [KubeConfigSelectionComponent]
-    })
+      ,
+        KubeConfigSelectionComponent
+      ]})
       .compileComponents();
   });
 

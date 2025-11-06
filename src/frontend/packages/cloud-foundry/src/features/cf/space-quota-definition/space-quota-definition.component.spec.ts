@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { testSCFEndpoint, testSCFEndpointGuid } from '@stratosui/store/testing';
+import { testSCFEndpoint, testSCFEndpointGuid } from "../../test-framework/cloud-foundry-endpoint-service.helper";
 
 import { TabNavService } from '../../../../../core/src/tab-nav.service';
 import { EntityCatalogHelpers } from '../../../../../store/src/entity-catalog/entity-catalog.helper';
@@ -88,7 +88,7 @@ describe('SpaceQuotaDefinitionComponent', () => {
       type: 'POPULATE_TEST_DATA',
       ...stratosEndpointEntityConfig
     }, 'fetch'));
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SpaceQuotaDefinitionComponent);

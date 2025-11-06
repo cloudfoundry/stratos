@@ -3,8 +3,8 @@ import { ComponentFixture, inject, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Store } from '@ngrx/store';
-import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { PaginationEntityState } from 'src/frontend/packages/store/src/types/pagination.types';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from "../test-framework/core-test.helper";
+import { PaginationEntityState } from '@stratosui/store';
 import { BehaviorSubject, of as observableOf } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
@@ -141,7 +141,7 @@ describe('ListComponent', () => {
         ],
       })
         .compileComponents();
-    }));
+    });
 
     beforeEach(() => {
       fixture = TestBed.createComponent<ListComponent<EndpointModel>>(ListComponent);

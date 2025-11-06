@@ -38,7 +38,7 @@ describe('CliInfoCloudFoundryComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CliInfoCloudFoundryComponent);

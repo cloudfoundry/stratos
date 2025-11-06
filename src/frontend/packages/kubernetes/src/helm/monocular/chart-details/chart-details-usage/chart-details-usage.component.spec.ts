@@ -12,8 +12,7 @@ import { ChartDetailsUsageComponent } from './chart-details-usage.component';
 describe('Component: ChartDetailsUsage', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [...BaseTestModulesNoShared],
-      declarations: [ChartDetailsUsageComponent],
+      imports: [...BaseTestModulesNoShared, ChartDetailsUsageComponent],
       providers: [
         EndpointsService,
         UtilsService,

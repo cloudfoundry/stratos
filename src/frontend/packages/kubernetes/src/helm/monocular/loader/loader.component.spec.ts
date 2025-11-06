@@ -8,14 +8,11 @@ describe('LoaderComponent', () => {
   let component: LoaderComponent;
   let fixture: ComponentFixture<LoaderComponent>;
 
-  beforeEach(
-    () => {
-      TestBed.configureTestingModule({
-        imports: [CoreModule],
-        declarations: [LoaderComponent]
+  beforeEach(async () => {
+      await TestBed.configureTestingModule({
+        imports: [CoreModule, LoaderComponent]
       }).compileComponents();
-    })
-  );
+    });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(LoaderComponent);

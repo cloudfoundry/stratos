@@ -22,7 +22,7 @@ describe('CloudFoundrySpaceBaseComponent', () => {
       providers: [generateTestCfEndpointServiceProvider(), TabNavService, CloudFoundryUserProvidedServicesService]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundrySpaceBaseComponent);

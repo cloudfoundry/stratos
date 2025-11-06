@@ -42,7 +42,7 @@ describe('CloudFoundryOrganizationEventsComponent', () => {
       imports: [...CFBaseTestModules]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryOrganizationEventsComponent);

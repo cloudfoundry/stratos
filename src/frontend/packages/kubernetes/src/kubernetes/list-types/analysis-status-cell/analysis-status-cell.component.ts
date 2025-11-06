@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { CustomTooltipDirective } from '@stratosui/core';
-import { TableCellCustom } from 'src/frontend/packages/core/src/shared/components/list/list.types';
+import { CustomTooltipDirective, ProgressSpinnerComponent, TableCellCustom } from '@stratosui/core';
 
 @Component({
   selector: 'app-analysis-status-cell',
@@ -8,13 +7,9 @@ import { TableCellCustom } from 'src/frontend/packages/core/src/shared/component
   styleUrls: ['./analysis-status-cell.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CustomTooltipDirective]
+  imports: [CustomTooltipDirective, ProgressSpinnerComponent]
 })
 export class AnalysisStatusCellComponent extends TableCellCustom<any> {
-
-  constructor() {
-    super();
-    this.row = {};
-  }
-
+  // row property is inherited from TableCellCustom base class
+  // No constructor needed - base class handles initialization
 }

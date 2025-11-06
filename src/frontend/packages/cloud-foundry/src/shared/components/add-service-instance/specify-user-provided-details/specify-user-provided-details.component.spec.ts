@@ -30,7 +30,7 @@ describe('SpecifyUserProvidedDetailsComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SpecifyUserProvidedDetailsComponent);

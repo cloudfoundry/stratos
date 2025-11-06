@@ -17,7 +17,7 @@ describe('PollingIndicatorComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(PollingIndicatorComponent);

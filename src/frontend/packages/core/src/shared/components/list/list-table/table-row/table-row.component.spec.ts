@@ -63,7 +63,7 @@ describe('TableRowComponent', () => {
 
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TestHostComponent);
@@ -140,7 +140,7 @@ describe('TableRowComponent', () => {
       const configFunction = vi.fn().mockImplementation((row: any) => ({
         testValue: `dynamic-${row.id}`,
         enabled: row.active
-      }));
+      });
 
       const columns: ITableColumn<any>[] = [
         {
@@ -223,7 +223,7 @@ describe('TableRowComponent', () => {
       // Arrange
       const configFunction = vi.fn().mockImplementation((row: any) => ({
         testValue: `row-${row.id}`
-      }));
+      });
 
       const columns: ITableColumn<any>[] = [
         {

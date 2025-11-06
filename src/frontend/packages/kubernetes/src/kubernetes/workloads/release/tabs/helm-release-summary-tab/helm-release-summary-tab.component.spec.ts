@@ -20,9 +20,10 @@ describe('HelmReleaseSummaryTabComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         ...WorkloadsBaseTestingModule
-      ],
-      declarations: [HelmReleaseSummaryTabComponent, AnalysisReportSelectorComponent],
-      providers: [
+      ,
+        HelmReleaseSummaryTabComponent,
+        AnalysisReportSelectorComponent
+      ]providers: [
         ...HelmReleaseProviders,
         KubernetesAnalysisService,
         KubernetesEndpointService,

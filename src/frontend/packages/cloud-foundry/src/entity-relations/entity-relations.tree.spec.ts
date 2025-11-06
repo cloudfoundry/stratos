@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { CFEntitySchema } from '../cf-entity-schema-types';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
 import { fetchEntityTree } from './entity-relations.tree';

@@ -14,13 +14,11 @@ describe('KubeConfigRegistrationComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         ...KubernetesBaseTestModules
-      ],
-      declarations: [
+      ,
         KubeConfigRegistrationComponent,
         KubeConfigSelectionComponent,
         KubeConfigImportComponent
-      ]
-    })
+      ]})
       .compileComponents();
   });
 

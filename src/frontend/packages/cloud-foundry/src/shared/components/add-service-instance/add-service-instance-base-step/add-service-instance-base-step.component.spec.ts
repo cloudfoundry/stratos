@@ -16,7 +16,7 @@ describe('AddServiceInstanceBaseStepComponent', () => {
       providers: [TabNavService]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AddServiceInstanceBaseStepComponent);

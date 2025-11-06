@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { UntypedFormBuilder } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { CoreModule } from 'src/frontend/packages/core/src/core/core.module';
+import { CoreModule } from '@stratosui/core';
 
 import { SharedModule } from './../../../../../core/src/shared/shared.module';
 import { KubernetesCertsAuthFormComponent } from './kubernetes-certs-auth-form.component';
@@ -12,12 +12,12 @@ describe('KubernetesCertsAuthFormComponent', () => {
   let fixture: ComponentFixture<KubernetesCertsAuthFormComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      declarations: [KubernetesCertsAuthFormComponent],
-      imports: [
+    TestBed.configureTestingModule({imports: [
         CoreModule,
         SharedModule,
         NoopAnimationsModule
+      ,
+        KubernetesCertsAuthFormComponent
       ]
     })
       .compileComponents();

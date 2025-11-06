@@ -23,7 +23,7 @@ describe('BackupConnectionCellComponent', () => {
     
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(BackupConnectionCellComponent);

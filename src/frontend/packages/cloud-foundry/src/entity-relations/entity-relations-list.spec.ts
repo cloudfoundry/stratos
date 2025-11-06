@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import { listEntityRelations } from './entity-relations';
 import { createEntityRelationKey, EntityInlineParentAction } from './entity-relations.types';

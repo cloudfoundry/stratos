@@ -47,7 +47,7 @@ describe('GitRegistrationComponent', () => {
       ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(GitRegistrationComponent);

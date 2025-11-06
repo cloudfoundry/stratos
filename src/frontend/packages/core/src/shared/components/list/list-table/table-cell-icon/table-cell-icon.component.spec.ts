@@ -18,7 +18,7 @@ describe('TableCellIconComponent', () => {
     
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellIconComponent);

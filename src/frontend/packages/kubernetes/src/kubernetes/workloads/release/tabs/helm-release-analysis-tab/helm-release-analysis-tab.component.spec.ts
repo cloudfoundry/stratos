@@ -16,10 +16,12 @@ describe('HelmReleaseAnalysisTabComponent', () => {
   let fixture: ComponentFixture<HelmReleaseAnalysisTabComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      declarations: [HelmReleaseAnalysisTabComponent, AnalysisReportSelectorComponent, AnalysisReportViewerComponent],
-      imports: [
+    TestBed.configureTestingModule({imports: [
         KubernetesBaseTestModules,
+      ,
+        HelmReleaseAnalysisTabComponent,
+        AnalysisReportSelectorComponent,
+        AnalysisReportViewerComponent
       ],
       providers: [
         KubernetesAnalysisService,

@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from '@stratosui/store/testing';
+import { createBasicStoreModule } from "../../test-framework/cloud-foundry-endpoint-service.helper";
 
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../../../../cf-api.types';

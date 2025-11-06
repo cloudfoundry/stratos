@@ -15,11 +15,12 @@ describe('KubernetesAnalysisInfoComponent', () => {
   let fixture: ComponentFixture<KubernetesAnalysisInfoComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      declarations: [KubernetesAnalysisInfoComponent, AnalysisInfoCardComponent],
-      imports: [
+    TestBed.configureTestingModule({imports: [
         SharedModule,
         KubernetesBaseTestModules,
+      ,
+        KubernetesAnalysisInfoComponent,
+        AnalysisInfoCardComponent
       ],
       providers: [
         KubernetesAnalysisService,

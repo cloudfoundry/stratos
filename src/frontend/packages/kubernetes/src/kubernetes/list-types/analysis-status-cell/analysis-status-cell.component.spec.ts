@@ -1,10 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { MDAppModule } from '../../../../../core/src/public-api';
-import {
-  AnalysisReportSelectorComponent,
-} from './../../analysis-report-viewer/analysis-report-selector/analysis-report-selector.component';
+import { BaseTestModules } from '../../../../../core/test-framework/core-test.helper';
 import { AnalysisStatusCellComponent } from './analysis-status-cell.component';
 
 describe('AnalysisStatusCellComponent', () => {
@@ -13,9 +10,9 @@ describe('AnalysisStatusCellComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [AnalysisStatusCellComponent, AnalysisReportSelectorComponent],
       imports: [
-        MDAppModule,
+        AnalysisStatusCellComponent,
+        ...BaseTestModules
       ]
     })
       .compileComponents();
@@ -24,6 +21,8 @@ describe('AnalysisStatusCellComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(AnalysisStatusCellComponent);
     component = fixture.componentInstance;
+    // Set required row property (inherited from TableCellCustom)
+    component.row = { status: 'completed' };
     fixture.detectChanges();
   });
 

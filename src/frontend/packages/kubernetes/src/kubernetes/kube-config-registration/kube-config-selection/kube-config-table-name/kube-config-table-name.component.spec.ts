@@ -16,9 +16,9 @@ describe('KubeConfigTableName', () => {
     TestBed.configureTestingModule({
       imports: [
         ...KubernetesBaseTestModules
-      ],
-      declarations: [KubeConfigTableNameComponent]
-    })
+      ,
+        KubeConfigTableNameComponent
+      ]})
       .compileComponents();
   });
 

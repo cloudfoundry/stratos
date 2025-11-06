@@ -22,7 +22,7 @@ describe('ServiceBaseComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServiceBaseComponent);

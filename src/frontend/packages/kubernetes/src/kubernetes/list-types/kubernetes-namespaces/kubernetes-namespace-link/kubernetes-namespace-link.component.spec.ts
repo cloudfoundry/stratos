@@ -13,8 +13,10 @@ describe('KubernetesNamespaceLinkComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [KubernetesNamespaceLinkComponent],
-      imports: KubernetesBaseTestModules,
+      imports: [
+        KubernetesNamespaceLinkComponent,
+        ...KubernetesBaseTestModules
+      ],
       providers: [KubernetesEndpointService, BaseKubeGuid]
     })
       .compileComponents();

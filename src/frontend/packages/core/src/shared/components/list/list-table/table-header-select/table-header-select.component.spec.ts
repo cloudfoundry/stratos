@@ -19,7 +19,7 @@ describe('TableHeaderSelectComponent', () => {
     
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TableHeaderSelectComponent);

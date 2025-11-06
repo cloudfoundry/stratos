@@ -26,7 +26,7 @@ describe('EnvVarViewComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EnvVarViewComponent);

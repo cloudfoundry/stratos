@@ -2,16 +2,16 @@ import {Component, OnInit, signal, inject, ChangeDetectionStrategy } from '@angu
 import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { IHeaderBreadcrumbLink } from 'src/frontend/packages/core/src/shared/components/page-header/page-header.types';
+import { IHeaderBreadcrumbLink } from '@stratosui/core';
 import { Observable, of, Subject } from 'rxjs';
 import { catchError, first, map, startWith } from 'rxjs/operators';
 
 import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
 import { KubernetesAnalysisService } from '../../../services/kubernetes.analysis.service';
 import { getParentURL } from '../../../services/route.helper';
-import { PageHeaderModule } from 'src/frontend/packages/core/src/shared/components/page-header/page-header.module';
-import { PageSubNavComponent } from 'src/frontend/packages/core/src/shared/components/page-sub-nav/page-sub-nav.component';
-import { LoadingPageComponent } from 'src/frontend/packages/core/src/shared/components/loading-page/loading-page.component';
+import { PageHeaderModule } from '@stratosui/core';
+import { PageSubNavComponent } from '@stratosui/core';
+import { LoadingPageComponent } from '@stratosui/core';
 import { AnalysisReportViewerComponent } from '../../../analysis-report-viewer/analysis-report-viewer.component';
 
 @Component({

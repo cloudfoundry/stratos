@@ -10,9 +10,10 @@ describe('KubernetesNodeIpsComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [KubernetesNodeIpsComponent],
-      imports: BaseTestModules
-    })
+      imports: [
+        KubernetesNodeIpsComponent,
+        ...BaseTestModules
+      ]})
       .compileComponents();
   });
 

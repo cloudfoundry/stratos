@@ -15,7 +15,7 @@ describe('DotContentComponent', () => {
       
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(DotContentComponent);

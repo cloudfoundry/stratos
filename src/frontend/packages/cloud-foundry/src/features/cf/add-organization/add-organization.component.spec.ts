@@ -10,14 +10,14 @@ describe('AddOrganizationComponent', () => {
   let component: AddOrganizationComponent;
   let fixture: ComponentFixture<AddOrganizationComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [AddOrganizationComponent, CreateOrganizationStepComponent],
       imports: generateCfBaseTestModules(),
       providers: [TabNavService]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AddOrganizationComponent);

@@ -18,7 +18,7 @@ describe('CardComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent<CardComponent<EntityInfo>>(CardComponent);

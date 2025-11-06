@@ -32,5 +32,6 @@ describe('CfAppVariablesListConfigService', () => {
     [CfAppVariablesListConfigService],
     (service: CfAppVariablesListConfigService) => {
       expect(service).toBeTruthy();
-    });
+    }
+  ));
 });

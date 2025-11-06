@@ -16,7 +16,7 @@ describe('CreateSpaceStepComponent', () => {
       providers: [ActiveRouteCfOrgSpace]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CreateSpaceStepComponent);

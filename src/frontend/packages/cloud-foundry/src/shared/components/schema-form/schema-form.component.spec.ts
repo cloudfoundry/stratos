@@ -18,7 +18,7 @@ describe('SchemaFormComponent', () => {
       ],
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SchemaFormComponent);

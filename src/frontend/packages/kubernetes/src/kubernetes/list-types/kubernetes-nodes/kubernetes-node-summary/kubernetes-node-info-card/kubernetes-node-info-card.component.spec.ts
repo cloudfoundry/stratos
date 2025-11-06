@@ -13,8 +13,10 @@ describe('KubernetesNodeInfoCardComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [KubernetesNodeInfoCardComponent],
-      imports: KubernetesBaseTestModules,
+      imports: [
+        KubernetesNodeInfoCardComponent,
+        ...KubernetesBaseTestModules
+      ],
       providers: [BaseKubeGuid, KubernetesNodeService, KubernetesEndpointService]
     })
       .compileComponents();

@@ -15,9 +15,9 @@ describe('WorkloadLiveReloadComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         ...KubernetesBaseTestModules
-      ],
-      declarations: [WorkloadLiveReloadComponent],
-      providers: [
+      ,
+        WorkloadLiveReloadComponent
+      ]providers: [
         HelmReleaseSocketService,
         HelmReleaseHelperService,
         HelmReleaseGuidMock

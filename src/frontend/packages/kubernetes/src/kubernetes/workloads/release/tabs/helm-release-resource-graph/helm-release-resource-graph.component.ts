@@ -5,7 +5,7 @@ import { AppProgressBarComponent } from '../../../../../../../core/src/shared/co
 import { CustomIconComponent } from '../../../../../../../core/src/shared/components/custom-material/custom-material.component';
 import { CustomTooltipDirective } from '../../../../../../../core/src/shared/components/custom-tooltip/custom-tooltip.directive';
 import { Edge, NgxGraphModule } from '@swimlane/ngx-graph';
-import { SidePanelService } from 'src/frontend/packages/core/src/shared/services/side-panel.service';
+import { SidePanelService } from '@stratosui/core';
 import { combineLatest, Observable, Subject, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, publishReplay, refCount, startWith } from 'rxjs/operators';
 

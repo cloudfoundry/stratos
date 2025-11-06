@@ -21,7 +21,7 @@ describe('TableCellBooleanIndicatorComponent', () => {
     
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellBooleanIndicatorComponent);

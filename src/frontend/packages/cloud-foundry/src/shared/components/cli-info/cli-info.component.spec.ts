@@ -15,14 +15,16 @@ describe('CliInfoComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [CliInfoComponent, CodeBlockComponent, CopyToClipboardComponent],
       imports: [
         CoreModule,
         MDAppModule,
+        CliInfoComponent,
+        CodeBlockComponent,
+        CopyToClipboardComponent
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CliInfoComponent);

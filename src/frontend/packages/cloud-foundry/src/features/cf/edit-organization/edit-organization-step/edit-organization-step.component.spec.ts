@@ -22,7 +22,7 @@ describe('EditOrganizationStepComponent', () => {
       providers: [ActiveRouteCfOrgSpace, generateTestCfEndpointServiceProvider(), CloudFoundryUserProvidedServicesService]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EditOrganizationStepComponent);

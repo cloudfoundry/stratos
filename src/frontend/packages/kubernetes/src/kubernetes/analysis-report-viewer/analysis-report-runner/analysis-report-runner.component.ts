@@ -1,6 +1,6 @@
 import { AsyncPipe } from '@angular/common';
 import {Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { SidePanelService } from 'src/frontend/packages/core/src/shared/services/side-panel.service';
+import { SidePanelService } from '@stratosui/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 

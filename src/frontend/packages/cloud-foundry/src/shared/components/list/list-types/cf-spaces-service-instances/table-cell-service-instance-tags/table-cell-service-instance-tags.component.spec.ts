@@ -14,8 +14,11 @@ describe('TableCellServiceInstanceTagsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [TableCellServiceInstanceTagsComponent, AppChipsComponent],
-      imports: generateCfBaseTestModulesNoShared(),
+      imports: [
+        ...generateCfBaseTestModulesNoShared(),
+        TableCellServiceInstanceTagsComponent,
+        AppChipsComponent
+      ],
       providers: [EntityMonitorFactory]
 
     })
@@ -52,9 +55,9 @@ describe('TableCellServiceInstanceTagsComponent', () => {
       }
     };
     fixture.detectChanges();
-  }));
+  });
 
   it('should create'(() => {
     expect(component).toBeTruthy();
-  }));
+  });
 });

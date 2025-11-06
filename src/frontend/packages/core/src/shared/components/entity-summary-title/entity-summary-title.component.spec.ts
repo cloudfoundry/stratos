@@ -16,7 +16,7 @@ describe('EntitySummaryTitleComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EntitySummaryTitleComponent);

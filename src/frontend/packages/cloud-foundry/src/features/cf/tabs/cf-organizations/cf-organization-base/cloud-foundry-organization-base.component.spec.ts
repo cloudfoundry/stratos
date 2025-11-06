@@ -22,7 +22,7 @@ describe('CloudFoundryOrganizationBaseComponent', () => {
       providers: [...generateTestCfEndpointServiceProvider(), TabNavService, CloudFoundryUserProvidedServicesService]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryOrganizationBaseComponent);

@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
-import { createBasicStoreModule } from '@stratosui/store/testing';
+import { createBasicStoreModule } from "../test-framework/core-test.helper";
 
 import { CoreTestingModule } from '../../../../../test-framework/core-test.modules';
 import { CoreModule } from '../../../../core/core.module';

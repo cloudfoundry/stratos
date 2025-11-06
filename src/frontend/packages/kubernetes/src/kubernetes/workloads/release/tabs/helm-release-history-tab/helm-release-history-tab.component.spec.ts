@@ -11,8 +11,9 @@ describe('HelmReleaseHistoryTabComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ HelmReleaseHistoryTabComponent ],
-      providers: [
+      imports: [
+        HelmReleaseHistoryTabComponent
+      ]providers: [
         HelmReleaseHelperService,
         HelmReleaseGuidMock
       ]

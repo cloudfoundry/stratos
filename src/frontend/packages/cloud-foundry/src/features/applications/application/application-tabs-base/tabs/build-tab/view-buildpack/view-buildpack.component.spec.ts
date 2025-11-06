@@ -9,7 +9,7 @@ describe('ViewBuildpackComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ViewBuildpackComponent ]
+      imports: [ ViewBuildpackComponent ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ViewBuildpackComponent);

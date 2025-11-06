@@ -29,9 +29,7 @@ describe('TableCellAppCfOrgSpaceHeaderComponent', () => {
         TableCellAppStatusComponent,
         ApplicationStateComponent,
         ApplicationStateIconComponent,
-        ApplicationStateIconPipe
-      ,
-      imports: [
+        ApplicationStateIconPipe,
         StoreModule,
         generateCfStoreModules()
       ],

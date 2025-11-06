@@ -27,7 +27,7 @@ describe('AddApiKeyDialogComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AddApiKeyDialogComponent);

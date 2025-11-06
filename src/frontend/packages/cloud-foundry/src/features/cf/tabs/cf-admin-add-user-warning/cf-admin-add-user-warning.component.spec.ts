@@ -17,7 +17,7 @@ describe('CfAdminAddUserWarningComponent', () => {
       providers: [ActiveRouteCfOrgSpace, CfUserService]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CfAdminAddUserWarningComponent);

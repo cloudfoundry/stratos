@@ -1,7 +1,7 @@
-import { TestBed, ComponentFixture, fakeAsync, tick, flush } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { Component } from '@angular/core';
-import { TailwindDialogService, TailwindDialogRef, MAT_DIALOG_DATA } from './tailwind-dialog.service';
+import { TailwindDialogService, TailwindDialogRef } from './tailwind-dialog.service';
 import { ApplicationRef, Injector, EnvironmentInjector } from '@angular/core';
 
 // Test component to be used in dialogs
@@ -39,30 +39,29 @@ describe('TailwindDialogService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        TailwindDialogService,
-        ApplicationRef,
-        Injector,
-        EnvironmentInjector
+        TailwindDialogService
       ]
     });
 
     service = TestBed.inject(TailwindDialogService);
-    appRef = TestBed.inject(ApplicationRef);
-    injector = TestBed.inject(Injector);
-    environmentInjector = TestBed.inject(EnvironmentInjector);
   });
 
   afterEach(() => {
     // Clean up any open dialogs
-    service.closeAll();
-    // Remove any remaining dialog elements
-    document.querySelectorAll('[class*="fixed inset-0"]').forEach(el => el.remove());
+    if (service) {
+      service.closeAll();
+    }
+    // Remove any remaining dialog elements (check if document exists first)
+    if (typeof document !== 'undefined') {
+      document.querySelectorAll('[class*="fixed inset-0"]').forEach(el => el.remove());
+    }
   });
 
   describe('Basic Dialog Opening', () => {
-    it('should open a dialog', fakeAsync(() => {
+    it('should open a dialog', async () => {
+      vi.useFakeTimers();
       const dialogRef = service.open(TestDialogComponent);
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       expect(dialogRef).toBeTruthy();
       expect(dialogRef.componentInstance).toBeInstanceOf(TestDialogComponent);
@@ -72,10 +71,12 @@ describe('TailwindDialogService', () => {
       expect(dialogElement).toBeTruthy();
 
       dialogRef.close();
-      tick(300); // Wait for close animation
-    }));
+      await vi.advanceTimersByTimeAsync(300); // Wait for close animation
+      vi.useRealTimers();
+    });
 
-    it('should emit afterOpened event', fakeAsync(() => {
+    it('should emit afterOpened event', async () => {
+      vi.useFakeTimers();
       let opened = false;
       const dialogRef = service.open(TestDialogComponent);
 
@@ -83,16 +84,18 @@ describe('TailwindDialogService', () => {
         opened = true;
       });
 
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
       expect(opened).toBe(true);
 
       dialogRef.close();
-      tick(300);
-    }));
+      await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
+    });
 
-    it('should create dialog with correct DOM structure', fakeAsync(() => {
+    it('should create dialog with correct DOM structure', async () => {
+      vi.useFakeTimers();
       const dialogRef = service.open(TestDialogComponent);
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       // Check backdrop
       const backdrop = document.querySelector('.fixed.inset-0.bg-black.bg-opacity-50');
@@ -107,14 +110,16 @@ describe('TailwindDialogService', () => {
       expect(content).toBeTruthy();
 
       dialogRef.close();
-      tick(300);
-    }));
+      await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
+    });
   });
 
   describe('Dialog Closing', () => {
-    it('should close on backdrop click when disableClose is false', fakeAsync(() => {
+    it('should close on backdrop click when disableClose is false', async () => {
+      vi.useFakeTimers();
       const dialogRef = service.open(TestDialogComponent, { disableClose: false });
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       let closed = false;
       dialogRef.afterClosed().subscribe(() => {
@@ -129,13 +134,15 @@ describe('TailwindDialogService', () => {
       Object.defineProperty(clickEvent, 'target', { value: backdrop, enumerable: true });
       backdrop.dispatchEvent(clickEvent);
 
-      tick(300);
+      await vi.advanceTimersByTimeAsync(300);
       expect(closed).toBe(true);
-    }));
+      vi.useRealTimers();
+    });
 
-    it('should close on ESC key when disableClose is false', fakeAsync(() => {
+    it('should close on ESC key when disableClose is false', async () => {
+      vi.useFakeTimers();
       const dialogRef = service.open(TestDialogComponent, { disableClose: false });
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       let closed = false;
       dialogRef.afterClosed().subscribe(() => {
@@ -146,13 +153,15 @@ describe('TailwindDialogService', () => {
       const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
       document.dispatchEvent(escapeEvent);
 
-      tick(300);
+      await vi.advanceTimersByTimeAsync(300);
       expect(closed).toBe(true);
-    }));
+      vi.useRealTimers();
+    });
 
-    it('should NOT close on backdrop click when disableClose is true', fakeAsync(() => {
+    it('should NOT close on backdrop click when disableClose is true', async () => {
+      vi.useFakeTimers();
       const dialogRef = service.open(TestDialogComponent, { disableClose: true });
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       let closed = false;
       dialogRef.afterClosed().subscribe(() => {
@@ -165,17 +174,19 @@ describe('TailwindDialogService', () => {
       Object.defineProperty(clickEvent, 'target', { value: backdrop, enumerable: true });
       backdrop.dispatchEvent(clickEvent);
 
-      tick(300);
+      await vi.advanceTimersByTimeAsync(300);
       expect(closed).toBe(false);
 
       // Manually close for cleanup
       dialogRef.close();
-      tick(300);
-    }));
+      await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
+    });
 
-    it('should NOT close on ESC key when disableClose is true', fakeAsync(() => {
+    it('should NOT close on ESC key when disableClose is true', async () => {
+      vi.useFakeTimers();
       const dialogRef = service.open(TestDialogComponent, { disableClose: true });
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       let closed = false;
       dialogRef.afterClosed().subscribe(() => {
@@ -186,17 +197,19 @@ describe('TailwindDialogService', () => {
       const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
       document.dispatchEvent(escapeEvent);
 
-      tick(300);
+      await vi.advanceTimersByTimeAsync(300);
       expect(closed).toBe(false);
 
       // Manually close for cleanup
       dialogRef.close();
-      tick(300);
-    }));
+      await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
+    });
 
-    it('should close programmatically via dialogRef.close()', fakeAsync(() => {
+    it('should close programmatically via dialogRef.close()', async () => {
+      vi.useFakeTimers();
       const dialogRef = service.open(TestDialogComponent);
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       let closed = false;
       let result: any;
@@ -206,137 +219,166 @@ describe('TailwindDialogService', () => {
       });
 
       dialogRef.close('test-result');
-      tick(300);
+      await vi.advanceTimersByTimeAsync(300);
 
       expect(closed).toBe(true);
       expect(result).toBe('test-result');
-    }));
+      vi.useRealTimers();
+    });
 
-    it('should remove dialog from DOM after closing', fakeAsync(() => {
+    it('should remove dialog from DOM after closing', async () => {
+      vi.useFakeTimers();
       const dialogRef = service.open(TestDialogComponent);
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       expect(document.querySelector('.fixed.inset-0')).toBeTruthy();
 
       dialogRef.close();
-      tick(300); // Wait for animation
-      flush(); // Ensure all timers complete
+      await vi.advanceTimersByTimeAsync(300); // Wait for animation
+      await vi.runAllTimersAsync(); // Ensure all timers complete
 
       expect(document.querySelector('.fixed.inset-0')).toBeFalsy();
-    }));
+      vi.useRealTimers();
+    });
   });
 
   describe('Dialog Configuration', () => {
-    it('should apply custom width', fakeAsync(() => {
+    it('should apply custom width', async () => {
+
+      vi.useFakeTimers();
       const dialogRef = service.open(TestDialogComponent, { width: '500px' });
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       const panel = document.querySelector('.rounded-lg') as HTMLElement;
       expect(panel.style.width).toBe('500px');
 
       dialogRef.close();
-      tick(300);
-    }));
+      await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
+    });
 
-    it('should apply custom height', fakeAsync(() => {
+    it('should apply custom height', async () => {
+
+      vi.useFakeTimers();
       const dialogRef = service.open(TestDialogComponent, { height: '400px' });
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       const panel = document.querySelector('.rounded-lg') as HTMLElement;
       expect(panel.style.height).toBe('400px');
 
       dialogRef.close();
-      tick(300);
-    }));
+      await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
+    });
 
-    it('should apply custom maxWidth', fakeAsync(() => {
+    it('should apply custom maxWidth', async () => {
+
+      vi.useFakeTimers();
       const dialogRef = service.open(TestDialogComponent, { maxWidth: '800px' });
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       const panel = document.querySelector('.rounded-lg') as HTMLElement;
       expect(panel.style.maxWidth).toBe('800px');
 
       dialogRef.close();
-      tick(300);
-    }));
+      await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
+    });
 
-    it('should apply custom maxHeight', fakeAsync(() => {
+    it('should apply custom maxHeight', async () => {
+
+      vi.useFakeTimers();
       const dialogRef = service.open(TestDialogComponent, { maxHeight: '600px' });
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       const panel = document.querySelector('.rounded-lg') as HTMLElement;
       expect(panel.style.maxHeight).toBe('600px');
 
       dialogRef.close();
-      tick(300);
-    }));
+      await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
+    });
 
-    it('should apply custom panelClass', fakeAsync(() => {
+    it('should apply custom panelClass', async () => {
+
+      vi.useFakeTimers();
       const dialogRef = service.open(TestDialogComponent, { panelClass: 'custom-dialog-class' });
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       const panel = document.querySelector('.rounded-lg') as HTMLElement;
       expect(panel.classList.contains('custom-dialog-class')).toBe(true);
 
       dialogRef.close();
-      tick(300);
-    }));
+      await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
+    });
 
-    it('should apply multiple custom panelClasses', fakeAsync(() => {
+    it('should apply multiple custom panelClasses', async () => {
       const dialogRef = service.open(TestDialogComponent, {
         panelClass: ['custom-class-1', 'custom-class-2']
       });
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       const panel = document.querySelector('.rounded-lg') as HTMLElement;
       expect(panel.classList.contains('custom-class-1')).toBe(true);
       expect(panel.classList.contains('custom-class-2')).toBe(true);
 
       dialogRef.close();
-      tick(300);
-    }));
+      await vi.advanceTimersByTimeAsync(300);
+    });
 
-    it('should apply custom backdropClass', fakeAsync(() => {
+    it('should apply custom backdropClass', async () => {
+
+      vi.useFakeTimers();
       const dialogRef = service.open(TestDialogComponent, { backdropClass: 'custom-backdrop' });
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       const backdrop = document.querySelector('.fixed.inset-0') as HTMLElement;
       expect(backdrop.classList.contains('custom-backdrop')).toBe(true);
 
       dialogRef.close();
-      tick(300);
-    }));
+      await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
+    });
   });
 
   describe('Data Injection', () => {
-    it('should inject data into dialog component', fakeAsync(() => {
+    it('should inject data into dialog component', async () => {
+
+      vi.useFakeTimers();
       const testData = { message: 'Test Message', value: 42 };
       const dialogRef = service.open(TestDialogWithDataComponent, { data: testData });
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       expect(dialogRef.componentInstance.data).toEqual(testData);
       expect(dialogRef.componentInstance.data.message).toBe('Test Message');
       expect(dialogRef.componentInstance.data.value).toBe(42);
 
       dialogRef.close();
-      tick(300);
-    }));
+      await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
+    });
 
-    it('should inject empty object when no data provided', fakeAsync(() => {
+    it('should inject empty object when no data provided', async () => {
+
+      vi.useFakeTimers();
       const dialogRef = service.open(TestDialogWithDataComponent);
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       expect(dialogRef.componentInstance.data).toEqual({});
 
       dialogRef.close();
-      tick(300);
-    }));
+      await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
+    });
   });
 
   describe('DialogRef Methods', () => {
-    it('should have working afterClosed observable', fakeAsync(() => {
+    it('should have working afterClosed observable', async () => {
+
+      vi.useFakeTimers();
       const dialogRef = service.open(TestDialogComponent);
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       let closed = false;
       let result: any;
@@ -344,18 +386,19 @@ describe('TailwindDialogService', () => {
       dialogRef.afterClosed().subscribe((res) => {
         closed = true;
         result = res;
+      vi.useRealTimers();
       });
 
       expect(closed).toBe(false);
 
       dialogRef.close('result-value');
-      tick(300);
+      await vi.advanceTimersByTimeAsync(300);
 
       expect(closed).toBe(true);
       expect(result).toBe('result-value');
-    }));
+    });
 
-    it('should have working afterOpened observable', fakeAsync(() => {
+    it('should have working afterOpened observable', async () => {
       let opened = false;
 
       const dialogRef = service.open(TestDialogComponent);
@@ -363,68 +406,79 @@ describe('TailwindDialogService', () => {
         opened = true;
       });
 
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       expect(opened).toBe(true);
 
       dialogRef.close();
-      tick(300);
-    }));
+      await vi.advanceTimersByTimeAsync(300);
+    });
 
-    it('should provide componentInstance reference', fakeAsync(() => {
+    it('should provide componentInstance reference', async () => {
+
+      vi.useFakeTimers();
       const dialogRef = service.open(TestDialogComponent);
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       expect(dialogRef.componentInstance).toBeInstanceOf(TestDialogComponent);
       expect(dialogRef.componentInstance.dialogRef).toBe(dialogRef);
 
       dialogRef.close();
-      tick(300);
-    }));
+      await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
+    });
   });
 
   describe('Multiple Dialogs', () => {
-    it('should support opening multiple dialogs', fakeAsync(() => {
+    it('should support opening multiple dialogs', async () => {
+
+      vi.useFakeTimers();
       const dialogRef1 = service.open(TestDialogComponent);
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       const dialogRef2 = service.open(TestDialogComponent);
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       const dialogs = document.querySelectorAll('.fixed.inset-0');
       expect(dialogs.length).toBe(2);
 
       dialogRef1.close();
-      tick(300);
+      await vi.advanceTimersByTimeAsync(300);
 
       dialogRef2.close();
-      tick(300);
-    }));
+      await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
+    });
 
-    it('should close all dialogs with closeAll()', fakeAsync(() => {
+    it('should close all dialogs with closeAll()', async () => {
+
+      vi.useFakeTimers();
       service.open(TestDialogComponent);
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
       service.open(TestDialogComponent);
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
       service.open(TestDialogComponent);
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       expect(document.querySelectorAll('.fixed.inset-0').length).toBe(3);
 
       service.closeAll();
-      tick(300);
-      flush();
+      await vi.advanceTimersByTimeAsync(300);
+      await vi.runAllTimersAsync();
 
       // Note: closeAll() removes immediately without animation
       expect(document.querySelectorAll('.fixed.inset-0').length).toBe(0);
-    }));
+      vi.useRealTimers();
+    });
 
-    it('should maintain proper z-index stacking for multiple dialogs', fakeAsync(() => {
+    it('should maintain proper z-index stacking for multiple dialogs', async () => {
+
+      vi.useFakeTimers();
       const dialogRef1 = service.open(TestDialogComponent);
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       const dialogRef2 = service.open(TestDialogComponent);
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       const dialogs = document.querySelectorAll('.fixed.inset-0');
       expect(dialogs.length).toBe(2);
@@ -432,97 +486,116 @@ describe('TailwindDialogService', () => {
       // All dialogs should have z-50 class
       dialogs.forEach(dialog => {
         expect(dialog.classList.contains('z-50')).toBe(true);
+      vi.useRealTimers();
       });
 
       dialogRef1.close();
-      tick(300);
+      await vi.advanceTimersByTimeAsync(300);
       dialogRef2.close();
-      tick(300);
-    }));
+      await vi.advanceTimersByTimeAsync(300);
+    });
   });
 
   describe('Animations', () => {
-    it('should have fade-in animation class on backdrop', fakeAsync(() => {
+    it('should have fade-in animation class on backdrop', async () => {
+
+      vi.useFakeTimers();
       const dialogRef = service.open(TestDialogComponent);
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       const backdrop = document.querySelector('.fixed.inset-0');
       expect(backdrop.classList.contains('animate-fade-in')).toBe(true);
 
       dialogRef.close();
-      tick(300);
-    }));
+      await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
+    });
 
-    it('should have scale-in animation class on panel', fakeAsync(() => {
+    it('should have scale-in animation class on panel', async () => {
+
+      vi.useFakeTimers();
       const dialogRef = service.open(TestDialogComponent);
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       const panel = document.querySelector('.rounded-lg');
       expect(panel.classList.contains('animate-scale-in')).toBe(true);
 
       dialogRef.close();
-      tick(300);
-    }));
+      await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
+    });
 
-    it('should apply fade-out transition on close', fakeAsync(() => {
+    it('should apply fade-out transition on close', async () => {
+
+      vi.useFakeTimers();
       const dialogRef = service.open(TestDialogComponent);
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       const backdrop = document.querySelector('.fixed.inset-0') as HTMLElement;
 
       dialogRef.close();
-      tick(10); // Small tick to trigger close animation
+      await vi.advanceTimersByTimeAsync(10); // Small tick to trigger close animation
 
       expect(backdrop.style.transition).toContain('opacity');
       expect(backdrop.style.opacity).toBe('0');
 
-      tick(300);
-    }));
+      await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
+    });
   });
 
   describe('Edge Cases', () => {
-    it('should handle rapid open/close operations', fakeAsync(() => {
+    it('should handle rapid open/close operations', async () => {
+
+      vi.useFakeTimers();
       const dialogRef = service.open(TestDialogComponent);
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
       dialogRef.close();
 
       const dialogRef2 = service.open(TestDialogComponent);
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
       dialogRef2.close();
 
-      tick(300);
-      flush();
+      await vi.advanceTimersByTimeAsync(300);
+      await vi.runAllTimersAsync();
 
       expect(document.querySelectorAll('.fixed.inset-0').length).toBe(0);
-    }));
+      vi.useRealTimers();
+    });
 
-    it('should handle close being called multiple times', fakeAsync(() => {
+    it('should handle close being called multiple times', async () => {
+
+      vi.useFakeTimers();
       const dialogRef = service.open(TestDialogComponent);
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       let closeCount = 0;
       dialogRef.afterClosed().subscribe(() => {
         closeCount++;
+      vi.useRealTimers();
       });
 
       dialogRef.close();
       dialogRef.close();
       dialogRef.close();
 
-      tick(300);
+      await vi.advanceTimersByTimeAsync(300);
 
       expect(closeCount).toBe(1); // Should only emit once
-    }));
+    });
 
-    it('should handle dialog with no configuration', fakeAsync(() => {
+    it('should handle dialog with no configuration', async () => {
+
+      vi.useFakeTimers();
       const dialogRef = service.open(TestDialogComponent);
-      tick();
+      await vi.advanceTimersByTimeAsync(0);
 
       expect(dialogRef).toBeTruthy();
       expect(document.querySelector('.fixed.inset-0')).toBeTruthy();
 
       dialogRef.close();
-      tick(300);
-    }));
+      await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
+    });
   });
 });

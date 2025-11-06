@@ -35,7 +35,7 @@ describe('DetachServiceInstanceComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(DetachServiceInstanceComponent);

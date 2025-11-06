@@ -32,7 +32,7 @@ describe('EditSpaceQuotaComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EditSpaceQuotaComponent);

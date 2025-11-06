@@ -12,8 +12,7 @@ describe('TableCellServiceActiveComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TableCellServiceActiveComponent, BooleanIndicatorComponent,
-      imports: [CoreModule]
+      imports: [TableCellServiceActiveComponent, BooleanIndicatorComponent, CoreModule]
     })
       .compileComponents();
 

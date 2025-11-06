@@ -19,7 +19,7 @@ describe('SimpleUsageChartComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SimpleUsageChartComponent);

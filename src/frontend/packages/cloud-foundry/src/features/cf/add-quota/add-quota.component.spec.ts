@@ -19,7 +19,7 @@ describe('AddQuotaComponent', () => {
       providers: [TabNavService, LongRunningCfOperationsService]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AddQuotaComponent);

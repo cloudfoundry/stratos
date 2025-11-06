@@ -25,7 +25,7 @@ describe('SnackBarReturnComponent', () => {
       }]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SnackBarReturnComponent);

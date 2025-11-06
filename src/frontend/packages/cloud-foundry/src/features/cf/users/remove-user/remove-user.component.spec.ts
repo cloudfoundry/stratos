@@ -50,7 +50,7 @@ describe('RemoveUserComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(RemoveUserComponent);

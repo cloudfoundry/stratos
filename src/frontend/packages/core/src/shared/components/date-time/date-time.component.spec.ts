@@ -21,7 +21,7 @@ describe('DateTimeComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(DateTimeComponent);

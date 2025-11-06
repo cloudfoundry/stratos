@@ -19,8 +19,12 @@ describe('CfSecurityGroupsCardComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [CfSecurityGroupsCardComponent, MetadataCardTestComponents, BooleanIndicatorComponent, AppChipsComponent],
-      imports: generateCfBaseTestModulesNoShared(),
+      declarations: [CfSecurityGroupsCardComponent, MetadataCardTestComponents],
+      imports: [
+        ...generateCfBaseTestModulesNoShared(),
+        BooleanIndicatorComponent,
+        AppChipsComponent
+      ],
       providers: [ActiveRouteCfOrgSpace, generateTestCfEndpointService()]
     })
       .compileComponents();

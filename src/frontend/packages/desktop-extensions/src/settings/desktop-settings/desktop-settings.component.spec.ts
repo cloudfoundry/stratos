@@ -12,7 +12,7 @@ describe('DesktopSettingsComponent', () => {
       declarations: [ DesktopSettingsComponent ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(DesktopSettingsComponent);

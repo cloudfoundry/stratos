@@ -1,7 +1,7 @@
 import {Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState } from 'src/frontend/packages/store/src/app-state';
-import { endpointOfTypeSelector } from 'src/frontend/packages/store/src/selectors/endpoint.selectors';
+import { AppState } from '@stratosui/store';
+import { endpointOfTypeSelector } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 

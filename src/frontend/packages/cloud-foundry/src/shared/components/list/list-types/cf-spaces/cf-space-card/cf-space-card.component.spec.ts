@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Store } from '@ngrx/store';
-import { testSessionData } from '@stratosui/store/testing';
+import { testSessionData } from "../../test-framework/cloud-foundry-endpoint-service.helper";
 
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { MetadataCardTestComponents } from '../../../../../../../../core/test-framework/core-test.helper';
@@ -48,7 +48,7 @@ describe('CfSpaceCardComponent', () => {
 
     const store = TestBed.inject(Store);
     store.dispatch(new VerifiedSession(testSessionData));
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CfSpaceCardComponent);

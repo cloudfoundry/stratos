@@ -51,7 +51,7 @@ describe('CardAppInstancesComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CardAppInstancesComponent);

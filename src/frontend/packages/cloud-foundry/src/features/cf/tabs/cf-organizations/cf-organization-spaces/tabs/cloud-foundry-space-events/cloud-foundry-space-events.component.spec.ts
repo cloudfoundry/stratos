@@ -46,7 +46,7 @@ describe('CloudFoundrySpaceEventsComponent', () => {
       imports: [...CFBaseTestModules]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundrySpaceEventsComponent);

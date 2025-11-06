@@ -34,7 +34,7 @@ describe('SpecifyDetailsStepComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SpecifyDetailsStepComponent);

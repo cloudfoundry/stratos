@@ -17,7 +17,7 @@ describe('StackedInputActionComponent', () => {
       ],
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(StackedInputActionComponent);
@@ -27,7 +27,7 @@ describe('StackedInputActionComponent', () => {
       result: StackedInputActionResult.OTHER_VALUES_UPDATED
     });
     fixture.detectChanges();
-  }));
+  });
 
   it('should create', () => {
     expect(component).toBeTruthy();

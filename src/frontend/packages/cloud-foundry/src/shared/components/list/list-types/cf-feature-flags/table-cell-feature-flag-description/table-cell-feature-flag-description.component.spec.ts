@@ -9,7 +9,7 @@ describe('TableCellFeatureFlagDescriptionComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ TableCellFeatureFlagDescriptionComponent ]
+      imports: [ TableCellFeatureFlagDescriptionComponent ]
     })
     .compileComponents();
 

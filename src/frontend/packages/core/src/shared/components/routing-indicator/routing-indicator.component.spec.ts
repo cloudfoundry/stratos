@@ -20,7 +20,7 @@ describe('RoutingIndicatorComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(RoutingIndicatorComponent);

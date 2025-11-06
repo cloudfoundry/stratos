@@ -39,7 +39,7 @@ describe('ConsoleUaaWizardComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ConsoleUaaWizardComponent);

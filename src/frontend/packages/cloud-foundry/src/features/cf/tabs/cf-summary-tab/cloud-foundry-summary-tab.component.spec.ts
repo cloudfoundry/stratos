@@ -14,9 +14,8 @@ import { CloudFoundrySummaryTabComponent } from './cloud-foundry-summary-tab.com
 describe('CloudFoundrySummaryTabComponent', () => {
   let component: CloudFoundrySummaryTabComponent;
   let fixture: ComponentFixture<CloudFoundrySummaryTabComponent>;
-  beforeEach(
-    () => {
-      TestBed.configureTestingModule({
+  beforeEach(async () => {
+      await TestBed.configureTestingModule({
         declarations: [
           CloudFoundrySummaryTabComponent,
           CardCfInfoComponent,
@@ -29,8 +28,7 @@ describe('CloudFoundrySummaryTabComponent', () => {
           TabNavService
         ]
       }).compileComponents();
-    })
-  );
+    });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundrySummaryTabComponent);

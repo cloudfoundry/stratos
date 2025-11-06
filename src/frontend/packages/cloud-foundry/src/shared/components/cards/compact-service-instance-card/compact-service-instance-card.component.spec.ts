@@ -13,11 +13,14 @@ describe('CompactServiceInstanceCardComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [CompactServiceInstanceCardComponent, AppChipsComponent],
-      imports: generateCfBaseTestModulesNoShared()
+      imports: [
+        ...generateCfBaseTestModulesNoShared(),
+        CompactServiceInstanceCardComponent,
+        AppChipsComponent
+      ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CompactServiceInstanceCardComponent);

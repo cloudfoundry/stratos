@@ -12,11 +12,11 @@ describe('KubeScoreReportViewerComponent', () => {
   let fixture: ComponentFixture<KubeScoreReportViewerComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      declarations: [KubeScoreReportViewerComponent],
-      imports: [
+    TestBed.configureTestingModule({imports: [
         KubernetesBaseTestModules,
         MDAppModule
+      ,
+        KubeScoreReportViewerComponent
       ],
       providers: [
         KubernetesAnalysisService,

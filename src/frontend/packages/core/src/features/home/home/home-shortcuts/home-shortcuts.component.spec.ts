@@ -15,7 +15,7 @@ describe('HomeShortcutsComponent', () => {
       
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(HomeShortcutsComponent);

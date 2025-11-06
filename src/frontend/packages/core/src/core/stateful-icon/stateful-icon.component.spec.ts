@@ -20,7 +20,7 @@ describe('StatefulIconComponent', () => {
     
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(StatefulIconComponent);

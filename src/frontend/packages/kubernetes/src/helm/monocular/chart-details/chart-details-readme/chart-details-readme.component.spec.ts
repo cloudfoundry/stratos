@@ -9,8 +9,7 @@ import { ChartDetailsReadmeComponent } from './chart-details-readme.component';
 describe('Component: ChartDetailsReadme', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [],
-      declarations: [ChartDetailsReadmeComponent],
+      imports: [ChartDetailsReadmeComponent],
       providers: [
         { provide: ChartsService, useValue: new MockChartService() },
       ],

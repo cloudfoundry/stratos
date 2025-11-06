@@ -12,15 +12,17 @@ describe('HelmHubRegistrationComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [...BaseTestModules],
-      declarations: [HelmHubRegistrationComponent],
+      imports: [
+        ...BaseTestModules,
+        HelmHubRegistrationComponent
+      ],
       providers: [
         EndpointsService,
         UserService
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(HelmHubRegistrationComponent);

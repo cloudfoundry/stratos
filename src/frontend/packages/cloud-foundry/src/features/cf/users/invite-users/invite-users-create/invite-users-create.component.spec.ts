@@ -29,7 +29,7 @@ describe('InviteUsersCreateComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(InviteUsersCreateComponent);

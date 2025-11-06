@@ -32,7 +32,7 @@ describe('UsersRolesSelectComponent', () => {
       declarations: [UsersRolesSelectComponent]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(UsersRolesSelectComponent);

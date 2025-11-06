@@ -26,7 +26,7 @@ describe('SpaceRolesListWrapperComponent', () => {
       declarations: [SpaceRolesListWrapperComponent]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SpaceRolesListWrapperComponent);

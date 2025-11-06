@@ -31,7 +31,7 @@ describe('CloudFoundryOrganizationSpacesComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryOrganizationSpacesComponent);

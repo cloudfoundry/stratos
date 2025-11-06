@@ -29,7 +29,7 @@ describe('TableCellFavoriteComponent', () => {
 
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent<TableCellFavoriteComponent<TestEntity, TestMetadata>>(TableCellFavoriteComponent);

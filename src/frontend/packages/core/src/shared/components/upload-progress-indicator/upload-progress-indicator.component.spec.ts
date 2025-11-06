@@ -20,7 +20,7 @@ describe('UploadProgressIndicatorComponent', () => {
       ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(UploadProgressIndicatorComponent);

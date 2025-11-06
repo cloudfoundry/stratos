@@ -18,7 +18,7 @@ describe('StartEndDateComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(StartEndDateComponent);

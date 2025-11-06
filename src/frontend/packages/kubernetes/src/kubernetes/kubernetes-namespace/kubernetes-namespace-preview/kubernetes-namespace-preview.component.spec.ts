@@ -9,9 +9,9 @@ describe('KubernetesNamespacePreviewComponent', () => {
   let fixture: ComponentFixture<KubernetesNamespacePreviewComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [ KubernetesNamespacePreviewComponent ],
-      imports: [...KubernetesBaseTestModules],
+    await TestBed.configureTestingModule({imports: [...KubernetesBaseTestModules,
+        KubernetesNamespacePreviewComponent
+      ],
 
     })
     .compileComponents();

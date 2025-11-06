@@ -24,7 +24,7 @@ describe('ApplicationStateComponent', () => {
     
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ApplicationStateComponent);

@@ -11,9 +11,10 @@ describe('KubernetesLabelsCellComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [KubernetesLabelsCellComponent],
-      imports: BaseTestModules
-    })
+      imports: [
+        KubernetesLabelsCellComponent,
+        ...BaseTestModules
+      ]})
       .compileComponents();
   });
 

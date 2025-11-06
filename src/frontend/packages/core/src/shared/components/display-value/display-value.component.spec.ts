@@ -12,7 +12,7 @@ describe('DisplayValueComponent', () => {
       imports: [ DisplayValueComponent ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(DisplayValueComponent);

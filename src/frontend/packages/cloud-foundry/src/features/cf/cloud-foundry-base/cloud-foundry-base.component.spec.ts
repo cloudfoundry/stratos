@@ -8,15 +8,13 @@ import { CloudFoundryBaseComponent } from './cloud-foundry-base.component';
 describe('CloudFoundryBaseComponent', () => {
   let component: CloudFoundryBaseComponent;
   let fixture: ComponentFixture<CloudFoundryBaseComponent>;
-  beforeEach(
-    () => {
-      TestBed.configureTestingModule({
-        declarations: [CloudFoundryBaseComponent],
-        imports: [RouterTestingModule],
-        providers: [CloudFoundryEndpointService]
-      }).compileComponents();
-    })
-  );
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [CloudFoundryBaseComponent],
+      imports: [RouterTestingModule],
+      providers: [CloudFoundryEndpointService]
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryBaseComponent);

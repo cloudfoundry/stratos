@@ -16,7 +16,7 @@ describe('SshViewerComponent', () => {
       ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SshViewerComponent);

@@ -18,7 +18,7 @@ describe('TileSelectorTileComponent', () => {
       ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TileSelectorTileComponent) as ComponentFixture<TileSelectorTileComponent<ITileImgConfig>>;

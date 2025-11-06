@@ -13,8 +13,8 @@ describe('TableCellAppNameComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TableCellAppNameComponent,
       imports: [
+        TableCellAppNameComponent,
         RouterTestingModule,
         generateCfStoreModules()
       ]
@@ -31,7 +31,7 @@ describe('TableCellAppNameComponent', () => {
     });
 
 
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellAppNameComponent);

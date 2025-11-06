@@ -13,8 +13,10 @@ describe('KubernetesNodePodsComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [KubernetesNodePodsComponent],
-      imports: KubernetesBaseTestModules,
+      imports: [
+        KubernetesNodePodsComponent,
+        ...KubernetesBaseTestModules
+      ],
       providers: [BaseKubeGuid, KubernetesEndpointService, KubernetesNodeService]
     })
       .compileComponents();

@@ -14,9 +14,9 @@ describe('HelmReleaseTabBaseComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [...KubernetesBaseTestModules],
-      declarations: [HelmReleaseTabBaseComponent],
-      providers: [
+      imports: [...KubernetesBaseTestModules,
+        HelmReleaseTabBaseComponent
+      ]providers: [
         ...HelmReleaseProviders,
         TabNavService,
         KubernetesAnalysisService,

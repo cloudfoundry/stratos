@@ -24,7 +24,7 @@ describe('BackupCheckboxCellComponent', () => {
     
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(BackupCheckboxCellComponent);

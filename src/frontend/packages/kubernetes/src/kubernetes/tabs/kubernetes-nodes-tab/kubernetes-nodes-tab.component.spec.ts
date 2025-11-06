@@ -11,8 +11,10 @@ describe('KubernetesNodesTabComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [KubernetesNodesTabComponent],
-      imports: KubernetesBaseTestModules,
+      imports: [
+        KubernetesNodesTabComponent,
+        ...KubernetesBaseTestModules
+      ],
       providers: [BaseKubeGuid]
     })
       .compileComponents();

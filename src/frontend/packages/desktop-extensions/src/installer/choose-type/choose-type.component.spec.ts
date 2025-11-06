@@ -12,7 +12,7 @@ describe('ChooseTypeComponent', () => {
       declarations: [ ChooseTypeComponent ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ChooseTypeComponent);

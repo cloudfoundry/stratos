@@ -25,9 +25,7 @@ describe('ChartsComponent', () => {
       imports: [
         HttpClientTestingModule,
         createBasicStoreModule(),
-        RouterTestingModule
-      ],
-      declarations: [
+        RouterTestingModule,
         ChartsComponent,
         ChartListComponent,
         ChartItemComponent,

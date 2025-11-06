@@ -4,7 +4,7 @@ import { Component, ViewChild } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { createBasicStoreModule } from '@stratosui/store/testing';
+import { createBasicStoreModule } from "../test-framework/core-test.helper";
 import { EMPTY, of as observableOf } from 'rxjs';
 
 import { ListSort } from '../../../../../../store/src/actions/list.actions';
@@ -114,7 +114,7 @@ describe('Table CellConfig Integration Flow', () => {
           UtilsService
         ]
       }).compileComponents();
-    }));
+    });
 
     beforeEach(() => {
       fixture = TestBed.createComponent(TestHostComponent);
@@ -147,7 +147,7 @@ describe('Table CellConfig Integration Flow', () => {
         expect(table.columnNames).toContain('staticConfig');
         expect(table.columns.length).toBeGreaterThan(0);
       });
-    }));
+    });
 
     it('should pass static cellConfig to cell component correctly', () => {
       const testConfig = {
@@ -171,7 +171,7 @@ describe('Table CellConfig Integration Flow', () => {
         expect(column).toBeTruthy();
         expect(column.cellConfig).toEqual(testConfig);
       });
-    }));
+    });
 
     it('should handle column without cellConfig gracefully', () => {
       component.columns = [
@@ -189,7 +189,7 @@ describe('Table CellConfig Integration Flow', () => {
         expect(table).toBeTruthy();
         expect(table.columnNames).toContain('no-config');
       });
-    }));
+    });
   });
 
   describe('Dynamic cellConfig Function Flow', () => {
@@ -245,7 +245,7 @@ describe('Table CellConfig Integration Flow', () => {
           UtilsService
         ]
       }).compileComponents();
-    }));
+    });
 
     beforeEach(() => {
       fixture = TestBed.createComponent(DynamicTestHostComponent);
@@ -274,7 +274,7 @@ describe('Table CellConfig Integration Flow', () => {
         expect(table).toBeTruthy();
         expect(table.columnNames).toContain('dynamicConfig');
       });
-    }));
+    });
 
     it('should evaluate cellConfig function for each entity', () => {
       let callCount = 0;
@@ -301,7 +301,7 @@ describe('Table CellConfig Integration Flow', () => {
         expect(table).toBeTruthy();
         // Config function should be stored, evaluation happens in cell rendering
       });
-    }));
+    });
   });
 
   describe('Favorite Cell End-to-End Flow', () => {
@@ -358,7 +358,7 @@ describe('Table CellConfig Integration Flow', () => {
           UtilsService
         ]
       }).compileComponents();
-    }));
+    });
 
     beforeEach(() => {
       fixture = TestBed.createComponent(FavoriteTestHostComponent);
@@ -387,7 +387,7 @@ describe('Table CellConfig Integration Flow', () => {
         expect(favCol.cellComponent).toBe(TableCellFavoriteComponent);
         expect(favCol.cellConfig).toBeTruthy();
       });
-    }));
+    });
 
     it('should have valid cellConfig in favorite column', () => {
       const favoriteColumn = createTableColumnFavorite<TestEntity, TestFavoriteMetadata>(
@@ -407,7 +407,7 @@ describe('Table CellConfig Integration Flow', () => {
         const config = favCol.cellConfig as any;
         expect(typeof config.createUserFavorite).toBe('function');
       });
-    }));
+    });
 
     it('should render favorite column end-to-end without console errors', () => {
       vi.spyOn(console, 'error');
@@ -430,7 +430,7 @@ describe('Table CellConfig Integration Flow', () => {
         expect(table).toBeTruthy();
         expect(table.columnNames).toContain('favorite');
       });
-    }));
+    });
 
     it('should handle createUserFavorite function correctly in cellConfig', () => {
       const createFavoriteSpy = vi.fn().mockImplementation(
@@ -460,7 +460,7 @@ describe('Table CellConfig Integration Flow', () => {
         const config = favCol.cellConfig as any;
         expect(config.createUserFavorite).toBe(createFavoriteSpy);
       });
-    }));
+    });
   });
 
   describe('Mixed Config Types in Table', () => {
@@ -517,7 +517,7 @@ describe('Table CellConfig Integration Flow', () => {
           UtilsService
         ]
       }).compileComponents();
-    }));
+    });
 
     beforeEach(() => {
       fixture = TestBed.createComponent(MixedTestHostComponent);
@@ -554,7 +554,7 @@ describe('Table CellConfig Integration Flow', () => {
         expect(table.columnNames).toContain('col2');
         expect(table.columnNames).toContain('col3');
       });
-    }));
+    });
 
     it('should render favorite column alongside other columns', () => {
       const favoriteColumn = createTableColumnFavorite<TestEntity, TestFavoriteMetadata>(
@@ -582,7 +582,7 @@ describe('Table CellConfig Integration Flow', () => {
         const table = component.table;
         expect(table.columnNames).toEqual(['id', 'favorite', 'name']);
       });
-    }));
+    });
   });
 
   describe('Config Error Handling and Validation', () => {
@@ -639,7 +639,7 @@ describe('Table CellConfig Integration Flow', () => {
           UtilsService
         ]
       }).compileComponents();
-    }));
+    });
 
     beforeEach(() => {
       fixture = TestBed.createComponent(ErrorTestHostComponent);
@@ -664,7 +664,7 @@ describe('Table CellConfig Integration Flow', () => {
         expect(table).toBeTruthy();
         expect(table.columnNames).toContain('nullable');
       });
-    }));
+    });
 
     it('should handle undefined cellConfig gracefully', () => {
       component.columns = [
@@ -684,7 +684,7 @@ describe('Table CellConfig Integration Flow', () => {
         expect(table).toBeTruthy();
         expect(table.columnNames).toContain('undefined');
       });
-    }));
+    });
 
     it('should render table even with invalid favorite cellConfig', () => {
       vi.spyOn(console, 'error');
@@ -708,7 +708,7 @@ describe('Table CellConfig Integration Flow', () => {
         const table = component.table;
         expect(table).toBeTruthy();
       });
-    }));
+    });
   });
 
   describe('Complete List to Cell Rendering Chain', () => {
@@ -755,7 +755,7 @@ describe('Table CellConfig Integration Flow', () => {
           UtilsService
         ]
       }).compileComponents();
-    }));
+    });
 
     beforeEach(() => {
       fixture = TestBed.createComponent(CompleteTestHostComponent);
@@ -793,6 +793,6 @@ describe('Table CellConfig Integration Flow', () => {
         expect(component.columns.length).toBe(3);
         expect(console.error).not.toHaveBeenCalled();
       });
-    }));
+    });
   });
 });

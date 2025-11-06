@@ -14,7 +14,7 @@ describe('DialogErrorComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(DialogErrorComponent);

@@ -15,7 +15,7 @@ describe('StepperFormComponent', () => {
       
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(StepperFormComponent);

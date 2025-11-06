@@ -1,8 +1,29 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { ComponentFixture, TestBed, getTestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { CustomExpansionPanelComponent, CustomExpansionPanelHeaderComponent } from './custom-expansion-panel.component';
-import { DebugElement } from '@angular/core';
+import { DebugElement, NgModule, provideZonelessChangeDetection } from '@angular/core';
 import { By } from '@angular/platform-browser';
+import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
+
+// Initialize TestBed if not already initialized (check if platform is set up)
+try {
+  getTestBed().inject(String);
+} catch {
+  @NgModule({
+    providers: [provideZonelessChangeDetection()],
+  })
+  class ZonelessTestModule {}
+
+  getTestBed().initTestEnvironment(
+    [BrowserTestingModule, ZonelessTestModule],
+    platformBrowserTesting(),
+  );
+}
+
+// Configure TestBed once before all tests
+TestBed.configureTestingModule({
+  imports: [CustomExpansionPanelComponent],
+});
 
 describe('CustomExpansionPanelComponent', () => {
   let component: CustomExpansionPanelComponent;
@@ -10,10 +31,7 @@ describe('CustomExpansionPanelComponent', () => {
   let compiled: DebugElement;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [CustomExpansionPanelComponent, CustomExpansionPanelHeaderComponent]
-    }).compileComponents();
-
+    await TestBed.compileComponents();
     fixture = TestBed.createComponent(CustomExpansionPanelComponent);
     component = fixture.componentInstance;
     compiled = fixture.debugElement;
@@ -400,45 +418,19 @@ describe('CustomExpansionPanelComponent', () => {
   });
 });
 
+// CustomExpansionPanelHeaderComponent tests
 describe('CustomExpansionPanelHeaderComponent', () => {
-  let component: CustomExpansionPanelHeaderComponent;
-  let fixture: ComponentFixture<CustomExpansionPanelHeaderComponent>;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [CustomExpansionPanelHeaderComponent]
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(CustomExpansionPanelHeaderComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
-
-  it('should create header component', () => {
-    expect(component).toBeTruthy();
-  });
-
-  it('should have default collapsedHeight', () => {
+  it('should have proper default properties', () => {
+    const component = new CustomExpansionPanelHeaderComponent();
     expect(component.collapsedHeight).toBe('auto');
-  });
-
-  it('should have default expandedHeight', () => {
     expect(component.expandedHeight).toBe('auto');
   });
 
-  it('should accept custom collapsedHeight', () => {
+  it('should accept custom heights', () => {
+    const component = new CustomExpansionPanelHeaderComponent();
     component.collapsedHeight = '48px';
-    expect(component.collapsedHeight).toBe('48px');
-  });
-
-  it('should accept custom expandedHeight', () => {
     component.expandedHeight = '100px';
+    expect(component.collapsedHeight).toBe('48px');
     expect(component.expandedHeight).toBe('100px');
-  });
-
-  it('should project content', () => {
-    const compiled = fixture.debugElement;
-    // The component should have ng-content to project header content
-    expect(compiled).toBeTruthy();
   });
 });

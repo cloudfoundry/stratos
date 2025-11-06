@@ -11,11 +11,11 @@ describe('KubernetesGKEAuthFormComponent', () => {
   let fixture: ComponentFixture<KubernetesGKEAuthFormComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      declarations: [KubernetesGKEAuthFormComponent],
-      imports: [
+    TestBed.configureTestingModule({imports: [
         SharedModule,
         NoopAnimationsModule
+      ,
+        KubernetesGKEAuthFormComponent
       ]
     })
       .compileComponents();

@@ -12,7 +12,7 @@ describe('JsonViewerComponent', () => {
       imports: [ JsonViewerComponent ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(JsonViewerComponent);

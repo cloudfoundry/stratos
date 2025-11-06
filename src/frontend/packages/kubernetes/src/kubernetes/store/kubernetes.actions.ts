@@ -1,8 +1,8 @@
 // Replaced Angular Material sort with custom type
 export type SortDirection = 'asc' | 'desc' | '';
 import { Action } from '@ngrx/store';
-import { getActions } from 'src/frontend/packages/store/src/actions/action.helper';
-import { ApiRequestTypes } from 'src/frontend/packages/store/src/reducers/api-request-reducer/request-helpers';
+import { getActions } from '@stratosui/store';
+import { ApiRequestTypes } from '@stratosui/store';
 
 import { MetricQueryConfig, MetricsAction, MetricsChartAction } from '../../../../store/src/actions/metrics.actions';
 import { getPaginationKey } from '../../../../store/src/actions/pagination.actions';

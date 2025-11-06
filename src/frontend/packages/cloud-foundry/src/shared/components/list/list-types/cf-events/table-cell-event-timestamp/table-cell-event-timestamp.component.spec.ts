@@ -10,7 +10,7 @@ describe('TableCellEventTimestampComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [TableCellEventTimestampComponent]
+      imports: [TableCellEventTimestampComponent]
     })
       .compileComponents();
 

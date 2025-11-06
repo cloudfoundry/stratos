@@ -12,9 +12,9 @@ describe('KubeConfigTableImportStatusComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         ...KubernetesBaseTestModules
-      ],
-      declarations: [KubeConfigTableImportStatusComponent]
-    })
+      ,
+        KubeConfigTableImportStatusComponent
+      ]})
       .compileComponents();
   });
 

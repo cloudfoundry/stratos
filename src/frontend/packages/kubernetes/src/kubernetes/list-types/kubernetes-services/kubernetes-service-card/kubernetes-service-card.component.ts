@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component} from '@angular/core';
-import { CardCell } from 'src/frontend/packages/core/src/shared/components/list/list.types';
-import { MetaCardComponent } from 'src/frontend/packages/core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
-import { MetaCardItemComponent } from 'src/frontend/packages/core/src/shared/components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
-import { MetaCardKeyComponent } from 'src/frontend/packages/core/src/shared/components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
-import { MetaCardTitleComponent } from 'src/frontend/packages/core/src/shared/components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
-import { MetaCardValueComponent } from 'src/frontend/packages/core/src/shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
-import { MultilineTitleComponent } from 'src/frontend/packages/core/src/shared/components/multiline-title/multiline-title.component';
+import { CardCell } from '@stratosui/core';
+import { MetaCardComponent } from '@stratosui/core';
+import { MetaCardItemComponent } from '@stratosui/core';
+import { MetaCardKeyComponent } from '@stratosui/core';
+import { MetaCardTitleComponent } from '@stratosui/core';
+import { MetaCardValueComponent } from '@stratosui/core';
+import { MultilineTitleComponent } from '@stratosui/core';
 
 import { KubeService } from '../../../store/kube.types';
 import { KubernetesServicePortsComponent } from '../../kubernetes-service-ports/kubernetes-service-ports.component';
@@ -26,4 +26,8 @@ import { KubernetesServicePortsComponent } from '../../kubernetes-service-ports/
     KubernetesServicePortsComponent
   ]
 })
-export class KubeServiceCardComponent extends CardCell<KubeService> { }
+export class KubeServiceCardComponent extends CardCell<KubeService> {
+  constructor() {
+    super();
+  }
+}

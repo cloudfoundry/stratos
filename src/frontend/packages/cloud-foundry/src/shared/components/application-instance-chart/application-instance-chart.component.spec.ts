@@ -25,7 +25,7 @@ describe('ApplicationInstanceChartComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ApplicationInstanceChartComponent);

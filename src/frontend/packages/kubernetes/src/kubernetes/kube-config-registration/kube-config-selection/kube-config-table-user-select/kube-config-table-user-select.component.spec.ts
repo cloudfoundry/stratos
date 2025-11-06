@@ -14,11 +14,9 @@ describe('KubeConfigTableUserSelectComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         ...KubernetesBaseTestModules
-      ],
-      declarations: [
-        KubeConfigTableUserSelectComponent,
-      ],
-      providers: [
+      ,
+        KubeConfigTableUserSelectComponent
+      ]providers: [
         KubeConfigHelper
       ]
     })
