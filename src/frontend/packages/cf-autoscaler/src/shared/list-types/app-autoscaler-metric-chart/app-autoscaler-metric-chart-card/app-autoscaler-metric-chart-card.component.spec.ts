@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { createEmptyStoreModule } from "../../../../test-framework/cf-autoscaler-test.helper";
 
@@ -42,6 +43,7 @@ describe('AppAutoscalerMetricChartCardComponent', () => {
         AppAutoscalerMetricChartCardComponent,
       ],
       providers: [
+        
         EntityMonitorFactory,
         EntityCatalogHelper,
         generateTestApplicationServiceProvider('1', '1'),
@@ -51,6 +53,8 @@ describe('AppAutoscalerMetricChartCardComponent', () => {
         ConfirmationDialogService,
         DatePipe,
         ServiceActionHelperService,
+      ,
+        provideZonelessChangeDetection()
       ]
     })
       .compileComponents();

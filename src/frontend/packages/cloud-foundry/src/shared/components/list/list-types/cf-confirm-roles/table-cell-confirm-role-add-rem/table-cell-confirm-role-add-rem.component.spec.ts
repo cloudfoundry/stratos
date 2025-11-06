@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { MDAppModule } from '../../../../../../../../core/src/core/md.module';
@@ -14,6 +15,7 @@ describe('TableCellConfirmRoleAddRemComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       imports: [
         MDAppModule,
         TableCellConfirmRoleAddRemComponent

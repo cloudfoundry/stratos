@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { createBasicStoreModule } from "../test-framework/core-test.helper";
 
@@ -10,6 +11,7 @@ import { SharedModule } from './shared.module';
 
 describe('GlobalEventsService', () => {
   beforeEach(() => TestBed.configureTestingModule({
+    providers: [provideZonelessChangeDetection()],
     imports: [
       CoreModule,
       SharedModule,

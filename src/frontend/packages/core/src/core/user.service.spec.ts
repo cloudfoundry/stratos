@@ -1,4 +1,5 @@
 import { inject, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { createBasicStoreModule } from "../test-framework/core-test.helper";
 
@@ -11,7 +12,10 @@ describe('UserService', () => {
   beforeEach(() => {
 
     TestBed.configureTestingModule({
-      providers: [UserService],
+      providers: [
+        UserService,
+        provideZonelessChangeDetection()
+      ],
       imports: [
         CoreModule,
         SharedModule,

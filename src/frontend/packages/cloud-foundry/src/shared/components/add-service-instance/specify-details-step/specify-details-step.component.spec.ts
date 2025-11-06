@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { EntityMonitorFactory } from '../../../../../../store/src/monitors/entity-monitor.factory.service';
@@ -25,12 +26,15 @@ describe('SpecifyDetailsStepComponent', () => {
         TailwindJsonSchemaFormModule
       ],
       providers: [
+        
         CreateServiceInstanceHelperServiceFactory,
         CsiGuidsService,
         PaginationMonitorFactory,
         EntityMonitorFactory,
         CsiModeService,
         LongRunningCfOperationsService
+      ,
+        provideZonelessChangeDetection()
       ]
     })
       .compileComponents();

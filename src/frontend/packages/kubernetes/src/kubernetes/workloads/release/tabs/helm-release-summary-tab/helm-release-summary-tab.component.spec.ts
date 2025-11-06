@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { SidePanelService } from '../../../../../../../core/src/shared/services/side-panel.service';
@@ -24,12 +25,15 @@ describe('HelmReleaseSummaryTabComponent', () => {
         HelmReleaseSummaryTabComponent,
         AnalysisReportSelectorComponent
       ]providers: [
+        
         ...HelmReleaseProviders,
         KubernetesAnalysisService,
         KubernetesEndpointService,
         KubeBaseGuidMock,
         TabNavService,
         SidePanelService
+      ,
+        provideZonelessChangeDetection()
       ]
     })
       .compileComponents();

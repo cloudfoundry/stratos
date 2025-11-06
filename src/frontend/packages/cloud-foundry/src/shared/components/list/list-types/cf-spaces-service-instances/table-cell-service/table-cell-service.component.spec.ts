@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import {
@@ -26,7 +27,10 @@ describe('TableCellServiceComponent', () => {
         BooleanIndicatorComponent
       ,
       imports: [...generateCfBaseTestModulesNoShared()],
-      providers: [EntityMonitorFactory, LongRunningCfOperationsService]
+      providers: [
+        EntityMonitorFactory, LongRunningCfOperationsService,
+        provideZonelessChangeDetection()
+      ]
     })
       .compileComponents();
 

@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { EntityInfo } from '../../../../../../../../store/src/types/api.types';
@@ -10,6 +11,7 @@ describe('TableCellEventTimestampComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       imports: [TableCellEventTimestampComponent]
     })
       .compileComponents();

@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { of as observableOf } from 'rxjs';
 
@@ -37,11 +38,14 @@ describe('CardCfRecentAppsComponent', () => {
       ],
       imports: generateCfBaseTestModulesNoShared(),
       providers: [
+        
         generateActiveRouteCfOrgSpaceMock(),
         CloudFoundryEndpointService,
         EntityMonitorFactory,
         CfUserService,
         PaginationMonitorFactory
+      ,
+        provideZonelessChangeDetection()
       ]
     })
       .compileComponents();

@@ -1,4 +1,5 @@
 import { inject, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { pathGet, pathSet, safeStringToObj, safeUnsubscribe, UtilsService } from './utils.service';
@@ -9,7 +10,10 @@ describe('UtilsService', () => {
   beforeEach(() => {
     service = new UtilsService();
     TestBed.configureTestingModule({
-      providers: [UtilsService]
+      providers: [
+        UtilsService,
+        provideZonelessChangeDetection()
+      ]
     });
   });
 

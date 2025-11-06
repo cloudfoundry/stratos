@@ -1,4 +1,4 @@
-import { Component, DebugElement, ElementRef, Renderer2 } from '@angular/core';
+import {  Component, DebugElement, ElementRef, Renderer2, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { By } from '@angular/platform-browser';
@@ -25,8 +25,11 @@ describe('ButtonBlurOnClickDirective', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
+        
         { provide: ElementRef, useClass: MockElementRef },
         { provide: Renderer2, useClass: MockRenderer }
+      ,
+        provideZonelessChangeDetection()
       ],
       declarations: [
         TestButtonComponent

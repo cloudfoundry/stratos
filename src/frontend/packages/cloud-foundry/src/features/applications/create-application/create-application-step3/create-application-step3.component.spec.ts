@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideExperimentalZonelessChangeDetection } from '@angular/core';
+import {  provideExperimentalZonelessChangeDetection, provideZonelessChangeDetection } from '@angular/core';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 
@@ -15,9 +15,12 @@ describe('CreateApplicationStep3Component', () => {
     await TestBed.configureTestingModule({
       imports: [CreateApplicationStep3Component],
       providers: [
+        
         provideExperimentalZonelessChangeDetection(),
         provideNoopAnimations(),
-        provideRouter([]),
+        provideRouter([,
+        provideZonelessChangeDetection()
+      ]),
         ...generateCfStoreModules()
       ]
     }).compileComponents();

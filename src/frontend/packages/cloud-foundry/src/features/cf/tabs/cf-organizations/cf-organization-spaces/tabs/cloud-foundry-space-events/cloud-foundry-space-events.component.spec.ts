@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { ListConfig } from '../../../../../../../../../core/src/shared/components/list/list.component.types';
@@ -32,6 +33,7 @@ describe('CloudFoundrySpaceEventsComponent', () => {
         CloudFoundryEventsListComponent
       ],
       providers: [
+        
         {
           provide: ListConfig,
           useClass: CfSpaceEventsConfigService,
@@ -42,6 +44,8 @@ describe('CloudFoundrySpaceEventsComponent', () => {
         CloudFoundryEndpointService,
         CloudFoundryOrganizationService,
         CloudFoundryUserProvidedServicesService
+      ,
+        provideZonelessChangeDetection()
       ],
       imports: [...CFBaseTestModules]
     })

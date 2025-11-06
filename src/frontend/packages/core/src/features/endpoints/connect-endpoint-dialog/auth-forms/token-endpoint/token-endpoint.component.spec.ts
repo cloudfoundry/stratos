@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { TokenEndpointComponent } from './token-endpoint.component';
@@ -9,6 +10,7 @@ describe('TokenEndpointComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       imports: [
         TokenEndpointComponent
       ],

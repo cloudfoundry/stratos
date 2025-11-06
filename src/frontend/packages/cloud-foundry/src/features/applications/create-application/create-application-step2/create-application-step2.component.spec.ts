@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideExperimentalZonelessChangeDetection } from '@angular/core';
+import {  provideExperimentalZonelessChangeDetection, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
@@ -16,11 +16,14 @@ describe('CreateApplicationStep2Component', () => {
     await TestBed.configureTestingModule({
       imports: [CreateApplicationStep2Component],
       providers: [
+        
         provideExperimentalZonelessChangeDetection(),
         provideNoopAnimations(),
         provideHttpClient(),
         provideHttpClientTesting(),
         ...generateCfStoreModules()
+      ,
+        provideZonelessChangeDetection()
       ]
     }).compileComponents();
 

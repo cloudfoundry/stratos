@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import {
@@ -15,9 +16,12 @@ describe('CfOrgsSpaceListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
+        
         ...generateTestCfEndpointServiceProvider(),
         CfSpacesListConfigService,
         { provide: CloudFoundryOrganizationService, useClass: CloudFoundryOrganizationServiceMock },
+      ,
+        provideZonelessChangeDetection()
       ],
       imports: generateCfBaseTestModules()
 

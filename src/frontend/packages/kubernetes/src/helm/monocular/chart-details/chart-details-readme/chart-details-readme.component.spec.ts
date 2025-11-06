@@ -1,4 +1,4 @@
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import {  NO_ERRORS_SCHEMA, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
@@ -11,7 +11,10 @@ describe('Component: ChartDetailsReadme', () => {
     TestBed.configureTestingModule({
       imports: [ChartDetailsReadmeComponent],
       providers: [
+        
         { provide: ChartsService, useValue: new MockChartService() },
+      ,
+        provideZonelessChangeDetection()
       ],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();

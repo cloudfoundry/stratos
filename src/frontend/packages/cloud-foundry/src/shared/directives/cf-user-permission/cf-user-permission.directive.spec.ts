@@ -1,4 +1,4 @@
-import { Component, TemplateRef } from '@angular/core';
+import {  Component, TemplateRef, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
@@ -24,7 +24,10 @@ describe('CfUserPermissionDirective', () => {
         TestUserPermissionComponent
       ],
       providers: [
+        
         { provide: TemplateRef, useClass: MockTemplateRef },
+      ,
+        provideZonelessChangeDetection()
       ]
     });
     fixture = TestBed.createComponent(TestUserPermissionComponent);

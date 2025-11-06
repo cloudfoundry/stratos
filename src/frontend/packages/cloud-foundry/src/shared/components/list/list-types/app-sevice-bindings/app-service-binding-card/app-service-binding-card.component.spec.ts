@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
@@ -31,6 +32,7 @@ describe('AppServiceBindingCardComponent', () => {
       ],
       imports: generateCfBaseTestModules(),
       providers: [
+        
         EntityMonitorFactory,
         generateTestApplicationServiceProvider('1', '1'),
         ApplicationEnvVarsHelper,
@@ -39,6 +41,8 @@ describe('AppServiceBindingCardComponent', () => {
         ConfirmationDialogService,
         DatePipe,
         ServiceActionHelperService,
+      ,
+        provideZonelessChangeDetection()
       ]
     })
       .compileComponents();

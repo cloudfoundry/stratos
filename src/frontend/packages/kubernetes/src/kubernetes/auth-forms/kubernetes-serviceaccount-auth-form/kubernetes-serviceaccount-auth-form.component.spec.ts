@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { UntypedFormBuilder } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -11,7 +12,8 @@ describe('KubernetesSATokenAuthFormComponent', () => {
   let fixture: ComponentFixture<KubernetesSATokenAuthFormComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({imports: [
+    TestBed.configureTestingModule({
+        providers: [provideZonelessChangeDetection()],imports: [
         MDAppModule,
         SharedModule,
         NoopAnimationsModule

@@ -1,4 +1,5 @@
 import { inject, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { createEmptyStoreModule } from "../../test-framework/cf-autoscaler-test.helper";
 
@@ -10,9 +11,12 @@ describe('EditAutoscalerPolicyService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
+        
         EditAutoscalerPolicyService,
         EntityServiceFactory,
         EntityMonitorFactory
+      ,
+        provideZonelessChangeDetection()
       ],
       imports: [
         createEmptyStoreModule(),

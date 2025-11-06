@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import {
@@ -25,7 +26,10 @@ describe('CfSecurityGroupsCardComponent', () => {
         BooleanIndicatorComponent,
         AppChipsComponent
       ],
-      providers: [ActiveRouteCfOrgSpace, generateTestCfEndpointService()]
+      providers: [
+        ActiveRouteCfOrgSpace, generateTestCfEndpointService(),
+        provideZonelessChangeDetection()
+      ]
     })
       .compileComponents();
 

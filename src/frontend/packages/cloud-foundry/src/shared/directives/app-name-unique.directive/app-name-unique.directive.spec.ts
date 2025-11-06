@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpBackend, HttpClient, HttpClientModule } from '@angular/common/http';
 import { HttpTestingController } from '@angular/common/http/testing';
 import { inject, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Store } from '@ngrx/store';
@@ -34,6 +35,7 @@ describe('AppNameUniqueDirective', () => {
         HttpClientModule,
       ],
       providers: [
+        
         ExtensionService,
         {
           provide: HttpBackend,
@@ -44,6 +46,8 @@ describe('AppNameUniqueDirective', () => {
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
         CfUserService,
         ActiveRouteCfOrgSpace
+      ,
+        provideZonelessChangeDetection()
       ]
     });
   });

@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { BaseTestModules } from '../../../../../../../test-framework/core-test.helper';
@@ -12,7 +13,10 @@ describe('TableCellEndpointDetailsComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [...BaseTestModules],
-      providers: [EndpointListHelper]
+      providers: [
+        EndpointListHelper,
+        provideZonelessChangeDetection()
+      ]
     }).compileComponents();
   });
 

@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { BehaviorSubject, of } from 'rxjs';
 import { STORE_TEST_PROVIDERS } from "../test-framework/core-test.helper";
@@ -21,9 +22,12 @@ describe('EntityFavoriteStarComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
+        
         ...STORE_TEST_PROVIDERS,
         ConfirmationDialogService,
         SessionService
+      ,
+        provideZonelessChangeDetection()
       ],
       imports: [
         ...BaseTestModulesNoShared,

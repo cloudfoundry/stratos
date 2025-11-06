@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { STORE_TEST_PROVIDERS } from "../test-framework/core-test.helper";
 
@@ -17,7 +18,10 @@ describe('PageSideNavComponent', () => {
         BaseTestModulesNoShared,
         PageSideNavComponent
       ],
-      providers: [TabNavService, ...STORE_TEST_PROVIDERS]
+      providers: [
+        TabNavService, ...STORE_TEST_PROVIDERS,
+        provideZonelessChangeDetection()
+      ]
     })
       .compileComponents();
   });

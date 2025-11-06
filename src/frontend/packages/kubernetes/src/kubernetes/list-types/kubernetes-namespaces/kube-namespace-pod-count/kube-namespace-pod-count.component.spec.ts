@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { KubeBaseGuidMock, KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
@@ -15,7 +16,10 @@ describe('KubeNamespacePodCountComponent', () => {
         KubeNamespacePodCountComponent,
         ...KubernetesBaseTestModules
       ],
-      providers: [KubeBaseGuidMock, KubernetesEndpointService]
+      providers: [
+        KubeBaseGuidMock, KubernetesEndpointService,
+        provideZonelessChangeDetection()
+      ]
     })
       .compileComponents();
   });

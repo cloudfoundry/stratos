@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { inject, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
 
@@ -16,8 +17,11 @@ describe('CfAppVariablesListConfigService', () => {
 
     TestBed.configureTestingModule({
       providers: [
+        
         CfAppVariablesListConfigService,
         generateTestApplicationServiceProvider(appGuid, cfGuid)
+      ,
+        provideZonelessChangeDetection()
       ],
       imports: [
         generateCfStoreModules(),

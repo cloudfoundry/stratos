@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideExperimentalZonelessChangeDetection } from '@angular/core';
+import {  provideExperimentalZonelessChangeDetection, provideZonelessChangeDetection } from '@angular/core';
 
 import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { DeployApplicationStep21Component } from './deploy-application-step2-1.component';
@@ -13,8 +13,11 @@ describe('DeployApplicationStep21Component', () => {
     await TestBed.configureTestingModule({
       imports: [DeployApplicationStep21Component],
       providers: [
+        
         provideExperimentalZonelessChangeDetection(),
         ...generateCfStoreModules()
+      ,
+        provideZonelessChangeDetection()
       ]
     }).compileComponents();
 

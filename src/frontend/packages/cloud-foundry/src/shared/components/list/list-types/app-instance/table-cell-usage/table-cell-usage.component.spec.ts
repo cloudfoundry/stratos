@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { UtilsService } from '../../../../../../../../core/src/core/utils.service';
@@ -19,7 +20,10 @@ describe('TableCellUsageComponent', () => {
         PercentagePipe,
       ],
       providers: [
+        
         UtilsService,
+      ,
+        provideZonelessChangeDetection()
       ]
     }).compileComponents();
 

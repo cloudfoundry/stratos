@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { CoreModule } from '../../../../../../core/src/core/core.module';
@@ -33,7 +34,10 @@ describe('CardAppStatusComponent', () => {
         CoreModule
       ],
       providers: [
+        
         { provide: ApplicationService, useClass: ApplicationServiceMock },
+      ,
+        provideZonelessChangeDetection()
       ]
     })
       .compileComponents();

@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
@@ -13,7 +14,10 @@ describe('CreateOrganizationStepComponent', () => {
     TestBed.configureTestingModule({
       declarations: [CreateOrganizationStepComponent],
       imports: generateCfBaseTestModules(),
-      providers: [PaginationMonitorFactory]
+      providers: [
+        PaginationMonitorFactory,
+        provideZonelessChangeDetection()
+      ]
     })
       .compileComponents();
   });

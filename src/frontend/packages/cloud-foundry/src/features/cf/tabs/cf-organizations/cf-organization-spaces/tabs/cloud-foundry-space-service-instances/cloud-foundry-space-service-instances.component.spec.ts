@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { NgModule } from '@angular/core';
+import {  NgModule, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
@@ -28,7 +28,10 @@ describe('CloudFoundrySpaceServiceInstancesComponent', () => {
         ...generateCfBaseTestModules(),
         EntryComponentModules,
       ],
-      providers: [getCfSpaceServiceMock, DatePipe, ServiceActionHelperService],
+      providers: [
+        getCfSpaceServiceMock, DatePipe, ServiceActionHelperService,
+        provideZonelessChangeDetection()
+      ],
     })
       .compileComponents();
   });

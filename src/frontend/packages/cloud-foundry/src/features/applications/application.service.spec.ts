@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
 
@@ -30,6 +31,7 @@ describe('ApplicationService', () => {
         generateCfStoreModules()
       ],
       providers: [
+        
         generateTestApplicationServiceProvider(cfId, appId),
         ApplicationStateService,
         ApplicationEnvVarsHelper,
@@ -39,6 +41,8 @@ describe('ApplicationService', () => {
         GitSCMService,
         ExtensionService,
         LongRunningCfOperationsService
+      ,
+        provideZonelessChangeDetection()
       ]
     });
   });

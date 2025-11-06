@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { BrowserDynamicTestingModule } from '@angular/platform-browser-dynamic/testing';
 
@@ -23,8 +24,11 @@ describe('EndpointCardComponent', () => {
         MetricsEndpointDetailsComponent
       ],
       providers: [
+        
         EndpointListHelper,
         MetricsService
+      ,
+        provideZonelessChangeDetection()
       ]
     }).compileComponents();
   });

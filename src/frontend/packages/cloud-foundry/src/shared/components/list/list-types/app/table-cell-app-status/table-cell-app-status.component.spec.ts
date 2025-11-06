@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { StoreModule } from '@ngrx/store';
 
@@ -35,8 +36,11 @@ describe('TableCellAppStatusComponent', () => {
         generateCfStoreModules()
       ],
       providers: [
+        
         ApplicationStateService,
         PaginationMonitorFactory
+      ,
+        provideZonelessChangeDetection()
       ]
     })
       .compileComponents();

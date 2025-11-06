@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { generateTestApplicationServiceProvider } from '../../../../../../test-framework/application-service-helper';
@@ -15,12 +16,15 @@ describe('AppServiceBindingListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
+        
         AppServiceBindingListConfigService,
         generateTestApplicationServiceProvider('1', '1'),
         ApplicationEnvVarsHelper,
         DatePipe,
         ServiceActionHelperService,
         ApplicationStateService,
+      ,
+        provideZonelessChangeDetection()
       ],
       imports: generateCfBaseTestModules()
     });

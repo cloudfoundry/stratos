@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import {  Component, ViewChild, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
@@ -36,6 +36,7 @@ describe('UnlimitedInputComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       imports: [
         BrowserAnimationsModule,
         CoreModule,

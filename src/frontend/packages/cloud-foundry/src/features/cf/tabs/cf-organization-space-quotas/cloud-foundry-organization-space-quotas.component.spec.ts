@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { TabNavService } from '../../../../../../core/src/tab-nav.service';
@@ -17,7 +18,10 @@ describe('CloudFoundryOrganizationSpaceQuotasComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryOrganizationSpaceQuotasComponent],
-      providers: [CfSpaceQuotasListConfigService, generateTestCfEndpointServiceProvider(), TabNavService, DatePipe],
+      providers: [
+        CfSpaceQuotasListConfigService, generateTestCfEndpointServiceProvider(), TabNavService, DatePipe,
+        provideZonelessChangeDetection()
+      ],
       imports: [...CFBaseTestModules]
     })
       .compileComponents();

@@ -27,7 +27,7 @@
     "start-dev": "ng serve --aot=false",
     "test-clean": "./build/clean-test-reports.sh",
     "test-reports": "./build/show-test-reports.sh",
-    "test": "vitest run",
+    "test": "vitest run --project=core --project=store --project=cloud-foundry --project=kubernetes --project=cf-autoscaler --project=git --project=shared --project=extension",
     "test:ui": "vitest --ui",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",

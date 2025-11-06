@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { BaseTestModulesNoShared } from '../../../../../test-framework/core-test.helper';
@@ -14,6 +15,7 @@ describe('CardBooleanMetricComponent', () => {
         CardBooleanMetricComponent,
         ...BaseTestModulesNoShared
       ],
+      providers: [ provideZonelessChangeDetection() ]
     })
       .compileComponents();
   });

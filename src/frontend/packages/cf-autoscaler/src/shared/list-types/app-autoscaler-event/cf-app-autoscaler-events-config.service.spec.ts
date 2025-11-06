@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpBackend, HttpClient, HttpClientModule } from '@angular/common/http';
 import { HttpTestingController } from '@angular/common/http/testing';
 import { inject, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
 import { createEmptyStoreModule } from "../../../test-framework/cf-autoscaler-test.helper";
@@ -26,6 +27,7 @@ describe('CfAppAutoscalerEventsConfigService', () => {
 
     TestBed.configureTestingModule({
       providers: [
+        
         { provide: HttpBackend, useClass: HttpTestingController },
         CfAppAutoscalerEventsConfigService,
         EntityServiceFactory,
@@ -33,6 +35,8 @@ describe('CfAppAutoscalerEventsConfigService', () => {
         EntityCatalogHelper,
         generateTestApplicationServiceProvider(appGuid, cfGuid),
         HttpClient,
+      ,
+        provideZonelessChangeDetection()
       ],
       imports: [
         HttpClientModule,

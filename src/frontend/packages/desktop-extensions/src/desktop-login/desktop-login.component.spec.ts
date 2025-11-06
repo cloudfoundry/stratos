@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { DesktopLoginComponent } from './desktop-login.component';
@@ -9,6 +10,7 @@ describe('DesktopLoginComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       declarations: [ DesktopLoginComponent ]
     })
     .compileComponents();

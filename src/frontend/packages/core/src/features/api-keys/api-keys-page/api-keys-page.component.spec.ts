@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { TailwindDialogRef } from '@stratosui/core';
 
@@ -21,11 +22,14 @@ describe('ApiKeysPageComponent', () => {
         ApiKeysPageComponent
       ],
       providers: [
+        
         {
           provide: TailwindDialogRef,
           useValue: mockDialogRef
         },
         TabNavService
+      ,
+        provideZonelessChangeDetection()
       ]
     })
       .compileComponents();

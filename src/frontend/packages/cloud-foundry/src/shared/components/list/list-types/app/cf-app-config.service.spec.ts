@@ -1,5 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
@@ -12,9 +13,12 @@ describe('CfAppConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
+        
         CfAppConfigService,
         DatePipe,
         CfOrgSpaceDataService
+      ,
+        provideZonelessChangeDetection()
       ],
       imports: [
         CommonModule,

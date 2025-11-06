@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { ApplicationStateService } from './application-state.service';
@@ -11,7 +12,10 @@ describe('ApplicationStateService', () => {
 
   beforeEach(async () => {
     TestBed.configureTestingModule({
-      providers: [ApplicationStateService]
+      providers: [
+        ApplicationStateService,
+        provideZonelessChangeDetection()
+      ]
     }).compileComponents();
   });
 

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { DatePipe } from '@angular/common';
 import { TestBed } from '@angular/core/testing';
-import { provideExperimentalZonelessChangeDetection } from '@angular/core';
+import {  provideExperimentalZonelessChangeDetection, provideZonelessChangeDetection } from '@angular/core';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 
@@ -14,9 +14,12 @@ describe('CfAppMapRoutesListConfigService', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       providers: [
+        
         provideExperimentalZonelessChangeDetection(),
         provideNoopAnimations(),
-        provideRouter([]),
+        provideRouter([,
+        provideZonelessChangeDetection()
+      ]),
         ...generateCfStoreModules(),
         CfAppMapRoutesListConfigService,
         { provide: ApplicationService, useClass: ApplicationServiceMock },

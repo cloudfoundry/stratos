@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { TabNavService } from '../../../../../core/src/tab-nav.service';
@@ -23,11 +24,14 @@ describe('EditSpaceComponent', () => {
       declarations: [EditSpaceComponent, EditSpaceStepComponent],
       imports: generateCfBaseTestModules(),
       providers: [
+        
         ActiveRouteCfOrgSpace,
         generateTestCfEndpointServiceProvider(),
         TabNavService,
         CloudFoundryOrganizationService,
         CloudFoundryUserProvidedServicesService
+      ,
+        provideZonelessChangeDetection()
       ]
     })
       .compileComponents();

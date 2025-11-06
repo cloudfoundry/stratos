@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { TabNavService } from '../../../../../core/src/tab-nav.service';
@@ -17,9 +18,12 @@ describe('ReleasesTabComponent', () => {
       ,
         HelmReleasesTabComponent
       ]providers: [
+        
         DatePipe,
         HelmReleaseHelperService,
         TabNavService
+      ,
+        provideZonelessChangeDetection()
       ]
 
     })

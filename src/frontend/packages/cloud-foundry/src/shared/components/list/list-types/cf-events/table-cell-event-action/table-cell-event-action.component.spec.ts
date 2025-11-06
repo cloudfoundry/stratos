@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
@@ -11,6 +12,7 @@ describe('TableCellEventActionComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       imports: [TableCellEventActionComponent, EventTabActorIconPipe,
       imports: [CoreModule]
     })

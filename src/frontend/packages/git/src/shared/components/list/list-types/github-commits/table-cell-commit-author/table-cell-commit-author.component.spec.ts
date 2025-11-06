@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { BaseTestModulesNoShared } from '../../../../../../../../core/test-framework/core-test.helper';
@@ -11,6 +12,7 @@ describe('TableCellCommitAuthorComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       imports: [
         ...BaseTestModulesNoShared,
         TableCellCommitAuthorComponent,

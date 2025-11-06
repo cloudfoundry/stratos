@@ -1,4 +1,4 @@
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import {  NO_ERRORS_SCHEMA, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { Router } from '@angular/router';
@@ -38,11 +38,14 @@ describe('Component: ChartIndex', () => {
         // MainHeaderComponent
       ],
       providers: [
+        
         ConfigService,
         MenuService,
         { provide: ChartsService, useValue: new MockChartService() },
         // { provide: SeoService },
         { provide: Router }
+      ,
+        provideZonelessChangeDetection()
       ],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();

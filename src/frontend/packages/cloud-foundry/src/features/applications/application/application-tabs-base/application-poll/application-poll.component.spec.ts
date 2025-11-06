@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { generateTestApplicationServiceProvider } from '../../../../../../test-framework/application-service-helper';
@@ -19,10 +20,13 @@ describe('ApplicationPollComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [ApplicationPollComponent],
       providers: [
+        
         ApplicationPollingService,
         generateTestApplicationServiceProvider(cfId, appId),
         ApplicationEnvVarsHelper,
         ApplicationStateService,
+      ,
+        provideZonelessChangeDetection()
       ],
       imports: generateCfBaseTestModules()
     }).compileComponents();

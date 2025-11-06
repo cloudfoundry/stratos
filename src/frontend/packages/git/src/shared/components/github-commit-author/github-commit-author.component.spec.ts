@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ChangeDetectorRef } from '@angular/core';
+import {  ChangeDetectorRef, provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { GithubCommitAuthorComponent } from './github-commit-author.component';
@@ -11,6 +11,7 @@ describe('GithubCommitAuthorComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       imports: [GithubCommitAuthorComponent]
     })
       .compileComponents();

@@ -1,4 +1,5 @@
 import { inject, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { createBasicStoreModule } from "../test-framework/core-test.helper";
@@ -17,6 +18,7 @@ describe('LoggedInService', () => {
         LoggedInService,
         CurrentUserPermissionsService,
         ...STORE_TEST_PROVIDERS,
+        provideZonelessChangeDetection()
       ],
       imports: [
         CoreModule,

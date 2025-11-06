@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
@@ -32,11 +33,14 @@ describe('ServiceInstanceCardComponent', () => {
       ],
       imports: generateCfBaseTestModules(),
       providers: [
+        
         ServicesWallService,
         EntityServiceFactory,
         EntityMonitorFactory,
         PaginationMonitorFactory,
         ServiceActionHelperService,
+      ,
+        provideZonelessChangeDetection()
       ]
     })
       .compileComponents();

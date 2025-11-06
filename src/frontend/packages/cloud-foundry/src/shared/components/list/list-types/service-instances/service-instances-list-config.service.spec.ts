@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { generateCfBaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
@@ -12,10 +13,13 @@ describe('ServiceInstancesListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
+        
         ServiceInstancesListConfigService,
         { provide: ServicesService, useClass: ServicesServiceMock },
         DatePipe,
         ServiceActionHelperService
+      ,
+        provideZonelessChangeDetection()
       ],
       imports: [
         generateCfBaseTestModules(),

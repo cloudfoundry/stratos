@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Store } from '@ngrx/store';
 import { testSessionData } from "../../test-framework/cloud-foundry-endpoint-service.helper";
@@ -29,6 +30,7 @@ describe('CfOrgCardComponent', () => {
       ],
       imports: generateCfBaseTestModulesNoShared(),
       providers: [
+        
         PaginationMonitorFactory,
         EntityMonitorFactory,
         generateTestCfUserServiceProvider(),
@@ -36,6 +38,8 @@ describe('CfOrgCardComponent', () => {
         generateTestCfEndpointServiceProvider(),
         EntityServiceFactory,
         ConfirmationDialogService
+      ,
+        provideZonelessChangeDetection()
       ]
     })
       .compileComponents();

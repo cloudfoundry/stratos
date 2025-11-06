@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
 import { ROUTER_NAVIGATION } from '@ngrx/router-store';
@@ -13,6 +14,7 @@ describe('TableCellAppNameComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       imports: [
         TableCellAppNameComponent,
         RouterTestingModule,

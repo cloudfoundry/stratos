@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { SharedModule } from '../../../../../core/src/public-api';
@@ -20,10 +21,13 @@ describe('AnalysisReportRunnerComponent', () => {
         AnalysisReportRunnerComponent
       ],
       providers: [
+        
         KubernetesAnalysisService,
         KubernetesEndpointService,
         KubeBaseGuidMock,
         SidePanelService,
+      ,
+        provideZonelessChangeDetection()
       ]
     })
       .compileComponents();

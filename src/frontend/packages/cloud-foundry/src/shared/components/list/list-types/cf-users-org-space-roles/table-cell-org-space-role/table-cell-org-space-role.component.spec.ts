@@ -1,5 +1,6 @@
 import { HttpClientModule } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
@@ -26,11 +27,14 @@ describe('TableCellSpaceRoleComponent', () => {
         HttpClientModule
       ],
       providers: [
+        
         CfUserServiceTestProvider,
         CfRolesService,
         PaginationMonitorFactory,
         ActiveRouteCfOrgSpace,
         EntityMonitorFactory
+      ,
+        provideZonelessChangeDetection()
       ],
       declarations: [
         TableCellRoleOrgSpaceComponent,

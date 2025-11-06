@@ -1,4 +1,5 @@
 import { ChangeDetectorRef, NgZone } from '@angular/core';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, inject, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -65,7 +66,8 @@ describe('ListComponent', () => {
           { provide: ChangeDetectorRef, useValue: { detectChanges: () => { } } },
           // Fun fact, NgZone will execute something on import which causes an undefined error
           { provide: MockedNgZone, useValue: new MockedNgZone() },
-          EndpointListHelper
+          EndpointListHelper,
+          provideZonelessChangeDetection()
         ]
       });
       inject([Store, ChangeDetectorRef, NgZone], (
@@ -130,7 +132,8 @@ describe('ListComponent', () => {
           { provide: ListConfig, useClass: EndpointsListConfigService },
           // ApplicationStateService,
           EndpointListHelper,
-          CurrentUserPermissionsService
+          CurrentUserPermissionsService,
+          provideZonelessChangeDetection()
         ],
         imports: [
           CoreModule,

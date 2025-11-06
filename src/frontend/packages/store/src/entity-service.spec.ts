@@ -1,6 +1,7 @@
 import { HttpClientModule, HttpRequest, HttpXhrBackend } from '@angular/common/http';
 import { HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Action, Store } from '@ngrx/store';
 import { filter, first, map, pairwise } from 'rxjs/operators';
@@ -147,7 +148,8 @@ describe('EntityServiceService', () => {
         {
           provide: HttpXhrBackend,
           useClass: HttpTestingController
-        }
+        },
+        provideZonelessChangeDetection()
       ],
       imports: [
         HttpClientModule,

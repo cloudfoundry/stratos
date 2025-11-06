@@ -1,6 +1,6 @@
 import { CdkTableModule } from '@angular/cdk/table';
 import { CommonModule } from '@angular/common';
-import { Component, ViewChild } from '@angular/core';
+import {  Component, ViewChild, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -111,7 +111,10 @@ describe('Table CellConfig Integration Flow', () => {
           TestHostComponent
         ],
         providers: [
+          
           UtilsService
+        ,
+          provideZonelessChangeDetection()
         ]
       }).compileComponents();
     });
@@ -242,7 +245,10 @@ describe('Table CellConfig Integration Flow', () => {
           DynamicTestHostComponent
         ],
         providers: [
+          
           UtilsService
+        ,
+          provideZonelessChangeDetection()
         ]
       }).compileComponents();
     });
@@ -355,7 +361,10 @@ describe('Table CellConfig Integration Flow', () => {
           FavoriteTestHostComponent
         ],
         providers: [
+          
           UtilsService
+        ,
+          provideZonelessChangeDetection()
         ]
       }).compileComponents();
     });
@@ -514,7 +523,10 @@ describe('Table CellConfig Integration Flow', () => {
           MixedTestHostComponent
         ],
         providers: [
+          
           UtilsService
+        ,
+          provideZonelessChangeDetection()
         ]
       }).compileComponents();
     });
@@ -636,7 +648,10 @@ describe('Table CellConfig Integration Flow', () => {
           ErrorTestHostComponent
         ],
         providers: [
+          
           UtilsService
+        ,
+          provideZonelessChangeDetection()
         ]
       }).compileComponents();
     });
@@ -752,7 +767,10 @@ describe('Table CellConfig Integration Flow', () => {
           CompleteTestHostComponent
         ],
         providers: [
+          
           UtilsService
+        ,
+          provideZonelessChangeDetection()
         ]
       }).compileComponents();
     });

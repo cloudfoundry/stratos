@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
@@ -36,12 +37,15 @@ describe('SelectPlanStepComponent', () => {
       ],
       imports: generateCfBaseTestModulesNoShared(),
       providers: [
+        
         EntityServiceFactory,
         CreateServiceInstanceHelperServiceFactory,
         CsiGuidsService,
         PaginationMonitorFactory,
         EntityMonitorFactory,
         CsiModeService
+      ,
+        provideZonelessChangeDetection()
       ]
     })
       .compileComponents();

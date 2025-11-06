@@ -1,5 +1,6 @@
 import { ListAppEnvVar } from '../cf-app-variables-data-source';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { TableCellEditVariableComponent } from './table-cell-edit-variable.component';
@@ -11,6 +12,7 @@ describe('TableCellEditVariableComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       imports: [TableCellEditVariableComponent]
     })
       .compileComponents();

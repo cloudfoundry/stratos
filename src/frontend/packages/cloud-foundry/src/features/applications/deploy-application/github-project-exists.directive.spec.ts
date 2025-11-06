@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { provideExperimentalZonelessChangeDetection } from '@angular/core';
+import {  provideExperimentalZonelessChangeDetection, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Store } from '@ngrx/store';
@@ -15,12 +15,15 @@ describe('GithubProjectExistsDirective', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       providers: [
+        
         provideExperimentalZonelessChangeDetection(),
         provideHttpClient(),
         provideHttpClientTesting(),
         ...generateCfStoreModules(),
         GitSCMService,
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL }
+      ,
+        provideZonelessChangeDetection()
       ]
     }).compileComponents();
   });

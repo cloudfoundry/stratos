@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
@@ -20,7 +21,10 @@ describe('CardCfUserInfoComponent', () => {
           MetadataItemComponent,
           CopyToClipboardComponent
         ],
-        providers: [generateTestCfEndpointService()]
+        providers: [
+          generateTestCfEndpointService(),
+          provideZonelessChangeDetection()
+        ]
       }).compileComponents();
   });
 

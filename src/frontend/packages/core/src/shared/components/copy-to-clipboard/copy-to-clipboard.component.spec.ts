@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { createBasicStoreModule } from "../test-framework/core-test.helper";
 
@@ -12,6 +13,7 @@ describe('CopyToClipboardComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       imports: [
         CopyToClipboardComponent, // Now standalone
         CoreModule,

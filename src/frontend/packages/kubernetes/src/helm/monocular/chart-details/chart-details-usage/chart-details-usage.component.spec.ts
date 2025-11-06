@@ -1,4 +1,4 @@
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import {  NO_ERRORS_SCHEMA, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { SessionService } from '../../../../../../core/src/shared/services/session.service';
@@ -14,10 +14,13 @@ describe('Component: ChartDetailsUsage', () => {
     TestBed.configureTestingModule({
       imports: [...BaseTestModulesNoShared, ChartDetailsUsageComponent],
       providers: [
+        
         EndpointsService,
         UtilsService,
         PaginationMonitorFactory,
         SessionService
+      ,
+        provideZonelessChangeDetection()
       ],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();

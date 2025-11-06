@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { AppTabExtensionComponent } from './app-tab-extension.component';
@@ -13,6 +14,7 @@ describe('AppTabExtensionComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       declarations: [ AppTabExtensionComponent ],
       imports: [
         CoreModule,

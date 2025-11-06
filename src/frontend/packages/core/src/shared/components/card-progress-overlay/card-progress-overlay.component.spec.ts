@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { CardProgressOverlayComponent } from './card-progress-overlay.component';
@@ -10,6 +11,7 @@ describe('CardProgressOverlayComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       imports: [
         CardProgressOverlayComponent, // Now standalone
         CoreModule,

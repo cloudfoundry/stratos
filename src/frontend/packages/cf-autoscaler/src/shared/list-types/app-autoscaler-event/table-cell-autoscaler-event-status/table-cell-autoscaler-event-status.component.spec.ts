@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { EntityInfo } from '../../../../../../store/src/types/api.types';
@@ -11,6 +12,7 @@ describe('TableCellAutoscalerEventStatusComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       imports: [TableCellAutoscalerEventStatusComponent, TableCellAutoscalerEventStatusIconPipe]
     })
       .compileComponents();

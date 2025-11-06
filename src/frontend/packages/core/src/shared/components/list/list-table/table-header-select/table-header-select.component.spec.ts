@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { TableHeaderSelectComponent } from './table-header-select.component';
@@ -11,6 +12,8 @@ describe('TableHeaderSelectComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      
+      providers: [provideZonelessChangeDetection()],
       
       imports: [
         CoreModule,

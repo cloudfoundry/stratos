@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { TailwindDialogRef, MAT_DIALOG_DATA } from '@stratosui/core';
 import { BrowserDynamicTestingModule } from '@angular/platform-browser-dynamic/testing';
@@ -34,9 +35,12 @@ describe('ConnectEndpointDialogComponent', () => {
   beforeEach(() => {
     const testingModule = TestBed.configureTestingModule({
       providers: [
+        
         { provide: TailwindDialogRef, useClass: TailwindDialogRefMock },
         { provide: MAT_DIALOG_DATA, useClass: DialogDataMock },
         SidePanelService
+      ,
+        provideZonelessChangeDetection()
       ],
       imports: [
         CommonModule,

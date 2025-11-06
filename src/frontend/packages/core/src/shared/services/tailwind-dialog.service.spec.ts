@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { Component } from '@angular/core';
+import {  Component, provideZonelessChangeDetection } from '@angular/core';
 import { TailwindDialogService, TailwindDialogRef } from './tailwind-dialog.service';
 import { ApplicationRef, Injector, EnvironmentInjector } from '@angular/core';
 
@@ -39,7 +39,10 @@ describe('TailwindDialogService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
+        
         TailwindDialogService
+      ,
+        provideZonelessChangeDetection()
       ]
     });
 

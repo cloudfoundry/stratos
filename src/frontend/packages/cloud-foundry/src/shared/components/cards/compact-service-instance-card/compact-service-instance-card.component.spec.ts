@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { AppChipsComponent } from '../../../../../../core/src/shared/components/chips/chips.component';
@@ -13,6 +14,7 @@ describe('CompactServiceInstanceCardComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       imports: [
         ...generateCfBaseTestModulesNoShared(),
         CompactServiceInstanceCardComponent,

@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { UtilsService } from '../../core/utils.service';
@@ -12,8 +13,11 @@ describe('UptimePipe', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
+        
         UptimePipe,
         UtilsService
+      ,
+        provideZonelessChangeDetection()
       ]
     });
 

@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { STRATOS_ENDPOINT_TYPE, systemInfoEntityType } from '../../../../../../../store/src/helpers/stratos-entity-factory';
@@ -11,6 +12,7 @@ describe('EntityListViewComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       imports: [
         ...BaseTestModules,
       ]

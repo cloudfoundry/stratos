@@ -1,4 +1,5 @@
 import { inject, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { Store } from '@ngrx/store';
 import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from "../../test-framework/cloud-foundry-endpoint-service.helper";

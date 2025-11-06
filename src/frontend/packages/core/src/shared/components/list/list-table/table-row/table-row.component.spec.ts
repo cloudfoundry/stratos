@@ -1,5 +1,5 @@
 import { CdkTableModule } from '@angular/cdk/table';
-import { Component, DebugElement } from '@angular/core';
+import {  Component, DebugElement, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { By } from '@angular/platform-browser';
@@ -58,7 +58,10 @@ describe('TableRowComponent', () => {
         TableRowComponent
       ],
       providers: [
+        
         TableRowExpandedService
+      ,
+        provideZonelessChangeDetection()
       ]
 
     })

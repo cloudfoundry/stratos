@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from "../test-framework/core-test.helper";
@@ -23,9 +24,12 @@ describe('AppComponent', () => {
         createBasicStoreModule(),
       ],
       providers: [
+        
         ...STORE_TEST_PROVIDERS,
         LoggedInService,
         CurrentUserPermissionsService,
+      ,
+        provideZonelessChangeDetection()
       ]
     }).compileComponents();
   });

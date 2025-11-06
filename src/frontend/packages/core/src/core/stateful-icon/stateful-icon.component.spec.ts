@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { StratosStatus } from '../../../../store/src/types/shared.types';
@@ -12,6 +13,8 @@ describe('StatefulIconComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      
+      providers: [provideZonelessChangeDetection()],
       
       imports: [
         MDAppModule,

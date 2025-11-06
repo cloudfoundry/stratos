@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { BaseKubeGuid } from '../../kubernetes-page.types';
@@ -15,7 +16,10 @@ describe('KubernetesNodesTabComponent', () => {
         KubernetesNodesTabComponent,
         ...KubernetesBaseTestModules
       ],
-      providers: [BaseKubeGuid]
+      providers: [
+        BaseKubeGuid,
+        provideZonelessChangeDetection()
+      ]
     })
       .compileComponents();
   });

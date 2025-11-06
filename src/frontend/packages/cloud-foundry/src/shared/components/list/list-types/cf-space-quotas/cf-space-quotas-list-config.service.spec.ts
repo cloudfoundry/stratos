@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { CFBaseTestModules } from '../../../../../../test-framework/cf-test-helper';
@@ -11,7 +12,10 @@ import { CfSpaceQuotasListConfigService } from './cf-space-quotas-list-config.se
 describe('CfSpaceQuotasListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [...generateTestCfEndpointServiceProvider(), CfSpaceQuotasListConfigService, DatePipe],
+      providers: [
+        ...generateTestCfEndpointServiceProvider(), CfSpaceQuotasListConfigService, DatePipe,
+        provideZonelessChangeDetection()
+      ],
       imports: [
         ...CFBaseTestModules
       ]

@@ -1,5 +1,6 @@
 import { HttpClient, HttpHandler } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { generateCfBaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
@@ -20,6 +21,7 @@ describe('CfSpaceUsersListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
+        
         CfSpaceUsersListConfigService,
         { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock },
         { provide: CloudFoundryOrganizationService, useClass: CloudFoundryOrganizationServiceMock },
@@ -29,6 +31,8 @@ describe('CfSpaceUsersListConfigService', () => {
         HttpHandler,
         CloudFoundryEndpointService,
         CfUserService
+      ,
+        provideZonelessChangeDetection()
       ],
       imports: generateCfBaseTestModules()
     });

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { DatePipe } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideExperimentalZonelessChangeDetection } from '@angular/core';
+import {  provideExperimentalZonelessChangeDetection, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Store } from '@ngrx/store';
@@ -19,12 +19,15 @@ describe('CommitListWrapperComponent', () => {
     await TestBed.configureTestingModule({
       imports: [CommitListWrapperComponent],
       providers: [
+        
         provideExperimentalZonelessChangeDetection(),
         provideHttpClient(),
         provideHttpClientTesting(),
         ...generateCfStoreModules(),
         DatePipe,
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL }
+      ,
+        provideZonelessChangeDetection()
       ]
     }).compileComponents();
 

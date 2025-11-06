@@ -1,4 +1,5 @@
 import { TestBed, inject } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { ConfirmationDialogService } from './confirmation-dialog.service';
@@ -9,8 +10,11 @@ describe('ConfirmationDialogService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
+        
         ConfirmationDialogService,
         TailwindDialogService,
+      ,
+        provideZonelessChangeDetection()
       ],
       imports: [
         CoreModule,

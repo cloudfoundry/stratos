@@ -1,5 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { inject, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
@@ -14,9 +15,12 @@ describe('GithubCommitsListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
+        
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         GithubCommitsListConfigServiceBase,
         DatePipe
+      ,
+        provideZonelessChangeDetection()
       ],
       imports: [
         CommonModule,

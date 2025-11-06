@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import {
@@ -15,7 +16,10 @@ describe('CloudFoundryFirehoseComponent', () => {
       await TestBed.configureTestingModule({
         declarations: [CloudFoundryFirehoseComponent],
         imports: generateCfBaseTestModules(),
-        providers: [...generateTestCfEndpointServiceProvider()]
+        providers: [
+          ...generateTestCfEndpointServiceProvider(),
+          provideZonelessChangeDetection()
+        ]
       }).compileComponents();
     });
 

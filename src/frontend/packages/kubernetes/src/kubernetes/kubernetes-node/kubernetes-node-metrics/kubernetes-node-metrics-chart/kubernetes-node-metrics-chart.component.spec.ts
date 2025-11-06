@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { KubernetesNodeMetricsChartComponent } from './kubernetes-node-metrics-chart.component';
@@ -10,6 +11,7 @@ describe('KubernetesNodeMetricsChartComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       imports: [
         KubernetesNodeMetricsChartComponent,
         ...KubernetesBaseTestModules

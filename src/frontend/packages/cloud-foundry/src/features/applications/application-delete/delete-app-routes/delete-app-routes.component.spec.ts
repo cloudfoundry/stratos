@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { generateTestApplicationServiceProvider } from '../../../../../test-framework/application-service-helper';
@@ -20,10 +21,13 @@ describe('DeleteAppRoutesComponent', () => {
       declarations: [DeleteAppRoutesComponent],
       imports: generateCfBaseTestModules(),
       providers: [
+        
         generateTestApplicationServiceProvider(cfId, appId),
         ApplicationEnvVarsHelper,
         DatePipe,
         ApplicationStateService
+      ,
+        provideZonelessChangeDetection()
       ]
     }).compileComponents();
 

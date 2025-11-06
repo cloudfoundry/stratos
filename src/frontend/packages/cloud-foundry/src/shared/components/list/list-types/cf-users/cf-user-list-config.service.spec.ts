@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -26,6 +27,7 @@ describe('CfUserListConfigService', () => {
     TestBed.configureTestingModule({
       imports: generateCfBaseTestModules(),
       providers: [
+        
         {
           provide: CfUserListConfigService,
           useFactory: (
@@ -35,7 +37,9 @@ describe('CfUserListConfigService', () => {
             activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
             userPerms: CurrentUserPermissionsService,
           ) => new CfUserListConfigService(store, cfUserService, router, activeRouteCfOrgSpace, userPerms),
-          deps: [Store, CfUserService, Router, ActiveRouteCfOrgSpace, CurrentUserPermissionsService]
+          deps: [Store, CfUserService, Router, ActiveRouteCfOrgSpace, CurrentUserPermissionsService,
+        provideZonelessChangeDetection()
+      ]
         }
         ,
         { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock },

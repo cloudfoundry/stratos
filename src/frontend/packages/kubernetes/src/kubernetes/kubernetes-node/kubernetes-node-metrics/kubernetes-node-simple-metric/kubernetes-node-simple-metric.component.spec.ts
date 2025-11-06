@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { KubernetesNodeSimpleMetricComponent } from './kubernetes-node-simple-metric.component';
@@ -9,6 +10,7 @@ describe('KubernetesNodeSimpleMetricComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       imports: [ KubernetesNodeSimpleMetricComponent ]
     })
     .compileComponents();

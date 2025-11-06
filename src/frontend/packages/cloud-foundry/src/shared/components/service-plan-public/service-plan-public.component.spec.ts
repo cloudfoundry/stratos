@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { of } from 'rxjs';
 
@@ -28,8 +29,11 @@ describe('ServicePlanPublicComponent', () => {
       declarations: [ServicePlanPublicComponent],
       imports: generateCfBaseTestModulesNoShared(),
       providers: [
+        
         EntityMonitorFactory,
         { provide: ServicesService, useClass: ServicesServiceMock },
+      ,
+        provideZonelessChangeDetection()
       ]
     })
       .compileComponents();

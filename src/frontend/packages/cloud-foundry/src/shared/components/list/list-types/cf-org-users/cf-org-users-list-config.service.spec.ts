@@ -1,5 +1,6 @@
 import { HttpClient, HttpHandler } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
@@ -22,6 +23,7 @@ describe('CfOrgUsersListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
+        
         CfOrgUsersListConfigService,
         { provide: CloudFoundryOrganizationService, useClass: CloudFoundryOrganizationServiceMock },
         generateTestCfUserServiceProvider(),
@@ -33,6 +35,8 @@ describe('CfOrgUsersListConfigService', () => {
         HttpHandler,
         CloudFoundryEndpointService,
         ConfirmationDialogService
+      ,
+        provideZonelessChangeDetection()
       ],
       imports: generateCfBaseTestModulesNoShared()
     });

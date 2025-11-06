@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { PageHeaderEventsComponent } from './page-header-events.component';
@@ -13,7 +14,10 @@ describe('PageHeaderEventsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      providers: [InternalEventMonitorFactory],
+      providers: [
+        InternalEventMonitorFactory,
+        provideZonelessChangeDetection()
+      ],
       imports: [
         SharedModule,
         StoreModule.forRoot({}),

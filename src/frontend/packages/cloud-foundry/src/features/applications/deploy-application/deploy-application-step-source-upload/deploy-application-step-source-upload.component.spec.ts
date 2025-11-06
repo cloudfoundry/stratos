@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideExperimentalZonelessChangeDetection } from '@angular/core';
+import {  provideExperimentalZonelessChangeDetection, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
@@ -18,9 +18,12 @@ describe('DeployApplicationStepSourceUploadComponent', () => {
     await TestBed.configureTestingModule({
       imports: [DeployApplicationStepSourceUploadComponent],
       providers: [
+        
         provideExperimentalZonelessChangeDetection(),
         provideNoopAnimations(),
-        provideRouter([]),
+        provideRouter([,
+        provideZonelessChangeDetection()
+      ]),
         provideHttpClient(),
         provideHttpClientTesting(),
         ...generateCfStoreModules(),

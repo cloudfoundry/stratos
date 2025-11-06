@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { TableCellServiceBrokerComponent } from './table-cell-service-broker.component';
@@ -9,6 +10,7 @@ describe('TableCellServiceBrokerComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       imports: [TableCellServiceBrokerComponent]
     })
       .compileComponents();

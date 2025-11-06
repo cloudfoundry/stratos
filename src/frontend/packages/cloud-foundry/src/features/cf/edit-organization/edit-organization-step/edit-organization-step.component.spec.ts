@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import {
@@ -19,7 +20,10 @@ describe('EditOrganizationStepComponent', () => {
     TestBed.configureTestingModule({
       declarations: [EditOrganizationStepComponent],
       imports: generateCfBaseTestModules(),
-      providers: [ActiveRouteCfOrgSpace, generateTestCfEndpointServiceProvider(), CloudFoundryUserProvidedServicesService]
+      providers: [
+        ActiveRouteCfOrgSpace, generateTestCfEndpointServiceProvider(), CloudFoundryUserProvidedServicesService,
+        provideZonelessChangeDetection()
+      ]
     })
       .compileComponents();
   });

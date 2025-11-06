@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { createBasicStoreModule } from "../test-framework/core-test.helper";
 
@@ -14,6 +15,8 @@ describe('ConnectEndpointComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      
+      providers: [provideZonelessChangeDetection()],
       
       imports: [
         CommonModule,
