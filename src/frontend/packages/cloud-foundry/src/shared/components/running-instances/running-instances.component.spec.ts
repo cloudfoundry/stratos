@@ -10,7 +10,7 @@ describe('RunningInstancesComponent', () => {
   let component: RunningInstancesComponent;
   let fixture: ComponentFixture<RunningInstancesComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [RunningInstancesComponent],
       imports: [

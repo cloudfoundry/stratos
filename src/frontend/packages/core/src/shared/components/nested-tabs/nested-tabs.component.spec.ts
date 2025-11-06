@@ -8,7 +8,7 @@ describe('NestedTabsComponent', () => {
   let component: NestedTabsComponent;
   let fixture: ComponentFixture<NestedTabsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...BaseTestModulesNoShared,

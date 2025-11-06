@@ -7,7 +7,7 @@ describe('TokenEndpointComponent', () => {
   let component: TokenEndpointComponent;
   let fixture: ComponentFixture<TokenEndpointComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         TokenEndpointComponent

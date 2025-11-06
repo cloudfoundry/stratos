@@ -12,7 +12,7 @@ describe('CloudFoundryFirehoseComponent', () => {
   let fixture: ComponentFixture<CloudFoundryFirehoseComponent>;
 
   beforeEach(
-    waitForAsync(() => {
+    () => {
       TestBed.configureTestingModule({
         declarations: [CloudFoundryFirehoseComponent],
         imports: generateCfBaseTestModules(),

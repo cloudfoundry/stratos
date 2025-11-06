@@ -30,7 +30,7 @@ describe('CloudFoundrySpaceSummaryComponent', () => {
   let component: CloudFoundrySpaceSummaryComponent;
   let fixture: ComponentFixture<CloudFoundrySpaceSummaryComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         CloudFoundrySpaceSummaryComponent,

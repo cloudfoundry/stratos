@@ -27,7 +27,7 @@ describe('CardAppInstancesComponent', () => {
   let component: CardAppInstancesComponent;
   let fixture: ComponentFixture<CardAppInstancesComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         CardAppInstancesComponent,

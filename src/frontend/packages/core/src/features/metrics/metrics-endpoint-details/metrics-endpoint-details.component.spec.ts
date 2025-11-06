@@ -12,7 +12,7 @@ describe('MetricsEndpointDetailsComponent', () => {
   let component: MetricsEndpointDetailsComponent;
   let fixture: ComponentFixture<MetricsEndpointDetailsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         CoreModule,

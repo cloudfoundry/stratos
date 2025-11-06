@@ -4,7 +4,6 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import { TabNavService } from '../../../../../core/src/tab-nav.service';
 import { generateTestApplicationServiceProvider } from '../../../../test-framework/application-service-helper';
 import { generateCfBaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { ApplicationsModule } from '../applications.module';
 import { ApplicationDeleteComponent } from './application-delete.component';
 
 describe('ApplicationDeleteComponent', () => {
@@ -17,7 +16,7 @@ describe('ApplicationDeleteComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         ...generateCfBaseTestModules(),
-        ApplicationsModule
+        ApplicationDeleteComponent
       ],
       providers: [
         generateTestApplicationServiceProvider(cfId, appId),

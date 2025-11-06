@@ -20,7 +20,7 @@ describe('CardAppStatusComponent', () => {
   let component: CardAppStatusComponent;
   let fixture: ComponentFixture<CardAppStatusComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         CardAppStatusComponent,

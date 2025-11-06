@@ -21,7 +21,7 @@ describe('CloudFoundrySpaceServiceInstancesComponent', () => {
   let component: CloudFoundrySpaceServiceInstancesComponent;
   let fixture: ComponentFixture<CloudFoundrySpaceServiceInstancesComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundrySpaceServiceInstancesComponent],
       imports: [

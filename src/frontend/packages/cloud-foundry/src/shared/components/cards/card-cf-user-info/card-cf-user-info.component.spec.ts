@@ -13,7 +13,7 @@ describe('CardCfUserInfoComponent', () => {
   let component: CardCfUserInfoComponent;
   let fixture: ComponentFixture<CardCfUserInfoComponent>;
   beforeEach(
-    waitForAsync(() => {
+    () => {
       TestBed.configureTestingModule({
         declarations: [CardCfUserInfoComponent, MetadataItemComponent, CopyToClipboardComponent, CardCfUserInfoComponent],
         imports: generateCfBaseTestModulesNoShared(),

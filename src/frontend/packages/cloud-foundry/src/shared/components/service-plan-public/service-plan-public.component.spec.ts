@@ -23,7 +23,7 @@ describe('ServicePlanPublicComponent', () => {
   let element: HTMLElement;
   let servicesService: ServicesServiceMock;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ServicePlanPublicComponent],
       imports: generateCfBaseTestModulesNoShared(),

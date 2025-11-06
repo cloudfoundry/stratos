@@ -13,7 +13,7 @@ describe('CloudFoundryCellBaseComponent', () => {
   let component: CloudFoundryCellBaseComponent;
   let fixture: ComponentFixture<CloudFoundryCellBaseComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryCellBaseComponent],
       imports: generateCfBaseTestModules(),

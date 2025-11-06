@@ -11,7 +11,7 @@ describe('CreateApplicationStep1Component', () => {
   let component: CreateApplicationStep1Component;
   let fixture: ComponentFixture<CreateApplicationStep1Component>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         CreateApplicationStep1Component,

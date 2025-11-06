@@ -25,7 +25,7 @@ describe('LogOutDialogComponent', () => {
     data = '';
   }
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
         { provide: TailwindDialogRef, useClass: TailwindDialogRefMock },

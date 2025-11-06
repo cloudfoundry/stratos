@@ -14,7 +14,7 @@ describe('CreateEndpointConnectComponent', () => {
   let component: CreateEndpointConnectComponent;
   let fixture: ComponentFixture<CreateEndpointConnectComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       
       imports: [

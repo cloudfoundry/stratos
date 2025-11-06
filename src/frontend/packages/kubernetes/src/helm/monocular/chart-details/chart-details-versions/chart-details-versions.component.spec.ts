@@ -11,7 +11,7 @@ describe('ChartDetailsVersionsComponent', () => {
   let component: ChartDetailsVersionsComponent;
   let fixture: ComponentFixture<ChartDetailsVersionsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ChartDetailsVersionsComponent, PanelComponent],
       imports: [RouterTestingModule],

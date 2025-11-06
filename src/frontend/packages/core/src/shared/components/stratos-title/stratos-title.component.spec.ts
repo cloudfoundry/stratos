@@ -9,7 +9,7 @@ describe('StratosTitleComponent', () => {
   let component: StratosTitleComponent;
   let fixture: ComponentFixture<StratosTitleComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     const mockTheme = signal({
       branding: {
         companyName: 'Test Company',

@@ -13,7 +13,7 @@ describe('CliInfoComponent', () => {
   let component: CliInfoComponent;
   let fixture: ComponentFixture<CliInfoComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [CliInfoComponent, CodeBlockComponent, CopyToClipboardComponent],
       imports: [

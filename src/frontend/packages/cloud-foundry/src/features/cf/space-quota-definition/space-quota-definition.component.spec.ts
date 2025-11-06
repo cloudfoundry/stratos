@@ -28,7 +28,7 @@ describe('SpaceQuotaDefinitionComponent', () => {
 
   const helper = new EntityRelationSpecHelper();
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         SpaceQuotaDefinitionComponent

@@ -15,7 +15,7 @@ describe('ManageUsersSetUsernamesComponent', () => {
   let component: ManageUsersSetUsernamesComponent;
   let fixture: ComponentFixture<ManageUsersSetUsernamesComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...generateCfStoreModules(),

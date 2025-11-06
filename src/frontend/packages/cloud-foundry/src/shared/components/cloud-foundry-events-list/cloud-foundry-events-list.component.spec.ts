@@ -13,7 +13,7 @@ describe('CloudFoundryEventsListComponent', () => {
   let component: CloudFoundryEventsListComponent;
   let fixture: ComponentFixture<CloudFoundryEventsListComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         CloudFoundryEventsListComponent,

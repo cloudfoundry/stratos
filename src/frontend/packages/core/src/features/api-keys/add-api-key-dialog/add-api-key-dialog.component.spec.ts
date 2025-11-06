@@ -13,7 +13,7 @@ describe('AddApiKeyDialogComponent', () => {
     close: () => { }
   };
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...BaseTestModules,

@@ -11,7 +11,6 @@ import { CoreTestingModule } from '../../../../test-framework/core-test.modules'
 import { CoreModule } from '../../../core/core.module';
 import { SidePanelService } from '../../../shared/services/side-panel.service';
 import { SharedModule } from '../../../shared/shared.module';
-import { MetricsModule } from '../../metrics/metrics.module';
 import { ConnectEndpointComponent } from '../connect-endpoint/connect-endpoint.component';
 import { ConnectEndpointConfig } from '../connect.service';
 import { CredentialsAuthFormComponent } from './auth-forms/credentials-auth-form.component';
@@ -32,7 +31,7 @@ describe('ConnectEndpointDialogComponent', () => {
   let component: ConnectEndpointDialogComponent;
   let fixture: ComponentFixture<ConnectEndpointDialogComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     const testingModule = TestBed.configureTestingModule({
       providers: [
         { provide: TailwindDialogRef, useClass: TailwindDialogRefMock },
@@ -47,7 +46,6 @@ describe('ConnectEndpointDialogComponent', () => {
         NoopAnimationsModule,
         CoreTestingModule,
         createBasicStoreModule(),
-        MetricsModule,
         ConnectEndpointDialogComponent,
         ConnectEndpointComponent,
         CredentialsAuthFormComponent

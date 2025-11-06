@@ -10,7 +10,7 @@ describe('CreateQuotaStepComponent', () => {
   let component: CreateQuotaStepComponent;
   let fixture: ComponentFixture<CreateQuotaStepComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [CreateQuotaStepComponent, QuotaDefinitionFormComponent],
       imports: [...CFBaseTestModules],

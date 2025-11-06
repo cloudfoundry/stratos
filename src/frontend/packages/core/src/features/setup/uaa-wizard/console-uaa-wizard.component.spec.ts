@@ -19,7 +19,7 @@ describe('ConsoleUaaWizardComponent', () => {
   let component: ConsoleUaaWizardComponent;
   let fixture: ComponentFixture<ConsoleUaaWizardComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         CoreModule,

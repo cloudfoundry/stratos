@@ -16,7 +16,7 @@ describe('ServiceCatalogPageComponent', () => {
   let component: ServiceCatalogPageComponent;
   let fixture: ComponentFixture<ServiceCatalogPageComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         CommonModule,

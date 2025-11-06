@@ -14,7 +14,7 @@ describe('AcmeLoginComponent', () => {
   let component: AcmeLoginComponent;
   let fixture: ComponentFixture<AcmeLoginComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [AcmeLoginComponent],
       imports: [

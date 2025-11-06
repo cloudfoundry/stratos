@@ -9,7 +9,7 @@ describe('CreateSpaceStepComponent', () => {
   let component: CreateSpaceStepComponent;
   let fixture: ComponentFixture<CreateSpaceStepComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [CreateSpaceStepComponent],
       imports: generateCfBaseTestModules(),

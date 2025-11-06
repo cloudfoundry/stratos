@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -18,7 +18,7 @@ describe('EditAutoscalerPolicyStep4Component', () => {
   let component: EditAutoscalerPolicyStep4Component;
   let fixture: ComponentFixture<EditAutoscalerPolicyStep4Component>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [EditAutoscalerPolicyStep4Component],
       imports: [
@@ -37,7 +37,7 @@ describe('EditAutoscalerPolicyStep4Component', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EditAutoscalerPolicyStep4Component);

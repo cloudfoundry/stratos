@@ -9,7 +9,7 @@ describe('AcmeSupportInfoComponent', () => {
   let component: AcmeSupportInfoComponent;
   let fixture: ComponentFixture<AcmeSupportInfoComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ AcmeSupportInfoComponent ],
       imports: [

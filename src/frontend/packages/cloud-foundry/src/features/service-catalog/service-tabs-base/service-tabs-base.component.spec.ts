@@ -12,7 +12,7 @@ describe('ServiceTabsBaseComponent', () => {
   let component: ServiceTabsBaseComponent;
   let fixture: ComponentFixture<ServiceTabsBaseComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         ServiceTabsBaseComponent,

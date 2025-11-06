@@ -14,7 +14,7 @@ describe('EventsPageComponent', () => {
   let component: EventsPageComponent;
   let fixture: ComponentFixture<EventsPageComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       
       imports: [

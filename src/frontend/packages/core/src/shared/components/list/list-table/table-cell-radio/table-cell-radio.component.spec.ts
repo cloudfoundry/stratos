@@ -10,19 +10,17 @@ describe('TableCellRadioComponent', () => {
   let component: TableCellRadioComponent<any>;
   let fixture: ComponentFixture<TableCellRadioComponent<any>>;
 
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-      
-        imports: [
-        CoreModule,
-        TableCellRadioComponent
-      ],
-        providers: []
-      
-    }).compileComponents();
-    })
-  );
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+
+      imports: [
+      CoreModule,
+      TableCellRadioComponent
+    ],
+      providers: []
+
+  }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellRadioComponent);

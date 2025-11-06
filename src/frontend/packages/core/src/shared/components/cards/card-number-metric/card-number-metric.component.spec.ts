@@ -9,7 +9,7 @@ describe('CardNumberMetricComponent', () => {
   let component: CardNumberMetricComponent;
   let fixture: ComponentFixture<CardNumberMetricComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...BaseTestModulesNoShared,

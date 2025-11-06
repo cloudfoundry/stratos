@@ -9,7 +9,7 @@ describe('PageNotFoundComponentComponent', () => {
   let component: PageNotFoundComponentComponent;
   let fixture: ComponentFixture<PageNotFoundComponentComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
 
       imports: [

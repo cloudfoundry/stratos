@@ -13,7 +13,7 @@ describe('DetachServiceInstanceComponent', () => {
   let component: DetachServiceInstanceComponent;
   let fixture: ComponentFixture<DetachServiceInstanceComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [DetachServiceInstanceComponent, DetachAppsComponent],
       imports: generateCfBaseTestModules(),

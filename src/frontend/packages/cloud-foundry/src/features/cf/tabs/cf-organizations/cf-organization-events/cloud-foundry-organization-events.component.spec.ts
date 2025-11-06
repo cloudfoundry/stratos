@@ -22,7 +22,7 @@ describe('CloudFoundryOrganizationEventsComponent', () => {
   let component: CloudFoundryOrganizationEventsComponent;
   let fixture: ComponentFixture<CloudFoundryOrganizationEventsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         CloudFoundryOrganizationEventsComponent,

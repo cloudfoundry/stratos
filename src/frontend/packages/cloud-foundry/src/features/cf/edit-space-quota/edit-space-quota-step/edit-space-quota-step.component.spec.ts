@@ -11,7 +11,7 @@ describe('EditSpaceQuotaStepComponent', () => {
   let component: EditSpaceQuotaStepComponent;
   let fixture: ComponentFixture<EditSpaceQuotaStepComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [EditSpaceQuotaStepComponent, SpaceQuotaDefinitionFormComponent],
       imports: [

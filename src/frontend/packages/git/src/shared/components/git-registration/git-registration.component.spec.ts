@@ -13,7 +13,7 @@ describe('GitRegistrationComponent', () => {
   let component: GitRegistrationComponent;
   let fixture: ComponentFixture<GitRegistrationComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...BaseTestModulesNoShared,

@@ -9,7 +9,7 @@ describe('LoaderComponent', () => {
   let fixture: ComponentFixture<LoaderComponent>;
 
   beforeEach(
-    waitForAsync(() => {
+    () => {
       TestBed.configureTestingModule({
         imports: [CoreModule],
         declarations: [LoaderComponent]

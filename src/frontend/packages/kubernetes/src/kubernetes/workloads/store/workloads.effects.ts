@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { ApplicationRef, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
-import { environment } from 'frontend/packages/core/src/environments/environment';
+import { environment } from 'src/frontend/packages/core/src/environments/environment';
 import { Observable } from 'rxjs';
 import { catchError, flatMap, mergeMap } from 'rxjs/operators';
 

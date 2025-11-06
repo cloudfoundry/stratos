@@ -14,7 +14,7 @@ describe('NoEndpointsNonAdminComponent', () => {
   let component: NoEndpointsNonAdminComponent;
   let fixture: ComponentFixture<NoEndpointsNonAdminComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       
       imports: [

@@ -6,7 +6,6 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
 import { generateTestApplicationServiceProvider } from '../../../../../../test-framework/application-service-helper';
 import { generateCfStoreModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { ApplicationsModule } from '../../../../../features/applications/applications.module';
 import { CfAppVariablesListConfigService } from './cf-app-variables-list-config.service';
 
 describe('CfAppVariablesListConfigService', () => {
@@ -24,7 +23,6 @@ describe('CfAppVariablesListConfigService', () => {
         generateCfStoreModules(),
         CommonModule,
         SharedModule,
-        ApplicationsModule,
         RouterTestingModule
       ]
     });

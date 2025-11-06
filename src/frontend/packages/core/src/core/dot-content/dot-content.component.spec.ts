@@ -7,7 +7,7 @@ describe('DotContentComponent', () => {
   let component: DotContentComponent;
   let fixture: ComponentFixture<DotContentComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         DotContentComponent

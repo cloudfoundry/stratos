@@ -11,7 +11,7 @@ describe('CloudFoundryInviteUserLinkComponent', () => {
   let component: CloudFoundryInviteUserLinkComponent;
   let fixture: ComponentFixture<CloudFoundryInviteUserLinkComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryInviteUserLinkComponent],
       imports: generateCfBaseTestModules(),

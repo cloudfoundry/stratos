@@ -2,7 +2,7 @@ import { Component, Input, OnInit, computed, inject, ChangeDetectionStrategy, In
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
-import { AppState } from 'frontend/packages/store/src/app-state';
+import { AppState } from 'src/frontend/packages/store/src/app-state';
 import { combineLatest, Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 

@@ -18,7 +18,7 @@ describe('LocalAccountWizardComponent', () => {
   let component: LocalAccountWizardComponent;
   let fixture: ComponentFixture<LocalAccountWizardComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         CoreModule,

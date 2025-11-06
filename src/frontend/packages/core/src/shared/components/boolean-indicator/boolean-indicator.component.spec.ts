@@ -10,7 +10,7 @@ describe('BooleanIndicatorComponent', () => {
   let fixture: ComponentFixture<BooleanIndicatorComponent>;
   let element: HTMLElement;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [BooleanIndicatorComponent, CoreModule, NoopAnimationsModule]
     })

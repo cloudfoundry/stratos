@@ -28,7 +28,7 @@ describe('LoadingPageComponent', () => {
   let element: HTMLElement;
   let entityFactory: EntityMonitorFactoryMock;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         MDAppModule,

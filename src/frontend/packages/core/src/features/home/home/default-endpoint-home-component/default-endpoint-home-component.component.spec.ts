@@ -7,7 +7,7 @@ describe('DefaultEndpointHomeComponentComponent', () => {
   let component: DefaultEndpointHomeComponent;
   let fixture: ComponentFixture<DefaultEndpointHomeComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [ DefaultEndpointHomeComponent ]
     })

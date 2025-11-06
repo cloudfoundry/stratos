@@ -10,7 +10,7 @@ describe('DetailsCardComponent', () => {
   let component: DetailsCardComponent;
   let fixture: ComponentFixture<DetailsCardComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         DetailsCardComponent, // Now standalone

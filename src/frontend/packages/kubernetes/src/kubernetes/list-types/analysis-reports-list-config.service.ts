@@ -1,6 +1,6 @@
 import { Injectable, NgZone } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { ITableColumn } from 'frontend/packages/core/src/shared/components/list/list-table/table.types';
+import { ITableColumn } from 'src/frontend/packages/core/src/shared/components/list/list-table/table.types';
 import {
   IListAction,
   IListConfig,
@@ -8,7 +8,7 @@ import {
   ListViewTypes,
   IGlobalListAction,
   IMultiListAction,
-} from 'frontend/packages/core/src/shared/components/list/list.component.types';
+} from 'src/frontend/packages/core/src/shared/components/list/list.component.types';
 import { formatDistance } from 'date-fns';
 import { of } from 'rxjs';
 

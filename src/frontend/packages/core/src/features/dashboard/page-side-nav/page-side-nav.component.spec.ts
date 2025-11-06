@@ -11,7 +11,7 @@ describe('PageSideNavComponent', () => {
   let component: PageSideNavComponent;
   let fixture: ComponentFixture<PageSideNavComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         BaseTestModulesNoShared,

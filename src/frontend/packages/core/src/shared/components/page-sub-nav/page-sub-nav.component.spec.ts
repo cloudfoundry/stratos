@@ -9,7 +9,7 @@ describe('PageSubNavComponent', () => {
   let component: PageSubNavComponent;
   let fixture: ComponentFixture<PageSubNavComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,

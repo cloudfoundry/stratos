@@ -14,7 +14,7 @@ describe('CliCommandComponent', () => {
   let component: CliCommandComponent;
   let fixture: ComponentFixture<CliCommandComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [CliCommandComponent, CodeBlockComponent, CopyToClipboardComponent],
       imports: [

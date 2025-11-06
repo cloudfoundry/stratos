@@ -13,7 +13,7 @@ describe('ServicesWallComponent', () => {
   let component: ServicesWallComponent;
   let fixture: ComponentFixture<ServicesWallComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         ServicesWallComponent,

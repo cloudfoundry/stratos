@@ -10,7 +10,7 @@ describe('CfAdminAddUserWarningComponent', () => {
   let component: CfAdminAddUserWarningComponent;
   let fixture: ComponentFixture<CfAdminAddUserWarningComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [CfAdminAddUserWarningComponent],
       imports: generateCfBaseTestModules(),

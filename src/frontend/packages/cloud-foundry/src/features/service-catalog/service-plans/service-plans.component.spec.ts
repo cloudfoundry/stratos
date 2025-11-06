@@ -11,7 +11,7 @@ describe('ServicePlansComponent', () => {
   let component: ServicePlansComponent;
   let fixture: ComponentFixture<ServicePlansComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: generateCfBaseTestModules(),
       declarations: [

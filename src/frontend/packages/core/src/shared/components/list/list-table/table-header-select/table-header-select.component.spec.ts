@@ -9,7 +9,7 @@ describe('TableHeaderSelectComponent', () => {
   let component: TableHeaderSelectComponent<any>;
   let fixture: ComponentFixture<TableHeaderSelectComponent<any>>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       
       imports: [

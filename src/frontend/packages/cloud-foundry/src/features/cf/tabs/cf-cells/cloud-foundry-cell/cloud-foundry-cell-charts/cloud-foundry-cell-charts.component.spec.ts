@@ -10,7 +10,7 @@ describe('CloudFoundryCellChartsComponent', () => {
   let component: CloudFoundryCellChartsComponent;
   let fixture: ComponentFixture<CloudFoundryCellChartsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         CloudFoundryCellChartsComponent,

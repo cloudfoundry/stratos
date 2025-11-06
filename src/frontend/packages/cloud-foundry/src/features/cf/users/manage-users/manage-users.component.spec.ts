@@ -25,7 +25,7 @@ describe('UsersRolesComponent', () => {
   let component: UsersRolesComponent;
   let fixture: ComponentFixture<UsersRolesComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...generateCfStoreModules(),

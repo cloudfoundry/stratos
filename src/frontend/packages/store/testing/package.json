@@ -1,0 +1,11 @@
+{
+  "name": "@stratosui/store-testing",
+  "version": "0.0.1",
+  "main": "index.ts",
+  "exports": {
+    ".": {
+      "import": "./index.ts",
+      "require": "./index.ts"
+    }
+  }
+}

@@ -10,7 +10,7 @@ describe('RestoreEndpointsComponent', () => {
   let component: RestoreEndpointsComponent;
   let fixture: ComponentFixture<RestoreEndpointsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       
       imports: [

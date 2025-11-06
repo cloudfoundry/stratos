@@ -11,7 +11,7 @@ describe('StackedInputActionsComponent', () => {
   let component: StackedInputActionsComponent;
   let fixture: ComponentFixture<StackedInputActionsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...BaseTestModulesNoShared,

@@ -8,7 +8,7 @@ describe('ServiceIconComponent', () => {
   let component: ServiceIconComponent;
   let fixture: ComponentFixture<ServiceIconComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ServiceIconComponent],
       imports: generateCfBaseTestModulesNoShared()

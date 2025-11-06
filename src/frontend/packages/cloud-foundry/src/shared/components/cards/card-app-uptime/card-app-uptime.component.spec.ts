@@ -31,7 +31,7 @@ describe('CardAppUptimeComponent', () => {
   let component: CardAppUptimeComponent;
   let fixture: ComponentFixture<CardAppUptimeComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         CardAppUptimeComponent,

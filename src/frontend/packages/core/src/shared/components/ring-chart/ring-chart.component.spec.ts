@@ -9,7 +9,7 @@ describe('RingChartComponent', () => {
   let component: RingChartComponent;
   let fixture: ComponentFixture<RingChartComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         NoopAnimationsModule,

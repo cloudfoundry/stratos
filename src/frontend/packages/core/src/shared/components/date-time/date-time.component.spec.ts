@@ -10,7 +10,7 @@ describe('DateTimeComponent', () => {
   let component: DateTimeComponent;
   let fixture: ComponentFixture<DateTimeComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         DateTimeComponent, // Now standalone

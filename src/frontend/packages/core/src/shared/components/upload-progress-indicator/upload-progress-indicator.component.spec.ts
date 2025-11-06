@@ -10,7 +10,7 @@ describe('UploadProgressIndicatorComponent', () => {
   let component: UploadProgressIndicatorComponent;
   let fixture: ComponentFixture<UploadProgressIndicatorComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         UploadProgressIndicatorComponent,

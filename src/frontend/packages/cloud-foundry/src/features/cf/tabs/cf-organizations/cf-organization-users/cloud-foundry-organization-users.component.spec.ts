@@ -18,7 +18,7 @@ describe('CloudFoundryOrganizationUsersComponent', () => {
   let component: CloudFoundryOrganizationUsersComponent;
   let fixture: ComponentFixture<CloudFoundryOrganizationUsersComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryOrganizationUsersComponent, CloudFoundryInviteUserLinkComponent, CfAdminAddUserWarningComponent],
       imports: generateCfBaseTestModules(),

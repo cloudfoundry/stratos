@@ -7,7 +7,7 @@ describe('DesktopSettingsComponent', () => {
   let component: DesktopSettingsComponent;
   let fixture: ComponentFixture<DesktopSettingsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ DesktopSettingsComponent ]
     })

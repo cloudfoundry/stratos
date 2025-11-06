@@ -9,7 +9,7 @@ describe('CreateOrganizationStepComponent', () => {
   let component: CreateOrganizationStepComponent;
   let fixture: ComponentFixture<CreateOrganizationStepComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [CreateOrganizationStepComponent],
       imports: generateCfBaseTestModules(),

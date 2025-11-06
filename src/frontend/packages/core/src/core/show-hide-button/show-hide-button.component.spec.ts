@@ -7,7 +7,7 @@ describe('ShowHideButtonComponent', () => {
   let component: ShowHideButtonComponent;
   let fixture: ComponentFixture<ShowHideButtonComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ShowHideButtonComponent

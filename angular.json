@@ -159,22 +159,22 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "buildTarget": "stratos:build:development",
+            "buildTarget": "stratos:build-internal:development",
             "port": 5440,
             "ssl": true,
             "sslKey": "dev-ssl/server.key",
             "sslCert": "dev-ssl/server.crt",
-            "proxyConfig": "proxy.conf.js"
+            "proxyConfig": "proxy.conf.cjs"
           },
           "configurations": {
             "development": {
-              "buildTarget": "stratos:build:development"
+              "buildTarget": "stratos:build-internal:development"
             },
             "production": {
-              "buildTarget": "stratos:build:production"
+              "buildTarget": "stratos:build-internal:production"
             },
             "desktop": {
-              "buildTarget": "stratos:build:desktop"
+              "buildTarget": "stratos:build-internal:desktop"
             }
           }
         },

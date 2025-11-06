@@ -15,7 +15,7 @@ describe('MarkdownPreviewComponent', () => {
   let component: MarkdownPreviewComponent;
   let fixture: ComponentFixture<MarkdownPreviewComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [HttpClient, HttpHandler, SidePanelService],
       imports: [

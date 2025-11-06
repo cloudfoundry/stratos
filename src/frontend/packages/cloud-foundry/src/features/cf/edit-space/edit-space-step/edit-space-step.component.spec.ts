@@ -13,7 +13,7 @@ describe('EditSpaceStepComponent', () => {
   let component: EditSpaceStepComponent;
   let fixture: ComponentFixture<EditSpaceStepComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [EditSpaceStepComponent],
       imports: generateCfBaseTestModules(),

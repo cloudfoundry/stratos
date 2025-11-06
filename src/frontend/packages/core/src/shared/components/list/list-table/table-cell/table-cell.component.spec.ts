@@ -20,7 +20,7 @@ describe('TableCellComponent', () => {
   let component: TableCellComponent<any>;
   let fixture: ComponentFixture<TableCellComponent<any>>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
 
       declarations: [

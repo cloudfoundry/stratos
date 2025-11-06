@@ -14,7 +14,7 @@ describe('HomePageEndpointCardComponent', () => {
   let component: HomePageEndpointCardComponent;
   let fixture: ComponentFixture<HomePageEndpointCardComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       
       imports: [

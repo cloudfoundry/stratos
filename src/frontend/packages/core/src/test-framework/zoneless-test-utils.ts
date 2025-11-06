@@ -21,6 +21,11 @@ import { ApplicationRef } from '@angular/core';
  * - Completing async operations
  * - Triggering user interactions
  *
+ * IMPORTANT for zoneless mode:
+ * - Call fixture.detectChanges() directly, not appRef.tick()
+ * - appRef.tick() schedules async work; fixture.detectChanges() runs immediately
+ * - In zoneless mode with no Zone.js, appRef.tick() is unnecessary
+ *
  * @example
  * ```typescript
  * component.title = 'New Title';
@@ -29,8 +34,9 @@ import { ApplicationRef } from '@angular/core';
  * ```
  */
 export function detectChanges<T>(fixture: ComponentFixture<T>): void {
-  const appRef = TestBed.inject(ApplicationRef);
-  appRef.tick();
+  // In zoneless mode, we only need fixture.detectChanges()
+  // Do NOT call appRef.tick() - it causes NG0100 errors by scheduling
+  // change detection asynchronously when we need it synchronously
   fixture.detectChanges();
 }
 

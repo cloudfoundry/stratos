@@ -26,7 +26,7 @@ describe('LogViewerComponent', () => {
   let stream: Subject<string>;
   let contentEl: HTMLDivElement;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         LogViewerComponent,

@@ -9,7 +9,7 @@ describe('EntityListViewComponent', () => {
   let component: EntityListViewComponent;
   let fixture: ComponentFixture<EntityListViewComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...BaseTestModules,

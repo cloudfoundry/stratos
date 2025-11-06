@@ -15,7 +15,7 @@ describe('InviteUsersCreateComponent', () => {
   let component: InviteUsersCreateComponent;
   let fixture: ComponentFixture<InviteUsersCreateComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [InviteUsersCreateComponent],
       imports: generateCfBaseTestModules(),

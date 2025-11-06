@@ -11,7 +11,7 @@ describe('CodeBlockComponent', () => {
   let component: CodeBlockComponent;
   let fixture: ComponentFixture<CodeBlockComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         CodeBlockComponent, // Now standalone

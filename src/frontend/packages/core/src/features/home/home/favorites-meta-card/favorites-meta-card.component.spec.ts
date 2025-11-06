@@ -8,7 +8,7 @@ describe('FavoritesMetaCardComponent', () => {
   let component: FavoritesMetaCardComponent;
   let fixture: ComponentFixture<FavoritesMetaCardComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [...BaseTestModules],
     })

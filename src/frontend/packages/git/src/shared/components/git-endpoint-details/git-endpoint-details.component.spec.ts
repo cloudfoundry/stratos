@@ -9,7 +9,7 @@ describe('GitEndpointDetailsComponent', () => {
   let component: GitEndpointDetailsComponent;
   let fixture: ComponentFixture<GitEndpointDetailsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         CoreModule,

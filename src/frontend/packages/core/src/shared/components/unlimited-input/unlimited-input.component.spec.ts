@@ -34,7 +34,7 @@ describe('UnlimitedInputComponent', () => {
   let fixture: ComponentFixture<WrapperComponent>;
   let element: HTMLElement;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         BrowserAnimationsModule,

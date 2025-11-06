@@ -9,7 +9,7 @@ describe('PollingIndicatorComponent', () => {
   let component: PollingIndicatorComponent;
   let fixture: ComponentFixture<PollingIndicatorComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         PollingIndicatorComponent,

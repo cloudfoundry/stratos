@@ -9,7 +9,7 @@ describe('CloudFoundryBaseComponent', () => {
   let component: CloudFoundryBaseComponent;
   let fixture: ComponentFixture<CloudFoundryBaseComponent>;
   beforeEach(
-    waitForAsync(() => {
+    () => {
       TestBed.configureTestingModule({
         declarations: [CloudFoundryBaseComponent],
         imports: [RouterTestingModule],

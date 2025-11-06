@@ -15,7 +15,7 @@ describe('ServiceRecentInstancesCardComponent', () => {
   let component: ServiceRecentInstancesCardComponent;
   let fixture: ComponentFixture<ServiceRecentInstancesCardComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         ServiceRecentInstancesCardComponent,

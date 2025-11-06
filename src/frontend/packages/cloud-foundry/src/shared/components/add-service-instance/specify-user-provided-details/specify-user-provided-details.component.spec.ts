@@ -13,7 +13,7 @@ describe('SpecifyUserProvidedDetailsComponent', () => {
   let component: SpecifyUserProvidedDetailsComponent;
   let fixture: ComponentFixture<SpecifyUserProvidedDetailsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         SpecifyUserProvidedDetailsComponent,

@@ -7,7 +7,7 @@ describe('DisplayValueComponent', () => {
   let component: DisplayValueComponent;
   let fixture: ComponentFixture<DisplayValueComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [ DisplayValueComponent ]
     })

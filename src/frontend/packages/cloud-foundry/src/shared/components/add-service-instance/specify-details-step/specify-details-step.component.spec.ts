@@ -16,7 +16,7 @@ describe('SpecifyDetailsStepComponent', () => {
   let component: SpecifyDetailsStepComponent;
   let fixture: ComponentFixture<SpecifyDetailsStepComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         generateCfBaseTestModulesNoShared(),

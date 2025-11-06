@@ -7,7 +7,7 @@ describe('StepperFormComponent', () => {
   let component: StepperFormComponent;
   let fixture: ComponentFixture<StepperFormComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         StepperFormComponent

@@ -12,7 +12,7 @@ describe('CloudFoundryOrganizationsComponent', () => {
   let component: CloudFoundryOrganizationsComponent;
   let fixture: ComponentFixture<CloudFoundryOrganizationsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryOrganizationsComponent],
       providers: [generateTestCfEndpointServiceProvider(), TabNavService],

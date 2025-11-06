@@ -26,7 +26,7 @@ describe('CardCfOrgUserDetailsComponent', () => {
   let component: CardCfOrgUserDetailsComponent;
   let fixture: ComponentFixture<CardCfOrgUserDetailsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         CardCfOrgUserDetailsComponent,

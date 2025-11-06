@@ -13,7 +13,7 @@ describe('BreadcrumbsComponent', () => {
   let element: HTMLElement;
   let breadcrumbs: IBreadcrumb[];
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         CoreModule,

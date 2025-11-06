@@ -17,7 +17,7 @@ describe('CloudFoundryOrganizationSpacesComponent', () => {
   let component: CloudFoundryOrganizationSpacesComponent;
   let fixture: ComponentFixture<CloudFoundryOrganizationSpacesComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         CloudFoundryOrganizationSpacesComponent,

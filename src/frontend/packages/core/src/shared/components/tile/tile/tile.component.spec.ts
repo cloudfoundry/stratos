@@ -7,7 +7,7 @@ describe('TileComponent', () => {
   let component: TileComponent;
   let fixture: ComponentFixture<TileComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [ TileComponent ]
     })

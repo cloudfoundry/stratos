@@ -17,7 +17,7 @@ describe('SetupWelcomeComponent', () => {
   let component: SetupWelcomeComponent;
   let fixture: ComponentFixture<SetupWelcomeComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         CoreModule,

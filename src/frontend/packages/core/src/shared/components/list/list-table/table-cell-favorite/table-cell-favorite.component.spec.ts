@@ -19,7 +19,7 @@ describe('TableCellFavoriteComponent', () => {
   let component: TableCellFavoriteComponent<TestEntity, TestMetadata>;
   let fixture: ComponentFixture<TableCellFavoriteComponent<TestEntity, TestMetadata>>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
 
       imports: [

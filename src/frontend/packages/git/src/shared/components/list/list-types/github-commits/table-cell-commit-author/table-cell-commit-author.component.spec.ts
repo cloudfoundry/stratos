@@ -9,7 +9,7 @@ describe('TableCellCommitAuthorComponent', () => {
   let component: TableCellCommitAuthorComponent<any>;
   let fixture: ComponentFixture<TableCellCommitAuthorComponent<any>>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...BaseTestModulesNoShared,

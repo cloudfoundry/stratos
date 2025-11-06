@@ -9,7 +9,7 @@ describe('TileSelectorTileComponent', () => {
   let component: TileSelectorTileComponent<ITileImgConfig>;
   let fixture: ComponentFixture<TileSelectorTileComponent<ITileImgConfig>>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       
       imports: [

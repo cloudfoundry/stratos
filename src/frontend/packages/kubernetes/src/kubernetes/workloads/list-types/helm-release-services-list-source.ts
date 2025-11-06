@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
-import { ListDataSource } from 'frontend/packages/core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { IListConfig } from 'frontend/packages/core/src/shared/components/list/list.component.types';
-import { AppState } from 'frontend/packages/store/src/app-state';
+import { ListDataSource } from 'src/frontend/packages/core/src/shared/components/list/data-sources-controllers/list-data-source';
+import { IListConfig } from 'src/frontend/packages/core/src/shared/components/list/list.component.types';
+import { AppState } from 'src/frontend/packages/store/src/app-state';
 
 import { KubeService } from '../../store/kube.types';
 import { GetHelmReleases } from '../store/workloads.actions';

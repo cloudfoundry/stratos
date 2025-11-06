@@ -8,7 +8,7 @@ describe('TableCellIconComponent', () => {
   let component: TableCellIconComponent;
   let fixture: ComponentFixture<TableCellIconComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       
       imports: [

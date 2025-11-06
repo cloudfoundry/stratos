@@ -10,7 +10,7 @@ describe('BackupRestoreEndpointsComponent', () => {
   let component: BackupRestoreEndpointsComponent;
   let fixture: ComponentFixture<BackupRestoreEndpointsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       
       imports: [

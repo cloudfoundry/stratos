@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CustomTooltipDirective } from '@stratosui/core';
-import { TableCellCustom } from 'frontend/packages/core/src/shared/components/list/list.types';
+import { TableCellCustom } from 'src/frontend/packages/core/src/shared/components/list/list.types';
 
 @Component({
   selector: 'app-analysis-status-cell',

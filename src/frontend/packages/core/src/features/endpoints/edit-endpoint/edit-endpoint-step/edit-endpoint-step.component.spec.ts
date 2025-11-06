@@ -13,7 +13,7 @@ describe('EditEndpointStepComponent', () => {
   let component: EditEndpointStepComponent;
   let fixture: ComponentFixture<EditEndpointStepComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         CoreTestingModule,

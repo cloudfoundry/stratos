@@ -9,7 +9,7 @@ describe('CFHomeCardComponent', () => {
   let component: CFHomeCardComponent;
   let fixture: ComponentFixture<CFHomeCardComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ CFHomeCardComponent ],
       imports: generateCfBaseTestModules(),

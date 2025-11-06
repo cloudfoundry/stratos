@@ -10,7 +10,7 @@ describe('MaxListMessageComponent', () => {
   let component: MaxListMessageComponent;
   let fixture: ComponentFixture<MaxListMessageComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,

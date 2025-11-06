@@ -9,7 +9,7 @@ describe('AddServiceInstanceBaseStepComponent', () => {
   let component: AddServiceInstanceBaseStepComponent;
   let fixture: ComponentFixture<AddServiceInstanceBaseStepComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [AddServiceInstanceBaseStepComponent],
       imports: generateCfBaseTestModules(),

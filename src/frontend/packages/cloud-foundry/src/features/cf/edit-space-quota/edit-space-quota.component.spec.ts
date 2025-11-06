@@ -12,7 +12,7 @@ describe('EditSpaceQuotaComponent', () => {
   let component: EditSpaceQuotaComponent;
   let fixture: ComponentFixture<EditSpaceQuotaComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [EditSpaceQuotaComponent, EditSpaceQuotaStepComponent, SpaceQuotaDefinitionFormComponent],
       imports: [...CFBaseTestModules],

@@ -7,7 +7,7 @@ describe('EditableDisplayValueComponent', () => {
   let component: EditableDisplayValueComponent;
   let fixture: ComponentFixture<EditableDisplayValueComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         EditableDisplayValueComponent

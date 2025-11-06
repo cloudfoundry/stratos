@@ -2,9 +2,9 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
-import { ClearPaginationOfEntity, ClearPaginationOfType } from 'frontend/packages/store/src/actions/pagination.actions';
-import { ApiRequestTypes } from 'frontend/packages/store/src/reducers/api-request-reducer/request-helpers';
-import { connectedEndpointsOfTypesSelector } from 'frontend/packages/store/src/selectors/endpoint.selectors';
+import { ClearPaginationOfEntity, ClearPaginationOfType } from 'src/frontend/packages/store/src/actions/pagination.actions';
+import { ApiRequestTypes } from 'src/frontend/packages/store/src/reducers/api-request-reducer/request-helpers';
+import { connectedEndpointsOfTypesSelector } from 'src/frontend/packages/store/src/selectors/endpoint.selectors';
 import { of } from 'rxjs';
 import { catchError, first, flatMap, map, mergeMap, switchMap } from 'rxjs/operators';
 

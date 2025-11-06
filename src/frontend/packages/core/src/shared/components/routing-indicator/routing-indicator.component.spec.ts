@@ -10,7 +10,7 @@ describe('RoutingIndicatorComponent', () => {
   let component: RoutingIndicatorComponent;
   let fixture: ComponentFixture<RoutingIndicatorComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         RoutingIndicatorComponent,

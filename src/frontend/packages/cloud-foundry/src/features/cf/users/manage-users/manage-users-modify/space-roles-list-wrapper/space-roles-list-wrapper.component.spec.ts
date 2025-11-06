@@ -12,7 +12,7 @@ describe('SpaceRolesListWrapperComponent', () => {
   let component: SpaceRolesListWrapperComponent;
   let fixture: ComponentFixture<SpaceRolesListWrapperComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...generateCfStoreModules(),

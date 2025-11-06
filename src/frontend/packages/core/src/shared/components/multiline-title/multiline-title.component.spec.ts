@@ -7,7 +7,7 @@ describe('MultilineTitleComponent', () => {
   let component: MultilineTitleComponent;
   let fixture: ComponentFixture<MultilineTitleComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [ MultilineTitleComponent ]
     })

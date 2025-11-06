@@ -99,7 +99,7 @@ describe('TableComponent', () => {
   let component: TableHostComponent;
   let fixture: ComponentFixture<TableHostComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         CoreModule,

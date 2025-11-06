@@ -15,7 +15,7 @@ describe('CloudFoundrySummaryTabComponent', () => {
   let component: CloudFoundrySummaryTabComponent;
   let fixture: ComponentFixture<CloudFoundrySummaryTabComponent>;
   beforeEach(
-    waitForAsync(() => {
+    () => {
       TestBed.configureTestingModule({
         declarations: [
           CloudFoundrySummaryTabComponent,

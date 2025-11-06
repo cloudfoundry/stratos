@@ -86,7 +86,7 @@ describe('AddServiceInstanceComponent', () => {
   let component: AddServiceInstanceComponent;
   let fixture: ComponentFixture<AddServiceInstanceComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         AppNameUniqueDirective,

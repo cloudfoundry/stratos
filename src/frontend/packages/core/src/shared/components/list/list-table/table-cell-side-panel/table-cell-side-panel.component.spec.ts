@@ -9,7 +9,7 @@ describe('TableCellSidePanelComponent', () => {
   let component: TableCellSidePanelComponent;
   let fixture: ComponentFixture<TableCellSidePanelComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       
       providers: [

@@ -12,7 +12,7 @@ describe('ConnectEndpointComponent', () => {
   let component: ConnectEndpointComponent;
   let fixture: ComponentFixture<ConnectEndpointComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       
       imports: [

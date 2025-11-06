@@ -9,7 +9,7 @@ describe('CfEndpointDetailsComponent', () => {
   let component: CfEndpointDetailsComponent;
   let fixture: ComponentFixture<CfEndpointDetailsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [CfEndpointDetailsComponent],
       imports: [

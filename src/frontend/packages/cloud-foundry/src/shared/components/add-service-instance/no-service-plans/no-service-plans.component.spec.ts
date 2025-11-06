@@ -7,7 +7,7 @@ describe('NoServicePlansComponent', () => {
   let component: NoServicePlansComponent;
   let fixture: ComponentFixture<NoServicePlansComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ NoServicePlansComponent ]
     })

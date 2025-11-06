@@ -11,7 +11,7 @@ describe('EditQuotaStepComponent', () => {
   let component: EditQuotaStepComponent;
   let fixture: ComponentFixture<EditQuotaStepComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [EditQuotaStepComponent, QuotaDefinitionFormComponent, QuotaDefinitionFormComponent],
       imports: [...CFBaseTestModules],

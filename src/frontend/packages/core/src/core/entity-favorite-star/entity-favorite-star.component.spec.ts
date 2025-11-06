@@ -18,7 +18,7 @@ describe('EntityFavoriteStarComponent', () => {
   let element: HTMLElement;
   let userFavoriteManager: UserFavoriteManager;
   let favorite: UserFavorite;
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
         ...STORE_TEST_PROVIDERS,

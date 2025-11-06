@@ -5,10 +5,12 @@
     "types": [
       "vitest/globals",
       "node"
-    ]
+    ],
+    "module": "ESNext",
+    "target": "ES2022"
   },
   "files": [
-    "src/test-setup.ts"
+    "src/test-setup.mts"
   ],
   "include": [
     "**/*.spec.ts",

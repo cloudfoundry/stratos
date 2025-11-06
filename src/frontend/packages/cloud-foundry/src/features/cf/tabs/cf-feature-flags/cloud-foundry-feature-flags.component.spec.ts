@@ -9,7 +9,7 @@ describe('CloudFoundryFeatureFlagsComponent', () => {
   let component: CloudFoundryFeatureFlagsComponent;
   let fixture: ComponentFixture<CloudFoundryFeatureFlagsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryFeatureFlagsComponent],
       imports: generateCfBaseTestModules(),

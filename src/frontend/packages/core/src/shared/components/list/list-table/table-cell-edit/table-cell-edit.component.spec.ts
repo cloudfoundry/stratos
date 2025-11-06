@@ -9,7 +9,7 @@ describe('TableCellEditComponent', () => {
   let component: TableCellEditComponent<any>;
   let fixture: ComponentFixture<TableCellEditComponent<any>>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       
       imports: [

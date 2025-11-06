@@ -9,7 +9,7 @@ describe('CloudFoundrySecurityGroupsComponent', () => {
   let component: CloudFoundrySecurityGroupsComponent;
   let fixture: ComponentFixture<CloudFoundrySecurityGroupsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundrySecurityGroupsComponent],
       imports: generateCfBaseTestModules(),

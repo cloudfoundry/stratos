@@ -14,7 +14,7 @@ describe('LogoutPageComponent', () => {
   let component: LogoutPageComponent;
   let fixture: ComponentFixture<LogoutPageComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       
       imports: [

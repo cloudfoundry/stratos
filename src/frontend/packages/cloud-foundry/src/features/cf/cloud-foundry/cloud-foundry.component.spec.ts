@@ -16,7 +16,7 @@ describe('CloudFoundryComponent', () => {
   let fixture: ComponentFixture<CloudFoundryComponent>;
 
   beforeEach(
-    waitForAsync(() => {
+    () => {
       TestBed.configureTestingModule({
         declarations: [
           CloudFoundryComponent,

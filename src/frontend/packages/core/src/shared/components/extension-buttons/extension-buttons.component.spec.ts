@@ -8,7 +8,7 @@ describe('ExtensionButtonsComponent', () => {
   let component: ExtensionButtonsComponent;
   let fixture: ComponentFixture<ExtensionButtonsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       
       imports: [

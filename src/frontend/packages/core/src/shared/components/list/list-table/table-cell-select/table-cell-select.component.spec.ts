@@ -10,7 +10,7 @@ describe('TableCellSelectComponent', () => {
   let component: TableCellSelectComponent<any>;
   let fixture: ComponentFixture<TableCellSelectComponent<any>>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       
       imports: [

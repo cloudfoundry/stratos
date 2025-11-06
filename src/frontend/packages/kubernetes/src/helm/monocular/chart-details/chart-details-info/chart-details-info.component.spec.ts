@@ -9,7 +9,7 @@ import { ChartDetailsInfoComponent } from './chart-details-info.component';
 
 describe('Component: ChartDetailsInfo', () => {
   beforeEach(
-    waitForAsync(() => {
+    () => {
       TestBed.configureTestingModule({
         declarations: [ChartDetailsInfoComponent],
         imports: [],

@@ -13,7 +13,7 @@ describe('SteppersComponent', () => {
   let component: SteppersComponent;
   let fixture: ComponentFixture<SteppersComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       
       imports: [

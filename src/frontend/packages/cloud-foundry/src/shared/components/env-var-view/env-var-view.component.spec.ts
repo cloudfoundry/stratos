@@ -13,7 +13,7 @@ describe('EnvVarViewComponent', () => {
   let component: EnvVarViewComponent;
   let fixture: ComponentFixture<EnvVarViewComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         EnvVarViewComponent,

@@ -20,7 +20,7 @@ describe('CardCfInfoComponent', () => {
   let component: CardCfInfoComponent;
   let fixture: ComponentFixture<CardCfInfoComponent>;
   beforeEach(
-    waitForAsync(() => {
+    () => {
       TestBed.configureTestingModule({
         declarations: [
           CardCfInfoComponent,

@@ -11,7 +11,7 @@ describe('CatalogTabComponent', () => {
   let component: CatalogTabComponent;
   let fixture: ComponentFixture<CatalogTabComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...HelmBaseTestModules

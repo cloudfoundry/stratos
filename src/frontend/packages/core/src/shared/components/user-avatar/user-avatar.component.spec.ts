@@ -7,7 +7,7 @@ describe('UserAvatarComponent', () => {
   let component: UserAvatarComponent;
   let fixture: ComponentFixture<UserAvatarComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         UserAvatarComponent

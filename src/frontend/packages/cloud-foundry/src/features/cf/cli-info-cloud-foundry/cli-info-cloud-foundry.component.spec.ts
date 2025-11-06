@@ -20,7 +20,7 @@ describe('CliInfoCloudFoundryComponent', () => {
   let component: CliInfoCloudFoundryComponent;
   let fixture: ComponentFixture<CliInfoCloudFoundryComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         CliInfoCloudFoundryComponent,

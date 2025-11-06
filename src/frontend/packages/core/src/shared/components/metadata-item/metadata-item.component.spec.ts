@@ -9,7 +9,7 @@ describe('MetadataItemComponent', () => {
   let component: MetadataItemComponent;
   let fixture: ComponentFixture<MetadataItemComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         CoreModule,

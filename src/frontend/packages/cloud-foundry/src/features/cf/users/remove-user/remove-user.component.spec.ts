@@ -19,7 +19,7 @@ describe('RemoveUserComponent', () => {
   let component: RemoveUserComponent;
   let fixture: ComponentFixture<RemoveUserComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...generateCfStoreModules(),

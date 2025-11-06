@@ -11,7 +11,7 @@ describe('AppTabExtensionComponent', () => {
   let component: AppTabExtensionComponent;
   let fixture: ComponentFixture<AppTabExtensionComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ AppTabExtensionComponent ],
       imports: [

@@ -96,7 +96,7 @@ describe('Table CellConfig Integration Flow', () => {
     let component: TestHostComponent;
     let fixture: ComponentFixture<TestHostComponent>;
 
-    beforeEach(waitForAsync(() => {
+    beforeEach(() => {
       TestBed.configureTestingModule({
         imports: [
           CoreModule,
@@ -121,7 +121,7 @@ describe('Table CellConfig Integration Flow', () => {
       component = fixture.componentInstance;
     });
 
-    it('should render column with static cellConfig object', waitForAsync(() => {
+    it('should render column with static cellConfig object', () => {
       // Define a column with static cellConfig object
       const cellConfig = {
         customProperty: 'test-value',
@@ -149,7 +149,7 @@ describe('Table CellConfig Integration Flow', () => {
       });
     }));
 
-    it('should pass static cellConfig to cell component correctly', waitForAsync(() => {
+    it('should pass static cellConfig to cell component correctly', () => {
       const testConfig = {
         testProperty: 'integration-test-value'
       };
@@ -173,7 +173,7 @@ describe('Table CellConfig Integration Flow', () => {
       });
     }));
 
-    it('should handle column without cellConfig gracefully', waitForAsync(() => {
+    it('should handle column without cellConfig gracefully', () => {
       component.columns = [
         {
           columnId: 'no-config',
@@ -227,7 +227,7 @@ describe('Table CellConfig Integration Flow', () => {
     let component: DynamicTestHostComponent;
     let fixture: ComponentFixture<DynamicTestHostComponent>;
 
-    beforeEach(waitForAsync(() => {
+    beforeEach(() => {
       TestBed.configureTestingModule({
         imports: [
           CoreModule,
@@ -252,7 +252,7 @@ describe('Table CellConfig Integration Flow', () => {
       component = fixture.componentInstance;
     });
 
-    it('should render column with dynamic cellConfig function', waitForAsync(() => {
+    it('should render column with dynamic cellConfig function', () => {
       // Define a column with cellConfig as a function
       component.columns = [
         {
@@ -276,7 +276,7 @@ describe('Table CellConfig Integration Flow', () => {
       });
     }));
 
-    it('should evaluate cellConfig function for each entity', waitForAsync(() => {
+    it('should evaluate cellConfig function for each entity', () => {
       let callCount = 0;
       const configFunction = (entity: TestEntity) => {
         callCount++;
@@ -339,7 +339,7 @@ describe('Table CellConfig Integration Flow', () => {
     let component: FavoriteTestHostComponent;
     let fixture: ComponentFixture<FavoriteTestHostComponent>;
 
-    beforeEach(waitForAsync(() => {
+    beforeEach(() => {
       TestBed.configureTestingModule({
         imports: [
           CoreModule,
@@ -365,7 +365,7 @@ describe('Table CellConfig Integration Flow', () => {
       component = fixture.componentInstance;
     });
 
-    it('should create favorite column with proper config', waitForAsync(() => {
+    it('should create favorite column with proper config', () => {
       // Create favorite column using the helper
       const favoriteColumn = createTableColumnFavorite<TestEntity, TestFavoriteMetadata>(
         createTestUserFavorite
@@ -389,7 +389,7 @@ describe('Table CellConfig Integration Flow', () => {
       });
     }));
 
-    it('should have valid cellConfig in favorite column', waitForAsync(() => {
+    it('should have valid cellConfig in favorite column', () => {
       const favoriteColumn = createTableColumnFavorite<TestEntity, TestFavoriteMetadata>(
         createTestUserFavorite
       );
@@ -409,7 +409,7 @@ describe('Table CellConfig Integration Flow', () => {
       });
     }));
 
-    it('should render favorite column end-to-end without console errors', waitForAsync(() => {
+    it('should render favorite column end-to-end without console errors', () => {
       vi.spyOn(console, 'error');
 
       const favoriteColumn = createTableColumnFavorite<TestEntity, TestFavoriteMetadata>(
@@ -432,7 +432,7 @@ describe('Table CellConfig Integration Flow', () => {
       });
     }));
 
-    it('should handle createUserFavorite function correctly in cellConfig', waitForAsync(() => {
+    it('should handle createUserFavorite function correctly in cellConfig', () => {
       const createFavoriteSpy = vi.fn().mockImplementation(
         createTestUserFavorite
       );
@@ -498,7 +498,7 @@ describe('Table CellConfig Integration Flow', () => {
     let component: MixedTestHostComponent;
     let fixture: ComponentFixture<MixedTestHostComponent>;
 
-    beforeEach(waitForAsync(() => {
+    beforeEach(() => {
       TestBed.configureTestingModule({
         imports: [
           CoreModule,
@@ -524,7 +524,7 @@ describe('Table CellConfig Integration Flow', () => {
       component = fixture.componentInstance;
     });
 
-    it('should handle mixture of static and dynamic cellConfig', waitForAsync(() => {
+    it('should handle mixture of static and dynamic cellConfig', () => {
       component.columns = [
         {
           columnId: 'col1',
@@ -556,7 +556,7 @@ describe('Table CellConfig Integration Flow', () => {
       });
     }));
 
-    it('should render favorite column alongside other columns', waitForAsync(() => {
+    it('should render favorite column alongside other columns', () => {
       const favoriteColumn = createTableColumnFavorite<TestEntity, TestFavoriteMetadata>(
         createTestUserFavorite
       );
@@ -620,7 +620,7 @@ describe('Table CellConfig Integration Flow', () => {
     let component: ErrorTestHostComponent;
     let fixture: ComponentFixture<ErrorTestHostComponent>;
 
-    beforeEach(waitForAsync(() => {
+    beforeEach(() => {
       TestBed.configureTestingModule({
         imports: [
           CoreModule,
@@ -646,7 +646,7 @@ describe('Table CellConfig Integration Flow', () => {
       component = fixture.componentInstance;
     });
 
-    it('should handle null cellConfig gracefully', waitForAsync(() => {
+    it('should handle null cellConfig gracefully', () => {
       component.columns = [
         {
           columnId: 'nullable',
@@ -666,7 +666,7 @@ describe('Table CellConfig Integration Flow', () => {
       });
     }));
 
-    it('should handle undefined cellConfig gracefully', waitForAsync(() => {
+    it('should handle undefined cellConfig gracefully', () => {
       component.columns = [
         {
           columnId: 'undefined',
@@ -686,7 +686,7 @@ describe('Table CellConfig Integration Flow', () => {
       });
     }));
 
-    it('should render table even with invalid favorite cellConfig', waitForAsync(() => {
+    it('should render table even with invalid favorite cellConfig', () => {
       vi.spyOn(console, 'error');
 
       // Create column with invalid cellConfig (missing createUserFavorite function)
@@ -736,7 +736,7 @@ describe('Table CellConfig Integration Flow', () => {
     let component: CompleteTestHostComponent;
     let fixture: ComponentFixture<CompleteTestHostComponent>;
 
-    beforeEach(waitForAsync(() => {
+    beforeEach(() => {
       TestBed.configureTestingModule({
         imports: [
           CoreModule,
@@ -762,7 +762,7 @@ describe('Table CellConfig Integration Flow', () => {
       component = fixture.componentInstance;
     });
 
-    it('should complete full rendering chain without console errors', waitForAsync(() => {
+    it('should complete full rendering chain without console errors', () => {
       vi.spyOn(console, 'error');
 
       const favoriteColumn = createTableColumnFavorite<TestEntity, TestFavoriteMetadata>(

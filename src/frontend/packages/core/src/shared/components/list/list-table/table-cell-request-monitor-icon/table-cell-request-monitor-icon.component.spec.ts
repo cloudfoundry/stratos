@@ -10,7 +10,7 @@ describe('TableCellRequestMonitorIconComponent', () => {
   let component: TableCellRequestMonitorIconComponent;
   let fixture: ComponentFixture<TableCellRequestMonitorIconComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         BaseTestModules,

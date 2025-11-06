@@ -60,7 +60,7 @@ describe('SelectServiceComponent', () => {
   let component: SelectServiceComponent;
   let fixture: ComponentFixture<SelectServiceComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         SelectServiceComponent,

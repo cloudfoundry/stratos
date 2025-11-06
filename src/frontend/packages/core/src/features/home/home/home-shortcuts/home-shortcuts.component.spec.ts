@@ -7,7 +7,7 @@ describe('HomeShortcutsComponent', () => {
   let component: HomeShortcutsComponent;
   let fixture: ComponentFixture<HomeShortcutsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         HomeShortcutsComponent

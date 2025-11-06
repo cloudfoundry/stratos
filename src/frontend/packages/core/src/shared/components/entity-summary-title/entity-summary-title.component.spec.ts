@@ -8,7 +8,7 @@ describe('EntitySummaryTitleComponent', () => {
   let component: EntitySummaryTitleComponent;
   let fixture: ComponentFixture<EntitySummaryTitleComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         EntitySummaryTitleComponent, // Now standalone

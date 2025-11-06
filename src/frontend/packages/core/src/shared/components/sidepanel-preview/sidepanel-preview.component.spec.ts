@@ -14,7 +14,7 @@ describe('SidepanelPreviewComponent', () => {
   let component: SidepanelPreviewComponent;
   let fixture: ComponentFixture<SidepanelPreviewComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [HttpClient, HttpHandler, SidePanelService],
       imports: [

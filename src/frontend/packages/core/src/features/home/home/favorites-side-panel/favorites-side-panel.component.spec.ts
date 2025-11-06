@@ -7,7 +7,7 @@ describe('FavoritesSidePanelComponent', () => {
   let component: FavoritesSidePanelComponent;
   let fixture: ComponentFixture<FavoritesSidePanelComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         FavoritesSidePanelComponent

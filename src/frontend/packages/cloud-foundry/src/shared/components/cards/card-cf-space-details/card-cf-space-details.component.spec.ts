@@ -18,7 +18,7 @@ describe('CardCfSpaceDetailsComponent', () => {
   let component: CardCfSpaceDetailsComponent;
   let fixture: ComponentFixture<CardCfSpaceDetailsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         CardCfSpaceDetailsComponent,

@@ -11,7 +11,7 @@ describe('CloudFoundryQuotasComponent', () => {
   let component: CloudFoundryQuotasComponent;
   let fixture: ComponentFixture<CloudFoundryQuotasComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryQuotasComponent],
       providers: [generateTestCfEndpointServiceProvider(), TabNavService, DatePipe],

@@ -14,7 +14,7 @@ describe('ApiKeysPageComponent', () => {
     close: () => { }
   };
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...BaseTestModules,

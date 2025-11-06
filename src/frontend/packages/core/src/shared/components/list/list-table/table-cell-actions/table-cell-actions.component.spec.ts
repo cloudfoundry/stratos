@@ -14,7 +14,7 @@ describe('TableCellActionsComponent', () => {
   let component: TableCellActionsComponent<any>;
   let fixture: ComponentFixture<TableCellActionsComponent<any>>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
         ListConfig

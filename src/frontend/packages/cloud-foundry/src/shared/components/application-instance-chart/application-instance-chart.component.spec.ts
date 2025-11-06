@@ -13,7 +13,7 @@ describe('ApplicationInstanceChartComponent', () => {
   let component: ApplicationInstanceChartComponent;
   let fixture: ComponentFixture<ApplicationInstanceChartComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...generateCfStoreModules(),

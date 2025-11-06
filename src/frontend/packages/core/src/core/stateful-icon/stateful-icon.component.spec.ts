@@ -10,7 +10,7 @@ describe('StatefulIconComponent', () => {
   let fixture: ComponentFixture<StatefulIconComponent>;
   let element: HTMLElement;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       
       imports: [

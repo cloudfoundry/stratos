@@ -10,7 +10,7 @@ describe('AddSpaceComponent', () => {
   let component: AddSpaceComponent;
   let fixture: ComponentFixture<AddSpaceComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [AddSpaceComponent, CreateSpaceStepComponent],
       imports: [

@@ -7,7 +7,7 @@ describe('StepComponent', () => {
   let component: StepComponent;
   let fixture: ComponentFixture<StepComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         StepComponent

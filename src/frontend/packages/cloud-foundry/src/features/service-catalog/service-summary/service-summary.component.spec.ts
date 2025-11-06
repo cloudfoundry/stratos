@@ -23,7 +23,7 @@ describe('ServiceSummaryComponent', () => {
   let component: ServiceSummaryComponent;
   let fixture: ComponentFixture<ServiceSummaryComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         ServiceSummaryComponent,
@@ -42,7 +42,7 @@ describe('ServiceSummaryComponent', () => {
       .compileComponents();
   }));
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     fixture = TestBed.createComponent(ServiceSummaryComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

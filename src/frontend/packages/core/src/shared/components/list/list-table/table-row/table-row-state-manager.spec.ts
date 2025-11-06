@@ -1,7 +1,6 @@
 import { tap, skip } from 'rxjs/operators';
 import { RowsState, RowState } from '../../data-sources-controllers/list-data-source-types';
 import { Observable, Subscription } from 'rxjs';
-import {  } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { TableRowStateManager } from './table-row-state-manager';
 
@@ -21,16 +20,16 @@ describe('TableRowStateManager', () => {
     expect(actualState).not.toEqual(fake);
     expect(stateManager.rowState).not.toEqual(fake);
   };
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     stateManager = new TableRowStateManager();
     obs = stateManager.observable;
     if (sub) {
       sub.unsubscribe();
     }
-  }));
+  });
 
 
-  it('should init the state', waitForAsync(() => {
+  it('should init the state', () => {
     const initState = {
       1: {
         error: true
@@ -49,8 +48,8 @@ describe('TableRowStateManager', () => {
         checkState(stateManager, state, initState);
       })
     ).subscribe();
-  }));
-  it('should update the row state', waitForAsync(() => {
+  });
+  it('should update the row state', () => {
     const initState = {
       1: {
         error: true,
@@ -90,8 +89,8 @@ describe('TableRowStateManager', () => {
       })
     ).subscribe();
     stateManager.updateRowState('1', updateState);
-  }));
-  it('should update the state', waitForAsync(() => {
+  });
+  it('should update the state', () => {
     const initState = {
       1: {
         error: true,
@@ -132,9 +131,9 @@ describe('TableRowStateManager', () => {
       }),
     ).subscribe();
     stateManager.updateState(updateState);
-  }));
+  });
 
-  it('should set the state', waitForAsync(() => {
+  it('should set the state', () => {
     const initState = {
       1: {
         error: true,
@@ -164,9 +163,9 @@ describe('TableRowStateManager', () => {
       }),
     ).subscribe();
     stateManager.setState(setState);
-  }));
+  });
 
-  it('should set the row state', waitForAsync((done) => {
+  it('should set the row state', () => {
     const initState = {
       1: {
         error: true,
@@ -203,5 +202,5 @@ describe('TableRowStateManager', () => {
       }),
     ).subscribe();
     stateManager.setRowState('1', setState);
-  }));
+  });
 });

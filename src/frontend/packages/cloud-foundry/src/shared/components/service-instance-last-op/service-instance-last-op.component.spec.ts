@@ -11,7 +11,7 @@ describe('ServiceInstanceLastOpComponent', () => {
   let component: ServiceInstanceLastOpComponent;
   let fixture: ComponentFixture<ServiceInstanceLastOpComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         ServiceInstanceLastOpComponent,

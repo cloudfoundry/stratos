@@ -7,7 +7,7 @@ describe('ApplicationStateIconComponent', () => {
   let component: ApplicationStateIconComponent;
   let fixture: ComponentFixture<ApplicationStateIconComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ApplicationStateIconComponent

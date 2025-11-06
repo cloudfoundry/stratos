@@ -12,7 +12,7 @@ describe('RecentEntitiesComponent', () => {
   let component: RecentEntitiesComponent;
   let fixture: ComponentFixture<RecentEntitiesComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,

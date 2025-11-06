@@ -9,7 +9,7 @@ describe('AppActionMonitorIconComponent', () => {
   let component: AppActionMonitorIconComponent;
   let fixture: ComponentFixture<AppActionMonitorIconComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...BaseTestModules,

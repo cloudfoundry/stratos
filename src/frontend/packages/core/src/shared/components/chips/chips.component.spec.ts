@@ -16,7 +16,7 @@ describe('AppChipsComponent', () => {
     { value: 'value5', custom: 'custom5' }
   ];
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         AppChipsComponent, // Now standalone

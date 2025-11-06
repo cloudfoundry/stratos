@@ -15,7 +15,7 @@ describe('ServiceBrokerCardComponent', () => {
   let component: ServiceBrokerCardComponent;
   let fixture: ComponentFixture<ServiceBrokerCardComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         ServiceBrokerCardComponent,

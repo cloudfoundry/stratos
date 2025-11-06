@@ -3,19 +3,18 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 
 import { TabNavService } from '../../../../core/src/tab-nav.service';
 import { BaseTestModulesNoShared } from '../../../../core/test-framework/core-test.helper';
-import { HelmModule } from '../helm.module';
 import { MonocularTabBaseComponent } from './monocular-tab-base.component';
 
 describe('MonocularTabBaseComponent', () => {
   let component: MonocularTabBaseComponent;
   let fixture: ComponentFixture<MonocularTabBaseComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [],
       imports: [
         ...BaseTestModulesNoShared,
-        HelmModule
+        MonocularTabBaseComponent
       ],
       providers: [
         TabNavService

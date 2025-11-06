@@ -11,7 +11,7 @@ describe('AppActionExtensionComponent', () => {
   let component: AppActionExtensionComponent;
   let fixture: ComponentFixture<AppActionExtensionComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ AppActionExtensionComponent ],
       imports: [

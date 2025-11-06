@@ -15,7 +15,7 @@ describe('UsersRolesConfirmComponent', () => {
   let component: UsersRolesConfirmComponent;
   let fixture: ComponentFixture<UsersRolesConfirmComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...generateCfStoreModules(),

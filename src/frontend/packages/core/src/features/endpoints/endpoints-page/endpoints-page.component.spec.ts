@@ -19,7 +19,7 @@ describe('EndpointsPageComponent', () => {
   let component: EndpointsPageComponent;
   let fixture: ComponentFixture<EndpointsPageComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       
       imports: [

@@ -4,7 +4,7 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Store } from '@ngrx/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { PaginationEntityState } from 'frontend/packages/store/src/types/pagination.types';
+import { PaginationEntityState } from 'src/frontend/packages/store/src/types/pagination.types';
 import { BehaviorSubject, of as observableOf } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
@@ -123,7 +123,7 @@ describe('ListComponent', () => {
     let component: ListComponent<EndpointModel>;
     let fixture: ComponentFixture<ListComponent<EndpointModel>>;
 
-    beforeEach(waitForAsync(() => {
+    beforeEach(() => {
       TestBed.configureTestingModule({
         providers: [
           ...STORE_TEST_PROVIDERS,

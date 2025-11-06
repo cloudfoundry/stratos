@@ -10,7 +10,7 @@ describe('SimpleUsageChartComponent', () => {
   let component: SimpleUsageChartComponent;
   let fixture: ComponentFixture<SimpleUsageChartComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         CoreModule,

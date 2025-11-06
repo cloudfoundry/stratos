@@ -23,7 +23,7 @@ describe('SelectPlanStepComponent', () => {
   let component: SelectPlanStepComponent;
   let fixture: ComponentFixture<SelectPlanStepComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         SelectPlanStepComponent,

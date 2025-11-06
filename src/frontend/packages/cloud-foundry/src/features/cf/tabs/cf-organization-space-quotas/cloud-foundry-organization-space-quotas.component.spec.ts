@@ -14,7 +14,7 @@ describe('CloudFoundryOrganizationSpaceQuotasComponent', () => {
   let component: CloudFoundryOrganizationSpaceQuotasComponent;
   let fixture: ComponentFixture<CloudFoundryOrganizationSpaceQuotasComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryOrganizationSpaceQuotasComponent],
       providers: [CfSpaceQuotasListConfigService, generateTestCfEndpointServiceProvider(), TabNavService, DatePipe],

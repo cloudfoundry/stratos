@@ -10,7 +10,7 @@ describe('CopyToClipboardComponent', () => {
   let component: CopyToClipboardComponent;
   let fixture: ComponentFixture<CopyToClipboardComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         CopyToClipboardComponent, // Now standalone

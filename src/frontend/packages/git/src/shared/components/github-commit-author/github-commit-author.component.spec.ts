@@ -8,7 +8,7 @@ describe('GithubCommitAuthorComponent', () => {
   let fixture: ComponentFixture<GithubCommitAuthorComponent>;
   let element: HTMLElement;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [GithubCommitAuthorComponent]
     })

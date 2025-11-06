@@ -6,7 +6,7 @@ describe('NoContentMessageComponent', () => {
   let component: NoContentMessageComponent;
   let fixture: ComponentFixture<NoContentMessageComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         NoContentMessageComponent

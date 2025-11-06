@@ -9,7 +9,7 @@ describe('SchemaFormComponent', () => {
   let component: SchemaFormComponent;
   let fixture: ComponentFixture<SchemaFormComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...generateCfBaseTestModulesNoShared(),

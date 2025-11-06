@@ -11,7 +11,7 @@ import { SharedModule } from './shared/shared.module';
 
 describe('AppComponent', () => {
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         AppComponent
@@ -28,11 +28,11 @@ describe('AppComponent', () => {
         CurrentUserPermissionsService,
       ]
     }).compileComponents();
-  }));
+  });
 
-  it('should create the app', waitForAsync(() => {
+  it('should create the app', () => {
     const fixture = TestBed.createComponent<AppComponent>(AppComponent);
     const app = fixture.componentInstance;
     expect(app).toBeTruthy();
-  }));
+  });
 });

@@ -10,7 +10,7 @@ describe('BackupConnectionCellComponent', () => {
   let component: BackupConnectionCellComponent;
   let fixture: ComponentFixture<BackupConnectionCellComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       
       imports: [

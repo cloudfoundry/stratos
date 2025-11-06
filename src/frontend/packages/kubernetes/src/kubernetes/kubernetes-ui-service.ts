@@ -1,5 +1,5 @@
 import { Injectable, Type } from '@angular/core';
-import { ISimpleListConfig } from 'frontend/packages/core/src/shared/components/list/list.component.types';
+import { ISimpleListConfig } from 'src/frontend/packages/core/src/shared/components/list/list.component.types';
 
 import { PreviewableComponent } from '../../../core/src/shared/previewable-component';
 

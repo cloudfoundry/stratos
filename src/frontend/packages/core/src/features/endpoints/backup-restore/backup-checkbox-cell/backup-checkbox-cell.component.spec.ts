@@ -11,7 +11,7 @@ describe('BackupCheckboxCellComponent', () => {
   let component: BackupCheckboxCellComponent;
   let fixture: ComponentFixture<BackupCheckboxCellComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       
       imports: [

@@ -16,7 +16,7 @@ describe('BindAppsStepComponent', () => {
   let component: BindAppsStepComponent;
   let fixture: ComponentFixture<BindAppsStepComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         generateCfBaseTestModulesNoShared(),

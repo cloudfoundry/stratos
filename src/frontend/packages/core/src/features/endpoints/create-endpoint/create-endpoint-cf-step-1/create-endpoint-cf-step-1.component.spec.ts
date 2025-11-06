@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
@@ -14,7 +14,7 @@ describe('CreateEndpointCfStep1Component', () => {
   let component: CreateEndpointCfStep1Component;
   let fixture: ComponentFixture<CreateEndpointCfStep1Component>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         CoreModule,
@@ -37,7 +37,7 @@ describe('CreateEndpointCfStep1Component', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CreateEndpointCfStep1Component);

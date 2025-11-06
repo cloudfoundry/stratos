@@ -10,7 +10,7 @@ describe('SnackBarReturnComponent', () => {
   let component: SnackBarReturnComponent;
   let fixture: ComponentFixture<SnackBarReturnComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         SnackBarReturnComponent,

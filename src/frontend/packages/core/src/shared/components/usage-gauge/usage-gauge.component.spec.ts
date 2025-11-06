@@ -10,7 +10,7 @@ describe('UsageGaugeComponent', () => {
   let component: UsageGaugeComponent;
   let fixture: ComponentFixture<UsageGaugeComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         UsageGaugeComponent, // Now standalone (includes PercentagePipe)

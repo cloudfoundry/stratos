@@ -10,7 +10,7 @@ describe('StartEndDateComponent', () => {
   let fixture: ComponentFixture<StartEndDateComponent>;
   let element: HTMLElement;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         StartEndDateComponent,

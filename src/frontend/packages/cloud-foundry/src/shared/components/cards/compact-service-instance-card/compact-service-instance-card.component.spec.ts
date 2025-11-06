@@ -11,7 +11,7 @@ describe('CompactServiceInstanceCardComponent', () => {
   let component: CompactServiceInstanceCardComponent;
   let fixture: ComponentFixture<CompactServiceInstanceCardComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [CompactServiceInstanceCardComponent, AppChipsComponent],
       imports: generateCfBaseTestModulesNoShared()

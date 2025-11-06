@@ -17,7 +17,7 @@ describe('EditEndpointComponent', () => {
   let component: EditEndpointComponent;
   let fixture: ComponentFixture<EditEndpointComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         CoreTestingModule,

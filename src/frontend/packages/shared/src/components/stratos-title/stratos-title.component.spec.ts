@@ -7,7 +7,7 @@ describe('StratosTitleComponent', () => {
   let component: StratosTitleComponent;
   let fixture: ComponentFixture<StratosTitleComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
     declarations: [StratosTitleComponent],
     teardown: { destroyAfterEach: false }

@@ -9,7 +9,7 @@ describe('TableCellExpanderComponent', () => {
   let component: TableCellExpanderComponent;
   let fixture: ComponentFixture<TableCellExpanderComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       
       imports: [

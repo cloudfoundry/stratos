@@ -8,7 +8,7 @@ describe('CardBooleanMetricComponent', () => {
   let component: CardBooleanMetricComponent;
   let fixture: ComponentFixture<CardBooleanMetricComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         CardBooleanMetricComponent,

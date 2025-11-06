@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { createEmptyStoreModule } from '@stratosui/store/testing';
@@ -26,7 +26,7 @@ describe('CardAutoscalerDefaultComponent', () => {
   let component: CardAutoscalerDefaultComponent;
   let fixture: ComponentFixture<CardAutoscalerDefaultComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         CardAutoscalerDefaultComponent,
@@ -51,7 +51,7 @@ describe('CardAutoscalerDefaultComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CardAutoscalerDefaultComponent);

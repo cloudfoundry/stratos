@@ -26,7 +26,7 @@ describe('CardCfRecentAppsComponent', () => {
   let component: CardCfRecentAppsComponent;
   let fixture: ComponentFixture<CardCfRecentAppsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         CardCfRecentAppsComponent,

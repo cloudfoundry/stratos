@@ -14,7 +14,7 @@ describe('DiagnosticsPageComponent', () => {
   let component: DiagnosticsPageComponent;
   let fixture: ComponentFixture<DiagnosticsPageComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       
       imports: [

@@ -7,7 +7,7 @@ describe('IntroScreenComponent', () => {
   let component: IntroScreenComponent;
   let fixture: ComponentFixture<IntroScreenComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [IntroScreenComponent]
     })

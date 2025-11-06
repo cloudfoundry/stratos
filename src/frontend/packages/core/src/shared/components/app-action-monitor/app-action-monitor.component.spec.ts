@@ -8,7 +8,7 @@ describe('AppActionMonitorComponent', () => {
   let component: AppActionMonitorComponent<any>;
   let fixture: ComponentFixture<AppActionMonitorComponent<any>>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...BaseTestModules,

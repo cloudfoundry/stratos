@@ -7,7 +7,7 @@ describe('DialogErrorComponent', () => {
   let component: DialogErrorComponent;
   let fixture: ComponentFixture<DialogErrorComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         DialogErrorComponent

@@ -8,7 +8,7 @@ describe('SshViewerComponent', () => {
   let component: SshViewerComponent;
   let fixture: ComponentFixture<SshViewerComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         SshViewerComponent,

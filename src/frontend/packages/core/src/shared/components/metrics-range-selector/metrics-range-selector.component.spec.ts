@@ -15,7 +15,7 @@ describe('MetricsRangeSelectorComponent', () => {
   let component: MetricsRangeSelectorComponent;
   let fixture: ComponentFixture<MetricsRangeSelectorComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         MetricsRangeSelectorComponent,

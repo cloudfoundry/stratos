@@ -72,6 +72,14 @@
       "type": "boolean",
       "description": "Enable watch mode (passed through to underlying builder)",
       "default": false
+    },
+    "budgets": {
+      "type": "array",
+      "description": "Budget thresholds for build output sizes (passed through to underlying builder)",
+      "default": [],
+      "items": {
+        "type": "object"
+      }
     }
   },
   "required": ["browserTarget"],

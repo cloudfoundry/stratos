@@ -9,7 +9,7 @@ describe('TileSelectorComponent', () => {
   let component: TileSelectorComponent;
   let fixture: ComponentFixture<TileSelectorComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         TileSelectorComponent, // Now standalone (includes TileSelectorTileComponent)

@@ -2,10 +2,10 @@ import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { ITableColumn } from 'frontend/packages/core/src/shared/components/list/list-table/table.types';
+import { ITableColumn } from 'src/frontend/packages/core/src/shared/components/list/list-table/table.types';
 import {
   TableCellEndpointNameComponent,
-} from 'frontend/packages/core/src/shared/components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
+} from 'src/frontend/packages/core/src/shared/components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
 import {
   IListConfig,
   IListMultiFilterConfig,
@@ -13,8 +13,8 @@ import {
   IGlobalListAction,
   IMultiListAction,
   IListAction,
-} from 'frontend/packages/core/src/shared/components/list/list.component.types';
-import { AppState } from 'frontend/packages/store/src/app-state';
+} from 'src/frontend/packages/core/src/shared/components/list/list.component.types';
+import { AppState } from 'src/frontend/packages/store/src/app-state';
 import { filter, map } from 'rxjs/operators';
 
 import { ListView } from '../../../../../store/src/actions/list.actions';

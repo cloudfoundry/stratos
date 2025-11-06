@@ -9,7 +9,7 @@ describe('StackedInputActionComponent', () => {
   let component: StackedInputActionComponent;
   let fixture: ComponentFixture<StackedInputActionComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         StackedInputActionComponent,
@@ -19,7 +19,7 @@ describe('StackedInputActionComponent', () => {
       .compileComponents();
   }));
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     fixture = TestBed.createComponent(StackedInputActionComponent);
     component = fixture.componentInstance;
     component.stateIn$ = observableOf({
@@ -29,7 +29,7 @@ describe('StackedInputActionComponent', () => {
     fixture.detectChanges();
   }));
 
-  it('should create', waitForAsync(() => {
+  it('should create', () => {
     expect(component).toBeTruthy();
-  }));
+  });
 });

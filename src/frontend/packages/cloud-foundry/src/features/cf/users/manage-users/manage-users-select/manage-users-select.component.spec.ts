@@ -15,7 +15,7 @@ describe('UsersRolesSelectComponent', () => {
   let component: UsersRolesSelectComponent;
   let fixture: ComponentFixture<UsersRolesSelectComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...generateCfStoreModules(),

@@ -16,7 +16,7 @@ describe('CfRoleCheckboxComponent', () => {
   let component: CfRoleCheckboxComponent;
   let fixture: ComponentFixture<CfRoleCheckboxComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...generateCfStoreModules(),

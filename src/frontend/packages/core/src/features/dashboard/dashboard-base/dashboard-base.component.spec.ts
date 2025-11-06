@@ -22,7 +22,7 @@ describe('DashboardBaseComponent', () => {
   let component: DashboardBaseComponent;
   let fixture: ComponentFixture<DashboardBaseComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       
       imports: [

@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NgxGraphModule } from '@swimlane/ngx-graph';
-import { SidePanelService } from 'frontend/packages/core/src/shared/services/side-panel.service';
+import { SidePanelService } from 'src/frontend/packages/core/src/shared/services/side-panel.service';
 
 import { TabNavService } from '../../../../../../../core/src/tab-nav.service';
 import { HelmReleaseProviders, KubernetesBaseTestModules } from '../../../../kubernetes.testing.module';

@@ -10,7 +10,7 @@ describe('ServicePlanPriceComponent', () => {
   let component: ServicePlanPriceComponent;
   let fixture: ComponentFixture<ServicePlanPriceComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ServicePlanPriceComponent],
       imports: [

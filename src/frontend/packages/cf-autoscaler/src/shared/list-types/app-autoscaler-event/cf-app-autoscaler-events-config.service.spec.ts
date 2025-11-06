@@ -6,7 +6,6 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import { RouterTestingModule } from '@angular/router/testing';
 import { createEmptyStoreModule } from '@stratosui/store/testing';
 
-import { ApplicationsModule } from '../../../../../cloud-foundry/src/features/applications/applications.module';
 import {
   generateTestApplicationServiceProvider,
 } from '../../../../../cloud-foundry/test-framework/application-service-helper';
@@ -41,7 +40,6 @@ describe('CfAppAutoscalerEventsConfigService', () => {
         CommonModule,
         CoreModule,
         SharedModule,
-        ApplicationsModule,
         createEmptyStoreModule(),
         RouterTestingModule,
         AppTestModule

@@ -1,8 +1,8 @@
 import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { AppState } from 'frontend/packages/store/src/app-state';
-import { endpointOfTypeSelector } from 'frontend/packages/store/src/selectors/endpoint.selectors';
+import { AppState } from 'src/frontend/packages/store/src/app-state';
+import { endpointOfTypeSelector } from 'src/frontend/packages/store/src/selectors/endpoint.selectors';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 

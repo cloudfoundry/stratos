@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { PreviewableComponent } from 'frontend/packages/core/src/shared/previewable-component';
+import { PreviewableComponent } from 'src/frontend/packages/core/src/shared/previewable-component';
 import { Observable } from 'rxjs';
 
 import { KubernetesAnalysisService } from '../../../services/kubernetes.analysis.service';
 import { AnalysisInfoCardComponent } from './analysis-info-card/analysis-info-card.component';
-import { SidepanelPreviewComponent } from 'frontend/packages/core/src/shared/components/sidepanel-preview/sidepanel-preview.component';
+import { SidepanelPreviewComponent } from 'src/frontend/packages/core/src/shared/components/sidepanel-preview/sidepanel-preview.component';
 
 
 @Component({

@@ -13,7 +13,7 @@ describe('CfOrgSpaceLinksComponent', () => {
   let fixture: ComponentFixture<CfOrgSpaceLinksComponent>;
   let service;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [CfOrgSpaceLinksComponent],
       imports: [

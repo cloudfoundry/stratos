@@ -7,7 +7,7 @@ describe('CardStatusComponent', () => {
   let component: CardStatusComponent;
   let fixture: ComponentFixture<CardStatusComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [ CardStatusComponent ]
     })

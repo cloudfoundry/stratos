@@ -16,7 +16,7 @@ describe('CompactAppCardComponent', () => {
   let component: CompactAppCardComponent;
   let fixture: ComponentFixture<CompactAppCardComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         CompactAppCardComponent,

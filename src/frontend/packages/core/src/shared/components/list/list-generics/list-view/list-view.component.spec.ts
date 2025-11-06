@@ -12,7 +12,7 @@ describe('ListViewComponent', () => {
   let component: ListViewComponent<any>;
   let fixture: ComponentFixture<ListViewComponent<any>>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         CoreModule,

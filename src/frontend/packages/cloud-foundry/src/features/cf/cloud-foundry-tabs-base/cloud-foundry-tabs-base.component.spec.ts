@@ -15,7 +15,7 @@ describe('CloudFoundryTabsBaseComponent', () => {
   let component: CloudFoundryTabsBaseComponent;
   let fixture: ComponentFixture<CloudFoundryTabsBaseComponent>;
   beforeEach(
-    waitForAsync(() => {
+    () => {
       TestBed.configureTestingModule({
         declarations: [CloudFoundryTabsBaseComponent],
         imports: generateCfBaseTestModules(),

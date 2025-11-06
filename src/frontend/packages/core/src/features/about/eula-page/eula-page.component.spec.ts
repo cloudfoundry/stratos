@@ -15,7 +15,7 @@ describe('EulaPageComponent', () => {
   let component: EulaPageComponent;
   let fixture: ComponentFixture<EulaPageComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       
       imports: [

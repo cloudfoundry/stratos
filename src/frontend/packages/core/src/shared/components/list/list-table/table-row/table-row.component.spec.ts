@@ -45,7 +45,7 @@ describe('TableRowComponent', () => {
   const elementShown = (element: Element) => element && window.getComputedStyle(element).display !== 'none';
 
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
 
       declarations: [
@@ -75,7 +75,7 @@ describe('TableRowComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should show error', waitForAsync(() => {
+  it('should show error', () => {
     fixture.detectChanges();
     const [error1, error2] = getElements('table-row__error');
     const errorShown = elementShown(error1);
@@ -86,7 +86,7 @@ describe('TableRowComponent', () => {
       expect(errorNotShown).toBeTruthy();
       expect(errorShown).toBeTruthy();
     });
-  }));
+  });
 
   describe('Config binding', () => {
     let configFixture: ComponentFixture<TableRowComponent>;

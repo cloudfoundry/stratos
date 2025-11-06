@@ -7,7 +7,7 @@ describe('JsonViewerComponent', () => {
   let component: JsonViewerComponent;
   let fixture: ComponentFixture<JsonViewerComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [ JsonViewerComponent ]
     })

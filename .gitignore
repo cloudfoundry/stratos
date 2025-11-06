@@ -164,3 +164,4 @@ src/frontend/packages/store/node_modules/
 test-results/
 secrets.yaml
 node_modules
+*.darwin

@@ -10,7 +10,7 @@ describe('HelmHubRegistrationComponent', () => {
   let component: HelmHubRegistrationComponent;
   let fixture: ComponentFixture<HelmHubRegistrationComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [...BaseTestModules],
       declarations: [HelmHubRegistrationComponent],

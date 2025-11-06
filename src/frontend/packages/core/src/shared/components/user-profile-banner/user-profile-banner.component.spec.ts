@@ -8,7 +8,7 @@ describe('UserProfileBannerComponent', () => {
   let component: UserProfileBannerComponent;
   let fixture: ComponentFixture<UserProfileBannerComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         UserProfileBannerComponent,

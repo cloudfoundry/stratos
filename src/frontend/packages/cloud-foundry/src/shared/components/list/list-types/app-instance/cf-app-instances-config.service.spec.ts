@@ -11,7 +11,6 @@ import {
   generateCfStoreModules,
   generateTestCfEndpointServiceProvider,
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { ApplicationsModule } from '../../../../../features/applications/applications.module';
 import { CfAppInstancesConfigService } from './cf-app-instances-config.service';
 
 describe('CfAppInstancesConfigService', () => {
@@ -34,7 +33,6 @@ describe('CfAppInstancesConfigService', () => {
         generateCfStoreModules(),
         CommonModule,
         SharedModule,
-        ApplicationsModule,
         RouterTestingModule,
       ]
     });

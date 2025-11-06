@@ -13,7 +13,7 @@ describe('CfEndpointsMissingComponent', () => {
   let component: CfEndpointsMissingComponent;
   let fixture: ComponentFixture<CfEndpointsMissingComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [CfEndpointsMissingComponent],
       imports: [

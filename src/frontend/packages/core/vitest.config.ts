@@ -9,6 +9,7 @@ export default defineConfig({
     root: join(__dirname),
     globals: true,
     environment: 'jsdom',
+    pool: 'forks', // Required for Angular 20 + Vitest 4 ESM module resolution
     setupFiles: [join(__dirname, 'src/test-setup.ts')],
     include: ['src/**/*.spec.ts'],
     exclude: ['node_modules', 'dist', 'out-tsc', '**/test-e2e/**', '**/e2e/**'],
@@ -27,7 +28,7 @@ export default defineConfig({
     alias: {
       '@stratosui/core': join(__dirname, 'src/public-api.ts'),
       '@stratosui/store': join(__dirname, '../store/src/public-api.ts'),
-      '@stratosui/store/testing': join(__dirname, '../store/testing/public-api.ts'),
+      '@stratosui/store/testing': join(__dirname, '../store/testing/index.ts'),
       '@stratosui/shared': join(__dirname, '../shared/src/public-api.ts'),
       '@stratosui/cloud-foundry': join(__dirname, '../cloud-foundry/src/public_api.ts'),
       '@stratosui/kubernetes': join(__dirname, '../kubernetes/src/public-api.ts'),

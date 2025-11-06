@@ -30,7 +30,7 @@ describe('CardAppUsageComponent', () => {
   let component: CardAppUsageComponent;
   let fixture: ComponentFixture<CardAppUsageComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         CardAppUsageComponent,

@@ -13,7 +13,7 @@ describe('MonocularChartCardComponent', () => {
   let component: MonocularChartCardComponent;
   let fixture: ComponentFixture<MonocularChartCardComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         MonocularChartCardComponent,

@@ -13,7 +13,7 @@ describe('CardsComponent', () => {
   let component: CardsComponent<EntityInfo>;
   let fixture: ComponentFixture<CardsComponent<EntityInfo>>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         CoreModule,

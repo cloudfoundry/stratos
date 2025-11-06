@@ -7,7 +7,7 @@ describe('PageSubNavSectionComponent', () => {
   let component: PageSubNavSectionComponent;
   let fixture: ComponentFixture<PageSubNavSectionComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [ PageSubNavSectionComponent ]
     })

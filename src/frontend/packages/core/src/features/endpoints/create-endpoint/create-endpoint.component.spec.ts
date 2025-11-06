@@ -21,7 +21,7 @@ describe('CreateEndpointComponent', () => {
   let component: CreateEndpointComponent;
   let fixture: ComponentFixture<CreateEndpointComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         CoreModule,

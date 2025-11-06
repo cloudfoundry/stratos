@@ -7,7 +7,7 @@ describe('EnumerateComponent', () => {
   let component: EnumerateComponent;
   let fixture: ComponentFixture<EnumerateComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [ EnumerateComponent ]
     })

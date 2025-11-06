@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { createEmptyStoreModule } from '@stratosui/store/testing';
 
@@ -29,7 +29,7 @@ import { AppAutoscalerComboSeriesVerticalComponent } from './combo-chart/combo-s
 describe('AppAutoscalerMetricChartCardComponent', () => {
   let component: AppAutoscalerMetricChartCardComponent;
   let fixture: ComponentFixture<AppAutoscalerMetricChartCardComponent>;
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         AppAutoscalerComboSeriesVerticalComponent
@@ -54,7 +54,7 @@ describe('AppAutoscalerMetricChartCardComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AppAutoscalerMetricChartCardComponent);

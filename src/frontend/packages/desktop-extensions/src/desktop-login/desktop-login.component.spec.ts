@@ -7,7 +7,7 @@ describe('DesktopLoginComponent', () => {
   let component: DesktopLoginComponent;
   let fixture: ComponentFixture<DesktopLoginComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ DesktopLoginComponent ]
     })

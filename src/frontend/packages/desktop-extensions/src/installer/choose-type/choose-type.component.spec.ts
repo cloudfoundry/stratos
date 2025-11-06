@@ -7,7 +7,7 @@ describe('ChooseTypeComponent', () => {
   let component: ChooseTypeComponent;
   let fixture: ComponentFixture<ChooseTypeComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ ChooseTypeComponent ]
     })

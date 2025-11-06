@@ -10,7 +10,7 @@ describe('TableCellBooleanIndicatorComponent', () => {
   let component: TableCellBooleanIndicatorComponent;
   let fixture: ComponentFixture<TableCellBooleanIndicatorComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       
       imports: [

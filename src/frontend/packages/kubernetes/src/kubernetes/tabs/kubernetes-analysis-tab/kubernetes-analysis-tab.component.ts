@@ -1,12 +1,12 @@
 import {Component, inject, ChangeDetectionStrategy } from '@angular/core';
 
-import { ListConfig } from 'frontend/packages/core/src/shared/components/list/list.component.types';
+import { ListConfig } from 'src/frontend/packages/core/src/shared/components/list/list.component.types';
 
 import { AnalysisReportsListConfig } from '../../list-types/analysis-reports-list-config.service';
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { KubernetesAnalysisService } from '../../services/kubernetes.analysis.service';
-import { ListComponent } from 'frontend/packages/core/src/shared/components/list/list.component';
-import { PageSubNavComponent } from 'frontend/packages/core/src/shared/components/page-sub-nav/page-sub-nav.component';
+import { ListComponent } from 'src/frontend/packages/core/src/shared/components/list/list.component';
+import { PageSubNavComponent } from 'src/frontend/packages/core/src/shared/components/page-sub-nav/page-sub-nav.component';
 import { AnalysisReportRunnerComponent } from '../../analysis-report-viewer/analysis-report-runner/analysis-report-runner.component';
 
 @Component({

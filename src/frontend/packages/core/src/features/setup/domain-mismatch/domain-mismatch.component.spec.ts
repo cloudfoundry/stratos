@@ -10,7 +10,7 @@ describe('DomainMismatchComponent', () => {
   let component: DomainMismatchComponent;
   let fixture: ComponentFixture<DomainMismatchComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       
       imports: [

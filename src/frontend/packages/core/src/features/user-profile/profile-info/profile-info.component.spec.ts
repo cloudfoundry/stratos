@@ -17,7 +17,7 @@ describe('ProfileInfoComponent', () => {
   let component: ProfileInfoComponent;
   let fixture: ComponentFixture<ProfileInfoComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       
       imports: [

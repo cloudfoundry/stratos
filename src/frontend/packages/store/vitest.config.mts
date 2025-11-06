@@ -28,7 +28,7 @@ export default defineConfig({
     alias: {
       '@stratosui/core': join(__dirname, '../core/src/public-api.ts'),
       '@stratosui/store': join(__dirname, 'src/public-api.ts'),
-      '@stratosui/store/testing': join(__dirname, '../testing/public-api.ts'),
+      '@stratosui/store/testing': join(__dirname, 'testing/index.ts'),
       '@stratosui/shared': join(__dirname, '../shared/src/public-api.ts'),
       '@stratosui/cloud-foundry': join(__dirname, '../cloud-foundry/src/public_api.ts'),
       '@stratosui/kubernetes': join(__dirname, '../kubernetes/src/public-api.ts'),

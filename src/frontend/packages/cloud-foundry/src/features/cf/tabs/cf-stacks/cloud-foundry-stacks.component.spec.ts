@@ -9,7 +9,7 @@ describe('CloudFoundryStacksComponent', () => {
   let component: CloudFoundryStacksComponent;
   let fixture: ComponentFixture<CloudFoundryStacksComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryStacksComponent],
       imports: generateCfBaseTestModules(),

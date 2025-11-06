@@ -17,7 +17,7 @@ describe('EditOrganizationComponent', () => {
   let component: EditOrganizationComponent;
   let fixture: ComponentFixture<EditOrganizationComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [EditOrganizationComponent, EditOrganizationStepComponent],
       imports: generateCfBaseTestModules(),

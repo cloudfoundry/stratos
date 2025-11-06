@@ -28,7 +28,7 @@ describe('ChartDetailsComponent', () => {
   let fixture: ComponentFixture<ChartDetailsComponent>;
 
   beforeEach(
-    waitForAsync(() => {
+    () => {
       TestBed.configureTestingModule({
         imports: [
           BrowserModule,

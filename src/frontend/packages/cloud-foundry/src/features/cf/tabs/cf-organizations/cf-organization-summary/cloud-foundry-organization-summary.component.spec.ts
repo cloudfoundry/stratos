@@ -22,7 +22,7 @@ describe('CloudFoundryOrganizationSummaryComponent', () => {
   let component: CloudFoundryOrganizationSummaryComponent;
   let fixture: ComponentFixture<CloudFoundryOrganizationSummaryComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         CloudFoundryOrganizationSummaryComponent,
@@ -41,7 +41,7 @@ describe('CloudFoundryOrganizationSummaryComponent', () => {
       .compileComponents();
   }));
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryOrganizationSummaryComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

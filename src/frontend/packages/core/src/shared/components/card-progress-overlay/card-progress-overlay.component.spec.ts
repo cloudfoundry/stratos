@@ -8,7 +8,7 @@ describe('CardProgressOverlayComponent', () => {
   let component: CardProgressOverlayComponent;
   let fixture: ComponentFixture<CardProgressOverlayComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         CardProgressOverlayComponent, // Now standalone

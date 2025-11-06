@@ -15,7 +15,7 @@ xdescribe('MetricsChartComponent', () => {
   let component: MetricsChartComponent;
   let fixture: ComponentFixture<MetricsChartComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         MDAppModule,

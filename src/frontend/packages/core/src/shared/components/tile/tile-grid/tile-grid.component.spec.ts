@@ -7,7 +7,7 @@ describe('TileGridComponent', () => {
   let component: TileGridComponent;
   let fixture: ComponentFixture<TileGridComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [ TileGridComponent ]
     })

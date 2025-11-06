@@ -10,7 +10,7 @@ describe('CreateSpaceQuotaStepComponent', () => {
   let component: CreateSpaceQuotaStepComponent;
   let fixture: ComponentFixture<CreateSpaceQuotaStepComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [CreateSpaceQuotaStepComponent, SpaceQuotaDefinitionFormComponent],
       imports: [...CFBaseTestModules],
