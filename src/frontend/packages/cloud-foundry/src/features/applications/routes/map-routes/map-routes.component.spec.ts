@@ -16,27 +16,23 @@ describe('MapRoutesComponent', () => {
   let component: MapRoutesComponent;
   let fixture: ComponentFixture<MapRoutesComponent>;
 
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        declarations: [MapRoutesComponent],
-        providers: [
-          ListConfig,
-          { provide: ApplicationService, useClass: ApplicationServiceMock },
-          DatePipe
-        ],
-        imports: [
-          ...generateCfStoreModules(),
-          CoreModule,
-          SharedModule,
-          NoopAnimationsModule,
-          RouterTestingModule
-        ]
-      }).compileComponents();
-    })
-  );
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [MapRoutesComponent],
+      providers: [
+        ListConfig,
+        { provide: ApplicationService, useClass: ApplicationServiceMock },
+        DatePipe
+      ],
+      imports: [
+        ...generateCfStoreModules(),
+        CoreModule,
+        SharedModule,
+        NoopAnimationsModule,
+        RouterTestingModule
+      ]
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(MapRoutesComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

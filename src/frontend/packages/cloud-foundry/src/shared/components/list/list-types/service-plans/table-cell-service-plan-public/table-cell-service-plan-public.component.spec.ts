@@ -1,8 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { StoreModule } from '@ngrx/store';
 
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesService } from '../../../../../../features/service-catalog/services.service';
@@ -14,15 +13,14 @@ describe('TableCellAServicePlanPublicComponent', () => {
   let component: TableCellAServicePlanPublicComponent;
   let fixture: ComponentFixture<TableCellAServicePlanPublicComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
         TableCellAServicePlanPublicComponent,
         ServicePlanPublicComponent
-      ],
+      ,
       imports: [
         StoreModule,
-        CoreModule,
         generateCfStoreModules()
       ],
       providers: [
@@ -31,9 +29,7 @@ describe('TableCellAServicePlanPublicComponent', () => {
       ]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellAServicePlanPublicComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

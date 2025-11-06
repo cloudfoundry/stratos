@@ -1,8 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { StoreModule } from '@ngrx/store';
 
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import {
   ApplicationStateIconComponent,
 } from '../../../../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.component';
@@ -24,17 +23,16 @@ describe('TableCellAppCfOrgSpaceHeaderComponent', () => {
   let component: TableCellAppCfOrgSpaceHeaderComponent;
   let fixture: ComponentFixture<TableCellAppCfOrgSpaceHeaderComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
         TableCellAppStatusComponent,
         ApplicationStateComponent,
         ApplicationStateIconComponent,
         ApplicationStateIconPipe
-      ],
+      ,
       imports: [
         StoreModule,
-        CoreModule,
         generateCfStoreModules()
       ],
       providers: [
@@ -43,9 +41,7 @@ describe('TableCellAppCfOrgSpaceHeaderComponent', () => {
       ]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellAppCfOrgSpaceHeaderComponent);
     component = fixture.componentInstance;
     component.row = { entity: {}, metadata: {} } as APIResource<IApp>;

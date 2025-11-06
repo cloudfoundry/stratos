@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { RunningInstancesComponent } from '../../../../running-instances/running-instances.component';
@@ -11,24 +10,21 @@ describe('TableCellAppInstancesComponent', () => {
   let component: TableCellAppInstancesComponent<any>;
   let fixture: ComponentFixture<TableCellAppInstancesComponent<any>>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
         TableCellAppInstancesComponent,
         RunningInstancesComponent
-      ],
+      ,
       imports: [
         ...generateCfStoreModules(),
-        CoreModule,
       ],
       providers: [
         PaginationMonitorFactory
       ]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellAppInstancesComponent);
     component = fixture.componentInstance;
     component.row = { entity: {}, metadata: {} };

@@ -16,8 +16,8 @@ describe('DeleteAppInstancesComponent', () => {
   let fixture: ComponentFixture<DeleteAppServiceInstancesComponent>;
   const appId = '1';
   const cfId = '2';
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [DeleteAppServiceInstancesComponent],
       imports: generateCfBaseTestModules(),
       providers: [
@@ -27,11 +27,8 @@ describe('DeleteAppInstancesComponent', () => {
         ServiceActionHelperService,
         ApplicationStateService,
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(DeleteAppServiceInstancesComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

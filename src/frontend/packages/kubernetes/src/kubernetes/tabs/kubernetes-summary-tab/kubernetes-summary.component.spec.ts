@@ -11,7 +11,7 @@ describe('KubernetesSummaryTabComponent', () => {
   let component: KubernetesSummaryTabComponent;
   let fixture: ComponentFixture<KubernetesSummaryTabComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesSummaryTabComponent],
       imports: [...KubernetesBaseTestModules],
@@ -24,7 +24,7 @@ describe('KubernetesSummaryTabComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesSummaryTabComponent);

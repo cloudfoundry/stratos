@@ -1,15 +1,15 @@
 {
   "name": "@stratosui/store",
   "version": "0.0.1",
-  "description": "Stratos Store",
-  "license": "Apache-2.0",
   "repository": "https://github.com/cloudfoundry/stratos",
   "peerDependencies": {
     "@angular/common": "20.3.9",
     "@angular/core": "20.3.9"
   },
+  "description": "Stratos Store",
+  "license": "Apache-2.0",
   "devDependencies": {
-    "@analogjs/vite-plugin-angular": "^1.22.4",
-    "@analogjs/vitest-angular": "^1.22.4"
+    "@analogjs/vite-plugin-angular": "^2.0.0",
+    "@analogjs/vitest-angular": "^2.0.0"
   }
 }

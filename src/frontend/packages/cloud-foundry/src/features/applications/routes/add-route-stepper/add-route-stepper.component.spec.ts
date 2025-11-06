@@ -18,31 +18,27 @@ describe('AddRouteStepperComponent', () => {
   let component: AddRouteStepperComponent;
   let fixture: ComponentFixture<AddRouteStepperComponent>;
 
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        declarations: [
-          AddRouteStepperComponent,
-          AddRoutesComponent,
-          MapRoutesComponent
-        ],
-        imports: [
-          ...generateCfStoreModules(),
-          SteppersModule,
-          CoreModule,
-          SharedModule,
-          RouterTestingModule,
-          NoopAnimationsModule
-        ],
-        providers: [
-          { provide: ApplicationService, useClass: ApplicationServiceMock },
-          TabNavService
-        ]
-      }).compileComponents();
-    })
-  );
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [
+        AddRouteStepperComponent,
+        AddRoutesComponent,
+        MapRoutesComponent
+      ],
+      imports: [
+        ...generateCfStoreModules(),
+        SteppersModule,
+        CoreModule,
+        SharedModule,
+        RouterTestingModule,
+        NoopAnimationsModule
+      ],
+      providers: [
+        { provide: ApplicationService, useClass: ApplicationServiceMock },
+        TabNavService
+      ]
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(AddRouteStepperComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

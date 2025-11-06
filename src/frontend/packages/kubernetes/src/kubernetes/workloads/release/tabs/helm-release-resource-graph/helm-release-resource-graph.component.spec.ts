@@ -17,7 +17,7 @@ describe('HelmReleaseResourceGraphComponent', () => {
   let component: HelmReleaseResourceGraphComponent;
   let fixture: ComponentFixture<HelmReleaseResourceGraphComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...KubernetesBaseTestModules,
@@ -34,7 +34,7 @@ describe('HelmReleaseResourceGraphComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(HelmReleaseResourceGraphComponent);

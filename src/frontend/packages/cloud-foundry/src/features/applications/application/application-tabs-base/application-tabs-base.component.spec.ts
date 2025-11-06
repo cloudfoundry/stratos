@@ -24,8 +24,8 @@ describe('ApplicationTabsBaseComponent', () => {
   const appId = '1';
   const cfId = '2';
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         ApplicationTabsBaseComponent,
         ...generateCfStoreModules(),
@@ -45,12 +45,8 @@ describe('ApplicationTabsBaseComponent', () => {
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
         TabNavService
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-
-  beforeEach(() => {
     fixture = TestBed.createComponent(ApplicationTabsBaseComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
-import { inject, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import { generateCfBaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesService } from '../../../../../features/service-catalog/services.service';
@@ -23,7 +23,8 @@ describe('ServiceInstancesListConfigService', () => {
     });
   });
 
-  it('should be created', inject([ServiceInstancesListConfigService], (service: ServiceInstancesListConfigService) => {
+  it('should be created', () => {
+    const service = TestBed.inject(ServiceInstancesListConfigService);
     expect(service).toBeTruthy();
-  }));
+  });
 });

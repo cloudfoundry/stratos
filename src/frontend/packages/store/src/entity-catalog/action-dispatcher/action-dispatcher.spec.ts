@@ -114,22 +114,22 @@ describe('ActionDispatcher', () => {
     expect(entityActionDispatcher.get).toBeDefined();
     expect(entityActionDispatcher.get(testGuid, testEndpointGuid)).toBeDefined();
     expect(storeDispatchSpy).toHaveBeenCalledWith(getAction);
-    storeDispatchSpy.calls.reset();
+    storeDispatchSpy.mockClear();
 
     expect(entityActionDispatcher.custom).toBeDefined();
     expect(entityActionDispatcher.custom(testGuid)).toBeDefined();
     expect(storeDispatchSpy).toHaveBeenCalledWith(customGetAction);
-    storeDispatchSpy.calls.reset();
+    storeDispatchSpy.mockClear();
 
     expect(entityActionDispatcher.getMultiple).toBeDefined();
     expect(entityActionDispatcher.getMultiple(testEndpointGuid, testPaginationKey)).toBeDefined();
     expect(storeDispatchSpy).toHaveBeenCalledWith(getMultipleAction);
-    storeDispatchSpy.calls.reset();
+    storeDispatchSpy.mockClear();
 
     expect(entityActionDispatcher.customMultipleAction).toBeDefined();
     expect(entityActionDispatcher.customMultipleAction(testPaginationKey)).toBeDefined();
     expect(storeDispatchSpy).toHaveBeenCalledWith(customGetMultipleAction);
-    storeDispatchSpy.calls.reset();
+    storeDispatchSpy.mockClear();
 
   });
 

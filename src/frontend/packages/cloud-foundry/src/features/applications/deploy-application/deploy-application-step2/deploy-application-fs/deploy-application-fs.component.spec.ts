@@ -1,10 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideExperimentalZonelessChangeDetection } from '@angular/core';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { provideRouter } from '@angular/router';
 
-import { CoreModule } from '../../../../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
 import { generateCfStoreModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { DeployApplicationFsComponent } from './deploy-application-fs.component';
 
@@ -12,21 +10,17 @@ describe('DeployApplicationFsComponent', () => {
   let component: DeployApplicationFsComponent;
   let fixture: ComponentFixture<DeployApplicationFsComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [DeployApplicationFsComponent],
-      imports: [
-        ...generateCfStoreModules(),
-        CoreModule,
-        SharedModule,
-        RouterTestingModule,
-        NoopAnimationsModule
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [DeployApplicationFsComponent],
+      providers: [
+        provideExperimentalZonelessChangeDetection(),
+        provideNoopAnimations(),
+        provideRouter([]),
+        ...generateCfStoreModules()
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(DeployApplicationFsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

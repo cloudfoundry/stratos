@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { CATALOGUE_ENTITIES, entityCatalog, EntityCatalogFeatureModule, TestEntityCatalog } from '@stratosui/store';
+import { CATALOGUE_ENTITIES, entityCatalog, EntityCatalogFeatureModule, TestEntityCatalog, ENTITY_CATALOG_TOKEN } from '@stratosui/store';
 
 @NgModule({
   imports: [
@@ -13,6 +13,11 @@ import { CATALOGUE_ENTITIES, entityCatalog, EntityCatalogFeatureModule, TestEnti
             return [];
           }
         },
+        // Provide the entity catalog token for DI
+        {
+          provide: ENTITY_CATALOG_TOKEN,
+          useValue: entityCatalog
+        }
       ]
     },
   ]

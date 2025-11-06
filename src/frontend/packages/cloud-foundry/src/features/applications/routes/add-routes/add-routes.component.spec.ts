@@ -15,8 +15,8 @@ describe('AddRoutesComponent', () => {
   let component: AddRoutesComponent;
   let fixture: ComponentFixture<AddRoutesComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [AddRoutesComponent, MapRoutesComponent],
       imports: [
         ...generateCfStoreModules(),
@@ -28,11 +28,8 @@ describe('AddRoutesComponent', () => {
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(AddRoutesComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

@@ -1,16 +1,21 @@
-// Vitest + Angular testing setup (Zoneless)
-import '@analogjs/vitest-angular/setup-zone';
+// Vitest + Angular testing setup (Zoneless - Angular 20)
+// Official configuration from https://analogjs.org/docs/features/testing/vitest
 
-// Import compiler for JIT compilation support (required for partially compiled libraries)
 import '@angular/compiler';
-
+import '@analogjs/vitest-angular/setup-snapshots';
+import { provideZonelessChangeDetection, NgModule } from '@angular/core';
+import {
+  BrowserTestingModule,
+  platformBrowserTesting,
+} from '@angular/platform-browser/testing';
 import { getTestBed } from '@angular/core/testing';
-import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
 
-// Initialize the Angular testing environment
+@NgModule({
+  providers: [provideZonelessChangeDetection()],
+})
+export class ZonelessTestModule {}
+
 getTestBed().initTestEnvironment(
-  BrowserDynamicTestingModule,
-  platformBrowserDynamicTesting(), {
-    teardown: { destroyAfterEach: false }
-  }
+  [BrowserTestingModule, ZonelessTestModule],
+  platformBrowserTesting(),
 );

@@ -1,57 +1,39 @@
-import { HttpClientModule } from '@angular/common/http';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideExperimentalZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { provideRouter } from '@angular/router';
 
-import { CoreModule } from '../../../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../../../core/src/shared/shared.module';
 import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../../git/src/shared/github.helpers';
 import { GitSCMService } from '../../../../../../git/src/shared/scm/scm.service';
 import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationDeploySourceTypes } from '../deploy-application-steps.types';
-import { GithubProjectExistsDirective } from '../github-project-exists.directive';
-import { DeployApplicationFsComponent } from './deploy-application-fs/deploy-application-fs.component';
 import { DeployApplicationStep2Component } from './deploy-application-step2.component';
 
 describe('DeployApplicationStep2Component', () => {
   let component: DeployApplicationStep2Component;
   let fixture: ComponentFixture<DeployApplicationStep2Component>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
-        DeployApplicationStep2Component,
-        DeployApplicationFsComponent,
-        GithubProjectExistsDirective,
-      ],
-      imports: [
-        ...generateCfStoreModules(),
-        CoreModule,
-        SharedModule,
-        RouterTestingModule,
-        NoopAnimationsModule,
-        HttpClientModule,
-        HttpClientTestingModule
-      ],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [DeployApplicationStep2Component],
       providers: [
-        { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
+        provideExperimentalZonelessChangeDetection(),
+        provideNoopAnimations(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        ...generateCfStoreModules(),
         GitSCMService,
-        ApplicationDeploySourceTypes
+        ApplicationDeploySourceTypes,
+        { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL }
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(DeployApplicationStep2Component);
     component = fixture.componentInstance;
     fixture.detectChanges();
-  });
-
-  afterEach(() => {
-    fixture.destroy();
   });
 
   it('should create', () => {

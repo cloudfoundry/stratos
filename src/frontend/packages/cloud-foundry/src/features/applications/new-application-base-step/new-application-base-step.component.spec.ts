@@ -13,8 +13,8 @@ describe('NewApplicationBaseStepComponent', () => {
   let component: NewApplicationBaseStepComponent;
   let fixture: ComponentFixture<NewApplicationBaseStepComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [NewApplicationBaseStepComponent],
       imports: [
         ...generateCfStoreModules(),
@@ -26,11 +26,8 @@ describe('NewApplicationBaseStepComponent', () => {
         TabNavService,
         ApplicationDeploySourceTypes
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(NewApplicationBaseStepComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

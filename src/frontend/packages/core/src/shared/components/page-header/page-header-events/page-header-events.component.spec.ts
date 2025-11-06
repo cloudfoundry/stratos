@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import { PageHeaderEventsComponent } from './page-header-events.component';
 import { SharedModule } from '../../../shared.module';
@@ -11,17 +11,16 @@ describe('PageHeaderEventsComponent', () => {
   let component: PageHeaderEventsComponent;
   let fixture: ComponentFixture<PageHeaderEventsComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       providers: [InternalEventMonitorFactory],
       imports: [
         SharedModule,
         StoreModule.forRoot({}),
         RouterTestingModule
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(PageHeaderEventsComponent);

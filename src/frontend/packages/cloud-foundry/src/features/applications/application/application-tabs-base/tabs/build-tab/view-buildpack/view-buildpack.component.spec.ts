@@ -7,14 +7,11 @@ describe('ViewBuildpackComponent', () => {
   let component: ViewBuildpackComponent;
   let fixture: ComponentFixture<ViewBuildpackComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [ ViewBuildpackComponent ]
-    })
-    .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(ViewBuildpackComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

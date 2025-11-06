@@ -14,7 +14,7 @@ describe('KubernetesResourceViewerComponent', () => {
   let component: KubernetesResourceViewerComponent;
   let fixture: ComponentFixture<KubernetesResourceViewerComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesResourceViewerComponent, KubernetesResourceViewerComponent, ResourceAlertViewComponent],
       imports: KubernetesBaseTestModules,
@@ -36,7 +36,7 @@ describe('KubernetesResourceViewerComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesResourceViewerComponent);

@@ -12,14 +12,14 @@ describe('KubernetesNodeConditionCardComponent', () => {
   let component: KubernetesNodeConditionCardComponent;
   let fixture: ComponentFixture<KubernetesNodeConditionCardComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesNodeConditionCardComponent, KubernetesNodeConditionComponent],
       imports: KubernetesBaseTestModules,
       providers: [BaseKubeGuid, KubernetesEndpointService, KubernetesNodeService]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesNodeConditionCardComponent);

@@ -1,6 +1,6 @@
 import { HttpClient, HttpHandler } from '@angular/common/http';
-import { inject, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
@@ -38,7 +38,8 @@ describe('CfOrgUsersListConfigService', () => {
     });
   });
 
-  it('should be created', inject([CfOrgUsersListConfigService], (service: CfOrgUsersListConfigService) => {
+  it('should be created', () => {
+    const service = TestBed.inject(CfOrgUsersListConfigService);
     expect(service).toBeTruthy();
-  }));
+  });
 });

@@ -15,8 +15,8 @@ describe('DeleteAppRoutesComponent', () => {
   let fixture: ComponentFixture<DeleteAppRoutesComponent>;
   const appId = '1';
   const cfId = '2';
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [DeleteAppRoutesComponent],
       imports: generateCfBaseTestModules(),
       providers: [
@@ -25,12 +25,8 @@ describe('DeleteAppRoutesComponent', () => {
         DatePipe,
         ApplicationStateService
       ]
+    }).compileComponents();
 
-    })
-      .compileComponents();
-  }));
-
-  beforeEach(() => {
     fixture = TestBed.createComponent(DeleteAppRoutesComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

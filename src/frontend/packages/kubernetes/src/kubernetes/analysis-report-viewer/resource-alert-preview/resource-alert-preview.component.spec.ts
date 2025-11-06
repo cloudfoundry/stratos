@@ -10,7 +10,7 @@ describe('ResourceAlertPreviewComponent', () => {
   let component: ResourceAlertPreviewComponent;
   let fixture: ComponentFixture<ResourceAlertPreviewComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ ResourceAlertPreviewComponent, ResourceAlertViewComponent ],
       imports: [
@@ -21,7 +21,7 @@ describe('ResourceAlertPreviewComponent', () => {
       ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ResourceAlertPreviewComponent);

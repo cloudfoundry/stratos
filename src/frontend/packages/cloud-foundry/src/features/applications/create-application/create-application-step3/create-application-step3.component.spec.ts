@@ -1,11 +1,8 @@
-import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideExperimentalZonelessChangeDetection } from '@angular/core';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { provideRouter } from '@angular/router';
 
-import { CoreModule } from '../../../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../../../core/src/shared/shared.module';
 import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CreateApplicationStep3Component } from './create-application-step3.component';
 
@@ -13,22 +10,17 @@ describe('CreateApplicationStep3Component', () => {
   let component: CreateApplicationStep3Component;
   let fixture: ComponentFixture<CreateApplicationStep3Component>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [CreateApplicationStep3Component],
-      imports: [
-        ...generateCfStoreModules(),
-        CommonModule,
-        CoreModule,
-        SharedModule,
-        NoopAnimationsModule,
-        RouterTestingModule
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [CreateApplicationStep3Component],
+      providers: [
+        provideExperimentalZonelessChangeDetection(),
+        provideNoopAnimations(),
+        provideRouter([]),
+        ...generateCfStoreModules()
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(CreateApplicationStep3Component);
     component = fixture.componentInstance;
     fixture.detectChanges();

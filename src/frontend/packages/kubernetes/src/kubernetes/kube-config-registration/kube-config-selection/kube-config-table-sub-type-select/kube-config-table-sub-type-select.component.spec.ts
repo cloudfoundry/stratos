@@ -10,7 +10,7 @@ describe('KubeConfigTableSubTypeSelectComponent', () => {
   let component: KubeConfigTableSubTypeSelectComponent;
   let fixture: ComponentFixture<KubeConfigTableSubTypeSelectComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...KubernetesBaseTestModules
@@ -21,7 +21,7 @@ describe('KubeConfigTableSubTypeSelectComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubeConfigTableSubTypeSelectComponent);

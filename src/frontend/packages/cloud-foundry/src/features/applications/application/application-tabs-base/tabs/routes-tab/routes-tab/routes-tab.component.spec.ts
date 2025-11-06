@@ -12,8 +12,8 @@ describe('RoutesTabComponent', () => {
   let component: RoutesTabComponent;
   let fixture: ComponentFixture<RoutesTabComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [RoutesTabComponent],
       imports: generateCfBaseTestModules(),
       providers: [
@@ -22,11 +22,8 @@ describe('RoutesTabComponent', () => {
         DatePipe,
         ApplicationStateService,
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(RoutesTabComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

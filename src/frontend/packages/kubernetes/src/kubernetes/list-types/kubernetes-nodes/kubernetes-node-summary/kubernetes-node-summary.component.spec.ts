@@ -20,7 +20,7 @@ describe('KubernetesNodeSummaryComponent', () => {
   let component: KubernetesNodeSummaryComponent;
   let fixture: ComponentFixture<KubernetesNodeSummaryComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesNodeSummaryComponent,
         KubernetesNodeConditionComponent,
@@ -33,7 +33,7 @@ describe('KubernetesNodeSummaryComponent', () => {
       providers: [BaseKubeGuid, KubernetesEndpointService, KubernetesNodeService]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesNodeSummaryComponent);

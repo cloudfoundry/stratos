@@ -9,12 +9,12 @@ describe('TableCellAutoscalerEventChangeComponent', () => {
   let component: TableCellAutoscalerEventChangeComponent;
   let fixture: ComponentFixture<TableCellAutoscalerEventChangeComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [TableCellAutoscalerEventChangeComponent, TableCellAutoscalerEventChangeIconPipe]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent<TableCellAutoscalerEventChangeComponent>(TableCellAutoscalerEventChangeComponent);

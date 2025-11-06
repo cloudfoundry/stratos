@@ -1,8 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { StoreModule } from '@ngrx/store';
 
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import {
   ApplicationStateIconComponent,
 } from '../../../../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.component';
@@ -24,17 +23,16 @@ describe('TableCellAppCfOrgSpaceComponent', () => {
   let component: TableCellAppCfOrgSpaceComponent;
   let fixture: ComponentFixture<TableCellAppCfOrgSpaceComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
         TableCellAppStatusComponent,
         ApplicationStateComponent,
         ApplicationStateIconComponent,
         ApplicationStateIconPipe
-      ],
+      ,
       imports: [
         StoreModule,
-        CoreModule,
         generateCfStoreModules()
       ],
       providers: [
@@ -43,9 +41,7 @@ describe('TableCellAppCfOrgSpaceComponent', () => {
       ]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellAppCfOrgSpaceComponent);
     component = fixture.componentInstance;
     component.row = {

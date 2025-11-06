@@ -10,12 +10,14 @@ import { PaginationMonitor } from './pagination-monitor';
 @Injectable()
 export class PaginationMonitorFactory {
 
-  private store = inject(Store<AppState>);
-  private entityCatalog = inject<IEntityCatalog>(ENTITY_CATALOG_TOKEN);
-
   private monitorCache: {
     [key: string]: PaginationMonitor
   } = {};
+
+  constructor(
+    private store: Store<AppState>,
+    @Inject(ENTITY_CATALOG_TOKEN) private entityCatalog: IEntityCatalog
+  ) {}
 
   public create<T = any>(
     paginationKey: string,

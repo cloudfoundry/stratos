@@ -1,10 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { inject, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
 import { testSCFEndpointGuid } from '@stratosui/store/testing';
 
-import { CoreModule } from '../../../../../../../core/src/core/core.module';
 import { CF_GUID } from '../../../../../../../core/src/shared/entity.tokens';
 import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
 import { generateTestApplicationServiceProvider } from '../../../../../../test-framework/application-service-helper';
@@ -34,7 +33,6 @@ describe('CfAppInstancesConfigService', () => {
       imports: [
         generateCfStoreModules(),
         CommonModule,
-        CoreModule,
         SharedModule,
         ApplicationsModule,
         RouterTestingModule,
@@ -42,7 +40,8 @@ describe('CfAppInstancesConfigService', () => {
     });
   });
 
-  it('should be created', inject([CfAppInstancesConfigService], (service: CfAppInstancesConfigService) => {
+  it('should be created', () => {
+    const service = TestBed.inject(CfAppInstancesConfigService);
     expect(service).toBeTruthy();
-  }));
+  });
 });

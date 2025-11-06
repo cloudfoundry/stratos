@@ -9,14 +9,14 @@ describe('KubernetesNodesTabComponent', () => {
   let component: KubernetesNodesTabComponent;
   let fixture: ComponentFixture<KubernetesNodesTabComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesNodesTabComponent],
       imports: KubernetesBaseTestModules,
       providers: [BaseKubeGuid]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesNodesTabComponent);

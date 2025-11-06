@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
@@ -22,8 +22,8 @@ describe('AppServiceBindingCardComponent', () => {
   let component: AppServiceBindingCardComponent;
   let fixture: ComponentFixture<AppServiceBindingCardComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [
         AppServiceBindingCardComponent,
         ServiceIconComponent,
@@ -42,9 +42,7 @@ describe('AppServiceBindingCardComponent', () => {
       ]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(AppServiceBindingCardComponent);
     component = fixture.componentInstance;
     component.row = {

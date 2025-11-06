@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
-import { inject, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 
 import { generateCfBaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
@@ -27,7 +27,8 @@ describe('DetachAppsListConfigService', () => {
     });
   });
 
-  it('should be created', inject([DetachAppsListConfigService], (service: DetachAppsListConfigService) => {
+  it('should be created', () => {
+    const service = TestBed.inject(DetachAppsListConfigService);
     expect(service).toBeTruthy();
-  }));
+  });
 });

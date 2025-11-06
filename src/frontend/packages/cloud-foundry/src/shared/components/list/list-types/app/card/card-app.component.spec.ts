@@ -1,8 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
 import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResourceMetadata } from '../../../../../../../../store/src/types/api.types';
@@ -17,16 +16,15 @@ describe('CardAppComponent', () => {
   let component: CardAppComponent;
   let fixture: ComponentFixture<CardAppComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
         CardAppComponent,
         RunningInstancesComponent,
         CfOrgSpaceLinksComponent
-      ],
+      ,
       imports: [
         ...generateCfStoreModules(),
-        CoreModule,
         RouterTestingModule,
         SharedModule
       ],
@@ -36,9 +34,7 @@ describe('CardAppComponent', () => {
       ]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(CardAppComponent);
     component = fixture.componentInstance;
     component.row = {

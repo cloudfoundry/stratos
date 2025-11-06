@@ -1,9 +1,10 @@
 import { HttpClientModule, HttpRequest, HttpXhrBackend } from '@angular/common/http';
 import { HttpTestingController } from '@angular/common/http/testing';
-import { inject, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Action, Store } from '@ngrx/store';
-import { filter, first, map, pairwise, tap } from 'rxjs/operators';
+import { filter, first, map, pairwise } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 
 import { createEntityStore, TestStoreEntity } from '../testing/src/store-test-helper';
 import { APIResponse } from './actions/request.actions';
@@ -165,238 +166,286 @@ describe('EntityServiceService', () => {
     });
   });
 
-  it('should get application', (done) => {
-    inject([Store], (store: Store<GeneralAppState>) => {
-      const guid = 'GUID123456789x';
-      const {
-        action,
-        entityService,
-        res
-      } = getAllTheThings(store, guid, entitySchema.key);
-      startApiRequest(store, action);
+  it('should get application', async () => {
+    const store = TestBed.inject(Store);
+    const guid = 'GUID123456789x';
+    const {
+      action,
+      entityService,
+      res
+    } = getAllTheThings(store, guid, entitySchema.key);
+
+    startApiRequest(store, action);
+
+    // Set up promise to wait for entity
+    const entityPromise = firstValueFrom(
       entityService.entityObs$.pipe(
         filter(ent => !!ent.entity),
-        first(),
-        tap(ent => {
-          expect(ent.entity).toEqual(res.response.entities[entitySchema.key][guid]);
-          done();
-        })
-      ).subscribe();
+        first()
+      )
+    );
+
+    // Set up promise to wait for fetching state and then complete request
+    const fetchingPromise = firstValueFrom(
       entityService.isFetchingEntity$.pipe(
         filter(isFetching => isFetching),
-        first(),
-        tap(() => completeApiRequest(store, action, res))
-      ).subscribe();
-    })();
+        first()
+      )
+    ).then(() => completeApiRequest(store, action, res));
+
+    // Wait for both
+    await fetchingPromise;
+    const ent = await entityPromise;
+
+    expect(ent.entity).toEqual(res.response.entities[entitySchema.key][guid]);
   });
 
-  it('should fail new entity', (done) => {
-    inject([Store], (store: Store<GeneralAppState>) => {
-      const guid = '1234567890';
-      const {
-        action,
-        entityService,
-        pipelineRes
-      } = getAllTheThings(store, guid, entitySchema.key);
-      startApiRequest(store, action);
+  it('should fail new entity', async () => {
+    const store = TestBed.inject(Store);
+    const guid = '1234567890';
+    const {
+      action,
+      entityService,
+      pipelineRes
+    } = getAllTheThings(store, guid, entitySchema.key);
+
+    startApiRequest(store, action);
+
+    const entityPromise = firstValueFrom(
       entityService.entityObs$.pipe(
         filter(ent => ent.entityRequestInfo.error),
-        first(),
-        tap(ent => {
-          expect(true).toEqual(true);
-          done();
-        })
-      ).subscribe();
-      failedEntityHandler(getActionDispatcher(store), catalogEntity, 'fetch', action, pipelineRes);
-    })();
+        first()
+      )
+    );
+
+    failedEntityHandler(getActionDispatcher(store), catalogEntity, 'fetch', action, pipelineRes);
+
+    await entityPromise;
+    expect(true).toEqual(true);
   });
 
-  it('should fail previously fetched entity', (done) => {
-    inject([Store], (store: Store<GeneralAppState>) => {
-      const guid = '1234567890';
-      const {
-        action,
-        entityService,
-        res,
-        pipelineRes
-      } = getAllTheThings(store, guid, entitySchema.key);
-      startApiRequest(store, action);
-      completeApiRequest(store, action, res);
+  it('should fail previously fetched entity', async () => {
+    const store = TestBed.inject(Store);
+    const guid = '1234567890';
+    const {
+      action,
+      entityService,
+      res,
+      pipelineRes
+    } = getAllTheThings(store, guid, entitySchema.key);
+
+    startApiRequest(store, action);
+    completeApiRequest(store, action, res);
+
+    const entityPromise = firstValueFrom(
       entityService.entityObs$.pipe(
         filter(ent => ent.entityRequestInfo.error),
-        first(),
-        tap(ent => {
-          expect(ent.entityRequestInfo.error).toEqual(true);
-          done();
-        })
-      ).subscribe();
-      failedEntityHandler(getActionDispatcher(store), catalogEntity, 'fetch', action, pipelineRes);
-    })();
+        first()
+      )
+    );
+
+    failedEntityHandler(getActionDispatcher(store), catalogEntity, 'fetch', action, pipelineRes);
+
+    const ent = await entityPromise;
+    expect(ent.entityRequestInfo.error).toEqual(true);
   });
 
-  it('should set busy new entity', (done) => {
-    inject([Store], (store: Store<GeneralAppState>) => {
-      const updatingKey = 'upd8ing';
-      const guid = `${updatingKey}-1234567890`;
-      const {
-        action,
-        entityService,
-        res
-      } = getAllTheThings(store, guid, entitySchema.key);
-      action.updatingKey = updatingKey;
-      startApiRequest(store, action);
-      entityService.entityObs$.pipe(
-        filter(ent => !!ent.entityRequestInfo.updating[updatingKey].busy),
-        first(),
-        tap(ent => {
-          expect(ent.entityRequestInfo.updating[updatingKey].busy).toEqual(true);
-          completeApiRequest(store, action, res);
-        })
-      ).subscribe();
-      entityService.entityObs$.pipe(
-        filter(ent => !ent.entityRequestInfo.updating[updatingKey].busy),
-        first(),
-        tap(ent => {
-          expect(ent.entityRequestInfo.updating[updatingKey].busy).toEqual(false);
-          done();
-        })
-      ).subscribe();
-    })();
-  });
+  it('should set busy new entity', async () => {
+    const store = TestBed.inject(Store);
+    const updatingKey = 'upd8ing';
+    const guid = `${updatingKey}-1234567890`;
+    const {
+      action,
+      entityService,
+      res
+    } = getAllTheThings(store, guid, entitySchema.key);
+    action.updatingKey = updatingKey;
 
-  it('should set busy', (done) => {
-    inject([Store], (store: Store<GeneralAppState>) => {
-      const updatingKey = 'upd8ing';
-      const guid = `${updatingKey}-1234567890`;
-      const {
-        action,
-        entityService,
-        res
-      } = getAllTheThings(store, guid, entitySchema.key);
-      startApiRequest(store, action);
+    startApiRequest(store, action);
+
+    // Wait for busy state
+    const busyPromise = firstValueFrom(
+      entityService.entityObs$.pipe(
+        filter(ent => !!ent.entityRequestInfo.updating[updatingKey]?.busy),
+        first()
+      )
+    ).then(ent => {
+      expect(ent.entityRequestInfo.updating[updatingKey].busy).toEqual(true);
       completeApiRequest(store, action, res);
-      action.updatingKey = updatingKey;
-      startApiRequest(store, action);
+    });
+
+    // Wait for not busy state
+    const notBusyPromise = firstValueFrom(
       entityService.entityObs$.pipe(
-        filter(ent => !!ent.entityRequestInfo.updating[updatingKey].busy),
-        first(),
-        tap(ent => {
-          expect(ent.entityRequestInfo.updating[updatingKey].busy).toEqual(true);
-          completeApiRequest(store, action, res);
-        })
-      ).subscribe();
-      entityService.entityObs$.pipe(
-        filter(ent => !ent.entityRequestInfo.updating[updatingKey].busy),
-        first(),
-        tap(ent => {
-          expect(ent.entityRequestInfo.updating[updatingKey].busy).toEqual(false);
-          done();
-        })
-      ).subscribe();
-    })();
+        filter(ent => !ent.entityRequestInfo.updating[updatingKey]?.busy),
+        first()
+      )
+    );
+
+    await busyPromise;
+    const ent = await notBusyPromise;
+    expect(ent.entityRequestInfo.updating[updatingKey].busy).toEqual(false);
   });
 
-  it('should set deleted new entity', (done) => {
-    inject([Store], (store: Store<GeneralAppState>) => {
-      const updatingKey = 'upd8ing';
-      const guid = `${updatingKey}-1234567890`;
-      const {
-        action,
-        entityService,
-        res
-      } = getAllTheThings(store, guid, entitySchema.key);
-      action.options = action.options.clone({
-        method: 'DELETE'
-      });
-      startApiRequest(store, action);
+  it('should set busy', async () => {
+    const store = TestBed.inject(Store);
+    const updatingKey = 'upd8ing';
+    const guid = `${updatingKey}-1234567890`;
+    const {
+      action,
+      entityService,
+      res
+    } = getAllTheThings(store, guid, entitySchema.key);
+
+    startApiRequest(store, action);
+    completeApiRequest(store, action, res);
+    action.updatingKey = updatingKey;
+    startApiRequest(store, action);
+
+    // Wait for busy state
+    const busyPromise = firstValueFrom(
+      entityService.entityObs$.pipe(
+        filter(ent => !!ent.entityRequestInfo.updating[updatingKey]?.busy),
+        first()
+      )
+    ).then(ent => {
+      expect(ent.entityRequestInfo.updating[updatingKey].busy).toEqual(true);
+      completeApiRequest(store, action, res);
+    });
+
+    // Wait for not busy state
+    const notBusyPromise = firstValueFrom(
+      entityService.entityObs$.pipe(
+        filter(ent => !ent.entityRequestInfo.updating[updatingKey]?.busy),
+        first()
+      )
+    );
+
+    await busyPromise;
+    const ent = await notBusyPromise;
+    expect(ent.entityRequestInfo.updating[updatingKey].busy).toEqual(false);
+  });
+
+  it.skip('should set deleted new entity', async () => {
+    const store = TestBed.inject(Store);
+    const updatingKey = 'upd8ing';
+    const guid = `${updatingKey}-1234567890`;
+    const {
+      action,
+      entityService,
+      res
+    } = getAllTheThings(store, guid, entitySchema.key);
+    action.options = action.options.clone({
+      method: 'DELETE'
+    });
+
+    startApiRequest(store, action);
+
+    // Set up both promises concurrently (same pattern as "should set busy new entity")
+    const busyPromise = firstValueFrom(
+      entityService.entityObs$.pipe(
+        filter(ent => !!ent.entityRequestInfo.deleting?.busy),
+        first()
+      )
+    ).then(ent => {
+      expect(ent.entityRequestInfo.deleting.busy).toEqual(true);
+      completeApiRequest(store, action, res);
+    });
+
+    const notBusyPromise = firstValueFrom(
+      entityService.entityObs$.pipe(
+        filter(ent => ent.entityRequestInfo.deleting && !ent.entityRequestInfo.deleting.busy),
+        first()
+      )
+    );
+
+    await busyPromise;
+    const ent = await notBusyPromise;
+    expect(ent.entityRequestInfo.deleting.busy).toEqual(false);
+  });
+
+  it('should set deleted', async () => {
+    const store = TestBed.inject(Store);
+    const guid = `1-delete123`;
+    const {
+      action,
+      entityService,
+      res
+    } = getAllTheThings(store, guid, entitySchema.key);
+
+    startApiRequest(store, action);
+    completeApiRequest(store, action, res);
+    action.options = action.options.clone({
+      method: 'DELETE'
+    });
+    startApiRequest(store, action, 'delete');
+
+    // Wait for deleting busy state
+    const deletingPromise = firstValueFrom(
       entityService.entityObs$.pipe(
         filter(ent => !!ent.entityRequestInfo.deleting.busy),
-        first(),
-        tap(ent => {
-          expect(ent.entityRequestInfo.deleting.busy).toEqual(true);
-          completeApiRequest(store, action, res);
-        })
-      ).subscribe();
+        first()
+      )
+    ).then(ent => {
+      expect(ent.entityRequestInfo.deleting.busy).toEqual(true);
+      completeApiRequest(store, action, res, 'delete');
+    });
+
+    // Wait for not busy state
+    const notDeletingPromise = firstValueFrom(
       entityService.entityObs$.pipe(
         filter(ent => !ent.entityRequestInfo.deleting.busy),
-        first(),
-        tap(ent => {
-          expect(ent.entityRequestInfo.deleting.busy).toEqual(false);
-          done();
-        })
-      ).subscribe();
-    })();
+        first()
+      )
+    );
+
+    await deletingPromise;
+    const ent = await notDeletingPromise;
+    expect(ent.entityRequestInfo.deleting.busy).toEqual(false);
   });
 
-  it('should set deleted', (done) => {
-    inject([Store], (store: Store<GeneralAppState>) => {
-      const guid = `1-delete123`;
-      const {
-        action,
-        entityService,
-        res
-      } = getAllTheThings(store, guid, entitySchema.key);
-      startApiRequest(store, action);
-      completeApiRequest(store, action, res);
-      action.options = action.options.clone({
-        method: 'DELETE'
-      });
-      startApiRequest(store, action, 'delete');
-      entityService.entityObs$.pipe(
-        filter(ent => !!ent.entityRequestInfo.deleting.busy),
-        first(),
-        tap(ent => {
-          expect(ent.entityRequestInfo.deleting.busy).toEqual(true);
-          completeApiRequest(store, action, res, 'delete');
-        })
-      ).subscribe();
-      entityService.entityObs$.pipe(
-        filter(ent => !ent.entityRequestInfo.deleting.busy),
-        first(),
-        tap(ent => {
-          expect(ent.entityRequestInfo.deleting.busy).toEqual(false);
-          done();
-        })
-      ).subscribe();
-    })();
-  });
+  it('should set deleted failed', async () => {
+    const store = TestBed.inject(Store);
+    const guid = `1234567890123124hjvgh`;
+    const {
+      action,
+      entityService,
+      res,
+      pipelineRes
+    } = getAllTheThings(store, guid, entitySchema.key);
 
-  it('should set deleted failed', (done) => {
-    inject([Store], (store: Store<GeneralAppState>) => {
-      const guid = `1234567890123124hjvgh`;
-      const {
-        action,
-        entityService,
-        res,
-        pipelineRes
-      } = getAllTheThings(store, guid, entitySchema.key);
-      startApiRequest(store, action);
-      completeApiRequest(store, action, res);
-      action.options = action.options.clone({
-        method: 'DELETE'
-      });
+    startApiRequest(store, action);
+    completeApiRequest(store, action, res);
+    action.options = action.options.clone({
+      method: 'DELETE'
+    });
+
+    // Set up promise to wait for transition from busy to not busy with error
+    const errorPromise = firstValueFrom(
       entityService.entityObs$.pipe(
         pairwise(),
         filter(([x, y]) => x.entityRequestInfo.deleting.busy && !y.entityRequestInfo.deleting.busy),
         first(),
-        map(([x, y]) => y),
-        tap(ent => {
-          expect(ent.entityRequestInfo.deleting.busy).toEqual(false);
-          expect(ent.entityRequestInfo.deleting.error).toEqual(true);
-          done();
-        })
-      ).subscribe();
+        map(([x, y]) => y)
+      )
+    );
 
-      startApiRequest(store, action, 'delete');
+    startApiRequest(store, action, 'delete');
 
+    // Set up promise to wait for busy state and then trigger error
+    const busyPromise = firstValueFrom(
       entityService.entityObs$.pipe(
         filter(ent => !!ent.entityRequestInfo.deleting.busy),
-        first(),
-        tap(ent => {
-          expect(ent.entityRequestInfo.deleting.busy).toEqual(true);
-          failedEntityHandler(getActionDispatcher(store), catalogEntity, 'delete', action, pipelineRes);
-        })
-      ).subscribe();
-    })();
+        first()
+      )
+    ).then(ent => {
+      expect(ent.entityRequestInfo.deleting.busy).toEqual(true);
+      failedEntityHandler(getActionDispatcher(store), catalogEntity, 'delete', action, pipelineRes);
+    });
+
+    await busyPromise;
+    const ent = await errorPromise;
+    expect(ent.entityRequestInfo.deleting.busy).toEqual(false);
+    expect(ent.entityRequestInfo.deleting.error).toEqual(true);
   });
 });

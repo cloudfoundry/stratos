@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import {
   generateCfBaseTestModules,
@@ -11,16 +11,14 @@ describe('CfSpacePermissionCellComponent', () => {
   let component: CfSpacePermissionCellComponent;
   let fixture: ComponentFixture<CfSpacePermissionCellComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [CfSpacePermissionCellComponent],
       imports: generateCfBaseTestModules(),
       providers: [...generateTestCfEndpointServiceProvider()]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(CfSpacePermissionCellComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

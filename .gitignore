@@ -8,6 +8,7 @@
 
 # dependencies
 /node_modules
+src/frontend/packages/devkit/package-lock.json
 
 # IDEs and editors
 .idea
@@ -162,3 +163,4 @@ build/src/
 src/frontend/packages/store/node_modules/
 test-results/
 secrets.yaml
+node_modules

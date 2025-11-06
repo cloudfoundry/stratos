@@ -14,7 +14,7 @@ describe('UpgradeReleaseComponent', () => {
   let component: UpgradeReleaseComponent;
   let fixture: ComponentFixture<UpgradeReleaseComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ UpgradeReleaseComponent ],
       imports: [
@@ -29,7 +29,7 @@ describe('UpgradeReleaseComponent', () => {
       ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(UpgradeReleaseComponent);

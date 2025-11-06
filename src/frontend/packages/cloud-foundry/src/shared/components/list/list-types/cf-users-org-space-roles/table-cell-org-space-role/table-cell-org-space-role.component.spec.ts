@@ -1,9 +1,8 @@
 import { HttpClientModule } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
@@ -19,11 +18,10 @@ describe('TableCellSpaceRoleComponent', () => {
   let component: TableCellRoleOrgSpaceComponent;
   let fixture: ComponentFixture<TableCellRoleOrgSpaceComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         ...generateCfStoreModules(),
-        CoreModule,
         NoopAnimationsModule,
         HttpClientModule
       ],
@@ -40,9 +38,7 @@ describe('TableCellSpaceRoleComponent', () => {
       ]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellRoleOrgSpaceComponent);
     component = fixture.componentInstance;
     component.row = {

@@ -14,7 +14,7 @@ describe('KubernetesAnalysisInfoComponent', () => {
   let component: KubernetesAnalysisInfoComponent;
   let fixture: ComponentFixture<KubernetesAnalysisInfoComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesAnalysisInfoComponent, AnalysisInfoCardComponent],
       imports: [
@@ -29,7 +29,7 @@ describe('KubernetesAnalysisInfoComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesAnalysisInfoComponent);

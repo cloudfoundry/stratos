@@ -8,14 +8,13 @@ describe('MetaCardTitleComponent', () => {
   let component: MetaCardTitleComponent;
   let fixture: ComponentFixture<MetaCardTitleComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         SharedModule
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(MetaCardTitleComponent);

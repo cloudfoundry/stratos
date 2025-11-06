@@ -8,13 +8,13 @@ describe('KubernetesNodeIpsComponent', () => {
   let component: KubernetesNodeIpsComponent;
   let fixture: ComponentFixture<KubernetesNodeIpsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesNodeIpsComponent],
       imports: BaseTestModules
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesNodeIpsComponent);

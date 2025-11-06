@@ -8,7 +8,7 @@ describe('AnalysisInfoCardComponent', () => {
   let component: AnalysisInfoCardComponent;
   let fixture: ComponentFixture<AnalysisInfoCardComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ AnalysisInfoCardComponent ],
       imports: [
@@ -16,7 +16,7 @@ describe('AnalysisInfoCardComponent', () => {
       ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AnalysisInfoCardComponent);

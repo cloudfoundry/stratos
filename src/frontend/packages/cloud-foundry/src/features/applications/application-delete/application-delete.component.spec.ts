@@ -12,8 +12,9 @@ describe('ApplicationDeleteComponent', () => {
   let fixture: ComponentFixture<ApplicationDeleteComponent<any>>;
   const appId = '1';
   const cfId = '2';
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         ...generateCfBaseTestModules(),
         ApplicationsModule
@@ -23,9 +24,7 @@ describe('ApplicationDeleteComponent', () => {
         TabNavService
       ]
     }).compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(ApplicationDeleteComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

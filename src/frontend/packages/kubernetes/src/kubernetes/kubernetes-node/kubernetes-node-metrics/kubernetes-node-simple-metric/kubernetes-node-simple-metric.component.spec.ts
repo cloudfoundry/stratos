@@ -7,12 +7,12 @@ describe('KubernetesNodeSimpleMetricComponent', () => {
   let component: KubernetesNodeSimpleMetricComponent;
   let fixture: ComponentFixture<KubernetesNodeSimpleMetricComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ KubernetesNodeSimpleMetricComponent ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesNodeSimpleMetricComponent);

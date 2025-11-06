@@ -11,7 +11,7 @@ describe('PopeyeReportViewerComponent', () => {
   let component: PopeyeReportViewerComponent;
   let fixture: ComponentFixture<PopeyeReportViewerComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [PopeyeReportViewerComponent],
       imports: [
@@ -25,7 +25,7 @@ describe('PopeyeReportViewerComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(PopeyeReportViewerComponent);

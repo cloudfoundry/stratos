@@ -1,4 +1,4 @@
-import { inject, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';
@@ -13,7 +13,8 @@ describe('ServiceActionHelperService', () => {
     });
   });
 
-  it('should be created', inject([ServiceActionHelperService], (service: ServiceActionHelperService) => {
+  it('should be created', () => {
+    const service = TestBed.inject(ServiceActionHelperService);
     expect(service).toBeTruthy();
-  }));
+  });
 });

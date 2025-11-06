@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { UtilsService } from '../../../../../../../../core/src/core/utils.service';
 import { UsageGaugeComponent } from '../../../../../../../../core/src/shared/components/usage-gauge/usage-gauge.component';
 import { PercentagePipe } from '../../../../../../../../core/src/shared/pipes/percentage.pipe';
@@ -12,24 +11,18 @@ describe('TableCellUsageComponent', () => {
   let component: TableCellUsageComponent<EntityInfo>;
   let fixture: ComponentFixture<TableCellUsageComponent<EntityInfo>>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
         TableCellUsageComponent,
         UsageGaugeComponent,
         PercentagePipe,
       ],
-      imports: [
-        CoreModule,
-      ],
       providers: [
         UtilsService,
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent<TableCellUsageComponent<EntityInfo>>(TableCellUsageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

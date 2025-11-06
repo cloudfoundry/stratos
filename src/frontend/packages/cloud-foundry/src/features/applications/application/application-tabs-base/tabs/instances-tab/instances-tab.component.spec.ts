@@ -23,8 +23,8 @@ describe('InstancesTabComponent', () => {
   let component: InstancesTabComponent;
   let fixture: ComponentFixture<InstancesTabComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [InstancesTabComponent],
       imports: [
         ...generateCfStoreModules(),
@@ -45,11 +45,8 @@ describe('InstancesTabComponent', () => {
         ApplicationStateService,
         ApplicationEnvVarsHelper,
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(InstancesTabComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

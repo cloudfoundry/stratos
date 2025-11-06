@@ -1,8 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { StoreModule } from '@ngrx/store';
 
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationStateService } from '../../../../../services/application-state.service';
@@ -12,14 +11,12 @@ describe('TableCellAServicePlanExtrasComponent', () => {
   let component: TableCellAServicePlanExtrasComponent;
   let fixture: ComponentFixture<TableCellAServicePlanExtrasComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
         TableCellAServicePlanExtrasComponent,
-      ],
       imports: [
         StoreModule,
-        CoreModule,
         generateCfStoreModules()
       ],
       providers: [
@@ -28,9 +25,7 @@ describe('TableCellAServicePlanExtrasComponent', () => {
       ]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellAServicePlanExtrasComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

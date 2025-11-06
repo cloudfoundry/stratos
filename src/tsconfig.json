@@ -25,7 +25,8 @@
     "types": [
       "jasmine",
       "jasminewd2",
-      "karma"
+      "karma",
+      "vite"
     ],
     "typeRoots": [
       "../node_modules/@types",

@@ -8,7 +8,7 @@ describe('KubeConfigTableImportStatusComponent', () => {
   let component: KubeConfigTableImportStatusComponent;
   let fixture: ComponentFixture<KubeConfigTableImportStatusComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...KubernetesBaseTestModules
@@ -16,7 +16,7 @@ describe('KubeConfigTableImportStatusComponent', () => {
       declarations: [KubeConfigTableImportStatusComponent]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubeConfigTableImportStatusComponent);

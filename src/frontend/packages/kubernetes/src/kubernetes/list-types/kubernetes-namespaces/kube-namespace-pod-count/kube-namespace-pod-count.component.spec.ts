@@ -9,14 +9,14 @@ describe('KubeNamespacePodCountComponent', () => {
   let component: KubeNamespacePodCountComponent;
   let fixture: ComponentFixture<KubeNamespacePodCountComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubeNamespacePodCountComponent],
       imports: KubernetesBaseTestModules,
       providers: [KubeBaseGuidMock, KubernetesEndpointService]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubeNamespacePodCountComponent);

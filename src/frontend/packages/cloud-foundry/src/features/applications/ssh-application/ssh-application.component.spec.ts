@@ -14,8 +14,8 @@ describe('SshApplicationComponent', () => {
   let component: SshApplicationComponent;
   let fixture: ComponentFixture<SshApplicationComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [SshApplicationComponent],
       imports: [
         CoreModule,
@@ -27,11 +27,8 @@ describe('SshApplicationComponent', () => {
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         TabNavService
       ],
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(SshApplicationComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

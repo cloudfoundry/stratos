@@ -9,7 +9,7 @@ describe('KubeConfigTableCertComponent', () => {
   let component: KubeConfigTableCertComponent;
   let fixture: ComponentFixture<KubeConfigTableCertComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...KubernetesBaseTestModules
@@ -20,7 +20,7 @@ describe('KubeConfigTableCertComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubeConfigTableCertComponent);

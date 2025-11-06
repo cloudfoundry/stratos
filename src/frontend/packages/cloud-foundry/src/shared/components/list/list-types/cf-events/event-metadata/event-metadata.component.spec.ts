@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { ValuesPipe } from '../../../../../../../../core/src/shared/pipes/values.pipe';
 import { EventMetadataComponent } from './event-metadata.component';
 
@@ -9,15 +8,13 @@ describe('EventMetadataComponent', () => {
   let component: EventMetadataComponent;
   let fixture: ComponentFixture<EventMetadataComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [EventMetadataComponent, ValuesPipe],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [EventMetadataComponent, ValuesPipe,
       imports: [CoreModule]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(EventMetadataComponent);
     component = fixture.componentInstance;
     component.metadata = {};

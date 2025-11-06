@@ -9,13 +9,13 @@ describe('KubernetesPodContainersComponent', () => {
   let component: KubernetesPodContainersComponent;
   let fixture: ComponentFixture<KubernetesPodContainersComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesPodContainersComponent],
       imports: KubernetesBaseTestModules
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesPodContainersComponent);

@@ -1,7 +1,7 @@
 # Stratos Development Makefile
 # Full stack development with source maps and hot reload
 
-.PHONY: help build build-frontend build-backend dev-frontend dev-backend dev-full-build clean-dev
+.PHONY: help bootstrap build build-frontend build-backend dev-frontend dev-backend dev-full-build clean-dev check-bootstrap test-unit test-e2e test-all
 
 # Default target
 .DEFAULT_GOAL := help
@@ -17,10 +17,18 @@ NC     := \033[0m # No Color
 help:
 	@echo "Stratos Development Commands:"
 	@echo ""
+	@echo "Setup Commands:"
+	@echo "  make bootstrap       - Initialize fresh checkout (run once after git clone)"
+	@echo ""
 	@echo "Build Commands:"
 	@echo "  make build           - Build both frontend and backend"
 	@echo "  make build-frontend  - Build Angular frontend only"
 	@echo "  make build-backend   - Build Jetstream backend only"
+	@echo ""
+	@echo "Test Commands:"
+	@echo "  make test-unit       - Run unit tests (Vitest)"
+	@echo "  make test-e2e        - Run E2E tests (Playwright)"
+	@echo "  make test-all        - Run all tests (unit + E2E)"
 	@echo ""
 	@echo "Development Commands:"
 	@echo "  make dev-frontend    - Build and start Angular dev server (port 5000)"
@@ -33,6 +41,44 @@ help:
 	@echo "  Terminal 2: make dev-backend"
 	@echo "  Access at:  https://127.0.0.1:5440"
 	@echo ""
+	@echo "First-Time Setup:"
+	@echo "  1. git clone \"git@github.com:cloudfoundry/stratos\""
+	@echo "  2. cd stratos"
+	@echo "  3. make bootstrap      (one-time setup)"
+	@echo "  4. bun install         (install dependencies)"
+	@echo "  5. make dev-frontend   (start development)"
+	@echo ""
+
+# Bootstrap fresh checkout (creates required files before bun install)
+bootstrap:
+	@echo "$(BLUE)==> Bootstrapping Stratos development environment...$(NC)"
+	@if [ ! -f bootstrap ]; then \
+		echo "$(RED)✗ bootstrap not found$(NC)"; \
+		exit 1; \
+	fi
+	@./bootstrap
+	@echo ""
+	@echo "$(GREEN)✓ Bootstrap complete!$(NC)"
+	@echo "$(YELLOW)Next steps:$(NC)"
+	@echo "  1. Run: bun install"
+	@echo "  2. Run: make dev-frontend (or make build)"
+
+# Check if bootstrap has been run
+check-bootstrap:
+	@if [ ! -d dist-devkit ]; then \
+		echo "$(RED)✗ Environment not bootstrapped!$(NC)"; \
+		echo "$(YELLOW)Required files are missing. Please run:$(NC)"; \
+		echo "  make bootstrap"; \
+		echo "  bun install"; \
+		exit 1; \
+	fi
+	@if [ ! -f src/frontend/packages/core/src/_custom-import.module.ts ]; then \
+		echo "$(RED)✗ Extension module not generated!$(NC)"; \
+		echo "$(YELLOW)Required files are missing. Please run:$(NC)"; \
+		echo "  make bootstrap"; \
+		echo "  bun install"; \
+		exit 1; \
+	fi
 
 .PHONY: install-tools
 install-tools:
@@ -48,7 +94,7 @@ build: build-frontend build-backend
 	@echo "✅ Full build complete (frontend + backend)"
 
 # Build Angular frontend
-build-frontend:
+build-frontend: check-bootstrap
 	@echo "Building Angular frontend..."
 	bun run build
 
@@ -58,7 +104,7 @@ build-backend:
 	bun run build-backend
 
 # Start Angular dev server with source maps and hot reload
-dev-frontend:
+dev-frontend: check-bootstrap
 	@echo "Starting Angular dev server with source maps on https://127.0.0.1:5440"
 	@echo "✅ Source maps enabled (real TypeScript line numbers)"
 	@echo "✅ Hot reload enabled (instant updates on file save)"
@@ -122,3 +168,19 @@ clean-dev:
 	rm -rf .angular/
 	rm -rf src/jetstream/jetstream
 	@echo "✅ Development artifacts cleaned"
+
+# Run unit tests (Vitest)
+test-unit: check-bootstrap
+	@echo "$(BLUE)==> Running unit tests (Vitest)...$(NC)"
+	bun test
+	@echo "$(GREEN)✓ Unit tests complete$(NC)"
+
+# Run E2E tests (Playwright)
+test-e2e: check-bootstrap
+	@echo "$(BLUE)==> Running E2E tests (Playwright)...$(NC)"
+	bun run e2e
+	@echo "$(GREEN)✓ E2E tests complete$(NC)"
+
+# Run all tests
+test-all: test-unit test-e2e
+	@echo "$(GREEN)✓ All tests complete$(NC)"

@@ -22,7 +22,7 @@ interface SuiteResult {
   timestamp: string;
 }
 
-export default class StratosReporter implements Reporter {
+class StratosReporter implements Reporter {
   private results: TestResults = {
     suites: {},
     totalTests: 0,
@@ -192,3 +192,5 @@ Exit Code: ${this.results.exitCode}
     return focused;
   }
 }
+
+export default StratosReporter;

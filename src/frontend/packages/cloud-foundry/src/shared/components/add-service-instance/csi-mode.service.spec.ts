@@ -1,4 +1,4 @@
-import { inject, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { generateCfBaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
@@ -12,7 +12,8 @@ describe('CsiModeService', () => {
     });
   });
 
-  it('should be created', inject([CsiModeService], (service: CsiModeService) => {
+  it('should be created', () => {
+    const service = TestBed.inject(CsiModeService);
     expect(service).toBeTruthy();
-  }));
+  });
 });

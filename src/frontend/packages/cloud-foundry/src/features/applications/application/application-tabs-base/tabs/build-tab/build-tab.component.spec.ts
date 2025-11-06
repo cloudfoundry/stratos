@@ -1,6 +1,6 @@
 import { HttpClientModule } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ComponentFixture, inject, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -26,8 +26,8 @@ describe('BuildTabComponent', () => {
   let component: BuildTabComponent;
   let fixture: ComponentFixture<BuildTabComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [
         BuildTabComponent,
         ViewBuildpackComponent,
@@ -54,15 +54,12 @@ describe('BuildTabComponent', () => {
         { provide: APP_GUID, useValue: '' },
         ApplicationPollingService
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(inject([ApplicationService], (applicationService: ApplicationService) => {
     fixture = TestBed.createComponent(BuildTabComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-  }));
+  });
 
   afterEach(() => {
     fixture.destroy();

@@ -61,7 +61,7 @@ describe('CustomExpansionPanelComponent', () => {
       expect(component.expanded).toBe(initialState);
     });
 
-    it('should emit opened event when expanding', (done) => {
+    it('should emit opened event when expanding', async () => {
       component.expanded = false;
       let openedEmitted = false;
 
@@ -73,13 +73,12 @@ describe('CustomExpansionPanelComponent', () => {
       header.nativeElement.click();
 
       fixture.detectChanges();
-      fixture.whenStable().then(() => {
-        expect(openedEmitted).toBe(true);
-        done();
-      });
+      await fixture.whenStable();
+
+      expect(openedEmitted).toBe(true);
     });
 
-    it('should emit closed event when collapsing', (done) => {
+    it('should emit closed event when collapsing', async () => {
       component.expanded = true;
       let closedEmitted = false;
 
@@ -91,10 +90,9 @@ describe('CustomExpansionPanelComponent', () => {
       header.nativeElement.click();
 
       fixture.detectChanges();
-      fixture.whenStable().then(() => {
-        expect(closedEmitted).toBe(true);
-        done();
-      });
+      await fixture.whenStable();
+
+      expect(closedEmitted).toBe(true);
     });
 
     it('should not toggle when disabled', () => {
@@ -108,7 +106,7 @@ describe('CustomExpansionPanelComponent', () => {
       expect(component.expanded).toBe(false);
     });
 
-    it('should not emit events when toggling while disabled', (done) => {
+    it('should not emit events when toggling while disabled', async () => {
       component.disabled = true;
       component.expanded = false;
 
@@ -124,10 +122,9 @@ describe('CustomExpansionPanelComponent', () => {
       header.nativeElement.click();
 
       fixture.detectChanges();
-      fixture.whenStable().then(() => {
-        expect(eventEmitted).toBe(false);
-        done();
-      });
+      await fixture.whenStable();
+
+      expect(eventEmitted).toBe(false);
     });
   });
 
@@ -375,7 +372,7 @@ describe('CustomExpansionPanelComponent', () => {
       expect(panel.nativeElement.classList.contains('disabled')).toBe(true);
     });
 
-    it('should emit only appropriate events on toggle', (done) => {
+    it('should emit only appropriate events on toggle', async () => {
       let openedCount = 0;
       let closedCount = 0;
 
@@ -387,21 +384,18 @@ describe('CustomExpansionPanelComponent', () => {
       // Open
       header.nativeElement.click();
       fixture.detectChanges();
+      await fixture.whenStable();
 
-      setTimeout(() => {
-        expect(openedCount).toBe(1);
-        expect(closedCount).toBe(0);
+      expect(openedCount).toBe(1);
+      expect(closedCount).toBe(0);
 
-        // Close
-        header.nativeElement.click();
-        fixture.detectChanges();
+      // Close
+      header.nativeElement.click();
+      fixture.detectChanges();
+      await fixture.whenStable();
 
-        setTimeout(() => {
-          expect(openedCount).toBe(1);
-          expect(closedCount).toBe(1);
-          done();
-        }, 50);
-      }, 50);
+      expect(openedCount).toBe(1);
+      expect(closedCount).toBe(1);
     });
   });
 });

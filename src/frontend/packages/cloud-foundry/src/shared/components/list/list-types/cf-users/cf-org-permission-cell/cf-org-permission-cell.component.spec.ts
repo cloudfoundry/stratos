@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
 import {
@@ -13,24 +13,20 @@ describe('CfUserPermissionCellComponent', () => {
   let component: CfOrgPermissionCellComponent;
   let fixture: ComponentFixture<CfOrgPermissionCellComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
-        CfOrgPermissionCellComponent
-      ],
-      providers: [
-        ...generateTestCfEndpointServiceProvider()
-      ],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
+        CfOrgPermissionCellComponent,
         ...generateCfStoreModules(),
         SharedModule,
         HttpClientModule
+      ],
+      providers: [
+        ...generateTestCfEndpointServiceProvider()
       ]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(CfOrgPermissionCellComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

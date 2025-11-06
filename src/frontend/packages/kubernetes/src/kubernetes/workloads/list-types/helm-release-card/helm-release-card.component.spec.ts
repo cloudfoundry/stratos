@@ -10,7 +10,7 @@ describe('HelmReleaseCardComponent', () => {
   let component: HelmReleaseCardComponent;
   let fixture: ComponentFixture<HelmReleaseCardComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [HelmReleaseCardComponent],
       imports: KubernetesBaseTestModules,
@@ -19,7 +19,7 @@ describe('HelmReleaseCardComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(HelmReleaseCardComponent);

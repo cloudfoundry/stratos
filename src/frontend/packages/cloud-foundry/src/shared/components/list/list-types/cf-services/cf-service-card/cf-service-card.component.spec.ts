@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import {
   BooleanIndicatorComponent,
@@ -27,8 +27,8 @@ describe('CfServiceCardComponent', () => {
   let component: CfServiceCardComponent;
   let fixture: ComponentFixture<CfServiceCardComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [
         CfServiceCardComponent,
         CfOrgSpaceLinksComponent,
@@ -48,9 +48,7 @@ describe('CfServiceCardComponent', () => {
       ]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(CfServiceCardComponent);
     component = fixture.componentInstance;
     component.row = {

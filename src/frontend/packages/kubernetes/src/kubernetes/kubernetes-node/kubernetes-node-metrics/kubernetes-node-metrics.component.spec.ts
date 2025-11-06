@@ -17,7 +17,7 @@ describe('KubernetesNodeMetricsComponent', () => {
   let component: KubernetesNodeMetricsComponent;
   let fixture: ComponentFixture<KubernetesNodeMetricsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         KubernetesNodeMetricsComponent,
@@ -28,7 +28,7 @@ describe('KubernetesNodeMetricsComponent', () => {
       providers: [BaseKubeGuid, KubernetesEndpointService, KubernetesNodeService]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesNodeMetricsComponent);

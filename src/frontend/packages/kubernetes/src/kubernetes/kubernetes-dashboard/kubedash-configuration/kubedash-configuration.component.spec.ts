@@ -11,7 +11,7 @@ describe('KubedashConfigurationComponent', () => {
   let component: KubedashConfigurationComponent;
   let fixture: ComponentFixture<KubedashConfigurationComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [...KubernetesBaseTestModules],
       declarations: [KubedashConfigurationComponent],
@@ -33,7 +33,7 @@ describe('KubedashConfigurationComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubedashConfigurationComponent);

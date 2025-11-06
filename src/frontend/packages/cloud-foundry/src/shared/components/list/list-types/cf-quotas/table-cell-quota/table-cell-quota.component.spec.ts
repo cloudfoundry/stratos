@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
 import { createBasicStoreModule } from '@stratosui/store/testing';
 
@@ -11,18 +11,16 @@ describe('TableCellQuotaComponent', () => {
   let component: TableCellQuotaComponent;
   let fixture: ComponentFixture<TableCellQuotaComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [TableCellQuotaComponent],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [TableCellQuotaComponent,
       imports: [
         RouterTestingModule,
         createBasicStoreModule(),
       ]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellQuotaComponent);
     component = fixture.componentInstance;
     component.config = {

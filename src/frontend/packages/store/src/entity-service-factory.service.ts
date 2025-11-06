@@ -9,13 +9,14 @@ import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service'
 import { ENTITY_CATALOG_TOKEN } from './tokens/store-injection.tokens';
 import { EntityRequestAction } from './types/request.types';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class EntityServiceFactory {
-  private store = inject(Store<GeneralEntityAppState>);
-  private entityMonitorFactory = inject(EntityMonitorFactory);
-  private entityCatalog = inject<IEntityCatalog>(ENTITY_CATALOG_TOKEN);
+
+  constructor(
+    private store: Store<GeneralEntityAppState>,
+    private entityMonitorFactory: EntityMonitorFactory,
+    @Inject(ENTITY_CATALOG_TOKEN) private entityCatalog: IEntityCatalog
+  ) {}
 
   private isConfig(config: string | EntityActionBuilderEntityConfig) {
     if (config) {

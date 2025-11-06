@@ -1,5 +1,5 @@
-import { inject, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import {
   generateCfBaseTestModules,
@@ -24,7 +24,8 @@ describe('CfOrgsSpaceListConfigService', () => {
     });
   });
 
-  it('should be created', inject([CfSpacesListConfigService], (service: CfSpacesListConfigService) => {
+  it('should be created', () => {
+    const service = TestBed.inject(CfSpacesListConfigService);
     expect(service).toBeTruthy();
-  }));
+  });
 });

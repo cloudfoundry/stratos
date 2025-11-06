@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import {
   CopyToClipboardComponent,
@@ -12,20 +12,18 @@ describe('TableCellEventActeeComponent', () => {
   let component: TableCellEventActeeComponent;
   let fixture: ComponentFixture<TableCellEventActeeComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
         TableCellEventActeeComponent,
         CopyToClipboardComponent
-      ],
+      ,
       imports: [
         ...BaseTestModulesNoShared
       ]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellEventActeeComponent);
     component = fixture.componentInstance;
     component.row = { entity: {}, metadata: {} } as APIResource;

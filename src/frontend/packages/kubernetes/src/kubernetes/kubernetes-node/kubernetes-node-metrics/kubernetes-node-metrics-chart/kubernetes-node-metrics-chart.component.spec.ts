@@ -8,13 +8,13 @@ describe('KubernetesNodeMetricsChartComponent', () => {
   let component: KubernetesNodeMetricsChartComponent;
   let fixture: ComponentFixture<KubernetesNodeMetricsChartComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesNodeMetricsChartComponent],
       imports: KubernetesBaseTestModules
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesNodeMetricsChartComponent);

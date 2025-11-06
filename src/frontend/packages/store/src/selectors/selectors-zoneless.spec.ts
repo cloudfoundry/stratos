@@ -8,9 +8,8 @@
  * 4. Verify selector memoization behavior
  */
 
-import { Component, Signal, computed } from '@angular/core';
+import { Component, Signal, computed, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideExperimentalZonelessChangeDetection } from '@angular/core';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { InternalAppState } from '../app-state';
 import { EndpointModel } from '../types/endpoint.types';
@@ -20,6 +19,8 @@ import {
   endpointsEntityRequestDataSelector,
   connectedEndpointsSelector
 } from './endpoint.selectors';
+import { firstValueFrom } from 'rxjs';
+import { JsonPipe } from '@angular/common';
 
 describe('Selectors in Zoneless Mode', () => {
   let store: MockStore;
@@ -42,7 +43,7 @@ describe('Selectors in Zoneless Mode', () => {
 
   const initialState: Partial<InternalAppState> = {
     requestData: {
-      endpoint: {
+      stratosEndpoint: {
         'endpoint-1': mockEndpoint
       }
     }
@@ -52,7 +53,7 @@ describe('Selectors in Zoneless Mode', () => {
     TestBed.configureTestingModule({
       providers: [
         // CRITICAL: Enable zoneless change detection
-        provideExperimentalZonelessChangeDetection(),
+        provideZonelessChangeDetection(),
         provideMockStore({ initialState })
       ]
     });
@@ -61,21 +62,21 @@ describe('Selectors in Zoneless Mode', () => {
   });
 
   describe('Direct Selector Usage', () => {
-    it('should select endpoint entities from state', () => {
-      const result = store.selectSnapshot(endpointEntitiesSelector);
+    it('should select endpoint entities from state', async () => {
+      const result = await firstValueFrom(store.select(endpointEntitiesSelector));
       expect(result).toBeDefined();
       expect(result['endpoint-1']).toEqual(mockEndpoint);
     });
 
-    it('should select specific endpoint by guid', () => {
+    it('should select specific endpoint by guid', async () => {
       const selector = endpointsEntityRequestDataSelector('endpoint-1');
-      const result = store.selectSnapshot(selector);
+      const result = await firstValueFrom(store.select(selector));
       expect(result).toEqual(mockEndpoint);
     });
 
-    it('should filter connected endpoints', () => {
+    it('should filter connected endpoints', async () => {
       const selector = connectedEndpointsSelector();
-      const result = store.selectSnapshot(selector);
+      const result = await firstValueFrom(store.select(selector));
       expect(result['endpoint-1']).toEqual(mockEndpoint);
     });
   });
@@ -124,7 +125,7 @@ describe('Selectors in Zoneless Mode', () => {
       store.setState({
         ...initialState,
         requestData: {
-          endpoint: {
+          stratosEndpoint: {
             'endpoint-1': updatedEndpoint
           }
         }
@@ -137,35 +138,35 @@ describe('Selectors in Zoneless Mode', () => {
   });
 
   describe('Selector Memoization', () => {
-    it('should memoize selector results', () => {
+    it('should memoize selector results', async () => {
       const selector = endpointsEntityRequestDataSelector('endpoint-1');
 
       // Call selector multiple times with same state
-      const result1 = store.selectSnapshot(selector);
-      const result2 = store.selectSnapshot(selector);
-      const result3 = store.selectSnapshot(selector);
+      const result1 = await firstValueFrom(store.select(selector));
+      const result2 = await firstValueFrom(store.select(selector));
+      const result3 = await firstValueFrom(store.select(selector));
 
       // Should return same reference (memoized)
       expect(result1).toBe(result2);
       expect(result2).toBe(result3);
     });
 
-    it('should recompute when state changes', () => {
+    it('should recompute when state changes', async () => {
       const selector = endpointsEntityRequestDataSelector('endpoint-1');
-      const result1 = store.selectSnapshot(selector);
+      const result1 = await firstValueFrom(store.select(selector));
 
       // Update state
       const updatedEndpoint = { ...mockEndpoint, name: 'Changed' };
       store.setState({
         ...initialState,
         requestData: {
-          endpoint: {
+          stratosEndpoint: {
             'endpoint-1': updatedEndpoint
           }
         }
       });
 
-      const result2 = store.selectSnapshot(selector);
+      const result2 = await firstValueFrom(store.select(selector));
 
       // Should be different reference (recomputed)
       expect(result1).not.toBe(result2);
@@ -174,16 +175,16 @@ describe('Selectors in Zoneless Mode', () => {
   });
 
   describe('Complex Selector Chains', () => {
-    it('should handle composed selectors', () => {
+    it('should handle composed selectors', async () => {
       // Composed selectors using `compose` should work correctly
       const selector = connectedEndpointsSelector();
-      const result = store.selectSnapshot(selector);
+      const result = await firstValueFrom(store.select(selector));
 
       expect(Object.keys(result)).toContain('endpoint-1');
       expect(result['endpoint-1'].connectionStatus).toBe('connected');
     });
 
-    it('should filter correctly in compose chains', () => {
+    it('should filter correctly in compose chains', async () => {
       // Add disconnected endpoint
       const disconnectedEndpoint: EndpointModel = {
         ...mockEndpoint,
@@ -195,7 +196,7 @@ describe('Selectors in Zoneless Mode', () => {
       store.setState({
         ...initialState,
         requestData: {
-          endpoint: {
+          stratosEndpoint: {
             'endpoint-1': mockEndpoint,
             'endpoint-2': disconnectedEndpoint
           }
@@ -203,7 +204,7 @@ describe('Selectors in Zoneless Mode', () => {
       });
 
       const selector = connectedEndpointsSelector();
-      const result = store.selectSnapshot(selector);
+      const result = await firstValueFrom(store.select(selector));
 
       // Should only include connected endpoint
       expect(Object.keys(result)).toHaveLength(1);
@@ -213,20 +214,20 @@ describe('Selectors in Zoneless Mode', () => {
   });
 
   describe('Error Handling', () => {
-    it('should handle missing state gracefully', () => {
+    it('should handle missing state gracefully', async () => {
       store.setState({ requestData: {} });
       const selector = endpointsEntityRequestDataSelector('nonexistent');
-      const result = store.selectSnapshot(selector);
+      const result = await firstValueFrom(store.select(selector));
       expect(result).toBeUndefined();
     });
 
-    it('should handle empty endpoint list', () => {
+    it('should handle empty endpoint list', async () => {
       store.setState({
         ...initialState,
-        requestData: { endpoint: {} }
+        requestData: { stratosEndpoint: {} }
       });
       const selector = connectedEndpointsSelector();
-      const result = store.selectSnapshot(selector);
+      const result = await firstValueFrom(store.select(selector));
       expect(result).toEqual({});
     });
   });
@@ -238,11 +239,34 @@ describe('Selectors in Zoneless Mode', () => {
 describe('Advanced Signal Selector Patterns', () => {
   let store: MockStore;
 
+  const mockEndpoint: EndpointModel = {
+    guid: 'endpoint-1',
+    name: 'Test Endpoint',
+    cnsi_type: 'cf',
+    api_endpoint: {
+      Host: 'api.test.com',
+      Scheme: 'https'
+    },
+    connectionStatus: 'connected',
+    user: null,
+    metadata: {},
+    sub_type: '',
+    endpoint_metadata: {}
+  };
+
+  const initialState: Partial<InternalAppState> = {
+    requestData: {
+      stratosEndpoint: {
+        'endpoint-1': mockEndpoint
+      }
+    }
+  };
+
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        provideExperimentalZonelessChangeDetection(),
-        provideMockStore({ initialState: {} })
+        provideZonelessChangeDetection(),
+        provideMockStore({ initialState })
       ]
     });
     store = TestBed.inject(MockStore);
@@ -257,7 +281,8 @@ describe('Advanced Signal Selector Patterns', () => {
           <span class="connected">{{ connected() | json }}</span>
         </div>
       `,
-      standalone: true
+      standalone: true,
+      imports: [JsonPipe]
     })
     class MultiSignalComponent {
       endpoints = selectAsSignal(endpointEntitiesSelector);
@@ -294,7 +319,7 @@ describe('Advanced Signal Selector Patterns', () => {
       const fixture = TestBed.createComponent(ComputedSignalComponent);
       const component = fixture.componentInstance;
 
-      expect(component.endpointCount()).toBe(0);
+      expect(component.endpointCount()).toBe(1);
     });
   });
 });
@@ -306,7 +331,7 @@ export function testSignalSelector<T>(
 ): Signal<T | undefined> {
   TestBed.configureTestingModule({
     providers: [
-      provideExperimentalZonelessChangeDetection(),
+      provideZonelessChangeDetection(),
       provideMockStore({ initialState })
     ]
   });

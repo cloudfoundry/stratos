@@ -11,14 +11,14 @@ describe('KubernetesNodeSummaryCardComponent', () => {
   let component: KubernetesNodeSummaryCardComponent;
   let fixture: ComponentFixture<KubernetesNodeSummaryCardComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesNodeSummaryCardComponent],
       imports: KubernetesBaseTestModules,
       providers: [BaseKubeGuid, KubernetesEndpointService, KubernetesNodeService]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesNodeSummaryCardComponent);

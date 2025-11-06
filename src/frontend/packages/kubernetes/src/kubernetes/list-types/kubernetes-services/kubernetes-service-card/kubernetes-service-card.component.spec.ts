@@ -11,7 +11,7 @@ describe('KubeServiceCardComponent', () => {
   let component: KubeServiceCardComponent;
   let fixture: ComponentFixture<KubeServiceCardComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         KubeServiceCardComponent,
@@ -20,7 +20,7 @@ describe('KubeServiceCardComponent', () => {
       imports: [...KubernetesBaseTestModules],
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubeServiceCardComponent);

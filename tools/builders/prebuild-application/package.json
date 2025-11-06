@@ -1,0 +1,22 @@
+{
+  "name": "@stratos/builders",
+  "version": "1.0.0",
+  "description": "Custom Angular builders with prebuild script execution",
+  "main": "dist/index.js",
+  "builders": "builders.json",
+  "dependencies": {
+    "@angular-devkit/architect": "^0.2003.9",
+    "@angular-devkit/core": "^20.3.9",
+    "@angular-devkit/build-angular": "^20.3.9",
+    "rxjs": "^7.8.2",
+    "glob": "^11.0.0"
+  },
+  "devDependencies": {
+    "typescript": "~5.8.3",
+    "@types/node": "^24.2.1"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  }
+}

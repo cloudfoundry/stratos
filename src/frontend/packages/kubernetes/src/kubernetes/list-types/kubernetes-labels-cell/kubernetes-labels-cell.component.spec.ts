@@ -9,13 +9,13 @@ describe('KubernetesLabelsCellComponent', () => {
   let component: KubernetesLabelsCellComponent;
   let fixture: ComponentFixture<KubernetesLabelsCellComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesLabelsCellComponent],
       imports: BaseTestModules
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesLabelsCellComponent);

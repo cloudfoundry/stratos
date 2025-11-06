@@ -9,7 +9,7 @@ describe('AnalysisReportViewerComponent', () => {
   let component: AnalysisReportViewerComponent;
   let fixture: ComponentFixture<AnalysisReportViewerComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ AnalysisReportViewerComponent ],
       imports: [
@@ -20,7 +20,7 @@ describe('AnalysisReportViewerComponent', () => {
       ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AnalysisReportViewerComponent);

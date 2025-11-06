@@ -75,8 +75,8 @@ describe('MetaCardComponent', () => {
   let element: HTMLElement;
   let entityMonitorFactory: EntityMonitorFactoryMock;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         SharedModule,
         StoreModule,
@@ -90,9 +90,8 @@ describe('MetaCardComponent', () => {
         { provide: EntityMonitorFactory, useClass: EntityMonitorFactoryMock },
         { provide: UserFavoriteManager, useClass: UserFavoriteManagerMock },
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(WrapperComponent);

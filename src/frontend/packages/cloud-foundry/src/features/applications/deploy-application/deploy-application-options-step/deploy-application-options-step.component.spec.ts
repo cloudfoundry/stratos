@@ -1,36 +1,28 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideExperimentalZonelessChangeDetection } from '@angular/core';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { provideRouter } from '@angular/router';
 
-import { CoreModule } from '../../../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../../../core/src/shared/shared.module';
 import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import {
-  ApplicationEnvVarsHelper,
-} from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { ApplicationEnvVarsHelper } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { DeployApplicationOptionsStepComponent } from './deploy-application-options-step.component';
 
 describe('DeployApplicationOptionsStepComponent', () => {
   let component: DeployApplicationOptionsStepComponent;
   let fixture: ComponentFixture<DeployApplicationOptionsStepComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [DeployApplicationOptionsStepComponent],
-      providers: [ApplicationEnvVarsHelper],
-      imports: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [DeployApplicationOptionsStepComponent],
+      providers: [
+        provideExperimentalZonelessChangeDetection(),
+        provideNoopAnimations(),
+        provideRouter([]),
         ...generateCfStoreModules(),
-        CoreModule,
-        SharedModule,
-        RouterTestingModule,
-        NoopAnimationsModule,
+        ApplicationEnvVarsHelper
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(DeployApplicationOptionsStepComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

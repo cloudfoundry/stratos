@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import {
   generateCfBaseTestModulesNoShared,
@@ -12,13 +12,13 @@ describe('TableCellServiceCfBreadcrumbsComponent', () => {
   let component: TableCellServiceCfBreadcrumbsComponent;
   let fixture: ComponentFixture<TableCellServiceCfBreadcrumbsComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
         TableCellServiceCfBreadcrumbsComponent,
         CfOrgSpaceLinksComponent
         // app-cf-org-space-links
-      ],
+      ,
       imports: [
         generateCfBaseTestModulesNoShared()
       ],
@@ -27,9 +27,7 @@ describe('TableCellServiceCfBreadcrumbsComponent', () => {
       ]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellServiceCfBreadcrumbsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

@@ -1,12 +1,10 @@
-import { CommonModule, DatePipe } from '@angular/common';
-import { HttpBackend, HttpClient, HttpClientModule } from '@angular/common/http';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { DatePipe } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { provideExperimentalZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Store } from '@ngrx/store';
 
-import { CoreModule } from '../../../../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
 import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../../../git/src/shared/github.helpers';
 import { generateCfStoreModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { SetAppSourceDetails } from '../../../../../actions/deploy-applications.actions';
@@ -16,37 +14,25 @@ describe('CommitListWrapperComponent', () => {
   let component: CommitListWrapperComponent;
   let fixture: ComponentFixture<CommitListWrapperComponent>;
 
-  beforeEach(() => {
-    // const store = generateCfTopLevelStoreEntities() as CFAppState;
-    TestBed.configureTestingModule({
-      declarations: [CommitListWrapperComponent],
-      imports: [
-        ...generateCfStoreModules(),
-        CommonModule,
-        CoreModule,
-        SharedModule,
-        HttpClientModule,
-        HttpClientTestingModule
-      ],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [CommitListWrapperComponent],
       providers: [
+        provideExperimentalZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        ...generateCfStoreModules(),
         DatePipe,
-        { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
-        HttpClient,
-        {
-          provide: HttpBackend,
-          useClass: HttpTestingController
-        }
+        { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL }
       ]
-    })
-      .compileComponents();
+    }).compileComponents();
+
     const store = TestBed.inject(Store);
     store.dispatch(new SetAppSourceDetails({
       id: 'id',
       name: 'name'
     }));
-  });
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(CommitListWrapperComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

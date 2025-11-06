@@ -8,13 +8,13 @@ describe('ConditionCellComponent', () => {
   let component: ConditionCellComponent;
   let fixture: ComponentFixture<ConditionCellComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ConditionCellComponent],
       imports: BaseTestModules
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ConditionCellComponent);

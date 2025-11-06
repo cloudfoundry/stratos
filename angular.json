@@ -9,6 +9,61 @@
       "projectType": "application",
       "architect": {
         "build": {
+          "builder": "@stratos/builders:prebuild-application",
+          "options": {
+            "browserTarget": "stratos:build-internal",
+            "prebuildScripts": [
+              {
+                "name": "Clean symlinks",
+                "script": "sh -c 'mv build/clean-symlinks.js build/clean-symlinks.cjs && node build/clean-symlinks.cjs && mv build/clean-symlinks.cjs build/clean-symlinks.js'",
+                "phase": 1,
+                "cache": true,
+                "cacheKey": ["src/frontend/packages/**/package.json"],
+                "timeout": 30000,
+                "required": true
+              },
+              {
+                "name": "Store git metadata",
+                "script": "sh -c 'mv build/store-git-metadata.js build/store-git-metadata.cjs && node build/store-git-metadata.cjs && mv build/store-git-metadata.cjs build/store-git-metadata.js'",
+                "phase": 1,
+                "cache": true,
+                "cacheKey": [".git/HEAD", ".git/refs/heads/**"],
+                "timeout": 30000,
+                "required": true
+              },
+              {
+                "name": "Generate custom imports",
+                "script": "sh -c 'mv build/extension-generator.js build/extension-generator.cjs && node build/extension-generator.cjs && mv build/extension-generator.cjs build/extension-generator.js'",
+                "phase": 2,
+                "cache": true,
+                "cacheKey": ["custom-src/**/*", "src/frontend/packages/core/custom-extensions.json"],
+                "timeout": 60000,
+                "required": true
+              },
+              {
+                "name": "Prepare backend",
+                "script": "sh -c 'mv dist-devkit/backend.js dist-devkit/backend.cjs 2>/dev/null || true && node dist-devkit/backend.cjs && mv dist-devkit/backend.cjs dist-devkit/backend.js 2>/dev/null || true'",
+                "phase": 2,
+                "cache": true,
+                "cacheKey": ["dist-devkit/backend.js", "src/jetstream/**/*.go"],
+                "timeout": 60000,
+                "required": false
+              }
+            ]
+          },
+          "configurations": {
+            "development": {
+              "browserTarget": "stratos:build-internal:development"
+            },
+            "production": {
+              "browserTarget": "stratos:build-internal:production"
+            },
+            "desktop": {
+              "browserTarget": "stratos:build-internal:desktop"
+            }
+          }
+        },
+        "build-internal": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
             "outputPath": "dist",

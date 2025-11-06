@@ -9,14 +9,14 @@ describe('NodePodCountComponent', () => {
   let component: NodePodCountComponent;
   let fixture: ComponentFixture<NodePodCountComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [NodePodCountComponent],
       imports: KubernetesBaseTestModules,
       providers: [KubeBaseGuidMock, KubernetesEndpointService]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(NodePodCountComponent);

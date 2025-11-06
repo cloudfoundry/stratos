@@ -1,10 +1,9 @@
 import { DatePipe } from '@angular/common';
-import { inject, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Store } from '@ngrx/store';
 
-import { CoreModule } from '../../../../../../../core/src/core/core.module';
 import {
   CurrentUserPermissionsService,
 } from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
@@ -41,13 +40,13 @@ describe('CfAppRoutesListConfigService', () => {
       imports: [
         ...generateCfStoreModules(),
         SharedModule,
-        CoreModule,
         NoopAnimationsModule,
       ]
     });
   });
 
-  it('should be created', inject([CfAppRoutesListConfigService], (service: CfAppRoutesListConfigService) => {
+  it('should be created', () => {
+    const service = TestBed.inject(CfAppRoutesListConfigService);
     expect(service).toBeTruthy();
-  }));
+  });
 });

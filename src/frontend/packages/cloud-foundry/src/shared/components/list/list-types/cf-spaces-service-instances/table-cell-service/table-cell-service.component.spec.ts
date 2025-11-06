@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import {
   LongRunningCfOperationsService,
@@ -18,20 +18,18 @@ describe('TableCellServiceComponent', () => {
   let component: TableCellServiceComponent;
   let fixture: ComponentFixture<TableCellServiceComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
         TableCellServiceComponent,
         ServiceInstanceLastOpComponent,
         BooleanIndicatorComponent
-      ],
+      ,
       imports: [...generateCfBaseTestModulesNoShared()],
       providers: [EntityMonitorFactory, LongRunningCfOperationsService]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellServiceComponent);
     component = fixture.componentInstance;
     component.row = {

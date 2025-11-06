@@ -1,5 +1,5 @@
-import { inject, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { UtilsService } from '../../core/utils.service';
 import { MbToHumanSizePipe } from './mb-to-human-size.pipe';
@@ -9,17 +9,17 @@ describe('MbToHumanSizePipe', () => {
   let pipe: MbToHumanSizePipe;
   let utilsService: UtilsService;
 
-  beforeEach(() => TestBed.configureTestingModule({
-    providers: [
-      MbToHumanSizePipe,
-      UtilsService
-    ]
-  }));
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        MbToHumanSizePipe,
+        UtilsService
+      ]
+    });
 
-  beforeEach(inject([MbToHumanSizePipe], (p: MbToHumanSizePipe) => {
     utilsService = TestBed.inject(UtilsService);
-    pipe = p;
-  }));
+    pipe = TestBed.inject(MbToHumanSizePipe);
+  });
 
   it('create an instance', () => {
     expect(pipe).toBeTruthy();

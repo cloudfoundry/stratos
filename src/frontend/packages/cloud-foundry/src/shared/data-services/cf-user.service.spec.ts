@@ -1,4 +1,4 @@
-import { inject, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { SharedModule } from '../../../../core/src/shared/shared.module';
@@ -23,7 +23,8 @@ describe('CfUserService', () => {
     });
   });
 
-  it('should be created', inject([CfUserService], (service: CfUserService) => {
+  it('should be created', () => {
+    const service = TestBed.inject(CfUserService);
     expect(service).toBeTruthy();
-  }));
+  });
 });

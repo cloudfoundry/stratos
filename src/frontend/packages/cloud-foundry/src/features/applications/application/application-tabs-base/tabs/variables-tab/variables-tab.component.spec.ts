@@ -17,8 +17,8 @@ describe('VariablesTabComponent', () => {
   let component: VariablesTabComponent;
   let fixture: ComponentFixture<VariablesTabComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [VariablesTabComponent],
       imports: [
         StoreModule,
@@ -33,14 +33,10 @@ describe('VariablesTabComponent', () => {
         ApplicationStateService,
         ApplicationEnvVarsHelper,
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(VariablesTabComponent);
     component = fixture.componentInstance;
-
     fixture.detectChanges();
   });
 

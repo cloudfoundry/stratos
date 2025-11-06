@@ -11,7 +11,7 @@ describe('KubernetesCertsAuthFormComponent', () => {
   let component: KubernetesCertsAuthFormComponent;
   let fixture: ComponentFixture<KubernetesCertsAuthFormComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesCertsAuthFormComponent],
       imports: [
@@ -21,7 +21,7 @@ describe('KubernetesCertsAuthFormComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesCertsAuthFormComponent);

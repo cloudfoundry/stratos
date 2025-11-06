@@ -5,10 +5,11 @@ import { join } from 'path';
 export default defineConfig({
   plugins: [angular()],
   test: {
+    root: join(__dirname),
     name: 'git',
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['src/test-setup.ts'],
+    setupFiles: [join(__dirname, 'src/test-setup.ts')],
     include: ['src/**/*.spec.ts'],
     exclude: ['node_modules', 'dist', 'out-tsc', '**/test-e2e/**', '**/e2e/**'],
     coverage: {
@@ -18,7 +19,7 @@ export default defineConfig({
       include: ['src/**/*.ts'],
       exclude: ['src/**/*.spec.ts', 'src/test-setup.ts', 'src/**/*.d.ts'],
     },
-    reporters: ['default', '../../build/vitest-stratos-reporter.ts'],
+    reporters: ['default'], // '../../../../build/vitest-stratos-reporter.ts' - disabled for Vitest 4 compatibility
     testTimeout: 10000,
     hookTimeout: 10000,
   },
@@ -26,6 +27,10 @@ export default defineConfig({
     alias: {
       '@stratosui/core': join(__dirname, '../core/src/public-api.ts'),
       '@stratosui/store': join(__dirname, '../store/src/public-api.ts'),
+      '@stratosui/store/testing': join(__dirname, '../store/testing/public-api.ts'),
+      '@stratosui/shared': join(__dirname, '../shared/src/public-api.ts'),
+      '@stratosui/cloud-foundry': join(__dirname, '../cloud-foundry/src/public_api.ts'),
+      '@stratosui/kubernetes': join(__dirname, '../kubernetes/src/public-api.ts'),
     },
   },
 });

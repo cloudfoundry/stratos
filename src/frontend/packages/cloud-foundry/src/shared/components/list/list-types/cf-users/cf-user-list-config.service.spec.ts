@@ -1,5 +1,5 @@
-import { inject, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 
@@ -45,7 +45,8 @@ describe('CfUserListConfigService', () => {
     });
   });
 
-  it('should be created', inject([CfUserListConfigService], (service: CfUserListConfigService) => {
+  it('should be created', () => {
+    const service = TestBed.inject(CfUserListConfigService);
     expect(service).toBeTruthy();
-  }));
+  });
 });

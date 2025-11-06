@@ -8,13 +8,13 @@ describe('KubernetesNodeLabelsComponent', () => {
   let component: KubernetesNodeLabelsComponent;
   let fixture: ComponentFixture<KubernetesNodeLabelsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesNodeLabelsComponent],
       imports: BaseTestModules
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesNodeLabelsComponent);

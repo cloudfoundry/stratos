@@ -10,7 +10,7 @@ describe('KubeConfigRegistrationComponent', () => {
   let component: KubeConfigRegistrationComponent;
   let fixture: ComponentFixture<KubeConfigRegistrationComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...KubernetesBaseTestModules
@@ -22,7 +22,7 @@ describe('KubeConfigRegistrationComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubeConfigRegistrationComponent);

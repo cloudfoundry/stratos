@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import {
   BooleanIndicatorComponent,
@@ -14,12 +14,12 @@ describe('TableCellServiceBindableComponent', () => {
   let component: TableCellServiceBindableComponent;
   let fixture: ComponentFixture<TableCellServiceBindableComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
         TableCellServiceBindableComponent,
         BooleanIndicatorComponent
-      ],
+      ,
       imports: [
         generateCfBaseTestModulesNoShared()
       ],
@@ -28,9 +28,7 @@ describe('TableCellServiceBindableComponent', () => {
       ]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellServiceBindableComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

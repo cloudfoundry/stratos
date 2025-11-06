@@ -17,7 +17,7 @@ describe('KubernetesNamespaceAnalysisReportComponent', () => {
   let component: KubernetesNamespaceAnalysisReportComponent;
   let fixture: ComponentFixture<KubernetesNamespaceAnalysisReportComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesNamespaceAnalysisReportComponent, AnalysisReportSelectorComponent, AnalysisReportViewerComponent],
       imports: [
@@ -33,7 +33,7 @@ describe('KubernetesNamespaceAnalysisReportComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesNamespaceAnalysisReportComponent);

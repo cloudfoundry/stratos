@@ -9,13 +9,12 @@ describe('TableCellEndpointDetailsComponent', () => {
   let component: TableCellEndpointDetailsComponent;
   let fixture: ComponentFixture<TableCellEndpointDetailsComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [...BaseTestModules],
       providers: [EndpointListHelper]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellEndpointDetailsComponent);

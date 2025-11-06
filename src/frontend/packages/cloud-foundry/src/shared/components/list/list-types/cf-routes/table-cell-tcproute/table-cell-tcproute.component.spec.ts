@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import {
   BooleanIndicatorComponent,
 } from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
@@ -14,17 +13,15 @@ describe('TableCellTCPRouteComponent', () => {
   let fixture: ComponentFixture<TableCellTCPRouteComponent>;
 
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [TableCellTCPRouteComponent, BooleanIndicatorComponent],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [TableCellTCPRouteComponent, BooleanIndicatorComponent,
       imports: [
         CoreModule
       ]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellTCPRouteComponent);
     component = fixture.componentInstance;
     component.row = {

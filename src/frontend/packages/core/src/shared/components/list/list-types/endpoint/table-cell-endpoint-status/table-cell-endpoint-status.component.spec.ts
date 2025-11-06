@@ -9,17 +9,14 @@ describe('TableCellEndpointStatusComponent', () => {
   let component: TableCellEndpointStatusComponent;
   let fixture: ComponentFixture<TableCellEndpointStatusComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         CoreModule,
         TableCellEndpointStatusComponent
       ]
-    
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellEndpointStatusComponent);

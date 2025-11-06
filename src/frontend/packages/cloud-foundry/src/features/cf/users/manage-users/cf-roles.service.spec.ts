@@ -1,5 +1,5 @@
 import { HttpClientModule } from '@angular/common/http';
-import { inject, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
 
@@ -26,7 +26,8 @@ describe('CfRolesService', () => {
     });
   });
 
-  it('should be created', inject([CfRolesService], (service: CfRolesService) => {
+  it('should be created', () => {
+    const service = TestBed.inject(CfRolesService);
     expect(service).toBeTruthy();
-  }));
+  });
 });

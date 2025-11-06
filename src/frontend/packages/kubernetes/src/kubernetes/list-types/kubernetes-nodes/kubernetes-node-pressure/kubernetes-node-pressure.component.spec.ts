@@ -8,13 +8,13 @@ describe('KubernetesNodePressureComponent', () => {
   let component: KubernetesNodePressureComponent;
   let fixture: ComponentFixture<KubernetesNodePressureComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesNodePressureComponent],
       imports: BaseTestModules
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesNodePressureComponent);

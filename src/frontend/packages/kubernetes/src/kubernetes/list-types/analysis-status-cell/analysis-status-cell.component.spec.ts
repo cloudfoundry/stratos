@@ -11,7 +11,7 @@ describe('AnalysisStatusCellComponent', () => {
   let component: AnalysisStatusCellComponent;
   let fixture: ComponentFixture<AnalysisStatusCellComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [AnalysisStatusCellComponent, AnalysisReportSelectorComponent],
       imports: [
@@ -19,7 +19,7 @@ describe('AnalysisStatusCellComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AnalysisStatusCellComponent);

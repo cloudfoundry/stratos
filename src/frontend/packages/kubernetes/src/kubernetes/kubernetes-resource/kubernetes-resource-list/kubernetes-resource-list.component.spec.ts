@@ -10,7 +10,7 @@ describe('KubernetesResourceListComponent', () => {
   let component: KubernetesResourceListComponent;
   let fixture: ComponentFixture<KubernetesResourceListComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ KubernetesResourceListComponent ],
       imports: [ KubernetesBaseTestModules ],
@@ -33,7 +33,7 @@ describe('KubernetesResourceListComponent', () => {
       ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesResourceListComponent);

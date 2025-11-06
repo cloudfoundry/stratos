@@ -11,14 +11,14 @@ describe('KubernetesNamespaceLinkComponent', () => {
   let component: KubernetesNamespaceLinkComponent;
   let fixture: ComponentFixture<KubernetesNamespaceLinkComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesNamespaceLinkComponent],
       imports: KubernetesBaseTestModules,
       providers: [KubernetesEndpointService, BaseKubeGuid]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesNamespaceLinkComponent);

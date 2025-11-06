@@ -11,7 +11,7 @@ describe('KubernetesNodeTagsCardComponent', () => {
   let component: KubernetesNodeTagsCardComponent;
   let fixture: ComponentFixture<KubernetesNodeTagsCardComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesNodeTagsCardComponent],
       imports: KubernetesBaseTestModules,
@@ -19,7 +19,7 @@ describe('KubernetesNodeTagsCardComponent', () => {
 
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesNodeTagsCardComponent);

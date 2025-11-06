@@ -15,8 +15,8 @@ describe('ServicesTabComponent', () => {
   let component: ServicesTabComponent;
   let fixture: ComponentFixture<ServicesTabComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [ServicesTabComponent],
       imports: generateCfBaseTestModules(),
       providers: [
@@ -28,11 +28,8 @@ describe('ServicesTabComponent', () => {
         DatePipe,
         ServiceActionHelperService
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(ServicesTabComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

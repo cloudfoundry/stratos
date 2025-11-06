@@ -20,8 +20,8 @@ describe('CliInfoApplicationComponent', () => {
   const appId = '1';
   const cfId = '2';
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [CliInfoApplicationComponent],
       imports: [
         ...generateCfStoreModules(),
@@ -37,11 +37,8 @@ describe('CliInfoApplicationComponent', () => {
         ApplicationEnvVarsHelper,
         TabNavService
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(CliInfoApplicationComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

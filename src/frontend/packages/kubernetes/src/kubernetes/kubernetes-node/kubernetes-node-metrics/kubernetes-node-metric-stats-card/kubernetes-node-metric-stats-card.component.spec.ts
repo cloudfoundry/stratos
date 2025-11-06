@@ -12,14 +12,14 @@ describe('KubernetesNodeMetricStatsCardComponent', () => {
   let component: KubernetesNodeMetricStatsCardComponent;
   let fixture: ComponentFixture<KubernetesNodeMetricStatsCardComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesNodeMetricStatsCardComponent, KubernetesNodeSimpleMetricComponent],
       imports: KubernetesBaseTestModules,
       providers: [KubernetesNodeService, KubernetesEndpointService, BaseKubeGuid]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesNodeMetricStatsCardComponent);

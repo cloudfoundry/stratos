@@ -11,7 +11,7 @@ describe('WorkloadLiveReloadComponent', () => {
   let component: WorkloadLiveReloadComponent;
   let fixture: ComponentFixture<WorkloadLiveReloadComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...KubernetesBaseTestModules
@@ -24,7 +24,7 @@ describe('WorkloadLiveReloadComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(WorkloadLiveReloadComponent);

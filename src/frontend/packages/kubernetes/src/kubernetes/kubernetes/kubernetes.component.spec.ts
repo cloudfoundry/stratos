@@ -9,14 +9,14 @@ describe('KubernetesComponent', () => {
   let component: KubernetesComponent;
   let fixture: ComponentFixture<KubernetesComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesComponent],
       imports: KubernetesBaseTestModules,
       providers: [TabNavService]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesComponent);

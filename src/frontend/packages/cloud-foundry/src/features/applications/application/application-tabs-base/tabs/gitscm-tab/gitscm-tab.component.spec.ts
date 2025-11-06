@@ -21,8 +21,8 @@ import { GitSCMTabComponent } from './gitscm-tab.component';
 describe('GitSCMTabComponent', () => {
   let component: GitSCMTabComponent;
   let fixture: ComponentFixture<GitSCMTabComponent>;
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [GitSCMTabComponent, GithubCommitAuthorComponent],
       imports: [
         ...generateCfStoreModules(),
@@ -39,11 +39,8 @@ describe('GitSCMTabComponent', () => {
         DatePipe,
         GitSCMService,
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(GitSCMTabComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

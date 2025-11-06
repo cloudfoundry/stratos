@@ -10,7 +10,7 @@ describe('KubernetesAWSAuthFormComponent', () => {
   let component: KubernetesAWSAuthFormComponent;
   let fixture: ComponentFixture<KubernetesAWSAuthFormComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesAWSAuthFormComponent],
       imports: [
@@ -20,7 +20,7 @@ describe('KubernetesAWSAuthFormComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesAWSAuthFormComponent);

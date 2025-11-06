@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import {
   generateCfBaseTestModulesNoShared,
@@ -10,15 +10,13 @@ describe('TableCellSpaceNameComponent', () => {
   let component: TableCellSpaceNameComponent;
   let fixture: ComponentFixture<TableCellSpaceNameComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [TableCellSpaceNameComponent],
       imports: generateCfBaseTestModulesNoShared()
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellSpaceNameComponent);
     component = fixture.componentInstance;
     component.row = {

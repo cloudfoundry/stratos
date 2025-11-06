@@ -1,5 +1,5 @@
-import { TestBed, inject } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import { MetricsRangeSelectorService } from './metrics-range-selector.service';
 
@@ -10,7 +10,8 @@ describe('MetricsRangeSelectorService', () => {
     });
   });
 
-  it('should be created', inject([MetricsRangeSelectorService], (service: MetricsRangeSelectorService) => {
+  it('should be created', () => {
+    const service = TestBed.inject(MetricsRangeSelectorService);
     expect(service).toBeTruthy();
-  }));
+  });
 });

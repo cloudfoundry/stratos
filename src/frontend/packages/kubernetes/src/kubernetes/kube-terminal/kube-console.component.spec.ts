@@ -14,7 +14,7 @@ describe('KubeConsoleComponent', () => {
   let component: KubeConsoleComponent;
   let fixture: ComponentFixture<KubeConsoleComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubeConsoleComponent],
       imports: [
@@ -30,7 +30,7 @@ describe('KubeConsoleComponent', () => {
       ],
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubeConsoleComponent);

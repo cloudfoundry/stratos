@@ -5,11 +5,12 @@ import { join } from 'path';
 export default defineConfig({
   plugins: [angular()],
   test: {
+    root: join(__dirname),
     name: 'store',
     globals: true,
     environment: 'jsdom',
     pool: 'forks', // Required for Angular 20 + Vitest 4 ESM module resolution
-    setupFiles: ['src/test-setup.ts'],
+    setupFiles: [join(__dirname, 'src/test-setup.ts')],
     include: ['src/**/*.spec.ts'],
     exclude: ['node_modules', 'dist', 'out-tsc', '**/test-e2e/**', '**/e2e/**'],
     coverage: {
@@ -25,8 +26,12 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@stratos/core': join(__dirname, '../core/src/public-api.ts'),
-      '@stratos/store': join(__dirname, 'src/public-api.ts'),
+      '@stratosui/core': join(__dirname, '../core/src/public-api.ts'),
+      '@stratosui/store': join(__dirname, 'src/public-api.ts'),
+      '@stratosui/store/testing': join(__dirname, '../testing/public-api.ts'),
+      '@stratosui/shared': join(__dirname, '../shared/src/public-api.ts'),
+      '@stratosui/cloud-foundry': join(__dirname, '../cloud-foundry/src/public_api.ts'),
+      '@stratosui/kubernetes': join(__dirname, '../kubernetes/src/public-api.ts'),
     },
   },
 });

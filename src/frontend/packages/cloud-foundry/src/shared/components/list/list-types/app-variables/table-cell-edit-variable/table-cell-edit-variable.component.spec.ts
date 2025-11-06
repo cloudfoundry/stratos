@@ -1,26 +1,22 @@
 import { ListAppEnvVar } from '../cf-app-variables-data-source';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import { TableCellEditVariableComponent } from './table-cell-edit-variable.component';
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { IListDataSource } from '../../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 
 describe('TableCellEditVariableComponent', () => {
   let component: TableCellEditVariableComponent;
   let fixture: ComponentFixture<TableCellEditVariableComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [TableCellEditVariableComponent],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [TableCellEditVariableComponent,
       imports: [
-        CoreModule,
       ]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellEditVariableComponent);
     component = fixture.componentInstance;
     component.row = {

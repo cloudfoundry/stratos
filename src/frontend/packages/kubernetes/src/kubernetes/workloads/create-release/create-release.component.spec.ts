@@ -19,7 +19,7 @@ describe('CreateReleaseComponent', () => {
   let fixture: ComponentFixture<CreateReleaseComponent>;
   let httpMock: HttpTestingController;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         CreateReleaseComponent,
@@ -43,7 +43,7 @@ describe('CreateReleaseComponent', () => {
 
     httpMock = TestBed.inject(HttpTestingController);
 
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CreateReleaseComponent);

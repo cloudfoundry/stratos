@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import {
   BooleanIndicatorComponent,
@@ -13,20 +13,18 @@ describe('TableCellServiceLastOpComponent', () => {
   let component: TableCellServiceLastOpComponent;
   let fixture: ComponentFixture<TableCellServiceLastOpComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
         TableCellServiceLastOpComponent,
         ServiceInstanceLastOpComponent,
         BooleanIndicatorComponent
-      ],
+      ,
       imports: [...BaseTestModulesNoShared],
       providers: [EntityMonitorFactory]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellServiceLastOpComponent);
     component = fixture.componentInstance;
     component.row = {

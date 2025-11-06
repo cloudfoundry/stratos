@@ -16,7 +16,7 @@ describe('HelmReleaseSummaryTabComponent', () => {
   let component: HelmReleaseSummaryTabComponent;
   let fixture: ComponentFixture<HelmReleaseSummaryTabComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...WorkloadsBaseTestingModule
@@ -32,7 +32,7 @@ describe('HelmReleaseSummaryTabComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(HelmReleaseSummaryTabComponent);

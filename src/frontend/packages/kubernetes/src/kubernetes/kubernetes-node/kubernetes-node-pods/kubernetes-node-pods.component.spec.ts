@@ -11,14 +11,14 @@ describe('KubernetesNodePodsComponent', () => {
   let component: KubernetesNodePodsComponent;
   let fixture: ComponentFixture<KubernetesNodePodsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesNodePodsComponent],
       imports: KubernetesBaseTestModules,
       providers: [BaseKubeGuid, KubernetesEndpointService, KubernetesNodeService]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesNodePodsComponent);

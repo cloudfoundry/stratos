@@ -33,8 +33,8 @@ describe('EventsTabComponent', () => {
   let component: EventsTabComponent;
   let fixture: ComponentFixture<EventsTabComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [
         EventsTabComponent,
         CloudFoundryEventsListComponent
@@ -51,8 +51,8 @@ describe('EventsTabComponent', () => {
         CoreModule,
         NoopAnimationsModule,
       ]
-    })
-      .compileComponents();
+    }).compileComponents();
+
     const eventsConfig: EntityCatalogEntityConfig = cfEntityFactory(cfEventEntityType);
 
     const mappedData = {
@@ -67,9 +67,7 @@ describe('EventsTabComponent', () => {
     };
     const store = TestBed.inject(Store);
     store.dispatch(new WrapperRequestActionSuccess(mappedData, pagAction, 'fetch'));
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(EventsTabComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

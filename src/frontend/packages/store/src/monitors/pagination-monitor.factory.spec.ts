@@ -1,23 +1,24 @@
-import { inject, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { StoreModule } from '@ngrx/store';
-
-import { appReducers } from '../reducers.module';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { TestEntityCatalog } from '../entity-catalog/entity-catalog';
 import { PaginationMonitorFactory } from './pagination-monitor.factory';
+import { Store } from '@ngrx/store';
+import { AppState } from '../app-state';
 
 describe('PaginationMonitorFactoryService', () => {
+  let service: PaginationMonitorFactory;
+  let mockStore: any;
+  let mockEntityCatalog: TestEntityCatalog;
+
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [PaginationMonitorFactory],
-      imports: [
-        StoreModule.forRoot(
-          appReducers,
-        )
-      ]
-    });
+    // Create mocks
+    mockStore = {} as Store<AppState>;
+    mockEntityCatalog = new TestEntityCatalog();
+
+    // Create service directly with mocked dependencies
+    service = new PaginationMonitorFactory(mockStore, mockEntityCatalog);
   });
 
-  it('should be created', inject([PaginationMonitorFactory], (service: PaginationMonitorFactory) => {
+  it('should be created', () => {
     expect(service).toBeTruthy();
-  }));
+  });
 });

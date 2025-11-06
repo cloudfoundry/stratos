@@ -25,8 +25,8 @@ describe('EditApplicationComponent', () => {
   let component: EditApplicationComponent;
   let fixture: ComponentFixture<EditApplicationComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [EditApplicationComponent],
       imports: [
         ...generateCfStoreModules(),
@@ -44,11 +44,8 @@ describe('EditApplicationComponent', () => {
         ApplicationEnvVarsHelper,
         TabNavService
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(EditApplicationComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

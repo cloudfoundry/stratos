@@ -11,7 +11,7 @@ describe('PodMetricsComponent', () => {
   let component: PodMetricsComponent;
   let fixture: ComponentFixture<PodMetricsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [PodMetricsComponent],
       imports: KubernetesBaseTestModules,
@@ -31,7 +31,7 @@ describe('PodMetricsComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(PodMetricsComponent);

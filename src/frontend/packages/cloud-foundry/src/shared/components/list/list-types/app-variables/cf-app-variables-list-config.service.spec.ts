@@ -1,9 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { inject, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { CoreModule } from '../../../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
 import { generateTestApplicationServiceProvider } from '../../../../../../test-framework/application-service-helper';
 import { generateCfStoreModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
@@ -24,7 +23,6 @@ describe('CfAppVariablesListConfigService', () => {
       imports: [
         generateCfStoreModules(),
         CommonModule,
-        CoreModule,
         SharedModule,
         ApplicationsModule,
         RouterTestingModule
@@ -36,5 +34,5 @@ describe('CfAppVariablesListConfigService', () => {
     [CfAppVariablesListConfigService],
     (service: CfAppVariablesListConfigService) => {
       expect(service).toBeTruthy();
-    }));
+    });
 });

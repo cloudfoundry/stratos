@@ -1,4 +1,4 @@
-import { inject, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
@@ -18,7 +18,8 @@ describe('ApplicationEnvVarsService', () => {
     });
   });
 
-  it('should be created', inject([ApplicationEnvVarsHelper], (service: ApplicationEnvVarsHelper) => {
+  it('should be created', () => {
+    const service = TestBed.inject(ApplicationEnvVarsHelper);
     expect(service).toBeTruthy();
-  }));
+  });
 });

@@ -14,7 +14,7 @@ describe('KubernetesAnalysisTabComponent', () => {
   let component: KubernetesAnalysisTabComponent;
   let fixture: ComponentFixture<KubernetesAnalysisTabComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesAnalysisTabComponent, AnalysisReportViewerComponent],
       imports: [
@@ -29,7 +29,7 @@ describe('KubernetesAnalysisTabComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesAnalysisTabComponent);

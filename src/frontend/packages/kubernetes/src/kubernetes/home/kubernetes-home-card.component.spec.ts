@@ -11,14 +11,14 @@ describe('KubernetesHomeCardComponent', () => {
   let component: KubernetesHomeCardComponent;
   let fixture: ComponentFixture<KubernetesHomeCardComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ KubernetesHomeCardComponent ],
       imports: [...KubernetesBaseTestModules],
       providers: [ KubernetesEndpointService, BaseKubeGuid ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesHomeCardComponent);

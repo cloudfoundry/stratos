@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../core/core.module';
@@ -10,8 +10,8 @@ describe('ShowPageHeaderComponent', () => {
   let component: ShowPageHeaderComponent;
   let fixture: ComponentFixture<ShowPageHeaderComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         ShowPageHeaderComponent,
         CoreModule,
@@ -20,9 +20,8 @@ describe('ShowPageHeaderComponent', () => {
       providers: [
         TabNavService
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ShowPageHeaderComponent);

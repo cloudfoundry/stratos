@@ -7,12 +7,12 @@ describe('KubernetesServicePortsComponent', () => {
   let component: KubernetesServicePortsComponent;
   let fixture: ComponentFixture<KubernetesServicePortsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesServicePortsComponent]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesServicePortsComponent);

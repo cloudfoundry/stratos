@@ -9,7 +9,7 @@ describe('HelmReleaseHistoryTabComponent', () => {
   let component: HelmReleaseHistoryTabComponent;
   let fixture: ComponentFixture<HelmReleaseHistoryTabComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ HelmReleaseHistoryTabComponent ],
       providers: [
@@ -18,7 +18,7 @@ describe('HelmReleaseHistoryTabComponent', () => {
       ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(HelmReleaseHistoryTabComponent);

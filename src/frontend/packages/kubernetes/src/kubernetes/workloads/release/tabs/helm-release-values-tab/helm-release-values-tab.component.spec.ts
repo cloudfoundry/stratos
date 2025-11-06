@@ -9,7 +9,7 @@ describe('HelmReleaseValuesTabComponent', () => {
   let component: HelmReleaseValuesTabComponent;
   let fixture: ComponentFixture<HelmReleaseValuesTabComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...KubernetesBaseTestModules
@@ -24,7 +24,7 @@ describe('HelmReleaseValuesTabComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(HelmReleaseValuesTabComponent);

@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { MetadataCardTestComponents } from '../../../../../../../../core/test-framework/core-test.helper';
@@ -12,18 +12,18 @@ describe('CfStacksCardComponent', () => {
   let component: CfStacksCardComponent;
   let fixture: ComponentFixture<CfStacksCardComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [CfStacksCardComponent, MetadataCardTestComponents],
-      imports: generateCfBaseTestModulesNoShared(),
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        CfStacksCardComponent,
+        ...MetadataCardTestComponents,
+        ...generateCfBaseTestModulesNoShared()
+      ],
       providers: [
         EntityMonitorFactory
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(CfStacksCardComponent);
     component = fixture.componentInstance;
     component.row = {

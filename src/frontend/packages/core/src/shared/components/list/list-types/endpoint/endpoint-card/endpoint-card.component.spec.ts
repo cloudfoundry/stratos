@@ -15,9 +15,8 @@ describe('EndpointCardComponent', () => {
   let component: EndpointCardComponent;
   let fixture: ComponentFixture<EndpointCardComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         ...BaseTestModules,
         EndpointCardComponent,
@@ -26,11 +25,9 @@ describe('EndpointCardComponent', () => {
       providers: [
         EndpointListHelper,
         MetricsService
-      ],
-    
-    })
-      .compileComponents();
-  }));
+      ]
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EndpointCardComponent);

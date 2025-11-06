@@ -15,8 +15,8 @@ describe('MetricsTabComponent', () => {
   let fixture: ComponentFixture<MetricsTabComponent>;
   const appId = '1';
   const cfId = '2';
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [MetricsTabComponent],
       imports: [
         ...generateCfStoreModules(),
@@ -29,11 +29,8 @@ describe('MetricsTabComponent', () => {
         ApplicationEnvVarsHelper,
         generateTestApplicationServiceProvider(cfId, appId),
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(MetricsTabComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

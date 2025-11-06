@@ -8,13 +8,13 @@ describe('KubernetesNodeCapacityComponent', () => {
   let component: KubernetesNodeCapacityComponent<any>;
   let fixture: ComponentFixture<KubernetesNodeCapacityComponent<any>>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesNodeCapacityComponent],
       imports: BaseTestModules
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesNodeCapacityComponent);

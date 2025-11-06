@@ -23,8 +23,8 @@ describe('LogStreamTabComponent', () => {
   const appId = '';
   const cfId = '2';
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         StoreModule,
         CoreModule,
@@ -45,11 +45,8 @@ describe('LogStreamTabComponent', () => {
         EntityMonitorFactory,
         PaginationMonitorFactory
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(LogStreamTabComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

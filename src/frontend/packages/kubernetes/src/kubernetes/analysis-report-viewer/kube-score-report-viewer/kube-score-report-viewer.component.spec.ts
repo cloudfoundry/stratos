@@ -11,7 +11,7 @@ describe('KubeScoreReportViewerComponent', () => {
   let component: KubeScoreReportViewerComponent;
   let fixture: ComponentFixture<KubeScoreReportViewerComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubeScoreReportViewerComponent],
       imports: [
@@ -25,7 +25,7 @@ describe('KubeScoreReportViewerComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubeScoreReportViewerComponent);

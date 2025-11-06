@@ -11,18 +11,17 @@ describe('TableCellEndpointNameComponent', () => {
   let component: TableCellEndpointNameComponent;
   let fixture: ComponentFixture<TableCellEndpointNameComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         CoreModule,
-        ...BaseTestModules,
+        ...BaseTestModules
       ],
       providers: [
-        EntityMonitorFactory,
+        EntityMonitorFactory
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellEndpointNameComponent);

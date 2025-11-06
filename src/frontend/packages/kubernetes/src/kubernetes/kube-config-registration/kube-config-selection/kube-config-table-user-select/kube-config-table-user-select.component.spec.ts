@@ -10,7 +10,7 @@ describe('KubeConfigTableUserSelectComponent', () => {
   let component: KubeConfigTableUserSelectComponent;
   let fixture: ComponentFixture<KubeConfigTableUserSelectComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...KubernetesBaseTestModules
@@ -23,7 +23,7 @@ describe('KubeConfigTableUserSelectComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubeConfigTableUserSelectComponent);

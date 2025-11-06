@@ -7,17 +7,17 @@ import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.type
 import { ENTITY_CATALOG_TOKEN } from '../tokens/store-injection.tokens';
 import { EntityMonitor } from './entity-monitor';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class EntityMonitorFactory {
-
-  private store = inject(Store<AppState>);
-  private entityCatalog = inject<IEntityCatalog>(ENTITY_CATALOG_TOKEN);
 
   private monitorCache: {
     [key: string]: EntityMonitor
   } = {};
+
+  constructor(
+    private store: Store<AppState>,
+    @Inject(ENTITY_CATALOG_TOKEN) private entityCatalog: IEntityCatalog
+  ) {}
 
   public create<T>(
     id: string,

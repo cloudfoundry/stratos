@@ -12,8 +12,8 @@ describe('ApplicationBaseComponent', () => {
   let component: ApplicationBaseComponent;
   let fixture: ComponentFixture<ApplicationBaseComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [ApplicationBaseComponent],
       imports: [
         CoreModule,
@@ -24,11 +24,8 @@ describe('ApplicationBaseComponent', () => {
         ApplicationStateService,
         ApplicationEnvVarsHelper
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(ApplicationBaseComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

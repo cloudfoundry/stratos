@@ -10,7 +10,7 @@ import { HelmReleasesTabComponent } from './releases-tab.component';
 describe('ReleasesTabComponent', () => {
   let component: HelmReleasesTabComponent;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...KubernetesBaseTestModules
@@ -24,7 +24,7 @@ describe('ReleasesTabComponent', () => {
 
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     const fixture = TestBed.createComponent(HelmReleasesTabComponent);

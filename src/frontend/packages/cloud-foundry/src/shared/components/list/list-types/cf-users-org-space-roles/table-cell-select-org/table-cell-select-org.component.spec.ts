@@ -1,9 +1,8 @@
 import { HttpClientModule } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
@@ -17,11 +16,10 @@ describe('TableCellSelectOrgComponent', () => {
   let component: TableCellSelectOrgComponent;
   let fixture: ComponentFixture<TableCellSelectOrgComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         ...generateCfStoreModules(),
-        CoreModule,
         NoopAnimationsModule,
         HttpClientModule
       ],
@@ -36,9 +34,7 @@ describe('TableCellSelectOrgComponent', () => {
       declarations: [TableCellSelectOrgComponent]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellSelectOrgComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

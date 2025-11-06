@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { ValuesPipe } from '../../../../../../../../core/src/shared/pipes/values.pipe';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { CfEvent } from '../../../../../../cf-api.types';
@@ -12,15 +11,13 @@ describe('TableCellEventDetailComponent', () => {
   let component: TableCellEventDetailComponent;
   let fixture: ComponentFixture<TableCellEventDetailComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [TableCellEventDetailComponent, ValuesPipe, EventMetadataComponent],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [TableCellEventDetailComponent, ValuesPipe, EventMetadataComponent,
       imports: [CoreModule]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent<TableCellEventDetailComponent>(TableCellEventDetailComponent);
     component = fixture.componentInstance;
     component.row = {

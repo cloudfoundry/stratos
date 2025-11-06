@@ -14,8 +14,8 @@ describe('ApplicationWallComponent', () => {
   let component: ApplicationWallComponent;
   let fixture: ComponentFixture<ApplicationWallComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [
         ApplicationWallComponent,
         CfEndpointsMissingComponent,
@@ -36,11 +36,8 @@ describe('ApplicationWallComponent', () => {
           }
         }
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(ApplicationWallComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

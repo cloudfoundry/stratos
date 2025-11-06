@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { EventTabActorIconPipe } from './event-tab-actor-icon.pipe';
 import { TableCellEventActionComponent } from './table-cell-event-action.component';
@@ -10,15 +9,13 @@ describe('TableCellEventActionComponent', () => {
   let component: TableCellEventActionComponent;
   let fixture: ComponentFixture<TableCellEventActionComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [TableCellEventActionComponent, EventTabActorIconPipe],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [TableCellEventActionComponent, EventTabActorIconPipe,
       imports: [CoreModule]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent<TableCellEventActionComponent>(TableCellEventActionComponent);
     component = fixture.componentInstance;
     component.row = {

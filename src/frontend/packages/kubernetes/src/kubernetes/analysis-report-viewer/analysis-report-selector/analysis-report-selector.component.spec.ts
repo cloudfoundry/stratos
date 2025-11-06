@@ -11,7 +11,7 @@ describe('AnalysisReportSelectorComponent', () => {
   let component: AnalysisReportSelectorComponent;
   let fixture: ComponentFixture<AnalysisReportSelectorComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [AnalysisReportSelectorComponent],
       imports: [
@@ -25,7 +25,7 @@ describe('AnalysisReportSelectorComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AnalysisReportSelectorComponent);

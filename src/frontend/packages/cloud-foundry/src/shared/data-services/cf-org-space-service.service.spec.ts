@@ -1,4 +1,4 @@
-import { inject, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { CoreModule } from '../../../../core/src/core/core.module';
@@ -21,7 +21,8 @@ describe('EndpointOrgSpaceServiceService', () => {
     });
   });
 
-  it('should be created', inject([CfOrgSpaceDataService], (service: CfOrgSpaceDataService) => {
+  it('should be created', () => {
+    const service = TestBed.inject(CfOrgSpaceDataService);
     expect(service).toBeTruthy();
-  }));
+  });
 });

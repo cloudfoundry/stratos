@@ -1,3 +1,4 @@
+/// <reference types="vite" />
 import { Action } from '@ngrx/store';
 
 import { IRequestEntityTypeState } from '../app-state';
@@ -602,7 +603,11 @@ export class TestEntityCatalog extends EntityCatalog {
 // https://github.com/cloudfoundry-incubator/stratos/issues/3753 - Reverting the entity catalog to an Angular service
 // makes testing much easier and remove the need for this.
 /* tslint:disable-next-line:no-string-literal  */
-export const entityCatalog: EntityCatalog = !!(window as any)['__karma__'] ? new TestEntityCatalog() : new EntityCatalog();
+// Detect test environment (Karma or Vitest)
+const isTestEnvironment = (typeof window !== 'undefined' && !!(window as any)['__karma__']) ||
+                          (typeof import.meta !== 'undefined' && import.meta.env?.VITEST) ||
+                          (typeof window !== 'undefined' && typeof (window as any).describe === 'function');
+export const entityCatalog: EntityCatalog = isTestEnvironment ? new TestEntityCatalog() : new EntityCatalog();
 
 // Expose diagnostics globally for debugging
 if (typeof window !== 'undefined') {

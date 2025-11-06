@@ -15,8 +15,8 @@ describe('ApplicationPollComponent', () => {
   const appId = '1';
   const cfId = '2';
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [ApplicationPollComponent],
       providers: [
         ApplicationPollingService,
@@ -25,11 +25,8 @@ describe('ApplicationPollComponent', () => {
         ApplicationStateService,
       ],
       imports: generateCfBaseTestModules()
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(ApplicationPollComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

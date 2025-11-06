@@ -10,14 +10,14 @@ describe('KubernetesNodeLinkComponent', () => {
   let component: KubernetesNodeLinkComponent;
   let fixture: ComponentFixture<KubernetesNodeLinkComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesNodeLinkComponent],
       imports: KubernetesBaseTestModules,
       providers: [KubernetesEndpointService, BaseKubeGuid]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesNodeLinkComponent);

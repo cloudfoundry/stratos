@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import { MDAppModule } from '../../../../../../../../core/src/core/md.module';
 import {
@@ -12,8 +12,8 @@ describe('TableCellConfirmRoleAddRemComponent', () => {
   let component: TableCellConfirmRoleAddRemComponent;
   let fixture: ComponentFixture<TableCellConfirmRoleAddRemComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         MDAppModule,
       ],
@@ -23,9 +23,7 @@ describe('TableCellConfirmRoleAddRemComponent', () => {
       ]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellConfirmRoleAddRemComponent);
     component = fixture.componentInstance;
     component.row = {

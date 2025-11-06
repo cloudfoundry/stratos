@@ -6,6 +6,15 @@ mat-sidenav-container {
   margin: 0;
   width: 100%;
 }
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0%;
+  height: 100vh;
+  min-height: 0;
+}
+
 .user-id {
   display: none;
 }

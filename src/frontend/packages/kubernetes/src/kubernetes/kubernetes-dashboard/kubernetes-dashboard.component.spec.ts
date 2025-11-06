@@ -10,7 +10,7 @@ describe('KubernetesDashboardTabComponent', () => {
   let component: KubernetesDashboardTabComponent;
   let fixture: ComponentFixture<KubernetesDashboardTabComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesDashboardTabComponent],
       imports: [...KubernetesBaseTestModules],
@@ -30,7 +30,7 @@ describe('KubernetesDashboardTabComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesDashboardTabComponent);

@@ -1,4 +1,4 @@
-import { inject, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
@@ -18,7 +18,8 @@ describe('ServicesWallService', () => {
     });
   });
 
-  it('should be created', inject([ServicesWallService], (service: ServicesWallService) => {
+  it('should be created', () => {
+    const service = TestBed.inject(ServicesWallService);
     expect(service).toBeTruthy();
-  }));
+  });
 });

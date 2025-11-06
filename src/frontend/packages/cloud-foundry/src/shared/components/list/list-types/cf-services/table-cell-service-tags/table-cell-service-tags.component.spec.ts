@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import { AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import {
@@ -12,12 +12,12 @@ describe('TableCellServiceTagsComponent', () => {
   let component: TableCellServiceTagsComponent;
   let fixture: ComponentFixture<TableCellServiceTagsComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
         TableCellServiceTagsComponent,
         AppChipsComponent
-      ],
+      ,
       imports: [
         generateCfBaseTestModulesNoShared()
       ],
@@ -26,9 +26,7 @@ describe('TableCellServiceTagsComponent', () => {
       ]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellServiceTagsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

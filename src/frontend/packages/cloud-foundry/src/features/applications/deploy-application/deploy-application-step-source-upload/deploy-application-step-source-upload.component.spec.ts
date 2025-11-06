@@ -1,12 +1,10 @@
-import { HttpClientModule } from '@angular/common/http';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideExperimentalZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { provideRouter } from '@angular/router';
 
-import { CoreModule } from '../../../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../../../core/src/shared/shared.module';
 import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { DeployApplicationStepSourceUploadComponent } from './deploy-application-step-source-upload.component';
@@ -15,26 +13,20 @@ describe('DeployApplicationStepSourceUploadComponent', () => {
   let component: DeployApplicationStepSourceUploadComponent;
   let fixture: ComponentFixture<DeployApplicationStepSourceUploadComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [DeployApplicationStepSourceUploadComponent],
-      imports: [
-        ...generateCfStoreModules(),
-        CoreModule,
-        SharedModule,
-        RouterTestingModule,
-        NoopAnimationsModule,
-        HttpClientModule,
-        HttpClientTestingModule,
-      ],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [DeployApplicationStepSourceUploadComponent],
       providers: [
+        provideExperimentalZonelessChangeDetection(),
+        provideNoopAnimations(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        ...generateCfStoreModules(),
         CfOrgSpaceDataService
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(DeployApplicationStepSourceUploadComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

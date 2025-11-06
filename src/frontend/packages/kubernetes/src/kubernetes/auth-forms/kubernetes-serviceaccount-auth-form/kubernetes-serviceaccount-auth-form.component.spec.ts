@@ -10,7 +10,7 @@ describe('KubernetesSATokenAuthFormComponent', () => {
   let component: KubernetesSATokenAuthFormComponent;
   let fixture: ComponentFixture<KubernetesSATokenAuthFormComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesSATokenAuthFormComponent],
       imports: [
@@ -20,7 +20,7 @@ describe('KubernetesSATokenAuthFormComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesSATokenAuthFormComponent);

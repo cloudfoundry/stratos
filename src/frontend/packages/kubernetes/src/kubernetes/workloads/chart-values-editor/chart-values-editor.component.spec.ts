@@ -12,7 +12,7 @@ describe('ChartValuesEditorComponent', () => {
   let component: ChartValuesEditorComponent;
   let fixture: ComponentFixture<ChartValuesEditorComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [ChartValuesEditorComponent],
       providers: [
@@ -28,7 +28,7 @@ describe('ChartValuesEditorComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ChartValuesEditorComponent);
