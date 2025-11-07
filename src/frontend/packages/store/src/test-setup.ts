@@ -2,6 +2,12 @@
 // Official configuration from https://analogjs.org/docs/features/testing/vitest
 
 import { expect, afterEach } from 'vitest';
+// IMMEDIATE: Expose vitest globals to window for entity-catalog test detection
+// This MUST happen before any Angular/Store imports that check window.describe
+if (typeof window !== 'undefined') {
+  (window as any).expect = expect;
+}
+
 import '@angular/compiler';
 import { provideZonelessChangeDetection, NgModule } from '@angular/core';
 import {
@@ -33,23 +39,29 @@ if (typeof window.matchMedia === 'undefined') {
 })
 export class ZonelessTestModule {}
 
-// Initialize test environment - ONCE per test run
-// In singleFork mode, setupFiles executes for each test file, but we only want ONE initialization
-// Use a module-level flag (more reliable than globalThis in fork pool mode)
-let __testEnvInitialized = false;
-
-if (!__testEnvInitialized) {
-  getTestBed().initTestEnvironment(
+// Initialize TestBed platform
+// Note: With isolate:false, this runs once and is shared across test files
+console.log('[TEST SETUP - STORE] Checking TestBed platform...');
+const testBed = getTestBed();
+if (!testBed.platform) {
+  console.log('[TEST SETUP - STORE] Initializing TestBed platform...');
+  testBed.initTestEnvironment(
     [BrowserTestingModule, ZonelessTestModule],
     platformBrowserTesting(),
     {
-      // Fix for Angular 20 zoneless + Vitest: properly destroy TestBed after each test
-      // to prevent circular dependency errors when TestBed is reused across tests
       teardown: { destroyAfterEach: true },
     }
   );
-  __testEnvInitialized = true;
+  console.log('[TEST SETUP - STORE] ✅ TestBed platform initialized');
+} else {
+  console.log('[TEST SETUP - STORE] TestBed platform already initialized (shared)');
 }
+
+// Reset TestBed after each test to clean up component instances
+// but preserve the platform for performance
+afterEach(() => {
+  getTestBed().resetTestingModule();
+});
 
 // Setup snapshots AFTER TestBed initialization
 // expect must be available globally before setup-snapshots tries to use it

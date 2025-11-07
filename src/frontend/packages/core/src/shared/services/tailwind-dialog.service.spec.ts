@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import {  Component, provideZonelessChangeDetection } from '@angular/core';
-import { TailwindDialogService, TailwindDialogRef } from './tailwind-dialog.service';
+import {  Component, provideZonelessChangeDetection, inject } from '@angular/core';
+import { TailwindDialogService, TailwindDialogRef, MAT_DIALOG_DATA } from './tailwind-dialog.service';
 import { ApplicationRef, Injector, EnvironmentInjector } from '@angular/core';
 
 // Test component to be used in dialogs
@@ -11,10 +11,8 @@ import { ApplicationRef, Injector, EnvironmentInjector } from '@angular/core';
   standalone: true
 })
 class TestDialogComponent {
-  constructor(
-    public dialogRef: TailwindDialogRef<TestDialogComponent>,
-    public data?: any
-  ) {}
+  public dialogRef = inject(TailwindDialogRef<TestDialogComponent>);
+  public data = inject(MAT_DIALOG_DATA, { optional: true });
 }
 
 // Test component with data injection
@@ -24,10 +22,8 @@ class TestDialogComponent {
   standalone: true
 })
 class TestDialogWithDataComponent {
-  constructor(
-    public dialogRef: TailwindDialogRef<TestDialogWithDataComponent>,
-    public data: any
-  ) {}
+  public dialogRef = inject(TailwindDialogRef<TestDialogWithDataComponent>);
+  public data = inject(MAT_DIALOG_DATA);
 }
 
 describe('TailwindDialogService', () => {

@@ -604,9 +604,11 @@ export class TestEntityCatalog extends EntityCatalog {
 // makes testing much easier and remove the need for this.
 /* tslint:disable-next-line:no-string-literal  */
 // Detect test environment (Karma or Vitest)
-const isTestEnvironment = (typeof window !== 'undefined' && !!(window as any)['__karma__']) ||
-                          (typeof import.meta !== 'undefined' && import.meta.env?.VITEST) ||
-                          (typeof window !== 'undefined' && typeof (window as any).describe === 'function');
+// Note: import.meta.env.VITEST is set automatically by Vitest at runtime
+const isTestEnvironment = (typeof import.meta !== 'undefined' && import.meta.env?.VITEST) ||
+                          (typeof window !== 'undefined' && !!(window as any)['__karma__']) ||
+                          (typeof window !== 'undefined' && typeof (window as any).describe === 'function') ||
+                          (typeof import.meta !== 'undefined' && import.meta.env?.MODE === 'test');
 export const entityCatalog: EntityCatalog = isTestEnvironment ? new TestEntityCatalog() : new EntityCatalog();
 
 // Expose diagnostics globally for debugging

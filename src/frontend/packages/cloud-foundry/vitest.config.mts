@@ -14,7 +14,7 @@ export default defineConfig({
     poolOptions: {
       forks: {
         singleFork: true, // Single process: ensures TestBed state reset between test files
-        isolate: true, // Isolate environments for complete cleanup
+        isolate: false, // Isolate environments for complete cleanup
       },
     },
     server: {
@@ -25,7 +25,10 @@ export default defineConfig({
         ],
       },
     },
-    setupFiles: [join(__dirname, 'src/test-setup.ts')],
+    setupFiles: [
+      join(__dirname, '../../vitest.workspace.setup.ts'), // Workspace-level platform init
+      join(__dirname, 'src/test-setup.ts'), // Package-specific setup
+    ],
     include: ['src/**/*.spec.ts'],
     exclude: ['node_modules', 'dist', 'out-tsc', '**/test-e2e/**', '**/e2e/**'],
     coverage: {

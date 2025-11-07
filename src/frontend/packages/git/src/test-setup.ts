@@ -2,6 +2,12 @@
 // Official configuration from https://analogjs.org/docs/features/testing/vitest
 
 import { expect, afterEach } from 'vitest';
+// IMMEDIATE: Expose vitest globals to window for entity-catalog test detection
+// This MUST happen before any Angular/Store imports that check window.describe
+if (typeof window !== 'undefined') {
+  (window as any).expect = expect;
+}
+
 import '@angular/compiler';
 import { provideZonelessChangeDetection, NgModule } from '@angular/core';
 import {
@@ -33,43 +39,30 @@ if (typeof window.matchMedia === 'undefined') {
 })
 export class ZonelessTestModule {}
 
-// Guard to prevent NG0400: platform re-initialization error
-// Only initialize test environment once per test file
-// Check if platform exists; if so, the environment was already initialized
+// Initialize TestBed platform
+// Note: With isolate:false, this runs once and is shared across test files
+console.log('[TEST SETUP - GIT] Checking TestBed platform...');
 const testBed = getTestBed();
-let platformInitialized = false;
-
-try {
-  // Check if TestBed is already configured with a platform
-  if (testBed.platform) {
-    platformInitialized = true;
-  }
-} catch {
-  // Platform check failed, try to initialize
-}
-
-if (!platformInitialized) {
-  try {
-    testBed.initTestEnvironment(
-      [BrowserTestingModule, ZonelessTestModule],
-      platformBrowserTesting(),
-      {
-        // Fix for Angular 20 zoneless + Vitest: properly destroy TestBed after each test
-        // to prevent circular dependency errors when TestBed is reused across tests
-        teardown: { destroyAfterEach: true },
-      }
-    );
-  } catch (e) {
-    // If platform initialization fails due to existing platform, that's expected
-    // This can happen when running multiple test files with singleFork:true or cross-package imports
-    if (e instanceof Error && e.message.includes('platform with a different configuration')) {
-      // Platform exists but with different config - this is OK, tests will use existing platform
-      platformInitialized = true;
-    } else {
-      throw e;
+if (!testBed.platform) {
+  console.log('[TEST SETUP - GIT] Initializing TestBed platform...');
+  testBed.initTestEnvironment(
+    [BrowserTestingModule, ZonelessTestModule],
+    platformBrowserTesting(),
+    {
+      teardown: { destroyAfterEach: true },
     }
-  }
+  );
+  console.log('[TEST SETUP - GIT] ✅ TestBed platform initialized');
+} else {
+  console.log('[TEST SETUP - GIT] TestBed platform already initialized (shared)');
 }
+
+// Reset TestBed after each test to clean up component instances
+// but preserve the platform for performance
+afterEach(() => {
+  getTestBed().resetTestingModule();
+});
+
 
 // Setup snapshots AFTER TestBed initialization
 // expect must be available globally before setup-snapshots tries to use it
