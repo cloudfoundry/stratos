@@ -4,8 +4,13 @@
   "type": "module",
   "description": "Stratos Console",
   "main": "index.js",
+  "trustedDependencies": [
+    "@stratosui/devkit"
+  ],
   "scripts": {
-    "bootstrap": "./bootstrap",
+    "preinstall": "node build/ensure-devkit.cjs",
+    "postinstall": "node build/post-setup.cjs",
+    "bootstrap": "echo '⚠️  Bootstrap is no longer required! Just run: bun install'",
     "build-backend": "./build/bk-build.sh",
     "full-build-dev": "npm run build-dev; npm run build-backend",
     "fetch-backend-deps": "./build/bk-fetch-deps.sh",
@@ -59,7 +64,6 @@
     "climate": "codeclimate analyze $(git diff --name-only master)",
     "gate-check": "npm run lint && npm run test-headless",
     "store-git-metadata": "sh -c 'mv build/store-git-metadata.js build/store-git-metadata.cjs 2>/dev/null || true && node build/store-git-metadata.cjs && mv build/store-git-metadata.cjs build/store-git-metadata.js 2>/dev/null || true'",
-    "postinstall": "npm run dev-setup && npm run build-devkit && npm run clean-symlinks && npm run store-git-metadata && npm run prepare-backend",
     "build-devkit": "cd src/frontend/packages/devkit && npm run build",
     "clean-symlinks": "sh -c 'mv build/clean-symlinks.js build/clean-symlinks.cjs 2>/dev/null || true && node build/clean-symlinks.cjs && mv build/clean-symlinks.cjs build/clean-symlinks.js 2>/dev/null || true'",
     "dev-setup": "sh -c 'mv build/dev-setup.js build/dev-setup.cjs 2>/dev/null || true && node build/dev-setup.cjs && mv build/dev-setup.cjs build/dev-setup.js 2>/dev/null || true'",

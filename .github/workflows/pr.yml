@@ -1,0 +1,215 @@
+name: Pull Request Tests
+
+on:
+  pull_request:
+    branches:
+      - master
+      - develop
+      - 'angular**'
+  push:
+    branches:
+      - develop
+      - master
+
+env:
+  NODE_OPTIONS: --max-old-space-size=5500
+  NODE_VERSION: '24'
+  GO_VERSION: '1.21'
+  BUN_VERSION: 'latest'
+
+jobs:
+  lint:
+    name: Lint Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Get Bun cache directory
+        id: bun-cache-dir
+        shell: bash
+        run: echo "dir=$(bun pm cache)" >> ${GITHUB_OUTPUT}
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.bun-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run linting
+        run: bun run lint
+
+  test-frontend:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: [core, store, cloud-foundry, kubernetes, git, shared, extension]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Get Bun cache directory
+        id: bun-cache-dir
+        shell: bash
+        run: echo "dir=$(bun pm cache)" >> ${GITHUB_OUTPUT}
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.bun-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run ${{ matrix.package }} tests
+        run: bun run test-frontend:${{ matrix.package }}
+
+  test-backend:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: src/jetstream/go.sum
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Create extra_plugins.go
+        run: |
+          cat > src/jetstream/extra_plugins.go << 'EOF'
+          package main
+          // This file is auto-generated - DO NOT EDIT
+          import _ "github.com/cloudfoundry/stratos/src/jetstream/plugins/autoscaler"
+          import _ "github.com/cloudfoundry/stratos/src/jetstream/plugins/cloudfoundry"
+          import _ "github.com/cloudfoundry/stratos/src/jetstream/plugins/cfapppush"
+          import _ "github.com/cloudfoundry/stratos/src/jetstream/plugins/cfappssh"
+          import _ "github.com/cloudfoundry/stratos/src/jetstream/plugins/userinvite"
+          import _ "github.com/cloudfoundry/stratos/src/jetstream/plugins/analysis"
+          import _ "github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes"
+          import _ "github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular"
+          EOF
+
+      - name: Run backend tests
+        run: make test-backend
+
+  build-check:
+    name: Build Check
+    runs-on: ubuntu-latest
+    needs: [lint, test-frontend, test-backend]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: src/jetstream/go.sum
+
+      - name: Get Bun cache directory
+        id: bun-cache-dir
+        shell: bash
+        run: echo "dir=$(bun pm cache)" >> ${GITHUB_OUTPUT}
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.bun-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build frontend
+        run: make build-frontend
+
+      - name: Build backend
+        run: make build-backend
+
+      - name: Upload frontend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: dist/
+          retention-days: 1
+
+      - name: Upload backend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-binary
+          path: dist/bin/jetstream
+          retention-days: 1
+
+  pr-success:
+    name: PR Quality Gate
+    runs-on: ubuntu-latest
+    needs: [lint, test-frontend, test-backend, build-check]
+    if: always()
+    steps:
+      - name: Check all jobs
+        run: |
+          if [ "${{ needs.lint.result }}" != "success" ] || \
+             [ "${{ needs.test-frontend.result }}" != "success" ] || \
+             [ "${{ needs.test-backend.result }}" != "success" ] || \
+             [ "${{ needs.build-check.result }}" != "success" ]; then
+            echo "❌ One or more required checks failed"
+            exit 1
+          fi
+          echo "✅ All PR checks passed!"
