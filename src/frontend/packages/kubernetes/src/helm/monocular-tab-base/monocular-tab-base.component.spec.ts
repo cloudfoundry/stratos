@@ -15,15 +15,15 @@ describe('MonocularTabBaseComponent', () => {
       declarations: [],
       imports: [
         ...BaseTestModulesNoShared,
-        MonocularTabBaseComponent
+        MonocularTabBaseComponent,
       ],
       providers: [
         
-        TabNavService
-      ,
-        provideZonelessChangeDetection()
+        TabNavService,
+
+        provideZonelessChangeDetection(),
       ]
-    })
+    }),
       .compileComponents();
   });
 

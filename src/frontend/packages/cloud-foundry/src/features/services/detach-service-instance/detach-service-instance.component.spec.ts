@@ -5,19 +5,21 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import { ActivatedRoute } from '@angular/router';
 
 import { TabNavService } from '../../../../../core/src/tab-nav.service';
-import { generateCfBaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ServiceActionHelperService } from '../../../shared/data-services/service-action-helper.service';
 import { DetachAppsComponent } from './detach-apps/detach-apps.component';
-import { DetachServiceInstanceComponent } from './detach-service-instance.component';
-
+import { DetachServiceInstanceComponent } from "./detach-service-instance.component";
 describe('DetachServiceInstanceComponent', () => {
   let component: DetachServiceInstanceComponent;
   let fixture: ComponentFixture<DetachServiceInstanceComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [DetachServiceInstanceComponent, DetachAppsComponent],
-      imports: generateCfBaseTestModules(),
+      imports: [
+        DetachServiceInstanceComponent,
+        DetachAppsComponent,
+        ...generateCfBaseTestModules(),
+      ],
       providers: [
         DatePipe,
         TabNavService,

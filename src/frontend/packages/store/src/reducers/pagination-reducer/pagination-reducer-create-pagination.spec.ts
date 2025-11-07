@@ -13,13 +13,13 @@ describe('CreatePaginationActionReducer', () => {
   it('should return exact state', () => {
     const paginationState: PaginationState = {
       [entityKey]: {
-        paginationKey: getDefaultPaginationEntityState()
+        paginationKey: getDefaultPaginationEntityState(),
       }
     };
     const action = new CreatePagination(
       {
         entityType,
-        endpointType
+        endpointType,
       },
       'paginationKey'
     );
@@ -32,15 +32,15 @@ describe('CreatePaginationActionReducer', () => {
     const defaultState = getDefaultPaginationEntityState();
     const paginationState = {
       [entityKey]: {
-        paginationKey: getDefaultPaginationEntityState()
+        paginationKey: getDefaultPaginationEntityState(),
       }
     };
     const action = new CreatePagination(
       {
         entityType,
-        endpointType
+        endpointType,
       },
-      paginationKey
+      paginationKey,
     );
     const state = createNewPaginationSection(paginationState, action, getDefaultPaginationEntityState());
     expect(defaultState).toEqual(state[entityKey][paginationKey]);
@@ -67,14 +67,14 @@ describe('CreatePaginationActionReducer', () => {
         paginationKey: {
           ...getDefaultPaginationEntityState(),
           ids,
-          pageRequests
+          pageRequests,
         }
       }
     };
     const action = new CreatePagination(
       {
         entityType,
-        endpointType
+        endpointType,
       },
       paginationKey,
       'paginationKey'

@@ -14,16 +14,16 @@ describe('KubeConfigTableSubTypeSelectComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
-        ...KubernetesBaseTestModules
-      ,
-        KubeConfigTableSubTypeSelectComponent
+        ...KubernetesBaseTestModules,
+
+        KubeConfigTableSubTypeSelectComponent,
       ]providers: [
         
-        KubeConfigHelper
-      ,
-        provideZonelessChangeDetection()
+        KubeConfigHelper,
+
+        provideZonelessChangeDetection(),
       ]
-    })
+    }),
       .compileComponents();
   });
 

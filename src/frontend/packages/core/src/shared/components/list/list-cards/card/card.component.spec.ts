@@ -1,11 +1,12 @@
-
-import { CoreModule } from '../../../../../core/core.module';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { MDAppModule } from '@stratosui/core';
+import { EntityInfo } from '@stratosui/store';
+import { createBasicStoreModule } from '@test-framework/core-test.helper';
+import { CoreTestingModule } from '@test-framework/core-test.modules';
 import { CardComponent, listCards } from './card.component';
-import { SharedModule } from '../../../../shared.module';
-import { EntityInfo } from '../../../../../../../store/src/types/api.types';
 
 describe('CardComponent', () => {
   let component: CardComponent<EntityInfo>;
@@ -13,13 +14,18 @@ describe('CardComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection()],
       imports: [
-        CoreModule,
-        SharedModule
+        MDAppModule,
+        CoreTestingModule,
+        NoopAnimationsModule,
+        createBasicStoreModule(),
+        CardComponent,
+      ],
+      providers: [
+        provideZonelessChangeDetection(),
       ]
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

@@ -12,7 +12,7 @@ describe('KubernetesServicePortsComponent', () => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [KubernetesServicePortsComponent]
-    })
+    }),
       .compileComponents();
   });
 

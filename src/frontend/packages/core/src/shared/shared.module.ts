@@ -145,6 +145,8 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
 @NgModule({
   imports: [
     CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
     PageHeaderModule,
     RouterModule,
     SteppersModule,

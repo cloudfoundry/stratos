@@ -15,9 +15,8 @@ describe('UptimePipe', () => {
       providers: [
         
         UptimePipe,
-        UtilsService
-      ,
-        provideZonelessChangeDetection()
+        UtilsService,
+        provideZonelessChangeDetection(),
       ]
     });
 

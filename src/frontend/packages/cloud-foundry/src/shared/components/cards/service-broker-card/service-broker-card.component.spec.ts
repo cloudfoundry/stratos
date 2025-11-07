@@ -5,13 +5,13 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import {
   BooleanIndicatorComponent,
 } from '../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import { EntityMonitorFactory } from '../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { EntityMonitorFactory } from '@stratosui/store/monitors/entity-monitor.factory.service';
 import { MetadataCardTestComponents } from '../../../../../../core/test-framework/core-test.helper';
-import { generateCfBaseTestModulesNoShared } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfBaseTestModulesNoShared } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ServicesService } from '../../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
 import { ServiceBrokerCardComponent } from './service-broker-card.component';
-
+import { EntityServiceFactory } from "@stratosui/store/entity-service-factory.service";
 describe('ServiceBrokerCardComponent', () => {
   let component: ServiceBrokerCardComponent;
   let fixture: ComponentFixture<ServiceBrokerCardComponent>;
@@ -19,19 +19,20 @@ describe('ServiceBrokerCardComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
-        ServiceBrokerCardComponent,
         MetadataCardTestComponents,
-        BooleanIndicatorComponent,
-      ],
+    ],
       imports: [
-        generateCfBaseTestModulesNoShared()
+        ServiceBrokerCardComponent,
+        BooleanIndicatorComponent,
+        generateCfBaseTestModulesNoShared(),
       ],
       providers: [
+        EntityServiceFactory,
         
         { provide: ServicesService, useClass: ServicesServiceMock },
-        EntityMonitorFactory
-      ,
-        provideZonelessChangeDetection()
+        EntityMonitorFactory,
+
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

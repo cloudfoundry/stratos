@@ -48,7 +48,6 @@ export class EntityFavoriteStarComponent {
   private userFavoriteManager = inject(UserFavoriteManager);
 
   public toggleFavorite(event: Event) {
-    event.cancelBubble = true;
     event.stopPropagation();
     if (this.confirmRemoval) {
       this.isFavorite$.pipe(

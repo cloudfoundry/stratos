@@ -3,11 +3,10 @@ import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { generateCfBaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { getCfSpaceServiceMock } from '../../../../../../test-framework/cloud-foundry-space.service.mock';
+import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { getCfSpaceServiceMock } from "@test-framework/cloud-foundry-space.service.mock";
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
-import { CfSpacesServiceInstancesListConfigService } from './cf-spaces-service-instances-list-config.service';
-
+import { CfSpacesServiceInstancesListConfigService } from "./cf-spaces-service-instances-list-config.service";
 describe('CfSpacesServiceInstancesListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -16,11 +15,11 @@ describe('CfSpacesServiceInstancesListConfigService', () => {
         CfSpacesServiceInstancesListConfigService,
         getCfSpaceServiceMock,
         DatePipe,
-        ServiceActionHelperService
-      ,
-        provideZonelessChangeDetection()
+        ServiceActionHelperService,
+
+        provideZonelessChangeDetection(),
       ],
-      imports: generateCfBaseTestModules()
+      imports: generateCfBaseTestModules(),
     });
   });
 

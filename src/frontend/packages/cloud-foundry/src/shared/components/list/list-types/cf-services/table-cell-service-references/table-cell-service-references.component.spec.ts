@@ -4,10 +4,9 @@ import { describe, it, expect, beforeEach } from 'vitest';
 
 import {
   generateCfBaseTestModulesNoShared,
-} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { LongRunningCfOperationsService } from '../../../../../data-services/long-running-cf-op.service';
-import { TableCellServiceReferencesComponent } from './table-cell-service-references.component';
-
+import { TableCellServiceReferencesComponent } from "./table-cell-service-references.component";
 describe('TableCellServiceReferencesComponent', () => {
   let component: TableCellServiceReferencesComponent;
   let fixture: ComponentFixture<TableCellServiceReferencesComponent>;
@@ -16,15 +15,12 @@ describe('TableCellServiceReferencesComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         TableCellServiceReferencesComponent,
-      imports: [
-        generateCfBaseTestModulesNoShared()
+        ...generateCfBaseTestModulesNoShared(),
       ],
       providers: [
-        
-        LongRunningCfOperationsService
-      ,
-        provideZonelessChangeDetection()
-      ]
+        LongRunningCfOperationsService,
+        provideZonelessChangeDetection(),
+      ],
     })
       .compileComponents();
 

@@ -8,33 +8,32 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { CoreModule } from '../../../../../../core/src/core/core.module';
 import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
 import { SharedModule } from '../../../../../../core/src/shared/shared.module';
-import { ApplicationServiceMock } from '../../../../../test-framework/application-service-helper';
-import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { ApplicationServiceMock } from "@test-framework/application-service-helper";
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ApplicationService } from '../../application.service';
-import { MapRoutesComponent } from './map-routes.component';
-
+import { MapRoutesComponent } from "./map-routes.component";
 describe('MapRoutesComponent', () => {
   let component: MapRoutesComponent;
   let fixture: ComponentFixture<MapRoutesComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [MapRoutesComponent],
       providers: [
         
         ListConfig,
         { provide: ApplicationService, useClass: ApplicationServiceMock },
-        DatePipe
-      ,
-        provideZonelessChangeDetection()
+        DatePipe,
+
+        provideZonelessChangeDetection(),
       ],
       imports: [
+        MapRoutesComponent,
         ...generateCfStoreModules(),
         CoreModule,
         SharedModule,
         NoopAnimationsModule,
-        RouterTestingModule
-      ]
+        RouterTestingModule,
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(MapRoutesComponent);

@@ -14,14 +14,14 @@ describe('PageSubNavComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
-        PageSubNavComponent
+        PageSubNavComponent,
       ],
       providers: [
         TabNavService,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

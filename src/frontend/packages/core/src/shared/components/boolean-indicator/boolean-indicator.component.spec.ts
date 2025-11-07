@@ -15,8 +15,8 @@ describe('BooleanIndicatorComponent', () => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [BooleanIndicatorComponent, CoreModule, NoopAnimationsModule]
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {
@@ -38,12 +38,14 @@ describe('BooleanIndicatorComponent', () => {
 
   it('should hide text if set', () => {
     component.showText = false;
+    // Component setter calls markForCheck(), but we need detectChanges in zoneless mode
     fixture.detectChanges();
     expect(element.textContent).not.toContain('Enabled');
   });
 
   it('should show unknown if not boolean value', () => {
     component.isTrue = null;
+    // Component setter calls markForCheck(), but we need detectChanges in zoneless mode
     fixture.detectChanges();
     expect(element.textContent).toContain('Unknown');
   });

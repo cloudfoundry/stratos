@@ -12,11 +12,11 @@ describe('ShowHideButtonComponent', () => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [
-        ShowHideButtonComponent
+        ShowHideButtonComponent,
       ],
       
-    })
-    .compileComponents();
+    });
+    TestBed.compileComponents();
   });
 
   beforeEach(() => {

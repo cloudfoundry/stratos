@@ -100,6 +100,8 @@ export { UploadProgressIndicatorComponent } from './shared/components/upload-pro
 export { EntitySummaryTitleComponent } from './shared/components/entity-summary-title/entity-summary-title.component';
 export { RingChartComponent } from './shared/components/ring-chart/ring-chart.component';
 export { CardProgressOverlayComponent } from './shared/components/card-progress-overlay/card-progress-overlay.component';
+export { ApplicationStateIconComponent } from './shared/components/application-state/application-state-icon/application-state-icon.component';
+export { EntityFavoriteStarComponent } from './core/entity-favorite-star/entity-favorite-star.component';
 
 // List Components
 export { ListComponent } from './shared/components/list/list.component';
@@ -159,6 +161,11 @@ export { SnackBarService } from './shared/services/snackbar.service';
 
 // Core Services
 export { UtilsService, safeUnsubscribe } from './core/utils.service';
+export { TabNavService } from './tab-nav.service';
+export { CurrentUserPermissionsService } from './core/permissions/current-user-permissions.service';
+export { StratosCurrentUserPermissions } from './core/permissions/stratos-user-permissions.checker';
+export { UserProfileService } from './core/user-profile.service';
+export { SessionService } from './shared/services/session.service';
 
 // Endpoints
 export * from './features/endpoints/create-endpoint/create-endpoint-helper';

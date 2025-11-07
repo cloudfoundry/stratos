@@ -12,8 +12,8 @@ describe('TileComponent', () => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [ TileComponent ]
-    })
-    .compileComponents();
+    });
+    TestBed.compileComponents();
   });
 
   beforeEach(() => {

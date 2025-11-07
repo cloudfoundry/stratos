@@ -5,24 +5,25 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import {
   generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
-} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from "@test-framework/cloud-foundry-endpoint-service.helper";
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../../shared/services/cloud-foundry-user-provided-services.service';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
-import { EditOrganizationStepComponent } from './edit-organization-step.component';
-
+import { EditOrganizationStepComponent } from "./edit-organization-step.component";
 describe('EditOrganizationStepComponent', () => {
   let component: EditOrganizationStepComponent;
   let fixture: ComponentFixture<EditOrganizationStepComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [EditOrganizationStepComponent],
-      imports: generateCfBaseTestModules(),
+      imports: [
+        EditOrganizationStepComponent,
+        ...generateCfBaseTestModules(),
+      ],
       providers: [
         ActiveRouteCfOrgSpace, generateTestCfEndpointServiceProvider(), CloudFoundryUserProvidedServicesService,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

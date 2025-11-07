@@ -1,10 +1,12 @@
 // Vitest + Angular testing setup (Zoneless - Angular 20)
 // Official configuration from https://analogjs.org/docs/features/testing/vitest
 
-import { expect, afterEach } from 'vitest';
+import { expect, describe, it, afterEach } from 'vitest';
 // IMMEDIATE: Expose vitest globals to window for entity-catalog test detection
 // This MUST happen before any Angular/Store imports that check window.describe
 if (typeof window !== 'undefined') {
+  (window as any).describe = describe;
+  (window as any).it = it;
   (window as any).expect = expect;
 }
 
@@ -15,6 +17,25 @@ import {
   platformBrowserTesting,
 } from '@angular/platform-browser/testing';
 import { getTestBed } from '@angular/core/testing';
+
+
+// Polyfill: window.matchMedia for tests
+// StratosThemeService and other components use matchMedia for responsive design
+if (typeof window.matchMedia === 'undefined') {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: (query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: () => {}, // deprecated but still used by some code
+      removeListener: () => {}, // deprecated but still used by some code
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => true,
+    }),
+  });
+}
 
 @NgModule({
   providers: [provideZonelessChangeDetection()],
@@ -50,10 +71,4 @@ afterEach(() => {
 // expect must be available globally before setup-snapshots tries to use it
 import('@analogjs/vitest-angular/setup-snapshots').catch(() => {
   // Silently ignore if setup-snapshots not available (older AnalogJS versions)
-});
-
-// Global cleanup hook to reset TestBed between tests
-// This clears component/service instances but preserves the platform
-afterEach(() => {
-  getTestBed().resetTestingModule();
 });

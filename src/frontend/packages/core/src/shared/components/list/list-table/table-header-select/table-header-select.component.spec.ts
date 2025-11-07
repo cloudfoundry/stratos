@@ -17,11 +17,11 @@ describe('TableHeaderSelectComponent', () => {
       
       imports: [
         CoreModule,
-        TableHeaderSelectComponent
+        TableHeaderSelectComponent,
       ]
     
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

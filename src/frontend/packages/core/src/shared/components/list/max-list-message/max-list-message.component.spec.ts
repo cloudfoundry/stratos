@@ -2,8 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
-
-import { createBasicStoreModule } from '../../../../../../store/testing/public-api';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 import { NoContentMessageComponent } from '../../no-content-message/no-content-message.component';
 import { MaxListMessageComponent } from './max-list-message.component';
 
@@ -18,10 +17,10 @@ describe('MaxListMessageComponent', () => {
         RouterTestingModule,
         createBasicStoreModule(),
         MaxListMessageComponent,
-        NoContentMessageComponent
+        NoContentMessageComponent,
       ],
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

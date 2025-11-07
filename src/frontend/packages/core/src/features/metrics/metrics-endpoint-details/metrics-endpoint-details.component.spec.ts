@@ -1,12 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-
-import { createBasicStoreModule } from '../../../../../store/testing/src/store-test-helper';
-import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
-import { SharedModule } from '../../../shared/shared.module';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { of } from 'rxjs';
+import { BaseTestModules, STORE_TEST_PROVIDERS } from '@test-framework';
 import { MetricsService } from '../services/metrics-service';
-import { CoreModule } from './../../../core/core.module';
 import { MetricsEndpointDetailsComponent } from './metrics-endpoint-details.component';
 
 describe('MetricsEndpointDetailsComponent', () => {
@@ -16,18 +13,23 @@ describe('MetricsEndpointDetailsComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
-        CoreModule,
-        SharedModule,
-        CoreTestingModule,
-        createBasicStoreModule(),
-        MetricsEndpointDetailsComponent
+        ...BaseTestModules,
+        MetricsEndpointDetailsComponent,
       ],
       providers: [
-         MetricsService ,
-        provideZonelessChangeDetection()
+        {
+          provide: MetricsService,
+          useValue: {
+            metricsEndpoints$: of([]),
+            haveNoMetricsEndpoints$: of(false),
+            haveNoConnectedMetricsEndpoints$: of(false)
+          }
+        },
+        ...(STORE_TEST_PROVIDERS || []),
+        provideZonelessChangeDetection(),
       ]
-    })
-    .compileComponents();
+    });
+    TestBed.compileComponents();
   });
 
   beforeEach(() => {

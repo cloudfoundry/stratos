@@ -3,7 +3,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { ValuesPipe } from '../../../../../../../../core/src/shared/pipes/values.pipe';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { APIResource } from '@stratosui/store/types/api.types';
 import { CfEvent } from '../../../../../../cf-api.types';
 import { EventMetadataComponent } from '../event-metadata/event-metadata.component';
 import { TableCellEventDetailComponent } from './table-cell-event-detail.component';
@@ -14,9 +14,8 @@ describe('TableCellEventDetailComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [TableCellEventDetailComponent, ValuesPipe, EventMetadataComponent],
       providers: [provideZonelessChangeDetection()],
-      imports: [TableCellEventDetailComponent, ValuesPipe, EventMetadataComponent,
-      imports: [CoreModule]
     })
       .compileComponents();
 

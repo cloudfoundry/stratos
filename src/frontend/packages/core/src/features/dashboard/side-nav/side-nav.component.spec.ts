@@ -2,11 +2,10 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from "../test-framework/core-test.helper";
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 
-import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
-import { CustomizationService } from '../../../core/customizations.types';
-import { MDAppModule } from '../../../core/md.module';
+import { CoreTestingModule } from "@test-framework/core-test.modules";
+import { CustomizationService, MDAppModule } from '@stratosui/core';
 import { SideNavComponent } from './side-nav.component';
 
 
@@ -22,17 +21,16 @@ describe('SideNavComponent', () => {
         MDAppModule,
         CoreTestingModule,
         createBasicStoreModule(),
-        SideNavComponent
+        SideNavComponent,
       ],
       providers: [
         
-        CustomizationService
-      ,
-        provideZonelessChangeDetection()
+        CustomizationService,
+        provideZonelessChangeDetection(),
       ]
     
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

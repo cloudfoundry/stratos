@@ -15,11 +15,11 @@ describe('ServiceInstanceLastOpComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
-      declarations: [
+      imports: [
         ServiceInstanceLastOpComponent,
         BooleanIndicatorComponent,
+        ...BaseTestModulesNoShared,
       ],
-      imports: [...BaseTestModulesNoShared]
     })
       .compileComponents();
   });

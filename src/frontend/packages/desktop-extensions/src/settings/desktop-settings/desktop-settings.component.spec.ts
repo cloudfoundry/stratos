@@ -12,7 +12,7 @@ describe('DesktopSettingsComponent', () => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       declarations: [ DesktopSettingsComponent ]
-    })
+    }),
     .compileComponents();
   });
 

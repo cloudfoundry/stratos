@@ -2,7 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { generateCfBaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { EntityServiceFactory } from '@stratosui/store/entity-service-factory.service';
+import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import {
   CompactServiceInstanceCardComponent,
 } from '../../../shared/components/cards/compact-service-instance-card/compact-service-instance-card.component';
@@ -18,29 +19,26 @@ import {
 import { ServiceIconComponent } from '../../../shared/components/service-icon/service-icon.component';
 import { ServicesService } from '../services.service';
 import { ServicesServiceMock } from '../services.service.mock';
-import { ServiceSummaryComponent } from './service-summary.component';
-
+import { ServiceSummaryComponent } from "./service-summary.component";
 describe('ServiceSummaryComponent', () => {
   let component: ServiceSummaryComponent;
   let fixture: ComponentFixture<ServiceSummaryComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
+      imports: [
         ServiceSummaryComponent,
         ServiceSummaryCardComponent,
         ServiceBrokerCardComponent,
         ServiceRecentInstancesCardComponent,
-        ServiceRecentInstancesCardComponent,
         ServiceIconComponent,
-        CompactServiceInstanceCardComponent
+        CompactServiceInstanceCardComponent,
+        ...generateCfBaseTestModules(),
       ],
-      imports: generateCfBaseTestModules(),
       providers: [
-        
+        EntityServiceFactory,
         { provide: ServicesService, useClass: ServicesServiceMock },
-      ,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

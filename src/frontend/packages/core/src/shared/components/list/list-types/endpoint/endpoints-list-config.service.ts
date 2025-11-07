@@ -11,11 +11,10 @@ import {
   EntityMonitorFactory,
   PaginationMonitorFactory,
   stratosEntityCatalog,
+  UserFavoriteManager,
 } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, of } from 'rxjs';
 import { debounceTime, filter, first, map } from 'rxjs/operators';
-
-import { UserFavoriteManager } from '../../../../../../../store/src/user-favorite-manager';
 import { SessionService } from '../../../../services/session.service';
 import { CurrentUserPermissionsService } from '../../../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../../../core/permissions/stratos-user-permissions.checker';

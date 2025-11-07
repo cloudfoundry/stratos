@@ -6,10 +6,9 @@ import { SharedModule } from '../../../../../../../../core/src/shared/shared.mod
 import {
   generateCfStoreModules,
   generateTestCfEndpointServiceProvider,
-} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { CfOrgPermissionCellComponent } from './cf-org-permission-cell.component';
-import { HttpClientModule } from '@angular/common/http';
-
+import { HttpClientModule } from "@angular/common/http";
 describe('CfUserPermissionCellComponent', () => {
   let component: CfOrgPermissionCellComponent;
   let fixture: ComponentFixture<CfOrgPermissionCellComponent>;
@@ -20,13 +19,13 @@ describe('CfUserPermissionCellComponent', () => {
         CfOrgPermissionCellComponent,
         ...generateCfStoreModules(),
         SharedModule,
-        HttpClientModule
-      ],
+        HttpClientModule,
+    ],
       providers: [
         
-        ...generateTestCfEndpointServiceProvider()
-      ,
-        provideZonelessChangeDetection()
+        ...generateTestCfEndpointServiceProvider(),
+
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

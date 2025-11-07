@@ -5,7 +5,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { generateBaseTestStoreModules } from '../../../../test-framework/core-test.helper';
+import { generateBaseTestStoreModules, STORE_TEST_PROVIDERS } from "@test-framework/core-test.helper";
+import { EntityServiceFactory } from '@stratosui/store';
 import { CoreModule } from '../../../core/core.module';
 import { MDAppModule } from '../../../core/md.module';
 import { PageHeaderModule } from '../../../shared/components/page-header/page-header.module';
@@ -34,10 +35,12 @@ describe('SetupWelcomeComponent', () => {
       ],
       providers: [
         TabNavService,
-        provideZonelessChangeDetection()
+        EntityServiceFactory,
+        ...(STORE_TEST_PROVIDERS || []),
+        provideZonelessChangeDetection(),
       ]
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

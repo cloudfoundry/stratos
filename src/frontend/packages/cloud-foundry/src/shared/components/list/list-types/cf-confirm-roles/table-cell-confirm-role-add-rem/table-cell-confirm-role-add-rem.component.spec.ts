@@ -17,12 +17,11 @@ describe('TableCellConfirmRoleAddRemComponent', () => {
     await TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [
+        BooleanIndicatorComponent,
         MDAppModule,
-        TableCellConfirmRoleAddRemComponent
+        TableCellConfirmRoleAddRemComponent,
       ],
-      declarations: [
-        BooleanIndicatorComponent
-      ]
+      
     })
       .compileComponents();
 

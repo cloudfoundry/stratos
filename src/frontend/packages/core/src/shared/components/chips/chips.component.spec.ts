@@ -22,10 +22,10 @@ describe('AppChipsComponent', () => {
       providers: [provideZonelessChangeDetection()],
       imports: [
         AppChipsComponent, // Now standalone
-        CoreModule
+        CoreModule,
       ]
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {
@@ -48,6 +48,7 @@ describe('AppChipsComponent', () => {
   it('should show number of hidden items when compacted', () => {
     component.toggleLimit(); // show less
     component.toggleLimit(); // +2
+    // Method calls markForCheck(), but we need detectChanges in zoneless mode
     fixture.detectChanges();
 
     expect(element.textContent).toContain('+2');
@@ -55,6 +56,7 @@ describe('AppChipsComponent', () => {
 
   it('should show "show less" when expanded', () => {
     component.toggleLimit();
+    // Method calls markForCheck(), but we need detectChanges in zoneless mode
     fixture.detectChanges();
 
     expect(element.textContent).toContain('Show less');
@@ -62,6 +64,7 @@ describe('AppChipsComponent', () => {
 
   it('should display custom object property', () => {
     component.displayProperty = 'custom';
+    // Setter calls markForCheck(), but we need detectChanges in zoneless mode
     fixture.detectChanges();
 
     expect(element.textContent).toContain('custom1');

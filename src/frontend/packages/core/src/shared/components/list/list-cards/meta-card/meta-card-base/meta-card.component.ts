@@ -1,5 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ContentChild, ContentChildren, Input, OnDestroy, QueryList, HostListener  } from '@angular/core';
+import { combineLatest, Observable, of as observableOf, of, Subscription } from 'rxjs';
+import { first, map, tap } from 'rxjs/operators';
+
 import {
   EntityMonitorFactory,
   MenuItem,
@@ -7,19 +10,17 @@ import {
   UserFavorite,
   ComponentEntityMonitorConfig,
   StratosStatus,
+  UserFavoriteManager,
 } from '@stratosui/store';
-import { combineLatest, Observable, of as observableOf, of, Subscription } from 'rxjs';
-import { first, map, tap } from 'rxjs/operators';
-
-import { UserFavoriteManager } from '@stratosui/store';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
 import { ApplicationStateIconComponent } from '../../../../application-state/application-state-icon/application-state-icon.component';
 import { CardStatusComponent } from '../../../../cards/card-status/card-status.component';
 import { ClickStopPropagationDirective } from '../../../../../../core/click-stop-propagation.directive';
 import { EntityFavoriteStarComponent } from '../../../../../../core/entity-favorite-star/entity-favorite-star.component';
+import { CustomIconComponent } from '../../../../custom-material/custom-material.component';
+import { AppProgressBarComponent } from '../../../../progress-bar/app-progress-bar.component';
 import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
-import { CustomIconComponent } from '../../../../../../shared/components/custom-material/custom-material.component';
 
 
 export function createMetaCardMenuItemSeparator(): MenuItem {
@@ -42,6 +43,9 @@ export function createMetaCardMenuItemSeparator(): MenuItem {
     CardStatusComponent,
     ClickStopPropagationDirective,
     EntityFavoriteStarComponent,
+    AppProgressBarComponent,
+    MetaCardItemComponent,
+    MetaCardTitleComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })

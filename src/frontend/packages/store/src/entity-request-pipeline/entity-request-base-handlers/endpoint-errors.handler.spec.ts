@@ -32,7 +32,7 @@ describe('endpoint-error-handler', () => {
       {
         error: {
           status: 'test',
-          statusCode: 200
+          statusCode: 200,
         },
         errorResponse: 'response'
       }
@@ -48,7 +48,7 @@ describe('endpoint-error-handler', () => {
       { type: 'test', guid: endpointGuid } as EntityRequestAction,
       entity,
       requestType,
-      errors
+      errors,
     );
 
     // Verify both actions were dispatched

@@ -1,5 +1,6 @@
 import { Provider } from '@angular/core';
-import { EntityCatalog } from '../entity-catalog/entity-catalog';
+import { vi } from 'vitest';
+import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { EntityServiceFactory } from '../entity-service-factory.service';
 import { EntityMonitorFactory } from '../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
@@ -15,13 +16,13 @@ import {
  */
 export const STORE_TEST_PROVIDERS: Provider[] = [
   // Concrete services
-  EntityCatalog,
   EntityServiceFactory,
   EntityMonitorFactory,
   PaginationMonitorFactory,
 
-  // Injection tokens pointing to concrete services
-  { provide: ENTITY_CATALOG_TOKEN, useExisting: EntityCatalog },
+  // Injection tokens pointing to services
+  // Note: entityCatalog is a singleton instance, not an @Injectable class
+  { provide: ENTITY_CATALOG_TOKEN, useValue: entityCatalog },
   { provide: ENTITY_SERVICE_FACTORY_TOKEN, useExisting: EntityServiceFactory },
   { provide: PAGINATION_MONITOR_FACTORY_TOKEN, useExisting: PaginationMonitorFactory },
 ];
@@ -37,15 +38,15 @@ export function getStoreTestProviders(...additionalProviders: Provider[]): Provi
 /**
  * Mock factory creators for tests that need spy objects
  */
-export function createMockEntityServiceFactory(): jasmine.SpyObj<EntityServiceFactory> {
+export function createMockEntityServiceFactory(): any {
   return { create: vi.fn() };
 }
 
-export function createMockEntityMonitorFactory(): jasmine.SpyObj<EntityMonitorFactory> {
+export function createMockEntityMonitorFactory(): any {
   return { create: vi.fn(), getMonitor: vi.fn() };
 }
 
-export function createMockPaginationMonitorFactory(): jasmine.SpyObj<PaginationMonitorFactory> {
+export function createMockPaginationMonitorFactory(): any {
   return { create: vi.fn(), getMonitor: vi.fn() };
 }
 
@@ -63,7 +64,6 @@ export function getMockStoreProviders(): Provider[] {
     { provide: EntityMonitorFactory, useValue: mockEntityMonitorFactory },
     { provide: PaginationMonitorFactory, useValue: mockPaginationMonitorFactory },
     { provide: PAGINATION_MONITOR_FACTORY_TOKEN, useValue: mockPaginationMonitorFactory },
-    EntityCatalog,
-    { provide: ENTITY_CATALOG_TOKEN, useExisting: EntityCatalog },
+    { provide: ENTITY_CATALOG_TOKEN, useValue: entityCatalog },
   ];
 }

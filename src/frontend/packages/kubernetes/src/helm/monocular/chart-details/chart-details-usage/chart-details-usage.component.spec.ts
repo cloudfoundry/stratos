@@ -18,9 +18,9 @@ describe('Component: ChartDetailsUsage', () => {
         EndpointsService,
         UtilsService,
         PaginationMonitorFactory,
-        SessionService
-      ,
-        provideZonelessChangeDetection()
+        SessionService,
+
+        provideZonelessChangeDetection(),
       ],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();

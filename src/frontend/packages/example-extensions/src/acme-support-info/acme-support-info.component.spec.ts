@@ -16,9 +16,9 @@ describe('AcmeSupportInfoComponent', () => {
       declarations: [ AcmeSupportInfoComponent ],
       imports: [
         CoreModule,
-        SharedModule
+        SharedModule,
       ]
-    })
+    }),
     .compileComponents();
   });
 

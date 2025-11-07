@@ -10,7 +10,7 @@ import { ChangeDetectionStrategy, AfterContentInit,
   ViewChild,
  } from '@angular/core';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { CustomFormFieldComponent } from '../../../components/custom-form-field/custom-form-field.component';
+import { CustomFormFieldComponent, AppErrorComponent, AppInputDirective } from '../../../components/custom-form-field/custom-form-field.component';
 import { CustomTooltipDirective } from '../../custom-tooltip/custom-tooltip.directive';
 import { Observable, Subscription } from 'rxjs';
 
@@ -53,6 +53,8 @@ export interface StackedInputActionUpdate {
     CommonModule,
     ReactiveFormsModule,
     CustomFormFieldComponent,
+    AppErrorComponent,
+    AppInputDirective,
     CustomIconComponent,
     CustomTooltipDirective,
     BooleanIndicatorComponent

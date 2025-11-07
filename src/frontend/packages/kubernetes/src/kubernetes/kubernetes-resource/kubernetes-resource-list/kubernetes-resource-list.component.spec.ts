@@ -5,6 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { TabNavService } from '../../../../../core/src/tab-nav.service';
 import { KubeBaseGuidMock, KubernetesBaseTestModules } from '../../kubernetes.testing.module';
 import { KubernetesResourceListComponent } from './kubernetes-resource-list.component';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 
 describe('KubernetesResourceListComponent', () => {
   let component: KubernetesResourceListComponent;
@@ -12,9 +13,9 @@ describe('KubernetesResourceListComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ KubernetesResourceListComponent ],
-      imports: [ KubernetesBaseTestModules ],
+      imports: [ KubernetesResourceListComponent, ...KubernetesBaseTestModules ],
       providers: [
+        EntityServiceFactory,
         KubeBaseGuidMock,
         TabNavService,
         {
@@ -31,7 +32,7 @@ describe('KubernetesResourceListComponent', () => {
           }
         }
       ]
-    })
+    }),
     .compileComponents();
   });
 

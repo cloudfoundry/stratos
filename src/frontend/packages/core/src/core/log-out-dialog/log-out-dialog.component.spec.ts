@@ -1,54 +1,47 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TailwindDialogRef, MAT_DIALOG_DATA } from '@stratosui/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from "../test-framework/core-test.helper";
-
-import { CoreTestingModule } from '../../../test-framework/core-test.modules';
-import { SharedModule } from '../../shared/shared.module';
-import { CoreModule } from '../core.module';
-import { RouteModule } from './../../app.routing';
 import { LogOutDialogComponent } from './log-out-dialog.component';
 
 describe('LogOutDialogComponent', () => {
   let component: LogOutDialogComponent;
   let fixture: ComponentFixture<LogOutDialogComponent>;
   let element: HTMLElement;
-  let router: any;
+  let router: Router;
 
-  class TailwindDialogRefMock {
+  class TailwindDialogRefMock extends TailwindDialogRef {
+    close = vi.fn();
+    afterClosed = vi.fn();
+    afterOpened = vi.fn();
+    componentInstance = null;
   }
 
-  class DialogDataMock {
-    data = '';
-  }
+  const dialogDataMock = {
+    expiryDate: Date.now() + 5000
+  };
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
       providers: [
-        
         { provide: TailwindDialogRef, useClass: TailwindDialogRefMock },
-        { provide: MAT_DIALOG_DATA, useClass: DialogDataMock },
-      ,
+        { provide: 'TailwindDialogRef', useClass: TailwindDialogRefMock },
+        { provide: MAT_DIALOG_DATA, useValue: dialogDataMock },
         provideZonelessChangeDetection()
       ],
       imports: [
-        CoreModule,
+        CommonModule,
+        LogOutDialogComponent,
         RouterTestingModule,
-        RouteModule,
-        SharedModule,
-        NoopAnimationsModule,
-        CoreTestingModule,
-        createBasicStoreModule(),
+        NoopAnimationsModule
       ]
-    })
-      .compileComponents();
-  });
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(LogOutDialogComponent);
     router = TestBed.inject(Router);
     component = fixture.componentInstance;
@@ -65,7 +58,7 @@ describe('LogOutDialogComponent', () => {
     const spy = vi.spyOn(router, 'navigate');
 
     component.data = {
-      expiryDate: Date.now() + 1000,
+      expiryDate: Date.now() + 1000
     };
     fixture.detectChanges();
     component.ngOnDestroy();

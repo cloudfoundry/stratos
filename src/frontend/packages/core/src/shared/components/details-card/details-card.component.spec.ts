@@ -18,10 +18,10 @@ describe('DetailsCardComponent', () => {
         DetailsCardComponent, // Now standalone
         CommonModule,
         CoreModule,
-        NoopAnimationsModule
+        NoopAnimationsModule,
       ]
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

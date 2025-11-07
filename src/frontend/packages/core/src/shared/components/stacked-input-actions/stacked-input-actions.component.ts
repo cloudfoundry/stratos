@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef,
   ComponentFactory,
   ComponentFactoryResolver,
   EventEmitter,
+  Injector,
   Input,
   OnDestroy,
   OnInit,
@@ -74,6 +75,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
   constructor(
     private componentFactoryResolver: ComponentFactoryResolver,
     private cd: ChangeDetectorRef,
+    private injector: Injector,
   ) {
     this.wrapperFactory = this.componentFactoryResolver.resolveComponentFactory(StackedInputActionComponent);
   }
@@ -103,7 +105,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
 
     // Track how we push state into the component using signals
     const stateInSignal = signal<StackedInputActionsState>(null);
-    stackedAction.stateIn$ = toObservable(stateInSignal);
+    stackedAction.stateIn$ = toObservable(stateInSignal, { injector: this.injector });
 
     // Track them all together in one pot
     this.components[stackedAction.key] = {

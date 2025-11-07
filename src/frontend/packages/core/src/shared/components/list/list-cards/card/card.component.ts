@@ -2,13 +2,12 @@ import { Component, ComponentFactoryResolver, ComponentRef, Input, Type, ViewChi
 import { MultiActionListEntity } from '@stratosui/store';
 
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
-import { EndpointCardComponent } from '../../list-types/endpoint/endpoint-card/endpoint-card.component';
 import { CardCell } from '../../list.types';
 import { CardDynamicComponent, CardMultiActionComponents } from '../card.component.types';
 
-export const listCards = [
-  EndpointCardComponent
-];
+// Initialize as empty array to avoid circular dependency issues
+// Cards will be registered at runtime
+export const listCards: any[] = [];
 export type CardTypes<T> = Type<CardCell<T>> | CardMultiActionComponents | CardDynamicComponent<T>;
 
 interface ISetupData<T> {

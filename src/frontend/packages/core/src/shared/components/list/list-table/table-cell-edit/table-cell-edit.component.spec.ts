@@ -16,12 +16,12 @@ describe('TableCellEditComponent', () => {
       providers: [provideZonelessChangeDetection()],
       
       imports: [
-        CoreModule,,
-        TableCellEditComponent
+        CoreModule,
+        TableCellEditComponent,
       ]
     
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

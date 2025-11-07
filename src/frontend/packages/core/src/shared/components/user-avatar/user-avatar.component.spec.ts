@@ -12,10 +12,10 @@ describe('UserAvatarComponent', () => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [
-        UserAvatarComponent
+        UserAvatarComponent,
       ]
-    })
-    .compileComponents();
+    });
+    TestBed.compileComponents();
   });
 
   beforeEach(() => {

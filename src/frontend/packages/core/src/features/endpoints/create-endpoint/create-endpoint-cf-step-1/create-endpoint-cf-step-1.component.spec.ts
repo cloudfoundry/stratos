@@ -1,43 +1,65 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
-import { createBasicStoreModule } from "../test-framework/core-test.helper";
+import {
+  entityCatalog,
+  EntityServiceFactory,
+  generateStratosEntities,
+  EntityCatalogHelper,
+  EntityCatalogHelpers,
+  StratosCatalogEndpointEntity
+} from '@stratosui/store';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 
-import { CoreTestingModule } from '../../../../../test-framework/core-test.modules';
-import { CoreModule } from '../../../../core/core.module';
-import { SharedModule } from '../../../../shared/shared.module';
 import { CreateEndpointCfStep1Component } from './create-endpoint-cf-step-1.component';
-import { CurrentUserPermissionsService } from '../../../../core/permissions/current-user-permissions.service';
 
 describe('CreateEndpointCfStep1Component', () => {
   let component: CreateEndpointCfStep1Component;
   let fixture: ComponentFixture<CreateEndpointCfStep1Component>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    // Clear and register entities BEFORE TestBed configuration for Angular 20
+    (entityCatalog as any).clear();
+    const entities = generateStratosEntities();
+    entities.forEach(entity => entityCatalog.register(entity));
+
+    // Register a minimal CF endpoint for this test
+    const cfEndpoint = new StratosCatalogEndpointEntity({
+      type: 'cf',
+      label: 'Cloud Foundry',
+      labelPlural: 'Cloud Foundry',
+      logoUrl: '/core/assets/endpoint-icons/cloudfoundry.svg',
+      authTypes: [],
+      renderPriority: 1,
+      tokenSharing: true
+    }, entity => `/cloud-foundry/${entity.guid}/summary`);
+    entityCatalog.register(cfEndpoint);
+
+    await TestBed.configureTestingModule({
       imports: [
-        CoreModule,
-        SharedModule,
-        CoreTestingModule,
         createBasicStoreModule(),
-        NoopAnimationsModule,
-        CreateEndpointCfStep1Component
+        CreateEndpointCfStep1Component,
       ],
-      providers: [{
-        provide: ActivatedRoute,
-        useValue: {
-          snapshot: {
-            queryParams: {},
-            params: { type: 'cf' }
+      providers: [
+        EntityServiceFactory,
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              queryParams: {},
+              params: { type: 'cf' }
+            }
           }
         },
-      },
-        CurrentUserPermissionsService
+        ...STORE_TEST_PROVIDERS,
+        provideZonelessChangeDetection(),
       ]
-    })
-      .compileComponents();
+    }).compileComponents();
+
+    // Initialize EntityCatalogHelper for Angular 20 compatibility
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
   });
 
   beforeEach(() => {
@@ -128,11 +150,11 @@ describe('CreateEndpointCfStep1Component', () => {
 
       urlControl.setValue('not a url');
       expect(urlControl.valid).toBe(false);
-      expect(urlControl.errors?.invalidUrl).toBe(true);
+      expect(urlControl.errors?.invalidUrl).toBeTruthy();
 
       urlControl.setValue('ht!tp://example.com');
       expect(urlControl.valid).toBe(false);
-      expect(urlControl.errors?.invalidUrl).toBe(true);
+      expect(urlControl.errors?.invalidUrl).toBeTruthy();
 
       urlControl.setValue('');
       expect(urlControl.valid).toBe(false);

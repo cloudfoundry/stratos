@@ -31,10 +31,10 @@ import {
 import {
   MultilineTitleComponent,
 } from '../../../../../core/src/shared/components/multiline-title/multiline-title.component';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { generateCfBaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { EntityServiceFactory } from '@stratosui/store/entity-service-factory.service';
+import { EntityMonitorFactory } from '@stratosui/store/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '@stratosui/store/monitors/pagination-monitor.factory';
+import { generateCfBaseTestModulesNoShared } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ServicesWallService } from '../../../features/services/services/services-wall.service';
 import { CsiGuidsService } from '../add-service-instance/csi-guids.service';
 import { CfOrgSpaceLinksComponent } from '../cf-org-space-links/cf-org-space-links.component';
@@ -55,15 +55,14 @@ import {
   TableCellServiceTagsComponent,
 } from '../list/list-types/cf-services/table-cell-service-tags/table-cell-service-tags.component';
 import { ServiceIconComponent } from '../service-icon/service-icon.component';
-import { SelectServiceComponent } from './select-service.component';
-
+import { SelectServiceComponent } from "./select-service.component";
 describe('SelectServiceComponent', () => {
   let component: SelectServiceComponent;
   let fixture: ComponentFixture<SelectServiceComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
+      imports: [
         SelectServiceComponent,
         CfOrgSpaceLinksComponent,
         CardStatusComponent,
@@ -84,18 +83,18 @@ describe('SelectServiceComponent', () => {
         TableCellServiceBindableComponent,
         TableCellServiceReferencesComponent,
         TableCellServiceCfBreadcrumbsComponent,
-        TableCellServiceTagsComponent
+        TableCellServiceTagsComponent,
+        ...generateCfBaseTestModulesNoShared(),
       ],
-      imports: generateCfBaseTestModulesNoShared(),
       providers: [
         
         PaginationMonitorFactory,
         ServicesWallService,
         EntityServiceFactory,
         CsiGuidsService,
-        EntityMonitorFactory
-      ,
-        provideZonelessChangeDetection()
+        EntityMonitorFactory,
+
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

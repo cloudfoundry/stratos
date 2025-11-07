@@ -1,5 +1,5 @@
 import { CdkTableModule } from '@angular/cdk/table';
-import {  Component, DebugElement, provideZonelessChangeDetection } from '@angular/core';
+import {  Component, DebugElement, provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { By } from '@angular/platform-browser';
@@ -31,7 +31,7 @@ describe('TableRowComponent', () => {
     });
     rowState2 = observableOf({
       error: false,
-      blocked: false
+      blocked: false,
     });
   }
 
@@ -49,23 +49,24 @@ describe('TableRowComponent', () => {
     TestBed.configureTestingModule({
 
       declarations: [
-        TestHostComponent
+        TestHostComponent,
       ],
       imports: [
         CoreModule,
         CdkTableModule,
         NoopAnimationsModule,
-        TableRowComponent
+        TableRowComponent,
       ],
       providers: [
-        
-        TableRowExpandedService
-      ,
-        provideZonelessChangeDetection()
-      ]
 
-    })
-      .compileComponents();
+        TableRowExpandedService,
+
+        provideZonelessChangeDetection(),
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
+
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {
@@ -78,17 +79,16 @@ describe('TableRowComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should show error', () => {
+  it('should show error', async () => {
     fixture.detectChanges();
     const [error1, error2] = getElements('table-row__error');
     const errorShown = elementShown(error1);
     const errorNotShown = !elementShown(error2);
 
-    fixture.whenStable().then(() => {
-      fixture.detectChanges();
-      expect(errorNotShown).toBeTruthy();
-      expect(errorShown).toBeTruthy();
-    });
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(errorNotShown).toBeTruthy();
+    expect(errorShown).toBeTruthy();
   });
 
   describe('Config binding', () => {
@@ -117,7 +117,7 @@ describe('TableRowComponent', () => {
         {
           columnId: 'test',
           cellComponent: MockCellComponent,
-          cellConfig: staticConfig
+          cellConfig: staticConfig,
         }
       ];
       const testRow = { id: 1, name: 'Test Row' };
@@ -135,21 +135,21 @@ describe('TableRowComponent', () => {
 
       const tableCellInstance = tableCellDebug.componentInstance as TableCellComponent<any>;
       expect(tableCellInstance.config).toEqual(staticConfig);
-      expect(tableCellInstance.config).not.toBe(columns[0]); // Should not be entire column
+      expect(tableCellInstance.config).not.toBe(columns[0]); // Should not be entire column,
     });
 
     it('should evaluate cellConfig function with row data', () => {
       // Arrange
       const configFunction = vi.fn().mockImplementation((row: any) => ({
         testValue: `dynamic-${row.id}`,
-        enabled: row.active
-      });
+        enabled: row.active,
+      }));
 
       const columns: ITableColumn<any>[] = [
         {
           columnId: 'test',
           cellComponent: MockCellComponent,
-          cellConfig: configFunction
+          cellConfig: configFunction,
         }
       ];
       const testRow = { id: 42, name: 'Test Row', active: true };
@@ -168,7 +168,7 @@ describe('TableRowComponent', () => {
 
       expect(tableCellInstance.config).toEqual({
         testValue: 'dynamic-42',
-        enabled: true
+        enabled: true,
       });
     });
 
@@ -178,7 +178,7 @@ describe('TableRowComponent', () => {
         {
           columnId: 'test',
           cellComponent: MockCellComponent
-          // cellConfig is undefined
+          // cellConfig is undefined,
         }
       ];
       const testRow = { id: 1, name: 'Test Row' };
@@ -203,7 +203,7 @@ describe('TableRowComponent', () => {
         {
           columnId: 'test',
           cellComponent: MockCellComponent,
-          cellConfig: null
+          cellConfig: null,
         }
       ];
       const testRow = { id: 1, name: 'Test Row' };
@@ -222,17 +222,17 @@ describe('TableRowComponent', () => {
       expect(tableCellInstance.config).toBeNull();
     });
 
-    it('should re-evaluate function config when row changes', () => {
+    it('should re-evaluate function config when row changes', async () => {
       // Arrange
       const configFunction = vi.fn().mockImplementation((row: any) => ({
         testValue: `row-${row.id}`
-      });
+      }));
 
       const columns: ITableColumn<any>[] = [
         {
           columnId: 'test',
           cellComponent: MockCellComponent,
-          cellConfig: configFunction
+          cellConfig: configFunction,
         }
       ];
 
@@ -242,11 +242,15 @@ describe('TableRowComponent', () => {
 
       // Act - Initial render
       configFixture.detectChanges();
+      await configFixture.whenStable();
       expect(configFunction).toHaveBeenCalledTimes(1);
 
-      // Change row
-      configComponent.row = { id: 2 };
+      // Change row using setInput for proper change detection in zoneless mode
+      configFixture.componentRef.setInput('row', { id: 2 });
+
+      // Trigger change detection to re-evaluate template expressions
       configFixture.detectChanges();
+      await configFixture.whenStable();
 
       // Assert - Function should be called again with new row
       expect(configFunction).toHaveBeenCalledTimes(2);
@@ -261,7 +265,7 @@ describe('TableRowComponent', () => {
           cellComponent: MockCellComponent,
           cellConfig: { testValue: 'correct-config' },
           cellFlex: '1 1 100px', // Other column properties
-          sort: true
+          sort: true,
         }
       ];
       const testRow = { id: 1 };

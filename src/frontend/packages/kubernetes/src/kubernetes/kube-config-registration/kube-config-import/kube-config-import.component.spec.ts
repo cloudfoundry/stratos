@@ -13,10 +13,10 @@ describe('KubeConfigImportComponent', () => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [
-        ...KubernetesBaseTestModules
-      ,
-        KubeConfigImportComponent
-      ]})
+        ...KubernetesBaseTestModules,
+
+        KubeConfigImportComponent,
+      ]}),
       .compileComponents();
   });
 

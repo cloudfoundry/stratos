@@ -3,7 +3,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { of as observableOf } from 'rxjs';
 
-import { BaseTestModulesNoShared } from '../../../../test-framework/core-test.helper';
+import { BaseTestModulesNoShared, STORE_TEST_PROVIDERS } from "@test-framework/core-test.helper";
 import { BooleanIndicatorComponent } from '../boolean-indicator/boolean-indicator.component';
 import { StackedInputActionComponent } from './stacked-input-action/stacked-input-action.component';
 import { StackedInputActionsComponent } from './stacked-input-actions.component';
@@ -14,15 +14,18 @@ describe('StackedInputActionsComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection()],
+      providers: [
+        ...(STORE_TEST_PROVIDERS || []),
+        provideZonelessChangeDetection()
+      ],
       imports: [
         ...BaseTestModulesNoShared,
         StackedInputActionsComponent,
         BooleanIndicatorComponent,
-        StackedInputActionComponent
+        StackedInputActionComponent,
       ],
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

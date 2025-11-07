@@ -35,6 +35,23 @@ export {
   TestConfigPresets
 } from './test-config';
 
+// Core test modules and helpers from package root test-framework
+export {
+  AppTestModule,
+  generateBaseTestStoreModules,
+  BaseTestModulesNoShared,
+  BaseTestModules,
+  MetadataCardTestComponents,
+  createBasicStoreModule,
+  createEmptyStoreModule,
+  createEntityStore,
+  createEntityStoreState,
+  populateStoreWithTestEndpoint,
+  StoreTestingModule,
+  STORE_TEST_PROVIDERS,
+  CoreTestingModule
+} from '../../test-framework/core-test.helper';
+
 /**
  * Quick Start Guide:
  *

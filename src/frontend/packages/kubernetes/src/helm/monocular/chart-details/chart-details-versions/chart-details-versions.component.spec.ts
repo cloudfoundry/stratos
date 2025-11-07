@@ -17,13 +17,13 @@ describe('ChartDetailsVersionsComponent', () => {
       imports: [
         RouterTestingModule,
         ChartDetailsVersionsComponent,
-        PanelComponent
+        PanelComponent,
       ],
       providers: [
         { provide: ChartsService, useValue: new MockChartService() },
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
-    })
+    }),
       .compileComponents();
   });
 

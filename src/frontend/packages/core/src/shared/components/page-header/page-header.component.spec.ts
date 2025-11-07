@@ -4,23 +4,20 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
+import { CommonModule } from '@angular/common';
 
-import { InternalEventMonitorFactory } from '../../../../../store/src/monitors/internal-event-monitor.factory';
-import { appReducers } from '../../../../../store/src/reducers.module';
-import { CoreModule } from '../../../core/core.module';
+import { InternalEventMonitorFactory, appReducers } from '@stratosui/store';
 import { EndpointsService } from '../../../core/endpoints.service';
-import { MDAppModule } from '../../../core/md.module';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { TabNavService } from '../../../tab-nav.service';
-import { SharedModule } from '../../shared.module';
 import { PageHeaderComponent } from './page-header.component';
-import { PageHeaderModule } from './page-header.module';
 
 describe('PageHeaderComponent', () => {
   let component: PageHeaderComponent;
   let fixture: ComponentFixture<PageHeaderComponent>;
   const URL_KEY = 'key';
   beforeEach(async () => {
+    TestBed.resetTestingModule();
     await TestBed.configureTestingModule({
       providers: [
         InternalEventMonitorFactory,
@@ -28,24 +25,21 @@ describe('PageHeaderComponent', () => {
           provide: ActivatedRoute,
           useValue: {
             snapshot: {
-              queryParams: { breadcrumbs: URL_KEY }
+              queryParams: { breadcrumbs: URL_KEY },
+              data: {}
             }
           }
         },
         TabNavService,
         CurrentUserPermissionsService,
         EndpointsService,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ],
       imports: [
-        MDAppModule,
-        CoreModule,
-        SharedModule,
-        PageHeaderModule,
+        CommonModule,
         RouterTestingModule,
-        StoreModule.forRoot(
-          appReducers
-        )
+        StoreModule.forRoot(appReducers),
+        PageHeaderComponent,
       ]
     }).compileComponents();
   });

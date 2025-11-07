@@ -32,7 +32,7 @@ describe('EntityCatalogService', () => {
     const definition = {
       type: 'entity',
       schema: getDefaultSchema(),
-      endpoint
+      endpoint,
     };
     entityCatalog.register(new StratosCatalogEntity(definition));
 
@@ -45,7 +45,7 @@ describe('EntityCatalogService', () => {
     const definition = {
       type: 'entity',
       schema: getDefaultSchema(),
-      endpoint
+      endpoint,
     };
     entityCatalog.register(new StratosCatalogEntity(definition));
 
@@ -62,9 +62,9 @@ describe('EntityCatalogService', () => {
       type: 'entity2',
       schema: {
         default: defaultSchema,
-        entitySchema2: getSchema('1')
+        entitySchema2: getSchema('1'),
       },
-      endpoint
+      endpoint,
     };
     entityCatalog.register(new StratosCatalogEntity(definition));
 
@@ -83,9 +83,9 @@ describe('EntityCatalogService', () => {
       type: 'entity3',
       schema: {
         default: getDefaultSchema(),
-        [schemaKey]: nonDefaultSchema
+        [schemaKey]: nonDefaultSchema,
       },
-      endpoint
+      endpoint,
     };
     entityCatalog.register(new StratosCatalogEntity(definition));
 
@@ -104,7 +104,7 @@ describe('EntityCatalogService', () => {
     expect(catalogEntity.definition).toEqual({
       ...endpoint,
       schema: {
-        default: stratosEntityFactory(endpointEntityType)
+        default: stratosEntityFactory(endpointEntityType),
       }
     });
   });
@@ -125,7 +125,7 @@ describe('EntityCatalogService', () => {
     const definition = {
       ...endpoint,
       subTypes: [
-        subtypeDefinition
+        subtypeDefinition,
       ]
     };
     entityCatalog.register(new StratosCatalogEndpointEntity(definition));
@@ -135,9 +135,9 @@ describe('EntityCatalogService', () => {
       iconFont: 'stratos-icons',
       listDetailsComponent: 'Test Component',
       schema: {
-        default: stratosEntityFactory(endpointEntityType)
+        default: stratosEntityFactory(endpointEntityType),
       },
-      parentType: endpoint.type
+      parentType: endpoint.type,
     };
     const catalogEntity = entityCatalog.getEndpoint(endpoint.type, SUBTYPE_TYPE);
     expect(catalogEntity).not.toBeUndefined();
@@ -163,7 +163,7 @@ describe('EntityCatalogService', () => {
       },
       endpoint,
       subTypes: [
-        subtypeDefinition
+        subtypeDefinition,
       ]
     };
     entityCatalog.register(new StratosCatalogEntity(definition));
@@ -173,7 +173,7 @@ describe('EntityCatalogService', () => {
       schema: {
         default: schema,
       },
-      parentType: TYPE
+      parentType: TYPE,
     };
     const catalogEntity = entityCatalog.getEntity(endpoint.type, TYPE, SUBTYPE_TYPE);
     expect(catalogEntity).not.toBeUndefined();

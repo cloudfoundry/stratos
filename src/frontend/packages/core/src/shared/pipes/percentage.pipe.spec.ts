@@ -15,9 +15,8 @@ describe('PercentagePipe', () => {
       providers: [
         
         PercentagePipe,
-        UtilsService
-      ,
-        provideZonelessChangeDetection()
+        UtilsService,
+        provideZonelessChangeDetection(),
       ]
     });
 

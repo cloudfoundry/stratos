@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { inject, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { createEmptyStoreModule } from "../../../../test-framework/cf-autoscaler-test.helper";
+import { createEmptyStoreModule } from "@test-framework/cf-autoscaler-test.helper";
 
 import {
   ApplicationEnvVarsHelper,
@@ -35,14 +35,14 @@ describe('AppAutoscalerMetricChartListConfigService', () => {
         EntityCatalogHelper,
         ApplicationStateService,
         PaginationMonitorFactory,
-        MetricsRangeSelectorService
-      ,
-        provideZonelessChangeDetection()
+        MetricsRangeSelectorService,
+
+        provideZonelessChangeDetection(),
       ],
       imports: [
         CfAutoscalerTestingModule,
         createEmptyStoreModule(),
-        AppTestModule
+        AppTestModule,
       ]
     });
   });

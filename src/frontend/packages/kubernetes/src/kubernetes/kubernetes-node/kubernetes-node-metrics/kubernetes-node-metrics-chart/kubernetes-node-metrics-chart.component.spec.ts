@@ -14,8 +14,8 @@ describe('KubernetesNodeMetricsChartComponent', () => {
       providers: [provideZonelessChangeDetection()],
       imports: [
         KubernetesNodeMetricsChartComponent,
-        ...KubernetesBaseTestModules
-      ]})
+        ...KubernetesBaseTestModules,
+      ]}),
       .compileComponents();
   });
 

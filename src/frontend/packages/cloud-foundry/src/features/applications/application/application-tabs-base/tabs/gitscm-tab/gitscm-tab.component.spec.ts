@@ -3,36 +3,31 @@ import { HttpClientModule } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
-import {
-  GithubCommitAuthorComponent,
-} from '../../../../../../../../git/src/shared/components/github-commit-author/github-commit-author.component';
-import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../../../../git/src/shared/github.helpers';
-import { GitSCMService } from '../../../../../../../../git/src/shared/scm/scm.service';
-import { ApplicationServiceMock } from '../../../../../../../test-framework/application-service-helper';
-import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CoreModule, SharedModule } from '@stratosui/core';
+import { GithubCommitAuthorComponent, getGitHubAPIURL, GITHUB_API_URL, GitSCMService } from '@stratosui/git';
+import { ApplicationServiceMock, generateCfStoreModules } from '@test-framework';
+
 import { ApplicationService } from '../../../../application.service';
 import { GitSCMTabComponent } from './gitscm-tab.component';
-
 describe('GitSCMTabComponent', () => {
   let component: GitSCMTabComponent;
   let fixture: ComponentFixture<GitSCMTabComponent>;
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [GitSCMTabComponent, GithubCommitAuthorComponent],
       imports: [
+        GitSCMTabComponent,
+        GithubCommitAuthorComponent,
         ...generateCfStoreModules(),
         CoreModule,
         SharedModule,
         RouterTestingModule,
         NoopAnimationsModule,
         HttpClientModule,
-        HttpClientTestingModule
+        HttpClientTestingModule,
       ],
       providers: [
         
@@ -40,8 +35,8 @@ describe('GitSCMTabComponent', () => {
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
         DatePipe,
         GitSCMService,
-      ,
-        provideZonelessChangeDetection()
+
+        provideZonelessChangeDetection(),
       ]
     }).compileComponents();
 

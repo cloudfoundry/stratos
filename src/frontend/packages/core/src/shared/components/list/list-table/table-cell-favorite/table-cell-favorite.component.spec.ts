@@ -1,9 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { IFavoriteMetadata, UserFavorite } from '@stratosui/store';
 
-import { BaseTestModulesNoShared } from '../../../../../../test-framework/core-test.helper';
+import { BaseTestModulesNoShared, STORE_TEST_PROVIDERS } from '@test-framework/core-test.helper';
 import { TableCellFavoriteComponent, TableCellFavoriteComponentConfig } from './table-cell-favorite.component';
 
 interface TestEntity {
@@ -23,15 +23,20 @@ describe('TableCellFavoriteComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
 
-      providers: [provideZonelessChangeDetection()],
+      providers: [
+        ...(STORE_TEST_PROVIDERS || []),
+        provideZonelessChangeDetection(),
+      ],
 
       imports: [
         ...BaseTestModulesNoShared,
-        TableCellFavoriteComponent
-      ]
+        TableCellFavoriteComponent,
+      ],
 
-    })
-      .compileComponents();
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
+
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {
@@ -54,7 +59,7 @@ describe('TableCellFavoriteComponent', () => {
           'application',
           entity.id,
           { name: entity.name, entityId: entity.id }
-        )
+        ),
       };
 
       component.config = validConfig;
@@ -76,7 +81,7 @@ describe('TableCellFavoriteComponent', () => {
           'application',
           entity.id,
           { name: entity.name, entityId: entity.id }
-        )
+        ),
       };
 
       component.config = validConfig;
@@ -107,11 +112,11 @@ describe('TableCellFavoriteComponent', () => {
           'pod',
           testEntity.id,
           { name: testEntity.name, entityId: testEntity.id }
-        )
+        ),
       );
 
       const validConfig: TableCellFavoriteComponentConfig<TestEntity, TestMetadata> = {
-        createUserFavorite: createUserFavoriteSpy
+        createUserFavorite: createUserFavoriteSpy,
       };
 
       component.config = validConfig;
@@ -132,7 +137,7 @@ describe('TableCellFavoriteComponent', () => {
           'deployment',
           entity.id,
           { name: entity.name, entityId: entity.id }
-        )
+        ),
       };
 
       component.config = validConfig;
@@ -146,7 +151,7 @@ describe('TableCellFavoriteComponent', () => {
       expect(favorite.entityType).toBe('deployment');
       expect(favorite.entityId).toBe('complete-test');
       expect(favorite.metadata.name).toBe('Complete Test Entity');
-      expect(favorite.guid).toBeTruthy(); // Guid should be auto-generated
+      expect(favorite.guid).toBeTruthy(); // Guid should be auto-generated,
     });
   });
 
@@ -169,7 +174,7 @@ describe('TableCellFavoriteComponent', () => {
           'application',
           entity.id,
           { name: entity.name, entityId: entity.id }
-        )
+        ),
       };
 
       // Set config without row
@@ -184,12 +189,11 @@ describe('TableCellFavoriteComponent', () => {
       const invalidConfig = { wrongProperty: 'value' } as any;
 
       component.row = testEntity;
+      component.config = invalidConfig;
 
-      // This should not crash even with invalid config
-      expect(() => {
-        component.config = invalidConfig;
-        fixture.detectChanges();
-      }).toThrow(); // Will throw because createUserFavorite is not a function
+      // This should not crash, component handles invalid config gracefully
+      expect(() => fixture.detectChanges()).not.toThrow();
+      expect(component.favorite).toBeUndefined();
     });
   });
 

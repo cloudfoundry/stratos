@@ -16,11 +16,11 @@ describe('TableCellIconComponent', () => {
       
       imports: [
         CoreModule,
-        TableCellIconComponent
+        TableCellIconComponent,
       ]
     
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {
@@ -30,7 +30,7 @@ describe('TableCellIconComponent', () => {
     component.config = {
       getIcon: (row) => ({
         icon: ''
-      })
+      }),
     };
     fixture.detectChanges();
   });

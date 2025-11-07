@@ -1,9 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { BaseTestModulesNoShared } from '../../../../../test-framework/core-test.helper';
-import { SharedModule } from '../../../../shared/shared.module';
+import { EntityCatalogTestModule, EntityServiceFactory, generateStratosEntities, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { AppTestModule, BaseTestModulesNoShared } from "@test-framework/core-test.helper";
+import { SharedModule } from '@stratosui/core';
 import { TabNavService } from '../../../../tab-nav.service';
 import { BackupRestoreEndpointsComponent } from './backup-restore-endpoints.component';
 
@@ -13,21 +16,33 @@ describe('BackupRestoreEndpointsComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      
       imports: [
         ...BaseTestModulesNoShared,
         SharedModule,
-        BackupRestoreEndpointsComponent
+        BackupRestoreEndpointsComponent,
+        {
+          ngModule: EntityCatalogTestModule,
+          providers: [
+            {
+              provide: TEST_CATALOGUE_ENTITIES,
+              useValue: [
+                ...generateStratosEntities(),
+              ]
+            }
+          ]
+        },
+        createBasicStoreModule(),
+        AppTestModule,
       ],
       providers: [
-        
-        TabNavService
-      ,
-        provideZonelessChangeDetection()
-      ],
-    
-    })
-      .compileComponents();
+        TabNavService,
+        EntityServiceFactory,
+        ...(STORE_TEST_PROVIDERS || []),
+        provideRouter([]),
+        provideZonelessChangeDetection(),
+      ]
+    });
+    TestBed.compileComponents();
   });
 
   beforeEach(() => {

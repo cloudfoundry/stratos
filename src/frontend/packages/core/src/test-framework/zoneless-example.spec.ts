@@ -11,7 +11,7 @@ import {
   getAllElements,
   clickElement,
   setInputValue,
-  flushMicrotasks
+  flushMicrotasks,
 } from './zoneless-test-utils';
 
 /**
@@ -64,7 +64,7 @@ class ExampleComponent {
   items: string[] = [];
 
   form = new FormGroup({
-    name: new FormControl('', [Validators.required])
+    name: new FormControl('', [Validators.required]),
   });
 
   increment(): void {
@@ -98,8 +98,8 @@ describe('Zoneless Example Tests', () => {
     await TestBed.configureTestingModule({
       imports: [ExampleComponent],
       providers: [
-        // CRITICAL: Must include zoneless provider in every test
-        provideZonelessChangeDetection()
+        // CRITICAL: Must include zoneless provider in every test,
+        provideZonelessChangeDetection(),
       ]
     }).compileComponents();
 
@@ -240,7 +240,7 @@ describe('Zoneless Example Tests', () => {
    */
   describe('Form Testing', () => {
     it('should have empty initial form', () => {
-      // Initial form state is available from component without needing detectChanges()
+      // Initial form state is available from component without needing detectChanges(),
       expect(component.form.value.name).toBe('');
     });
 
@@ -367,24 +367,26 @@ describe('Zoneless Example Tests', () => {
  * Example: Service Testing in Zoneless Mode
  */
 describe('Service Testing Example', () => {
-  it('should demonstrate service testing pattern', async () => {
-    // Services in zoneless mode require provideZonelessChangeDetection() in TestBed config
-    // This example creates a simple service for demonstration
-
-    // Create a test service
-    class TestService {
-      getValue(): string {
-        return 'Test Value';
-      }
+  // Create a test service
+  class TestService {
+    getValue(): string {
+      return 'Test Value';
     }
+  }
 
+  beforeEach(async () => {
     await TestBed.configureTestingModule({
       providers: [
         TestService,
-        // Services require zoneless provider just like components
-        provideZonelessChangeDetection()
+        // Services require zoneless provider just like components,
+        provideZonelessChangeDetection(),
       ]
     }).compileComponents();
+  });
+
+  it('should demonstrate service testing pattern', () => {
+    // Services in zoneless mode require, provideZonelessChangeDetection() in TestBed config
+    // This example demonstrates service testing in zoneless mode
 
     // Service testing in zoneless mode is the same as zone-based mode
     // The zoneless provider just ensures change detection works correctly

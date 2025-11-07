@@ -1,12 +1,10 @@
-import {  Type, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { Type, provideZonelessChangeDetection } from '@angular/core';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { EntityInfo } from '../../../../../../store/src/types/api.types';
-import { CoreModule } from '../../../../core/core.module';
-import { SharedModule } from '../../../shared.module';
-import { IListDataSource } from '../data-sources-controllers/list-data-source-types';
-import { CardCell } from '../list.types';
+import { EntityInfo } from '@stratosui/store';
+import { IListDataSource, CardCell } from '@stratosui/core';
 import { CardsComponent } from './cards.component';
 
 describe('CardsComponent', () => {
@@ -17,11 +15,11 @@ describe('CardsComponent', () => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [
-        CoreModule,
-        SharedModule
+        CardsComponent, // Standalone component
+        NoopAnimationsModule,
       ]
-    })
-      .compileComponents();
+    });
+    TestBed.compileComponents();
   });
 
   beforeEach(() => {

@@ -5,11 +5,10 @@ import {  provideExperimentalZonelessChangeDetection, provideZonelessChangeDetec
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 
-import { ApplicationServiceMock } from '../../../../../../test-framework/application-service-helper';
-import { generateCfStoreModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { ApplicationServiceMock } from "@test-framework/application-service-helper";
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { CfAppMapRoutesListConfigService } from './cf-app-map-routes-list-config.service';
-
+import { CfAppMapRoutesListConfigService } from "./cf-app-map-routes-list-config.service";
 describe('CfAppMapRoutesListConfigService', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -18,13 +17,13 @@ describe('CfAppMapRoutesListConfigService', () => {
         provideExperimentalZonelessChangeDetection(),
         provideNoopAnimations(),
         provideRouter([,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]),
         ...generateCfStoreModules(),
         CfAppMapRoutesListConfigService,
         { provide: ApplicationService, useClass: ApplicationServiceMock },
-        DatePipe
-      ]
+        DatePipe,
+    ]
     }).compileComponents();
   });
 

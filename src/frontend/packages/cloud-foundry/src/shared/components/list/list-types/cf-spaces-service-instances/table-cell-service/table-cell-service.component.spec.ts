@@ -11,9 +11,10 @@ import {
 import {
   BooleanIndicatorComponent,
 } from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { EntityMonitorFactory } from '@stratosui/store/monitors/entity-monitor.factory.service';
 import { ServiceInstanceLastOpComponent } from '../../../../service-instance-last-op/service-instance-last-op.component';
 import { TableCellServiceComponent } from './table-cell-service.component';
+import { EntityServiceFactory } from '@stratosui/store/entity-service-factory.service';
 
 describe('TableCellServiceComponent', () => {
   let component: TableCellServiceComponent;
@@ -24,13 +25,15 @@ describe('TableCellServiceComponent', () => {
       imports: [
         TableCellServiceComponent,
         ServiceInstanceLastOpComponent,
-        BooleanIndicatorComponent
-      ,
-      imports: [...generateCfBaseTestModulesNoShared()],
+        BooleanIndicatorComponent,
+        ...generateCfBaseTestModulesNoShared(),
+      ],
       providers: [
-        EntityMonitorFactory, LongRunningCfOperationsService,
-        provideZonelessChangeDetection()
-      ]
+        EntityServiceFactory,
+        EntityMonitorFactory,
+        LongRunningCfOperationsService,
+        provideZonelessChangeDetection(),
+      ],
     })
       .compileComponents();
 

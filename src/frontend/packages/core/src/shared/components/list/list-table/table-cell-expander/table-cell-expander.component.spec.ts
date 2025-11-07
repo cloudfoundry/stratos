@@ -15,17 +15,16 @@ describe('TableCellExpanderComponent', () => {
       
       imports: [
         NoopAnimationsModule,
-        TableCellExpanderComponent
+        TableCellExpanderComponent,
       ],
       providers: [
-        
-        TableRowExpandedService
-      ,
-        provideZonelessChangeDetection()
+
+        TableRowExpandedService,
+        provideZonelessChangeDetection(),
       ]
     
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

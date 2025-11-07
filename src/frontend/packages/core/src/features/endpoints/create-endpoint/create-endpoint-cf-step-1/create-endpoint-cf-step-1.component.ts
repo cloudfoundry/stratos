@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, AfterContentInit, Component, Input } from '@an
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { cfEndpointUrlValidator, normalizeUrl } from '../../../../shared/validators';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
-import { CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
+import { CustomFormFieldComponent, AppErrorComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -47,6 +47,7 @@ interface CreateEndpointForm {
     CommonModule,
     ReactiveFormsModule,
     CustomFormFieldComponent,
+    AppErrorComponent,
     CustomCheckboxComponent,
     CustomIconComponent,
     UniqueDirective,

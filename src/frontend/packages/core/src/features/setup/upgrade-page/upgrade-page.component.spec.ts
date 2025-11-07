@@ -18,7 +18,7 @@ describe('UpgradePageComponent', () => {
         MDAppModule,
         UpgradePageComponent,
         IntroScreenComponent,
-        StratosTitleComponent
+        StratosTitleComponent,
       ]
     }).compileComponents();
   });

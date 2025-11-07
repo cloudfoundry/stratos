@@ -11,9 +11,8 @@ describe('EventMetadataComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [EventMetadataComponent, ValuesPipe],
       providers: [provideZonelessChangeDetection()],
-      imports: [EventMetadataComponent, ValuesPipe,
-      imports: [CoreModule]
     })
       .compileComponents();
 

@@ -4,6 +4,7 @@
 
 // Helpers
 export * from './helpers/store-helpers';
+export { LocalStorageService } from './helpers/local-storage-service';
 
 // Used by store testing module
 export { getDefaultRequestState } from './reducers/api-request-reducer/types';
@@ -103,7 +104,7 @@ export {
   proxyAPIVersion,
 } from './jetstream';
 export { getPreviousRoutingState } from './types/routing.type';
-export { IFavoriteMetadata, IFavoritesInfo, UserFavorite, UserFavoriteEndpoint, IEndpointFavMetadata } from './types/user-favorites.types';
+export { IFavoriteMetadata, IFavoritesInfo, UserFavorite, UserFavoriteEndpoint, IEndpointFavMetadata, FavoriteIconData } from './types/user-favorites.types';
 export { AddRecentlyVisitedEntityAction, SetRecentlyVisitedEntityAction } from './actions/recently-visited.actions';
 export { UserFavoriteManager } from './user-favorite-manager';
 export { TestEntityCatalog, entityCatalog } from './entity-catalog/entity-catalog';
@@ -198,3 +199,4 @@ export { generateStratosEntities } from './stratos-entity-generator';
 export { MetricQueryConfig, MetricsAction } from './actions/metrics.actions';
 export { defaultClientPaginationPageSize } from './reducers/pagination-reducer/pagination-reducer-reset-pagination';
 export { appReducers } from './reducers.module';
+export { EntityCatalogTestModule, EntityCatalogTestModuleManualStore, TEST_CATALOGUE_ENTITIES } from './entity-catalog-test.module';

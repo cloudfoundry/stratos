@@ -18,10 +18,10 @@ describe('RoutingIndicatorComponent', () => {
         RoutingIndicatorComponent,
         RouterTestingModule,
         CoreModule,
-        ProgressBarComponent
+        ProgressBarComponent,
       ]
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

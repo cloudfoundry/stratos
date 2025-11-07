@@ -6,37 +6,34 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { CoreModule } from '../../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../../core/src/shared/shared.module';
-import { TabNavService } from '../../../../../core/src/tab-nav.service';
+import { CoreModule, SharedModule, TabNavService } from '@stratosui/core';
 import {
   ApplicationServiceMock,
   generateTestApplicationServiceProvider,
-} from '../../../../test-framework/application-service-helper';
-import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { ApplicationStateService } from '../../../shared/services/application-state.service';
+} from "@test-framework/application-service-helper";
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { ApplicationStateService } from '@stratosui/shared';
 import { ApplicationService } from '../application.service';
 import { ApplicationEnvVarsHelper } from '../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { EditApplicationComponent } from './edit-application.component';
 
 const appId = '4e4858c4-24ab-4caf-87a8-7703d1da58a0';
 const cfId = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
-
 describe('EditApplicationComponent', () => {
   let component: EditApplicationComponent;
   let fixture: ComponentFixture<EditApplicationComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [EditApplicationComponent],
       imports: [
+        EditApplicationComponent,
         ...generateCfStoreModules(),
         NoopAnimationsModule,
         CoreModule,
         SharedModule,
         RouterTestingModule,
         HttpClientModule,
-        HttpClientTestingModule
+        HttpClientTestingModule,
       ],
       providers: [
         
@@ -44,9 +41,8 @@ describe('EditApplicationComponent', () => {
         generateTestApplicationServiceProvider(cfId, appId),
         ApplicationStateService,
         ApplicationEnvVarsHelper,
-        TabNavService
-      ,
-        provideZonelessChangeDetection()
+        TabNavService,
+        provideZonelessChangeDetection(),
       ]
     }).compileComponents();
 

@@ -6,20 +6,21 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import {
   generateActiveRouteCfOrgSpaceMock,
   generateCfBaseTestModules,
-} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { UserInviteService } from '../../../user-invites/user-invite.service';
-import { InviteUsersCreateComponent } from './invite-users-create.component';
-
+import { InviteUsersCreateComponent } from "./invite-users-create.component";
 describe('InviteUsersCreateComponent', () => {
   let component: InviteUsersCreateComponent;
   let fixture: ComponentFixture<InviteUsersCreateComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [InviteUsersCreateComponent],
-      imports: generateCfBaseTestModules(),
+      imports: [
+        InviteUsersCreateComponent,
+        ...generateCfBaseTestModules(),
+      ],
       providers: [
         
         generateActiveRouteCfOrgSpaceMock(),
@@ -27,9 +28,9 @@ describe('InviteUsersCreateComponent', () => {
         UserInviteService,
         HttpClient,
         HttpHandler,
-        CfUserService
-      ,
-        provideZonelessChangeDetection()
+        CfUserService,
+
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

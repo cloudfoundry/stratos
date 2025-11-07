@@ -6,10 +6,9 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../core/src/shared/shared.module';
-import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { CloudFoundrySharedModule } from '../../cf-shared.module';
-import { ApplicationInstanceChartComponent } from './application-instance-chart.component';
-
+import { ApplicationInstanceChartComponent } from "./application-instance-chart.component";
 describe('ApplicationInstanceChartComponent', () => {
   let component: ApplicationInstanceChartComponent;
   let fixture: ComponentFixture<ApplicationInstanceChartComponent>;
@@ -23,8 +22,8 @@ describe('ApplicationInstanceChartComponent', () => {
         CoreModule,
         SharedModule,
         CloudFoundrySharedModule,
-        NoopAnimationsModule
-      ]
+        NoopAnimationsModule,
+    ]
     })
       .compileComponents();
   });

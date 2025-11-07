@@ -4,19 +4,22 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import { ActivatedRoute } from '@angular/router';
 
 import { TabNavService } from '../../../../../core/src/tab-nav.service';
-import { CFBaseTestModules } from '../../../../test-framework/cf-test-helper';
+import { CFBaseTestModules } from "@test-framework/cf-test-helper";
 import { SpaceQuotaDefinitionFormComponent } from '../space-quota-definition-form/space-quota-definition-form.component';
 import { EditSpaceQuotaStepComponent } from './edit-space-quota-step/edit-space-quota-step.component';
-import { EditSpaceQuotaComponent } from './edit-space-quota.component';
-
+import { EditSpaceQuotaComponent } from "./edit-space-quota.component";
 describe('EditSpaceQuotaComponent', () => {
   let component: EditSpaceQuotaComponent;
   let fixture: ComponentFixture<EditSpaceQuotaComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [EditSpaceQuotaComponent, EditSpaceQuotaStepComponent, SpaceQuotaDefinitionFormComponent],
-      imports: [...CFBaseTestModules],
+      imports: [
+        EditSpaceQuotaComponent,
+        EditSpaceQuotaStepComponent,
+        SpaceQuotaDefinitionFormComponent,
+        ...CFBaseTestModules,
+      ],
       providers: [
         TabNavService, {
           provide: ActivatedRoute,

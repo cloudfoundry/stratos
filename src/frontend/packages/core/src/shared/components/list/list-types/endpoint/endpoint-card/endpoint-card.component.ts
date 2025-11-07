@@ -282,3 +282,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   }
 
 }
+
+// Register this card component to avoid circular dependency issues
+import { listCards } from '../../../list-cards/card/card.component';
+listCards.push(EndpointCardComponent);

@@ -18,8 +18,8 @@ describe('RingChartComponent', () => {
         BaseChartDirective,
         RingChartComponent,
       ]
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

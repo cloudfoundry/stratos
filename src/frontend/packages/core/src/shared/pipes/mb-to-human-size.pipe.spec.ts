@@ -15,9 +15,8 @@ describe('MbToHumanSizePipe', () => {
       providers: [
         
         MbToHumanSizePipe,
-        UtilsService
-      ,
-        provideZonelessChangeDetection()
+        UtilsService,
+        provideZonelessChangeDetection(),
       ]
     });
 

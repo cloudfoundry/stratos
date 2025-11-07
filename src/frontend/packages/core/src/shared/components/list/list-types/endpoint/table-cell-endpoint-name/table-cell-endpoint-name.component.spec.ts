@@ -1,30 +1,38 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-
-import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
-import { BaseTestModules } from '../../../../../../../test-framework/core-test.helper';
-import { CoreModule } from '../../../../../../core/core.module';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { StoreModule } from '@ngrx/store';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { EndpointModel, appReducers, CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogFeatureModule } from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name.component';
 
 describe('TableCellEndpointNameComponent', () => {
   let component: TableCellEndpointNameComponent;
   let fixture: ComponentFixture<TableCellEndpointNameComponent>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
+  beforeEach(() => {
+    TestBed.configureTestingModule({
       imports: [
-        CoreModule,
-        ...BaseTestModules
+        TableCellEndpointNameComponent,
+        StoreModule.forRoot(appReducers, {
+          runtimeChecks: {
+            strictStateImmutability: false,
+            strictActionImmutability: false
+          }
+        }),
       ],
       providers: [
-        
-        EntityMonitorFactory
-      ,
-        provideZonelessChangeDetection()
+        ...STORE_TEST_PROVIDERS,
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideNoopAnimations(),
       ]
-    }).compileComponents();
+    });
+    TestBed.compileComponents();
   });
 
   beforeEach(() => {

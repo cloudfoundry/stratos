@@ -25,9 +25,9 @@ describe('AcmeLoginComponent', () => {
         SharedModule,
         RouterTestingModule,
         NoopAnimationsModule,
-        StoreModule.forRoot(appReducers)
+        StoreModule.forRoot(appReducers),
       ]
-    })
+    }),
       .compileComponents();
   });
 

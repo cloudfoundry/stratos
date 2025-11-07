@@ -1,8 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { APIResource } from '@stratosui/store';
 import { CoreModule } from '../../../../../core/core.module';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import { TableCellRadioComponent } from './table-cell-radio.component';
@@ -16,7 +15,7 @@ describe('TableCellRadioComponent', () => {
 
       imports: [
       CoreModule,
-      TableCellRadioComponent
+      TableCellRadioComponent,
     ],
       providers: [provideZonelessChangeDetection()]
 
@@ -31,7 +30,10 @@ describe('TableCellRadioComponent', () => {
         metadata: {}
       }
     } as APIResource;
-    component.dataSource = {} as IListDataSource<any>;
+    component.dataSource = {
+      selectedRows: () => new Map(),
+      getRowUniqueId: (row: any) => ''
+    } as unknown as IListDataSource<any>;
     fixture.detectChanges();
   });
 

@@ -10,6 +10,7 @@ import {
 } from '../../../../../core/src/shared/components/entity-summary-title/entity-summary-title.component';
 import { BaseTestModulesNoShared } from '../../../../../core/test-framework/core-test.helper';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
+import { EntityServiceFactory } from '@stratosui/store';
 import { ChartItemComponent } from '../chart-item/chart-item.component';
 import { ListItemComponent } from '../list-item/list-item.component';
 import { LoaderComponent } from '../loader/loader.component';
@@ -44,13 +45,14 @@ describe('ChartDetailsComponent', () => {
           PanelComponent,
           ChartItemComponent,
           ListItemComponent,
-          EntitySummaryTitleComponent
+          EntitySummaryTitleComponent,
         ],
         providers: [
           HttpClient,
           { provide: ChartsService, useValue: new MockChartService() },
           { provide: ConfigService, useValue: { appName: 'appName' } },
           { provide: MenuService },
+          EntityServiceFactory,
           PaginationMonitorFactory,
         ]
       }).compileComponents();

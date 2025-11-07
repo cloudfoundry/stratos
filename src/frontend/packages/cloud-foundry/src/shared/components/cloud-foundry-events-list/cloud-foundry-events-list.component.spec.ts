@@ -2,23 +2,22 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
-import { CFBaseTestModules } from '../../../../test-framework/cf-test-helper';
+import { CFBaseTestModules } from "@test-framework/cf-test-helper";
 import { ActiveRouteCfOrgSpace } from '../../../features/cf/cf-page.types';
 import { CloudFoundryEndpointService } from '../../../features/cf/services/cloud-foundry-endpoint.service';
 import { CfUserService } from '../../data-services/cf-user.service';
 import { CfAllEventsConfigService } from '../list/list-types/cf-events/types/cf-all-events-config.service';
-import { CloudFoundryEventsListComponent } from './cloud-foundry-events-list.component';
-
+import { CloudFoundryEventsListComponent } from "./cloud-foundry-events-list.component";
 describe('CloudFoundryEventsListComponent', () => {
   let component: CloudFoundryEventsListComponent;
   let fixture: ComponentFixture<CloudFoundryEventsListComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
+      imports: [
         CloudFoundryEventsListComponent,
+        ...CFBaseTestModules,
       ],
-      imports: [...CFBaseTestModules],
       providers: [{
         provide: ListConfig,
         useClass: CfAllEventsConfigService,
@@ -31,8 +30,8 @@ describe('CloudFoundryEventsListComponent', () => {
           spaceGuid: 'spaceGuid'
         }
       },
-        CfUserService
-      ]
+        CfUserService,
+    ]
     })
       .compileComponents();
   });

@@ -16,23 +16,21 @@ describe('KubernetesAnalysisTabComponent', () => {
   let fixture: ComponentFixture<KubernetesAnalysisTabComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({imports: [
+    TestBed.configureTestingModule({
+      imports: [
         KubernetesBaseTestModules,
-        MDAppModule
-      ,
+        MDAppModule,
         KubernetesAnalysisTabComponent,
-        AnalysisReportViewerComponent
+        AnalysisReportViewerComponent,
       ],
       providers: [
-        
         KubernetesAnalysisService,
         KubernetesEndpointService,
         KubeBaseGuidMock,
         TabNavService,
-      ,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
-    })
+    }),
       .compileComponents();
   });
 

@@ -7,11 +7,14 @@ import { CoreModule } from '../../../../core/src/core/core.module';
 import { ExtensionService } from '../../../../core/src/core/extension/extension-service';
 import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../git/src/shared/github.helpers';
 import { GitSCMService } from '../../../../git/src/shared/scm/scm.service';
-import { EntityMonitorFactory } from '../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
-import { AppStoreModule } from '../../../../store/src/store.module';
-import { generateTestApplicationServiceProvider } from '../../../test-framework/application-service-helper';
-import { generateCfStoreModules } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
+import {
+  AppStoreModule,
+  EntityMonitorFactory,
+  EntityServiceFactory,
+  PaginationMonitorFactory
+} from '@stratosui/store';
+import { generateTestApplicationServiceProvider } from '@test-framework/application-service-helper';
+import { generateCfStoreModules } from '@test-framework/cloud-foundry-endpoint-service.helper';
 import { LongRunningCfOperationsService } from '../../shared/data-services/long-running-cf-op.service';
 import { ApplicationStateService } from '../../shared/services/application-state.service';
 import { ApplicationService } from './application.service';
@@ -28,9 +31,10 @@ describe('ApplicationService', () => {
         CoreModule,
         AppStoreModule,
         RouterTestingModule,
-        generateCfStoreModules()
+        generateCfStoreModules(),
       ],
       providers: [
+        EntityServiceFactory,
         
         generateTestApplicationServiceProvider(cfId, appId),
         ApplicationStateService,
@@ -40,9 +44,9 @@ describe('ApplicationService', () => {
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
         GitSCMService,
         ExtensionService,
-        LongRunningCfOperationsService
-      ,
-        provideZonelessChangeDetection()
+        LongRunningCfOperationsService,
+
+        provideZonelessChangeDetection(),
       ]
     });
   });

@@ -12,11 +12,11 @@ describe('DotContentComponent', () => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [
-        DotContentComponent
+        DotContentComponent,
       ],
       
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

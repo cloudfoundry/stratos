@@ -4,7 +4,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createEmptyStoreModule } from "../../../test-framework/cf-autoscaler-test.helper";
+import { createEmptyStoreModule } from "@test-framework/cf-autoscaler-test.helper";
 
 import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
 import { ApplicationServiceMock } from '../../../../../cloud-foundry/test-framework/application-service-helper';
@@ -36,10 +36,10 @@ describe('EditAutoscalerPolicyStep4Component', () => {
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         TabNavService,
         EditAutoscalerPolicyService,
-      ,
-        provideZonelessChangeDetection()
+
+        provideZonelessChangeDetection(),
       ]
-    })
+    }),
       .compileComponents();
   });
 

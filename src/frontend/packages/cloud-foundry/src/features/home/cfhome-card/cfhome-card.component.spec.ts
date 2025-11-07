@@ -2,23 +2,24 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { generateCfBaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { EntityServiceFactory } from '@stratosui/store/entity-service-factory.service';
+import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ApplicationDeploySourceTypes } from '../../applications/deploy-application/deploy-application-steps.types';
-import { CFHomeCardComponent } from './cfhome-card.component';
-
+import { CFHomeCardComponent } from "./cfhome-card.component";
 describe('CFHomeCardComponent', () => {
   let component: CFHomeCardComponent;
   let fixture: ComponentFixture<CFHomeCardComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ CFHomeCardComponent ],
-      imports: generateCfBaseTestModules(),
+      imports: [
+        CFHomeCardComponent,
+        ...generateCfBaseTestModules(),
+      ],
       providers: [
-        
-        ApplicationDeploySourceTypes
-      ,
-        provideZonelessChangeDetection()
+        EntityServiceFactory,
+        ApplicationDeploySourceTypes,
+        provideZonelessChangeDetection(),
       ]
     })
     .compileComponents();

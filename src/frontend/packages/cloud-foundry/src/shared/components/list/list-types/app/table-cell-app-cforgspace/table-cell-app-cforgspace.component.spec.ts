@@ -12,14 +12,13 @@ import {
 import {
   ApplicationStateComponent,
 } from '../../../../../../../../core/src/shared/components/application-state/application-state.component';
-import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { PaginationMonitorFactory } from '@stratosui/store/monitors/pagination-monitor.factory';
+import { APIResource } from '@stratosui/store/types/api.types';
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { IApp } from '../../../../../../cf-api.types';
 import { ApplicationStateService } from '../../../../../services/application-state.service';
 import { TableCellAppStatusComponent } from '../table-cell-app-status/table-cell-app-status.component';
-import { TableCellAppCfOrgSpaceComponent } from './table-cell-app-cforgspace.component';
-
+import { TableCellAppCfOrgSpaceComponent } from "./table-cell-app-cforgspace.component";
 describe('TableCellAppCfOrgSpaceComponent', () => {
   let component: TableCellAppCfOrgSpaceComponent;
   let fixture: ComponentFixture<TableCellAppCfOrgSpaceComponent>;
@@ -30,19 +29,15 @@ describe('TableCellAppCfOrgSpaceComponent', () => {
         TableCellAppStatusComponent,
         ApplicationStateComponent,
         ApplicationStateIconComponent,
-        ApplicationStateIconPipe
-      ,
-      imports: [
+        ApplicationStateIconPipe,
         StoreModule,
-        generateCfStoreModules()
+        ...generateCfStoreModules(),
       ],
       providers: [
-        
         ApplicationStateService,
-        PaginationMonitorFactory
-      ,
-        provideZonelessChangeDetection()
-      ]
+        PaginationMonitorFactory,
+        provideZonelessChangeDetection(),
+      ],
     })
       .compileComponents();
 

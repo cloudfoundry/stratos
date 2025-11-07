@@ -5,23 +5,22 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Store } from '@ngrx/store';
 
-import {
-  CurrentUserPermissionsService,
-} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
-import { ApplicationServiceMock } from '../../../../../../test-framework/application-service-helper';
-import { generateCfStoreModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { ConfirmationDialogService, SharedModule } from '@stratosui/core';
+import { ApplicationServiceMock } from "@test-framework/application-service-helper";
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { CFAppState } from '../../../../../cf-app-state';
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { CfAppRoutesListConfigService } from './cf-app-routes-list-config.service';
-
-
-
+import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
+import { CfAppRoutesListConfigService } from "./cf-app-routes-list-config.service";
 describe('CfAppRoutesListConfigService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      imports: [
+        ...generateCfStoreModules(),
+        SharedModule,
+        NoopAnimationsModule,
+      ],
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         {
@@ -36,12 +35,8 @@ describe('CfAppRoutesListConfigService', () => {
           },
           deps: [Store, ApplicationService, ConfirmationDialogService, DatePipe, CurrentUserPermissionsService]
         },
-        DatePipe
-      ],
-      imports: [
-        ...generateCfStoreModules(),
-        SharedModule,
-        NoopAnimationsModule,
+        DatePipe,
+        provideZonelessChangeDetection(),
       ]
     });
   });

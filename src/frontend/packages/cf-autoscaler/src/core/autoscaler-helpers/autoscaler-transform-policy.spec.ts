@@ -94,11 +94,11 @@ describe('Autoscaler Transform Policy Helper', () => {
             days_of_week: [
               1,
               2,
-              3
+              3,
             ],
             instance_min_count: 1,
             instance_max_count: 10,
-            initial_min_instance_count: 5
+            initial_min_instance_count: 5,
           },
           {
             start_date: '2099-06-27',
@@ -108,10 +108,10 @@ describe('Autoscaler Transform Policy Helper', () => {
             days_of_month: [
               5,
               15,
-              25
+              25,
             ],
             instance_min_count: 3,
-            instance_max_count: 10
+            instance_max_count: 10,
           }
         ],
         specific_date: [
@@ -120,13 +120,13 @@ describe('Autoscaler Transform Policy Helper', () => {
             end_date_time: '2099-06-15T13:59',
             instance_min_count: 1,
             instance_max_count: 4,
-            initial_min_instance_count: 2
+            initial_min_instance_count: 2,
           },
           {
             start_date_time: '2099-01-04T20:00',
             end_date_time: '2099-02-19T23:15',
             instance_min_count: 2,
-            instance_max_count: 5
+            instance_max_count: 5,
           }
         ]
       }

@@ -3,6 +3,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 
+import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { TabNavService } from '../../../../core/src/tab-nav.service';
 import { KubeBaseGuidMock, KubernetesBaseTestModules } from '../kubernetes.testing.module';
 import { KubernetesNodeComponent } from './kubernetes-node.component';
@@ -13,9 +14,9 @@ describe('KubernetesNodeComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [KubernetesNodeComponent],
-      imports: KubernetesBaseTestModules,
+      imports: [KubernetesNodeComponent, ...KubernetesBaseTestModules],
       providers: [
+        EntityServiceFactory,
         TabNavService,
         KubeBaseGuidMock,
         {
@@ -30,7 +31,7 @@ describe('KubernetesNodeComponent', () => {
           }
         }
       ]
-    })
+    }),
       .compileComponents();
   });
 

@@ -12,10 +12,10 @@ describe('EditableDisplayValueComponent', () => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [
-        EditableDisplayValueComponent
+        EditableDisplayValueComponent,
       ]
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

@@ -14,8 +14,8 @@ describe('ConditionCellComponent', () => {
       providers: [provideZonelessChangeDetection()],
       imports: [
         ConditionCellComponent,
-        ...BaseTestModules
-      ]})
+        ...BaseTestModules,
+      ]}),
       .compileComponents();
   });
 

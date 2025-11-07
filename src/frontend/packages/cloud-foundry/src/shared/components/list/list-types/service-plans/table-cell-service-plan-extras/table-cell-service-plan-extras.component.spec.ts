@@ -3,11 +3,10 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { StoreModule } from '@ngrx/store';
 
-import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
-import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { PaginationMonitorFactory } from '@stratosui/store/monitors/pagination-monitor.factory';
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ApplicationStateService } from '../../../../../services/application-state.service';
-import { TableCellAServicePlanExtrasComponent } from './table-cell-service-plan-extras.component';
-
+import { TableCellAServicePlanExtrasComponent } from "./table-cell-service-plan-extras.component";
 describe('TableCellAServicePlanExtrasComponent', () => {
   let component: TableCellAServicePlanExtrasComponent;
   let fixture: ComponentFixture<TableCellAServicePlanExtrasComponent>;
@@ -16,17 +15,14 @@ describe('TableCellAServicePlanExtrasComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         TableCellAServicePlanExtrasComponent,
-      imports: [
         StoreModule,
-        generateCfStoreModules()
+        ...generateCfStoreModules(),
       ],
       providers: [
-        
         ApplicationStateService,
-        PaginationMonitorFactory
-      ,
-        provideZonelessChangeDetection()
-      ]
+        PaginationMonitorFactory,
+        provideZonelessChangeDetection(),
+      ],
     })
       .compileComponents();
 

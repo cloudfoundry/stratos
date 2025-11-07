@@ -24,7 +24,7 @@ describe('startEntityHandler', () => {
         endpointType: 'end',
         entityType: 'ent',
         type: 'type',
-      } as EntityRequestAction
+      } as EntityRequestAction,
     );
     expect(spyDispatcher).toHaveBeenCalledTimes(2);
   });

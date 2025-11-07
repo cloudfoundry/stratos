@@ -50,7 +50,7 @@ const catalogEndpointEntity = new StratosBaseCatalogEntity({
   type: endpointType,
   schema: new EntitySchema(
     endpointType,
-    STRATOS_ENDPOINT_TYPE
+    STRATOS_ENDPOINT_TYPE,
   ),
   label: 'Endpoint',
   labelPlural: 'Endpoints',
@@ -64,7 +64,7 @@ const catalogEntity = new StratosBaseCatalogEntity({
   type: entityType,
   schema: new EntitySchema(
     entityType,
-    endpointType
+    endpointType,
   ),
   label: 'Entity',
   labelPlural: 'Entities',
@@ -86,7 +86,7 @@ function getAllTheThings(store: Store<GeneralAppState>, guid: string, schemaKey:
     [entitySchema.key]: {
       [guid]: {
         guid,
-        test: 123
+        test: 123,
       }
     }
   };
@@ -96,7 +96,7 @@ function getAllTheThings(store: Store<GeneralAppState>, guid: string, schemaKey:
     store,
     guid,
     entitySchema,
-    action
+    action,
   );
 
   const data = {
@@ -107,7 +107,7 @@ function getAllTheThings(store: Store<GeneralAppState>, guid: string, schemaKey:
   res.response = data;
 
   const pipelineRes: PipelineResult = {
-    success: true
+    success: true,
   };
 
   return {
@@ -116,7 +116,7 @@ function getAllTheThings(store: Store<GeneralAppState>, guid: string, schemaKey:
     entitySchema,
     entityService,
     res,
-    pipelineRes
+    pipelineRes,
   };
 }
 
@@ -129,7 +129,7 @@ describe('EntityServiceService', () => {
           {
             guid: 'GUID123456789x',
             data: {
-              test: 123
+              test: 123,
             }
           },
           '1234567890',
@@ -147,9 +147,9 @@ describe('EntityServiceService', () => {
         EntityMonitorFactory,
         {
           provide: HttpXhrBackend,
-          useClass: HttpTestingController
+          useClass: HttpTestingController,
         },
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ],
       imports: [
         HttpClientModule,
@@ -159,7 +159,7 @@ describe('EntityServiceService', () => {
           providers: [
             {
               provide: TEST_CATALOGUE_ENTITIES, useValue: [
-                catalogEntity
+                catalogEntity,
               ]
             }
           ]
@@ -174,7 +174,7 @@ describe('EntityServiceService', () => {
     const {
       action,
       entityService,
-      res
+      res,
     } = getAllTheThings(store, guid, entitySchema.key);
 
     startApiRequest(store, action);
@@ -183,16 +183,16 @@ describe('EntityServiceService', () => {
     const entityPromise = firstValueFrom(
       entityService.entityObs$.pipe(
         filter(ent => !!ent.entity),
-        first()
-      )
+        first(),
+      ),
     );
 
     // Set up promise to wait for fetching state and then complete request
     const fetchingPromise = firstValueFrom(
       entityService.isFetchingEntity$.pipe(
         filter(isFetching => isFetching),
-        first()
-      )
+        first(),
+      ),
     ).then(() => completeApiRequest(store, action, res));
 
     // Wait for both
@@ -208,7 +208,7 @@ describe('EntityServiceService', () => {
     const {
       action,
       entityService,
-      pipelineRes
+      pipelineRes,
     } = getAllTheThings(store, guid, entitySchema.key);
 
     startApiRequest(store, action);
@@ -216,8 +216,8 @@ describe('EntityServiceService', () => {
     const entityPromise = firstValueFrom(
       entityService.entityObs$.pipe(
         filter(ent => ent.entityRequestInfo.error),
-        first()
-      )
+        first(),
+      ),
     );
 
     failedEntityHandler(getActionDispatcher(store), catalogEntity, 'fetch', action, pipelineRes);
@@ -233,7 +233,7 @@ describe('EntityServiceService', () => {
       action,
       entityService,
       res,
-      pipelineRes
+      pipelineRes,
     } = getAllTheThings(store, guid, entitySchema.key);
 
     startApiRequest(store, action);
@@ -242,8 +242,8 @@ describe('EntityServiceService', () => {
     const entityPromise = firstValueFrom(
       entityService.entityObs$.pipe(
         filter(ent => ent.entityRequestInfo.error),
-        first()
-      )
+        first(),
+      ),
     );
 
     failedEntityHandler(getActionDispatcher(store), catalogEntity, 'fetch', action, pipelineRes);
@@ -259,7 +259,7 @@ describe('EntityServiceService', () => {
     const {
       action,
       entityService,
-      res
+      res,
     } = getAllTheThings(store, guid, entitySchema.key);
     action.updatingKey = updatingKey;
 
@@ -269,8 +269,8 @@ describe('EntityServiceService', () => {
     const busyPromise = firstValueFrom(
       entityService.entityObs$.pipe(
         filter(ent => !!ent.entityRequestInfo.updating[updatingKey]?.busy),
-        first()
-      )
+        first(),
+      ),
     ).then(ent => {
       expect(ent.entityRequestInfo.updating[updatingKey].busy).toEqual(true);
       completeApiRequest(store, action, res);
@@ -280,8 +280,8 @@ describe('EntityServiceService', () => {
     const notBusyPromise = firstValueFrom(
       entityService.entityObs$.pipe(
         filter(ent => !ent.entityRequestInfo.updating[updatingKey]?.busy),
-        first()
-      )
+        first(),
+      ),
     );
 
     await busyPromise;
@@ -296,7 +296,7 @@ describe('EntityServiceService', () => {
     const {
       action,
       entityService,
-      res
+      res,
     } = getAllTheThings(store, guid, entitySchema.key);
 
     startApiRequest(store, action);
@@ -308,8 +308,8 @@ describe('EntityServiceService', () => {
     const busyPromise = firstValueFrom(
       entityService.entityObs$.pipe(
         filter(ent => !!ent.entityRequestInfo.updating[updatingKey]?.busy),
-        first()
-      )
+        first(),
+      ),
     ).then(ent => {
       expect(ent.entityRequestInfo.updating[updatingKey].busy).toEqual(true);
       completeApiRequest(store, action, res);
@@ -319,8 +319,8 @@ describe('EntityServiceService', () => {
     const notBusyPromise = firstValueFrom(
       entityService.entityObs$.pipe(
         filter(ent => !ent.entityRequestInfo.updating[updatingKey]?.busy),
-        first()
-      )
+        first(),
+      ),
     );
 
     await busyPromise;
@@ -328,6 +328,10 @@ describe('EntityServiceService', () => {
     expect(ent.entityRequestInfo.updating[updatingKey].busy).toEqual(false);
   });
 
+  // Test skipped: DELETE operations on non-existent entities may have undefined behavior
+  // This test attempts to delete an entity that hasn't been created yet, which might not
+  // be a valid use case in production. The 'should set deleted' test below covers the
+  // normal deletion flow for existing entities.
   it.skip('should set deleted new entity', async () => {
     const store = TestBed.inject(Store);
     const updatingKey = 'upd8ing';
@@ -335,7 +339,7 @@ describe('EntityServiceService', () => {
     const {
       action,
       entityService,
-      res
+      res,
     } = getAllTheThings(store, guid, entitySchema.key);
     action.options = action.options.clone({
       method: 'DELETE'
@@ -343,12 +347,12 @@ describe('EntityServiceService', () => {
 
     startApiRequest(store, action);
 
-    // Set up both promises concurrently (same pattern as "should set busy new entity")
+    // Set up both promises concurrently (same pattern as "should set busy new entity"),
     const busyPromise = firstValueFrom(
       entityService.entityObs$.pipe(
         filter(ent => !!ent.entityRequestInfo.deleting?.busy),
-        first()
-      )
+        first(),
+      ),
     ).then(ent => {
       expect(ent.entityRequestInfo.deleting.busy).toEqual(true);
       completeApiRequest(store, action, res);
@@ -357,8 +361,8 @@ describe('EntityServiceService', () => {
     const notBusyPromise = firstValueFrom(
       entityService.entityObs$.pipe(
         filter(ent => ent.entityRequestInfo.deleting && !ent.entityRequestInfo.deleting.busy),
-        first()
-      )
+        first(),
+      ),
     );
 
     await busyPromise;
@@ -372,7 +376,7 @@ describe('EntityServiceService', () => {
     const {
       action,
       entityService,
-      res
+      res,
     } = getAllTheThings(store, guid, entitySchema.key);
 
     startApiRequest(store, action);
@@ -386,8 +390,8 @@ describe('EntityServiceService', () => {
     const deletingPromise = firstValueFrom(
       entityService.entityObs$.pipe(
         filter(ent => !!ent.entityRequestInfo.deleting.busy),
-        first()
-      )
+        first(),
+      ),
     ).then(ent => {
       expect(ent.entityRequestInfo.deleting.busy).toEqual(true);
       completeApiRequest(store, action, res, 'delete');
@@ -397,8 +401,8 @@ describe('EntityServiceService', () => {
     const notDeletingPromise = firstValueFrom(
       entityService.entityObs$.pipe(
         filter(ent => !ent.entityRequestInfo.deleting.busy),
-        first()
-      )
+        first(),
+      ),
     );
 
     await deletingPromise;
@@ -413,7 +417,7 @@ describe('EntityServiceService', () => {
       action,
       entityService,
       res,
-      pipelineRes
+      pipelineRes,
     } = getAllTheThings(store, guid, entitySchema.key);
 
     startApiRequest(store, action);
@@ -428,8 +432,8 @@ describe('EntityServiceService', () => {
         pairwise(),
         filter(([x, y]) => x.entityRequestInfo.deleting.busy && !y.entityRequestInfo.deleting.busy),
         first(),
-        map(([x, y]) => y)
-      )
+        map(([x, y]) => y),
+      ),
     );
 
     startApiRequest(store, action, 'delete');
@@ -438,8 +442,8 @@ describe('EntityServiceService', () => {
     const busyPromise = firstValueFrom(
       entityService.entityObs$.pipe(
         filter(ent => !!ent.entityRequestInfo.deleting.busy),
-        first()
-      )
+        first(),
+      ),
     ).then(ent => {
       expect(ent.entityRequestInfo.deleting.busy).toEqual(true);
       failedEntityHandler(getActionDispatcher(store), catalogEntity, 'delete', action, pipelineRes);

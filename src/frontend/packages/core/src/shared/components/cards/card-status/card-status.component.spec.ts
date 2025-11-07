@@ -12,8 +12,8 @@ describe('CardStatusComponent', () => {
     TestBed.configureTestingModule({
       imports: [ CardStatusComponent ],
       providers: [ provideZonelessChangeDetection() ]
-    })
-    .compileComponents();
+    });
+    TestBed.compileComponents();
   });
 
   beforeEach(() => {

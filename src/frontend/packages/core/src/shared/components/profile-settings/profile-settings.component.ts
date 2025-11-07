@@ -7,15 +7,15 @@ import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
 import {
+  AppState,
+  LocalStorageService,
+  selectDashboardState,
+  selectSessionData,
   SetGravatarEnabledAction,
   SetPollingEnabledAction,
   SetSessionTimeoutAction,
-} from '../../../../../store/src/actions/dashboard-actions';
-import { AppState } from '../../../../../store/src/app-state';
-import { LocalStorageService } from '../../../../../store/src/helpers/local-storage-service';
-import { selectSessionData } from '../../../../../store/src/reducers/auth.reducer';
-import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
-import { ThemeService } from '../../../../../store/src/theme.service';
+  ThemeService,
+} from '@stratosui/store';
 import { BytesToHumanSize } from '../../../core/byte-formatters.pipe';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
@@ -87,7 +87,7 @@ export class ProfileSettingsComponent {
   );
 
   public localStorageSize$ = this.sessionData$.pipe(
-    map(sessionData => LocalStorageService.localStorageSize(sessionData)),
+    map(sessionData => sessionData && sessionData.user ? LocalStorageService.localStorageSize(sessionData) : -1),
     filter(bytes => bytes !== -1),
   );
 
@@ -137,7 +137,11 @@ export class ProfileSettingsComponent {
   }
 
   clearLocalStorage() {
-    this.sessionData$.pipe(first()).subscribe(sessionData => LocalStorageService.clearLocalStorage(sessionData, this.confirmationService));
+    this.sessionData$.pipe(first()).subscribe(sessionData => {
+      if (sessionData && sessionData.user) {
+        LocalStorageService.clearLocalStorage(sessionData, this.confirmationService);
+      }
+    });
   }
 
 }

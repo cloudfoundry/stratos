@@ -1,19 +1,21 @@
-import {  Component, ViewChild, provideZonelessChangeDetection } from '@angular/core';
+import { Component, ViewChild, provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { StoreModule } from '@ngrx/store';
-import { createBasicStoreModule } from "../test-framework/core-test.helper";
+import { describe, it, expect, beforeEach } from 'vitest';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Observable, of } from 'rxjs';
-
-import { EntitySchema } from '../../../../../../../../store/src/helpers/entity-schema';
-import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../store/src/types/shared.types';
-import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
-import { UserFavoriteManager } from '@stratosui/store';
-import { CoreTestingModule } from '../../../../../../../test-framework/core-test.modules';
-import { SharedModule } from '../../../../../shared.module';
+import {
+  ComponentEntityMonitorConfig,
+  EntityMonitorFactory,
+  EntitySchema,
+  EntityServiceFactory,
+  IFavoriteMetadata,
+  StratosStatus,
+  UserFavorite,
+  UserFavoriteManager,
+} from '@stratosui/store';
+import { createBasicStoreModule, CoreTestingModule } from '@test-framework';
 import { MetaCardComponent } from './meta-card.component';
+import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
 
 @Component({
   standalone: false,
@@ -45,10 +47,10 @@ class EntityMonitorFactoryMock {
   entity = {
     entity: {
       entity: {
-        cfGuid: 1
+        cfGuid: 1,
       },
       metadata: {
-        guid: 2
+        guid: 2,
       }
     }
   };
@@ -58,7 +60,7 @@ class EntityMonitorFactoryMock {
     entity$: new Observable(subscriber => {
       subscriber.next(this.entity);
       subscriber.complete();
-    })
+    }),
   };
 
   create() {
@@ -78,21 +80,20 @@ describe('MetaCardComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        SharedModule,
-        StoreModule,
+        MetaCardComponent,
+        MetaCardTitleComponent,
         CoreTestingModule,
         NoopAnimationsModule,
-        BrowserAnimationsModule,
-        createBasicStoreModule()
+        createBasicStoreModule(),
       ],
       declarations: [WrapperComponent],
       providers: [
-        
+        EntityServiceFactory,
         { provide: EntityMonitorFactory, useClass: EntityMonitorFactoryMock },
         { provide: UserFavoriteManager, useClass: UserFavoriteManagerMock },
-      ,
-        provideZonelessChangeDetection()
-      ]
+        provideZonelessChangeDetection(),
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
     }).compileComponents();
   });
 
@@ -100,8 +101,8 @@ describe('MetaCardComponent', () => {
     fixture = TestBed.createComponent(WrapperComponent);
     entityMonitorFactory = TestBed.inject(EntityMonitorFactory) as any as EntityMonitorFactoryMock;
     component = fixture.componentInstance.metaCard;
-    fixture.detectChanges();
     element = fixture.debugElement.nativeElement;
+    // Don't call detectChanges here - let each test control when it happens
   });
 
   it('should create', () => {
@@ -113,37 +114,41 @@ describe('MetaCardComponent', () => {
     component.entityConfig = entityConfig;
     fixture.detectChanges();
 
-    expect(element.querySelector('mat-progress-bar')).toBeTruthy();
+    expect(element.querySelector('app-progress-bar')).toBeTruthy();
   });
 
   it('should show action menu', () => {
     component.actionMenu = [
       {
         label: 'Action1',
-        action: null,
+        action: () => {},
         can: of(true),
       },
       {
         label: 'Action2',
-        action: null,
+        action: () => {},
       },
     ];
     fixture.detectChanges();
 
-    expect(element.querySelector('mat-menu')).toBeTruthy();
+    // The menu button should be visible when actionMenu is set and showMenu$ is true
+    const menuButton = element.querySelector('button.meta-card__header__button');
+    expect(menuButton).toBeTruthy();
   });
 
   it('should hide actions without permission', () => {
     component.actionMenu = [
       {
         label: 'Action1',
-        action: null,
+        action: () => {},
         can: of(false),
       },
     ];
     fixture.detectChanges();
 
-    expect(element.querySelector('mat-menu')).toBeFalsy();
+    // The menu button should not be visible when all actions have can: false
+    const menuButton = element.querySelector('button.meta-card__header__button');
+    expect(menuButton).toBeFalsy();
   });
 
   it('should show star if favoritable', () => {

@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { BaseTestModules } from '../../../../test-framework/core-test.helper';
+import { BaseTestModules, STORE_TEST_PROVIDERS } from "@test-framework/core-test.helper";
 import { AppActionMonitorComponent } from './app-action-monitor.component';
 
 describe('AppActionMonitorComponent', () => {
@@ -11,13 +11,17 @@ describe('AppActionMonitorComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection()],
+      providers: [
+        ...(STORE_TEST_PROVIDERS || []),
+        provideZonelessChangeDetection()
+      ],
       imports: [
         ...BaseTestModules,
-        AppActionMonitorComponent
-      ]
-    })
-      .compileComponents();
+        AppActionMonitorComponent,
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

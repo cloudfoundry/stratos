@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 
 import { getRowMetadata, EntitySchema, APIResource } from '@stratosui/store';
 
@@ -27,12 +27,28 @@ selector: 'app-table-cell-request-monitor-icon',
     AppActionMonitorIconComponent
 ]
 })
-export class TableCellRequestMonitorIconComponent<T = any> extends TableCellCustom<T, Config<T>> implements OnInit {
+export class TableCellRequestMonitorIconComponent<T = any> extends TableCellCustom<T, Config<T>> implements OnInit, OnChanges {
   public configObj!: ITableCellRequestMonitorIconConfig;
 
   public id!: string;
 
+  constructor(private cdr: ChangeDetectorRef) {
+    super();
+  }
+
   ngOnInit() {
+    this.updateConfig();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    // When row or config changes, update the configuration
+    // This is necessary in zoneless mode with OnPush change detection
+    if (changes['row'] || changes['config']) {
+      this.updateConfig();
+    }
+  }
+
+  private updateConfig() {
     this.configObj = this.config.getConfig(this.row);
 
     if (this.configObj && this.configObj.getId) {
@@ -44,6 +60,8 @@ export class TableCellRequestMonitorIconComponent<T = any> extends TableCellCust
     } else {
       throw new Error('Cannot get id for request monitor cell');
     }
+    // Mark for check to ensure template expressions re-evaluate in zoneless mode
+    this.cdr.markForCheck();
   }
 
 }

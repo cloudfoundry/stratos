@@ -66,3 +66,6 @@ export const listTableComponents = [
   ...listTableCells,
   TableCellStatusDirective,
 ];
+
+// Export listTableCells for use in component tests
+export { listTableCells };

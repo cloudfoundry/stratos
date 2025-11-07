@@ -35,7 +35,7 @@ describe('Component: ChartIndex', () => {
         LoaderComponent,
         PanelComponent,
         // HeaderBarComponent,
-        // MainHeaderComponent
+        // MainHeaderComponent,
       ],
       providers: [
         
@@ -43,9 +43,9 @@ describe('Component: ChartIndex', () => {
         MenuService,
         { provide: ChartsService, useValue: new MockChartService() },
         // { provide: SeoService },
-        { provide: Router }
-      ,
-        provideZonelessChangeDetection()
+        { provide: Router },
+
+        provideZonelessChangeDetection(),
       ],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();

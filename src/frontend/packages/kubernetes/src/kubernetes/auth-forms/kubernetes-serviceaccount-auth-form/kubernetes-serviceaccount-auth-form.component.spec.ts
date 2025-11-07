@@ -16,11 +16,11 @@ describe('KubernetesSATokenAuthFormComponent', () => {
         providers: [provideZonelessChangeDetection()],imports: [
         MDAppModule,
         SharedModule,
-        NoopAnimationsModule
-      ,
-        KubernetesSATokenAuthFormComponent
+        NoopAnimationsModule,
+
+        KubernetesSATokenAuthFormComponent,
       ]
-    })
+    }),
       .compileComponents();
   });
 

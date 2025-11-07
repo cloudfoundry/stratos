@@ -20,9 +20,9 @@ describe('AppActionExtensionComponent', () => {
         CoreModule,
         RouterTestingModule,
         SharedModule,
-        createBasicStoreModule()
+        createBasicStoreModule(),
       ]
-    })
+    }),
     .compileComponents();
   });
 

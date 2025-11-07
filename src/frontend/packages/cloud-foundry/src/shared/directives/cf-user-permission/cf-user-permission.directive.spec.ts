@@ -3,8 +3,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { BaseTestModules } from '../../../../../core/test-framework/core-test.helper';
-
-
 @Component({
   standalone: false,
   template: `<input type="text" appCfUserPermission>`
@@ -21,13 +19,13 @@ describe('CfUserPermissionDirective', () => {
     TestBed.configureTestingModule({
       imports: [
         ...BaseTestModules,
-        TestUserPermissionComponent
-      ],
+        TestUserPermissionComponent,
+    ],
       providers: [
         
         { provide: TemplateRef, useClass: MockTemplateRef },
-      ,
-        provideZonelessChangeDetection()
+
+        provideZonelessChangeDetection(),
       ]
     });
     fixture = TestBed.createComponent(TestUserPermissionComponent);

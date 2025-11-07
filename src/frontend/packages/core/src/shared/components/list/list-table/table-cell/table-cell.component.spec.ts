@@ -1,21 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CoreModule } from '../../../../../core/core.module';
-import { UtilsService } from '../../../../../core/utils.service';
-import { PercentagePipe } from '../../../../pipes/percentage.pipe';
-import { ValuesPipe } from '../../../../pipes/values.pipe';
-import { AppActionMonitorIconComponent } from '../../../app-action-monitor-icon/app-action-monitor-icon.component';
-import {
-  ApplicationStateIconComponent,
-} from '../../../application-state/application-state-icon/application-state-icon.component';
-import { ApplicationStateIconPipe } from '../../../application-state/application-state-icon/application-state-icon.pipe';
-import { ApplicationStateComponent } from '../../../application-state/application-state.component';
-import { BooleanIndicatorComponent } from '../../../boolean-indicator/boolean-indicator.component';
-import { AppChipsComponent } from '../../../chips/chips.component';
-import { UsageGaugeComponent } from '../../../usage-gauge/usage-gauge.component';
-import { listTableCells, TableCellComponent } from './table-cell.component';
+import { TableCellComponent } from './table-cell.component';
 
 describe('TableCellComponent', () => {
   let component: TableCellComponent<any>;
@@ -23,40 +10,14 @@ describe('TableCellComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-
-      declarations: [
-        // EventTabActorIconPipe,
-        ValuesPipe,
-        ApplicationStateIconPipe,
-        PercentagePipe,
-        // RunningInstancesComponent,
-        AppChipsComponent,
-        // CfRoleCheckboxComponent,
-        // GithubCommitAuthorComponent,
-        // ServicePlanPriceComponent,
-        // ServicePlanPublicComponent,
-        // CfOrgSpaceLinksComponent,
-        // ServiceInstanceLastOpComponent
-      ],
       imports: [
-        CoreModule,
-        AppActionMonitorIconComponent,
         TableCellComponent,
-        ApplicationStateComponent,
-        ApplicationStateIconComponent,
-        UsageGaugeComponent,
-        BooleanIndicatorComponent,
-        ...listTableCells
       ],
       providers: [
-        
-        UtilsService,
-      ,
-        provideZonelessChangeDetection()
-      ]
-    
-    })
-      .compileComponents();
+        provideZonelessChangeDetection(),
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
+    }).compileComponents();
   });
 
   beforeEach(() => {

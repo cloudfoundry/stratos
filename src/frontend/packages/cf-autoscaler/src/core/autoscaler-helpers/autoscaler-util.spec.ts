@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  isEqual, buildLegendData, shiftArray
+  isEqual, buildLegendData, shiftArray,
 } from './autoscaler-util';
 
 describe('Autoscaler Util Helper', () => {
@@ -42,7 +42,7 @@ describe('Autoscaler Util Helper', () => {
         params: {
           start: 1557026400,
           end: 1557026880,
-          step: 9.6
+          step: 9.6,
         }
       }
     };

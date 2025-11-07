@@ -14,16 +14,16 @@ describe('AnalysisStatusCellComponent', () => {
       providers: [provideZonelessChangeDetection()],
       imports: [
         AnalysisStatusCellComponent,
-        ...BaseTestModules
+        ...BaseTestModules,
       ]
-    })
+    }),
       .compileComponents();
   });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AnalysisStatusCellComponent);
     component = fixture.componentInstance;
-    // Set required row property (inherited from TableCellCustom)
+    // Set required row property (inherited from TableCellCustom),
     component.row = { status: 'completed' };
     fixture.detectChanges();
   });

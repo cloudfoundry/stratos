@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { BaseTestModulesNoShared } from '../../../../test-framework/core-test.helper';
+import { BaseTestModulesNoShared, STORE_TEST_PROVIDERS } from "@test-framework/core-test.helper";
 import { NestedTabsComponent } from './nested-tabs.component';
 
 describe('NestedTabsComponent', () => {
@@ -11,13 +11,16 @@ describe('NestedTabsComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection()],
+      providers: [
+        provideZonelessChangeDetection(),
+        ...STORE_TEST_PROVIDERS
+      ],
       imports: [
         ...BaseTestModulesNoShared,
         NestedTabsComponent,
       ]
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

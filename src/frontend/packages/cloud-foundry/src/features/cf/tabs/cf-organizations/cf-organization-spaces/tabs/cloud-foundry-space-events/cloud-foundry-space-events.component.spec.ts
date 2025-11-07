@@ -3,10 +3,10 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { ListConfig } from '../../../../../../../../../core/src/shared/components/list/list.component.types';
-import { CFBaseTestModules } from '../../../../../../../../test-framework/cf-test-helper';
+import { CFBaseTestModules } from "@test-framework/cf-test-helper";
 import {
   generateActiveRouteCfOrgSpaceMock,
-} from '../../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from "@test-framework/cloud-foundry-endpoint-service.helper";
 import {
   CloudFoundryEventsListComponent,
 } from '../../../../../../../shared/components/cloud-foundry-events-list/cloud-foundry-events-list.component';
@@ -20,18 +20,13 @@ import {
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
-import { CloudFoundrySpaceEventsComponent } from './cloud-foundry-space-events.component';
-
+import { CloudFoundrySpaceEventsComponent } from "./cloud-foundry-space-events.component";
 describe('CloudFoundrySpaceEventsComponent', () => {
   let component: CloudFoundrySpaceEventsComponent;
   let fixture: ComponentFixture<CloudFoundrySpaceEventsComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        CloudFoundrySpaceEventsComponent,
-        CloudFoundryEventsListComponent
-      ],
       providers: [
         
         {
@@ -43,11 +38,15 @@ describe('CloudFoundrySpaceEventsComponent', () => {
         CfUserService,
         CloudFoundryEndpointService,
         CloudFoundryOrganizationService,
-        CloudFoundryUserProvidedServicesService
-      ,
-        provideZonelessChangeDetection()
+        CloudFoundryUserProvidedServicesService,
+
+        provideZonelessChangeDetection(),
       ],
-      imports: [...CFBaseTestModules]
+      imports: [
+        CloudFoundrySpaceEventsComponent,
+        CloudFoundryEventsListComponent,
+        ...CFBaseTestModules,
+      ],
     })
       .compileComponents();
   });

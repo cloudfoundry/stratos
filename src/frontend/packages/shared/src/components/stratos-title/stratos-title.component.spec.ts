@@ -13,7 +13,7 @@ describe('StratosTitleComponent', () => {
       providers: [provideZonelessChangeDetection()],
       declarations: [StratosTitleComponent],
       teardown: { destroyAfterEach: false }
-    })
+    }),
       .compileComponents();
   });
 

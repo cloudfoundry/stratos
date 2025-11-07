@@ -2,11 +2,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-
-import { createBasicStoreModule } from '../../../../../../../store/testing/public-api';
-import { CoreTestingModule } from '../../../../../../test-framework/core-test.modules';
-import { CoreModule } from '../../../../../core/core.module';
-import { SharedModule } from '../../../../shared.module';
+import { createBasicStoreModule } from '@stratosui/store/testing';
+import { CoreTestingModule } from '@test-framework/core-test.modules';
+import { CoreModule, SharedModule } from '@stratosui/core';
 import { ListViewComponent } from './list-view.component';
 
 describe('ListViewComponent', () => {
@@ -21,10 +19,10 @@ describe('ListViewComponent', () => {
         SharedModule,
         CoreTestingModule,
         createBasicStoreModule(),
-        NoopAnimationsModule
+        NoopAnimationsModule,
       ]
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {
@@ -33,7 +31,7 @@ describe('ListViewComponent', () => {
     component.config = {
       getListConfig: () => null,
       updateDataSourceConfig: () => null,
-      updateListConfig: () => null
+      updateListConfig: () => null,
     };
     fixture.detectChanges();
   });

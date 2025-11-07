@@ -13,21 +13,19 @@ describe('PopeyeReportViewerComponent', () => {
   let fixture: ComponentFixture<PopeyeReportViewerComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({imports: [
+    TestBed.configureTestingModule({
+      imports: [
         KubernetesBaseTestModules,
-        MDAppModule
-      ,
-        PopeyeReportViewerComponent
+        MDAppModule,
+        PopeyeReportViewerComponent,
       ],
       providers: [
-        
         KubernetesAnalysisService,
         KubernetesEndpointService,
         KubeBaseGuidMock,
-      ,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
-    })
+    }),
       .compileComponents();
   });
 

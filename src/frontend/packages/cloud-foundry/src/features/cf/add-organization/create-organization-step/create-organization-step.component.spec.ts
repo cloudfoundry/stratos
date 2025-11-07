@@ -2,21 +2,22 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
-import { generateCfBaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CreateOrganizationStepComponent } from './create-organization-step.component';
-
+import { PaginationMonitorFactory } from '@stratosui/store/monitors/pagination-monitor.factory';
+import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { CreateOrganizationStepComponent } from "./create-organization-step.component";
 describe('CreateOrganizationStepComponent', () => {
   let component: CreateOrganizationStepComponent;
   let fixture: ComponentFixture<CreateOrganizationStepComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [CreateOrganizationStepComponent],
-      imports: generateCfBaseTestModules(),
+      imports: [
+        CreateOrganizationStepComponent,
+        ...generateCfBaseTestModules(),
+      ],
       providers: [
         PaginationMonitorFactory,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

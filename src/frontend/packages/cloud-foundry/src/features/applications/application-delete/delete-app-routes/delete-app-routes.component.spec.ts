@@ -3,8 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { generateTestApplicationServiceProvider } from '../../../../../test-framework/application-service-helper';
-import { generateCfBaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateTestApplicationServiceProvider } from "@test-framework/application-service-helper";
+import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import {
   ApplicationEnvVarsHelper,
 } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
@@ -18,16 +18,18 @@ describe('DeleteAppRoutesComponent', () => {
   const cfId = '2';
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [DeleteAppRoutesComponent],
-      imports: generateCfBaseTestModules(),
+      imports: [
+        DeleteAppRoutesComponent,
+        ...generateCfBaseTestModules(),
+      ],
       providers: [
         
         generateTestApplicationServiceProvider(cfId, appId),
         ApplicationEnvVarsHelper,
         DatePipe,
-        ApplicationStateService
-      ,
-        provideZonelessChangeDetection()
+        ApplicationStateService,
+
+        provideZonelessChangeDetection(),
       ]
     }).compileComponents();
 

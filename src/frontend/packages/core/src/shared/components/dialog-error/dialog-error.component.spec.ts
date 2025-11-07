@@ -12,10 +12,10 @@ describe('DialogErrorComponent', () => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [
-        DialogErrorComponent
+        DialogErrorComponent,
       ]
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

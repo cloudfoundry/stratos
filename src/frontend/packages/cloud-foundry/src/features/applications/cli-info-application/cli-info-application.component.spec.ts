@@ -3,12 +3,9 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { CoreModule } from '../../../../../core/src/core/core.module';
-import { MDAppModule } from '../../../../../core/src/core/md.module';
-import { SharedModule } from '../../../../../core/src/shared/shared.module';
-import { TabNavService } from '../../../../../core/src/tab-nav.service';
-import { generateTestApplicationServiceProvider } from '../../../../test-framework/application-service-helper';
-import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CoreModule, MDAppModule, SharedModule, TabNavService } from '@stratosui/core';
+import { generateTestApplicationServiceProvider } from "@test-framework/application-service-helper";
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { CloudFoundrySharedModule } from '../../../shared/cf-shared.module';
 import { ApplicationStateService } from '../../../shared/services/application-state.service';
 import { ApplicationEnvVarsHelper } from '../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
@@ -20,26 +17,25 @@ describe('CliInfoApplicationComponent', () => {
 
   const appId = '1';
   const cfId = '2';
-
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [CliInfoApplicationComponent],
       imports: [
+        CliInfoApplicationComponent,
         ...generateCfStoreModules(),
         CoreModule,
         SharedModule,
         MDAppModule,
         RouterTestingModule,
-        CloudFoundrySharedModule
+        CloudFoundrySharedModule,
       ],
       providers: [
         
         generateTestApplicationServiceProvider(cfId, appId),
         ApplicationStateService,
         ApplicationEnvVarsHelper,
-        TabNavService
-      ,
-        provideZonelessChangeDetection()
+        TabNavService,
+
+        provideZonelessChangeDetection(),
       ]
     }).compileComponents();
 

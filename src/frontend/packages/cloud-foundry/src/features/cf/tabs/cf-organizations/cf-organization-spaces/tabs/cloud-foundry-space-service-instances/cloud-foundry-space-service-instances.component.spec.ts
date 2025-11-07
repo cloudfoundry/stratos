@@ -1,19 +1,18 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import {  NgModule, provideZonelessChangeDetection } from '@angular/core';
+import { NgModule, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { generateCfBaseTestModules } from '../../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { getCfSpaceServiceMock } from '../../../../../../../../test-framework/cloud-foundry-space.service.mock';
-import {
-  TableCellAppCfOrgSpaceHeaderComponent,
-} from '../../../../../../../shared/components/list/list-types/app/table-cell-app-cforgspace-header/table-cell-app-cforgspace-header.component';
+import { generateCfBaseTestModules } from '@test-framework/cloud-foundry-endpoint-service.helper';
+import { getCfSpaceServiceMock } from '@test-framework/cloud-foundry-space.service.mock';
+import { TableCellAppCfOrgSpaceHeaderComponent } from '../../../../../../../shared/components/list/list-types/app/table-cell-app-cforgspace-header/table-cell-app-cforgspace-header.component';
 import { ServiceActionHelperService } from '../../../../../../../shared/data-services/service-action-helper.service';
 import { CloudFoundrySpaceServiceInstancesComponent } from './cloud-foundry-space-service-instances.component';
-
 @NgModule({
-    declarations: [TableCellAppCfOrgSpaceHeaderComponent],
-    imports: [CommonModule]
+  imports: [
+    TableCellAppCfOrgSpaceHeaderComponent,
+    CommonModule,
+  ],
 })
 class EntryComponentModules { }
 
@@ -23,14 +22,14 @@ describe('CloudFoundrySpaceServiceInstancesComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [CloudFoundrySpaceServiceInstancesComponent],
       imports: [
+        CloudFoundrySpaceServiceInstancesComponent,
         ...generateCfBaseTestModules(),
         EntryComponentModules,
       ],
       providers: [
         getCfSpaceServiceMock, DatePipe, ServiceActionHelperService,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ],
     })
       .compileComponents();

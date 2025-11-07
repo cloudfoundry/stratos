@@ -2,26 +2,25 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Store } from '@ngrx/store';
-import { testSessionData } from "../../test-framework/cloud-foundry-endpoint-service.helper";
+import { testSessionData } from "@test-framework/cloud-foundry-endpoint-service.helper";
 
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { MetadataCardTestComponents } from '../../../../../../../../core/test-framework/core-test.helper';
-import { VerifiedSession } from '../../../../../../../../store/src/actions/auth.actions';
-import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
-import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
+import { VerifiedSession } from '@stratosui/store/actions/auth.actions';
+import { EntityServiceFactory } from '@stratosui/store/entity-service-factory.service';
+import { EntityMonitorFactory } from '@stratosui/store/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '@stratosui/store/monitors/pagination-monitor.factory';
 import {
   generateCfBaseTestModulesNoShared,
   generateTestCfEndpointServiceProvider,
   generateTestCfUserServiceProvider,
-} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { CloudFoundryOrganizationService } from '../../../../../../features/cf/services/cloud-foundry-organization.service';
 import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../../../services/cloud-foundry-user-provided-services.service';
-import { CfSpaceCardComponent } from './cf-space-card.component';
-
+import { CfSpaceCardComponent } from "./cf-space-card.component";
 describe('CfSpaceCardComponent', () => {
   let component: CfSpaceCardComponent;
   let fixture: ComponentFixture<CfSpaceCardComponent>;
@@ -29,10 +28,12 @@ describe('CfSpaceCardComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
+        MetadataCardTestComponents,
+    ],
+      imports: [
         CfSpaceCardComponent,
-        ...MetadataCardTestComponents
+        ...generateCfBaseTestModulesNoShared(),
       ],
-      imports: generateCfBaseTestModulesNoShared(),
       providers: [
         
         PaginationMonitorFactory,
@@ -43,9 +44,9 @@ describe('CfSpaceCardComponent', () => {
         generateTestCfEndpointServiceProvider(),
         EntityServiceFactory,
         ConfirmationDialogService,
-        CloudFoundryUserProvidedServicesService
-      ,
-        provideZonelessChangeDetection()
+        CloudFoundryUserProvidedServicesService,
+
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

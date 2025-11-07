@@ -1,11 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { createBasicStoreModule } from "../test-framework/core-test.helper";
+import { createBasicStoreModule } from "@test-framework/core-test.helper";
 import { of as observableOf } from 'rxjs';
-
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CoreTestingModule } from '../../../../../../test-framework/core-test.modules';
+import { APIResource } from '@stratosui/store';
+import { CoreTestingModule } from "@test-framework/core-test.modules";
 import { CoreModule } from '../../../../../core/core.module';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import { ListConfig } from '../../list.component.types';
@@ -19,18 +18,17 @@ describe('TableCellActionsComponent', () => {
     TestBed.configureTestingModule({
       providers: [
         
-        ListConfig
-      ,
-        provideZonelessChangeDetection()
+        ListConfig,
+        provideZonelessChangeDetection(),
       ],
       imports: [
         CoreModule,
         CoreTestingModule,
         createBasicStoreModule(),
-        TableCellActionsComponent
+        TableCellActionsComponent,
       ]
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

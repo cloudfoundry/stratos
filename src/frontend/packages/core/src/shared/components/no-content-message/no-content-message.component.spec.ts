@@ -11,10 +11,10 @@ describe('NoContentMessageComponent', () => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [
-        NoContentMessageComponent
+        NoContentMessageComponent,
       ]
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

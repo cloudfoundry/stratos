@@ -5,10 +5,9 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { SharedModule } from '../../../../../../core/src/shared/shared.module';
-import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
-import { CfRolesService } from './cf-roles.service';
-
+import { CfRolesService } from "./cf-roles.service";
 describe('CfRolesService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -16,14 +15,14 @@ describe('CfRolesService', () => {
         ...generateCfStoreModules(),
         SharedModule,
         HttpClientModule,
-        RouterTestingModule
-      ],
+        RouterTestingModule,
+    ],
       providers: [
         
         CfRolesService,
         CfUserService,
-      ,
-        provideZonelessChangeDetection()
+
+        provideZonelessChangeDetection(),
       ]
     });
   });

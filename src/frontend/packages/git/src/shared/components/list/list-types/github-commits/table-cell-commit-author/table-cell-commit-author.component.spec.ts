@@ -16,9 +16,9 @@ describe('TableCellCommitAuthorComponent', () => {
       imports: [
         ...BaseTestModulesNoShared,
         TableCellCommitAuthorComponent,
-        GithubCommitAuthorComponent
+        GithubCommitAuthorComponent,
       ]
-    })
+    }),
       .compileComponents();
   });
 

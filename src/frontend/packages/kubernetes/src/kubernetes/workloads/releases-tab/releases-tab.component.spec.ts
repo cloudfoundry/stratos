@@ -14,19 +14,16 @@ describe('ReleasesTabComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
-        ...KubernetesBaseTestModules
-      ,
-        HelmReleasesTabComponent
-      ]providers: [
-        
+        ...KubernetesBaseTestModules,
+        HelmReleasesTabComponent,
+      ],
+      providers: [
         DatePipe,
         HelmReleaseHelperService,
-        TabNavService
-      ,
-        provideZonelessChangeDetection()
+        TabNavService,
+        provideZonelessChangeDetection(),
       ]
-
-    })
+    }),
       .compileComponents();
   });
 

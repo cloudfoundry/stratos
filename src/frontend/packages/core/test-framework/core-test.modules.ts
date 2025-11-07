@@ -2,26 +2,22 @@ import { NgModule } from '@angular/core';
 import {
   CATALOGUE_ENTITIES,
   EntityCatalogFeatureModule,
-  entityCatalog,
-  TestEntityCatalog,
   generateStratosEntities,
 } from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 
 @NgModule({
   imports: [
+    EntityCatalogFeatureModule,
+  ],
+  providers: [
+    ...STORE_TEST_PROVIDERS,
     {
-      ngModule: EntityCatalogFeatureModule,
-      providers: [
-        {
-          provide: CATALOGUE_ENTITIES, useFactory: () => {
-            const testEntityCatalog = entityCatalog as TestEntityCatalog;
-            testEntityCatalog.clear();
-            return [
-              ...generateStratosEntities()
-            ];
-          }
-        },
-      ]
+      provide: CATALOGUE_ENTITIES,
+      useFactory: () => [
+        ...generateStratosEntities()
+      ],
+      multi: true
     },
   ]
 })

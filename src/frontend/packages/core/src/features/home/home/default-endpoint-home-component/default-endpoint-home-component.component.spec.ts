@@ -12,8 +12,8 @@ describe('DefaultEndpointHomeComponentComponent', () => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [ DefaultEndpointHomeComponent ]
-    })
-    .compileComponents();
+    });
+    TestBed.compileComponents();
   });
 
   beforeEach(() => {

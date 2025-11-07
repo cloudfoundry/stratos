@@ -3,23 +3,23 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { TabNavService } from '../../../../../core/src/tab-nav.service';
-import { CFBaseTestModules } from '../../../../test-framework/cf-test-helper';
+import { CFBaseTestModules } from "@test-framework/cf-test-helper";
 import { AddSpaceComponent } from './add-space.component';
-import { CreateSpaceStepComponent } from './create-space-step/create-space-step.component';
-
+import { CreateSpaceStepComponent } from "./create-space-step/create-space-step.component";
 describe('AddSpaceComponent', () => {
   let component: AddSpaceComponent;
   let fixture: ComponentFixture<AddSpaceComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [AddSpaceComponent, CreateSpaceStepComponent],
       imports: [
+        AddSpaceComponent,
+        CreateSpaceStepComponent,
         ...CFBaseTestModules,
       ],
       providers: [
         TabNavService,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

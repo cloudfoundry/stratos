@@ -17,8 +17,8 @@ describe('AnalysisReportRunnerComponent', () => {
     TestBed.configureTestingModule({imports: [
         SharedModule,
         KubernetesBaseTestModules,
-      ,
-        AnalysisReportRunnerComponent
+
+        AnalysisReportRunnerComponent,
       ],
       providers: [
         
@@ -26,10 +26,10 @@ describe('AnalysisReportRunnerComponent', () => {
         KubernetesEndpointService,
         KubeBaseGuidMock,
         SidePanelService,
-      ,
-        provideZonelessChangeDetection()
+
+        provideZonelessChangeDetection(),
       ]
-    })
+    }),
       .compileComponents();
   });
 

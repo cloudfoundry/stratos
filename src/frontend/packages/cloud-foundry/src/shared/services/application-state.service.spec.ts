@@ -3,8 +3,6 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { ApplicationStateService } from './application-state.service';
-
-
 describe('ApplicationStateService', () => {
 
   const $translate = { instant: (label) => label };
@@ -14,7 +12,7 @@ describe('ApplicationStateService', () => {
     TestBed.configureTestingModule({
       providers: [
         ApplicationStateService,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
     }).compileComponents();
   });
@@ -35,7 +33,7 @@ describe('ApplicationStateService', () => {
         package_state: packageState,
         package_updated_at: undefined,
         running_instances: 0,
-        instances: instanceStates ? instanceStates.length : undefined
+        instances: instanceStates ? instanceStates.length : undefined,
       };
       let instances = [];
       let running = 0;
@@ -50,7 +48,7 @@ describe('ApplicationStateService', () => {
       summary.running_instances = running;
       return {
         summary,
-        instances
+        instances,
       };
     }
 

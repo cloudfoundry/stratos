@@ -1,22 +1,27 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from "../../test-framework/cloud-foundry-endpoint-service.helper";
+import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { first, tap } from 'rxjs/operators';
 
 import { PermissionConfig } from '../../../../core/src/core/permissions/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../core/src/core/permissions/current-user-permissions.service';
 import { StratosScopeStrings } from '../../../../core/src/core/permissions/stratos-user-permissions.checker';
 import { AppTestModule } from '../../../../core/test-framework/core-test.helper';
-import { AppState } from '../../../../store/src/app-state';
-import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES } from '../../../../store/src/entity-catalog-test.module';
-import { EntityCatalogEntityConfig } from '../../../../store/src/entity-catalog/entity-catalog.types';
-import { endpointEntityType, stratosEntityFactory } from '../../../../store/src/helpers/stratos-entity-factory';
-import { generateStratosEntities } from '../../../../store/src/stratos-entity-generator';
-import { APIResource } from '../../../../store/src/types/api.types';
-import { EndpointModel } from '../../../../store/src/types/endpoint.types';
-import { BaseEntityValues } from '../../../../store/src/types/entity.types';
-import { PaginationState } from '../../../../store/src/types/pagination.types';
+import {
+  AppState,
+  EntityCatalogTestModule,
+  TEST_CATALOGUE_ENTITIES,
+  EntityCatalogEntityConfig,
+  endpointEntityType,
+  stratosEntityFactory,
+  generateStratosEntities,
+  APIResource,
+  EndpointModel,
+  BaseEntityValues,
+  EntityServiceFactory,
+} from '@stratosui/store';
+import { PaginationState } from '@stratosui/store/types/pagination.types';
 import { CFFeatureFlagTypes, IFeatureFlag } from '../../cf-api.types';
 import { cfEntityFactory } from '../../cf-entity-factory';
 import { generateCFEntities } from '../../cf-entity-generator';
@@ -32,8 +37,6 @@ const ffSchema = cfEntityFactory(featureFlagEntityType);
 
 describe('CurrentUserPermissionsService with CF checker', () => {
   let service: CurrentUserPermissionsService;
-
-
   function createStoreState(): Partial<AppState<BaseEntityValues>> {
     // Data
     const endpoints: EndpointModel[] = [
@@ -69,12 +72,12 @@ describe('CurrentUserPermissionsService with CF checker', () => {
         creator: {
           name: 'admin',
           admin: true,
-          system: false
+          system: false,
         },
         metricsAvailable: false,
         connectionStatus: 'connected',
         system_shared_token: false,
-        sso_allowed: false
+        sso_allowed: false,
       },
       {
         guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
@@ -106,18 +109,18 @@ describe('CurrentUserPermissionsService with CF checker', () => {
             CfScopeStrings.CF_ADMIN_GROUP,
             CfScopeStrings.CF_READ_ONLY_ADMIN_GROUP,
             CfScopeStrings.CF_ADMIN_GLOBAL_AUDITOR_GROUP,
-            StratosScopeStrings.SCIM_READ
-          ]
+            StratosScopeStrings.SCIM_READ,
+    ]
         },
         creator: {
           name: 'admin',
           admin: true,
-          system: false
+          system: false,
         },
         metricsAvailable: false,
         connectionStatus: 'connected',
         system_shared_token: false,
-        sso_allowed: false
+        sso_allowed: false,
       }
     ];
 
@@ -507,7 +510,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
           totalResults: 2,
           pageCount: 1,
           ids: {
-            1: endpoints.map(endpoint => endpoint.guid)
+            1: endpoints.map(endpoint => endpoint.guid),
           },
           pageRequests: {
             1: {
@@ -530,10 +533,10 @@ describe('CurrentUserPermissionsService with CF checker', () => {
               string: '',
               items: {}
             },
-            totalResults: 2
+            totalResults: 2,
           },
           maxedState: {},
-          isListPagination: true
+          isListPagination: true,
         }
       },
       cfFeatureFlag: {
@@ -542,7 +545,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
           currentPage: 1,
           totalResults: 13,
           ids: {
-            1: featureFlags1.map(ff => ff.entity.guid)
+            1: featureFlags1.map(ff => ff.entity.guid),
           },
           pageRequests: {
             1: {
@@ -559,17 +562,17 @@ describe('CurrentUserPermissionsService with CF checker', () => {
               string: '',
               items: {}
             },
-            totalResults: 13
+            totalResults: 13,
           },
           maxedState: {},
-          isListPagination: false
+          isListPagination: false,
         },
         'endpoint-c80420ca-204b-4879-bf69-b6b7a202ad87': {
           pageCount: 1,
           currentPage: 1,
           totalResults: 13,
           ids: {
-            1: featureFlags2.map(ff => ff.entity.guid)
+            1: featureFlags2.map(ff => ff.entity.guid),
           },
           pageRequests: {
             1: {
@@ -586,10 +589,10 @@ describe('CurrentUserPermissionsService with CF checker', () => {
               string: '',
               items: {}
             },
-            totalResults: 13
+            totalResults: 13,
           },
           maxedState: {},
-          isListPagination: false
+          isListPagination: false,
         }
       },
     };
@@ -598,23 +601,21 @@ describe('CurrentUserPermissionsService with CF checker', () => {
     const initialState: Partial<AppState<BaseEntityValues>> = {
 
     };
-
-
     // Create request and requestData sections
     const entityMap = new Map<EntityCatalogEntityConfig, Array<TestStoreEntity | string>>([
       [
         stratosEntityFactory(endpointEntityType),
         endpoints.map(endpoint => ({
           guid: endpoint.guid,
-          data: endpoint
-        }))
+          data: endpoint,
+        })),
       ],
       [
         ffSchema,
         [...featureFlags1, ...featureFlags2].map(featureFlag => ({
           guid: featureFlag.entity.guid,
-          data: featureFlag
-        }))
+          data: featureFlag,
+        })),
       ]
     ]);
     const requestAndRequestData = createEntityStoreState(entityMap);
@@ -630,8 +631,8 @@ describe('CurrentUserPermissionsService with CF checker', () => {
             // CfScopeStrings.CF_WRITE_SCOPE,
             // CfScopeStrings.CF_READ_SCOPE,
             StratosScopeStrings.STRATOS_CHANGE_PASSWORD,
-            StratosScopeStrings.SCIM_READ
-          ],
+            StratosScopeStrings.SCIM_READ,
+    ],
         },
         endpoints: {
           cf: {
@@ -655,7 +656,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
                   orgId: 'abc',
                   isManager: true,
                   isAuditor: false,
-                  isDeveloper: true
+                  isDeveloper: true,
                 }
               },
               organizations: {
@@ -677,7 +678,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
               state: {
                 initialised: true,
                 fetching: false,
-                error: null
+                error: null,
               }
             },
             'c80420ca-204b-4879-bf69-b6b7a202ad87': {
@@ -753,7 +754,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
               state: {
                 initialised: true,
                 fetching: false,
-                error: null
+                error: null,
               }
             },
             READ_ONLY_ADMIN: {
@@ -781,19 +782,19 @@ describe('CurrentUserPermissionsService with CF checker', () => {
                   orgId: 'abc',
                   isManager: true,
                   isAuditor: false,
-                  isDeveloper: true
+                  isDeveloper: true,
                 },
                 'c6450a21-aa1a-4643-9437-035cc818ea72': {
                   orgId: 'abc',
                   isManager: true,
                   isAuditor: false,
-                  isDeveloper: true
+                  isDeveloper: true,
                 },
                 '86577124-4b64-4ca1-9a78-d904c60505c4': {
                   orgId: 'abc',
                   isManager: true,
                   isAuditor: false,
-                  isDeveloper: true
+                  isDeveloper: true,
                 }
               },
               organizations: {
@@ -829,7 +830,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
               state: {
                 initialised: true,
                 fetching: false,
-                error: null
+                error: null,
               }
             },
             READ_ONLY_USER: {
@@ -905,7 +906,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
               state: {
                 initialised: true,
                 fetching: false,
-                error: null
+                error: null,
               }
             }
           },
@@ -913,16 +914,16 @@ describe('CurrentUserPermissionsService with CF checker', () => {
         state: {
           initialised: true,
           fetching: false,
-          error: null
+          error: null,
         }
       },
       requestData: {
         ...initialState.requestData,
-        ...requestAndRequestData.requestData
+        ...requestAndRequestData.requestData,
       },
       pagination: {
         ...initialState.pagination,
-        ...pagination
+        ...pagination,
       },
     };
   }
@@ -930,8 +931,9 @@ describe('CurrentUserPermissionsService with CF checker', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        ...cfCurrentUserPermissionsService
-      ],
+        EntityServiceFactory,
+        ...cfCurrentUserPermissionsService,
+    ],
       imports: [
         {
           ngModule: EntityCatalogTestModule,
@@ -939,7 +941,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
             {
               provide: TEST_CATALOGUE_ENTITIES, useValue: [
                 ...generateStratosEntities(),
-                generateCFEntities().find(a => a.type === ffSchema.entityType)
+                generateCFEntities().find(a => a.type === ffSchema.entityType),
               ]
             }
           ]
@@ -997,8 +999,6 @@ describe('CurrentUserPermissionsService with CF checker', () => {
     ).pipe(first()).toPromise();
     expect(can).toBe(false);
   });
-
-
   it('should allow if has endpoint scope', async () => {
     const can = await service.can(new PermissionConfig(CfPermissionTypes.ENDPOINT_SCOPE, StratosScopeStrings.SCIM_READ), 'c80420ca-204b-4879-bf69-b6b7a202ad87').pipe(first()).toPromise();
     expect(can).toBe(true);

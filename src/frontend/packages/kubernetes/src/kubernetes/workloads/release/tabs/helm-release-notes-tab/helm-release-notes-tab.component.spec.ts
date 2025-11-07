@@ -12,16 +12,16 @@ describe('HelmReleaseNotesTabComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
-        ...KubernetesBaseTestModules
-      ,
-        HelmReleaseNotesTabComponent
+        ...KubernetesBaseTestModules,
+
+        HelmReleaseNotesTabComponent,
       ]providers: [
         
-        ...HelmReleaseProviders
-      ,
-        provideZonelessChangeDetection()
+        ...HelmReleaseProviders,
+
+        provideZonelessChangeDetection(),
       ]
-    })
+    }),
       .compileComponents();
   });
 

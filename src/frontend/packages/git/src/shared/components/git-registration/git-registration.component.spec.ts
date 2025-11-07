@@ -7,8 +7,10 @@ import { getGitHubAPIURL, gitEntityCatalog, GITHUB_API_URL, GitSCMService } from
 import { CATALOGUE_ENTITIES, entityCatalog, TestEntityCatalog } from '@stratosui/store';
 
 import { BaseTestModulesNoShared } from '../../../../../core/test-framework/core-test.helper';
+import { GitTestingModule } from '../../../git-testing.module';
 import { GitRegistrationComponent } from './git-registration.component';
 import { generateStratosEntities } from '../../../../../store/src/stratos-entity-generator';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 
 describe('GitRegistrationComponent', () => {
   let component: GitRegistrationComponent;
@@ -19,21 +21,13 @@ describe('GitRegistrationComponent', () => {
       imports: [
         ...BaseTestModulesNoShared,
         SharedModule,
+        GitTestingModule,
         GitRegistrationComponent,
       ],
       providers: [
+        EntityServiceFactory,
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
         GitSCMService,
-        {
-          provide: CATALOGUE_ENTITIES, useFactory: () => {
-            const testEntityCatalog = entityCatalog as TestEntityCatalog;
-            testEntityCatalog.clear();
-            return [
-              ...generateStratosEntities(),
-              ...gitEntityCatalog.allGitEntities()
-            ];
-          }, multi: false
-        },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -46,7 +40,7 @@ describe('GitRegistrationComponent', () => {
           }
         }
       ]
-    })
+    }),
     .compileComponents();
   });
 

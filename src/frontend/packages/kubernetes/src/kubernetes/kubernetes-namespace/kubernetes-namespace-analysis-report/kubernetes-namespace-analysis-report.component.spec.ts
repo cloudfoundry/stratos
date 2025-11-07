@@ -19,25 +19,23 @@ describe('KubernetesNamespaceAnalysisReportComponent', () => {
   let fixture: ComponentFixture<KubernetesNamespaceAnalysisReportComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({imports: [
+    TestBed.configureTestingModule({
+      imports: [
         KubernetesBaseTestModules,
-        MDAppModule
-      ,
+        MDAppModule,
         KubernetesNamespaceAnalysisReportComponent,
         AnalysisReportSelectorComponent,
-        AnalysisReportViewerComponent
+        AnalysisReportViewerComponent,
       ],
       providers: [
-        
         KubernetesAnalysisService,
         KubernetesEndpointService,
         KubeBaseGuidMock,
         KubernetesNamespaceService,
         TabNavService,
-      ,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
-    })
+    }),
       .compileComponents();
   });
 

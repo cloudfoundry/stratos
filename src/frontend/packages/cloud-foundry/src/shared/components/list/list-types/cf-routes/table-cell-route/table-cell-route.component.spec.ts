@@ -3,23 +3,22 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { APIResource } from '@stratosui/store/types/api.types';
 import { ListCfRoute } from '../cf-routes-data-source-base';
-import { TableCellRouteComponent } from './table-cell-route.component';
-
+import { TableCellRouteComponent } from "./table-cell-route.component";
 describe('TableCellRouteComponent', () => {
   let component: TableCellRouteComponent;
   let fixture: ComponentFixture<TableCellRouteComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection()],
-      imports: [TableCellRouteComponent,
       imports: [
+        TableCellRouteComponent,
         ...generateCfStoreModules(),
         RouterTestingModule,
-      ]
+      ],
+      providers: [provideZonelessChangeDetection()],
     })
       .compileComponents();
 

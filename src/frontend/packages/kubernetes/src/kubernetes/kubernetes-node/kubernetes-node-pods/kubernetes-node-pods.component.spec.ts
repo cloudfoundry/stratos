@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
+import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
 import { KubernetesNodePodsComponent } from './kubernetes-node-pods.component';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesNodeService } from '../../services/kubernetes-node.service';
@@ -16,13 +17,16 @@ describe('KubernetesNodePodsComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         KubernetesNodePodsComponent,
-        ...KubernetesBaseTestModules
+        ...KubernetesBaseTestModules,
       ],
       providers: [
-        BaseKubeGuid, KubernetesEndpointService, KubernetesNodeService,
-        provideZonelessChangeDetection()
+        EntityServiceFactory,
+        BaseKubeGuid,
+        KubernetesEndpointService,
+        KubernetesNodeService,
+        provideZonelessChangeDetection(),
       ]
-    })
+    }),
       .compileComponents();
   });
 

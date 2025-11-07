@@ -17,11 +17,11 @@ describe('KubernetesCertsAuthFormComponent', () => {
         providers: [provideZonelessChangeDetection()],imports: [
         CoreModule,
         SharedModule,
-        NoopAnimationsModule
-      ,
-        KubernetesCertsAuthFormComponent
+        NoopAnimationsModule,
+
+        KubernetesCertsAuthFormComponent,
       ]
-    })
+    }),
       .compileComponents();
   });
 

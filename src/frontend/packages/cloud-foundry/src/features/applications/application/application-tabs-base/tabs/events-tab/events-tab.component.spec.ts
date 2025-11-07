@@ -9,12 +9,12 @@ import { MDAppModule } from '../../../../../../../../core/src/core/md.module';
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
 import {
   getPaginationAction,
-} from '../../../../../../../../store/src/entity-catalog/action-orchestrator/action-orchestrator.spec.helpers';
-import { EntityCatalogEntityConfig } from '../../../../../../../../store/src/entity-catalog/entity-catalog.types';
-import { NormalizedResponse } from '../../../../../../../../store/src/types/api.types';
-import { PaginatedAction } from '../../../../../../../../store/src/types/pagination.types';
-import { WrapperRequestActionSuccess } from '../../../../../../../../store/src/types/request.types';
-import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from '@stratosui/store/entity-catalog/action-orchestrator/action-orchestrator.spec.helpers';
+import { EntityCatalogEntityConfig } from '@stratosui/store/entity-catalog/entity-catalog.types';
+import { NormalizedResponse } from '@stratosui/store/types/api.types';
+import { PaginatedAction } from '@stratosui/store/types/pagination.types';
+import { WrapperRequestActionSuccess } from '@stratosui/store/types/request.types';
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { cfEventEntityType } from '../../../../../../cf-entity-types';
 import {
@@ -24,6 +24,7 @@ import { ApplicationStateService } from '../../../../../../shared/services/appli
 import { ApplicationService } from '../../../../application.service';
 import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { EventsTabComponent } from './events-tab.component';
+import { EntityServiceFactory } from '@stratosui/store/entity-service-factory.service';
 
 describe('EventsTabComponent', () => {
   class ApplicationServiceMock {
@@ -36,25 +37,24 @@ describe('EventsTabComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        EventsTabComponent,
-        CloudFoundryEventsListComponent
-      ],
       providers: [
+        EntityServiceFactory,
         
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         ApplicationStateService,
-        ApplicationEnvVarsHelper
-      ,
-        provideZonelessChangeDetection()
+        ApplicationEnvVarsHelper,
+
+        provideZonelessChangeDetection(),
       ],
       imports: [
+        EventsTabComponent,
+        CloudFoundryEventsListComponent,
         ...generateCfStoreModules(),
         MDAppModule,
         SharedModule,
         CoreModule,
         NoopAnimationsModule,
-      ]
+      ],
     }).compileComponents();
 
     const eventsConfig: EntityCatalogEntityConfig = cfEntityFactory(cfEventEntityType);

@@ -5,17 +5,19 @@ import { inject, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createEmptyStoreModule } from "../../../test-framework/cf-autoscaler-test.helper";
+import { createEmptyStoreModule } from "@test-framework/cf-autoscaler-test.helper";
 
 import {
   generateTestApplicationServiceProvider,
-} from '../../../../../cloud-foundry/test-framework/application-service-helper';
-import { CoreModule } from '../../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../../core/src/shared/shared.module';
-import { AppTestModule } from '../../../../../core/test-framework/core-test.helper';
-import { EntityCatalogHelper } from '../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
+} from '@stratosui/cloud-foundry/test-framework/application-service-helper';
+import { CoreModule } from '@stratosui/core/src/core/core.module';
+import { SharedModule } from '@stratosui/core/src/shared/shared.module';
+import { AppTestModule } from '@stratosui/core/test-framework/core-test.helper';
+import {
+  EntityCatalogHelper,
+  EntityServiceFactory,
+  EntityMonitorFactory,
+} from '@stratosui/store';
 import { CfAutoscalerTestingModule } from '../../../cf-autoscaler-testing.module';
 import { CfAppAutoscalerEventsConfigService } from './cf-app-autoscaler-events-config.service';
 
@@ -35,8 +37,8 @@ describe('CfAppAutoscalerEventsConfigService', () => {
         EntityCatalogHelper,
         generateTestApplicationServiceProvider(appGuid, cfGuid),
         HttpClient,
-      ,
-        provideZonelessChangeDetection()
+
+        provideZonelessChangeDetection(),
       ],
       imports: [
         HttpClientModule,
@@ -46,7 +48,7 @@ describe('CfAppAutoscalerEventsConfigService', () => {
         SharedModule,
         createEmptyStoreModule(),
         RouterTestingModule,
-        AppTestModule
+        AppTestModule,
       ]
     });
   });

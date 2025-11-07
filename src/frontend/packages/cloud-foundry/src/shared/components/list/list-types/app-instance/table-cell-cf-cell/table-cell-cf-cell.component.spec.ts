@@ -15,10 +15,8 @@ describe('TableCellCfCellComponent', () => {
         TableCellCfCellComponent,
       ],
       providers: [
-        
         UtilsService,
-      ,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
     }).compileComponents();
 

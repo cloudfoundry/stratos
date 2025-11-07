@@ -16,16 +16,16 @@ describe('TableCellSidePanelComponent', () => {
       providers: [
         
         SidePanelService,
-      ,
-        provideZonelessChangeDetection()
+
+        provideZonelessChangeDetection(),
       ],
       imports: [
         RouterTestingModule,
-        TableCellSidePanelComponent
+        TableCellSidePanelComponent,
       ]
     
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

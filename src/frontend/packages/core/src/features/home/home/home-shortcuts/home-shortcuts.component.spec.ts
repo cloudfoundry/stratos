@@ -12,11 +12,11 @@ describe('HomeShortcutsComponent', () => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [
-        HomeShortcutsComponent
+        HomeShortcutsComponent,
       ],
       
-    })
-    .compileComponents();
+    });
+    TestBed.compileComponents();
   });
 
   beforeEach(() => {

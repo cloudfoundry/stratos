@@ -14,13 +14,13 @@ describe('KubeNamespacePodCountComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         KubeNamespacePodCountComponent,
-        ...KubernetesBaseTestModules
+        ...KubernetesBaseTestModules,
       ],
       providers: [
         KubeBaseGuidMock, KubernetesEndpointService,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
-    })
+    }),
       .compileComponents();
   });
 

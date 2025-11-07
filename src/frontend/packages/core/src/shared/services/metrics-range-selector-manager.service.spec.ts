@@ -11,9 +11,8 @@ describe('MetricsRangeSelectorManagerService', () => {
       providers: [
         
         MetricsRangeSelectorManagerService,
-        MetricsRangeSelectorService
-      ,
-        provideZonelessChangeDetection()
+        MetricsRangeSelectorService,
+        provideZonelessChangeDetection(),
       ],
     });
   });

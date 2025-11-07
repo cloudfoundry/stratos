@@ -7,29 +7,28 @@ import { TabNavService } from '../../../../../../core/src/tab-nav.service';
 import {
   generateCfActiveRouteMock,
   generateCfBaseTestModules,
-} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { InviteUsersCreateComponent } from './invite-users-create/invite-users-create.component';
-import { InviteUsersComponent } from './invite-users.component';
-
+import { InviteUsersComponent } from "./invite-users.component";
 describe('InviteUsersComponent', () => {
   let component: InviteUsersComponent;
   let fixture: ComponentFixture<InviteUsersComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
+      imports: [
         InviteUsersComponent,
-        InviteUsersCreateComponent
+        InviteUsersCreateComponent,
+        ...generateCfBaseTestModules(),
       ],
-      imports: generateCfBaseTestModules(),
       providers: [
         
         generateCfActiveRouteMock(),
         HttpClient,
         HttpHandler,
-        TabNavService
-      ,
-        provideZonelessChangeDetection()
+        TabNavService,
+
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

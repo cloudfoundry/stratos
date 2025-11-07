@@ -8,7 +8,8 @@ import { ApplicationServiceMock } from '../../../../../../../cloud-foundry/test-
 import { CoreModule } from '../../../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
 import { CoreTestingModule } from '../../../../../../../core/test-framework/core-test.modules';
-import { createBasicStoreModule } from '../../../../../../../store/testing/public-api';
+import { createBasicStoreModule } from '../../../../../../../store/testing/src/store-test-helper';
+import { GitTestingModule } from '../../../../../git-testing.module';
 import { GithubCommitsListConfigServiceBase } from './github-commits-list-config-base.service';
 
 describe('GithubCommitsListConfigService', () => {
@@ -18,16 +19,17 @@ describe('GithubCommitsListConfigService', () => {
         
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         GithubCommitsListConfigServiceBase,
-        DatePipe
-      ,
-        provideZonelessChangeDetection()
+        DatePipe,
+
+        provideZonelessChangeDetection(),
       ],
       imports: [
         CommonModule,
         CoreModule,
         SharedModule,
         CoreTestingModule,
-        createBasicStoreModule()
+        GitTestingModule,
+        createBasicStoreModule(),
       ]
     });
   });

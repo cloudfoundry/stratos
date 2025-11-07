@@ -4,10 +4,9 @@ import {  provideExperimentalZonelessChangeDetection, provideZonelessChangeDetec
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 
-import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { CreateApplicationComponent } from './create-application.component';
-import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
-
+import { CfOrgSpaceDataService } from "../../../shared/data-services/cf-org-space-service.service";
 describe('CreateApplicationComponent', () => {
   let component: CreateApplicationComponent;
   let fixture: ComponentFixture<CreateApplicationComponent>;
@@ -20,11 +19,11 @@ describe('CreateApplicationComponent', () => {
         provideExperimentalZonelessChangeDetection(),
         provideNoopAnimations(),
         provideRouter([,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]),
         ...generateCfStoreModules(),
-        CfOrgSpaceDataService
-      ]
+        CfOrgSpaceDataService,
+    ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(CreateApplicationComponent);

@@ -4,9 +4,9 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { StoreModule } from '@ngrx/store';
 
-import { appReducers } from '../../../../../store/src/reducers.module';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@test-framework/core-test.helper';
+import { CoreTestingModule } from '@test-framework/core-test.modules';
 import { CoreModule } from '../../../core/core.module';
 import { MDAppModule } from '../../../core/md.module';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
@@ -31,18 +31,18 @@ describe('ConsoleUaaWizardComponent', () => {
         PageHeaderModule,
         ReactiveFormsModule,
         MDAppModule,
-        StoreModule.forRoot(appReducers),
+        CoreTestingModule,
+        createBasicStoreModule(),
         NoopAnimationsModule,
       ],
       providers: [
-        
+        ...(STORE_TEST_PROVIDERS || []),
         TabNavService,
-        CurrentUserPermissionsService
-      ,
-        provideZonelessChangeDetection()
+        CurrentUserPermissionsService,
+        provideZonelessChangeDetection(),
       ]
-    })
-      .compileComponents();
+    });
+    TestBed.compileComponents();
   });
 
   beforeEach(() => {

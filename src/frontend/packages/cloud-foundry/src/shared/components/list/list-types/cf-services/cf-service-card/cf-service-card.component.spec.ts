@@ -7,10 +7,10 @@ import {
 } from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import { AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { MetadataCardTestComponents } from '../../../../../../../../core/test-framework/core-test.helper';
-import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { EntityMonitorFactory } from '@stratosui/store/monitors/entity-monitor.factory.service';
 import {
   generateCfBaseTestModulesNoShared,
-} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
 import { ServiceIconComponent } from '../../../../service-icon/service-icon.component';
 import { TableCellServiceActiveComponent } from '../table-cell-service-active/table-cell-service-active.component';
@@ -23,7 +23,7 @@ import {
 } from '../table-cell-service-references/table-cell-service-references.component';
 import { TableCellServiceTagsComponent } from '../table-cell-service-tags/table-cell-service-tags.component';
 import { CfServiceCardComponent } from './cf-service-card.component';
-
+import { EntityServiceFactory } from "@stratosui/store/entity-service-factory.service";
 describe('CfServiceCardComponent', () => {
   let component: CfServiceCardComponent;
   let fixture: ComponentFixture<CfServiceCardComponent>;
@@ -31,9 +31,11 @@ describe('CfServiceCardComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
+        MetadataCardTestComponents,
+    ],
+      imports: [
         CfServiceCardComponent,
         CfOrgSpaceLinksComponent,
-        MetadataCardTestComponents,
         BooleanIndicatorComponent,
         AppChipsComponent,
         ServiceIconComponent,
@@ -41,14 +43,15 @@ describe('CfServiceCardComponent', () => {
         TableCellServiceBindableComponent,
         TableCellServiceReferencesComponent,
         TableCellServiceCfBreadcrumbsComponent,
-        TableCellServiceTagsComponent
+        TableCellServiceTagsComponent,
+        ...generateCfBaseTestModulesNoShared(),
       ],
-      imports: generateCfBaseTestModulesNoShared(),
       providers: [
+        EntityServiceFactory,
         
-        EntityMonitorFactory
-      ,
-        provideZonelessChangeDetection()
+        EntityMonitorFactory,
+
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();
@@ -70,7 +73,7 @@ describe('CfServiceCardComponent', () => {
         service_plans_url: '',
         service_plans: [],
       },
-      metadata: null
+      metadata: null,
     };
     fixture.detectChanges();
   });

@@ -6,7 +6,7 @@ import {
   CopyToClipboardComponent,
 } from '../../../../../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
 import { BaseTestModulesNoShared } from '../../../../../../../../core/test-framework/core-test.helper';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { APIResource } from '@stratosui/store/types/api.types';
 import { TableCellEventActeeComponent } from './table-cell-event-actee.component';
 
 describe('TableCellEventActeeComponent', () => {
@@ -15,14 +15,12 @@ describe('TableCellEventActeeComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection()],
       imports: [
         TableCellEventActeeComponent,
-        CopyToClipboardComponent
-      ,
-      imports: [
-        ...BaseTestModulesNoShared
-      ]
+        CopyToClipboardComponent,
+        ...BaseTestModulesNoShared,
+      ],
+      providers: [provideZonelessChangeDetection()],
     })
       .compileComponents();
 

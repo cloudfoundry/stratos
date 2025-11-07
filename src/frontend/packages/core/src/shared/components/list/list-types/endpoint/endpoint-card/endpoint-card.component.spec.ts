@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { BrowserDynamicTestingModule } from '@angular/platform-browser-dynamic/testing';
-
-import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
-import { BaseTestModules } from '../../../../../../../test-framework/core-test.helper';
-import {
-  MetricsEndpointDetailsComponent,
-} from '../../../../../../features/metrics/metrics-endpoint-details/metrics-endpoint-details.component';
-import { MetricsService } from '../../../../../../features/metrics/services/metrics-service';
+import { NO_ERRORS_SCHEMA, provideZonelessChangeDetection } from '@angular/core';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { RouterTestingModule } from '@angular/router/testing';
+import { HttpClientModule } from '@angular/common/http';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { of } from 'rxjs';
+import { EndpointModel, UserFavoriteManager, EntityCatalogTestModuleManualStore, generateStratosEntities, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { CurrentUserPermissionsService, SessionService } from '@stratosui/core';
 import { EndpointListHelper } from '../endpoint-list.helpers';
 import { EndpointCardComponent } from './endpoint-card.component';
+import { MetricsService } from '../../../../../../features/metrics/services/metrics-service';
 
 describe('EndpointCardComponent', () => {
   let component: EndpointCardComponent;
@@ -19,17 +19,45 @@ describe('EndpointCardComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        ...BaseTestModules,
+        RouterTestingModule,
+        NoopAnimationsModule,
+        HttpClientModule,
+        createBasicStoreModule(),
+        EntityCatalogTestModuleManualStore,
         EndpointCardComponent,
-        MetricsEndpointDetailsComponent
       ],
       providers: [
-        
+        provideZonelessChangeDetection(),
+        ...STORE_TEST_PROVIDERS,
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: generateStratosEntities()
+        },
         EndpointListHelper,
-        MetricsService
-      ,
-        provideZonelessChangeDetection()
-      ]
+        UserFavoriteManager,
+        {
+          provide: MetricsService,
+          useValue: {
+            metricsEndpoints$: of([]),
+            haveNoMetricsEndpoints$: of(false),
+            haveNoConnectedMetricsEndpoints$: of(false)
+          }
+        },
+        {
+          provide: SessionService,
+          useValue: {
+            userEndpointsEnabled: () => of(true),
+            userEndpointsNotDisabled: () => of(true)
+          }
+        },
+        {
+          provide: CurrentUserPermissionsService,
+          useValue: {
+            can: () => of(true)
+          }
+        },
+      ],
+      schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
   });
 

@@ -14,13 +14,13 @@ describe('NodePodCountComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         NodePodCountComponent,
-        ...KubernetesBaseTestModules
+        ...KubernetesBaseTestModules,
       ],
       providers: [
         KubeBaseGuidMock, KubernetesEndpointService,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
-    })
+    }),
       .compileComponents();
   });
 

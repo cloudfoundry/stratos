@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
+import { EntityServiceFactory } from '@stratosui/store';
 import { BaseTestModules } from '../../../../../core/test-framework/core-test.helper';
 import { KubernetesStatus } from '../../store/kube.types';
 import { KubernetesLabelsCellComponent } from './kubernetes-labels-cell.component';
@@ -12,11 +13,11 @@ describe('KubernetesLabelsCellComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection()],
+      providers: [EntityServiceFactory, provideZonelessChangeDetection()],
       imports: [
         KubernetesLabelsCellComponent,
-        ...BaseTestModules
-      ]})
+        ...BaseTestModules,
+      ]}),
       .compileComponents();
   });
 
@@ -31,7 +32,7 @@ describe('KubernetesLabelsCellComponent', () => {
         uid: 'test'
       },
       status: {
-        phase: KubernetesStatus.ACTIVE
+        phase: KubernetesStatus.ACTIVE,
       },
       spec: {
         containers: [],

@@ -11,7 +11,11 @@ describe('NoServicePlansComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
-      declarations: [ NoServicePlansComponent ]
+      imports: [
+        NoServicePlansComponent,
+      ],
+      
+      
     })
     .compileComponents();
   });

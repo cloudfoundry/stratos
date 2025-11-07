@@ -11,11 +11,13 @@ describe('CloudFoundryBaseComponent', () => {
   let fixture: ComponentFixture<CloudFoundryBaseComponent>;
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [CloudFoundryBaseComponent],
-      imports: [RouterTestingModule],
+      imports: [
+        CloudFoundryBaseComponent,
+        RouterTestingModule,
+      ],
       providers: [
         CloudFoundryEndpointService,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
     }).compileComponents();
   });

@@ -12,7 +12,7 @@ describe('UtilsService', () => {
     TestBed.configureTestingModule({
       providers: [
         UtilsService,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
     });
   });

@@ -6,30 +6,29 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { CoreModule } from '../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../../core/src/tab-nav.service';
-import { ApplicationServiceMock } from '../../../../test-framework/application-service-helper';
-import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { ApplicationServiceMock } from "@test-framework/application-service-helper";
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ApplicationService } from '../application.service';
-import { SshApplicationComponent } from './ssh-application.component';
-
+import { SshApplicationComponent } from "./ssh-application.component";
 describe('SshApplicationComponent', () => {
   let component: SshApplicationComponent;
   let fixture: ComponentFixture<SshApplicationComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [SshApplicationComponent],
       imports: [
+        SshApplicationComponent,
         CoreModule,
         SharedModule,
         RouterTestingModule,
-        generateCfStoreModules()
+        generateCfStoreModules(),
       ],
       providers: [
         
         { provide: ApplicationService, useClass: ApplicationServiceMock },
-        TabNavService
-      ,
-        provideZonelessChangeDetection()
+        TabNavService,
+
+        provideZonelessChangeDetection(),
       ],
     }).compileComponents();
 

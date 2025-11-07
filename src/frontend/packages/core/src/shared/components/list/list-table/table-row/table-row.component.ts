@@ -1,11 +1,14 @@
 import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ComponentFactoryResolver,
   ComponentRef,
   Input,
+  OnChanges,
   OnInit,
+  SimpleChanges,
   ViewChild,
   ViewContainerRef,
   ViewEncapsulation,
@@ -35,7 +38,7 @@ selector: 'app-table-row',
     TableCellComponent
   ]
 })
-export class TableRowComponent<T = any> implements OnInit {
+export class TableRowComponent<T = any> implements OnInit, OnChanges {
 
   @ViewChild('expandedComponent', { read: ViewContainerRef, static: true })
   expandedComponent!: ViewContainerRef;
@@ -66,7 +69,8 @@ export class TableRowComponent<T = any> implements OnInit {
 
   constructor(
     private componentFactoryResolver: ComponentFactoryResolver,
-    public expandedService: TableRowExpandedService
+    public expandedService: TableRowExpandedService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit() {
@@ -99,6 +103,20 @@ export class TableRowComponent<T = any> implements OnInit {
 
     // Ensure we 'register' with the expander service. This also helps with page changes
     this.expandedService.collapse(this.rowId);
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    // When row, columns, or other relevant inputs change, mark for check
+    // This is necessary in zoneless mode with OnPush change detection
+    if (changes['row'] || changes['columns'] || changes['dataSource']) {
+      // Update expanded component if it exists with new row data
+      if (this.expandedComponentRef && changes['row']) {
+        const instance: CardCell<any> = this.expandedComponentRef.instance;
+        instance.row = this.row;
+      }
+      // Mark for check to ensure template expressions re-evaluate in zoneless mode
+      this.cdr.markForCheck();
+    }
   }
 
   private getComponent() {

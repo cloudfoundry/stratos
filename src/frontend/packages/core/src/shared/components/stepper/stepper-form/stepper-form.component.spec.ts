@@ -12,11 +12,11 @@ describe('StepperFormComponent', () => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [
-        StepperFormComponent
+        StepperFormComponent,
       ],
       
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

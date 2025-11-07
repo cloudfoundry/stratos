@@ -8,29 +8,28 @@ import {
 import {
   ApplicationStateIconPipe,
 } from '../../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.pipe';
-import { generateCfBaseTestModulesNoShared } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { EntityServiceFactory } from '@stratosui/store/entity-service-factory.service';
+import { generateCfBaseTestModulesNoShared } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ApplicationStateService } from '../../../../shared/services/application-state.service';
 import { ActiveRouteCfOrgSpace } from '../../../cf/cf-page.types';
-import { CompactAppCardComponent } from './compact-app-card.component';
-
+import { CompactAppCardComponent } from "./compact-app-card.component";
 describe('CompactAppCardComponent', () => {
   let component: CompactAppCardComponent;
   let fixture: ComponentFixture<CompactAppCardComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
+      imports: [
         CompactAppCardComponent,
         ApplicationStateIconComponent,
-        ApplicationStateIconPipe
+        ApplicationStateIconPipe,
+        ...generateCfBaseTestModulesNoShared(),
       ],
-      imports: generateCfBaseTestModulesNoShared(),
       providers: [
-        
+        EntityServiceFactory,
         ApplicationStateService,
-        ActiveRouteCfOrgSpace
-      ,
-        provideZonelessChangeDetection()
+        ActiveRouteCfOrgSpace,
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

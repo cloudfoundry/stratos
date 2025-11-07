@@ -14,17 +14,17 @@ describe('ResourceAlertPreviewComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({imports: [
         KubernetesBaseTestModules,
-      ,
+
         ResourceAlertPreviewComponent,
-        ResourceAlertViewComponent
+        ResourceAlertViewComponent,
       ],
       providers: [
         
         SidePanelService,
-      ,
-        provideZonelessChangeDetection()
+
+        provideZonelessChangeDetection(),
       ]
-    })
+    }),
     .compileComponents();
   });
 

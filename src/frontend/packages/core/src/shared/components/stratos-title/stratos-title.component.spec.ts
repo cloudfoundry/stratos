@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import {  signal, provideZonelessChangeDetection } from '@angular/core';
 
 import { StratosTitleComponent } from './stratos-title.component';
-import { StratosThemeService } from '../../../../../theme/theme.service';
+import { StratosThemeService } from '@stratosui/theme';
 
 describe('StratosTitleComponent', () => {
   let component: StratosTitleComponent;
@@ -20,16 +20,16 @@ describe('StratosTitleComponent', () => {
     } as any);
 
     const mockThemeService = {
-      theme: mockTheme.asReadonly()
+      theme: mockTheme.asReadonly(),
     };
 
     TestBed.configureTestingModule({
       imports: [ StratosTitleComponent ],
       providers: [
-        
-        { provide: StratosThemeService, useValue: mockThemeService }
-      ,
-        provideZonelessChangeDetection()
+
+        { provide: StratosThemeService, useValue: mockThemeService },
+
+        provideZonelessChangeDetection(),
       ]
     })
     .compileComponents();

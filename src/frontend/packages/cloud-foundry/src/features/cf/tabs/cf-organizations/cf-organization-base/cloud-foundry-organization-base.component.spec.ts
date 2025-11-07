@@ -6,23 +6,24 @@ import { TabNavService } from '../../../../../../../core/src/tab-nav.service';
 import {
   generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
-} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from "@test-framework/cloud-foundry-endpoint-service.helper";
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../../../shared/services/cloud-foundry-user-provided-services.service';
-import { CloudFoundryOrganizationBaseComponent } from './cloud-foundry-organization-base.component';
-
+import { CloudFoundryOrganizationBaseComponent } from "./cloud-foundry-organization-base.component";
 describe('CloudFoundryOrganizationBaseComponent', () => {
   let component: CloudFoundryOrganizationBaseComponent;
   let fixture: ComponentFixture<CloudFoundryOrganizationBaseComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [CloudFoundryOrganizationBaseComponent],
-      imports: generateCfBaseTestModules(),
+      imports: [
+        CloudFoundryOrganizationBaseComponent,
+        ...generateCfBaseTestModules(),
+      ],
       providers: [
         ...generateTestCfEndpointServiceProvider(), TabNavService, CloudFoundryUserProvidedServicesService,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

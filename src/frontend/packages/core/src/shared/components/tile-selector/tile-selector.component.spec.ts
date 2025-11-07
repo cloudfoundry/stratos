@@ -14,11 +14,11 @@ describe('TileSelectorComponent', () => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [
-        TileSelectorComponent, // Now standalone (includes TileSelectorTileComponent)
-        MDAppModule
+        TileSelectorComponent, // Now standalone (includes TileSelectorTileComponent),
+        MDAppModule,
       ]
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

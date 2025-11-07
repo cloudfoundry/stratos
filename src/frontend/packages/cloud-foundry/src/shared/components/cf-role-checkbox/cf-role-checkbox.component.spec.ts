@@ -5,14 +5,14 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { CoreModule } from '../../../../../core/src/core/core.module';
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CfUserServiceTestProvider } from '../../../../test-framework/user-service-helper';
+import { EntityMonitorFactory } from '@stratosui/store/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '@stratosui/store/monitors/pagination-monitor.factory';
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { CfUserServiceTestProvider } from "@test-framework/user-service-helper";
 import { ActiveRouteCfOrgSpace } from '../../../features/cf/cf-page.types';
 import { CfRolesService } from '../../../features/cf/users/manage-users/cf-roles.service';
 import { CfRoleCheckboxComponent } from './cf-role-checkbox.component';
-
+import { EntityServiceFactory } from "@stratosui/store/entity-service-factory.service";
 describe('CfRoleCheckboxComponent', () => {
   let component: CfRoleCheckboxComponent;
   let fixture: ComponentFixture<CfRoleCheckboxComponent>;
@@ -20,22 +20,24 @@ describe('CfRoleCheckboxComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
+        CfRoleCheckboxComponent,
         ...generateCfStoreModules(),
         CoreModule,
         NoopAnimationsModule,
-        HttpClientModule
+        HttpClientModule,
       ],
       providers: [
+        EntityServiceFactory,
         
         CfUserServiceTestProvider,
         CfRolesService,
         PaginationMonitorFactory,
         ActiveRouteCfOrgSpace,
-        EntityMonitorFactory
-      ,
-        provideZonelessChangeDetection()
+        EntityMonitorFactory,
+
+        provideZonelessChangeDetection(),
       ],
-      declarations: [CfRoleCheckboxComponent]
+      
     })
       .compileComponents();
   });

@@ -30,7 +30,7 @@ describe('Entity Relations - Tree', () => {
     const action = createBaseAction();
     action.entity = new CFEntitySchema(action.entityType, {
       entity: {
-        rel1: childSchema
+        rel1: childSchema,
       }
     });
 
@@ -46,7 +46,7 @@ describe('Entity Relations - Tree', () => {
     action.includeRelations = [createEntityRelationKey(action.entityType, childSchema.relationKey)];
     action.entity = new CFEntitySchema(action.entityType, {
       entity: {
-        [childSchema.relationKey]: childSchema
+        [childSchema.relationKey]: childSchema,
       }
     });
 
@@ -63,7 +63,7 @@ describe('Entity Relations - Tree', () => {
     action.includeRelations = [createEntityRelationKey(action.entityType, childSchema.entityType)];
     action.entity = new CFEntitySchema(action.entityType, {
       entity: {
-        [childSchema.entityType]: childSchema
+        [childSchema.entityType]: childSchema,
       }
     });
 
@@ -77,14 +77,14 @@ describe('Entity Relations - Tree', () => {
     const child2Schema = new CFEntitySchema('child2');
     const child1Schema = new CFEntitySchema('child1', {
       entity: {
-        [child2Schema.entityType]: child2Schema
+        [child2Schema.entityType]: child2Schema,
       }
     });
 
     const action = createBaseAction();
     action.includeRelations = [
       createEntityRelationKey(action.entityType, child1Schema.entityType),
-      createEntityRelationKey(child1Schema.entityType, child2Schema.entityType)
+      createEntityRelationKey(child1Schema.entityType, child2Schema.entityType),
     ];
     action.entity = new CFEntitySchema(action.entityType, { entity: { [child1Schema.entityType]: child1Schema } });
 
@@ -98,7 +98,7 @@ describe('Entity Relations - Tree', () => {
     const child2Schema = new CFEntitySchema('child2');
     const child1Schema = new CFEntitySchema('child1', {
       entity: {
-        [child2Schema.entityType]: child2Schema
+        [child2Schema.entityType]: child2Schema,
       }
     });
 
@@ -111,4 +111,3 @@ describe('Entity Relations - Tree', () => {
   });
 
 });
-

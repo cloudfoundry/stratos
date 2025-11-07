@@ -14,8 +14,8 @@ describe('Component: ChartDetailsInfo', () => {
         providers: [
           
           { provide: ChartsService, useValue: new MockChartService() },
-        ,
-          provideZonelessChangeDetection()
+
+          provideZonelessChangeDetection(),
         ],
         schemas: [NO_ERRORS_SCHEMA]
       }).compileComponents();

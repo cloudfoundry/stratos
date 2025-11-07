@@ -12,11 +12,11 @@ describe('FavoritesSidePanelComponent', () => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [
-        FavoritesSidePanelComponent
+        FavoritesSidePanelComponent,
       ],
       
-    })
-    .compileComponents();
+    });
+    TestBed.compileComponents();
   });
 
   beforeEach(() => {

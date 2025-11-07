@@ -15,11 +15,11 @@ describe('KubernetesGKEAuthFormComponent', () => {
     TestBed.configureTestingModule({
         providers: [provideZonelessChangeDetection()],imports: [
         SharedModule,
-        NoopAnimationsModule
-      ,
-        KubernetesGKEAuthFormComponent
+        NoopAnimationsModule,
+
+        KubernetesGKEAuthFormComponent,
       ]
-    })
+    }),
       .compileComponents();
   });
 

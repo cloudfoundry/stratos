@@ -8,7 +8,7 @@ export default defineConfig({
     root: join(__dirname),
     name: 'git',
     globals: false, // Recommended for Angular 20 + Vitest 4 (avoid global namespace pollution)
-    environment: 'jsdom',
+    environment: 'happy-dom',
     // Fork pool with single-fork mode for complete test isolation and Angular TestBed stability
     pool: 'forks',
     poolOptions: {
@@ -49,12 +49,13 @@ export default defineConfig({
   resolve: {
     alias: {
       '@stratosui/core': join(__dirname, '../core/src/public-api.ts'),
+      '@stratosui/store/testing': join(__dirname, '../store/testing'),
       '@stratosui/store': join(__dirname, '../store/src/public-api.ts'),
-      '@stratosui/store/testing': join(__dirname, '../store/testing/index.ts'),
       '@stratosui/shared': join(__dirname, '../shared/src/public-api.ts'),
       '@stratosui/cloud-foundry': join(__dirname, '../cloud-foundry/src/public_api.ts'),
       '@stratosui/kubernetes': join(__dirname, '../kubernetes/src/public-api.ts'),
       '@stratosui/git': join(__dirname, './src/public_api.ts'),
+      '@test-framework': join(__dirname, 'test-framework'),
     },
   },
 });

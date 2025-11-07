@@ -12,10 +12,10 @@ describe('ApplicationStateIconComponent', () => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [
-        ApplicationStateIconComponent
+        ApplicationStateIconComponent,
       ]
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

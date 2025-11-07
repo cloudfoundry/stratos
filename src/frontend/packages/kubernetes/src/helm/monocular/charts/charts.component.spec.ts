@@ -7,7 +7,7 @@ import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of } from 'rxjs';
 
-import { createBasicStoreModule } from '../../../../../store/testing/public-api';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 import { ChartItemComponent } from '../chart-item/chart-item.component';
 import { ChartListComponent } from '../chart-list/chart-list.component';
 import { LoaderComponent } from '../loader/loader.component';
@@ -45,7 +45,7 @@ describe('ChartsComponent', () => {
               queryParams: {}
             },
             queryParams: of({}),
-            params: of({})
+            params: of({}),
           }
         },
         ReposService,

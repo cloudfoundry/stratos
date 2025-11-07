@@ -40,10 +40,10 @@ import {
 import { PageHeaderModule } from '../../../../../../core/src/shared/components/page-header/page-header.module';
 import { SteppersModule } from '../../../../../../core/src/shared/components/stepper/steppers.module';
 import { TabNavService } from '../../../../../../core/src/tab-nav.service';
-import { EntityMonitorFactory } from '../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { InternalEventMonitorFactory } from '../../../../../../store/src/monitors/internal-event-monitor.factory';
-import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
-import { generateCfBaseTestModulesNoShared } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { EntityMonitorFactory } from '@stratosui/store/monitors/entity-monitor.factory.service';
+import { InternalEventMonitorFactory } from '@stratosui/store/monitors/internal-event-monitor.factory';
+import { PaginationMonitorFactory } from '@stratosui/store/monitors/pagination-monitor.factory';
+import { generateCfBaseTestModulesNoShared } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ServicesService } from '../../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
@@ -82,14 +82,14 @@ import {
   SpecifyUserProvidedDetailsComponent,
 } from '../specify-user-provided-details/specify-user-provided-details.component';
 import { AddServiceInstanceComponent } from './add-service-instance.component';
-
+import { EntityServiceFactory } from "@stratosui/store/entity-service-factory.service";
 describe('AddServiceInstanceComponent', () => {
   let component: AddServiceInstanceComponent;
   let fixture: ComponentFixture<AddServiceInstanceComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
+      imports: [
         AppNameUniqueDirective,
         AddServiceInstanceComponent,
         CopyToClipboardComponent,
@@ -123,15 +123,14 @@ describe('AddServiceInstanceComponent', () => {
         TableCellServiceBindableComponent,
         TableCellServiceReferencesComponent,
         TableCellServiceCfBreadcrumbsComponent,
-        TableCellServiceTagsComponent
-      ],
-      imports: [
+        TableCellServiceTagsComponent,
         ...generateCfBaseTestModulesNoShared(),
         PageHeaderModule,
         SteppersModule,
         TailwindJsonSchemaFormModule,
       ],
       providers: [
+        EntityServiceFactory,
         
         { provide: ServicesService, useClass: ServicesServiceMock },
         EntityMonitorFactory,
@@ -140,9 +139,9 @@ describe('AddServiceInstanceComponent', () => {
         InternalEventMonitorFactory,
         CloudFoundryService,
         TabNavService,
-        LongRunningCfOperationsService
-      ,
-        provideZonelessChangeDetection()
+        LongRunningCfOperationsService,
+
+        provideZonelessChangeDetection(),
       ],
 
     })

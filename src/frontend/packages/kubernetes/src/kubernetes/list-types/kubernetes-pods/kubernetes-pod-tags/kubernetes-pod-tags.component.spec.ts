@@ -15,8 +15,8 @@ describe('KubernetesPodTagsComponent', () => {
       providers: [provideZonelessChangeDetection()],
       imports: [
         KubernetesPodTagsComponent,
-        ...KubernetesBaseTestModules
-      ]})
+        ...KubernetesBaseTestModules,
+      ]}),
       .compileComponents();
   });
 
@@ -26,7 +26,7 @@ describe('KubernetesPodTagsComponent', () => {
     component.row = {
       spec: {},
       status: {
-        phase: KubernetesStatus.RUNNING
+        phase: KubernetesStatus.RUNNING,
       },
       metadata: {
         namespace: 'test',

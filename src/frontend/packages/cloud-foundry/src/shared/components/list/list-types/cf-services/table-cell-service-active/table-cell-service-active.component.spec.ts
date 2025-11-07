@@ -14,7 +14,7 @@ describe('TableCellServiceActiveComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
-      imports: [TableCellServiceActiveComponent, BooleanIndicatorComponent, CoreModule]
+      imports: [TableCellServiceActiveComponent, BooleanIndicatorComponent]
     })
       .compileComponents();
 

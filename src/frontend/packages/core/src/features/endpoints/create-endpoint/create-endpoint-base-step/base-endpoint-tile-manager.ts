@@ -1,13 +1,13 @@
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
-
-import { GeneralEntityAppState } from '../../../../../../store/src/app-state';
 import {
+  GeneralEntityAppState,
+  IStratosEndpointDefinition,
   StratosCatalogEndpointEntity,
-} from '../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { IStratosEndpointDefinition } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
-import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity-catalog';
+  stratosEntityCatalog,
+} from '@stratosui/store';
+
 import { TileConfigManager } from '../../../../shared/components/tile/tile-selector.helpers';
 import { ITileConfig, ITileData } from '../../../../shared/components/tile/tile-selector.types';
 

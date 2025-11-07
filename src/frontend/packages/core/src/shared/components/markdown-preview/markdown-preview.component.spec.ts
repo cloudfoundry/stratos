@@ -4,9 +4,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from "../test-framework/core-test.helper";
+import { createBasicStoreModule } from "@test-framework/core-test.helper";
 
-import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
+import { CoreTestingModule } from "@test-framework/core-test.modules";
 import { SidepanelPreviewComponent } from '../sidepanel-preview/sidepanel-preview.component';
 import { MDAppModule } from './../../../core/md.module';
 import { SidePanelService } from './../../services/side-panel.service';
@@ -20,7 +20,7 @@ describe('MarkdownPreviewComponent', () => {
     TestBed.configureTestingModule({
       providers: [
         HttpClient, HttpHandler, SidePanelService,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ],
       imports: [
         MarkdownPreviewComponent,
@@ -30,10 +30,10 @@ describe('MarkdownPreviewComponent', () => {
         HttpClientModule,
         HttpClientTestingModule,
         CoreTestingModule,
-        createBasicStoreModule()
+        createBasicStoreModule(),
       ]
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

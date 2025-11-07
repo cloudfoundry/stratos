@@ -5,27 +5,26 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import {
   generateCfBaseTestModulesNoShared,
-} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundrySpaceServiceMock } from '../../../../../../../test-framework/cloud-foundry-space.service.mock';
+} from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { CloudFoundrySpaceServiceMock } from "@test-framework/cloud-foundry-space.service.mock";
 import { CloudFoundrySpaceService } from '../../../../../../features/cf/services/cloud-foundry-space.service';
-import { TableCellRouteAppsAttachedComponent } from './table-cell-route-apps-attached.component';
-
+import { TableCellRouteAppsAttachedComponent } from "./table-cell-route-apps-attached.component";
 describe('TableCellRouteAppsAttachedComponent', () => {
   let component: TableCellRouteAppsAttachedComponent;
   let fixture: ComponentFixture<TableCellRouteAppsAttachedComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
+      imports: [
         TableCellRouteAppsAttachedComponent,
-        AppChipsComponent
+        AppChipsComponent,
+        ...generateCfBaseTestModulesNoShared(),
       ],
-      imports: generateCfBaseTestModulesNoShared(),
       providers: [
         
-        { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock }
-      ,
-        provideZonelessChangeDetection()
+        { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock },
+
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();
@@ -38,7 +37,7 @@ describe('TableCellRouteAppsAttachedComponent', () => {
         domain_guid: 'test',
         space_guid: 'test'
       },
-      metadata: null
+      metadata: null,
     };
     fixture.detectChanges();
   });

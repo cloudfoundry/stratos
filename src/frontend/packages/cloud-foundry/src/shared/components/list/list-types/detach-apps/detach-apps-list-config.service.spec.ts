@@ -4,9 +4,8 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 
-import { generateCfBaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { DetachAppsListConfigService } from './detach-apps-list-config.service';
-
+import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { DetachAppsListConfigService } from "./detach-apps-list-config.service";
 describe('DetachAppsListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({

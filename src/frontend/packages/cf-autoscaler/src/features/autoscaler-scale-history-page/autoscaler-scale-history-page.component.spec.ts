@@ -4,14 +4,11 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createEmptyStoreModule } from "../../test-framework/cf-autoscaler-test.helper";
+import { createEmptyStoreModule } from "@test-framework/cf-autoscaler-test.helper";
 
-import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
-import { ApplicationServiceMock } from '../../../../cloud-foundry/test-framework/application-service-helper';
-import { CoreModule } from '../../../../core/src/core/core.module';
-import { CurrentUserPermissionsService } from '../../../../core/src/core/permissions/current-user-permissions.service';
-import { SharedModule } from '../../../../core/src/shared/shared.module';
-import { TabNavService } from '../../../../core/src/tab-nav.service';
+import { ApplicationService } from '@stratosui/cloud-foundry';
+import { ApplicationServiceMock } from '@stratosui/cloud-foundry/testing';
+import { CoreModule, CurrentUserPermissionsService, SharedModule, TabNavService } from '@stratosui/core';
 import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
 import { AutoscalerScaleHistoryPageComponent } from './autoscaler-scale-history-page.component';
 
@@ -35,11 +32,11 @@ describe('AutoscalerScaleHistoryPageComponent', () => {
         DatePipe,
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         TabNavService,
-        CurrentUserPermissionsService
-      ,
-        provideZonelessChangeDetection()
+        CurrentUserPermissionsService,
+
+        provideZonelessChangeDetection(),
       ]
-    })
+    }),
       .compileComponents();
   });
 

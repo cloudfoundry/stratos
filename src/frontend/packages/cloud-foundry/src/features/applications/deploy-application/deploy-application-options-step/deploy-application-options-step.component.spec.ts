@@ -4,10 +4,9 @@ import {  provideExperimentalZonelessChangeDetection, provideZonelessChangeDetec
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 
-import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ApplicationEnvVarsHelper } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { DeployApplicationOptionsStepComponent } from './deploy-application-options-step.component';
-
+import { DeployApplicationOptionsStepComponent } from "./deploy-application-options-step.component";
 describe('DeployApplicationOptionsStepComponent', () => {
   let component: DeployApplicationOptionsStepComponent;
   let fixture: ComponentFixture<DeployApplicationOptionsStepComponent>;
@@ -20,11 +19,11 @@ describe('DeployApplicationOptionsStepComponent', () => {
         provideExperimentalZonelessChangeDetection(),
         provideNoopAnimations(),
         provideRouter([,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]),
         ...generateCfStoreModules(),
-        ApplicationEnvVarsHelper
-      ]
+        ApplicationEnvVarsHelper,
+    ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(DeployApplicationOptionsStepComponent);

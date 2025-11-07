@@ -13,31 +13,28 @@ import {
   ApplicationStateComponent,
 } from '../../../../../../core/src/shared/components/application-state/application-state.component';
 import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
-import { ApplicationServiceMock } from '../../../../../test-framework/application-service-helper';
+import { ApplicationServiceMock } from "@test-framework/application-service-helper";
 import { ApplicationService } from '../../../../features/applications/application.service';
-import { CardAppStatusComponent } from './card-app-status.component';
-
+import { CardAppStatusComponent } from "./card-app-status.component";
 describe('CardAppStatusComponent', () => {
   let component: CardAppStatusComponent;
   let fixture: ComponentFixture<CardAppStatusComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
+      imports: [
         CardAppStatusComponent,
         CardStatusComponent,
         ApplicationStateComponent,
         ApplicationStateIconComponent,
         ApplicationStateIconPipe,
-      ],
-      imports: [
-        CoreModule
+        CoreModule,
       ],
       providers: [
         
         { provide: ApplicationService, useClass: ApplicationServiceMock },
-      ,
-        provideZonelessChangeDetection()
+
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

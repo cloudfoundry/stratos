@@ -14,13 +14,13 @@ describe('ServicePlanPriceComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
-      declarations: [ServicePlanPriceComponent],
       imports: [
+        ServicePlanPriceComponent,
         FormsModule,
         ReactiveFormsModule,
         MDAppModule,
-        NoopAnimationsModule
-      ]
+        NoopAnimationsModule,
+      ],
     })
       .compileComponents();
   });

@@ -5,7 +5,7 @@ import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 
-import { createBasicStoreModule } from '../../../../../store/testing/public-api';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 import { ChartsService } from '../shared/services/charts.service';
 import { ConfigService } from '../shared/services/config.service';
 import { ChartItemComponent } from './chart-item.component';
@@ -17,7 +17,7 @@ describe('Component: ChartItem', () => {
       imports: [
         HttpClientTestingModule,
         createBasicStoreModule(),
-        ChartItemComponent
+        ChartItemComponent,
       ],
       providers: [
         HttpClient,

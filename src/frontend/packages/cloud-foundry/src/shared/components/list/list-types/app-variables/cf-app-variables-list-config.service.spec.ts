@@ -5,8 +5,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
-import { generateTestApplicationServiceProvider } from '../../../../../../test-framework/application-service-helper';
-import { generateCfStoreModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateTestApplicationServiceProvider } from "@test-framework/application-service-helper";
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { CfAppVariablesListConfigService } from './cf-app-variables-list-config.service';
 
 describe('CfAppVariablesListConfigService', () => {
@@ -14,21 +14,20 @@ describe('CfAppVariablesListConfigService', () => {
   beforeEach(() => {
     const cfGuid = 'cfGuid';
     const appGuid = 'appGuid';
-
     TestBed.configureTestingModule({
       providers: [
         
         CfAppVariablesListConfigService,
-        generateTestApplicationServiceProvider(appGuid, cfGuid)
-      ,
-        provideZonelessChangeDetection()
+        generateTestApplicationServiceProvider(appGuid, cfGuid),
+
+        provideZonelessChangeDetection(),
       ],
       imports: [
         generateCfStoreModules(),
         CommonModule,
         SharedModule,
-        RouterTestingModule
-      ]
+        RouterTestingModule,
+    ]
     });
   });
 

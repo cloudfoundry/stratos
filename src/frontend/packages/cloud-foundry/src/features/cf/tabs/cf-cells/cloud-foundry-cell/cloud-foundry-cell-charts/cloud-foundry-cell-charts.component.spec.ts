@@ -2,7 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { generateCfBaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { EntityServiceFactory } from '@stratosui/store/entity-service-factory.service';
+import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ActiveRouteCfCell } from '../../../../cf-page.types';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 import { CloudFoundryCellChartsComponent } from './cloud-foundry-cell-charts.component';
@@ -13,16 +14,15 @@ describe('CloudFoundryCellChartsComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
+      imports: [
         CloudFoundryCellChartsComponent,
+        ...generateCfBaseTestModules(),
       ],
-      imports: generateCfBaseTestModules(),
       providers: [
-        
+        EntityServiceFactory,
         CloudFoundryCellService,
-        ActiveRouteCfCell
-      ,
-        provideZonelessChangeDetection()
+        ActiveRouteCfCell,
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

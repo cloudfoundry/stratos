@@ -5,13 +5,12 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import {
   generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
-} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from "@test-framework/cloud-foundry-endpoint-service.helper";
 import {
   CloudFoundryOrganizationServiceMock,
-} from '../../../../../../test-framework/cloud-foundry-organization.service.mock';
+} from "@test-framework/cloud-foundry-organization.service.mock";
 import { CloudFoundryOrganizationService } from '../../../../../features/cf/services/cloud-foundry-organization.service';
-import { CfSpacesListConfigService } from './cf-spaces-list-config.service';
-
+import { CfSpacesListConfigService } from "./cf-spaces-list-config.service";
 describe('CfOrgsSpaceListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -20,10 +19,10 @@ describe('CfOrgsSpaceListConfigService', () => {
         ...generateTestCfEndpointServiceProvider(),
         CfSpacesListConfigService,
         { provide: CloudFoundryOrganizationService, useClass: CloudFoundryOrganizationServiceMock },
-      ,
-        provideZonelessChangeDetection()
+
+        provideZonelessChangeDetection(),
       ],
-      imports: generateCfBaseTestModules()
+      imports: generateCfBaseTestModules(),
 
     });
   });

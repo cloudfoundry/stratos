@@ -16,9 +16,9 @@ describe('KubeServiceCardComponent', () => {
     TestBed.configureTestingModule({
         providers: [provideZonelessChangeDetection()],imports: [...KubernetesBaseTestModules,
         KubeServiceCardComponent,
-        KubernetesServicePortsComponent
+        KubernetesServicePortsComponent,
       ],
-    })
+    }),
       .compileComponents();
   });
 

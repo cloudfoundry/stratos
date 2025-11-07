@@ -4,9 +4,8 @@ import {  provideExperimentalZonelessChangeDetection, provideZonelessChangeDetec
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 
-import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CreateApplicationStep3Component } from './create-application-step3.component';
-
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { CreateApplicationStep3Component } from "./create-application-step3.component";
 describe('CreateApplicationStep3Component', () => {
   let component: CreateApplicationStep3Component;
   let fixture: ComponentFixture<CreateApplicationStep3Component>;
@@ -19,9 +18,9 @@ describe('CreateApplicationStep3Component', () => {
         provideExperimentalZonelessChangeDetection(),
         provideNoopAnimations(),
         provideRouter([,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]),
-        ...generateCfStoreModules()
+        ...generateCfStoreModules(),
       ]
     }).compileComponents();
 

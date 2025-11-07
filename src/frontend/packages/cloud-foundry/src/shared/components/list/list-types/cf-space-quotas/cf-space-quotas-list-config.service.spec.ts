@@ -3,22 +3,21 @@ import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CFBaseTestModules } from '../../../../../../test-framework/cf-test-helper';
+import { CFBaseTestModules } from "@test-framework/cf-test-helper";
 import {
   generateTestCfEndpointServiceProvider,
-} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CfSpaceQuotasListConfigService } from './cf-space-quotas-list-config.service';
-
+} from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { CfSpaceQuotasListConfigService } from "./cf-space-quotas-list-config.service";
 describe('CfSpaceQuotasListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
         ...generateTestCfEndpointServiceProvider(), CfSpaceQuotasListConfigService, DatePipe,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ],
       imports: [
-        ...CFBaseTestModules
-      ]
+        ...CFBaseTestModules,
+    ]
 
     });
   });

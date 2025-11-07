@@ -3,13 +3,12 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
-import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { EntityServiceFactory } from '@stratosui/store/entity-service-factory.service';
+import { EntityMonitorFactory } from '@stratosui/store/monitors/entity-monitor.factory.service';
 import {
   generateCfBaseTestModulesNoShared,
-} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { TableCellServiceInstanceAppsAttachedComponent } from './table-cell-service-instance-apps-attached.component';
-
+} from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { TableCellServiceInstanceAppsAttachedComponent } from "./table-cell-service-instance-apps-attached.component";
 describe('TableCellServiceInstanceAppsAttachedComponent', () => {
   let component: TableCellServiceInstanceAppsAttachedComponent;
   let fixture: ComponentFixture<TableCellServiceInstanceAppsAttachedComponent>;
@@ -18,18 +17,14 @@ describe('TableCellServiceInstanceAppsAttachedComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         TableCellServiceInstanceAppsAttachedComponent,
-        AppChipsComponent
-      ,
-      imports: [
-        generateCfBaseTestModulesNoShared()
+        AppChipsComponent,
+        ...generateCfBaseTestModulesNoShared(),
       ],
       providers: [
-        
         EntityServiceFactory,
-        EntityMonitorFactory
-      ,
-        provideZonelessChangeDetection()
-      ]
+        EntityMonitorFactory,
+        provideZonelessChangeDetection(),
+      ],
     })
       .compileComponents();
 
@@ -62,7 +57,7 @@ describe('TableCellServiceInstanceAppsAttachedComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create'(() => {
+  it('should create', () => {
     expect(component).toBeTruthy();
   });
 });

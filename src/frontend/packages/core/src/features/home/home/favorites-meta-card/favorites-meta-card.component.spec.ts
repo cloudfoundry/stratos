@@ -1,8 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-
-import { BaseTestModules } from '../../../../../test-framework/core-test.helper';
+import { BaseTestModulesNoShared, STORE_TEST_PROVIDERS } from "@test-framework/core-test.helper";
+import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
+import { SessionService } from '../../../../shared/services/session.service';
 import { FavoritesMetaCardComponent } from './favorites-meta-card.component';
 
 describe('FavoritesMetaCardComponent', () => {
@@ -11,10 +12,18 @@ describe('FavoritesMetaCardComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection()],
-      imports: [...BaseTestModules],
-    })
-      .compileComponents();
+      providers: [
+        ...(STORE_TEST_PROVIDERS || []),
+        ConfirmationDialogService,
+        SessionService,
+        provideZonelessChangeDetection(),
+      ],
+      imports: [
+        ...BaseTestModulesNoShared,
+        FavoritesMetaCardComponent,
+      ],
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

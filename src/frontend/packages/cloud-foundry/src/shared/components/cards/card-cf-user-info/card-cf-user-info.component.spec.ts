@@ -6,10 +6,9 @@ import { MetadataItemComponent } from '../../../../../../core/src/shared/compone
 import {
   generateCfBaseTestModulesNoShared,
   generateTestCfEndpointService,
-} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { CardCfUserInfoComponent } from './card-cf-user-info.component';
-import { CopyToClipboardComponent } from '../../../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
-
+import { CopyToClipboardComponent } from "../../../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component";
 describe('CardCfUserInfoComponent', () => {
   let component: CardCfUserInfoComponent;
   let fixture: ComponentFixture<CardCfUserInfoComponent>;
@@ -19,11 +18,11 @@ describe('CardCfUserInfoComponent', () => {
           ...generateCfBaseTestModulesNoShared(),
           CardCfUserInfoComponent,
           MetadataItemComponent,
-          CopyToClipboardComponent
-        ],
+          CopyToClipboardComponent,
+    ],
         providers: [
           generateTestCfEndpointService(),
-          provideZonelessChangeDetection()
+          provideZonelessChangeDetection(),
         ]
       }).compileComponents();
   });

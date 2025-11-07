@@ -16,7 +16,7 @@ describe('HelmReleaseTabBaseComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [...KubernetesBaseTestModules,
-        HelmReleaseTabBaseComponent
+        HelmReleaseTabBaseComponent,
       ]providers: [
         
         ...HelmReleaseProviders,
@@ -24,10 +24,10 @@ describe('HelmReleaseTabBaseComponent', () => {
         KubernetesAnalysisService,
         KubernetesEndpointService,
         KubeBaseGuidMock,
-      ,
-        provideZonelessChangeDetection()
+
+        provideZonelessChangeDetection(),
       ]
-    })
+    }),
       .compileComponents();
   });
 

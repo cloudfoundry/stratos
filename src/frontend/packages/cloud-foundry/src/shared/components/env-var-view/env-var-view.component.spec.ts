@@ -16,12 +16,12 @@ describe('EnvVarViewComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
+      imports: [
         EnvVarViewComponent,
         CodeBlockComponent,
-        CopyToClipboardComponent
+        CopyToClipboardComponent,
+        ...BaseTestModulesNoShared,
       ],
-      imports: [...BaseTestModulesNoShared],
       providers: [
         { provide: TailwindDialogRef, useValue: {} }, { provide: MAT_DIALOG_DATA, useValue: { key: '', value: '' } }
       ]

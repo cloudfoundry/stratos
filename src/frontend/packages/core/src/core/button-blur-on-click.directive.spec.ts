@@ -27,15 +27,14 @@ describe('ButtonBlurOnClickDirective', () => {
       providers: [
         
         { provide: ElementRef, useClass: MockElementRef },
-        { provide: Renderer2, useClass: MockRenderer }
-      ,
-        provideZonelessChangeDetection()
+        { provide: Renderer2, useClass: MockRenderer },
+        provideZonelessChangeDetection(),
       ],
       declarations: [
-        TestButtonComponent
+        TestButtonComponent,
       ],
       imports: [
-        ButtonBlurOnClickDirective
+        ButtonBlurOnClickDirective,
       ],
     }).compileComponents();
     fixture = TestBed.createComponent(TestButtonComponent);

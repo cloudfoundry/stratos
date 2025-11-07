@@ -22,8 +22,8 @@ describe('CliInfoComponent', () => {
         MDAppModule,
         CliInfoComponent,
         CodeBlockComponent,
-        CopyToClipboardComponent
-      ]
+        CopyToClipboardComponent,
+    ]
     })
       .compileComponents();
   });

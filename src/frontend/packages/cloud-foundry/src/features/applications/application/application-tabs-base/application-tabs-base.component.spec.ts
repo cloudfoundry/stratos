@@ -12,8 +12,8 @@ import { MDAppModule } from '../../../../../../core/src/core/md.module';
 import { SharedModule } from '../../../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../../../core/src/tab-nav.service';
 import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../../git/src/shared/github.helpers';
-import { generateTestApplicationServiceProvider } from '../../../../../test-framework/application-service-helper';
-import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateTestApplicationServiceProvider } from "@test-framework/application-service-helper";
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ApplicationStateService } from '../../../../shared/services/application-state.service';
 import { ApplicationTabsBaseComponent } from './application-tabs-base.component';
 import { ApplicationEnvVarsHelper } from './tabs/build-tab/application-env-vars.service';
@@ -24,7 +24,6 @@ describe('ApplicationTabsBaseComponent', () => {
 
   const appId = '1';
   const cfId = '2';
-
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
@@ -37,17 +36,17 @@ describe('ApplicationTabsBaseComponent', () => {
         RouterTestingModule,
         MDAppModule,
         HttpClientModule,
-        HttpClientTestingModule
-      ],
+        HttpClientTestingModule,
+    ],
       providers: [
         
         generateTestApplicationServiceProvider(cfId, appId),
         ApplicationStateService,
         ApplicationEnvVarsHelper,
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
-        TabNavService
-      ,
-        provideZonelessChangeDetection()
+        TabNavService,
+
+        provideZonelessChangeDetection(),
       ]
     }).compileComponents();
 

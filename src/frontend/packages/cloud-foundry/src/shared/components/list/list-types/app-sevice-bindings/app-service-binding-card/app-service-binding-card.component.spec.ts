@@ -4,11 +4,11 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { generateTestApplicationServiceProvider } from '../../../../../../../test-framework/application-service-helper';
-import { generateCfBaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { EntityMonitorFactory } from '@stratosui/store/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '@stratosui/store/monitors/pagination-monitor.factory';
+import { APIResource } from '@stratosui/store/types/api.types';
+import { generateTestApplicationServiceProvider } from "@test-framework/application-service-helper";
+import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { IServiceInstance } from '../../../../../../cf-api-svc.types';
 import {
   ApplicationEnvVarsHelper,
@@ -18,20 +18,21 @@ import { ApplicationStateService } from '../../../../../services/application-sta
 import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
 import { ServiceIconComponent } from '../../../../service-icon/service-icon.component';
 import { AppServiceBindingCardComponent } from './app-service-binding-card.component';
-
+import { EntityServiceFactory } from "@stratosui/store/entity-service-factory.service";
 describe('AppServiceBindingCardComponent', () => {
   let component: AppServiceBindingCardComponent;
   let fixture: ComponentFixture<AppServiceBindingCardComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
+      imports: [
         AppServiceBindingCardComponent,
         ServiceIconComponent,
-        CfOrgSpaceLinksComponent
+        CfOrgSpaceLinksComponent,
+        ...generateCfBaseTestModules(),
       ],
-      imports: generateCfBaseTestModules(),
       providers: [
+        EntityServiceFactory,
         
         EntityMonitorFactory,
         generateTestApplicationServiceProvider('1', '1'),
@@ -41,8 +42,8 @@ describe('AppServiceBindingCardComponent', () => {
         ConfirmationDialogService,
         DatePipe,
         ServiceActionHelperService,
-      ,
-        provideZonelessChangeDetection()
+
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

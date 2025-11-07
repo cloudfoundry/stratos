@@ -2,8 +2,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
+import { EntityServiceFactory } from '@stratosui/store/entity-service-factory.service';
 import { TabNavService } from '../../../../../../../../core/src/tab-nav.service';
-import { generateCfBaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { CfUserService } from '../../../../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../../../../cf-page.types';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
@@ -16,11 +17,15 @@ describe('CloudFoundryCellBaseComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [CloudFoundryCellBaseComponent],
-      imports: generateCfBaseTestModules(),
+      imports: [
+        CloudFoundryCellBaseComponent,
+        ...generateCfBaseTestModules(),
+      ],
       providers: [
+        EntityServiceFactory,
         CloudFoundryEndpointService,
-        CloudFoundryCellService, {
+        CloudFoundryCellService,
+        {
           provide: ActiveRouteCfOrgSpace,
           useValue: {
             cfGuid: 'cfGuid',
@@ -29,7 +34,8 @@ describe('CloudFoundryCellBaseComponent', () => {
           }
         },
         TabNavService,
-        CfUserService
+        CfUserService,
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

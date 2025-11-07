@@ -3,15 +3,15 @@ import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
-import { testSCFEndpointGuid } from "../../test-framework/cloud-foundry-endpoint-service.helper";
+import { testSCFEndpointGuid } from "@test-framework/cloud-foundry-endpoint-service.helper";
 
 import { CF_GUID } from '../../../../../../../core/src/shared/entity.tokens';
 import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
-import { generateTestApplicationServiceProvider } from '../../../../../../test-framework/application-service-helper';
+import { generateTestApplicationServiceProvider } from "@test-framework/application-service-helper";
 import {
   generateCfStoreModules,
   generateTestCfEndpointServiceProvider,
-} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { CfAppInstancesConfigService } from './cf-app-instances-config.service';
 
 describe('CfAppInstancesConfigService', () => {
@@ -19,7 +19,6 @@ describe('CfAppInstancesConfigService', () => {
   beforeEach(() => {
     const cfGuid = 'cfGuid';
     const appGuid = 'appGuid';
-
     TestBed.configureTestingModule({
       providers: [
         
@@ -30,8 +29,8 @@ describe('CfAppInstancesConfigService', () => {
           provide: CF_GUID,
           useValue: testSCFEndpointGuid,
         },
-      ,
-        provideZonelessChangeDetection()
+
+        provideZonelessChangeDetection(),
       ],
       imports: [
         generateCfStoreModules(),

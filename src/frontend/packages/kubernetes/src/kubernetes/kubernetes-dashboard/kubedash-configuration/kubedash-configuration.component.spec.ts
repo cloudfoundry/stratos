@@ -14,8 +14,7 @@ describe('KubedashConfigurationComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [...KubernetesBaseTestModules],
-      declarations: [KubedashConfigurationComponent],
+      imports: [KubedashConfigurationComponent, ...KubernetesBaseTestModules],
       providers: [
         {
           provide: ActivatedRoute,
@@ -32,7 +31,7 @@ describe('KubedashConfigurationComponent', () => {
         HttpClient,
         HttpHandler,
       ]
-    })
+    }),
       .compileComponents();
   });
 

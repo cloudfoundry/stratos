@@ -16,7 +16,7 @@ describe('CatalogTabComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         ...HelmBaseTestModules,
-        CatalogTabComponent
+        CatalogTabComponent,
       ],
       providers: [
         { provide: ChartsService, useValue: new MockChartService() },
@@ -25,7 +25,7 @@ describe('CatalogTabComponent', () => {
           }
         }
       ]
-    })
+    }),
       .compileComponents();
   });
 

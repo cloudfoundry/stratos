@@ -16,8 +16,8 @@ describe('CardProgressOverlayComponent', () => {
         CardProgressOverlayComponent, // Now standalone
         CoreModule,
       ]
-    })
-    .compileComponents();
+    });
+    TestBed.compileComponents();
   });
 
   beforeEach(() => {

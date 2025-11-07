@@ -17,10 +17,10 @@ describe('SimpleUsageChartComponent', () => {
       imports: [
         CoreModule,
         NoopAnimationsModule,
-        SimpleUsageChartComponent
+        SimpleUsageChartComponent,
       ]
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

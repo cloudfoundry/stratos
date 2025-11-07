@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
-import { Observable, Subject, Subscription } from 'rxjs';
+import { Observable, Subject, Subscription, takeUntil } from 'rxjs';
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
 
@@ -47,29 +47,35 @@ export class SshViewerComponent implements OnInit, OnDestroy {
   private msgSubscription!: Subscription;
   private connectSubscription!: Subscription;
   private resizeSubscription!: Subscription;
+  private resizeTimers: ReturnType<typeof setTimeout>[] = [];
+  private destroy$ = new Subject<void>();
 
   ngOnInit() {
     if (!this.connectionStatus) {
       return;
     }
 
-    this.resizeSubscription = this.resizer.resizeEvent$.subscribe(r => {
-      if (this.xtermFitAddon) {
-        this.resize();
-      }
-    });
+    this.resizeSubscription = this.resizer.resizeEvent$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(r => {
+        if (this.xtermFitAddon) {
+          this.resize();
+        }
+      });
 
-    this.connectSubscription = this.connectionStatus.subscribe((count: number) => {
-      this.isConnected = (count !== 0);
-      if (this.isConnected) {
-        this.xterm.focus();
-        this.isConnecting = false;
-        this.resize();
-      }
-      if (!this.isDestroying) {
-        this.changeDetector.detectChanges();
-      }
-    });
+    this.connectSubscription = this.connectionStatus
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((count: number) => {
+        this.isConnected = (count !== 0);
+        if (this.isConnected) {
+          this.xterm.focus();
+          this.isConnecting = false;
+          this.resize();
+        }
+        if (!this.isDestroying) {
+          this.changeDetector.detectChanges();
+        }
+      });
 
     this.xterm = new Terminal();
     this.xterm.loadAddon(this.xtermFitAddon);
@@ -77,13 +83,13 @@ export class SshViewerComponent implements OnInit, OnDestroy {
     this.resize();
 
     this.xterm.onKey(e => {
-      if (!this.msgSubscription.closed) {
+      if (this.msgSubscription && !this.msgSubscription.closed) {
         this.sshInput.next(JSON.stringify({ key: e.key }));
       }
     });
 
     this.xterm.onResize(size => {
-      if (!this.msgSubscription.closed) {
+      if (this.msgSubscription && !this.msgSubscription.closed) {
         this.sshInput.next(JSON.stringify({ cols: size.cols, rows: size.rows }));
       }
     });
@@ -92,18 +98,36 @@ export class SshViewerComponent implements OnInit, OnDestroy {
   }
 
   public resize() {
-    setTimeout(() => {
+    const timerId = setTimeout(() => {
       this.xtermFitAddon.fit();
     }, 150);
+    this.resizeTimers.push(timerId);
   }
 
   ngOnDestroy() {
     this.isDestroying = true;
+    this.destroy$.next();
+    this.destroy$.complete();
+
+    // Clear all pending timers
+    this.resizeTimers.forEach(timerId => clearTimeout(timerId));
+    this.resizeTimers = [];
+
+    // Unsubscribe from all subscriptions
     this.disconnect();
+
     if (this.connectSubscription && !this.connectSubscription.closed) {
       this.connectSubscription.unsubscribe();
     }
-    this.resizeSubscription.unsubscribe();
+
+    if (this.resizeSubscription && !this.resizeSubscription.closed) {
+      this.resizeSubscription.unsubscribe();
+    }
+
+    // Dispose of xterm terminal
+    if (this.xterm) {
+      this.xterm.dispose();
+    }
   }
 
   disconnect() {
@@ -120,6 +144,7 @@ export class SshViewerComponent implements OnInit, OnDestroy {
     this.errorMessage = undefined;
     this.xterm.reset();
     this.msgSubscription = this.sshStream
+      .pipe(takeUntil(this.destroy$))
       .subscribe(
         (data: string) => {
           // Check for a window title message

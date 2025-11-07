@@ -17,8 +17,7 @@ describe('KubernetesResourceViewerComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [KubernetesResourceViewerComponent, KubernetesResourceViewerComponent, ResourceAlertViewComponent],
-      imports: KubernetesBaseTestModules,
+      imports: [KubernetesResourceViewerComponent, ResourceAlertViewComponent, ...KubernetesBaseTestModules],
       providers: [
         KubernetesEndpointService,
         KubeBaseGuidMock,
@@ -33,9 +32,9 @@ describe('KubernetesResourceViewerComponent', () => {
             }
           }
         },
-        SidePanelService
+        SidePanelService,
       ]
-    })
+    }),
       .compileComponents();
   });
 

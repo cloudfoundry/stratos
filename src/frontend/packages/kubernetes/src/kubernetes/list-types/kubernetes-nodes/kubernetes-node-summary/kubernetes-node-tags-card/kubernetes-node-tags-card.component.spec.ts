@@ -16,14 +16,14 @@ describe('KubernetesNodeTagsCardComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         KubernetesNodeTagsCardComponent,
-        ...KubernetesBaseTestModules
+        ...KubernetesBaseTestModules,
       ],
       providers: [
         BaseKubeGuid, KubernetesEndpointService, KubernetesNodeService,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ],
 
-    })
+    }),
       .compileComponents();
   });
 

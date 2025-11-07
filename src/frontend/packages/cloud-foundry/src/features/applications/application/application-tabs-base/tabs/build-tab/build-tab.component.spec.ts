@@ -11,9 +11,9 @@ import { APP_GUID, CF_GUID } from '../../../../../../../../core/src/shared/entit
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../../../../../core/src/tab-nav.service';
 import { GITHUB_API_URL } from '../../../../../../../../git/src/shared/github.helpers';
-import { AppStoreModule } from '../../../../../../../../store/src/store.module';
-import { ApplicationServiceMock } from '../../../../../../../test-framework/application-service-helper';
-import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { AppStoreModule } from '@stratosui/store/store.module';
+import { ApplicationServiceMock } from "@test-framework/application-service-helper";
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { CloudFoundrySharedModule } from '../../../../../../shared/cf-shared.module';
 import { ApplicationStateService } from '../../../../../../shared/services/application-state.service';
 import { ApplicationService } from '../../../../application.service';
@@ -21,20 +21,17 @@ import { ApplicationPollComponent } from '../../application-poll/application-pol
 import { ApplicationPollingService } from '../../application-polling.service';
 import { ApplicationEnvVarsHelper } from './application-env-vars.service';
 import { BuildTabComponent } from './build-tab.component';
-import { ViewBuildpackComponent } from './view-buildpack/view-buildpack.component';
-
+import { ViewBuildpackComponent } from "./view-buildpack/view-buildpack.component";
 describe('BuildTabComponent', () => {
   let component: BuildTabComponent;
   let fixture: ComponentFixture<BuildTabComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
+      imports: [
         BuildTabComponent,
         ViewBuildpackComponent,
         ApplicationPollComponent,
-      ],
-      imports: [
         ...generateCfStoreModules(),
         CoreModule,
         SharedModule,
@@ -42,7 +39,7 @@ describe('BuildTabComponent', () => {
         NoopAnimationsModule,
         HttpClientModule,
         HttpClientTestingModule,
-        CloudFoundrySharedModule
+        CloudFoundrySharedModule,
       ],
       providers: [
         
@@ -54,9 +51,9 @@ describe('BuildTabComponent', () => {
         TabNavService,
         { provide: CF_GUID, useValue: '' },
         { provide: APP_GUID, useValue: '' },
-        ApplicationPollingService
-      ,
-        provideZonelessChangeDetection()
+        ApplicationPollingService,
+
+        provideZonelessChangeDetection(),
       ]
     }).compileComponents();
 

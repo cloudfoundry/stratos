@@ -2,8 +2,8 @@ import { animate, style, transition, trigger } from '@angular/animations';
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { EntitySchema, EntityMonitor, EntityMonitorFactory } from '@stratosui/store';
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { filter, first, map, startWith } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
+import { filter, first, map } from 'rxjs/operators';
 
 @Component({
 selector: 'app-loading-page',
@@ -52,22 +52,19 @@ export class LoadingPageComponent implements OnInit {
 
   ngOnInit() {
     if (this.isLoading) {
-      this.isLoading
-        .pipe(
-          filter(loading => !loading),
-          first()
-        );
-      this.isDeleting = observableOf(false);
+      // isLoading is already provided as an input
+      this.isDeleting = new BehaviorSubject(false);
     } else if (this.entityId && this.entitySchema) {
       this.buildFromMonitor(this.entityMonitorFactory.create(this.entityId, this.entitySchema));
     } else {
-      this.isLoading = this.isDeleting = observableOf(false);
+      this.isLoading = new BehaviorSubject(false);
+      this.isDeleting = new BehaviorSubject(false);
     }
 
-    this.text$ = combineLatest(
-      this.isLoading.pipe(startWith(false)),
-      this.isDeleting.pipe(startWith(false))
-    ).pipe(
+    this.text$ = combineLatest([
+      this.isLoading,
+      this.isDeleting
+    ]).pipe(
       map(([isLoading, isDeleting]) => {
         if (isDeleting) {
           return this.deleteText;

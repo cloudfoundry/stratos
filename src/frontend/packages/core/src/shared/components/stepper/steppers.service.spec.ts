@@ -9,7 +9,7 @@ describe('SteppersService', () => {
     TestBed.configureTestingModule({
       providers: [
         SteppersService,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
     });
   });

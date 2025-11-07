@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
+import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
 import { KubernetesNodeSimpleMetricComponent } from './kubernetes-node-simple-metric.component';
 
 describe('KubernetesNodeSimpleMetricComponent', () => {
@@ -10,9 +11,9 @@ describe('KubernetesNodeSimpleMetricComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection()],
+      providers: [EntityServiceFactory, provideZonelessChangeDetection()],
       imports: [ KubernetesNodeSimpleMetricComponent ]
-    })
+    }),
     .compileComponents();
   });
 

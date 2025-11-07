@@ -9,7 +9,7 @@ describe('CsiGuidsService', () => {
     TestBed.configureTestingModule({
       providers: [
         CsiGuidsService,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
     });
   });

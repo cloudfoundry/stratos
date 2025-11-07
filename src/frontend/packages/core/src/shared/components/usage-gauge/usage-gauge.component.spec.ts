@@ -14,17 +14,17 @@ describe('UsageGaugeComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
-        UsageGaugeComponent, // Now standalone (includes PercentagePipe)
+        UsageGaugeComponent, // Now standalone (includes PercentagePipe),
         CoreModule,
       ],
       providers: [
         
         UtilsService,
-      ,
-        provideZonelessChangeDetection()
+
+        provideZonelessChangeDetection(),
       ]
-    })
-    .compileComponents();
+    });
+    TestBed.compileComponents();
   });
 
   beforeEach(() => {

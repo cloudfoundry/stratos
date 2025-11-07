@@ -3,20 +3,20 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 
-import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
-import { CFBaseTestModules } from '../../../../../test-framework/cf-test-helper';
+import { PaginationMonitorFactory } from '@stratosui/store/monitors/pagination-monitor.factory';
+import { CFBaseTestModules } from "@test-framework/cf-test-helper";
 import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-form/space-quota-definition-form.component';
-import { EditSpaceQuotaStepComponent } from './edit-space-quota-step.component';
-
+import { EditSpaceQuotaStepComponent } from "./edit-space-quota-step.component";
 describe('EditSpaceQuotaStepComponent', () => {
   let component: EditSpaceQuotaStepComponent;
   let fixture: ComponentFixture<EditSpaceQuotaStepComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [EditSpaceQuotaStepComponent, SpaceQuotaDefinitionFormComponent],
       imports: [
-        ...CFBaseTestModules
+        EditSpaceQuotaStepComponent,
+        SpaceQuotaDefinitionFormComponent,
+        ...CFBaseTestModules,
       ],
       providers: [
         PaginationMonitorFactory, {

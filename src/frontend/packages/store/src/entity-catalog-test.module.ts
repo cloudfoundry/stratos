@@ -6,10 +6,18 @@ import { entityCatalog, TestEntityCatalog } from './entity-catalog/entity-catalo
 import { StratosBaseCatalogEntity } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { requestDataReducerFactory } from './reducers/api-request-data-reducer/request-data-reducer.factory';
 import { chainApiReducers, requestActions } from './reducers/api-request-reducers.generator.helpers';
+import { ENTITY_CATALOG_TOKEN } from './tokens/store-injection.tokens';
 
 export const TEST_CATALOGUE_ENTITIES = '__TEST_CATALOGUE_ENTITIES__';
 
-@NgModule()
+@NgModule({
+  providers: [
+    {
+      provide: ENTITY_CATALOG_TOKEN,
+      useValue: entityCatalog
+    }
+  ]
+})
 export class EntityCatalogTestModule {
   constructor(
     store: Store<any>,
@@ -23,7 +31,14 @@ export class EntityCatalogTestModule {
 /**
  * To be used in conjunction with `createBasicStoreModule` and `createEntityStoreState`
  */
-@NgModule()
+@NgModule({
+  providers: [
+    {
+      provide: ENTITY_CATALOG_TOKEN,
+      useValue: entityCatalog
+    }
+  ]
+})
 export class EntityCatalogTestModuleManualStore {
   constructor(
     reducerManager: ReducerManager,

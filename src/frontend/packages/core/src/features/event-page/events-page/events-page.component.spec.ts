@@ -2,9 +2,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from "../test-framework/core-test.helper";
+import { createBasicStoreModule } from "@test-framework/core-test.helper";
 
-import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
+import { CoreTestingModule } from "@test-framework/core-test.modules";
 import { CoreModule } from '../../../core/core.module';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { SharedModule } from '../../../shared/shared.module';
@@ -24,18 +24,17 @@ describe('EventsPageComponent', () => {
         CoreTestingModule,
         createBasicStoreModule(),
         RouterTestingModule,
-        EventsPageComponent
+        EventsPageComponent,
       ],
       providers: [
         
         TabNavService,
-        CurrentUserPermissionsService
-      ,
-        provideZonelessChangeDetection()
+        CurrentUserPermissionsService,
+        provideZonelessChangeDetection(),
       ]
     
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

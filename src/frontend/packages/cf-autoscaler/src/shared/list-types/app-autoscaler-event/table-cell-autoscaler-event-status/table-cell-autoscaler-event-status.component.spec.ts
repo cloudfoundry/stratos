@@ -14,7 +14,7 @@ describe('TableCellAutoscalerEventStatusComponent', () => {
     await TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [TableCellAutoscalerEventStatusComponent, TableCellAutoscalerEventStatusIconPipe]
-    })
+    }),
       .compileComponents();
   });
 

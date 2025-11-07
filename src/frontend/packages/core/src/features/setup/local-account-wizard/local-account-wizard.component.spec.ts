@@ -4,7 +4,7 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createEmptyStoreModule } from "../test-framework/core-test.helper";
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from "@test-framework/core-test.helper";
 
 import { CoreModule } from '../../../core/core.module';
 import { MDAppModule } from '../../../core/md.module';
@@ -30,18 +30,17 @@ describe('LocalAccountWizardComponent', () => {
         PageHeaderModule,
         ReactiveFormsModule,
         MDAppModule,
-        createEmptyStoreModule(),
+        createBasicStoreModule(),
         NoopAnimationsModule,
       ],
       providers: [
-        
+        ...(STORE_TEST_PROVIDERS || []),
         TabNavService,
-        CurrentUserPermissionsService
-      ,
-        provideZonelessChangeDetection()
+        CurrentUserPermissionsService,
+        provideZonelessChangeDetection(),
       ]
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

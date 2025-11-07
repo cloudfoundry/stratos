@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { createEmptyStoreModule } from "../../../../test-framework/cf-autoscaler-test.helper";
+import { createEmptyStoreModule } from "@test-framework/cf-autoscaler-test.helper";
 
 import {
   ApplicationEnvVarsHelper,
@@ -25,6 +25,7 @@ import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/p
 import { CfAutoscalerTestingModule } from '../../../../cf-autoscaler-testing.module';
 import { AppAutoscalerMetricChartCardComponent } from './app-autoscaler-metric-chart-card.component';
 import { AppAutoscalerComboSeriesVerticalComponent } from './combo-chart/combo-series-vertical.component';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 
 
 describe('AppAutoscalerMetricChartCardComponent', () => {
@@ -33,7 +34,7 @@ describe('AppAutoscalerMetricChartCardComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
-        AppAutoscalerComboSeriesVerticalComponent
+        AppAutoscalerComboSeriesVerticalComponent,
       ],
       imports: [
         CfAutoscalerTestingModule,
@@ -43,6 +44,7 @@ describe('AppAutoscalerMetricChartCardComponent', () => {
         AppAutoscalerMetricChartCardComponent,
       ],
       providers: [
+        EntityServiceFactory,
         
         EntityMonitorFactory,
         EntityCatalogHelper,
@@ -53,10 +55,10 @@ describe('AppAutoscalerMetricChartCardComponent', () => {
         ConfirmationDialogService,
         DatePipe,
         ServiceActionHelperService,
-      ,
-        provideZonelessChangeDetection()
+
+        provideZonelessChangeDetection(),
       ]
-    })
+    }),
       .compileComponents();
   });
 

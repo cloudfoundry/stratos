@@ -4,7 +4,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createEmptyStoreModule } from "../../../../test-framework/cf-autoscaler-test.helper";
+import { createEmptyStoreModule } from "@test-framework/cf-autoscaler-test.helper";
 import { BaseChartDirective } from 'ng2-charts';
 
 import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
@@ -33,11 +33,11 @@ describe('AppAutoscalerComboSeriesVerticalComponent', () => {
         
         DatePipe,
         { provide: ApplicationService, useClass: ApplicationServiceMock },
-        TabNavService
-      ,
-        provideZonelessChangeDetection()
+        TabNavService,
+
+        provideZonelessChangeDetection(),
       ]
-    })
+    }),
       .compileComponents();
   });
 

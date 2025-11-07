@@ -3,25 +3,26 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { generateCfBaseTestModules } from '../../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundrySpaceServiceMock } from '../../../../../../../../test-framework/cloud-foundry-space.service.mock';
+import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { CloudFoundrySpaceServiceMock } from "@test-framework/cloud-foundry-space.service.mock";
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
-import { CloudFoundrySpaceAppsComponent } from './cloud-foundry-space-apps.component';
-
+import { CloudFoundrySpaceAppsComponent } from "./cloud-foundry-space-apps.component";
 describe('CloudFoundrySpaceAppsComponent', () => {
   let component: CloudFoundrySpaceAppsComponent;
   let fixture: ComponentFixture<CloudFoundrySpaceAppsComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [CloudFoundrySpaceAppsComponent],
-      imports: generateCfBaseTestModules(),
+      imports: [
+        CloudFoundrySpaceAppsComponent,
+        ...generateCfBaseTestModules(),
+      ],
       providers: [
         
         DatePipe,
-        { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock }
-      ,
-        provideZonelessChangeDetection()
+        { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock },
+
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

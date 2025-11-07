@@ -2,21 +2,22 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { generateCfBaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
-import { CloudFoundryFeatureFlagsComponent } from './cloud-foundry-feature-flags.component';
-
+import { CloudFoundryFeatureFlagsComponent } from "./cloud-foundry-feature-flags.component";
 describe('CloudFoundryFeatureFlagsComponent', () => {
   let component: CloudFoundryFeatureFlagsComponent;
   let fixture: ComponentFixture<CloudFoundryFeatureFlagsComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [CloudFoundryFeatureFlagsComponent],
-      imports: generateCfBaseTestModules(),
+      imports: [
+        CloudFoundryFeatureFlagsComponent,
+        ...generateCfBaseTestModules(),
+      ],
       providers: [
         ActiveRouteCfOrgSpace,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

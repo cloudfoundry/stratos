@@ -1,8 +1,10 @@
-import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { generateCfBaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
+import { generateCfBaseTestModulesNoShared, STORE_TEST_PROVIDERS } from '@test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCFEntities } from '../../../cf-entity-generator';
 import { CsiModeService } from './csi-mode.service';
 
 describe('CsiModeService', () => {
@@ -10,9 +12,18 @@ describe('CsiModeService', () => {
     TestBed.configureTestingModule({
       providers: [
         CsiModeService,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ],
-      imports: generateCfBaseTestModulesNoShared(),
+      imports: [
+        {
+          ngModule: EntityCatalogTestModule,
+          providers: [
+            ...STORE_TEST_PROVIDERS,
+            { provide: TEST_CATALOGUE_ENTITIES, useValue: generateCFEntities() }
+          ]
+        },
+        ...generateCfBaseTestModulesNoShared(),
+      ],
     });
   });
 

@@ -19,10 +19,10 @@ describe('HelmReleaseAnalysisTabComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({imports: [
         KubernetesBaseTestModules,
-      ,
+
         HelmReleaseAnalysisTabComponent,
         AnalysisReportSelectorComponent,
-        AnalysisReportViewerComponent
+        AnalysisReportViewerComponent,
       ],
       providers: [
         
@@ -30,11 +30,11 @@ describe('HelmReleaseAnalysisTabComponent', () => {
         KubernetesEndpointService,
         KubeBaseGuidMock,
         HelmReleaseProviders,
-        TabNavService
-      ,
-        provideZonelessChangeDetection()
+        TabNavService,
+
+        provideZonelessChangeDetection(),
       ]
-    })
+    }),
       .compileComponents();
   });
 

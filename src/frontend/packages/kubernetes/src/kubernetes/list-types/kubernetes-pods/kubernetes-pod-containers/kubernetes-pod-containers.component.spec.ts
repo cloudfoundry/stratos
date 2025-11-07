@@ -3,7 +3,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
-import { KubernetesPod } from '../../../store/kube.types';
+import { KubernetesPod } from '@stratosui/store';
 import { KubernetesPodContainersComponent } from './kubernetes-pod-containers.component';
 
 describe('KubernetesPodContainersComponent', () => {
@@ -15,8 +15,8 @@ describe('KubernetesPodContainersComponent', () => {
       providers: [provideZonelessChangeDetection()],
       imports: [
         KubernetesPodContainersComponent,
-        ...KubernetesBaseTestModules
-      ]})
+        ...KubernetesBaseTestModules,
+      ]}),
       .compileComponents();
   });
 

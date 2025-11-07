@@ -22,28 +22,28 @@ describe('SchemaTreeTraversal', () => {
 
     const grandChildSchema = new EntitySchema(grandChildKey, endpointType);
     const childSchema = new EntitySchema(childKey, endpointType, {
-      [grandChildSchema.entityType]: grandChildSchema
+      [grandChildSchema.entityType]: grandChildSchema,
     });
     const parentSchema = new EntitySchema(parentKey, endpointType, {
-      [childSchema.entityType]: childSchema
+      [childSchema.entityType]: childSchema,
     });
 
     const state = {
       [parentSchema.key]: {
         [parentId]: {
           id: parentId,
-          [childSchema.entityType]: childId
+          [childSchema.entityType]: childId,
         }
       },
       [childSchema.key]: {
         [childId]: {
           id: childId,
-          [grandChildSchema.entityType]: grandchildId
+          [grandChildSchema.entityType]: grandchildId,
         }
       },
       [grandChildSchema.key]: {
         [grandchildId]: {
-          id: grandchildId
+          id: grandchildId,
         }
       }
     };
@@ -52,14 +52,14 @@ describe('SchemaTreeTraversal', () => {
     const res1: IFlatTreeValue = {
       schema: childSchema,
       ids: new Set([
-        childId
-      ])
+        childId,
+      ]),
     };
     const res2: IFlatTreeValue = {
       schema: grandChildSchema,
       ids: new Set([
-        grandchildId
-      ])
+        grandchildId,
+      ]),
     };
 
     expect(Object.keys(build)).toEqual([childSchema.key, grandChildSchema.key]);
@@ -67,7 +67,7 @@ describe('SchemaTreeTraversal', () => {
     expect(build[grandChildSchema.key]).toEqual(res2);
     expect(build).toEqual({
       [childSchema.key]: res1,
-      [grandChildSchema.key]: res2
+      [grandChildSchema.key]: res2,
     });
   });
 
@@ -81,13 +81,13 @@ describe('SchemaTreeTraversal', () => {
       [grandChildSchema.entityType]: [grandChildSchema]
     });
     const parentSchema = new EntitySchema(parentKey, endpointType, {
-      [childSchema.entityType]: childSchema
+      [childSchema.entityType]: childSchema,
     });
     const state = {
       [parentSchema.key]: {
         [parentId]: {
           id: parentId,
-          [childSchema.entityType]: childId
+          [childSchema.entityType]: childId,
         }
       },
       [childSchema.key]: {
@@ -98,10 +98,10 @@ describe('SchemaTreeTraversal', () => {
       },
       [grandChildSchema.key]: {
         [grandchildId]: {
-          id: grandchildId
+          id: grandchildId,
         },
         [grandchild2Id]: {
-          id: grandchild2Id
+          id: grandchild2Id,
         }
       }
     };
@@ -110,19 +110,19 @@ describe('SchemaTreeTraversal', () => {
     const res1: IFlatTreeValue = {
       schema: childSchema,
       ids: new Set([
-        childId
-      ])
+        childId,
+      ]),
     };
     const res2: IFlatTreeValue = {
       schema: grandChildSchema,
       ids: new Set([
         grandchildId,
-        grandchild2Id
-      ])
+        grandchild2Id,
+      ]),
     };
     expect(build).toEqual({
       [childSchema.key]: res1,
-      [grandChildSchema.key]: res2
+      [grandChildSchema.key]: res2,
     });
   });
 
@@ -140,13 +140,13 @@ describe('SchemaTreeTraversal', () => {
       [grandChildSchema.entityType]: [grandChildSchema]
     });
     const parentSchema = new EntitySchema(parentKey, endpointType, {
-      [childSchema.entityType]: childSchema
+      [childSchema.entityType]: childSchema,
     });
     const state = {
       [parentSchema.key]: {
         [parentId]: {
           id: parentId,
-          [childSchema.entityType]: childId
+          [childSchema.entityType]: childId,
         }
       },
       [childSchema.key]: {
@@ -171,10 +171,10 @@ describe('SchemaTreeTraversal', () => {
       },
       [greatGrandChildSchema.key]: {
         [childId]: {
-          id: childId
+          id: childId,
         },
         [child2Id]: {
-          id: child2Id
+          id: child2Id,
         }
       }
     };
@@ -183,28 +183,28 @@ describe('SchemaTreeTraversal', () => {
     const res1: IFlatTreeValue = {
       schema: childSchema,
       ids: new Set([
-        childId
-      ])
+        childId,
+      ]),
     };
     const res2: IFlatTreeValue = {
       schema: grandChildSchema,
       ids: new Set([
         grandchildId,
-        grandchild2Id
-      ])
+        grandchild2Id,
+      ]),
     };
     const res3: IFlatTreeValue = {
       schema: greatGrandChildSchema,
       ids: new Set([
         childId,
-        child2Id
-      ])
+        child2Id,
+      ]),
     };
 
     expect(build).toEqual({
       [childSchema.key]: res1,
       [grandChildSchema.key]: res2,
-      [greatGrandChildSchema.key]: res3
+      [greatGrandChildSchema.key]: res3,
     });
   });
 
@@ -224,13 +224,13 @@ describe('SchemaTreeTraversal', () => {
       }
     });
     const parentSchema = new EntitySchema(parentKey, endpointType, {
-      [childSchema.entityType]: childSchema
+      [childSchema.entityType]: childSchema,
     });
     const state = {
       [parentSchema.key]: {
         [parentId]: {
           id: parentId,
-          [childKey]: childId
+          [childKey]: childId,
         }
       },
       [childSchema.key]: {
@@ -259,10 +259,10 @@ describe('SchemaTreeTraversal', () => {
       },
       [greatGrandChildSchema.key]: {
         [childId]: {
-          id: childId
+          id: childId,
         },
         [child2Id]: {
-          id: child2Id
+          id: child2Id,
         }
       }
     };
@@ -271,27 +271,27 @@ describe('SchemaTreeTraversal', () => {
     const res1: IFlatTreeValue = {
       schema: childSchema,
       ids: new Set([
-        childId
-      ])
+        childId,
+      ]),
     };
     const res2: IFlatTreeValue = {
       schema: grandChildSchema,
       ids: new Set([
         grandchildId,
-        grandchild2Id
-      ])
+        grandchild2Id,
+      ]),
     };
     const res3: IFlatTreeValue = {
       schema: greatGrandChildSchema,
       ids: new Set([
         childId,
-        child2Id
-      ])
+        child2Id,
+      ]),
     };
     expect(build).toEqual({
       [childSchema.key]: res1,
       [grandChildSchema.key]: res2,
-      [greatGrandChildSchema.key]: res3
+      [greatGrandChildSchema.key]: res3,
     });
   });
 
@@ -311,14 +311,14 @@ describe('SchemaTreeTraversal', () => {
       }
     });
     const parentSchema = new EntitySchema(parentKey, endpointType, {
-      [childSchema.entityType]: childSchema
+      [childSchema.entityType]: childSchema,
     }, {}, null, null, [grandChildSchema.entityType]);
 
     const state = {
       [parentSchema.key]: {
         [parentId]: {
           id: parentId,
-          [childSchema.entityType]: childId
+          [childSchema.entityType]: childId,
         }
       },
       [childSchema.key]: {
@@ -347,10 +347,10 @@ describe('SchemaTreeTraversal', () => {
       },
       [greatGrandChildSchema.key]: {
         [childId]: {
-          id: childId
+          id: childId,
         },
         [child2Id]: {
-          id: child2Id
+          id: child2Id,
         }
       }
     };
@@ -359,12 +359,12 @@ describe('SchemaTreeTraversal', () => {
     const res1: IFlatTreeValue = {
       schema: childSchema,
       ids: new Set([
-        childId
-      ])
+        childId,
+      ]),
     };
     expect(Object.keys(build)).toEqual([childSchema.key]);
     expect(build).toEqual({
-      [childSchema.key]: res1
+      [childSchema.key]: res1,
     });
   });
 });

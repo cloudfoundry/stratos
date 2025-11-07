@@ -18,7 +18,7 @@ import { selectAsSignal } from '../helpers/signal-selectors';
 import {
   endpointEntitiesSelector,
   endpointsEntityRequestDataSelector,
-  connectedEndpointsSelector
+  connectedEndpointsSelector,
 } from './endpoint.selectors';
 import { firstValueFrom } from 'rxjs';
 import { JsonPipe } from '@angular/common';
@@ -45,7 +45,7 @@ describe('Selectors in Zoneless Mode', () => {
   const initialState: Partial<InternalAppState> = {
     requestData: {
       stratosEndpoint: {
-        'endpoint-1': mockEndpoint
+        'endpoint-1': mockEndpoint,
       }
     }
   };
@@ -55,7 +55,7 @@ describe('Selectors in Zoneless Mode', () => {
       providers: [
         // CRITICAL: Enable zoneless change detection
         provideZonelessChangeDetection(),
-        provideMockStore({ initialState })
+        provideMockStore({ initialState }),
       ]
     });
 
@@ -92,12 +92,12 @@ describe('Selectors in Zoneless Mode', () => {
           }
         </div>
       `,
-      standalone: true
-    })
+      standalone: true,
+    }),
     class TestComponent {
       // Convert selector to signal for zoneless mode
       endpoint: Signal<EndpointModel | undefined> = selectAsSignal(
-        endpointsEntityRequestDataSelector('endpoint-1')
+        endpointsEntityRequestDataSelector('endpoint-1'),
       );
     }
 
@@ -127,7 +127,7 @@ describe('Selectors in Zoneless Mode', () => {
         ...initialState,
         requestData: {
           stratosEndpoint: {
-            'endpoint-1': updatedEndpoint
+            'endpoint-1': updatedEndpoint,
           }
         }
       });
@@ -147,7 +147,7 @@ describe('Selectors in Zoneless Mode', () => {
       const result2 = await firstValueFrom(store.select(selector));
       const result3 = await firstValueFrom(store.select(selector));
 
-      // Should return same reference (memoized)
+      // Should return same reference (memoized),
       expect(result1).toBe(result2);
       expect(result2).toBe(result3);
     });
@@ -162,14 +162,14 @@ describe('Selectors in Zoneless Mode', () => {
         ...initialState,
         requestData: {
           stratosEndpoint: {
-            'endpoint-1': updatedEndpoint
+            'endpoint-1': updatedEndpoint,
           }
         }
       });
 
       const result2 = await firstValueFrom(store.select(selector));
 
-      // Should be different reference (recomputed)
+      // Should be different reference (recomputed),
       expect(result1).not.toBe(result2);
       expect(result2.name).toBe('Changed');
     });
@@ -199,7 +199,7 @@ describe('Selectors in Zoneless Mode', () => {
         requestData: {
           stratosEndpoint: {
             'endpoint-1': mockEndpoint,
-            'endpoint-2': disconnectedEndpoint
+            'endpoint-2': disconnectedEndpoint,
           }
         }
       });
@@ -258,7 +258,7 @@ describe('Advanced Signal Selector Patterns', () => {
   const initialState: Partial<InternalAppState> = {
     requestData: {
       stratosEndpoint: {
-        'endpoint-1': mockEndpoint
+        'endpoint-1': mockEndpoint,
       }
     }
   };
@@ -267,7 +267,7 @@ describe('Advanced Signal Selector Patterns', () => {
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
-        provideMockStore({ initialState })
+        provideMockStore({ initialState }),
       ]
     });
     store = TestBed.inject(MockStore);
@@ -284,7 +284,7 @@ describe('Advanced Signal Selector Patterns', () => {
       `,
       standalone: true,
       imports: [JsonPipe]
-    })
+    }),
     class MultiSignalComponent {
       endpoints = selectAsSignal(endpointEntitiesSelector);
       connected = selectAsSignal(connectedEndpointsSelector());
@@ -305,8 +305,8 @@ describe('Advanced Signal Selector Patterns', () => {
       @Component({
         selector: 'test-computed',
         template: '',
-        standalone: true
-      })
+        standalone: true,
+      }),
       class ComputedSignalComponent {
         endpoints = selectAsSignal(endpointEntitiesSelector);
 
@@ -328,12 +328,12 @@ describe('Advanced Signal Selector Patterns', () => {
 // Export helper for testing signal selectors
 export function testSignalSelector<T>(
   selector: (state: any) => T,
-  initialState: any
+  initialState: any,
 ): Signal<T | undefined> {
   TestBed.configureTestingModule({
     providers: [
       provideZonelessChangeDetection(),
-      provideMockStore({ initialState })
+      provideMockStore({ initialState }),
     ]
   });
 

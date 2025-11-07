@@ -17,14 +17,14 @@ describe('DomainMismatchComponent', () => {
       providers: [provideZonelessChangeDetection()],
       
       imports: [
-        MDAppModule,,
+        MDAppModule,
         DomainMismatchComponent,
         IntroScreenComponent,
-        StratosTitleComponent
+        StratosTitleComponent,
       ]
     
-    })
-    .compileComponents();
+    });
+    TestBed.compileComponents();
   });
 
   beforeEach(() => {

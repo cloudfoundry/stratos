@@ -8,9 +8,8 @@ import { CodeBlockComponent } from '../../../../../../core/src/shared/components
 import {
   CopyToClipboardComponent,
 } from '../../../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
-import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CliCommandComponent } from './cli-command.component';
-
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { CliCommandComponent } from "./cli-command.component";
 describe('CliCommandComponent', () => {
   let component: CliCommandComponent;
   let fixture: ComponentFixture<CliCommandComponent>;
@@ -24,8 +23,8 @@ describe('CliCommandComponent', () => {
         CoreModule,
         CliCommandComponent,
         CodeBlockComponent,
-        CopyToClipboardComponent
-      ]
+        CopyToClipboardComponent,
+    ]
     })
       .compileComponents();
   });

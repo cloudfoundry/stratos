@@ -2,20 +2,37 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import {
-  generateCfBaseTestModulesNoShared,
-} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { TableCellSpaceNameComponent } from './table-cell-space-name.component';
-
+import { EntityCatalogTestModule, generateStratosEntities, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { generateCfBaseTestModulesNoShared } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { generateCFEntities } from '../../../../../../cf-entity-generator';
+import { TableCellSpaceNameComponent } from "./table-cell-space-name.component";
 describe('TableCellSpaceNameComponent', () => {
   let component: TableCellSpaceNameComponent;
   let fixture: ComponentFixture<TableCellSpaceNameComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection()],
-      declarations: [TableCellSpaceNameComponent],
-      imports: generateCfBaseTestModulesNoShared()
+      providers: [
+        ...STORE_TEST_PROVIDERS,
+        provideZonelessChangeDetection(),
+      ],
+      imports: [
+        TableCellSpaceNameComponent,
+        ...generateCfBaseTestModulesNoShared(),
+        {
+          ngModule: EntityCatalogTestModule,
+          providers: [
+            {
+              provide: TEST_CATALOGUE_ENTITIES,
+              useValue: [
+                ...generateCFEntities(),
+                ...generateStratosEntities(),
+              ]
+            }
+          ]
+        },
+      ],
     })
       .compileComponents();
 
@@ -91,7 +108,7 @@ describe('TableCellSpaceNameComponent', () => {
                 service_plans_url: '',
                 service_plans: [],
               },
-              metadata: null
+              metadata: null,
             },
             service_instances_url: '',
           },

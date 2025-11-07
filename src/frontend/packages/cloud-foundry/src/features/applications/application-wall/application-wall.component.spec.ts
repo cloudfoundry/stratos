@@ -1,32 +1,23 @@
-import { DatePipe } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { TabNavService } from '../../../../../core/src/tab-nav.service';
-import { generateCfBaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
-import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
-import { CfUserPermissionDirective } from '../../../shared/directives/cf-user-permission/cf-user-permission.directive';
+import { TabNavService } from '@stratosui/core';
+import { generateCfBaseTestModulesNoShared } from '@test-framework/cloud-foundry-endpoint-service.helper';
+
 import { ApplicationWallComponent } from './application-wall.component';
-
 describe('ApplicationWallComponent', () => {
   let component: ApplicationWallComponent;
   let fixture: ComponentFixture<ApplicationWallComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
+      imports: [
         ApplicationWallComponent,
-        CfEndpointsMissingComponent,
-        CfUserPermissionDirective
+        ...generateCfBaseTestModulesNoShared(),
       ],
-      imports: generateCfBaseTestModules(),
       providers: [
-        DatePipe,
         TabNavService,
-        CloudFoundryService,
         {
           provide: ActivatedRoute,
           useValue: {

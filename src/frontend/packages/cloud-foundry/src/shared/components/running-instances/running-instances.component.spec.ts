@@ -3,26 +3,25 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { CoreModule } from '../../../../../core/src/core/core.module';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { RunningInstancesComponent } from './running-instances.component';
-
+import { PaginationMonitorFactory } from '@stratosui/store/monitors/pagination-monitor.factory';
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { RunningInstancesComponent } from "./running-instances.component";
 describe('RunningInstancesComponent', () => {
   let component: RunningInstancesComponent;
   let fixture: ComponentFixture<RunningInstancesComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [RunningInstancesComponent],
       imports: [
+        RunningInstancesComponent,
         ...generateCfStoreModules(),
         CoreModule,
       ],
       providers: [
         
-        PaginationMonitorFactory
-      ,
-        provideZonelessChangeDetection()
+        PaginationMonitorFactory,
+
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

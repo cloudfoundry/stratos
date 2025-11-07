@@ -13,7 +13,7 @@ describe('GithubCommitAuthorComponent', () => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [GithubCommitAuthorComponent]
-    })
+    }),
       .compileComponents();
   });
 
@@ -67,7 +67,7 @@ describe('GithubCommitAuthorComponent', () => {
     // OnPush change detection requires new object reference and manual check
     component.commit = {
       ...component.commit,
-      author: null
+      author: null,
     };
     // Manually trigger change detection for OnPush strategy
     const cdr = fixture.debugElement.injector.get(ChangeDetectorRef);

@@ -13,8 +13,8 @@ describe('ConfirmationDialogService', () => {
         
         ConfirmationDialogService,
         TailwindDialogService,
-      ,
-        provideZonelessChangeDetection()
+
+        provideZonelessChangeDetection(),
       ],
       imports: [
         CoreModule,

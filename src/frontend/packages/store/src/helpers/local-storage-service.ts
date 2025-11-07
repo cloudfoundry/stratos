@@ -201,7 +201,8 @@ export class LocalStorageService {
         const key = LocalStorageService.makeKey(sessionId, type);
         const content = storage.getItem(key);
         // We're getting an approximate size in bytes, so just assume a character is one byte
-        return total + content.length;
+        // content can be null if the item doesn't exist in localStorage
+        return total + (content ? content.length : 0);
       }, 0);
     }
     return -1;

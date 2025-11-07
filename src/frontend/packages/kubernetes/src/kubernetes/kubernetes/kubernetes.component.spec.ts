@@ -14,13 +14,13 @@ describe('KubernetesComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         KubernetesComponent,
-        ...KubernetesBaseTestModules
+        ...KubernetesBaseTestModules,
       ],
       providers: [
         TabNavService,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
-    })
+    }),
       .compileComponents();
   });
 

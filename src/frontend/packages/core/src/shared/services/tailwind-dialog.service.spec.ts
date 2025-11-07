@@ -8,7 +8,7 @@ import { ApplicationRef, Injector, EnvironmentInjector } from '@angular/core';
 @Component({
   selector: 'test-dialog-component',
   template: '<div class="test-dialog">Test Dialog Content</div>',
-  standalone: true
+  standalone: true,
 })
 class TestDialogComponent {
   public dialogRef = inject(TailwindDialogRef<TestDialogComponent>);
@@ -19,7 +19,7 @@ class TestDialogComponent {
 @Component({
   selector: 'test-dialog-with-data',
   template: '<div>{{ data.message }}</div>',
-  standalone: true
+  standalone: true,
 })
 class TestDialogWithDataComponent {
   public dialogRef = inject(TailwindDialogRef<TestDialogWithDataComponent>);
@@ -36,9 +36,8 @@ describe('TailwindDialogService', () => {
     TestBed.configureTestingModule({
       providers: [
         
-        TailwindDialogService
-      ,
-        provideZonelessChangeDetection()
+        TailwindDialogService,
+        provideZonelessChangeDetection(),
       ]
     });
 
@@ -95,9 +94,10 @@ describe('TailwindDialogService', () => {
       vi.useFakeTimers();
       const dialogRef = service.open(TestDialogComponent);
       await vi.advanceTimersByTimeAsync(0);
+      await vi.runAllTimersAsync(); // Run all pending timers including requestAnimationFrame
 
-      // Check backdrop
-      const backdrop = document.querySelector('.fixed.inset-0.bg-black.bg-opacity-50');
+      // Check backdrop - uses inline styles for opacity, not bg-opacity class
+      const backdrop = document.querySelector('.fixed.inset-0.bg-black') as HTMLElement;
       expect(backdrop).toBeTruthy();
 
       // Check dialog panel
@@ -313,6 +313,7 @@ describe('TailwindDialogService', () => {
     });
 
     it('should apply multiple custom panelClasses', async () => {
+      vi.useFakeTimers();
       const dialogRef = service.open(TestDialogComponent, {
         panelClass: ['custom-class-1', 'custom-class-2']
       });
@@ -324,6 +325,7 @@ describe('TailwindDialogService', () => {
 
       dialogRef.close();
       await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
     });
 
     it('should apply custom backdropClass', async () => {
@@ -385,7 +387,6 @@ describe('TailwindDialogService', () => {
       dialogRef.afterClosed().subscribe((res) => {
         closed = true;
         result = res;
-      vi.useRealTimers();
       });
 
       expect(closed).toBe(false);
@@ -395,9 +396,11 @@ describe('TailwindDialogService', () => {
 
       expect(closed).toBe(true);
       expect(result).toBe('result-value');
+      vi.useRealTimers();
     });
 
     it('should have working afterOpened observable', async () => {
+      vi.useFakeTimers();
       let opened = false;
 
       const dialogRef = service.open(TestDialogComponent);
@@ -411,6 +414,7 @@ describe('TailwindDialogService', () => {
 
       dialogRef.close();
       await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
     });
 
     it('should provide componentInstance reference', async () => {
@@ -479,45 +483,66 @@ describe('TailwindDialogService', () => {
       const dialogRef2 = service.open(TestDialogComponent);
       await vi.advanceTimersByTimeAsync(0);
 
-      const dialogs = document.querySelectorAll('.fixed.inset-0');
+      const dialogs = document.querySelectorAll('.fixed.inset-0') as NodeListOf<HTMLElement>;
       expect(dialogs.length).toBe(2);
 
-      // All dialogs should have z-50 class
-      dialogs.forEach(dialog => {
-        expect(dialog.classList.contains('z-50')).toBe(true);
-      vi.useRealTimers();
-      });
+      // Check that dialogs have proper z-index stacking (uses inline styles, not classes)
+      // First dialog should have z-index 1000, second should have 1010
+      expect(parseInt(dialogs[0].style.zIndex)).toBe(1000);
+      expect(parseInt(dialogs[1].style.zIndex)).toBe(1010);
 
       dialogRef1.close();
       await vi.advanceTimersByTimeAsync(300);
       dialogRef2.close();
       await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
     });
   });
 
   describe('Animations', () => {
-    it('should have fade-in animation class on backdrop', async () => {
+    it('should have fade-in animation on backdrop', async () => {
 
       vi.useFakeTimers();
       const dialogRef = service.open(TestDialogComponent);
-      await vi.advanceTimersByTimeAsync(0);
 
-      const backdrop = document.querySelector('.fixed.inset-0');
-      expect(backdrop.classList.contains('animate-fade-in')).toBe(true);
+      // Check initial state (before animation)
+      const backdrop = document.querySelector('.fixed.inset-0') as HTMLElement;
+      expect(backdrop).toBeTruthy();
+
+      // The service uses inline styles for animation, not classes
+      // It should have transition-opacity class and start transparent
+      expect(backdrop.classList.contains('transition-opacity')).toBe(true);
+      expect(backdrop.style.backgroundColor).toBe('rgba(0, 0, 0, 0)');
+
+      // After requestAnimationFrame, it should fade in
+      await vi.runAllTimersAsync();
+      expect(backdrop.style.backgroundColor).toBe('rgba(0, 0, 0, 0.5)');
 
       dialogRef.close();
       await vi.advanceTimersByTimeAsync(300);
       vi.useRealTimers();
     });
 
-    it('should have scale-in animation class on panel', async () => {
+    it('should have scale-in animation on panel', async () => {
 
       vi.useFakeTimers();
       const dialogRef = service.open(TestDialogComponent);
       await vi.advanceTimersByTimeAsync(0);
 
-      const panel = document.querySelector('.rounded-lg');
-      expect(panel.classList.contains('animate-scale-in')).toBe(true);
+      const panel = document.querySelector('.rounded-lg') as HTMLElement;
+      expect(panel).toBeTruthy();
+
+      // The service uses inline styles for animation, not classes
+      // Panel should have transition classes and start scaled down
+      expect(panel.classList.contains('transform')).toBe(true);
+      expect(panel.classList.contains('transition-all')).toBe(true);
+      expect(panel.classList.contains('scale-95')).toBe(true);
+      expect(panel.classList.contains('opacity-0')).toBe(true);
+
+      // After requestAnimationFrame, it should scale and fade in
+      await vi.runAllTimersAsync();
+      expect(panel.style.transform).toBe('scale(1)');
+      expect(panel.style.opacity).toBe('1');
 
       dialogRef.close();
       await vi.advanceTimersByTimeAsync(300);
@@ -535,8 +560,9 @@ describe('TailwindDialogService', () => {
       dialogRef.close();
       await vi.advanceTimersByTimeAsync(10); // Small tick to trigger close animation
 
-      expect(backdrop.style.transition).toContain('opacity');
-      expect(backdrop.style.opacity).toBe('0');
+      // The service uses background-color transition for fade-out (line 459 in service)
+      expect(backdrop.style.transition).toContain('background-color');
+      expect(backdrop.style.backgroundColor).toBe('rgba(0, 0, 0, 0)');
 
       await vi.advanceTimersByTimeAsync(300);
       vi.useRealTimers();
@@ -571,7 +597,6 @@ describe('TailwindDialogService', () => {
       let closeCount = 0;
       dialogRef.afterClosed().subscribe(() => {
         closeCount++;
-      vi.useRealTimers();
       });
 
       dialogRef.close();
@@ -581,6 +606,7 @@ describe('TailwindDialogService', () => {
       await vi.advanceTimersByTimeAsync(300);
 
       expect(closeCount).toBe(1); // Should only emit once
+      vi.useRealTimers();
     });
 
     it('should handle dialog with no configuration', async () => {

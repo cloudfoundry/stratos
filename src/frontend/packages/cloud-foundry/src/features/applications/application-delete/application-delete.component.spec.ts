@@ -2,9 +2,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { TabNavService } from '../../../../../core/src/tab-nav.service';
-import { generateTestApplicationServiceProvider } from '../../../../test-framework/application-service-helper';
-import { generateCfBaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { TabNavService } from '@stratosui/core';
+import { generateTestApplicationServiceProvider } from "@test-framework/application-service-helper";
+import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ApplicationDeleteComponent } from './application-delete.component';
 
 describe('ApplicationDeleteComponent', () => {
@@ -12,19 +12,16 @@ describe('ApplicationDeleteComponent', () => {
   let fixture: ComponentFixture<ApplicationDeleteComponent<any>>;
   const appId = '1';
   const cfId = '2';
-
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
         ...generateCfBaseTestModules(),
-        ApplicationDeleteComponent
+        ApplicationDeleteComponent,
       ],
       providers: [
-        
         generateTestApplicationServiceProvider(cfId, appId),
-        TabNavService
-      ,
-        provideZonelessChangeDetection()
+        TabNavService,
+        provideZonelessChangeDetection(),
       ]
     }).compileComponents();
 

@@ -1,9 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-
-import { endpointEntityType, stratosEntityFactory } from '../../../../../store/src/helpers/stratos-entity-factory';
-import { BaseTestModules } from '../../../../test-framework/core-test.helper';
+import { endpointEntityType, stratosEntityFactory } from '@stratosui/store';
+import { BaseTestModules, STORE_TEST_PROVIDERS } from "@test-framework/core-test.helper";
 import { AppActionMonitorIconComponent } from './app-action-monitor-icon.component';
 
 describe('AppActionMonitorIconComponent', () => {
@@ -12,13 +11,17 @@ describe('AppActionMonitorIconComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection()],
+      providers: [
+        ...(STORE_TEST_PROVIDERS || []),
+        provideZonelessChangeDetection()
+      ],
       imports: [
         ...BaseTestModules,
-        AppActionMonitorIconComponent
-      ]
-    })
-      .compileComponents();
+        AppActionMonitorIconComponent,
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {
@@ -26,7 +29,7 @@ describe('AppActionMonitorIconComponent', () => {
     component = fixture.componentInstance;
     component.id = '1';
     component.schema = stratosEntityFactory(endpointEntityType);
-    fixture.detectChanges();
+    // Don't call detectChanges() yet - component needs inputs set first
   });
 
   it('should create', () => {

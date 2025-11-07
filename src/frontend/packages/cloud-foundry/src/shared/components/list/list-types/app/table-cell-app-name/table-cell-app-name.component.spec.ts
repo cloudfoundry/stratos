@@ -5,9 +5,8 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { ROUTER_NAVIGATION } from '@ngrx/router-store';
 import { Store } from '@ngrx/store';
 
-import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { TableCellAppNameComponent } from './table-cell-app-name.component';
-
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { TableCellAppNameComponent } from "./table-cell-app-name.component";
 describe('TableCellAppNameComponent', () => {
   let component: TableCellAppNameComponent<any>;
   let fixture: ComponentFixture<TableCellAppNameComponent<any>>;
@@ -18,7 +17,7 @@ describe('TableCellAppNameComponent', () => {
       imports: [
         TableCellAppNameComponent,
         RouterTestingModule,
-        generateCfStoreModules()
+        generateCfStoreModules(),
       ]
     })
       .compileComponents();
@@ -31,8 +30,6 @@ describe('TableCellAppNameComponent', () => {
         }
       }
     });
-
-
   });
 
   beforeEach(() => {

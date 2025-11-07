@@ -13,20 +13,18 @@ describe('ApplicationStateComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      
+
       providers: [provideZonelessChangeDetection()],
-      
-      declarations: [
-        ApplicationStateIconPipe
-      ],
+
       imports: [
         MDAppModule,
         ApplicationStateComponent,
-        ApplicationStateIconComponent
+        ApplicationStateIconComponent,
+        ApplicationStateIconPipe,
       ]
-    
-    })
-      .compileComponents();
+
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

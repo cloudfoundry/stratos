@@ -10,10 +10,10 @@ describe('EventWatcherService', () => {
     TestBed.configureTestingModule({
       providers: [
         EventWatcherService,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ],
       imports: [
-        CoreModule
+        CoreModule,
       ]
     });
   });

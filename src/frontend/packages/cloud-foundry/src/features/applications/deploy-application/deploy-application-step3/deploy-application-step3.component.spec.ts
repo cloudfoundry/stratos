@@ -6,10 +6,9 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 
-import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
-import { DeployApplicationStep3Component } from './deploy-application-step3.component';
-
+import { DeployApplicationStep3Component } from "./deploy-application-step3.component";
 describe('DeployApplicationStep3Component', () => {
   let component: DeployApplicationStep3Component;
   let fixture: ComponentFixture<DeployApplicationStep3Component>;
@@ -22,13 +21,13 @@ describe('DeployApplicationStep3Component', () => {
         provideExperimentalZonelessChangeDetection(),
         provideNoopAnimations(),
         provideRouter([,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]),
         provideHttpClient(),
         provideHttpClientTesting(),
         ...generateCfStoreModules(),
-        CfOrgSpaceDataService
-      ]
+        CfOrgSpaceDataService,
+    ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(DeployApplicationStep3Component);

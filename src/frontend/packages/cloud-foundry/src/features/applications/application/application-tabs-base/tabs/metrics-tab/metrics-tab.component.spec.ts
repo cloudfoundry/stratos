@@ -5,8 +5,8 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { MDAppModule } from '../../../../../../../../core/src/core/md.module';
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
-import { generateTestApplicationServiceProvider } from '../../../../../../../test-framework/application-service-helper';
-import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateTestApplicationServiceProvider } from "@test-framework/application-service-helper";
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ApplicationStateService } from '../../../../../../shared/services/application-state.service';
 import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { MetricsTabComponent } from './metrics-tab.component';
@@ -18,20 +18,20 @@ describe('MetricsTabComponent', () => {
   const cfId = '2';
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [MetricsTabComponent],
       imports: [
+        MetricsTabComponent,
         ...generateCfStoreModules(),
         SharedModule,
         MDAppModule,
-        NoopAnimationsModule
+        NoopAnimationsModule,
       ],
       providers: [
         
         ApplicationStateService,
         ApplicationEnvVarsHelper,
         generateTestApplicationServiceProvider(cfId, appId),
-      ,
-        provideZonelessChangeDetection()
+
+        provideZonelessChangeDetection(),
       ]
     }).compileComponents();
 

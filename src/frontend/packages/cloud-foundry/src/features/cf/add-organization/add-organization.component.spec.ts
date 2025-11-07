@@ -3,21 +3,23 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { TabNavService } from '../../../../../core/src/tab-nav.service';
-import { generateCfBaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { AddOrganizationComponent } from './add-organization.component';
-import { CreateOrganizationStepComponent } from './create-organization-step/create-organization-step.component';
-
+import { CreateOrganizationStepComponent } from "./create-organization-step/create-organization-step.component";
 describe('AddOrganizationComponent', () => {
   let component: AddOrganizationComponent;
   let fixture: ComponentFixture<AddOrganizationComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [AddOrganizationComponent, CreateOrganizationStepComponent],
-      imports: generateCfBaseTestModules(),
+      imports: [
+        AddOrganizationComponent,
+        CreateOrganizationStepComponent,
+        ...generateCfBaseTestModules(),
+      ],
       providers: [
         TabNavService,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

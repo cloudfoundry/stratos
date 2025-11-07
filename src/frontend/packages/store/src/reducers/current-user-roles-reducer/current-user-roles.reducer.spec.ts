@@ -11,7 +11,7 @@ describe('currentUserRolesReducer', () => {
         scopes: []
       },
       endpoints: {},
-      state: getDefaultRolesRequestState()
+      state: getDefaultRolesRequestState(),
     };
     expect(state).toEqual(expectedState);
   });

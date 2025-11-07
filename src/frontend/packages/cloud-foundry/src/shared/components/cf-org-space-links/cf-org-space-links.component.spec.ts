@@ -1,13 +1,15 @@
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of } from 'rxjs';
 
-import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { EntityCatalogTestModule, generateStratosEntities, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { generateCFEntities } from '../../../cf-entity-generator';
 import { CfOrgSpaceLabelService } from '../../services/cf-org-space-label.service';
-import { CfOrgSpaceLinksComponent } from './cf-org-space-links.component';
-
+import { CfOrgSpaceLinksComponent } from "./cf-org-space-links.component";
 
 describe('CfOrgSpaceLinksComponent', () => {
   let component: CfOrgSpaceLinksComponent;
@@ -17,31 +19,38 @@ describe('CfOrgSpaceLinksComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
-      declarations: [CfOrgSpaceLinksComponent],
       imports: [
+        CfOrgSpaceLinksComponent,
         RouterTestingModule,
-        generateCfStoreModules()
-      ]
+        ...generateCfStoreModules(),
+        {
+          ngModule: EntityCatalogTestModule,
+          providers: [
+            {
+              provide: TEST_CATALOGUE_ENTITIES,
+              useValue: [
+                ...generateCFEntities(),
+                ...generateStratosEntities(),
+              ]
+            }
+          ]
+        },
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
     })
       .compileComponents();
   });
 
   beforeEach(() => {
-    service = jasmine.createSpyObj<CfOrgSpaceLabelService>('CfOrgSpaceLabelService', [
-      'getCfName',
-      'getCfURL',
-      'getOrgName',
-      'getOrgURL',
-      'getSpaceName',
-      'getSpaceURL'
-    ]);
-    service.multipleConnectedEndpoints$ = of(false);
-    service.getCfName.mockReturnValue(of('CfName'));
-    service.getCfURL.mockReturnValue(['/cf/path']);
-    service.getOrgName.mockReturnValue(of('OrgName'));
-    service.getOrgURL.mockReturnValue(['/org/path']);
-    service.getSpaceName.mockReturnValue(of('SpaceName'));
-    service.getSpaceURL.mockReturnValue(['/space/path']);
+    service = {
+      getCfName: vi.fn().mockReturnValue(of('CfName')),
+      getCfURL: vi.fn().mockReturnValue(['/cf/path']),
+      getOrgName: vi.fn().mockReturnValue(of('OrgName')),
+      getOrgURL: vi.fn().mockReturnValue(['/org/path']),
+      getSpaceName: vi.fn().mockReturnValue(of('SpaceName')),
+      getSpaceURL: vi.fn().mockReturnValue(['/space/path']),
+      multipleConnectedEndpoints$: of(false)
+    };
     fixture = TestBed.createComponent(CfOrgSpaceLinksComponent);
     component = fixture.componentInstance;
     component.service = service;

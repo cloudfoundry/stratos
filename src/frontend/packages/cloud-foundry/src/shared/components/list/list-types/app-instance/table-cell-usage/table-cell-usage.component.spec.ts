@@ -5,7 +5,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { UtilsService } from '../../../../../../../../core/src/core/utils.service';
 import { UsageGaugeComponent } from '../../../../../../../../core/src/shared/components/usage-gauge/usage-gauge.component';
 import { PercentagePipe } from '../../../../../../../../core/src/shared/pipes/percentage.pipe';
-import { EntityInfo } from '../../../../../../../../store/src/types/api.types';
+import { EntityInfo } from '@stratosui/store/types/api.types';
 import { TableCellUsageComponent } from './table-cell-usage.component';
 
 describe('TableCellUsageComponent', () => {
@@ -20,10 +20,8 @@ describe('TableCellUsageComponent', () => {
         PercentagePipe,
       ],
       providers: [
-        
         UtilsService,
-      ,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
     }).compileComponents();
 

@@ -13,8 +13,7 @@ describe('KubernetesTabBaseComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [KubernetesTabBaseComponent],
-      imports: KubernetesBaseTestModules,
+      imports: [KubernetesTabBaseComponent, ...KubernetesBaseTestModules],
       providers: [
         TabNavService,
         {
@@ -29,7 +28,7 @@ describe('KubernetesTabBaseComponent', () => {
           }
         }
       ]
-    })
+    }),
       .compileComponents();
   });
 

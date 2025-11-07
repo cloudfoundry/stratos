@@ -15,10 +15,10 @@ describe('ShowPageHeaderComponent', () => {
       imports: [
         ShowPageHeaderComponent,
         CoreModule,
-        RouterTestingModule
+        RouterTestingModule,
       ],
       providers: [
-        TabNavService
+        TabNavService,
       ]
     }).compileComponents();
   });

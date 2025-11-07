@@ -4,11 +4,10 @@ import { describe, it, expect, beforeEach } from 'vitest';
 
 import {
   generateCfBaseTestModulesNoShared,
-} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { LongRunningCfOperationsService } from '../../../../../data-services/long-running-cf-op.service';
 import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
-import { TableCellServiceCfBreadcrumbsComponent } from './table-cell-service-cf-breadcrumbs.component';
-
+import { TableCellServiceCfBreadcrumbsComponent } from "./table-cell-service-cf-breadcrumbs.component";
 describe('TableCellServiceCfBreadcrumbsComponent', () => {
   let component: TableCellServiceCfBreadcrumbsComponent;
   let fixture: ComponentFixture<TableCellServiceCfBreadcrumbsComponent>;
@@ -17,18 +16,13 @@ describe('TableCellServiceCfBreadcrumbsComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         TableCellServiceCfBreadcrumbsComponent,
-        CfOrgSpaceLinksComponent
-        // app-cf-org-space-links
-      ,
-      imports: [
-        generateCfBaseTestModulesNoShared()
+        CfOrgSpaceLinksComponent,
+        ...generateCfBaseTestModulesNoShared(),
       ],
       providers: [
-        
-        LongRunningCfOperationsService
-      ,
-        provideZonelessChangeDetection()
-      ]
+        LongRunningCfOperationsService,
+        provideZonelessChangeDetection(),
+      ],
     })
       .compileComponents();
 

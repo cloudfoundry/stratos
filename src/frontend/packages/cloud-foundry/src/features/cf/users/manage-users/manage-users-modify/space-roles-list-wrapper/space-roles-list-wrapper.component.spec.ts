@@ -5,10 +5,9 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
-import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ActiveRouteCfOrgSpace } from '../../../../cf-page.types';
-import { SpaceRolesListWrapperComponent } from './space-roles-list-wrapper.component';
-
+import { SpaceRolesListWrapperComponent } from "./space-roles-list-wrapper.component";
 describe('SpaceRolesListWrapperComponent', () => {
   let component: SpaceRolesListWrapperComponent;
   let fixture: ComponentFixture<SpaceRolesListWrapperComponent>;
@@ -16,18 +15,19 @@ describe('SpaceRolesListWrapperComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
+        SpaceRolesListWrapperComponent,
         ...generateCfStoreModules(),
         CoreModule,
         SharedModule,
-        NoopAnimationsModule
+        NoopAnimationsModule,
       ],
       providers: [
         
         ActiveRouteCfOrgSpace,
-      ,
-        provideZonelessChangeDetection()
+
+        provideZonelessChangeDetection(),
       ],
-      declarations: [SpaceRolesListWrapperComponent]
+      
     })
       .compileComponents();
   });

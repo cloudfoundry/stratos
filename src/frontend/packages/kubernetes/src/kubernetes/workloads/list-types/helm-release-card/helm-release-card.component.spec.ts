@@ -15,15 +15,15 @@ describe('HelmReleaseCardComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         HelmReleaseCardComponent,
-        ...KubernetesBaseTestModules
+        ...KubernetesBaseTestModules,
       ],
       providers: [
         
         DatePipe,
-      ,
-        provideZonelessChangeDetection()
+
+        provideZonelessChangeDetection(),
       ]
-    })
+    }),
       .compileComponents();
   });
 
@@ -33,7 +33,7 @@ describe('HelmReleaseCardComponent', () => {
     component.row = {
       status: 'status',
       info: {
-        last_deployed: null
+        last_deployed: null,
       },
       chart: {
         metadata: {}

@@ -13,21 +13,19 @@ describe('KubeScoreReportViewerComponent', () => {
   let fixture: ComponentFixture<KubeScoreReportViewerComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({imports: [
+    TestBed.configureTestingModule({
+      imports: [
         KubernetesBaseTestModules,
-        MDAppModule
-      ,
-        KubeScoreReportViewerComponent
+        MDAppModule,
+        KubeScoreReportViewerComponent,
       ],
       providers: [
-        
         KubernetesAnalysisService,
         KubernetesEndpointService,
         KubeBaseGuidMock,
-      ,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
-    })
+    }),
       .compileComponents();
   });
 

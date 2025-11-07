@@ -9,7 +9,7 @@ describe('PageHeaderService', () => {
     TestBed.configureTestingModule({
       providers: [
         PageHeaderService,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
     });
   });

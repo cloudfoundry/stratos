@@ -3,20 +3,18 @@ import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { generateCfBaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import {
   CloudFoundryOrganizationServiceMock,
-} from '../../../../../../test-framework/cloud-foundry-organization.service.mock';
-import { CloudFoundrySpaceServiceMock } from '../../../../../../test-framework/cloud-foundry-space.service.mock';
+} from "@test-framework/cloud-foundry-organization.service.mock";
+import { CloudFoundrySpaceServiceMock } from "@test-framework/cloud-foundry-space.service.mock";
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
 import { CloudFoundryEndpointService } from '../../../../../features/cf/services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../../features/cf/services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../features/cf/services/cloud-foundry-space.service';
 import { UserInviteService } from '../../../../../features/cf/user-invites/user-invite.service';
 import { CfUserService } from '../../../../data-services/cf-user.service';
-import { CfSpaceUsersListConfigService } from './cf-space-users-list-config.service';
-
-
+import { CfSpaceUsersListConfigService } from "./cf-space-users-list-config.service";
 describe('CfSpaceUsersListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -30,11 +28,11 @@ describe('CfSpaceUsersListConfigService', () => {
         HttpClient,
         HttpHandler,
         CloudFoundryEndpointService,
-        CfUserService
-      ,
-        provideZonelessChangeDetection()
+        CfUserService,
+
+        provideZonelessChangeDetection(),
       ],
-      imports: generateCfBaseTestModules()
+      imports: generateCfBaseTestModules(),
     });
   });
 

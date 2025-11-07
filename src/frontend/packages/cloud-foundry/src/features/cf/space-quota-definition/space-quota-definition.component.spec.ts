@@ -3,22 +3,23 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { testSCFEndpoint, testSCFEndpointGuid } from "../../test-framework/cloud-foundry-endpoint-service.helper";
+import { testSCFEndpoint, testSCFEndpointGuid } from "@test-framework/cloud-foundry-endpoint-service.helper";
 
 import { TabNavService } from '../../../../../core/src/tab-nav.service';
-import { EntityCatalogHelpers } from '../../../../../store/src/entity-catalog/entity-catalog.helper';
-import { EntityCatalogEntityConfig } from '../../../../../store/src/entity-catalog/entity-catalog.types';
-import { endpointEntityType, stratosEntityFactory } from '../../../../../store/src/helpers/stratos-entity-factory';
-import { NormalizedResponse } from '../../../../../store/src/types/api.types';
-import { WrapperRequestActionSuccess } from '../../../../../store/src/types/request.types';
+import { EntityCatalogHelpers } from '@stratosui/store/entity-catalog/entity-catalog.helper';
+import { EntityCatalogEntityConfig } from '@stratosui/store/entity-catalog/entity-catalog.types';
+import { endpointEntityType, stratosEntityFactory } from '@stratosui/store/helpers/stratos-entity-factory';
+import { NormalizedResponse } from '@stratosui/store/types/api.types';
+import { WrapperRequestActionSuccess } from '@stratosui/store/types/request.types';
 import {
   generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
-} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { EntityRelationSpecHelper } from '../../../../test-framework/entity-relations-spec-helper';
+} from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { EntityRelationSpecHelper } from "../../../entity-relations/entity-relations-spec-helper";
 import { cfEntityFactory } from '../../../cf-entity-factory';
 import { organizationEntityType, spaceEntityType } from '../../../cf-entity-types';
 import { SpaceQuotaDefinitionComponent } from './space-quota-definition.component';
+import { EntityServiceFactory } from '@stratosui/store/entity-service-factory.service';
 
 describe('SpaceQuotaDefinitionComponent', () => {
   let component: SpaceQuotaDefinitionComponent;
@@ -26,16 +27,16 @@ describe('SpaceQuotaDefinitionComponent', () => {
   const cfGuid = testSCFEndpointGuid;
   const orgGuid = '123';
   const spaceGuid = '123';
-
   const helper = new EntityRelationSpecHelper();
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        SpaceQuotaDefinitionComponent
+      imports: [
+        SpaceQuotaDefinitionComponent,
+        ...generateCfBaseTestModules(),
       ],
-      imports: generateCfBaseTestModules(),
       providers: [
+        EntityServiceFactory,
         {
           provide: ActivatedRoute,
           useValue: {
@@ -51,13 +52,11 @@ describe('SpaceQuotaDefinitionComponent', () => {
 
     })
       .compileComponents();
-
-
     const stratosEndpointEntityConfig: EntityCatalogEntityConfig = stratosEntityFactory(endpointEntityType);
     const stratosEndpointEntityKey = EntityCatalogHelpers.buildEntityKey(
       stratosEndpointEntityConfig.entityType,
-      stratosEndpointEntityConfig.endpointType
-    );
+      stratosEndpointEntityConfig.endpointType,
+      );
 
     const orgEndpointEntityConfig: EntityCatalogEntityConfig = cfEntityFactory(organizationEntityType);
     const orgEntityKey = EntityCatalogHelpers.buildEntityKey(orgEndpointEntityConfig.entityType, orgEndpointEntityConfig.endpointType);
@@ -66,20 +65,20 @@ describe('SpaceQuotaDefinitionComponent', () => {
     const spaceEndpointEntityConfig: EntityCatalogEntityConfig = cfEntityFactory(spaceEntityType);
     const spaceEntityKey = EntityCatalogHelpers.buildEntityKey(
       spaceEndpointEntityConfig.entityType,
-      spaceEndpointEntityConfig.endpointType
-    );
+      spaceEndpointEntityConfig.endpointType,
+      );
     const space = helper.createEmptyOrg(spaceGuid, 'space');
 
     const mappedData = {
       entities: {
         [stratosEndpointEntityKey]: {
-          [testSCFEndpoint.guid]: testSCFEndpoint
+          [testSCFEndpoint.guid]: testSCFEndpoint,
         },
         [orgEntityKey]: {
-          [org.entity.guid]: org
+          [org.entity.guid]: org,
         },
         [spaceEntityKey]: {
-          [space.entity.guid]: space
+          [space.entity.guid]: space,
         }
       },
       result: [testSCFEndpoint.guid]
@@ -87,7 +86,7 @@ describe('SpaceQuotaDefinitionComponent', () => {
     const store = TestBed.inject(Store);
     store.dispatch(new WrapperRequestActionSuccess(mappedData, {
       type: 'POPULATE_TEST_DATA',
-      ...stratosEndpointEntityConfig
+      ...stratosEndpointEntityConfig,
     }, 'fetch'));
   });
 

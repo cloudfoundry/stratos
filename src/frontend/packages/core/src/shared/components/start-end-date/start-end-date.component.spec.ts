@@ -16,10 +16,10 @@ describe('StartEndDateComponent', () => {
       providers: [provideZonelessChangeDetection()],
       imports: [
         StartEndDateComponent,
-        NoopAnimationsModule
+        NoopAnimationsModule,
       ]
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

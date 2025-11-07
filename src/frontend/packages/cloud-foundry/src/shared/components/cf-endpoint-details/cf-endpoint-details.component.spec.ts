@@ -13,11 +13,11 @@ describe('CfEndpointDetailsComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
-      declarations: [CfEndpointDetailsComponent],
       imports: [
+        CfEndpointDetailsComponent,
         CoreModule,
-        SharedModule
-      ]
+        SharedModule,
+      ],
     })
       .compileComponents();
   });

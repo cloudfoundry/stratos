@@ -15,9 +15,8 @@ describe('UsageBytesPipe', () => {
       providers: [
         
         UsageBytesPipe,
-        UtilsService
-      ,
-        provideZonelessChangeDetection()
+        UtilsService,
+        provideZonelessChangeDetection(),
       ]
     });
 

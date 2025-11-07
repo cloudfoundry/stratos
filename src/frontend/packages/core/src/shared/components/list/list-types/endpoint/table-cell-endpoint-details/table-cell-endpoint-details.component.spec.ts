@@ -1,8 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-
-import { BaseTestModules } from '../../../../../../../test-framework/core-test.helper';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { BaseTestModules } from '@test-framework/core-test.helper';
 import { EndpointListHelper } from '../endpoint-list.helpers';
 import { TableCellEndpointDetailsComponent } from './table-cell-endpoint-details.component';
 
@@ -12,10 +10,12 @@ describe('TableCellEndpointDetailsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [...BaseTestModules],
+      imports: [
+        TableCellEndpointDetailsComponent,
+        ...BaseTestModules
+      ],
       providers: [
-        EndpointListHelper,
-        provideZonelessChangeDetection()
+        EndpointListHelper
       ]
     }).compileComponents();
   });

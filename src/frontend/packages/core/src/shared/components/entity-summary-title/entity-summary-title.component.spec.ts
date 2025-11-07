@@ -16,8 +16,8 @@ describe('EntitySummaryTitleComponent', () => {
         EntitySummaryTitleComponent, // Now standalone
         CoreModule,
       ]
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

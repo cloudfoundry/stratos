@@ -16,10 +16,10 @@ describe('MetadataItemComponent', () => {
       imports: [
         CoreModule,
         MetadataItemComponent,
-        CopyToClipboardComponent
+        CopyToClipboardComponent,
       ],
-    })
-    .compileComponents();
+    });
+    TestBed.compileComponents();
   });
 
   beforeEach(() => {

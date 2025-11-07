@@ -3,23 +3,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { createEmptyStoreModule } from "../../test-framework/cf-autoscaler-test.helper";
+import { createEmptyStoreModule } from "@test-framework/cf-autoscaler-test.helper";
 
-import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
-import {
-  RunningInstancesComponent,
-} from '../../../../cloud-foundry/src/shared/components/running-instances/running-instances.component';
-import { ApplicationStateService } from '../../../../cloud-foundry/src/shared/services/application-state.service';
-import { ApplicationServiceMock } from '../../../../cloud-foundry/test-framework/application-service-helper';
-import { CoreModule } from '../../../../core/src/core/core.module';
-import {
-  CopyToClipboardComponent,
-} from '../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
-import { MetadataItemComponent } from '../../../../core/src/shared/components/metadata-item/metadata-item.component';
-import { AppTestModule } from '../../../../core/test-framework/core-test.helper';
-import { EntityCatalogHelper } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
-import { EntityMonitorFactory } from '../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
+import { ApplicationService, RunningInstancesComponent, ApplicationStateService } from '@stratosui/cloud-foundry';
+import { ApplicationServiceMock } from '@stratosui/cloud-foundry/testing';
+import { CoreModule, CopyToClipboardComponent, MetadataItemComponent, AppTestModule } from '@stratosui/core';
+import { EntityCatalogHelper, EntityMonitorFactory, PaginationMonitorFactory, EntityServiceFactory } from '@stratosui/store';
 import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
 import { CardAutoscalerDefaultComponent } from './card-autoscaler-default.component';
 
@@ -41,19 +30,20 @@ describe('CardAutoscalerDefaultComponent', () => {
         CommonModule,
         NoopAnimationsModule,
         createEmptyStoreModule(),
-        AppTestModule
+        AppTestModule,
       ],
       providers: [
+        EntityServiceFactory,
         
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         ApplicationStateService,
         EntityMonitorFactory,
         PaginationMonitorFactory,
-        EntityCatalogHelper
-      ,
-        provideZonelessChangeDetection()
+        EntityCatalogHelper,
+
+        provideZonelessChangeDetection(),
       ]
-    })
+    }),
       .compileComponents();
   });
 

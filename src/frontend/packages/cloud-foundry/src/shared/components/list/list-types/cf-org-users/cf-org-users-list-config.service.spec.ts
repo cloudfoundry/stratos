@@ -4,25 +4,26 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
+import { EntityMonitorFactory } from '@stratosui/store/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '@stratosui/store/monitors/pagination-monitor.factory';
 import {
   generateCfBaseTestModulesNoShared,
   generateTestCfUserServiceProvider,
-} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from "@test-framework/cloud-foundry-endpoint-service.helper";
 import {
   CloudFoundryOrganizationServiceMock,
-} from '../../../../../../test-framework/cloud-foundry-organization.service.mock';
+} from "@test-framework/cloud-foundry-organization.service.mock";
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
 import { CloudFoundryEndpointService } from '../../../../../features/cf/services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../../features/cf/services/cloud-foundry-organization.service';
 import { UserInviteService } from '../../../../../features/cf/user-invites/user-invite.service';
 import { CfOrgUsersListConfigService } from './cf-org-users-list-config.service';
-
+import { EntityServiceFactory } from "@stratosui/store/entity-service-factory.service";
 describe('CfOrgUsersListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
+        EntityServiceFactory,
         
         CfOrgUsersListConfigService,
         { provide: CloudFoundryOrganizationService, useClass: CloudFoundryOrganizationServiceMock },
@@ -34,11 +35,11 @@ describe('CfOrgUsersListConfigService', () => {
         HttpClient,
         HttpHandler,
         CloudFoundryEndpointService,
-        ConfirmationDialogService
-      ,
-        provideZonelessChangeDetection()
+        ConfirmationDialogService,
+
+        provideZonelessChangeDetection(),
       ],
-      imports: generateCfBaseTestModulesNoShared()
+      imports: generateCfBaseTestModulesNoShared(),
     });
   });
 

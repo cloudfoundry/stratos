@@ -16,14 +16,21 @@ describe('SshViewerComponent', () => {
         SshViewerComponent,
         CoreModule,
       ]
-    })
-    .compileComponents();
+    });
+    TestBed.compileComponents();
   });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SshViewerComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    // Properly clean up the component
+    if (fixture) {
+      fixture.destroy();
+    }
   });
 
   it('should create', () => {

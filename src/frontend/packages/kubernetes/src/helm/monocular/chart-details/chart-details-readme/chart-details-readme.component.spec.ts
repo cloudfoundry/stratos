@@ -13,8 +13,8 @@ describe('Component: ChartDetailsReadme', () => {
       providers: [
         
         { provide: ChartsService, useValue: new MockChartService() },
-      ,
-        provideZonelessChangeDetection()
+
+        provideZonelessChangeDetection(),
       ],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();

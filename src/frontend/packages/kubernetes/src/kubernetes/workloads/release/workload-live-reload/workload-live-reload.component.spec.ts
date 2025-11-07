@@ -15,18 +15,18 @@ describe('WorkloadLiveReloadComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
-        ...KubernetesBaseTestModules
-      ,
-        WorkloadLiveReloadComponent
+        ...KubernetesBaseTestModules,
+
+        WorkloadLiveReloadComponent,
       ]providers: [
         
         HelmReleaseSocketService,
         HelmReleaseHelperService,
-        HelmReleaseGuidMock
-      ,
-        provideZonelessChangeDetection()
+        HelmReleaseGuidMock,
+
+        provideZonelessChangeDetection(),
       ]
-    })
+    }),
       .compileComponents();
   });
 

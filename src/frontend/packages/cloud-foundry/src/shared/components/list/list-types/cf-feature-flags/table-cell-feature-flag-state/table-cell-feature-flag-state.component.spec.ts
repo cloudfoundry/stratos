@@ -7,9 +7,8 @@ import {
 } from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import {
   generateCfBaseTestModulesNoShared,
-} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { TableCellFeatureFlagStateComponent } from './table-cell-feature-flag-state.component';
-
+} from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { TableCellFeatureFlagStateComponent } from "./table-cell-feature-flag-state.component";
 describe('TableCellFeatureFlagStateComponent', () => {
   let component: TableCellFeatureFlagStateComponent;
   let fixture: ComponentFixture<TableCellFeatureFlagStateComponent>;
@@ -17,11 +16,11 @@ describe('TableCellFeatureFlagStateComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
-      declarations: [TableCellFeatureFlagStateComponent],
       imports: [
+        TableCellFeatureFlagStateComponent,
         ...generateCfBaseTestModulesNoShared(),
-        BooleanIndicatorComponent
-      ]
+        BooleanIndicatorComponent,
+      ],
     })
       .compileComponents();
 

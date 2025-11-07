@@ -16,11 +16,11 @@ describe('PageNotFoundComponentComponent', () => {
       providers: [provideZonelessChangeDetection()],
 
       imports: [
-        PageNotFoundComponentComponent
+        PageNotFoundComponentComponent,
       ]
 
-    })
-    .compileComponents();
+    });
+    TestBed.compileComponents();
   });
 
   beforeEach(() => {

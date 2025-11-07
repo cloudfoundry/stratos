@@ -16,11 +16,11 @@ describe('KubernetesAWSAuthFormComponent', () => {
         providers: [provideZonelessChangeDetection()],imports: [
         MDAppModule,
         SharedModule,
-        NoopAnimationsModule
-      ,
-        KubernetesAWSAuthFormComponent
+        NoopAnimationsModule,
+
+        KubernetesAWSAuthFormComponent,
       ]
-    })
+    }),
       .compileComponents();
   });
 

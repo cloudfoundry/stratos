@@ -13,16 +13,16 @@ describe('KubeConfigTableCertComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
-        ...KubernetesBaseTestModules
-      ,
-        KubeConfigTableCertComponent
+        ...KubernetesBaseTestModules,
+
+        KubeConfigTableCertComponent,
       ]providers: [
         
-        KubeConfigHelper
-      ,
-        provideZonelessChangeDetection()
+        KubeConfigHelper,
+
+        provideZonelessChangeDetection(),
       ]
-    })
+    }),
       .compileComponents();
   });
 

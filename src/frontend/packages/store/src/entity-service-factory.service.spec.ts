@@ -15,7 +15,7 @@ describe('EntityServiceFactoryService', () => {
     // Create mocks
     mockStore = {} as Store<GeneralEntityAppState>;
     mockEntityMonitorFactory = {
-      create: vi.fn()
+      create: vi.fn(),
     } as any;
     mockEntityCatalog = new TestEntityCatalog();
 
@@ -23,7 +23,7 @@ describe('EntityServiceFactoryService', () => {
     service = new EntityServiceFactory(
       mockStore,
       mockEntityMonitorFactory,
-      mockEntityCatalog
+      mockEntityCatalog,
     );
   });
 

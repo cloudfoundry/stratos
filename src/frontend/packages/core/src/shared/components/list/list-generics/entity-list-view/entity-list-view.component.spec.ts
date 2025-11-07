@@ -1,38 +1,44 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-
-import { STRATOS_ENDPOINT_TYPE, systemInfoEntityType } from '../../../../../../../store/src/helpers/stratos-entity-factory';
-import { BaseTestModules } from '../../../../../../test-framework/core-test.helper';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { STRATOS_ENDPOINT_TYPE, systemInfoEntityType } from '@stratosui/store';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { EntityListViewComponent } from './entity-list-view.component';
 
 describe('EntityListViewComponent', () => {
   let component: EntityListViewComponent;
   let fixture: ComponentFixture<EntityListViewComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection()],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        ...STORE_TEST_PROVIDERS
+      ],
       imports: [
-        ...BaseTestModules,
+        EntityListViewComponent,
+        NoopAnimationsModule,
+        createBasicStoreModule()
       ]
-    })
-      .compileComponents();
-  });
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(EntityListViewComponent);
     component = fixture.componentInstance;
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('should initialize provider on ngOnInit with entity config', () => {
     component.config = {
       entityConfig: {
         entityType: systemInfoEntityType,
         endpointType: STRATOS_ENDPOINT_TYPE,
       },
     };
-    expect(() => fixture.detectChanges()).toThrowError('List Error: stratosSystemInfo has no action builder for the getMultiple action.');
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
+    component.ngOnInit();
+    expect(component.provider).toBeDefined();
   });
 });

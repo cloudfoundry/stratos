@@ -13,21 +13,19 @@ describe('AnalysisReportSelectorComponent', () => {
   let fixture: ComponentFixture<AnalysisReportSelectorComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({imports: [
+    TestBed.configureTestingModule({
+      imports: [
         KubernetesBaseTestModules,
-        MDAppModule
-      ,
-        AnalysisReportSelectorComponent
+        MDAppModule,
+        AnalysisReportSelectorComponent,
       ],
       providers: [
-        
         KubernetesAnalysisService,
         KubernetesEndpointService,
         KubeBaseGuidMock,
-      ,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
-    })
+    }),
       .compileComponents();
   });
 

@@ -4,7 +4,6 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import { TailwindDialogRef, MAT_DIALOG_DATA } from '@stratosui/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
-import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { DialogConfirmComponent } from './dialog-confirm.component';
 
 describe('DialogConfirmComponent', () => {
@@ -25,7 +24,7 @@ describe('DialogConfirmComponent', () => {
       entity: {
         metadata: {}
       },
-      entityRequestInfo: {} as RequestInfoState
+      entityRequestInfo: {}
     };
   }
 
@@ -36,11 +35,9 @@ describe('DialogConfirmComponent', () => {
         NoopAnimationsModule,
       ],
       providers: [
-        
         { provide: TailwindDialogRef, useClass: TailwindDialogRefMock },
         { provide: MAT_DIALOG_DATA, useClass: DialogDataMock },
-      ,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();
@@ -59,14 +56,23 @@ describe('DialogConfirmComponent', () => {
 
   it('should close when clicked on cancel', () => {
     const spy = vi.spyOn(component.dialogRef, 'close');
-    element.querySelector('button').click();
+    const cancelButton = element.querySelector('button');
+    expect(cancelButton).toBeTruthy();
+    cancelButton?.click();
 
     expect(spy).toHaveBeenCalled();
   });
 
   it('should enable confirm button if matches text', () => {
-    const confirm: HTMLButtonElement = element.querySelector('.confirm-dialog__confirm');
-    const input: HTMLInputElement = element.querySelector('input');
+    const confirm: HTMLButtonElement | null = element.querySelector('.confirm-dialog__confirm');
+    const input: HTMLInputElement | null = element.querySelector('input');
+    expect(confirm).toBeTruthy();
+    expect(input).toBeTruthy();
+
+    if (!confirm || !input) {
+      return;
+    }
+
     expect(confirm.disabled).toBeTruthy();
 
     input.value = 'textToMatch';
@@ -86,7 +92,9 @@ describe('DialogConfirmComponent', () => {
     };
     fixture.detectChanges();
 
-    expect(element.querySelector('mat-icon').textContent).toEqual('warning');
+    const warningIcon = element.querySelector('.material-icons');
+    expect(warningIcon).toBeTruthy();
+    expect(warningIcon?.textContent).toEqual('warning');
   });
 
   it('should show warning icon if text to match', () => {
@@ -99,7 +107,9 @@ describe('DialogConfirmComponent', () => {
     };
     fixture.detectChanges();
 
-    expect(element.querySelector('mat-icon').textContent).toEqual('warning');
+    const warningIcon = element.querySelector('.material-icons');
+    expect(warningIcon).toBeTruthy();
+    expect(warningIcon?.textContent).toEqual('warning');
   });
 
   it('should show warning icon if is critical', () => {
@@ -112,12 +122,14 @@ describe('DialogConfirmComponent', () => {
     };
     fixture.detectChanges();
 
-    expect(element.querySelector('mat-icon').textContent).toEqual('warning');
-
+    const warningIcon = element.querySelector('.material-icons');
+    expect(warningIcon).toBeTruthy();
+    expect(warningIcon?.textContent).toEqual('warning');
   });
 
   it('should disable confirm button if not matching text', () => {
-    const confirm: HTMLButtonElement = element.querySelector('.confirm-dialog__confirm');
-    expect(confirm.disabled).toBeTruthy();
+    const confirm: HTMLButtonElement | null = element.querySelector('.confirm-dialog__confirm');
+    expect(confirm).toBeTruthy();
+    expect(confirm?.disabled).toBeTruthy();
   });
 });

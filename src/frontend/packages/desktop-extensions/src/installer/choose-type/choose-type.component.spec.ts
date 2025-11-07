@@ -12,7 +12,7 @@ describe('ChooseTypeComponent', () => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       declarations: [ ChooseTypeComponent ]
-    })
+    }),
     .compileComponents();
   });
 

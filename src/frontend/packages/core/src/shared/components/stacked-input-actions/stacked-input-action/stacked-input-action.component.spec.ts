@@ -3,7 +3,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { of as observableOf } from 'rxjs';
 
-import { BaseTestModulesNoShared } from '../../../../../test-framework/core-test.helper';
+import { BaseTestModulesNoShared, STORE_TEST_PROVIDERS } from "@test-framework/core-test.helper";
 import { StackedInputActionComponent, StackedInputActionResult } from './stacked-input-action.component';
 
 describe('StackedInputActionComponent', () => {
@@ -12,13 +12,16 @@ describe('StackedInputActionComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection()],
-      imports: [
-        StackedInputActionComponent,
-        ...BaseTestModulesNoShared
+      providers: [
+        ...(STORE_TEST_PROVIDERS || []),
+        provideZonelessChangeDetection()
       ],
-    })
-      .compileComponents();
+      imports: [
+        ...BaseTestModulesNoShared,
+        StackedInputActionComponent,
+      ],
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {
@@ -26,7 +29,7 @@ describe('StackedInputActionComponent', () => {
     component = fixture.componentInstance;
     component.stateIn$ = observableOf({
       key: 'string',
-      result: StackedInputActionResult.OTHER_VALUES_UPDATED
+      result: StackedInputActionResult.OTHER_VALUES_UPDATED,
     });
     fixture.detectChanges();
   });

@@ -13,10 +13,9 @@ import { MetadataItemComponent } from '../../../../../../core/src/shared/compone
 import {
   generateCfBaseTestModulesNoShared,
   generateTestCfEndpointService,
-} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { UserInviteService } from '../../../../features/cf/user-invites/user-invite.service';
-import { CardCfInfoComponent } from './card-cf-info.component';
-
+import { CardCfInfoComponent } from "./card-cf-info.component";
 describe('CardCfInfoComponent', () => {
   let component: CardCfInfoComponent;
   let fixture: ComponentFixture<CardCfInfoComponent>;
@@ -27,15 +26,15 @@ describe('CardCfInfoComponent', () => {
           CardCfInfoComponent,
           MetadataItemComponent,
           BooleanIndicatorComponent,
-          CopyToClipboardComponent
-        ],
+          CopyToClipboardComponent,
+    ],
         providers: [
           
           generateTestCfEndpointService(),
           UserInviteService,
-          ConfirmationDialogService
-        ,
-          provideZonelessChangeDetection()
+          ConfirmationDialogService,
+
+          provideZonelessChangeDetection(),
         ]
       }).compileComponents();
     });

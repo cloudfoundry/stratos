@@ -12,7 +12,7 @@ describe('TableRowStateManager', () => {
   const checkState = (manager: TableRowStateManager, actualState: RowState, expectedState: RowState) => {
     const fake = {
       FAKE: {
-        error: false
+        error: false,
       }
     };
     expect(actualState).toEqual(expectedState);
@@ -32,11 +32,11 @@ describe('TableRowStateManager', () => {
   it('should init the state', () => {
     const initState = {
       1: {
-        error: true
+        error: true,
       },
       2: {
         error: false,
-        blocked: true
+        blocked: true,
       }
     };
 
@@ -46,7 +46,7 @@ describe('TableRowStateManager', () => {
     sub = obs.pipe(
       tap(state => {
         checkState(stateManager, state, initState);
-      })
+      }),
     ).subscribe();
   });
   it('should update the row state', () => {
@@ -86,7 +86,7 @@ describe('TableRowStateManager', () => {
       skip(1),
       tap(state => {
         checkState(stateManager, state, expectedState);
-      })
+      }),
     ).subscribe();
     stateManager.updateRowState('1', updateState);
   });
@@ -98,16 +98,16 @@ describe('TableRowStateManager', () => {
       },
       2: {
         error: false,
-        blocked: true
+        blocked: true,
       }
     };
     const updateState = {
       1: {
         error: false,
-        blocked: true
+        blocked: true,
       },
       2: {
-        blocked: false
+        blocked: false,
       }
     };
     const expectedState = {
@@ -118,7 +118,7 @@ describe('TableRowStateManager', () => {
       },
       2: {
         blocked: false,
-        error: false
+        error: false,
       }
     };
 
@@ -141,16 +141,16 @@ describe('TableRowStateManager', () => {
       },
       2: {
         error: false,
-        blocked: true
+        blocked: true,
       }
     };
     const setState = {
       1: {
         error: false,
-        blocked: true
+        blocked: true,
       },
       2: {
-        blocked: false
+        blocked: false,
       }
     };
 
@@ -173,7 +173,7 @@ describe('TableRowStateManager', () => {
       },
       2: {
         error: false,
-        blocked: true
+        blocked: true,
       }
     };
     const setState = {
@@ -189,7 +189,7 @@ describe('TableRowStateManager', () => {
       },
       2: {
         error: false,
-        blocked: true
+        blocked: true,
       }
     };
 

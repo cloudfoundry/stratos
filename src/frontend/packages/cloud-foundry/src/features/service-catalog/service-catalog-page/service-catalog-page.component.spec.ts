@@ -5,14 +5,14 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { CoreModule } from '../../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../../core/src/shared/shared.module';
-import { TabNavService } from '../../../../../core/src/tab-nav.service';
-import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
-import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
-import { ServiceCatalogPageComponent } from './service-catalog-page.component';
-
+import { EntityServiceFactory } from '@stratosui/store/entity-service-factory.service';
+import { CoreModule } from '@stratosui/core/core.module';
+import { SharedModule } from '@stratosui/core/shared.module';
+import { TabNavService } from '@stratosui/core/tab-nav.service';
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { CfEndpointsMissingComponent } from '@stratosui/shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
+import { CloudFoundryService } from '@stratosui/shared/data-services/cloud-foundry.service';
+import { ServiceCatalogPageComponent } from "./service-catalog-page.component";
 describe('ServiceCatalogPageComponent', () => {
   let component: ServiceCatalogPageComponent;
   let fixture: ComponentFixture<ServiceCatalogPageComponent>;
@@ -20,23 +20,20 @@ describe('ServiceCatalogPageComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
+        ServiceCatalogPageComponent,
+        CfEndpointsMissingComponent,
         CommonModule,
         CoreModule,
         SharedModule,
         RouterTestingModule,
         NoopAnimationsModule,
-        generateCfStoreModules()
-      ],
-      declarations: [
-        ServiceCatalogPageComponent,
-        CfEndpointsMissingComponent
+        ...generateCfStoreModules(),
       ],
       providers: [
-        
+        EntityServiceFactory,
         TabNavService,
-        CloudFoundryService
-      ,
-        provideZonelessChangeDetection()
+        CloudFoundryService,
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

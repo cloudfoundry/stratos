@@ -16,8 +16,8 @@ describe('UserProfileBannerComponent', () => {
         UserProfileBannerComponent,
         CoreModule,
       ]
-    })
-    .compileComponents();
+    });
+    TestBed.compileComponents();
   });
 
   beforeEach(() => {

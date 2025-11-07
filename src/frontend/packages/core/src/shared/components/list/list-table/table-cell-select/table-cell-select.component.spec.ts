@@ -18,11 +18,11 @@ describe('TableCellSelectComponent', () => {
       
       imports: [
         CoreModule,
-        TableCellSelectComponent
+        TableCellSelectComponent,
       ]
     
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {
@@ -30,7 +30,10 @@ describe('TableCellSelectComponent', () => {
     component = fixture.componentInstance;
     component.row = {};
     component.rowState = observableOf({});
-    component.dataSource = {} as IListDataSource<any>;
+    component.dataSource = {
+      selectedRows: () => new Map(),
+      getRowUniqueId: (row: any) => ''
+    } as unknown as IListDataSource<any>;
     fixture.detectChanges();
   });
 

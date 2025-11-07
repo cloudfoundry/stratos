@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input, OnInit  } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 
@@ -39,13 +39,19 @@ export class AppChip<T = string> implements IAppChip<T> {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppChipsComponent implements OnInit {
-
-  constructor() { }
+  private cdr = inject(ChangeDetectorRef);
 
   public atLowerLimit = true;
 
+  private pChips: AppChip[] = [];
   @Input()
-  public chips: AppChip[] = [];
+  get chips(): AppChip[] {
+    return this.pChips;
+  }
+  set chips(chips: AppChip[]) {
+    this.pChips = chips;
+    this.cdr.markForCheck();
+  }
 
   @Input()
   stacked = false;
@@ -56,8 +62,15 @@ export class AppChipsComponent implements OnInit {
   @Input()
   lowerLimit = 3;
 
+  private pDisplayProperty = 'value';
   @Input()
-  displayProperty = 'value';
+  get displayProperty(): string {
+    return this.pDisplayProperty;
+  }
+  set displayProperty(displayProperty: string) {
+    this.pDisplayProperty = displayProperty;
+    this.cdr.markForCheck();
+  }
 
   public limit!: number;
 
@@ -73,6 +86,7 @@ export class AppChipsComponent implements OnInit {
       this.limit = this.lowerLimit;
       this.atLowerLimit = true;
     }
+    this.cdr.markForCheck();
   }
 
   public getChipClasses(color?: string): string {

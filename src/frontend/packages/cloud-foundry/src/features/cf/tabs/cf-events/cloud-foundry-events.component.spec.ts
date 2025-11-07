@@ -2,27 +2,25 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { CFBaseTestModules } from '../../../../../test-framework/cf-test-helper';
+import { CFBaseTestModules } from "@test-framework/cf-test-helper";
 import {
   CloudFoundryEventsListComponent,
 } from '../../../../shared/components/cloud-foundry-events-list/cloud-foundry-events-list.component';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
-import { CloudFoundryEventsComponent } from './cloud-foundry-events.component';
-
+import { CloudFoundryEventsComponent } from "./cloud-foundry-events.component";
 describe('CloudFoundryEventsComponent', () => {
   let component: CloudFoundryEventsComponent;
   let fixture: ComponentFixture<CloudFoundryEventsComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
+      imports: [
         CloudFoundryEventsComponent,
-        CloudFoundryEventsListComponent
-
+        CloudFoundryEventsListComponent,
+        ...CFBaseTestModules,
       ],
-      imports: [...CFBaseTestModules],
       providers: [
         CloudFoundryEndpointService,
         CfUserService, {

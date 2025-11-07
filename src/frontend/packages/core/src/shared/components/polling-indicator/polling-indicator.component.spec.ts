@@ -15,10 +15,10 @@ describe('PollingIndicatorComponent', () => {
       providers: [provideZonelessChangeDetection()],
       imports: [
         PollingIndicatorComponent,
-        CoreModule
+        CoreModule,
       ]
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

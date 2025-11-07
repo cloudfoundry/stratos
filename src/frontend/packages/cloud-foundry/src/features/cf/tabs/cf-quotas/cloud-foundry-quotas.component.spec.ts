@@ -4,22 +4,23 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { TabNavService } from '../../../../../../core/src/tab-nav.service';
-import { CFBaseTestModules } from '../../../../../test-framework/cf-test-helper';
-import { generateTestCfEndpointServiceProvider } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundryQuotasComponent } from './cloud-foundry-quotas.component';
-
+import { CFBaseTestModules } from "@test-framework/cf-test-helper";
+import { generateTestCfEndpointServiceProvider } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { CloudFoundryQuotasComponent } from "./cloud-foundry-quotas.component";
 describe('CloudFoundryQuotasComponent', () => {
   let component: CloudFoundryQuotasComponent;
   let fixture: ComponentFixture<CloudFoundryQuotasComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [CloudFoundryQuotasComponent],
       providers: [
         generateTestCfEndpointServiceProvider(), TabNavService, DatePipe,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ],
-      imports: [...CFBaseTestModules]
+      imports: [
+        CloudFoundryQuotasComponent,
+        ...CFBaseTestModules,
+      ],
     })
       .compileComponents();
   });

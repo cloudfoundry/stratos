@@ -4,10 +4,8 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../../store/src/app-state';
-import { StratosStatus } from '../../../../../../store/src/types/shared.types';
-import { UtilsService } from '../../../../core/utils.service';
+import { RouterNav, AppState, StratosStatus } from '@stratosui/store';
+import { UtilsService } from '@stratosui/core';
 import { CardStatusComponent, determineCardStatus } from '../card-status/card-status.component';
 
 enum AlertLevel {

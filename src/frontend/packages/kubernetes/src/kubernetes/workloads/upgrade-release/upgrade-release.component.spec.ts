@@ -17,9 +17,9 @@ describe('UpgradeReleaseComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ UpgradeReleaseComponent ],
       imports: [
-        ...WorkloadsBaseTestingModule
+        UpgradeReleaseComponent,
+        ...WorkloadsBaseTestingModule,
       ],
       providers: [
         KubernetesEndpointService,
@@ -28,7 +28,7 @@ describe('UpgradeReleaseComponent', () => {
         { provide: ChartsService, useValue: new MockChartService() },
         { provide: ConfigService, useValue: { appName: 'appName' } },
       ]
-    })
+    }),
     .compileComponents();
   });
 

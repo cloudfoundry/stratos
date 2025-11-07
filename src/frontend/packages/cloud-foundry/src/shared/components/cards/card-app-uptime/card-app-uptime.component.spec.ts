@@ -20,21 +20,20 @@ import {
 } from '../../../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
 import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
 import { UptimePipe } from '../../../../../../core/src/shared/pipes/uptime.pipe';
-import { ApplicationServiceMock } from '../../../../../test-framework/application-service-helper';
-import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { ApplicationServiceMock } from "@test-framework/application-service-helper";
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ApplicationMonitorService } from '../../../../features/applications/application-monitor.service';
 import { ApplicationService } from '../../../../features/applications/application.service';
 import { ApplicationStateService } from '../../../services/application-state.service';
 import { CardAppStatusComponent } from '../card-app-status/card-app-status.component';
-import { CardAppUptimeComponent } from './card-app-uptime.component';
-
+import { CardAppUptimeComponent } from "./card-app-uptime.component";
 describe('CardAppUptimeComponent', () => {
   let component: CardAppUptimeComponent;
   let fixture: ComponentFixture<CardAppUptimeComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
+      imports: [
         CardAppUptimeComponent,
         CardAppStatusComponent,
         CardStatusComponent,
@@ -44,8 +43,6 @@ describe('CardAppUptimeComponent', () => {
         UptimePipe,
         MetadataItemComponent,
         CopyToClipboardComponent,
-      ],
-      imports: [
         ...generateCfStoreModules(),
         CoreModule,
         NoopAnimationsModule,
@@ -56,8 +53,8 @@ describe('CardAppUptimeComponent', () => {
         ApplicationStateService,
         UtilsService,
         ApplicationMonitorService,
-      ,
-        provideZonelessChangeDetection()
+
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

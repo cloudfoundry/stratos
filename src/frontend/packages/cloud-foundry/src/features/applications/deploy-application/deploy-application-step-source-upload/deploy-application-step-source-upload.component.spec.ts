@@ -6,10 +6,9 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 
-import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
-import { DeployApplicationStepSourceUploadComponent } from './deploy-application-step-source-upload.component';
-
+import { DeployApplicationStepSourceUploadComponent } from "./deploy-application-step-source-upload.component";
 describe('DeployApplicationStepSourceUploadComponent', () => {
   let component: DeployApplicationStepSourceUploadComponent;
   let fixture: ComponentFixture<DeployApplicationStepSourceUploadComponent>;
@@ -22,13 +21,13 @@ describe('DeployApplicationStepSourceUploadComponent', () => {
         provideExperimentalZonelessChangeDetection(),
         provideNoopAnimations(),
         provideRouter([,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]),
         provideHttpClient(),
         provideHttpClientTesting(),
         ...generateCfStoreModules(),
-        CfOrgSpaceDataService
-      ]
+        CfOrgSpaceDataService,
+    ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(DeployApplicationStepSourceUploadComponent);

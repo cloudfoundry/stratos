@@ -2,24 +2,27 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { TabNavService } from '../../../../../core/src/tab-nav.service';
-import { generateCfBaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { LongRunningCfOperationsService } from '../../../shared/data-services/long-running-cf-op.service';
+import { TabNavService } from '@stratosui/core';
+import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { LongRunningCfOperationsService } from '@stratosui/shared';
 import { QuotaDefinitionFormComponent } from '../quota-definition-form/quota-definition-form.component';
 import { AddQuotaComponent } from './add-quota.component';
-import { CreateQuotaStepComponent } from './create-quota-step/create-quota-step.component';
-
+import { CreateQuotaStepComponent } from "./create-quota-step/create-quota-step.component";
 describe('AddQuotaComponent', () => {
   let component: AddQuotaComponent;
   let fixture: ComponentFixture<AddQuotaComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [AddQuotaComponent, CreateQuotaStepComponent, QuotaDefinitionFormComponent],
-      imports: [...generateCfBaseTestModules()],
+      imports: [
+        AddQuotaComponent,
+        CreateQuotaStepComponent,
+        QuotaDefinitionFormComponent,
+        ...generateCfBaseTestModules(),
+      ],
       providers: [
         TabNavService, LongRunningCfOperationsService,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

@@ -19,10 +19,10 @@ describe('DateTimeComponent', () => {
         FormsModule,
         ReactiveFormsModule,
         MDAppModule,
-        NoopAnimationsModule
+        NoopAnimationsModule,
       ]
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

@@ -5,25 +5,26 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import {
   generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
-} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundrySpaceServiceMock } from '../../../../../test-framework/cloud-foundry-space.service.mock';
+} from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { CloudFoundrySpaceServiceMock } from "@test-framework/cloud-foundry-space.service.mock";
 import { CloudFoundrySpaceService } from '../../services/cloud-foundry-space.service';
-import { EditSpaceStepComponent } from './edit-space-step.component';
-
+import { EditSpaceStepComponent } from "./edit-space-step.component";
 describe('EditSpaceStepComponent', () => {
   let component: EditSpaceStepComponent;
   let fixture: ComponentFixture<EditSpaceStepComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [EditSpaceStepComponent],
-      imports: generateCfBaseTestModules(),
+      imports: [
+        EditSpaceStepComponent,
+        ...generateCfBaseTestModules(),
+      ],
       providers: [
         
         { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock },
         generateTestCfEndpointServiceProvider(),
-      ,
-        provideZonelessChangeDetection()
+
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

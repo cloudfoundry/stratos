@@ -1,9 +1,11 @@
+import { provideHttpClient } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-
-import { BaseTestModulesNoShared } from '../../../../../test-framework/core-test.helper';
-import { SharedModule } from '../../../../shared/shared.module';
+import { RouterTestingModule } from '@angular/router/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { entityCatalog, EntityServiceFactory, generateStratosEntities } from '@stratosui/store';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { AppTestModule } from "@test-framework/core-test.helper";
 import { TabNavService } from '../../../../tab-nav.service';
 import { RestoreEndpointsComponent } from './restore-endpoints.component';
 
@@ -13,27 +15,29 @@ describe('RestoreEndpointsComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      
       imports: [
-        ...BaseTestModulesNoShared,
-        SharedModule,
-        RestoreEndpointsComponent
+        createBasicStoreModule(),
+        AppTestModule,
+        RouterTestingModule,
+        RestoreEndpointsComponent,
       ],
       providers: [
-        
-        TabNavService
-      ,
-        provideZonelessChangeDetection()
-      ]
-    
-    })
-      .compileComponents();
+        TabNavService,
+        EntityServiceFactory,
+        ...STORE_TEST_PROVIDERS,
+        provideHttpClient(),
+        provideZonelessChangeDetection(),
+      ],
+    });
+
+    // Register entities AFTER modules are loaded
+    const entities = generateStratosEntities();
+    entities.forEach(entity => entityCatalog.register(entity));
   });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(RestoreEndpointsComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {

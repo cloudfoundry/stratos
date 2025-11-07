@@ -2,34 +2,34 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { TabNavService } from '../../../../../core/src/tab-nav.service';
+import { TabNavService } from '@stratosui/core';
 import {
   generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
-} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import {
-  CloudFoundryUserProvidedServicesService,
-} from '../../../shared/services/cloud-foundry-user-provided-services.service';
+} from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { CloudFoundryUserProvidedServicesService } from '@stratosui/shared';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { EditOrganizationStepComponent } from './edit-organization-step/edit-organization-step.component';
-import { EditOrganizationComponent } from './edit-organization.component';
-
+import { EditOrganizationComponent } from "./edit-organization.component";
 describe('EditOrganizationComponent', () => {
   let component: EditOrganizationComponent;
   let fixture: ComponentFixture<EditOrganizationComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [EditOrganizationComponent, EditOrganizationStepComponent],
-      imports: generateCfBaseTestModules(),
+      imports: [
+        EditOrganizationComponent,
+        EditOrganizationStepComponent,
+        ...generateCfBaseTestModules(),
+      ],
       providers: [
         
         ActiveRouteCfOrgSpace,
         generateTestCfEndpointServiceProvider(),
         TabNavService,
         CloudFoundryUserProvidedServicesService,
-      ,
-        provideZonelessChangeDetection()
+
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

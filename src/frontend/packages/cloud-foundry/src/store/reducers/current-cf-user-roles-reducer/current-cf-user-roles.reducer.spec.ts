@@ -35,8 +35,8 @@ function getOrgAction(type: CfUserRelationTypes, orgGuid: string = testOrgGuid) 
 function getState(
   orgOrSpace: RoleEntities,
   allRoles: { guid: string, roles: ISpaceRoleState | IOrgRoleState }[] = [],
-  roles?: ISpaceRoleState | IOrgRoleState
-): ICfRolesState {
+  roles?: ISpaceRoleState | IOrgRoleState,
+      ): ICfRolesState {
   const baseState = getDefaultCfEndpointRoles();
   if (!allRoles.length) {
     let guid = testSpaceGuid;
@@ -50,7 +50,7 @@ function getState(
   };
   if (orgOrSpace === RoleEntities.SPACES) {
     orgSpaceRoles.organizations = {
-      [testOrgGuid]: createCfOrgRoleStateState()
+      [testOrgGuid]: createCfOrgRoleStateState(),
     };
   }
   allRoles.forEach(role => {
@@ -61,7 +61,7 @@ function getState(
   });
   return {
     ...baseState,
-    ...orgSpaceRoles
+    ...orgSpaceRoles,
   };
 }
 
@@ -153,7 +153,7 @@ describe('currentCfUserRolesReducer', () => {
         orgId: testOrgGuid,
         isManager: false,
         isAuditor: false,
-        isDeveloper: true
+        isDeveloper: true,
       }
     },
     {
@@ -162,7 +162,7 @@ describe('currentCfUserRolesReducer', () => {
         orgId: generalGuid,
         isManager: true,
         isAuditor: false,
-        isDeveloper: false
+        isDeveloper: false,
       }
     }]);
     const orgState = getState(RoleEntities.ORGS, [{
@@ -173,8 +173,8 @@ describe('currentCfUserRolesReducer', () => {
         isBillingManager: false,
         isUser: false,
         spaceGuids: [
-          testSpaceGuid
-        ]
+          testSpaceGuid,
+    ]
       }
     },
     {
@@ -185,8 +185,8 @@ describe('currentCfUserRolesReducer', () => {
         isBillingManager: false,
         isUser: false,
         spaceGuids: [
-          generalGuid
-        ]
+          generalGuid,
+    ]
       }
     }]);
     toEqual.organizations = orgState.organizations;
@@ -199,15 +199,13 @@ describe('currentCfUserRolesReducer', () => {
     state = currentCfUserRolesReducer(state, getOrgAction(CfUserRelationTypes.ORGANIZATIONS));
     state = currentCfUserRolesReducer(state, getOrgAction(CfUserRelationTypes.AUDITED_ORGANIZATIONS, generalGuid));
     const cfPermissions = state[testCFEndpointGuid];
-
-
     const spaceState = getState(RoleEntities.SPACES, [{
       guid: testSpaceGuid,
       roles: {
         orgId: testOrgGuid,
         isManager: false,
         isAuditor: false,
-        isDeveloper: true
+        isDeveloper: true,
       }
     },
     {
@@ -216,7 +214,7 @@ describe('currentCfUserRolesReducer', () => {
         orgId: generalGuid,
         isManager: true,
         isAuditor: false,
-        isDeveloper: false
+        isDeveloper: false,
       }
     }]);
 
@@ -228,8 +226,8 @@ describe('currentCfUserRolesReducer', () => {
         isBillingManager: false,
         isUser: true,
         spaceGuids: [
-          testSpaceGuid
-        ]
+          testSpaceGuid,
+    ]
       }
     },
     {
@@ -240,8 +238,8 @@ describe('currentCfUserRolesReducer', () => {
         isBillingManager: false,
         isUser: false,
         spaceGuids: [
-          generalGuid
-        ]
+          generalGuid,
+    ]
       }
     }]);
     spaceState.organizations = orgState.organizations;

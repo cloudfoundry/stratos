@@ -20,8 +20,8 @@ describe('UploadProgressIndicatorComponent', () => {
         CommonModule,
         CoreModule,
       ]
-    })
-    .compileComponents();
+    });
+    TestBed.compileComponents();
   });
 
   beforeEach(() => {

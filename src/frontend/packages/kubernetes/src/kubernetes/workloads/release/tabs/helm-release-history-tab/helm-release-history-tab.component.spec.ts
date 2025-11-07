@@ -13,15 +13,15 @@ describe('HelmReleaseHistoryTabComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
-        HelmReleaseHistoryTabComponent
+        HelmReleaseHistoryTabComponent,
       ]providers: [
         
         HelmReleaseHelperService,
-        HelmReleaseGuidMock
-      ,
-        provideZonelessChangeDetection()
+        HelmReleaseGuidMock,
+
+        provideZonelessChangeDetection(),
       ]
-    })
+    }),
     .compileComponents();
   });
 

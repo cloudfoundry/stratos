@@ -2,23 +2,24 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
-import { populateStoreWithTestEndpoint, testSCFEndpointGuid } from "../../test-framework/cloud-foundry-endpoint-service.helper";
+import { populateStoreWithTestEndpoint, testSCFEndpointGuid } from "@test-framework/cloud-foundry-endpoint-service.helper";
 
 import { TabNavService } from '../../../../../core/src/tab-nav.service';
 import {
   generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
-} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { QuotaDefinitionComponent } from './quota-definition.component';
-
+} from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { QuotaDefinitionComponent } from "./quota-definition.component";
 describe('QuotaDefinitionComponent', () => {
   let component: QuotaDefinitionComponent;
   let fixture: ComponentFixture<QuotaDefinitionComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [QuotaDefinitionComponent],
-      imports: generateCfBaseTestModules(),
+      imports: [
+        QuotaDefinitionComponent,
+        ...generateCfBaseTestModules(),
+      ],
       providers: [
         {
           provide: ActivatedRoute,

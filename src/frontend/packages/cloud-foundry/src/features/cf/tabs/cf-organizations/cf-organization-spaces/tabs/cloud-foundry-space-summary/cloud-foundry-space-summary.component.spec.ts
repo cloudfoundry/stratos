@@ -6,8 +6,8 @@ import { TabNavService } from '../../../../../../../../../core/src/tab-nav.servi
 import {
   generateActiveRouteCfOrgSpaceMock,
   generateCfBaseTestModules,
-} from '../../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundrySpaceServiceMock } from '../../../../../../../../test-framework/cloud-foundry-space.service.mock';
+} from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { CloudFoundrySpaceServiceMock } from "@test-framework/cloud-foundry-space.service.mock";
 import {
   CardCfSpaceDetailsComponent,
 } from '../../../../../../../shared/components/cards/card-cf-space-details/card-cf-space-details.component';
@@ -25,22 +25,21 @@ import {
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
-import { CloudFoundrySpaceSummaryComponent } from './cloud-foundry-space-summary.component';
-
+import { CloudFoundrySpaceSummaryComponent } from "./cloud-foundry-space-summary.component";
 describe('CloudFoundrySpaceSummaryComponent', () => {
   let component: CloudFoundrySpaceSummaryComponent;
   let fixture: ComponentFixture<CloudFoundrySpaceSummaryComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
+      imports: [
         CloudFoundrySpaceSummaryComponent,
         CardCfSpaceDetailsComponent,
         CardCfRecentAppsComponent,
         CompactAppCardComponent,
-        CfUserPermissionDirective
+        CfUserPermissionDirective,
+        ...generateCfBaseTestModules(),
       ],
-      imports: generateCfBaseTestModules(),
       providers: [
         
         generateActiveRouteCfOrgSpaceMock(),
@@ -49,9 +48,9 @@ describe('CloudFoundrySpaceSummaryComponent', () => {
         CloudFoundryOrganizationService,
         TabNavService,
         CfUserService,
-        CloudFoundryUserProvidedServicesService
-      ,
-        provideZonelessChangeDetection()
+        CloudFoundryUserProvidedServicesService,
+
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

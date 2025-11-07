@@ -18,7 +18,7 @@ describe('authGuard', () => {
       providers: [provideZonelessChangeDetection()],
       imports: [
         RouterTestingModule,
-        StoreModule.forRoot(appReducers)
+        StoreModule.forRoot(appReducers),
       ]
     });
     store = TestBed.inject(Store);

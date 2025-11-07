@@ -1,10 +1,12 @@
 // Vitest + Angular testing setup (Zoneless - Angular 20)
 // Official configuration from https://analogjs.org/docs/features/testing/vitest
 
-import { expect, afterEach } from 'vitest';
+import { expect, describe, it, afterEach } from 'vitest';
 // IMMEDIATE: Expose vitest globals to window for entity-catalog test detection
 // This MUST happen before any Angular/Store imports that check window.describe
 if (typeof window !== 'undefined') {
+  (window as any).describe = describe;
+  (window as any).it = it;
   (window as any).expect = expect;
 }
 
@@ -15,6 +17,7 @@ import {
   platformBrowserTesting,
 } from '@angular/platform-browser/testing';
 import { getTestBed } from '@angular/core/testing';
+import { entityCatalog, TestEntityCatalog } from '@stratosui/store';
 
 // Polyfill: window.matchMedia for tests
 // Components that use media queries need matchMedia to be available
@@ -61,6 +64,14 @@ if (!testBed.platform) {
 // but preserve the platform for performance
 afterEach(() => {
   getTestBed().resetTestingModule();
+
+  // Clear entity catalog to prevent duplicate entity warnings
+  // The entityCatalog is a singleton that persists across tests,
+  // so we need to clear it between tests to avoid accumulation
+  const testCatalog = entityCatalog as TestEntityCatalog;
+  if (testCatalog && typeof testCatalog.clear === 'function') {
+    testCatalog.clear();
+  }
 });
 
 
@@ -68,10 +79,4 @@ afterEach(() => {
 // expect must be available globally before setup-snapshots tries to use it
 import('@analogjs/vitest-angular/setup-snapshots').catch(() => {
   // Silently ignore if setup-snapshots not available (older AnalogJS versions)
-});
-
-// Global cleanup hook to reset TestBed between tests
-// This clears component/service instances but preserves the platform
-afterEach(() => {
-  getTestBed().resetTestingModule();
 });

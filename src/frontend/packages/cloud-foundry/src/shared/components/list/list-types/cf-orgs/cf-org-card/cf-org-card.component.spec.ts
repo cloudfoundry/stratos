@@ -2,22 +2,21 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Store } from '@ngrx/store';
-import { testSessionData } from "../../test-framework/cloud-foundry-endpoint-service.helper";
+import { testSessionData } from "@test-framework/cloud-foundry-endpoint-service.helper";
 
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { MetadataCardTestComponents } from '../../../../../../../../core/test-framework/core-test.helper';
-import { VerifiedSession } from '../../../../../../../../store/src/actions/auth.actions';
-import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
-import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
+import { VerifiedSession } from '@stratosui/store/actions/auth.actions';
+import { EntityServiceFactory } from '@stratosui/store/entity-service-factory.service';
+import { EntityMonitorFactory } from '@stratosui/store/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '@stratosui/store/monitors/pagination-monitor.factory';
 import {
   generateCfBaseTestModulesNoShared,
   generateTestCfEndpointServiceProvider,
   generateTestCfUserServiceProvider,
-} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
-import { CfOrgCardComponent } from './cf-org-card.component';
-
+import { CfOrgCardComponent } from "./cf-org-card.component";
 describe('CfOrgCardComponent', () => {
   let component: CfOrgCardComponent;
   let fixture: ComponentFixture<CfOrgCardComponent>;
@@ -25,10 +24,12 @@ describe('CfOrgCardComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [
+        MetadataCardTestComponents,
+    ],
+      imports: [
         CfOrgCardComponent,
-        MetadataCardTestComponents
+        ...generateCfBaseTestModulesNoShared(),
       ],
-      imports: generateCfBaseTestModulesNoShared(),
       providers: [
         
         PaginationMonitorFactory,
@@ -37,9 +38,9 @@ describe('CfOrgCardComponent', () => {
         CfOrgSpaceDataService,
         generateTestCfEndpointServiceProvider(),
         EntityServiceFactory,
-        ConfirmationDialogService
-      ,
-        provideZonelessChangeDetection()
+        ConfirmationDialogService,
+
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();
@@ -177,7 +178,7 @@ describe('CfOrgCardComponent', () => {
                 entity: {
                   name: 'cf-dev.io',
                   router_group_guid: null,
-                  router_group_type: null
+                  router_group_type: null,
                 }
               }
             ],
@@ -373,7 +374,7 @@ describe('CfOrgCardComponent', () => {
             guid: 'test',
             cfGuid: 'test'
           },
-          metadata: null
+          metadata: null,
         }],
         quota_definition: {
           entity: {
@@ -386,9 +387,9 @@ describe('CfOrgCardComponent', () => {
             total_service_keys: 1,
             total_reserved_route_ports: 1,
             total_services: -1,
-            total_routes: -1
+            total_routes: -1,
           },
-          metadata: null
+          metadata: null,
         }
       },
       metadata: {

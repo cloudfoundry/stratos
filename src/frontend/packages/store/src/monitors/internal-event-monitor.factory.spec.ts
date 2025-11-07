@@ -11,10 +11,10 @@ describe('InternalEventMonitorFactory', () => {
     TestBed.configureTestingModule({
       providers: [
         InternalEventMonitorFactory,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ],
       imports: [
-        StoreModule.forRoot({})
+        StoreModule.forRoot({}),
       ]
     });
   });

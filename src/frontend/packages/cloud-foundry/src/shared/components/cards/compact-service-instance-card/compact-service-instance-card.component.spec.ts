@@ -1,13 +1,12 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
 
+import { EntityCatalogTestModule, generateStratosEntities, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
 import { AppChipsComponent } from '../../../../../../core/src/shared/components/chips/chips.component';
-import {
-  generateCfBaseTestModulesNoShared,
-} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfBaseTestModulesNoShared, STORE_TEST_PROVIDERS } from '@test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCFEntities } from '../../../../cf-entity-generator';
 import { CompactServiceInstanceCardComponent } from './compact-service-instance-card.component';
-
 describe('CompactServiceInstanceCardComponent', () => {
   let component: CompactServiceInstanceCardComponent;
   let fixture: ComponentFixture<CompactServiceInstanceCardComponent>;
@@ -18,8 +17,20 @@ describe('CompactServiceInstanceCardComponent', () => {
       imports: [
         ...generateCfBaseTestModulesNoShared(),
         CompactServiceInstanceCardComponent,
-        AppChipsComponent
-      ]
+        AppChipsComponent,
+        {
+          ngModule: EntityCatalogTestModule,
+          providers: [
+            {
+              provide: TEST_CATALOGUE_ENTITIES,
+              useValue: [
+                ...generateCFEntities(),
+                ...generateStratosEntities(),
+              ]
+            }
+          ]
+        },
+    ]
     })
       .compileComponents();
   });

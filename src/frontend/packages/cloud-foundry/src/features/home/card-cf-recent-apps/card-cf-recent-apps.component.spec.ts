@@ -12,16 +12,17 @@ import {
 import {
   PollingIndicatorComponent,
 } from '../../../../../core/src/shared/components/polling-indicator/polling-indicator.component';
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
+import { EntityMonitorFactory } from '@stratosui/store';
+import { PaginationMonitorFactory } from '@stratosui/store';
 import {
   generateActiveRouteCfOrgSpaceMock,
   generateCfBaseTestModulesNoShared,
-} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from '@test-framework/cloud-foundry-endpoint-service.helper';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { CloudFoundryEndpointService } from '../../cf/services/cloud-foundry-endpoint.service';
 import { CardCfRecentAppsComponent } from './card-cf-recent-apps.component';
 import { CompactAppCardComponent } from './compact-app-card/compact-app-card.component';
+import { EntityServiceFactory } from '@stratosui/store';
 
 describe('CardCfRecentAppsComponent', () => {
   let component: CardCfRecentAppsComponent;
@@ -29,26 +30,24 @@ describe('CardCfRecentAppsComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
+      imports: [
         CardCfRecentAppsComponent,
         ApplicationStateIconComponent,
         CompactAppCardComponent,
         PollingIndicatorComponent,
-        ApplicationStateIconPipe
+        ApplicationStateIconPipe,
+        ...generateCfBaseTestModulesNoShared(),
       ],
-      imports: generateCfBaseTestModulesNoShared(),
       providers: [
-        
+        EntityServiceFactory,
         generateActiveRouteCfOrgSpaceMock(),
         CloudFoundryEndpointService,
         EntityMonitorFactory,
         CfUserService,
-        PaginationMonitorFactory
-      ,
-        provideZonelessChangeDetection()
+        PaginationMonitorFactory,
+        provideZonelessChangeDetection(),
       ]
-    })
-      .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

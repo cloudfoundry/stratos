@@ -100,7 +100,7 @@ export function selectNestedEntity<T = APIResource[]>(
 // T => APIResource || base entity (e.g. EndpointModel)
 export function getRequestEntityKey<T>(entityKey: string) {
   return (state: IRequestTypeState): IRequestEntityKeyState<T> => {
-    return state[entityKey] || {} as IRequestEntityKeyState<T>;
+    return state?.[entityKey] || {} as IRequestEntityKeyState<T>;
   };
 }
 

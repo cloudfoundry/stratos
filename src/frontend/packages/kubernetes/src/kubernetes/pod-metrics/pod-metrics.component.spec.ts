@@ -14,8 +14,7 @@ describe('PodMetricsComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [PodMetricsComponent],
-      imports: KubernetesBaseTestModules,
+      imports: [PodMetricsComponent, ...KubernetesBaseTestModules],
       providers: [
         TabNavService,
         {
@@ -30,7 +29,7 @@ describe('PodMetricsComponent', () => {
           }
         }
       ]
-    })
+    }),
       .compileComponents();
   });
 

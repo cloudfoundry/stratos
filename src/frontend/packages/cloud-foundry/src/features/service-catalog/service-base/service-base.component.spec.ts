@@ -3,26 +3,26 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { generateCfBaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { EntityServiceFactory } from '@stratosui/store/entity-service-factory.service';
+import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ServicesService } from '../services.service';
 import { ServicesServiceMock } from '../services.service.mock';
-import { ServiceBaseComponent } from './service-base.component';
-
+import { ServiceBaseComponent } from "./service-base.component";
 describe('ServiceBaseComponent', () => {
   let component: ServiceBaseComponent;
   let fixture: ComponentFixture<ServiceBaseComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ServiceBaseComponent],
+      imports: [
+        ServiceBaseComponent,
+        ...generateCfBaseTestModules(),
+      ],
       providers: [
-        
+        EntityServiceFactory,
         { provide: ServicesService, useClass: ServicesServiceMock },
         DatePipe,
-        provideZonelessChangeDetection()
-      ],
-      imports: [
-        generateCfBaseTestModules(),
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

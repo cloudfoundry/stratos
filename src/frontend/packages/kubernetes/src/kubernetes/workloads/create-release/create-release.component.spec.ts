@@ -14,6 +14,7 @@ import { ChartsService } from '../../../helm/monocular/shared/services/charts.se
 import { ConfigService } from '../../../helm/monocular/shared/services/config.service';
 import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
 import { CreateReleaseComponent } from './create-release.component';
+import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 
 describe('CreateReleaseComponent', () => {
   let component: CreateReleaseComponent;
@@ -22,14 +23,13 @@ describe('CreateReleaseComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        CreateReleaseComponent,
-      ],
       imports: [
+        CreateReleaseComponent,
         KubernetesBaseTestModules,
         HttpClientTestingModule,
       ],
       providers: [
+        EntityServiceFactory,
         HttpClient,
         PaginationMonitorFactory,
         EntityMonitorFactory,
@@ -39,7 +39,7 @@ describe('CreateReleaseComponent', () => {
         { provide: ChartsService, useValue: new MockChartService() },
         { provide: ConfigService, useValue: { appName: 'appName' } },
       ]
-    })
+    }),
       .compileComponents();
 
     httpMock = TestBed.inject(HttpTestingController);

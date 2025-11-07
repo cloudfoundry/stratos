@@ -3,15 +3,15 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { of } from 'rxjs';
 
-import { EntityService } from '../../../../../store/src/entity-service';
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
-import { StratosStatus } from '../../../../../store/src/types/shared.types';
-import { generateCfBaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { EntityService } from '@stratosui/store/entity-service';
+import { EntityMonitorFactory } from '@stratosui/store/monitors/entity-monitor.factory.service';
+import { StratosStatus } from '@stratosui/store/types/shared.types';
+import { generateCfBaseTestModulesNoShared } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import * as servicesHelpers from '../../../features/service-catalog/services-helper';
 import { ServicesService } from '../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../features/service-catalog/services.service.mock';
 import { ServicePlanPublicComponent } from './service-plan-public.component';
-
+import { EntityServiceFactory } from "@stratosui/store/entity-service-factory.service";
 const getCfService = {
   waitForEntity$: {
     pipe() { }
@@ -26,14 +26,17 @@ describe('ServicePlanPublicComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ServicePlanPublicComponent],
-      imports: generateCfBaseTestModulesNoShared(),
+      imports: [
+        ServicePlanPublicComponent,
+        ...generateCfBaseTestModulesNoShared(),
+      ],
       providers: [
+        EntityServiceFactory,
         
         EntityMonitorFactory,
         { provide: ServicesService, useClass: ServicesServiceMock },
-      ,
-        provideZonelessChangeDetection()
+
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

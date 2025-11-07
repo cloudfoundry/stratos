@@ -10,25 +10,27 @@ import { MetadataCardTestComponents } from '../../../../../../../../core/test-fr
 import {
   generateCfBaseTestModulesNoShared,
   generateTestCfEndpointService,
-} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ActiveRouteCfOrgSpace } from '../../../../../../features/cf/cf-page.types';
-import { CfSecurityGroupsCardComponent } from './cf-security-groups-card.component';
-
+import { CfSecurityGroupsCardComponent } from "./cf-security-groups-card.component";
 describe('CfSecurityGroupsCardComponent', () => {
   let component: CfSecurityGroupsCardComponent;
   let fixture: ComponentFixture<CfSecurityGroupsCardComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [CfSecurityGroupsCardComponent, MetadataCardTestComponents],
+      declarations: [
+        MetadataCardTestComponents,
+    ],
       imports: [
+        CfSecurityGroupsCardComponent,
         ...generateCfBaseTestModulesNoShared(),
         BooleanIndicatorComponent,
-        AppChipsComponent
+        AppChipsComponent,
       ],
       providers: [
         ActiveRouteCfOrgSpace, generateTestCfEndpointService(),
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

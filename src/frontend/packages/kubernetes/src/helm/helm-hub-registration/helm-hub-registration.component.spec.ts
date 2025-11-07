@@ -15,16 +15,16 @@ describe('HelmHubRegistrationComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         ...BaseTestModules,
-        HelmHubRegistrationComponent
+        HelmHubRegistrationComponent,
       ],
       providers: [
         
         EndpointsService,
-        UserService
-      ,
-        provideZonelessChangeDetection()
+        UserService,
+
+        provideZonelessChangeDetection(),
       ]
-    })
+    }),
       .compileComponents();
   });
 

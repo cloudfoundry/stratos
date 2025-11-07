@@ -8,10 +8,9 @@ import { provideRouter } from '@angular/router';
 
 import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../../git/src/shared/github.helpers';
 import { GitSCMService } from '../../../../../../git/src/shared/scm/scm.service';
-import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ApplicationDeploySourceTypes } from '../deploy-application-steps.types';
-import { DeployApplicationStep2Component } from './deploy-application-step2.component';
-
+import { DeployApplicationStep2Component } from "./deploy-application-step2.component";
 describe('DeployApplicationStep2Component', () => {
   let component: DeployApplicationStep2Component;
   let fixture: ComponentFixture<DeployApplicationStep2Component>;
@@ -24,7 +23,7 @@ describe('DeployApplicationStep2Component', () => {
         provideExperimentalZonelessChangeDetection(),
         provideNoopAnimations(),
         provideRouter([,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]),
         provideHttpClient(),
         provideHttpClientTesting(),

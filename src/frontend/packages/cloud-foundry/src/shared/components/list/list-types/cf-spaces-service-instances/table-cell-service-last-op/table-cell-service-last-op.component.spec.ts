@@ -6,9 +6,10 @@ import {
   BooleanIndicatorComponent,
 } from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import { BaseTestModulesNoShared } from '../../../../../../../../core/test-framework/core-test.helper';
-import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { EntityMonitorFactory } from '@stratosui/store/monitors/entity-monitor.factory.service';
 import { ServiceInstanceLastOpComponent } from '../../../../service-instance-last-op/service-instance-last-op.component';
 import { TableCellServiceLastOpComponent } from './table-cell-service-last-op.component';
+import { EntityServiceFactory } from '@stratosui/store/entity-service-factory.service';
 
 describe('TableCellServiceLastOpComponent', () => {
   let component: TableCellServiceLastOpComponent;
@@ -19,13 +20,14 @@ describe('TableCellServiceLastOpComponent', () => {
       imports: [
         TableCellServiceLastOpComponent,
         ServiceInstanceLastOpComponent,
-        BooleanIndicatorComponent
-      ,
-      imports: [...BaseTestModulesNoShared],
+        BooleanIndicatorComponent,
+        ...BaseTestModulesNoShared,
+      ],
       providers: [
+        EntityServiceFactory,
         EntityMonitorFactory,
-        provideZonelessChangeDetection()
-      ]
+        provideZonelessChangeDetection(),
+      ],
     })
       .compileComponents();
 

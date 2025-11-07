@@ -4,11 +4,9 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
-import { generateCfStoreModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { CfOrgSpaceDataService } from '../../../../data-services/cf-org-space-service.service';
-import { CfAppConfigService } from './cf-app-config.service';
-
-
+import { CfAppConfigService } from "./cf-app-config.service";
 describe('CfAppConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -16,9 +14,9 @@ describe('CfAppConfigService', () => {
         
         CfAppConfigService,
         DatePipe,
-        CfOrgSpaceDataService
-      ,
-        provideZonelessChangeDetection()
+        CfOrgSpaceDataService,
+
+        provideZonelessChangeDetection(),
       ],
       imports: [
         CommonModule,

@@ -1,17 +1,14 @@
 import { CdkTableModule } from '@angular/cdk/table';
-import {  Component, ViewChild, provideZonelessChangeDetection } from '@angular/core';
+import {  Component, ViewChild, provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { createBasicStoreModule } from "../test-framework/core-test.helper";
 import { EMPTY, of as observableOf } from 'rxjs';
 
-import { ListSort } from '../../../../../../store/src/actions/list.actions';
-import { CoreTestingModule } from '../../../../../test-framework/core-test.modules';
-import { CoreModule } from '../../../../core/core.module';
-import { UtilsService } from '../../../../core/utils.service';
-import { SharedModule } from '../../../shared.module';
-import { IListPaginationController } from '../data-sources-controllers/list-pagination-controller';
+import { IListPaginationController } from '@stratosui/core';
+import { ListSort } from '@stratosui/store';
+import { createBasicStoreModule } from '@stratosui/store/testing';
+
 import { TableComponent } from './table.component';
 
 describe('TableComponent', () => {
@@ -34,7 +31,7 @@ describe('TableComponent', () => {
     }
   ];
   @Component({
-  standalone: false,
+    standalone: false,
     selector: `app-host-component`,
     template: `
     <app-table
@@ -79,13 +76,13 @@ describe('TableComponent', () => {
     public columns = columns;
     // new Array<ITableColumn<any>>();
     public paginationController = {
-      sort$: observableOf({} as ListSort)
+      sort$: observableOf({} as ListSort),
     } as IListPaginationController<any>;
     public dataSource = {
       trackBy: () => '1',
       connect: () => EMPTY,
       disconnect: () => null,
-      isTableLoading$: observableOf(false)
+      isTableLoading$: observableOf(false),
     };
     @ViewChild('basicColumnsTable', { static: true })
     public basicColumnsTable!: TableComponent<any>;
@@ -102,24 +99,20 @@ describe('TableComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
-        CoreModule,
         CdkTableModule,
         NoopAnimationsModule,
-        CoreTestingModule,
         createBasicStoreModule(),
-        SharedModule
+        TableComponent,
       ],
       declarations: [
-        TableHostComponent
+        TableHostComponent,
       ],
       providers: [
-        
-        UtilsService,
-      ,
-        provideZonelessChangeDetection()
-      ]
-    })
-      .compileComponents();
+        provideZonelessChangeDetection(),
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

@@ -7,10 +7,9 @@ import { Store } from '@ngrx/store';
 
 import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../git/src/shared/github.helpers';
 import { GitSCMService } from '../../../../../git/src/shared/scm/scm.service';
-import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { CFAppState } from '../../../cf-app-state';
-import { GithubProjectExistsDirective } from './github-project-exists.directive';
-
+import { GithubProjectExistsDirective } from "./github-project-exists.directive";
 describe('GithubProjectExistsDirective', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -21,9 +20,9 @@ describe('GithubProjectExistsDirective', () => {
         provideHttpClientTesting(),
         ...generateCfStoreModules(),
         GitSCMService,
-        { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL }
-      ,
-        provideZonelessChangeDetection()
+        { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
+
+        provideZonelessChangeDetection(),
       ]
     }).compileComponents();
   });

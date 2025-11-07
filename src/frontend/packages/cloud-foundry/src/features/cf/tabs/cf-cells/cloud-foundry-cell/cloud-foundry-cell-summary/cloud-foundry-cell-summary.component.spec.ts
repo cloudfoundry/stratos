@@ -12,9 +12,10 @@ import {
 import {
   MetricsChartHelpers,
 } from '../../../../../../../../core/src/shared/components/metrics-chart/metrics.component.helpers';
-import { MetricQueryConfig } from '../../../../../../../../store/src/actions/metrics.actions';
-import { MetricQueryType } from '../../../../../../../../store/src/types/metric.types';
-import { generateCfBaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { MetricQueryConfig } from '@stratosui/store/actions/metrics.actions';
+import { MetricQueryType } from '@stratosui/store/types/metric.types';
+import { EntityServiceFactory } from '@stratosui/store/entity-service-factory.service';
+import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { FetchCFCellMetricsAction } from '../../../../../../actions/cf-metrics.actions';
 import { ActiveRouteCfCell } from '../../../../cf-page.types';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
@@ -48,14 +49,14 @@ class MockCloudFoundryCellService {
       'guid',
       'cellId',
       new MetricQueryConfig(queryString, {}),
-      queryRange
-    ),
+      queryRange,
+      ),
   })
   buildChartConfig = (yAxisLabel: string): MetricsLineChartConfig => ({
     chartType: MetricsChartTypes.LINE,
     xAxisLabel: 'Time',
     yAxisLabel,
-    autoScale: true
+    autoScale: true,
   })
 
 }
@@ -66,20 +67,19 @@ describe('CloudFoundryCellSummaryComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        CloudFoundryCellSummaryComponent
+      imports: [
+        CloudFoundryCellSummaryComponent,
+        ...generateCfBaseTestModules(),
       ],
-      imports: generateCfBaseTestModules(),
       providers: [
-        
+        EntityServiceFactory,
         {
           provide: CloudFoundryCellService,
-          useValue: new MockCloudFoundryCellService()
+          useValue: new MockCloudFoundryCellService(),
         },
         ActiveRouteCfCell,
-        DatePipe
-      ,
-        provideZonelessChangeDetection()
+        DatePipe,
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

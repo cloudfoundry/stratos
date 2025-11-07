@@ -14,12 +14,11 @@ describe('TableCellConfirmOrgSpaceComponent', () => {
     await TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [
+        AppChipsComponent,
         NoopAnimationsModule,
-        TableCellConfirmOrgSpaceComponent
+        TableCellConfirmOrgSpaceComponent,
       ],
-      declarations: [
-        AppChipsComponent
-      ]
+      
     })
       .compileComponents();
 

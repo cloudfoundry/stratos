@@ -9,7 +9,7 @@ describe('MetricsRangeSelectorService', () => {
     TestBed.configureTestingModule({
       providers: [
         MetricsRangeSelectorService,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
     });
   });

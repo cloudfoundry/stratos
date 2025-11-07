@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
+import { EntityServiceFactory } from '@stratosui/store';
 import { BaseTestModules } from '../../../../../../core/test-framework/core-test.helper';
 import { KubernetesNodeCapacityComponent } from './kubernetes-node-capacity.component';
 
@@ -11,11 +12,11 @@ describe('KubernetesNodeCapacityComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection()],
+      providers: [EntityServiceFactory, provideZonelessChangeDetection()],
       imports: [
         KubernetesNodeCapacityComponent,
-        ...BaseTestModules
-      ]})
+        ...BaseTestModules,
+      ]}),
       .compileComponents();
   });
 
@@ -35,7 +36,7 @@ describe('KubernetesNodeCapacityComponent', () => {
         capacity: {
           pods: 100,
           memory: '100Ki',
-          cpu: 100
+          cpu: 100,
         }
       },
       spec: {

@@ -3,8 +3,8 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { ListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { CFBaseTestModules } from '../../../../../../test-framework/cf-test-helper';
-import { generateActiveRouteCfOrgSpaceMock } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CFBaseTestModules } from "@test-framework/cf-test-helper";
+import { generateActiveRouteCfOrgSpaceMock } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import {
   CloudFoundryEventsListComponent,
 } from '../../../../../shared/components/cloud-foundry-events-list/cloud-foundry-events-list.component';
@@ -17,18 +17,13 @@ import {
 } from '../../../../../shared/services/cloud-foundry-user-provided-services.service';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
-import { CloudFoundryOrganizationEventsComponent } from './cloud-foundry-organization-events.component';
-
+import { CloudFoundryOrganizationEventsComponent } from "./cloud-foundry-organization-events.component";
 describe('CloudFoundryOrganizationEventsComponent', () => {
   let component: CloudFoundryOrganizationEventsComponent;
   let fixture: ComponentFixture<CloudFoundryOrganizationEventsComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        CloudFoundryOrganizationEventsComponent,
-        CloudFoundryEventsListComponent
-      ],
       providers: [
         
         {
@@ -39,11 +34,15 @@ describe('CloudFoundryOrganizationEventsComponent', () => {
         CloudFoundryOrganizationService,
         CfUserService,
         CloudFoundryEndpointService,
-        CloudFoundryUserProvidedServicesService
-      ,
-        provideZonelessChangeDetection()
+        CloudFoundryUserProvidedServicesService,
+
+        provideZonelessChangeDetection(),
       ],
-      imports: [...CFBaseTestModules]
+      imports: [
+        CloudFoundryOrganizationEventsComponent,
+        CloudFoundryEventsListComponent,
+        ...CFBaseTestModules,
+      ],
     })
       .compileComponents();
   });

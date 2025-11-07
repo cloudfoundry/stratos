@@ -26,9 +26,9 @@ describe('failedEntityHandlers', () => {
         type: 'type',
       } as EntityRequestAction,
       {
-        success: false
+        success: false,
       },
-      false
+      false,
     );
     expect(spyDispatcher).toHaveBeenCalledTimes(2);
   });
@@ -53,9 +53,9 @@ describe('failedEntityHandlers', () => {
         type: 'type',
       } as EntityRequestAction,
       {
-        success: false
+        success: false,
       },
-      true
+      true,
     );
     expect(spyDispatcher).toHaveBeenCalledTimes(3);
   });

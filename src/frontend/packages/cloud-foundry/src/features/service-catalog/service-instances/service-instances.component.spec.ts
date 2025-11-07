@@ -3,35 +3,32 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { generateCfBaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import {
-  ServiceSummaryCardComponent,
-} from '../../../shared/components/cards/service-summary-card/service-summary-card.component';
-import { ServiceIconComponent } from '../../../shared/components/service-icon/service-icon.component';
-import { ServiceActionHelperService } from '../../../shared/data-services/service-action-helper.service';
+import { EntityServiceFactory } from '@stratosui/store/entity-service-factory.service';
+import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { ServiceSummaryCardComponent } from '@stratosui/shared/components/cards/service-summary-card/service-summary-card.component';
+import { ServiceIconComponent } from '@stratosui/shared/components/service-icon/service-icon.component';
+import { ServiceActionHelperService } from '@stratosui/shared/data-services/service-action-helper.service';
 import { ServicesService } from '../services.service';
 import { ServicesServiceMock } from '../services.service.mock';
-import { ServiceInstancesComponent } from './service-instances.component';
-
+import { ServiceInstancesComponent } from "./service-instances.component";
 describe('ServiceInstancesComponent', () => {
   let component: ServiceInstancesComponent;
   let fixture: ComponentFixture<ServiceInstancesComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
+      imports: [
         ServiceInstancesComponent,
         ServiceSummaryCardComponent,
-        ServiceIconComponent
+        ServiceIconComponent,
+        ...generateCfBaseTestModules(),
       ],
-      imports: generateCfBaseTestModules(),
       providers: [
-        
+        EntityServiceFactory,
         { provide: ServicesService, useClass: ServicesServiceMock },
         DatePipe,
-        ServiceActionHelperService
-      ,
-        provideZonelessChangeDetection()
+        ServiceActionHelperService,
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

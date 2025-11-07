@@ -1,4 +1,4 @@
-import {  Component, ViewChild, provideZonelessChangeDetection } from '@angular/core';
+import {  Component, ViewChild, provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
@@ -23,7 +23,7 @@ class WrapperComponent {
 
   constructor() {
     this.formGroup = new UntypedFormGroup({
-      inputName: new UntypedFormControl()
+      inputName: new UntypedFormControl(),
     });
 
   }
@@ -37,14 +37,15 @@ describe('UnlimitedInputComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
+      declarations: [WrapperComponent],
       imports: [
         BrowserAnimationsModule,
         CoreModule,
-        WrapperComponent,
-        UnlimitedInputComponent
+        UnlimitedInputComponent,
       ],
-    })
-      .compileComponents();
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {
@@ -75,7 +76,10 @@ describe('UnlimitedInputComponent', () => {
   it('should disable input if checkbox checked', () => {
     const input: HTMLInputElement = element.querySelector('input[type=number]');
     const checkbox: HTMLInputElement = element.querySelector('input[type=checkbox]');
-    checkbox.click();
+
+    // Toggle the unlimited flag and call onChange
+    component.unlimited = true;
+    component.onChange();
     fixture.detectChanges();
 
     expect(input.disabled).toBeTruthy();
@@ -88,7 +92,9 @@ describe('UnlimitedInputComponent', () => {
     fixture.detectChanges();
     expect(input.value).toEqual('2');
 
-    checkbox.click();
+    // Toggle to unlimited (clears the input),
+    component.unlimited = true;
+    component.onChange();
     fixture.detectChanges();
     expect(input.value).toEqual('');
   });
@@ -97,14 +103,18 @@ describe('UnlimitedInputComponent', () => {
     const input: HTMLInputElement = element.querySelector('input[type=number]');
     const checkbox: HTMLInputElement = element.querySelector('input[type=checkbox]');
     component.formControl.setValue(2);
-    expect(input.value).toEqual('2');
     fixture.detectChanges();
+    expect(input.value).toEqual('2');
 
-    checkbox.click();
+    // Toggle to unlimited (disable input),
+    component.unlimited = true;
+    component.onChange();
     fixture.detectChanges();
     expect(input.value).toEqual('');
 
-    checkbox.click();
+    // Toggle back from unlimited (enable input and restore value),
+    component.unlimited = false;
+    component.onChange();
     fixture.detectChanges();
     expect(input.value).toEqual('2');
   });

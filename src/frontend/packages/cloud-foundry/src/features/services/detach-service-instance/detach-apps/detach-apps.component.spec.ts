@@ -4,17 +4,18 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 
-import { generateCfBaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { DetachAppsComponent } from './detach-apps.component';
-
+import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { DetachAppsComponent } from "./detach-apps.component";
 describe('DetachAppsComponent', () => {
   let component: DetachAppsComponent;
   let fixture: ComponentFixture<DetachAppsComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [DetachAppsComponent],
-      imports: generateCfBaseTestModules(),
+      imports: [
+        DetachAppsComponent,
+        ...generateCfBaseTestModules(),
+      ],
       providers: [
         DatePipe, {
           provide: ActivatedRoute,

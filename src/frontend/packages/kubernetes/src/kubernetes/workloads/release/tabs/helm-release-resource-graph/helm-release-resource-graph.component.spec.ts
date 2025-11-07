@@ -22,10 +22,10 @@ describe('HelmReleaseResourceGraphComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         ...KubernetesBaseTestModules,
-        NgxGraphModule
-      ,
+        NgxGraphModule,
+
         HelmReleaseResourceGraphComponent,
-        AnalysisReportSelectorComponent
+        AnalysisReportSelectorComponent,
       ]providers: [
         
         ...HelmReleaseProviders,
@@ -34,10 +34,10 @@ describe('HelmReleaseResourceGraphComponent', () => {
         KubernetesAnalysisService,
         KubernetesEndpointService,
         KubeBaseGuidMock,
-      ,
-        provideZonelessChangeDetection()
+
+        provideZonelessChangeDetection(),
       ]
-    })
+    }),
       .compileComponents();
   });
 

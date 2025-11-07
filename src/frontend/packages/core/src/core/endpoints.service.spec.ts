@@ -1,10 +1,8 @@
 import { inject, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { createBasicStoreModule, STORE_TEST_PROVIDERS } from "../test-framework/core-test.helper";
-
-import { PaginationMonitorFactory } from '../../../store/src/monitors/pagination-monitor.factory';
-import { CoreTestingModule } from '../../test-framework/core-test.modules';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { CoreTestingModule } from '@test-framework/core-test.modules';
 import { SessionService } from '../shared/services/session.service';
 import { CoreModule } from './core.module';
 import { EndpointsService } from './endpoints.service';
@@ -14,11 +12,11 @@ describe('EndpointsService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        ...STORE_TEST_PROVIDERS,
+        ...(STORE_TEST_PROVIDERS || []),
         EndpointsService,
         UtilsService,
         SessionService,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ],
       imports: [
         CoreModule,

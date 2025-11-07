@@ -11,17 +11,16 @@ import {
 import {
   generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
-} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from "@test-framework/cloud-foundry-endpoint-service.helper";
 import {
   CloudFoundryOrganizationServiceMock,
-} from '../../../../../../test-framework/cloud-foundry-organization.service.mock';
-import { CloudFoundrySpaceServiceMock } from '../../../../../../test-framework/cloud-foundry-space.service.mock';
+} from "@test-framework/cloud-foundry-organization.service.mock";
+import { CloudFoundrySpaceServiceMock } from "@test-framework/cloud-foundry-space.service.mock";
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
 import { CloudFoundryOrganizationService } from '../../../../../features/cf/services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../features/cf/services/cloud-foundry-space.service';
 import { CfUserService } from '../../../../data-services/cf-user.service';
-import { CfUserListConfigService } from './cf-user-list-config.service';
-
+import { CfUserListConfigService } from "./cf-user-list-config.service";
 describe('CfUserListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -38,13 +37,13 @@ describe('CfUserListConfigService', () => {
             userPerms: CurrentUserPermissionsService,
           ) => new CfUserListConfigService(store, cfUserService, router, activeRouteCfOrgSpace, userPerms),
           deps: [Store, CfUserService, Router, ActiveRouteCfOrgSpace, CurrentUserPermissionsService,
-        provideZonelessChangeDetection()
+        provideZonelessChangeDetection(),
       ]
-        }
-        ,
+        },
+
         { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock },
         { provide: CloudFoundryOrganizationService, useClass: CloudFoundryOrganizationServiceMock },
-        ...generateTestCfEndpointServiceProvider()
+        ...generateTestCfEndpointServiceProvider(),
       ]
     });
   });

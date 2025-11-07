@@ -58,11 +58,11 @@ describe('handle-multi-endpoint-pipe', () => {
     const endpoint4Guid = 'endpoint4';
     const endpoint2Res = {
       entities: [{ data1: 'ThisIsData', }],
-      total: 10
+      total: 10,
     };
     const endpoint4Res = {
       entities: [{ data2: 'ThisIsData5' }],
-      total: 15
+      total: 15,
     };
     const resData = {
       [endpoint2Guid]: [endpoint2Res],
@@ -78,7 +78,7 @@ describe('handle-multi-endpoint-pipe', () => {
       getPaginationParameters: () => ({ page: '1' }),
       getTotalPages: () => 4,
       canIgnoreMaxedState: () => of(false),
-      maxedStateStartAt: () => null
+      maxedStateStartAt: () => null,
     })(resData);
     expect(handled.successes.length).toBe(2);
     expect(handled.successes[0].entities[0].data1).toBe(endpoint2Res.entities[0].data1);

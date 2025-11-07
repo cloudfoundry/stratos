@@ -1,10 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { STORE_TEST_PROVIDERS } from "../test-framework/core-test.helper";
+import { STORE_TEST_PROVIDERS, BASE_TEST_PROVIDERS } from "@test-framework/core-test.helper";
 
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
-import { BaseTestModulesNoShared } from '../../../../test-framework/core-test.helper';
+import { EntityMonitorFactory, EntityServiceFactory } from '@stratosui/store';
+import { BaseTestModulesNoShared } from "@test-framework/core-test.helper";
+import { CurrentUserPermissionsService } from '@stratosui/core';
 import { TabNavService } from '../../../tab-nav.service';
 import { PageSideNavComponent } from './page-side-nav.component';
 
@@ -16,14 +17,18 @@ describe('PageSideNavComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         BaseTestModulesNoShared,
-        PageSideNavComponent
+        PageSideNavComponent,
       ],
       providers: [
-        TabNavService, ...STORE_TEST_PROVIDERS,
-        provideZonelessChangeDetection()
+        ...BASE_TEST_PROVIDERS,
+        TabNavService,
+        EntityServiceFactory,
+        CurrentUserPermissionsService,
+        ...(STORE_TEST_PROVIDERS || []),
+        provideZonelessChangeDetection(),
       ]
-    })
-      .compileComponents();
+    });
+      TestBed.compileComponents();
   });
 
   beforeEach(() => {

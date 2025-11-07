@@ -13,16 +13,16 @@ describe('AnalysisReportViewerComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({imports: [
         KubernetesBaseTestModules,
-      ,
-        AnalysisReportViewerComponent
+
+        AnalysisReportViewerComponent,
       ],
       providers: [
         
-        KubernetesAnalysisService
-      ,
-        provideZonelessChangeDetection()
+        KubernetesAnalysisService,
+
+        provideZonelessChangeDetection(),
       ]
-    })
+    }),
     .compileComponents();
   });
 

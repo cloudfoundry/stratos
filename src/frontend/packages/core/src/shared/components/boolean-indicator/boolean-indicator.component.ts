@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, inject } from '@angular/core';
 
 export enum BooleanIndicatorType {
   enabledDisabled = 'enabled-disabled',
@@ -40,6 +40,8 @@ export type booleanStringType = 'True' | 'False' | 'Unknown';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BooleanIndicatorComponent {
+  private cdr = inject(ChangeDetectorRef);
+
   public booleanOutput!: IBooleanOutput;
   // Invert the text labels with the icons (No text for yes value and vice-versa)
   @Input() inverse = false;
@@ -52,9 +54,18 @@ export class BooleanIndicatorComponent {
   set subtle(subtle: boolean) {
     this.pSubtle = subtle;
     this.updateBooleanOutput();
+    this.cdr.markForCheck();
   }
 
-  @Input() showText = true;
+  private pShowText = true;
+  @Input()
+  get showText(): boolean {
+    return this.pShowText;
+  }
+  set showText(showText: boolean) {
+    this.pShowText = showText;
+    this.cdr.markForCheck();
+  }
 
   private icons = {
     Yes: 'check_circle',
@@ -83,6 +94,7 @@ export class BooleanIndicatorComponent {
   set type(type: BooleanIndicatorType) {
     this.pType = type;
     this.updateBooleanOutput();
+    this.cdr.markForCheck();
   }
 
   private pIsTrue!: boolean;
@@ -93,6 +105,7 @@ export class BooleanIndicatorComponent {
   set isTrue(isTrue: boolean) {
     this.pIsTrue = isTrue;
     this.updateBooleanOutput();
+    this.cdr.markForCheck();
   }
 
   private updateBooleanOutput() {

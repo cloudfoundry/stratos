@@ -17,10 +17,10 @@ describe('KubeConfigTableName', () => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [
-        ...KubernetesBaseTestModules
-      ,
-        KubeConfigTableNameComponent
-      ]})
+        ...KubernetesBaseTestModules,
+
+        KubeConfigTableNameComponent,
+      ]}),
       .compileComponents();
   });
 

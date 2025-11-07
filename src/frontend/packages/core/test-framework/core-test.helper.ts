@@ -1,10 +1,18 @@
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideRouter } from '@angular/router';
 import { StoreModule } from '@ngrx/store';
 import { EntityCatalogHelper, EntityCatalogHelpers, appReducers } from '@stratosui/store';
-import { createBasicStoreModule } from '../../store/testing/src/store-test-helper';
+import {
+  createBasicStoreModule,
+  createEmptyStoreModule,
+  createEntityStore,
+  createEntityStoreState,
+  populateStoreWithTestEndpoint,
+  StoreTestingModule,
+  STORE_TEST_PROVIDERS
+} from '@stratosui/store/testing';
 
 import { CoreModule } from '../src/core/core.module';
 import { CurrentUserPermissionsService } from '../src/core/permissions/current-user-permissions.service';
@@ -49,30 +57,36 @@ export class AppTestModule {
 export function generateBaseTestStoreModules() {
   return [
     CoreTestingModule,
-    StoreModule.forRoot(
-      appReducers,
-      {
-        initialState: createBasicStoreModule(), runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
-      }
-    ),
+    createBasicStoreModule(),
     AppTestModule
   ];
 }
 
 export const BaseTestModulesNoShared = [
   ...generateBaseTestStoreModules(),
-  RouterTestingModule,
   CoreModule,
   NoopAnimationsModule,
-  HttpClientModule
 ];
 export const BaseTestModules = [...BaseTestModulesNoShared, SharedModule];
+
+// Base test providers for router and HTTP (replacing deprecated RouterTestingModule and HttpClientModule)
+export const BASE_TEST_PROVIDERS = [
+  provideRouter([]),
+  provideHttpClient(),
+];
 
 export const MetadataCardTestComponents = [MetaCardComponent, MetaCardItemComponent,
   MetaCardKeyComponent, ApplicationStateIconPipe, ApplicationStateIconComponent,
   MetaCardTitleComponent, CardStatusComponent, MetaCardValueComponent, MultilineTitleComponent];
 
-// Re-export store testing utilities to resolve @stratosui/store/testing imports
-export { createBasicStoreModule, createEmptyStoreModule, createEntityStore, createEntityStoreState, populateStoreWithTestEndpoint } from '../../store/testing/src/store-test-helper';
-export { StoreTestingModule } from '../../store/testing/src/store-test.module';
-export { STORE_TEST_PROVIDERS } from '../../store/src/testing/store-test-providers';
+// Re-export store testing utilities so they're available from @test-framework
+// This is needed because index.ts does export * from core-test.helper
+export {
+  createBasicStoreModule,
+  createEmptyStoreModule,
+  createEntityStore,
+  createEntityStoreState,
+  populateStoreWithTestEndpoint,
+  StoreTestingModule,
+  STORE_TEST_PROVIDERS
+} from '@stratosui/store/testing';

@@ -17,10 +17,10 @@ describe('TileSelectorTileComponent', () => {
       
       imports: [
         MDAppModule,
-        TileSelectorTileComponent
+        TileSelectorTileComponent,
       ]
-    })
-    .compileComponents();
+    });
+    TestBed.compileComponents();
   });
 
   beforeEach(() => {

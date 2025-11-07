@@ -5,9 +5,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
-import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CreateApplicationStep2Component } from './create-application-step2.component';
-
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { CreateApplicationStep2Component } from "./create-application-step2.component";
 describe('CreateApplicationStep2Component', () => {
   let component: CreateApplicationStep2Component;
   let fixture: ComponentFixture<CreateApplicationStep2Component>;
@@ -21,9 +20,9 @@ describe('CreateApplicationStep2Component', () => {
         provideNoopAnimations(),
         provideHttpClient(),
         provideHttpClientTesting(),
-        ...generateCfStoreModules()
-      ,
-        provideZonelessChangeDetection()
+        ...generateCfStoreModules(),
+
+        provideZonelessChangeDetection(),
       ]
     }).compileComponents();
 
