@@ -1,15 +1,8 @@
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
-
-import {
-  CurrentUserPermissionsService,
-} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ListComponent } from '../../../../../../../../core/src/shared/components/list/list.component';
-import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
+import { CurrentUserPermissionsService, ListComponent, ListConfig } from '@stratosui/core';
 import { CFAppState } from '../../../../../../cf-app-state';
-import {
-  CfUsersSpaceRolesListConfigService,
-} from '../../../../../../shared/components/list/list-types/cf-users-org-space-roles/cf-users-space-roles-list-config.service';
+import { CfUsersSpaceRolesListConfigService } from '../../../../../../shared/components/list/list-types/cf-users-org-space-roles/cf-users-space-roles-list-config.service';
 import { ActiveRouteCfOrgSpace } from '../../../../cf-page.types';
 
 @Component({

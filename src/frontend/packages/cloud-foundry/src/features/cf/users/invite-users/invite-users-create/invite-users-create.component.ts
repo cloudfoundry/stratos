@@ -1,22 +1,19 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { toObservable } from '@angular/core/rxjs-interop';
 
 import {
   StackedInputActionResult,
-} from '../../../../../../../core/src/shared/components/stacked-input-actions/stacked-input-action/stacked-input-action.component';
-import {
   StackedInputActionsComponent,
   StackedInputActionsState,
   StackedInputActionsUpdate,
-} from '../../../../../../../core/src/shared/components/stacked-input-actions/stacked-input-actions.component';
-import { StepOnNextFunction } from '../../../../../../../core/src/shared/components/stepper/step/step.component';
-import { ClearPaginationOfType } from '../../../../../../../store/src/actions/pagination.actions';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+  StepOnNextFunction,
+} from '@stratosui/core';
+import { APIResource, ClearPaginationOfType } from '@stratosui/store';
 import { IOrganization, ISpace } from '../../../../../cf-api.types';
 import { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';

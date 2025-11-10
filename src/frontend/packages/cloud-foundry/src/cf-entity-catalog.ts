@@ -1,9 +1,9 @@
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
-} from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { APIResource } from '../../store/src/types/api.types';
-import { IFavoriteMetadata } from '../../store/src/types/user-favorites.types';
+  APIResource,
+  IFavoriteMetadata
+} from '@stratosui/store';
 import {
   IService,
   IServiceBinding,

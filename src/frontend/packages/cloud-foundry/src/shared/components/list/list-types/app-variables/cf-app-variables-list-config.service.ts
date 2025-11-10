@@ -3,20 +3,19 @@ import { Store } from '@ngrx/store';
 import { of as observableOf, Subject } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import {
-  TableCellEditComponent,
-} from '../../../../../../../core/src/shared/components/list/list-table/table-cell-edit/table-cell-edit.component';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import {
+  ConfirmationDialogConfig,
+  ConfirmationDialogService,
+  IListMultiFilterConfig,
   IGlobalListAction,
   IListAction,
   IListConfig,
   IMultiListAction,
+  ITableColumn,
   ListViewTypes,
-} from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
+} from '@stratosui/core';
+import { entityCatalog } from '@stratosui/store';
+import { TableCellEditComponent } from '../../../../../../../core/src/shared/components/list/list-table/table-cell-edit/table-cell-edit.component';
 import { UpdateExistingApplication } from '../../../../../actions/application.actions';
 import { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
@@ -146,7 +145,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
   getSingleActions = (): IListAction<ListAppEnvVar>[] => [this.listActionDelete];
   getColumns = (): ITableColumn<ListAppEnvVar>[] => this.columns;
   getDataSource = (): CfAppVariablesDataSource => this.envVarsDataSource;
-  getMultiFiltersConfigs = (): import('../../../../../../../core/src/shared/components/list/list.component.types').IListMultiFilterConfig[] => [];
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
 
   constructor(
     private store: Store<CFAppState>,

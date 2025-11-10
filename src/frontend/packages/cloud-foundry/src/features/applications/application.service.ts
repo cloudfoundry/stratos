@@ -3,13 +3,22 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map, pairwise, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
-import { AppMetadataTypes } from '../../../../cloud-foundry/src/actions/app-metadata.actions';
+import { APP_GUID, CF_GUID } from '@stratosui/core';
 import {
-  GetApplication,
-  UpdateApplication,
-  UpdateExistingApplication,
-} from '../../../../cloud-foundry/src/actions/application.actions';
-import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
+  ActionState,
+  APIResource,
+  endpointEntitiesSelector,
+  EntityInfo,
+  EntityService,
+  getCurrentPageRequestInfo,
+  PaginatedAction,
+  PaginationEntityState,
+  PaginationObservables,
+  rootUpdatingKey
+} from '@stratosui/store';
+import { AppMetadataTypes } from '../../actions/app-metadata.actions';
+import { GetApplication, UpdateApplication, UpdateExistingApplication } from '../../actions/application.actions';
+import { CFAppState } from '../../cf-app-state';
 import {
   applicationEntityType,
   domainEntityType,
@@ -17,18 +26,8 @@ import {
   routeEntityType,
   serviceBindingEntityType,
   spaceEntityType,
-  stackEntityType,
-} from '../../../../cloud-foundry/src/cf-entity-types';
-import { APP_GUID, CF_GUID } from '../../../../core/src/shared/entity.tokens';
-import { EntityService } from '../../../../store/src/entity-service';
-import { ActionState, rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
-import {
-  getCurrentPageRequestInfo,
-  PaginationObservables,
-} from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
-import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
-import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
-import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
+  stackEntityType
+} from '../../cf-entity-types';
 import { IApp, IAppSummary, IDomain, IOrganization, ISpace, IStack } from '../../cf-api.types';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { createEntityRelationKey } from '../../entity-relations/entity-relations.types';

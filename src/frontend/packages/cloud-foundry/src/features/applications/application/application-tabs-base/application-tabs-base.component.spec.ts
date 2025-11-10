@@ -1,58 +1,133 @@
-import { HttpClientModule } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
-import { StoreModule } from '@ngrx/store';
+import { provideRouter } from '@angular/router';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { Store } from '@ngrx/store';
+import { BehaviorSubject } from 'rxjs';
 
-import { CoreModule } from '../../../../../../core/src/core/core.module';
-import { MDAppModule } from '../../../../../../core/src/core/md.module';
-import { SharedModule } from '../../../../../../core/src/shared/shared.module';
-import { TabNavService } from '../../../../../../core/src/tab-nav.service';
-import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../../git/src/shared/github.helpers';
-import { generateTestApplicationServiceProvider } from "@test-framework/application-service-helper";
-import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { ApplicationStateService } from '../../../../shared/services/application-state.service';
+import { ApplicationServiceMock, generateCfStoreModules, ApplicationStateService, ApplicationEnvVarsHelper, populateStoreWithTestEndpoint } from '@test-framework/cf';
+import { ApplicationService, CFAppState, IApp, IOrganization, ISpace, CfCurrentUserPermissions } from '@stratosui/cloud-foundry';
+import { APIResource, EntityInfo, RequestInfoState, EndpointModel, endpointEntitiesSelector, UserFavoriteManager } from '@stratosui/store';
+import { EndpointsService, CurrentUserPermissionsService } from '@stratosui/core';
+import { GitSCMService } from '@stratosui/git';
 import { ApplicationTabsBaseComponent } from './application-tabs-base.component';
-import { ApplicationEnvVarsHelper } from './tabs/build-tab/application-env-vars.service';
 
 describe('ApplicationTabsBaseComponent', () => {
   let component: ApplicationTabsBaseComponent;
   let fixture: ComponentFixture<ApplicationTabsBaseComponent>;
+  let store: Store<CFAppState>;
+  let applicationServiceMock: ApplicationServiceMock;
 
-  const appId = '1';
-  const cfId = '2';
   beforeEach(async () => {
+    // Create mock - we'll override specific observables to prevent immediate completion
+    applicationServiceMock = new ApplicationServiceMock();
+
+    // Create mock for EndpointsService.hasMetrics() that returns a BehaviorSubject
+    // to prevent immediate completion which causes EmptyErrors
+    const hasMetricsSubject = new BehaviorSubject<boolean>(false);
+    const disablePersistenceFeaturesSubject = new BehaviorSubject<boolean>(false);
+    const mockEndpointsService = {
+      hasMetrics: vi.fn().mockReturnValue(hasMetricsSubject.asObservable()),
+      disablePersistenceFeatures$: disablePersistenceFeaturesSubject.asObservable()
+    };
+
+    // Mock other required services
+    const mockCurrentUserPermissionsService = {
+      can: vi.fn().mockReturnValue(new BehaviorSubject<boolean>(true).asObservable())
+    };
+
+    const mockGitSCMService = {
+      getSCM: vi.fn().mockReturnValue({
+        getLabel: () => 'Git',
+        getIcon: () => ({ fontName: 'stratos-icons', iconName: 'git' })
+      })
+    };
+
+    const mockUserFavoriteManager = {
+      getFavorite: vi.fn().mockReturnValue(null)
+    };
+
+    // The issue is that observableOf() completes immediately after emitting,
+    // which causes withLatestFrom to miss values. We need observables that
+    // emit but don't complete immediately.
+
+    // Create mock endpoint data for store selector
+    const mockEndpoint: EndpointModel = {
+      guid: 'mockCfGuid',
+      name: 'Mock CF',
+      cnsi_type: 'cf',
+      api_endpoint: {
+        Scheme: 'https',
+        Opaque: '',
+        User: null,
+        Host: 'api.mock.cf',
+        Path: '',
+        RawPath: '',
+        ForceQuery: false,
+        RawQuery: '',
+        Fragment: '',
+        RawFragment: ''
+      },
+      authorization_endpoint: '',
+      token_endpoint: '',
+      doppler_logging_endpoint: '',
+      skip_ssl_validation: false,
+      user: {
+        guid: 'user-guid',
+        name: 'test-user',
+        admin: false,
+        scopes: []
+      },
+      system_shared_token: false,
+      sso_allowed: false,
+      sub_type: '',
+      metadata: {},
+      logged_in_as_admin: false
+    };
+
+    const endpointsSubject = new BehaviorSubject<{ [guid: string]: EndpointModel }>({
+      mockCfGuid: mockEndpoint
+    });
+
     await TestBed.configureTestingModule({
       imports: [
         ApplicationTabsBaseComponent,
         ...generateCfStoreModules(),
-        StoreModule,
-        CoreModule,
-        SharedModule,
-        NoopAnimationsModule,
-        RouterTestingModule,
-        MDAppModule,
-        HttpClientModule,
         HttpClientTestingModule,
-    ],
+      ],
       providers: [
-        
-        generateTestApplicationServiceProvider(cfId, appId),
+        { provide: ApplicationService, useValue: applicationServiceMock },
+        { provide: EndpointsService, useValue: mockEndpointsService },
+        { provide: CurrentUserPermissionsService, useValue: mockCurrentUserPermissionsService },
+        { provide: GitSCMService, useValue: mockGitSCMService },
+        { provide: UserFavoriteManager, useValue: mockUserFavoriteManager },
         ApplicationStateService,
         ApplicationEnvVarsHelper,
-        { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
-        TabNavService,
-
+        provideRouter([]),
         provideZonelessChangeDetection(),
       ]
     }).compileComponents();
 
+    store = TestBed.inject(Store);
+    populateStoreWithTestEndpoint();
+
+    // Override store.select to return our mocked endpoints observable
+    const originalSelect = store.select.bind(store);
+    store.select = vi.fn().mockImplementation((selector: any) => {
+      // Return mocked endpoints for the endpoint selector
+      if (selector === endpointEntitiesSelector) {
+        console.log('[TEST] Returning mocked endpoints observable');
+        return endpointsSubject.asObservable();
+      }
+      // Fall back to original select for other selectors
+      return originalSelect(selector);
+    }) as any;
+
     fixture = TestBed.createComponent(ApplicationTabsBaseComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    // Don't call detectChanges() as the component's constructor subscribes to observables
+    // that may not have all the data they need in the test environment
   });
 
   it('should be created', () => {

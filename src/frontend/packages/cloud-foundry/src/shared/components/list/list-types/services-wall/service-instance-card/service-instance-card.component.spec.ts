@@ -1,55 +1,85 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { importProvidersFrom } from '@angular/core';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { EntityServiceFactory } from '@stratosui/store/entity-service-factory.service';
-import { EntityMonitorFactory } from '@stratosui/store/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '@stratosui/store/monitors/pagination-monitor.factory';
-import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import {
+  EntityCatalogTestModule,
+  generateStratosEntities,
+  TEST_CATALOGUE_ENTITIES,
+  appReducers,
+  EntityCatalogHelper,
+  EntityCatalogHelpers,
+  EntityServiceFactory,
+  EntityMonitorFactory,
+  PaginationMonitorFactory
+} from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { CurrentUserPermissionsService } from '@stratosui/core';
+import { CloudFoundryTestingModule, generateCFEntities } from '@test-framework/cf';
+import { ServiceActionHelperService } from '@stratosui/cloud-foundry';
 import { ServicesWallService } from '../../../../../../features/services/services/services-wall.service';
-import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
-import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
-import { ServiceInstanceLastOpComponent } from '../../../../service-instance-last-op/service-instance-last-op.component';
-import {
-  TableCellServiceBindableComponent,
-} from '../../cf-services/table-cell-service-bindable/table-cell-service-bindable.component';
-import {
-  TableCellServiceReferencesComponent,
-} from '../../cf-services/table-cell-service-references/table-cell-service-references.component';
 import { ServiceInstanceCardComponent } from "./service-instance-card.component";
+
 describe('ServiceInstanceCardComponent', () => {
   let component: ServiceInstanceCardComponent;
   let fixture: ComponentFixture<ServiceInstanceCardComponent>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
+  beforeEach(() => {
+    TestBed.configureTestingModule({
       imports: [
         ServiceInstanceCardComponent,
-        CfOrgSpaceLinksComponent,
-        ServiceInstanceLastOpComponent,
-        TableCellServiceBindableComponent,
-        TableCellServiceReferencesComponent,
-        ...generateCfBaseTestModules(),
       ],
       providers: [
-        
-        ServicesWallService,
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideNoopAnimations(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          CloudFoundryTestingModule,
+          StoreModule.forRoot(appReducers, {
+            runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
+          }),
+          EntityCatalogTestModule
+        ),
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities(),
+          ]
+        },
         EntityServiceFactory,
         EntityMonitorFactory,
         PaginationMonitorFactory,
+        EntityCatalogHelper,
+        CurrentUserPermissionsService,
+        ServicesWallService,
         ServiceActionHelperService,
-
-        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();
 
+    // Initialize EntityCatalogHelper for Angular 20 compatibility
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+  });
+
+  beforeEach(() => {
     fixture = TestBed.createComponent(ServiceInstanceCardComponent);
     component = fixture.componentInstance;
     component.row = {
       entity: {
+        name: 'test-service-instance',
         service_plan_guid: 'test',
-        space_guid: '',
+        space_guid: 'test-space-guid',
+        cfGuid: 'test-cf-guid',
+        service_bindings: [],
         space: {
           entity: {
             name: '',

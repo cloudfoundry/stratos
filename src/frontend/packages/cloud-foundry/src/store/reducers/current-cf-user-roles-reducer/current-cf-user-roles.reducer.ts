@@ -1,19 +1,20 @@
 import { Action } from '@ngrx/store';
 
-import { SESSION_VERIFIED, VerifiedSession } from '../../../../../store/src/actions/auth.actions';
 import {
+  SESSION_VERIFIED,
+  VerifiedSession,
   CONNECT_ENDPOINTS_SUCCESS,
   DISCONNECT_ENDPOINTS_SUCCESS,
   EndpointActionComplete,
   REGISTER_ENDPOINTS_SUCCESS,
   UNREGISTER_ENDPOINTS_SUCCESS,
-} from '../../../../../store/src/actions/endpoint.actions';
+  APISuccessOrFailedAction
+} from '@stratosui/store';
 import { EntityUserRolesReducer } from '../../../../../store/src/entity-request-pipeline/entity-request-pipeline.types';
 import {
   currentUserRolesRequestStateReducer,
   RolesRequestStateStage,
 } from '../../../../../store/src/reducers/current-user-roles-reducer/current-user-roles.reducer';
-import { APISuccessOrFailedAction } from '../../../../../store/src/types/request.types';
 import { DELETE_ORGANIZATION_SUCCESS } from '../../../actions/organization.actions';
 import {
   GET_CURRENT_CF_USER_RELATION_SUCCESS,

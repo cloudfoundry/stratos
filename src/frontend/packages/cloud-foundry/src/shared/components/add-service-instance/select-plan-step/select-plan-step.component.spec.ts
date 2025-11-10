@@ -1,16 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-
-import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
-import {
-  CopyToClipboardComponent,
-} from '../../../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
-import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
-import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
-import { EntityServiceFactory } from '@stratosui/store/entity-service-factory.service';
-import { EntityMonitorFactory } from '@stratosui/store/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '@stratosui/store/monitors/pagination-monitor.factory';
+import { ActivatedRoute } from '@angular/router';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { PaginationMonitorFactory } from '@stratosui/store';
 import { generateCfBaseTestModulesNoShared } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ServicePlanPriceComponent } from '../../service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from '../../service-plan-public/service-plan-public.component';
@@ -18,6 +10,7 @@ import { CreateServiceInstanceHelperServiceFactory } from '../create-service-ins
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
 import { SelectPlanStepComponent } from "./select-plan-step.component";
+
 describe('SelectPlanStepComponent', () => {
   let component: SelectPlanStepComponent;
   let fixture: ComponentFixture<SelectPlanStepComponent>;
@@ -26,23 +19,27 @@ describe('SelectPlanStepComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         SelectPlanStepComponent,
-        CardStatusComponent,
-        MetadataItemComponent,
-        CopyToClipboardComponent,
         ServicePlanPublicComponent,
         ServicePlanPriceComponent,
-        FocusDirective,
         ...generateCfBaseTestModulesNoShared(),
       ],
       providers: [
-        
-        EntityServiceFactory,
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              params: {},
+              queryParams: {},
+              queryParamMap: {
+                get: () => null
+              }
+            }
+          }
+        },
         CreateServiceInstanceHelperServiceFactory,
         CsiGuidsService,
         PaginationMonitorFactory,
-        EntityMonitorFactory,
         CsiModeService,
-
         provideZonelessChangeDetection(),
       ]
     })

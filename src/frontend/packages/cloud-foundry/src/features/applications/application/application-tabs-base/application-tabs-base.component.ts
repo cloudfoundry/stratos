@@ -6,37 +6,43 @@ import { GitSCMService, GitSCMType } from '@stratosui/git';
 import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
 import { filter, first, map, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { applicationEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
-import { EndpointsService } from '../../../../../../core/src/core/endpoints.service';
 import {
+  EndpointsService,
   getActionsFromExtensions,
   getTabsFromExtensions,
   StratosActionMetadata,
   StratosActionType,
   StratosTabType,
-} from '../../../../../../core/src/core/extension/extension-service';
-import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
-import { IPageSideNavTab } from '../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
-import { LoadingPageComponent } from '../../../../../../core/src/shared/components/loading-page/loading-page.component';
-import { PageHeaderComponent } from '../../../../../../core/src/shared/components/page-header/page-header.component';
-import { IHeaderBreadcrumb } from '../../../../../../core/src/shared/components/page-header/page-header.types';
-import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
-import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
-import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { endpointEntitiesSelector } from '../../../../../../store/src/selectors/endpoint.selectors';
-import { APIResource } from '../../../../../../store/src/types/api.types';
-import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
-import { IFavoriteMetadata } from '../../../../../../store/src/types/user-favorites.types';
-import { UserFavoriteManager } from '../../../../../../store/src/user-favorite-manager';
-import { UpdateExistingApplication } from '../../../../actions/application.actions';
-import { IApp, IOrganization, ISpace } from '../../../../cf-api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
-import { ApplicationStateData } from '../../../../shared/services/application-state.service';
-import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
-import { ApplicationService } from '../../application.service';
+  CurrentUserPermissionsService,
+  safeUnsubscribe,
+  IPageSideNavTab,
+  LoadingPageComponent,
+  PageHeaderComponent,
+  IHeaderBreadcrumb
+} from '@stratosui/core';
+import {
+  RouterNav,
+  entityCatalog,
+  EntitySchema,
+  ActionState,
+  endpointEntitiesSelector,
+  APIResource,
+  EndpointModel,
+  IFavoriteMetadata,
+  UserFavoriteManager
+} from '@stratosui/store';
+import {
+  CFAppState,
+  applicationEntityType,
+  UpdateExistingApplication,
+  IApp,
+  IOrganization,
+  ISpace,
+  CF_ENDPOINT_TYPE,
+  ApplicationService,
+  CfCurrentUserPermissions,
+  ApplicationStateData
+} from '@stratosui/cloud-foundry';
 import { ApplicationPollingService } from './application-polling.service';
 
 @Component({
@@ -114,7 +120,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       { link: 'events', label: 'Events', icon: 'watch_later' }
     ];
 
-    this.endpointsService.hasMetrics(applicationService.cfGuid).subscribe(hasMetrics => {
+    this.endpointsService.hasMetrics(applicationService.cfGuid).subscribe((hasMetrics: boolean) => {
       if (hasMetrics) {
         this.tabLinks = [
           ...this.tabLinks,

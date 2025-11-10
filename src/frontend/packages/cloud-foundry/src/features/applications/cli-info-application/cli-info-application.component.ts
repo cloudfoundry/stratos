@@ -3,15 +3,11 @@ import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
-import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
-import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
-import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
-import { EntityService } from '../../../../../store/src/entity-service';
-import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
-import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
+import { IHeaderBreadcrumb, PageHeaderComponent } from '@stratosui/core';
+import { EndpointModel, EntityService, getFullEndpointApiUrl, stratosEntityCatalog } from '@stratosui/store';
+import { ApplicationService } from '@stratosui/cloud-foundry';
 import { CliCommandComponent } from '../../../shared/components/cli-info/cli-command/cli-command.component';
 import { CFAppCLIInfoContext, CliInfoComponent } from '../../../shared/components/cli-info/cli-info.component';
-import { ApplicationService } from '../application.service';
 
 @Component({
   selector: 'app-cli-info-application',

@@ -3,8 +3,8 @@ import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
 
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
+import { StepOnNextFunction } from '@stratosui/core';
+import { RequestInfoState } from '@stratosui/store';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';

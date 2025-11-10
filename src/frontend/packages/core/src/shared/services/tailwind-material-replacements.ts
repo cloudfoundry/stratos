@@ -12,9 +12,9 @@ export {
 } from './tailwind-dialog.service';
 
 // Re-export classes directly for provider usage
+// Note: ErrorStateMatcher and ShowOnDirtyErrorStateMatcher are exported from tailwind-error-state-matcher.ts
+// to avoid duplicate exports in public-api.ts
 export {
-  TailwindErrorStateMatcher as ErrorStateMatcher,
-  TailwindShowOnDirtyErrorStateMatcher as ShowOnDirtyErrorStateMatcher,
   TailwindDefaultErrorStateMatcher as DefaultErrorStateMatcher
 } from './tailwind-error-state-matcher';
 export type MatSidenav = any; // Will be replaced with TailwindSidenav
@@ -70,8 +70,6 @@ export {
 } from './tailwind-dialog.service';
 
 export {
-  TailwindErrorStateMatcher,
-  TailwindShowOnDirtyErrorStateMatcher,
   TailwindDefaultErrorStateMatcher
 } from './tailwind-error-state-matcher';
 

@@ -5,12 +5,14 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, map, startWith } from 'rxjs/operators';
 
-import { PageSubNavComponent } from '../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
-import { TileGridComponent } from '../../../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
-import { TileGroupComponent } from '../../../../../../core/src/shared/components/tile/tile-group/tile-group.component';
-import { TileComponent } from '../../../../../../core/src/shared/components/tile/tile/tile.component';
-import { LoadingPageComponent } from '../../../../../../core/src/shared/components/loading-page/loading-page.component';
-import { CardNumberMetricComponent } from '../../../../../../core/src/shared/components/cards/card-number-metric/card-number-metric.component';
+import {
+  PageSubNavComponent,
+  TileGridComponent,
+  TileGroupComponent,
+  TileComponent,
+  LoadingPageComponent,
+  CardNumberMetricComponent
+} from '@stratosui/core';
 import { CFAppState } from '../../../../cf-app-state';
 import { goToAppWall } from '../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';

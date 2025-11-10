@@ -3,16 +3,9 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { ITableColumn, ITableText } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import {
-  IListConfig,
-  IListMultiFilterConfig,
-  ListViewTypes,
-} from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { connectedEndpointsOfTypesSelector } from '../../../../../../../store/src/selectors/endpoint.selectors';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { IListConfig, IListMultiFilterConfig, ITableColumn, ITableText, ListViewTypes } from '@stratosui/core';
+import { APIResource, connectedEndpointsOfTypesSelector, ListView } from '@stratosui/store';
+import { CFAppState } from '../../../../../cf-app-state';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
 import { haveMultiConnectedCfs } from '../../../../../features/cf/cf.helpers';

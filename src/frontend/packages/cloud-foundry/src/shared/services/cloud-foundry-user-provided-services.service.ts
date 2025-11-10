@@ -3,11 +3,14 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
-import { ClearPaginationOfType } from '../../../../store/src/actions/pagination.actions';
-import { EntityCatalogEntityConfig } from '../../../../store/src/entity-catalog/entity-catalog.types';
-import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
-import { ActionState, RequestInfoState } from '../../../../store/src/reducers/api-request-reducer/types';
-import { APIResource } from '../../../../store/src/types/api.types';
+import {
+  ClearPaginationOfType,
+  EntityCatalogEntityConfig,
+  PaginationMonitorFactory,
+  ActionState,
+  RequestInfoState,
+  APIResource
+} from '@stratosui/store';
 import {
   getUserProvidedServiceInstanceRelations,
   IUserProvidedServiceInstanceData,

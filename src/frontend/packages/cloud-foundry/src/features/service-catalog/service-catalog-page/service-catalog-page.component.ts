@@ -3,9 +3,7 @@ import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
-import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
-import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
+import { ListComponent, ListConfig, PageHeaderComponent } from '@stratosui/core';
 import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
 import {
   CfServicesListConfigService,

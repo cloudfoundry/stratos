@@ -2,19 +2,8 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, first, map } from 'rxjs/operators';
 
-import { arraysEqual } from '../../../../../../../core/src/core/utils.service';
-import {
-  valueOrCommonFalsy,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-pagination-controller';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import {
-  IListConfig,
-  ListConfig,
-  ListViewTypes,
-} from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { AddParams } from '../../../../../../../store/src/actions/pagination.actions';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
+import { arraysEqual, valueOrCommonFalsy, ITableColumn, IListConfig, ListConfig, ListViewTypes } from '@stratosui/core';
+import { AddParams, APIResource, PaginatedAction } from '@stratosui/store';
 import { CfEvent } from '../../../../../cf-api.types';
 import { CFAppState } from '../../../../../cf-app-state';
 import { QParam, QParamJoiners } from '../../../../q-param';

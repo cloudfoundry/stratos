@@ -1,12 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { ITableColumn, IListFilter, ListViewTypes } from '@stratosui/core';
+import { ListView } from '@stratosui/store';
+import { CFAppState, IFeatureFlag, ActiveRouteCfOrgSpace } from '@stratosui/cloud-foundry';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import { IListFilter, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { IFeatureFlag } from '../../../../../cf-api.types';
-import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfFeatureFlagsDataSource } from './cf-feature-flags-data-source';
 import {

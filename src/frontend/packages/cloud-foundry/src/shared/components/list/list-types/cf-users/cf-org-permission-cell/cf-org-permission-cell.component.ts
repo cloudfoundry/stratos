@@ -4,17 +4,11 @@ import { Store } from '@ngrx/store';
 import { combineLatest, of as observableOf } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
-import { RemoveCfUserRole } from '../../../../../../../../cloud-foundry/src/actions/users.actions';
-import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { organizationEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
-import { arrayHelper } from '../../../../../../../../core/src/core/helper-classes/array.helper';
-import {
-  CurrentUserPermissionsService,
-} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { AppChip, AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { AppChip, AppChipsComponent, arrayHelper, ConfirmationDialogService, CurrentUserPermissionsService } from '@stratosui/core';
+import { APIResource, entityCatalog } from '@stratosui/store';
+import { RemoveCfUserRole } from '../../../../../../actions/users.actions';
+import { CFAppState } from '../../../../../../cf-app-state';
+import { organizationEntityType } from '../../../../../../cf-entity-types';
 import { IOrganization } from '../../../../../../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { getOrgRoles } from '../../../../../../features/cf/cf.helpers';

@@ -7,9 +7,8 @@ import { EMPTY, NEVER, Observable, Subject, of, timer, throwError } from 'rxjs';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
 import { catchError, debounceTime, first, map, share, startWith, switchMap, tap, retry, retryWhen, delayWhen, take } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { AnsiColorizer } from '../../../../../../../../core/src/shared/components/log-viewer/ansi-colorizer';
-import { LogViewerComponent } from '../../../../../../../../core/src/shared/components/log-viewer/log-viewer.component';
+import { AnsiColorizer, LogViewerComponent } from '@stratosui/core';
+import { CFAppState } from '@stratosui/cloud-foundry';
 import { ApplicationService } from '../../../../application.service';
 
 

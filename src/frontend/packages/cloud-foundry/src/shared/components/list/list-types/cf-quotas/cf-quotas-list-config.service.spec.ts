@@ -1,24 +1,28 @@
 import { DatePipe } from '@angular/common';
-import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CFBaseTestModules } from "@test-framework/cf-test-helper";
-import {
-  generateTestCfEndpointServiceProvider,
-} from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { CfQuotasListConfigService } from "./cf-quotas-list-config.service";
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { generateCfBaseTestModulesNoShared, generateActiveRouteCfOrgSpaceMock } from '@test-framework/cf';
+import { ConfirmationDialogService, CurrentUserPermissionsService } from '@stratosui/core';
+import { CfQuotasListConfigService } from './cf-quotas-list-config.service';
+
 describe('CfQuotasListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        ...generateTestCfEndpointServiceProvider(), CfQuotasListConfigService, DatePipe,
-        provideZonelessChangeDetection(),
+        ...STORE_TEST_PROVIDERS,
+        generateActiveRouteCfOrgSpaceMock(),
+        CfQuotasListConfigService,
+        DatePipe,
+        ConfirmationDialogService,
+        CurrentUserPermissionsService,
+        provideRouter([]),
+        provideZonelessChangeDetection()
       ],
-      imports: [
-        ...CFBaseTestModules,
-    ]
-
+      imports: generateCfBaseTestModulesNoShared()
     });
   });
 

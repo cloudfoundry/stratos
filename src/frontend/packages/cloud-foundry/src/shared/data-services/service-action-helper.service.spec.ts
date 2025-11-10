@@ -1,19 +1,33 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { Store, StoreModule } from '@ngrx/store';
 
-import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';
-import { generateCfBaseTestModules } from '@test-framework/cloud-foundry-endpoint-service.helper';
+import { ConfirmationDialogService } from '@stratosui/core';
+import { appReducers } from '@stratosui/store';
+
 import { ServiceActionHelperService } from './service-action-helper.service';
 
 describe('ServiceActionHelperService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        ServiceActionHelperService, ConfirmationDialogService,
+        ServiceActionHelperService,
+        ConfirmationDialogService,
         provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
       ],
-      imports: generateCfBaseTestModules(),
+      imports: [
+        StoreModule.forRoot(appReducers, {
+          runtimeChecks: {
+            strictStateImmutability: false,
+            strictActionImmutability: false
+          }
+        }),
+      ],
     });
   });
 

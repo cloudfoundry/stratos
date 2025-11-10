@@ -1,8 +1,7 @@
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 
-import { BooleanIndicatorComponent } from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { BooleanIndicatorComponent, TableCellCustom } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
 import { IService } from '../../../../../../cf-api-svc.types';
 
 @Component({

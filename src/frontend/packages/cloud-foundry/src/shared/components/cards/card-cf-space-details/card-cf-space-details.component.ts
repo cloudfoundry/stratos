@@ -5,12 +5,8 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
-import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
-import { BooleanIndicatorComponent } from '../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import { SnackBarService } from '../../../../../../core/src/shared/services/snackbar.service';
-import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../../store/src/app-state';
+import { safeUnsubscribe, MetadataItemComponent, BooleanIndicatorComponent, SnackBarService } from '@stratosui/core';
+import { RouterNav, AppState } from '@stratosui/store';
 import { CloudFoundrySpaceService } from '../../../../features/cf/services/cloud-foundry-space.service';
 
 @Component({

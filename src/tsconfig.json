@@ -54,6 +54,7 @@
       "@stratosui/git": ["frontend/packages/git/src/public_api.ts"],
       "@stratosui/material-replacements": ["frontend/packages/core/src/shared/services/tailwind-material-replacements.ts"],
       "@test-framework": ["frontend/packages/core/test-framework/index.ts"],
+      "@test-framework/cf": ["frontend/packages/cloud-foundry/test-framework/index.ts"],
       "@core/sass/*": ["frontend/packages/core/sass/*"]
     }
   }

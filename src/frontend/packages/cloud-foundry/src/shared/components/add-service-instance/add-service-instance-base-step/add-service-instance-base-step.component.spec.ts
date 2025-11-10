@@ -1,10 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { TabNavService } from '../../../../../../core/src/tab-nav.service';
-import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { PageHeaderModule } from '@stratosui/core/shared/components/page-header/page-header.module';
+import { SteppersModule } from '@stratosui/core/shared/components/stepper/steppers.module';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { generateCfBaseTestModulesNoShared } from "@test-framework/cf";
 import { AddServiceInstanceBaseStepComponent } from "./add-service-instance-base-step.component";
+
 describe('AddServiceInstanceBaseStepComponent', () => {
   let component: AddServiceInstanceBaseStepComponent;
   let fixture: ComponentFixture<AddServiceInstanceBaseStepComponent>;
@@ -13,11 +18,17 @@ describe('AddServiceInstanceBaseStepComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         AddServiceInstanceBaseStepComponent,
-        ...generateCfBaseTestModules(),
       ],
       providers: [
-        TabNavService,
         provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          generateCfBaseTestModulesNoShared(),
+          PageHeaderModule,
+          SteppersModule
+        ),
       ]
     })
       .compileComponents();

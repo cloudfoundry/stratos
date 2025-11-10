@@ -1,28 +1,21 @@
-import { inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
-
-import {
-  IPermissionConfigs,
-  PermissionConfig,
-  PermissionConfigLink,
-  PermissionTypes,
-} from '../../../core/src/core/permissions/current-user-permissions.config';
-import {
-  CurrentUserPermissionsService,
-  CUSTOM_USER_PERMISSION_CHECKERS,
-} from '../../../core/src/core/permissions/current-user-permissions.service';
 import {
   BaseCurrentUserPermissionsChecker,
+  CUSTOM_USER_PERMISSION_CHECKERS,
+  CurrentUserPermissionsService,
   IConfigGroup,
   IConfigGroups,
   ICurrentUserPermissionsChecker,
   IPermissionCheckCombiner,
-} from '../../../core/src/core/permissions/current-user-permissions.types';
-import { GeneralEntityAppState } from '../../../store/src/app-state';
-import { PermissionValues } from '../../../store/src/selectors/current-user-role.selectors';
-import { connectedEndpointsSelector } from '../../../store/src/selectors/endpoint.selectors';
+  IPermissionConfigs,
+  PermissionConfig,
+  PermissionConfigLink,
+  PermissionTypes,
+} from '@stratosui/core';
+import { GeneralEntityAppState, PermissionValues, connectedEndpointsSelector } from '@stratosui/store';
 import { CFFeatureFlagTypes, IFeatureFlag } from '../cf-api.types';
 import { cfEntityCatalog } from '../cf-entity-catalog';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
@@ -32,73 +25,15 @@ import {
   getCurrentUserCFGlobalState,
 } from '../store/selectors/cf-current-user-role.selectors';
 import { IOrgRoleState, ISpaceRoleState, ISpacesRoleState } from '../store/types/cf-current-user-roles.types';
+import {
+  CfCurrentUserPermissions,
+  CfPermissionStrings,
+  CfPermissionTypes,
+  CfScopeStrings,
+} from './cf-user-permissions.types';
 
-export const cfCurrentUserPermissionsService = [
-  {
-    provide: CUSTOM_USER_PERMISSION_CHECKERS,
-    useFactory: () => [new CfUserPermissionsChecker()],
-    deps: [] as any[]
-  },
-  CurrentUserPermissionsService,
-];
-
-export enum CfCurrentUserPermissions {
-  APPLICATION_VIEW = 'view.application',
-  APPLICATION_EDIT = 'edit.application',
-  APPLICATION_CREATE = 'create.application',
-  APPLICATION_MANAGE = 'manage.application',
-  APPLICATION_VIEW_ENV_VARS = 'env-vars.view.application',
-  SPACE_VIEW = 'view.space',
-  SPACE_CREATE = 'create.space',
-  SPACE_DELETE = 'delete.space',
-  SPACE_EDIT = 'edit.space',
-  SPACE_CHANGE_ROLES = 'change-roles.space',
-  ROUTE_CREATE = 'create.route',
-  // ROUTE_BINDING_CREATE = 'create.binding.route',
-  QUOTA_CREATE = 'create.quota',
-  QUOTA_EDIT = 'edit.quota',
-  QUOTA_DELETE = 'delete.quota',
-  SPACE_QUOTA_CREATE = 'create.space-quota',
-  SPACE_QUOTA_EDIT = 'edit.space-quota',
-  SPACE_QUOTA_DELETE = 'delete.space-quota',
-  ORGANIZATION_CREATE = 'create.org',
-  ORGANIZATION_DELETE = 'delete.org',
-  ORGANIZATION_EDIT = 'edit.org',
-  ORGANIZATION_SUSPEND = 'suspend.org',
-  ORGANIZATION_CHANGE_ROLES = 'change-roles.org',
-  SERVICE_INSTANCE_DELETE = 'delete.service-instance',
-  SERVICE_INSTANCE_CREATE = 'create.service-instance',
-  SERVICE_BINDING_EDIT = 'edit.service-binding',
-  FIREHOSE_VIEW = 'view-firehose',
-  SERVICE_INSTANCE_EDIT = 'edit.service-instance'
-}
-
-export enum CfPermissionStrings {
-  _GLOBAL_ = 'global',
-  SPACE_MANAGER = 'isManager',
-  SPACE_AUDITOR = 'isAuditor',
-  SPACE_DEVELOPER = 'isDeveloper',
-  ORG_MANAGER = 'isManager',
-  ORG_AUDITOR = 'isAuditor',
-  ORG_BILLING_MANAGER = 'isBillingManager',
-  ORG_USER = 'isUser',
-}
-
-export enum CfScopeStrings {
-  CF_ADMIN_GROUP = 'cloud_controller.admin',
-  CF_READ_ONLY_ADMIN_GROUP = 'cloud_controller.admin_read_only',
-  CF_ADMIN_GLOBAL_AUDITOR_GROUP = 'cloud_controller.global_auditor',
-  CF_WRITE_SCOPE = 'cloud_controller.write',
-  CF_READ_SCOPE = 'cloud_controller.write',
-}
-
-export enum CfPermissionTypes {
-  SPACE = 'spaces',
-  ORGANIZATION = 'organizations',
-  ENDPOINT = 'endpoint',
-  ENDPOINT_SCOPE = 'endpoint-scope',
-  FEATURE_FLAG = 'feature-flag',
-}
+// Re-export permission types for backward compatibility
+export { CfCurrentUserPermissions, CfPermissionStrings, CfPermissionTypes, CfScopeStrings } from './cf-user-permissions.types';
 
 enum CHECKER_GROUPS {
   CF_GROUP = '__CF_TYPE__'
@@ -178,11 +113,11 @@ export const cfPermissionConfigs: IPermissionConfigs = {
   ],
 };
 
+@Injectable()
 export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker implements ICurrentUserPermissionsChecker {
   static readonly ALL_SPACES = 'PERMISSIONS__ALL_SPACES_PLEASE';
-  private store = inject(Store<GeneralEntityAppState>);
 
-  constructor() {
+  constructor(private store: Store<GeneralEntityAppState>) {
     super();
   }
 
@@ -498,3 +433,13 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
   }
 
 }
+
+export const cfCurrentUserPermissionsService = [
+  CfUserPermissionsChecker,
+  {
+    provide: CUSTOM_USER_PERMISSION_CHECKERS,
+    useFactory: (checker: CfUserPermissionsChecker) => [checker],
+    deps: [CfUserPermissionsChecker]
+  },
+  CurrentUserPermissionsService,
+];

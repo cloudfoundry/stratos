@@ -5,13 +5,16 @@ import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, combineLatest, EMPTY, Observable, of as observableOf, of } from 'rxjs';
 import { catchError, filter, first, map, mergeMap, pairwise, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
-import { ResetPagination } from '../../../../store/src/actions/pagination.actions';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
-import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
-import { selectSessionData } from '../../../../store/src/reducers/auth.reducer';
-import { SessionDataEndpoint } from '../../../../store/src/types/auth.types';
-import { PaginatedAction } from '../../../../store/src/types/pagination.types';
-import { ICFAction, UpdateCfAction } from '../../../../store/src/types/request.types';
+import {
+  ResetPagination,
+  entityCatalog,
+  ActionState,
+  selectSessionData,
+  SessionDataEndpoint,
+  PaginatedAction,
+  ICFAction
+} from '@stratosui/store';
+import { UpdateCfAction } from '../../../../store/src/types/request.types';
 import { GET_CURRENT_CF_USER_RELATION, GetCurrentCfUserRelations } from '../../actions/permissions.actions';
 import { UsersRolesActions, UsersRolesClearUpdateState, UsersRolesExecuteChanges } from '../../actions/users-roles.actions';
 import { AddCfUserRole, ChangeCfUserRole, RemoveCfUserRole } from '../../actions/users.actions';

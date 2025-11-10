@@ -1,15 +1,21 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { Store, StoreModule } from '@ngrx/store';
 
-import { CFBaseTestModules } from "@test-framework/cf-test-helper";
-import {
-  CloudFoundryEventsListComponent,
-} from '../../../../shared/components/cloud-foundry-events-list/cloud-foundry-events-list.component';
+import { appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule } from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { ListConfig } from '@stratosui/core';
+import { generateActiveRouteCfOrgSpaceMock } from '@test-framework/cf';
+import { generateCFEntities } from '../../../../cf-entity-generator';
+import { CfAllEventsConfigService } from '../../../../shared/components/list/list-types/cf-events/types/cf-all-events-config.service';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
-import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
-import { CloudFoundryEventsComponent } from "./cloud-foundry-events.component";
+import { CloudFoundryEventsComponent } from './cloud-foundry-events.component';
+
 describe('CloudFoundryEventsComponent', () => {
   let component: CloudFoundryEventsComponent;
   let fixture: ComponentFixture<CloudFoundryEventsComponent>;
@@ -18,20 +24,38 @@ describe('CloudFoundryEventsComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         CloudFoundryEventsComponent,
-        CloudFoundryEventsListComponent,
-        ...CFBaseTestModules,
+        NoopAnimationsModule,
+        StoreModule.forRoot(
+          appReducers,
+          { runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false } }
+        ),
+        {
+          ngModule: EntityCatalogTestModule,
+          providers: [
+            {
+              provide: TEST_CATALOGUE_ENTITIES,
+              useValue: [
+                ...generateStratosEntities(),
+                ...generateCFEntities()
+              ]
+            }
+          ]
+        },
       ],
       providers: [
+        ...STORE_TEST_PROVIDERS,
+        {
+          provide: ListConfig,
+          useClass: CfAllEventsConfigService,
+        },
+        generateActiveRouteCfOrgSpaceMock(),
+        CfUserService,
         CloudFoundryEndpointService,
-        CfUserService, {
-          provide: ActiveRouteCfOrgSpace,
-          useValue: {
-            cfGuid: 'cfGuid',
-            orgGuid: 'orgGuid',
-            spaceGuid: 'spaceGuid'
-          }
-        }
-      ]
+        Store,
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+      ],
     })
       .compileComponents();
   });

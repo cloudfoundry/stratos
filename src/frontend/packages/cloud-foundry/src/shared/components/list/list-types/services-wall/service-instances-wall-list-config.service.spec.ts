@@ -1,25 +1,31 @@
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { CfOrgSpaceDataService } from '../../../../data-services/cf-org-space-service.service';
-import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
-import { ServiceInstancesWallListConfigService } from "./service-instances-wall-list-config.service";
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
+import { CfOrgSpaceDataService, ServiceActionHelperService } from '@stratosui/cloud-foundry';
+import { CurrentUserPermissionsService } from '@stratosui/core';
+import { ServiceInstancesWallListConfigService } from './service-instances-wall-list-config.service';
+
 describe('ServiceInstancesWallListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(generateCfBaseTestModulesNoShared()),
         ServiceInstancesWallListConfigService,
         CfOrgSpaceDataService,
         DatePipe,
         ServiceActionHelperService,
-
-        provideZonelessChangeDetection(),
+        CurrentUserPermissionsService,
       ],
-      imports: generateCfBaseTestModules(),
     });
   });
 

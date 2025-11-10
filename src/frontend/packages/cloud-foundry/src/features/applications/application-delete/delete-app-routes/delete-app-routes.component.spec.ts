@@ -1,14 +1,12 @@
 import { DatePipe } from '@angular/common';
+import { provideHttpClient } from '@angular/common/http';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { provideRouter } from '@angular/router';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { generateTestApplicationServiceProvider } from "@test-framework/application-service-helper";
-import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
-import {
-  ApplicationEnvVarsHelper,
-} from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { ApplicationStateService } from './../../../../shared/services/application-state.service';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { generateTestApplicationServiceProvider, generateCfBaseTestModulesNoShared, ApplicationStateService, ApplicationEnvVarsHelper } from '@test-framework/cf';
 import { DeleteAppRoutesComponent } from './delete-app-routes.component';
 
 describe('DeleteAppRoutesComponent', () => {
@@ -16,20 +14,22 @@ describe('DeleteAppRoutesComponent', () => {
   let fixture: ComponentFixture<DeleteAppRoutesComponent>;
   const appId = '1';
   const cfId = '2';
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
         DeleteAppRoutesComponent,
-        ...generateCfBaseTestModules(),
       ],
       providers: [
-        
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(generateCfBaseTestModulesNoShared()),
         generateTestApplicationServiceProvider(cfId, appId),
+        ApplicationStateService,
         ApplicationEnvVarsHelper,
         DatePipe,
-        ApplicationStateService,
-
-        provideZonelessChangeDetection(),
       ]
     }).compileComponents();
 
@@ -41,6 +41,4 @@ describe('DeleteAppRoutesComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
-
-  afterAll(() => { });
 });

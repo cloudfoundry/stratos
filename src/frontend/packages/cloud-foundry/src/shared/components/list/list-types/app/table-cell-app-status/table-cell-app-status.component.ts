@@ -2,9 +2,8 @@ import { Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angu
 import { Observable } from 'rxjs';
 import { startWith } from 'rxjs/operators';
 
-import { ApplicationStateComponent } from '../../../../../../../../core/src/shared/components/application-state/application-state.component';
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { ApplicationStateComponent, TableCellCustom } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
 import { IApp } from '../../../../../../cf-api.types';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { ApplicationStateData, ApplicationStateService } from '../../../../../services/application-state.service';

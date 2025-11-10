@@ -1,15 +1,17 @@
 
 import { Component, Input, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { CustomCheckboxComponent } from '../../../../../core/src/shared/components/custom-checkbox/custom-checkbox.component';
-import { CustomFormFieldComponent } from '@stratosui/core';
 import { Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
-import { FocusDirective } from '../../../../../core/src/shared/components/focus.directive';
-import { UnlimitedInputComponent } from '../../../../../core/src/shared/components/unlimited-input/unlimited-input.component';
-import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
-import { endpointEntityType } from '../../../../../store/src/helpers/stratos-entity-factory';
+import {
+  CustomCheckboxComponent,
+  CustomFormFieldComponent,
+  FocusDirective,
+  UnlimitedInputComponent,
+  safeUnsubscribe
+} from '@stratosui/core';
+import { endpointEntityType } from '@stratosui/store';
 import { IQuotaDefinition } from '../../../cf-api.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { createEntityRelationPaginationKey } from '../../../entity-relations/entity-relations.types';

@@ -1,7 +1,6 @@
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 
-import { ListComponent } from '../../../../../../../../../core/src/shared/components/list/list.component';
-import { ListConfig } from '../../../../../../../../../core/src/shared/components/list/list.component.types';
+import { ListComponent, ListConfig } from '@stratosui/core';
 import {
   CfUserServiceInstancesListConfigBase,
 } from '../../../../../../../shared/components/list/list-types/cf-services/cf-user-service-instances-list-config';

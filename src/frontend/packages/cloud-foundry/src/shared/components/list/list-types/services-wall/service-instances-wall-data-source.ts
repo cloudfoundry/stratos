@@ -1,24 +1,20 @@
 import { Store } from '@ngrx/store';
-import { getRowMetadata } from '@stratosui/store';
+import { getRowMetadata, APIResource, PaginatedAction, PaginationParam } from '@stratosui/store';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { serviceInstancesEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import {
+  CFAppState,
+  serviceInstancesEntityType,
   createEntityRelationPaginationKey,
-} from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+  cfEntityCatalog,
+  createCfOrSpaceMultipleFilterFn,
+} from '@stratosui/cloud-foundry';
 import {
   ActionSchemaConfig,
   MultiActionConfig,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-config';
-import {
   ListPaginationMultiFilterChange,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
-import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { PaginatedAction, PaginationParam } from '../../../../../../../store/src/types/pagination.types';
-import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
+  IListConfig,
+} from '@stratosui/core';
 import { CFListDataSource } from '../../../../cf-list-data-source';
-import { createCfOrSpaceMultipleFilterFn } from '../../../../data-services/cf-org-space-service.service';
 
 export class ServiceInstancesWallDataSource extends CFListDataSource<APIResource> {
   constructor(store: Store<CFAppState>, transformEntities: any[], listConfig?: IListConfig<APIResource>) {

@@ -1,12 +1,10 @@
-import { Component, Input, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
-
-import { CfRoute } from '../../../../../../../../cloud-foundry/src/store/types/route.types';
-import { AppChip, AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { AppChip, AppChipsComponent, TableCellCustom } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
+import { CfRoute, IApp } from '@stratosui/cloud-foundry';
 
 @Component({
   selector: 'app-table-cell-route-apps-attached',
@@ -42,7 +40,7 @@ export class TableCellRouteAppsAttachedComponent extends TableCellCustom<APIReso
       this.row$
     ]).pipe(
       map(([config, route]) => {
-        return route.entity.apps ? route.entity.apps.map(app => {
+        return route.entity.apps ? route.entity.apps.map((app: APIResource<IApp>) => {
           return {
             value: app.entity.name,
             url: {

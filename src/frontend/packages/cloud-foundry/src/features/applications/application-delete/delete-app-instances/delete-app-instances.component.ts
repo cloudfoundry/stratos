@@ -1,9 +1,8 @@
 import { Component, EventEmitter, OnDestroy, Output, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Subscription } from 'rxjs';
 
-import { ListComponent } from '../../../../../../core/src/shared/components/list/list.component';
-import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
-import { APIResource } from '../../../../../../store/src/types/api.types';
+import { ListComponent, ListConfig } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
 import { IServiceInstance } from '../../../../cf-api-svc.types';
 import { AppDeleteServiceInstancesListConfigService } from './app-delete-instances-routes-list-config.service';
 

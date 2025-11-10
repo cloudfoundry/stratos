@@ -1,29 +1,19 @@
 import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CustomFormFieldComponent } from '@stratosui/core';
 import { AbstractControl, ReactiveFormsModule, FormControl, FormGroup, Validators, FormBuilder } from '@angular/forms';
-import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { catchError, filter, first, map, mergeMap, pairwise, switchMap, tap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { domainEntityType, organizationEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
-import { selectNewAppState } from '../../../../../../cloud-foundry/src/store/effects/create-app-effects';
-import { CreateNewApplicationState } from '../../../../../../cloud-foundry/src/store/types/create-application.types';
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import {
-  ActionState,
-  getDefaultRequestState,
-  RequestInfoState,
-} from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { APIResource } from '../../../../../../store/src/types/api.types';
+import { CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, ErrorStateMatcher, ShowOnDirtyErrorStateMatcher, StepOnNextFunction } from '@stratosui/core';
+import { RouterNav, ActionState, getDefaultRequestState, RequestInfoState, APIResource } from '@stratosui/store';
+import { CFAppState, domainEntityType, organizationEntityType } from '@stratosui/cloud-foundry';
 import { IDomain } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { createEntityRelationKey } from '../../../../entity-relations/entity-relations.types';
 import { createGetApplicationAction } from '../../application.service';
+import { selectNewAppState } from '../../../../store/effects/create-app-effects';
+import { CreateNewApplicationState } from '../../../../store/types/create-application.types';
 
 interface DomainHostForm {
   domain: FormControl<string>;

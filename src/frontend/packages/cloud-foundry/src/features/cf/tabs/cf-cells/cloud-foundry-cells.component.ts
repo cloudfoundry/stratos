@@ -3,13 +3,10 @@ import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import { ListComponent } from '../../../../../../core/src/shared/components/list/list.component';
-import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
-import { AppState } from '../../../../../../store/src/app-state';
-import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
-import {
-  CfCellsListConfigService,
-} from '../../../../shared/components/list/list-types/cf-cells/cf-cells-list-config.service';
+import { ListComponent, ListConfig } from '@stratosui/core';
+import { AppState, PaginationMonitorFactory } from '@stratosui/store';
+
+import { CfCellsListConfigService } from '../../../../shared/components/list/list-types/cf-cells/cf-cells-list-config.service';
 import { CfCellHelper } from '../../cf-cell.helpers';
 import { getActiveRouteCfCellProvider } from '../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';

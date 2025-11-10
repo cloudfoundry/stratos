@@ -1,16 +1,19 @@
 
-import { CustomFormFieldComponent, AppInputDirective } from '@stratosui/core';
 import { Component, Input, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
-import { ReactiveFormsModule,FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { CustomSelectComponent, CustomOptionComponent } from '../../../../../core/src/shared/components/custom-select/custom-select.component';
-
+import { ReactiveFormsModule, FormControl, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
-import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
-import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
-import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
-import { APIResource } from '../../../../../store/src/types/api.types';
+import {
+  CustomFormFieldComponent,
+  AppInputDirective,
+  CustomSelectComponent,
+  CustomOptionComponent,
+  ListComponent,
+  ListConfig,
+  safeUnsubscribe
+} from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
 import { CfEventsConfigService } from '../list/list-types/cf-events/cf-events-config.service';
 
 /**

@@ -3,29 +3,30 @@ import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, of as observableOf } from 'rxjs';
 
-import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { userProvidedServiceInstanceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
+import {
+  CFAppState,
+  userProvidedServiceInstanceEntityType,
+  IUserProvidedServiceInstance,
+  cfEntityFactory,
+  CfCurrentUserPermissions,
+  ServiceActionHelperService,
+  CfOrgSpaceLabelService,
+  CfOrgSpaceLinksComponent,
+  CSI_CANCEL_URL,
+} from '@stratosui/cloud-foundry';
 import {
   CurrentUserPermissionsService,
-} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { AppChip, AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { MetaCardComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
-import { MetaCardItemComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
-import { MetaCardKeyComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
-import { MetaCardTitleComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
-import { MetaCardValueComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
-import { MultilineTitleComponent } from '../../../../../../../../core/src/shared/components/multiline-title/multiline-title.component';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
-import { ComponentEntityMonitorConfig } from '../../../../../../../../store/src/types/shared.types';
-import { IUserProvidedServiceInstance } from '../../../../../../cf-api-svc.types';
-import { cfEntityFactory } from '../../../../../../cf-entity-factory';
-import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
-import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
-import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
-import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
-import { CSI_CANCEL_URL } from '../../../../add-service-instance/csi-mode.service';
+  AppChip,
+  AppChipsComponent,
+  CardCell,
+  MetaCardComponent,
+  MetaCardItemComponent,
+  MetaCardKeyComponent,
+  MetaCardTitleComponent,
+  MetaCardValueComponent,
+  MultilineTitleComponent,
+} from '@stratosui/core';
+import { APIResource, MenuItem, ComponentEntityMonitorConfig } from '@stratosui/store';
 
 
 @Component({

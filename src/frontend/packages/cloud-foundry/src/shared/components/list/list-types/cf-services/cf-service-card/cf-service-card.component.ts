@@ -2,18 +2,19 @@ import { CommonModule } from '@angular/common';
 import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { MetaCardComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
-import { MetaCardItemComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
-import { MetaCardKeyComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
-import { MetaCardTitleComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
-import { MetaCardValueComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
-import { MultilineTitleComponent } from '../../../../../../../../core/src/shared/components/multiline-title/multiline-title.component';
-import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
-import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import {
+  AppChip,
+  CardCell,
+  MetaCardComponent,
+  MetaCardItemComponent,
+  MetaCardKeyComponent,
+  MetaCardTitleComponent,
+  MetaCardValueComponent,
+  MultilineTitleComponent
+} from '@stratosui/core';
+import { APIResource, EntityServiceFactory, RouterNav } from '@stratosui/store';
+
+import { CFAppState } from '../../../../../../cf-app-state';
 import { IService, IServiceExtra } from '../../../../../../cf-api-svc.types';
 import { getServiceName } from '../../../../../../features/service-catalog/services-helper';
 import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';

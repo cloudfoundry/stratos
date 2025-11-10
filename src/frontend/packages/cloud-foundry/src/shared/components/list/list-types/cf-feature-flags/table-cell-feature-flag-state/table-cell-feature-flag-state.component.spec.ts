@@ -1,25 +1,34 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { provideStore } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import {
-  BooleanIndicatorComponent,
-} from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import {
-  generateCfBaseTestModulesNoShared,
-} from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { TableCellFeatureFlagStateComponent } from "./table-cell-feature-flag-state.component";
+import { appReducers } from '@stratosui/store';
+import { TableCellFeatureFlagStateComponent } from './table-cell-feature-flag-state.component';
+
 describe('TableCellFeatureFlagStateComponent', () => {
   let component: TableCellFeatureFlagStateComponent;
   let fixture: ComponentFixture<TableCellFeatureFlagStateComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection()],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideNoopAnimations(),
+        provideStore(appReducers, {
+          runtimeChecks: {
+            strictStateImmutability: false,
+            strictActionImmutability: false
+          }
+        }),
+      ],
       imports: [
         TableCellFeatureFlagStateComponent,
-        ...generateCfBaseTestModulesNoShared(),
-        BooleanIndicatorComponent,
       ],
     })
       .compileComponents();

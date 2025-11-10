@@ -4,11 +4,10 @@ import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
 
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { IServiceBroker } from '../../../../../../cf-api-svc.types';
+import { TableCellCustom } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
+import { IServiceBroker, IService } from '../../../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
-import { IService } from '../../../../../../public_api';
 
 export enum TableCellServiceBrokerComponentMode {
   NAME = 'NAME',

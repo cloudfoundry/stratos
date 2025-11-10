@@ -3,10 +3,8 @@ import { inject, Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import { IGlobalListAction, IListAction, IListConfig, IListMultiFilterConfig, IMultiListAction, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { ITableColumn, IGlobalListAction, IListAction, IListConfig, IListMultiFilterConfig, IMultiListAction, ListViewTypes } from '@stratosui/core';
+import { ListView, APIResource } from '@stratosui/store';
 import { IServiceBinding } from '../../../../../cf-api-svc.types';
 import { CFAppState } from '../../../../../cf-app-state';
 import { DetachAppsDataSource } from './detach-apps-data-source';

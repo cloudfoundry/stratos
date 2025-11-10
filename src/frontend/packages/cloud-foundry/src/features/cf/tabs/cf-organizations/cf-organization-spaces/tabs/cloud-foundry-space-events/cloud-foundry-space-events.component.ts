@@ -1,9 +1,7 @@
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 
-import { ListConfig } from '../../../../../../../../../core/src/shared/components/list/list.component.types';
-import {
-  CfSpaceEventsConfigService,
-} from '../../../../../../../shared/components/list/list-types/cf-events/types/cf-space-events-config.service';
+import { ListConfig } from '@stratosui/core';
+import { CfSpaceEventsConfigService } from '../../../../../../../shared/components/list/list-types/cf-events/types/cf-space-events-config.service';
 import { CloudFoundryEventsListComponent } from '../../../../../../../shared/components/cloud-foundry-events-list/cloud-foundry-events-list.component';
 
 @Component({

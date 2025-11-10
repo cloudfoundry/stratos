@@ -1,9 +1,8 @@
 
 import { Component , ChangeDetectionStrategy } from '@angular/core';
-import { CustomTooltipDirective, CustomIconComponent } from '@stratosui/core';
 import { RouterModule } from '@angular/router';
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { CustomTooltipDirective, CustomIconComponent, TableCellCustom } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
 
 interface CellEVentActeeConfig {
   setActeeFilter: (actee: string) => void;

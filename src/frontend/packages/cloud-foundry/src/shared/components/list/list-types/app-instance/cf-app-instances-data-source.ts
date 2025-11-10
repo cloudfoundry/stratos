@@ -1,11 +1,7 @@
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
-
-import { AppStat, AppStats } from '../../../../../../../cloud-foundry/src/store/types/app-metadata.types';
-import {
-  ListDataSource,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { ListDataSource, IListConfig } from '@stratosui/core';
+import { AppStat, AppStats } from '../../../../../store/types/app-metadata.types';
 import { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';

@@ -5,10 +5,9 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { BREADCRUMB_URL_PARAM } from '../../../../../../../../core/src/shared/components/breadcrumbs/breadcrumbs.types';
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { getCurrentRoutingState, RoutingEvent } from '../../../../../../../../store/src/types/routing.type';
+import { BREADCRUMB_URL_PARAM, TableCellCustom } from '@stratosui/core';
+import { getCurrentRoutingState, RoutingEvent } from '@stratosui/store';
+import { CFAppState } from '../../../../../../cf-app-state';
 
 @Component({
   selector: 'app-table-cell-app-name',

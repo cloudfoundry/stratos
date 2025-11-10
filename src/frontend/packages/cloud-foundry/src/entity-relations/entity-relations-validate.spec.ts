@@ -2,9 +2,7 @@ import { inject, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { Store } from '@ngrx/store';
-import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from "@test-framework/cloud-foundry-endpoint-service.helper";
-
-import { environment } from '@stratosui/core';
+import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '@stratosui/store/testing';
 import {
   SetInitialParams,
   APIResponse,
@@ -90,7 +88,7 @@ describe('Entity Relations - validate -', () => {
       res.completed
         .then(completedRes => {
           expect(iStore.dispatch).toHaveBeenCalledTimes(0);
-          expect(dispatchSpy.calls.count()).toBe(0);
+          expect(dispatchSpy.mock.calls.length).toBe(0);
 
           if (apiResponse) {
             expect(completedRes).toBeTruthy();
@@ -154,9 +152,9 @@ describe('Entity Relations - validate -', () => {
         expect(res.started).toBeTruthy();
 
         expect(iStore.dispatch).toHaveBeenCalledTimes(2);
-        expect(dispatchSpy.calls.count()).toBe(2);
-        expect(dispatchSpy.calls.all()[0].args[0]).toEqual(setSpacesParamsActions);
-        expect(dispatchSpy.calls.all()[1].args[0]).toEqual(getSpacesAction);
+        expect(dispatchSpy.mock.calls.length).toBe(2);
+        expect(dispatchSpy.mock.calls[0][0]).toEqual(setSpacesParamsActions);
+        expect(dispatchSpy.mock.calls[1][0]).toEqual(getSpacesAction);
         done();
       })();
     });
@@ -221,8 +219,8 @@ describe('Entity Relations - validate -', () => {
         });
 
         expect(iStore.dispatch).toHaveBeenCalledTimes(1);
-        expect(dispatchSpy.calls.count()).toBe(1);
-        expect(dispatchSpy.calls.all()[0].args[0]).toEqual(getQuotaAction);
+        expect(dispatchSpy.mock.calls.length).toBe(1);
+        expect(dispatchSpy.mock.calls[0][0]).toEqual(getQuotaAction);
         done();
 
       })();
@@ -359,9 +357,9 @@ describe('Entity Relations - validate -', () => {
           expect(res.started).toBeTruthy();
 
           expect(iStore.dispatch).toHaveBeenCalledTimes(2);
-          expect(dispatchSpy.calls.count()).toBe(2);
-          expect(dispatchSpy.calls.all()[0].args[0]).toEqual(setSpaceRoutesParamsActions);
-          expect(dispatchSpy.calls.all()[1].args[0]).toEqual(getSpaceRoutesAction);
+          expect(dispatchSpy.mock.calls.length).toBe(2);
+          expect(dispatchSpy.mock.calls[0][0]).toEqual(setSpaceRoutesParamsActions);
+          expect(dispatchSpy.mock.calls[1][0]).toEqual(getSpaceRoutesAction);
           done();
 
         })();
@@ -396,7 +394,7 @@ describe('Entity Relations - validate -', () => {
           res.completed.then(completedRes => {
             expect(completedRes).toBeFalsy();
             expect(iStore.dispatch).toHaveBeenCalledTimes(0);
-            expect(dispatchSpy.calls.count()).toBe(0);
+            expect(dispatchSpy.mock.calls.length).toBe(0);
             done();
           });
 
@@ -431,7 +429,7 @@ describe('Entity Relations - validate -', () => {
           res.completed.then(completedRes => {
             expect(completedRes).toBeFalsy();
             expect(iStore.dispatch).toHaveBeenCalledTimes(0);
-            expect(dispatchSpy.calls.count()).toBe(0);
+            expect(dispatchSpy.mock.calls.length).toBe(0);
             done();
           });
 
@@ -464,11 +462,9 @@ describe('Entity Relations - validate -', () => {
         type: '[Entity] Associate with parent',
         endpointType: CF_ENDPOINT_TYPE,
       };
-      if (!environment.production) {
-        // Add for easier debugging
-        /* tslint:disable-next-line:no-string-literal  */
-        associateAPIAction['childEntityKey'] = quotaEntityKey;
-      }
+      // Add for easier debugging in tests
+      /* tslint:disable-next-line:no-string-literal  */
+      associateAPIAction['childEntityKey'] = quotaEntityKey;
 
       const associateAction = new WrapperRequestActionSuccess({
         entities: {
@@ -494,8 +490,8 @@ describe('Entity Relations - validate -', () => {
           expect(res.started).toBeTruthy();
 
           expect(iStore.dispatch).toHaveBeenCalledTimes(1);
-          expect(dispatchSpy.calls.count()).toBe(1);
-          expect(dispatchSpy.calls.all()[0].args[0]).toEqual(associateAction);
+          expect(dispatchSpy.mock.calls.length).toBe(1);
+          expect(dispatchSpy.mock.calls[0][0]).toEqual(associateAction);
           done();
 
         })();

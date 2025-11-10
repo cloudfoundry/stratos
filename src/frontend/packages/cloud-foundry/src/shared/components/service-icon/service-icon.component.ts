@@ -2,7 +2,7 @@ import { Component, Input, OnInit , ChangeDetectionStrategy } from '@angular/cor
 import { CommonModule } from '@angular/common';
 
 import { CustomIconComponent } from '@stratosui/core';
-import { APIResource } from '../../../../../store/src/types/api.types';
+import { APIResource } from '@stratosui/store';
 import { IService, IServiceExtra } from '../../../cf-api-svc.types';
 
 @Component({

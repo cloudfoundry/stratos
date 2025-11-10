@@ -1,11 +1,5 @@
 import { Component , ChangeDetectionStrategy } from '@angular/core';
-
-
-import { CustomTooltipDirective } from '@stratosui/core';
-
-import {
-  EndpointListDetailsComponent,
-} from '../../../../../core/src/shared/components/list/list-types/endpoint/endpoint-list.helpers';
+import { CustomTooltipDirective, EndpointListDetailsComponent } from '@stratosui/core';
 
 
 @Component({

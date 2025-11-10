@@ -1,18 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
-import { AfterContentInit, Component, Input, OnDestroy, signal,
-  ChangeDetectionStrategy} from '@angular/core';
-import { ReactiveFormsModule,FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
+import { AfterContentInit, Component, Input, OnDestroy, signal, ChangeDetectionStrategy } from '@angular/core';
+import { ReactiveFormsModule, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-
-import { SetCreateServiceInstanceApp } from '../../../../../../cloud-foundry/src/actions/create-service-instance.actions';
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { pathGet } from '../../../../../../core/src/core/utils.service';
-import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { APIResource } from '../../../../../../store/src/types/api.types';
+import { CustomFormFieldComponent, MatLabelComponent, CustomSelectComponent, CustomOptionComponent, pathGet, StepOnNextResult } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
+import { SetCreateServiceInstanceApp } from '../../../../actions/create-service-instance.actions';
+import { CFAppState } from '../../../../cf-app-state';
 import { IServicePlan } from '../../../../cf-api-svc.types';
 import { IApp } from '../../../../cf-api.types';
 import { SchemaFormComponent, SchemaFormConfig } from '../../schema-form/schema-form.component';

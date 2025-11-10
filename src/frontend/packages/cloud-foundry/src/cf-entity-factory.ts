@@ -1,6 +1,4 @@
-import { EntitySchema } from '../../store/src/helpers/entity-schema';
-import { metricEntityType } from '../../store/src/helpers/stratos-entity-factory';
-import { APIResource } from '../../store/src/types/api.types';
+import { EntitySchema, metricEntityType, APIResource } from '@stratosui/store';
 import {
   CFApplicationEntitySchema,
   CFEntitySchema,

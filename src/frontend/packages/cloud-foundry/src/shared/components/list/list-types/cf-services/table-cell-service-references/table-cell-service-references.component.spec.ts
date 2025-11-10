@@ -2,11 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import {
-  generateCfBaseTestModulesNoShared,
-} from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { LongRunningCfOperationsService } from '../../../../../data-services/long-running-cf-op.service';
 import { TableCellServiceReferencesComponent } from "./table-cell-service-references.component";
+
 describe('TableCellServiceReferencesComponent', () => {
   let component: TableCellServiceReferencesComponent;
   let fixture: ComponentFixture<TableCellServiceReferencesComponent>;
@@ -15,10 +12,8 @@ describe('TableCellServiceReferencesComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         TableCellServiceReferencesComponent,
-        ...generateCfBaseTestModulesNoShared(),
       ],
       providers: [
-        LongRunningCfOperationsService,
         provideZonelessChangeDetection(),
       ],
     })
@@ -26,7 +21,7 @@ describe('TableCellServiceReferencesComponent', () => {
 
     fixture = TestBed.createComponent(TableCellServiceReferencesComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    // Don't call detectChanges() since the component needs input data
   });
 
   it('should create', () => {

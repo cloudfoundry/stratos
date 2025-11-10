@@ -4,23 +4,23 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { RemoveCfUserRole } from '../../../../../../../../cloud-foundry/src/actions/users.actions';
-import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { organizationEntityType, spaceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
-import { selectCfEntity } from '../../../../../../../../cloud-foundry/src/store/selectors/api.selectors';
-import { arrayHelper } from '../../../../../../../../core/src/core/helper-classes/array.helper';
+import { AppChipsComponent, arrayHelper, ConfirmationDialogService, CurrentUserPermissionsService } from '@stratosui/core';
+import { APIResource, entityCatalog } from '@stratosui/store';
 import {
-  CurrentUserPermissionsService,
-} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { IOrganization, ISpace } from '../../../../../../cf-api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
-import { getSpaceRoles } from '../../../../../../features/cf/cf.helpers';
-import { CfUser, IUserPermissionInSpace, SpaceUserRoleNames } from '../../../../../../store/types/cf-user.types';
-import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
+  CFAppState,
+  CF_ENDPOINT_TYPE,
+  CfCurrentUserPermissions,
+  CfUser,
+  getSpaceRoles,
+  IOrganization,
+  ISpace,
+  IUserPermissionInSpace,
+  organizationEntityType,
+  RemoveCfUserRole,
+  selectCfEntity,
+  spaceEntityType,
+  SpaceUserRoleNames
+} from '@stratosui/cloud-foundry';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { CfPermissionCellDirective, ICellPermissionList } from '../cf-permission-cell';
 

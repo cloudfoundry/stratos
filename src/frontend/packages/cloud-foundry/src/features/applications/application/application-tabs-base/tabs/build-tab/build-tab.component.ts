@@ -6,26 +6,23 @@ import { GitCommit, gitEntityCatalog, GitRepo, GitSCMService, GitSCMType, SCMIco
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { combineLatest, delay, distinct, filter, first, map, mergeMap, startWith, switchMap, tap } from 'rxjs/operators';
 
-import { AppMetadataTypes } from '../../../../../../../../cloud-foundry/src/actions/app-metadata.actions';
-import { UpdateExistingApplication } from '../../../../../../../../cloud-foundry/src/actions/application.actions';
-import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
+import { CFAppState } from '@stratosui/cloud-foundry';
 import {
   CurrentUserPermissionsService,
-} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { MbToHumanSizePipe } from '../../../../../../../../core/src/shared/pipes/mb-to-human-size.pipe';
-import { UptimePipe } from '../../../../../../../../core/src/shared/pipes/uptime.pipe';
-import { MetadataItemComponent } from '../../../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
-import { PageSubNavComponent } from '@stratosui/core';
-import { PageSubNavSectionComponent } from '@stratosui/core';
-import { TileComponent } from '@stratosui/core';
-import { TileGridComponent } from '@stratosui/core';
-import { TileGroupComponent } from '@stratosui/core';
-import { ResetPagination } from '../../../../../../../../store/src/actions/pagination.actions';
-import { getFullEndpointApiUrl } from '../../../../../../../../store/src/endpoint-utils';
-import { ActionState } from '../../../../../../../../store/src/reducers/api-request-reducer/types';
-import { EntityInfo } from '../../../../../../../../store/src/types/api.types';
+  ConfirmationDialogConfig,
+  ConfirmationDialogService,
+  MetadataItemComponent,
+  PageSubNavComponent,
+  PageSubNavSectionComponent,
+  TileComponent,
+  TileGridComponent,
+  TileGroupComponent,
+  MbToHumanSizePipe,
+  UptimePipe,
+} from '@stratosui/core';
+import { ResetPagination, getFullEndpointApiUrl, ActionState, EntityInfo } from '@stratosui/store';
+import { AppMetadataTypes } from '../../../../../../actions/app-metadata.actions';
+import { UpdateExistingApplication } from '../../../../../../actions/application.actions';
 import { IAppSummary } from '../../../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
 import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';

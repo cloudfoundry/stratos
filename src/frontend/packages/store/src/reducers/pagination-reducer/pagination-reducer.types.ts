@@ -1,4 +1,6 @@
-import { Observable } from 'rxjs'; import { PaginationEntityState } from '../../types/pagination.types';
+import { Observable } from 'rxjs';
+
+import { PaginationEntityState } from '../../types/pagination.types';
 import { ListActionState } from '../api-request-reducer/types';
 
 

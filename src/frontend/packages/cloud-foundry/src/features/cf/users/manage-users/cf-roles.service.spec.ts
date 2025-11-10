@@ -1,30 +1,48 @@
-import { HttpClientModule } from '@angular/common/http';
-import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { RouterTestingModule } from '@angular/router/testing';
+import { TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { SharedModule } from '../../../../../../core/src/shared/shared.module';
-import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { CurrentUserPermissionsService } from '@stratosui/core';
+import {
+  EntityCatalogTestModule,
+  TEST_CATALOGUE_ENTITIES,
+  generateStratosEntities,
+  EntityCatalogHelper,
+  EntityCatalogHelpers,
+} from '@stratosui/store';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { generateTestCfEndpointServiceProvider } from '@test-framework/cloud-foundry-endpoint-service.helper';
+
+import { generateCFEntities } from '../../../../cf-entity-generator';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
-import { CfRolesService } from "./cf-roles.service";
+import { CfRolesService } from './cf-roles.service';
+
 describe('CfRolesService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
-        ...generateCfStoreModules(),
-        SharedModule,
-        HttpClientModule,
-        RouterTestingModule,
-    ],
+        createBasicStoreModule(),
+        EntityCatalogTestModule,
+      ],
       providers: [
-        
+        ...generateTestCfEndpointServiceProvider(),
+        ...STORE_TEST_PROVIDERS,
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities(),
+          ]
+        },
         CfRolesService,
-        CfUserService,
-
+        CurrentUserPermissionsService,
         provideZonelessChangeDetection(),
       ]
     });
+
+    // Initialize EntityCatalogHelper for Angular 20 compatibility
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
   });
 
   it('should be created', () => {

@@ -4,12 +4,8 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
-import { BASE_REDIRECT_QUERY } from '../../../../../core/src/shared/components/stepper/stepper.types';
-import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { EndpointModel } from '../../../../../store/src/public-api';
-import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
-import { APIResource } from '../../../../../store/src/types/api.types';
+import { BASE_REDIRECT_QUERY } from '@stratosui/core';
+import { RouterNav, PaginationMonitorFactory, EndpointModel, ActionState, APIResource } from '@stratosui/store';
 import { IApp } from '../../../cf-api.types';
 import { CFAppState } from '../../../cf-app-state';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
@@ -25,14 +21,13 @@ import {
 import { ActiveRouteCfOrgSpace } from '../../cf/cf-page.types';
 import { goToAppWall } from '../../cf/cf.helpers';
 import { appDataSort, CloudFoundryEndpointService } from '../../cf/services/cloud-foundry-endpoint.service';
-import { HomePageCardLayout, HomePageEndpointCard } from './../../../../../core/src/features/home/home.types';
-import { ITileConfig } from './../../../../../core/src/shared/components/tile/tile-selector.types';
-import { TileGridComponent } from '../../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
-import { TileGroupComponent } from '../../../../../core/src/shared/components/tile/tile-group/tile-group.component';
-import { TileComponent } from '../../../../../core/src/shared/components/tile/tile/tile.component';
-import { CardNumberMetricComponent } from '../../../../../core/src/shared/components/cards/card-number-metric/card-number-metric.component';
+import { HomePageCardLayout, HomePageEndpointCard, ITileConfig } from '@stratosui/core';
+import { TileGridComponent } from '@stratosui/core';
+import { TileGroupComponent } from '@stratosui/core';
+import { TileComponent } from '@stratosui/core';
+import { CardNumberMetricComponent } from '@stratosui/core';
 import { CardCfRecentAppsComponent } from '../card-cf-recent-apps/card-cf-recent-apps.component';
-import { TileSelectorComponent } from '../../../../../core/src/shared/components/tile-selector/tile-selector.component';
+import { TileSelectorComponent } from '@stratosui/core';
 
 
 @Component({

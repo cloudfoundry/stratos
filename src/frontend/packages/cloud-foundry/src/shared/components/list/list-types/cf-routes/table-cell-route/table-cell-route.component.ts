@@ -1,8 +1,6 @@
 import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
-
-
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { TableCellCustom } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
 import { getRoute, isTCPRoute } from '../../../../../../features/applications/routes/routes.helper';
 import { ListCfRoute } from '../cf-routes-data-source-base';
 

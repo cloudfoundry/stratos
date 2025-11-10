@@ -1,20 +1,37 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Store } from '@ngrx/store';
-import { testSessionData } from "@test-framework/cloud-foundry-endpoint-service.helper";
 
-import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { MetadataCardTestComponents } from '../../../../../../../../core/test-framework/core-test.helper';
-import { VerifiedSession } from '@stratosui/store/actions/auth.actions';
-import { EntityServiceFactory } from '@stratosui/store/entity-service-factory.service';
-import { EntityMonitorFactory } from '@stratosui/store/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '@stratosui/store/monitors/pagination-monitor.factory';
 import {
+  ConfirmationDialogService,
+  CurrentUserPermissionsService,
+  MetaCardComponent,
+  MetaCardItemComponent,
+  MetaCardKeyComponent,
+  MetaCardTitleComponent,
+  MetaCardValueComponent,
+  MultilineTitleComponent,
+  ApplicationStateIconComponent,
+  ApplicationStateIconPipe,
+  CardStatusComponent
+} from '@stratosui/core';
+import {
+  VerifiedSession,
+  EntityServiceFactory,
+  EntityMonitorFactory,
+  PaginationMonitorFactory,
+  UserFavoriteManager
+} from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import {
+  testSessionData,
   generateCfBaseTestModulesNoShared,
   generateTestCfEndpointServiceProvider,
   generateTestCfUserServiceProvider,
-} from "@test-framework/cloud-foundry-endpoint-service.helper";
+} from "@test-framework/cf";
 import { CloudFoundryOrganizationService } from '../../../../../../features/cf/services/cloud-foundry-organization.service';
 import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
 import {
@@ -27,15 +44,24 @@ describe('CfSpaceCardComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        MetadataCardTestComponents,
-    ],
       imports: [
         CfSpaceCardComponent,
-        ...generateCfBaseTestModulesNoShared(),
+        MetaCardComponent,
+        MetaCardItemComponent,
+        MetaCardKeyComponent,
+        MetaCardTitleComponent,
+        MetaCardValueComponent,
+        MultilineTitleComponent,
+        ApplicationStateIconComponent,
+        ApplicationStateIconPipe,
+        CardStatusComponent,
       ],
       providers: [
-        
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(generateCfBaseTestModulesNoShared()),
         PaginationMonitorFactory,
         EntityMonitorFactory,
         generateTestCfUserServiceProvider(),
@@ -45,8 +71,8 @@ describe('CfSpaceCardComponent', () => {
         EntityServiceFactory,
         ConfirmationDialogService,
         CloudFoundryUserProvidedServicesService,
-
-        provideZonelessChangeDetection(),
+        UserFavoriteManager,
+        CurrentUserPermissionsService,
       ]
     })
       .compileComponents();

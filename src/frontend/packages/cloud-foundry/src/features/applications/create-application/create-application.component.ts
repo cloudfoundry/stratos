@@ -4,10 +4,8 @@ import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 import { filter, first, tap } from 'rxjs/operators';
 
-import { PageHeaderComponent } from '@stratosui/core';
-import { StepComponent } from '@stratosui/core';
-import { SteppersComponent } from '@stratosui/core';
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import { PageHeaderComponent, StepComponent, SteppersComponent } from '@stratosui/core';
+import { CFAppState } from '@stratosui/cloud-foundry';
 import { applicationEntityType } from '../../../cf-entity-types';
 import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { CreateApplicationStep1Component } from '../../../shared/components/create-application/create-application-step1/create-application-step1.component';
@@ -35,7 +33,7 @@ import { CreateApplicationStep3Component } from './create-application-step3/crea
 })
 export class CreateApplicationComponent implements OnInit, OnDestroy {
 
-  paginationStateSub!: Subscription;
+  paginationStateSub?: Subscription;
 
   private store = inject(Store<CFAppState>);
   public cfOrgSpaceService = inject(CfOrgSpaceDataService);
@@ -60,7 +58,7 @@ export class CreateApplicationComponent implements OnInit, OnDestroy {
     })).subscribe();
   }
   ngOnDestroy(): void {
-    this.paginationStateSub.unsubscribe();
+    this.paginationStateSub?.unsubscribe();
   }
 
 }

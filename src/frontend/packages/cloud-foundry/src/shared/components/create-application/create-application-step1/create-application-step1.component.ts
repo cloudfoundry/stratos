@@ -2,14 +2,12 @@ import { CommonModule } from '@angular/common';
 import { AfterContentInit, Component, Input, OnInit, ViewChild,
   ChangeDetectionStrategy} from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
-import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { asapScheduler, Observable, of } from 'rxjs';
 import { map, observeOn, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import { CustomSelectComponent, CustomOptionComponent, FocusDirective, StepOnNextFunction } from '@stratosui/core';
 import { SetCFDetails } from '../../../../actions/create-applications-page.actions';
 import { ISpace } from '../../../../cf-api.types';
 import { CFAppState } from '../../../../cf-app-state';

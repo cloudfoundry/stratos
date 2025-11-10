@@ -1,17 +1,16 @@
-import { HttpClient, HttpClientModule, HttpHandler } from '@angular/common/http';
+import { provideHttpClient, HttpClient, HttpHandler } from '@angular/common/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { ActivatedRoute } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
+import { ActivatedRoute, provideRouter } from '@angular/router';
 import { Store, StoreModule } from '@ngrx/store';
-import { testSCFEndpointGuid } from '../../store/testing/src/store-test-helper';
 
-import { CoreModule } from '../../core/src/core/core.module';
-import { SharedModule } from '../../core/src/shared/shared.module';
-import { AppTestModule } from '../../core/test-framework/core-test.helper';
-import { EntityServiceFactory } from '../../store/src/entity-service-factory.service';
-import { EntityMonitorFactory } from '../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../store/src/monitors/pagination-monitor.factory';
-import { appReducers } from '../../store/src/reducers.module';
+import { CoreModule, SharedModule } from '@stratosui/core';
+import { EntityServiceFactory, EntityMonitorFactory, PaginationMonitorFactory, appReducers } from '@stratosui/store';
+import { testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
+import { AppTestModule, generateBaseTestStoreModules } from '@test-framework';
+
+// Re-export test endpoint utilities for convenience
+export { testSCFEndpointGuid, populateStoreWithTestEndpoint };
+
 import { CFAppState } from '../src/cf-app-state';
 import { CloudFoundryTestingModule } from '../src/cloud-foundry-test.module';
 import { ActiveRouteCfOrgSpace } from '../src/features/cf/cf-page.types';
@@ -72,7 +71,7 @@ export function generateTestCfEndpointServiceProvider(guid = testSCFEndpointGuid
   return [
     generateActiveRouteCfOrgSpaceMock(guid),
     generateCfActiveRouteMock(guid),
-    CfUserServiceTestProvider,
+    ...CfUserServiceTestProvider,
     CloudFoundryEndpointService,
     UserInviteService,
     UserInviteConfigureService,
@@ -84,7 +83,7 @@ export function generateTestCfEndpointServiceProvider(guid = testSCFEndpointGuid
 export function generateTestCfEndpointService() {
   return [
     ...cfEndpointServiceProviderDeps,
-    generateTestCfEndpointServiceProvider()
+    ...generateTestCfEndpointServiceProvider()
   ];
 }
 
@@ -172,10 +171,22 @@ export function generateCfTopLevelStoreEntities() {
 
 export function generateCfStoreModules() {
   return [
+    // AppTestModule is imported from core test framework which includes the basic store setup
+    // This must come BEFORE CloudFoundryTestingModule because CloudFoundryTestingModule needs Store
+    ...generateBaseTestStoreModules(),
+    CloudFoundryTestingModule,
+  ].filter(m => m !== undefined && m !== null);
+}
+
+/**
+ * Generate CF store providers for standalone component testing
+ * Use this instead of generateCfStoreModules() when using importProvidersFrom()
+ */
+export function generateCfStoreProviders() {
+  return [
     CloudFoundryTestingModule,
     StoreModule.forRoot(
-      appReducers, { runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false } },
-      // Do not include initial store here, it's properties will be ignored as they won't have corresponding reducers in appReducers
+      appReducers, { runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false } }
     ),
     AppTestModule
   ];
@@ -184,12 +195,15 @@ export function generateCfStoreModules() {
 export function generateCfBaseTestModulesNoShared() {
   return [
     ...generateCfStoreModules(),
-    RouterTestingModule,
     CoreModule,
     NoopAnimationsModule,
-    HttpClientModule
-  ];
+  ].filter(m => m !== undefined && m !== null);
 }
+
+export const CF_BASE_TEST_PROVIDERS = [
+  provideRouter([]),
+  provideHttpClient(),
+];
 
 export function generateCfBaseTestModules() {
   return [
@@ -198,7 +212,5 @@ export function generateCfBaseTestModules() {
   ];
 }
 
-// Re-export store testing utilities to resolve @stratosui/store/testing imports
-export { createBasicStoreModule, createEmptyStoreModule, createEntityStore, createEntityStoreState, populateStoreWithTestEndpoint } from '../../store/testing/src/store-test-helper';
-export { StoreTestingModule } from '../../store/testing/src/store-test.module';
-export { STORE_TEST_PROVIDERS } from '../../store/src/testing/store-test-providers';
+// Re-export CloudFoundryTestingModule for convenience
+export { CloudFoundryTestingModule };

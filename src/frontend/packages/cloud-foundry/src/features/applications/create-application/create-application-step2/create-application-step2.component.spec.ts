@@ -1,28 +1,34 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import {  provideExperimentalZonelessChangeDetection, provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { provideRouter } from '@angular/router';
+import { StoreModule } from '@ngrx/store';
 
-import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { CreateApplicationStep2Component } from "./create-application-step2.component";
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { appReducers } from '@stratosui/store';
+import { CreateApplicationStep2Component } from './create-application-step2.component';
 describe('CreateApplicationStep2Component', () => {
   let component: CreateApplicationStep2Component;
   let fixture: ComponentFixture<CreateApplicationStep2Component>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CreateApplicationStep2Component],
+      imports: [
+        CreateApplicationStep2Component,
+        StoreModule.forRoot(appReducers, {
+          runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
+        }),
+      ],
       providers: [
-        
-        provideExperimentalZonelessChangeDetection(),
+        provideZonelessChangeDetection(),
         provideNoopAnimations(),
         provideHttpClient(),
         provideHttpClientTesting(),
-        ...generateCfStoreModules(),
-
-        provideZonelessChangeDetection(),
+        provideRouter([]),
+        ...STORE_TEST_PROVIDERS,
       ]
     }).compileComponents();
 

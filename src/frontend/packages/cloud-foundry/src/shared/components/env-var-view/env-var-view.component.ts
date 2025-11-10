@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Inject , ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, TailwindDialogRef } from '@stratosui/core';
-import { CodeBlockComponent } from '../../../../../core/src/shared/components/code-block/code-block.component';
+import { MAT_DIALOG_DATA, TailwindDialogRef, CodeBlockComponent } from '@stratosui/core';
 
 
 @Component({

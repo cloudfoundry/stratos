@@ -1,35 +1,53 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
+import { EntityServiceFactory, appReducers, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { AppTestModule } from '@test-framework';
+import { CloudFoundryTestingModule } from '@test-framework/cf';
 
-import {
-  BooleanIndicatorComponent,
-} from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import { BaseTestModulesNoShared } from '../../../../../../../../core/test-framework/core-test.helper';
-import { EntityMonitorFactory } from '@stratosui/store/monitors/entity-monitor.factory.service';
 import { ServiceInstanceLastOpComponent } from '../../../../service-instance-last-op/service-instance-last-op.component';
 import { TableCellServiceLastOpComponent } from './table-cell-service-last-op.component';
-import { EntityServiceFactory } from '@stratosui/store/entity-service-factory.service';
 
 describe('TableCellServiceLastOpComponent', () => {
   let component: TableCellServiceLastOpComponent;
   let fixture: ComponentFixture<TableCellServiceLastOpComponent>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
+  beforeEach(() => {
+    TestBed.configureTestingModule({
       imports: [
         TableCellServiceLastOpComponent,
         ServiceInstanceLastOpComponent,
-        BooleanIndicatorComponent,
-        ...BaseTestModulesNoShared,
       ],
       providers: [
-        EntityServiceFactory,
-        EntityMonitorFactory,
         provideZonelessChangeDetection(),
-      ],
+        provideRouter([]),
+        provideHttpClient(),
+        provideNoopAnimations(),
+        ...STORE_TEST_PROVIDERS,
+        EntityServiceFactory,
+        importProvidersFrom(
+          CloudFoundryTestingModule,
+          StoreModule.forRoot(appReducers, {
+            runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
+          }),
+          AppTestModule
+        ),
+        EntityCatalogHelper,
+      ]
     })
       .compileComponents();
+
+    // Initialize EntityCatalogHelper for Angular 20 compatibility
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+  });
+
+  beforeEach(() => {
 
     fixture = TestBed.createComponent(TableCellServiceLastOpComponent);
     component = fixture.componentInstance;

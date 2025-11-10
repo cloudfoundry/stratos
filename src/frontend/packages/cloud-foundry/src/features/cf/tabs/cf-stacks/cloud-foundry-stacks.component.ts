@@ -1,10 +1,7 @@
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 
-import { ListComponent } from '../../../../../../core/src/shared/components/list/list.component';
-import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
-import {
-  CfStacksListConfigService,
-} from '../../../../shared/components/list/list-types/cf-stacks/cf-stacks-list-config.service';
+import { ListComponent, ListConfig } from '@stratosui/core';
+import { CfStacksListConfigService } from '../../../../shared/components/list/list-types/cf-stacks/cf-stacks-list-config.service';
 
 @Component({
   selector: 'app-cloud-foundry-stacks',

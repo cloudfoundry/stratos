@@ -2,19 +2,17 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { CoreModule } from '../../../../../../core/src/core/core.module';
 import {
+  CoreModule,
   ApplicationStateIconComponent,
-} from '../../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.component';
-import {
   ApplicationStateIconPipe,
-} from '../../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.pipe';
-import {
   ApplicationStateComponent,
-} from '../../../../../../core/src/shared/components/application-state/application-state.component';
-import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
+  CardStatusComponent,
+  CF_GUID,
+  APP_GUID
+} from '@stratosui/core';
 import { ApplicationServiceMock } from "@test-framework/application-service-helper";
-import { ApplicationService } from '../../../../features/applications/application.service';
+import { ApplicationService } from '@stratosui/cloud-foundry';
 import { CardAppStatusComponent } from "./card-app-status.component";
 describe('CardAppStatusComponent', () => {
   let component: CardAppStatusComponent;
@@ -31,13 +29,11 @@ describe('CardAppStatusComponent', () => {
         CoreModule,
       ],
       providers: [
-        
-        { provide: ApplicationService, useClass: ApplicationServiceMock },
-
         provideZonelessChangeDetection(),
       ]
     })
-      .compileComponents();
+    .overrideProvider(ApplicationService, { useValue: new ApplicationServiceMock() })
+    .compileComponents();
   });
 
   beforeEach(() => {

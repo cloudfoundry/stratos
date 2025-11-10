@@ -1,12 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { RouterTestingModule } from '@angular/router/testing';
-
-import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { APIResource } from '@stratosui/store/types/api.types';
+import { appReducers, APIResource } from '@stratosui/store';
 import { ListCfRoute } from '../cf-routes-data-source-base';
-import { TableCellRouteComponent } from "./table-cell-route.component";
+import { TableCellRouteComponent } from './table-cell-route.component';
+
 describe('TableCellRouteComponent', () => {
   let component: TableCellRouteComponent;
   let fixture: ComponentFixture<TableCellRouteComponent>;
@@ -15,10 +14,13 @@ describe('TableCellRouteComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         TableCellRouteComponent,
-        ...generateCfStoreModules(),
-        RouterTestingModule,
+        StoreModule.forRoot(appReducers, {
+          runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
+        }),
       ],
-      providers: [provideZonelessChangeDetection()],
+      providers: [
+        provideZonelessChangeDetection(),
+      ],
     })
       .compileComponents();
 

@@ -2,7 +2,7 @@ import { CommonModule, registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
 import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 
-import { APIResource } from '../../../../../store/src/types/api.types';
+import { APIResource } from '@stratosui/store';
 import { IServicePlan, IServicePlanCost } from '../../../cf-api-svc.types';
 
 

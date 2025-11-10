@@ -2,6 +2,8 @@ import { of as observableOf } from 'rxjs';
 
 
 export class ServicesServiceMock {
+  cfGuid = 'test-cf-guid';
+  serviceGuid = 'test-service-guid';
   servicePlanVisibilities$ = observableOf([]);
   service$ = observableOf(
     {

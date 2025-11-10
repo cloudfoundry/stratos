@@ -4,18 +4,14 @@ import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   CurrentUserPermissionsService,
-} from '../../../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import {
   ConfirmationDialogService,
-} from '../../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { ListComponent } from '../../../../../../../../../core/src/shared/components/list/list.component';
-import { ListConfig } from '../../../../../../../../../core/src/shared/components/list/list.component.types';
-import {
+  ListComponent,
+  ListConfig,
   NoContentMessageComponent,
-} from '../../../../../../../../../core/src/shared/components/no-content-message/no-content-message.component';
+} from '@stratosui/core';
+import { CFAppState } from '../../../../../../../cf-app-state';
 import {
   CfAppRoutesListConfigService,
 } from '../../../../../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';

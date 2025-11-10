@@ -12,8 +12,7 @@ import {
 import {
   ApplicationStateComponent,
 } from '../../../../../../../../core/src/shared/components/application-state/application-state.component';
-import { PaginationMonitorFactory } from '@stratosui/store/monitors/pagination-monitor.factory';
-import { APIResource } from '@stratosui/store/types/api.types';
+import { PaginationMonitorFactory, APIResource } from '@stratosui/store';
 import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { IApp } from '../../../../../../cf-api.types';
 import { ApplicationStateService } from '../../../../../services/application-state.service';

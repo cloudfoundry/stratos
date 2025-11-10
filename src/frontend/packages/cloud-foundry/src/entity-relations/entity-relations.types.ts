@@ -1,11 +1,15 @@
 import { Action, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
-import { getPaginationKey } from '../../../store/src/actions/pagination.actions';
-import { APIResponse } from '../../../store/src/actions/request.actions';
-import { GeneralEntityAppState, GeneralRequestDataState, IRequestTypeState } from '../../../store/src/app-state';
-import { EntityRequestAction } from '../../../store/src/types/request.types';
+import {
+  EntityCatalogEntityConfig,
+  getPaginationKey,
+  APIResponse,
+  GeneralEntityAppState,
+  GeneralRequestDataState,
+  IRequestTypeState,
+  EntityRequestAction,
+} from '@stratosui/store';
 import { EntityTreeRelation } from './entity-relation-tree';
 
 export class ValidateEntityRelationsConfig<T extends GeneralEntityAppState = GeneralEntityAppState> {

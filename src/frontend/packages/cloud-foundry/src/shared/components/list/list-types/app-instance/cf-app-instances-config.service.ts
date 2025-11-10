@@ -3,32 +3,31 @@ import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest as combineLatestObs, Observable } from 'rxjs';
 import { combineLatest, map, switchMap } from 'rxjs/operators';
-
-import { DeleteApplicationInstance } from '../../../../../../../cloud-foundry/src/actions/application.actions';
-import { FetchApplicationMetricsAction } from '../../../../../../../cloud-foundry/src/actions/cf-metrics.actions';
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   CurrentUserPermissionsService,
-} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { UtilsService } from '../../../../../../../core/src/core/utils.service';
-import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import {
+  UtilsService,
+  ConfirmationDialogConfig,
+  ConfirmationDialogService,
   getIntegerFieldSortFunction,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/local-filtering-sorting';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import {
+  ITableColumn,
   IGlobalListAction,
   IListAction,
   IListConfig,
   IMultiListAction,
   ListViewTypes,
-} from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
-import { EntityServiceFactory } from '../../../../../../../store/src/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
-import { IMetricMatrixResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
-import { IMetricApplication, MetricQueryType } from '../../../../../../../store/src/types/metric.types';
+} from '@stratosui/core';
+import {
+  EntityServiceFactory,
+  PaginationMonitorFactory,
+  MetricQueryConfig,
+  IMetricMatrixResult,
+  IMetrics,
+  IMetricApplication,
+  MetricQueryType,
+} from '@stratosui/store';
+import { DeleteApplicationInstance } from '../../../../../actions/application.actions';
+import { FetchApplicationMetricsAction } from '../../../../../actions/cf-metrics.actions';
+import { CFAppState } from '../../../../../cf-app-state';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { CfCellHelper } from '../../../../../features/cf/cf-cell.helpers';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';

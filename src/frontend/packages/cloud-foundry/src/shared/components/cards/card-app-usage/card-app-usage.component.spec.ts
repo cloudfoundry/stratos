@@ -1,31 +1,17 @@
+import { CUSTOM_ELEMENTS_SCHEMA, importProvidersFrom } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CoreModule } from '../../../../../../core/src/core/core.module';
-import { UtilsService } from '../../../../../../core/src/core/utils.service';
-import {
-  ApplicationStateIconComponent,
-} from '../../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.component';
-import {
-  ApplicationStateIconPipe,
-} from '../../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.pipe';
-import {
-  ApplicationStateComponent,
-} from '../../../../../../core/src/shared/components/application-state/application-state.component';
-import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
-import {
-  TableCellStatusDirective,
-} from '../../../../../../core/src/shared/components/list/list-table/table-cell-status.directive';
-import { PercentagePipe } from '../../../../../../core/src/shared/pipes/percentage.pipe';
-import { ApplicationServiceMock } from "@test-framework/application-service-helper";
-import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { UtilsService } from '@stratosui/core';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { ApplicationServiceMock, generateCfBaseTestModulesNoShared, ApplicationStateService } from "@test-framework/cf";
 import { ApplicationMonitorService } from '../../../../features/applications/application-monitor.service';
 import { ApplicationService } from '../../../../features/applications/application.service';
-import { ApplicationStateService } from '../../../services/application-state.service';
-import { CardAppStatusComponent } from '../card-app-status/card-app-status.component';
 import { CardAppUsageComponent } from "./card-app-usage.component";
+
 describe('CardAppUsageComponent', () => {
   let component: CardAppUsageComponent;
   let fixture: ComponentFixture<CardAppUsageComponent>;
@@ -34,26 +20,16 @@ describe('CardAppUsageComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         CardAppUsageComponent,
-        CardAppStatusComponent,
-        CardStatusComponent,
-        ApplicationStateComponent,
-        ApplicationStateIconComponent,
-        ApplicationStateIconPipe,
-        PercentagePipe,
-        TableCellStatusDirective,
-        ...generateCfStoreModules(),
-        CoreModule,
-        NoopAnimationsModule,
       ],
       providers: [
-        
-        { provide: ApplicationService, useClass: ApplicationServiceMock },
-        ApplicationStateService,
-        UtilsService,
-        ApplicationMonitorService,
-
         provideZonelessChangeDetection(),
-      ]
+        provideRouter([]),
+        provideHttpClient(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(generateCfBaseTestModulesNoShared()),
+        { provide: ApplicationService, useClass: ApplicationServiceMock },
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
     })
       .compileComponents();
   });

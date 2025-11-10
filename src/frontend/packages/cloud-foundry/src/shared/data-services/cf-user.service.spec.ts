@@ -1,40 +1,39 @@
 import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { HttpClientModule } from '@angular/common/http';
 
-import { SharedModule } from '../../../../core/src/shared/shared.module';
+import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import {
-  generateCfStoreModules,
   generateTestCfEndpointServiceProvider,
 } from '@test-framework/cloud-foundry-endpoint-service.helper';
-import { EntityCatalogTestModule, generateStratosEntities, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
 import { generateCFEntities } from '../../cf-entity-generator';
 import { CfUserService } from './cf-user.service';
 
 describe('CfUserService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [
-        ...generateCfStoreModules(),
-        SharedModule,
-        HttpClientModule,
-        {
-          ngModule: EntityCatalogTestModule,
-          providers: [
-            {
-              provide: TEST_CATALOGUE_ENTITIES,
-              useValue: [
-                ...generateCFEntities(),
-                ...generateStratosEntities(),
-              ]
-            }
-          ]
-        },
-      ],
       providers: [
         ...generateTestCfEndpointServiceProvider(),
-      ]
+        ...STORE_TEST_PROVIDERS,
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities(),
+          ]
+        },
+        provideZonelessChangeDetection(),
+      ],
+      imports: [
+        createBasicStoreModule(),
+        EntityCatalogTestModule,
+      ],
     });
+
+    // Initialize EntityCatalogHelper for Angular 20 compatibility
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
   });
 
   it('should be created', () => {

@@ -1,9 +1,23 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
+import { EffectsModule } from '@ngrx/effects';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { EntityServiceFactory } from '@stratosui/store/entity-service-factory.service';
-import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import {
+  EntityServiceFactory,
+  EntityMonitorFactory,
+  EntityCatalogFeatureModule,
+  CATALOGUE_ENTITIES,
+  generateStratosEntities,
+  entityCatalog,
+  TestEntityCatalog,
+  ENTITY_CATALOG_TOKEN
+} from '@stratosui/store';
+import { createBasicStoreModule } from '@test-framework';
+import { generateCFEntities } from '../../../cf-entity-generator';
 import {
   CompactServiceInstanceCardComponent,
 } from '../../../shared/components/cards/compact-service-instance-card/compact-service-instance-card.component';
@@ -20,12 +34,17 @@ import { ServiceIconComponent } from '../../../shared/components/service-icon/se
 import { ServicesService } from '../services.service';
 import { ServicesServiceMock } from '../services.service.mock';
 import { ServiceSummaryComponent } from "./service-summary.component";
+
 describe('ServiceSummaryComponent', () => {
   let component: ServiceSummaryComponent;
   let fixture: ComponentFixture<ServiceSummaryComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    // Initialize entity catalog before test
+    const testEntityCatalog = entityCatalog as TestEntityCatalog;
+    testEntityCatalog.clear();
+
+    await TestBed.configureTestingModule({
       imports: [
         ServiceSummaryComponent,
         ServiceSummaryCardComponent,
@@ -33,15 +52,34 @@ describe('ServiceSummaryComponent', () => {
         ServiceRecentInstancesCardComponent,
         ServiceIconComponent,
         CompactServiceInstanceCardComponent,
-        ...generateCfBaseTestModules(),
+        EntityCatalogFeatureModule,
+        EffectsModule.forRoot([]),
+        createBasicStoreModule(),
       ],
       providers: [
         EntityServiceFactory,
+        EntityMonitorFactory,
         { provide: ServicesService, useClass: ServicesServiceMock },
         provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+        {
+          provide: ENTITY_CATALOG_TOKEN,
+          useValue: entityCatalog
+        },
+        {
+          provide: CATALOGUE_ENTITIES,
+          useFactory: () => {
+            return [
+              ...generateCFEntities(),
+              ...generateStratosEntities(),
+            ];
+          },
+          multi: true
+        },
       ]
-    })
-      .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

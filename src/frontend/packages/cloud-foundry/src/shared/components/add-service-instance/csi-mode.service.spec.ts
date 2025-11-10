@@ -1,28 +1,35 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { ActivatedRoute, Router } from '@angular/router';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
-import { generateCfBaseTestModulesNoShared, STORE_TEST_PROVIDERS } from '@test-framework/cloud-foundry-endpoint-service.helper';
-import { generateCFEntities } from '../../../cf-entity-generator';
 import { CsiModeService } from './csi-mode.service';
 
 describe('CsiModeService', () => {
+  let mockActivatedRoute: Partial<ActivatedRoute>;
+  let mockRouter: Partial<Router>;
+
   beforeEach(() => {
+    mockActivatedRoute = {
+      snapshot: {
+        params: {},
+        queryParams: {},
+        queryParamMap: {
+          get: vi.fn().mockReturnValue(null),
+        } as any,
+      } as any,
+    };
+
+    mockRouter = {
+      getCurrentNavigation: vi.fn().mockReturnValue(null),
+    };
+
     TestBed.configureTestingModule({
       providers: [
         CsiModeService,
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        { provide: Router, useValue: mockRouter },
         provideZonelessChangeDetection(),
-      ],
-      imports: [
-        {
-          ngModule: EntityCatalogTestModule,
-          providers: [
-            ...STORE_TEST_PROVIDERS,
-            { provide: TEST_CATALOGUE_ENTITIES, useValue: generateCFEntities() }
-          ]
-        },
-        ...generateCfBaseTestModulesNoShared(),
       ],
     });
   });

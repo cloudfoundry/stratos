@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 
-import { BooleanIndicatorComponent } from '../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import { APIResource } from '../../../../../store/src/types/api.types';
+import { BooleanIndicatorComponent } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
 import { IServiceInstance } from '../../../cf-api-svc.types';
 
 @Component({

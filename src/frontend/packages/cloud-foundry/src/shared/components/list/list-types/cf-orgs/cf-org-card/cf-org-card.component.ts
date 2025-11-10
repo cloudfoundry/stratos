@@ -4,43 +4,51 @@ import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { organizationEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import {
   CurrentUserPermissionsService,
-} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { InfinityPipe } from '../../../../../../../../core/src/core/infinity.pipe';
-import { truthyIncludingZeroString } from '../../../../../../../../core/src/core/utils.service';
-import { MbToHumanSizePipe } from '../../../../../../../../core/src/shared/pipes/mb-to-human-size.pipe';
-import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { MetaCardComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
-import { MetaCardItemComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
-import { MetaCardKeyComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
-import { MetaCardTitleComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
-import { MetaCardValueComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
-import { MultilineTitleComponent } from '../../../../../../../../core/src/shared/components/multiline-title/multiline-title.component';
-import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
-import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { EndpointUser } from '../../../../../../../../store/src/types/endpoint.types';
-import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
-import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../store/src/types/shared.types';
-import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
-import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
-import { IApp, IOrganization } from '../../../../../../cf-api.types';
-import { cfEntityFactory } from '../../../../../../cf-entity-factory';
-import { getStartedAppInstanceCount } from '../../../../../../cf.helpers';
-import { getOrgRolesString } from '../../../../../../features/cf/cf.helpers';
+  InfinityPipe,
+  truthyIncludingZeroString,
+  MbToHumanSizePipe,
+  ConfirmationDialogConfig,
+  ConfirmationDialogService,
+  CardCell,
+  MetaCardComponent,
+  MetaCardItemComponent,
+  MetaCardKeyComponent,
+  MetaCardTitleComponent,
+  MetaCardValueComponent,
+  MultilineTitleComponent
+} from '@stratosui/core';
+import {
+  RouterNav,
+  EntityMonitorFactory,
+  PaginationMonitorFactory,
+  APIResource,
+  EndpointUser,
+  MenuItem,
+  ComponentEntityMonitorConfig,
+  StratosStatus,
+  IFavoriteMetadata,
+  UserFavorite,
+  UserFavoriteManager
+} from '@stratosui/store';
+import {
+  CFAppState,
+  organizationEntityType,
+  IApp,
+  IOrganization,
+  IOrgQuotaDefinition,
+  cfEntityFactory,
+  getStartedAppInstanceCount,
+  getOrgRolesString,
+  createOrgQuotaDefinition,
+  createUserRoleInOrg,
+  CfCurrentUserPermissions,
+  CF_ENDPOINT_TYPE
+} from '@stratosui/cloud-foundry';
 import { CloudFoundryEndpointService } from '../../../../../../features/cf/services/cloud-foundry-endpoint.service';
 import { OrgQuotaHelper } from '../../../../../../features/cf/services/cloud-foundry-organization-quota';
-import { createOrgQuotaDefinition } from '../../../../../../features/cf/services/cloud-foundry-organization.service';
-import { createUserRoleInOrg } from '../../../../../../store/types/cf-user.types';
-import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
-import { CF_ENDPOINT_TYPE } from './../../../../../../cf-types';
 
 
 @Component({
@@ -155,7 +163,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
 
   setValues = (role: string, apps: APIResource<IApp>[]) => {
     this.userRolesInOrg = role;
-    const quotaDefinition = this.row.entity.quota_definition || { entity: createOrgQuotaDefinition(), metadata: null };
+    const quotaDefinition = this.row.entity.quota_definition || { entity: createOrgQuotaDefinition(), metadata: null } as APIResource<IOrgQuotaDefinition>;
 
     // Debug: Log quota definition data
     if (!this.row.entity.quota_definition) {

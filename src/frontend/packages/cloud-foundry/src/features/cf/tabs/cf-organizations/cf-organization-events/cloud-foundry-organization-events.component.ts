@@ -1,6 +1,6 @@
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
-import { ListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { ListConfig } from '@stratosui/core';
 import {
   CfOrganizationEventsConfigService,
 } from '../../../../../shared/components/list/list-types/cf-events/types/cf-org-events-config.service';

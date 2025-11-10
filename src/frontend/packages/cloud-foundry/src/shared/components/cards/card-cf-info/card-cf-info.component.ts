@@ -1,12 +1,11 @@
 import { Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TailwindDialogService, MetadataItemComponent } from '@stratosui/core';
-import { fetchAutoscalerInfo } from '@stratosui/cf-autoscaler';
 import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
-import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
-import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
+import { TailwindDialogService, MetadataItemComponent } from '@stratosui/core';
+import { fetchAutoscalerInfo } from '@stratosui/cf-autoscaler';
+import { EntityServiceFactory, APIResource, EntityInfo } from '@stratosui/store';
 import { ICfV2Info } from '../../../../cf-api.types';
 import { CloudFoundryEndpointService } from '../../../../features/cf/services/cloud-foundry-endpoint.service';
 import {

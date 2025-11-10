@@ -1,48 +1,62 @@
-import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { EntityServiceFactory } from '@stratosui/store/entity-service-factory.service';
-import { CoreModule } from '@stratosui/core/core.module';
-import { SharedModule } from '@stratosui/core/shared.module';
-import { TabNavService } from '@stratosui/core/tab-nav.service';
-import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { CfEndpointsMissingComponent } from '@stratosui/shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
-import { CloudFoundryService } from '@stratosui/shared/data-services/cloud-foundry.service';
+import { createBasicStoreModule, testSCFEndpointGuid, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import {
+  EntityCatalogTestModule,
+  generateStratosEntities,
+  TEST_CATALOGUE_ENTITIES,
+  EntityCatalogHelper,
+  EntityCatalogHelpers
+} from '@stratosui/store';
+import { CF_BASE_TEST_PROVIDERS, generateCfActiveRouteMock } from '@test-framework/cf';
+import { generateCFEntities } from '../../../cf-entity-generator';
 import { ServiceCatalogPageComponent } from "./service-catalog-page.component";
+
 describe('ServiceCatalogPageComponent', () => {
   let component: ServiceCatalogPageComponent;
   let fixture: ComponentFixture<ServiceCatalogPageComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         ServiceCatalogPageComponent,
-        CfEndpointsMissingComponent,
-        CommonModule,
-        CoreModule,
-        SharedModule,
-        RouterTestingModule,
         NoopAnimationsModule,
-        ...generateCfStoreModules(),
+        {
+          ngModule: EntityCatalogTestModule,
+          providers: [
+            {
+              provide: TEST_CATALOGUE_ENTITIES,
+              useValue: [
+                ...generateCFEntities(),
+                ...generateStratosEntities(),
+              ]
+            }
+          ]
+        },
       ],
       providers: [
-        EntityServiceFactory,
-        TabNavService,
-        CloudFoundryService,
+        importProvidersFrom(createBasicStoreModule()),
+        ...STORE_TEST_PROVIDERS,
+        EntityCatalogHelper,
+        ...CF_BASE_TEST_PROVIDERS,
+        generateCfActiveRouteMock(testSCFEndpointGuid),
         provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();
+
+    // Initialize EntityCatalogHelper
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
   });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServiceCatalogPageComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    // Don't call detectChanges() yet - let the test control this
   });
 
   it('should create', () => {

@@ -78,7 +78,8 @@
               "xterm-addon-fit",
               "dagre",
               "webcola",
-              "intersect"
+              "intersect",
+              "expect-type"
             ],
             "tsConfig": "src/frontend/packages/core/tsconfig.app.json",
             "assets": [

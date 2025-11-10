@@ -1,8 +1,6 @@
-import { Component , ChangeDetectionStrategy } from '@angular/core';
-
-import { BooleanIndicatorComponent } from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { IFeatureFlag } from '../../../../../../cf-api.types';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { BooleanIndicatorComponent, TableCellCustom } from '@stratosui/core';
+import { IFeatureFlag } from '@stratosui/cloud-foundry';
 
 @Component({
   selector: 'app-table-cell-feature-flag-state',

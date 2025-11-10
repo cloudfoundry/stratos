@@ -1,18 +1,20 @@
 
-import { CustomFormFieldComponent } from '@stratosui/core';
 import { AfterContentInit, ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormControl, FormGroup } from '@angular/forms';
+import { BehaviorSubject, Subscription } from 'rxjs';
+import { delay } from 'rxjs/operators';
+import {
+  CustomFormFieldComponent,
+  ErrorStateMatcher,
+  ShowOnDirtyErrorStateMatcher,
+  TailwindJsonSchemaFormModule,
+  safeStringToObj,
+  isValidJsonValidator
+} from '@stratosui/core';
 
 interface SchemaJsonForm {
   json: FormControl<string>;
 }
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
-import { BehaviorSubject, Subscription } from 'rxjs';
-import { delay } from 'rxjs/operators';
-
-import { safeStringToObj } from '../../../../../core/src/core/utils.service';
-import { isValidJsonValidator } from '../../../../../core/src/shared/form-validators';
-import { TailwindJsonSchemaFormModule } from '../../../../../core/src/shared/components/tailwind-json-schema-form/tailwind-json-schema-form.module';
 
 // Simple JsonPointer replacement
 class JsonPointer {

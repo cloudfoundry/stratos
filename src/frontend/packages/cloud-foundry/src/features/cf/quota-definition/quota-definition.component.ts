@@ -2,26 +2,11 @@ import { CommonModule } from '@angular/common';
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 
-import { CustomTooltipDirective } from '@stratosui/core';
+import { CustomTooltipDirective, CurrentUserPermissionsService, PageHeaderComponent, IHeaderBreadcrumb, PageSubNavComponent, BooleanIndicatorComponent, LoadingPageComponent, CardNumberMetricComponent, TileGridComponent, TileGroupComponent, TileComponent } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
-
-import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
-import {
-  PageHeaderComponent,
-  IHeaderBreadcrumb,
-  PageSubNavComponent,
-  BooleanIndicatorComponent,
-  LoadingPageComponent,
-  CardNumberMetricComponent,
-  TileGridComponent,
-  TileGroupComponent,
-  TileComponent
-} from '@stratosui/core';
-import { AppState } from '../../../../../store/src/app-state';
-import { APIResource } from '../../../../../store/src/types/api.types';
-import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
+import { AppState, APIResource, EndpointModel } from '@stratosui/store';
 import { IOrganization, IOrgQuotaDefinition, ISpace } from '../../../cf-api.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';

@@ -1,54 +1,64 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { ListConfig } from '../../../../../../../../../core/src/shared/components/list/list.component.types';
-import { CFBaseTestModules } from "@test-framework/cf-test-helper";
-import {
-  generateActiveRouteCfOrgSpaceMock,
-} from "@test-framework/cloud-foundry-endpoint-service.helper";
-import {
-  CloudFoundryEventsListComponent,
-} from '../../../../../../../shared/components/cloud-foundry-events-list/cloud-foundry-events-list.component';
-import {
-  CfSpaceEventsConfigService,
-} from '../../../../../../../shared/components/list/list-types/cf-events/types/cf-space-events-config.service';
-import { CfUserService } from '../../../../../../../shared/data-services/cf-user.service';
-import {
-  CloudFoundryUserProvidedServicesService,
-} from '../../../../../../../shared/services/cloud-foundry-user-provided-services.service';
+import { ListConfig, CoreModule } from '@stratosui/core';
+import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
+import { createEmptyStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { generateActiveRouteCfOrgSpaceMock } from '@test-framework/cf';
+import { generateCFEntities } from '../../../../../../../cf-entity-generator';
+import { CfSpaceEventsConfigService } from '../../../../../../../shared/components/list/list-types/cf-events/types/cf-space-events-config.service';
+import { CloudFoundryUserProvidedServicesService } from '../../../../../../../shared/services/cloud-foundry-user-provided-services.service';
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
-import { CloudFoundrySpaceEventsComponent } from "./cloud-foundry-space-events.component";
+import { CloudFoundrySpaceEventsComponent } from './cloud-foundry-space-events.component';
+
 describe('CloudFoundrySpaceEventsComponent', () => {
   let component: CloudFoundrySpaceEventsComponent;
   let fixture: ComponentFixture<CloudFoundrySpaceEventsComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        createEmptyStoreModule(),
+        EntityCatalogTestModule,
+        CoreModule,
+        NoopAnimationsModule,
+        CloudFoundrySpaceEventsComponent,
+      ],
       providers: [
-        
+        ...STORE_TEST_PROVIDERS,
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities(),
+          ]
+        },
+        EntityCatalogHelper,
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        generateActiveRouteCfOrgSpaceMock(),
         {
           provide: ListConfig,
           useClass: CfSpaceEventsConfigService,
         },
-        generateActiveRouteCfOrgSpaceMock(),
         CloudFoundrySpaceService,
-        CfUserService,
         CloudFoundryEndpointService,
         CloudFoundryOrganizationService,
         CloudFoundryUserProvidedServicesService,
-
-        provideZonelessChangeDetection(),
-      ],
-      imports: [
-        CloudFoundrySpaceEventsComponent,
-        CloudFoundryEventsListComponent,
-        ...CFBaseTestModules,
-      ],
+      ]
     })
       .compileComponents();
+
+    // Initialize EntityCatalogHelper manually
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
   });
 
   beforeEach(() => {

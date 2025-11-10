@@ -1,9 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { ITableColumn } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
+import { CFAppState } from '../../../../../cf-app-state';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfSecurityGroupsCardComponent } from './cf-security-groups-card/cf-security-groups-card.component';

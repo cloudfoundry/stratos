@@ -4,25 +4,21 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   CurrentUserPermissionsService,
-} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import {
-  ListDataSource,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { ITableColumn, ITableText } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import {
   defaultPaginationPageSizeOptionsTable,
   IGlobalListAction,
   IListAction,
   IListConfig,
   IListMultiFilterConfig,
   IMultiListAction,
-  ListViewTypes,
-} from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+  ITableColumn,
+  ITableText,
+  ListDataSource,
+  ListViewTypes
+} from '@stratosui/core';
+import { APIResource, ListView } from '@stratosui/store';
+import { CFAppState } from '../../../../../cf-app-state';
 import { IServiceInstance } from '../../../../../cf-api-svc.types';
 import { isUserProvidedServiceInstance } from '../../../../../features/cf/cf.helpers';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';

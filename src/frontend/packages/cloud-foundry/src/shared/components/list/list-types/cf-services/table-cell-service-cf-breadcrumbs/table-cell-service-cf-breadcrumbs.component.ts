@@ -1,8 +1,8 @@
 import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { TableCellCustom } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
 import { IService } from '../../../../../../cf-api-svc.types';
 import { CFAppState } from '../../../../../../cf-app-state';
 import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';

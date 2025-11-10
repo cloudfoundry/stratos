@@ -1,8 +1,6 @@
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 
-import { TailwindDialogService } from '@stratosui/core';
-
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom, TailwindDialogService } from '@stratosui/core';
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
 import { ListAppEnvVar } from '../cf-app-variables-data-source';
 

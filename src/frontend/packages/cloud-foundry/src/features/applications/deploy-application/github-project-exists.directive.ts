@@ -5,9 +5,7 @@ import { GitSCMService, GitSCMType } from '@stratosui/git';
 import { Observable, of as observableOf } from 'rxjs';
 import { debounceTime, filter, first, map, tap } from 'rxjs/operators';
 
-import { CheckProjectExists } from '../../../../../cloud-foundry/src/actions/deploy-applications.actions';
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { selectDeployAppState } from '../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
+import { CFAppState, CheckProjectExists, selectDeployAppState } from '@stratosui/cloud-foundry';
 
 interface GithubProjectExistsResponse {
   githubProjectDoesNotExist: boolean;

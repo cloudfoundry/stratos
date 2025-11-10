@@ -55,6 +55,9 @@ function fetchingEndpointInfo(state: any) {
 function succeedEndpointInfo(state: any, action: any) {
   const newState = { ...state };
   const payload = action.type === GET_SYSTEM_INFO_SUCCESS ? action.payload : action.sessionData;
+  if (!payload || !payload.endpoints) {
+    return state;
+  }
   Object.keys(payload.endpoints).forEach((type: string) => {
     getAllEndpointIds(newState[type], payload.endpoints[type]).forEach((guid: string) => {
       const endpointInfo = payload.endpoints[type][guid] as EndpointModel;

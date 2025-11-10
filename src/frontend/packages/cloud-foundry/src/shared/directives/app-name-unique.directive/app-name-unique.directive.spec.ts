@@ -1,51 +1,26 @@
-import { CommonModule } from '@angular/common';
-import { HttpBackend, HttpClient, HttpClientModule } from '@angular/common/http';
-import { HttpTestingController } from '@angular/common/http/testing';
-import { inject, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { RouterTestingModule } from '@angular/router/testing';
+import { HttpClient } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { inject, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
-import { createBasicStoreModule } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CoreModule } from '../../../../../core/src/core/core.module';
-import { ExtensionService } from '../../../../../core/src/core/extension/extension-service';
-import { SharedModule } from '../../../../../core/src/shared/shared.module';
-import { CoreTestingModule } from '../../../../../core/test-framework/core-test.modules';
-import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../git/src/shared/github.helpers';
-import { AppStoreModule } from '@stratosui/store/store.module';
-import { CFAppState } from '../../../cf-app-state';
-import { ActiveRouteCfOrgSpace } from '../../../features/cf/cf-page.types';
-import { CfUserService } from '../../data-services/cf-user.service';
+import { createBasicStoreModule } from '@stratosui/store/testing';
+import { CFAppState } from '@stratosui/cloud-foundry';
 import { AppNameUniqueDirective } from './app-name-unique.directive';
+
 describe('AppNameUniqueDirective', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
-        AppStoreModule,
-        CommonModule,
-        CoreModule,
-        SharedModule,
-        RouterTestingModule,
-        CoreTestingModule,
         createBasicStoreModule(),
-        HttpClientModule,
       ],
       providers: [
-        
-        ExtensionService,
-        {
-          provide: HttpBackend,
-          useClass: HttpTestingController,
-
-        },
-        HttpClient,
-        { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
-        CfUserService,
-        ActiveRouteCfOrgSpace,
-
         provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
       ]
     });
   });

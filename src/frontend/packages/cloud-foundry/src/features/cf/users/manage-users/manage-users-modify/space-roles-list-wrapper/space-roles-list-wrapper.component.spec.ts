@@ -1,33 +1,31 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { CloudFoundryTestingModule, generateActiveRouteCfOrgSpaceMock, CF_BASE_TEST_PROVIDERS } from '@test-framework/cf';
+import { SpaceRolesListWrapperComponent } from './space-roles-list-wrapper.component';
 
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
-import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { ActiveRouteCfOrgSpace } from '../../../../cf-page.types';
-import { SpaceRolesListWrapperComponent } from "./space-roles-list-wrapper.component";
 describe('SpaceRolesListWrapperComponent', () => {
   let component: SpaceRolesListWrapperComponent;
   let fixture: ComponentFixture<SpaceRolesListWrapperComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         SpaceRolesListWrapperComponent,
-        ...generateCfStoreModules(),
-        CoreModule,
-        SharedModule,
         NoopAnimationsModule,
       ],
       providers: [
-        
-        ActiveRouteCfOrgSpace,
-
+        ...CF_BASE_TEST_PROVIDERS,
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          createBasicStoreModule(),
+          CloudFoundryTestingModule
+        ),
+        generateActiveRouteCfOrgSpaceMock(),
         provideZonelessChangeDetection(),
-      ],
-      
+      ]
     })
       .compileComponents();
   });

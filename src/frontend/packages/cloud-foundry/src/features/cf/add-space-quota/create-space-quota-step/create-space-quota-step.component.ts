@@ -1,12 +1,10 @@
-
 import { Component, ViewChild , ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
 
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { APIResource } from '../../../../../../store/src/types/api.types';
+import { StepOnNextFunction } from '@stratosui/core';
+import { RequestInfoState, APIResource } from '@stratosui/store';
 import { IQuotaDefinition } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';

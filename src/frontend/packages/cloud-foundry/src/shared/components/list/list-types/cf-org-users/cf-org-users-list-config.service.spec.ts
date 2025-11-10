@@ -1,46 +1,70 @@
-import { HttpClient, HttpHandler } from '@angular/common/http';
-import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
+import { Store } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { EntityMonitorFactory } from '@stratosui/store/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '@stratosui/store/monitors/pagination-monitor.factory';
+import { CFAppState } from '@stratosui/cloud-foundry';
+import { CurrentUserPermissionsService } from '@stratosui/core';
 import {
-  generateCfBaseTestModulesNoShared,
-  generateTestCfUserServiceProvider,
-} from "@test-framework/cloud-foundry-endpoint-service.helper";
+  EntityCatalogTestModule,
+  TEST_CATALOGUE_ENTITIES,
+  generateStratosEntities,
+  EntityCatalogHelper,
+  EntityCatalogHelpers,
+} from '@stratosui/store';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import {
+  generateTestCfEndpointServiceProvider,
   CloudFoundryOrganizationServiceMock,
-} from "@test-framework/cloud-foundry-organization.service.mock";
+  CloudFoundrySpaceServiceMock
+} from '@test-framework/cf';
+import { generateCFEntities } from '../../../../../cf-entity-generator';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
-import { CloudFoundryEndpointService } from '../../../../../features/cf/services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../../features/cf/services/cloud-foundry-organization.service';
-import { UserInviteService } from '../../../../../features/cf/user-invites/user-invite.service';
+import { CloudFoundrySpaceService } from '../../../../../features/cf/services/cloud-foundry-space.service';
+import { CfUserService } from '../../../../data-services/cf-user.service';
 import { CfOrgUsersListConfigService } from './cf-org-users-list-config.service';
-import { EntityServiceFactory } from "@stratosui/store/entity-service-factory.service";
+
 describe('CfOrgUsersListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        EntityServiceFactory,
-        
-        CfOrgUsersListConfigService,
-        { provide: CloudFoundryOrganizationService, useClass: CloudFoundryOrganizationServiceMock },
-        generateTestCfUserServiceProvider(),
-        PaginationMonitorFactory,
-        ActiveRouteCfOrgSpace,
-        EntityMonitorFactory,
-        UserInviteService,
-        HttpClient,
-        HttpHandler,
-        CloudFoundryEndpointService,
-        ConfirmationDialogService,
-
-        provideZonelessChangeDetection(),
+      imports: [
+        createBasicStoreModule(),
+        EntityCatalogTestModule,
       ],
-      imports: generateCfBaseTestModulesNoShared(),
+      providers: [
+        provideZonelessChangeDetection(),
+        ...generateTestCfEndpointServiceProvider(),
+        ...STORE_TEST_PROVIDERS,
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities(),
+          ]
+        },
+        {
+          provide: CfOrgUsersListConfigService,
+          useFactory: (
+            store: Store<CFAppState>,
+            cfOrgService: CloudFoundryOrganizationService,
+            cfUserService: CfUserService,
+            router: Router,
+            activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
+            userPerms: CurrentUserPermissionsService,
+          ) => new CfOrgUsersListConfigService(store, cfOrgService, cfUserService, router, activeRouteCfOrgSpace, userPerms),
+          deps: [Store, CloudFoundryOrganizationService, CfUserService, Router, ActiveRouteCfOrgSpace, CurrentUserPermissionsService]
+        },
+        { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock },
+        { provide: CloudFoundryOrganizationService, useClass: CloudFoundryOrganizationServiceMock },
+        CurrentUserPermissionsService,
+      ]
     });
+
+    // Initialize EntityCatalogHelper for Angular 20 compatibility
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
   });
 
   it('should be created', () => {

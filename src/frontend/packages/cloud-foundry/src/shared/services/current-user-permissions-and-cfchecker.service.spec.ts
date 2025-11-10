@@ -1,13 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { first, tap } from 'rxjs/operators';
-
-import { PermissionConfig } from '../../../../core/src/core/permissions/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../core/src/core/permissions/current-user-permissions.service';
-import { StratosScopeStrings } from '../../../../core/src/core/permissions/stratos-user-permissions.checker';
-import { AppTestModule } from '../../../../core/test-framework/core-test.helper';
+import { first, tap, timeout } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
+import { PermissionConfig, CurrentUserPermissionsService, StratosScopeStrings } from '@stratosui/core';
+import { AppTestModule } from '@stratosui/core/test-framework';
+import { createBasicStoreModule, createEntityStoreState, TestStoreEntity, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import {
   AppState,
   EntityCatalogTestModule,
@@ -20,6 +18,8 @@ import {
   EndpointModel,
   BaseEntityValues,
   EntityServiceFactory,
+  EntityCatalogHelper,
+  EntityCatalogHelpers,
 } from '@stratosui/store';
 import { PaginationState } from '@stratosui/store/types/pagination.types';
 import { CFFeatureFlagTypes, IFeatureFlag } from '../../cf-api.types';
@@ -31,7 +31,9 @@ import {
   cfCurrentUserPermissionsService,
   CfPermissionTypes,
   CfScopeStrings,
+  CfUserPermissionsChecker,
 } from '../../user-permissions/cf-user-permissions-checkers';
+import { CUSTOM_USER_PERMISSION_CHECKERS } from '@stratosui/core';
 
 const ffSchema = cfEntityFactory(featureFlagEntityType);
 
@@ -931,26 +933,35 @@ describe('CurrentUserPermissionsService with CF checker', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
+        CurrentUserPermissionsService,
         EntityServiceFactory,
-        ...cfCurrentUserPermissionsService,
-    ],
-      imports: [
+        ...STORE_TEST_PROVIDERS,
+        CfUserPermissionsChecker,
         {
-          ngModule: EntityCatalogTestModule,
-          providers: [
-            {
-              provide: TEST_CATALOGUE_ENTITIES, useValue: [
-                ...generateStratosEntities(),
-                generateCFEntities().find(a => a.type === ffSchema.entityType),
-              ]
-            }
+          provide: CUSTOM_USER_PERMISSION_CHECKERS,
+          useFactory: (checker: CfUserPermissionsChecker) => [checker],
+          deps: [CfUserPermissionsChecker]
+        },
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities(),
           ]
         },
+        provideZonelessChangeDetection(),
+      ],
+      imports: [
         createBasicStoreModule(createStoreState()),
-        AppTestModule,
+        EntityCatalogTestModule,
       ],
 
     });
+
+    // Initialize EntityCatalogHelper for Angular 20 compatibility
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+
     service = TestBed.inject(CurrentUserPermissionsService);
   });
 
@@ -959,71 +970,121 @@ describe('CurrentUserPermissionsService with CF checker', () => {
   });
 
   it('should allow create application', async () => {
-    const can = await service.can(CfCurrentUserPermissions.APPLICATION_CREATE).pipe(first()).toPromise();
+    const can = await firstValueFrom(
+      service.can(CfCurrentUserPermissions.APPLICATION_CREATE).pipe(
+        first(),
+        timeout(5000)
+      )
+    );
     expect(can).toBe(true);
   });
 
   it('should allow create application for single endpoint with access', async () => {
-    const can = await service.can(CfCurrentUserPermissions.APPLICATION_CREATE, '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb').pipe(first()).toPromise();
+    const can = await firstValueFrom(
+      service.can(CfCurrentUserPermissions.APPLICATION_CREATE, '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb').pipe(
+        first(),
+        timeout(5000)
+      )
+    );
     expect(can).toBe(true);
   });
 
   it('should allow create application for single endpoint with access and org/space', async () => {
-    const can = await service.can(
-      CfCurrentUserPermissions.APPLICATION_CREATE,
-      'c80420ca-204b-4879-bf69-b6b7a202ad87',
-      '86577124-4b64-4ca1-9a78-d904c60505c4'
-    ).pipe(first()).toPromise();
+    const can = await firstValueFrom(
+      service.can(
+        CfCurrentUserPermissions.APPLICATION_CREATE,
+        'c80420ca-204b-4879-bf69-b6b7a202ad87',
+        '86577124-4b64-4ca1-9a78-d904c60505c4'
+      ).pipe(
+        first(),
+        timeout(5000)
+      )
+    );
     expect(can).toBe(true);
   });
 
   it('should allow if feature flag', async () => {
-    const can = await service.can(
-      [new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.private_domain_creation)]
-    ).pipe(first()).toPromise();
+    const can = await firstValueFrom(
+      service.can(
+        [new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.private_domain_creation)]
+      ).pipe(
+        first(),
+        timeout(5000)
+      )
+    );
     expect(can).toBe(true);
   });
 
   it('should allow if feature flag with cf', async () => {
-    const can = await service.can(
-      [new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.private_domain_creation)],
-      'c80420ca-204b-4879-bf69-b6b7a202ad87'
-    ).pipe(first()).toPromise();
+    const can = await firstValueFrom(
+      service.can(
+        [new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.private_domain_creation)],
+        'c80420ca-204b-4879-bf69-b6b7a202ad87'
+      ).pipe(
+        first(),
+        timeout(5000)
+      )
+    );
     expect(can).toBe(false);
   });
 
   it('should not allow if no feature flag', async () => {
-    const can = await service.can(
-      [new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.user_org_creation)],
-      'c80420ca-204b-4879-bf69-b6b7a202ad87'
-    ).pipe(first()).toPromise();
+    const can = await firstValueFrom(
+      service.can(
+        [new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.user_org_creation)],
+        'c80420ca-204b-4879-bf69-b6b7a202ad87'
+      ).pipe(
+        first(),
+        timeout(5000)
+      )
+    );
     expect(can).toBe(false);
   });
   it('should allow if has endpoint scope', async () => {
-    const can = await service.can(new PermissionConfig(CfPermissionTypes.ENDPOINT_SCOPE, StratosScopeStrings.SCIM_READ), 'c80420ca-204b-4879-bf69-b6b7a202ad87').pipe(first()).toPromise();
+    const can = await firstValueFrom(
+      service.can(new PermissionConfig(CfPermissionTypes.ENDPOINT_SCOPE, StratosScopeStrings.SCIM_READ), 'c80420ca-204b-4879-bf69-b6b7a202ad87').pipe(
+        first(),
+        timeout(5000)
+      )
+    );
     expect(can).toBe(true);
   });
 
   it('should not allow if has endpoint scope', async () => {
-    const can = await service.can(new PermissionConfig(CfPermissionTypes.ENDPOINT_SCOPE, StratosScopeStrings.SCIM_READ), '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb').pipe(first()).toPromise();
+    const can = await firstValueFrom(
+      service.can(new PermissionConfig(CfPermissionTypes.ENDPOINT_SCOPE, StratosScopeStrings.SCIM_READ), '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb').pipe(
+        first(),
+        timeout(5000)
+      )
+    );
     expect(can).toBe(false);
   });
 
   it('should not allow if read only admin', async () => {
-    const can = await service.can(
-      CfCurrentUserPermissions.APPLICATION_CREATE,
-      'READ_ONLY_ADMIN',
-      'c6450a21-aa1a-4643-9437-035cc818ea72'
-    ).pipe(first()).toPromise();
+    const can = await firstValueFrom(
+      service.can(
+        CfCurrentUserPermissions.APPLICATION_CREATE,
+        'READ_ONLY_ADMIN',
+        'c6450a21-aa1a-4643-9437-035cc818ea72'
+      ).pipe(
+        first(),
+        timeout(5000)
+      )
+    );
     expect(can).toBe(false);
   });
 
   it('should not allow if read only user', async () => {
-    const can = await service.can(
-      CfCurrentUserPermissions.APPLICATION_CREATE,
-      'READ_ONLY_USER',
-      'c6450a21-aa1a-4643-9437-035cc818ea72'
-    ).pipe(first()).toPromise();
+    const can = await firstValueFrom(
+      service.can(
+        CfCurrentUserPermissions.APPLICATION_CREATE,
+        'READ_ONLY_USER',
+        'c6450a21-aa1a-4643-9437-035cc818ea72'
+      ).pipe(
+        first(),
+        timeout(5000)
+      )
+    );
     expect(can).toBe(false);
   });
 

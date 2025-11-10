@@ -1,24 +1,18 @@
 import { DatePipe } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, importProvidersFrom, APP_INITIALIZER } from '@angular/core';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { EntityMonitorFactory } from '@stratosui/store/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '@stratosui/store/monitors/pagination-monitor.factory';
-import { APIResource } from '@stratosui/store/types/api.types';
-import { generateTestApplicationServiceProvider } from "@test-framework/application-service-helper";
-import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { ConfirmationDialogService, CurrentUserPermissionsService } from '@stratosui/core';
+import { EntityCatalogHelper, EntityCatalogHelpers, EntityMonitorFactory, PaginationMonitorFactory, EntityServiceFactory, APIResource } from '@stratosui/store';
+import { STORE_TEST_PROVIDERS, createBasicStoreModule } from '@stratosui/store/testing';
+import { ApplicationServiceMock, CloudFoundryTestingModule, CF_BASE_TEST_PROVIDERS } from "@test-framework/cf";
 import { IServiceInstance } from '../../../../../../cf-api-svc.types';
-import {
-  ApplicationEnvVarsHelper,
-} from '../../../../../../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 import { ApplicationStateService } from '../../../../../services/application-state.service';
-import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
-import { ServiceIconComponent } from '../../../../service-icon/service-icon.component';
 import { AppServiceBindingCardComponent } from './app-service-binding-card.component';
-import { EntityServiceFactory } from "@stratosui/store/entity-service-factory.service";
 describe('AppServiceBindingCardComponent', () => {
   let component: AppServiceBindingCardComponent;
   let fixture: ComponentFixture<AppServiceBindingCardComponent>;
@@ -27,22 +21,29 @@ describe('AppServiceBindingCardComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         AppServiceBindingCardComponent,
-        ServiceIconComponent,
-        CfOrgSpaceLinksComponent,
-        ...generateCfBaseTestModules(),
       ],
       providers: [
-        EntityServiceFactory,
-        
-        EntityMonitorFactory,
-        generateTestApplicationServiceProvider('1', '1'),
-        ApplicationEnvVarsHelper,
+        ...CF_BASE_TEST_PROVIDERS,
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          NoopAnimationsModule,
+          CloudFoundryTestingModule,
+          createBasicStoreModule(),
+        ),
+        EntityCatalogHelper,
+        {
+          provide: APP_INITIALIZER,
+          useFactory: (ech: EntityCatalogHelper) => () => EntityCatalogHelpers.SetEntityCatalogHelper(ech),
+          deps: [EntityCatalogHelper],
+          multi: true
+        },
+        { provide: ApplicationService, useClass: ApplicationServiceMock },
         ApplicationStateService,
-        PaginationMonitorFactory,
         ConfirmationDialogService,
+        CurrentUserPermissionsService,
+        PaginationMonitorFactory,
         DatePipe,
         ServiceActionHelperService,
-
         provideZonelessChangeDetection(),
       ]
     })

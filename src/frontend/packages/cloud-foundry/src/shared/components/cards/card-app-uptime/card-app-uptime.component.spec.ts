@@ -1,63 +1,40 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CoreModule } from '../../../../../../core/src/core/core.module';
-import { UtilsService } from '../../../../../../core/src/core/utils.service';
-import {
-  ApplicationStateIconComponent,
-} from '../../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.component';
-import {
-  ApplicationStateIconPipe,
-} from '../../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.pipe';
-import {
-  ApplicationStateComponent,
-} from '../../../../../../core/src/shared/components/application-state/application-state.component';
-import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
-import {
-  CopyToClipboardComponent,
-} from '../../../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
-import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
-import { UptimePipe } from '../../../../../../core/src/shared/pipes/uptime.pipe';
+import { EntityMonitorFactory, EntityServiceFactory } from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
 import { ApplicationServiceMock } from "@test-framework/application-service-helper";
-import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ApplicationMonitorService } from '../../../../features/applications/application-monitor.service';
 import { ApplicationService } from '../../../../features/applications/application.service';
 import { ApplicationStateService } from '../../../services/application-state.service';
-import { CardAppStatusComponent } from '../card-app-status/card-app-status.component';
 import { CardAppUptimeComponent } from "./card-app-uptime.component";
+
 describe('CardAppUptimeComponent', () => {
   let component: CardAppUptimeComponent;
   let fixture: ComponentFixture<CardAppUptimeComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         CardAppUptimeComponent,
-        CardAppStatusComponent,
-        CardStatusComponent,
-        ApplicationStateComponent,
-        ApplicationStateIconComponent,
-        ApplicationStateIconPipe,
-        UptimePipe,
-        MetadataItemComponent,
-        CopyToClipboardComponent,
-        ...generateCfStoreModules(),
-        CoreModule,
-        NoopAnimationsModule,
       ],
       providers: [
-        
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(generateCfBaseTestModulesNoShared()),
+        EntityServiceFactory,
+        EntityMonitorFactory,
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         ApplicationStateService,
-        UtilsService,
         ApplicationMonitorService,
-
-        provideZonelessChangeDetection(),
       ]
-    })
-      .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

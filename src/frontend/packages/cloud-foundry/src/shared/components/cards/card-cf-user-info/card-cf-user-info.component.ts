@@ -1,7 +1,12 @@
 import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
+import {
+  MetadataItemComponent,
+  CardWrapperComponent,
+  CardHeaderComponent,
+  CardTitleComponent,
+  CardContentComponent
+} from '@stratosui/core';
 import { CloudFoundryEndpointService } from '../../../../features/cf/services/cloud-foundry-endpoint.service';
 
 @Component({
@@ -12,7 +17,11 @@ import { CloudFoundryEndpointService } from '../../../../features/cf/services/cl
   standalone: true,
   imports: [
     CommonModule,
-    MetadataItemComponent
+    MetadataItemComponent,
+    CardWrapperComponent,
+    CardHeaderComponent,
+    CardTitleComponent,
+    CardContentComponent
   ]
 })
 export class CardCfUserInfoComponent implements OnInit {

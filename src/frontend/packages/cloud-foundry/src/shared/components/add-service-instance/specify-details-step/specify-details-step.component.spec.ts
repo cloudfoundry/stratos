@@ -1,18 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { EntityMonitorFactory } from '@stratosui/store/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '@stratosui/store/monitors/pagination-monitor.factory';
-import { generateCfBaseTestModulesNoShared } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { TailwindJsonSchemaFormModule } from '@stratosui/core';
+import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
 import { LongRunningCfOperationsService } from '../../../data-services/long-running-cf-op.service';
 import { SchemaFormComponent } from '../../schema-form/schema-form.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
 import { SpecifyDetailsStepComponent } from './specify-details-step.component';
-import { TailwindJsonSchemaFormModule } from '../../../../../../core/src/shared/components/tailwind-json-schema-form/tailwind-json-schema-form.module';
-import { EntityServiceFactory } from "@stratosui/store/entity-service-factory.service";
+
 describe('SpecifyDetailsStepComponent', () => {
   let component: SpecifyDetailsStepComponent;
   let fixture: ComponentFixture<SpecifyDetailsStepComponent>;
@@ -20,22 +21,22 @@ describe('SpecifyDetailsStepComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
-        generateCfBaseTestModulesNoShared(),
         SpecifyDetailsStepComponent,
         SchemaFormComponent,
-        TailwindJsonSchemaFormModule,
-    ],
+      ],
       providers: [
-        EntityServiceFactory,
-        
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          ...generateCfBaseTestModulesNoShared(),
+          TailwindJsonSchemaFormModule,
+        ),
         CreateServiceInstanceHelperServiceFactory,
         CsiGuidsService,
-        PaginationMonitorFactory,
-        EntityMonitorFactory,
         CsiModeService,
         LongRunningCfOperationsService,
-
-        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();

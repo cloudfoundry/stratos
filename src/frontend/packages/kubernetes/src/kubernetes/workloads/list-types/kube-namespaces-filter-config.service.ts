@@ -2,9 +2,12 @@ import { Injectable, OnDestroy, signal, WritableSignal, computed, Injector, inje
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { safeUnsubscribe } from '@stratosui/core';
-import { AppState } from '@stratosui/store';
-import { connectedEndpointsOfTypesSelector } from '@stratosui/store';
-import { EndpointModel } from '@stratosui/store';
+import {
+  AppState,
+  connectedEndpointsOfTypesSelector,
+  EndpointModel,
+  getCurrentPageRequestInfo
+} from '@stratosui/store';
 import { Observable, Subscription } from 'rxjs';
 import {
   distinctUntilChanged,
@@ -17,8 +20,6 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs/operators';
-
-import { getCurrentPageRequestInfo } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes-entity-factory';
 import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
 import { KubernetesNamespace } from '../../store/kube.types';

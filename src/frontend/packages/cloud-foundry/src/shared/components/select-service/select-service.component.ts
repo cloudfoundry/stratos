@@ -1,16 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { AfterContentInit, ChangeDetectionStrategy, Component, OnDestroy, computed, effect, inject, signal } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { CustomSelectComponent, CustomOptionComponent } from '../../../../../core/src/shared/components/custom-select/custom-select.component';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, Subject } from 'rxjs';
 import { catchError, filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 
-import { StepOnNextResult } from '../../../../../core/src/shared/components/stepper/step/step.component';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { APIResource } from '../../../../../store/src/types/api.types';
+import { CustomFormFieldComponent, MatLabelComponent, CustomSelectComponent, CustomOptionComponent, StepOnNextResult } from '@stratosui/core';
+import { PaginationMonitorFactory, APIResource } from '@stratosui/store';
 import { SetCreateServiceInstanceServiceGuid } from '../../../actions/create-service-instance.actions';
 import { IService } from '../../../cf-api-svc.types';
 import { CFAppState } from '../../../cf-app-state';

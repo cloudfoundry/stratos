@@ -1,14 +1,10 @@
 import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
-
 import { FormsModule } from '@angular/forms';
-import { CustomCheckboxComponent } from '../../../../../../core/src/shared/components/custom-checkbox/custom-checkbox.component';
 import { Observable, Subject } from 'rxjs';
-import websocketConnect from 'rxjs-websockets';
 import { catchError, filter, map, share, switchMap } from 'rxjs/operators';
+import websocketConnect from 'rxjs-websockets';
 
-import { UtilsService } from '../../../../../../core/src/core/utils.service';
-import { environment } from '../../../../../../core/src/environments/environment.prod';
-import { LogViewerComponent } from '../../../../../../core/src/shared/components/log-viewer/log-viewer.component';
+import { CustomCheckboxComponent, LogViewerComponent, UtilsService, environment } from '@stratosui/core';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryFirehoseFormatter } from './cloud-foundry-firehose-formatter';
 

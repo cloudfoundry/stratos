@@ -1,7 +1,6 @@
 import { format } from 'date-fns';
 
-import { UtilsService } from '../../../../../../core/src/core/utils.service';
-import { AnsiColorizer } from '../../../../../../core/src/shared/components/log-viewer/ansi-colorizer';
+import { UtilsService, AnsiColorizer } from '@stratosui/core';
 import { FireHoseItem, HTTP_METHODS } from './cloud-foundry-firehose.types';
 
 /**

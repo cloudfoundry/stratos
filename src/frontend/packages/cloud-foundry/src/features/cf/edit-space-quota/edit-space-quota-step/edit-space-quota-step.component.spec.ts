@@ -1,12 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { PaginationMonitorFactory } from '@stratosui/store/monitors/pagination-monitor.factory';
-import { CFBaseTestModules } from "@test-framework/cf-test-helper";
+import { PaginationMonitorFactory, EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities } from '@stratosui/store';
+import { BaseTestModulesNoShared } from '@test-framework';
+import { CFBaseTestProviders, generateCFEntities } from '@test-framework/cf-test-helper';
 import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-form/space-quota-definition-form.component';
-import { EditSpaceQuotaStepComponent } from "./edit-space-quota-step.component";
+import { EditSpaceQuotaStepComponent } from './edit-space-quota-step.component';
+
 describe('EditSpaceQuotaStepComponent', () => {
   let component: EditSpaceQuotaStepComponent;
   let fixture: ComponentFixture<EditSpaceQuotaStepComponent>;
@@ -16,16 +18,28 @@ describe('EditSpaceQuotaStepComponent', () => {
       imports: [
         EditSpaceQuotaStepComponent,
         SpaceQuotaDefinitionFormComponent,
-        ...CFBaseTestModules,
+        ...BaseTestModulesNoShared,
+        EntityCatalogTestModule,
       ],
       providers: [
-        PaginationMonitorFactory, {
+        ...CFBaseTestProviders,
+        PaginationMonitorFactory,
+        provideZonelessChangeDetection(),
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities()
+          ]
+        },
+        {
           provide: ActivatedRoute,
           useValue: {
             snapshot: {
               params: {
-                quotaId: 'quotaId',
-                endpointId: 'endpointId'
+                quotaId: 'test-quota-id',
+                orgId: 'test-org-id',
+                endpointId: 'test-cf-guid'
               },
               queryParams: {}
             },

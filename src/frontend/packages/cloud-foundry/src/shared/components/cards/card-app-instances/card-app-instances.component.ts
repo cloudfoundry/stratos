@@ -1,20 +1,23 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild , ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CustomFormFieldComponent } from '@stratosui/core';
 import { FormsModule } from '@angular/forms';
-
-import { TailwindSnackBarService, TailwindSnackBarRef } from '@stratosui/core';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
 
-import { AppMetadataTypes } from '../../../../../../cloud-foundry/src/actions/app-metadata.actions';
-import { ApplicationService } from '../../../../../../cloud-foundry/src/features/applications/application.service';
-import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ConfirmationDialogConfig } from '../../../../../../core/src/shared/components/confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { StratosStatus } from '../../../../../../store/src/types/shared.types';
+import {
+  AppInputDirective,
+  CardStatusComponent,
+  ConfirmationDialogConfig,
+  ConfirmationDialogService,
+  CurrentUserPermissionsService,
+  CustomFormFieldComponent,
+  TailwindSnackBarRef,
+  TailwindSnackBarService
+} from '@stratosui/core';
+import { StratosStatus } from '@stratosui/store';
+import { AppMetadataTypes } from '../../../../actions/app-metadata.actions';
+import { ApplicationService } from '../../../../features/applications/application.service';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
-import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
 import { RunningInstancesComponent } from '../../running-instances/running-instances.component';
 
 const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig('Set Instance count to 0',
@@ -29,6 +32,7 @@ const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig('Set Ins
   imports: [
     CommonModule,
     FormsModule,
+    AppInputDirective,
     CustomFormFieldComponent,
     CardStatusComponent,
     RunningInstancesComponent

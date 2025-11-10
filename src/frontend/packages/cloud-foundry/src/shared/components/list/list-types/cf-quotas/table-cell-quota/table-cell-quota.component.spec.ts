@@ -1,10 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { describe, it, expect, beforeEach } from 'vitest';
 
+import { createBasicStoreModule } from '@stratosui/store/testing';
 import { APIResource } from '@stratosui/store/types/api.types';
+
 import { IQuotaDefinition } from '../../../../../../cf-api.types';
 import { TableCellQuotaComponent } from './table-cell-quota.component';
 

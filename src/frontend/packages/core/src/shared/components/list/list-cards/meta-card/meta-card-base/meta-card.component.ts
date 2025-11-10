@@ -44,8 +44,6 @@ export function createMetaCardMenuItemSeparator(): MenuItem {
     ClickStopPropagationDirective,
     EntityFavoriteStarComponent,
     AppProgressBarComponent,
-    MetaCardItemComponent,
-    MetaCardTitleComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })

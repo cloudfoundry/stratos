@@ -1,28 +1,33 @@
-import { CommonModule, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { provideMockStore } from '@ngrx/store/testing';
 
-import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
-import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { of } from 'rxjs';
+import { UtilsService } from '@stratosui/core';
 import { CfOrgSpaceDataService } from '../../../../data-services/cf-org-space-service.service';
-import { CfAppConfigService } from "./cf-app-config.service";
+import { CfAppConfigService } from './cf-app-config.service';
+
 describe('CfAppConfigService', () => {
   beforeEach(() => {
+    const mockCfOrgSpaceDataService = {
+      isLoading$: of(false),
+      cf: { list$: of([{ guid: 'test-guid' }]) },
+      setInitialValuesFromAction: vi.fn(),
+      org: { list$: of([]) },
+      space: { list$: of([]) },
+    };
+
     TestBed.configureTestingModule({
       providers: [
-        
         CfAppConfigService,
         DatePipe,
-        CfOrgSpaceDataService,
-
+        UtilsService,
+        { provide: CfOrgSpaceDataService, useValue: mockCfOrgSpaceDataService },
+        provideMockStore(),
         provideZonelessChangeDetection(),
       ],
-      imports: [
-        CommonModule,
-        SharedModule,
-        generateCfStoreModules(),
-      ]
     });
   });
 

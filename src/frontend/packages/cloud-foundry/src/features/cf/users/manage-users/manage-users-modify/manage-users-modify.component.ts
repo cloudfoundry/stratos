@@ -12,9 +12,8 @@ import {
   ViewContainerRef,
   signal,
   ChangeDetectionStrategy} from '@angular/core';
-import { TailwindSnackBarService, TailwindSnackBarRef } from '@stratosui/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { getRowMetadata } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import {
   catchError,
@@ -29,13 +28,16 @@ import {
   switchMap,
   tap,
 } from 'rxjs/operators';
-import { toObservable } from '@angular/core/rxjs-interop';
 
 import {
+  TailwindSnackBarService,
+  TailwindSnackBarRef,
   ITableListDataSource,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+  ITableColumn,
+  EnumerateComponent,
+  TableComponent,
+} from '@stratosui/core';
+import { getRowMetadata, APIResource } from '@stratosui/store';
 import { UsersRolesFlipSetRoles, UsersRolesSetOrg } from '../../../../../actions/users-roles.actions';
 import { IOrganization } from '../../../../../cf-api.types';
 import { CFAppState } from '../../../../../cf-app-state';
@@ -56,8 +58,6 @@ import { CfUser, OrgUserRoleNames } from '../../../../../store/types/cf-user.typ
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfRolesService } from '../cf-roles.service';
 import { SpaceRolesListWrapperComponent } from './space-roles-list-wrapper/space-roles-list-wrapper.component';
-import { EnumerateComponent } from '../../../../../../../core/src/shared/components/enumerate/enumerate.component';
-import { TableComponent } from '../../../../../../../core/src/shared/components/list/list-table/table.component';
 
 interface Org { metadata: { guid: string, }; }
 interface CfUserWithWarning extends CfUser {

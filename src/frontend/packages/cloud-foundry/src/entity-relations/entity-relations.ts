@@ -3,21 +3,29 @@ import { denormalize } from 'normalizr';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, mergeMap, pairwise, skipWhile, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { pathGet } from '../../../core/src/core/utils.service';
-import { environment } from '../../../core/src/environments/environment';
-import { SetInitialParams } from '../../../store/src/actions/pagination.actions';
-import { APIResponse } from '../../../store/src/actions/request.actions';
-import { GeneralEntityAppState } from '../../../store/src/app-state';
-import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
-import { isEntityBlocked } from '../../../store/src/entity-service';
-import { EntitySchema } from '../../../store/src/helpers/entity-schema';
-import { pick } from '../../../store/src/helpers/reducer.helper';
-import { RequestInfoState } from '../../../store/src/reducers/api-request-reducer/types';
-import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../../../store/src/selectors/api.selectors';
-import { selectPaginationState } from '../../../store/src/selectors/pagination.selectors';
-import { APIResource, NormalizedResponse } from '../../../store/src/types/api.types';
-import { isPaginatedAction, PaginatedAction, PaginationEntityState } from '../../../store/src/types/pagination.types';
-import { EntityRequestAction, WrapperRequestActionSuccess } from '../../../store/src/types/request.types';
+import { pathGet } from '@stratosui/core';
+import { environment } from '@stratosui/core';
+import {
+  SetInitialParams,
+  APIResponse,
+  GeneralEntityAppState,
+  entityCatalog,
+  isEntityBlocked,
+  EntitySchema,
+  pick,
+  RequestInfoState,
+  getAPIRequestDataState,
+  selectEntity,
+  selectRequestInfo,
+  selectPaginationState,
+  APIResource,
+  NormalizedResponse,
+  isPaginatedAction,
+  PaginatedAction,
+  PaginationEntityState,
+  EntityRequestAction,
+  WrapperRequestActionSuccess,
+} from '@stratosui/store';
 import { FetchRelationAction, FetchRelationPaginatedAction, FetchRelationSingleAction } from '../actions/relation.actions';
 import { EntityTreeRelation } from './entity-relation-tree';
 import { validationPostProcessor } from './entity-relations-post-processor';
@@ -299,8 +307,13 @@ function associateChildWithParent(
   if (action.child.isArray) {
     const { paginationKey } = action as FetchRelationPaginatedAction;
     childValue = store.select(selectPaginationState(entityCatalog.getEntityKey(action), paginationKey)).pipe(
-      first(),
-      map((paginationSate: PaginationEntityState) => (paginationSate.ids as Record<number, string[]>)[1] || [])
+      first(undefined, null),
+      map((paginationSate: PaginationEntityState) => {
+        if (!paginationSate || !paginationSate.ids) {
+          return [];
+        }
+        return (paginationSate.ids as Record<number, string[]>)[1] || [];
+      })
     );
   } else {
     const { guid } = action as FetchRelationSingleAction;
@@ -376,7 +389,7 @@ function handleValidationLoopResults(
         return oldFetching.fetching === true && newFetching.fetching === false;
       }),
       skipWhile(completed => !completed),
-      first()) : observableOf(true);
+      first(undefined, true)) : observableOf(true);
     // Associate the missing parameter with it's parent
     const associatedObs = obs.pipe(
       switchMap(() => {
@@ -390,7 +403,7 @@ function handleValidationLoopResults(
   return {
     started: !!(paginationFinished.length),
     completed: Promise.all(paginationFinished)
-      .then(() => store.select(getAPIRequestDataState).pipe(first()).toPromise())
+      .then(() => store.select(getAPIRequestDataState).pipe(first(undefined, null)).toPromise())
       .then(entities => {
         // Post processor needs to run once all 'results[x].fetchingState$' have finished. This will mean we've fetched any missing params
         // (fetch org and it's managers, more then 50 managers so we independently fetch list, need to ensure that the
@@ -507,7 +520,7 @@ export function populatePaginationFromParent(store: Store<GeneralEntityAppState>
   }
 
   return selectEntity$.pipe(
-    first(),
+    first(undefined, null),
     mergeMap(entity => {
       if (!entity) {
         return observableOf(null);
@@ -522,7 +535,7 @@ export function populatePaginationFromParent(store: Store<GeneralEntityAppState>
     filter((entityInfo: RequestInfoState) => {
       return !isEntityBlocked(entityInfo);
     }),
-    first(),
+    first(undefined, null),
     // At this point we should know that the parent entity is ready to be checked
     withLatestFrom(
       store.select(selectEntity<any>(parentEntityKey, parentGuid)),

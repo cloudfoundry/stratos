@@ -2,11 +2,12 @@ import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
-} from '../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { IStratosEndpointDefinition, StratosEndpointExtensionDefinition } from '../../../store/src/entity-catalog/entity-catalog.types';
-import { metricEntityType } from '../../../store/src/helpers/stratos-entity-factory';
-import { APIResource } from '../../../store/src/types/api.types';
-import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
+  IStratosEndpointDefinition,
+  StratosEndpointExtensionDefinition,
+  metricEntityType,
+  APIResource,
+  IFavoriteMetadata
+} from '@stratosui/store';
 import { AppAutoscalerEvent, AppAutoscalerHealth, AppAutoscalerPolicy, AppScalingTrigger } from './app-autoscaler.types';
 import {
   appAutoscalerAppMetricEntityType,
@@ -34,7 +35,8 @@ export function generateASEntities(): StratosBaseCatalogEntity[] {
     // Autoscaler is a virtual endpoint type - it doesn't appear in the endpoints list
     // as it's a feature running on CF endpoints, not a separate connectable endpoint
     unConnectable: true,
-    listDetailsComponent: null as any,
+    // No listDetailsComponent needed for virtual endpoints - omit the property entirely
+    // rather than setting it to null, as Angular TestBed will try to process null values
     renderPriority: 0,
   };
   return [

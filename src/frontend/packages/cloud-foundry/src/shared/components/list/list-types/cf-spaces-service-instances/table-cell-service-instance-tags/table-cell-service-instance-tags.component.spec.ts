@@ -3,12 +3,11 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { EntityMonitorFactory } from '@stratosui/store/monitors/entity-monitor.factory.service';
+import { EntityMonitorFactory, EntityServiceFactory } from '@stratosui/store';
 import {
   generateCfBaseTestModulesNoShared,
 } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { TableCellServiceInstanceTagsComponent } from './table-cell-service-instance-tags.component';
-import { EntityServiceFactory } from "@stratosui/store/entity-service-factory.service";
 describe('TableCellServiceInstanceTagsComponent', () => {
   let component: TableCellServiceInstanceTagsComponent;
   let fixture: ComponentFixture<TableCellServiceInstanceTagsComponent>;

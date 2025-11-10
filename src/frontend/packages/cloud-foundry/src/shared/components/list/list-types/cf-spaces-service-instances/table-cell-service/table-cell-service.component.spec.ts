@@ -1,20 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import {
-  LongRunningCfOperationsService,
-} from '../../../../../../../../cloud-foundry/src/shared/data-services/long-running-cf-op.service';
+import { EntityMonitorFactory, EntityServiceFactory } from '@stratosui/store';
+import { BooleanIndicatorComponent } from '@stratosui/core';
 import {
   generateCfBaseTestModulesNoShared,
-} from '../../../../../../../../cloud-foundry/test-framework/cloud-foundry-endpoint-service.helper';
-import {
-  BooleanIndicatorComponent,
-} from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import { EntityMonitorFactory } from '@stratosui/store/monitors/entity-monitor.factory.service';
+} from '@test-framework/cloud-foundry-endpoint-service.helper';
+import { LongRunningCfOperationsService } from '../../../../../data-services/long-running-cf-op.service';
 import { ServiceInstanceLastOpComponent } from '../../../../service-instance-last-op/service-instance-last-op.component';
 import { TableCellServiceComponent } from './table-cell-service.component';
-import { EntityServiceFactory } from '@stratosui/store/entity-service-factory.service';
 
 describe('TableCellServiceComponent', () => {
   let component: TableCellServiceComponent;
@@ -33,6 +29,7 @@ describe('TableCellServiceComponent', () => {
         EntityMonitorFactory,
         LongRunningCfOperationsService,
         provideZonelessChangeDetection(),
+        provideRouter([]),
       ],
     })
       .compileComponents();

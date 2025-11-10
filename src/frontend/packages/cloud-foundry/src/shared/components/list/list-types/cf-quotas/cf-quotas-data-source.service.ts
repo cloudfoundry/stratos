@@ -1,18 +1,10 @@
 import { Store } from '@ngrx/store';
-import { getRowMetadata } from '@stratosui/store';
 import { of } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 
-import { GetQuotaDefinitions } from '../../../../../../../cloud-foundry/src/actions/quota-definitions.actions';
-import {
-  ListDataSource,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import {
-  getDefaultRowState,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
-import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { endpointEntityType } from '../../../../../../../store/src/helpers/stratos-entity-factory';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { ListDataSource, getDefaultRowState, IListConfig } from '@stratosui/core';
+import { getRowMetadata, endpointEntityType, APIResource } from '@stratosui/store';
+import { GetQuotaDefinitions } from '../../../../../actions/quota-definitions.actions';
 import { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';

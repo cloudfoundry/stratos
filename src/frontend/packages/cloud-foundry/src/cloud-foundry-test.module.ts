@@ -1,45 +1,62 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NgModule } from '@angular/core';
 import { EffectsModule } from '@ngrx/effects';
-import { getGitHubAPIURL, GITHUB_API_URL, GitSCMService } from '@stratosui/git';
+import { getGitHubAPIURL, GITHUB_API_URL } from '@stratosui/git';
 import { CATALOGUE_ENTITIES, EntityCatalogFeatureModule, entityCatalog, TestEntityCatalog, generateStratosEntities } from '@stratosui/store';
 import { testSCFEndpointGuid } from '@stratosui/store/testing';
+import { generateASEntities } from '@stratosui/cf-autoscaler';
 
-import { generateASEntities } from '../../cf-autoscaler/src/store/autoscaler-entity-generator';
 import { BaseCfOrgSpaceRouteMock } from '../test-framework/cloud-foundry-endpoint-service.helper';
 import { generateCFEntities } from './cf-entity-generator';
 import { ActiveRouteCfOrgSpace } from './features/cf/cf-page.types';
 import { CfUserService } from './shared/data-services/cf-user.service';
 import { LongRunningCfOperationsService } from './shared/data-services/long-running-cf-op.service';
-import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
+import { CloudFoundryReducersModule } from './store/cloud-foundry.reducers.module';
+import { AppVariablesEffect } from './store/effects/app-variables.effects';
+import { AppEffects } from './store/effects/app.effects';
+import { CloudFoundryEffects } from './store/effects/cloud-foundry.effects';
+import { CreateAppPageEffects } from './store/effects/create-app-effects';
+import { DeployAppEffects } from './store/effects/deploy-app.effects';
+import { CfValidateEffects } from './store/effects/request.effects';
+import { RouteEffect } from './store/effects/route.effects';
+import { ServiceInstanceEffects } from './store/effects/service-instance.effects';
+import { UpdateAppEffects } from './store/effects/update-app-effects';
+import { UsersRolesEffects } from './store/effects/users-roles.effects';
 
 @NgModule({
   imports: [
-    {
-      ngModule: EntityCatalogFeatureModule,
-      providers: [
-        {
-          provide: CATALOGUE_ENTITIES,
-          useFactory: () => {
-            const testEntityCatalog = entityCatalog as TestEntityCatalog;
-            testEntityCatalog.clear();
-            return [
-              ...generateCFEntities(),
-              ...generateStratosEntities(),
-              ...generateASEntities(), // FIXME: Remove hard link between cf and autoscaler packages #4416
-            ];
-          },
-          multi: true
-        }
-      ]
-    },
+    EntityCatalogFeatureModule,
+    CloudFoundryReducersModule,
     EffectsModule.forRoot([]),
-    CloudFoundryStoreModule,
+    EffectsModule.forFeature([
+      CreateAppPageEffects,
+      AppVariablesEffect,
+      DeployAppEffects,
+      CloudFoundryEffects,
+      RouteEffect,
+      ServiceInstanceEffects,
+      AppEffects,
+      UpdateAppEffects,
+      CfValidateEffects,
+      UsersRolesEffects
+    ]),
     HttpClientTestingModule,
   ],
   providers: [
+    {
+      provide: CATALOGUE_ENTITIES,
+      useFactory: () => {
+        const testEntityCatalog = entityCatalog as TestEntityCatalog;
+        testEntityCatalog.clear();
+        return [
+          ...generateCFEntities(),
+          ...generateStratosEntities(),
+          ...generateASEntities(), // FIXME: Remove hard link between cf and autoscaler packages #4416
+        ];
+      },
+      multi: true
+    },
     { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
-    GitSCMService,
     LongRunningCfOperationsService,
     CfUserService,
     {

@@ -1,9 +1,7 @@
 import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 
-
-import { ClickStopPropagationDirective } from '../../../../../../../../core/src/core/click-stop-propagation.directive';
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { ClickStopPropagationDirective, TableCellCustom } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
 import { IService, IServiceExtra } from '../../../../../../cf-api-svc.types';
 
 @Component({

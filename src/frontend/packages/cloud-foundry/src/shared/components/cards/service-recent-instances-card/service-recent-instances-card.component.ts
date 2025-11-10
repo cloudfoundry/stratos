@@ -10,8 +10,8 @@ import {
   CardTitleComponent,
   CardContentComponent
 } from '@stratosui/core';
-import { ServicesService } from '../../../../../../cloud-foundry/src/features/service-catalog/services.service';
-import { APIResource } from '../../../../../../store/src/types/api.types';
+import { APIResource } from '@stratosui/store';
+import { ServicesService } from '../../../../features/service-catalog/services.service';
 import { IServiceInstance } from '../../../../cf-api-svc.types';
 import { CompactServiceInstanceCardComponent } from '../compact-service-instance-card/compact-service-instance-card.component';
 

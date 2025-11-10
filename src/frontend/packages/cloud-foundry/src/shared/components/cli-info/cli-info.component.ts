@@ -1,7 +1,6 @@
-
 import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 
-import { CodeBlockComponent } from '../../../../../core/src/shared/components/code-block/code-block.component';
+import { CodeBlockComponent } from '@stratosui/core';
 
 // Context used in the CLI Info template
 export interface CFAppCLIInfoContext {

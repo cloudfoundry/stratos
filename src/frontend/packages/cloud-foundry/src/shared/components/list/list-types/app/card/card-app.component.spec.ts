@@ -1,41 +1,79 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { StoreModule } from '@ngrx/store';
 
-import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
-import { PaginationMonitorFactory } from '@stratosui/store/monitors/pagination-monitor.factory';
-import { APIResourceMetadata } from '@stratosui/store/types/api.types';
-import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { SharedModule } from '@stratosui/core';
+import {
+  PaginationMonitorFactory,
+  APIResourceMetadata,
+  EntityCatalogTestModule,
+  generateStratosEntities,
+  TEST_CATALOGUE_ENTITIES,
+  appReducers,
+  EntityCatalogHelper,
+  EntityCatalogHelpers,
+  EntityServiceFactory,
+  EntityMonitorFactory
+} from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { CloudFoundryTestingModule, generateCFEntities } from '@test-framework/cf';
 import { IApp } from '../../../../../../cf-api.types';
 import { ApplicationStateService } from '../../../../../services/application-state.service';
 import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
 import { RunningInstancesComponent } from '../../../../running-instances/running-instances.component';
 import { CardAppComponent } from "./card-app.component";
+
 describe('CardAppComponent', () => {
   let component: CardAppComponent;
   let fixture: ComponentFixture<CardAppComponent>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
+  beforeEach(() => {
+    TestBed.configureTestingModule({
       imports: [
         CardAppComponent,
         RunningInstancesComponent,
         CfOrgSpaceLinksComponent,
-        ...generateCfStoreModules(),
-        RouterTestingModule,
-        SharedModule,
-    ],
+      ],
       providers: [
-        
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideNoopAnimations(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          SharedModule,
+          CloudFoundryTestingModule,
+          StoreModule.forRoot(appReducers, {
+            runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
+          }),
+          EntityCatalogTestModule
+        ),
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities(),
+          ]
+        },
         ApplicationStateService,
         PaginationMonitorFactory,
-
-        provideZonelessChangeDetection(),
+        EntityServiceFactory,
+        EntityMonitorFactory,
+        EntityCatalogHelper,
       ]
     })
       .compileComponents();
 
+    // Initialize EntityCatalogHelper for Angular 20 compatibility
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+  });
+
+  beforeEach(() => {
     fixture = TestBed.createComponent(CardAppComponent);
     component = fixture.componentInstance;
     component.row = {

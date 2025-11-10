@@ -1,8 +1,6 @@
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 
-import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
-import { StepComponent } from '../../../../../core/src/shared/components/stepper/step/step.component';
-import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
+import { PageHeaderComponent, StepComponent, SteppersComponent } from '@stratosui/core';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { CreateSpaceQuotaStepComponent } from './create-space-quota-step/create-space-quota-step.component';

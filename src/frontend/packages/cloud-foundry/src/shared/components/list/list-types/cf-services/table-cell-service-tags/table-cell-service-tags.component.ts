@@ -1,9 +1,8 @@
 import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 import { of } from 'rxjs';
 
-import { AppChip, AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { AppChip, AppChipsComponent, TableCellCustom } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
 import { IService } from '../../../../../../cf-api-svc.types';
 import { ServiceTag } from '../cf-service-card/cf-service-card.component';
 

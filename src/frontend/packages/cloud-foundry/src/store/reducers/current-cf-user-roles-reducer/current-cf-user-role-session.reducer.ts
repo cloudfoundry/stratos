@@ -1,9 +1,7 @@
-import { VerifiedSession } from '../../../../../store/src/actions/auth.actions';
-import { EndpointActionComplete } from '../../../../../store/src/actions/endpoint.actions';
-import { SessionUser } from '../../../../../store/src/types/auth.types';
-import { EndpointUser, INewlyConnectedEndpointInfo } from '../../../../../store/src/types/endpoint.types';
+import { EndpointActionComplete, EndpointUser, INewlyConnectedEndpointInfo, SessionUser, VerifySession, VerifiedSession } from '@stratosui/store';
+
 import { CF_ENDPOINT_TYPE } from '../../../cf-types';
-import { CfScopeStrings } from '../../../user-permissions/cf-user-permissions-checkers';
+import { CfScopeStrings } from '../../../user-permissions/cf-user-permissions.types';
 import { IAllCfRolesState, ICfRolesState, IGlobalRolesState } from '../../types/cf-current-user-roles.types';
 import { getDefaultCfEndpointRoles } from './current-cf-user-base-cf-role.reducer';
 
@@ -16,8 +14,11 @@ export function cfRoleInfoFromSessionReducer(
   state: IAllCfRolesState,
   action: VerifiedSession
 ): IAllCfRolesState {
+  if (!action.sessionData || !action.sessionData.endpoints) {
+    return state;
+  }
   const { endpoints } = action.sessionData;
-  return propagateEndpointsAdminPermissions(state, Object.values(endpoints.cf));
+  return propagateEndpointsAdminPermissions(state, Object.values(endpoints.cf || {}));
 }
 
 export function updateNewlyConnectedCfEndpoint(

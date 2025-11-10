@@ -1,22 +1,45 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { generateCfBaseTestModulesNoShared } from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { ServiceIconComponent } from "./service-icon.component";
+import { CoreModule } from '@stratosui/core';
+import {
+  TEST_CATALOGUE_ENTITIES,
+  generateStratosEntities,
+  EntityCatalogTestModule
+} from '@stratosui/store';
+import { createBasicStoreModule } from '@stratosui/store/testing';
+import { generateCFEntities } from '@stratosui/cloud-foundry';
+
+import { ServiceIconComponent } from './service-icon.component';
+
 describe('ServiceIconComponent', () => {
   let component: ServiceIconComponent;
   let fixture: ComponentFixture<ServiceIconComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection()],
       imports: [
         ServiceIconComponent,
-        ...generateCfBaseTestModulesNoShared(),
+        NoopAnimationsModule,
+        EntityCatalogTestModule,
       ],
-    })
-      .compileComponents();
+      providers: [
+        provideZonelessChangeDetection(),
+        importProvidersFrom(
+          createBasicStoreModule(),
+          CoreModule,
+        ),
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities()
+          ]
+        },
+      ],
+    }).compileComponents();
   });
 
   beforeEach(() => {

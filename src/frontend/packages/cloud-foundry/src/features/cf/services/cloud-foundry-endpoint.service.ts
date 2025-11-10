@@ -3,15 +3,19 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, first, map, publishReplay, refCount } from 'rxjs/operators';
 
-import { EntityService } from '../../../../../store/src/entity-service';
-import { endpointEntityType } from '../../../../../store/src/helpers/stratos-entity-factory';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { PaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
-import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
-import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
-import { EndpointModel, EndpointUser } from '../../../../../store/src/types/endpoint.types';
-import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
+import {
+  EntityService,
+  endpointEntityType,
+  PaginationMonitorFactory,
+  getPaginationObservables,
+  PaginationObservables,
+  stratosEntityCatalog,
+  APIResource,
+  EntityInfo,
+  EndpointModel,
+  EndpointUser,
+  PaginatedAction,
+} from '@stratosui/store';
 import { GetAllApplications } from '../../../actions/application.actions';
 import { GetAllRoutes } from '../../../actions/route.actions';
 import { GetSpaceRoutes } from '../../../actions/space.actions';

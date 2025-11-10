@@ -5,54 +5,44 @@ import { combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { filter, first, map, pairwise, shareReplay, startWith, switchMap, tap } from 'rxjs/operators';
 
 import {
+  AppMonitorComponentTypes,
+  ITableColumn,
+  LoadingPageComponent,
+  PageHeaderComponent,
+  StepComponent,
+  SteppersComponent,
+} from '@stratosui/core';
+import {
+  RouterNav,
+  GeneralEntityAppState,
+  entityCatalog,
+  EntityMonitor,
+  PaginationMonitor,
+  PaginationMonitorFactory,
+  RequestInfoState,
+  APIResource,
+} from '@stratosui/store';
+import {
   applicationEntityType,
   routeEntityType,
   serviceInstancesEntityType,
   userProvidedServiceInstanceEntityType,
-} from '../../../../../cloud-foundry/src/cf-entity-types';
-import {
-  AppMonitorComponentTypes,
-} from '../../../../../core/src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
-import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
-import { LoadingPageComponent } from '../../../../../core/src/shared/components/loading-page/loading-page.component';
-import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
-import { StepComponent } from '../../../../../core/src/shared/components/stepper/step/step.component';
-import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
-import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { GeneralEntityAppState } from '../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
-import { EntityMonitor } from '../../../../../store/src/monitors/entity-monitor';
-import { PaginationMonitor } from '../../../../../store/src/monitors/pagination-monitor';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
-import { APIResource } from '../../../../../store/src/types/api.types';
-import { IServiceBinding } from '../../../cf-api-svc.types';
-import { IApp, IRoute } from '../../../cf-api.types';
-import { cfEntityCatalog } from '../../../cf-entity-catalog';
-import { CF_ENDPOINT_TYPE } from '../../../cf-types';
-import {
+  IServiceBinding,
+  IApp,
+  IRoute,
+  cfEntityCatalog,
+  CF_ENDPOINT_TYPE,
   CfAppRoutesListConfigService,
-} from '../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
-import {
   AppServiceBindingDataSource,
-} from '../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-data-source';
-import {
   AppServiceBindingListConfigService,
-} from '../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
-import {
   TableCellAppInstancesComponent,
-} from '../../../shared/components/list/list-types/app/table-cell-app-instances/table-cell-app-instances.component';
-import {
   TableCellAppStatusComponent,
-} from '../../../shared/components/list/list-types/app/table-cell-app-status/table-cell-app-status.component';
-import {
   TableCellRouteComponent,
-} from '../../../shared/components/list/list-types/cf-routes/table-cell-route/table-cell-route.component';
-import {
   TableCellTCPRouteComponent,
-} from '../../../shared/components/list/list-types/cf-routes/table-cell-tcproute/table-cell-tcproute.component';
-import { isServiceInstance, isUserProvidedServiceInstance } from '../../cf/cf.helpers';
-import { ApplicationService } from '../application.service';
+  isServiceInstance,
+  isUserProvidedServiceInstance,
+  ApplicationService,
+} from '@stratosui/cloud-foundry';
 
 
 @Component({
@@ -66,7 +56,7 @@ import { ApplicationService } from '../application.service';
     PageHeaderComponent,
     SteppersComponent,
     StepComponent,
-    LoadingPageComponent
+    LoadingPageComponent,
   ],
   providers: [
     CfAppRoutesListConfigService,

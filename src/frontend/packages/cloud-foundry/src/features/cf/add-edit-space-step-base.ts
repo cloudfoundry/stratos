@@ -4,9 +4,8 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, first, map, tap } from 'rxjs/operators';
 
-import { StepOnNextResult } from '../../../../core/src/shared/components/stepper/step/step.component';
-import { getPaginationKey } from '../../../../store/src/actions/pagination.actions';
-import { APIResource } from '../../../../store/src/types/api.types';
+import { StepOnNextResult } from '@stratosui/core';
+import { getPaginationKey, APIResource } from '@stratosui/store';
 import { ISpaceQuotaDefinition } from '../../cf-api.types';
 import { CFAppState } from '../../cf-app-state';
 import { cfEntityCatalog } from '../../cf-entity-catalog';

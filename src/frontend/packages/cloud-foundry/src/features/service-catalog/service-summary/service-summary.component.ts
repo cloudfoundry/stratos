@@ -4,13 +4,15 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { TileGridComponent } from '../../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
-import { TileGroupComponent } from '../../../../../core/src/shared/components/tile/tile-group/tile-group.component';
-import { TileComponent } from '../../../../../core/src/shared/components/tile/tile/tile.component';
-import { CardNumberMetricComponent } from '../../../../../core/src/shared/components/cards/card-number-metric/card-number-metric.component';
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { APIResource } from '../../../../../store/src/types/api.types';
+import {
+  TileGridComponent,
+  TileGroupComponent,
+  TileComponent,
+  CardNumberMetricComponent
+} from '@stratosui/core';
+import { RouterNav } from '@stratosui/store';
+import { APIResource } from '@stratosui/store';
+import { CFAppState } from '../../../cf-app-state';
 import { IServiceInstance, IServicePlan } from '../../../cf-api-svc.types';
 import { ServicesService } from '../services.service';
 import { ServiceSummaryCardComponent } from '../../../shared/components/cards/service-summary-card/service-summary-card.component';

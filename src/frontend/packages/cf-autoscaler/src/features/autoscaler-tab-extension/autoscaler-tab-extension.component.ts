@@ -34,20 +34,20 @@ import { PollingIndicatorComponent } from '../../../../core/src/shared/component
 import { TileComponent } from '../../../../core/src/shared/components/tile/tile/tile.component';
 import { TileGridComponent } from '../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
 import { TileGroupComponent } from '../../../../core/src/shared/components/tile/tile-group/tile-group.component';
-import { RouterNav } from '../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../store/src/app-state';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
-import { EntityService } from '../../../../store/src/entity-service';
-import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
-import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
-import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import {
+  RouterNav,
+  AppState,
+  entityCatalog,
+  EntityService,
+  EntityServiceFactory,
+  PaginationMonitorFactory,
+  ActionState,
+  getPaginationObservables,
   getCurrentPageRequestInfo,
   PaginationObservables,
-} from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
-import { selectDeletionInfo } from '../../../../store/src/selectors/api.selectors';
-import { APIResource } from '../../../../store/src/types/api.types';
+  selectDeletionInfo,
+  APIResource
+} from '@stratosui/store';
 import { fetchAutoscalerInfo, isAutoscalerEnabled } from '../../core/autoscaler-helpers/autoscaler-available';
 import { AutoscalerConstants } from '../../core/autoscaler-helpers/autoscaler-util';
 import {

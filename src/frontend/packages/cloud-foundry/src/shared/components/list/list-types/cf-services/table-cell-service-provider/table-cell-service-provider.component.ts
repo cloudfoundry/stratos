@@ -1,7 +1,7 @@
 import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { TableCellCustom } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
 import { IService, IServiceExtra } from '../../../../../../cf-api-svc.types';
 
 @Component({

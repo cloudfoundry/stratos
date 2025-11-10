@@ -1,16 +1,13 @@
 
-import { CustomFormFieldComponent } from '@stratosui/core';
 import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule, ReactiveFormsModule,FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
-import { StatefulIconComponent } from '../../../../../../core/src/core/stateful-icon/stateful-icon.component';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { SetNewAppName } from '../../../../../../cloud-foundry/src/actions/create-applications-page.actions';
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import { CustomFormFieldComponent, ErrorStateMatcher, ShowOnDirtyErrorStateMatcher, StatefulIconComponent, StepOnNextFunction } from '@stratosui/core';
+import { CFAppState } from '@stratosui/cloud-foundry';
+import { SetNewAppName } from '../../../../actions/create-applications-page.actions';
 import { AppNameUniqueChecking, AppNameUniqueDirective } from '../../../../shared/directives/app-name-unique.directive/app-name-unique.directive';
 
 interface CreateApplicationForm {

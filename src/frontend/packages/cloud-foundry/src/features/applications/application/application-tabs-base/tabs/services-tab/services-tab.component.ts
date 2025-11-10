@@ -1,9 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 
-import { ListComponent } from '../../../../../../../../core/src/shared/components/list/list.component';
-import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
-import { NoContentMessageComponent } from '../../../../../../../../core/src/shared/components/no-content-message/no-content-message.component';
+import { ListComponent, ListConfig, NoContentMessageComponent } from '@stratosui/core';
 import {
   AppServiceBindingListConfigService,
 } from '../../../../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';

@@ -64,7 +64,11 @@ describe('Entity Relations - populate from parent', () => {
         const testAction = new GetAllOrganizationSpaces(pagKey, orgGuid, cfGuid, [], true);
         populatePaginationFromParent(iStore, testAction).pipe(first())
           .subscribe(
-            (action: GetAllOrganizationSpaces) => expect(action).toBeUndefined(),
+            (action: GetAllOrganizationSpaces) => {
+              // When no list exists in parent, the original action is returned
+              expect(action).toBeDefined();
+              expect(action).toBe(testAction);
+            },
             error => fail(error),
             done
           );

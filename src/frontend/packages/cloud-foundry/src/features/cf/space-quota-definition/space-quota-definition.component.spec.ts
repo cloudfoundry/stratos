@@ -1,25 +1,34 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { testSCFEndpoint, testSCFEndpointGuid } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { Store, StoreModule } from '@ngrx/store';
 
-import { TabNavService } from '../../../../../core/src/tab-nav.service';
-import { EntityCatalogHelpers } from '@stratosui/store/entity-catalog/entity-catalog.helper';
-import { EntityCatalogEntityConfig } from '@stratosui/store/entity-catalog/entity-catalog.types';
-import { endpointEntityType, stratosEntityFactory } from '@stratosui/store/helpers/stratos-entity-factory';
-import { NormalizedResponse } from '@stratosui/store/types/api.types';
-import { WrapperRequestActionSuccess } from '@stratosui/store/types/request.types';
+import { TabNavService, CurrentUserPermissionsService } from '@stratosui/core';
 import {
-  generateCfBaseTestModules,
-  generateTestCfEndpointServiceProvider,
-} from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { EntityRelationSpecHelper } from "../../../entity-relations/entity-relations-spec-helper";
+  EntityCatalogHelpers,
+  EntityCatalogHelper,
+  EntityCatalogEntityConfig,
+  endpointEntityType,
+  stratosEntityFactory,
+  NormalizedResponse,
+  WrapperRequestActionSuccess,
+  EntityServiceFactory,
+  appReducers,
+  TEST_CATALOGUE_ENTITIES,
+  generateStratosEntities,
+  EntityCatalogTestModule
+} from '@stratosui/store';
+import { STORE_TEST_PROVIDERS, testSCFEndpoint, testSCFEndpointGuid } from '@stratosui/store/testing';
+import { generateTestCfEndpointServiceProvider } from '@test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCFEntities } from '@test-framework/cf';
+import { EntityRelationSpecHelper } from '../../../entity-relations/entity-relations-spec-helper';
 import { cfEntityFactory } from '../../../cf-entity-factory';
 import { organizationEntityType, spaceEntityType } from '../../../cf-entity-types';
 import { SpaceQuotaDefinitionComponent } from './space-quota-definition.component';
-import { EntityServiceFactory } from '@stratosui/store/entity-service-factory.service';
 
 describe('SpaceQuotaDefinitionComponent', () => {
   let component: SpaceQuotaDefinitionComponent;
@@ -33,10 +42,28 @@ describe('SpaceQuotaDefinitionComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         SpaceQuotaDefinitionComponent,
-        ...generateCfBaseTestModules(),
       ],
       providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideNoopAnimations(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          StoreModule.forRoot(appReducers, {
+            runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
+          }),
+          EntityCatalogTestModule
+        ),
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities()
+          ]
+        },
         EntityServiceFactory,
+        CurrentUserPermissionsService,
         {
           provide: ActivatedRoute,
           useValue: {
@@ -52,6 +79,11 @@ describe('SpaceQuotaDefinitionComponent', () => {
 
     })
       .compileComponents();
+
+    // Initialize Entity Catalog Helper AFTER compileComponents
+    const ech = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(ech);
+
     const stratosEndpointEntityConfig: EntityCatalogEntityConfig = stratosEntityFactory(endpointEntityType);
     const stratosEndpointEntityKey = EntityCatalogHelpers.buildEntityKey(
       stratosEndpointEntityConfig.entityType,

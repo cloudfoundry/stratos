@@ -2,14 +2,13 @@ import { Component, Input, OnDestroy, OnInit , ChangeDetectionStrategy } from '@
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
-import { APIResource } from '../../../../../../store/src/types/api.types';
+import { ListConfig, ListComponent } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
 import {
   CfAppMapRoutesListConfigService,
 } from '../../../../shared/components/list/list-types/app-route/cf-app-map-routes-list-config.service';
 import { CfAppRoutesDataSource } from '../../../../shared/components/list/list-types/app-route/cf-app-routes-data-source';
 import { ApplicationService } from '../../application.service';
-import { ListComponent } from '../../../../../../core/src/shared/components/list/list.component';
 
 @Component({
   selector: 'app-map-routes',

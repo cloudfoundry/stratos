@@ -1,11 +1,8 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 
-import { ListComponent } from '../../../../../../../../core/src/shared/components/list/list.component';
-import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
-import { TileComponent } from '../../../../../../../../core/src/shared/components/tile/tile/tile.component';
-import { TileGridComponent } from '../../../../../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
-import { TileGroupComponent } from '../../../../../../../../core/src/shared/components/tile/tile-group/tile-group.component';
-import { CF_GUID } from '../../../../../../../../core/src/shared/entity.tokens';
+import { ListComponent, ListConfig } from '@stratosui/core';
+import { TileComponent, TileGridComponent, TileGroupComponent } from '@stratosui/core';
+import { CF_GUID } from '@stratosui/core';
 import { CardAppInstancesComponent } from '../../../../../../shared/components/cards/card-app-instances/card-app-instances.component';
 import { CardAppStatusComponent } from '../../../../../../shared/components/cards/card-app-status/card-app-status.component';
 import { CardAppUsageComponent } from '../../../../../../shared/components/cards/card-app-usage/card-app-usage.component';

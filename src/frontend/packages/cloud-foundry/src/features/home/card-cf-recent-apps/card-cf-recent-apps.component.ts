@@ -3,12 +3,17 @@ import { AsyncPipe, CommonModule } from '@angular/common';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { filter, map, startWith, tap } from 'rxjs/operators';
 
-import { PaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
-import { APIResource } from '../../../../../store/src/types/api.types';
+import { PaginationObservables, APIResource } from '@stratosui/store';
 import { IApp } from '../../../cf-api.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { appDataSort } from '../../cf/services/cloud-foundry-endpoint.service';
-import { PollingIndicatorComponent } from '../../../../../core/src/shared/components/polling-indicator/polling-indicator.component';
+import {
+  PollingIndicatorComponent,
+  CardWrapperComponent,
+  CardHeaderComponent,
+  CardTitleComponent,
+  CardContentComponent,
+} from '@stratosui/core';
 import { CompactAppCardComponent } from './compact-app-card/compact-app-card.component';
 
 
@@ -24,7 +29,11 @@ const RECENT_ITEMS_COUNT = 10;
     CommonModule,
     AsyncPipe,
     PollingIndicatorComponent,
-    CompactAppCardComponent
+    CompactAppCardComponent,
+    CardWrapperComponent,
+    CardHeaderComponent,
+    CardTitleComponent,
+    CardContentComponent,
   ]
 })
 export class CardCfRecentAppsComponent implements OnInit {

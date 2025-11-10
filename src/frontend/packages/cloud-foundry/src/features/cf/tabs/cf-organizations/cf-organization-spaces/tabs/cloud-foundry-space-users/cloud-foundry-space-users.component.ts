@@ -8,8 +8,11 @@ import { map, switchMap } from 'rxjs/operators';
 
 import {
   CurrentUserPermissionsService,
-} from '../../../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ListComponent, ListConfig, NoContentMessageComponent, PageSubNavComponent } from '@stratosui/core';
+  ListComponent,
+  ListConfig,
+  NoContentMessageComponent,
+  PageSubNavComponent
+} from '@stratosui/core';
 import { CFFeatureFlagTypes } from '../../../../../../../cf-api.types';
 import { CFAppState } from '../../../../../../../cf-app-state';
 import {

@@ -16,7 +16,7 @@ import { combineLatest, Observable, Subscription, timer } from 'rxjs';
 import { debounce, distinctUntilChanged, map, startWith } from 'rxjs/operators';
 import { BaseChartDirective } from 'ng2-charts';
 
-import { CardWrapperComponent } from '@stratosui/core';
+import { CardWrapperComponent } from '../cards/card/card.component';
 import { MetricsRangeSelectorComponent } from '../metrics-range-selector/metrics-range-selector.component';
 import { MetricsChartTypes, MetricsLineChartConfig, YAxisTickFormattingFunc } from './metrics-chart.types';
 import { MetricsChartManager } from './metrics.component.manager';

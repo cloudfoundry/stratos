@@ -1,25 +1,25 @@
-import { DatePipe } from '@angular/common';
-import { TestBed } from '@angular/core/testing';
+import { CommonModule, DatePipe } from '@angular/common';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach } from 'vitest';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 import { Store } from '@ngrx/store';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { ConfirmationDialogService, SharedModule } from '@stratosui/core';
-import { ApplicationServiceMock } from "@test-framework/application-service-helper";
-import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { ConfirmationDialogService, CoreModule, CurrentUserPermissionsService } from '@stratosui/core';
+import { ApplicationServiceMock, generateCfStoreModules } from '@test-framework/cf';
 import { CFAppState } from '../../../../../cf-app-state';
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { CfAppRoutesListConfigService } from "./cf-app-routes-list-config.service";
+import { CfAppRoutesListConfigService } from './cf-app-routes-list-config.service';
+
 describe('CfAppRoutesListConfigService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         ...generateCfStoreModules(),
-        SharedModule,
-        NoopAnimationsModule,
+        CommonModule,
+        CoreModule,
+        RouterTestingModule,
       ],
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },

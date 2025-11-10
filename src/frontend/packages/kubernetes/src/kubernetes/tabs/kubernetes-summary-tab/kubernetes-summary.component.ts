@@ -16,10 +16,14 @@ import {
 import { SimpleUsageChartComponent } from '../../../../../core/src/shared/components/simple-usage-chart/simple-usage-chart.component';
 import { PageSubNavComponent } from '../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
 import { LoadingPageComponent } from '../../../../../core/src/shared/components/loading-page/loading-page.component';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { AppState, entityCatalog } from '../../../../../store/src/public-api';
-import { getCurrentPageRequestInfo } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
-import { PaginatedAction, PaginationEntityState } from '../../../../../store/src/types/pagination.types';
+import {
+  PaginationMonitorFactory,
+  AppState,
+  entityCatalog,
+  getCurrentPageRequestInfo,
+  PaginatedAction,
+  PaginationEntityState
+} from '@stratosui/store';
 import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
 import { CaaspNodesData, KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 

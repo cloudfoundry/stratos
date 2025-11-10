@@ -1,37 +1,47 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach } from 'vitest';
+import { StoreModule } from '@ngrx/store';
 
-import {
-  BooleanIndicatorComponent,
-} from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import { EntityMonitorFactory } from '@stratosui/store/monitors/entity-monitor.factory.service';
-import { MetadataCardTestComponents } from '../../../../../../../../core/test-framework/core-test.helper';
-import {
-  generateCfBaseTestModulesNoShared,
-} from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule } from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { generateCFEntities } from '@stratosui/cloud-foundry';
 import { CfBuildpackCardComponent } from './cf-buildpack-card.component';
-import { EntityServiceFactory } from "@stratosui/store/entity-service-factory.service";
+
 describe('CfBuildpackCardComponent', () => {
   let component: CfBuildpackCardComponent;
   let fixture: ComponentFixture<CfBuildpackCardComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        MetadataCardTestComponents,
-    ],
       imports: [
         CfBuildpackCardComponent,
-        ...generateCfBaseTestModulesNoShared(),
-        BooleanIndicatorComponent,
+        NoopAnimationsModule,
+        StoreModule.forRoot(
+          appReducers,
+          { runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false } }
+        ),
+        {
+          ngModule: EntityCatalogTestModule,
+          providers: [
+            {
+              provide: TEST_CATALOGUE_ENTITIES,
+              useValue: [
+                ...generateStratosEntities(),
+                ...generateCFEntities()
+              ]
+            }
+          ]
+        },
       ],
       providers: [
-        EntityServiceFactory,
-        
-        EntityMonitorFactory,
-
+        ...STORE_TEST_PROVIDERS,
         provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
       ]
     })
       .compileComponents();

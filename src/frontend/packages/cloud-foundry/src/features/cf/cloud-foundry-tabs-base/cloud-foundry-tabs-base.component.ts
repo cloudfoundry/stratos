@@ -4,21 +4,20 @@ import { RouterModule } from '@angular/router';
 import { Observable, of as observableOf } from 'rxjs';
 import { first, map, startWith } from 'rxjs/operators';
 
-import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import {
+  EndpointsService,
   getActionsFromExtensions,
   getTabsFromExtensions,
   StratosActionMetadata,
   StratosActionType,
   StratosTabType,
-} from '../../../../../core/src/core/extension/extension-service';
-import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
-import { environment } from '../../../../../core/src/environments/environment.prod';
-import { IPageSideNavTab } from '../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
-import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
-import { LoadingPageComponent } from '../../../../../core/src/shared/components/loading-page/loading-page.component';
-import { UserFavoriteEndpoint } from '../../../../../store/src/types/user-favorites.types';
-import { UserFavoriteManager } from '../../../../../store/src/user-favorite-manager';
+  CurrentUserPermissionsService,
+  environment,
+  IPageSideNavTab,
+  PageHeaderComponent,
+  LoadingPageComponent
+} from '@stratosui/core';
+import { UserFavoriteEndpoint, UserFavoriteManager } from '@stratosui/store';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 

@@ -1,24 +1,55 @@
 import { TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { EntityServiceFactory } from '@stratosui/store/entity-service-factory.service';
-import { EntityMonitorFactory } from '@stratosui/store/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '@stratosui/store/monitors/pagination-monitor.factory';
-import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import {
+  EntityServiceFactory,
+  EntityMonitorFactory,
+  PaginationMonitorFactory,
+  EntityCatalogTestModule,
+  generateStratosEntities,
+  TEST_CATALOGUE_ENTITIES,
+  EntityCatalogHelper,
+  EntityCatalogHelpers
+} from '@stratosui/store';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { CF_BASE_TEST_PROVIDERS } from '@test-framework/cf';
+import { generateCFEntities } from '../../../cf-entity-generator';
 import { ServicesWallService } from "./services-wall.service";
+
 describe('ServicesWallService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
+      imports: [
+        {
+          ngModule: EntityCatalogTestModule,
+          providers: [
+            {
+              provide: TEST_CATALOGUE_ENTITIES,
+              useValue: [
+                ...generateCFEntities(),
+                ...generateStratosEntities(),
+              ]
+            }
+          ]
+        },
+      ],
       providers: [
+        importProvidersFrom(createBasicStoreModule()),
+        ...STORE_TEST_PROVIDERS,
+        EntityCatalogHelper,
+        ...CF_BASE_TEST_PROVIDERS,
         ServicesWallService,
         EntityServiceFactory,
         EntityMonitorFactory,
         PaginationMonitorFactory,
         provideZonelessChangeDetection(),
       ],
-      imports: generateCfBaseTestModules(),
     });
+
+    // Initialize EntityCatalogHelper
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
   });
 
   it('should be created', () => {

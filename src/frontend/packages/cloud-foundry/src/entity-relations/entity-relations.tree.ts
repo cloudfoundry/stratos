@@ -22,6 +22,9 @@ export function fetchEntityTree(action: EntityInlineParentAction, fromCache = tr
   const cachedTree = entityTreeCache[cacheKey];
   const entityTree = fromCache && cachedTree ? cachedTree : createEntityTree(entity as EntitySchema, isArray);
   entityTreeCache[cacheKey] = entityTree;
+  // Reset maxDepth before recalculating to avoid accumulation across cached calls
+  entityTree.maxDepth = 0;
+  entityTree.requiredParamNames = [];
   // Calc max depth and exclude not needed
   entityTree.rootRelation.childRelations = parseEntityTree(entityTree, entityTree.rootRelation, action.includeRelations);
   return entityTree;

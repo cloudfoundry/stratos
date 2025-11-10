@@ -6,23 +6,24 @@ import { Observable } from 'rxjs';
 import { catchError, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { PaginationResponse } from '../../../cloud-foundry/src/store/types/cf-api.types';
-import { environment } from '../../../core/src/environments/environment';
-import { AppState } from '../../../store/src/app-state';
-import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
-import { isHttpErrorResponse } from '../../../store/src/jetstream';
-import { ApiRequestTypes } from '../../../store/src/reducers/api-request-reducer/request-helpers';
+import { environment } from '@stratosui/core';
 import {
-  resultPerPageParam,
-  resultPerPageParamDefault,
-} from '../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
-import { selectPaginationState } from '../../../store/src/selectors/pagination.selectors';
-import { APIResource, NormalizedResponse } from '../../../store/src/types/api.types';
-import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../store/src/types/pagination.types';
-import {
+  AppState,
+  entityCatalog,
+  isHttpErrorResponse,
+  ApiRequestTypes,
+  selectPaginationState,
+  APIResource,
+  NormalizedResponse,
+  PaginatedAction,
+  PaginationEntityState,
+  PaginationParam,
   StartRequestAction,
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
-} from '../../../store/src/types/request.types';
+  resultPerPageParam,
+  resultPerPageParamDefault
+} from '@stratosui/store';
 import { buildMetricData } from '../core/autoscaler-helpers/autoscaler-transform-metric';
 import {
   autoscalerTransformArrayToMap,

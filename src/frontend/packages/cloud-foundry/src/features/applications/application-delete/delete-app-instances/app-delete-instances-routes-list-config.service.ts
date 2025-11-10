@@ -4,22 +4,14 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { serviceBindingEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
-import {
-  createEntityRelationPaginationKey,
-} from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { RowState } from '../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
-import { ListViewTypes } from '../../../../../../core/src/shared/components/list/list.component.types';
-import { endpointEntityType } from '../../../../../../store/src/helpers/stratos-entity-factory';
-import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
-import { APIResource } from '../../../../../../store/src/types/api.types';
+import { CurrentUserPermissionsService, RowState, ListViewTypes } from '@stratosui/core';
+import { endpointEntityType, PaginationMonitorFactory, APIResource } from '@stratosui/store';
+import { CFAppState } from '../../../../cf-app-state';
+import { serviceBindingEntityType } from '../../../../cf-entity-types';
+import { createEntityRelationPaginationKey } from '../../../../entity-relations/entity-relations.types';
 import { IServiceBinding } from '../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
-import {
-  AppServiceBindingListConfigService,
-} from '../../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
+import { AppServiceBindingListConfigService } from '../../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
 import { ServiceActionHelperService } from '../../../../shared/data-services/service-action-helper.service';
 import { fetchTotalResults } from '../../../cf/cf.helpers';
 import { ApplicationService } from '../../application.service';

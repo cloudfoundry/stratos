@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { PaginationMonitorFactory } from '@stratosui/store/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '@stratosui/store';
 import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { RunningInstancesComponent } from '../../../../running-instances/running-instances.component';
 import { TableCellAppInstancesComponent } from "./table-cell-app-instances.component";

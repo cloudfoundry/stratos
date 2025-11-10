@@ -4,27 +4,24 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { getCFEntityKey } from '../../../../../../../cloud-foundry/src/cf-entity-helpers';
-import {
-  serviceInstancesEntityType,
-  userProvidedServiceInstanceEntityType,
-} from '../../../../../../../cloud-foundry/src/cf-entity-types';
-import {
-  CurrentUserPermissionsService,
-} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import {
-  CardMultiActionComponents,
-} from '../../../../../../../core/src/shared/components/list/list-cards/card.component.types';
-import { ITableText } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import {
-  defaultPaginationPageSizeOptionsCards,
-  ListViewTypes,
-} from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
+// eslint-disable-next-line @stratosui/no-relative-imports
+import { CFAppState } from '../../../../../cf-app-state';
+// eslint-disable-next-line @stratosui/no-relative-imports
+import { getCFEntityKey } from '../../../../../cf-entity-helpers';
+// eslint-disable-next-line @stratosui/no-relative-imports
+import { serviceInstancesEntityType, userProvidedServiceInstanceEntityType } from '../../../../../cf-entity-types';
+// eslint-disable-next-line @stratosui/no-relative-imports
 import { cfOrgSpaceFilter } from '../../../../../features/cf/cf.helpers';
 import { CfOrgSpaceDataService, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
+import {
+  CurrentUserPermissionsService,
+  CardMultiActionComponents,
+  ITableText,
+  defaultPaginationPageSizeOptionsCards,
+  ListViewTypes,
+} from '@stratosui/core';
+import { ListView } from '@stratosui/store';
 import { CfServiceInstancesListConfigBase } from '../cf-services/cf-service-instances-list-config.base';
 import { ServiceInstanceCardComponent } from './service-instance-card/service-instance-card.component';
 import { ServiceInstancesWallDataSource } from './service-instances-wall-data-source';

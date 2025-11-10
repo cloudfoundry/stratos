@@ -7,16 +7,16 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, first, map, share, startWith, switchMap } from 'rxjs/operators';
 
-import { SaveAppOverrides } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
+import { StepOnNextFunction } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
+import { SaveAppOverrides } from '../../../../actions/deploy-applications.actions';
+import { CFAppState } from '../../../../cf-app-state';
 import {
   selectCfDetails,
   selectDeployAppState,
   selectSourceType,
-} from '../../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
-import { OverrideAppDetails, SourceType } from '../../../../../../cloud-foundry/src/store/types/deploy-application.types';
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { APIResource } from '../../../../../../store/src/types/api.types';
+} from '../../../../store/selectors/deploy-application.selector';
+import { OverrideAppDetails, SourceType } from '../../../../store/types/deploy-application.types';
 import { IDomain } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import {

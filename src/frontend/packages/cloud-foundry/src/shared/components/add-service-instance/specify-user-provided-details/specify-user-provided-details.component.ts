@@ -19,27 +19,23 @@ interface BindExistingInstanceForm {
   serviceInstances: FormControl<string>;
 }
 
-import { StatefulIconComponent } from '../../../../../../core/src/core/stateful-icon/stateful-icon.component';
+import { StatefulIconComponent, safeUnsubscribe, urlValidationExpression, environment, StepOnNextResult, isValidJsonValidator } from '@stratosui/core';
 import { AppNameUniqueDirective } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
 import { Store } from '@ngrx/store';
 import { combineLatest as obsCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
+import { APIResource } from '@stratosui/store';
 
-import { IUserProvidedServiceInstanceData } from '../../../../../../cloud-foundry/src/actions/user-provided-service.actions';
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
+import { IUserProvidedServiceInstanceData } from '../../../../actions/user-provided-service.actions';
+import { CFAppState } from '../../../../cf-app-state';
 import {
   serviceBindingEntityType,
   userProvidedServiceInstanceEntityType,
-} from '../../../../../../cloud-foundry/src/cf-entity-types';
-import { createEntityRelationKey } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+} from '../../../../cf-entity-types';
+import { createEntityRelationKey } from '../../../../entity-relations/entity-relations.types';
 import {
   selectCreateServiceInstance,
-} from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
-import { safeUnsubscribe, urlValidationExpression } from '../../../../../../core/src/core/utils.service';
-import { environment } from '../../../../../../core/src/environments/environment';
-import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { isValidJsonValidator } from '../../../../../../core/src/shared/form-validators';
-import { APIResource } from '../../../../../../store/src/types/api.types';
+} from '../../../../store/selectors/create-service-instance.selectors';
 import { IUserProvidedServiceInstance } from '../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { AppNameUniqueChecking } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
@@ -99,7 +95,6 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   public tags: { label: string, }[] = [];
   public validate = signal(false);
   private subscriptions: Subscription[] = [];
-  private tagsChangedSignal = signal(true);
 
   @Input()
   public cfGuid!: string;
@@ -145,20 +140,9 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       map(valid => this.validAndChanged(valid)),
     );
 
-    // Trigger form validation when tags change using signal
+    // Subscribe to form status changes and update validate signal
+    // Note: We don't call updateValueAndValidity here to avoid infinite loops
     this.subscriptions.push(obs.subscribe(valid => {
-      // Combine with tagsChanged signal
-      if (this.tagsChangedSignal()) {
-        if (this.formMode === CreateServiceFormMode.CreateServiceInstance) {
-          this.createEditServiceInstance.markAsTouched();
-          this.createEditServiceInstance.markAsDirty();
-          this.createEditServiceInstance.updateValueAndValidity();
-        } else {
-          this.bindExistingInstance.markAsTouched();
-          this.bindExistingInstance.markAsDirty();
-          this.bindExistingInstance.updateValueAndValidity();
-        }
-      }
       this.validate.set(valid);
     }));
   }
@@ -382,7 +366,6 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
     if (label) {
       this.tags.push({ label });
       this.updateTagsFormControl();
-      this.tagsChangedSignal.set(true);
       input.value = '';
     }
   }
@@ -393,7 +376,6 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
     if (index >= 0) {
       this.tags.splice(index, 1);
       this.updateTagsFormControl();
-      this.tagsChangedSignal.set(true);
     }
   }
 
@@ -401,6 +383,8 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
     const tagsArray = this.tags.map(t => t.label);
     this.createEditServiceInstance.controls.tags.setValue(tagsArray);
     this.createEditServiceInstance.controls.tags.markAsTouched();
+    // Mark the form as dirty to trigger change detection
+    this.createEditServiceInstance.markAsDirty();
   }
 
 }

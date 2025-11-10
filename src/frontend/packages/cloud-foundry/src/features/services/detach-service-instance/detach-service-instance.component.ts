@@ -13,15 +13,13 @@ import {
 } from '../../../../../cloud-foundry/src/shared/data-services/service-action-helper.service';
 import {
   AppMonitorComponentTypes,
-} from '../../../../../core/src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
+  ITableColumn,
+  PageHeaderComponent,
+  StepComponent,
+  SteppersComponent,
+} from '@stratosui/core';
 import { AppActionMonitorComponent } from '../../../../../core/src/shared/components/app-action-monitor/app-action-monitor.component';
-import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
-import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
-import { StepComponent } from '../../../../../core/src/shared/components/stepper/step/step.component';
-import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
-import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
-import { APIResource } from '../../../../../store/src/types/api.types';
+import { RouterNav, entityCatalog, APIResource } from '@stratosui/store';
 import { IServiceBinding } from '../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { CF_ENDPOINT_TYPE } from '../../../cf-types';

@@ -5,25 +5,23 @@ import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, mergeMap, pairwise, switchMap, tap } from 'rxjs/operators';
 import { toObservable } from '@angular/core/rxjs-interop';
 
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { domainEntityType, spaceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
-import { createEntityRelationKey } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { Route, RouteMode } from '../../../../../../cloud-foundry/src/store/types/route.types';
-import {
-  StepOnNextFunction,
-  StepOnNextResult,
-} from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { ActionState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { APIResource } from '../../../../../../store/src/types/api.types';
+import { CFAppState } from '../../../../cf-app-state';
+import { domainEntityType, spaceEntityType } from '../../../../cf-entity-types';
+import { createEntityRelationKey } from '../../../../entity-relations/entity-relations.types';
+import { Route, RouteMode } from '../../../../store/types/route.types';
+import { StepOnNextFunction, StepOnNextResult } from '@stratosui/core';
+import { RouterNav, ActionState, RequestInfoState, APIResource } from '@stratosui/store';
 import { IDomain } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ApplicationService } from '../../application.service';
 
-import { CustomFormFieldComponent } from '@stratosui/core';
-import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
-import { CustomCheckboxComponent } from '../../../../../../core/src/shared/components/custom-checkbox/custom-checkbox.component';
-import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
+import {
+  CustomFormFieldComponent,
+  CustomSelectComponent,
+  CustomOptionComponent,
+  CustomCheckboxComponent,
+  FocusDirective
+} from '@stratosui/core';
 import { MapRoutesComponent } from '../map-routes/map-routes.component';
 
 const hostPattern = '^([\\w\\-\\.]*)$';
@@ -83,10 +81,12 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     entity: {},
     metadata: {}
   });
+  // Convert signal to observable in field initializer (injection context)
+  private _selectedRoute$ = toObservable(this._selectedRoute);
   // Expose as writable object for child component compatibility
   selectedRoute$ = {
     next: (value: any) => this._selectedRoute.set(value),
-    subscribe: (fn: any) => toObservable(this._selectedRoute).subscribe(fn)
+    subscribe: (fn: any) => this._selectedRoute$.subscribe(fn)
   } as any;
   appUrl: string;
   isRouteSelected = signal<boolean>(false);
@@ -180,7 +180,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
 
     this.subscriptions.push(space$.subscribe());
 
-    const selRoute$ = toObservable(this._selectedRoute).subscribe(x => {
+    const selRoute$ = this._selectedRoute$.subscribe(x => {
       if (x.metadata.guid) {
         this.isRouteSelected.set(true);
       }
@@ -299,7 +299,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   }
 
   private mapRouteSubmit(): Observable<StepOnNextResult> {
-    return toObservable(this._selectedRoute).pipe(
+    return this._selectedRoute$.pipe(
       switchMap(route => this.mapRoute(route.metadata.guid))
     );
   }

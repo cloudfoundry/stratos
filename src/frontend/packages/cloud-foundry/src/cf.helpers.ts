@@ -1,4 +1,4 @@
-import { APIResource } from '../../store/src/types/api.types';
+import { APIResource } from '@stratosui/store';
 import { IApp } from './cf-api.types';
 import { CfApplicationState } from './store/types/application.types';
 

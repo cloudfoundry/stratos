@@ -1,7 +1,7 @@
 
 import { ChangeDetectionStrategy, AfterContentInit, Component, ContentChildren, OnDestroy, QueryList  } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CardWrapperComponent } from '@stratosui/core';
+import { CardWrapperComponent } from '../cards/card/card.component';
 import { CustomFormFieldComponent } from '../custom-form-field/custom-form-field.component';
 import { CustomSelectComponent, CustomOptionComponent } from '../custom-select/custom-select.component';
 import { EntityMonitorFactory, IMetrics, MetricQueryType } from '@stratosui/store';

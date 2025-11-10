@@ -1,34 +1,33 @@
 import { Compiler, Injector } from '@angular/core';
 import { Action, Store } from '@ngrx/store';
-import { entityFetchedWithoutError } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
-import { BaseEndpointAuth } from '../../core/src/core/endpoint-auth';
-import { urlValidationExpression } from '../../core/src/core/utils.service';
-import { AppState, GeneralEntityAppState } from '../../store/src/app-state';
+import { BaseEndpointAuth, urlValidationExpression } from '@stratosui/core';
 import {
+  ActionDispatcher,
+  APIResource,
+  AppState,
+  EndpointHealthCheck,
+  EntityInfo,
+  EntitySchema,
+  entityFetchedWithoutError,
+  GeneralEntityAppState,
+  ICFAction,
+  IFavoriteMetadata,
+  IStratosEntityDefinition,
+  JetstreamError,
+  JetstreamResponse,
+  metricEntityType,
+  PaginatedAction,
+  PaginationEntityState,
+  RequestInfoState,
+  selectSessionData,
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
-} from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import {
-  EndpointHealthCheck,
-  IStratosEntityDefinition,
-  StratosEndpointExtensionDefinition,
-} from '../../store/src/entity-catalog/entity-catalog.types';
-import {
-  JetstreamError,
-} from '../../store/src/entity-request-pipeline/entity-request-base-handlers/handle-multi-endpoints.pipe';
-import { ActionDispatcher, JetstreamResponse } from '../../store/src/entity-request-pipeline/entity-request-pipeline.types';
-import { EntitySchema } from '../../store/src/helpers/entity-schema';
-import { metricEntityType } from '../../store/src/helpers/stratos-entity-factory';
-import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
-import { selectSessionData } from '../../store/src/reducers/auth.reducer';
-import { APIResource, EntityInfo } from '../../store/src/types/api.types';
-import { PaginatedAction, PaginationEntityState } from '../../store/src/types/pagination.types';
-import { ICFAction } from '../../store/src/types/request.types';
-import { IFavoriteMetadata } from '../../store/src/types/user-favorites.types';
+  StratosEndpointExtensionDefinition
+} from '@stratosui/store';
 import { CfValidateEntitiesStart } from './actions/relations-actions';
 import {
   IService,

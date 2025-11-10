@@ -1,28 +1,38 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-import {
-  generateCfBaseTestModules,
-  generateTestCfEndpointServiceProvider,
-} from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { CloudFoundryFirehoseComponent } from "./cloud-foundry-firehose.component";
+import { UtilsService } from '@stratosui/core';
+import { CloudFoundryFirehoseComponent } from './cloud-foundry-firehose.component';
+import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
+
 describe('CloudFoundryFirehoseComponent', () => {
   let component: CloudFoundryFirehoseComponent;
   let fixture: ComponentFixture<CloudFoundryFirehoseComponent>;
 
   beforeEach(async () => {
-      await TestBed.configureTestingModule({
-        imports: [
+    const mockCfEndpointService = {
+      cfGuid: 'mock-guid'
+    };
+
+    const mockUtilsService = {
+      bytesToHumanSize: vi.fn((bytes) => bytes + 'B'),
+      formatUptime: vi.fn((seconds) => seconds + 's')
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [
         CloudFoundryFirehoseComponent,
-        ...generateCfBaseTestModules(),
       ],
-        providers: [
-          ...generateTestCfEndpointServiceProvider(),
-          provideZonelessChangeDetection(),
-        ]
-      }).compileComponents();
-    });
+      providers: [
+        provideZonelessChangeDetection(),
+        { provide: CloudFoundryEndpointService, useValue: mockCfEndpointService },
+        { provide: UtilsService, useValue: mockUtilsService },
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryFirehoseComponent);

@@ -142,14 +142,14 @@ function getDefaultInitialTestStratosStoreState() {
     auth: {
       loggedIn: true,
       loggingIn: false,
-      user: null,
+      user: null as any,
       error: false,
       errorResponse: '',
       sessionData: testSessionData,
       verifying: false
     },
     uaaSetup: {
-      payload: null,
+      payload: null as any,
       setup: false,
       error: false,
       message: '',
@@ -169,7 +169,7 @@ function getDefaultInitialTestStratosStoreState() {
       isMobileNavOpen: false,
       sideNavPinned: false,
       pollingEnabled: true,
-      themeKey: null,
+      themeKey: null as any,
       headerEventMinimized: true,
       gravatarEnabled: false,
       homeLayout: 0,
@@ -207,7 +207,7 @@ function getDefaultInitialTestStratosStoreState() {
     currentUserRoles: {
       internal: {
         isAdmin: false,
-        scopes: []
+        scopes: [] as any[]
       },
       endpoints: {},
       state: getDefaultRolesRequestState()
@@ -362,7 +362,7 @@ export function createEmptyStoreModule(): ModuleWithProviders<StoreRootModule> {
   );
 }
 
-function getStoreSectionForIds(entities: Array<TestStoreEntity | string>, dataOverride?: any) {
+function getStoreSectionForIds(entities: Array<TestStoreEntity | string>, dataOverride?: any): Record<string, any> {
   return entities.reduce((sections, entity) => {
     if (typeof entity === 'string') {
       return {
@@ -371,7 +371,7 @@ function getStoreSectionForIds(entities: Array<TestStoreEntity | string>, dataOv
     }
     sections[entity.guid] = dataOverride || entity.data || {};
     return sections;
-  }, {});
+  }, {} as Record<string, any>);
 }
 
 export interface TestStoreEntity {

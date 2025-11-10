@@ -6,47 +6,35 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { serviceInstancesEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
+import {
+  CFAppState,
+  serviceInstancesEntityType,
+  IService,
+  IServiceInstance,
+  cfEntityCatalog,
+  cfEntityFactory,
+  CfCurrentUserPermissions,
+  ServiceActionHelperService,
+  CfOrgSpaceLabelService,
+  CSI_CANCEL_URL,
+  CfOrgSpaceLinksComponent,
+} from '@stratosui/cloud-foundry';
+import { getServiceName, getServicePlanName, getServiceSummaryUrl } from '../../../../../../features/service-catalog/services-helper';
+import { ServiceInstanceLastOpComponent } from '../../../../service-instance-last-op/service-instance-last-op.component';
 import {
   CurrentUserPermissionsService,
-} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ClickStopPropagationDirective } from '@stratosui/core';
-import { AppChip, AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
-import {
-  MetaCardComponent
-} from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
-import {
-  MetaCardItemComponent
-} from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
-import {
-  MetaCardKeyComponent
-} from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
-import {
-  MetaCardTitleComponent
-} from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
-import {
-  MetaCardValueComponent
-} from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
-import { MultilineTitleComponent } from '../../../../../../../../core/src/shared/components/multiline-title/multiline-title.component';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
-import { ComponentEntityMonitorConfig } from '../../../../../../../../store/src/types/shared.types';
-import { IService, IServiceInstance } from '../../../../../../cf-api-svc.types';
-import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
-import { cfEntityFactory } from '../../../../../../cf-entity-factory';
-import {
-  getServiceName,
-  getServicePlanName,
-  getServiceSummaryUrl,
-} from '../../../../../../features/service-catalog/services-helper';
-import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
-import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
-import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
-import { CSI_CANCEL_URL } from '../../../../add-service-instance/csi-mode.service';
-import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
-import { ServiceInstanceLastOpComponent } from '../../../../service-instance-last-op/service-instance-last-op.component';
+  ClickStopPropagationDirective,
+  AppChip,
+  AppChipsComponent,
+  CardCell,
+  MetaCardComponent,
+  MetaCardItemComponent,
+  MetaCardKeyComponent,
+  MetaCardTitleComponent,
+  MetaCardValueComponent,
+  MultilineTitleComponent,
+} from '@stratosui/core';
+import { APIResource, MenuItem, ComponentEntityMonitorConfig } from '@stratosui/store';
 import {
   TableCellServiceBrokerComponent,
   TableCellServiceBrokerComponentConfig,

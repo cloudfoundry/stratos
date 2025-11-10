@@ -4,14 +4,11 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { applicationEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
-import { UtilsService } from '../../../../../../../core/src/core/utils.service';
 import {
+  UtilsService,
   createTableColumnFavorite,
-} from '../../../../../../../core/src/shared/components/list/list-table/table-cell-favorite/table-cell-favorite.component';
-import { ITableColumn, ITableText } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import {
+  ITableColumn,
+  ITableText,
   IGlobalListAction,
   IListAction,
   IListConfig,
@@ -19,11 +16,14 @@ import {
   IMultiListAction,
   ListConfig,
   ListViewTypes,
-} from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { IFavoriteMetadata, UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
+} from '@stratosui/core';
+import { APIResource, IFavoriteMetadata, ListView, UserFavorite } from '@stratosui/store';
+// eslint-disable-next-line @stratosui/no-relative-imports
 import { IApp } from '../../../../../cf-api.types';
+// eslint-disable-next-line @stratosui/no-relative-imports
+import { CFAppState } from '../../../../../cf-app-state';
+// eslint-disable-next-line @stratosui/no-relative-imports
+import { applicationEntityType } from '../../../../../cf-entity-types';
 import { CfOrgSpaceDataService, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
 import { CardAppComponent } from './card/card-app.component';
 import { CfAppsDataSource } from './cf-apps-data-source';

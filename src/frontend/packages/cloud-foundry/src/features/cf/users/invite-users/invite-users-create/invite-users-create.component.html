@@ -11,10 +11,10 @@
   @if (isSpace) {
     <div class="flex flex-col gap-3">
       <div class="font-medium">Please select the users initial space role:</div>
-      <div class="flex flex-col gap-2" [(ngModel)]="spaceRole">
+      <div class="flex flex-col gap-2">
         @for (season of spaceRoles; track season) {
           <label class="flex items-center gap-2 cursor-pointer">
-            <input type="radio" [value]="season.value" [(ngModel)]="spaceRole"
+            <input type="radio" name="spaceRole" [value]="season.value" [(ngModel)]="spaceRole"
               class="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300">
             <span>{{season.label}}</span>
           </label>

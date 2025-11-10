@@ -5,18 +5,20 @@ import { RouterModule } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 
-import { ServicesService } from '../../../../../../cloud-foundry/src/features/service-catalog/services.service';
-import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
-import { APIResource } from '../../../../../../store/src/types/api.types';
+import {
+  safeUnsubscribe,
+  MetaCardComponent,
+  MetaCardItemComponent,
+  MetaCardKeyComponent,
+  MetaCardValueComponent,
+  MetaCardTitleComponent,
+  BooleanIndicatorComponent,
+  ClickStopPropagationDirective
+} from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
+import { ServicesService } from '../../../../features/service-catalog/services.service';
 import { IServiceBroker } from '../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
-import { MetaCardComponent } from '../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
-import { MetaCardItemComponent } from '../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
-import { MetaCardKeyComponent } from '../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
-import { MetaCardValueComponent } from '../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
-import { MetaCardTitleComponent } from '../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
-import { BooleanIndicatorComponent } from '../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import { ClickStopPropagationDirective } from '@stratosui/core';
 
 @Component({
   selector: 'app-service-broker-card',

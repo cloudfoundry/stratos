@@ -1,4 +1,4 @@
-import { APIResource } from '../../store/src/types/api.types';
+import { APIResource } from '@stratosui/store';
 import { IApp, IOrganization, IRoute, ISpace } from './cf-api.types';
 
 export interface ILastOperation {

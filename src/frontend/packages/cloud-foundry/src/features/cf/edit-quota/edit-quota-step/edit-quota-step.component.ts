@@ -5,11 +5,8 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
-import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { AppState } from '../../../../../../store/src/app-state';
-import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { APIResource } from '../../../../../../store/src/types/api.types';
+import { safeUnsubscribe, StepOnNextFunction } from '@stratosui/core';
+import { AppState, ActionState, APIResource } from '@stratosui/store';
 import { IOrgQuotaDefinition } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';

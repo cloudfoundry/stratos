@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { AbstractControl, ReactiveFormsModule, FormBuilder, FormGroup, FormControl, ValidatorFn, Validators } from '@angular/forms';
 import { CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
 import { RouterModule } from '@angular/router';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '../../../shared/services/tailwind-material-replacements';
+import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '../../../shared/services/tailwind-error-state-matcher';
 import { UserProfileInfo, UserProfileInfoUpdates } from '@stratosui/store';
 import { Subscription } from 'rxjs';
 import { delay, first, map, take, tap } from 'rxjs/operators';

@@ -1,12 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import {
-  generateCfBaseTestModules,
-  generateTestCfEndpointServiceProvider,
-} from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { CfSpacePermissionCellComponent } from "./cf-space-permission-cell.component";
+import { CoreModule } from '@stratosui/core';
+import { appReducers } from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { CloudFoundryTestingModule, generateTestCfEndpointServiceProvider } from '@test-framework/cf';
+import { CfSpacePermissionCellComponent } from './cf-space-permission-cell.component';
+
 describe('CfSpacePermissionCellComponent', () => {
   let component: CfSpacePermissionCellComponent;
   let fixture: ComponentFixture<CfSpacePermissionCellComponent>;
@@ -15,11 +20,22 @@ describe('CfSpacePermissionCellComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         CfSpacePermissionCellComponent,
-        ...generateCfBaseTestModules(),
       ],
       providers: [
-        ...generateTestCfEndpointServiceProvider(),
         provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          NoopAnimationsModule,
+          StoreModule.forRoot(
+            appReducers,
+            { runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false } }
+          ),
+          CloudFoundryTestingModule,
+          CoreModule,
+        ),
+        ...generateTestCfEndpointServiceProvider(),
       ]
     })
       .compileComponents();

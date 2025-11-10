@@ -1,20 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { CustomFormFieldComponent } from '@stratosui/core';
-import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, pairwise, take, tap } from 'rxjs/operators';
 
-import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
-import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { endpointEntityType } from '../../../../../../store/src/helpers/stratos-entity-factory';
-import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
-import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { APIResource } from '../../../../../../store/src/types/api.types';
+import { CustomFormFieldComponent, safeUnsubscribe, FocusDirective, StepOnNextFunction, CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
+import { endpointEntityType, PaginationMonitorFactory, ActionState, getPaginationObservables, APIResource } from '@stratosui/store';
 import { IOrganization, IOrgQuotaDefinition } from '../../../../cf-api.types';
 import { CFAppState } from '../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';

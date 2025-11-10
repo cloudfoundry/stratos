@@ -9,6 +9,5 @@ export const CfUserServiceTestProvider = [
   {
     provide: HttpBackend,
     useClass: HttpTestingController
-  },
-  HttpClient
+  }
 ];

@@ -1,7 +1,7 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { PollingIndicatorComponent } from '../../../../../../../core/src/shared/components/polling-indicator/polling-indicator.component';
+import { PollingIndicatorComponent } from '@stratosui/core';
 import { ApplicationPollingService } from '../application-polling.service';
 
 @Component({

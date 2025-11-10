@@ -4,16 +4,13 @@ import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { AppActionMonitorComponent } from '../../../../../../../core/src/shared/components/app-action-monitor/app-action-monitor.component';
 import {
+  AppActionMonitorComponent,
   AppMonitorComponentTypes,
-} from '../../../../../../../core/src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
-import {
+  ITableColumn,
   ITableCellRequestMonitorIconConfig,
-} from '../../../../../../../core/src/shared/components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+} from '@stratosui/core';
+import { entityCatalog, APIResource } from '@stratosui/store';
 import { UsersRolesClearUpdateState } from '../../../../../actions/users-roles.actions';
 import { ChangeCfUserRole } from '../../../../../actions/users.actions';
 import { CFAppState } from '../../../../../cf-app-state';

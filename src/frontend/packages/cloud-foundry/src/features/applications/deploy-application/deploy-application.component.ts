@@ -9,25 +9,22 @@ import { AsyncPipe } from '@angular/common';
 import {
   DeleteDeployAppSection,
   StoreCFSettings,
-} from '../../../../../cloud-foundry/src/actions/deploy-applications.actions';
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { getCFEntityKey } from '../../../../../cloud-foundry/src/cf-entity-helpers';
-import { applicationEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
+} from '../../../actions/deploy-applications.actions';
+import { CFAppState } from '@stratosui/cloud-foundry';
+import { getCFEntityKey } from '../../../cf-entity-helpers';
+import { applicationEntityType } from '@stratosui/cloud-foundry';
 import {
   selectApplicationSource,
   selectCfDetails,
-} from '../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
-import { DeployApplicationSource, SourceType } from '../../../../../cloud-foundry/src/store/types/deploy-application.types';
-import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
-import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { selectPaginationState } from '../../../../../store/src/selectors/pagination.selectors';
+} from '../../../store/selectors/deploy-application.selector';
+import { DeployApplicationSource, SourceType } from '../../../store/types/deploy-application.types';
+import { RouterNav, selectPaginationState } from '@stratosui/store';
 import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { AUTO_SELECT_CF_URL_PARAM } from '../new-application-base-step/new-application-base-step.component';
 import { ApplicationDeploySourceTypes } from './deploy-application-steps.types';
-import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
-import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
-import { StepComponent } from '../../../../../core/src/shared/components/stepper/step/step.component';
+import { PageHeaderComponent, SteppersComponent, StepComponent } from '@stratosui/core';
+import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { CreateApplicationStep1Component } from '../../../shared/components/create-application/create-application-step1/create-application-step1.component';
 import { DeployApplicationStep2Component } from './deploy-application-step2/deploy-application-step2.component';
 import { DeployApplicationStep21Component } from './deploy-application-step2-1/deploy-application-step2-1.component';

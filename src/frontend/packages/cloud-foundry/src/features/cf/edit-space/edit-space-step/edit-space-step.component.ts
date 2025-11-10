@@ -1,17 +1,20 @@
 import { CommonModule } from '@angular/common';
-import { CustomFormFieldComponent } from '@stratosui/core';
-import { Component, OnDestroy , ChangeDetectionStrategy } from '@angular/core';
-import { FormsModule, ReactiveFormsModule,FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
+import { Component, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { FormsModule, ReactiveFormsModule, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { filter, map, pairwise, switchMap, take, tap } from 'rxjs/operators';
-import { CustomSlideToggleComponent } from '../../../../../../core/src/shared/components/custom-slide-toggle/custom-slide-toggle.component';
 
-import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
+import {
+  CustomFormFieldComponent,
+  CustomSelectComponent,
+  CustomOptionComponent,
+  CustomSlideToggleComponent,
+  FocusDirective,
+  StepOnNextFunction
+} from '@stratosui/core';
+import { ActionState } from '@stratosui/store';
 import { CFAppState } from '../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';

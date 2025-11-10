@@ -1,36 +1,50 @@
-import {  Component, TemplateRef, provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideRouter } from '@angular/router';
+import { provideMockStore } from '@ngrx/store/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { BaseTestModules } from '../../../../../core/test-framework/core-test.helper';
+import { CurrentUserPermissionsService } from '@stratosui/core';
+
+import { CfUserPermissionDirective } from './cf-user-permission.directive';
+
 @Component({
   standalone: false,
-  template: `<input type="text" appCfUserPermission>`
+  template: `
+    <div *appCfUserPermission="permission">
+      Test Content
+    </div>
+  `
 })
 class TestUserPermissionComponent {
+  permission: any;
 }
-
-class MockTemplateRef { }
 
 describe('CfUserPermissionDirective', () => {
   let component: TestUserPermissionComponent;
   let fixture: ComponentFixture<TestUserPermissionComponent>;
+
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
-        ...BaseTestModules,
+        NoopAnimationsModule,
+        CfUserPermissionDirective,
+      ],
+      declarations: [
         TestUserPermissionComponent,
-    ],
+      ],
       providers: [
-        
-        { provide: TemplateRef, useClass: MockTemplateRef },
-
         provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideMockStore({}),
+        CurrentUserPermissionsService,
       ]
     });
     fixture = TestBed.createComponent(TestUserPermissionComponent);
     component = fixture.componentInstance;
   });
+
   it('should create an instance', () => {
     expect(component).toBeTruthy();
   });

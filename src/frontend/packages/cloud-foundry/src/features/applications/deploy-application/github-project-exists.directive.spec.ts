@@ -1,36 +1,31 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import {  provideExperimentalZonelessChangeDetection, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { Store } from '@ngrx/store';
 
-import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../git/src/shared/github.helpers';
-import { GitSCMService } from '../../../../../git/src/shared/scm/scm.service';
-import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { CFAppState } from '../../../cf-app-state';
-import { GithubProjectExistsDirective } from "./github-project-exists.directive";
+import { getGitHubAPIURL, GITHUB_API_URL, GitSCMService } from '@stratosui/git';
+import { createBasicStoreModule } from '@test-framework';
+import { GithubProjectExistsDirective } from './github-project-exists.directive';
+
 describe('GithubProjectExistsDirective', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [
+        createBasicStoreModule(),
+      ],
       providers: [
-        
-        provideExperimentalZonelessChangeDetection(),
+        provideZonelessChangeDetection(),
         provideHttpClient(),
         provideHttpClientTesting(),
-        ...generateCfStoreModules(),
         GitSCMService,
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
-
-        provideZonelessChangeDetection(),
       ]
     }).compileComponents();
   });
 
   it('should create an instance', () => {
-    const store = TestBed.inject(Store<CFAppState>);
-    const scmService = TestBed.inject(GitSCMService);
-    const directive = new GithubProjectExistsDirective(store, scmService);
+    const directive = TestBed.runInInjectionContext(() => new GithubProjectExistsDirective());
     expect(directive).toBeTruthy();
   });
 });

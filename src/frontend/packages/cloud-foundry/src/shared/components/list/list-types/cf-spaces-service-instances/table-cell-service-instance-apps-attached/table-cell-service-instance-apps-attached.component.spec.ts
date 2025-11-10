@@ -3,8 +3,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { EntityServiceFactory } from '@stratosui/store/entity-service-factory.service';
-import { EntityMonitorFactory } from '@stratosui/store/monitors/entity-monitor.factory.service';
+import { EntityServiceFactory, EntityMonitorFactory } from '@stratosui/store';
 import {
   generateCfBaseTestModulesNoShared,
 } from "@test-framework/cloud-foundry-endpoint-service.helper";

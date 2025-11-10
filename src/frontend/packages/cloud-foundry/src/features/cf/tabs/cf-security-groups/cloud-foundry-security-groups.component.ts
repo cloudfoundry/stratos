@@ -1,10 +1,7 @@
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
-import { ListComponent } from '../../../../../../core/src/shared/components/list/list.component';
-import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
-import {
-  CfSecurityGroupsListConfigService,
-} from '../../../../shared/components/list/list-types/cf-security-groups/cf-security-groups-list-config.service';
+import { ListComponent, ListConfig } from '@stratosui/core';
+import { CfSecurityGroupsListConfigService } from '../../../../shared/components/list/list-types/cf-security-groups/cf-security-groups-list-config.service';
 
 @Component({
   selector: 'app-cloud-foundry-security-groups',

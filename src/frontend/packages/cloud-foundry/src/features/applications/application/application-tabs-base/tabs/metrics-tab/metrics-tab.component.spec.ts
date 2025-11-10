@@ -1,43 +1,68 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-
-import { MDAppModule } from '../../../../../../../../core/src/core/md.module';
-import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
-import { generateTestApplicationServiceProvider } from "@test-framework/application-service-helper";
-import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { ApplicationStateService } from '../../../../../../shared/services/application-state.service';
-import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
+import { provideZonelessChangeDetection, Component, input } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { EntityMonitorFactory } from '@stratosui/store';
+import { MetricsChartComponent, MetricsParentRangeSelectorComponent } from '@stratosui/core';
 import { MetricsTabComponent } from './metrics-tab.component';
+import { ApplicationService } from '@stratosui/cloud-foundry';
+
+// Mock components for testing
+@Component({
+  selector: 'app-metrics-chart',
+  template: '',
+  standalone: true
+})
+class MockMetricsChartComponent {
+  metricsConfig = input<any>();
+  chartConfig = input<any>();
+}
+
+@Component({
+  selector: 'app-metrics-parent-range-selector',
+  template: '<ng-content></ng-content>',
+  standalone: true
+})
+class MockMetricsParentRangeSelectorComponent {}
 
 describe('MetricsTabComponent', () => {
   let component: MetricsTabComponent;
   let fixture: ComponentFixture<MetricsTabComponent>;
   const appId = '1';
   const cfId = '2';
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [
-        MetricsTabComponent,
-        ...generateCfStoreModules(),
-        SharedModule,
-        MDAppModule,
-        NoopAnimationsModule,
-      ],
-      providers: [
-        
-        ApplicationStateService,
-        ApplicationEnvVarsHelper,
-        generateTestApplicationServiceProvider(cfId, appId),
 
+  beforeEach(async () => {
+    const mockApplicationService = {
+      appGuid: appId,
+      cfGuid: cfId,
+    };
+
+    const mockEntityMonitorFactory = {
+      create: () => ({
+        entity$: { pipe: () => ({ subscribe: () => ({}) }) },
+        entityRequest$: { pipe: () => ({ subscribe: () => ({}) }) }
+      })
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [MetricsTabComponent],
+      providers: [
+        { provide: ApplicationService, useValue: mockApplicationService },
+        { provide: EntityMonitorFactory, useValue: mockEntityMonitorFactory },
         provideZonelessChangeDetection(),
       ]
-    }).compileComponents();
+    })
+    .overrideComponent(MetricsTabComponent, {
+      remove: {
+        imports: [MetricsChartComponent, MetricsParentRangeSelectorComponent]
+      },
+      add: {
+        imports: [MockMetricsChartComponent, MockMetricsParentRangeSelectorComponent]
+      }
+    })
+    .compileComponents();
 
     fixture = TestBed.createComponent(MetricsTabComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {

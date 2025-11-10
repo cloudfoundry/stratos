@@ -3,26 +3,12 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, switchMap, tap } from 'rxjs/operators';
 
-import { UsersRolesSetUsers } from '../../../../../../../cloud-foundry/src/actions/users-roles.actions';
-import { GetAllCfUsersAsAdmin } from '../../../../../../../cloud-foundry/src/actions/users.actions';
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import {
-  CurrentUserPermissionsService,
-} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ITableColumn, ITableText } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import {
-  IListAction,
-  IListMultiFilterConfig,
-  IMultiListAction,
-  ListConfig,
-  ListViewTypes,
-} from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { SetClientFilter } from '../../../../../../../store/src/actions/pagination.actions';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
-import { selectPaginationState } from '../../../../../../../store/src/selectors/pagination.selectors';
-import { APIResource, EntityInfo } from '../../../../../../../store/src/types/api.types';
-import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
+import { CFAppState } from '@stratosui/cloud-foundry';
+import { CurrentUserPermissionsService, ITableColumn, ITableText, IListAction, IListMultiFilterConfig, IMultiListAction, ListConfig, ListViewTypes } from '@stratosui/core';
+import { SetClientFilter, entityCatalog, selectPaginationState, APIResource, EntityInfo, PaginatedAction } from '@stratosui/store';
 import { IOrganization, ISpace } from '../../../../../cf-api.types';
+import { UsersRolesSetUsers } from '../../../../../actions/users-roles.actions';
+import { GetAllCfUsersAsAdmin } from '../../../../../actions/users.actions';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
 import {
   canUpdateOrgSpaceRoles,

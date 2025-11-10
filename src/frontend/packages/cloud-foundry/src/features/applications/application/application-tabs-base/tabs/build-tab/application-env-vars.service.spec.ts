@@ -1,23 +1,22 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { provideMockStore } from '@ngrx/store/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import { PaginationMonitorFactory } from '@stratosui/store';
-import { generateCfStoreModules } from '@test-framework/cloud-foundry-endpoint-service.helper';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { ApplicationEnvVarsHelper } from './application-env-vars.service';
+
 describe('ApplicationEnvVarsService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        
         ApplicationEnvVarsHelper,
         PaginationMonitorFactory,
-
+        provideMockStore(),
+        ...STORE_TEST_PROVIDERS,
         provideZonelessChangeDetection(),
       ],
-      imports: [
-        generateCfStoreModules(),
-      ]
     });
   });
 

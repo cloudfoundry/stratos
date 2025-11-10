@@ -1,15 +1,13 @@
 import { ComponentFactoryResolver, ComponentRef, Injectable, ViewContainerRef } from '@angular/core';
-import { TailwindDialogService } from '../../../../services/tailwind-dialog.service';
 import { Store } from '@ngrx/store';
 import { stratosEntityCatalog, RouterNav, AppState, entityCatalog, EndpointModel, ActionState } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { map, pairwise } from 'rxjs/operators';
 
+import { TailwindDialogService } from '../../../../services/tailwind-dialog.service';
 import { CurrentUserPermissionsService } from '../../../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../../../core/permissions/stratos-user-permissions.checker';
-import {
-  ConnectEndpointDialogComponent,
-} from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
+import { ConnectEndpointDialogComponent } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
 import { SessionService } from '../../../../../shared/services/session.service';
 import { UserProfileService } from '../../../../../core/user-profile.service';
 import { SnackBarService } from '../../../../services/snackbar.service';

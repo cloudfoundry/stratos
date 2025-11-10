@@ -1,27 +1,59 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { of } from 'rxjs';
 
-import {
-  generateCfBaseTestModules,
-  generateTestCfEndpointServiceProvider,
-} from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { CloudFoundryInviteUserLinkComponent } from "./cloud-foundry-invite-user-link.component";
+import { CoreModule } from '@stratosui/core';
+import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities } from '@stratosui/store';
+import { createEmptyStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { generateCFEntities } from '../../../../../cf-entity-generator';
+import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
+import { UserInviteService } from '../../../user-invites/user-invite.service';
+import { CloudFoundryInviteUserLinkComponent } from './cloud-foundry-invite-user-link.component';
+
 describe('CloudFoundryInviteUserLinkComponent', () => {
   let component: CloudFoundryInviteUserLinkComponent;
   let fixture: ComponentFixture<CloudFoundryInviteUserLinkComponent>;
 
+  const mockActiveRoute = {
+    cfGuid: 'test-guid',
+    orgGuid: 'org-guid',
+    spaceGuid: null
+  };
+
+  const mockUserInviteService = {
+    canShowInviteUser: vi.fn().mockReturnValue(of(true)),
+    configured$: of(true),
+    enabled$: of(true),
+    canConfigure$: of(true)
+  };
+
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
+        createEmptyStoreModule(),
+        EntityCatalogTestModule,
+        CoreModule,
+        NoopAnimationsModule,
         CloudFoundryInviteUserLinkComponent,
-        ...generateCfBaseTestModules(),
       ],
       providers: [
-        
-        ...generateTestCfEndpointServiceProvider(),
-
+        ...STORE_TEST_PROVIDERS,
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities()
+          ]
+        },
         provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        { provide: ActiveRouteCfOrgSpace, useValue: mockActiveRoute },
+        { provide: UserInviteService, useValue: mockUserInviteService },
       ]
     })
       .compileComponents();

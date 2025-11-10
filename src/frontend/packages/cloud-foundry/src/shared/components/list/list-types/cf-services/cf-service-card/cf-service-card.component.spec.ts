@@ -1,57 +1,50 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, ChangeDetectorRef } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { importProvidersFrom } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
+import { StoreModule } from '@ngrx/store';
 
-import {
-  BooleanIndicatorComponent,
-} from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import { AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { MetadataCardTestComponents } from '../../../../../../../../core/test-framework/core-test.helper';
-import { EntityMonitorFactory } from '@stratosui/store/monitors/entity-monitor.factory.service';
-import {
-  generateCfBaseTestModulesNoShared,
-} from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
-import { ServiceIconComponent } from '../../../../service-icon/service-icon.component';
-import { TableCellServiceActiveComponent } from '../table-cell-service-active/table-cell-service-active.component';
-import { TableCellServiceBindableComponent } from '../table-cell-service-bindable/table-cell-service-bindable.component';
-import {
-  TableCellServiceCfBreadcrumbsComponent,
-} from '../table-cell-service-cf-breadcrumbs/table-cell-service-cf-breadcrumbs.component';
-import {
-  TableCellServiceReferencesComponent,
-} from '../table-cell-service-references/table-cell-service-references.component';
-import { TableCellServiceTagsComponent } from '../table-cell-service-tags/table-cell-service-tags.component';
+import { EntityCatalogTestModule, generateStratosEntities, TEST_CATALOGUE_ENTITIES, appReducers } from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { AppTestModule } from '@test-framework';
+import { generateCFEntities } from '../../../../../../cf-entity-generator';
 import { CfServiceCardComponent } from './cf-service-card.component';
-import { EntityServiceFactory } from "@stratosui/store/entity-service-factory.service";
+
 describe('CfServiceCardComponent', () => {
   let component: CfServiceCardComponent;
   let fixture: ComponentFixture<CfServiceCardComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        MetadataCardTestComponents,
-    ],
       imports: [
         CfServiceCardComponent,
-        CfOrgSpaceLinksComponent,
-        BooleanIndicatorComponent,
-        AppChipsComponent,
-        ServiceIconComponent,
-        TableCellServiceActiveComponent,
-        TableCellServiceBindableComponent,
-        TableCellServiceReferencesComponent,
-        TableCellServiceCfBreadcrumbsComponent,
-        TableCellServiceTagsComponent,
-        ...generateCfBaseTestModulesNoShared(),
+        NoopAnimationsModule,
+        StoreModule.forRoot(
+          appReducers,
+          { runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false } }
+        ),
+        {
+          ngModule: EntityCatalogTestModule,
+          providers: [
+            {
+              provide: TEST_CATALOGUE_ENTITIES,
+              useValue: [
+                ...generateStratosEntities(),
+                ...generateCFEntities()
+              ]
+            }
+          ]
+        },
       ],
       providers: [
-        EntityServiceFactory,
-        
-        EntityMonitorFactory,
-
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(AppTestModule),
         provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
       ]
     })
       .compileComponents();
@@ -89,7 +82,14 @@ describe('CfServiceCardComponent', () => {
   });
 
   it('active field should be false/NO', () => {
-    component.serviceEntity.entity.active = 0;
+    component.row = {
+      ...component.serviceEntity,
+      entity: {
+        ...component.serviceEntity.entity,
+        active: 0
+      }
+    };
+    fixture.componentRef.injector.get(ChangeDetectorRef).markForCheck();
     fixture.detectChanges();
 
     const activeStatus = fixture.nativeElement.querySelector('app-table-cell-service-active').textContent;
@@ -104,7 +104,14 @@ describe('CfServiceCardComponent', () => {
   });
 
   it('bindable field should be false/NO', () => {
-    component.serviceEntity.entity.bindable = 0;
+    component.row = {
+      ...component.serviceEntity,
+      entity: {
+        ...component.serviceEntity.entity,
+        bindable: 0
+      }
+    };
+    fixture.componentRef.injector.get(ChangeDetectorRef).markForCheck();
     fixture.detectChanges();
 
     const bindableStatus = fixture.nativeElement.querySelector('app-table-cell-service-bindable').textContent;

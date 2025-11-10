@@ -1,13 +1,12 @@
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideRouter } from '@angular/router';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { of } from 'rxjs';
 
-import { EntityCatalogTestModule, generateStratosEntities, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
+import { CoreModule } from '@stratosui/core';
 import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { generateCFEntities } from '../../../cf-entity-generator';
 import { CfOrgSpaceLabelService } from '../../services/cf-org-space-label.service';
 import { CfOrgSpaceLinksComponent } from "./cf-org-space-links.component";
 
@@ -18,27 +17,15 @@ describe('CfOrgSpaceLinksComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection()],
       imports: [
         CfOrgSpaceLinksComponent,
-        RouterTestingModule,
-        ...generateCfStoreModules(),
-        {
-          ngModule: EntityCatalogTestModule,
-          providers: [
-            {
-              provide: TEST_CATALOGUE_ENTITIES,
-              useValue: [
-                ...generateCFEntities(),
-                ...generateStratosEntities(),
-              ]
-            }
-          ]
-        },
+      ],
+      providers: [
+        provideRouter([]),
+        provideZonelessChangeDetection(),
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA]
-    })
-      .compileComponents();
+    });
   });
 
   beforeEach(() => {
@@ -68,7 +55,20 @@ describe('CfOrgSpaceLinksComponent', () => {
 
   describe('with multiple endpoints', () => {
     beforeEach(() => {
-      service.multipleConnectedEndpoints$ = of(true);
+      // Create a new service instance with multipleConnectedEndpoints$ set to true
+      service = {
+        getCfName: vi.fn().mockReturnValue(of('CfName')),
+        getCfURL: vi.fn().mockReturnValue(['/cf/path']),
+        getOrgName: vi.fn().mockReturnValue(of('OrgName')),
+        getOrgURL: vi.fn().mockReturnValue(['/org/path']),
+        getSpaceName: vi.fn().mockReturnValue(of('SpaceName')),
+        getSpaceURL: vi.fn().mockReturnValue(['/space/path']),
+        multipleConnectedEndpoints$: of(true)
+      };
+      // Recreate the component with the new service
+      fixture = TestBed.createComponent(CfOrgSpaceLinksComponent);
+      component = fixture.componentInstance;
+      component.service = service;
       fixture.detectChanges();
     });
 

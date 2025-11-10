@@ -1,15 +1,8 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 
-
-import { MetricsConfig } from '../../../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
-import {
-  MetricsLineChartConfig,
-} from '../../../../../../../../core/src/shared/components/metrics-chart/metrics-chart.types';
-import { IMetricMatrixResult } from '../../../../../../../../store/src/types/base-metric.types';
-import { IMetricCell, MetricQueryType } from '../../../../../../../../store/src/types/metric.types';
+import { MetricsConfig, MetricsChartComponent, MetricsLineChartConfig, MetricsParentRangeSelectorComponent } from '@stratosui/core';
+import { IMetricMatrixResult, IMetricCell, MetricQueryType } from '@stratosui/store';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
-import { MetricsChartComponent } from '../../../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
-import { MetricsParentRangeSelectorComponent } from '../../../../../../../../core/src/shared/components/metrics-parent-range-selector/metrics-parent-range-selector.component';
 
 @Component({
   selector: 'app-cloud-foundry-cell-charts',

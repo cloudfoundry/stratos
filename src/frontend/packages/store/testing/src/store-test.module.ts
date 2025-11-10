@@ -10,7 +10,7 @@ import { STORE_TEST_PROVIDERS } from '../../src/testing/store-test-providers';
     ...STORE_TEST_PROVIDERS,
     {
       provide: CATALOGUE_ENTITIES,
-      useFactory: () => {
+      useFactory: (): unknown[] => {
         const testEntityCatalog = entityCatalog as TestEntityCatalog;
         testEntityCatalog.clear();
         return [];
@@ -35,7 +35,7 @@ export function getStoreTestingModule(): ModuleWithProviders<StoreTestingModule>
       ...STORE_TEST_PROVIDERS,
       {
         provide: CATALOGUE_ENTITIES,
-        useFactory: () => {
+        useFactory: (): unknown[] => {
           const testEntityCatalog = entityCatalog as TestEntityCatalog;
           testEntityCatalog.clear();
           return [];

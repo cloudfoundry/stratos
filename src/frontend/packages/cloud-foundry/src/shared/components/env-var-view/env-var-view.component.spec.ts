@@ -1,35 +1,23 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { MAT_DIALOG_DATA, TailwindDialogRef } from '@stratosui/core';
-
-import { CodeBlockComponent } from '../../../../../core/src/shared/components/code-block/code-block.component';
-import {
-  CopyToClipboardComponent,
-} from '../../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
-import { BaseTestModulesNoShared } from '../../../../../core/test-framework/core-test.helper';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { MAT_DIALOG_DATA } from '@stratosui/core';
 import { EnvVarViewComponent } from './env-var-view.component';
 
 describe('EnvVarViewComponent', () => {
   let component: EnvVarViewComponent;
   let fixture: ComponentFixture<EnvVarViewComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      imports: [
-        EnvVarViewComponent,
-        CodeBlockComponent,
-        CopyToClipboardComponent,
-        ...BaseTestModulesNoShared,
-      ],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [EnvVarViewComponent],
       providers: [
-        { provide: TailwindDialogRef, useValue: {} }, { provide: MAT_DIALOG_DATA, useValue: { key: '', value: '' } }
+        provideZonelessChangeDetection(),
+        { provide: 'TailwindDialogRef', useValue: {} },
+        { provide: MAT_DIALOG_DATA, useValue: { key: 'TEST_KEY', value: 'test value' } }
       ]
-    })
-      .compileComponents();
-  });
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(EnvVarViewComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -37,5 +25,16 @@ describe('EnvVarViewComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should have data from MAT_DIALOG_DATA', () => {
+    expect(component.data.key).toBe('TEST_KEY');
+    expect(component.data.value).toBe('test value');
+  });
+
+  it('should detect objects correctly', () => {
+    expect(component.isObject({})).toBe(true);
+    expect(component.isObject('string')).toBe(false);
+    expect(component.isObject(123)).toBe(false);
   });
 });

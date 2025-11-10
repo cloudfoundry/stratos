@@ -1,11 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideStore } from '@ngrx/store';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { PaginationMonitorFactory } from '@stratosui/store/monitors/pagination-monitor.factory';
-import { CFBaseTestModules } from "@test-framework/cf-test-helper";
+import { EntityCatalogHelper, appReducers, EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities } from '@stratosui/store';
+import { generateCFEntities } from '@test-framework/cf';
+import { CreateQuotaStepComponent } from './create-quota-step.component';
 import { QuotaDefinitionFormComponent } from '../../quota-definition-form/quota-definition-form.component';
-import { CreateQuotaStepComponent } from "./create-quota-step.component";
+import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
+
 describe('CreateQuotaStepComponent', () => {
   let component: CreateQuotaStepComponent;
   let fixture: ComponentFixture<CreateQuotaStepComponent>;
@@ -15,20 +20,34 @@ describe('CreateQuotaStepComponent', () => {
       imports: [
         CreateQuotaStepComponent,
         QuotaDefinitionFormComponent,
-        ...CFBaseTestModules,
+        EntityCatalogTestModule,
       ],
       providers: [
-        PaginationMonitorFactory,
         provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideStore(appReducers),
+        EntityCatalogHelper,
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities()
+          ]
+        },
+        {
+          provide: ActiveRouteCfOrgSpace,
+          useValue: {
+            cfGuid: 'cfGuid',
+            orgGuid: 'orgGuid',
+            spaceGuid: 'spaceGuid'
+          }
+        }
       ]
-    })
-      .compileComponents();
-  });
+    });
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(CreateQuotaStepComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {

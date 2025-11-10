@@ -1,12 +1,19 @@
 import { DatePipe } from '@angular/common';
+import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { StoreModule } from '@ngrx/store';
 
-import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { getCfSpaceServiceMock } from "@test-framework/cloud-foundry-space.service.mock";
-import { ServiceActionHelperService } from '../../../../../../../shared/data-services/service-action-helper.service';
-import { CloudFoundrySpaceUserServiceInstancesComponent } from "./cloud-foundry-space-user-service-instances.component";
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule } from '@stratosui/store';
+import { generateASEntities } from '@stratosui/cf-autoscaler';
+import { getCfSpaceServiceMock } from '@test-framework/cloud-foundry-space.service.mock';
+import { generateCFEntities } from '@test-framework/cf';
+import { CloudFoundrySpaceUserServiceInstancesComponent } from './cloud-foundry-space-user-service-instances.component';
+
 describe('CloudFoundrySpaceUserServiceInstancesComponent', () => {
   let component: CloudFoundrySpaceUserServiceInstancesComponent;
   let fixture: ComponentFixture<CloudFoundrySpaceUserServiceInstancesComponent>;
@@ -15,11 +22,29 @@ describe('CloudFoundrySpaceUserServiceInstancesComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         CloudFoundrySpaceUserServiceInstancesComponent,
-        ...generateCfBaseTestModules(),
       ],
       providers: [
-        getCfSpaceServiceMock, DatePipe, ServiceActionHelperService,
         provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideNoopAnimations(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          StoreModule.forRoot(appReducers, {
+            runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
+          }),
+          EntityCatalogTestModule
+        ),
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities(),
+            ...generateASEntities()
+          ]
+        },
+        getCfSpaceServiceMock,
+        DatePipe,
       ]
     })
       .compileComponents();

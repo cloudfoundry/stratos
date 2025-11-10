@@ -3,21 +3,20 @@ import { Action, Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { catchError, first, map, pairwise, share, skipWhile, switchMap, tap } from 'rxjs/operators';
 
-import { AppState } from '../../../store/src/app-state';
-import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
 import {
+  AppState,
+  entityCatalog,
   EntityUserRolesEndpoint,
   EntityUserRolesFetch,
-} from '../../../store/src/entity-request-pipeline/entity-request-pipeline.types';
-import {
   BaseHttpClientFetcher,
   flattenPagination,
   PaginationFlattener,
-} from '../../../store/src/helpers/paginated-request-helpers';
-import { ActionState } from '../../../store/src/reducers/api-request-reducer/types';
-import { connectedEndpointsOfTypesSelector } from '../../../store/src/selectors/endpoint.selectors';
-import { selectPaginationState } from '../../../store/src/selectors/pagination.selectors';
-import { BasePaginatedAction, PaginationEntityState } from '../../../store/src/types/pagination.types';
+  ActionState,
+  connectedEndpointsOfTypesSelector,
+  selectPaginationState,
+  PaginationEntityState,
+  BasePaginatedAction,
+} from '@stratosui/store';
 import {
   CfUserRelationTypes,
   GET_CURRENT_CF_USER_RELATIONS,

@@ -1,21 +1,15 @@
-import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, importProvidersFrom } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { EntityCatalogTestModule, generateStratosEntities, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
-import {
-  BooleanIndicatorComponent,
-} from '../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import {
-  CopyToClipboardComponent,
-} from '../../../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
-import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
-import { generateCfBaseTestModulesNoShared, STORE_TEST_PROVIDERS } from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { CloudFoundrySpaceServiceMock } from "@test-framework/cloud-foundry-space.service.mock";
-import { generateCFEntities } from '../../../../cf-entity-generator';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { generateCfBaseTestModulesNoShared, CloudFoundrySpaceServiceMock } from '@test-framework/cf';
 import { CloudFoundrySpaceService } from '../../../../features/cf/services/cloud-foundry-space.service';
 import { CardCfSpaceDetailsComponent } from './card-cf-space-details.component';
+
 describe('CardCfSpaceDetailsComponent', () => {
   let component: CardCfSpaceDetailsComponent;
   let fixture: ComponentFixture<CardCfSpaceDetailsComponent>;
@@ -24,27 +18,14 @@ describe('CardCfSpaceDetailsComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         CardCfSpaceDetailsComponent,
-        MetadataItemComponent,
-        CopyToClipboardComponent,
-        BooleanIndicatorComponent,
-        ...generateCfBaseTestModulesNoShared(),
-        {
-          ngModule: EntityCatalogTestModule,
-          providers: [
-            {
-              provide: TEST_CATALOGUE_ENTITIES,
-              useValue: [
-                ...generateCFEntities(),
-                ...generateStratosEntities(),
-              ]
-            }
-          ]
-        },
       ],
       providers: [
-        ...STORE_TEST_PROVIDERS,
-        { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock },
         provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(generateCfBaseTestModulesNoShared()),
+        { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock },
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA]
     })

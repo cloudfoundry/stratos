@@ -3,10 +3,9 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
-import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
-import { AppState } from '../../../../../store/src/app-state';
-import { waitForCFPermissions } from '../../../features/cf/cf.helpers';
-import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
+import { CurrentUserPermissionsService } from '@stratosui/core';
+import { AppState } from '@stratosui/store';
+import { CfCurrentUserPermissions, waitForCFPermissions } from '@stratosui/cloud-foundry';
 
 @Directive({
   selector: '[appCfUserPermission]',

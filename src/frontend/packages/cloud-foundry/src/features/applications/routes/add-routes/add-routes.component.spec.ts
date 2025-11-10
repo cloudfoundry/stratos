@@ -1,16 +1,13 @@
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
 
-import { CoreModule } from '../../../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../../../core/src/shared/shared.module';
-import { ApplicationServiceMock } from "@test-framework/application-service-helper";
-import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { ApplicationServiceMock, generateCfStoreModules } from '@test-framework/cf';
 import { ApplicationService } from '../../application.service';
-import { MapRoutesComponent } from '../map-routes/map-routes.component';
 import { AddRoutesComponent } from "./add-routes.component";
+
 describe('AddRoutesComponent', () => {
   let component: AddRoutesComponent;
   let fixture: ComponentFixture<AddRoutesComponent>;
@@ -19,17 +16,12 @@ describe('AddRoutesComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         AddRoutesComponent,
-        MapRoutesComponent,
         ...generateCfStoreModules(),
-        CoreModule,
-        SharedModule,
-        RouterTestingModule,
+        HttpClientTestingModule,
         NoopAnimationsModule,
       ],
       providers: [
-        
         { provide: ApplicationService, useClass: ApplicationServiceMock },
-
         provideZonelessChangeDetection(),
       ]
     }).compileComponents();

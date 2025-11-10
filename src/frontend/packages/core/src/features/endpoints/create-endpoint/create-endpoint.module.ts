@@ -12,8 +12,6 @@ import { CreateEndpointComponent } from './create-endpoint.component';
 @NgModule({
   imports: [
     CommonModule,
-    CoreModule,
-    SharedModule,
     CreateEndpointComponent,
     CreateEndpointCfStep1Component,
     CreateEndpointBaseStepComponent,
@@ -24,6 +22,7 @@ import { CreateEndpointComponent } from './create-endpoint.component';
   exports: [
     CreateEndpointComponent,
     CreateEndpointCfStep1Component,
+    CreateEndpointBaseStepComponent,
     CreateEndpointConnectComponent,
     ConnectEndpointComponent,
   ]

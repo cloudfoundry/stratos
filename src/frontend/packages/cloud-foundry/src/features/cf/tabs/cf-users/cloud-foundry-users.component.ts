@@ -2,10 +2,8 @@ import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 
-import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
-import { ListComponent } from '../../../../../../core/src/shared/components/list/list.component';
-import { NoContentMessageComponent } from '../../../../../../core/src/shared/components/no-content-message/no-content-message.component';
+import { CurrentUserPermissionsService } from '@stratosui/core';
+import { ListConfig, ListComponent, NoContentMessageComponent } from '@stratosui/core';
 import { CFAppState } from '../../../../cf-app-state';
 import { CfUserListConfigService } from '../../../../shared/components/list/list-types/cf-users/cf-user-list-config.service';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';

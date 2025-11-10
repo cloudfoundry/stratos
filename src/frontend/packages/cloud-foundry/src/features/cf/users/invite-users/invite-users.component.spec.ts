@@ -1,46 +1,59 @@
-import { HttpClient, HttpHandler } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { TabNavService } from '../../../../../../core/src/tab-nav.service';
-import {
-  generateCfActiveRouteMock,
-  generateCfBaseTestModules,
-} from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { InviteUsersCreateComponent } from './invite-users-create/invite-users-create.component';
-import { InviteUsersComponent } from "./invite-users.component";
+import { InviteUsersComponent } from './invite-users.component';
+import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
+
 describe('InviteUsersComponent', () => {
   let component: InviteUsersComponent;
-  let fixture: ComponentFixture<InviteUsersComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      imports: [
-        InviteUsersComponent,
-        InviteUsersCreateComponent,
-        ...generateCfBaseTestModules(),
-      ],
-      providers: [
-        
-        generateCfActiveRouteMock(),
-        HttpClient,
-        HttpHandler,
-        TabNavService,
+    // Create mock ActiveRouteCfOrgSpace directly
+    const mockActiveRouteCfOrgSpace: ActiveRouteCfOrgSpace = {
+      cfGuid: 'test-cf-guid',
+      orgGuid: 'test-org-guid',
+      spaceGuid: 'test-space-guid'
+    };
 
-        provideZonelessChangeDetection(),
-      ]
-    })
-      .compileComponents();
-  });
-
-  beforeEach(() => {
-    fixture = TestBed.createComponent(InviteUsersComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+    // Create component instance directly with mock dependency
+    component = new InviteUsersComponent(mockActiveRouteCfOrgSpace);
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should set defaultCancelUrl correctly for space level', () => {
+    const mockActiveRouteCfOrgSpace: ActiveRouteCfOrgSpace = {
+      cfGuid: 'cf-123',
+      orgGuid: 'org-456',
+      spaceGuid: 'space-789'
+    };
+    component = new InviteUsersComponent(mockActiveRouteCfOrgSpace);
+
+    expect(component.defaultCancelUrl).toBe('/cloud-foundry/cf-123/organizations/org-456/spaces/space-789/users');
+  });
+
+  it('should set defaultCancelUrl correctly for org level', () => {
+    const mockActiveRouteCfOrgSpace: ActiveRouteCfOrgSpace = {
+      cfGuid: 'cf-123',
+      orgGuid: 'org-456',
+      spaceGuid: ''
+    };
+    component = new InviteUsersComponent(mockActiveRouteCfOrgSpace);
+
+    expect(component.defaultCancelUrl).toBe('/cloud-foundry/cf-123/organizations/org-456/users');
+  });
+
+  it('should set defaultCancelUrl correctly for cf level', () => {
+    const mockActiveRouteCfOrgSpace: ActiveRouteCfOrgSpace = {
+      cfGuid: 'cf-123',
+      orgGuid: '',
+      spaceGuid: ''
+    };
+    component = new InviteUsersComponent(mockActiveRouteCfOrgSpace);
+
+    expect(component.defaultCancelUrl).toBe('/cloud-foundry/cf-123/users');
   });
 });

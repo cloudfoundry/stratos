@@ -1,21 +1,18 @@
 import { Store } from '@ngrx/store';
+import { IListDataSource, IListConfig } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import { CFAppState } from '../../../../../cf-app-state';
 import {
   applicationEntityType,
   domainEntityType,
   routeEntityType,
   spaceEntityType,
-} from '../../../../../../../cloud-foundry/src/cf-entity-types';
+} from '../../../../../cf-entity-types';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
-} from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import {
-  IListDataSource,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
-import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+} from '../../../../../entity-relations/entity-relations.types';
 import { IRoute } from '../../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { CfRoutesDataSourceBase } from '../cf-routes/cf-routes-data-source-base';

@@ -7,15 +7,16 @@ import {
   Injector,
   ViewChild,
   ViewContainerRef,
-  ChangeDetectionStrategy} from '@angular/core';
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { Store } from '@ngrx/store';
-import { GitCommit } from '@stratosui/git';
 import { Observable } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
-import { SetDeployCommit } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import { StepOnNextFunction } from '@stratosui/core';
+import { GitCommit } from '@stratosui/git';
+import { SetDeployCommit } from '../../../../actions/deploy-applications.actions';
+import { CFAppState } from '../../../../cf-app-state';
 import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wrapper.component';
 
 @Component({

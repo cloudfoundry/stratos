@@ -40,6 +40,6 @@ export class CodeBlockComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.observer.disconnect();
+    this.observer?.disconnect();
   }
 }

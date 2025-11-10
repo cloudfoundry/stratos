@@ -5,9 +5,8 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { BREADCRUMB_URL_PARAM } from '../../../../../../core/src/shared/components/breadcrumbs/breadcrumbs.types';
-import { ApplicationStateIconComponent } from '../../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.component';
-import { StratosStatus } from '../../../../../../store/src/types/shared.types';
+import { BREADCRUMB_URL_PARAM, ApplicationStateIconComponent } from '@stratosui/core';
+import { StratosStatus } from '@stratosui/store';
 import { CFAppState } from '../../../../cf-app-state';
 import { ApplicationStateData, ApplicationStateService } from '../../../../shared/services/application-state.service';
 import { ApplicationService } from '../../../applications/application.service';

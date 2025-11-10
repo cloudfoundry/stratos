@@ -9,13 +9,10 @@ import {
 } from 'rxjs';
 import { filter, first, map, startWith } from 'rxjs/operators';
 
-import { DeleteDeployAppSection } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
-import { LogViewerComponent } from '../../../../../../core/src/shared/components/log-viewer/log-viewer.component';
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { SnackBarService } from '../../../../../../core/src/shared/services/snackbar.service';
-import { RouterNav } from '../../../../../../store/src/actions/router.actions';
+import { safeUnsubscribe, LogViewerComponent, StepOnNextFunction, SnackBarService } from '@stratosui/core';
+import { RouterNav } from '@stratosui/store';
+import { CFAppState } from '@stratosui/cloud-foundry';
+import { DeleteDeployAppSection } from '../../../../actions/deploy-applications.actions';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { CfAppsDataSource } from '../../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';

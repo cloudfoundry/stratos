@@ -3,9 +3,8 @@ import { Component, EventEmitter, OnDestroy, Output, inject, ChangeDetectionStra
 import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { ListComponent } from '../../../../../../core/src/shared/components/list/list.component';
-import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
-import { APIResource } from '../../../../../../store/src/types/api.types';
+import { ListComponent, ListConfig } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
 import { IServiceBinding } from '../../../../cf-api-svc.types';
 import {
   DetachAppsListConfigService,

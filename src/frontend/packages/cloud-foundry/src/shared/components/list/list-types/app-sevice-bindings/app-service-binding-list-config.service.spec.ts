@@ -1,31 +1,39 @@
 import { DatePipe } from '@angular/common';
-import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { generateTestApplicationServiceProvider } from "@test-framework/application-service-helper";
-import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
-import {
-  ApplicationEnvVarsHelper,
-} from '../../../../../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
-import { ApplicationStateService } from '../../../../services/application-state.service';
-import { AppServiceBindingListConfigService } from "./app-service-binding-list-config.service";
+import { CurrentUserPermissionsService } from '@stratosui/core';
+import { ServiceActionHelperService } from '@stratosui/cloud-foundry';
+import { generateTestApplicationServiceProvider, generateCfStoreModules, ApplicationStateService, ApplicationEnvVarsHelper } from '@test-framework/cf';
+
+import { AppServiceBindingListConfigService } from './app-service-binding-list-config.service';
+
 describe('AppServiceBindingListConfigService', () => {
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [
-        
-        AppServiceBindingListConfigService,
-        generateTestApplicationServiceProvider('1', '1'),
-        ApplicationEnvVarsHelper,
-        DatePipe,
-        ServiceActionHelperService,
-        ApplicationStateService,
+    const cfGuid = 'test-cf-guid';
+    const appGuid = 'test-app-guid';
 
-        provideZonelessChangeDetection(),
+    TestBed.configureTestingModule({
+      imports: [
+        ...generateCfStoreModules(),
       ],
-      imports: generateCfBaseTestModules(),
+      providers: [
+        AppServiceBindingListConfigService,
+        generateTestApplicationServiceProvider(appGuid, cfGuid),
+        ApplicationStateService,
+        ApplicationEnvVarsHelper,
+        ServiceActionHelperService,
+        CurrentUserPermissionsService,
+        DatePipe,
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
     });
   });
 

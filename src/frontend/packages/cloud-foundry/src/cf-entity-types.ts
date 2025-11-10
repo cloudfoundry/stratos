@@ -1,6 +1,4 @@
-import { IRequestEntityTypeState } from '../../store/src/app-state';
-import { APIResource } from '../../store/src/types/api.types';
-import { BaseEntityValues } from '../../store/src/types/entity.types';
+import { IRequestEntityTypeState, APIResource, BaseEntityValues } from '@stratosui/store';
 import {
   IService,
   IServiceBinding,

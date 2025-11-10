@@ -1,22 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
-import { StoreModule } from '@ngrx/store';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
-import { MDAppModule } from '../../../../../../../../core/src/core/md.module';
-import { LogViewerComponent } from '../../../../../../../../core/src/shared/components/log-viewer/log-viewer.component';
-import { EntityMonitorFactory } from '@stratosui/store/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '@stratosui/store/monitors/pagination-monitor.factory';
-import { AppStoreModule } from '@stratosui/store/store.module';
-import { generateTestApplicationServiceProvider } from "@test-framework/application-service-helper";
-import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { ApplicationStateService } from '../../../../../../shared/services/application-state.service';
-import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
+import { TabNavService } from '@stratosui/core';
+import { generateTestApplicationServiceProvider, generateCfStoreModules, ApplicationStateService, ApplicationEnvVarsHelper } from '@test-framework/cf';
 import { LogStreamTabComponent } from './log-stream-tab.component';
-import { EntityServiceFactory } from '@stratosui/store/entity-service-factory.service';
 
 describe('LogStreamTabComponent', () => {
   let component: LogStreamTabComponent;
@@ -27,25 +16,15 @@ describe('LogStreamTabComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        LogViewerComponent,
         LogStreamTabComponent,
-        StoreModule,
-        CoreModule,
-        NoopAnimationsModule,
-        RouterTestingModule,
-        MDAppModule,
-        generateCfStoreModules(),
+        ...generateCfStoreModules(),
+        HttpClientTestingModule,
       ],
       providers: [
-        EntityServiceFactory,
-        
         generateTestApplicationServiceProvider(cfId, appId),
-        AppStoreModule,
         ApplicationStateService,
         ApplicationEnvVarsHelper,
-        EntityMonitorFactory,
-        PaginationMonitorFactory,
-
+        TabNavService,
         provideZonelessChangeDetection(),
       ]
     }).compileComponents();

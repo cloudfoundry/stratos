@@ -1,23 +1,32 @@
 import { DatePipe } from '@angular/common';
+import { provideHttpClient } from '@angular/common/http';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
+import { provideRouter } from '@angular/router';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { DetachAppsComponent } from "./detach-apps.component";
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
+import { DetachAppsComponent } from './detach-apps.component';
+
 describe('DetachAppsComponent', () => {
   let component: DetachAppsComponent;
   let fixture: ComponentFixture<DetachAppsComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         DetachAppsComponent,
-        ...generateCfBaseTestModules(),
       ],
       providers: [
-        DatePipe, {
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(generateCfBaseTestModulesNoShared()),
+        DatePipe,
+        {
           provide: ActivatedRoute,
           useValue: {
             snapshot: {
@@ -29,8 +38,7 @@ describe('DetachAppsComponent', () => {
           }
         },
       ]
-    })
-      .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

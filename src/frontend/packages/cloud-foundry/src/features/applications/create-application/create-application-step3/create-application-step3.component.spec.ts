@@ -1,26 +1,27 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import {  provideExperimentalZonelessChangeDetection, provideZonelessChangeDetection } from '@angular/core';
+import { importProvidersFrom } from '@angular/core';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
-import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { CreateApplicationStep3Component } from "./create-application-step3.component";
+import { generateCfStoreModules } from '@test-framework/cf';
+import { CreateApplicationStep3Component } from './create-application-step3.component';
 describe('CreateApplicationStep3Component', () => {
   let component: CreateApplicationStep3Component;
   let fixture: ComponentFixture<CreateApplicationStep3Component>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CreateApplicationStep3Component],
+      imports: [
+        CreateApplicationStep3Component,
+      ],
       providers: [
-        
-        provideExperimentalZonelessChangeDetection(),
-        provideNoopAnimations(),
-        provideRouter([,
         provideZonelessChangeDetection(),
-      ]),
-        ...generateCfStoreModules(),
+        provideNoopAnimations(),
+        provideRouter([]),
+        importProvidersFrom(...generateCfStoreModules(), HttpClientTestingModule),
       ]
     }).compileComponents();
 

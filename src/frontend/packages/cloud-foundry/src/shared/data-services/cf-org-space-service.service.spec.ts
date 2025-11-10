@@ -1,28 +1,48 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { CoreModule } from '../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../core/src/shared/shared.module';
-import { generateCfStoreModules } from '@test-framework/cloud-foundry-endpoint-service.helper';
+import {
+  EntityCatalogTestModule,
+  TEST_CATALOGUE_ENTITIES,
+  generateStratosEntities,
+  EntityCatalogHelper,
+  EntityCatalogHelpers,
+} from '@stratosui/store';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+
+import { generateCFEntities } from '../../cf-entity-generator';
 import { CfOrgSpaceDataService } from './cf-org-space-service.service';
-import { HttpClientModule } from '@angular/common/http';
 
 describe('EndpointOrgSpaceServiceService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      imports: [
+        createBasicStoreModule(),
+        EntityCatalogTestModule,
+      ],
       providers: [
         CfOrgSpaceDataService,
+        ...STORE_TEST_PROVIDERS,
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities(),
+          ]
+        },
         provideZonelessChangeDetection(),
-      ],
-      imports: [
-        ...generateCfStoreModules(),
-        SharedModule,
-        CoreModule,
-        HttpClientModule,
+        provideHttpClient(),
+        provideHttpClientTesting(),
       ]
     });
+
+    // Initialize EntityCatalogHelper for Angular 20 compatibility
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
   });
 
   it('should be created', () => {

@@ -5,10 +5,7 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, of } from 'rxjs';
 import { combineLatest, filter, first, map } from 'rxjs/operators';
 
-import { PageHeaderComponent } from '../../../../../../core/src/shared/components/page-header/page-header.component';
-import { StepComponent } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { SteppersComponent } from '../../../../../../core/src/shared/components/stepper/steppers/steppers.component';
+import { PageHeaderComponent, StepComponent, StepOnNextFunction, SteppersComponent } from '@stratosui/core';
 import { UsersRolesClear, UsersRolesExecuteChanges, UsersRolesSetUsers } from '../../../../actions/users-roles.actions';
 import { CFAppState } from '../../../../cf-app-state';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';

@@ -4,14 +4,16 @@ import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 import { filter, first, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
 
-import { GetAllEndpoints } from '../../../../store/src/actions/endpoint.actions';
-import { AppState } from '../../../../store/src/app-state';
-import { EntityService } from '../../../../store/src/entity-service';
-import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
-import { EndpointModel } from '../../../../store/src/public-api';
-import { PaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
-import { EntityInfo } from '../../../../store/src/types/api.types';
-import { EndpointUser } from '../../../../store/src/types/endpoint.types';
+import {
+  GetAllEndpoints,
+  AppState,
+  EntityService,
+  EntityServiceFactory,
+  EndpointModel,
+  PaginationObservables,
+  EntityInfo,
+  EndpointUser
+} from '@stratosui/store';
 import { kubeEntityCatalog } from '../kubernetes-entity-generator';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import {

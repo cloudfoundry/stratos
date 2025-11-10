@@ -1,25 +1,21 @@
-import { Component, OnInit, signal , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CustomFormFieldComponent } from '@stratosui/core';
 import { FormsModule } from '@angular/forms';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
-import { toObservable } from '@angular/core/rxjs-interop';
 
-import { PermissionConfig } from '../../../../../../../core/src/core/permissions/current-user-permissions.config';
 import {
+  CustomFormFieldComponent,
+  PermissionConfig,
   CurrentUserPermissionsService,
-} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import {
   StackedInputActionConfig,
-} from '../../../../../../../core/src/shared/components/stacked-input-actions/stacked-input-action/stacked-input-action.component';
-import {
   StackedInputActionsComponent,
   StackedInputActionsState,
   StackedInputActionsUpdate,
-} from '../../../../../../../core/src/shared/components/stacked-input-actions/stacked-input-actions.component';
-import { StepOnNextFunction } from '../../../../../../../core/src/shared/components/stepper/step/step.component';
+  StepOnNextFunction,
+} from '@stratosui/core';
 import {
   UsersRolesSetIsRemove,
   UsersRolesSetIsSetByUsername,

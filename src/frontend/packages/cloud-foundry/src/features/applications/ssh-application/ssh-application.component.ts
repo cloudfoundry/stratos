@@ -1,16 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ViewChild , ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { CustomTooltipDirective } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { NEVER, Observable, Subject } from 'rxjs';
 import websocketConnect, { normalClosureMessage } from 'rxjs-websockets';
 import { catchError, first, map, switchMap, tap } from 'rxjs/operators';
-
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
-import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
+import { CustomTooltipDirective, PageHeaderComponent, IHeaderBreadcrumb } from '@stratosui/core';
 import { SshViewerComponent } from '../../../../../core/src/shared/components/ssh-viewer/ssh-viewer.component';
+import { CFAppState } from '@stratosui/cloud-foundry';
 import { IApp } from '../../../cf-api.types';
 import { ApplicationService } from '../application.service';
 

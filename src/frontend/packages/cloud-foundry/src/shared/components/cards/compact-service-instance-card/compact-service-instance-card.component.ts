@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit , ChangeDetectionStrategy } from '@angular/core';
 
-import { AppChipsComponent, AppChip } from '../../../../../../core/src/shared/components/chips/chips.component';
-import { APIResource } from '../../../../../../store/src/types/api.types';
+import { AppChipsComponent, AppChip } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
 import { IServiceInstance } from '../../../../cf-api-svc.types';
 
 @Component({

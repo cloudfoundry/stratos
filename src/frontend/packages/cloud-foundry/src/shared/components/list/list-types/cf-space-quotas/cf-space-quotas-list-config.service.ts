@@ -5,13 +5,13 @@ import { Observable, Subscription } from 'rxjs';
 
 import {
   CurrentUserPermissionsService,
-} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import { IListAction, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+  ConfirmationDialogConfig,
+  ConfirmationDialogService,
+  ITableColumn,
+  IListAction,
+  ListViewTypes,
+} from '@stratosui/core';
+import { RouterNav, APIResource } from '@stratosui/store';
 import { DeleteSpaceQuotaDefinition } from '../../../../../actions/quota-definitions.actions';
 import { IQuotaDefinition } from '../../../../../cf-api.types';
 import { CFAppState } from '../../../../../cf-app-state';

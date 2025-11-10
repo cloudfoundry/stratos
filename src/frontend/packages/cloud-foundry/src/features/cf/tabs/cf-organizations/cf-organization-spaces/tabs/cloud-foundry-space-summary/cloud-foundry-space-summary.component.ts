@@ -7,26 +7,22 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, pairwise, startWith, tap } from 'rxjs/operators';
 
-import { ConfirmationDialogConfig } from '../../../../../../../../../core/src/shared/components/confirmation-dialog.config';
-import {
-  ConfirmationDialogService,
-} from '../../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { RouterNav } from '../../../../../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../../../../../store/src/entity-catalog/entity-catalog';
-import { selectDeletionInfo } from '../../../../../../../../../store/src/selectors/api.selectors';
+import { ConfirmationDialogConfig, ConfirmationDialogService } from '@stratosui/core';
+import { RouterNav, AppState, entityCatalog, selectDeletionInfo } from '@stratosui/store';
 import { spaceEntityType } from '../../../../../../../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../../cf-types';
 import { CfCurrentUserPermissions } from '../../../../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
-import { PageSubNavComponent } from '../../../../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
-import { TileGridComponent } from '../../../../../../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
-import { TileGroupComponent } from '../../../../../../../../../core/src/shared/components/tile/tile-group/tile-group.component';
-import { TileComponent } from '../../../../../../../../../core/src/shared/components/tile/tile/tile.component';
-import { LoadingPageComponent } from '../../../../../../../../../core/src/shared/components/loading-page/loading-page.component';
-import { CardNumberMetricComponent } from '../../../../../../../../../core/src/shared/components/cards/card-number-metric/card-number-metric.component';
+import {
+  PageSubNavComponent,
+  TileGridComponent,
+  TileGroupComponent,
+  TileComponent,
+  LoadingPageComponent,
+  CardNumberMetricComponent
+} from '@stratosui/core';
 import { CardCfRecentAppsComponent } from '../../../../../../../features/home/card-cf-recent-apps/card-cf-recent-apps.component';
 import { CfUserPermissionDirective } from '../../../../../../../shared/directives/cf-user-permission/cf-user-permission.directive';
 import { CardCfSpaceDetailsComponent } from '../../../../../../../shared/components/cards/card-cf-space-details/card-cf-space-details.component';

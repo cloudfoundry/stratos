@@ -1,12 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import { IGlobalListAction, IListAction, IListConfig, IListMultiFilterConfig, IMultiListAction, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { ISpace } from '../../../../../cf-api.types';
+import { CFAppState, ISpace } from '@stratosui/cloud-foundry';
+import { ITableColumn } from '@stratosui/core';
+import { IGlobalListAction, IListAction, IListConfig, IListMultiFilterConfig, IMultiListAction, ListViewTypes } from '@stratosui/core';
+import { ListView } from '@stratosui/store';
+import { APIResource } from '@stratosui/store';
 import { CloudFoundryOrganizationService } from '../../../../../features/cf/services/cloud-foundry-organization.service';
 import { CfSpaceCardComponent } from './cf-space-card/cf-space-card.component';
 import { CfSpacesDataSourceService } from './cf-spaces-data-source.service';

@@ -2,10 +2,9 @@ import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/cor
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { ApplicationStateComponent } from '../../../../../../core/src/shared/components/application-state/application-state.component';
-import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
-import { ApplicationService } from '../../../../../../cloud-foundry/src/features/applications/application.service';
-import { StratosStatus } from '../../../../../../store/src/types/shared.types';
+import { ApplicationStateComponent, CardStatusComponent } from '@stratosui/core';
+import { StratosStatus } from '@stratosui/store';
+import { ApplicationService } from '../../../../features/applications/application.service';
 
 @Component({
   selector: 'app-card-app-status',

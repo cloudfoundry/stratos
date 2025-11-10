@@ -3,16 +3,11 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import {
-  serviceInstancesEntityType,
-  servicePlanVisibilityEntityType,
-} from '../../../../../cloud-foundry/src/cf-entity-types';
-import { createEntityRelationPaginationKey } from '../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { CF_GUID } from '../../../../../core/src/shared/entity.tokens';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { APIResource } from '../../../../../store/src/types/api.types';
+import { CF_GUID } from '@stratosui/core';
+import { APIResource, getPaginationObservables, PaginationMonitorFactory } from '@stratosui/store';
+import { CFAppState } from '../../../cf-app-state';
+import { serviceInstancesEntityType, servicePlanVisibilityEntityType } from '../../../cf-entity-types';
+import { createEntityRelationPaginationKey } from '../../../entity-relations/entity-relations.types';
 import { IService, IServiceBroker, IServiceInstance, IServicePlan, IServicePlanVisibility } from '../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../cf-entity-factory';

@@ -1,34 +1,70 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { EntityServiceFactory } from '@stratosui/store/entity-service-factory.service';
-import { generateCfBaseTestModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { EntityServiceFactory, MetricQueryConfig, MetricQueryType } from '@stratosui/store';
+import { MetricsConfig, MetricsChartTypes, MetricsLineChartConfig, MetricsChartHelpers } from '@stratosui/core';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { CloudFoundryTestingModule } from '../../../../../../cloud-foundry-test.module';
 import { ActiveRouteCfCell } from '../../../../cf-page.types';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 import { CloudFoundryCellChartsComponent } from './cloud-foundry-cell-charts.component';
+import { FetchCFCellMetricsAction } from '../../../../../../actions/cf-metrics.actions';
+
+class MockCloudFoundryCellService {
+  cfGuid = 'cfGuid';
+  cellId = 'cellId';
+
+  buildMetricConfig = (queryString: string, queryRange: MetricQueryType): MetricsConfig<any> => ({
+    getSeriesName: (result: any) => `${result}`,
+    mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
+    metricsAction: new FetchCFCellMetricsAction(
+      'guid',
+      'cellId',
+      new MetricQueryConfig(queryString, {}),
+      queryRange,
+    ),
+  })
+
+  buildChartConfig = (yAxisLabel: string): MetricsLineChartConfig => ({
+    chartType: MetricsChartTypes.LINE,
+    xAxisLabel: 'Time',
+    yAxisLabel,
+    autoScale: true,
+  })
+}
 
 describe('CloudFoundryCellChartsComponent', () => {
   let component: CloudFoundryCellChartsComponent;
   let fixture: ComponentFixture<CloudFoundryCellChartsComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         CloudFoundryCellChartsComponent,
-        ...generateCfBaseTestModules(),
+        NoopAnimationsModule,
       ],
       providers: [
-        EntityServiceFactory,
-        CloudFoundryCellService,
-        ActiveRouteCfCell,
         provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          createBasicStoreModule(),
+          CloudFoundryTestingModule
+        ),
+        EntityServiceFactory,
+        {
+          provide: CloudFoundryCellService,
+          useValue: new MockCloudFoundryCellService(),
+        },
+        ActiveRouteCfCell,
       ]
-    })
-      .compileComponents();
-  });
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryCellChartsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
