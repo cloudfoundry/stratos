@@ -11,16 +11,16 @@ describe('KubernetesConfigAuthFormComponent', () => {
   let component: KubernetesConfigAuthFormComponent;
   let fixture: ComponentFixture<KubernetesConfigAuthFormComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-        providers: [provideZonelessChangeDetection()],imports: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
         SharedModule,
         NoopAnimationsModule,
 
         KubernetesConfigAuthFormComponent,
-      ]
-    }),
-      .compileComponents();
+      ],
+      providers: [provideZonelessChangeDetection()]
+    }).compileComponents();
   });
 
   beforeEach(() => {

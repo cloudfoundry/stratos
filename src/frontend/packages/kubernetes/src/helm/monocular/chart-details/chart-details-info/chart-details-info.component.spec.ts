@@ -4,6 +4,7 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 
 import { MockChartService } from '../../shared/services/chart.service.mock';
 import { ChartsService } from '../../shared/services/charts.service';
+import { HelmReleaseActivatedRouteMock } from '../../../helm-testing.module';
 import { ChartDetailsInfoComponent } from './chart-details-info.component';
 
 
@@ -12,7 +13,7 @@ describe('Component: ChartDetailsInfo', () => {
       await TestBed.configureTestingModule({
         imports: [ChartDetailsInfoComponent],
         providers: [
-          
+          HelmReleaseActivatedRouteMock,
           { provide: ChartsService, useValue: new MockChartService() },
 
           provideZonelessChangeDetection(),

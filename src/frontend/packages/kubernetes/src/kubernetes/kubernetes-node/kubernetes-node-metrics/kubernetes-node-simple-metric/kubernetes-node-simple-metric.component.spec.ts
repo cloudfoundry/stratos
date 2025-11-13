@@ -9,12 +9,11 @@ describe('KubernetesNodeSimpleMetricComponent', () => {
   let component: KubernetesNodeSimpleMetricComponent;
   let fixture: ComponentFixture<KubernetesNodeSimpleMetricComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       providers: [EntityServiceFactory, provideZonelessChangeDetection()],
       imports: [ KubernetesNodeSimpleMetricComponent ]
-    }),
-    .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

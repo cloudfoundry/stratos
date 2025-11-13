@@ -82,8 +82,11 @@ export class UpgradeReleaseComponent {
 
     this.helper.hasUpgrade(true).pipe(
       filter(c => !!c),
-      first()
+      first(undefined, null)
     ).subscribe(chart => {
+      if (!chart) {
+        return;
+      }
       const name = chart.upgrade.name;
       const repoName = chart.upgrade.repo.name;
       const version = chart.release.chart.metadata.version;
@@ -121,8 +124,11 @@ export class UpgradeReleaseComponent {
     return combineLatest(
       [this.helper.release$, this.chartsService.getVersionFromEndpoint(endpointID, chart.repo.name, chart.name, version)]
     ).pipe(
-      first(),
+      first(undefined, [null, null]),
       tap(([release, chartVersionDetail]) => {
+        if (!release || !chartVersionDetail) {
+          return;
+        }
         this.chartUrl = this.chartsService.getChartURL(chartVersionDetail);
         const schemaUrl = this.chartsService.getChartSchemaURL(chartVersionDetail, chart.name, chart.repo);
         this.config = {

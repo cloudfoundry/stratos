@@ -10,14 +10,13 @@ describe('KubernetesPodContainersComponent', () => {
   let component: KubernetesPodContainersComponent;
   let fixture: ComponentFixture<KubernetesPodContainersComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [
         KubernetesPodContainersComponent,
         ...KubernetesBaseTestModules,
-      ]}),
-      .compileComponents();
+      ]}).compileComponents();
   });
 
   beforeEach(() => {
@@ -25,7 +24,10 @@ describe('KubernetesPodContainersComponent', () => {
     component = fixture.componentInstance;
     component.row = {
       metadata: {
-        uid: ''
+        uid: '',
+        kubeId: 'test-kube-id',
+        name: 'test-pod',
+        namespace: 'default'
       },
       status: {
 

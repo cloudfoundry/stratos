@@ -27,8 +27,12 @@ import { KubernetesNamespace } from '../../store/kube.types';
 // Helper function to create a signal wrapper compatible with IListMultiFilterConfig
 // The wrapper provides BehaviorSubject-like API (.next, .getValue, .asObservable)
 // while being backed by a Signal
+// MUST be called within an injection context (constructor, field initializer, or runInInjectionContext)
 function createSignalWrapper<T>(initialValue: T) {
   const _signal = signal<T>(initialValue);
+  // Convert signal to observable within injection context once
+  const _observable = toObservable(_signal);
+
   const wrapper = Object.assign(
     // Make it callable like a signal
     () => _signal(),
@@ -40,7 +44,7 @@ function createSignalWrapper<T>(initialValue: T) {
       // BehaviorSubject compatibility methods
       next: (value: T) => _signal.set(value),
       getValue: () => _signal(),
-      asObservable: () => toObservable(_signal),
+      asObservable: () => _observable,
     }
   );
   return wrapper as WritableSignal<T> & {
@@ -81,7 +85,7 @@ export class KubernetesNamespacesFilterService implements OnDestroy {
     this.namespace = this.createNamespace();
 
     // Start watching the namespace plus automatically setting values only when we actually have values to auto select
-    this.namespace.list$.pipe(first()).subscribe(() => this.setupAutoSelectors());
+    this.namespace.list$.pipe(first(undefined, [])).subscribe(() => this.setupAutoSelectors());
   }
 
   private getNamespacesObservable() {
@@ -96,17 +100,18 @@ export class KubernetesNamespacesFilterService implements OnDestroy {
       refCount(),
     );
 
-    return {
+    // Create signal wrapper within injection context
+    return runInInjectionContext(this.injector, () => ({
       list$: list$.pipe(
         map(endpoints => Object.values(endpoints)),
-        first(),
+        first(undefined, []), // Provide default empty array to prevent EmptyError
         map((endpoints: EndpointModel[]) => {
           return Object.values(endpoints).sort((a: EndpointModel, b: EndpointModel) => a.name.localeCompare(b.name));
         }),
       ),
       loading$: list$.pipe(map(kubes => !kubes)),
       select: createSignalWrapper<string>(undefined)
-    };
+    }));
   }
 
   private createNamespace(): KubernetesNamespacesFilterItem<KubernetesNamespace> {

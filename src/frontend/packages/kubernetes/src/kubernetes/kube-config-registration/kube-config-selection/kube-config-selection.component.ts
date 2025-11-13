@@ -6,6 +6,7 @@ import { combineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
 
 import { FileInputComponent } from '../../../../../core/src/shared/components/file-input/file-input.component';
+import { CustomIconComponent } from '../../../../../core/src/shared/components/custom-material/custom-material.component';
 import {
   ITableListDataSource,
   RowState,
@@ -42,6 +43,7 @@ selector: 'app-kube-config-selection',
     CommonModule,
     FileInputComponent,
     TableComponent,
+    CustomIconComponent
   ]
 })
 export class KubeConfigSelectionComponent {

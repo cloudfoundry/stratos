@@ -2,7 +2,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
 import { SharedModule } from '../../../../../../core/src/public-api';
 import { SidePanelService } from '../../../../../../core/src/shared/services/side-panel.service';
 import { KubeBaseGuidMock, KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
@@ -16,8 +15,8 @@ describe('KubernetesAnalysisInfoComponent', () => {
   let component: KubernetesAnalysisInfoComponent;
   let fixture: ComponentFixture<KubernetesAnalysisInfoComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({imports: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({imports: [
         SharedModule,
         KubernetesBaseTestModules,
 
@@ -25,15 +24,13 @@ describe('KubernetesAnalysisInfoComponent', () => {
         AnalysisInfoCardComponent,
       ],
       providers: [
-        EntityServiceFactory,
         KubernetesAnalysisService,
         KubernetesEndpointService,
         SidePanelService,
         KubeBaseGuidMock,
         provideZonelessChangeDetection(),
       ]
-    }),
-      .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

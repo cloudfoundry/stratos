@@ -12,8 +12,8 @@ describe('KubedashConfigurationComponent', () => {
   let component: KubedashConfigurationComponent;
   let fixture: ComponentFixture<KubedashConfigurationComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [KubedashConfigurationComponent, ...KubernetesBaseTestModules],
       providers: [
         {
@@ -31,8 +31,7 @@ describe('KubedashConfigurationComponent', () => {
         HttpClient,
         HttpHandler,
       ]
-    }),
-      .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

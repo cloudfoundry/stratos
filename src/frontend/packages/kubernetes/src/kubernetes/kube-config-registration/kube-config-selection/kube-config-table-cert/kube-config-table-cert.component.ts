@@ -3,6 +3,7 @@ import {Component, Input, signal, inject, ChangeDetectionStrategy } from '@angul
 import { CommonModule } from '@angular/common';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { CustomCheckboxComponent } from '../../../../../../core/src/shared/components/custom-checkbox/custom-checkbox.component';
+import { ProgressSpinnerComponent } from '../../../../../../core/src/shared/components/progress-spinner/progress-spinner.component';
 import { timeout } from 'rxjs/operators';
 
 import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
@@ -25,6 +26,7 @@ selector: 'app-kube-config-table-cert',
   imports: [
     CommonModule,
     CustomCheckboxComponent,
+    ProgressSpinnerComponent
   ]
 })
 export class KubeConfigTableCertComponent extends TableCellCustom<KubeConfigFileCluster> {

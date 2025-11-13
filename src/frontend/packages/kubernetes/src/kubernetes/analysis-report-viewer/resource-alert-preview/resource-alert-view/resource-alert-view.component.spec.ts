@@ -12,8 +12,8 @@ describe('ResourceAlertViewComponent', () => {
   let component: ResourceAlertViewComponent;
   let fixture: ComponentFixture<ResourceAlertViewComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         KubernetesBaseTestModules,
         MDAppModule,
@@ -25,8 +25,7 @@ describe('ResourceAlertViewComponent', () => {
         KubeBaseGuidMock,
         provideZonelessChangeDetection(),
       ]
-    }),
-      .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

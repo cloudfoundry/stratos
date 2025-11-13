@@ -25,21 +25,27 @@ export class KubeConfigAuthHelper {
       const defn = k8s.definition;
 
       // Collect all of the auth types
-      defn.authTypes.forEach(at => {
-        this.authTypes[at.value] = at;
-      });
+      if (defn.authTypes) {
+        defn.authTypes.forEach(at => {
+          this.authTypes[at.value] = at;
+        });
+      }
 
       this.subTypes.push({ id: '', name: 'Generic' });
 
       // Collect all of the auth types for the sub-types
-      defn.subTypes.forEach(st => {
-        if (st.type !== 'config') {
-          this.subTypes.push({ id: st.type, name: st.labelShort });
-        }
-        st.authTypes.forEach(at => {
-          this.authTypes[at.value] = at;
+      if (defn.subTypes) {
+        defn.subTypes.forEach(st => {
+          if (st.type !== 'config') {
+            this.subTypes.push({ id: st.type, name: st.labelShort });
+          }
+          if (st.authTypes) {
+            st.authTypes.forEach(at => {
+              this.authTypes[at.value] = at;
+            });
+          }
         });
-      });
+      }
 
       // Sort the subtypes
       this.subTypes = this.subTypes.sort((a, b) => a.name.localeCompare(b.name));

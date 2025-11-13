@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { MDAppModule } from '../../../../../core/src/public-api';
@@ -12,8 +13,8 @@ describe('KubeScoreReportViewerComponent', () => {
   let component: KubeScoreReportViewerComponent;
   let fixture: ComponentFixture<KubeScoreReportViewerComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         KubernetesBaseTestModules,
         MDAppModule,
@@ -24,9 +25,17 @@ describe('KubeScoreReportViewerComponent', () => {
         KubernetesEndpointService,
         KubeBaseGuidMock,
         provideZonelessChangeDetection(),
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              params: { endpointId: 'test' },
+              queryParams: {}
+            }
+          }
+        }
       ]
-    }),
-      .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

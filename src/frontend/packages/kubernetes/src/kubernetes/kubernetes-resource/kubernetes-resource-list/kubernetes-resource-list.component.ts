@@ -113,6 +113,7 @@ export class KubernetesResourceListComponent implements OnDestroy {
 
       // Watch for namespace changes
       this.sub = this.store.select<KubernetesCurrentNamespace>((state: any) => state.k8sCurrentNamespace).pipe(
+        filter((data: Record<string, string>) => !!data), // Filter out undefined/null before accessing properties
         map((data: Record<string, string>) => data[this.kubeId]),
         filter((data: string) => !!data)
       ).subscribe((ns: string) => {

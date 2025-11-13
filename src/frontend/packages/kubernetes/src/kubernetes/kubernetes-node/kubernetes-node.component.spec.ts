@@ -5,6 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { TabNavService } from '../../../../core/src/tab-nav.service';
+import { populateStoreWithTestEndpoint, testSCFEndpointGuid } from '@stratosui/store/testing';
 import { KubeBaseGuidMock, KubernetesBaseTestModules } from '../kubernetes.testing.module';
 import { KubernetesNodeComponent } from './kubernetes-node.component';
 
@@ -12,8 +13,8 @@ describe('KubernetesNodeComponent', () => {
   let component: KubernetesNodeComponent;
   let fixture: ComponentFixture<KubernetesNodeComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [KubernetesNodeComponent, ...KubernetesBaseTestModules],
       providers: [
         EntityServiceFactory,
@@ -24,15 +25,17 @@ describe('KubernetesNodeComponent', () => {
           useValue: {
             snapshot: {
               params: {
-                endpointId: 'anything'
+                endpointId: testSCFEndpointGuid
               },
               queryParams: {}
             }
           }
         }
       ]
-    }),
-      .compileComponents();
+    }).compileComponents();
+
+    // Populate store with test endpoint data to prevent EmptyError in hasMetrics() observable
+    populateStoreWithTestEndpoint();
   });
 
   beforeEach(() => {

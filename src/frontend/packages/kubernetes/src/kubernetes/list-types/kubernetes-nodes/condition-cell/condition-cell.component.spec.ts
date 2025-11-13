@@ -9,14 +9,14 @@ describe('ConditionCellComponent', () => {
   let component: ConditionCellComponent;
   let fixture: ComponentFixture<ConditionCellComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [
         ConditionCellComponent,
         ...BaseTestModules,
-      ]}),
-      .compileComponents();
+      ]
+    }).compileComponents();
   });
 
   beforeEach(() => {

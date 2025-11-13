@@ -12,14 +12,13 @@ describe('KubeServiceCardComponent', () => {
   let component: KubeServiceCardComponent;
   let fixture: ComponentFixture<KubeServiceCardComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
         providers: [provideZonelessChangeDetection()],imports: [...KubernetesBaseTestModules,
         KubeServiceCardComponent,
         KubernetesServicePortsComponent,
       ],
-    }),
-      .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

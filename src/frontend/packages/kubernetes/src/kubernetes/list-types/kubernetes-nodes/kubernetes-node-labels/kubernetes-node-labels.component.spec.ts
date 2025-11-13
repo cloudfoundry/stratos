@@ -10,14 +10,14 @@ describe('KubernetesNodeLabelsComponent', () => {
   let component: KubernetesNodeLabelsComponent;
   let fixture: ComponentFixture<KubernetesNodeLabelsComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       providers: [EntityServiceFactory, provideZonelessChangeDetection()],
       imports: [
         KubernetesNodeLabelsComponent,
         ...BaseTestModules,
-      ]}),
-      .compileComponents();
+      ]
+    }).compileComponents();
   });
 
   beforeEach(() => {

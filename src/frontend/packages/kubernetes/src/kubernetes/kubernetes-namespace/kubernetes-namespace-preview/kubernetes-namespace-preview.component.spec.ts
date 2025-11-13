@@ -11,12 +11,14 @@ describe('KubernetesNamespacePreviewComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-        providers: [provideZonelessChangeDetection()],imports: [...KubernetesBaseTestModules,
+      imports: [
+        ...KubernetesBaseTestModules,
         KubernetesNamespacePreviewComponent,
       ],
-
-    }),
-    .compileComponents();
+      providers: [
+        provideZonelessChangeDetection(),
+      ]
+    }).compileComponents();
   });
 
   beforeEach(() => {

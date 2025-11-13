@@ -11,17 +11,17 @@ describe('KubernetesSATokenAuthFormComponent', () => {
   let component: KubernetesSATokenAuthFormComponent;
   let fixture: ComponentFixture<KubernetesSATokenAuthFormComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-        providers: [provideZonelessChangeDetection()],imports: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
         MDAppModule,
         SharedModule,
         NoopAnimationsModule,
 
         KubernetesSATokenAuthFormComponent,
-      ]
-    }),
-      .compileComponents();
+      ],
+      providers: [provideZonelessChangeDetection()]
+    }).compileComponents();
   });
 
   beforeEach(() => {

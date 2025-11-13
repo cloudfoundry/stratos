@@ -1,37 +1,39 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { MDAppModule } from '../../../../../core/src/public-api';
 import { TabNavService } from '../../../../../core/src/tab-nav.service';
 import { KubeBaseGuidMock, KubernetesBaseTestModules } from '../../kubernetes.testing.module';
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { KubernetesAnalysisService } from '../../services/kubernetes.analysis.service';
-import { AnalysisReportViewerComponent } from './../../analysis-report-viewer/analysis-report-viewer.component';
 import { KubernetesAnalysisTabComponent } from './kubernetes-analysis-tab.component';
-
 
 describe('KubernetesAnalysisTabComponent', () => {
   let component: KubernetesAnalysisTabComponent;
   let fixture: ComponentFixture<KubernetesAnalysisTabComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
-        KubernetesBaseTestModules,
-        MDAppModule,
         KubernetesAnalysisTabComponent,
-        AnalysisReportViewerComponent,
+        ...KubernetesBaseTestModules,
       ],
       providers: [
         KubernetesAnalysisService,
         KubernetesEndpointService,
         KubeBaseGuidMock,
         TabNavService,
-        provideZonelessChangeDetection(),
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              params: { endpointId: 'test' },
+              queryParams: {}
+            }
+          }
+        },
       ]
-    }),
-      .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

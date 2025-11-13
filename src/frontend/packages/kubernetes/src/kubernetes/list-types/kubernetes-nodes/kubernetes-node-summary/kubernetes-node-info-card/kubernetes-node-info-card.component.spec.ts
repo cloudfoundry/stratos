@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { BaseKubeGuid } from '../../../../kubernetes-page.types';
@@ -12,18 +13,28 @@ describe('KubernetesNodeInfoCardComponent', () => {
   let component: KubernetesNodeInfoCardComponent;
   let fixture: ComponentFixture<KubernetesNodeInfoCardComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         KubernetesNodeInfoCardComponent,
         ...KubernetesBaseTestModules,
       ],
       providers: [
-        BaseKubeGuid, KubernetesNodeService, KubernetesEndpointService,
+        BaseKubeGuid,
+        KubernetesNodeService,
+        KubernetesEndpointService,
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              queryParams: {},
+              params: { nodeName: 'test-node' }
+            }
+          }
+        },
         provideZonelessChangeDetection(),
       ]
-    }),
-      .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

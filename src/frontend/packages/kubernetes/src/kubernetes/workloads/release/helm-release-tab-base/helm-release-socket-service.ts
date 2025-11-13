@@ -74,7 +74,17 @@ export class HelmReleaseSocketService implements OnDestroy {
 
     let prefix = '';
     this.sub = messages.subscribe((jsonString: string) => {
-      const messageObj = JSON.parse(jsonString);
+      // Guard against empty, invalid, or non-string data
+      if (!jsonString || typeof jsonString !== 'string' || jsonString.trim() === '') {
+        return;
+      }
+      let messageObj;
+      try {
+        messageObj = JSON.parse(jsonString);
+      } catch (e) {
+        console.error('Failed to parse WebSocket message:', e);
+        return;
+      }
       if (messageObj) {
         if (messageObj.kind === 'ReleasePrefix') {
           prefix = messageObj.data;
@@ -195,7 +205,9 @@ export class HelmReleaseSocketService implements OnDestroy {
   }
 
   ngOnDestroy() {
-    this.sub.unsubscribe();
+    if (this.sub) {
+      this.sub.unsubscribe();
+    }
     this.snackbarService.hide();
   }
 

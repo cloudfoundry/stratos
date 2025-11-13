@@ -11,14 +11,13 @@ describe('KubernetesLabelsCellComponent', () => {
   let component: KubernetesLabelsCellComponent;
   let fixture: ComponentFixture<KubernetesLabelsCellComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       providers: [EntityServiceFactory, provideZonelessChangeDetection()],
       imports: [
         KubernetesLabelsCellComponent,
         ...BaseTestModules,
-      ]}),
-      .compileComponents();
+      ]}).compileComponents();
   });
 
   beforeEach(() => {

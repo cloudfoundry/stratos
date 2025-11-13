@@ -1,8 +1,9 @@
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, NgStyle } from '@angular/common';
 import {Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
+import { BooleanIndicatorComponent } from '@stratosui/core';
 import { KubernetesNodeService } from '../../../../../services/kubernetes-node.service';
 import { ConditionType, ConditionTypeLabels, KubernetesCondition } from '../../../../../store/kube.types';
 
@@ -12,7 +13,7 @@ import { ConditionType, ConditionTypeLabels, KubernetesCondition } from '../../.
   styleUrls: ['./kubernetes-node-condition.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [AsyncPipe]
+  imports: [AsyncPipe, NgStyle, BooleanIndicatorComponent]
 })
 export class KubernetesNodeConditionComponent implements OnInit {
 

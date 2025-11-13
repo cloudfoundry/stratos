@@ -9,14 +9,14 @@ describe('KubernetesNodeMetricsChartComponent', () => {
   let component: KubernetesNodeMetricsChartComponent;
   let fixture: ComponentFixture<KubernetesNodeMetricsChartComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [
         KubernetesNodeMetricsChartComponent,
         ...KubernetesBaseTestModules,
-      ]}),
-      .compileComponents();
+      ]
+    }).compileComponents();
   });
 
   beforeEach(() => {
@@ -26,7 +26,9 @@ describe('KubernetesNodeMetricsChartComponent', () => {
   });
 
   afterEach(() => {
-    fixture.destroy();
+    if (fixture) {
+      fixture.destroy();
+    }
   });
 
   it('should create', () => {

@@ -10,14 +10,14 @@ describe('KubernetesNodePressureComponent', () => {
   let component: KubernetesNodePressureComponent;
   let fixture: ComponentFixture<KubernetesNodePressureComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       providers: [EntityServiceFactory, provideZonelessChangeDetection()],
       imports: [
         KubernetesNodePressureComponent,
         ...BaseTestModules,
-      ]}),
-      .compileComponents();
+      ]
+    }).compileComponents();
   });
 
   beforeEach(() => {

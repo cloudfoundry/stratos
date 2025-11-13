@@ -10,14 +10,13 @@ describe('KubernetesPodTagsComponent', () => {
   let component: KubernetesPodTagsComponent<any>;
   let fixture: ComponentFixture<KubernetesPodTagsComponent<any>>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [
         KubernetesPodTagsComponent,
         ...KubernetesBaseTestModules,
-      ]}),
-      .compileComponents();
+      ]}).compileComponents();
   });
 
   beforeEach(() => {

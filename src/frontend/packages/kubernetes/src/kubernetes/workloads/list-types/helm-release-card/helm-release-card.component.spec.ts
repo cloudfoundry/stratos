@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
@@ -11,20 +12,18 @@ describe('HelmReleaseCardComponent', () => {
   let component: HelmReleaseCardComponent;
   let fixture: ComponentFixture<HelmReleaseCardComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         HelmReleaseCardComponent,
         ...KubernetesBaseTestModules,
       ],
       providers: [
-        
+        provideRouter([]),
         DatePipe,
-
         provideZonelessChangeDetection(),
       ]
-    }),
-      .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

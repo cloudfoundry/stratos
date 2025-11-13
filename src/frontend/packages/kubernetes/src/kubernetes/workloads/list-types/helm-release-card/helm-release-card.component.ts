@@ -10,6 +10,7 @@ import { MetaCardTitleComponent } from '../../../../../../core/src/shared/compon
 import { MetaCardValueComponent } from '../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
 import { MultilineTitleComponent } from '../../../../../../core/src/shared/components/multiline-title/multiline-title.component';
 import { TableCellEndpointNameComponent } from '../../../../../../core/src/shared/components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
+import { CustomIconComponent } from '../../../../../../core/src/shared/components/custom-material/custom-material.component';
 import { HelmRelease } from '../../workload.types';
 
 @Component({
@@ -27,6 +28,7 @@ import { HelmRelease } from '../../workload.types';
     MetaCardValueComponent,
     MultilineTitleComponent,
     TableCellEndpointNameComponent,
+    CustomIconComponent,
     DatePipe,
     TitleCasePipe
   ],

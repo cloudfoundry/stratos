@@ -7,6 +7,7 @@ import { EndpointsService } from '../../../../../../core/src/core/endpoints.serv
 import { UtilsService } from '../../../../../../core/src/core/utils.service';
 import { BaseTestModulesNoShared } from '../../../../../../core/test-framework/core-test.helper';
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
+import { HelmReleaseActivatedRouteMock } from '../../../helm-testing.module';
 import { ChartDetailsUsageComponent } from './chart-details-usage.component';
 
 describe('Component: ChartDetailsUsage', () => {
@@ -14,7 +15,7 @@ describe('Component: ChartDetailsUsage', () => {
     TestBed.configureTestingModule({
       imports: [...BaseTestModulesNoShared, ChartDetailsUsageComponent],
       providers: [
-        
+        HelmReleaseActivatedRouteMock,
         EndpointsService,
         UtilsService,
         PaginationMonitorFactory,

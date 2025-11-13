@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
 import { CustomCardComponent, CustomCardHeaderComponent, CustomCardContentComponent } from '../../../../../../core/src/shared/components/custom-card/custom-card.component';
+import { CardWrapperComponent } from '../../../../../../core/src/shared/components/cards/card/card.component';
 
 import { MetricsChartComponent, MetricsConfig } from '../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
 import { MetricsLineChartConfig } from '../../../../../../core/src/shared/components/metrics-chart/metrics-chart.types';
@@ -18,7 +19,8 @@ import { FetchKubernetesMetricsAction } from '../../../store/kubernetes.actions'
     CustomCardComponent,
     CustomCardHeaderComponent,
     CustomCardContentComponent,
-    MetricsChartComponent
+    MetricsChartComponent,
+    CardWrapperComponent
   ]
 })
 export class KubernetesNodeMetricsChartComponent implements OnInit {

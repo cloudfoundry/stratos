@@ -2,7 +2,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
+import { entityCatalog } from '@stratosui/store';
 import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
+import { kubeEntityCatalog } from '../../../kubernetes-entity-generator';
 import { KubeConfigHelper } from '../../kube-config.helper';
 import { KubeConfigFileCluster } from '../../kube-config.types';
 import { KubeConfigTableSelectComponent } from './kube-config-table-select.component';
@@ -11,20 +13,23 @@ describe('KubeConfigTableSelectComponent', () => {
   let component: KubeConfigTableSelectComponent;
   let fixture: ComponentFixture<KubeConfigTableSelectComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    // Ensure the Kubernetes endpoint entity is registered in the catalog first
+    // This is required because KubeConfigHelper -> KubeConfigAuthHelper depends on it
+    // The KubeConfigAuthHelper accesses defn.subTypes which is only available when the endpoint is registered
+    entityCatalog.register(kubeEntityCatalog.endpoint);
+
+    await TestBed.configureTestingModule({
       imports: [
         ...KubernetesBaseTestModules,
 
         KubeConfigTableSelectComponent,
-      ]providers: [
-        
+      ],
+      providers: [
         KubeConfigHelper,
-
         provideZonelessChangeDetection(),
       ]
-    }),
-      .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

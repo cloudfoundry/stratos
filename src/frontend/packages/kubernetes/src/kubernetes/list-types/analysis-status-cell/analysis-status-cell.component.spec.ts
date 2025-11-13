@@ -9,15 +9,14 @@ describe('AnalysisStatusCellComponent', () => {
   let component: AnalysisStatusCellComponent;
   let fixture: ComponentFixture<AnalysisStatusCellComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [
         AnalysisStatusCellComponent,
         ...BaseTestModules,
       ]
-    }),
-      .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

@@ -10,14 +10,14 @@ describe('KubernetesNodeCapacityComponent', () => {
   let component: KubernetesNodeCapacityComponent<any>;
   let fixture: ComponentFixture<KubernetesNodeCapacityComponent<any>>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       providers: [EntityServiceFactory, provideZonelessChangeDetection()],
       imports: [
         KubernetesNodeCapacityComponent,
         ...BaseTestModules,
-      ]}),
-      .compileComponents();
+      ]
+    }).compileComponents();
   });
 
   beforeEach(() => {

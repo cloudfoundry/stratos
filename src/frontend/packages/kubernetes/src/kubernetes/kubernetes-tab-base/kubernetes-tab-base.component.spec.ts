@@ -11,8 +11,8 @@ describe('KubernetesTabBaseComponent', () => {
   let component: KubernetesTabBaseComponent;
   let fixture: ComponentFixture<KubernetesTabBaseComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [KubernetesTabBaseComponent, ...KubernetesBaseTestModules],
       providers: [
         TabNavService,
@@ -28,8 +28,7 @@ describe('KubernetesTabBaseComponent', () => {
           }
         }
       ]
-    }),
-      .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

@@ -10,14 +10,14 @@ describe('KubernetesNodeIpsComponent', () => {
   let component: KubernetesNodeIpsComponent;
   let fixture: ComponentFixture<KubernetesNodeIpsComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       providers: [EntityServiceFactory, provideZonelessChangeDetection()],
       imports: [
         KubernetesNodeIpsComponent,
         ...BaseTestModules,
-      ]}),
-      .compileComponents();
+      ]
+    }).compileComponents();
   });
 
   beforeEach(() => {

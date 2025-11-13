@@ -10,19 +10,18 @@ describe('HelmReleaseHistoryTabComponent', () => {
   let component: HelmReleaseHistoryTabComponent;
   let fixture: ComponentFixture<HelmReleaseHistoryTabComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         HelmReleaseHistoryTabComponent,
-      ]providers: [
-        
+      ],
+      providers: [
         HelmReleaseHelperService,
         HelmReleaseGuidMock,
 
         provideZonelessChangeDetection(),
       ]
-    }),
-    .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

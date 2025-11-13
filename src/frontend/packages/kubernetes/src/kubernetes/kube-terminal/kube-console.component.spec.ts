@@ -1,45 +1,65 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from '@stratosui/store/testing';
+import { of } from 'rxjs';
 
-import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
-import { ApplicationServiceMock } from '../../../../cloud-foundry/test-framework/application-service-helper';
-import { CurrentUserPermissionsService } from '../../../../core/src/core/permissions/current-user-permissions.service';
-import { CoreModule, SharedModule } from '../../../../core/src/public-api';
-import { TabNavService } from '../../../../core/src/tab-nav.service';
+import { EndpointModel } from '@stratosui/store';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { TabNavService } from '@stratosui/core';
 import { KubeConsoleComponent } from './kube-console.component';
+import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 
 describe('KubeConsoleComponent', () => {
   let component: KubeConsoleComponent;
   let fixture: ComponentFixture<KubeConsoleComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({imports: [
-        CoreModule,
-        SharedModule,
-        RouterTestingModule,
-        createBasicStoreModule(),
+  beforeEach(async () => {
+    const mockEndpoint: EndpointModel = {
+      guid: 'test-endpoint-guid',
+      name: 'Test Kubernetes Endpoint',
+      connectionStatus: 'connected',
+      user: {
+        guid: 'test-user',
+        name: 'test-user',
+        admin: false
+      }
+    } as EndpointModel;
 
+    const mockKubernetesEndpointService = {
+      baseKube: { guid: 'test-endpoint-guid' },
+      endpoint$: of({
+        entity: mockEndpoint,
+        metadata: {}
+      })
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [
         KubeConsoleComponent,
+        createBasicStoreModule(),
       ],
       providers: [
-        
-        { provide: ApplicationService, useClass: ApplicationServiceMock },
+        ...STORE_TEST_PROVIDERS,
         TabNavService,
-        CurrentUserPermissionsService,
-
+        {
+          provide: KubernetesEndpointService,
+          useValue: mockKubernetesEndpointService
+        },
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideZonelessChangeDetection(),
       ],
-    }),
-      .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubeConsoleComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    // Don't call detectChanges to avoid ngOnInit and xterm initialization
   });
 
   it('should create', () => {

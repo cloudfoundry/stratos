@@ -8,6 +8,135 @@ if (typeof window !== 'undefined') {
   (window as any).describe = describe;
   (window as any).it = it;
   (window as any).expect = expect;
+
+  // IMMEDIATE: Suppress console.error for Monaco and other test warnings
+  // This must be set up BEFORE any component initialization
+  if (typeof console !== 'undefined' && console.error) {
+    const originalConsoleError = console.error.bind(console);
+    console.error = function (...args: any[]) {
+      const firstArg = args[0];
+      const message = typeof firstArg === 'string' ? firstArg : String(firstArg || '');
+      const messageStr = JSON.stringify(firstArg || '');
+
+      // Filter Monaco editor loading warnings
+      if (message && message.includes("Monaco editor is not loaded")) {
+        return; // Silently skip Monaco editor warning (we provide a mock)
+      }
+      // Filter Chart.js errors
+      if (message && message.includes("Failed to create chart: can't acquire context from the given item")) {
+        return; // Silently skip Chart.js error
+      }
+      // Filter ECONNREFUSED errors
+      if (args[0]?.code === 'ECONNREFUSED' || (firstArg && firstArg.errors && firstArg.errors[0]?.code === 'ECONNREFUSED')) {
+        return; // Silently skip connection refused errors during test cleanup
+      }
+      // Filter WebSocket connection errors in tests
+      if (messageStr.includes('WEBSOCKET_FAILED') || messageStr.includes('Log stream connection failed')) {
+        return; // Silently skip WebSocket connection errors (we provide a mock)
+      }
+      // Pass all other errors through
+      return originalConsoleError(...args);
+    };
+  }
+
+  // IMMEDIATE: Setup WebSocket mock for tests that use log streaming
+  // This prevents actual WebSocket connection attempts during testing
+  if (typeof window !== 'undefined' && typeof (window as any).WebSocket === 'undefined') {
+    class MockWebSocket {
+      static CONNECTING = 0;
+      static OPEN = 1;
+      static CLOSING = 2;
+      static CLOSED = 3;
+
+      readyState = MockWebSocket.CLOSED;
+      onopen: ((event: any) => void) | null = null;
+      onclose: ((event: any) => void) | null = null;
+      onerror: ((event: any) => void) | null = null;
+      onmessage: ((event: any) => void) | null = null;
+
+      constructor(public url: string) {
+        // Simulate immediate connection failure in test environment
+        setTimeout(() => {
+          this.readyState = MockWebSocket.CLOSED;
+          if (this.onerror) {
+            this.onerror({ type: 'error', target: this });
+          }
+          if (this.onclose) {
+            this.onclose({ type: 'close', code: 1006, reason: 'Test environment', wasClean: false });
+          }
+        }, 0);
+      }
+
+      send(data: any): void {
+        // No-op in test environment
+      }
+
+      close(code?: number, reason?: string): void {
+        this.readyState = MockWebSocket.CLOSED;
+        if (this.onclose) {
+          this.onclose({ type: 'close', code: code || 1000, reason: reason || '', wasClean: true });
+        }
+      }
+
+      addEventListener(type: string, listener: any): void {
+        if (type === 'open') this.onopen = listener;
+        if (type === 'close') this.onclose = listener;
+        if (type === 'error') this.onerror = listener;
+        if (type === 'message') this.onmessage = listener;
+      }
+
+      removeEventListener(type: string, listener: any): void {
+        if (type === 'open' && this.onopen === listener) this.onopen = null;
+        if (type === 'close' && this.onclose === listener) this.onclose = null;
+        if (type === 'error' && this.onerror === listener) this.onerror = null;
+        if (type === 'message' && this.onmessage === listener) this.onmessage = null;
+      }
+    }
+
+    (window as any).WebSocket = MockWebSocket;
+  }
+
+  // IMMEDIATE: Setup Monaco Editor mock before any component initialization
+  // This prevents "Monaco editor is not loaded" errors during test setup
+  const monacoMock = {
+    editor: {
+      create: () => ({
+        getValue: () => '',
+        setValue: () => {},
+        updateOptions: () => {},
+        layout: () => {},
+        focus: () => {},
+        dispose: () => {},
+        onDidChangeModelContent: () => ({ dispose: () => {} }),
+        onDidBlurEditorText: () => ({ dispose: () => {} }),
+        setModel: () => {},
+      }),
+      createModel: () => ({}),
+      getModel: () => null,
+      setTheme: () => {},
+    },
+    Uri: {
+      parse: (uri: string) => ({ toString: () => uri }),
+    },
+    languages: {
+      yaml: {
+        yamlDefaults: {
+          setDiagnosticsOptions: () => {},
+        },
+      },
+    },
+  };
+
+  (window as any).monaco = monacoMock;
+
+  // Mock the AMD require function used by Chart Values Editor
+  (window as any).require = (modules: string[], callback: () => void) => {
+    // Immediately call callback for YAML language support
+    if (modules.includes('vs/language/yaml/monaco.contribution')) {
+      setTimeout(callback, 0);
+    }
+  };
+  (window as any).require.config = () => {};
 }
 
 import '@angular/compiler';
@@ -141,28 +270,6 @@ function createMockWebGLContext(): WebGLRenderingContext {
     getSupportedExtensions: () => [],
     getExtension: () => null,
   } as unknown as WebGLRenderingContext;
-}
-
-// Suppress Chart.js and ECONNREFUSED warnings in test environment
-// Chart.js attempts to create charts on canvas elements, but fails silently in happy-dom
-// ECONNREFUSED errors occur when tests cleanup network connections during teardown
-// We suppress these console.error messages to keep test output clean
-if (typeof console !== 'undefined' && console.error) {
-  const originalConsoleError = console.error.bind(console);
-  console.error = function (...args: any[]) {
-    const firstArg = args[0];
-    const message = typeof firstArg === 'string' ? firstArg : String(firstArg || '');
-    // Filter out specific test environment errors
-    if (message && message.includes("Failed to create chart: can't acquire context from the given item")) {
-      return; // Silently skip Chart.js error
-    }
-    // Filter out ECONNREFUSED errors (network cleanup during test teardown)
-    if (args[0]?.code === 'ECONNREFUSED' || (firstArg && firstArg.errors && firstArg.errors[0]?.code === 'ECONNREFUSED')) {
-      return; // Silently skip connection refused errors during test cleanup
-    }
-    // Pass all other errors through
-    return originalConsoleError(...args);
-  };
 }
 
 // Polyfill: localStorage for tests

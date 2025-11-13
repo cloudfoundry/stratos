@@ -13,9 +13,9 @@ describe('ChartValuesEditorComponent', () => {
   let component: ChartValuesEditorComponent;
   let fixture: ComponentFixture<ChartValuesEditorComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({providers: [
-      
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({providers: [
+
         HttpClient,
         HttpHandler,
         ConfirmationDialogService,
@@ -30,8 +30,7 @@ describe('ChartValuesEditorComponent', () => {
 
         ChartValuesEditorComponent,
       ]
-    }),
-      .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

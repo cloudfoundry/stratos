@@ -3,7 +3,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { EntityServiceFactory } from '@stratosui/store';
 import { TabNavService } from '../../../../../core/src/tab-nav.service';
 import { KubeBaseGuidMock, KubernetesBaseTestModules } from '../../kubernetes.testing.module';
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
@@ -13,12 +12,11 @@ describe('KubernetesSummaryTabComponent', () => {
   let component: KubernetesSummaryTabComponent;
   let fixture: ComponentFixture<KubernetesSummaryTabComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({imports: [...KubernetesBaseTestModules,
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({imports: [...KubernetesBaseTestModules,
         KubernetesSummaryTabComponent,
       ],
       providers: [
-        EntityServiceFactory,
         KubernetesEndpointService,
         KubeBaseGuidMock,
         HttpClient,
@@ -26,8 +24,7 @@ describe('KubernetesSummaryTabComponent', () => {
         TabNavService,
         provideZonelessChangeDetection(),
       ]
-    }),
-      .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

@@ -12,6 +12,7 @@ import { LoaderComponent } from '../loader/loader.component';
 import { PanelComponent } from '../panel/panel.component';
 import { ListFiltersComponent } from '../list-filters/list-filters.component';
 import { ChartListComponent } from '../chart-list/chart-list.component';
+import { CustomIconComponent } from '../../../../../core/src/shared/components/custom-material/custom-material.component';
 
 @Component({
   selector: 'app-charts',
@@ -24,7 +25,8 @@ import { ChartListComponent } from '../chart-list/chart-list.component';
     LoaderComponent,
     PanelComponent,
     ListFiltersComponent,
-    ChartListComponent
+    ChartListComponent,
+    CustomIconComponent
 ]
 })
 export class ChartsComponent implements OnInit {

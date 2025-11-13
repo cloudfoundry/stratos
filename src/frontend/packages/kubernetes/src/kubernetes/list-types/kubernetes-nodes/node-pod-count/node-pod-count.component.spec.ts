@@ -10,8 +10,8 @@ describe('NodePodCountComponent', () => {
   let component: NodePodCountComponent;
   let fixture: ComponentFixture<NodePodCountComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         NodePodCountComponent,
         ...KubernetesBaseTestModules,
@@ -20,8 +20,7 @@ describe('NodePodCountComponent', () => {
         KubeBaseGuidMock, KubernetesEndpointService,
         provideZonelessChangeDetection(),
       ]
-    }),
-      .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

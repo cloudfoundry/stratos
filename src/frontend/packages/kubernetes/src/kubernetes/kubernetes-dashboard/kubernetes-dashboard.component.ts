@@ -1,4 +1,5 @@
-import { Component, ElementRef, OnInit, Renderer2, ViewChild, signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, OnInit, Renderer2, ViewChild, signal, inject, ChangeDetectionStrategy, Injector } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, RouterModule } from '@angular/router';
@@ -59,8 +60,10 @@ export class KubernetesDashboardTabComponent implements OnInit {
 
   source: SafeResourceUrl;
   href = '';
-  isLoading = signal<boolean>(true);
-  hasError = signal<boolean>(false);
+  private isLoadingSignal = signal<boolean>(true);
+  private hasErrorSignal = signal<boolean>(false);
+  isLoading$: Observable<boolean>;
+  hasError$: Observable<boolean>;
   expanded = true;
 
   private loadCheckTries = 0;
@@ -73,9 +76,13 @@ export class KubernetesDashboardTabComponent implements OnInit {
   public kubeEndpointService = inject(KubernetesEndpointService);
   private sanitizer = inject(DomSanitizer);
   public renderer = inject(Renderer2);
+  private injector = inject(Injector);
 
   constructor() {
-    this.hasError.set(false);
+    this.hasErrorSignal.set(false);
+    // Convert signals to observables for compatibility with LoadingPageComponent
+    this.isLoading$ = toObservable(this.isLoadingSignal, { injector: this.injector });
+    this.hasError$ = toObservable(this.hasErrorSignal, { injector: this.injector });
   }
 
   ngOnInit() {
@@ -119,7 +126,7 @@ export class KubernetesDashboardTabComponent implements OnInit {
         firstLine: errMsg,
         secondLine: { text: '' }
       });
-      this.hasError.set(true);
+      this.hasErrorSignal.set(true);
     }
 
     const kdToolbar = this.getKubeDashToolbar();
@@ -140,7 +147,7 @@ export class KubernetesDashboardTabComponent implements OnInit {
     }
 
     if (hasLoaded) {
-      this.isLoading.set(false);
+      this.isLoadingSignal.set(false);
       this.toggle(true);
     }
 

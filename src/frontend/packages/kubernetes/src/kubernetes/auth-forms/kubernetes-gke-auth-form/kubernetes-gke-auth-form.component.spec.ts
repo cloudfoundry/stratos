@@ -11,16 +11,16 @@ describe('KubernetesGKEAuthFormComponent', () => {
   let component: KubernetesGKEAuthFormComponent;
   let fixture: ComponentFixture<KubernetesGKEAuthFormComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-        providers: [provideZonelessChangeDetection()],imports: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
         SharedModule,
         NoopAnimationsModule,
 
         KubernetesGKEAuthFormComponent,
-      ]
-    }),
-      .compileComponents();
+      ],
+      providers: [provideZonelessChangeDetection()]
+    }).compileComponents();
   });
 
   beforeEach(() => {

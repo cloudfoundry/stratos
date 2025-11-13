@@ -16,8 +16,9 @@ describe('HelmReleaseAnalysisTabComponent', () => {
   let component: HelmReleaseAnalysisTabComponent;
   let fixture: ComponentFixture<HelmReleaseAnalysisTabComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({imports: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
         KubernetesBaseTestModules,
 
         HelmReleaseAnalysisTabComponent,
@@ -25,7 +26,7 @@ describe('HelmReleaseAnalysisTabComponent', () => {
         AnalysisReportViewerComponent,
       ],
       providers: [
-        
+
         KubernetesAnalysisService,
         KubernetesEndpointService,
         KubeBaseGuidMock,
@@ -34,8 +35,7 @@ describe('HelmReleaseAnalysisTabComponent', () => {
 
         provideZonelessChangeDetection(),
       ]
-    }),
-      .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

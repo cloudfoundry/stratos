@@ -8,6 +8,29 @@ if (typeof window !== 'undefined') {
   (window as any).describe = describe;
   (window as any).it = it;
   (window as any).expect = expect;
+
+  // IMMEDIATE: Suppress console.error for WebSocket connection failures in tests
+  // This must be set up BEFORE any component initialization
+  if (typeof console !== 'undefined' && console.error) {
+    const originalConsoleError = console.error.bind(console);
+    console.error = function (...args: any[]) {
+      const firstArg = args[0];
+      const message = typeof firstArg === 'string' ? firstArg : '';
+
+      // Filter WebSocket connection errors in tests (first arg is the message string)
+      if (message.includes('Log stream connection failed')) {
+        return; // Silently skip WebSocket connection errors in test environment
+      }
+
+      // Filter WebSocket connection errors when second arg is the error object
+      if (args.length >= 2 && typeof args[1] === 'object' && args[1]?.code === 'WEBSOCKET_FAILED') {
+        return; // Silently skip WebSocket connection errors in test environment
+      }
+
+      // Pass all other errors through
+      return originalConsoleError(...args);
+    };
+  }
 }
 
 import '@angular/compiler';

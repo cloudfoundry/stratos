@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { EntityServiceFactory } from '@stratosui/store';
@@ -13,19 +14,20 @@ describe('KubernetesNamespaceLinkComponent', () => {
   let component: KubernetesNamespaceLinkComponent;
   let fixture: ComponentFixture<KubernetesNamespaceLinkComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         KubernetesNamespaceLinkComponent,
         ...KubernetesBaseTestModules,
       ],
       providers: [
         EntityServiceFactory,
-        KubernetesEndpointService, BaseKubeGuid,
+        KubernetesEndpointService,
+        BaseKubeGuid,
         provideZonelessChangeDetection(),
+        provideRouter([]),
       ]
-    }),
-      .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

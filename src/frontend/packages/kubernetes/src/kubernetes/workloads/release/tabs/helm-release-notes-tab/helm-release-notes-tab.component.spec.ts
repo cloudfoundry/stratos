@@ -9,20 +9,19 @@ describe('HelmReleaseNotesTabComponent', () => {
   let component: HelmReleaseNotesTabComponent;
   let fixture: ComponentFixture<HelmReleaseNotesTabComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         ...KubernetesBaseTestModules,
 
         HelmReleaseNotesTabComponent,
-      ]providers: [
-        
+      ],
+      providers: [
         ...HelmReleaseProviders,
 
         provideZonelessChangeDetection(),
       ]
-    }),
-      .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

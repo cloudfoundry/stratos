@@ -12,8 +12,8 @@ describe('PodMetricsComponent', () => {
   let component: PodMetricsComponent;
   let fixture: ComponentFixture<PodMetricsComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [PodMetricsComponent, ...KubernetesBaseTestModules],
       providers: [
         TabNavService,
@@ -29,8 +29,7 @@ describe('PodMetricsComponent', () => {
           }
         }
       ]
-    }),
-      .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

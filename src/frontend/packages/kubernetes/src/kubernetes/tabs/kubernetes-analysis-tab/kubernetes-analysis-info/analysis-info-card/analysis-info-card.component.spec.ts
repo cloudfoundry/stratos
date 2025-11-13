@@ -9,15 +9,14 @@ describe('AnalysisInfoCardComponent', () => {
   let component: AnalysisInfoCardComponent;
   let fixture: ComponentFixture<AnalysisInfoCardComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [
         AnalysisInfoCardComponent,
         HttpClientTestingModule,
       ]
-    }),
-    .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

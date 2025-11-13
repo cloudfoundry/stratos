@@ -8,12 +8,11 @@ describe('KubernetesServicePortsComponent', () => {
   let component: KubernetesServicePortsComponent;
   let fixture: ComponentFixture<KubernetesServicePortsComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [KubernetesServicePortsComponent]
-    }),
-      .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

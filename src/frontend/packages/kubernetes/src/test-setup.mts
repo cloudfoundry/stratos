@@ -37,6 +37,49 @@ if (typeof window.matchMedia === 'undefined') {
   });
 }
 
+// Mock Monaco editor for tests
+// Components that use Monaco editor expect a global monaco object
+if (typeof (window as any).monaco === 'undefined') {
+  const mockEditor = {
+    getValue: () => '',
+    setValue: (value: string) => { },
+    updateOptions: (options: any) => { },
+    layout: () => { },
+    focus: () => { },
+    dispose: () => { },
+    onDidChangeModelContent: (callback: any) => ({ dispose: () => { } }),
+    onDidBlurEditorText: (callback: any) => ({ dispose: () => { } }),
+    setModel: (model: any) => { },
+  };
+
+  (window as any).monaco = {
+    editor: {
+      create: () => mockEditor,
+      getModel: () => null,
+      createModel: () => ({}),
+      setTheme: () => { },
+    },
+    Uri: {
+      parse: (uri: string) => ({ toString: () => uri }),
+    },
+    languages: {
+      yaml: {
+        yamlDefaults: {
+          setDiagnosticsOptions: () => { },
+        },
+      },
+    },
+  };
+
+  // Mock require for YAML language support
+  (window as any).require = (deps: string[], callback: () => void) => {
+    // Immediately invoke callback for YAML language support
+    if (deps.includes('vs/language/yaml/monaco.contribution')) {
+      setTimeout(callback, 0);
+    }
+  };
+}
+
 @NgModule({
   providers: [provideZonelessChangeDetection()],
 })

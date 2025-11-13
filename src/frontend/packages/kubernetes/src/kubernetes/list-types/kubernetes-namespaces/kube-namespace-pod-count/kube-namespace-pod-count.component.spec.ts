@@ -10,18 +10,18 @@ describe('KubeNamespacePodCountComponent', () => {
   let component: KubeNamespacePodCountComponent;
   let fixture: ComponentFixture<KubeNamespacePodCountComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         KubeNamespacePodCountComponent,
         ...KubernetesBaseTestModules,
       ],
       providers: [
-        KubeBaseGuidMock, KubernetesEndpointService,
+        KubeBaseGuidMock,
+        KubernetesEndpointService,
         provideZonelessChangeDetection(),
       ]
-    }),
-      .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

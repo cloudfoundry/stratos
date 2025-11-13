@@ -1,5 +1,6 @@
+import { AsyncPipe, NgIf } from '@angular/common';
 import {Component, inject, ChangeDetectionStrategy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AppState } from '@stratosui/store';
 import { Observable } from 'rxjs';
@@ -17,6 +18,7 @@ import { KubernetesService } from '../../services/kubernetes.service';
   styleUrls: ['./kubernetes-namespace-preview.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
+  imports: [AsyncPipe, NgIf, RouterLink],
   providers: [
     {
       provide: BaseKubeGuid,

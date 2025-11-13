@@ -8,6 +8,7 @@ import { map } from 'rxjs/operators';
 import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
 import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
+import { NoContentMessageComponent } from '../../../../../core/src/shared/components/no-content-message/no-content-message.component';
 import { HELM_ENDPOINT_TYPE } from '../../../helm/helm-entity-factory';
 import { HelmReleasesListConfig } from '../list-types/helm-releases-list-config.service';
 import { KubernetesNamespacesFilterService } from '../list-types/kube-namespaces-filter-config.service';
@@ -26,7 +27,8 @@ selector: 'app-releases-tab',
   standalone: true,
   imports: [
     ListComponent,
-    PageHeaderComponent
+    PageHeaderComponent,
+    NoContentMessageComponent
   ]
 })
 export class HelmReleasesTabComponent implements OnInit {

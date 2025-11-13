@@ -13,15 +13,14 @@ describe('KubeConfigTableName', () => {
   let component: KubeConfigTableNameComponent;
   let fixture: ComponentFixture<KubeConfigTableNameComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [
         ...KubernetesBaseTestModules,
 
         KubeConfigTableNameComponent,
-      ]}),
-      .compileComponents();
+      ]}).compileComponents();
   });
 
   beforeEach(() => {

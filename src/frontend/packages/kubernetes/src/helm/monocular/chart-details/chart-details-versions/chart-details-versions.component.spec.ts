@@ -12,8 +12,8 @@ describe('ChartDetailsVersionsComponent', () => {
   let component: ChartDetailsVersionsComponent;
   let fixture: ComponentFixture<ChartDetailsVersionsComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
         ChartDetailsVersionsComponent,
@@ -23,8 +23,7 @@ describe('ChartDetailsVersionsComponent', () => {
         { provide: ChartsService, useValue: new MockChartService() },
         provideZonelessChangeDetection(),
       ]
-    }),
-      .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

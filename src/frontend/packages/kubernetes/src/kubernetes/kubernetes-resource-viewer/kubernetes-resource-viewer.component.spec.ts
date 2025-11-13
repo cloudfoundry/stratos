@@ -15,8 +15,8 @@ describe('KubernetesResourceViewerComponent', () => {
   let component: KubernetesResourceViewerComponent;
   let fixture: ComponentFixture<KubernetesResourceViewerComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [KubernetesResourceViewerComponent, ResourceAlertViewComponent, ...KubernetesBaseTestModules],
       providers: [
         KubernetesEndpointService,
@@ -34,8 +34,7 @@ describe('KubernetesResourceViewerComponent', () => {
         },
         SidePanelService,
       ]
-    }),
-      .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { KubernetesBaseTestModules } from '../kubernetes.testing.module';
@@ -11,17 +12,27 @@ describe('KubeConfigRegistrationComponent', () => {
   let component: KubeConfigRegistrationComponent;
   let fixture: ComponentFixture<KubeConfigRegistrationComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection()],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              params: { endpointId: 'test' },
+              queryParams: {}
+            }
+          }
+        }
+      ],
       imports: [
         ...KubernetesBaseTestModules,
 
         KubeConfigRegistrationComponent,
         KubeConfigSelectionComponent,
         KubeConfigImportComponent,
-      ]}),
-      .compileComponents();
+      ]}).compileComponents();
   });
 
   beforeEach(() => {

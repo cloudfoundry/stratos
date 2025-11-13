@@ -11,17 +11,17 @@ describe('KubernetesAWSAuthFormComponent', () => {
   let component: KubernetesAWSAuthFormComponent;
   let fixture: ComponentFixture<KubernetesAWSAuthFormComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-        providers: [provideZonelessChangeDetection()],imports: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
         MDAppModule,
         SharedModule,
         NoopAnimationsModule,
 
         KubernetesAWSAuthFormComponent,
-      ]
-    }),
-      .compileComponents();
+      ],
+      providers: [provideZonelessChangeDetection()]
+    }).compileComponents();
   });
 
   beforeEach(() => {

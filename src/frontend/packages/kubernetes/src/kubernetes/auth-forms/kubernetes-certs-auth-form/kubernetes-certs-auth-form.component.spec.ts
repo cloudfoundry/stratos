@@ -12,17 +12,17 @@ describe('KubernetesCertsAuthFormComponent', () => {
   let component: KubernetesCertsAuthFormComponent;
   let fixture: ComponentFixture<KubernetesCertsAuthFormComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-        providers: [provideZonelessChangeDetection()],imports: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
         CoreModule,
         SharedModule,
         NoopAnimationsModule,
 
         KubernetesCertsAuthFormComponent,
-      ]
-    }),
-      .compileComponents();
+      ],
+      providers: [provideZonelessChangeDetection()]
+    }).compileComponents();
   });
 
   beforeEach(() => {

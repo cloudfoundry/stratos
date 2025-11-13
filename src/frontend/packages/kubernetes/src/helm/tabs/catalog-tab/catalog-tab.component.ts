@@ -61,7 +61,7 @@ export class CatalogTabComponent implements OnDestroy {
     // Determine the starting state of the filter by repo section
     stratosEntityCatalog.endpoint.store.getAll.getPaginationService().entities$.pipe(
       filter(entities => !!entities),
-      first()
+      first(undefined, []) // Provide default empty array to prevent EmptyError
     ).subscribe((endpoints: unknown[]) => {
       let stratosHelmEndpoints = 0;
       for (const ep of endpoints) {
@@ -130,7 +130,9 @@ export class CatalogTabComponent implements OnDestroy {
    */
   public filterCharts(repoName: string) {
     this.filteredRepo = repoName;
-    helmEntityCatalog.chart.store.getPaginationMonitor().pagination$.pipe(first()).subscribe((pagination: any) => {
+    helmEntityCatalog.chart.store.getPaginationMonitor().pagination$.pipe(
+      first(undefined, { clientPagination: { filter: { string: '', items: {} } } }) // Provide default pagination to prevent EmptyError
+    ).subscribe((pagination: any) => {
       const action = helmEntityCatalog.chart.actions.getMultiple();
       this.store.dispatch(new SetClientFilter(action, action.paginationKey, {
         string: pagination.clientPagination?.filter?.string ?? '',

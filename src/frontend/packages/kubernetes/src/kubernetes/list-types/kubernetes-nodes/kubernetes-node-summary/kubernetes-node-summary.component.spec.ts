@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { EntityServiceFactory } from '@stratosui/store';
@@ -22,8 +23,8 @@ describe('KubernetesNodeSummaryComponent', () => {
   let component: KubernetesNodeSummaryComponent;
   let fixture: ComponentFixture<KubernetesNodeSummaryComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         KubernetesNodeSummaryComponent,
         KubernetesNodeConditionComponent,
@@ -35,11 +36,23 @@ describe('KubernetesNodeSummaryComponent', () => {
       ],
       providers: [
         EntityServiceFactory,
-        BaseKubeGuid, KubernetesEndpointService, KubernetesNodeService,
+        BaseKubeGuid,
+        KubernetesEndpointService,
+        KubernetesNodeService,
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              params: {
+                endpointId: 'anything'
+              },
+              queryParams: {}
+            }
+          }
+        },
         provideZonelessChangeDetection(),
       ]
-    }),
-      .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

@@ -9,15 +9,14 @@ describe('KubeConfigTableImportStatusComponent', () => {
   let component: KubeConfigTableImportStatusComponent;
   let fixture: ComponentFixture<KubeConfigTableImportStatusComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [
         ...KubernetesBaseTestModules,
 
         KubeConfigTableImportStatusComponent,
-      ]}),
-      .compileComponents();
+      ]}).compileComponents();
   });
 
   beforeEach(() => {
