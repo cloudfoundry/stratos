@@ -10,7 +10,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { CurrentUserPermissionsService } from '@stratosui/core';
 import { appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { ApplicationService, CFAppState, generateCFEntities, ServiceActionHelperService } from '@stratosui/cloud-foundry';
+import {ApplicationService, CFAppState, generateCFEntities, ServiceActionHelperService,
+  cfCurrentUserPermissionsService} from '@stratosui/cloud-foundry';
 import { ApplicationServiceMock, generateActiveRouteCfOrgSpaceMock, ApplicationStateService, ApplicationEnvVarsHelper } from '@test-framework/cf';
 import { ServicesTabComponent } from './services-tab.component';
 
@@ -48,7 +49,7 @@ describe('ServicesTabComponent', () => {
         ApplicationEnvVarsHelper,
         DatePipe,
         ServiceActionHelperService,
-        CurrentUserPermissionsService,
+        ...cfCurrentUserPermissionsService,
         Store,
         provideZonelessChangeDetection(),
         provideRouter([]),

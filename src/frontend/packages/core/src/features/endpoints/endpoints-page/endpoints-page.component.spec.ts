@@ -6,9 +6,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of } from 'rxjs';
 import {
-  entityCatalog,
   EntityServiceFactory,
-  generateStratosEntities,
   EntityCatalogHelper,
   EntityCatalogHelpers
 } from '@stratosui/store';
@@ -60,8 +58,8 @@ describe('EndpointsPageComponent', () => {
     closeModal: vi.fn()
   };
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         CoreTestingModule,
         createBasicStoreModule(),
@@ -85,18 +83,12 @@ describe('EndpointsPageComponent', () => {
         ...STORE_TEST_PROVIDERS,
         provideZonelessChangeDetection(),
       ]
-    });
+    }).compileComponents();
 
-    // Clear and register entities on the singleton entity catalog
-    (entityCatalog as any).clear();
-    const entities = generateStratosEntities();
-    entities.forEach(entity => entityCatalog.register(entity));
-
-    // Set up entity catalog helper from DI
+    // Set up entity catalog helper from DI after module compilation
+    // Entity catalog is initialized synchronously by EntityCatalogFeatureModule during compilation
     const helper = TestBed.inject(EntityCatalogHelper);
     EntityCatalogHelpers.SetEntityCatalogHelper(helper);
-
-    TestBed.compileComponents();
   });
 
   beforeEach(() => {

@@ -94,6 +94,7 @@ export { SetupConsoleGetScopes, SetupSaveConfig } from './actions/setup.actions'
 export type { IMetricApplication, IMetricCell } from './types/metric.types';
 export { MetricQueryType } from './types/metric.types';
 export { CATALOGUE_ENTITIES, EntityCatalogFeatureModule, EntityCatalogModule } from './entity-catalog.module';
+export { EntityCatalogProvidersModule } from './entity-catalog-providers.module';
 export { EntityServiceFactory } from './entity-service-factory.service';
 export type { MetricsAPITargets } from './actions/metrics-api.actions';
 export { MetricsAPIAction, MetricsStratosAction } from './actions/metrics-api.actions';

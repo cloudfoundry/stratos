@@ -7,7 +7,12 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CurrentUserPermissionsService, ListConfig, ConfirmationDialogService } from '@stratosui/core';
+import {
+  
+  ListConfig,
+  ConfirmationDialogService
+} from '@stratosui/core';
+import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import {
   appReducers,
   TEST_CATALOGUE_ENTITIES,
@@ -53,7 +58,7 @@ describe('CloudFoundrySecurityGroupsComponent', () => {
           ]
         },
         EntityServiceFactory,
-        CurrentUserPermissionsService,
+        ...cfCurrentUserPermissionsService,
         ...generateTestCfEndpointServiceProvider(testSCFEndpointGuid),
         {
           provide: ActiveRouteCfOrgSpace,

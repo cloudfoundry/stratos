@@ -1,9 +1,8 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
 
-import { ApplicationService } from '../../../cloud-foundry/src/features/applications/application.service';
-import { getGuids } from '../../../cloud-foundry/src/features/applications/application/application-base.component';
-import { APP_GUID, CF_GUID } from '../../../core/src/shared/entity.tokens';
+import { ApplicationService, getGuids } from '@stratosui/cloud-foundry';
+import { APP_GUID, CF_GUID } from '@stratosui/core';
 
 @Component({
   selector: 'app-autoscaler-base',

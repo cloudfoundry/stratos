@@ -9,6 +9,7 @@ export * from './cf-api-svc.types';
 
 // Services
 export { ApplicationService } from './features/applications/application.service';
+export { ApplicationMonitorService } from './features/applications/application-monitor.service';
 export { ApplicationStateService, ApplicationStateData } from './shared/services/application-state.service';
 export { ApplicationEnvVarsHelper } from './features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 export { CfOrgSpaceDataService, createCfOrgSpaceFilterConfig, CfOrgSpaceItem } from './shared/data-services/cf-org-space-service.service';
@@ -16,6 +17,9 @@ export { ServiceActionHelperService } from './shared/data-services/service-actio
 export { CloudFoundryService } from './shared/data-services/cloud-foundry.service';
 export { CfAppConfigService } from './shared/components/list/list-types/app/cf-app-config.service';
 export { CfOrgSpaceLabelService } from './shared/services/cf-org-space-label.service';
+
+// Utility Functions
+export { getGuids } from './features/applications/application/application-base.component';
 
 // Service Instance Constants
 export { CSI_CANCEL_URL } from './shared/components/add-service-instance/csi-mode.service';
@@ -29,7 +33,7 @@ export { createOrgQuotaDefinition } from './features/cf/services/cloud-foundry-o
 export { createCfOrSpaceMultipleFilterFn } from './shared/data-services/cf-org-space-service.service';
 
 // Permissions
-export { CfCurrentUserPermissions } from './user-permissions/cf-user-permissions-checkers';
+export { CfCurrentUserPermissions, cfCurrentUserPermissionsService } from './user-permissions/cf-user-permissions-checkers';
 
 // Test helpers
 export * from './entity-relations/entity-relations-spec-helper';
@@ -124,6 +128,9 @@ export { AppServiceBindingDataSource } from './shared/components/list/list-types
 // Components
 export { CfEndpointsMissingComponent } from './shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
 export { CfOrgSpaceLinksComponent } from './shared/components/cf-org-space-links/cf-org-space-links.component';
+export { CardAppInstancesComponent } from './shared/components/cards/card-app-instances/card-app-instances.component';
+export { CardAppUsageComponent } from './shared/components/cards/card-app-usage/card-app-usage.component';
+export { RunningInstancesComponent } from './shared/components/running-instances/running-instances.component';
 
 // Directives
 export { CfUserPermissionDirective } from './shared/directives/cf-user-permission/cf-user-permission.directive';

@@ -12,6 +12,8 @@ if (typeof window !== 'undefined') {
 
 import '@angular/compiler';
 import { provideZonelessChangeDetection, NgModule } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import {
   BrowserTestingModule,
   platformBrowserTesting,
@@ -47,6 +49,119 @@ if (typeof document !== 'undefined' && !document.queryCommandSupported) {
     // Return true for 'copy' command which is used by copy-to-clipboard component
     // Return false for other deprecated commands
     return command === 'copy';
+  };
+}
+
+// Polyfill: Canvas context for Chart.js components
+// happy-dom (test environment) has limited canvas support, so we need to mock getContext
+// This allows Chart.js to create charts during testing without the warning:
+// "Failed to create chart: can't acquire context from the given item"
+if (typeof HTMLCanvasElement !== 'undefined') {
+  const originalGetContext = HTMLCanvasElement.prototype.getContext;
+  HTMLCanvasElement.prototype.getContext = function (
+    contextType: string,
+    ...args: any[]
+  ): any {
+    // First try to use the native implementation
+    if (originalGetContext) {
+      const context = originalGetContext.call(this, contextType, ...args);
+      if (context) {
+        return context;
+      }
+    }
+
+    // Fallback: Mock canvas context for 2d and webgl contexts
+    // This allows Chart.js to initialize without errors in test environment
+    if (contextType === '2d') {
+      return createMockCanvasContext2D();
+    } else if (contextType === 'webgl' || contextType === 'experimental-webgl') {
+      return createMockWebGLContext();
+    }
+
+    return null;
+  };
+}
+
+// Create a mock 2D canvas context for Chart.js
+function createMockCanvasContext2D(): CanvasRenderingContext2D {
+  return {
+    fillRect: () => { },
+    clearRect: () => { },
+    getImageData: () => ({ data: new Uint8ClampedArray() } as ImageData),
+    putImageData: () => { },
+    createImageData: () => ({ data: new Uint8ClampedArray() } as ImageData),
+    setTransform: () => { },
+    drawImage: () => { },
+    save: () => { },
+    fillText: () => { },
+    restore: () => { },
+    beginPath: () => { },
+    moveTo: () => { },
+    lineTo: () => { },
+    closePath: () => { },
+    stroke: () => { },
+    translate: () => { },
+    scale: () => { },
+    rotate: () => { },
+    arc: () => { },
+    fill: () => { },
+    measureText: () => ({ width: 0 } as TextMetrics),
+    transform: () => { },
+    rect: () => { },
+    clip: () => { },
+    createLinearGradient: () => ({ addColorStop: () => { } } as CanvasGradient),
+    createPattern: () => null as any,
+    createRadialGradient: () => ({ addColorStop: () => { } } as CanvasGradient),
+    arcTo: () => { },
+    canvas: {} as HTMLCanvasElement,
+    fillStyle: '',
+    font: '',
+    globalAlpha: 1,
+    globalCompositeOperation: 'source-over',
+    lineCap: 'butt',
+    lineJoin: 'miter',
+    lineWidth: 1,
+    miterLimit: 10,
+    shadowBlur: 0,
+    shadowColor: 'rgba(0, 0, 0, 0)',
+    shadowOffsetX: 0,
+    shadowOffsetY: 0,
+    strokeStyle: '',
+    textAlign: 'start',
+    textBaseline: 'alphabetic',
+    direction: 'ltr',
+    filter: 'none',
+  } as unknown as CanvasRenderingContext2D;
+}
+
+// Create a mock WebGL context
+function createMockWebGLContext(): WebGLRenderingContext {
+  return {
+    getParameter: () => null,
+    getSupportedExtensions: () => [],
+    getExtension: () => null,
+  } as unknown as WebGLRenderingContext;
+}
+
+// Suppress Chart.js and ECONNREFUSED warnings in test environment
+// Chart.js attempts to create charts on canvas elements, but fails silently in happy-dom
+// ECONNREFUSED errors occur when tests cleanup network connections during teardown
+// We suppress these console.error messages to keep test output clean
+if (typeof console !== 'undefined' && console.error) {
+  const originalConsoleError = console.error.bind(console);
+  console.error = function (...args: any[]) {
+    const firstArg = args[0];
+    const message = typeof firstArg === 'string' ? firstArg : String(firstArg || '');
+    // Filter out specific test environment errors
+    if (message && message.includes("Failed to create chart: can't acquire context from the given item")) {
+      return; // Silently skip Chart.js error
+    }
+    // Filter out ECONNREFUSED errors (network cleanup during test teardown)
+    if (args[0]?.code === 'ECONNREFUSED' || (firstArg && firstArg.errors && firstArg.errors[0]?.code === 'ECONNREFUSED')) {
+      return; // Silently skip connection refused errors during test cleanup
+    }
+    // Pass all other errors through
+    return originalConsoleError(...args);
   };
 }
 
@@ -102,7 +217,11 @@ if (typeof window !== 'undefined') {
 }
 
 @NgModule({
-  providers: [provideZonelessChangeDetection()],
+  providers: [
+    provideZonelessChangeDetection(),
+    provideHttpClient(),
+    provideHttpClientTesting(),
+  ],
 })
 export class ZonelessTestModule { }
 

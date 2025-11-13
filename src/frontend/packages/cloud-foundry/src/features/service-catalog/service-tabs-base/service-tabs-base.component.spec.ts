@@ -9,6 +9,7 @@ import { CoreModule, TabNavService } from '@stratosui/core';
 import { EntityServiceFactory, EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { createEmptyStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCFEntities } from '../../../cf-entity-generator';
+import { cfCurrentUserPermissionsService } from '../../../user-permissions/cf-user-permissions-checkers';
 import { ServicesService } from '../services.service';
 import { ServicesServiceMock } from '../services.service.mock';
 import { ServiceTabsBaseComponent } from "./service-tabs-base.component";
@@ -42,6 +43,7 @@ describe('ServiceTabsBaseComponent', () => {
         provideZonelessChangeDetection(),
         provideRouter([]),
         provideHttpClient(),
+        ...cfCurrentUserPermissionsService
       ]
     })
       .compileComponents();

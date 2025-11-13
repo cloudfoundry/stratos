@@ -6,7 +6,10 @@ import { describe, it, expect, beforeEach } from 'vitest';
 
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCfBaseTestModulesNoShared, generateActiveRouteCfOrgSpaceMock } from '@test-framework/cf';
-import { ConfirmationDialogService, CurrentUserPermissionsService } from '@stratosui/core';
+import {
+  ConfirmationDialogService
+} from '@stratosui/core';
+import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import { CfQuotasListConfigService } from './cf-quotas-list-config.service';
 
 describe('CfQuotasListConfigService', () => {
@@ -18,7 +21,7 @@ describe('CfQuotasListConfigService', () => {
         CfQuotasListConfigService,
         DatePipe,
         ConfirmationDialogService,
-        CurrentUserPermissionsService,
+        ...cfCurrentUserPermissionsService,
         provideRouter([]),
         provideZonelessChangeDetection()
       ],

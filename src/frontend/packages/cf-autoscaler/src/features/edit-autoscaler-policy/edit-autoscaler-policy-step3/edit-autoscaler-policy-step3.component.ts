@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
 import { addDays, format } from 'date-fns';
 
-import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
+import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher, TileGridComponent, TileGroupComponent, TileComponent, MetadataItemComponent } from '@stratosui/core';
+import { ApplicationService } from '@stratosui/cloud-foundry';
 import { AutoscalerConstants, PolicyAlert, shiftArray } from '../../../core/autoscaler-helpers/autoscaler-util';
 import {
   dateIsAfter,
@@ -20,10 +20,6 @@ import {
   validateRecurringSpecificMax,
   validateRecurringSpecificMin,
 } from '../edit-autoscaler-policy-step4/edit-autoscaler-policy-step4.component';
-import { TileGridComponent } from '../../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
-import { TileGroupComponent } from '../../../../../core/src/shared/components/tile/tile-group/tile-group.component';
-import { TileComponent } from '../../../../../core/src/shared/components/tile/tile/tile.component';
-import { MetadataItemComponent } from '../../../../../core/src/shared/components/metadata-item/metadata-item.component';
 
 interface EditRecurringScheduleForm {
   days_of_week: FormControl<number[]>;

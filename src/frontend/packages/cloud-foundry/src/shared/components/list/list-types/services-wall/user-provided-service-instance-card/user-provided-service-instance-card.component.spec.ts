@@ -20,6 +20,7 @@ import {
 } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CurrentUserPermissionsService } from '@stratosui/core';
+import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import { CloudFoundryTestingModule, generateCFEntities } from '@test-framework/cf';
 import { ServicesWallService } from '../../../../../../features/services/services/services-wall.service';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
@@ -63,7 +64,7 @@ describe('UserProvidedServiceInstanceCardComponent', () => {
         EntityMonitorFactory,
         PaginationMonitorFactory,
         EntityCatalogHelper,
-        CurrentUserPermissionsService,
+        ...cfCurrentUserPermissionsService,
         ServicesWallService,
         ServiceActionHelperService,
         CloudFoundryUserProvidedServicesService,

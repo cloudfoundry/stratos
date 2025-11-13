@@ -6,8 +6,8 @@ import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 
-import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
-import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
+import { ApplicationService } from '@stratosui/cloud-foundry';
+import { safeUnsubscribe, TileGridComponent, TileGroupComponent, TileComponent } from '@stratosui/core';
 import {
   AutoscalerConstants,
   getAdjustmentType,
@@ -23,9 +23,6 @@ import {
 import { AppAutoscalerInvalidPolicyError, AppAutoscalerPolicyLocal } from '../../../store/app-autoscaler.types';
 import { EditAutoscalerPolicyDirective } from '../edit-autoscaler-policy-base-step';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
-import { TileGridComponent } from '../../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
-import { TileGroupComponent } from '../../../../../core/src/shared/components/tile/tile-group/tile-group.component';
-import { TileComponent } from '../../../../../core/src/shared/components/tile/tile/tile.component';
 
 interface EditTriggerForm {
   metric_type: FormControl<string>;

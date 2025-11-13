@@ -12,8 +12,11 @@ import {
   StratosStatus,
   UserFavorite,
   UserFavoriteManager,
+  entityCatalog,
+  TestEntityCatalog,
 } from '@stratosui/store';
 import { createBasicStoreModule, CoreTestingModule } from '@test-framework';
+import { generateGenericMockEntities } from '@test-framework/mock-catalog-entities';
 import { MetaCardComponent } from './meta-card.component';
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
 
@@ -69,6 +72,12 @@ class EntityMonitorFactoryMock {
 }
 
 describe('MetaCardComponent', () => {
+  // Register generic mock entities BEFORE any test data is created
+  // This must run at module load time because const declarations below use the catalog
+  const testEntityCatalog = entityCatalog as TestEntityCatalog;
+  testEntityCatalog.clear();
+  generateGenericMockEntities().forEach(entity => entityCatalog.register(entity));
+
   const favorite = new UserFavorite<IFavoriteMetadata>('endpoint', 'endpointType', 'entityType');
   const entityConfig = new ComponentEntityMonitorConfig('guid', new EntitySchema('schema', 'endpointType'));
 
@@ -78,6 +87,7 @@ describe('MetaCardComponent', () => {
   let entityMonitorFactory: EntityMonitorFactoryMock;
 
   beforeEach(async () => {
+
     await TestBed.configureTestingModule({
       imports: [
         MetaCardComponent,

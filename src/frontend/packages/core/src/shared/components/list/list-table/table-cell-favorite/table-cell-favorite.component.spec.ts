@@ -188,12 +188,25 @@ describe('TableCellFavoriteComponent', () => {
       const testEntity: TestEntity = { id: 'invalid-config-test', name: 'Invalid Config Test' };
       const invalidConfig = { wrongProperty: 'value' } as any;
 
+      // Suppress the expected console.error since this is testing error handling
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
       component.row = testEntity;
       component.config = invalidConfig;
 
       // This should not crash, component handles invalid config gracefully
       expect(() => fixture.detectChanges()).not.toThrow();
       expect(component.favorite).toBeUndefined();
+
+      // Verify the error was logged
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('[TableCellFavoriteComponent] Invalid config'),
+        expect.stringContaining('Received config:'),
+        invalidConfig,
+        expect.stringContaining('Expected:')
+      );
+
+      consoleErrorSpy.mockRestore();
     });
   });
 

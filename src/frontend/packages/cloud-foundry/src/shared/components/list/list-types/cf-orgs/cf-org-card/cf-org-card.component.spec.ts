@@ -7,7 +7,6 @@ import { Store } from '@ngrx/store';
 
 import {
   ConfirmationDialogService,
-  CurrentUserPermissionsService,
   MetaCardComponent,
   MetaCardItemComponent,
   MetaCardKeyComponent,
@@ -17,6 +16,7 @@ import {
   InfinityPipe,
   MbToHumanSizePipe
 } from '@stratosui/core';
+import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import {
   VerifiedSession,
   EntityServiceFactory,
@@ -64,7 +64,7 @@ describe('CfOrgCardComponent', () => {
         ...generateTestCfEndpointServiceProvider(),
         EntityServiceFactory,
         ConfirmationDialogService,
-        CurrentUserPermissionsService,
+        ...cfCurrentUserPermissionsService,
         UserFavoriteManager,
       ]
     })

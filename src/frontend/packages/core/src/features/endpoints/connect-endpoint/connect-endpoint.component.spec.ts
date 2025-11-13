@@ -2,9 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import {
-  entityCatalog,
   EntityServiceFactory,
-  generateStratosEntities,
   EntityCatalogHelper,
   EntityCatalogHelpers
 } from '@stratosui/store';
@@ -28,12 +26,8 @@ describe('ConnectEndpointComponent', () => {
       ]
     });
 
-    // Clear and register entities on the singleton entity catalog
-    (entityCatalog as any).clear();
-    const entities = generateStratosEntities();
-    entities.forEach(entity => entityCatalog.register(entity));
-
     // Set up entity catalog helper from DI
+    // Entities are registered automatically via BaseTestModules' CATALOGUE_ENTITIES provider
     const helper = TestBed.inject(EntityCatalogHelper);
     EntityCatalogHelpers.SetEntityCatalogHelper(helper);
 

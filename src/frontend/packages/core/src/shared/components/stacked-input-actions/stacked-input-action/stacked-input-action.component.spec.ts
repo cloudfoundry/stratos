@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { of as observableOf } from 'rxjs';
 
@@ -14,6 +16,8 @@ describe('StackedInputActionComponent', () => {
     TestBed.configureTestingModule({
       providers: [
         ...(STORE_TEST_PROVIDERS || []),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideZonelessChangeDetection()
       ],
       imports: [

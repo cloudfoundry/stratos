@@ -95,7 +95,7 @@ describe('ActionDispatcher', () => {
     );
 
     const store = {
-      dispatch: (action: Action) => { console.log(action); },
+      dispatch: (action: Action) => { },
       select: (...args: any[]) => of(null),
     } as Store<AppState<any>>;
 

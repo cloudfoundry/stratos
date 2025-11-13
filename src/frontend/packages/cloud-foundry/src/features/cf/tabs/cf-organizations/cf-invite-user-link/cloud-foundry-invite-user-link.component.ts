@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
+import { CardWrapperComponent, CardContentComponent } from '../../../../../../../core/src/shared/components/cards';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { createCfOrgSpaceSteppersUrl } from '../../../cf.helpers';
 import { UserInviteService } from '../../../user-invites/user-invite.service';
@@ -20,7 +21,9 @@ interface UserInviteStepperLink {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule
+    CommonModule,
+    CardWrapperComponent,
+    CardContentComponent
   ]
 })
 export class CloudFoundryInviteUserLinkComponent implements OnInit {

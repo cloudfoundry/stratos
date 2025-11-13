@@ -7,7 +7,6 @@ import { Store } from '@ngrx/store';
 
 import {
   ConfirmationDialogService,
-  CurrentUserPermissionsService,
   MetaCardComponent,
   MetaCardItemComponent,
   MetaCardKeyComponent,
@@ -18,6 +17,7 @@ import {
   ApplicationStateIconPipe,
   CardStatusComponent
 } from '@stratosui/core';
+import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import {
   VerifiedSession,
   EntityServiceFactory,
@@ -72,7 +72,7 @@ describe('CfSpaceCardComponent', () => {
         ConfirmationDialogService,
         CloudFoundryUserProvidedServicesService,
         UserFavoriteManager,
-        CurrentUserPermissionsService,
+        ...cfCurrentUserPermissionsService,
       ]
     })
       .compileComponents();

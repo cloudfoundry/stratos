@@ -1,16 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { provideRouter } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
-import { SharedModule } from '@stratosui/core';
-import { getGitHubAPIURL, gitEntityCatalog, GITHUB_API_URL, GitSCMService } from '@stratosui/git';
-import { CATALOGUE_ENTITIES, entityCatalog, TestEntityCatalog } from '@stratosui/store';
-
-import { BaseTestModulesNoShared } from '../../../../../core/test-framework/core-test.helper';
-import { GitTestingModule } from '../../../git-testing.module';
-import { GitRegistrationComponent } from './git-registration.component';
+import { provideHttpClient } from '@angular/common/http';
+import { getGitHubAPIURL, GITHUB_API_URL, GitSCMService, gitEntityCatalog } from '@stratosui/git';
+import { createBasicStoreModule } from '../../../../../store/testing/src/store-test-helper';
+import { EntityCatalogHelper, EntityCatalogHelpers, EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateStratosEntities } from '../../../../../store/src/stratos-entity-generator';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
+import { GitRegistrationComponent } from './git-registration.component';
 
 describe('GitRegistrationComponent', () => {
   let component: GitRegistrationComponent;
@@ -19,13 +18,25 @@ describe('GitRegistrationComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
-        ...BaseTestModulesNoShared,
-        SharedModule,
-        GitTestingModule,
         GitRegistrationComponent,
       ],
       providers: [
-        EntityServiceFactory,
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          createBasicStoreModule(),
+          EntityCatalogTestModule
+        ),
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...gitEntityCatalog.allGitEntities()
+          ]
+        },
+        EntityCatalogHelper,
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
         GitSCMService,
         {
@@ -40,8 +51,12 @@ describe('GitRegistrationComponent', () => {
           }
         }
       ]
-    }),
+    })
     .compileComponents();
+
+    // Initialize EntityCatalogHelper for Angular 20 compatibility
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
   });
 
   beforeEach(() => {

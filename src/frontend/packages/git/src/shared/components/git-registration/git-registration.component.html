@@ -8,9 +8,12 @@
             @for (gitTypeEntry of gitTypes[epSubType].types | keyvalue; track gitTypeEntry) {
               <div class="block">
                 <label class="flex items-start space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors"
-                  [class.opacity-50]="gitTypeEntry.value.exists" [class.cursor-not-allowed]="gitTypeEntry.value.exists">
-                  <input type="radio" formControlName="selectedType" [value]="gitTypeEntry.key" [disabled]="gitTypeEntry.value.exists"
-                    class="mt-1 text-primary-600 focus:ring-primary-500 border-gray-300">
+                  [class.opacity-50]="gitTypeEntry.value.exists"
+                  [class.cursor-not-allowed]="gitTypeEntry.value.exists"
+                  [class.pointer-events-none]="gitTypeEntry.value.exists">
+                  <input type="radio" formControlName="selectedType" [value]="gitTypeEntry.key"
+                    class="mt-1 text-primary-600 focus:ring-primary-500 border-gray-300"
+                    [attr.aria-disabled]="gitTypeEntry.value.exists ? 'true' : null">
                   <div class="flex-1">
                     <div class="font-medium text-gray-900">{{ gitTypeEntry.value.label }}</div>
                     @if (gitTypeEntry.value.description) {

@@ -54,7 +54,6 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
   spaceGuid: string;
   editSpaceForm: FormGroup<EditSpaceForm>;
   originalSpaceQuotaGuid!: string;
-  spaceName!: string;
 
   constructor(
     store: Store<CFAppState>,
@@ -73,7 +72,6 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
       map(o => o.entity.entity),
       take(1),
       tap(n => {
-        this.spaceName = n.name;
         this.originalName = n.name;
         this.originalSpaceQuotaGuid = n.space_quota_definition_guid;
 
@@ -93,7 +91,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
     if (this.allSpacesInOrg) {
       return this.allSpacesInOrg
         .filter(o => o !== this.originalName)
-        .indexOf(spaceName ? spaceName : this.spaceName) === -1;
+        .indexOf(spaceName ? spaceName : this.editSpaceForm.value.spaceName || '') === -1;
     }
     return true;
   };

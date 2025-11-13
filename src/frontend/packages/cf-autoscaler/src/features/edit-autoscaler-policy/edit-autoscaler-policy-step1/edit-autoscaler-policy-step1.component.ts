@@ -1,13 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
-import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
 import { of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
-
-import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
-import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
+import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
+import { ApplicationService } from '@stratosui/cloud-foundry';
+import { StepOnNextFunction } from '@stratosui/core';
 import { autoscalerTransformArrayToMap } from '../../../core/autoscaler-helpers/autoscaler-transform-policy';
 import { PolicyAlert } from '../../../core/autoscaler-helpers/autoscaler-util';
 import { numberWithFractionOrExceedRange } from '../../../core/autoscaler-helpers/autoscaler-validation';

@@ -15,7 +15,7 @@
       </div>
       <form class="stepper-form" [formGroup]="domainFormGroup">
         <app-form-field>
-          <app-select formControlName="domain" placeholder="Domain" [(ngModel)]="selectedDomain" required [appFocus]="domains">
+          <app-select formControlName="domain" placeholder="Domain" required [appFocus]="domains">
             @for (domain of domains; track domain) {
               <app-option [value]="domain">{{domain?.entity?.name}}</app-option>
             }

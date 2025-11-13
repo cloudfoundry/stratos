@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach } from 'vitest';
 
@@ -48,6 +49,7 @@ describe('DetachServiceInstanceComponent', () => {
           }
         },
         provideZonelessChangeDetection(),
+        provideNoopAnimations(),
       ]
     }).compileComponents();
 

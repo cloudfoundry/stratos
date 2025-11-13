@@ -1,6 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter, RouterOutlet } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS, CoreTestingModule } from '@test-framework';
 
@@ -28,6 +30,8 @@ describe('AppComponent', () => {
         CurrentUserPermissionsService,
         provideZonelessChangeDetection(),
         provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
       ]
     }).compileComponents();
   });

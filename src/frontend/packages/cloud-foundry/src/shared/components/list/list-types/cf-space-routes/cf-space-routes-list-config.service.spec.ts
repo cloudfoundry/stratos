@@ -7,7 +7,11 @@ import { provideRouter } from '@angular/router';
 import { Store, StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { ConfirmationDialogService, CurrentUserPermissionsService } from '@stratosui/core';
+import {
+  ConfirmationDialogService,
+  CurrentUserPermissionsService
+} from '@stratosui/core';
+import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import {
   appReducers,
   TEST_CATALOGUE_ENTITIES,
@@ -85,6 +89,7 @@ describe('CfSpaceRoutesListConfigService', () => {
           deps: [Store, ConfirmationDialogService, CloudFoundrySpaceService, DatePipe, CurrentUserPermissionsService]
         },
         DatePipe,
+        ...cfCurrentUserPermissionsService,
       ]
     });
 

@@ -9,12 +9,9 @@ import { of as observableOf } from 'rxjs';
 import { filter, first, map, pairwise } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 
-import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
-import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
-import { AppState } from '../../../../../store/src/app-state';
-import { EntityService } from '../../../../../store/src/entity-service';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
-import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
+import { ApplicationService } from '@stratosui/cloud-foundry';
+import { StepOnNextFunction } from '@stratosui/core';
+import { AppState, EntityService, EntityServiceFactory, RequestInfoState } from '@stratosui/store';
 import { AutoscalerConstants, PolicyAlert } from '../../../core/autoscaler-helpers/autoscaler-util';
 import {
   dateTimeIsSameOrAfter,
@@ -29,10 +26,12 @@ import {
 } from '../../../store/app-autoscaler.types';
 import { EditAutoscalerPolicyDirective } from '../edit-autoscaler-policy-base-step';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
-import { TileGridComponent } from '../../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
-import { TileGroupComponent } from '../../../../../core/src/shared/components/tile/tile-group/tile-group.component';
-import { TileComponent } from '../../../../../core/src/shared/components/tile/tile/tile.component';
-import { MetadataItemComponent } from '../../../../../core/src/shared/components/metadata-item/metadata-item.component';
+import {
+  TileGridComponent,
+  TileGroupComponent,
+  TileComponent,
+  MetadataItemComponent
+} from '@stratosui/core';
 
 interface EditSpecificDateForm {
   instance_min_count: FormControl<number>;

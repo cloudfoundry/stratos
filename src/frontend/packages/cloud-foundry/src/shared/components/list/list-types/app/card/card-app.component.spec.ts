@@ -79,9 +79,12 @@ describe('CardAppComponent', () => {
     component.row = {
       entity: {
         state: '',
+        cfGuid: 'cf-guid',
+        space_guid: 'space-guid',
         space: {
           entity: {
             name: '',
+            organization_guid: 'org-guid',
             organization: {
               entity: {
                 name: '',
@@ -90,7 +93,9 @@ describe('CardAppComponent', () => {
           },
         },
       } as IApp,
-      metadata: {} as APIResourceMetadata,
+      metadata: {
+        guid: 'app-guid'
+      } as APIResourceMetadata,
     };
     fixture.detectChanges();
   });

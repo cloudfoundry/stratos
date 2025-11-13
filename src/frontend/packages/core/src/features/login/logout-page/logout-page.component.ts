@@ -8,6 +8,7 @@ import { map } from 'rxjs/operators';
 
 import { IntroScreenComponent } from '../../../shared/components/intro-screen/intro-screen.component';
 import { StratosTitleComponent } from '../../../shared/components/stratos-title/stratos-title.component';
+import { AppProgressBarComponent } from '../../../shared/components/progress-bar/app-progress-bar.component';
 
 @Component({
 selector: 'app-logout-page',
@@ -19,7 +20,8 @@ selector: 'app-logout-page',
     CommonModule,
     CardWrapperComponent,
     IntroScreenComponent,
-    StratosTitleComponent
+    StratosTitleComponent,
+    AppProgressBarComponent
   ]
 })
 export class LogoutPageComponent implements OnInit {

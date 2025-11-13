@@ -11,6 +11,7 @@ import {
   EntityCatalogTestModuleManualStore,
   TEST_CATALOGUE_ENTITIES,
   entityCatalog,
+  TestEntityCatalog,
   EntityCatalogEntityConfig,
   EntityRequestAction,
   WrapperRequestActionSuccess,
@@ -51,9 +52,44 @@ describe('Entity Relations - validate -', () => {
   let apiResponse: APIResponse;
   let newEntities: IRequestTypeState;
 
-  const orgEntityKey = entityCatalog.getEntityKey(CF_ENDPOINT_TYPE, organizationEntityType);
-  const spaceEntityKey = entityCatalog.getEntityKey(CF_ENDPOINT_TYPE, spaceEntityType);
-  const quotaEntityKey = entityCatalog.getEntityKey(CF_ENDPOINT_TYPE, quotaDefinitionEntityType);
+  // Entity keys computed lazily after catalog is initialized
+  let orgEntityKey: string;
+  let spaceEntityKey: string;
+  let quotaEntityKey: string;
+
+  // Suppress entity catalog warnings for these tests
+  // The warnings occur because EntityCatalogTestModuleManualStore clears and re-registers
+  // the catalog after entity keys are computed, causing temporary lookup failures
+  beforeAll(() => {
+    const originalWarn = console.warn;
+    vi.spyOn(console, 'warn').mockImplementation((...args: any[]) => {
+      // Suppress only the entity catalog warnings
+      const firstArg = args[0];
+      if (typeof firstArg === 'string' && firstArg.includes('Missing catalog entity:')) {
+        return;
+      }
+      // Allow other warnings through
+      originalWarn.apply(console, args);
+    });
+  });
+
+  afterAll(() => {
+    vi.restoreAllMocks();
+  });
+
+  function initEntityCatalog() {
+    // Clear and register CF entities
+    const testEntityCatalog = entityCatalog as TestEntityCatalog;
+    testEntityCatalog.clear();
+    generateCFEntities().forEach(entity => {
+      entityCatalog.register(entity);
+    });
+
+    // Compute entity keys after catalog is populated
+    orgEntityKey = entityCatalog.getEntityKey(CF_ENDPOINT_TYPE, organizationEntityType);
+    spaceEntityKey = entityCatalog.getEntityKey(CF_ENDPOINT_TYPE, spaceEntityType);
+    quotaEntityKey = entityCatalog.getEntityKey(CF_ENDPOINT_TYPE, quotaDefinitionEntityType);
+  }
 
   function setup(store) {
     TestBed.configureTestingModule({
@@ -230,6 +266,9 @@ describe('Entity Relations - validate -', () => {
   describe('validate from store - ', () => {
 
     function createBasicStore() {
+      // Initialize catalog before creating entity store
+      initEntityCatalog();
+
       const entityMap = new Map<EntityCatalogEntityConfig, Array<TestStoreEntity>>([
         [
           cfEntityFactory(organizationEntityType),
@@ -253,6 +292,12 @@ describe('Entity Relations - validate -', () => {
     function advancedSetup(mapStore: (store) => Partial<CFAppState> = mStore => mStore) {
       const store = mapStore(createBasicStore());
       setup(store);
+
+      // Recompute entity keys after setup() clears and re-registers catalog
+      orgEntityKey = entityCatalog.getEntityKey(CF_ENDPOINT_TYPE, organizationEntityType);
+      spaceEntityKey = entityCatalog.getEntityKey(CF_ENDPOINT_TYPE, spaceEntityType);
+      quotaEntityKey = entityCatalog.getEntityKey(CF_ENDPOINT_TYPE, quotaDefinitionEntityType);
+
       allEntities = store.requestData;
       newEntities = null;
       apiResponse = null;
@@ -502,6 +547,8 @@ describe('Entity Relations - validate -', () => {
   describe('validate from api response', () => {
 
     beforeEach(() => {
+      // Initialize catalog before creating entity store
+      initEntityCatalog();
 
       const entityMap = new Map<EntityCatalogEntityConfig, Array<TestStoreEntity>>([
         [
@@ -514,6 +561,11 @@ describe('Entity Relations - validate -', () => {
       ]);
       const store = createEntityStoreState(entityMap) as Partial<CFAppState>;
       setup(store);
+
+      // Recompute entity keys after setup() clears and re-registers catalog
+      orgEntityKey = entityCatalog.getEntityKey(CF_ENDPOINT_TYPE, organizationEntityType);
+      spaceEntityKey = entityCatalog.getEntityKey(CF_ENDPOINT_TYPE, spaceEntityType);
+      quotaEntityKey = entityCatalog.getEntityKey(CF_ENDPOINT_TYPE, quotaDefinitionEntityType);
 
       apiResponse = {
         response: {

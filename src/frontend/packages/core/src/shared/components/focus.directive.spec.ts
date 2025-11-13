@@ -2,6 +2,8 @@ import { FocusDirective } from './focus.directive';
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Component, DebugElement, provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { By } from '@angular/platform-browser';
 
 @Component({
@@ -24,6 +26,8 @@ describe('FocusDirective', () => {
     TestBed.configureTestingModule({
       imports: [TestAutoFocusComponent],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideZonelessChangeDetection(),
       ]
     });

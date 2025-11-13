@@ -5,7 +5,12 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { Store } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { ConfirmationDialogService, CoreModule, CurrentUserPermissionsService } from '@stratosui/core';
+import {
+  ConfirmationDialogService,
+  CoreModule,
+  CurrentUserPermissionsService
+} from '@stratosui/core';
+import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import { ApplicationServiceMock, generateCfStoreModules } from '@test-framework/cf';
 import { CFAppState } from '../../../../../cf-app-state';
 import { ApplicationService } from '../../../../../features/applications/application.service';
@@ -36,6 +41,7 @@ describe('CfAppRoutesListConfigService', () => {
           deps: [Store, ApplicationService, ConfirmationDialogService, DatePipe, CurrentUserPermissionsService]
         },
         DatePipe,
+        ...cfCurrentUserPermissionsService,
         provideZonelessChangeDetection(),
       ]
     });

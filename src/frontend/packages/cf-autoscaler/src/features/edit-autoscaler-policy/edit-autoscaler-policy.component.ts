@@ -5,11 +5,8 @@ import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core
 import { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
-import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
-import { CustomIconComponent } from '@stratosui/core';
-import { PageHeaderComponent } from '../../../../core/src/shared/components/page-header/page-header.component';
-import { SteppersComponent } from '../../../../core/src/shared/components/stepper/steppers/steppers.component';
-import { StepComponent } from '../../../../core/src/shared/components/stepper/step/step.component';
+import { ApplicationService } from '@stratosui/cloud-foundry';
+import { CustomIconComponent, PageHeaderComponent, SteppersComponent, StepComponent } from '@stratosui/core';
 import { EditAutoscalerPolicyStep1Component } from './edit-autoscaler-policy-step1/edit-autoscaler-policy-step1.component';
 import { EditAutoscalerPolicyStep2Component } from './edit-autoscaler-policy-step2/edit-autoscaler-policy-step2.component';
 import { EditAutoscalerPolicyStep3Component } from './edit-autoscaler-policy-step3/edit-autoscaler-policy-step3.component';

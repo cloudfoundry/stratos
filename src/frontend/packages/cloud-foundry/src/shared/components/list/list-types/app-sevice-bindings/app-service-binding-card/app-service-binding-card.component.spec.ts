@@ -4,7 +4,10 @@ import { provideZonelessChangeDetection, importProvidersFrom, APP_INITIALIZER } 
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { ConfirmationDialogService, CurrentUserPermissionsService } from '@stratosui/core';
+import {
+  ConfirmationDialogService
+} from '@stratosui/core';
+import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import { EntityCatalogHelper, EntityCatalogHelpers, EntityMonitorFactory, PaginationMonitorFactory, EntityServiceFactory, APIResource } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS, createBasicStoreModule } from '@stratosui/store/testing';
 import { ApplicationServiceMock, CloudFoundryTestingModule, CF_BASE_TEST_PROVIDERS } from "@test-framework/cf";
@@ -40,8 +43,9 @@ describe('AppServiceBindingCardComponent', () => {
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         ApplicationStateService,
         ConfirmationDialogService,
-        CurrentUserPermissionsService,
+        
         PaginationMonitorFactory,
+        ...cfCurrentUserPermissionsService,
         DatePipe,
         ServiceActionHelperService,
         provideZonelessChangeDetection(),

@@ -2,9 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
-  entityCatalog,
   EntityServiceFactory,
-  generateStratosEntities,
   EntityCatalogHelper,
   EntityCatalogHelpers
 } from '@stratosui/store';
@@ -43,12 +41,8 @@ describe('DashboardBaseComponent', () => {
       ],
     });
 
-    // Clear and register entities on the singleton entity catalog
-    (entityCatalog as any).clear();
-    const entities = generateStratosEntities();
-    entities.forEach(entity => entityCatalog.register(entity));
-
     // Set up entity catalog helper from DI
+    // Entities are registered automatically via BaseTestModulesNoShared's CATALOGUE_ENTITIES provider
     const helper = TestBed.inject(EntityCatalogHelper);
     EntityCatalogHelpers.SetEntityCatalogHelper(helper);
 

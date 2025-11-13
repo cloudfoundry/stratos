@@ -1,14 +1,12 @@
-import { CommonModule } from '@angular/common';
+import { CUSTOM_ELEMENTS_SCHEMA, importProvidersFrom } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { createEmptyStoreModule } from "@test-framework/cf-autoscaler-test.helper";
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { ApplicationService, RunningInstancesComponent, ApplicationStateService } from '@stratosui/cloud-foundry';
-import { ApplicationServiceMock } from '@stratosui/cloud-foundry/testing';
-import { CoreModule, CopyToClipboardComponent, MetadataItemComponent, AppTestModule } from '@stratosui/core';
-import { EntityCatalogHelper, EntityMonitorFactory, PaginationMonitorFactory, EntityServiceFactory } from '@stratosui/store';
+import { ApplicationServiceMock, ApplicationStateService } from "@test-framework/cf";
+import { ApplicationService } from '@stratosui/cloud-foundry';
+import { CoreModule } from '@stratosui/core';
+import { generateBaseTestStoreModules } from '@test-framework/core-test.helper';
 import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
 import { CardAutoscalerDefaultComponent } from './card-autoscaler-default.component';
 
@@ -16,35 +14,23 @@ describe('CardAutoscalerDefaultComponent', () => {
   let component: CardAutoscalerDefaultComponent;
   let fixture: ComponentFixture<CardAutoscalerDefaultComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      declarations: [
-        CardAutoscalerDefaultComponent,
-        MetadataItemComponent,
-        CopyToClipboardComponent,
-        RunningInstancesComponent,
-      ],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
-        CfAutoscalerTestingModule,
-        CoreModule,
-        CommonModule,
-        NoopAnimationsModule,
-        createEmptyStoreModule(),
-        AppTestModule,
+        CardAutoscalerDefaultComponent,
       ],
       providers: [
-        EntityServiceFactory,
-        
+        importProvidersFrom(
+          CfAutoscalerTestingModule,
+          ...generateBaseTestStoreModules(),
+          CoreModule,
+          NoopAnimationsModule
+        ),
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         ApplicationStateService,
-        EntityMonitorFactory,
-        PaginationMonitorFactory,
-        EntityCatalogHelper,
-
-        provideZonelessChangeDetection(),
-      ]
-    }),
-      .compileComponents();
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
+    }).compileComponents();
   });
 
   beforeEach(() => {

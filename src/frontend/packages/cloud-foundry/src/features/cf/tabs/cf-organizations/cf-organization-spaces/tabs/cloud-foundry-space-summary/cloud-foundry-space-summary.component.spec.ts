@@ -17,7 +17,14 @@ import {
   EntityCatalogHelpers
 } from '@stratosui/store';
 import { createEmptyStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { TabNavService, ConfirmationDialogService, TailwindSnackBarService, CurrentUserPermissionsService, CoreModule } from '@stratosui/core';
+import {
+  TabNavService,
+  ConfirmationDialogService,
+  TailwindSnackBarService,
+  
+  CoreModule
+} from '@stratosui/core';
+import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import {
   CloudFoundrySpaceServiceMock,
   generateActiveRouteCfOrgSpaceMock,
@@ -70,7 +77,7 @@ describe('CloudFoundrySpaceSummaryComponent', () => {
         TabNavService,
         ConfirmationDialogService,
         TailwindSnackBarService,
-        CurrentUserPermissionsService,
+        ...cfCurrentUserPermissionsService,
         PaginationMonitorFactory,
         EntityMonitorFactory,
         EntityServiceFactory,

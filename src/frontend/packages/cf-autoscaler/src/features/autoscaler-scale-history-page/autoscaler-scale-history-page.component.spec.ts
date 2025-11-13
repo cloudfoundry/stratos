@@ -1,14 +1,15 @@
 import { DatePipe } from '@angular/common';
+import { CUSTOM_ELEMENTS_SCHEMA, importProvidersFrom } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
-import { createEmptyStoreModule } from "@test-framework/cf-autoscaler-test.helper";
+import { provideRouter } from '@angular/router';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { ApplicationService } from '@stratosui/cloud-foundry';
-import { ApplicationServiceMock } from '@stratosui/cloud-foundry/testing';
-import { CoreModule, CurrentUserPermissionsService, SharedModule, TabNavService } from '@stratosui/core';
+import { ApplicationServiceMock } from '@test-framework/cf';
+import { CoreModule, CurrentUserPermissionsService, TabNavService } from '@stratosui/core';
+import { generateBaseTestStoreModules } from '@test-framework/core-test.helper';
 import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
 import { AutoscalerScaleHistoryPageComponent } from './autoscaler-scale-history-page.component';
 
@@ -18,25 +19,25 @@ describe('AutoscalerScaleHistoryPageComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [AutoscalerScaleHistoryPageComponent],
       imports: [
-        CfAutoscalerTestingModule,
-        NoopAnimationsModule,
-        createEmptyStoreModule(),
-        CoreModule,
-        SharedModule,
-        RouterTestingModule,
+        AutoscalerScaleHistoryPageComponent,
       ],
       providers: [
-        
+        importProvidersFrom(
+          CfAutoscalerTestingModule,
+          ...generateBaseTestStoreModules(),
+          CoreModule,
+          NoopAnimationsModule
+        ),
+        provideRouter([]),
         DatePipe,
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         TabNavService,
         CurrentUserPermissionsService,
-
         provideZonelessChangeDetection(),
-      ]
-    }),
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
+    })
       .compileComponents();
   });
 
@@ -50,5 +51,5 @@ describe('AutoscalerScaleHistoryPageComponent', () => {
     expect(component).toBeTruthy();
   });
 
-
+  afterAll(() => { });
 });

@@ -7,6 +7,7 @@ import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 import { CurrentUserPermissionsService } from '@stratosui/core';
+import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import {
   appReducers,
   TEST_CATALOGUE_ENTITIES,
@@ -51,7 +52,7 @@ describe('EditOrganizationStepComponent', () => {
           ]
         },
         EntityServiceFactory,
-        CurrentUserPermissionsService,
+        ...cfCurrentUserPermissionsService,
         {
           provide: ActivatedRoute,
           useValue: {

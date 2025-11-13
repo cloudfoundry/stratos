@@ -93,7 +93,7 @@ describe('Selectors in Zoneless Mode', () => {
         </div>
       `,
       standalone: true,
-    }),
+    })
     class TestComponent {
       // Convert selector to signal for zoneless mode
       endpoint: Signal<EndpointModel | undefined> = selectAsSignal(
@@ -284,7 +284,7 @@ describe('Advanced Signal Selector Patterns', () => {
       `,
       standalone: true,
       imports: [JsonPipe]
-    }),
+    })
     class MultiSignalComponent {
       endpoints = selectAsSignal(endpointEntitiesSelector);
       connected = selectAsSignal(connectedEndpointsSelector());
@@ -306,7 +306,7 @@ describe('Advanced Signal Selector Patterns', () => {
         selector: 'test-computed',
         template: '',
         standalone: true,
-      }),
+      })
       class ComputedSignalComponent {
         endpoints = selectAsSignal(endpointEntitiesSelector);
 

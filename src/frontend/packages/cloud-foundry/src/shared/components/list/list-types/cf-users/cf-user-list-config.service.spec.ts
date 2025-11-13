@@ -4,7 +4,8 @@ import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CFAppState } from '@stratosui/cloud-foundry';
+import {CFAppState,
+  cfCurrentUserPermissionsService} from '@stratosui/cloud-foundry';
 import { CurrentUserPermissionsService } from '@stratosui/core';
 import {
   EntityCatalogTestModule,
@@ -57,7 +58,7 @@ describe('CfUserListConfigService', () => {
         },
         { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock },
         { provide: CloudFoundryOrganizationService, useClass: CloudFoundryOrganizationServiceMock },
-        CurrentUserPermissionsService,
+        ...cfCurrentUserPermissionsService,
       ]
     });
 

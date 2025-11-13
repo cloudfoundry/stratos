@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, TemplateR
 
 import { StratosStatus } from '@stratosui/store';
 import { CustomIconComponent } from '../../shared/components/custom-material/custom-material.component';
+import { AppSpinnerComponent } from '../../shared/components/progress-spinner/app-spinner.component';
 
 interface IconDefinition {
   icon: string;
@@ -22,7 +23,8 @@ type StatefulIconDefinition = IconDefinition | IconTemplateDefinition;
   standalone: true,
   imports: [
     CommonModule,
-    CustomIconComponent
+    CustomIconComponent,
+    AppSpinnerComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })

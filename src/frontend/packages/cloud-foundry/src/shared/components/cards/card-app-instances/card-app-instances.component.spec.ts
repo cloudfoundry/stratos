@@ -3,7 +3,12 @@ import { provideZonelessChangeDetection, importProvidersFrom, APP_INITIALIZER } 
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { ConfirmationDialogService, CurrentUserPermissionsService, TailwindSnackBarService } from '@stratosui/core';
+import {
+  ConfirmationDialogService,
+  
+  TailwindSnackBarService
+} from '@stratosui/core';
+import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import { EntityCatalogHelper, EntityCatalogHelpers, PaginationMonitorFactory } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS, createBasicStoreModule } from '@stratosui/store/testing';
 import { ApplicationServiceMock } from '@test-framework/application-service-helper';
@@ -38,7 +43,7 @@ describe('CardAppInstancesComponent', () => {
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         ApplicationStateService,
         ConfirmationDialogService,
-        CurrentUserPermissionsService,
+        ...cfCurrentUserPermissionsService,
         PaginationMonitorFactory,
         TailwindSnackBarService,
         provideZonelessChangeDetection(),

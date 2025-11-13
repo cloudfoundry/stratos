@@ -7,6 +7,7 @@ import { StoreModule } from '@ngrx/store';
 import { CommonModule } from '@angular/common';
 
 import { InternalEventMonitorFactory, appReducers } from '@stratosui/store';
+import { CoreTestingModule } from '@test-framework';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { TabNavService } from '../../../tab-nav.service';
@@ -36,6 +37,7 @@ describe('PageHeaderComponent', () => {
         provideZonelessChangeDetection(),
       ],
       imports: [
+        CoreTestingModule,
         CommonModule,
         RouterTestingModule,
         StoreModule.forRoot(appReducers),

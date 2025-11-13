@@ -3,12 +3,9 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Inpu
 import { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
-import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
-import { RunningInstancesComponent } from '../../../../cloud-foundry/src/shared/components/running-instances/running-instances.component';
-import { MetadataItemComponent } from '../../../../core/src/shared/components/metadata-item/metadata-item.component';
-import { EntityService } from '../../../../store/src/entity-service';
-import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
-import { APIResource } from '../../../../store/src/types/api.types';
+import { ApplicationService, RunningInstancesComponent } from '@stratosui/cloud-foundry';
+import { MetadataItemComponent } from '@stratosui/core';
+import { EntityService, EntityServiceFactory, APIResource } from '@stratosui/store';
 import { GetAppAutoscalerPolicyAction } from '../../store/app-autoscaler.actions';
 import { AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
 

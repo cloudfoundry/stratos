@@ -2,21 +2,21 @@ import { DatePipe } from '@angular/common';
 import { inject, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { createEmptyStoreModule } from "@test-framework/cf-autoscaler-test.helper";
 
 import {
   ApplicationEnvVarsHelper,
-} from '../../../../../cloud-foundry/src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { ApplicationStateService } from '../../../../../cloud-foundry/src/shared/services/application-state.service';
-import {
+  ApplicationStateService,
   generateTestApplicationServiceProvider,
-} from '../../../../../cloud-foundry/test-framework/application-service-helper';
+} from '@test-framework/cf';
+import {
+  AppTestModule,
+} from '@test-framework';
+import {
+  EntityCatalogHelper,
+} from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 import { MetricsRangeSelectorService } from '../../../../../core/src/shared/services/metrics-range-selector.service';
-import { AppTestModule } from '../../../../../core/test-framework/core-test.helper';
-import { EntityCatalogHelper } from '../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { CfAutoscalerTestingModule } from '../../../cf-autoscaler-testing.module';
 import { AppAutoscalerMetricChartListConfigService } from './app-autoscaler-metric-chart-list-config.service';
 
@@ -25,23 +25,19 @@ describe('AppAutoscalerMetricChartListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        
         AppAutoscalerMetricChartListConfigService,
         generateTestApplicationServiceProvider('1', '1'),
         ApplicationEnvVarsHelper,
         DatePipe,
-        EntityServiceFactory,
-        EntityMonitorFactory,
         EntityCatalogHelper,
         ApplicationStateService,
-        PaginationMonitorFactory,
         MetricsRangeSelectorService,
-
+        ...STORE_TEST_PROVIDERS,
         provideZonelessChangeDetection(),
       ],
       imports: [
         CfAutoscalerTestingModule,
-        createEmptyStoreModule(),
+        createBasicStoreModule(),
         AppTestModule,
       ]
     });

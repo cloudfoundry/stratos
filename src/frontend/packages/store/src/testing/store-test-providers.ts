@@ -1,5 +1,4 @@
 import { Provider } from '@angular/core';
-import { vi } from 'vitest';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { EntityServiceFactory } from '../entity-service-factory.service';
 import { EntityMonitorFactory } from '../monitors/entity-monitor.factory.service';
@@ -36,18 +35,27 @@ export function getStoreTestProviders(...additionalProviders: Provider[]): Provi
 }
 
 /**
- * Mock factory creators for tests that need spy objects
+ * Mock factory creators for tests that need spy objects.
+ * Note: These use a simple mock function implementation to avoid importing test dependencies.
  */
+const createMockFn = () => {
+  const fn: any = (...args: any[]) => fn.mock.results[fn.mock.results.length - 1]?.value;
+  fn.mock = { calls: [], results: [] };
+  fn.mockReturnValue = (value: any) => { fn.mock.results.push({ value }); return fn; };
+  fn.mockImplementation = (impl: any) => { fn.impl = impl; return fn; };
+  return fn;
+};
+
 export function createMockEntityServiceFactory(): any {
-  return { create: vi.fn() };
+  return { create: createMockFn() };
 }
 
 export function createMockEntityMonitorFactory(): any {
-  return { create: vi.fn(), getMonitor: vi.fn() };
+  return { create: createMockFn(), getMonitor: createMockFn() };
 }
 
 export function createMockPaginationMonitorFactory(): any {
-  return { create: vi.fn(), getMonitor: vi.fn() };
+  return { create: createMockFn(), getMonitor: createMockFn() };
 }
 
 /**

@@ -5,7 +5,10 @@ import { provideRouter } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { TabNavService, CurrentUserPermissionsService } from '@stratosui/core';
+import {
+  TabNavService
+} from '@stratosui/core';
+import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import {
   appReducers,
   TEST_CATALOGUE_ENTITIES,
@@ -46,7 +49,7 @@ describe('CloudFoundryTabsBaseComponent', () => {
             ]
           },
           EntityServiceFactory,
-          CurrentUserPermissionsService,
+          ...cfCurrentUserPermissionsService,
           ...generateTestCfEndpointServiceProvider(),
           { provide: ActiveRouteCfOrgSpace, useValue: { cfGuid: testSCFEndpointGuid } },
           TabNavService,

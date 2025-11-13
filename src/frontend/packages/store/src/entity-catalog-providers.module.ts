@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { entityCatalog } from './entity-catalog/entity-catalog';
 import { EntityServiceFactory } from './entity-service-factory.service';
+import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from './monitors/pagination-monitor.factory';
 import {
   ENTITY_CATALOG_TOKEN,
@@ -16,6 +17,7 @@ import {
   providers: [
     // Provide the actual services
     EntityServiceFactory,
+    EntityMonitorFactory,
     PaginationMonitorFactory,
     // Provide the entityCatalog singleton via token
     {

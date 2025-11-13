@@ -5,7 +5,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientModule } from '@angular/common/http';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { of } from 'rxjs';
-import { EndpointModel, UserFavoriteManager } from '@stratosui/store';
+import { EndpointModel, UserFavoriteManager, UserFavorite, IEndpointFavMetadata } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { SidePanelService } from '@stratosui/core';
 import { CoreTestingModule } from '@test-framework/core-test.modules';
@@ -39,19 +39,33 @@ describe('HomePageEndpointCardComponent', () => {
     component = fixture.componentInstance;
     userFavoriteManager = TestBed.inject(UserFavoriteManager);
 
+    // Create a proper UserFavorite mock for the endpoint
+    const mockEndpoint: EndpointModel = {
+      cnsi_type: 'metrics',
+      guid: 'test-guid',
+      name: 'Test Metrics'
+    } as EndpointModel;
+
+    // UserFavorite constructor: (endpointId, endpointType, entityType, entityId, metadata)
+    // For endpoint favorites, entityType is 'endpoint' and endpointType is the endpoint's cnsi_type
+    const mockFavorite = new UserFavorite<IEndpointFavMetadata>(
+      mockEndpoint.guid,              // endpointId
+      mockEndpoint.cnsi_type,          // endpointType (metrics)
+      'endpoint',                      // entityType (this is an endpoint favorite)
+      mockEndpoint.guid,               // entityId
+      {
+        name: mockEndpoint.name || 'Test Endpoint',
+        guid: mockEndpoint.guid,
+      }
+    );
+
     // Mock UserFavoriteManager methods used in ngOnInit
     vi.spyOn(userFavoriteManager, 'endpointHasEntitiesThatCanFavorite').mockReturnValue(false);
     vi.spyOn(userFavoriteManager, 'getFavoritesForEndpoint').mockReturnValue(of([]));
-    vi.spyOn(userFavoriteManager, 'getFavoriteEndpointFromEntity').mockReturnValue({
-      getLink: () => '/test-link',
-      getPrettyTypeName: () => 'Endpoint'
-    } as any);
+    vi.spyOn(userFavoriteManager, 'getFavoriteEndpointFromEntity').mockReturnValue(mockFavorite as any);
 
     // Set required input
-    fixture.componentInstance.endpoint = {
-      cnsi_type: 'metrics',
-      guid: 'test-guid'
-    } as EndpointModel;
+    fixture.componentInstance.endpoint = mockEndpoint;
 
     fixture.detectChanges();
   });

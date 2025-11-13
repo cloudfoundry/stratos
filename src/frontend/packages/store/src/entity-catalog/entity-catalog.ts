@@ -265,7 +265,12 @@ export class EntityCatalog {
 
   private registerEndpoint(endpoint: StratosCatalogEndpointEntity) {
     if (this.endpoints.has(endpoint.entityKey)) {
-      console.warn(`Duplicate endpoint catalog entity found. ID: ${endpoint.entityKey} - Type: ${endpoint.definition.type}`);
+      // Suppress duplicate warnings in test environment to reduce noise
+      // Test setup can cause harmless duplicate registrations
+      const isTestEnv = typeof (window as any).describe !== 'undefined';
+      if (!isTestEnv) {
+        console.warn(`Duplicate endpoint catalog entity found. ID: ${endpoint.entityKey} - Type: ${endpoint.definition.type}`);
+      }
     } else {
       this.endpoints.set(endpoint.entityKey, endpoint);
       if (this.debugConfig.enabled && this.debugConfig.logRegistrations) {
@@ -277,9 +282,14 @@ export class EntityCatalog {
   private registerEntity(entity: StratosCatalogEntity) {
     if (this.entities.has(entity.entityKey)) {
       const { type } = entity.definition;
-      console.warn(
-        `Duplicate catalog entity found. ID: ${entity.entityKey} - Type: ${type} - Endpoint: ${entity.definition.endpoint.type}`
-      );
+      // Suppress duplicate warnings in test environment to reduce noise
+      // Test setup can cause harmless duplicate registrations
+      const isTestEnv = typeof (window as any).describe !== 'undefined';
+      if (!isTestEnv) {
+        console.warn(
+          `Duplicate catalog entity found. ID: ${entity.entityKey} - Type: ${type} - Endpoint: ${entity.definition.endpoint.type}`
+        );
+      }
     } else {
       this.entities.set(entity.entityKey, entity);
       if (this.debugConfig.enabled && this.debugConfig.logRegistrations) {
@@ -604,9 +614,8 @@ export class TestEntityCatalog extends EntityCatalog {
 // makes testing much easier and remove the need for this.
 /* tslint:disable-next-line:no-string-literal  */
 // Detect test environment (Karma or Vitest)
-// Note: import.meta.env.VITEST is set automatically by Vitest at runtime
-const isTestEnvironment = (typeof import.meta !== 'undefined' && import.meta.env?.VITEST) ||
-                          (typeof window !== 'undefined' && !!(window as any)['__karma__']) ||
+// Note: We check for test globals without importing test dependencies to avoid bundling test code
+const isTestEnvironment = (typeof window !== 'undefined' && !!(window as any)['__karma__']) ||
                           (typeof window !== 'undefined' && typeof (window as any).describe === 'function') ||
                           (typeof import.meta !== 'undefined' && import.meta.env?.MODE === 'test');
 export const entityCatalog: EntityCatalog = isTestEnvironment ? new TestEntityCatalog() : new EntityCatalog();

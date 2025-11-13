@@ -188,8 +188,22 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     });
     this.updateType();
 
-    // Check for changes to the from selected type
-    this.sub = this.registerForm.controls.selectedType.valueChanges.subscribe(changes => this.updateType(changes));
+    // Check for changes to the selected type
+    this.sub = this.registerForm.controls.selectedType.valueChanges.subscribe(changes => {
+      // Prevent selection of already-registered endpoints
+      const typ = changes ?? '';
+      const defn = this.gitTypes[this.epSubType].types[typ];
+      if (defn?.exists) {
+        // If user tries to select an existing endpoint, revert to the previous valid selection
+        const validSelection = Object.keys(this.gitTypes[this.epSubType].types).find(key => {
+          const item = this.gitTypes[this.epSubType].types[key];
+          return !item.exists;
+        });
+        this.registerForm.controls.selectedType.setValue(validSelection || '', { emitEvent: false });
+      } else {
+        this.updateType(changes);
+      }
+    });
 
     this.validate = this.registerForm.statusChanges.pipe(map(() => {
       const typ = this.registerForm.value.selectedType ?? '';
@@ -271,5 +285,13 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
       this.registerForm.controls.nameField.updateValueAndValidity();
       this.registerForm.controls.urlField.updateValueAndValidity();
     });
+  }
+
+  /**
+   * Check if a git type option is selectable (not already registered)
+   * Used for visual styling and preventing selection in the template
+   */
+  isTypeSelectable(gitType: GithubType): boolean {
+    return !gitType.exists;
   }
 }

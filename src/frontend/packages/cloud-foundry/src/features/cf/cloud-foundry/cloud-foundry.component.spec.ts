@@ -5,7 +5,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 
 import { TabNavService } from '@stratosui/core';
 import { EntityCatalogHelper, EntityCatalogHelpers, EntityCatalogTestModule, generateStratosEntities, PaginationMonitorFactory, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
-import { createBasicStoreModule, STORE_TEST_PROVIDERS, testSCFEndpointGuid } from '@stratosui/store/testing';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
 import { CF_BASE_TEST_PROVIDERS, generateCfActiveRouteMock } from '@test-framework/cf';
 
 import { generateCFEntities } from '../../../cf-entity-generator';
@@ -52,6 +52,9 @@ describe('CloudFoundryComponent', () => {
     // Initialize EntityCatalogHelper
     const helper = TestBed.inject(EntityCatalogHelper);
     EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+
+    // Populate store with test endpoint data to prevent EmptyError
+    populateStoreWithTestEndpoint();
   });
 
   beforeEach(() => {

@@ -6,7 +6,11 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { of } from 'rxjs';
 
-import { TabNavService, CoreModule, CurrentUserPermissionsService } from '@stratosui/core';
+import {
+  TabNavService,
+  CoreModule
+} from '@stratosui/core';
+import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { createEmptyStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCFEntities } from '../../../../../cf-entity-generator';
@@ -27,7 +31,8 @@ describe('CloudFoundryOrganizationBaseComponent', () => {
         entity: {
           name: 'test-org',
           guid: 'org-guid',
-          spaces: []
+          spaces: [],
+          cfGuid: 'cf-guid'
         },
         metadata: {
           guid: 'org-guid'
@@ -84,7 +89,7 @@ describe('CloudFoundryOrganizationBaseComponent', () => {
         { provide: CloudFoundryOrganizationService, useValue: mockOrgService },
         { provide: CloudFoundryEndpointService, useValue: mockEndpointService },
         TabNavService,
-        CurrentUserPermissionsService,
+        ...cfCurrentUserPermissionsService,
       ]
     })
     .overrideComponent(CloudFoundryOrganizationBaseComponent, {

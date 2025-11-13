@@ -6,7 +6,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CoreModule, CurrentUserPermissionsService } from '@stratosui/core';
+import {
+  CoreModule
+} from '@stratosui/core';
+import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { createEmptyStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { getCfSpaceServiceMock } from '@test-framework/cloud-foundry-space.service.mock';
@@ -41,7 +44,7 @@ describe('CfSpacesServiceInstancesListConfigService', () => {
         CfSpacesServiceInstancesListConfigService,
         DatePipe,
         ServiceActionHelperService,
-        CurrentUserPermissionsService,
+        ...cfCurrentUserPermissionsService,
       ],
     });
 

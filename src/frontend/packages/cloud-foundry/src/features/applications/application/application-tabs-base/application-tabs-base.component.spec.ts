@@ -7,9 +7,12 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 
 import { ApplicationServiceMock, generateCfStoreModules, ApplicationStateService, ApplicationEnvVarsHelper, populateStoreWithTestEndpoint } from '@test-framework/cf';
-import { ApplicationService, CFAppState, IApp, IOrganization, ISpace, CfCurrentUserPermissions } from '@stratosui/cloud-foundry';
+import {ApplicationService, CFAppState, IApp, IOrganization, ISpace, CfCurrentUserPermissions} from '@stratosui/cloud-foundry';
 import { APIResource, EntityInfo, RequestInfoState, EndpointModel, endpointEntitiesSelector, UserFavoriteManager } from '@stratosui/store';
-import { EndpointsService, CurrentUserPermissionsService } from '@stratosui/core';
+import {
+  EndpointsService,
+  CurrentUserPermissionsService
+} from '@stratosui/core';
 import { GitSCMService } from '@stratosui/git';
 import { ApplicationTabsBaseComponent } from './application-tabs-base.component';
 
@@ -117,7 +120,6 @@ describe('ApplicationTabsBaseComponent', () => {
     store.select = vi.fn().mockImplementation((selector: any) => {
       // Return mocked endpoints for the endpoint selector
       if (selector === endpointEntitiesSelector) {
-        console.log('[TEST] Returning mocked endpoints observable');
         return endpointsSubject.asObservable();
       }
       // Fall back to original select for other selectors

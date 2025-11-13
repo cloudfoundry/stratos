@@ -7,7 +7,9 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 import { StoreModule } from '@ngrx/store';
 
-import { TabNavService, CurrentUserPermissionsService } from '@stratosui/core';
+import {
+  TabNavService
+} from '@stratosui/core';
 import {
   appReducers,
   TEST_CATALOGUE_ENTITIES,
@@ -19,7 +21,8 @@ import {
 } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
 import { generateTestCfEndpointServiceProvider } from '@test-framework/cloud-foundry-endpoint-service.helper';
-import { generateCFEntities } from '@stratosui/cloud-foundry';
+import {generateCFEntities,
+  cfCurrentUserPermissionsService} from '@stratosui/cloud-foundry';
 import { QuotaDefinitionComponent } from "./quota-definition.component";
 
 describe('QuotaDefinitionComponent', () => {
@@ -51,7 +54,7 @@ describe('QuotaDefinitionComponent', () => {
           ]
         },
         EntityServiceFactory,
-        CurrentUserPermissionsService,
+        ...cfCurrentUserPermissionsService,
         {
           provide: ActivatedRoute,
           useValue: {

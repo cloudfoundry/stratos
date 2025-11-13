@@ -7,7 +7,10 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 import { Store, StoreModule } from '@ngrx/store';
 
-import { TabNavService, CurrentUserPermissionsService } from '@stratosui/core';
+import {
+  TabNavService
+} from '@stratosui/core';
+import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import {
   EntityCatalogHelpers,
   EntityCatalogHelper,
@@ -63,7 +66,7 @@ describe('SpaceQuotaDefinitionComponent', () => {
           ]
         },
         EntityServiceFactory,
-        CurrentUserPermissionsService,
+        ...cfCurrentUserPermissionsService,
         {
           provide: ActivatedRoute,
           useValue: {

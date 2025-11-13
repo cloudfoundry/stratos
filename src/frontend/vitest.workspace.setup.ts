@@ -93,6 +93,64 @@ if (typeof window !== 'undefined') {
   });
 }
 
+// Mock WebSocket to prevent connection attempts during tests
+// This suppresses Vite HMR connection errors that appear in stderr
+if (typeof window !== 'undefined' && typeof WebSocket !== 'undefined') {
+  const OriginalWebSocket = WebSocket;
+  // Create a mock WebSocket that doesn't actually connect
+  class MockWebSocket {
+    static CONNECTING = 0;
+    static OPEN = 1;
+    static CLOSING = 2;
+    static CLOSED = 3;
+
+    CONNECTING = 0;
+    OPEN = 1;
+    CLOSING = 2;
+    CLOSED = 3;
+
+    readyState = MockWebSocket.CLOSED;
+    onopen: any = null;
+    onclose: any = null;
+    onerror: any = null;
+    onmessage: any = null;
+
+    constructor(url: string | URL, protocols?: string | string[]) {
+      // Don't actually connect, just create a closed socket
+      this.readyState = MockWebSocket.CLOSED;
+      // Immediately trigger close event to simulate failed connection
+      setTimeout(() => {
+        if (this.onclose) {
+          this.onclose(new Event('close'));
+        }
+      }, 0);
+    }
+
+    send(data: any): void {
+      // No-op
+    }
+
+    close(code?: number, reason?: string): void {
+      this.readyState = MockWebSocket.CLOSED;
+    }
+
+    addEventListener(type: string, listener: any): void {
+      // No-op
+    }
+
+    removeEventListener(type: string, listener: any): void {
+      // No-op
+    }
+
+    dispatchEvent(event: Event): boolean {
+      return false;
+    }
+  }
+
+  // Replace WebSocket with mock
+  (window as any).WebSocket = MockWebSocket;
+}
+
 @NgModule({
   providers: [provideZonelessChangeDetection()],
 })
@@ -120,6 +178,43 @@ if (!testBed.platform) {
   }
 } else {
   console.log('[WORKSPACE SETUP] TestBed platform already initialized (reusing)');
+}
+
+// Suppress network connection errors in test environment
+// Vite HMR and other services may try to connect during tests, causing noisy stderr output
+// We suppress these specific errors to keep test output clean
+if (typeof console !== 'undefined') {
+  const originalConsoleError = console.error;
+  const originalConsoleWarn = console.warn;
+
+  console.error = function(...args: any[]) {
+    const str = args.join(' ');
+    // Suppress ECONNREFUSED errors to localhost:3000 (Vite HMR)
+    if (str.includes('ECONNREFUSED') && (str.includes('127.0.0.1:3000') || str.includes('::1:3000'))) {
+      return; // Suppress this error
+    }
+    if (str.includes('AggregateError') && args.length > 0 && typeof args[0] === 'object') {
+      // Check if this is an AggregateError with ECONNREFUSED errors
+      const errors = args[0]?.errors || [];
+      const allConnectionErrors = errors.every((e: any) =>
+        e?.message?.includes('ECONNREFUSED') &&
+        (e?.message?.includes('127.0.0.1:3000') || e?.message?.includes('::1:3000'))
+      );
+      if (allConnectionErrors && errors.length > 0) {
+        return; // Suppress this AggregateError
+      }
+    }
+    return originalConsoleError.apply(console, args);
+  };
+
+  console.warn = function(...args: any[]) {
+    const str = args.join(' ');
+    // Suppress ECONNREFUSED warnings to localhost:3000
+    if (str.includes('ECONNREFUSED') && (str.includes('127.0.0.1:3000') || str.includes('::1:3000'))) {
+      return; // Suppress this warning
+    }
+    return originalConsoleWarn.apply(console, args);
+  };
 }
 
 // Setup snapshots

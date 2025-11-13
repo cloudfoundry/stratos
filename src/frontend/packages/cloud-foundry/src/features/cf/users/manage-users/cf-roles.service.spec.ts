@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { CurrentUserPermissionsService } from '@stratosui/core';
+import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import {
   EntityCatalogTestModule,
   TEST_CATALOGUE_ENTITIES,
@@ -35,7 +36,7 @@ describe('CfRolesService', () => {
           ]
         },
         CfRolesService,
-        CurrentUserPermissionsService,
+        ...cfCurrentUserPermissionsService,
         provideZonelessChangeDetection(),
       ]
     });

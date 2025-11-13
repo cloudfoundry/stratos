@@ -12,6 +12,7 @@ import { ActiveRouteCfOrgSpace } from './features/cf/cf-page.types';
 import { CfUserService } from './shared/data-services/cf-user.service';
 import { LongRunningCfOperationsService } from './shared/data-services/long-running-cf-op.service';
 import { CloudFoundryReducersModule } from './store/cloud-foundry.reducers.module';
+import { cfCurrentUserPermissionsService } from './user-permissions/cf-user-permissions-checkers';
 import { AppVariablesEffect } from './store/effects/app-variables.effects';
 import { AppEffects } from './store/effects/app.effects';
 import { CloudFoundryEffects } from './store/effects/cloud-foundry.effects';
@@ -62,7 +63,8 @@ import { UsersRolesEffects } from './store/effects/users-roles.effects';
     {
       provide: ActiveRouteCfOrgSpace,
       useFactory: () => new BaseCfOrgSpaceRouteMock(testSCFEndpointGuid)
-    }
+    },
+    ...cfCurrentUserPermissionsService
   ]
 })
 export class CloudFoundryTestingModule { }

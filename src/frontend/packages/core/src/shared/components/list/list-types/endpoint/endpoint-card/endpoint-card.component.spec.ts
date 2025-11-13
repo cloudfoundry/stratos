@@ -65,7 +65,10 @@ describe('EndpointCardComponent', () => {
     fixture = TestBed.createComponent(EndpointCardComponent);
     component = fixture.componentInstance;
     component.row = {
+      guid: 'test-endpoint-guid',
       cnsi_type: 'metrics',
+      name: 'Test Metrics Endpoint',
+      connectionStatus: 'connected'
     } as EndpointModel;
     fixture.detectChanges();
   });

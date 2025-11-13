@@ -13,7 +13,7 @@ describe('GithubCommitAuthorComponent', () => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [GithubCommitAuthorComponent]
-    }),
+    })
       .compileComponents();
   });
 

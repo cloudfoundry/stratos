@@ -174,11 +174,24 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
               this.domains.push(domain);
             });
             this.selectedDomain = Object.values(this.domains)[0];
+            // Set initial domain value in the form
+            if (this.selectedDomain) {
+              this.domainFormGroup.patchValue({ domain: this.selectedDomain });
+            }
           })
         )
       ));
 
     this.subscriptions.push(space$.subscribe());
+
+    // Subscribe to domain form changes to update selectedDomain
+    this.subscriptions.push(
+      this.domainFormGroup.controls.domain.valueChanges.subscribe(domain => {
+        if (domain && typeof domain !== 'string') {
+          this.selectedDomain = domain;
+        }
+      })
+    );
 
     const selRoute$ = this._selectedRoute$.subscribe(x => {
       if (x.metadata.guid) {

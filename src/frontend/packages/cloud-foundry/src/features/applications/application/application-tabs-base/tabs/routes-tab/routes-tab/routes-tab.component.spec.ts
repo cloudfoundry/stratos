@@ -10,12 +10,16 @@ import { of } from 'rxjs';
 
 import { appReducers, PaginationMonitorFactory, EntityMonitorFactory, EntityServiceFactory } from '@stratosui/store';
 import { ApplicationServiceMock } from '@test-framework/cf';
-import { ApplicationService } from '@stratosui/cloud-foundry';
+import {ApplicationService} from '@stratosui/cloud-foundry';
 import { ApplicationStateService } from '../../../../../../../shared/services/application-state.service';
 import { ApplicationEnvVarsHelper } from '../../build-tab/application-env-vars.service';
 import { CfOrgSpaceDataService } from '../../../../../../../shared/data-services/cf-org-space-service.service';
 import { RoutesTabComponent } from './routes-tab.component';
-import { ListConfig, ConfirmationDialogService, CurrentUserPermissionsService } from '@stratosui/core';
+import {
+  ListConfig,
+  ConfirmationDialogService,
+  CurrentUserPermissionsService
+} from '@stratosui/core';
 
 describe('RoutesTabComponent', () => {
   let component: RoutesTabComponent;

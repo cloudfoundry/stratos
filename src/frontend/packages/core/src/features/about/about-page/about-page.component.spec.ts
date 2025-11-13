@@ -3,7 +3,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@test-framework';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS, CoreTestingModule } from '@test-framework';
 
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { TabNavService } from '../../../tab-nav.service';
@@ -16,6 +16,7 @@ describe('AboutPageComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
+        CoreTestingModule,
         RouterTestingModule,
         NoopAnimationsModule,
         createBasicStoreModule(),

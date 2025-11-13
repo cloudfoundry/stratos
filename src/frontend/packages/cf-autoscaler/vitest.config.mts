@@ -52,7 +52,9 @@ export default defineConfig({
       '@stratosui/cf-autoscaler': join(__dirname, 'src/public_api.ts'),
       '@stratosui/kubernetes': join(__dirname, '../kubernetes/src/public-api.ts'),
       '@stratosui/git': join(__dirname, '../git/src/public_api.ts'),
-      '@test-framework': join(__dirname, 'test-framework'),
+      '@test-framework/cf-autoscaler-test.helper': join(__dirname, 'test-framework/cf-autoscaler-test.helper.ts'),
+      '@test-framework/cf': join(__dirname, '../cloud-foundry/test-framework'),
+      '@test-framework': join(__dirname, '../core/test-framework'),
     },
   },
   ssr: {

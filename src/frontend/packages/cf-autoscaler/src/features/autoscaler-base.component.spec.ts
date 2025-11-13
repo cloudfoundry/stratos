@@ -1,15 +1,17 @@
 import { DatePipe } from '@angular/common';
+import { CUSTOM_ELEMENTS_SCHEMA, importProvidersFrom } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
-import { createEmptyStoreModule } from "@test-framework/cf-autoscaler-test.helper";
+import { provideRouter } from '@angular/router';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { ApplicationService } from '@stratosui/cloud-foundry';
-import { ApplicationServiceMock } from '@stratosui/cloud-foundry/test-framework';
-import { CoreModule, SharedModule, TabNavService } from '@stratosui/core';
-import { CfAutoscalerTestingModule } from '../cf-autoscaler-testing.module';
+import { ApplicationService, generateCFEntities } from '@stratosui/cloud-foundry';
+import { ApplicationServiceMock } from '@test-framework/cf';
+import { CoreModule, TabNavService } from '@stratosui/core';
+import { generateBaseTestStoreModules } from '@test-framework/core-test.helper';
+import { CATALOGUE_ENTITIES } from '@stratosui/store';
+import { generateASEntities } from '../store/autoscaler-entity-generator';
 import { AutoscalerBaseComponent } from './autoscaler-base.component';
 
 describe('AutoscalerBaseComponent', () => {
@@ -18,22 +20,31 @@ describe('AutoscalerBaseComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [AutoscalerBaseComponent],
       imports: [
-        CfAutoscalerTestingModule,
-        NoopAnimationsModule,
-        createEmptyStoreModule(),
-        CoreModule,
-        SharedModule,
-        RouterTestingModule,
+        AutoscalerBaseComponent,
       ],
       providers: [
+        importProvidersFrom(
+          ...generateBaseTestStoreModules(),
+          CoreModule,
+          NoopAnimationsModule
+        ),
+        {
+          provide: CATALOGUE_ENTITIES,
+          useFactory: () => [
+            ...generateASEntities(),
+            ...generateCFEntities()
+          ],
+          multi: true
+        },
+        provideRouter([]),
         DatePipe,
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         TabNavService,
         provideZonelessChangeDetection(),
-      ]
-    }),
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
+    })
       .compileComponents();
   });
 

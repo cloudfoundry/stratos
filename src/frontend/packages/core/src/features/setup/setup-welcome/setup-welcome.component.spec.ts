@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -38,6 +40,8 @@ describe('SetupWelcomeComponent', () => {
         EntityServiceFactory,
         ...(STORE_TEST_PROVIDERS || []),
         provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
       ]
     });
       TestBed.compileComponents();

@@ -6,7 +6,9 @@ import { provideRouter } from '@angular/router';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CoreModule, CurrentUserPermissionsService } from '@stratosui/core';
+import {
+  CoreModule
+} from '@stratosui/core';
 import {
   EntityCatalogTestModule,
   TEST_CATALOGUE_ENTITIES,
@@ -15,7 +17,8 @@ import {
   EntityCatalogHelpers
 } from '@stratosui/store';
 import { createEmptyStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { generateCFEntities, ServiceActionHelperService } from '@stratosui/cloud-foundry';
+import {generateCFEntities, ServiceActionHelperService,
+  cfCurrentUserPermissionsService} from '@stratosui/cloud-foundry';
 
 import { ServicesService } from '../../../../../features/service-catalog/services.service';
 import { ServiceInstancesListConfigService } from './service-instances-list-config.service';
@@ -51,7 +54,7 @@ describe('ServiceInstancesListConfigService', () => {
         { provide: ServicesService, useClass: ServicesServiceMock },
         DatePipe,
         ServiceActionHelperService,
-        CurrentUserPermissionsService,
+        ...cfCurrentUserPermissionsService,
       ],
     });
 

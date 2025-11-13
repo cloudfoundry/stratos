@@ -6,7 +6,13 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { of } from 'rxjs';
 
-import { TabNavService, CoreModule, ConfirmationDialogService, TailwindSnackBarService, CurrentUserPermissionsService } from '@stratosui/core';
+import {
+  TabNavService,
+  CoreModule,
+  ConfirmationDialogService,
+  TailwindSnackBarService
+} from '@stratosui/core';
+import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { createEmptyStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCFEntities } from '../../../../../cf-entity-generator';
@@ -91,7 +97,7 @@ describe('CloudFoundryOrganizationSummaryComponent', () => {
         TabNavService,
         ConfirmationDialogService,
         TailwindSnackBarService,
-        CurrentUserPermissionsService,
+        ...cfCurrentUserPermissionsService,
       ]
     })
       .compileComponents();

@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { EntityCatalogTestModule, EntityServiceFactory, generateStratosEntities, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
@@ -40,6 +42,8 @@ describe('BackupRestoreEndpointsComponent', () => {
         ...(STORE_TEST_PROVIDERS || []),
         provideRouter([]),
         provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
       ]
     });
     TestBed.compileComponents();

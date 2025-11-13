@@ -4,36 +4,40 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BaseChartDirective } from 'ng2-charts';
 
-import { TailwindSnackBarService, TailwindSnackBarRef } from '../../../../core/src/shared/services/tailwind-snackbar.service';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, pairwise, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { cfEntityCatalog } from '../../../../cloud-foundry/src/cf-entity-catalog';
 import {
+  TailwindSnackBarService,
+  TailwindSnackBarRef,
+  StratosTab,
+  StratosTabType,
+  CurrentUserPermissionsService,
+  safeUnsubscribe,
+  ConfirmationDialogConfig,
+  ConfirmationDialogService,
+  CustomIconComponent,
+  MetadataItemComponent,
+  NoContentMessageComponent,
+  PageSubNavComponent,
+  PollingIndicatorComponent,
+  TileComponent,
+  TileGridComponent,
+  TileGroupComponent
+} from '@stratosui/core';
+import {
+  cfEntityCatalog,
   applicationEntityType,
   organizationEntityType,
   spaceEntityType,
-} from '../../../../cloud-foundry/src/cf-entity-types';
-import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
-} from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { ApplicationMonitorService } from '../../../../cloud-foundry/src/features/applications/application-monitor.service';
-import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
-import { getGuids } from '../../../../cloud-foundry/src/features/applications/application/application-base.component';
-import { CfCurrentUserPermissions } from '../../../../cloud-foundry/src/user-permissions/cf-user-permissions-checkers';
-import { StratosTab, StratosTabType } from '../../../../core/src/core/extension/extension-service';
-import { CurrentUserPermissionsService } from '../../../../core/src/core/permissions/current-user-permissions.service';
-import { safeUnsubscribe } from '../../../../core/src/core/utils.service';
-import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';
-import { MetadataItemComponent } from '../../../../core/src/shared/components/metadata-item/metadata-item.component';
-import { NoContentMessageComponent } from '../../../../core/src/shared/components/no-content-message/no-content-message.component';
-import { PageSubNavComponent } from '../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
-import { PollingIndicatorComponent } from '../../../../core/src/shared/components/polling-indicator/polling-indicator.component';
-import { TileComponent } from '../../../../core/src/shared/components/tile/tile/tile.component';
-import { TileGridComponent } from '../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
-import { TileGroupComponent } from '../../../../core/src/shared/components/tile/tile-group/tile-group.component';
+  ApplicationMonitorService,
+  ApplicationService,
+  getGuids,
+  CfCurrentUserPermissions,
+  CardAppUsageComponent
+} from '@stratosui/cloud-foundry';
 import {
   RouterNav,
   AppState,
@@ -65,7 +69,6 @@ import {
   AppScalingTrigger,
 } from '../../store/app-autoscaler.types';
 import { appAutoscalerAppMetricEntityType, autoscalerEntityFactory } from '../../store/autoscaler-entity-factory';
-import { CardAppUsageComponent } from '../../../../cloud-foundry/src/shared/components/cards/card-app-usage/card-app-usage.component';
 import { CardAutoscalerDefaultComponent } from '../../shared/card-autoscaler-default/card-autoscaler-default.component';
 
 @StratosTab({
@@ -130,6 +133,7 @@ import { CardAutoscalerDefaultComponent } from '../../shared/card-autoscaler-def
     TileComponent,
     CardAutoscalerDefaultComponent,
     CardAppUsageComponent,
+    CustomIconComponent,
     MetadataItemComponent,
     PollingIndicatorComponent,
     NoContentMessageComponent

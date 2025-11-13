@@ -10,9 +10,17 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { ITableColumn } from './table.types';
 import { TableCellFavoriteComponent, createTableColumnFavorite } from './table-cell-favorite/table-cell-favorite.component';
-import { IFavoriteMetadata, UserFavorite, entityCatalog } from '@stratosui/store';
+import { IFavoriteMetadata, UserFavorite, entityCatalog, TestEntityCatalog } from '@stratosui/store';
+import { generateMockCFEntities } from '../../../../../test-framework/mock-catalog-entities';
 
 describe('Table CellConfig Integration - Column Definition Flow', () => {
+
+  // Register CF entities before all tests to prevent catalog lookup warnings
+  beforeEach(() => {
+    const testEntityCatalog = entityCatalog as TestEntityCatalog;
+    testEntityCatalog.clear();
+    generateMockCFEntities().forEach(entity => entityCatalog.register(entity));
+  });
 
   // Test interfaces
   interface TestEntity {

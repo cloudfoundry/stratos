@@ -1,9 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, first } from 'rxjs/operators';
-
-import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
-import { EntityInfo } from '../../../../store/src/types/api.types';
+import { EntityServiceFactory, EntityInfo } from '@stratosui/store';
 import { autoscalerTransformArrayToMap } from '../../core/autoscaler-helpers/autoscaler-transform-policy';
 import { GetAppAutoscalerPolicyAction } from '../../store/app-autoscaler.actions';
 import { AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';

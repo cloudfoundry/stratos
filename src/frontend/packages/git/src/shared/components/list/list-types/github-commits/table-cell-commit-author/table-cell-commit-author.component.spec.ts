@@ -18,7 +18,7 @@ describe('TableCellCommitAuthorComponent', () => {
         TableCellCommitAuthorComponent,
         GithubCommitAuthorComponent,
       ]
-    }),
+    })
       .compileComponents();
   });
 

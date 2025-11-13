@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
+import { ProgressSpinnerComponent } from '../../../../../../../../core/src/shared/components/progress-spinner/progress-spinner.component';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { EntityService } from '../../../../../../../../store/src/entity-service';
 import { IMetricMatrixResult, IMetrics } from '../../../../../../../../store/src/types/base-metric.types';
@@ -18,7 +19,8 @@ import { ListAppInstance } from '../app-instance-types';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
-    RouterModule
+    RouterModule,
+    ProgressSpinnerComponent
   ]
 })
 export class TableCellCfCellComponent extends TableCellCustom<ListAppInstance> implements OnDestroy {

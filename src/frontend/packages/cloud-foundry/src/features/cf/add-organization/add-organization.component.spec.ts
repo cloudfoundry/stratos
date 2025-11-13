@@ -5,7 +5,10 @@ import { provideRouter, ActivatedRoute } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { TabNavService, CurrentUserPermissionsService } from '@stratosui/core';
+import {
+  TabNavService
+} from '@stratosui/core';
+import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import {
   appReducers,
   TEST_CATALOGUE_ENTITIES,
@@ -50,7 +53,7 @@ describe('AddOrganizationComponent', () => {
           ]
         },
         EntityServiceFactory,
-        CurrentUserPermissionsService,
+        ...cfCurrentUserPermissionsService,
         {
           provide: ActivatedRoute,
           useValue: {

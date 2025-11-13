@@ -6,6 +6,7 @@ import { provideMockStore } from '@ngrx/store/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { CurrentUserPermissionsService } from '@stratosui/core';
+import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 
 import { CfUserPermissionDirective } from './cf-user-permission.directive';
 
@@ -38,7 +39,7 @@ describe('CfUserPermissionDirective', () => {
         provideZonelessChangeDetection(),
         provideRouter([]),
         provideMockStore({}),
-        CurrentUserPermissionsService,
+        ...cfCurrentUserPermissionsService,
       ]
     });
     fixture = TestBed.createComponent(TestUserPermissionComponent);

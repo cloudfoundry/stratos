@@ -4,14 +4,11 @@ import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
-import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
-import { ListConfig } from '../../../../core/src/shared/components/list/list.component.types';
+import { ApplicationService } from '@stratosui/cloud-foundry';
+import { ListConfig, CustomIconComponent, PageHeaderModule, ListComponent } from '@stratosui/core';
 import {
   CfAppAutoscalerEventsConfigService,
 } from '../../shared/list-types/app-autoscaler-event/cf-app-autoscaler-events-config.service';
-import { PageHeaderModule } from '../../../../core/src/shared/components/page-header/page-header.module';
-import { ListComponent } from '../../../../core/src/shared/components/list/list.component';
-import { CustomIconComponent } from '@stratosui/core';
 
 @Component({
   selector: 'app-autoscaler-scale-history-page',

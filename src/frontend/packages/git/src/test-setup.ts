@@ -28,10 +28,10 @@ if (typeof window.matchMedia === 'undefined') {
       matches: false,
       media: query,
       onchange: null,
-      addListener: () => {}, // deprecated but still used by some code
-      removeListener: () => {}, // deprecated but still used by some code
-      addEventListener: () => {},
-      removeEventListener: () => {},
+      addListener: () => { }, // deprecated but still used by some code
+      removeListener: () => { }, // deprecated but still used by some code
+      addEventListener: () => { },
+      removeEventListener: () => { },
       dispatchEvent: () => true,
     }),
   });
@@ -40,14 +40,12 @@ if (typeof window.matchMedia === 'undefined') {
 @NgModule({
   providers: [provideZonelessChangeDetection()],
 })
-export class ZonelessTestModule {}
+export class ZonelessTestModule { }
 
 // Initialize TestBed platform
 // Note: With isolate:false, this runs once and is shared across test files
-console.log('[TEST SETUP - GIT] Checking TestBed platform...');
 const testBed = getTestBed();
 if (!testBed.platform) {
-  console.log('[TEST SETUP - GIT] Initializing TestBed platform...');
   testBed.initTestEnvironment(
     [BrowserTestingModule, ZonelessTestModule],
     platformBrowserTesting(),
@@ -55,9 +53,6 @@ if (!testBed.platform) {
       teardown: { destroyAfterEach: true },
     }
   );
-  console.log('[TEST SETUP - GIT] ✅ TestBed platform initialized');
-} else {
-  console.log('[TEST SETUP - GIT] TestBed platform already initialized (shared)');
 }
 
 // Reset TestBed after each test to clean up component instances

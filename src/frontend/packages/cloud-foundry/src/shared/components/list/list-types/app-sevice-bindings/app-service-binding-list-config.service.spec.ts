@@ -7,7 +7,8 @@ import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { CurrentUserPermissionsService } from '@stratosui/core';
-import { ServiceActionHelperService } from '@stratosui/cloud-foundry';
+import {ServiceActionHelperService,
+  cfCurrentUserPermissionsService} from '@stratosui/cloud-foundry';
 import { generateTestApplicationServiceProvider, generateCfStoreModules, ApplicationStateService, ApplicationEnvVarsHelper } from '@test-framework/cf';
 
 import { AppServiceBindingListConfigService } from './app-service-binding-list-config.service';
@@ -27,7 +28,7 @@ describe('AppServiceBindingListConfigService', () => {
         ApplicationStateService,
         ApplicationEnvVarsHelper,
         ServiceActionHelperService,
-        CurrentUserPermissionsService,
+        ...cfCurrentUserPermissionsService,
         DatePipe,
         provideZonelessChangeDetection(),
         provideRouter([]),
