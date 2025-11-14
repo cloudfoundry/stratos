@@ -272,6 +272,20 @@ body {
   @apply h-full m-0 p-0 font-sans;
 }
 
+/* Router outlet needs to be a flex container to properly pass flex layout to children */
+router-outlet {
+  display: contents;
+}
+
+/* Ensure all routed components can participate in flex layout */
+router-outlet + * {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0%;
+  min-height: 0;
+  width: 100%;
+}
+
 /* Component base styles */
 @layer components {
   /* Modern Button System */
@@ -673,6 +687,65 @@ mat-card-subtitle,
 mat-mdc-card-subtitle {
   @apply text-sm text-gray-600 mb-3;
   display: block;
+}
+
+/* Material overlay surfaces (menus, autocomplete, selects) */
+.mat-mdc-menu-panel,
+.mat-mdc-select-panel,
+.mat-mdc-autocomplete-panel,
+.mat-menu-panel,
+.mat-select-panel,
+.mat-autocomplete-panel,
+.cdk-overlay-pane .mat-mdc-menu-panel {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--shadow-lg);
+  color: var(--content-text);
+}
+
+.mat-mdc-menu-item,
+.mat-mdc-option,
+.mat-mdc-autocomplete-panel mat-option,
+.mat-menu-item,
+.mat-option,
+.mat-autocomplete-panel mat-option {
+  color: var(--content-text);
+
+  &.mat-mdc-menu-item-highlighted,
+  &.mat-mdc-option-active,
+  &:hover {
+    background-color: var(--nav-hover);
+    color: var(--header-text);
+  }
+}
+
+.mat-mdc-menu-item-text,
+.mat-mdc-option .mdc-list-item__primary-text,
+.mat-mdc-chip .mdc-evolution-chip__text-label,
+.mat-menu-item .mat-mdc-menu-item-text,
+.mat-option .mat-option-text {
+  color: inherit;
+}
+
+/* Chip pills */
+.mat-mdc-chip,
+.mat-mdc-standard-chip,
+.mat-mdc-chip.mat-mdc-chip-appearance-standard,
+mat-chip {
+  background-color: var(--content-secondary);
+  border: 1px solid var(--card-border);
+  color: var(--content-text);
+}
+
+.mat-mdc-chip .mat-mdc-chip-remove,
+.mat-mdc-chip .mat-mdc-chip-trailing-icon {
+  color: inherit;
+}
+
+.mat-mdc-chip:hover,
+.mat-mdc-chip.mat-mdc-chip-highlighted,
+.mat-mdc-chip:focus-visible {
+  background-color: var(--table-row-hover);
 }
 
 /* Header styles */

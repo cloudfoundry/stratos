@@ -139,3 +139,38 @@
     margin: 10px 0;
   }
 }
+
+/* Theme-aware layout switcher dropdown */
+.layout-dropdown {
+  &__panel {
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--shadow-lg);
+    color: var(--content-text);
+    overflow: hidden;
+  }
+
+  &__option {
+    @apply flex items-center justify-between w-full px-4 py-2 text-sm transition-colors;
+    background: transparent;
+    border: 0;
+    color: var(--content-text);
+    text-align: left;
+    width: 100%;
+
+    &:hover,
+    &:focus-visible {
+      background-color: var(--nav-hover);
+      color: var(--header-text);
+    }
+
+    .material-icons {
+      color: inherit;
+    }
+  }
+
+  &__divider {
+    @apply my-1;
+    border-bottom: 1px solid var(--card-border);
+  }
+}

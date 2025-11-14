@@ -20,6 +20,10 @@
       background-color: rgba(0, 0, 0, 0.1);
       overflow: hidden;
 
+      :host-context(.dark) & {
+        background-color: rgba(255, 255, 255, 0.15);
+      }
+
       &-indeterminate {
         height: 100%;
         animation: progress-indeterminate 1.5s linear infinite;
@@ -28,13 +32,19 @@
   }
 
   .card {
-    @apply bg-white rounded-lg shadow;
+    @apply rounded-lg shadow;
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    color: var(--content-text);
 
     &-header {
-      @apply px-6 py-4 border-b border-gray-200;
+      @apply px-6 py-4 border-b;
+      background-color: var(--card-header-bg);
+      border-color: var(--card-border);
 
       h2 {
-        @apply text-lg font-semibold text-gray-900 m-0;
+        @apply text-lg font-semibold m-0;
+        color: var(--header-text);
       }
     }
 

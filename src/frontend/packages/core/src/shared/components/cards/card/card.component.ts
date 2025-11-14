@@ -9,13 +9,18 @@ import { ChangeDetectionStrategy, Component  } from '@angular/core';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+    <div class="card card-wrapper">
       <ng-content></ng-content>
     </div>
   `,
   styles: [`
     :host {
       display: block;
+    }
+
+    .card-wrapper {
+      width: 100%;
+      height: 100%;
     }
   `]
 })
