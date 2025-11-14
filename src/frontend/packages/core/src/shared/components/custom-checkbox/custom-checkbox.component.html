@@ -42,7 +42,9 @@
       </div>
     </div>
 
-    <ng-content></ng-content>
+    <span class="checkbox-label" style="color: var(--content-text);">
+      <ng-content></ng-content>
+    </span>
   </div>
 
   @if (invalid && errorMessage) {

@@ -7,10 +7,10 @@
     padding: 12px 16px;
     font-size: 14px;
     line-height: 1.6;
-    color: rgba(0, 0, 0, 0.7);
-    background-color: rgba(0, 0, 0, 0.03);
+    color: var(--content-text);
+    background-color: var(--content-secondary);
     border-radius: 4px;
-    border-left: 3px solid rgba(0, 0, 0, 0.12);
+    border-left: 3px solid var(--content-border);
     word-wrap: break-word;
     overflow-wrap: break-word;
 
@@ -23,7 +23,7 @@
     }
 
     a {
-      color: #1976d2;
+      color: var(--color-primary);
       text-decoration: none;
       word-break: break-all;
 

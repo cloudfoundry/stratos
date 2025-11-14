@@ -555,6 +555,35 @@ router-outlet + * {
     }
   }
 
+  /* Global input theming - ensures all inputs respect theme */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  textarea,
+  select {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border-color: var(--input-border);
+
+    &::placeholder {
+      color: var(--input-placeholder);
+    }
+
+    &:focus {
+      background-color: var(--input-bg);
+      border-color: var(--input-focus-border);
+    }
+
+    &:disabled {
+      background-color: var(--input-disabled-bg);
+      opacity: 0.6;
+    }
+  }
+
   /* Card styles */
   .card {
     @apply bg-white rounded-lg border border-gray-200 p-4;
@@ -767,10 +796,16 @@ mat-chip {
 
 /* Loading spinner */
 .spinner {
-  @apply inline-block w-4 h-4 border-2 border-solid border-gray-200 border-r-transparent rounded-full animate-spin;
+  @apply inline-block w-4 h-4 border-2 border-solid border-gray-200 dark:border-gray-700 border-r-transparent rounded-full animate-spin;
 }
 
 .spinner-primary {
+  border-color: var(--color-primary);
+  border-right-color: transparent;
+}
+
+/* Dark mode support for spinner-primary border */
+.dark .spinner-primary {
   border-color: var(--color-primary);
   border-right-color: transparent;
 }

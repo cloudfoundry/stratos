@@ -1,13 +1,13 @@
 @if ((show$ | async)) {
-  <div class="relative inline-block">
-    <button [disabled]="busy$ | async" class="btn btn-icon" (click)="toggleMenu()">
+  <div class="table-cell-actions-container">
+    <button [disabled]="busy()" class="btn btn-icon" (click)="toggleMenu()">
       <span class="material-icons">more_vert</span>
     </button>
-    <div class="dropdown-menu absolute right-0 top-full mt-1 min-w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50"
-      [class.hidden]="!menuOpen">
+    <div class="table-cell-actions-menu"
+      [class.table-cell-actions-menu--open]="menuOpen">
       @for (action of actions; track action) {
         @if (obs.visible[action.label] | async) {
-          <button class="table-cell-actions__button dropdown-item flex items-center gap-2 w-full px-4 py-2 text-left text-sm hover:bg-gray-100"
+          <button class="table-cell-actions__button"
             (click)="action.action(row); toggleMenu()"
             [disabled]="!(obs.enabled[action.label] | async)"
             [title]="action.description"

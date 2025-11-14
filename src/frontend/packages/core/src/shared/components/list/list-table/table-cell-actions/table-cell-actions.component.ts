@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, Injector, Input, OnInit, Signal, signal, WritableSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, Injector, Input, OnDestroy, OnInit, Renderer2, Signal, signal, ViewChild, WritableSignal } from '@angular/core';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { AppState } from '@stratosui/store';
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { RowState } from '../../data-sources-controllers/list-data-source-types';
@@ -36,7 +36,7 @@ function createSignalWrapper<T>(initialValue: T, injector: Injector) {
     CommonModule
   ]
 })
-export class TableCellActionsComponent<T> extends TableCellCustom<T> {
+export class TableCellActionsComponent<T> extends TableCellCustom<T> implements OnDestroy {
 
   @Input()
   declare rowState: Observable<RowState>;
@@ -51,19 +51,14 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> {
   }
 
   // Convert observables to signals
-  // Note: toSignal must be called in injection context (field initializer)
-  // We use a getter pattern to defer signal creation until rowState is available
-  private _rowStateSignal?: Signal<RowState | undefined>;
-  private get rowStateSignal(): Signal<RowState | undefined> {
-    if (!this._rowStateSignal && this.rowState) {
-      this._rowStateSignal = toSignal(this.rowState);
-    }
-    return this._rowStateSignal!;
-  }
+  // Use a writable signal to avoid toSignal() in reactive context
+  private rowStateSignal = signal<RowState | undefined>(undefined);
 
-  public busy = computed(() => this.rowStateSignal?.()?.busy);
+  public busy = computed(() => this.rowStateSignal()?.busy);
   public show$!: Observable<boolean>;
   public menuOpen = false;
+
+  @ViewChild('menuElement', { read: ElementRef }) menuElement?: ElementRef;
 
   actions: IListAction<T>[];
   obs!: {
@@ -72,11 +67,15 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> {
   };
 
   private subjects: Array<ReturnType<typeof createSignalWrapper<T>>> = [];
+  private documentClickListener?: () => void;
+  private rowStateSubscription?: Subscription;
 
   constructor(
     private store: Store<AppState>,
     public listConfig: ListConfig<T>,
-    private injector: Injector
+    private injector: Injector,
+    private elementRef: ElementRef,
+    private renderer: Renderer2
   ) {
     super();
     this.actions = listConfig.getSingleActions();
@@ -86,6 +85,14 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> {
     if (this.obs) {
       return this.updateActionButtons(row);
     }
+
+    // Subscribe to rowState observable and update signal
+    if (this.rowState && !this.rowStateSubscription) {
+      this.rowStateSubscription = this.rowState.subscribe(state => {
+        this.rowStateSignal.set(state);
+      });
+    }
+
     this.obs = {
       visible: {},
       enabled: {}
@@ -116,5 +123,64 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> {
 
   toggleMenu() {
     this.menuOpen = !this.menuOpen;
+
+    if (this.menuOpen) {
+      // Position the menu using fixed positioning
+      setTimeout(() => this.positionMenu(), 0);
+
+      // Add click listener to close menu when clicking outside
+      this.documentClickListener = this.renderer.listen('document', 'click', (event: MouseEvent) => {
+        if (!this.elementRef.nativeElement.contains(event.target)) {
+          this.menuOpen = false;
+          this.cleanupListener();
+        }
+      });
+    } else {
+      this.cleanupListener();
+    }
+  }
+
+  private positionMenu() {
+    const containerElement = this.elementRef.nativeElement.querySelector('.table-cell-actions-container');
+    const menuElement = this.elementRef.nativeElement.querySelector('.table-cell-actions-menu');
+
+    if (!containerElement || !menuElement) {
+      return;
+    }
+
+    const rect = containerElement.getBoundingClientRect();
+    const menuHeight = menuElement.offsetHeight;
+    const viewportHeight = window.innerHeight;
+
+    // Position below the button by default
+    let top = rect.bottom + 4;
+    let left = rect.right - menuElement.offsetWidth;
+
+    // If menu would go off bottom of screen, position above instead
+    if (top + menuHeight > viewportHeight) {
+      top = rect.top - menuHeight - 4;
+    }
+
+    // Ensure menu doesn't go off left edge
+    if (left < 0) {
+      left = 4;
+    }
+
+    this.renderer.setStyle(menuElement, 'top', `${top}px`);
+    this.renderer.setStyle(menuElement, 'left', `${left}px`);
+  }
+
+  private cleanupListener() {
+    if (this.documentClickListener) {
+      this.documentClickListener();
+      this.documentClickListener = undefined;
+    }
+  }
+
+  ngOnDestroy() {
+    this.cleanupListener();
+    if (this.rowStateSubscription) {
+      this.rowStateSubscription.unsubscribe();
+    }
   }
 }

@@ -107,6 +107,8 @@ mat-header-cell {
     }
 
     &--table-column-action {
+      overflow: visible;
+
       app-table-cell {
         display: flex;
         justify-content: flex-end;

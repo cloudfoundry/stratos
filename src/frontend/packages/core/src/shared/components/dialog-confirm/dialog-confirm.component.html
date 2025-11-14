@@ -1,28 +1,30 @@
-<h1 class="confirm-dialog__header text-lg font-semibold mb-4 flex items-center justify-between" style="color: var(--content-text)">
-  <span class="confirm-dialog__header-title">{{data.title}}</span>
-  @if (data.critical || textToMatch) {
-    <span class="material-icons confirm-dialog__warn-icon" style="color: var(--color-warning)">warning</span>
+<div class="p-6">
+  <h1 class="confirm-dialog__header text-lg font-semibold mb-4 flex items-center justify-between text-gray-900 dark:text-slate-100">
+    <span class="confirm-dialog__header-title">{{data.title}}</span>
+    @if (data.critical || textToMatch) {
+      <span class="material-icons confirm-dialog__warn-icon text-warning-shade-500">warning</span>
+    }
+  </h1>
+  @if (!textToMatch) {
+    <div class="confirm-dialog__message mb-4 text-gray-700 dark:text-slate-300" [innerHtml]="data.message"></div>
   }
-</h1>
-@if (!textToMatch) {
-  <div class="confirm-dialog__message mb-4" style="color: var(--content-text)" [innerHtml]="data.message"></div>
-}
-@if (textToMatch) {
-  <div class="confirm-dialog__enter-text mb-4">
-    <span class="block mb-2">Please type <b class="font-semibold">{{textToMatch}}</b> to continue.</span>
-    <div class="form-field">
-      <input (paste)="handlePaste($event)" required class="input" id="typeToConfirm" [(ngModel)]="matchValue"
-        [pattern]="textToMatch">
+  @if (textToMatch) {
+    <div class="confirm-dialog__enter-text mb-4">
+      <span class="block mb-2 text-gray-700 dark:text-slate-300">Please type <b class="font-semibold text-gray-900 dark:text-slate-100">{{textToMatch}}</b> to continue.</span>
+      <div class="form-field">
+        <input (paste)="handlePaste($event)" required class="input" id="typeToConfirm" [(ngModel)]="matchValue"
+          [pattern]="textToMatch">
+      </div>
     </div>
-  </div>
-}
-<div class="confirm-dialog__actions flex gap-2 justify-end mt-6">
-  <button class="btn btn-secondary" (click)="onNoClick()" cdkFocusInitial>Cancel</button>
-  @if (data.confirm) {
-    <button class="confirm-dialog__confirm"
-      [class]="data.critical || textToMatch ? 'btn btn-danger' : 'btn btn-primary'"
-      (click)="dialogRef.close(true)"
-      [disabled]="textToMatch && textToMatch !== matchValue">{{
-    data.confirm }}</button>
   }
+  <div class="confirm-dialog__actions flex gap-2 justify-end mt-6">
+    <button class="btn btn-secondary" (click)="onNoClick()" cdkFocusInitial>Cancel</button>
+    @if (data.confirm) {
+      <button class="confirm-dialog__confirm"
+        [class]="data.critical || textToMatch ? 'btn btn-danger' : 'btn btn-primary'"
+        (click)="dialogRef.close(true)"
+        [disabled]="textToMatch && textToMatch !== matchValue">{{
+      data.confirm }}</button>
+    }
+  </div>
 </div>

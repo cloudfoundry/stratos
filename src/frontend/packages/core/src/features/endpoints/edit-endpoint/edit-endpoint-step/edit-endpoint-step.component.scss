@@ -22,10 +22,6 @@ form.stepper-form {
 .edit-endpoint {
   &__section {
     margin-top: $checkbox-margin;
-
-    &-title {
-      font-size: 16px;
-    }
   }
   &__sso {
     margin-top: $checkbox-margin;
@@ -38,15 +34,20 @@ form.stepper-form {
     overflow: hidden;
   }
   &__cacert-title {
-    font-size: 14px;
     margin: 10px 0;
+    display: block;
   }
   &__cacert {
-    font-family: "Source Code Pro";
-    font-size: 14px;
     line-break: anywhere;
     max-width: 580px;
-  }  
+    resize: vertical;
+
+    &:focus {
+      outline: none;
+      border-color: var(--input-focus-border);
+      box-shadow: 0 0 0 1px var(--input-focus-border);
+    }
+  }
   &__shown {
     height: auto;
   }

@@ -24,6 +24,7 @@
 
 .custom-form-field {
   /* Base layout - uses Tailwind classes in HTML, minimal overrides here */
+  background-color: transparent;
 
   &.disabled {
     @apply opacity-60 cursor-not-allowed pointer-events-none;
@@ -241,6 +242,22 @@
   .dark-theme & {
     color: var(--content-muted);
   }
+}
+
+/* ============================================================================
+   Form Field Container Base Styles
+   ============================================================================ */
+
+.form-field-wrapper {
+  background-color: transparent;
+}
+
+.form-field-flex {
+  background-color: transparent;
+}
+
+.form-field-infix {
+  background-color: transparent;
 }
 
 /* ============================================================================
@@ -540,6 +557,15 @@
   .form-field-infix {
     padding: 0 !important;
     min-width: auto !important;
+
+    /* Ensure inputs still respect theme variables in compact mode */
+    input,
+    textarea,
+    select {
+      background-color: var(--input-bg);
+      color: var(--input-text);
+      border-color: var(--input-border);
+    }
   }
 
   .form-field-label {

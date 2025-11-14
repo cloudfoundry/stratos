@@ -7,7 +7,7 @@
         <app-card-status [status$]="status$"></app-card-status>
         <div class="flex items-start space-x-4">
           @if (icon) {
-            <span class="text-3xl text-gray-400 dark:text-gray-500 flex-shrink-0"
+            <span class="text-3xl text-gray-400 dark:text-slate-500 flex-shrink-0"
             [ngClass]="iconFont === 'stratos-icons' ? 'stratos-icons' : 'material-icons'">{{ icon }}</span>
           }
           <div class="flex-1" [ngClass]="{'flex flex-col-reverse': labelAtTop, 'flex flex-col': !labelAtTop}">
@@ -20,10 +20,10 @@
                     [ngClass]="{
                       'text-danger-500': status === 'error',
                       'text-warning-500': status === 'warning',
-                      'text-gray-900 dark:text-gray-100': status !== 'error' && status !== 'warning'
+                      'text-gray-900 dark:text-slate-100': status !== 'error' && status !== 'warning'
                     }">{{ formattedValue }}</span>
                   @if (limit) {
-                    <span class="text-lg text-gray-500 dark:text-gray-400"> / {{ formattedLimit }}</span>
+                    <span class="text-lg text-gray-500 dark:text-slate-400"> / {{ formattedLimit }}</span>
                   }
                 </div>
                 @if (usage) {
@@ -31,7 +31,7 @@
                 }
               </div>
             }
-            <div class="number-metric-card-label text-sm text-gray-500 dark:text-gray-400"
+            <div class="number-metric-card-label text-sm text-gray-500 dark:text-slate-400"
               [ngClass]="{'mb-2': labelAtTop, 'mt-1': !labelAtTop}">
               {{ labelSingular && value === '1' ? labelSingular : label }}
             </div>
@@ -69,18 +69,18 @@
         <div class="number-metric-card__container-inner"
           [ngClass]="{'number-metric-card__container-inner-reverse': labelAtTop}">
           @if ((status$ | async); as status) {
-            <div class="number-metric-card__value">
+            <div class="number-metric-card__value text-gray-900 dark:text-slate-100">
               <span class="number-metric-card__usage-count"
-              [ngClass]="{'text-danger': status === 'error', 'text-warning': status === 'warning'}">{{ formattedValue }}</span>
+              [ngClass]="{'text-danger-500': status === 'error', 'text-warning-500': status === 'warning', 'dark:text-slate-100': status !== 'error' && status !== 'warning'}">{{ formattedValue }}</span>
               @if (limit) {
-                <span class="number-metric-card__limit"> / {{ formattedLimit }}</span>
+                <span class="number-metric-card__limit text-gray-500 dark:text-slate-400"> / {{ formattedLimit }}</span>
               }
               @if (usage) {
-                <div class="number-metric-card__usage">{{ usage }} %</div>
+                <div class="number-metric-card__usage text-primary-600 dark:text-primary-400">{{ usage }} %</div>
               }
             </div>
           }
-          <div class="number-metric-card__label">{{ labelSingular && value === '1' ? labelSingular : label }}</div>
+          <div class="number-metric-card__label text-gray-500 dark:text-slate-400">{{ labelSingular && value === '1' ? labelSingular : label }}</div>
         </div>
       </div>
     }

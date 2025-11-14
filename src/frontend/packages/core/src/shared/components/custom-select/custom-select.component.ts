@@ -9,7 +9,7 @@ export interface MatSelectChange {
 
 @Component({
   selector: 'app-option',
-  template: '<div class="custom-option-content" [class.selected]="selected" [class.disabled]="disabled" (click)="select()"><ng-content></ng-content></div>',
+  template: '<div class="custom-option-content dark:text-slate-100 dark:hover:bg-slate-700" [class.selected]="selected" [class.disabled]="disabled" (click)="select()"><ng-content></ng-content></div>',
   styleUrls: ['./custom-select.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -89,18 +89,17 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
 
   toggle() {
     if (this.disabled) return;
-    this.isOpen = !this.isOpen;
 
-    if (this.isOpen) {
-      // Calculate position for fixed dropdown
-      setTimeout(() => {
-        const rect = this.selectTrigger.nativeElement.getBoundingClientRect();
-        this.dropdownTop = `${rect.bottom + 2}px`;  // Add 2px gap
-        this.dropdownLeft = `${rect.left}px`;
-        this.dropdownWidth = `${rect.width}px`;  // Match trigger width
-      }, 0);
+    if (!this.isOpen) {
+      // Calculate position BEFORE opening dropdown to prevent flash at wrong position
+      const rect = this.selectTrigger.nativeElement.getBoundingClientRect();
+      this.dropdownTop = `${rect.bottom + 4}px`;  // Add 4px gap for better spacing
+      this.dropdownLeft = `${rect.left}px`;
+      // Use trigger width as minimum, but allow dropdown to expand for content
+      this.dropdownWidth = `${rect.width}px`;
     }
 
+    this.isOpen = !this.isOpen;
     this._onTouched();
   }
 

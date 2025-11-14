@@ -12,11 +12,15 @@
     transition: transform .2s ease;
     user-select: none;
     width: 100%;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);
 
     &:hover {
       opacity: 1;
       transform: scale(1.02);
+      background-color: rgba(255, 255, 255, 0.1);
     }
+
     &__more {
       align-items: center;
       cursor: pointer;
@@ -50,6 +54,7 @@
       flex: 0;
       padding: 10px;
       text-align: center;
+      color: rgba(0, 0, 0, 0.7);
     }
 
     &__content {
@@ -62,6 +67,10 @@
       position: relative;
       text-align: center;
       word-wrap: break-word;
+
+      h3 {
+        color: rgba(0, 0, 0, 0.87);
+      }
     }
 
     &__icon {
@@ -69,6 +78,24 @@
       height: $icon-size;
       opacity: 0.6;
       width: $icon-size;
+    }
+  }
+
+  /* Dark mode styles */
+  :host-context(.dark) .tile-selector {
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .tile-selector__description {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .tile-selector__content h3 {
+      color: rgba(255, 255, 255, 0.9);
     }
   }
 }

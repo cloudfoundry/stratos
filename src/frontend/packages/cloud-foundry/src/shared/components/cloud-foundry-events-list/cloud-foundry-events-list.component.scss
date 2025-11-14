@@ -3,12 +3,13 @@ form {
     @apply flex-1;
 
     &:first-child {
-      min-width: 180px;
-      max-w: 220px;
+      min-width: 240px;
+      flex: 1 1 auto;
     }
 
     &:last-child {
-      max-width: 300px;
+      min-width: 240px;
+      flex: 1 1 auto;
     }
   }
 }

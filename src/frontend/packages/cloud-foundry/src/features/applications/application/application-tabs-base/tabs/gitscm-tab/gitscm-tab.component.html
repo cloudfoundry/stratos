@@ -49,38 +49,36 @@
           @if (gitSCMRepo$ | async; as gitSCMRepo) {
             <app-tile>
               <div class="card">
-                <div class="card-header">
+                <div class="card-header flex items-center justify-between">
                   <h3 class="text-lg font-semibold">Repository Details</h3>
+                  <div class="gitscm-tab__avatar">
+                    <img src={{gitSCMRepo.owner.avatar_url}} alt="Repository owner avatar" class="h-12 w-12 rounded-full">
+                  </div>
                 </div>
                 <div class="card-body">
                   <div>
-                    <div class="gitscm-tab__avatar">
-                      <img src={{gitSCMRepo.owner.avatar_url}}>
-                    </div>
-                    <div>
-                      <app-metadata-item label="Full Name">
-                        <div class="gitscm-tab__repo__name">
-                          <a href="{{ gitSCMRepo.html_url }}" target="_blank">{{ gitSCMRepo.full_name }}</a>
-                          @if (gitSCMRepo.private) {
-                            <span class="material-icons gitscm-tab__repo__name--icon"
-                              title="Private Repo">
-                            lock</span>
-                          }
-                        </div>
-                      </app-metadata-item>
-                      <app-metadata-item label="Owner">{{ gitSCMRepo.owner.login || gitSCMRepo.owner.name }}
-                      </app-metadata-item>
-                      <app-metadata-item label="Description">{{ gitSCMRepo.description || '-' }}</app-metadata-item>
-                      <app-metadata-item label="Created:">{{ gitSCMRepo.created_at | date:'medium' }}</app-metadata-item>
-                      @if (gitSCMRepo.pushed_at) {
-                        <app-metadata-item label="Last Pushed:">
-                        {{ gitSCMRepo.pushed_at | date:'medium' }}</app-metadata-item>
-                      }
-                      @if (gitSCMRepo.last_activity_at) {
-                        <app-metadata-item label="Last Actvity:">
-                        {{ gitSCMRepo.last_activity_at | date:'medium' }}</app-metadata-item>
-                      }
-                    </div>
+                    <app-metadata-item label="Full Name">
+                      <div class="gitscm-tab__repo__name">
+                        <a href="{{ gitSCMRepo.html_url }}" target="_blank">{{ gitSCMRepo.full_name }}</a>
+                        @if (gitSCMRepo.private) {
+                          <span class="material-icons gitscm-tab__repo__name--icon"
+                            title="Private Repo">
+                          lock</span>
+                        }
+                      </div>
+                    </app-metadata-item>
+                    <app-metadata-item label="Owner">{{ gitSCMRepo.owner.login || gitSCMRepo.owner.name }}
+                    </app-metadata-item>
+                    <app-metadata-item label="Description">{{ gitSCMRepo.description || '-' }}</app-metadata-item>
+                    <app-metadata-item label="Created:">{{ gitSCMRepo.created_at | date:'medium' }}</app-metadata-item>
+                    @if (gitSCMRepo.pushed_at) {
+                      <app-metadata-item label="Last Pushed:">
+                      {{ gitSCMRepo.pushed_at | date:'medium' }}</app-metadata-item>
+                    }
+                    @if (gitSCMRepo.last_activity_at) {
+                      <app-metadata-item label="Last Actvity:">
+                      {{ gitSCMRepo.last_activity_at | date:'medium' }}</app-metadata-item>
+                    }
                   </div>
                 </div>
               </div>
@@ -89,25 +87,23 @@
           @if (commit$ | async; as commitInfo) {
             <app-tile>
               <div class="card">
-                <div class="card-header">
+                <div class="card-header flex items-center justify-between">
                   <h3 class="text-lg font-semibold">Commit Details</h3>
+                  <div class="gitscm-tab__avatar">
+                    <img src={{commitInfo.author.avatar_url}} alt="Commit author avatar" class="h-12 w-12 rounded-full">
+                  </div>
                 </div>
                 <div class="card-body">
                   <div>
-                    <div class="gitscm-tab__avatar">
-                      <img src={{commitInfo.author.avatar_url}}>
-                    </div>
-                    <div>
-                      <app-metadata-item label="Message">{{ commitInfo.commit.message }}</app-metadata-item>
-                      <app-metadata-item label="SHA">
-                        <a href={{commitInfo.html_url}} target="_blank">{{ commitInfo.sha | limitTo: 8}}</a>
-                      </app-metadata-item>
-                      <app-metadata-item label="Author">
-                        <app-github-commit-author [commit]="commitInfo" [showAvatar]="false"></app-github-commit-author>
-                      </app-metadata-item>
-                      <app-metadata-item label="Date:">{{ commitInfo.commit.author.date | date:'medium' }}
-                      </app-metadata-item>
-                    </div>
+                    <app-metadata-item label="Message">{{ commitInfo.commit.message }}</app-metadata-item>
+                    <app-metadata-item label="SHA">
+                      <a href={{commitInfo.html_url}} target="_blank">{{ commitInfo.sha | limitTo: 8}}</a>
+                    </app-metadata-item>
+                    <app-metadata-item label="Author">
+                      <app-github-commit-author [commit]="commitInfo" [showAvatar]="false"></app-github-commit-author>
+                    </app-metadata-item>
+                    <app-metadata-item label="Date:">{{ commitInfo.commit.author.date | date:'medium' }}
+                    </app-metadata-item>
                   </div>
                 </div>
               </div>
