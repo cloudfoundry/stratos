@@ -1,6 +1,6 @@
-<div class="dashboard-outer h-screen bg-app-bg text-app-text">
+<div class="dashboard-outer h-screen min-h-0 flex flex-col overflow-hidden bg-app-bg text-app-text">
   <!-- Main layout container -->
-  <div class="dashboard flex flex-row h-full overflow-hidden"
+  <div class="dashboard flex flex-row h-full min-h-0 w-full overflow-hidden"
     style="display: flex !important; flex-direction: row !important; width: 100% !important; height: 100vh !important;">
     <!-- Side navigation drawer -->
     @if (mainNavState$ | async; as navState) {
@@ -19,7 +19,7 @@
     }
 
     <!-- Main content area -->
-    <div class="dashboard-content flex-1 flex flex-col min-w-0 h-full overflow-hidden bg-app-bg">
+    <div class="dashboard-content flex-1 flex flex-col min-w-0 min-h-0 h-full overflow-hidden bg-app-bg">
 
       <div class="page-content flex-1 flex flex-col min-h-0 overflow-hidden">
         <!-- Page header -->
@@ -78,7 +78,7 @@
             }
 
             <!-- Main page content -->
-            <div #content class="flex-1 flex flex-col min-h-0 overflow-hidden bg-content-bg text-content-text"
+            <div #content class="flex-1 flex flex-col min-h-0 overflow-x-hidden overflow-y-auto bg-content-bg text-content-text"
               [ngClass]="{'p-6': !(noMargin$ | async), 'p-0': noMargin$ | async}">
               <div class="flex-1 flex flex-col min-h-0">
                 <router-outlet></router-outlet>

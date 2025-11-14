@@ -1,29 +1,32 @@
-<div class="firehose-filter-panel">
-  <div class="firehose-filter-panel__controls">
-    <span class="controls-label">Select:</span>
-    <a class="firehose-filter-panel__link" (click)="formatter.showAll(true)">All</a>
-    <span>|</span>
-    <a class="firehose-filter-panel__link" (click)="formatter.showAll(false)">None</a>
+<div class="firehose-page flex flex-1 flex-col min-h-0 overflow-hidden">
+
+  <div class="firehose-filter-panel flex-none">
+    <div class="firehose-filter-panel__controls">
+      <span class="controls-label">Select:</span>
+      <a class="firehose-filter-panel__link" (click)="formatter.showAll(true)">All</a>
+      <span>|</span>
+      <a class="firehose-filter-panel__link" (click)="formatter.showAll(false)">None</a>
+    </div>
+
+    <div class="firehose-filter-panel__filters">
+      <app-checkbox class="firehose-filter-panel__apps-filter"
+        [(ngModel)]="formatter.hoseFilters.apps">Apps</app-checkbox>
+      <app-checkbox class="firehose-filter-panel__api-filter"
+        [(ngModel)]="formatter.hoseFilters.api">Api</app-checkbox>
+      <app-checkbox class="firehose-filter-panel__metrics-filter"
+        [(ngModel)]="formatter.hoseFilters.metrics">Metrics</app-checkbox>
+      <app-checkbox class="firehose-filter-panel__counters-filter"
+        [(ngModel)]="formatter.hoseFilters.counters">Counters</app-checkbox>
+      <app-checkbox class="firehose-filter-panel__container-metrics-filter"
+        [(ngModel)]="formatter.hoseFilters.containerMetrics">Container Metrics</app-checkbox>
+      <app-checkbox class="firehose-filter-panel__errors-filter"
+        [(ngModel)]="formatter.hoseFilters.errors">Errors</app-checkbox>
+    </div>
   </div>
 
-  <div class="firehose-filter-panel__filters">
-    <app-checkbox class="firehose-filter-panel__apps-filter"
-      [(ngModel)]="formatter.hoseFilters.apps">Apps</app-checkbox>
-    <app-checkbox class="firehose-filter-panel__api-filter"
-      [(ngModel)]="formatter.hoseFilters.api">Api</app-checkbox>
-    <app-checkbox class="firehose-filter-panel__metrics-filter"
-      [(ngModel)]="formatter.hoseFilters.metrics">Metrics</app-checkbox>
-    <app-checkbox class="firehose-filter-panel__counters-filter"
-      [(ngModel)]="formatter.hoseFilters.counters">Counters</app-checkbox>
-    <app-checkbox class="firehose-filter-panel__container-metrics-filter"
-      [(ngModel)]="formatter.hoseFilters.containerMetrics">Container Metrics</app-checkbox>
-    <app-checkbox class="firehose-filter-panel__errors-filter"
-      [(ngModel)]="formatter.hoseFilters.errors">Errors</app-checkbox>
-  </div>
+  <app-log-viewer
+    [filter]="filter"
+    class="flex flex-1 min-h-0 overflow-hidden"
+    [logStream]="messages"
+    [status]="connectionStatus"></app-log-viewer>
 </div>
-
-<app-log-viewer
-  [filter]="filter"
-  class="flex flex-1 min-h-0 mb-3"
-  [logStream]="messages"
-  [status]="connectionStatus"></app-log-viewer>
