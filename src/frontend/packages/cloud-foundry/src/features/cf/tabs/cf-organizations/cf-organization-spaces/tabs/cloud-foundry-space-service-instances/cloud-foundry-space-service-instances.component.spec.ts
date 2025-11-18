@@ -12,8 +12,7 @@ import {
 import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { createEmptyStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { generateActiveRouteCfOrgSpaceMock } from '@test-framework/cf';
-import { getCfSpaceServiceMock } from '@test-framework/cloud-foundry-space.service.mock';
+import { generateActiveRouteCfOrgSpaceMock, getCfSpaceServiceMock } from '@test-framework/cf';
 import { generateCFEntities } from '../../../../../../../cf-entity-generator';
 import { ServiceActionHelperService } from '../../../../../../../shared/data-services/service-action-helper.service';
 import { CloudFoundrySpaceServiceInstancesComponent } from './cloud-foundry-space-service-instances.component';

@@ -87,12 +87,12 @@ describe('LoadingPageComponent', () => {
     });
 
     it('should show progress bar until is done', () => {
-      const progressBar = element.querySelector('.progress-bar');
+      const progressBar = element.querySelector('.loading-page__progress-bar');
       expect(progressBar).toBeTruthy();
     });
 
     it('should hide progress bar when is done', async () => {
-      let progressBar = element.querySelector('.progress-bar');
+      let progressBar = element.querySelector('.loading-page__progress-bar');
       expect(progressBar).toBeTruthy();
 
       // Update the observables to emit false
@@ -104,7 +104,7 @@ describe('LoadingPageComponent', () => {
       await fixture.whenStable();
       fixture.detectChanges();
 
-      progressBar = element.querySelector('.progress-bar');
+      progressBar = element.querySelector('.loading-page__progress-bar');
       expect(progressBar).toBeFalsy();
     });
   });
@@ -133,12 +133,12 @@ describe('LoadingPageComponent', () => {
     });
 
     it('should show progress bar until is done', () => {
-      const progressBar = element.querySelector('.progress-bar');
+      const progressBar = element.querySelector('.loading-page__progress-bar');
       expect(progressBar).toBeTruthy();
     });
 
     it('should hide progress bar when is done', async () => {
-      let progressBar = element.querySelector('.progress-bar');
+      let progressBar = element.querySelector('.loading-page__progress-bar');
       expect(progressBar).toBeTruthy();
 
       // Update loading to false
@@ -149,7 +149,7 @@ describe('LoadingPageComponent', () => {
       await fixture.whenStable();
       fixture.detectChanges();
 
-      progressBar = element.querySelector('.progress-bar');
+      progressBar = element.querySelector('.loading-page__progress-bar');
       expect(progressBar).toBeFalsy();
     });
   });

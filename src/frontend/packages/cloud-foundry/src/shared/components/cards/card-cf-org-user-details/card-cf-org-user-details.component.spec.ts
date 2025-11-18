@@ -19,8 +19,7 @@ import {
 } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { MetadataItemComponent, BooleanIndicatorComponent, CapitalizeFirstPipe } from '@stratosui/core';
-import { CloudFoundryTestingModule, generateCFEntities } from '@test-framework/cf';
-import { CloudFoundryOrganizationServiceMock } from "@test-framework/cloud-foundry-organization.service.mock";
+import { CloudFoundryTestingModule, generateCFEntities, CloudFoundryOrganizationServiceMock } from '@test-framework/cf';
 import { CloudFoundryOrganizationService } from '../../../../features/cf/services/cloud-foundry-organization.service';
 import { CardCfOrgUserDetailsComponent } from './card-cf-org-user-details.component';
 

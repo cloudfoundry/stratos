@@ -7,11 +7,11 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { CurrentUserPermissionsService } from '@stratosui/core';
 import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
 import {
+  generateCfBaseTestModulesNoShared,
   CloudFoundryOrganizationServiceMock,
-} from "@test-framework/cloud-foundry-organization.service.mock";
-import { CloudFoundrySpaceServiceMock } from "@test-framework/cloud-foundry-space.service.mock";
+  CloudFoundrySpaceServiceMock
+} from '@test-framework/cf';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
 import { CloudFoundryEndpointService } from '../../../../../features/cf/services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../../features/cf/services/cloud-foundry-organization.service';

@@ -15,8 +15,7 @@ import {
   EntityCatalogHelpers,
 } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
-import { generateTestCfEndpointServiceProvider, ActiveRouteCfOrgSpace } from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { CloudFoundrySpaceServiceMock } from "@test-framework/cloud-foundry-space.service.mock";
+import { generateTestCfEndpointServiceProvider, ActiveRouteCfOrgSpace, CloudFoundrySpaceServiceMock } from "@test-framework/cf";
 import { generateCFEntities } from '@stratosui/cloud-foundry';
 import { CloudFoundrySpaceService } from '../../services/cloud-foundry-space.service';
 import { EditSpaceStepComponent } from "./edit-space-step.component";

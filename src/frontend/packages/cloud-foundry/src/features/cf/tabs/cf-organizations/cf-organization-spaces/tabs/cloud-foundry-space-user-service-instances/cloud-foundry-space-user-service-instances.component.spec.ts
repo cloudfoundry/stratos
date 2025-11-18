@@ -10,8 +10,7 @@ import { StoreModule } from '@ngrx/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule } from '@stratosui/store';
 import { generateASEntities } from '@stratosui/cf-autoscaler';
-import { getCfSpaceServiceMock } from '@test-framework/cloud-foundry-space.service.mock';
-import { generateCFEntities } from '@test-framework/cf';
+import { getCfSpaceServiceMock, generateCFEntities } from '@test-framework/cf';
 import { CloudFoundrySpaceUserServiceInstancesComponent } from './cloud-foundry-space-user-service-instances.component';
 
 describe('CloudFoundrySpaceUserServiceInstancesComponent', () => {
