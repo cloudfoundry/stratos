@@ -37,7 +37,8 @@
         <ng-content select="input, textarea, select, app-select"></ng-content>
 
         <!-- Floating Label -->
-        @if (placeholder) {
+        <!-- Don't render label for app-select when floatLabel is 'never' - let app-select show its own placeholder -->
+        @if (placeholder && !(selectComponent && floatLabel === 'never')) {
           <label
             [for]="inputId"
                class="form-field-label absolute left-0 pointer-events-none select-none

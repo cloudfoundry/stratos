@@ -42,3 +42,28 @@
     margin-right: 4px;
   }
 }
+
+// Theme-aware styles for new card structure
+.fav-card {
+  &--clickable {
+    &:hover {
+      background-color: var(--table-row-hover);
+    }
+  }
+
+  &__icon-bg {
+    background-color: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  }
+
+  &__icon {
+    color: var(--color-primary);
+  }
+
+  &__name {
+    color: var(--content-text);
+  }
+
+  &__type {
+    color: var(--content-muted);
+  }
+}

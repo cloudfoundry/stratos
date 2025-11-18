@@ -549,14 +549,21 @@
 .custom-form-field[ng-reflect-float-label="never"],
 .custom-form-field.float-label-never {
   @apply mb-0;
+  background-color: transparent !important;
 
   .form-field-wrapper {
     padding-bottom: 0 !important;
+    background-color: transparent !important;
+  }
+
+  .form-field-flex {
+    background-color: transparent !important;
   }
 
   .form-field-infix {
     padding: 0 !important;
     min-width: auto !important;
+    background-color: transparent !important;
 
     /* Ensure inputs still respect theme variables in compact mode */
     input,
@@ -565,6 +572,13 @@
       background-color: var(--input-bg);
       color: var(--input-text);
       border-color: var(--input-border);
+    }
+
+    app-select {
+      display: block;
+      background-color: var(--input-bg) !important;
+      border: none !important;
+      border-radius: 0.375rem;
     }
   }
 

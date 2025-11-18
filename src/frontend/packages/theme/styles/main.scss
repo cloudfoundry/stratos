@@ -590,6 +590,7 @@ router-outlet + * {
     background-color: var(--card-bg);
     border-color: var(--card-border);
     box-shadow: var(--shadow-sm);
+    color: var(--content-text);
   }
 
   .card-header {

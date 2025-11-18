@@ -6,8 +6,8 @@
   [attr.aria-describedby]="invalid && errorMessage ? 'error-' + (id || name) : null">
 
   <div class="select-trigger" #selectTrigger (click)="toggle()">
-    <span class="select-value" [class.placeholder]="!displayValue">
-      {{ displayValue || placeholder }}
+    <span class="select-value" [class.placeholder]="!displayValue || displayValue === ''">
+      {{ displayValue && displayValue !== '' ? displayValue : (placeholder || 'Select...') }}
     </span>
     <div class="select-suffix">
       <div class="select-arrow">

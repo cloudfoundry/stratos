@@ -1,3 +1,11 @@
+:host {
+  display: block;
+  background-color: var(--input-bg) !important;
+  color: var(--input-text) !important;
+  border: none;
+  border-radius: 0.375rem;
+}
+
 .custom-select {
   position: relative;
   display: inline-block;
@@ -58,10 +66,15 @@
 
 .select-value {
   flex: 1;
-  color: inherit;
+  color: var(--input-text);
 
   &.placeholder {
-    color: var(--input-placeholder);
+    color: var(--input-placeholder, #9ca3af) !important;
+
+    // Dark theme support
+    .dark-theme & {
+      color: var(--input-placeholder, #64748b) !important;
+    }
   }
 }
 

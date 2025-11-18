@@ -9,7 +9,7 @@
         [appFocus]="!(cfOrgSpaceService.cf.loading$ | async)"
         class="block w-full border-b border-gray-300 dark:border-gray-600 pb-2">
         @for (cf of cfOrgSpaceService.cf.list$ | async; track cf) {
-          <app-option [value]="cf.guid">
+          <app-option [value]="cf.guid" [label]="cf.name">
             <span>{{ cf.name }}</span>
           </app-option>
         }
@@ -25,7 +25,7 @@
       [appFocus]="isMarketplaceMode && !(!cfOrgSpaceService.cf.select.getValue() || (cfOrgSpaceService.org.loading$ | async) || isRedeploy)"
       class="block w-full border-b border-gray-300 dark:border-gray-600 pb-2">
       @for (org of cfOrgSpaceService.org.list$ | async; track org) {
-        <app-option [value]="org.guid">
+        <app-option [value]="org.guid" [label]="org.name">
           <span>{{ org.name }}</span>
         </app-option>
       }
@@ -44,7 +44,7 @@
       (selectionChange)="cfOrgSpaceService.space.select.next($event.value)" required name="space"
       class="block w-full border-b border-gray-300 dark:border-gray-600 pb-2">
       @for (space of spaces$ | async; track space) {
-        <app-option [value]="space.guid">
+        <app-option [value]="space.guid" [label]="space.name">
           <span>{{ space.name }}</span>
         </app-option>
       }
