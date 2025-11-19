@@ -10,15 +10,16 @@
   "scripts": {
     "preinstall": "node build/ensure-devkit.cjs",
     "postinstall": "node build/post-setup.cjs",
+    "pretest": "node build/check-versions.cjs",
     "bootstrap": "echo '⚠️  Bootstrap is no longer required! Just run: bun install'",
     "build-backend": "./build/bk-build.sh",
-    "full-build-dev": "npm run build-dev; npm run build-backend",
+    "full-build-dev": "bun run build-dev; bun run build-backend",
     "fetch-backend-deps": "./build/bk-fetch-deps.sh",
     "test-backend": "./build/bk-build.sh test",
     "build": "ng build stratos --configuration production",
     "build-cf": "ng build stratos --configuration production",
     "build-dev": "ng build stratos --configuration development",
-    "prebuild-ui": "npm run build && npm run prebuild-zip",
+    "prebuild-ui": "bun run build && bun run prebuild-zip",
     "prebuild-zip": "node build/prebuild-zip.js",
     "pre-build-only": "node build/build-orchestrator.js",
     "test-build": "ng build stratos --configuration development --skip-pre-build",
@@ -62,9 +63,9 @@
     "e2e:local": "STRATOS_E2E_BASE_URL=https://127.0.0.1 playwright test",
     "e2e:report": "playwright show-report e2e-reports/html",
     "climate": "codeclimate analyze $(git diff --name-only master)",
-    "gate-check": "npm run lint && npm run test-headless",
+    "gate-check": "bun run lint && bun run test-headless",
     "store-git-metadata": "sh -c 'mv build/store-git-metadata.js build/store-git-metadata.cjs 2>/dev/null || true && node build/store-git-metadata.cjs && mv build/store-git-metadata.cjs build/store-git-metadata.js 2>/dev/null || true'",
-    "build-devkit": "cd src/frontend/packages/devkit && npm run build",
+    "build-devkit": "cd src/frontend/packages/devkit && bun run build",
     "clean-symlinks": "sh -c 'mv build/clean-symlinks.js build/clean-symlinks.cjs 2>/dev/null || true && node build/clean-symlinks.cjs && mv build/clean-symlinks.cjs build/clean-symlinks.js 2>/dev/null || true'",
     "dev-setup": "sh -c 'mv build/dev-setup.js build/dev-setup.cjs 2>/dev/null || true && node build/dev-setup.cjs && mv build/dev-setup.cjs build/dev-setup.js 2>/dev/null || true'",
     "prepare-backend": "sh -c 'mv dist-devkit/backend.js dist-devkit/backend.cjs 2>/dev/null || true && node dist-devkit/backend.cjs && mv dist-devkit/backend.cjs dist-devkit/backend.js 2>/dev/null || true'"
@@ -125,7 +126,8 @@
   },
   "engines": {
     "node": "^24.0",
-    "npm": ">=8.3"
+    "npm": ">=8.3",
+    "bun": ">=1.2.0"
   },
   "devDependencies": {
     "@analogjs/vite-plugin-angular": "^2.0.0",

@@ -218,7 +218,7 @@ test: test-unit
 
 test-unit:
 	@echo "$(BLUE)🧪 Running unit tests (Vitest)...$(NC)"
-	bun test
+	bun run test
 	@echo "$(GREEN)✅ Unit tests complete$(NC)"
 
 test-e2e:
