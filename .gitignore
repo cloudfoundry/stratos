@@ -117,9 +117,6 @@ src/frontend/packages/core/assets/custom
 src/frontend/packages/core/sass/custom
 src/frontend/packages/core/src/index.html
 
-# Customisation - generated import module
-src/frontend/packages/core/src/_custom-import.module.ts
-
 # Backend file generated to include extra plugins
 src/jetstream/extra_plugins.go
 
