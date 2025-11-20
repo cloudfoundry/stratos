@@ -112,6 +112,7 @@ src/frontend/packages/core/favicon.ico
 src/frontend/packages/core/sass/custom.scss
 src/frontend/packages/core/assets/eula.html
 src/frontend/packages/core/src/custom-import.module.ts
+src/frontend/packages/core/src/_custom-import.module.ts
 src/frontend/packages/core/src/custom
 src/frontend/packages/core/assets/custom
 src/frontend/packages/core/sass/custom
