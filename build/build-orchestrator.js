@@ -24,10 +24,11 @@ const __dirname = dirname(__filename);
 const tools = [
   {
     name: 'Backend Plugin Generator',
-    script: '../dist-devkit/backend.js',
+    script: '../src/frontend/packages/devkit/src/backend.ts',
     required: true,
     description: 'Generates extra_plugins.go for Jetstream backend',
-    watchPaths: ['src/frontend/packages/*/package.json']
+    watchPaths: ['src/frontend/packages/*/package.json'],
+    useTsx: true  // Run with tsx for TypeScript support
   },
   {
     name: 'Extension Generator',
@@ -123,7 +124,10 @@ async function runTool(tool, context = {}) {
     // Run from project root, not from build directory
     const projectRoot = path.resolve(__dirname, '..');
     const args = tool.args ? (Array.isArray(tool.args) ? tool.args.join(' ') : tool.args) : '';
-    const command = `node ${toolPath} ${args}`.trim();
+    
+    // Use tsx for TypeScript files, node for JavaScript
+    const runner = tool.useTsx ? 'npx tsx' : 'node';
+    const command = `${runner} ${toolPath} ${args}`.trim();
     execSync(command, {
       stdio: 'inherit',
       cwd: projectRoot,
