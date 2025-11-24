@@ -1,7 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { AfterContentInit, ChangeDetectionStrategy, Component, HostBinding, Inject, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AuthOnlyAppState, ThemeService, VerifySession } from '@stratosui/store';
+import { AuthOnlyAppState, ThemeService, VerifySession, entityCatalog } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { create } from 'rxjs-spy';
 
@@ -71,6 +71,23 @@ export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
     if (environment.desktopMode) {
       this.document.body.classList.add('stratos-desktop');
     }
+
+    // Debug: Log entity catalog state to diagnose fresh clone issues
+    console.group('🔍 Entity Catalog Diagnostics');
+    const diagnostics = entityCatalog.getDiagnostics();
+    console.log('Summary:', diagnostics.summary);
+    console.log('Registered Endpoints:', diagnostics.registeredEndpoints);
+    console.log('Registered Entities:', diagnostics.registeredEntities);
+    console.log('Entities by Endpoint:', diagnostics.entitiesByEndpoint);
+    
+    // Get all endpoint types available for registration
+    const allEndpointTypes = entityCatalog.getAllEndpointTypes(false);
+    console.log('Endpoint Types Available for Registration:', allEndpointTypes.map(ep => ({
+      type: ep.definition.type,
+      label: ep.definition.label,
+      subType: ep.definition.subTypes?.map(st => st.type)
+    })));
+    console.groupEnd();
   }
 
   ngOnDestroy() {

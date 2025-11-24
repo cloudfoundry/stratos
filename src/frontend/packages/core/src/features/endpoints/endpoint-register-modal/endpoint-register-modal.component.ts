@@ -63,6 +63,18 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
 
   ngOnInit() {
     // BaseEndpointTileManager will handle setting up the tile selector config
+    
+    // Debug: Log what endpoint types are available for the modal
+    this.tileSelectorConfig$.subscribe(tiles => {
+      console.group('🎯 Endpoint Register Modal - Tile Config');
+      console.log('Number of tiles available:', tiles.length);
+      console.log('Tiles:', tiles.map(t => ({
+        label: t.label,
+        type: t.data?.type,
+        parentType: t.data?.parentType
+      })));
+      console.groupEnd();
+    });
   }
 
   ngOnDestroy() {
