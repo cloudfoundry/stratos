@@ -24,8 +24,13 @@
  * Reference: dist-devkit/build/sass.js (original webpack implementation)
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Configuration
 const CONFIG = {
@@ -528,13 +533,13 @@ async function main() {
   }
 }
 
-// Run if called directly
-if (require.main === module) {
+// Run if called directly (ES module version)
+if (import.meta.url.endsWith(process.argv[1].replace(/\\/g, '/'))) {
   main();
 }
 
 // Export functions for testing
-module.exports = {
+export {
   resolveTildeImport,
   calculateRelativePath,
   processScssFile,
