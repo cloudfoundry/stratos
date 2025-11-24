@@ -3,6 +3,7 @@
  */
 
 export * from './git-package.module';
+export * from './git-routing.module';
 export * from './git.routes';
 export * from './shared/git-shared.module';
 
