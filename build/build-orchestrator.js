@@ -32,8 +32,9 @@ const tools = [
   {
     name: 'SASS Resolver',
     script: './sass-resolver.js',
+    args: ['--analyze'],
     required: false,
-    description: 'Resolves SASS imports and processes SCSS files',
+    description: 'Analyze SASS imports',
     watchPaths: ['src/**/*.scss', 'src/**/*.sass']
   },
   {
@@ -46,7 +47,8 @@ const tools = [
   {
     name: 'Index Transformer',
     script: './index-transformer.js',
-    required: true,
+    args: ['src/frontend/packages/core/src/index.html'],
+    required: false,
     description: 'Transforms index.html with metadata injection',
     watchPaths: ['src/index.html', 'package.json']
   }
@@ -113,7 +115,9 @@ async function runTool(tool, context = {}) {
     // Execute tool with inherited stdio for real-time output
     // Run from project root, not from build directory
     const projectRoot = path.resolve(__dirname, '..');
-    execSync(`node ${toolPath}`, {
+    const args = tool.args ? (Array.isArray(tool.args) ? tool.args.join(' ') : tool.args) : '';
+    const command = `node ${toolPath} ${args}`.trim();
+    execSync(command, {
       stdio: 'inherit',
       cwd: projectRoot,
       env: {
