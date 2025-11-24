@@ -69,12 +69,43 @@ function checkDevkitBuild() {
   }
 }
 
+function buildCustomBuilders() {
+  const buildersDir = path.join(ROOT_DIR, 'tools/builders/prebuild-application');
+  const distDir = path.join(buildersDir, 'dist');
+
+  // Check if already built
+  if (fs.existsSync(distDir)) {
+    log('✓ Custom builders already built');
+    return;
+  }
+
+  if (!fs.existsSync(buildersDir)) {
+    log('⚠️  Custom builders directory not found');
+    return;
+  }
+
+  log('Building custom Angular builders...');
+  try {
+    execSync('npm run build', {
+      cwd: buildersDir,
+      stdio: 'inherit'
+    });
+    log('✓ Custom builders compiled successfully');
+  } catch (err) {
+    error(`Failed to build custom builders: ${err.message}`);
+    log('   The build may fail. Try running: cd tools/builders/prebuild-application && npm run build');
+  }
+}
+
 function main() {
   log('Running post-install setup tasks...');
   log('');
 
   // Check devkit
   checkDevkitBuild();
+
+  // Build custom builders
+  buildCustomBuilders();
 
   // Run dev-setup
   const devSetupPath = path.join(ROOT_DIR, 'build/dev-setup.js');
