@@ -7,6 +7,7 @@
   },
   "stratos": {
     "module": "GitPackageModule",
+    "routingModule": "GitRoutingModule",
     "routes": "GIT_ROUTES",
     "theming": "sass/_all-theme#apply-theme-git",
     "assets": {

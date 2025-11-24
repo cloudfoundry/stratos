@@ -6,8 +6,14 @@
  * Replaces webpack's index.transform.js for Angular 20 compatibility
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import yaml from 'js-yaml';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /**
  * Read git metadata from .stratos-git-metadata.json
@@ -39,7 +45,6 @@ function readStratosConfig(rootDir) {
 
   if (fs.existsSync(stratosYamlPath)) {
     try {
-      const yaml = require('js-yaml');
       return yaml.load(fs.readFileSync(stratosYamlPath, 'utf8'));
     } catch (e) {
       console.warn('⚠️ Failed to read stratos.yaml:', e.message);
@@ -169,8 +174,8 @@ function transformFile(inputPath, outputPath, rootDir) {
   console.log('✅ index.html transformed successfully');
 }
 
-// CLI mode when run directly
-if (require.main === module) {
+// CLI mode when run directly (ES module version)
+if (import.meta.url.endsWith(process.argv[1].replace(/\\/g, '/'))) {
   const args = process.argv.slice(2);
 
   if (args.length === 0 || args.includes('--help') || args.includes('-h')) {
@@ -226,7 +231,7 @@ Examples:
 }
 
 // Export for use as module
-module.exports = {
+export {
   transformIndexHtml,
   angularIndexTransformer,
   readGitMetadata,

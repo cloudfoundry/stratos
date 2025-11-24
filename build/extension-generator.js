@@ -5,9 +5,14 @@
  * Replaces webpack's NormalModuleReplacementPlugin functionality
  */
 
-const fs = require('fs');
-const path = require('path');
-const yaml = require('js-yaml');
+import fs from 'fs';
+import path from 'path';
+import yaml from 'js-yaml';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /**
  * Package information structure
@@ -404,9 +409,9 @@ function main() {
 }
 
 // Export for testing
-module.exports = { ExtensionGenerator, PackageInfo };
+export { ExtensionGenerator, PackageInfo };
 
-// Run if called directly
-if (require.main === module) {
+// Run if called directly (ES module version)
+if (import.meta.url.endsWith(process.argv[1].replace(/\\/g, '/'))) {
   main();
 }

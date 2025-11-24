@@ -11,9 +11,14 @@
  * 5. Signal ready for Angular build
  */
 
-const { execSync, spawn } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Tool definitions with dependencies and requirements
 const tools = [
@@ -106,9 +111,11 @@ async function runTool(tool, context = {}) {
 
   try {
     // Execute tool with inherited stdio for real-time output
+    // Run from project root, not from build directory
+    const projectRoot = path.resolve(__dirname, '..');
     execSync(`node ${toolPath}`, {
       stdio: 'inherit',
-      cwd: __dirname,
+      cwd: projectRoot,
       env: {
         ...process.env,
         ...context.env
@@ -180,10 +187,10 @@ async function orchestrate(options = {}) {
 /**
  * Watch mode implementation
  */
-function watchMode() {
+async function watchMode() {
   let chokidar;
   try {
-    chokidar = require('chokidar');
+    chokidar = (await import('chokidar')).default;
   } catch (error) {
     log('error', 'Watch mode requires chokidar package');
     log('info', 'Install with: npm install --save-dev chokidar');
@@ -319,8 +326,8 @@ async function main() {
   }
 }
 
-// Execute if called directly
-if (require.main === module) {
+// Execute if called directly (ES module version)
+if (import.meta.url.endsWith(process.argv[1].replace(/\\/g, '/'))) {
   main().catch(error => {
     log('error', `Fatal error: ${error.message}`);
     if (error.stack) {
@@ -331,7 +338,7 @@ if (require.main === module) {
 }
 
 // Export for programmatic use
-module.exports = {
+export {
   orchestrate,
   runTool,
   tools
