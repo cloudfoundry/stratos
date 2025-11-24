@@ -23,6 +23,13 @@ const __dirname = dirname(__filename);
 // Tool definitions with dependencies and requirements
 const tools = [
   {
+    name: 'Backend Plugin Generator',
+    script: '../dist-devkit/backend.js',
+    required: true,
+    description: 'Generates extra_plugins.go for Jetstream backend',
+    watchPaths: ['src/frontend/packages/*/package.json']
+  },
+  {
     name: 'Extension Generator',
     script: './extension-generator.js',
     required: true,
