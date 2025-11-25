@@ -114,7 +114,7 @@ function buildCustomBuilders() {
 
 function generateExtensionModule() {
   log('Generating extension module...');
-  const extensionGenPath = path.join(ROOT_DIR, 'build/extension-generator.js');
+  const extensionGenPath = path.join(ROOT_DIR, 'build/extension-generator.mjs');
   const extensionModulePath = path.join(ROOT_DIR, 'src/frontend/packages/core/src/_custom-import.module.ts');
 
   // Check if already exists

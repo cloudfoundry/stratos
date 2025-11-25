@@ -33,7 +33,7 @@
               },
               {
                 "name": "Generate custom imports",
-                "script": "sh -c 'mv build/extension-generator.js build/extension-generator.cjs && node build/extension-generator.cjs && mv build/extension-generator.cjs build/extension-generator.js'",
+                "script": "node build/extension-generator.mjs",
                 "phase": 2,
                 "cache": true,
                 "cacheKey": ["custom-src/**/*", "src/frontend/packages/core/custom-extensions.json"],

@@ -6,7 +6,7 @@
   "license": "Apache-2.0",
   "repository": "https://github.com/cloudfoundry/stratos",
   "scripts": {
-    "build": "tsc && node build.js",
+    "build": "tsc && node build.cjs",
     "tsc": "tsc"
   },
   "dependencies": {

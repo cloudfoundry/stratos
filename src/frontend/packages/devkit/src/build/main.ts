@@ -1,7 +1,12 @@
-import { StratosConfig } from "../lib/stratos.config";
-import { AssetsHandler } from "./assets";
-import { ExtensionsHandler } from "./extensions";
-import { SassHandler } from "./sass";
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import { StratosConfig } from "../lib/stratos.config.js";
+import { AssetsHandler } from "./assets.js";
+import { ExtensionsHandler } from "./extensions.js";
+import { SassHandler } from "./sass.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /**
  * Webpack customizations for Stratos

@@ -3,7 +3,7 @@ import { JsonObject } from '@angular-devkit/core';
 import * as FS from 'fs-extra';
 import * as Path from 'path';
 
-import { Packages } from '../lib/packages';
+import { Packages } from '../lib/packages.js';
 
 export interface ThemeOptions extends JsonObject {
   outputPath: string;
