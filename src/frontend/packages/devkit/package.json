@@ -1,6 +1,7 @@
 {
   "name": "@stratosui/devkit",
   "version": "0.0.1",
+  "type": "module",
   "description": "Stratos Development Kit for apps and extensions",
   "license": "Apache-2.0",
   "repository": "https://github.com/cloudfoundry/stratos",
