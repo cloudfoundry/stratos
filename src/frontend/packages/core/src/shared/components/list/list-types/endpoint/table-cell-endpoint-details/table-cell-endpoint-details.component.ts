@@ -1,16 +1,17 @@
 import { ChangeDetectionStrategy, Component,
   ComponentFactoryResolver,
-  ComponentRef,
+  type ComponentRef,
   Input,
-  OnDestroy,
-  Type,
+  type OnDestroy,
+  type Type,
   ViewChild,
   ViewContainerRef,
  } from '@angular/core';
-import { entityCatalog, EndpointModel } from '@stratosui/store';
+import { entityCatalog, type EndpointModel } from '@stratosui/store';
 
 import { TableCellCustom } from '../../../list.types';
-import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
+import {EndpointListHelper} from '../endpoint-list.helpers';
+import type {EndpointListDetailsComponent} from '../endpoint-list.helpers';
 
 @Component({
   selector: 'app-table-cell-endpoint-details',
@@ -49,7 +50,7 @@ export class TableCellEndpointDetailsComponent extends TableCellCustom<EndpointM
     }
     if (!this.cell) {
       const res =
-        this.endpointListHelper.createEndpointDetails(e.listDetailsComponent, this.endpointDetails, this.componentFactoryResolver);
+        this.endpointListHelper.createEndpointDetails(e.listDetailsComponent as typeof EndpointListDetailsComponent, this.endpointDetails, this.componentFactoryResolver);
       this.componentRef = res.componentRef;
       this.cell = res.component;
     }

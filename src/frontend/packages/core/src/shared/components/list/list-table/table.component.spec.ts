@@ -1,12 +1,12 @@
 import { CdkTableModule } from '@angular/cdk/table';
 import {  Component, ViewChild, provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { EMPTY, of as observableOf } from 'rxjs';
 
-import { IListPaginationController } from '@stratosui/core';
-import { ListSort } from '@stratosui/store';
+import type { IListPaginationController } from '@stratosui/core';
+import type { ListSort } from '@stratosui/store';
 import { createBasicStoreModule } from '@stratosui/store/testing';
 
 import { TableComponent } from './table.component';
@@ -74,24 +74,24 @@ describe('TableComponent', () => {
   class TableHostComponent {
     public addSelect = false;
     public columns = columns;
-    // new Array<ITableColumn<any>>();
+    // new Array<ITableColumn<unknown>>();
     public paginationController = {
       sort$: observableOf({} as ListSort),
-    } as IListPaginationController<any>;
+    } as IListPaginationController<unknown>;
     public dataSource = {
-      trackBy: () => '1',
+      trackBy: (_index: number, _item: unknown): string | number => '1',
       connect: () => EMPTY,
-      disconnect: () => null,
+      disconnect: (): null => null,
       isTableLoading$: observableOf(false),
     };
     @ViewChild('basicColumnsTable', { static: true })
-    public basicColumnsTable!: TableComponent<any>;
+    public basicColumnsTable!: TableComponent<unknown>;
     @ViewChild('selectionColumnsTable', { static: true })
-    public selectionColumnsTable!: TableComponent<any>;
+    public selectionColumnsTable!: TableComponent<unknown>;
     @ViewChild('actionColumnsTable', { static: true })
-    public actionColumnsTable!: TableComponent<any>;
+    public actionColumnsTable!: TableComponent<unknown>;
     @ViewChild('actionAndSelectionColumnsTable', { static: true })
-    public actionAndSelectionColumnsTable!: TableComponent<any>;
+    public actionAndSelectionColumnsTable!: TableComponent<unknown>;
   }
   let component: TableHostComponent;
   let fixture: ComponentFixture<TableHostComponent>;

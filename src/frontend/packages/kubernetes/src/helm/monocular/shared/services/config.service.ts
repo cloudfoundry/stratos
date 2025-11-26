@@ -12,16 +12,16 @@ export class ConfigService {
   // EO configurable options
 
   constructor() {
-    let overrides: Record<string, any> = {};
+    let overrides: Record<string, unknown> = {};
     // Object.keys(window).find(param => param === 'monocular');
     /* tslint:disable-next-line:no-string-literal */
-    const monocular = (window as any)['monocular'];
+    const monocular = (window as unknown as { monocular?: { overrides?: Record<string, unknown> } }).monocular;
     if (monocular) {
       overrides = monocular.overrides || {};
     }
 
-    this.backendHostname = overrides.backendHostname || '/api';
-    this.appName = overrides.appName || 'Monocular';
-    this.aboutUrl = overrides.aboutUrl || 'https://github.com/helm/monocular/blob/master/docs/about.md';
+    this.backendHostname = (overrides.backendHostname as string) || '/api';
+    this.appName = (overrides.appName as string) || 'Monocular';
+    this.aboutUrl = (overrides.aboutUrl as string) || 'https://github.com/helm/monocular/blob/master/docs/about.md';
   }
 }

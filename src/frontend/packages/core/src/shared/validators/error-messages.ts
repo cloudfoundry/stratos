@@ -29,7 +29,7 @@ export const DEFAULT_ERROR_MESSAGES: Record<ValidationErrorKey, string> = {
  * ```
  */
 export function getValidationErrorMessage(
-  errors: Record<string, any>,
+  errors: Record<string, unknown>,
   customMessages?: Partial<Record<ValidationErrorKey, string>>
 ): string {
   const messages = { ...DEFAULT_ERROR_MESSAGES, ...customMessages };
@@ -38,8 +38,9 @@ export function getValidationErrorMessage(
   const firstErrorKey = Object.keys(errors)[0] as ValidationErrorKey;
 
   // Check if error has custom message embedded
-  if (errors[firstErrorKey]?.message) {
-    return errors[firstErrorKey].message;
+  const errorValue = errors[firstErrorKey];
+  if (errorValue && typeof errorValue === 'object' && 'message' in errorValue) {
+    return (errorValue as { message: string }).message;
   }
 
   // Use default message
@@ -50,17 +51,18 @@ export function getValidationErrorMessage(
  * Get all validation error messages for a control
  */
 export function getAllValidationErrorMessages(
-  errors: Record<string, any>,
+  errors: Record<string, unknown>,
   customMessages?: Partial<Record<ValidationErrorKey, string>>
 ): string[] {
   const messages = { ...DEFAULT_ERROR_MESSAGES, ...customMessages };
 
   return Object.keys(errors).map(key => {
     const errorKey = key as ValidationErrorKey;
+    const errorValue = errors[key];
 
     // Check for embedded message
-    if (errors[key]?.message) {
-      return errors[key].message;
+    if (errorValue && typeof errorValue === 'object' && 'message' in errorValue) {
+      return (errorValue as { message: string }).message;
     }
 
     return messages[errorKey] || 'Validation error';

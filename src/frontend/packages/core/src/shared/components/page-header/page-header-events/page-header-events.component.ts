@@ -1,13 +1,13 @@
 import { animate, style, transition, trigger } from '@angular/animations';
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input, OnInit  } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, Input, type OnInit  } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { AppState } from '@stratosui/store';
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import type { AppState } from '@stratosui/store';
+import { combineLatest, type Observable, of as observableOf } from 'rxjs';
 import { first, map, publishReplay, refCount, share } from 'rxjs/operators';
 
-import { endpointEventKey, GlobalEventService, IGlobalEvent } from '../../../global-events.service';
+import { endpointEventKey, GlobalEventService, type IGlobalEvent } from '../../../global-events.service';
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 
 @Component({
@@ -43,11 +43,10 @@ export class PageHeaderEventsComponent implements OnInit {
   public simpleErrorMessage = false;
 
   public errorMessage$!: Observable<string>;
-  endpointId: any;
-  private events$!: Observable<any>;
+  endpointId: unknown;
+  private events$!: Observable<unknown>;
   constructor(
-    private activatedRoute: ActivatedRoute,
-    private store: Store<AppState>,
+    private activatedRoute: ActivatedRoute,_store: Store<AppState>,
     private eventService: GlobalEventService,
   ) { }
 
@@ -56,16 +55,18 @@ export class PageHeaderEventsComponent implements OnInit {
       first(),
     ).subscribe((events: IGlobalEvent[]) => {
       if (events && !!events.length) {
-        events.forEach(event => this.eventService.updateEventReadState(event, true));
+        events.forEach(event => {
+          this.eventService.updateEventReadState(event, true);
+        });
       }
     });
   }
 
   ngOnInit() {
-    this.endpointId = this.activatedRoute.snapshot.params && this.activatedRoute.snapshot.params.endpointId ?
+    this.endpointId = this.activatedRoute.snapshot.params?.endpointId ?
       this.activatedRoute.snapshot.params.endpointId : null;
     if (!this.endpointIds$ && this.endpointId) {
-      this.endpointIds$ = observableOf([this.endpointId]);
+      this.endpointIds$ = observableOf([this.endpointId as string]);
     }
     if (this.endpointIds$) {
       this.events$ = combineLatest(
@@ -82,6 +83,7 @@ export class PageHeaderEventsComponent implements OnInit {
               const unread = !event.read;
               return relevantEndpoint && unread;
             }
+            return false;
           });
           return filteredEvents;
         }),

@@ -1,27 +1,31 @@
 import { DatePipe } from '@angular/common';
 import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, type Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 // eslint-disable-next-line @stratosui/no-relative-imports
-import { CFAppState } from '../../../../../cf-app-state';
+import type { CFAppState } from '../../../../../cf-app-state';
 // eslint-disable-next-line @stratosui/no-relative-imports
 import { getCFEntityKey } from '../../../../../cf-entity-helpers';
 // eslint-disable-next-line @stratosui/no-relative-imports
 import { serviceInstancesEntityType, userProvidedServiceInstanceEntityType } from '../../../../../cf-entity-types';
 // eslint-disable-next-line @stratosui/no-relative-imports
 import { cfOrgSpaceFilter } from '../../../../../features/cf/cf.helpers';
+import type { IServiceInstance } from '../../../../../cf-api-svc.types';
 import { CfOrgSpaceDataService, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import {
   CurrentUserPermissionsService,
   CardMultiActionComponents,
-  ITableText,
+  type ITableText,
   defaultPaginationPageSizeOptionsCards,
   ListViewTypes,
+  type DataFunction,
+  type DataFunctionDefinition,
+  type IListConfig,
 } from '@stratosui/core';
-import { ListView } from '@stratosui/store';
+import type { ListView, GeneralEntityAppState, PaginationEntityState, APIResource } from '@stratosui/store';
 import { CfServiceInstancesListConfigBase } from '../cf-services/cf-service-instances-list-config.base';
 import { ServiceInstanceCardComponent } from './service-instance-card/service-instance-card.component';
 import { ServiceInstancesWallDataSource } from './service-instances-wall-data-source';
@@ -64,7 +68,7 @@ export class ServiceInstancesWallListConfigService extends CfServiceInstancesLis
   private cfOrgSpaceService = inject(CfOrgSpaceDataService);
 
   constructor() {
-    const store = inject(Store<CFAppState>);
+    const store = inject(Store<GeneralEntityAppState>);
     const datePipe = inject(DatePipe);
     const currentUserPermissionsService = inject(CurrentUserPermissionsService);
     const serviceActionHelperService = inject(ServiceActionHelperService);
@@ -82,8 +86,11 @@ export class ServiceInstancesWallListConfigService extends CfServiceInstancesLis
       createCfOrgSpaceFilterConfig('space', 'Space', this.cfOrgSpaceService.space),
     ];
 
-    const transformEntities = [{ type: 'filter', field: 'entity.name' }, cfOrgSpaceFilter];
-    this.dataSource = new ServiceInstancesWallDataSource(store, transformEntities, this);
+    const transformEntities: (DataFunction<APIResource> | DataFunctionDefinition)[] = [
+      { type: 'filter', field: 'entity.name' },
+      cfOrgSpaceFilter as DataFunction<APIResource>
+    ];
+    this.dataSource = new ServiceInstancesWallDataSource(store, transformEntities, this as unknown as IListConfig<APIResource>);
     this.getMultiFiltersConfigs = () => multiFilterConfigs;
 
     this.serviceInstanceColumns.find(column => column.columnId === 'attachedApps').cellConfig = {

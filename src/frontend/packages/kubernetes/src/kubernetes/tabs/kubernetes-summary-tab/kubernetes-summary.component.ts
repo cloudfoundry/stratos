@@ -1,15 +1,15 @@
 import { HttpClient } from '@angular/common/http';
-import {Component, NgZone, OnDestroy, OnInit, computed, inject, ChangeDetectionStrategy, Injector, runInInjectionContext } from '@angular/core';
+import {Component, NgZone, type OnDestroy, type OnInit, computed, inject, ChangeDetectionStrategy, Injector, runInInjectionContext } from '@angular/core';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
-import { SafeResourceUrl } from '@angular/platform-browser';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import type { SafeResourceUrl } from '@angular/platform-browser';
 import { Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { interval, Observable, Subscription } from 'rxjs';
+import { interval, type Observable, type Subscription } from 'rxjs';
 import { first, map, startWith } from 'rxjs/operators';
 
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
-import {
+import type {
   IChartThresholds,
   ISimpleUsageChartData,
 } from '../../../../../core/src/shared/components/simple-usage-chart/simple-usage-chart.types';
@@ -18,14 +18,14 @@ import { PageSubNavComponent } from '../../../../../core/src/shared/components/p
 import { LoadingPageComponent } from '../../../../../core/src/shared/components/loading-page/loading-page.component';
 import {
   PaginationMonitorFactory,
-  AppState,
+  type AppState,
   entityCatalog,
   getCurrentPageRequestInfo,
-  PaginatedAction,
-  PaginationEntityState
+  type PaginatedAction,
+  type PaginationEntityState
 } from '@stratosui/store';
 import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
-import { CaaspNodesData, KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
+import { type CaaspNodesData, KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 
 interface IValueLabels {
   usedLabel?: string;
@@ -187,15 +187,15 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
 
     // Convert all observables to signals within injection context
     runInInjectionContext(this.injector, () => {
-      const endpointDetailsSignal = toSignal(this.endpointDetails$, { initialValue: null as any });
+      const endpointDetailsSignal = toSignal(this.endpointDetails$, { initialValue: null as IEndpointDetails | null });
       const podCountSignal = toSignal(this.podCount$, { initialValue: null as number | null });
       const nodeCountSignal = toSignal(this.nodeCount$, { initialValue: null as number | null });
-      const podCapacitySignal = toSignal(this.podCapacity$, { initialValue: null as any });
-      const diskPressureSignal = toSignal(this.diskPressure$, { initialValue: null as any });
-      const memoryPressureSignal = toSignal(this.memoryPressure$, { initialValue: null as any });
-      const outOfDiskSignal = toSignal(this.outOfDisk$, { initialValue: null as any });
-      const nodesReadySignal = toSignal(this.nodesReady$, { initialValue: null as any });
-      const networkUnavailableSignal = toSignal(this.networkUnavailable$, { initialValue: null as any });
+      const podCapacitySignal = toSignal(this.podCapacity$, { initialValue: null as ISimpleUsageChartData | null });
+      const diskPressureSignal = toSignal(this.diskPressure$, { initialValue: null as ISimpleUsageChartData | null });
+      const memoryPressureSignal = toSignal(this.memoryPressure$, { initialValue: null as ISimpleUsageChartData | null });
+      const outOfDiskSignal = toSignal(this.outOfDisk$, { initialValue: null as ISimpleUsageChartData | null });
+      const nodesReadySignal = toSignal(this.nodesReady$, { initialValue: null as ISimpleUsageChartData | null });
+      const networkUnavailableSignal = toSignal(this.networkUnavailable$, { initialValue: null as ISimpleUsageChartData | null });
 
       // Compute loading state - false when all are loaded
       const isLoadingComputed = computed(() => {

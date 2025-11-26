@@ -1,7 +1,7 @@
-import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
+import type { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { FetchAllDomains, FetchDomain } from '../actions/domains.actions';
 import { GetAllOrganizationDomains } from '../actions/organization.actions';
-import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
+import type { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
 export interface DomainActionBuilders extends OrchestratedActionBuilders {
   get: (
@@ -11,7 +11,7 @@ export interface DomainActionBuilders extends OrchestratedActionBuilders {
   getMultiple: (
     endpointGuid: string,
     paginationKey: string,
-    { flatten }: CFBasePipelineRequestActionMeta
+    { flatten }?: CFBasePipelineRequestActionMeta
   ) => FetchAllDomains;
   getOrganizationDomains: (
     orgGuid: string,

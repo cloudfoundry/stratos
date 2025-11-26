@@ -3,8 +3,8 @@ import {
   SaveUserFavoriteSuccessAction,
   UpdateUserFavoriteMetadataSuccessAction,
 } from '../actions/user-favourites.actions';
-import { IRequestEntityTypeState } from '../app-state';
-import { IFavoriteMetadata, UserFavorite } from '../types/user-favorites.types';
+import type { IRequestEntityTypeState } from '../app-state';
+import type { IFavoriteMetadata, UserFavorite } from '../types/user-favorites.types';
 
 export function addOrUpdateUserFavoriteMetadataReducer(
   state: IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>>,

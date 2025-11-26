@@ -1,7 +1,7 @@
 import { metricEntityType } from '../helpers/stratos-entity-factory';
 import { proxyAPIVersion } from '../jetstream';
 import { MetricQueryType } from '../types/metric.types';
-import { EntityRequestAction } from '../types/request.types';
+import type { EntityRequestAction } from '../types/request.types';
 
 export const METRICS_START = '[Metrics] Fetch Start';
 export const METRICS_START_SUCCESS = '[Metrics] Fetch Succeeded';
@@ -20,7 +20,7 @@ function joinParams(queryConfig: MetricQueryConfig) {
   // If the query contains it's own curly brackets don't add a new set
   const hasSquiggly = queryConfig.metric.indexOf('}') >= 0;
   const windowString = window && !(params.start && params.end) ? `${(hasSquiggly ? '' : '{}')}[${window}]` : '';
-  const paramString = Object.keys(params).reduce((accum, key) => accum + `&${key}=${params[key]}`, '');
+  const paramString = Object.keys(params).reduce((accum, key) => `${accum}&${key}=${params[key]}`, '');
   return windowString + paramString || '';
 }
 

@@ -1,6 +1,6 @@
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { EntityRequestAction } from '../../../store/src/types/request.types';
-import { GitMeta, GitSCM } from '../shared/scm/scm';
+import type { PaginatedAction } from '../../../store/src/types/pagination.types';
+import type { EntityRequestAction } from '../../../store/src/types/request.types';
+import type { GitMeta, GitSCM } from '../shared/scm/scm';
 import { getBranchGuid, getCommitGuid, getRepositoryGuid, GIT_ENDPOINT_TYPE, gitEntityFactory } from './git-entity-factory';
 import {
   FETCH_BRANCH_FAILED,
@@ -14,7 +14,7 @@ import {
   FETCH_COMMIT,
   FETCH_COMMITS,
   FETCH_GITHUB_REPO,
-  GitCommit,
+  type GitCommit,
 } from './git.public-types';
 import { gitBranchesEntityType, gitCommitEntityType, gitRepoEntityType } from './git.types';
 
@@ -59,7 +59,7 @@ export class FetchBranchesForProject implements PaginatedAction {
   flattenPagination = true;
   entity = [gitEntityFactory(gitBranchesEntityType)];
 
-  static createPaginationKey = (scm: GitSCM, projectName: string) => scm.getType() + '--' + projectName;
+  static createPaginationKey = (scm: GitSCM, projectName: string) => `${scm.getType()}--${projectName}`;
 }
 
 export class FetchCommit implements EntityRequestAction {
@@ -92,7 +92,7 @@ export class FetchCommits implements PaginatedAction {
     public projectName: string,
     public sha: string
   ) {
-    this.paginationKey = scm.getType() + '--' + projectName + '--' + sha;
+    this.paginationKey = `${scm.getType()}--${projectName}--${sha}`;
   }
   actions = [
     '[Deploy App] Fetch commits start',

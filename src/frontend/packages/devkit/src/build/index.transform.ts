@@ -1,7 +1,7 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
 
 import { StratosConfig } from '../lib/stratos.config.js';
 
@@ -21,7 +21,7 @@ export class IndexHtmlHandler {
   public apply(src: string): string {
 
     // Patch different page title if there is one
-    const title = this.config.stratosConfig.title || 'Stratos';
+    const title = (this.config.stratosConfig as any).title || 'Stratos';
     src = src.replace(/@@TITLE@@/g, title);
 
     // // Git Information
@@ -39,14 +39,14 @@ export class IndexHtmlHandler {
     const hasTheme = loadingTheme.stratos && loadingTheme.theme;
 
     // Custom loading indicator should default to the loading screen in the default theme, if custom theme does not have one
-    if (!hasTheme || hasTheme && !loadingTheme.json.stratos.theme.loadingCss) {
+    if (!hasTheme || (hasTheme && !(loadingTheme.json.stratos as any)?.theme?.loadingCss)) {
       loadingTheme = this.config.getDefaultTheme();
     }
 
     const themePackageJson = loadingTheme.json;
     const themePackageFolder = loadingTheme.dir;
-    const css = themePackageJson.stratos.theme.loadingCss;
-    const html = themePackageJson.stratos.theme.loadingHtml;
+    const css = (themePackageJson.stratos as any)?.theme?.loadingCss;
+    const html = (themePackageJson.stratos as any)?.theme?.loadingHtml;
 
     if (css) {
       const cssFile = path.resolve(themePackageFolder, css);
@@ -74,7 +74,7 @@ interface TargetOptions {
 }
 
 // Transform the index.html
-const indexTransform = (options: TargetOptions, content: string) => {
+const indexTransform = (_options: TargetOptions, content: string) => {
 
   // Get the Stratos config - don't log a second time
   const sConfig = new StratosConfig(__dirname, null, false);

@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { Component, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
@@ -31,7 +31,7 @@ import {
   IFavoriteMetadata,
   UserFavorite,
   UserFavoriteManager
-} from '@stratosui/store';
+, GeneralEntityAppState } from '@stratosui/store';
 import {
   CFAppState,
   organizationEntityType,
@@ -59,6 +59,7 @@ selector: 'app-cf-org-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    AsyncPipe,
     MetaCardComponent,
     MetaCardTitleComponent,
     MetaCardItemComponent,
@@ -88,7 +89,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
   constructor(
     private cfUserService: CfUserService,
     public cfEndpointService: CloudFoundryEndpointService,
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     private currentUserPermissionsService: CurrentUserPermissionsService,
     private confirmDialog: ConfirmationDialogService,
     private paginationMonitorFactory: PaginationMonitorFactory,
@@ -185,7 +186,9 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
   }
 
   ngOnDestroy() {
-    this.subscriptions.forEach(p => p.unsubscribe());
+    for (const sub of this.subscriptions) {
+      sub.unsubscribe();
+    }
   }
 
   edit = () => {

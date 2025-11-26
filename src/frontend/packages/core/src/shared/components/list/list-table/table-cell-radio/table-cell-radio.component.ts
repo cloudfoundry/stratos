@@ -1,7 +1,11 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, type OnInit } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
 
 import { TableCellCustom } from '../../list.types';
+
+export interface TableCellRadioConfig<T> {
+  isDisabled: (row: T) => boolean;
+}
 
 @Component({
   selector: 'app-table-cell-radio',
@@ -13,7 +17,7 @@ import { TableCellCustom } from '../../list.types';
     CommonModule
   ]
 })
-export class TableCellRadioComponent<T> extends TableCellCustom<T> implements OnInit {
+export class TableCellRadioComponent<T> extends TableCellCustom<T, TableCellRadioConfig<T>> implements OnInit {
   disable!: boolean;
 
   constructor(private cdr: ChangeDetectorRef) {

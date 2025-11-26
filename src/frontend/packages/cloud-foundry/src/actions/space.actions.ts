@@ -1,9 +1,9 @@
 import { HttpParams, HttpRequest } from '@angular/common/http';
 
 import { getActions } from '../../../store/src/actions/action.helper';
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { ICFAction } from '../../../store/src/types/request.types';
-import { IUpdateSpace } from '../cf-api.types';
+import type { PaginatedAction } from '../../../store/src/types/pagination.types';
+import type { ICFAction } from '../../../store/src/types/request.types';
+import type { IUpdateSpace } from '../cf-api.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import {
   applicationEntityType,
@@ -19,8 +19,8 @@ import {
 import { CFEntityConfig } from '../cf-types';
 import {
   createEntityRelationKey,
-  EntityInlineChildAction,
-  EntityInlineParentAction,
+  type EntityInlineChildAction,
+  type EntityInlineParentAction,
 } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
 import { GetAllOrgUsers } from './organization.actions';
@@ -64,7 +64,7 @@ export class GetSpace extends CFStartAction implements ICFAction, EntityInlinePa
   entity = [cfEntityFactory(spaceEntityType)];
   schemaKey = ''; // Required by builder
   entityType = spaceEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
 }
 
 export class GetAllSpaces extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
@@ -84,7 +84,7 @@ export class GetAllSpaces extends CFStartAction implements PaginatedAction, Enti
   entity = [cfEntityFactory(spaceWithOrgEntityType)];
   schemaKey = spaceWithOrgEntityType;
   entityType = spaceEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   initialParams = {
     'results-per-page': 100,
     'order-direction': 'asc',
@@ -126,7 +126,7 @@ export class GetSpaceRoutes extends CFStartAction implements PaginatedAction, En
   parentGuid: string;
   entity = cfEntityFactory(routeEntityType);
   entityType = routeEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   parentEntityConfig = new CFEntityConfig(spaceEntityType);
 }
 
@@ -149,7 +149,7 @@ export class GetAllAppsInSpace extends CFStartAction implements PaginatedAction,
   actions = getActions('Spaces', 'Get Apps');
   entity = [cfEntityFactory(applicationEntityType)];
   entityType = applicationEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   initialParams = {
     page: 1,
     'results-per-page': 100,
@@ -165,7 +165,7 @@ export abstract class BaseSpaceAction extends CFStartAction implements ICFAction
   actions!: string[];
   entity = [cfEntityFactory(spaceEntityType)];
   entityType = spaceEntityType;
-  options!: HttpRequest<any>;
+  options!: HttpRequest<unknown>;
   removeEntityOnDelete?: boolean;
   constructor(public guid: string, public orgGuid: string, public endpointGuid: string) {
     super();
@@ -217,7 +217,7 @@ export class UpdateSpace extends CFStartAction implements ICFAction {
   actions = getActions('Spaces', 'Update Space');
   entity = [cfEntityFactory(spaceEntityType)];
   entityType = spaceEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   updatingKey = UpdateSpace.UpdateExistingSpace;
 }
 
@@ -257,7 +257,7 @@ export class GetAllServicesForSpace extends CFStartAction implements PaginatedAc
   actions = getActions('Space', 'Get all Services');
   entity = cfEntityFactory(serviceEntityType);
   entityType = serviceEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   initialParams = {
     page: 1,
     'results-per-page': 100,
@@ -293,7 +293,7 @@ export class GetServiceInstancesForSpace
   entity = [cfEntityFactory(serviceInstancesWithSpaceEntityType)];
   schemaKey = serviceInstancesWithSpaceEntityType;
   entityType = serviceInstancesEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   initialParams = {
     page: 1,
     'results-per-page': 100,

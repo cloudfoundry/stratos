@@ -1,6 +1,6 @@
 import { importProvidersFrom } from '@angular/core';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
@@ -110,7 +110,6 @@ describe('ServiceInstanceCardComponent', () => {
         tags: [],
         service_guid: 'service_guid',
         service_plan_url: '',
-        service_bindings: [],
         service_bindings_url: '',
         service_keys_url: '',
         last_operation: {

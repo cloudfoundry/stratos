@@ -1,7 +1,7 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { Component, type OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
 import { CardWrapperComponent, CardContentComponent } from '../../../../../../../core/src/shared/components/cards';

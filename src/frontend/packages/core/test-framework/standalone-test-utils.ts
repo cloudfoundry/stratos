@@ -10,8 +10,8 @@
  * - This ensures proper module compatibility in TestBed configuration
  */
 
-import { Component, Type } from '@angular/core';
-import { TestBedStatic } from '@angular/core/testing';
+import { Component, type Type } from '@angular/core';
+import type { TestBedStatic } from '@angular/core/testing';
 
 /**
  * Interface for test host component configuration

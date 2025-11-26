@@ -3,24 +3,24 @@ import { Component, signal , ChangeDetectionStrategy } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf } from 'rxjs';
+import { type Observable, of as observableOf } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import type { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { serviceBindingEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
 import {
   ServiceActionHelperService,
 } from '../../../../../cloud-foundry/src/shared/data-services/service-action-helper.service';
 import {
   AppMonitorComponentTypes,
-  ITableColumn,
+  type ITableColumn,
   PageHeaderComponent,
   StepComponent,
   SteppersComponent,
+  AppActionMonitorComponent
 } from '@stratosui/core';
-import { AppActionMonitorComponent } from '../../../../../core/src/shared/components/app-action-monitor/app-action-monitor.component';
-import { RouterNav, entityCatalog, APIResource } from '@stratosui/store';
-import { IServiceBinding } from '../../../cf-api-svc.types';
+import { RouterNav, entityCatalog, type APIResource } from '@stratosui/store';
+import type { IServiceBinding } from '../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import { DetachAppsComponent } from './detach-apps/detach-apps.component';
@@ -31,6 +31,7 @@ import { DetachAppsComponent } from './detach-apps/detach-apps.component';
   styleUrls: ['./detach-service-instance.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [DatePipe],
   imports: [
     AsyncPipe,
     PageHeaderComponent,
@@ -74,7 +75,7 @@ export class DetachServiceInstanceComponent {
   public selectedBindings$ = toObservable(this._selectedBindings);
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store,
     private datePipe: DatePipe,
     private serviceActionHelperService: ServiceActionHelperService,
     activatedRoute: ActivatedRoute,
@@ -99,7 +100,7 @@ export class DetachServiceInstanceComponent {
       return this.store.dispatch(new RouterNav({ path: '/services' }));
     }
     this.deleteStarted = true;
-    if (this.selectedBindings && this.selectedBindings.length) {
+    if (this.selectedBindings?.length) {
       this.selectedBindings.forEach(binding => {
         this.serviceActionHelperService.detachServiceBinding([binding], binding.entity.service_instance_guid, this.cfGuid, true);
       });

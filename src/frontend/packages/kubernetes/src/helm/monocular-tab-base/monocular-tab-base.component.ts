@@ -1,9 +1,9 @@
-import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { AppState } from '@stratosui/store';
+import type { AppState } from '@stratosui/store';
 import { endpointOfTypeSelector } from '@stratosui/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { PageHeaderComponent } from '@stratosui/core';

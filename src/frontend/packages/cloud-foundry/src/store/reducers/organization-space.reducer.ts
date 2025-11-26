@@ -1,8 +1,8 @@
-import { IRequestEntityTypeState } from '../../../../store/src/app-state';
-import { APIResource, NormalizedResponse } from '../../../../store/src/types/api.types';
-import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
-import { CREATE_SPACE_SUCCESS, CreateSpace, DELETE_SPACE_SUCCESS, DeleteSpace } from '../../actions/space.actions';
-import { IOrganization, ISpace } from '../../cf-api.types';
+import type { IRequestEntityTypeState } from '../../../../store/src/app-state';
+import type { APIResource, NormalizedResponse } from '../../../../store/src/types/api.types';
+import type { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
+import { CREATE_SPACE_SUCCESS, type CreateSpace, DELETE_SPACE_SUCCESS, type DeleteSpace } from '../../actions/space.actions';
+import type { IOrganization, ISpace } from '../../cf-api.types';
 import { getCFEntityKey } from '../../cf-entity-helpers';
 import { spaceEntityType } from '../../cf-entity-types';
 
@@ -11,14 +11,16 @@ type entityOrgType = APIResource<IOrganization<string>>;
 export function updateOrganizationSpaceReducer() {
   return (state: IRequestEntityTypeState<entityOrgType>, action: APISuccessOrFailedAction<NormalizedResponse>) => {
     switch (action.type) {
-      case DELETE_SPACE_SUCCESS:
+      case DELETE_SPACE_SUCCESS: {
         const deleteSpaceAction: DeleteSpace = action.apiAction as DeleteSpace;
         return removeSpaceFromOrg(state, deleteSpaceAction.orgGuid, deleteSpaceAction.guid);
-      case CREATE_SPACE_SUCCESS:
+      }
+      case CREATE_SPACE_SUCCESS: {
         const createSpaceAction = action.apiAction as CreateSpace;
         const response = action.response;
-        const space = response.entities[getCFEntityKey(spaceEntityType)][response.result[0]];
+        const space = response.entities[getCFEntityKey(spaceEntityType)][response.result[0]] as APIResource<ISpace>;
         return addSpaceToOrg(state, createSpaceAction.orgGuid, space);
+      }
     }
     return state;
   };

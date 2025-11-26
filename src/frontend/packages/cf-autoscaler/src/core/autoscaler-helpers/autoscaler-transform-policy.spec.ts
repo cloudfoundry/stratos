@@ -4,7 +4,7 @@ import {
   autoscalerTransformArrayToMap,
   autoscalerTransformMapToArray,
 } from './autoscaler-transform-policy';
-import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
+import type { AppAutoscalerPolicy, AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
 
 describe('Autoscaler Transform Policy Helper', () => {
   it('Test policy transformation', () => {

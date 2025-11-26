@@ -1,11 +1,12 @@
-import { Directive, Input, OnDestroy, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
+import { Directive, Input, type OnDestroy, type OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf, Subscription } from 'rxjs';
+import { type Observable, of as observableOf, type Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
 import { CurrentUserPermissionsService } from '@stratosui/core';
-import { AppState } from '@stratosui/store';
-import { CfCurrentUserPermissions, waitForCFPermissions } from '@stratosui/cloud-foundry';
+import type { AppState, GeneralEntityAppState } from '@stratosui/store';
+import { type CfCurrentUserPermissions, waitForCFPermissions } from '@stratosui/cloud-foundry';
+import type { ICfRolesState } from '../../../store/types/cf-current-user-roles.types';
 
 @Directive({
   selector: '[appCfUserPermission]',
@@ -27,8 +28,8 @@ export class CfUserPermissionDirective implements OnDestroy, OnInit {
   private canSub!: Subscription;
 
   constructor(
-    private store: Store<AppState>,
-    private templateRef: TemplateRef<any>,
+    private store: Store<GeneralEntityAppState>,
+    private templateRef: TemplateRef<unknown>,
     private viewContainer: ViewContainerRef,
     private currentUserPermissionsService: CurrentUserPermissionsService,
   ) { }
@@ -52,7 +53,7 @@ export class CfUserPermissionDirective implements OnDestroy, OnInit {
     );
   }
 
-  private waitForEndpointPermissions(endpointGuid: string): Observable<any> {
+  private waitForEndpointPermissions(endpointGuid: string): Observable<boolean | ICfRolesState> {
     return endpointGuid && endpointGuid.length > 0 ? waitForCFPermissions(this.store, endpointGuid) : observableOf(true);
   }
 

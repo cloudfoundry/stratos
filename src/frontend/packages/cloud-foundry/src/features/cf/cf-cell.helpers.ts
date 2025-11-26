@@ -1,15 +1,16 @@
 import { Store } from '@ngrx/store';
-import { Observable, of } from 'rxjs';
+import { type Observable, of } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { endpointHasMetricsByAvailable } from '../../../../core/src/features/endpoints/endpoint-helpers';
 import {
-  AppState,
+  type AppState,
   getPaginationObservables,
-  IMetrics,
+  type IMetrics,
   MetricQueryConfig,
   MetricQueryType,
-  PaginationMonitorFactory
+  type PaginationMonitorFactory,
+  type GeneralEntityAppState
 } from '@stratosui/store';
 import { FetchCFCellMetricsPaginatedAction } from '../../actions/cf-metrics.actions';
 import { CFEntityConfig } from '../../cf-types';
@@ -18,12 +19,12 @@ import { CellMetrics } from './tabs/cf-cells/cloud-foundry-cell/cloud-foundry-ce
 export class CfCellHelper {
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<GeneralEntityAppState>,
     private paginationMonitorFactory: PaginationMonitorFactory) {
   }
 
   public createCellMetricAction(cfId: string, cellId?: string): Observable<FetchCFCellMetricsPaginatedAction> {
-    const cellIdString = !!cellId ? `{bosh_job_id="${cellId}"}` : '';
+    const cellIdString = cellId ? `{bosh_job_id="${cellId}"}` : '';
 
     const newMetricAction: FetchCFCellMetricsPaginatedAction = new FetchCFCellMetricsPaginatedAction(
       cfId,
@@ -56,7 +57,7 @@ export class CfCellHelper {
     }).entities$.pipe(
       filter(entities => !!entities && !!entities.length),
       first(),
-      map(entities => !!entities.find(entity => !!entity.data && !!entity.data.result.length) ? action : null),
+      map(entities => entities.find(entity => !!entity.data && !!entity.data.result.length) ? action : null),
       publishReplay(1),
       refCount()
     );

@@ -1,12 +1,12 @@
 import { HttpClient, HttpHeaders, HttpParams, HttpRequest, HttpResponse } from '@angular/common/http';
-import { Directive, forwardRef, Input, OnInit } from '@angular/core';
-import { AbstractControl, AsyncValidator, NG_ASYNC_VALIDATORS } from '@angular/forms';
+import { Directive, forwardRef, Input, type OnInit } from '@angular/core';
+import { type AbstractControl, type AsyncValidator, NG_ASYNC_VALIDATORS } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf, throwError as observableThrowError, timer as observableTimer } from 'rxjs';
+import { type Observable, of as observableOf, throwError as observableThrowError, timer as observableTimer } from 'rxjs';
 import { catchError, filter, map, switchMap, take } from 'rxjs/operators';
 
 import { environment } from '@stratosui/core';
-import { CFAppState } from '../../../cf-app-state';
+import type { CFAppState } from '../../../cf-app-state';
 import { selectNewAppState } from './../../../store/effects/create-app-effects';
 
 const APP_UNIQUE_NAME_PROVIDER = {
@@ -16,8 +16,8 @@ const APP_UNIQUE_NAME_PROVIDER = {
 // See: https://medium.com/@kahlil/asynchronous-validation-with-angular-reactive-forms-1a392971c062
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
-export type NameTaken<T = any> = (response: HttpResponse<T>) => boolean;
-export type UniqueValidatorRequestBuilder<T = any> = (name: string) => HttpRequest<T>;
+export type NameTaken<T = unknown> = (response: HttpResponse<T>) => boolean;
+export type UniqueValidatorRequestBuilder<T = unknown> = (name: string) => HttpRequest<T>;
 export class AppNameUniqueChecking {
   busy!: boolean;
   taken: boolean | undefined;
@@ -38,18 +38,18 @@ export class AppNameUniqueChecking {
 }
 
 @Directive({
-selector: '[appApplicationNameUnique][formControlName],[appApplicationNameUnique][formControl],[appApplicationNameUnique][ngModel]',
+  selector: '[appApplicationNameUnique][formControlName],[appApplicationNameUnique][formControl],[appApplicationNameUnique][ngModel]',
   providers: [APP_UNIQUE_NAME_PROVIDER],
-standalone: true
+  standalone: true
 })
 export class AppNameUniqueDirective implements AsyncValidator, OnInit {
 
   @Input() appApplicationNameUnique!: AppNameUniqueChecking;
   @Input() appApplicationNameUniqueRequest!: UniqueValidatorRequestBuilder;
-  @Input() appApplicationNameUniqueValidator: NameTaken = (res: HttpResponse<any>) => res.body.total_results > 0;
+  @Input() appApplicationNameUniqueValidator: NameTaken = (res: HttpResponse<{ total_results: number }>) => res.body.total_results > 0;
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store,
     private http: HttpClient,
   ) {
     if (!this.appApplicationNameUnique) {
@@ -93,8 +93,8 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
 
   private getDefaultRequest(cfGuid: string, spaceGuid: string, name: string) {
     const params = new HttpParams()
-      .set('q', 'name:' + name)
-      .append('q', 'space_guid:' + spaceGuid);
+      .set('q', `name:${name}`)
+      .append('q', `space_guid:${spaceGuid}`);
     const headers = new HttpHeaders({
       'x-cap-cnsi-list': cfGuid,
       'x-cap-passthrough': 'true'
@@ -126,7 +126,7 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
     );
   }
 
-  private nameTaken(requestData: HttpRequest<any>, taken: NameTaken) {
+  private nameTaken(requestData: HttpRequest<unknown>, taken: NameTaken) {
     return this.http.request(requestData).pipe(
       filter((event) => event instanceof HttpResponse),
       map(taken)

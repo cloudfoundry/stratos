@@ -1,21 +1,21 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { DataFunction } from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
 import {
-  IListConfig,
-  IListFilter,
-  ListViewTypes,
-  IGlobalListAction,
-  IMultiListAction,
-  IListAction,
-  IListMultiFilterConfig,
-} from '../../../../../core/src/shared/components/list/list.component.types';
-import { AppState } from '../../../../../store/src/public-api';
-import { PaginationEntityState } from '../../../../../store/src/types/pagination.types';
-import { BaseKubeGuid } from '../../kubernetes-page.types';
-import { ConditionType, KubernetesAddressExternal, KubernetesAddressInternal, KubernetesNode } from '../../store/kube.types';
+  type DataFunction,
+  type IGlobalListAction,
+  type IListAction,
+  type IListConfig,
+  type IListFilter,
+  type IListMultiFilterConfig,
+  type IMultiListAction,
+  type ITableColumn,
+  ListViewTypes
+} from '@stratosui/core';
+import type { AppState } from '../../../../../store/src/public-api';
+import type { PaginationEntityState } from '../../../../../store/src/types/pagination.types';
+import type { BaseKubeGuid } from '../../kubernetes-page.types';
+import { ConditionType, KubernetesAddressExternal, KubernetesAddressInternal, type KubernetesNode } from '../../store/kube.types';
 import { defaultHelmKubeListPageSize } from '../kube-helm-list-types';
 import { createKubeAgeColumn, getConditionSort } from '../kube-list.helper';
 import { ConditionCellComponent } from './condition-cell/condition-cell.component';

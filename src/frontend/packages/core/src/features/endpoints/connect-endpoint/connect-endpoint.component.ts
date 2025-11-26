@@ -1,21 +1,21 @@
 
 import { ChangeDetectionStrategy, Component,
   ComponentFactoryResolver,
-  ComponentRef,
+  type ComponentRef,
   EventEmitter,
   Input,
-  OnDestroy,
-  OnInit,
+  type OnDestroy,
+  type OnInit,
   Output,
   ViewChild,
   ViewContainerRef,
  } from '@angular/core';
-import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup, AbstractControl } from '@angular/forms';
+import { ReactiveFormsModule, Validators, FormBuilder, FormControl, type FormGroup, AbstractControl } from '@angular/forms';
 import { CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
 import { CustomCheckboxComponent } from '../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../shared/components/custom-select/custom-select.component';
-import { entityCatalog, EndpointAuthTypeConfig, IAuthForm, IEndpointAuthComponent } from '@stratosui/store';
-import { Subscription } from 'rxjs';
+import { entityCatalog, type EndpointAuthTypeConfig, type IAuthForm, type IEndpointAuthComponent, type EndpointAuthValues, type AuthParams } from '@stratosui/store';
+import type { Subscription } from 'rxjs';
 
 import { BaseEndpointAuth } from '../../../core/endpoint-auth';
 import { safeUnsubscribe } from '../../../core/utils.service';
@@ -28,7 +28,7 @@ import { ConnectEndpointConfig, ConnectEndpointData, ConnectEndpointService } fr
 interface EndpointForm {
   authType: FormControl<string>;
   systemShared: FormControl<boolean>;
-  [key: string]: AbstractControl<any>;
+  [key: string]: AbstractControl<unknown>;
 }
 
 @Component({
@@ -162,8 +162,8 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     if (!this.sameAuthTypeFormFields(this.cachedAuthTypeFormFields, authTypeFormFields)) {
       // Don't remove and re-add the same control, this helps with form validation
       this.cachedAuthTypeFormFields = authTypeFormFields;
-      (this.endpointForm as any).removeControl('authValues');
-      (this.endpointForm as any).addControl('authValues', this.fb.group(authType.form || {}));
+      this.endpointForm.removeControl('authValues');
+      this.endpointForm.addControl('authValues', this.fb.group(authType.form || {}));
 
       // Update the auth form component
       this.createComponent(authType);
@@ -195,19 +195,19 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
 
   private getData(): ConnectEndpointData {
     const { authType, authValues, systemShared } = this.endpointForm.value;
-    let authVal = authValues;
+    let authVal = authValues as EndpointAuthValues;
 
     // Allow the auth form to supply body content if it needs to
     const endpointFormInstance = this.authFormComponentRef.instance as IEndpointAuthComponent;
     if (endpointFormInstance.getBody && endpointFormInstance.getValues) {
       this.bodyContent = endpointFormInstance.getBody();
-      authVal = endpointFormInstance.getValues(authValues);
+      authVal = endpointFormInstance.getValues(authValues as EndpointAuthValues);
     }
 
     return {
-      authType: authType ?? '',
-      authVal,
-      systemShared: systemShared ?? false,
+      authType: (authType as string) ?? '',
+      authVal: authVal as AuthParams,
+      systemShared: (systemShared as boolean) ?? false,
       bodyContent: this.bodyContent,
     };
   }

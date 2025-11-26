@@ -1,5 +1,5 @@
-import { APIResource } from '@stratosui/store';
-import { IOrganization, IOrgQuotaDefinition, ISpace } from '../cf-api.types';
+import type { APIResource } from '@stratosui/store';
+import type { IOrganization, IOrgQuotaDefinition, ISpace } from '../cf-api.types';
 
 export const entityRelationMissingSpacesUrl = 'spaces_url';
 export const entityRelationMissingQuotaGuid = 'quota_guid';

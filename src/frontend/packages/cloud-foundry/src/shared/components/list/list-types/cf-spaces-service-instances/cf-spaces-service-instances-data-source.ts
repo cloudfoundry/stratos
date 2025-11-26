@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
-import { getRowMetadata } from '@stratosui/store';
+import { getRowMetadata, type GeneralEntityAppState } from '@stratosui/store';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import type { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   applicationEntityType,
   serviceBindingEntityType,
@@ -17,14 +17,14 @@ import {
 } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import {
   ListDataSource,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+} from '@stratosui/core';
+import type { IListConfig } from '@stratosui/core';
+import type { APIResource } from '../../../../../../../store/src/types/api.types';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 
 export class CfSpacesServiceInstancesDataSource extends ListDataSource<APIResource> {
-  constructor(cfGuid: string, spaceGuid: string, store: Store<CFAppState>, listConfig?: IListConfig<APIResource>) {
+  constructor(cfGuid: string, spaceGuid: string, store: Store<GeneralEntityAppState>, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(spaceEntityType, spaceGuid);
     const action = cfEntityCatalog.serviceInstance.actions.getAllInSpace(spaceGuid, cfGuid, paginationKey, null, {
       includeRelations: [

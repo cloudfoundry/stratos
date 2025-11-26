@@ -4,15 +4,15 @@ import { ChangeDetectionStrategy, Component,
   EventEmitter,
   Host,
   Input,
-  OnDestroy,
-  OnInit,
+  type OnDestroy,
+  type OnInit,
   Optional,
   Output,
   SkipSelf,
   ViewChild,
  } from '@angular/core';
 import { ControlContainer, FormGroupName } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 
 import { getEventFiles } from '../../../core/browser-helper';
 import { safeUnsubscribe } from '../../../core/utils.service';
@@ -65,7 +65,7 @@ export class FileInputComponent implements OnInit, OnDestroy {
     safeUnsubscribe(this.sub);
   }
 
-  get fileCount(): number { return this.files && this.files.length || 0; }
+  get fileCount(): number { return this.files?.length || 0; }
 
   onNativeInputFileSelect($event: Event) {
     const fs = getEventFiles($event);
@@ -73,7 +73,7 @@ export class FileInputComponent implements OnInit, OnDestroy {
       this.files = Array.from(fs);
       this.onFileSelect.emit(this.files[0]);
 
-      if (!!this.formGroupControl) {
+      if (this.formGroupControl) {
         this.handleFileData(this.files[0], (value: string | ArrayBuffer | null) => this.updateFileState(value));
       } else {
         this.handleFileData(this.files[0], (value: string | ArrayBuffer | null) => this.onFileData.emit(value as string));

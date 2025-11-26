@@ -4,7 +4,8 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 
 import { APP_GUID, CF_GUID } from '@stratosui/core';
-import { CFAppState } from '../../../cf-app-state';
+import type { GeneralEntityAppState } from '@stratosui/store';
+import type { CFAppState } from '../../../cf-app-state';
 import { ApplicationStateService } from '../../../shared/services/application-state.service';
 import { ApplicationService } from '../application.service';
 import { ApplicationEnvVarsHelper } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
@@ -12,7 +13,7 @@ import { ApplicationEnvVarsHelper } from './application-tabs-base/tabs/build-tab
 export function applicationServiceFactory(
   cfId: string,
   id: string,
-  store: Store<CFAppState>,
+  store: Store<GeneralEntityAppState>,
   appStateService: ApplicationStateService,
   appEnvVarsService: ApplicationEnvVarsHelper,
 ) {

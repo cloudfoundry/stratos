@@ -79,5 +79,9 @@ export {
   createEntityStoreState,
   populateStoreWithTestEndpoint,
   StoreTestingModule,
-  STORE_TEST_PROVIDERS
+  STORE_TEST_PROVIDERS,
+  type TestStoreEntity,
+  testSCFEndpoint,
+  testSCFEndpointGuid,
+  testSessionData
 } from '@stratosui/store/testing';

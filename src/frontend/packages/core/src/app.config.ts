@@ -1,4 +1,4 @@
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { type ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient, withInterceptors, HttpXsrfTokenExtractor } from '@angular/common/http';
 import { xsrfInterceptor, HttpXsrfHeaderExtractor } from './xsrf.module';

@@ -1,22 +1,22 @@
-import { DISCONNECT_ENDPOINTS_SUCCESS, DisconnectEndpoint } from '../../../../store/src/actions/endpoint.actions';
-import { IRequestEntityTypeState } from '../../../../store/src/app-state';
+import { DISCONNECT_ENDPOINTS_SUCCESS, type DisconnectEndpoint } from '../../../../store/src/actions/endpoint.actions';
+import type { IRequestEntityTypeState } from '../../../../store/src/app-state';
 import { deepMergeState } from '../../../../store/src/helpers/reducer.helper';
-import { APIResource, NormalizedResponse } from '../../../../store/src/types/api.types';
-import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
-import { GET_ORGANIZATION_USERS_SUCCESS, GetAllOrgUsers } from '../../actions/organization.actions';
+import type { APIResource, NormalizedResponse } from '../../../../store/src/types/api.types';
+import type { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
+import { GET_ORGANIZATION_USERS_SUCCESS, type GetAllOrgUsers } from '../../actions/organization.actions';
 import {
   ADD_CF_ROLE_SUCCESS,
-  ChangeCfUserRole,
+  type ChangeCfUserRole,
   createDefaultCfUserRelations,
   REMOVE_CF_ROLE_SUCCESS,
 } from '../../actions/users.actions';
-import { IOrganization, ISpace } from '../../cf-api.types';
+import type { IOrganization, ISpace } from '../../cf-api.types';
 import { cfUserEntityType } from '../../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import {
-  CfUser,
-  CfUserMissingOrgRoles,
-  CfUserMissingSpaceRoles,
+  type CfUser,
+  type CfUserMissingOrgRoles,
+  type CfUserMissingSpaceRoles,
   CfUserRoleParams,
   getDefaultCfUserMissingRoles,
   OrgUserRoleNames,
@@ -40,7 +40,7 @@ const properties = {
 export function cfUserReducer(state: IRequestEntityTypeState<APIResource<CfUser>>, action: APISuccessOrFailedAction) {
   switch (action.type) {
     case ADD_CF_ROLE_SUCCESS:
-    case REMOVE_CF_ROLE_SUCCESS:
+    case REMOVE_CF_ROLE_SUCCESS: {
       // Ensure that a user's roles collections are updated when we call add/remove
       const permAction = action.apiAction as ChangeCfUserRole;
       if (permAction.username) {
@@ -54,9 +54,10 @@ export function cfUserReducer(state: IRequestEntityTypeState<APIResource<CfUser>
           entity: updatePermission(state[userGuid].entity, entityGuid, isSpace, permissionTypeKey, action.type === ADD_CF_ROLE_SUCCESS),
         }
       };
+    }
     case GET_ORGANIZATION_USERS_SUCCESS:
       // Determine if any of the user's roles have not been provided
-      return updateUserMissingRoles(state, action);
+      return updateUserMissingRoles(state, action as APISuccessOrFailedAction<NormalizedResponse>);
   }
   return state;
 }
@@ -64,7 +65,7 @@ export function cfUserReducer(state: IRequestEntityTypeState<APIResource<CfUser>
 export function endpointDisconnectUserReducer(state: IRequestEntityTypeState<APIResource<CfUser>>, action: DisconnectEndpoint): IRequestEntityTypeState<APIResource<CfUser>> {
   if (action.endpointType === CF_ENDPOINT_TYPE) {
     switch (action.type) {
-      case DISCONNECT_ENDPOINTS_SUCCESS:
+      case DISCONNECT_ENDPOINTS_SUCCESS: {
         const cfGuid = action.guid;
         // remove users that belong to this CF
         const newUsers: IRequestEntityTypeState<APIResource<CfUser>> = {};
@@ -74,6 +75,7 @@ export function endpointDisconnectUserReducer(state: IRequestEntityTypeState<API
             newUsers[u.metadata.guid] = u;
           });
         return newUsers;
+      }
     }
   }
   return state;
@@ -86,10 +88,11 @@ function updatePermission(
   permissionType: OrgUserRoleNames | SpaceUserRoleNames,
   add = false) {
   const type = isSpace ? 'space' : 'org';
-  const paramName: any = (properties as any)[type][permissionType];
+  const paramName: CfUserRoleParams = (properties as Record<string, Record<string, CfUserRoleParams>>)[type][permissionType];
+  const currentCollection = (user as unknown as Record<string, string[]>)[paramName] || [];
   const newCollection = add ?
-    [...(user as any)[paramName], entityGuid] :
-    (user as any)[paramName].filter((guid: string) => guid !== entityGuid);
+    [...currentCollection, entityGuid] :
+    currentCollection.filter((guid: string) => guid !== entityGuid);
   return {
     ...user,
     [paramName]: newCollection
@@ -103,11 +106,12 @@ export function userSpaceOrgReducer<T = StateEntity>(isSpace: boolean) {
   return (state: StateEntities<T>, action: APISuccessOrFailedAction) => {
     switch (action.type) {
       case ADD_CF_ROLE_SUCCESS:
-      case REMOVE_CF_ROLE_SUCCESS:
+      case REMOVE_CF_ROLE_SUCCESS: {
         // Ensure that an org or space's roles lists are updated when we call add/remove
         const permAction = action.apiAction as ChangeCfUserRole;
-        const isAdd = action.type === ADD_CF_ROLE_SUCCESS ? true : false;
+        const isAdd = action.type  === ADD_CF_ROLE_SUCCESS;
         return (isSpace && !!permAction.isSpace) || (!isSpace && !permAction.isSpace) ? newEntityState<T>(state, permAction, isAdd) : state;
+      }
     }
     return state;
   };
@@ -118,13 +122,13 @@ function newEntityState<T = StateEntity>(state: StateEntities<T>, action: Change
   if (!apiResource) {
     return state;
   }
-  let roles: string[] | undefined = (apiResource.entity as any)[action.permissionTypeKey];
+  let roles: string[] | undefined = (apiResource.entity as Record<string, string[]>)[action.permissionTypeKey];
   if (!roles) {
     // No roles in entity, we can't modify them if they don't exist
     return state;
   }
 
-  const index = roles.findIndex(guid => guid === action.userGuid);
+  const index = roles.indexOf(action.userGuid);
   const exists = index >= 0;
 
   if (add && !exists) {
@@ -142,9 +146,9 @@ function newEntityState<T = StateEntity>(state: StateEntities<T>, action: Change
     return state;
   }
 
-  const updatedEntity: any = Object.assign({}, apiResource.entity, {
+  const updatedEntity = Object.assign({}, apiResource.entity, {
     [action.permissionTypeKey]: roles
-  });
+  }) as T;
 
   return {
     ...state,
@@ -162,7 +166,7 @@ function updateUserMissingRoles(users: IRequestEntityTypeState<APIResource<CfUse
   // At this point in the flow the request flow (APISuccessOrFailedAction), the users may or may not be in the store yet
   // (via WrapperRequestActionSuccess). Therefore in order to avoid partial entities we need to stick the whole user set into the store
   // including `missingRoles`.
-  const usersInResponse: IRequestEntityTypeState<APIResource<CfUser>> = action.response.entities[cfUserEntityType];
+  const usersInResponse = action.response.entities[cfUserEntityType] as unknown as IRequestEntityTypeState<APIResource<CfUser>>;
   if (!usersInResponse) {
     return users;
   }
@@ -187,7 +191,7 @@ function updateUserMissingRoles(users: IRequestEntityTypeState<APIResource<CfUse
       || getDefaultCfUserMissingRoles();
     const newMissingRoles = getDefaultCfUserMissingRoles();
     Object.values(CfUserRoleParams).forEach((roleParam: string) => {
-      if ((user.entity as any)[roleParam]) {
+      if ((user.entity as unknown as Record<string, string[]>)[roleParam]) {
         return;
       }
       // What's with all the `as`? Typing fun...

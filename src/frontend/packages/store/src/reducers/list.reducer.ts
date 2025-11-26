@@ -1,8 +1,9 @@
-import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Action } from '@ngrx/store';
+import type { Store } from '@ngrx/store';
+import type { Observable } from 'rxjs';
 
-import { HydrateListsStateAction, ListStateActionTypes, ListView, SetListViewAction } from '../actions/list.actions';
-import { ListsOnlyAppState } from '../app-state';
+import { type HydrateListsStateAction, ListStateActionTypes, type ListView, type SetListViewAction } from '../actions/list.actions';
+import type { ListsOnlyAppState } from '../app-state';
 import { mergeState } from '../helpers/reducer.helper';
 
 export class ListsState {
@@ -15,36 +16,40 @@ export interface ListState {
 
 const defaultListsState = {} as ListsState;
 
-export function listReducer(state = defaultListsState, action: any): ListsState {
+export function listReducer(state = defaultListsState, action: Action): ListsState {
   switch (action.type) {
-    case ListStateActionTypes.SET:
+    case ListStateActionTypes.SET: {
       const setListState = action as SetListViewAction;
 
       return {
         ...state,
-        [action.key]: {
-          view: setListState.view ? setListState.view.toString() : ''
+        [setListState.key]: {
+          view: setListState.view || 'table'
         }
       };
-    case ListStateActionTypes.SET_VIEW:
-      const listView = (action as SetListViewAction).view;
+    }
+    case ListStateActionTypes.SET_VIEW: {
+      const setListView = action as SetListViewAction;
+      const listView = setListView.view;
       return mergeListState(
         state,
-        action.key,
+        setListView.key,
         'view',
-        listView ? listView.toString() : ''
+        listView || 'table'
       );
-    case ListStateActionTypes.HYDRATE:
+    }
+    case ListStateActionTypes.HYDRATE: {
       const hydrate = action as HydrateListsStateAction;
       return {
         ...hydrate.listsState
       };
+    }
     default:
       return state;
   }
 }
 
-function mergeListState(state: any, listKey: any, key: any, value: any) {
+function mergeListState(state: ListsState, listKey: string, key: keyof ListState, value: ListView): ListsState {
   const newListState = {
     [key]: value
   };
@@ -70,11 +75,11 @@ export const getListStateObservables = (
 };
 
 function selectListState(key: string) {
-  return (state: any) => state.lists[key];
+  return (state: ListsOnlyAppState) => state.lists[key];
 }
 
-function selectListStateProperty(key: string, property: string) {
-  return (state: any) => {
-    return (state.lists[key] || {})[property];
+function selectListStateProperty(key: string, property: keyof ListState) {
+  return (state: ListsOnlyAppState) => {
+    return state.lists[key]?.[property];
   };
 }

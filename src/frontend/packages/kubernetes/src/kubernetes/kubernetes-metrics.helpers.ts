@@ -1,7 +1,7 @@
 import { intervalToDuration } from 'date-fns';
 
 
-export function formatCPUTime(value: string | number, debug = false): string {
+export function formatCPUTime(value: string | number, _debug = false): string {
 
   const cpuTimeFormat: Record<string, number> = {
     day: 86400,
@@ -12,7 +12,7 @@ export function formatCPUTime(value: string | number, debug = false): string {
   const cpuTimeFormatOrder = ['day', 'hour', 'minute', 'second'];
 
   let num = (typeof value === 'number') ? value : parseFloat(replaceAll(value, ',', ''));
-  if (isNaN(num)) {
+  if (Number.isNaN(num)) {
     return '-';
   }
 

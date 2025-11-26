@@ -1,14 +1,12 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
-import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
-import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
-import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
+import { PageHeaderComponent, ListComponent, ListConfig } from '@stratosui/core';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { CFAppState } from '../../../cf-app-state';
+import type { CFAppState } from '../../../cf-app-state';
 import {
   CFEndpointsListConfigService,
 } from '../../../shared/components/list/list-types/cf-endpoints/cf-endpoints-list-config.service';
@@ -38,7 +36,7 @@ import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpo
 export class CloudFoundryComponent {
   connectedEndpoints$: Observable<number>;
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store,
     cfService: CloudFoundryService
   ) {
     this.connectedEndpoints$ = cfService.connectedCFEndpoints$.pipe(

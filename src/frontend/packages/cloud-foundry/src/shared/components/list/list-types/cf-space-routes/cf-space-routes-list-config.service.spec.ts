@@ -24,7 +24,7 @@ import {
 } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
 import { generateCFEntities, ActiveRouteCfOrgSpace } from '@test-framework/cf';
-import { CFAppState } from '../../../../../cf-app-state';
+import type { CFAppState } from '../../../../../cf-app-state';
 import { CloudFoundrySpaceService } from '../../../../../features/cf/services/cloud-foundry-space.service';
 import { CfSpaceRoutesListConfigService } from "./cf-space-routes-list-config.service";
 

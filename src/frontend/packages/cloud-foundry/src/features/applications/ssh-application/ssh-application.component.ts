@@ -1,14 +1,14 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild , ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { Component, type OnInit, ViewChild , ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { NEVER, Observable, Subject } from 'rxjs';
+import { NEVER, type Observable, Subject } from 'rxjs';
 import websocketConnect, { normalClosureMessage } from 'rxjs-websockets';
 import { catchError, first, map, switchMap, tap } from 'rxjs/operators';
-import { CustomTooltipDirective, PageHeaderComponent, IHeaderBreadcrumb } from '@stratosui/core';
+import { CustomTooltipDirective, PageHeaderComponent, type IHeaderBreadcrumb } from '@stratosui/core';
 import { SshViewerComponent } from '../../../../../core/src/shared/components/ssh-viewer/ssh-viewer.component';
-import { CFAppState } from '@stratosui/cloud-foundry';
-import { IApp } from '../../../cf-api.types';
+import type { CFAppState } from '@stratosui/cloud-foundry';
+import type { IApp } from '../../../cf-api.types';
 import { ApplicationService } from '../application.service';
 
 
@@ -62,8 +62,7 @@ export class SshApplicationComponent implements OnInit {
   }
 
   constructor(
-    private activatedRoute: ActivatedRoute,
-    private store: Store<CFAppState>,
+    private activatedRoute: ActivatedRoute,_store: Store,
     private applicationService: ApplicationService,
   ) { }
 
@@ -92,8 +91,8 @@ export class SshApplicationComponent implements OnInit {
 
       this.messages = connection.pipe(
         tap(() => this.connectionStatus.next(1)),
-        switchMap((getResponse: any): any[] => getResponse(this.sshInput)),
-        catchError((e: Error): any[] => {
+        switchMap((getResponse: (input: Subject<string>) => Observable<string>) => getResponse(this.sshInput)),
+        catchError((e: Error): string[] => {
           if (e.message !== normalClosureMessage) {
             this.errorMessage = 'Error connecting to web socket';
           }

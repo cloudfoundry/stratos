@@ -1,5 +1,5 @@
 import { provideHttpClient } from '@angular/common/http';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
@@ -86,7 +86,7 @@ describe('UsersRolesConfirmComponent', () => {
     component = fixture.componentInstance;
 
     // Mock the changes$ observable to avoid initialization issues
-    component.changes$ = vi.fn(() => []) as any;
+    component.changes$ = vi.fn(() => []) as unknown as typeof component.changes$;
 
     fixture.detectChanges();
   });

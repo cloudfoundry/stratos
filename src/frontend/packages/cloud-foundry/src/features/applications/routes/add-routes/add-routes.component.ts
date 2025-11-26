@@ -1,17 +1,18 @@
-import { Component, OnDestroy, OnInit, signal , ChangeDetectionStrategy } from '@angular/core';
-import { Validators, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Component, type OnDestroy, type OnInit, signal , ChangeDetectionStrategy } from '@angular/core';
+import { Validators, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf, Subscription } from 'rxjs';
+import { type Observable, of as observableOf, type Subscription } from 'rxjs';
 import { filter, map, mergeMap, pairwise, switchMap, tap } from 'rxjs/operators';
 import { toObservable } from '@angular/core/rxjs-interop';
 
-import { CFAppState } from '../../../../cf-app-state';
+import type { CFAppState } from '../../../../cf-app-state';
 import { domainEntityType, spaceEntityType } from '../../../../cf-entity-types';
 import { createEntityRelationKey } from '../../../../entity-relations/entity-relations.types';
-import { Route, RouteMode } from '../../../../store/types/route.types';
-import { StepOnNextFunction, StepOnNextResult } from '@stratosui/core';
-import { RouterNav, ActionState, RequestInfoState, APIResource } from '@stratosui/store';
-import { IDomain } from '../../../../cf-api.types';
+import { Route, type RouteMode } from '../../../../store/types/route.types';
+import type { IRoute } from '../../../../cf-api.types';
+import type { StepOnNextFunction, StepOnNextResult } from '@stratosui/core';
+import { RouterNav, type ActionState, type RequestInfoState, type APIResource, type EntityInfo, createPartialAPIResource } from '@stratosui/store';
+import type { IDomain, ISpace } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ApplicationService } from '../../application.service';
 
@@ -20,7 +21,9 @@ import {
   CustomSelectComponent,
   CustomOptionComponent,
   CustomCheckboxComponent,
-  FocusDirective
+  FocusDirective,
+  AppInputDirective,
+  AppErrorComponent
 } from '@stratosui/core';
 import { MapRoutesComponent } from '../map-routes/map-routes.component';
 
@@ -54,6 +57,8 @@ interface TCPRouteFormModel {
     CustomOptionComponent,
     CustomCheckboxComponent,
     FocusDirective,
+    AppInputDirective,
+    AppErrorComponent,
     MapRoutesComponent
 ]
 })
@@ -76,18 +81,17 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   cfGuid: string;
   spaceGuid!: string;
   createTCPRoute = false;
-  selectedDomain!: APIResource<any>;
-  private _selectedRoute = signal<any>({
-    entity: {},
-    metadata: {}
-  });
+  selectedDomain!: APIResource<IDomain>;
+  private _selectedRoute = signal<Partial<APIResource<IRoute>>>(
+    createPartialAPIResource<IRoute>()
+  );
   // Convert signal to observable in field initializer (injection context)
   private _selectedRoute$ = toObservable(this._selectedRoute);
   // Expose as writable object for child component compatibility
   selectedRoute$ = {
-    next: (value: any) => this._selectedRoute.set(value),
-    subscribe: (fn: any) => this._selectedRoute$.subscribe(fn)
-  } as any;
+    next: (value: APIResource<IRoute>) => this._selectedRoute.set(value),
+    subscribe: (fn: (value: APIResource<IRoute>) => void) => this._selectedRoute$.subscribe(fn)
+  };
   appUrl: string;
   isRouteSelected = signal<boolean>(false);
   addRouteModes: RouteMode[] = [
@@ -98,7 +102,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   useRandomPort = false;
   constructor(
     private applicationService: ApplicationService,
-    private store: Store<CFAppState>,
+    private store: Store,
   ) {
     this.appGuid = applicationService.appGuid;
     this.cfGuid = applicationService.cfGuid;
@@ -166,13 +170,13 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
               { includeRelations: [createEntityRelationKey(spaceEntityType, domainEntityType)] }
             ).waitForEntity$;
           }),
-          filter(({ entity }) => !!entity.entity.domains),
-          tap(({ entity }) => {
+          filter(({ entity }: EntityInfo<APIResource<ISpace>>) => !!entity.entity.domains),
+          tap(({ entity }: EntityInfo<APIResource<ISpace>>) => {
             this.domains = [];
             const domains = entity.entity.domains;
-            domains.forEach(domain => {
+            for (const domain of domains) {
               this.domains.push(domain);
-            });
+            }
             this.selectedDomain = Object.values(this.domains)[0];
             // Set initial domain value in the form
             if (this.selectedDomain) {
@@ -194,18 +198,18 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     );
 
     const selRoute$ = this._selectedRoute$.subscribe(x => {
-      if (x.metadata.guid) {
+      if (x.metadata?.guid) {
         this.isRouteSelected.set(true);
       }
     });
     this.subscriptions.push(selRoute$);
   }
 
-  _getValueForKey(key: string, form: any) {
+  _getValueForKey(key: string, form: FormGroup) {
     return form.value[key] ? form.value[key] : '';
   }
 
-  _getValue(key: string, form: any) {
+  _getValue(key: string, form: FormGroup) {
     return form.value[key] !== '' ? form.value[key] : null;
   }
 
@@ -217,7 +221,9 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     } else {
       try {
         return this.isRouteSelected();
-      } catch (e) { }
+      } catch (_e) {
+        // Error checking route selection state
+      }
 
       return false;
     }
@@ -272,9 +278,9 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     host: string,
     path: string,
     port: number,
-    isTCP: boolean): Observable<StepOnNextResult> {
-    if (path && path.length && path[0] !== '/') {
-      path = '/' + path;
+    _isTCP: boolean): Observable<StepOnNextResult> {
+    if (path?.length && path[0] !== '/') {
+      path = `/${path}`;
     }
 
     return cfEntityCatalog.route.api.create<RequestInfoState>(
@@ -289,7 +295,8 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
         if (route.error) {
           return observableOf({ success: false, message: `Failed to create route: ${route.message}` });
         } else {
-          return this.mapRoute(route.response.result[0]);
+          const response = route.response as { result: string[] };
+          return this.mapRoute(response.result[0]);
         }
       })
     );
@@ -313,7 +320,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
 
   private mapRouteSubmit(): Observable<StepOnNextResult> {
     return this._selectedRoute$.pipe(
-      switchMap(route => this.mapRoute(route.metadata.guid))
+      switchMap(route => this.mapRoute(route.metadata?.guid ?? ''))
     );
   }
 
@@ -322,6 +329,8 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.subscriptions.forEach(s => s.unsubscribe());
+    for (const s of this.subscriptions) {
+      s.unsubscribe();
+    }
   }
 }

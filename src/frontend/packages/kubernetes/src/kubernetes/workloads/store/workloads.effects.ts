@@ -3,34 +3,34 @@ import { ApplicationRef, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { environment } from '@stratosui/core';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { catchError, flatMap, mergeMap } from 'rxjs/operators';
 
 import {
-  AppState,
+  type AppState,
   entityCatalog,
-  NormalizedResponse,
+  type NormalizedResponse,
   WrapperRequestActionSuccess,
 } from '../../../../../store/src/public-api';
-import { ApiRequestTypes } from '../../../../../store/src/reducers/api-request-reducer/request-helpers';
+import type { ApiRequestTypes } from '../../../../../store/src/reducers/api-request-reducer/request-helpers';
 import {
-  EntityRequestAction,
+  type EntityRequestAction,
   StartRequestAction,
   WrapperRequestActionFailed,
 } from '../../../../../store/src/types/request.types';
 import { HelmEffects } from '../../../helm/store/helm.effects';
-import { HelmRelease, HelmReleaseHistory } from '../workload.types';
+import type { HelmRelease, HelmReleaseHistory } from '../workload.types';
 import { workloadsEntityCatalog } from './../workloads-entity-catalog';
 import { getHelmReleaseId } from './workloads-entity-factory';
 import {
   GET_HELM_RELEASE,
   GET_HELM_RELEASE_HISTORY,
   GET_HELM_RELEASES,
-  GetHelmRelease,
-  GetHelmReleaseHistory,
-  GetHelmReleases,
+  type GetHelmRelease,
+  type GetHelmReleaseHistory,
+  type GetHelmReleases,
   UPGRADE_HELM_RELEASE,
-  UpgradeHelmRelease,
+  type UpgradeHelmRelease,
 } from './workloads.actions';
 
 @Injectable({
@@ -61,11 +61,11 @@ export class WorkloadsEffects {
 
         // Go through each endpoint ID
         Object.keys(response).forEach(endpointId => {
-          const endpointData = response[endpointId];
+          const endpointData = (response as any)[endpointId];
           if (!endpointData) {
             return;
           }
-          endpointData.forEach((data) => {
+          endpointData.forEach((data: any) => {
             const helmRelease = this.mapHelmRelease(data, endpointId, getHelmReleaseId(endpointId, data.namespace, data.name));
             processedData.entities[entityKey][helmRelease.guid] = helmRelease;
             processedData.result.push(helmRelease.guid);
@@ -118,7 +118,7 @@ export class WorkloadsEffects {
             revisions: []
           };
 
-          for (const version of response) {
+          for (const version of (response as any)) {
             data.revisions.push({
               ...version.info,
               revision: version.version,
@@ -170,7 +170,7 @@ export class WorkloadsEffects {
     })
   ));
 
-  private mapHelmRelease(data, endpointId, guid: string) {
+  private mapHelmRelease(data: any, endpointId: string, guid: string) {
     const helmRelease: HelmRelease = {
       ...data,
       endpointId
@@ -187,16 +187,16 @@ export class WorkloadsEffects {
   private makeRequest(
     action: EntityRequestAction,
     url: string,
-    mapResult: (response: any) => NormalizedResponse,
+    mapResult: (response: unknown) => NormalizedResponse,
     endpointIds: string[]
   ): Observable<Action> {
     this.store.dispatch(new StartRequestAction(action));
-    const requestArgs = {
+    const requestArgs: any = {
       headers: null,
       params: null
     };
     return this.httpClient.get(url, requestArgs).pipe(
-      mergeMap((response: any) => {
+      mergeMap((response: unknown) => {
         this.appRef.tick();
         return [new WrapperRequestActionSuccess(mapResult(response), action)];
       }),
@@ -217,7 +217,7 @@ export class WorkloadsEffects {
     );
   }
 
-  private mapHelmModifiedDate(date: any) {
+  private mapHelmModifiedDate(date: { seconds: number; nanos: number }) {
     let unix = date.seconds * 1000 + date.nanos / 1000;
     unix = Math.floor(unix);
     return new Date(unix);

@@ -1,13 +1,13 @@
 // Replaced Angular Material sort with custom type
 export type SortDirection = 'asc' | 'desc' | '';
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 import { getActions } from '@stratosui/store';
-import { ApiRequestTypes } from '@stratosui/store';
+import type { ApiRequestTypes } from '@stratosui/store';
 
 import { MetricQueryConfig, MetricsAction, MetricsChartAction } from '../../../../store/src/actions/metrics.actions';
 import { getPaginationKey } from '../../../../store/src/actions/pagination.actions';
-import { PaginatedAction, PaginationParam } from '../../../../store/src/types/pagination.types';
-import { EntityRequestAction } from '../../../../store/src/types/request.types';
+import type { PaginatedAction, PaginationParam } from '../../../../store/src/types/pagination.types';
+import type { EntityRequestAction } from '../../../../store/src/types/request.types';
 import {
   KUBERNETES_ENDPOINT_TYPE,
   kubernetesDashboardEntityType,
@@ -146,7 +146,7 @@ export class GetKubernetesNodes implements KubePaginationAction {
 export class KubeHealthCheck extends GetKubernetesNodes {
   constructor(kubeGuid: string) {
     super(kubeGuid);
-    this.paginationKey = kubeGuid + '-health-check';
+    this.paginationKey = `${kubeGuid}-health-check`;
     this.initialParams.limit = 1;
   }
 }

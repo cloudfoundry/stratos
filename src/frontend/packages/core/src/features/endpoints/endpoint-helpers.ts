@@ -1,19 +1,19 @@
-import { Type } from '@angular/core';
+import type { Type } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
-  AppState,
-  EndpointOnlyAppState,
+  type AppState,
+  type EndpointOnlyAppState,
   endpointEntitiesSelector,
   endpointsEntityRequestDataSelector,
-  EndpointModel,
+  type EndpointModel,
 } from '@stratosui/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
-import { EndpointListDetailsComponent } from '../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
+import type { EndpointListDetailsComponent } from '../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 
 export function getEndpointUsername(endpoint: EndpointModel) {
-  return endpoint && endpoint.user ? endpoint.user.name : '-';
+  return endpoint?.user ? endpoint.user.name : '-';
 }
 
 export const DEFAULT_ENDPOINT_TYPE = 'cf';
@@ -45,5 +45,5 @@ export function endpointHasMetricsByAvailable(store: Store<AppState>, endpointId
 // Client Redirect URI for SSO
 export function getSSOClientRedirectURI(): string {
   return window.location.protocol + '//' + window.location.hostname +
-    (window.location.port ? ':' + window.location.port : '') + '/pp/v1/auth/sso_login_callback';
+    (window.location.port ? `:${window.location.port}` : '') + '/pp/v1/auth/sso_login_callback';
 }

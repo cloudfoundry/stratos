@@ -1,12 +1,12 @@
-import { Component, Input, OnInit , ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
+import { Component, Input, type OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { BehaviorSubject, combineLatest, type Observable, of } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { AppChipsComponent, AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { IServiceInstance } from '../../../../../../cf-api-svc.types';
+import { AppChipsComponent, type AppChip } from '@stratosui/core';
+import { TableCellCustom } from '@stratosui/core';
+import type { APIResource } from '../../../../../../../../store/src/types/api.types';
+import type { IServiceInstance } from '../../../../../../cf-api-svc.types';
 import {
   applicationEntityType,
   serviceBindingEntityType,
@@ -31,11 +31,11 @@ export class TableCellServiceInstanceAppsAttachedComponent
   implements OnInit {
 
   boundApps$!: Observable<AppChip[]>;
-  config$ = new BehaviorSubject<any>(null);
+  config$ = new BehaviorSubject<{ breadcrumbs?: string } | null>(null);
   row$ = new BehaviorSubject<APIResource<IServiceInstance> | null>(null);
 
   @Input('config')
-  set config(config: any) {
+  set config(config: { breadcrumbs?: string }) {
     super.config = config;
     this.config$.next(config);
   }

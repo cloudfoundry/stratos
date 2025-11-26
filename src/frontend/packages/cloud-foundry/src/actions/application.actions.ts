@@ -1,15 +1,14 @@
 import { HttpParams, HttpRequest } from '@angular/common/http';
 
-import { pick } from '../../../store/src/helpers/reducer.helper';
-import { ActionMergeFunction } from '../../../store/src/types/api.types';
-import { PaginatedAction, PaginationParam } from '../../../store/src/types/pagination.types';
-import { ICFAction } from '../../../store/src/types/request.types';
-import { IApp } from '../cf-api.types';
+import { pick, type ActionMergeFunction, type NormalizedResponseEntities } from '@stratosui/store';
+import type { PaginatedAction, PaginationParam } from '../../../store/src/types/pagination.types';
+import type { ICFAction } from '../../../store/src/types/request.types';
+import type { IApp } from '../cf-api.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { applicationEntityType, appStatsEntityType } from '../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
-import { createEntityRelationPaginationKey, EntityInlineParentAction } from '../entity-relations/entity-relations.types';
-import { AppMetadataTypes } from './app-metadata.actions';
+import { createEntityRelationPaginationKey, type EntityInlineParentAction } from '../entity-relations/entity-relations.types';
+import type { AppMetadataTypes } from './app-metadata.actions';
 import { CFStartAction } from './cf-action.types';
 
 const GET_ALL = '[Application] Get all';
@@ -57,7 +56,7 @@ export class GetAllApplications extends CFStartAction implements PaginatedAction
   entity = [applicationEntitySchema];
   entityType = applicationEntityType;
   endpointType = CF_ENDPOINT_TYPE;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   initialParams: PaginationParam = {
     'order-direction': 'asc',
     'order-direction-field': GetAllApplications.sortField,
@@ -79,7 +78,7 @@ export class GetApplication extends CFStartAction implements ICFAction, EntityIn
   actions = [GET, GET_SUCCESS, GET_FAILED];
   entity = [applicationEntitySchema];
   entityType = applicationEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
 }
 
 export class CreateNewApplication extends CFStartAction implements ICFAction {
@@ -101,7 +100,7 @@ export class CreateNewApplication extends CFStartAction implements ICFAction {
   actions = [CREATE, CREATE_SUCCESS, CREATE_FAILED];
   entity = [applicationEntitySchema];
   entityType = applicationEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
 }
 
 export interface UpdateApplication {
@@ -109,7 +108,7 @@ export interface UpdateApplication {
   instances?: number;
   memory?: number;
   enable_ssh?: boolean;
-  environment_json?: any;
+  environment_json?: unknown;
   state?: string;
 }
 
@@ -139,18 +138,20 @@ export class UpdateExistingApplication extends CFStartAction implements ICFActio
   actions = [CF_APP_UPDATE, CF_APP_UPDATE_SUCCESS, CF_APP_UPDATE_FAILED];
   entity = [applicationEntitySchema];
   entityType = applicationEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   updatingKey = UpdateExistingApplication.updateKey;
-  entityMerge: ActionMergeFunction = (oldEntities: any, newEntities: any) => {
+  entityMerge: ActionMergeFunction = (oldEntities: unknown, newEntities: unknown): NormalizedResponseEntities => {
+    const oldEntitiesTyped = oldEntities as Record<string, Record<string, { entity: Record<string, unknown> }>>;
+    const newEntitiesTyped = newEntities as Record<string, Record<string, { entity: Record<string, unknown> }>>;
     const keepFromOld = pick(
-      oldEntities[applicationEntityType][this.guid].entity,
+      oldEntitiesTyped[applicationEntityType][this.guid].entity,
       Object.keys(applicationEntitySchema.schema)
     );
-    newEntities[applicationEntityType][this.guid].entity = {
-      ...newEntities[applicationEntityType][this.guid].entity,
+    newEntitiesTyped[applicationEntityType][this.guid].entity = {
+      ...newEntitiesTyped[applicationEntityType][this.guid].entity,
       ...keepFromOld
     };
-    return newEntities;
+    return newEntitiesTyped as NormalizedResponseEntities;
   };
 }
 
@@ -175,7 +176,7 @@ export class DeleteApplication extends CFStartAction implements ICFAction {
   actions = [DELETE, DELETE_SUCCESS, DELETE_FAILED];
   entity = [applicationEntitySchema];
   entityType = applicationEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
 }
 export class DeleteApplicationInstance extends CFStartAction
   implements ICFAction {
@@ -197,7 +198,7 @@ export class DeleteApplicationInstance extends CFStartAction
   entity = [cfEntityFactory(appStatsEntityType)];
   entityType = appStatsEntityType;
   removeEntityOnDelete = true;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
 }
 
 export class RestageApplication extends CFStartAction implements ICFAction {
@@ -212,6 +213,6 @@ export class RestageApplication extends CFStartAction implements ICFAction {
   actions = [RESTAGE, RESTAGE_SUCCESS, RESTAGE_FAILED];
   entity = [applicationEntitySchema];
   entityType = applicationEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   updatingKey = 'restaging';
 }

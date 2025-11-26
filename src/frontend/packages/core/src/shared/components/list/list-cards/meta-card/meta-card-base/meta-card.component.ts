@@ -1,17 +1,16 @@
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ContentChild, ContentChildren, Input, OnDestroy, QueryList, HostListener  } from '@angular/core';
-import { combineLatest, Observable, of as observableOf, of, Subscription } from 'rxjs';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, ContentChild, ContentChildren, Input, type OnDestroy, type QueryList, HostListener  } from '@angular/core';
+import { combineLatest, type Observable, of as observableOf, of, type Subscription } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
-import {
-  EntityMonitorFactory,
+import type {
   MenuItem,
   IFavoriteMetadata,
   UserFavorite,
   ComponentEntityMonitorConfig,
   StratosStatus,
-  UserFavoriteManager,
 } from '@stratosui/store';
+import { EntityMonitorFactory, UserFavoriteManager } from '@stratosui/store';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
 import { ApplicationStateIconComponent } from '../../../../application-state/application-state-icon/application-state-icon.component';
 import { CardStatusComponent } from '../../../../cards/card-status/card-status.component';
@@ -27,7 +26,9 @@ export function createMetaCardMenuItemSeparator(): MenuItem {
   return {
     label: '-',
     separator: true,
-    action: () => { }
+    action: () => {
+      // Separator action - no-op
+    }
   };
 }
 
@@ -95,11 +96,13 @@ export class MetaCardComponent implements OnDestroy {
       if (!this.favorite) {
         this.entityMonitorSub = entityMonitor.entity$.pipe(
           first(),
-          tap(entity => this.favorite = this.userFavoriteManager.getFavorite(
-            entity,
-            entityConfig.schema.entityType,
-            entityConfig.schema.endpointType
-          ))
+          tap(entity => {
+            this.favorite = this.userFavoriteManager.getFavorite(
+              entity,
+              entityConfig.schema.entityType,
+              entityConfig.schema.endpointType
+            );
+          })
         ).subscribe();
       }
     }

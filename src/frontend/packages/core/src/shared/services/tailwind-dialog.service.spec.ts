@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {  Component, provideZonelessChangeDetection, inject } from '@angular/core';
 import { TailwindDialogService, TailwindDialogRef, MAT_DIALOG_DATA } from './tailwind-dialog.service';
-import { ApplicationRef, Injector, EnvironmentInjector } from '@angular/core';
+import type { ApplicationRef, Injector, EnvironmentInjector } from '@angular/core';
 
 // Test component to be used in dialogs
 @Component({
@@ -211,7 +211,7 @@ describe('TailwindDialogService', () => {
       await vi.advanceTimersByTimeAsync(0);
 
       let closed = false;
-      let result: any;
+      let result: unknown;
       dialogRef.afterClosed().subscribe((res) => {
         closed = true;
         result = res;
@@ -352,8 +352,8 @@ describe('TailwindDialogService', () => {
       await vi.advanceTimersByTimeAsync(0);
 
       expect(dialogRef.componentInstance.data).toEqual(testData);
-      expect(dialogRef.componentInstance.data.message).toBe('Test Message');
-      expect(dialogRef.componentInstance.data.value).toBe(42);
+      expect((dialogRef.componentInstance.data as typeof testData).message).toBe('Test Message');
+      expect((dialogRef.componentInstance.data as typeof testData).value).toBe(42);
 
       dialogRef.close();
       await vi.advanceTimersByTimeAsync(300);
@@ -382,7 +382,7 @@ describe('TailwindDialogService', () => {
       await vi.advanceTimersByTimeAsync(0);
 
       let closed = false;
-      let result: any;
+      let result: unknown;
 
       dialogRef.afterClosed().subscribe((res) => {
         closed = true;

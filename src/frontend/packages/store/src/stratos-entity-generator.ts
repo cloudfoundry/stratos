@@ -1,10 +1,10 @@
-import { ApiKey } from './apiKey.types';
+import type { ApiKey } from './apiKey.types';
 import {
-  StratosBaseCatalogEntity,
+  type StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
 } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { IStratosEntityDefinition } from './entity-catalog/entity-catalog.types';
+import type { IStratosEntityDefinition } from './entity-catalog/entity-catalog.types';
 import {
   apiKeyEntityType,
   STRATOS_ENDPOINT_TYPE,
@@ -12,35 +12,42 @@ import {
   userFavouritesEntityType,
   userProfileEntityType,
 } from './helpers/stratos-entity-factory';
-import { endpointEntityType, EndpointModel, stratosEntityFactory } from './public-api';
+import { endpointEntityType, type EndpointModel, stratosEntityFactory } from './public-api';
 import { addOrUpdateUserFavoriteMetadataReducer, deleteUserFavoriteMetadataReducer } from './reducers/favorite.reducer';
 import { systemEndpointsReducer } from './reducers/system-endpoints.reducer';
 import {
-  ApiKeyActionBuilder,
+  type ApiKeyActionBuilder,
   apiKeyActionBuilder,
-  EndpointActionBuilder,
+  type EndpointActionBuilder,
   endpointActionBuilder,
-  SystemInfoActionBuilder,
+  type SystemInfoActionBuilder,
   systemInfoActionBuilder,
-  UserFavoriteActionBuilder,
+  type UserFavoriteActionBuilder,
   userFavoriteActionBuilder,
-  UserProfileActionBuilder,
+  type UserProfileActionBuilder,
   userProfileActionBuilder,
 } from './stratos-action-builders';
 import { stratosEntityCatalog } from './stratos-entity-catalog';
-import { SystemInfo } from './types/system.types';
-import { UserFavorite } from './types/user-favorites.types';
-import { UserProfileInfo } from './types/user-profile.types';
+import type { SystemInfo } from './types/system.types';
+import type { UserFavorite } from './types/user-favorites.types';
+import type { UserProfileInfo } from './types/user-profile.types';
+
+// StratosType is intentionally typed as 'any' because it's a fake endpoint type
+// used only to initialize the store correctly. It doesn't conform to the full
+// StratosEndpointExtensionDefinition interface by design.
 
 export function generateStratosEntities(): StratosBaseCatalogEntity[] {
   /**
-   * This is used as a fake endpoint type to allow the store to be initiated correctly
+   * This is used as a fake endpoint type to allow the store to be initiated correctly.
+   * It's intentionally cast to any because it doesn't need to conform to the full
+   * StratosEndpointExtensionDefinition interface - it's only used for store initialization.
    */
+  // biome-ignore lint/suspicious/noExplicitAny: Fake endpoint type for store initialization
   const stratosType: any = {
     logoUrl: '',
-    authTypes: [] as string[],
+    authTypes: [],
     type: STRATOS_ENDPOINT_TYPE,
-    schema: null as any
+    schema: null
   };
   return [
     generateEndpoint(stratosType),
@@ -56,6 +63,7 @@ export function generateStratosEntities(): StratosBaseCatalogEntity[] {
  * DefaultEndpointEntityType is used to represent a general endpoint
  * This should not be used to actually attempt to render an endpoint and is instead used as a way to fill the
  */
+// biome-ignore lint/suspicious/noExplicitAny: Fake endpoint type for store initialization
 function generateEndpoint(stratosType: any) {
   // NOTE: For endpoint entities, we should NOT set the 'endpoint' property.
   // The absence of 'endpoint' property triggers isEndpoint=true logic in StratosBaseCatalogEntity,
@@ -83,6 +91,7 @@ function generateEndpoint(stratosType: any) {
   return stratosEntityCatalog.endpoint;
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: Fake endpoint type for store initialization
 function generateSystemInfo(stratosType: any) {
   const definition: IStratosEntityDefinition = {
     schema: stratosEntityFactory(systemInfoEntityType),
@@ -102,6 +111,7 @@ function generateSystemInfo(stratosType: any) {
   return stratosEntityCatalog.systemInfo;
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: Fake endpoint type for store initialization
 function generateUserFavorite(stratosType: any) {
   const definition: IStratosEntityDefinition = {
     schema: stratosEntityFactory(userFavouritesEntityType),
@@ -125,6 +135,7 @@ function generateUserFavorite(stratosType: any) {
   return stratosEntityCatalog.userFavorite;
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: Fake endpoint type for store initialization
 function generateUserProfile(stratosType: any) {
   const definition: IStratosEntityDefinition = {
     schema: stratosEntityFactory(userProfileEntityType),
@@ -160,6 +171,7 @@ function generateMetricsEndpoint() {
   return stratosEntityCatalog.metricsEndpoint;
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: Fake endpoint type for store initialization
 function generateAPIKeys(stratosType: any) {
   const definition: IStratosEntityDefinition = {
     schema: stratosEntityFactory(apiKeyEntityType),

@@ -25,10 +25,7 @@ export class StyleService {
           }
           if (typeof rule.selectorText === 'string') { ret.push(rule.selectorText); }
         }
-      } catch (e) {
-        // Silently skip cross-origin stylesheets that throw SecurityError
-        // Expected in dev mode with proxy (different ports/protocols)
-        continue;
+      } catch (_e) {
       }
     }
     return ret;

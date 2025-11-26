@@ -1,35 +1,35 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef,
   Component,
-  ComponentFactory,
+  type ComponentFactory,
   ComponentFactoryResolver,
   EventEmitter,
   Injector,
   Input,
-  OnDestroy,
-  OnInit,
+  type OnDestroy,
+  type OnInit,
   Output,
   ViewChild,
   ViewContainerRef,
   signal,
-  Signal,
+  type Signal,
  } from '@angular/core';
-import { Observable, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { CustomIconComponent } from '../custom-material/custom-material.component';
 import {
   StackedInputActionComponent,
-  StackedInputActionConfig,
+  type StackedInputActionConfig,
   StackedInputActionResult,
-  StackedInputActionUpdate,
+  type StackedInputActionUpdate,
 } from './stacked-input-action/stacked-input-action.component';
 
 export interface StackedInputActionsState {
   key: string;
   result: StackedInputActionResult;
   message?: string;
-  otherValues?: any;
+  otherValues?: string[];
 }
 
 export interface StackedInputActionsUpdate { values: { [key: string]: string }; valid: boolean; }
@@ -95,7 +95,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
     }));
     // Handle updates of state from the compnent
     this.subs.push(stackedAction.stateOut.subscribe((update: StackedInputActionUpdate) => {
-      const updateRecord = update as Record<string, any>;
+      const updateRecord = update as unknown as Record<string, unknown>;
       const hasChanges = Object.keys(update).filter(key => updateRecord[key] !== this.components[update.key].update).length;
       if (hasChanges) {
         this.components[update.key].update = update;
@@ -177,7 +177,9 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
       // Disable the 'add new' button
       this.disabled = !!states.find(state => state.result === StackedInputActionResult.PROCESSING);
       // Push state using signal update function
-      states.forEach((state, index) => this.components[state.key].stateInUpdate(state));
+      states.forEach((state, _index) => {
+        this.components[state.key].stateInUpdate(state);
+      });
     }));
   }
 

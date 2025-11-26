@@ -1,7 +1,7 @@
-import { APIResource } from '../../../../../store/src/types/api.types';
+import type { APIResource } from '../../../../../store/src/types/api.types';
 import { CfUserRelationTypes } from '../../../actions/permissions.actions';
-import { ISpace } from '../../../cf-api.types';
-import { ISpaceRoleState } from '../../types/cf-current-user-roles.types';
+import type { ISpace } from '../../../cf-api.types';
+import type { ISpaceRoleState } from '../../types/cf-current-user-roles.types';
 
 export const defaultCfUserSpaceRoleState: ISpaceRoleState = {
   orgId: null,

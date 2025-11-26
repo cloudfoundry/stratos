@@ -1,12 +1,12 @@
 import { inject, Injectable, NgZone } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { distinctUntilChanged, publishReplay, refCount } from 'rxjs/operators';
 
 import { internalEventStateSelector } from '../selectors/internal-events.selectors';
-import { InternalEventsState } from '../types/internal-events.types';
+import type { InternalEventsState } from '../types/internal-events.types';
 import { InternalEventMonitor } from './internal-event.monitor';
-import { InternalAppState } from '../app-state';
+import type { InternalAppState } from '../app-state';
 
 @Injectable()
 export class InternalEventMonitorFactory {

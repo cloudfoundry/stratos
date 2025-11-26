@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, type OnDestroy, Output  } from '@angular/core';
 
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
-import { combineLatest, Observable, Subscription } from 'rxjs';
+import { combineLatest, type Observable, type Subscription } from 'rxjs';
 import { debounceTime, filter, map, shareReplay, tap } from 'rxjs/operators';
 import { format, parse, setHours, setMinutes, isValid, isEqual } from 'date-fns';
 
@@ -64,7 +64,7 @@ export class DateTimeComponent implements OnDestroy {
         ];
       }),
       filter(([hour, minute]: [number, number, Date]) => {
-        return !isNaN(hour + minute);
+        return !Number.isNaN(hour + minute);
       }),
       tap(([hour, minute, date]: [number, number, Date]) => {
 
@@ -78,7 +78,7 @@ export class DateTimeComponent implements OnDestroy {
     ).subscribe();
   }
 
-  private replayObservable(obs: Observable<any>) {
+  private replayObservable<T>(obs: Observable<T>): Observable<T> {
     return obs.pipe(
       shareReplay(1)
     );

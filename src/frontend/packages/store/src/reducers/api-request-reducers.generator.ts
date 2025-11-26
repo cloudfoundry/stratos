@@ -1,10 +1,10 @@
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 
-import { IRequestEntityTypeState } from '../app-state';
-import { IRequestState } from '../types/entity.types';
+import type { IRequestEntityTypeState } from '../app-state';
+import type { IRequestState } from '../types/entity.types';
 import { requestReducerFactory } from './api-request-reducer/request-reducer.factory';
-import { RequestInfoState } from './api-request-reducer/types';
-import { chainApiReducers, ExtraApiReducers, requestActions } from './api-request-reducers.generator.helpers';
+import type { RequestInfoState } from './api-request-reducer/types';
+import { chainApiReducers, type ExtraApiReducers, requestActions } from './api-request-reducers.generator.helpers';
 
 
 /**
@@ -19,5 +19,5 @@ const extraReducers = {
 const chainedReducers = chainApiReducers<IRequestEntityTypeState<RequestInfoState>>(baseRequestReducer, extraReducers);
 
 export function requestReducer(state: IRequestState, action: Action) {
-  return chainedReducers(state, action);
+  return chainedReducers(state as unknown as Record<string, IRequestEntityTypeState<RequestInfoState>>, action) as IRequestState;
 }

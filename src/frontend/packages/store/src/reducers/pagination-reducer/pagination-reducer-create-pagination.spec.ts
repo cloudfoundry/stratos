@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { CreatePagination } from '../../actions/pagination.actions';
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
-import { PaginationState } from '../../types/pagination.types';
+import type { PaginationState } from '../../types/pagination.types';
 import { createNewPaginationSection } from './pagination-reducer-create-pagination';
 import { getDefaultPaginationEntityState } from './pagination-reducer-reset-pagination';
 

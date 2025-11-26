@@ -6,7 +6,8 @@ import { MAT_DIALOG_DATA } from '../../services/tailwind-material-replacements';
 import { TailwindDialogRef } from '../../services/tailwind-dialog.service';
 
 import { environment } from '../../../environments/environment';
-import { ConfirmationDialogConfig, TypeToConfirm } from '../confirmation-dialog.config';
+import type {ConfirmationDialogConfig} from '../confirmation-dialog.config';
+import type {TypeToConfirm} from '../confirmation-dialog.config';
 
 @Component({
   selector: 'app-dialog-confirm',
@@ -27,7 +28,7 @@ export class DialogConfirmComponent {
     @Inject(MAT_DIALOG_DATA) public data: ConfirmationDialogConfig
   ) {
     const typeToConfirm = data.message as TypeToConfirm;
-    if (typeToConfirm && typeToConfirm.textToMatch) {
+    if (typeToConfirm?.textToMatch) {
       this.textToMatch = typeToConfirm.textToMatch;
     }
   }

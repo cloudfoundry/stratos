@@ -1,30 +1,30 @@
 import { Injectable, computed, Injector, inject, runInInjectionContext } from '@angular/core';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { Observable, of } from 'rxjs';
-import { filter, first, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
+import { type Observable, of } from 'rxjs';
+import { first, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
 
 import {
   GetAllEndpoints,
-  AppState,
-  EntityService,
-  EntityServiceFactory,
-  EndpointModel,
-  PaginationObservables,
-  EntityInfo,
-  EndpointUser
+  type AppState,
+  type EntityService,
+  type EntityServiceFactory,
+  type EndpointModel,
+  type PaginationObservables,
+  type EntityInfo,
+  type EndpointUser
 } from '@stratosui/store';
 import { kubeEntityCatalog } from '../kubernetes-entity-generator';
-import { BaseKubeGuid } from '../kubernetes-page.types';
-import {
+import type { BaseKubeGuid } from '../kubernetes-page.types';
+import type {
   KubernetesDeployment,
   KubernetesNode,
   KubernetesPod,
   KubernetesStatefulSet,
   KubeService,
 } from '../store/kube.types';
-import { KubeDashboardStatus } from '../store/kubernetes.effects';
-import { Annotations } from './../store/kube.types';
+import type { KubeDashboardStatus } from '../store/kubernetes.effects';
+import type { Annotations } from './../store/kube.types';
 
 const CAASP_VERSION_ANNOTATION = 'caasp.suse.com/caasp-release-version';
 const CAASP_DISRUPTIVE_UPDATES_ANNOTATION = 'caasp.suse.com/has-disruptive-updates';
@@ -51,8 +51,8 @@ export interface CaaspNodeData {
   providedIn: 'root'
 })
 export class KubernetesEndpointService {
-  info$: Observable<EntityInfo<any>>;
-  cfInfoEntityService: EntityService<any>;
+  info$: Observable<EntityInfo<KubeDashboardStatus>>;
+  cfInfoEntityService: EntityService<KubeDashboardStatus>;
   endpoint$: Observable<EntityInfo<EndpointModel>>;
   kubeEndpointEntityService: EntityService<EndpointModel>;
   connected$: Observable<boolean>;
@@ -104,7 +104,7 @@ export class KubernetesEndpointService {
 
   public static kubeDashboardConfigured(store: Store<AppState>, kubeGuid: string): Observable<boolean> {
     return KubernetesEndpointService.getKubeDashboardStatus(store, kubeGuid).pipe(
-      map(status => status && status.installed && !!status.serviceAccount && !!status.service),
+      map(status => status?.installed && !!status.serviceAccount && !!status.service),
     );
   }
 
@@ -174,7 +174,7 @@ export class KubernetesEndpointService {
   }
 
   getCaaspNodeData(n: KubernetesNode): CaaspNodeData | undefined {
-    if (n && n.metadata && n.metadata.annotations) {
+    if (n?.metadata?.annotations) {
       return {
         version: n.metadata.annotations[CAASP_VERSION_ANNOTATION],
         updates: this.hasBooleanAnnotation(n.metadata.annotations, CAASP_HAS_UPDATES_ANNOTATION),
@@ -187,7 +187,7 @@ export class KubernetesEndpointService {
 
   // Check for the specified annotation with a value of 'yes'
   private hasBooleanAnnotation(annotations: Annotations, annotation: string): boolean {
-    return annotations[annotation] && annotations[annotation] === 'yes' ? true : false;
+    return !!(annotations[annotation] && annotations[annotation] === 'yes' );
   }
 
   getNodeKubeVersions(nodes$: Observable<KubernetesNode[]> = this.nodes$): Observable<string> {
@@ -205,7 +205,7 @@ export class KubernetesEndpointService {
     );
   }
 
-  getCountObservable(entities$: Observable<any[]>): Observable<number | null> {
+  getCountObservable<T>(entities$: Observable<T[]>): Observable<number | null> {
     return entities$.pipe(
       map(entities => entities.length),
       startWith(null)
@@ -237,9 +237,9 @@ export class KubernetesEndpointService {
   getNodeStatusCount(
     nodes$: Observable<KubernetesNode[]>,
     conditionType: string,
-    valueLabels: Record<string, any> = {},
+    valueLabels: Record<string, string> = {},
     countStatus = 'True'
-  ): Observable<any> {
+  ): Observable<{ total: number; supported: boolean; unavailable: number; used: number; unknown: number }> {
     return nodes$.pipe(
       map(nodes => {
         const total = nodes.length;

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { APIResource, PaginationEntityState } from '@stratosui/store';
+import type { APIResource, PaginationEntityState } from '@stratosui/store';
 import { getFilterFunction } from './local-filtering-sorting';
 
 /**
@@ -51,10 +51,10 @@ describe('local-filtering-sorting', () => {
           },
         ];
 
-        const result = filterByLabel(entities, createPaginationState('hello'));
+        const result = filterByLabel(entities, createPaginationState('hello')) as APIResource[];
 
         expect(result.length).toBe(1);
-        expect(result[0].entity.label).toEqual('hello');
+        expect((result[0].entity as any).label).toEqual('hello');
       });
 
       it('should filter entities by tags (entity.tags)', () => {
@@ -74,10 +74,10 @@ describe('local-filtering-sorting', () => {
           },
         ];
 
-        const result = filterByTags(entities, createPaginationState('hello'));
+        const result = filterByTags(entities, createPaginationState('hello')) as APIResource[];
 
         expect(result.length).toBe(1);
-        expect(result[0].entity.tags).toEqual(['hello', 'world']);
+        expect((result[0].entity as any).tags).toEqual(['hello', 'world']);
       });
     });
 
@@ -88,7 +88,7 @@ describe('local-filtering-sorting', () => {
           { name: 'hello' },
           { name: 'world' },
         ];
-        const result = filter(entities, createPaginationState('hello'));
+        const result = filter(entities, createPaginationState('hello')) as Array<{ name: string }>;
 
         expect(result).toHaveLength(1);
         expect(result[0].name).toBe('hello');
@@ -106,7 +106,7 @@ describe('local-filtering-sorting', () => {
             entity: {}
           },
         ];
-        const result = filter(entities, createPaginationState('abc'));
+        const result = filter(entities, createPaginationState('abc')) as APIResource[];
 
         expect(result).toHaveLength(1);
         expect(result[0].metadata.guid).toBe('abc-123');
@@ -150,10 +150,10 @@ describe('local-filtering-sorting', () => {
         const filter = getFilterFunction({ type: 'filter', field: 'name' });
         const entities = [
           { name: 'hello' },
-          { other: 'field' } as any, // Missing 'name' field
+          { other: 'field' } as unknown, // Missing 'name' field
           { name: 'world' },
         ];
-        const result = filter(entities, createPaginationState('hello'));
+        const result = filter(entities, createPaginationState('hello')) as Array<{ name: string }>;
 
         expect(result).toHaveLength(1);
         expect(result[0].name).toBe('hello');
@@ -163,11 +163,11 @@ describe('local-filtering-sorting', () => {
         const filter = getFilterFunction({ type: 'filter', field: 'name' });
         const entities = [
           { name: 'hello' },
-          { name: null } as any,
-          { name: undefined } as any,
+          { name: null } as unknown,
+          { name: undefined } as unknown,
           { name: 'world' },
         ];
-        const result = filter(entities, createPaginationState('hello'));
+        const result = filter(entities, createPaginationState('hello')) as Array<{ name: string }>;
 
         expect(result).toHaveLength(1);
         expect(result[0].name).toBe('hello');
@@ -182,7 +182,7 @@ describe('local-filtering-sorting', () => {
           { tags: ['bar', 'baz'] },
           { tags: ['hello', 'bar'] },
         ];
-        const result = filter(entities, createPaginationState('hello'));
+        const result = filter(entities, createPaginationState('hello')) as Array<{ tags: string[] }>;
 
         expect(result).toHaveLength(2);
         expect(result[0].tags).toContain('hello');
@@ -196,7 +196,7 @@ describe('local-filtering-sorting', () => {
           { tags: [] },
           { tags: ['world'] },
         ];
-        const result = filter(entities, createPaginationState('hello'));
+        const result = filter(entities, createPaginationState('hello')) as Array<{ tags: string[] }>;
 
         expect(result).toHaveLength(1);
         expect(result[0].tags).toEqual(['hello']);
@@ -211,7 +211,7 @@ describe('local-filtering-sorting', () => {
           { description: 'Goodbye cruel world' },
           { description: 'Hello there' },
         ];
-        const result = filter(entities, createPaginationState('hello'));
+        const result = filter(entities, createPaginationState('hello')) as Array<{ description: string }>;
 
         expect(result).toHaveLength(2);
         expect(result[0].description).toContain('hello');

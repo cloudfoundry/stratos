@@ -1,7 +1,7 @@
 import { getActions } from '../../../../store/src/actions/action.helper';
-import { PaginatedAction } from '../../../../store/src/types/pagination.types';
+import type { PaginatedAction } from '../../../../store/src/types/pagination.types';
 import { analysisReportEntityType, KUBERNETES_ENDPOINT_TYPE, kubernetesEntityFactory } from '../kubernetes-entity-factory';
-import { KubeAction, KubePaginationAction, KubeSingleEntityAction } from './kubernetes.actions';
+import type { KubeAction, KubePaginationAction, KubeSingleEntityAction } from './kubernetes.actions';
 
 export const GET_ANALYSIS_REPORTS_TYPES = getActions('ANALYSIS', 'Get reports');
 export const GET_ANALYSIS_REPORT_BY_ID_TYPES = getActions('ANALYSIS', 'Get report by id');

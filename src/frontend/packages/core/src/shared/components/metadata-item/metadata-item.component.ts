@@ -20,8 +20,6 @@ import { CustomIconComponent } from '../custom-material/custom-material.componen
 })
 export class MetadataItemComponent {
 
-  constructor() { }
-
   @Input() icon!: string;
 
   @Input() public iconFont: string;

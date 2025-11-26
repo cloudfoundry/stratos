@@ -1,15 +1,16 @@
 import { CdkTableModule } from '@angular/cdk/table';
 import { CommonModule } from '@angular/common';
 import { Component, ViewChild, provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { EMPTY, of as observableOf } from 'rxjs';
 import { createBasicStoreModule } from '@stratosui/store/testing';
-import { ListSort, IFavoriteMetadata, UserFavorite } from '@stratosui/store';
-import { IListPaginationController } from '../data-sources-controllers/list-pagination-controller';
+import { type ListSort, type IFavoriteMetadata, UserFavorite } from '@stratosui/store';
+import type { IListPaginationController } from '../data-sources-controllers/list-pagination-controller';
+import type { EntitySelectConfig } from '../data-sources-controllers/list-data-source-types';
 import { ListComponent } from '../list.component';
-import { ITableColumn } from './table.types';
+import type { ITableColumn } from './table.types';
 import { TableComponent } from './table.component';
 import { TableCellFavoriteComponent, createTableColumnFavorite } from './table-cell-favorite/table-cell-favorite.component';
 
@@ -77,9 +78,9 @@ describe('Table CellConfig Integration Flow', () => {
       dataSource = {
         trackBy: (index: number) => index,
         connect: () => EMPTY,
-        disconnect: (): void => null as any,
+        disconnect: (): void => undefined,
         isTableLoading$: observableOf(false),
-        entitySelectConfig: undefined,
+        entitySelectConfig: undefined as EntitySelectConfig | undefined,
       };
 
       @ViewChild('testTable', { static: true })
@@ -207,9 +208,9 @@ describe('Table CellConfig Integration Flow', () => {
       dataSource = {
         trackBy: (index: number) => index,
         connect: () => EMPTY,
-        disconnect: (): void => null as any,
+        disconnect: (): void => undefined,
         isTableLoading$: observableOf(false),
-        entitySelectConfig: undefined,
+        entitySelectConfig: undefined as EntitySelectConfig | undefined,
       };
 
       @ViewChild('dynamicTable', { static: true })
@@ -318,9 +319,9 @@ describe('Table CellConfig Integration Flow', () => {
       dataSource = {
         trackBy: (index: number) => index,
         connect: () => EMPTY,
-        disconnect: (): void => null as any,
+        disconnect: (): void => undefined,
         isTableLoading$: observableOf(false),
-        entitySelectConfig: undefined,
+        entitySelectConfig: undefined as EntitySelectConfig | undefined,
       };
 
       @ViewChild('favoriteTable', { static: true })
@@ -393,7 +394,7 @@ describe('Table CellConfig Integration Flow', () => {
       const favCol = table.columns.find(col => col.columnId === 'favorite');
 
       expect(favCol.cellConfig).toBeTruthy();
-      const config = favCol.cellConfig as any;
+      const config = favCol.cellConfig as Record<string, unknown>;
       expect(typeof config.createUserFavorite).toBe('function');
     });
 
@@ -444,7 +445,7 @@ describe('Table CellConfig Integration Flow', () => {
       const favCol = table.columns.find(col => col.columnId === 'favorite');
 
       expect(favCol).toBeTruthy();
-      const config = favCol.cellConfig as any;
+      const config = favCol.cellConfig as Record<string, unknown>;
       expect(config.createUserFavorite).toBe(createFavoriteSpy);
     });
   });
@@ -473,9 +474,9 @@ describe('Table CellConfig Integration Flow', () => {
       dataSource = {
         trackBy: (index: number) => index,
         connect: () => EMPTY,
-        disconnect: (): void => null as any,
+        disconnect: (): void => undefined,
         isTableLoading$: observableOf(false),
-        entitySelectConfig: undefined,
+        entitySelectConfig: undefined as EntitySelectConfig | undefined,
       };
 
       @ViewChild('mixedTable', { static: true })
@@ -593,9 +594,9 @@ describe('Table CellConfig Integration Flow', () => {
       dataSource = {
         trackBy: (index: number) => index,
         connect: () => EMPTY,
-        disconnect: (): void => null as any,
+        disconnect: (): void => undefined,
         isTableLoading$: observableOf(false),
-        entitySelectConfig: undefined,
+        entitySelectConfig: undefined as EntitySelectConfig | undefined,
       };
 
       @ViewChild('errorTable', { static: true })

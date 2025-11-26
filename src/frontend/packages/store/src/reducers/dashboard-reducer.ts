@@ -1,30 +1,32 @@
+import type { Action } from '@ngrx/store';
+
 import {
   CLOSE_SIDE_NAV,
   DISABLE_SIDE_NAV_MOBILE_MODE,
   ENABLE_POLLING,
   ENABLE_SIDE_NAV_MOBILE_MODE,
   HYDRATE_DASHBOARD_STATE,
-  HydrateDashboardStateAction,
+  type HydrateDashboardStateAction,
   OPEN_SIDE_NAV,
   SET_DASHBOARD_STATE_VALUE,
   SET_STRATOS_THEME,
-  SetDashboardStateValueAction,
-  SetPollingEnabledAction,
-  SetSessionTimeoutAction,
-  SetThemeAction,
+  type SetDashboardStateValueAction,
+  type SetPollingEnabledAction,
+  type SetSessionTimeoutAction,
+  type SetThemeAction,
   TIMEOUT_SESSION,
   TOGGLE_SIDE_NAV,
 } from '../actions/dashboard-actions';
-import { DashboardState, defaultDashboardState } from '../types/dashboard.types';
+import { type DashboardState, defaultDashboardState } from '../types/dashboard.types';
 import {
   GRAVATAR_ENABLED,
   HOME_CARD_LAYOUT,
-  SetGravatarEnabledAction,
-  SetHomeCardLayoutAction,
+  type SetGravatarEnabledAction,
+  type SetHomeCardLayoutAction,
 } from './../actions/dashboard-actions';
 
 
-export function dashboardReducer(state: DashboardState = defaultDashboardState, action: any): DashboardState {
+export function dashboardReducer(state: DashboardState = defaultDashboardState, action: Action): DashboardState {
   switch (action.type) {
     case OPEN_SIDE_NAV:
       if (state.isMobile) {
@@ -45,51 +47,58 @@ export function dashboardReducer(state: DashboardState = defaultDashboardState, 
       return { ...state, isMobile: true, isMobileNavOpen: false };
     case DISABLE_SIDE_NAV_MOBILE_MODE:
       return { ...state, isMobile: false, isMobileNavOpen: false };
-    case TIMEOUT_SESSION:
+    case TIMEOUT_SESSION: {
       const timeoutSessionAction = action as SetSessionTimeoutAction;
       return {
         ...state,
         timeoutSession: timeoutSessionAction.timeoutSession
       };
-    case ENABLE_POLLING:
+    }
+    case ENABLE_POLLING: {
       const pollingAction = action as SetPollingEnabledAction;
       return {
         ...state,
         pollingEnabled: pollingAction.enablePolling
       };
-    case GRAVATAR_ENABLED:
+    }
+    case GRAVATAR_ENABLED: {
       const gravatarAction = action as SetGravatarEnabledAction;
       return {
         ...state,
         gravatarEnabled: gravatarAction.enableGravatar
       };
-    case HOME_CARD_LAYOUT:
+    }
+    case HOME_CARD_LAYOUT: {
       const layoutAction = action as SetHomeCardLayoutAction;
       return {
         ...state,
         homeLayout: layoutAction.id
       };
-    case SET_DASHBOARD_STATE_VALUE:
+    }
+    case SET_DASHBOARD_STATE_VALUE: {
       const setValueAction = action as SetDashboardStateValueAction;
-      if ((state as any)[setValueAction.prop] === setValueAction.value) {
+      if (state[setValueAction.prop as keyof DashboardState] === setValueAction.value) {
         return state;
       }
       return {
         ...state,
         [setValueAction.prop]: setValueAction.value
       };
-    case HYDRATE_DASHBOARD_STATE:
+    }
+    case HYDRATE_DASHBOARD_STATE: {
       const hydrateDashboardStateAction = action as HydrateDashboardStateAction;
       return {
         ...state,
         ...hydrateDashboardStateAction.dashboardState
       };
-    case SET_STRATOS_THEME:
+    }
+    case SET_STRATOS_THEME: {
       const setThemeAction = action as SetThemeAction;
       return {
         ...state,
         themeKey: setThemeAction.theme ? setThemeAction.theme.key : null
       };
+    }
     default:
       return state;
   }

@@ -1,9 +1,9 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { Component, type OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, of, Subscription } from 'rxjs';
+import { type Observable, of, type Subscription } from 'rxjs';
 import { filter, map, pairwise, switchMap, take, tap } from 'rxjs/operators';
 
 import {
@@ -11,11 +11,14 @@ import {
   CustomSelectComponent,
   CustomOptionComponent,
   CustomSlideToggleComponent,
+  AppInputDirective,
+  AppErrorComponent,
   FocusDirective,
-  StepOnNextFunction
+  type StepOnNextFunction
 } from '@stratosui/core';
-import { ActionState } from '@stratosui/store';
-import { CFAppState } from '../../../../cf-app-state';
+import type { ActionState, EntityInfo, APIResource } from '@stratosui/store';
+import type { CFAppState } from '../../../../cf-app-state';
+import type { ISpace } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
@@ -36,27 +39,30 @@ interface EditSpaceForm {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    AsyncPipe,
     FormsModule,
     ReactiveFormsModule,
     CustomFormFieldComponent,
     CustomSelectComponent,
     CustomOptionComponent,
     CustomSlideToggleComponent,
+    AppInputDirective,
+    AppErrorComponent,
     FocusDirective
   ]
 })
 export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDestroy {
 
-  originalName: any;
+  originalName!: string;
   spaceSubscription!: Subscription;
   space!: string;
-  space$: Observable<any>;
+  space$: Observable<EntityInfo<APIResource<ISpace>>>;
   spaceGuid: string;
   editSpaceForm: FormGroup<EditSpaceForm>;
   originalSpaceQuotaGuid!: string;
 
   constructor(
-    store: Store<CFAppState>,
+    store: Store,
     activatedRoute: ActivatedRoute,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private cfSpaceService: CloudFoundrySpaceService,
@@ -69,16 +75,16 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
       quotaDefinition: new FormControl<string | number | null>(null),
     });
     this.space$ = this.cfSpaceService.space$.pipe(
-      map(o => o.entity.entity),
       take(1),
-      tap(n => {
-        this.originalName = n.name;
-        this.originalSpaceQuotaGuid = n.space_quota_definition_guid;
+      tap(entityInfo => {
+        const space = entityInfo.entity.entity as ISpace;
+        this.originalName = space.name;
+        this.originalSpaceQuotaGuid = space.space_quota_definition_guid;
 
-        const spaceQuotaGuid = n.space_quota_definition_guid ? n.space_quota_definition_guid : 0;
+        const spaceQuotaGuid = space.space_quota_definition_guid ? space.space_quota_definition_guid : 0;
         this.editSpaceForm.patchValue({
-          spaceName: n.name,
-          toggleSsh: n.allow_ssh,
+          spaceName: space.name,
+          toggleSsh: space.allow_ssh,
           quotaDefinition: spaceQuotaGuid,
         });
       })

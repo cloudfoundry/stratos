@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
-import { denormalize, schema as normalizrSchema } from 'normalizr';
-import { combineLatest, interval as observableInterval, Observable } from 'rxjs';
+import { denormalize, type schema as normalizrSchema } from 'normalizr';
+import { combineLatest, interval as observableInterval, type Observable } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
 import {
   distinctUntilChanged,
@@ -14,20 +14,20 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { AppState, GeneralRequestDataState } from '../app-state';
-import { EntitySchema } from '../helpers/entity-schema';
+import type { AppState, GeneralRequestDataState } from '../app-state';
+import type { EntitySchema } from '../helpers/entity-schema';
 import {
-  ActionState,
+  type ActionState,
   getDefaultActionState,
   getDefaultRequestState,
-  RequestInfoState,
-  UpdatingSection,
+  type RequestInfoState,
+  type UpdatingSection,
 } from '../reducers/api-request-reducer/types';
 import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../selectors/api.selectors';
 import { selectDashboardState } from '../selectors/dashboard.selectors';
 
 
-export class EntityMonitor<T = any> {
+export class EntityMonitor<T = unknown> {
 
   constructor(
     private store: Store<AppState>,

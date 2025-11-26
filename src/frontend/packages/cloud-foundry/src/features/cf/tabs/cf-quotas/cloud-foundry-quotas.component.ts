@@ -1,12 +1,16 @@
-import { CommonModule, DatePipe } from '@angular/common';
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { DatePipe, AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
 
-import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ListComponent } from '../../../../../../core/src/shared/components/list/list.component';
-import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
-import { PageSubNavComponent } from '../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
+import type { Observable } from 'rxjs';
+
+import {
+  CurrentUserPermissionsService,
+  ListComponent,
+  ListConfig,
+  PageSubNavComponent,
+} from '@stratosui/core';
+
 import {
   CfQuotasListConfigService,
 } from '../../../../shared/components/list/list-types/cf-quotas/cf-quotas-list-config.service';
@@ -17,21 +21,21 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
   selector: 'app-cloud-foundry-quotas',
   templateUrl: './cloud-foundry-quotas.component.html',
   styleUrls: ['./cloud-foundry-quotas.component.scss'],
-  providers: [
-    {
-      provide: ListConfig,
-      useClass: CfQuotasListConfigService
-    },
-    DatePipe
-  ],
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
   imports: [
-    CommonModule,
+    AsyncPipe,
     RouterModule,
     PageSubNavComponent,
-    ListComponent
-  ]
+    ListComponent,
+  ],
+  providers: [
+    DatePipe,
+    {
+      provide: ListConfig,
+      useClass: CfQuotasListConfigService,
+    },
+  ],
 })
 export class CloudFoundryQuotasComponent {
   public canAddQuota$: Observable<boolean>;

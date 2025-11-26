@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
-import { PaginationObservables, APIResource } from '@stratosui/store';
-import { OverrideAppDetails } from '../../../../../../store/types/deploy-application.types';
+import type { PaginationObservables, APIResource } from '@stratosui/store';
+import type { OverrideAppDetails } from '../../../../../../store/types/deploy-application.types';
 import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
 
 
@@ -32,7 +32,7 @@ export class ApplicationEnvVarsHelper {
     return cfEntityCatalog.appEnvVar.store.getPaginationService(appGuid, cfGuid);
   }
 
-  FetchStratosProject(appEnvVars: any): EnvVarStratosProject {
+  FetchStratosProject(appEnvVars: { environment_json?: { STRATOS_PROJECT?: string } }): EnvVarStratosProject {
     if (!appEnvVars) {
       return null;
     }
@@ -40,7 +40,7 @@ export class ApplicationEnvVarsHelper {
     try {
       const res = stratosProjectString ? JSON.parse(stratosProjectString) as EnvVarStratosProject : null;
       return res;
-    } catch (err) {
+    } catch (_err) {
       // noop
     }
     return null;

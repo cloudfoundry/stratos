@@ -1,9 +1,9 @@
 import { compose, createSelector } from '@ngrx/store';
 
-import { InternalEventSeverity, InternalEventsState } from '../types/internal-events.types';
-import { InternalAppState } from '../app-state';
+import type { InternalEventSeverity, InternalEventsState } from '../types/internal-events.types';
+import type { AppState } from '../app-state';
 
-export const internalEventStateSelector = (state: InternalAppState) => state.internalEvents;
+export const internalEventStateSelector = (state: AppState) => state.internalEvents;
 
 export const internalEventTypeSelector = (type: string) => compose(
   (state: InternalEventsState) => state.types[type] || {},

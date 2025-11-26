@@ -1,8 +1,8 @@
-import { Schema, schema } from 'normalizr';
+import type { Schema, schema } from 'normalizr';
 
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import { stratosMonocularEndpointGuid } from './monocular/stratos-monocular.helper';
-import { HelmVersion, MonocularChart } from './store/helm.types';
+import type { HelmVersion, MonocularChart } from './store/helm.types';
 
 export const helmVersionsEntityType = 'helmVersions';
 export const monocularChartsEntityType = 'monocularCharts';
@@ -40,7 +40,7 @@ entityCache[monocularChartsEntityType] = new HelmEntitySchema(
   {
     idAttribute: (entity: MonocularChart) => {
       const monocularPrefix = entity.monocularEndpointId || stratosMonocularEndpointGuid;
-      return monocularPrefix + '/' + entity.id;
+      return `${monocularPrefix}/${entity.id}`;
     }
   }
 );

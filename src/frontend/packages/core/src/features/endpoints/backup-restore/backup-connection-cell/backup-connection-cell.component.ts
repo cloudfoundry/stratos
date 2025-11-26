@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../shared/components/custom-select/custom-select.component';

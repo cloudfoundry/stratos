@@ -1,14 +1,13 @@
 
-import {Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { ActivatedRoute, Params } from '@angular/router';
+import {Component, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { ActivatedRoute, type Params } from '@angular/router';
 import { finalize, first, switchMap, tap } from 'rxjs/operators';
 
 import { EntitySummaryTitleComponent } from '@stratosui/core';
 
-import { Chart } from '../shared/models/chart';
-import { ChartVersion } from '../shared/models/chart-version';
+import type { Chart } from '../shared/models/chart';
+import type { ChartVersion } from '../shared/models/chart-version';
 import { ChartsService } from '../shared/services/charts.service';
-import { ConfigService } from '../shared/services/config.service';
 import { getMonocularEndpoint, stratosMonocularEndpointGuid } from '../stratos-monocular.helper';
 import { LoaderComponent } from '../loader/loader.component';
 import { PanelComponent } from '../panel/panel.component';
@@ -42,14 +41,15 @@ export class ChartDetailsComponent implements OnInit {
   loadingDelay: ReturnType<typeof setTimeout>;
   private route = inject(ActivatedRoute);
   private chartsService = inject(ChartsService);
-  private config = inject(ConfigService);
 
 
 
   constructor() {
 
 
-    this.loadingDelay = setTimeout(() => this.loading = true, 100);
+    this.loadingDelay = setTimeout(() => {
+      this.loading = true;
+    }, 100);
 
 
   }
@@ -59,7 +59,7 @@ export class ChartDetailsComponent implements OnInit {
       const repo = params.repo;
       const chartName = params.chartName;
 
-      if (!!chartName) {
+      if (chartName) {
         this.chartsService.getChart(repo, chartName).pipe(
           first(),
           switchMap(chart => {
@@ -67,7 +67,7 @@ export class ChartDetailsComponent implements OnInit {
             this.chart = chart;
             this.chartSubTitle = chart.attributes.repo.name;
             if (getMonocularEndpoint(this.route, chart) !== stratosMonocularEndpointGuid) {
-              this.chartSubTitle = 'Artifact Hub - ' + this.chartSubTitle;
+              this.chartSubTitle = `Artifact Hub - ${this.chartSubTitle}`;
             }
             const version = params.version || this.chart.relationships.latestChartVersion.data.version;
             return this.chartsService.getVersion(repo, chartName, version).pipe(first());
@@ -92,7 +92,9 @@ export class ChartDetailsComponent implements OnInit {
   /**
    * Update the metatags with the name and the description of the application.
    */
-  updateMetaTags(): void { }
+  updateMetaTags(): void {
+    // Not yet implemented
+  }
 
   goToRepoUrl(): string {
     return `/charts/${getMonocularEndpoint(null, this.chart)}/${this.chart.attributes.repo.name}`;

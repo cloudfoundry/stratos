@@ -1,9 +1,9 @@
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 
-import { APIResponse } from '../../../store/src/actions/request.actions';
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { ICFAction } from '../../../store/src/types/request.types';
-import { ValidationResult } from '../entity-relations/entity-relations.types';
+import type { APIResponse } from '../../../store/src/actions/request.actions';
+import type { PaginatedAction } from '../../../store/src/types/pagination.types';
+import type { ICFAction } from '../../../store/src/types/request.types';
+import type { ValidationResult } from '../entity-relations/entity-relations.types';
 
 type EntitiesPipelineAction = ICFAction | PaginatedAction;
 

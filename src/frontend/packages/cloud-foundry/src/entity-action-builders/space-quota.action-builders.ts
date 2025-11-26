@@ -1,4 +1,4 @@
-import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
+import type { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import {
   AssociateSpaceQuota,
   CreateSpaceQuotaDefinition,
@@ -7,27 +7,24 @@ import {
   GetSpaceQuotaDefinition,
   UpdateSpaceQuotaDefinition,
 } from '../actions/quota-definitions.actions';
-import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
-import { QuotaFormValues } from '../features/cf/quota-definition-form/quota-definition-form.component';
+import type { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
+import type { QuotaFormValues } from '../features/cf/quota-definition-form/quota-definition-form.component';
 
 export interface SpaceQuotaDefinitionActionBuilders extends OrchestratedActionBuilders {
   get: (
     guid: string,
     endpointGuid: string,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    extraArgs?: Record<string, unknown>
   ) => GetSpaceQuotaDefinition;
   create: (
     id: string,
     endpointGuid: string,
-    args: {
-      orgGuid: string;
-      createQuota: QuotaFormValues;
-    },
+    extraArgs?: Record<string, unknown>
   ) => CreateSpaceQuotaDefinition;
   update: (
     guid: string,
     endpointGuid: string,
-    updateQuota: QuotaFormValues
+    extraArgs?: Record<string, unknown>
   ) => UpdateSpaceQuotaDefinition;
   getAllInOrganization: (
     orgGuid: string,
@@ -52,21 +49,24 @@ export const spaceQuotaDefinitionActionBuilders: SpaceQuotaDefinitionActionBuild
   get: (
     guid: string,
     endpointGuid: string,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetSpaceQuotaDefinition(guid, endpointGuid, includeRelations, populateMissing),
   create: (
     id: string,
     endpointGuid: string,
-    args: {
+    args?: {
       orgGuid: string;
       createQuota: QuotaFormValues;
-    }
-  ) => new CreateSpaceQuotaDefinition(id, endpointGuid, args.orgGuid, args.createQuota),
+    } | Record<string, unknown>
+  ) => {
+    const typedArgs = args as { orgGuid: string; createQuota: QuotaFormValues; };
+    return new CreateSpaceQuotaDefinition(id, endpointGuid, typedArgs.orgGuid, typedArgs.createQuota);
+  },
   update: (
     guid: string,
     endpointGuid: string,
-    updateQuota: QuotaFormValues
-  ) => new UpdateSpaceQuotaDefinition(guid, endpointGuid, updateQuota),
+    updateQuota?: QuotaFormValues | Record<string, unknown>
+  ) => new UpdateSpaceQuotaDefinition(guid, endpointGuid, updateQuota as QuotaFormValues),
   getAllInOrganization: (
     orgGuid: string,
     endpointGuid: string,

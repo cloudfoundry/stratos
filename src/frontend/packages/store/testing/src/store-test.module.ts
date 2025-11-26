@@ -1,5 +1,5 @@
-import { ModuleWithProviders, NgModule } from '@angular/core';
-import { CATALOGUE_ENTITIES, entityCatalog, EntityCatalogFeatureModule, TestEntityCatalog, ENTITY_CATALOG_TOKEN } from '@stratosui/store';
+import { type ModuleWithProviders, NgModule } from '@angular/core';
+import { CATALOGUE_ENTITIES, entityCatalog, EntityCatalogFeatureModule, type TestEntityCatalog, ENTITY_CATALOG_TOKEN } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '../../src/testing/store-test-providers';
 
 @NgModule({

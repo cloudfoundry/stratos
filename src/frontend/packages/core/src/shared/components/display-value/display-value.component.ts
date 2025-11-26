@@ -13,6 +13,4 @@ export class DisplayValueComponent {
 
   @Input() label!: string;
   @Input() value!: string;
-
-  constructor() { }
 }

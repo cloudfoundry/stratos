@@ -1,7 +1,7 @@
 import { HttpRequest } from '@angular/common/http';
 
 import { getActions } from '../../../store/src/actions/action.helper';
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
+import type { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import {
   applicationEntityType,
@@ -39,7 +39,7 @@ export class GetServicePlanServiceInstances extends CFStartAction implements Pag
   actions = getActions('Service Plan', 'Get service instances');
   entity = [cfEntityFactory(serviceInstancesEntityType)];
   entityType = serviceInstancesEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   initialParams = {
     page: 1,
     'results-per-page': 100,

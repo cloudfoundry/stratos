@@ -11,7 +11,7 @@ import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.se
 import { KubernetesNamespaceService } from '../../services/kubernetes-namespace.service';
 import { KubernetesAnalysisService } from '../../services/kubernetes.analysis.service';
 import { KubernetesService } from '../../services/kubernetes.service';
-import { AnalysisReport } from '../../store/kube.types';
+import type { AnalysisReport } from '../../store/kube.types';
 
 @Component({
 selector: 'app-kubernetes-namespace-analysis-report-tab',

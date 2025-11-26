@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, type PipeTransform } from '@angular/core';
 
 @Pipe({
   name: 'applicationStateIcon',
@@ -6,7 +6,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class ApplicationStateIconPipe implements PipeTransform {
 
-  private result(outputType: string, value: string, cssClass: string, icon: string) {
+  private result(outputType: string, _value: string, cssClass: string, icon: string) {
     switch (outputType) {
       case 'class':
         return cssClass;

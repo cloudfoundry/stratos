@@ -1,19 +1,19 @@
-import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, type OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { Observable, of as observableOf } from 'rxjs';
+import { type Observable, of as observableOf } from 'rxjs';
 import { first, map, startWith } from 'rxjs/operators';
 
 import {
   EndpointsService,
   getActionsFromExtensions,
   getTabsFromExtensions,
-  StratosActionMetadata,
+  type StratosActionMetadata,
   StratosActionType,
   StratosTabType,
   CurrentUserPermissionsService,
   environment,
-  IPageSideNavTab,
+  type IPageSideNavTab,
   PageHeaderComponent,
   LoadingPageComponent
 } from '@stratosui/core';

@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+import type { Routes } from '@angular/router';
 
 // Add any lazy loaded routes here
 export const GIT_ROUTES: Routes = [

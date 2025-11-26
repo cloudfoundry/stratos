@@ -1,10 +1,10 @@
-import { EntityService } from '../../entity-service';
-import { EntityMonitor } from '../../monitors/entity-monitor';
-import { PaginationMonitor } from '../../monitors/pagination-monitor';
-import { PaginationObservables } from '../../reducers/pagination-reducer/pagination-reducer.types';
-import { PaginatedAction } from '../../types/pagination.types';
-import { OrchestratedActionBuilders, OrchestratedActionCoreBuilders } from '../action-orchestrator/action-orchestrator';
-import { FilteredByNotReturnType, FilteredByReturnType, NeverKeys, RemoveIndex } from './type.helpers';
+import type { EntityService } from '../../entity-service';
+import type { EntityMonitor } from '../../monitors/entity-monitor';
+import type { PaginationMonitor } from '../../monitors/pagination-monitor';
+import type { PaginationObservables } from '../../reducers/pagination-reducer/pagination-reducer.types';
+import type { PaginatedAction } from '../../types/pagination.types';
+import type { OrchestratedActionBuilders, OrchestratedActionCoreBuilders } from '../action-orchestrator/action-orchestrator';
+import type { FilteredByNotReturnType, FilteredByReturnType, NeverKeys, RemoveIndex } from './type.helpers';
 
 
 /**

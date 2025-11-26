@@ -1,18 +1,18 @@
 import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CustomIconComponent } from '../custom-material/custom-material.component';
 import { Store } from '@ngrx/store';
 import {
-  AppState,
+  type AppState,
   endpointEntityType,
   recentlyVisitedSelector,
-  IRecentlyVisitedEntity,
+  type IRecentlyVisitedEntity,
   entityCatalog,
   MAX_RECENT_COUNT,
   endpointEntitiesSelector,
 } from '@stratosui/store';
-import { Observable, of as observableOf } from 'rxjs';
+import { type Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { NoContentMessageComponent } from '../no-content-message/no-content-message.component';

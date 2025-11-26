@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -30,7 +30,7 @@ describe('TokenEndpointComponent', () => {
       authValues: new FormGroup({
         token: new FormControl(''),
       }),
-    });
+    }) as any;
 
     fixture.detectChanges();
   });

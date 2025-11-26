@@ -1,16 +1,14 @@
-import { Injectable, signal, WritableSignal } from '@angular/core';
+import { Injectable, signal, type WritableSignal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import * as yaml from 'js-yaml';
-import { combineLatest, Observable, of } from 'rxjs';
+import { combineLatest, type Observable, of } from 'rxjs';
 import { filter, first, map, tap } from 'rxjs/operators';
 
-import { EndpointsService } from '../../../../core/src/core/endpoints.service';
-import { createGuid } from '../../../../core/src/core/utils.service';
-import { RowState } from '../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
+import { createGuid, EndpointsService, type RowState } from '@stratosui/core';
 import { getFullEndpointApiUrl } from '../../../../store/src/endpoint-utils';
-import { EndpointModel } from '../../../../store/src/public-api';
+import type { EndpointModel } from '../../../../store/src/public-api';
 import { KubeConfigAuthHelper } from './kube-config-auth.helper';
-import { KubeConfigFile, KubeConfigFileCluster } from './kube-config.types';
+import type { KubeConfigFile, KubeConfigFileCluster } from './kube-config.types';
 
 /**
  * Signal wrapper providing dual API compatibility with BehaviorSubject
@@ -68,7 +66,11 @@ export class KubeConfigHelper {
 
   public updateAll(): Observable<KubeConfigFileCluster[]> {
     return this.clusters$.pipe(
-      tap(clusters => clusters.forEach(cluster => this.update(cluster))),
+      tap(clusters => {
+        for (const cluster of clusters) {
+          this.update(cluster);
+        }
+      }),
     );
   }
 
@@ -143,14 +145,15 @@ export class KubeConfigHelper {
 
 
   // Check the validity of a cluster for import
-  public checkValidity(cluster: KubeConfigFileCluster): Observable<any> {
+  public checkValidity(cluster: KubeConfigFileCluster): Observable<KubeConfigFileCluster> {
     // Check endpoint name
     return combineLatest([
       this.endpointsService.endpoints$,
       this._clusters.asObservable() // Might be called before we've loaded clusters, so used the non-filtered one
     ]).pipe(
       first(),
-      map(([eps, clusters]) => this.validate(Object.values(eps), cluster, clusters))
+      map(([eps, clusters]) => this.validate(Object.values(eps), cluster, clusters)),
+      map(() => cluster)
     );
   }
 

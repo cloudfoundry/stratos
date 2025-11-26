@@ -1,9 +1,22 @@
-import { Component, EventEmitter, Input, OnInit, Output, inject, ChangeDetectionStrategy } from '@angular/core';
-import { Validators, ReactiveFormsModule, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { Component, EventEmitter, Input, type OnInit, Output, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Validators, ReactiveFormsModule, FormBuilder, FormControl, type FormGroup } from '@angular/forms';
 
 
 export interface TailwindJsonSchemaFormConfig {
   addSubmit?: boolean;
+}
+
+interface SchemaProperty {
+  type?: string;
+  format?: string;
+  maxLength?: number;
+  description?: string;
+  enum?: unknown[];
+}
+
+interface JsonSchema {
+  properties?: Record<string, SchemaProperty>;
+  required?: string[];
 }
 
 @Component({
@@ -19,18 +32,23 @@ export interface TailwindJsonSchemaFormConfig {
 export class TailwindJsonSchemaFormComponent implements OnInit {
   private fb = inject(FormBuilder);
 
-  @Input() schema: any;
-  @Input() data: any;
+  @Input() schema: JsonSchema;
+  @Input() data: Record<string, unknown>;
   @Input() framework: string = 'tailwind';
   @Input() options: TailwindJsonSchemaFormConfig = { addSubmit: false };
   @Input() loadExternalAssets: boolean = false;
 
-  @Output() onChanges = new EventEmitter<any>();
-  @Output() validationErrors = new EventEmitter<any[]>();
+  @Output() onChanges = new EventEmitter<unknown>();
+  @Output() validationErrors = new EventEmitter<unknown[]>();
 
-  form!: FormGroup<any>;
-  formFields: any[] = [];
-  formData: any = {};
+  form!: FormGroup;
+  formFields: Array<{
+    key: string;
+    property: SchemaProperty;
+    required: boolean;
+    control: FormControl;
+  }> = [];
+  formData: Record<string, unknown> = {};
 
   ngOnInit() {
     this.buildForm();
@@ -57,14 +75,17 @@ export class TailwindJsonSchemaFormComponent implements OnInit {
       return;
     }
 
-    const formGroup: any = {};
+    const formGroup: Record<string, FormControl> = {};
     this.formFields = [];
 
     Object.keys(this.schema.properties).forEach(key => {
-      const property = this.schema.properties[key];
-      const isRequired = this.schema.required && this.schema.required.includes(key);
+      const property = this.schema.properties?.[key];
+      if (!property) {
+        return;
+      }
+      const isRequired = this.schema.required?.includes(key) ?? false;
 
-      let validators = [];
+      const validators = [];
       if (isRequired) {
         validators.push(Validators.required);
       }
@@ -91,7 +112,7 @@ export class TailwindJsonSchemaFormComponent implements OnInit {
   }
 
   private checkValidation() {
-    const errors: any[] = [];
+    const errors: unknown[] = [];
 
     Object.keys(this.form.controls).forEach(key => {
       const control = this.form.controls[key];
@@ -117,7 +138,7 @@ export class TailwindJsonSchemaFormComponent implements OnInit {
     }
   }
 
-  getFieldType(property: any): string {
+  getFieldType(property: SchemaProperty): string {
     switch (property.type) {
       case 'string':
         return property.format === 'password' ? 'password' : 'text';
@@ -131,15 +152,15 @@ export class TailwindJsonSchemaFormComponent implements OnInit {
     }
   }
 
-  isTextarea(property: any): boolean {
+  isTextarea(property: SchemaProperty): boolean {
     return property.type === 'string' && (
       property.format === 'textarea' ||
-      property.maxLength > 100 ||
-      property.description?.includes('multiline')
+      (property.maxLength !== undefined && property.maxLength > 100) ||
+      property.description?.includes('multiline') === true
     );
   }
 
-  isSelect(property: any): boolean {
-    return property.enum && property.enum.length > 0;
+  isSelect(property: SchemaProperty): boolean {
+    return property.enum !== undefined && property.enum.length > 0;
   }
 }

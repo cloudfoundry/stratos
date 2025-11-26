@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { entityCatalog, FavoriteIconData, IFavoriteMetadata, UserFavorite, UserFavoriteManager } from '@stratosui/store';
+import { entityCatalog, type FavoriteIconData, type IFavoriteMetadata, type UserFavorite, UserFavoriteManager } from '@stratosui/store';
 
 import { EntityFavoriteStarComponent } from '../../../../core/entity-favorite-star/entity-favorite-star.component';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
@@ -16,13 +16,13 @@ import { ConfirmationDialogService } from '../../../../shared/components/confirm
   standalone: true,
   imports: [
     EntityFavoriteStarComponent
-],
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FavoritesMetaCardComponent {
 
   @Input()
-  public endpoint: any;
+  public endpoint: unknown;
 
   public favorite: UserFavorite<IFavoriteMetadata>;
 
@@ -60,7 +60,7 @@ export class FavoritesMetaCardComponent {
       return;
     }
     const entityDef = entityCatalog.getEntity(this.favorite.endpointType, this.favorite.entityType);
-    const isValidObs = (entityDef.builders.entityBuilder && entityDef.builders.entityBuilder.getIsValid) ?
+    const isValidObs = (entityDef.builders.entityBuilder?.getIsValid) ?
     entityDef.builders.entityBuilder.getIsValid(this.favorite) : of(true);
     isValidObs.pipe(first()).subscribe(isValid => {
       this.valid = isValid;

@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
@@ -8,10 +8,10 @@ import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { of as observableOf } from 'rxjs';
 
-import { MetricsConfig } from '@stratosui/core';
+import type { MetricsConfig } from '@stratosui/core';
 import {
   MetricsChartTypes,
-  MetricsLineChartConfig,
+  type MetricsLineChartConfig,
 } from '@stratosui/core';
 import {
   MetricsChartHelpers,
@@ -19,7 +19,7 @@ import {
 import {
   EntityServiceFactory,
   MetricQueryConfig,
-  MetricQueryType,
+  type MetricQueryType,
   appReducers,
   TEST_CATALOGUE_ENTITIES,
   generateStratosEntities,
@@ -38,7 +38,7 @@ class MockCloudFoundryCellService {
   cellMetric$ = observableOf(null);
 
   healthy$ = observableOf(null);
-  healthyMetricId = null;
+  healthyMetricId: string | null = null;
   cpus$ = observableOf(null);
 
   usageContainers$ = observableOf(null);
@@ -53,8 +53,8 @@ class MockCloudFoundryCellService {
   remainingMemory$ = observableOf(null);
   totalMemory$ = observableOf(null);
 
-  buildMetricConfig = (queryString: string, queryRange: MetricQueryType): MetricsConfig<any> => ({
-    getSeriesName: (result: any) => `${result}`,
+  buildMetricConfig = (queryString: string, queryRange: MetricQueryType): MetricsConfig<unknown> => ({
+    getSeriesName: (result: unknown) => `${result}`,
     mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
     metricsAction: new FetchCFCellMetricsAction(
       'guid',

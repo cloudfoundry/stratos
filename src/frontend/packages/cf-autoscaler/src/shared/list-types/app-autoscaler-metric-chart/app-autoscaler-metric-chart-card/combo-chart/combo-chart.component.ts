@@ -6,10 +6,19 @@ import {
   Input,
   Output,
   ViewEncapsulation,
-  OnChanges,
+  type OnChanges,
 } from '@angular/core';
-import { ChartConfiguration, ChartEvent, ActiveElement } from 'chart.js';
+import type { ChartConfiguration, ChartEvent, ActiveElement } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
+
+export interface ChartSeries {
+  name: string;
+  series: Array<{ name: string | number; value: number }>;
+}
+
+export interface ColorScheme {
+  domain?: string[];
+}
 
 @Component({
   selector: 'app-autoscaler-combo-chart-component',
@@ -29,10 +38,10 @@ export class AppAutoscalerComboChartComponent implements OnChanges {
   @Input() legend = false;
   @Input() xAxisLabel!: string;
   @Input() yAxisLabel!: string;
-  @Input() results: any[] = [];
-  @Input() lineChart: any[] = [];
-  @Input() colorSchemeLine: any;
-  @Input() scheme: any;
+  @Input() results: ChartSeries[] = [];
+  @Input() lineChart: ChartSeries[] = [];
+  @Input() colorSchemeLine: ColorScheme = {};
+  @Input() scheme: ColorScheme = {};
 
   @Output() select = new EventEmitter();
   @Output() activate = new EventEmitter();
@@ -93,18 +102,18 @@ export class AppAutoscalerComboChartComponent implements OnChanges {
 
     // Get labels from the data
     const labels = this.results && this.results.length > 0
-      ? this.results[0].series.map((item: any) => new Date(item.name).toLocaleDateString())
+      ? this.results[0].series.map((item) => new Date(item.name).toLocaleDateString())
       : [];
 
-    const datasets: any[] = [];
+    const datasets: ChartConfiguration['data']['datasets'] = [];
 
     // Add bar datasets
     if (this.results) {
-      this.results.forEach((series: any, index: number) => {
+      this.results.forEach((series, index: number) => {
         datasets.push({
           type: 'bar',
           label: series.name,
-          data: series.series.map((item: any) => item.value),
+          data: series.series.map((item) => item.value),
           backgroundColor: this.getColor(index, 'bar'),
           yAxisID: 'y'
         });
@@ -113,13 +122,13 @@ export class AppAutoscalerComboChartComponent implements OnChanges {
 
     // Add line datasets
     if (this.lineChart) {
-      this.lineChart.forEach((series: any, index: number) => {
+      this.lineChart.forEach((series, index: number) => {
         datasets.push({
           type: 'line',
           label: series.name,
-          data: series.series.map((item: any) => item.value),
+          data: series.series.map((item) => item.value),
           borderColor: this.getColor(index, 'line'),
-          backgroundColor: this.getColor(index, 'line') + '20',
+          backgroundColor: `${this.getColor(index, 'line')}20`,
           fill: false,
           tension: 0.1,
           yAxisID: 'y1'

@@ -5,10 +5,10 @@ import { map } from 'rxjs/operators';
 
 import { SendEventAction } from '../actions/internal-events.actions';
 import { RequestTypes } from '../actions/request.actions';
-import { InternalAppState } from '../app-state';
+import type { InternalAppState } from '../app-state';
 import { endpointEntityType } from '../helpers/stratos-entity-factory';
 import { InternalEventSeverity } from '../types/internal-events.types';
-import { WrapperRequestActionFailed } from '../types/request.types';
+import type { WrapperRequestActionFailed } from '../types/request.types';
 
 @Injectable({
   providedIn: 'root'
@@ -27,7 +27,7 @@ export class EndpointApiError {
       const internalEndpointError = action.internalEndpointError;
       if (internalEndpointError) {
         const { eventCode, message, error, url } = internalEndpointError;
-        internalEndpointError.endpointIds.forEach(endpoint =>
+        internalEndpointError.endpointIds.forEach(endpoint => {
           this.store.dispatch(
             new SendEventAction(endpointEntityType, endpoint, {
               eventCode,
@@ -42,8 +42,8 @@ export class EndpointApiError {
                 url,
               },
             }),
-          ),
-        );
+          );
+        });
         this.appRef.tick();
       }
     })), { dispatch: false });

@@ -1,12 +1,12 @@
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 
 import { ClearPaginationOfEntity, ClearPaginationOfType } from '../../actions/pagination.actions';
 import { RecursiveDeleteComplete } from '../../effects/recursive-entity-delete.effect';
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
-import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
-import { EntityRequestAction, WrapperRequestActionSuccess } from '../../types/request.types';
-import { PipelineResult } from '../entity-request-pipeline.types';
+import type { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import type { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
+import { type EntityRequestAction, WrapperRequestActionSuccess } from '../../types/request.types';
+import type { PipelineResult } from '../entity-request-pipeline.types';
 
 
 export function successEntityHandler(
@@ -34,7 +34,9 @@ export function successEntityHandler(
       // If clearPaginationEntityKeys is an array then clear the pagination sections regardless of removeEntityOnDelete
       action.clearPaginationEntityKeys.forEach(key => {
         const entityConfig = entityCatalog.getEntity(action.endpointType, key);
-        actionDispatcher(new ClearPaginationOfType(entityConfig.getSchema()));
+        if (entityConfig) {
+          actionDispatcher(new ClearPaginationOfType(entityConfig.getSchema()));
+        }
       });
     }
   }

@@ -1,30 +1,29 @@
 import {Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { format } from 'date-fns';
-import { Observable, of } from 'rxjs';
+import { type Observable, of } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { TableComponent } from '../../../../../../../core/src/shared/components/list/list-table/table.component';
-import { ITableListDataSource } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
+import { TableComponent, type ITableListDataSource, type ITableColumn } from '@stratosui/core';
+import type { HelmReleaseRevision } from '../../../workload.types';
 import { HelmReleaseHelperService } from './../helm-release-helper.service';
 
-class HelmReleaseHistoryDataSource implements ITableListDataSource<any> {
+class HelmReleaseHistoryDataSource implements ITableListDataSource<HelmReleaseRevision> {
   constructor(
-    private data$: Observable<any[]>,
+    private data$: Observable<HelmReleaseRevision[]>,
     public isTableLoading$: Observable<boolean>
   ) {}
 
-  connect(): Observable<any[]> {
+  connect(): Observable<HelmReleaseRevision[]> {
     return this.data$;
   }
 
   disconnect(): void {}
 
-  trackBy(index: number, item: any): any {
+  trackBy(_index: number, item: HelmReleaseRevision): number {
     return item.revision;
   }
 
-  getRowState(row: any): Observable<any> {
+  getRowState(_row: HelmReleaseRevision): Observable<Record<string, unknown>> {
     return of({});
   }
 }
@@ -41,9 +40,9 @@ class HelmReleaseHistoryDataSource implements ITableListDataSource<any> {
 })
 export class HelmReleaseHistoryTabComponent {
 
-  public columns: ITableColumn<any>[] = [];
+  public columns: ITableColumn<HelmReleaseRevision>[] = [];
 
-  public dataSource: ITableListDataSource<any>;
+  public dataSource: ITableListDataSource<HelmReleaseRevision>;
   public helmReleaseHelper = inject(HelmReleaseHelperService);
 
 

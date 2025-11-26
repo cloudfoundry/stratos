@@ -1,9 +1,9 @@
-import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
+import { type HttpHeaders, type HttpParams, HttpRequest } from '@angular/common/http';
 import type { Action } from '@ngrx/store';
 
 import type { EntitySchema } from '../../helpers/entity-schema';
 import type { PaginatedAction } from '../../types/pagination.types';
-import { EntityRequestAction, StartAction } from '../../types/request.types';
+import { type EntityRequestAction, StartAction } from '../../types/request.types';
 
 export interface ActionBuilderAction extends EntityRequestAction {
   actionBuilderActionType: string;
@@ -11,21 +11,21 @@ export interface ActionBuilderAction extends EntityRequestAction {
 
 // A function that returns a ICFAction
 export type OrchestratedActionBuilder<
-  T extends any[] = any[],
+  T extends unknown[] = unknown[],
   Y extends Action = Action
   > = (...args: T) => Y;
 
 
 export type KnownEntityActionBuilder<
-  T extends Record<any, any> = Record<any, any>
+  T extends Record<string, unknown> = Record<string, unknown>
   > = (guid: string, endpointGuid: string, extraArgs?: T) => EntityRequestAction;
 // createTrackingId should be unique to the thing that's being created.
 // It is used to track the status of the entity creation.
 export type CreateActionBuilder<
-  T extends Record<any, any> = Record<any, any>
+  T extends Record<string, unknown> = Record<string, unknown>
   > = (createTrackingId: string, endpointGuid: string, extraArgs?: T) => EntityRequestAction;
 // paginationKey could be optional, we could give it a default value.
-export type GetMultipleActionBuilder<T extends Record<any, any> = Record<any, any>> = (
+export type GetMultipleActionBuilder<T extends Record<string, unknown> = Record<string, unknown>> = (
   endpointGuid: string,
   paginationKey: string,
   extraArgs?: T
@@ -85,14 +85,14 @@ export interface BaseEntityRequestConfig {
     responseType?: 'arraybuffer' | 'blob' | 'json' | 'text';
     withCredentials?: boolean;
   };
-  requestBody?: any;
+  requestBody?: unknown;
 }
 
 export type BasePaginationRequestConfig = Omit<BaseEntityRequestConfig, 'httpMethod'>;
 
 export type BaseEntityRequestMethods = 'DELETE' | 'GET' | 'HEAD' | 'JSONP' | 'OPTIONS' | 'POST' | 'PUT' | 'PATCH';
 
-export class BasePipelineRequestAction<M extends Array<any> = any[]> extends StartAction {
+export class BasePipelineRequestAction<M extends Array<unknown> = unknown[]> extends StartAction {
   constructor(
     public entityType: string,
     public endpointType: string,
@@ -115,7 +115,7 @@ export class BasePipelineRequestAction<M extends Array<any> = any[]> extends Sta
 
 // This action will be created by the entity catalog from single request entity builder configs.
 export class BaseEntityRequestAction extends BasePipelineRequestAction implements EntityRequestAction {
-  public options: HttpRequest<any>;
+  public options: HttpRequest<unknown>;
   public updatingKey: string | null = null;
   constructor(
     entity: EntitySchema | EntitySchema[],
@@ -125,7 +125,7 @@ export class BaseEntityRequestAction extends BasePipelineRequestAction implement
     endpointType: string,
     url: string,
     requestConfig: BaseEntityRequestConfig,
-    metadata: any[] = [],
+    metadata: unknown[] = [],
     externalRequest: boolean = false
   ) {
     super(entityType, endpointType, entity, endpointGuid, metadata, externalRequest);
@@ -135,7 +135,7 @@ export class BaseEntityRequestAction extends BasePipelineRequestAction implement
 
 // This action will be created by the entity catalog from multi request entity builder configs.
 export class BasePaginationRequestAction extends BasePipelineRequestAction implements EntityRequestAction {
-  public options: HttpRequest<any>;
+  public options: HttpRequest<unknown>;
   constructor(
     entity: EntitySchema | EntitySchema[],
     // If pagination key is null then we expect it to come from the action builder.
@@ -145,7 +145,7 @@ export class BasePaginationRequestAction extends BasePipelineRequestAction imple
     endpointType: string,
     url: string,
     requestConfig: BasePaginationRequestConfig,
-    metadata: any[] = [],
+    metadata: unknown[] = [],
     jetstreamRequest: boolean = true
 
   ) {

@@ -1,26 +1,26 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal, inject, ChangeDetectionStrategy } from '@angular/core';
-import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { Component, type OnInit, signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { type AbstractControl, ReactiveFormsModule, type ValidatorFn, Validators, FormControl, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import {
-  InternalAppState,
-  UAASetupState,
-  LocalAdminSetupData,
-  AuthState,
+  type InternalAppState,
+  type UAASetupState,
+  type LocalAdminSetupData,
+  type AuthState,
   VerifySession,
   SetupSaveConfig,
 } from '@stratosui/store';
-import { Observable } from 'rxjs';
-import { delay, filter, map, take, tap } from 'rxjs/operators';
+import type { Observable } from 'rxjs';
+import { delay, filter, map, take, } from 'rxjs/operators';
 
 import { APP_TITLE } from '../../../core/core.types';
-import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
+import type { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { ShowPageHeaderComponent } from '../../../shared/components/page-header/show-page-header/show-page-header.component';
 import { SteppersComponent } from '../../../shared/components/stepper/steppers/steppers.component';
 import { StepComponent } from '../../../shared/components/stepper/step/step.component';
 import { LoadingPageComponent } from '../../../shared/components/loading-page/loading-page.component';
-import { ProductNameComponent } from '../../../shared/components/product-name.ccomponent';
+import { ProductNameComponent } from '../../../shared/components/product-name.component';
 import { ShowHideButtonComponent } from '../../../core/show-hide-button/show-hide-button.component';
 
 // Typed form interface for local account password form
@@ -99,7 +99,7 @@ export class LocalAccountWizardComponent implements OnInit {
       }),
       delay(2000),
       take(10),
-      filter(([uaa, auth]: [UAASetupState, AuthState]) => {
+      filter(([_uaa, auth]: [UAASetupState, AuthState]) => {
         const validUAASessionData = auth.sessionData && !auth.sessionData.uaaError;
         if (!validUAASessionData) {
           this.store.dispatch(new VerifySession());
@@ -110,7 +110,7 @@ export class LocalAccountWizardComponent implements OnInit {
         if (!state[0].error) {
           // Do a hard reload of the app
           const loc = window.location;
-          const reload = loc.protocol + '//' + loc.host;
+          const reload = `${loc.protocol}//${loc.host}`;
           window.location.assign(reload);
         } else {
           this.applyingSetup.set(false);

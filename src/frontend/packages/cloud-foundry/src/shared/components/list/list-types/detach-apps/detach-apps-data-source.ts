@@ -1,12 +1,13 @@
 import { Store } from '@ngrx/store';
 
-import { ListDataSource, IListConfig } from '@stratosui/core';
-import { getRowMetadata, APIResource } from '@stratosui/store';
+import { ListDataSource, type IListConfig } from '@stratosui/core';
+import { getRowMetadata, type APIResource } from '@stratosui/store';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
 } from '../../../../../entity-relations/entity-relations.types';
-import { CFAppState } from '../../../../../cf-app-state';
+import type { CFAppState } from '../../../../../cf-app-state';
+import type { IServiceBinding } from '../../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import {
@@ -15,8 +16,8 @@ import {
   serviceBindingNoBindingsEntityType,
 } from '../../../../../cf-entity-types';
 
-export class DetachAppsDataSource extends ListDataSource<APIResource> {
-  constructor(cfGuid: string, serviceInstanceGuid: string, store: Store<CFAppState>, listConfig?: IListConfig<APIResource>) {
+export class DetachAppsDataSource extends ListDataSource<APIResource<IServiceBinding>> {
+  constructor(cfGuid: string, serviceInstanceGuid: string, store: Store<CFAppState>, listConfig?: IListConfig<APIResource<IServiceBinding>>) {
     const paginationKey = createEntityRelationPaginationKey(serviceBindingEntityType, serviceInstanceGuid);
     const getAppServiceBindingsAction = cfEntityCatalog.serviceBinding.actions.getAllForServiceInstance(
       serviceInstanceGuid, cfGuid, paginationKey, {

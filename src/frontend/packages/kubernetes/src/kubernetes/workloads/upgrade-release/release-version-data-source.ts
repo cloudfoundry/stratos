@@ -1,12 +1,11 @@
 import { Store } from '@ngrx/store';
-import { Observable, of } from 'rxjs';
+import { type Observable, of } from 'rxjs';
 
-import { ListDataSource } from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { RowState } from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
-import { IListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
-import { PaginationEntityState } from '../../../../../store/src/types/pagination.types';
+import { type IListConfig, ListDataSource, type RowState } from '@stratosui/core';
+import type { AppState } from '../../../../../store/src/public-api';
+import type { PaginationEntityState } from '../../../../../store/src/types/pagination.types';
 import { helmEntityCatalog } from '../../../helm/helm-entity-catalog';
-import { MonocularVersion } from './../../../helm/store/helm.types';
+import type { MonocularVersion } from './../../../helm/store/helm.types';
 
 
 const typeFilterKey = 'versionType';
@@ -17,7 +16,7 @@ export class HelmReleaseVersionsDataSource extends ListDataSource<MonocularVersi
   private currentVersion: string;
 
   constructor(
-    store: Store<any>,
+    store: Store<AppState>,
     listConfig: IListConfig<MonocularVersion>,
     repoName: string,
     chartName: string,
@@ -43,7 +42,7 @@ export class HelmReleaseVersionsDataSource extends ListDataSource<MonocularVersi
     });
 
     this.currentVersion = version;
-    this.getRowState = (row: any): Observable<RowState> => of({ highlighted: row.attributes.version === this.currentVersion });
+    this.getRowState = (row: MonocularVersion): Observable<RowState> => of({ highlighted: row.attributes.version === this.currentVersion });
   }
 
 

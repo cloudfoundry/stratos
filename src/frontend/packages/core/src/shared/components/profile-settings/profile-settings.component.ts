@@ -1,9 +1,9 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 import { CustomSlideToggleComponent } from '../custom-slide-toggle/custom-slide-toggle.component';
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, type Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
 import {
@@ -87,7 +87,7 @@ export class ProfileSettingsComponent {
   );
 
   public localStorageSize$ = this.sessionData$.pipe(
-    map(sessionData => sessionData && sessionData.user ? LocalStorageService.localStorageSize(sessionData) : -1),
+    map(sessionData => sessionData?.user ? LocalStorageService.localStorageSize(sessionData) : -1),
     filter(bytes => bytes !== -1),
   );
 
@@ -138,7 +138,7 @@ export class ProfileSettingsComponent {
 
   clearLocalStorage() {
     this.sessionData$.pipe(first()).subscribe(sessionData => {
-      if (sessionData && sessionData.user) {
+      if (sessionData?.user) {
         LocalStorageService.clearLocalStorage(sessionData, this.confirmationService);
       }
     });

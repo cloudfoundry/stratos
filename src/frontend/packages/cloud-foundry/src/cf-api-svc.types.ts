@@ -1,5 +1,8 @@
-import { APIResource } from '@stratosui/store';
-import { IApp, IOrganization, IRoute, ISpace } from './cf-api.types';
+import type { APIResource } from '@stratosui/store';
+import type { IApp, IOrganization, IRoute, ISpace } from './cf-api.types';
+
+// Re-export IApp for use by other modules
+export type { IApp } from './cf-api.types';
 
 export interface ILastOperation {
   type: string;
@@ -12,12 +15,12 @@ export interface ILastOperation {
 export interface IServiceBinding {
   app_guid: string;
   service_instance_guid: string;
-  credentials: any;
-  binding_options: any;
-  gateway_data?: any;
+  credentials: Record<string, unknown>;
+  binding_options: Record<string, unknown>;
+  gateway_data?: unknown;
   gateway_name: string;
-  syslog_drain_url?: any;
-  volume_mounts: any[];
+  syslog_drain_url?: string | null;
+  volume_mounts: unknown[];
   app_url: string;
   app?: APIResource<IApp>;
   service_instance_url: string;
@@ -30,10 +33,10 @@ export interface IServiceInstance {
   guid?: string;
   cfGuid?: string;
   name?: string;
-  credentials?: any;
+  credentials?: Record<string, unknown>;
   service_plan_guid: string;
   space_guid: string;
-  gateway_data?: any;
+  gateway_data?: unknown;
   dashboard_url: string;
   type: string;
   last_operation?: ILastOperation;

@@ -1,14 +1,15 @@
-import { CommonModule } from '@angular/common';
-import { Component, Injector, OnDestroy , ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { Component, inject, Injector, type OnDestroy , ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf } from 'rxjs';
+import { type Observable, of as observableOf } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
+import type { GeneralEntityAppState } from '@stratosui/store';
 
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { BytesToHumanSize, StepOnNextFunction, UploadProgressIndicatorComponent } from '@stratosui/core';
+import type { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
+import { BytesToHumanSize, type StepOnNextFunction, UploadProgressIndicatorComponent } from '@stratosui/core';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
-import { DeployApplicationDeployer, FileTransferStatus } from '../deploy-application-deployer';
-import { FileScannerInfo } from '../deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
+import { DeployApplicationDeployer, type FileTransferStatus } from '../deploy-application-deployer';
+import type { FileScannerInfo } from '../deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
 
 
 @Component({
@@ -29,12 +30,12 @@ export class DeployApplicationStepSourceUploadComponent implements OnDestroy {
 
   public valid$: Observable<boolean>;
 
-  constructor(
-    store: Store<CFAppState>,
-    public cfOrgSpaceService: CfOrgSpaceDataService,
-    private injector: Injector
-  ) {
-    this.deployer = new DeployApplicationDeployer(store, cfOrgSpaceService, injector);
+  private readonly store = inject(Store<GeneralEntityAppState>);
+  public readonly cfOrgSpaceService = inject(CfOrgSpaceDataService);
+  private readonly injector = inject(Injector);
+
+  constructor() {
+    this.deployer = new DeployApplicationDeployer(this.store, this.cfOrgSpaceService, this.injector);
     this.valid$ = this.deployer.fileTransferStatus$.asObservable().pipe(
       filter(status => !!status),
       map((status: FileTransferStatus) => status.filesSent === status.totalFiles),

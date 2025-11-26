@@ -69,6 +69,65 @@ function checkDevkitBuild() {
   }
 }
 
+function verifyEsbuildBinary() {
+  log('Verifying esbuild platform binary...');
+
+  // Detect platform
+  const platform = process.platform;
+  const arch = process.arch;
+
+  // Map to esbuild package names
+  const platformMap = {
+    'darwin-arm64': '@esbuild/darwin-arm64',
+    'darwin-x64': '@esbuild/darwin-x64',
+    'linux-arm64': '@esbuild/linux-arm64',
+    'linux-x64': '@esbuild/linux-x64',
+    'win32-arm64': '@esbuild/win32-arm64',
+    'win32-x64': '@esbuild/win32-x64'
+  };
+
+  const platformKey = `${platform}-${arch}`;
+  const esbuildPackage = platformMap[platformKey];
+
+  if (!esbuildPackage) {
+    log(`⚠️  Unknown platform: ${platformKey}, skipping esbuild verification`);
+    return true;
+  }
+
+  // Check if the platform binary is installed
+  try {
+    require.resolve(esbuildPackage);
+    log(`✓ esbuild platform binary (${esbuildPackage}) is installed`);
+    return true;
+  } catch (err) {
+    log(`⚠️  Missing esbuild platform binary: ${esbuildPackage}`);
+    log(`   Installing ${esbuildPackage}...`);
+
+    try {
+      // Get the esbuild version from package.json or use the installed version
+      let esbuildVersion = '0.25.9'; // Default fallback
+      try {
+        const esbuildPkg = require(path.join(ROOT_DIR, 'node_modules/esbuild/package.json'));
+        esbuildVersion = esbuildPkg.version;
+      } catch (e) {
+        // Use fallback version
+      }
+
+      // Use --ignore-scripts to avoid recursive postinstall loop
+      execSync(`bun add -d --ignore-scripts ${esbuildPackage}@${esbuildVersion}`, {
+        cwd: ROOT_DIR,
+        stdio: 'inherit'
+      });
+      log(`✓ Installed ${esbuildPackage}@${esbuildVersion}`);
+      return true;
+    } catch (installErr) {
+      error(`Failed to install ${esbuildPackage}: ${installErr.message}`);
+      log(`   Try manually: bun add -d ${esbuildPackage}`);
+      return false;
+    }
+  }
+}
+
 function buildCustomBuilders() {
   log('Building custom Angular builders...');
   const buildersDir = path.join(ROOT_DIR, 'tools/builders/prebuild-application');
@@ -161,6 +220,9 @@ function applySkipWorktreeFlags() {
 function main() {
   log('Running post-install setup tasks...');
   log('');
+
+  // Verify esbuild platform binary (Bun sometimes misses optional deps)
+  verifyEsbuildBinary();
 
   // Check devkit
   checkDevkitBuild();

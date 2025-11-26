@@ -3,12 +3,13 @@ import { map } from 'rxjs/operators';
 
 import {
   ListDataSource,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
-import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
-import { FetchCFCellMetricsPaginatedAction } from '../../../../../actions/cf-metrics.actions';
-import { CFAppState } from '../../../../../cf-app-state';
+} from '@stratosui/core';
+import type { IListConfig } from '@stratosui/core';
+import type { GeneralEntityAppState } from '../../../../../../../store/src/app-state';
+import type { IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
+import type { IMetricCell } from '../../../../../../../store/src/types/metric.types';
+import type { FetchCFCellMetricsPaginatedAction } from '../../../../../actions/cf-metrics.actions';
+import type { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 
 export class CfCellsDataSource
@@ -20,7 +21,7 @@ export class CfCellsDataSource
   static cellDeploymentPath = 'metric.bosh_deployment';
 
   constructor(
-    store: Store<CFAppState>,
+    store: Store<GeneralEntityAppState>,
     listConfig: IListConfig<IMetricVectorResult<IMetricCell>>,
     action: FetchCFCellMetricsPaginatedAction
   ) {

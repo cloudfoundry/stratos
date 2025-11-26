@@ -1,16 +1,17 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnDestroy, OnInit, Output, computed, inject, signal , ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, type OnDestroy, type OnInit, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CustomCheckboxComponent } from '@stratosui/core';
 import { CustomTooltipDirective } from '@stratosui/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, Subscription } from 'rxjs';
-import { combineLatest as combineLatestOp, filter, first, map } from 'rxjs/operators';
+import type { Subscription } from 'rxjs';
+import { combineLatest as combineLatestOp, filter, first, } from 'rxjs/operators';
+import type { GeneralEntityAppState } from '@stratosui/store';
 
 import { UsersRolesSetOrgRole, UsersRolesSetSpaceRole } from '../../../../../cloud-foundry/src/actions/users-roles.actions';
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { CfUserRolesSelected } from '../../../../../cloud-foundry/src/store/types/users-roles.types';
-import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
+import type { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import type { CfUserRolesSelected } from '../../../../../cloud-foundry/src/store/types/users-roles.types';
+import { CurrentUserPermissionsService } from '@stratosui/core';
 import { canUpdateOrgSpaceRoles } from '../../../features/cf/cf.helpers';
 import { CfRolesService } from '../../../features/cf/users/manage-users/cf-roles.service';
 import {
@@ -19,9 +20,9 @@ import {
   selectCfUsersRolesPicked,
 } from '../../../store/selectors/cf-users-roles.selector';
 import {
-  CfUser,
-  IUserPermissionInOrg,
-  IUserPermissionInSpace,
+  type CfUser,
+  type IUserPermissionInOrg,
+  type IUserPermissionInSpace,
   OrgUserRoleNames,
   SpaceUserRoleNames,
 } from '../../../store/types/cf-user.types';
@@ -54,7 +55,7 @@ enum CfRoleCheckboxMode {
   ]
 })
 export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
-  private store = inject(Store<CFAppState>);
+  private store = inject(Store<GeneralEntityAppState>);
   private cfRolesService = inject(CfRolesService);
   private userPerms = inject(CurrentUserPermissionsService);
 
@@ -93,8 +94,8 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
   disabled = false;
 
   private static hasExistingRole(role: string, roles: CfUserRolesSelected, userGuid: string, orgGuid: string, spaceGuid: string): boolean {
-    if (roles && roles[userGuid] && roles[userGuid][orgGuid]) {
-      return !!this.hasRole(role, roles[userGuid][orgGuid], spaceGuid);
+    if (roles?.[userGuid]?.[orgGuid]) {
+      return !!CfRoleCheckboxComponent.hasRole(role, roles[userGuid][orgGuid], spaceGuid);
     }
     return false;
   }
@@ -288,7 +289,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
 
     this.sub = this.cfRolesService.existingRoles$.pipe(
       combineLatestOp(this.cfRolesService.newRoles$, users$, canEditRole$, selectUsersIsSetByUsername$),
-      filter(([existingRoles, newRoles, users, canEditRole, isSetByUsername]) => !!users.length && !!newRoles.orgGuid)
+      filter(([_existingRoles, newRoles, users, _canEditRole, _isSetByUsername]) => !!users.length && !!newRoles.orgGuid)
     ).subscribe(([existingRoles, newRoles, users, canEditRole, isSetByUsername]) => {
       const { checked, tooltip } = CfRoleCheckboxComponent.getCheckedState(
         this.role, users, existingRoles, newRoles, this.orgGuid, this.spaceGuid);
@@ -320,7 +321,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
     this.checked = checked;
     this.cfRolesService.newRoles$.pipe(
       first()
-    ).subscribe(newRoles => {
+    ).subscribe(_newRoles => {
       if (!checked) {
         this.tooltip = '';
       }

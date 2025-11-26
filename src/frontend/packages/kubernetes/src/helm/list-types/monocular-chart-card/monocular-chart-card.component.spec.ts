@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -11,7 +11,7 @@ import { ListItemComponent } from '../../monocular/list-item/list-item.component
 import { MockChartService } from '../../monocular/shared/services/chart.service.mock';
 import { ChartsService } from '../../monocular/shared/services/charts.service';
 import { ConfigService } from '../../monocular/shared/services/config.service';
-import { MonocularChart } from '../../store/helm.types';
+import type { MonocularChart } from '../../store/helm.types';
 import { MonocularChartCardComponent } from './monocular-chart-card.component';
 
 describe('MonocularChartCardComponent', () => {

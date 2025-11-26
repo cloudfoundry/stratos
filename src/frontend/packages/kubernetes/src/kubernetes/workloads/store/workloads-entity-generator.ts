@@ -1,21 +1,21 @@
 import {
-  StratosBaseCatalogEntity,
+  type StratosBaseCatalogEntity,
   StratosCatalogEntity,
 } from '../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { StratosEndpointExtensionDefinition } from '../../../../../store/src/entity-catalog/entity-catalog.types';
-import { IFavoriteMetadata } from '../../../../../store/src/types/user-favorites.types';
+import type { StratosEndpointExtensionDefinition } from '../../../../../store/src/entity-catalog/entity-catalog.types';
+import type { IFavoriteMetadata } from '../../../../../store/src/types/user-favorites.types';
 import { kubernetesEntityFactory } from '../../kubernetes-entity-factory';
-import { HelmRelease, HelmReleaseGraph, HelmReleaseResources } from '../workload.types';
+import type { HelmRelease, HelmReleaseGraph, HelmReleaseResources } from '../workload.types';
 import { workloadsEntityCatalog } from '../workloads-entity-catalog';
-import { HelmReleaseHistory } from './../workload.types';
+import type { HelmReleaseHistory } from './../workload.types';
 import {
-  WorkloadGraphBuilders,
+  type WorkloadGraphBuilders,
   workloadGraphBuilders,
-  WorkloadReleaseBuilders,
+  type WorkloadReleaseBuilders,
   workloadReleaseBuilders,
-  WorkloadResourceBuilders,
+  type WorkloadResourceBuilders,
   workloadResourceBuilders,
-  WorkloadResourceHistoryBuilders,
+  type WorkloadResourceHistoryBuilders,
   workloadResourceHistoryBuilders,
 } from './workload-action-builders';
 import {

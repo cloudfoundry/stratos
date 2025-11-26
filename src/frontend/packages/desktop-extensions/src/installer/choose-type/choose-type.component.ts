@@ -1,10 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, type OnInit } from '@angular/core';
+import { CardComponent, CardContentComponent, PageHeaderComponent } from '@stratosui/core';
 
 @Component({
-selector: 'app-choose-type',
+  selector: 'app-choose-type',
   templateUrl: './choose-type.component.html',
   styleUrls: ['./choose-type.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    PageHeaderComponent,
+    CardComponent,
+    CardContentComponent
+  ]
 })
 export class ChooseTypeComponent implements OnInit {
 
@@ -21,8 +29,6 @@ export class ChooseTypeComponent implements OnInit {
     description: 'There`s always got to be three choices',
     icon: '/core/assets/types/osb_logo.png'
   }]
-
-  constructor() { }
 
   ngOnInit(): void {
   }

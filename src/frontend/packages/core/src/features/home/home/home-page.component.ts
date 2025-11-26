@@ -1,23 +1,23 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { ScrollDispatcher } from '@angular/cdk/scrolling';
-import { ChangeDetectionStrategy, AfterViewInit,
+import { ChangeDetectionStrategy, type AfterViewInit,
   Component,
-  ElementRef,
+  type ElementRef,
   HostListener,
-  OnDestroy,
-  OnInit,
-  QueryList,
+  type OnDestroy,
+  type OnInit,
+  type QueryList,
   ViewChild,
   ViewChildren,
   signal,
  } from '@angular/core';
-import { toSignal, toObservable } from '@angular/core/rxjs-interop';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import {
-  IUserFavoritesGroups,
-  EndpointModel,
+  type IUserFavoritesGroups,
+  type EndpointModel,
   entityCatalog,
-  AuthState,
+  type AuthState,
   RouterNav,
   AppState,
   UserFavoriteManager,
@@ -26,8 +26,8 @@ import {
   SetDashboardStateValueAction,
   stratosEntityCatalog,
 } from '@stratosui/store';
-import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { debounceTime, filter, first, map, startWith, switchMap, tap } from 'rxjs/operators';
+import { combineLatest, type Observable, of, type Subscription } from 'rxjs';
+import { debounceTime, filter, first, map, startWith, switchMap, } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../core/endpoints.service';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
@@ -66,7 +66,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   public allEndpointIds$: Observable<string[]>;
   public haveRegistered$: Observable<boolean>;
 
-  public endpoints$: Observable<any>;
+  public endpoints$: Observable<unknown>;
 
   public layouts$: Observable<HomePageCardLayout[]>;
 
@@ -179,7 +179,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
     // Only show endpoints that have Home Card metadata
     this.endpoints$ = combineLatest([combinedShowMode$, connected$, userFavoriteManager.getAllFavorites()]).pipe(
-      map(([showMode, endpoints, [favGroups, favs]]) => {
+      map(([showMode, endpoints, [favGroups, _favs]]) => {
         if (this.showAllEndpoints !== showMode) {
           this.showAllEndpoints = showMode;
           // Persist the state
@@ -195,7 +195,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
       })
     );
 
-    this.haveThingsToShow$ = this.endpoints$.pipe(map(eps => eps.length > 0), startWith(true));
+    this.haveThingsToShow$ = this.endpoints$.pipe(map(eps => (eps as EndpointModel[]).length > 0), startWith(true));
 
     // Set an initial layout
     this._layout.set(this.getLayout(1, 1));
@@ -211,8 +211,8 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
   ngOnInit() {
     const scroll$ = this.scrollDispatcher.scrolled().pipe(
-      map((e: any) => {
-        const el = e.elementRef.nativeElement;
+      map((e: unknown) => {
+        const el = (e as { elementRef: { nativeElement: HTMLElement } }).elementRef.nativeElement;
         return el.scrollTop;
       }),
       debounceTime(100), // Debounce scroll events
@@ -369,7 +369,9 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     const processed: Record<string, boolean> = {};
     const result: EndpointModel[] = [];
     const epMap: Record<string, EndpointModel> = {};
-    endpoints.forEach(ep => epMap[ep.guid] = ep);
+    endpoints.forEach(ep => {
+      epMap[ep.guid] = ep;
+    });
 
     Object.keys(favorites).forEach(fav => {
       if (!favorites[fav].ethereal) {

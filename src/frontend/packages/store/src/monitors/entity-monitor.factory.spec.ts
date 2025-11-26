@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestEntityCatalog } from '../entity-catalog/entity-catalog';
 import { EntityMonitorFactory } from './entity-monitor.factory.service';
-import { Store } from '@ngrx/store';
-import { AppState } from '../app-state';
+import type { Store } from '@ngrx/store';
+import type { AppState } from '../app-state';
 
 describe('EntityMonitor', () => {
   let service: EntityMonitorFactory;
-  let mockStore: any;
+  let mockStore: Partial<Store<AppState>>;
   let mockEntityCatalog: TestEntityCatalog;
 
   beforeEach(() => {

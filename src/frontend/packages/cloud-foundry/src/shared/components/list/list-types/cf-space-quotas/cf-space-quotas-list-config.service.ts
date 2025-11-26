@@ -1,21 +1,21 @@
-import { DatePipe } from '@angular/common';
+import type { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 
 import {
   CurrentUserPermissionsService,
   ConfirmationDialogConfig,
   ConfirmationDialogService,
-  ITableColumn,
-  IListAction,
+  type ITableColumn,
+  type IListAction,
   ListViewTypes,
 } from '@stratosui/core';
-import { RouterNav, APIResource } from '@stratosui/store';
+import { RouterNav, type APIResource, type GeneralEntityAppState } from '@stratosui/store';
 import { DeleteSpaceQuotaDefinition } from '../../../../../actions/quota-definitions.actions';
-import { IQuotaDefinition } from '../../../../../cf-api.types';
-import { CFAppState } from '../../../../../cf-app-state';
-import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
+import type { IQuotaDefinition } from '../../../../../cf-api.types';
+import type { CFAppState } from '../../../../../cf-app-state';
+import type { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { QUOTA_FROM_LIST } from '../cf-quotas/cf-quotas-list-config.service';
@@ -32,7 +32,7 @@ export class CfSpaceQuotasListConfigService extends BaseCfListConfig<APIResource
   canDelete: Observable<boolean>;
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     private datePipe: DatePipe,
     private confirmDialog: ConfirmationDialogService,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
@@ -101,7 +101,7 @@ export class CfSpaceQuotasListConfigService extends BaseCfListConfig<APIResource
 
   viewType = ListViewTypes.TABLE_ONLY;
   getColumns = () => this.columns;
-  getDataSource = () => this.dataSource;
+  getDataSource = () => this.dataSource as any;
   getSingleActions = () => [this.listActionEdit, this.listActionDelete];
 
   editSingleQuota = (item: APIResource<IQuotaDefinition>) => {

@@ -20,7 +20,7 @@ selector: 'app-table-cell-boolean-indicator',
     BooleanIndicatorComponent
   ]
 })
-export class TableCellBooleanIndicatorComponent<T = any> extends TableCellCustom<T, TableCellBooleanIndicatorComponentConfig<T>> {
+export class TableCellBooleanIndicatorComponent<T = unknown> extends TableCellCustom<T, TableCellBooleanIndicatorComponentConfig<T>> {
 
   constructor(private cdr: ChangeDetectorRef) {
     super();

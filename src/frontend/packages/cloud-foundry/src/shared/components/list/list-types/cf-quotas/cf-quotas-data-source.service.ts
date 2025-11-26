@@ -2,18 +2,19 @@ import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 
-import { ListDataSource, getDefaultRowState, IListConfig } from '@stratosui/core';
-import { getRowMetadata, endpointEntityType, APIResource } from '@stratosui/store';
+import { ListDataSource, getDefaultRowState, type IListConfig } from '@stratosui/core';
+import { getRowMetadata, endpointEntityType, type APIResource, type GeneralEntityAppState } from '@stratosui/store';
 import { GetQuotaDefinitions } from '../../../../../actions/quota-definitions.actions';
-import { CFAppState } from '../../../../../cf-app-state';
+import type { CFAppState } from '../../../../../cf-app-state';
+import type { IQuotaDefinition } from '../../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { quotaDefinitionEntityType } from '../../../../../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../../../entity-relations/entity-relations.types';
 
-export class CfQuotasDataSourceService extends ListDataSource<APIResource> {
+export class CfQuotasDataSourceService extends ListDataSource<APIResource<IQuotaDefinition>> {
 
-  constructor(store: Store<CFAppState>, cfGuid: string, listConfig?: IListConfig<APIResource>) {
+  constructor(store: Store<GeneralEntityAppState>, cfGuid: string, listConfig?: IListConfig<APIResource<IQuotaDefinition>>) {
     const quotaPaginationKey = createEntityRelationPaginationKey(endpointEntityType, cfGuid);
     const action = new GetQuotaDefinitions(quotaPaginationKey, cfGuid);
 

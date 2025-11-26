@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
@@ -21,7 +21,7 @@ class MockCloudFoundryCellService {
   cellId = 'cellId';
   cellMetric$ = observableOf(null);
   healthy$ = observableOf(null);
-  healthyMetricId = null;
+  healthyMetricId: string | null = null;
   cpus$ = observableOf(null);
   usageContainers$ = observableOf(null);
   remainingContainers$ = observableOf(null);

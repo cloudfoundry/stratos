@@ -1,13 +1,12 @@
 import { ChangeDetectionStrategy, Component  } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe, DatePipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
-import {
-  AppState,
-  ThemeService,
+import type {
   UserProfileInfo,
 } from '@stratosui/store';
-import { combineLatest, Observable } from 'rxjs';
+import { ThemeService, GeneralEntityAppState } from '@stratosui/store';
+import { combineLatest, type Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
@@ -28,6 +27,8 @@ import { AppChipsComponent } from '../../../shared/components/chips/chips.compon
   standalone: true,
   imports: [
     CommonModule,
+    AsyncPipe,
+    DatePipe,
     RouterModule,
     PageHeaderComponent,
     NoContentMessageComponent,
@@ -52,7 +53,7 @@ export class ProfileInfoComponent {
     public userService: UserService,
     public themeService: ThemeService,
     private currentUserPermissionsService: CurrentUserPermissionsService,
-    private store: Store<AppState>
+    private store: Store<GeneralEntityAppState>
   ) {
     this.isError$ = userProfileService.isError$;
     this.userProfile$ = userProfileService.userProfile$;

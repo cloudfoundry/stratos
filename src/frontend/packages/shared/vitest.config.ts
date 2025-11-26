@@ -1,6 +1,6 @@
 import { defineConfig } from 'vitest/config';
 import angular from '@analogjs/vite-plugin-angular';
-import { join } from 'path';
+import { join } from 'node:path';
 
 export default defineConfig({
   plugins: [angular()],
@@ -31,10 +31,6 @@ export default defineConfig({
     ],
     include: ['src/**/*.spec.ts'],
     exclude: ['node_modules', 'dist', 'out-tsc', '**/test-e2e/**', '**/e2e/**'],
-    // Fix for Angular 20 zoneless + Vitest circular dependency errors
-    teardown: {
-      destroyAfterEach: true,
-    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],

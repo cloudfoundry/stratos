@@ -11,7 +11,7 @@ function arraysAreEqual(a1: unknown[], a2: unknown[]): boolean {
       if (!arraysAreEqual(a1[i] as unknown[], a2[i] as unknown[])) {
         return false;
       }
-    } else if (typeof (a1[i] === 'object')) {
+    } else if (typeof a1[i] === 'object') {
       if (!objectsAreEqual(a1[i] as Record<string, unknown>, a2[i] as Record<string, unknown>)) {
         return false;
       }
@@ -27,7 +27,7 @@ function objectsAreEqual(src: Record<string, unknown>, dest: Record<string, unkn
     return false;
   }
 
-  Object.keys(src).forEach(key => {
+  for (const key of Object.keys(src)) {
     if (typeof (src[key]) !== typeof (dest[key])) {
       return false;
     } else if (src[key] === null && dest[key] === null) {
@@ -37,7 +37,7 @@ function objectsAreEqual(src: Record<string, unknown>, dest: Record<string, unkn
     } else if (typeof (src[key]) === 'object' && !objectsAreEqual(src[key] as Record<string, unknown>, dest[key] as Record<string, unknown>)) {
       return false;
     }
-  });
+  }
 
   return true;
 }

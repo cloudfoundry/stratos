@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule,FormBuilder } from '@angular/forms';
+import { type FormControl, type FormGroup, ReactiveFormsModule,} from '@angular/forms';
 
-import { FileInputComponent } from '../../../../../core/src/shared/components/file-input/file-input.component';
-import { EndpointAuthValues, IEndpointAuthComponent } from '../../../../../store/src/extension-types';
+import { FileInputComponent } from '@stratosui/core';
+import type { EndpointAuthValues, IEndpointAuthComponent } from '../../../../../store/src/extension-types';
 
 interface GKEAuthForm {
   gkeconfig: FormControl<string>;
@@ -16,13 +16,13 @@ interface GKEAuthForm {
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    FileInputComponent,
+    FileInputComponent
   ]
 })
 export class KubernetesGKEAuthFormComponent implements IEndpointAuthComponent {
   @Input() formGroup: FormGroup<GKEAuthForm>;
 
-  public getValues(values: EndpointAuthValues): EndpointAuthValues {
+  public getValues(_values: EndpointAuthValues): EndpointAuthValues {
     return {};
   }
 

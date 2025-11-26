@@ -1,10 +1,11 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component,
-  ComponentFactory,
+  type ComponentFactory,
   ComponentFactoryResolver,
-  ComponentRef,
-  OnDestroy,
-  OnInit,
+  type ComponentRef,
+  type OnDestroy,
+  type OnInit,
+  type Type,
   ViewChild,
   ViewContainerRef,
  } from '@angular/core';
@@ -25,6 +26,7 @@ import { CreateEndpointConnectComponent } from './create-endpoint-connect/create
   standalone: true,
   imports: [
     CommonModule,
+    AsyncPipe,
     PageHeaderComponent,
     SteppersComponent,
     StepComponent,
@@ -37,9 +39,9 @@ export class CreateEndpointComponent implements OnInit, OnDestroy {
 
   showConnectStep: boolean;
 
-  component: any;
+  component: unknown;
   @ViewChild('customComponentContainer', { read: ViewContainerRef, static: true }) customComponentContainer!: ViewContainerRef;
-  componentRef!: ComponentRef<any>;
+  componentRef!: ComponentRef<unknown>;
 
   constructor(
     activatedRoute: ActivatedRoute,
@@ -61,7 +63,7 @@ export class CreateEndpointComponent implements OnInit, OnDestroy {
       this.componentRef.destroy();
     }
     if (this.component) {
-      const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(this.component);
+      const factory: ComponentFactory<unknown> = this.resolver.resolveComponentFactory(this.component as Type<unknown>);
       this.componentRef = this.customComponentContainer.createComponent(factory);
     }
   }

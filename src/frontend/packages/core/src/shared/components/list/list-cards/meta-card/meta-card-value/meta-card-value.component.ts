@@ -10,5 +10,5 @@ import { ChangeDetectionStrategy, Component, TemplateRef, ViewChild } from '@ang
 })
 export class MetaCardValueComponent {
   @ViewChild(TemplateRef, { static: true })
-  content!: TemplateRef<any>;
+  content!: TemplateRef<unknown>;
 }

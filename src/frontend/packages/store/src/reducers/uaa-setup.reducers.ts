@@ -1,16 +1,20 @@
-import { SETUP_SUCCESS } from './../actions/setup.actions';
-import { UAASetupState } from '../types/uaa-setup.types';
+import type { Action } from '@ngrx/store';
+
+import { SETUP_SUCCESS, type SetupSuccess, type SetupFailed } from './../actions/setup.actions';
+import type { UAASetupState } from '../types/uaa-setup.types';
 import { SETUP_GET_SCOPES, SETUP_SAVE_CONFIG, SETUP_FAILED } from '../actions/setup.actions';
 
-const defaultState = {
-  payload: null as null,
+type UAASetupAction = Action | SetupSuccess | SetupFailed;
+
+const defaultState: UAASetupState = {
+  payload: null,
   setup: false,
   error: false,
   message: '',
   settingUp: false
 };
 
-export function uaaSetupReducer(state: UAASetupState = defaultState, action: any) {
+export function uaaSetupReducer(state: UAASetupState = defaultState, action: UAASetupAction): UAASetupState {
   switch (action.type) {
     case SETUP_GET_SCOPES:
     case SETUP_SAVE_CONFIG:
@@ -28,14 +32,14 @@ export function uaaSetupReducer(state: UAASetupState = defaultState, action: any
         setup: true,
         message: '',
         error: false,
-        payload: { ...state.payload, ...action.payload }
+        payload: { ...state.payload, ...(action as SetupSuccess).payload }
       };
     case SETUP_FAILED:
       return {
         ...state,
         settingUp: false,
         setup: false,
-        message: action.message,
+        message: (action as SetupFailed).message,
         error: true
       };
     default:

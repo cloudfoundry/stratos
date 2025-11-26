@@ -1,6 +1,6 @@
 
 import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
-import { StratosThemeService, ThemeMode } from '../../../../../theme/theme.service';
+import { StratosThemeService, type ThemeMode } from '../../../../../theme/theme.service';
 
 @Component({
   selector: 'app-theme-toggle',

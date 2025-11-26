@@ -1,7 +1,7 @@
-import { CreatePagination } from '../../actions/pagination.actions';
+import type { CreatePagination } from '../../actions/pagination.actions';
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
-import { EntityCatalogEntityConfig } from '../../entity-catalog/entity-catalog.types';
-import {
+import type { EntityCatalogEntityConfig } from '../../entity-catalog/entity-catalog.types';
+import type {
   PaginationEntityState,
   PaginationEntityTypeState,
   PaginationParam,
@@ -80,7 +80,7 @@ function mergeParamsSections(
 function mergePaginationSections(
   currentPagination: PaginationEntityState,
   seedPagination: PaginationEntityState,
-  defaultState: PaginationEntityState
+  _defaultState: PaginationEntityState
 ) {
   const seedClientPagination = spreadClientPagination(seedPagination?.clientPagination);
   const currentClientPagination = spreadClientPagination(currentPagination?.clientPagination);

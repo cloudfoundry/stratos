@@ -1,24 +1,24 @@
-import { DatePipe } from '@angular/common';
+import type { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import {
   createTableColumnFavorite,
-  ITableColumn,
+  type ITableColumn,
   defaultPaginationPageSizeOptionsTable,
-  IGlobalListAction,
-  IListAction,
-  IListConfig,
-  IListMultiFilterConfig,
-  IMultiListAction,
+  type IGlobalListAction,
+  type IListAction,
+  type IListConfig,
+  type IListMultiFilterConfig,
+  type IMultiListAction,
   ListViewTypes,
 } from '@stratosui/core';
-import { ListView, APIResource, UserFavorite } from '@stratosui/store';
-import { CFAppState } from '../../../../../cf-app-state';
+import { type ListView, type APIResource, UserFavorite, type GeneralEntityAppState } from '@stratosui/store';
+import type { CFAppState } from '../../../../../cf-app-state';
 import { applicationEntityType } from '../../../../../cf-entity-types';
-import { ISpaceFavMetadata } from '../../../../../cf-metadata-types';
-import { IApp } from '../../../../../cf-api.types';
-import { CloudFoundrySpaceService } from '../../../../../features/cf/services/cloud-foundry-space.service';
+import type { ISpaceFavMetadata } from '../../../../../cf-metadata-types';
+import type { IApp } from '../../../../../cf-api.types';
+import type { CloudFoundrySpaceService } from '../../../../../features/cf/services/cloud-foundry-space.service';
 import { TableCellAppNameComponent } from '../app/table-cell-app-name/table-cell-app-name.component';
 import { TableCellAppStatusComponent } from '../app/table-cell-app-status/table-cell-app-status.component';
 import { CfSpaceAppsDataSource } from './cf-space-apps-data-source.service';
@@ -58,14 +58,14 @@ export class CfSpaceAppsListConfigService implements IListConfig<APIResource<IAp
       columnId: 'instances',
       headerCell: () => 'Instances',
       cellDefinition: {
-        getValue: (row: APIResource) => `${row.entity.instances}`
+        getValue: (row: APIResource<IApp>) => `${row.entity.instances}`
       },
       cellFlex: '1'
     },
     {
       columnId: 'creation', headerCell: () => 'Creation Date',
       cellDefinition: {
-        getValue: (row: APIResource) => `${this.datePipe.transform(row.metadata.created_at, 'medium')}`
+        getValue: (row: APIResource<IApp>) => `${this.datePipe.transform(row.metadata.created_at, 'medium')}`
       },
       sort: {
         type: 'sort',
@@ -85,9 +85,8 @@ export class CfSpaceAppsListConfigService implements IListConfig<APIResource<IAp
   ]
 
   constructor(
-    private store: Store<CFAppState>,
-    private datePipe: DatePipe,
-    private cfSpaceService: CloudFoundrySpaceService
+    private store: Store<GeneralEntityAppState>,
+    private datePipe: DatePipe,cfSpaceService: CloudFoundrySpaceService
   ) {
     this.dataSource = new CfSpaceAppsDataSource(this.store, cfSpaceService, this);
   }
@@ -96,5 +95,5 @@ export class CfSpaceAppsListConfigService implements IListConfig<APIResource<IAp
   getMultiActions = (): IMultiListAction<APIResource<IApp>>[] => [];
   getSingleActions = (): IListAction<APIResource<IApp>>[] => [];
   getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
-  getDataSource = (): CfSpaceAppsDataSource => this.dataSource;
+  getDataSource = () => this.dataSource;
 }

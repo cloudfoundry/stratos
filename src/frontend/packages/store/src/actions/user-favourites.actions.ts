@@ -1,7 +1,7 @@
 import { STRATOS_ENDPOINT_TYPE, stratosEntityFactory, userFavouritesEntityType } from '../helpers/stratos-entity-factory';
-import { PaginatedAction } from '../types/pagination.types';
-import { EntityRequestAction } from '../types/request.types';
-import { IFavoriteMetadata, UserFavorite } from '../types/user-favorites.types';
+import type { PaginatedAction } from '../types/pagination.types';
+import type { EntityRequestAction } from '../types/request.types';
+import type { IFavoriteMetadata, UserFavorite } from '../types/user-favorites.types';
 
 abstract class BaseUserFavoritesAction implements EntityRequestAction {
   constructor(

@@ -1,4 +1,4 @@
-import { Schema, schema } from 'normalizr';
+import type { Schema, schema } from 'normalizr';
 
 import { EntitySchema } from '../../store/src/helpers/entity-schema';
 import {

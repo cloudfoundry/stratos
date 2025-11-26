@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
@@ -49,7 +49,7 @@ describe('ChartDetailsComponent', () => {
         { provide: MenuService },
         { provide: ActivatedRoute, useValue: {
           params: {
-            forEach: (fn: any) => fn({}),
+            forEach: (fn: (value: Record<string, unknown>) => void) => fn({}),
             subscribe: () => {}
           },
           snapshot: { params: {}, queryParams: {} }

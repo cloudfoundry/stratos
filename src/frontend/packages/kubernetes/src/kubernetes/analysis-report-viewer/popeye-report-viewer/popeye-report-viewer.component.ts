@@ -1,8 +1,22 @@
-import { ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
+import { ChangeDetectionStrategy, Component, type OnInit} from '@angular/core';
 
 
-import { AnalysisReport } from '../../store/kube.types';
-import { IReportViewer } from '../analysis-report-viewer.component';
+import type { AnalysisReport } from '../../store/kube.types';
+import type { IReportViewer } from '../analysis-report-viewer.component';
+
+interface PopeyeSanitizer {
+  issues?: Record<string, unknown[]>;
+  hide?: boolean;
+  groups?: Array<{ name: string; issues: unknown[] }>;
+}
+
+interface ProcessedPopeyeReport {
+  report: {
+    popeye: {
+      sanitizers: PopeyeSanitizer[];
+    };
+  };
+}
 
 @Component({
 changeDetection: ChangeDetectionStrategy.OnPush,
@@ -25,7 +39,7 @@ export class PopeyeReportViewerComponent implements OnInit, IReportViewer {
     const reportData = response.report as { popeye?: { sanitizers?: unknown[] } } | undefined;
     if (reportData?.popeye?.sanitizers) {
       // In order to supplement the sanitizers with extra properties need to create new obj (see spread below and `reduce`)
-      const processedResponse = {
+      const processedResponse: ProcessedPopeyeReport = {
         ...response,
         report: {
           ...reportData,
@@ -34,15 +48,15 @@ export class PopeyeReportViewerComponent implements OnInit, IReportViewer {
             sanitizers: reportData.popeye.sanitizers
           }
         }
-      } as any;
+      } as ProcessedPopeyeReport;
       // Make the response easier to render
-      processedResponse.report.popeye.sanitizers = (processedResponse.report.popeye.sanitizers || []).reduce((ss: any[], oldS: { issues?: Record<string, unknown[]> }) => {
-        const s: { issues?: Record<string, unknown[]>; hide?: boolean; groups?: Array<{ name: string; issues: unknown[] }> } = { ...oldS };
+      processedResponse.report.popeye.sanitizers = (processedResponse.report.popeye.sanitizers || []).reduce((ss: PopeyeSanitizer[], oldS: { issues?: Record<string, unknown[]> }) => {
+        const s: PopeyeSanitizer = { ...oldS };
         const groups: Array<{ name: string; issues: unknown[] }> = [];
         let totalIssues = 0;
         if (s.issues) {
           Object.keys(s.issues).forEach((key: string) => {
-            const issues = s.issues![key];
+            const issues = s.issues?.[key];
             totalIssues += issues.length;
             if (issues.length > 0) {
               groups.push({
@@ -58,7 +72,7 @@ export class PopeyeReportViewerComponent implements OnInit, IReportViewer {
         s.groups = groups;
         ss.push(s);
         return ss;
-      }, [] as any[]);
+      }, [] as PopeyeSanitizer[]);
 
       return processedResponse.report;
     }

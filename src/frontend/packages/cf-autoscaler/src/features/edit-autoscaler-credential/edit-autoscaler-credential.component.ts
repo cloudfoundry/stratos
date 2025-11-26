@@ -1,29 +1,28 @@
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, type OnDestroy, type OnInit } from '@angular/core';
+import { FormBuilder, type FormControl, type FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { TailwindSnackBarService, TailwindSnackBarRef } from '@stratosui/core';
+import { TailwindSnackBarService, type TailwindSnackBarRef } from '@stratosui/core';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, type Observable, type Subscription } from 'rxjs';
 import { delay, filter, first, map, pairwise, publishReplay, refCount, tap } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
-import { safeUnsubscribe } from '../../../../core/src/core/utils.service';
-import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';
-import { PageHeaderComponent } from '../../../../core/src/shared/components/page-header/page-header.component';
-import { AppState } from '../../../../store/src/app-state';
+import { safeUnsubscribe, ConfirmationDialogConfig, ConfirmationDialogService, PageHeaderComponent } from '@stratosui/core';
+import type { AppState } from '../../../../store/src/app-state';
 import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
-import { EntityService } from '../../../../store/src/entity-service';
+import type { EntityService } from '../../../../store/src/entity-service';
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
-import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
+import type { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { selectDeletionInfo } from '../../../../store/src/selectors/api.selectors';
+import type { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
+import type { IApp } from '../../../../cloud-foundry/src/cf-api.types';
 import {
   DeleteAppAutoscalerCredentialAction,
   UpdateAppAutoscalerCredentialAction,
 } from '../../store/app-autoscaler.actions';
-import { AppAutoscalerCredential } from '../../store/app-autoscaler.types';
+import type { AppAutoscalerCredential } from '../../store/app-autoscaler.types';
 
 interface AutoscalerCredentialForm {
   actype: FormControl<boolean>;
@@ -56,7 +55,7 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
   public appAutoscalerCredential$!: Observable<AppAutoscalerCredential>;
 
   private appAutoscalerCredentialErrorSub!: Subscription;
-  private appAutoscalerCredentialSnackBarRef!: TailwindSnackBarRef<any>;
+  private appAutoscalerCredentialSnackBarRef!: TailwindSnackBarRef<void>;
 
 
   private creating = new BehaviorSubject(false);
@@ -83,7 +82,7 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.applicationName$ = this.applicationService.app$.pipe(
-      map(({ entity }) => entity ? entity.entity.name : null),
+      map(({ entity }: EntityInfo<APIResource<IApp>>) => entity ? entity.entity.name : null),
       publishReplay(1),
       refCount()
     );
@@ -128,17 +127,17 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
       action,
     );
     this.appAutoscalerCredential$ = updateAppAutoscalerCredentialService.entityObs$.pipe(
-      filter(({ entity, entityRequestInfo }) => {
-        return entityRequestInfo && !entityRequestInfo.creating && !entityRequestInfo.deleting.busy;
+      filter((entityInfo: EntityInfo<APIResource<AppAutoscalerCredential>>) => {
+        return !!entityInfo.entityRequestInfo && !entityInfo.entityRequestInfo.creating && !entityInfo.entityRequestInfo.deleting.busy;
       }),
-      map(({ entity }) => entity ? entity.entity : null),
+      map((entityInfo: EntityInfo<APIResource<AppAutoscalerCredential>>) => entityInfo.entity ? entityInfo.entity.entity : null),
       map(creds => {
         if (!creds) {
           return;
         }
         return {
           ...creds,
-          authHeader: 'basic ' + btoa(`${creds.username}:${creds.password}`),
+          authHeader: `basic ${btoa(`${creds.username}:${creds.password}`)}`,
           fullUrl: `${creds.url}/v1/apps/${creds.app_id}/metrics`
         };
       }),

@@ -1,9 +1,10 @@
 import { Store } from '@ngrx/store';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { TableCellCustom } from '../../../../../../../core/src/shared/components/list/list.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { IApp } from '../../../../../cf-api.types';
+import type { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import type { GeneralEntityAppState } from '../../../../../../../store/src/app-state';
+import { TableCellCustom } from '@stratosui/core';
+import type { APIResource } from '../../../../../../../store/src/types/api.types';
+import type { IApp } from '../../../../../cf-api.types';
 import { CfOrgSpaceLabelService } from '../../../../services/cf-org-space-label.service';
 
 
@@ -11,7 +12,7 @@ export class TableCellAppCfOrgSpaceBase extends TableCellCustom<APIResource<IApp
 
   public cfOrgSpace!: CfOrgSpaceLabelService;
 
-  constructor(private store: Store<CFAppState>) {
+  constructor(private store: Store<GeneralEntityAppState>) {
     super();
   }
 

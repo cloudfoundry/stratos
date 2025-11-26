@@ -1,30 +1,32 @@
-import { DatePipe } from '@angular/common';
+import type { DatePipe } from '@angular/common';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { ITableColumn, ITableText } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
+import type { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import { ConfirmationDialogConfig } from '@stratosui/core';
+import type { ConfirmationDialogService } from '@stratosui/core';
+import type { ITableColumn, ITableText } from '@stratosui/core';
 import {
   defaultPaginationPageSizeOptionsTable,
-  IGlobalListAction,
-  IListAction,
-  IListConfig,
-  IListMultiFilterConfig,
-  IMultiListAction,
+  type IGlobalListAction,
+  type IListAction,
+  type IListConfig,
+  type IListMultiFilterConfig,
+  type IMultiListAction,
   ListViewTypes,
-} from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+} from '@stratosui/core';
+import type { APIResource } from '../../../../../../../store/src/types/api.types';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import {
   TableCellRouteAppsAttachedComponent,
 } from '../cf-routes/table-cell-route-apps-attached/table-cell-route-apps-attached.component';
 import { TableCellRouteComponent } from '../cf-routes/table-cell-route/table-cell-route.component';
 import { TableCellTCPRouteComponent } from '../cf-routes/table-cell-tcproute/table-cell-tcproute.component';
-import { CfRoutesDataSourceBase, ListCfRoute } from './cf-routes-data-source-base';
+import type { CfRoutesDataSourceBase, ListCfRoute } from './cf-routes-data-source-base';
 
+// Re-export ListCfRoute so it can be imported by consumers of this module
+export type { ListCfRoute };
 
 export abstract class CfRoutesListConfigBase implements IListConfig<APIResource> {
 
@@ -34,7 +36,7 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
 
   abstract getDataSource: () => CfRoutesDataSourceBase;
   getGlobalActions: () => IGlobalListAction<APIResource>[];
-  getMultiActions: () => IMultiListAction<APIResource<any>>[];
+  getMultiActions: () => IMultiListAction<APIResource<ListCfRoute>>[];
   getSingleActions: () => IListAction<APIResource<ListCfRoute>>[];
 
   columns: Array<ITableColumn<APIResource>> = [
@@ -127,8 +129,8 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
     label: 'Unmap',
     description: 'Unmap route',
     createVisible: this.canEditRoute,
-    createEnabled: (row$: Observable<APIResource>) => row$.pipe(
-      map(row => !!(row && row.entity && row.entity.apps && row.entity.apps.length))
+    createEnabled: (row$: Observable<APIResource<ListCfRoute>>) => row$.pipe(
+      map(row => !!(row?.entity?.apps?.length))
     )
   };
 
@@ -158,7 +160,7 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
   private deleteSingleRoute(item: APIResource<ListCfRoute>): void {
     const confirmation = new ConfirmationDialogConfig(
       'Delete Route',
-      `Are you sure you want to delete the route \n\'${item.entity.url}\'?`,
+      `Are you sure you want to delete the route \n'${item.entity.url}'?`,
       'Delete',
       true
     );
@@ -175,20 +177,22 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
       `Delete ${items.length}`
     );
     this.confirmDialog.open(confirmation, () => {
-      items.forEach(item => this.dispatchDeleteAction(item));
+      for (const item of items) {
+        this.dispatchDeleteAction(item);
+      }
       this.getDataSource().selectClear();
     });
   }
 
   // If the data source only caters for a single app ensure we update that app alone
   private getSingleOrMultiAppGuids = (route: APIResource<ListCfRoute>): string[] =>
-    !!this.getDataSource().appGuid ? [this.getDataSource().appGuid] : route.entity.apps.map(app => app.metadata.guid)
+    this.getDataSource().appGuid ? [this.getDataSource().appGuid] : route.entity.apps.map(app => app.metadata.guid)
 
   private unmapSingleRoute(item: APIResource<ListCfRoute>): void {
-    const appText = !!this.getDataSource().appGuid ? '' : ` from ${item.entity.apps.length} application/s`;
+    const appText = this.getDataSource().appGuid ? '' : ` from ${item.entity.apps.length} application/s`;
     const confirmation = new ConfirmationDialogConfig(
       'Unmap Route',
-      `Are you sure you want to unmap the route \'${item.entity.url}\'${appText}?`,
+      `Are you sure you want to unmap the route '${item.entity.url}'${appText}?`,
       'Unmap',
       true
     );
@@ -199,7 +203,7 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
   }
 
   private unmapMultipleRoutes(items: APIResource<ListCfRoute>[]): void {
-    const appText = !!this.getDataSource().appGuid ? '' : ' from multiple applications';
+    const appText = this.getDataSource().appGuid ? '' : ' from multiple applications';
     const confirmation = new ConfirmationDialogConfig(
       'Unmap Routes',
       `Are you sure you want to unmap ${items.length} routes${appText}?`,
@@ -207,7 +211,9 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
       true
     );
     this.confirmDialog.open(confirmation, () => {
-      items.forEach(item => this.dispatchUnmapAction(item.metadata.guid, this.getSingleOrMultiAppGuids(item)));
+      for (const item of items) {
+        this.dispatchUnmapAction(item.metadata.guid, this.getSingleOrMultiAppGuids(item));
+      }
       this.getDataSource().selectClear();
     });
   }
@@ -223,8 +229,7 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
    * @param [canEditSpace$] User can edit space?
    * @param [removeEntityOnUnmap=false] On unmap remove the entity from the list
    */
-  constructor(
-    private store: Store<CFAppState>,
+  constructor(_store: Store,
     private confirmDialog: ConfirmationDialogService,
     private cfGuid: string,
     private datePipe: DatePipe,

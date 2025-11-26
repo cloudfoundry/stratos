@@ -1,13 +1,13 @@
 import { Store } from '@ngrx/store';
-import { getRowMetadata, APIResource } from '@stratosui/store';
-import { ListDataSource, IListConfig } from '@stratosui/core';
-import { CFAppState, organizationEntityType, spaceEntityType, spaceQuotaEntityType, createEntityRelationPaginationKey } from '@stratosui/cloud-foundry';
+import { getRowMetadata, type APIResource, type GeneralEntityAppState } from '@stratosui/store';
+import { ListDataSource, type IListConfig } from '@stratosui/core';
+import { type CFAppState, organizationEntityType, spaceEntityType, spaceQuotaEntityType, createEntityRelationPaginationKey } from '@stratosui/cloud-foundry';
 import { createEntityRelationKey } from '../../../../../entity-relations/entity-relations.types';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 
 export class CfSpacesDataSourceService extends ListDataSource<APIResource> {
-  constructor(cfGuid: string, orgGuid: string, store: Store<CFAppState>, listConfig?: IListConfig<APIResource>) {
+  constructor(cfGuid: string, orgGuid: string, store: Store<GeneralEntityAppState>, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(organizationEntityType, orgGuid);
     const action = cfEntityCatalog.space.actions.getAllInOrganization(orgGuid, cfGuid, paginationKey, {
       includeRelations: [

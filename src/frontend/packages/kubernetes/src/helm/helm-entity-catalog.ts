@@ -1,14 +1,14 @@
-import {
+import type {
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
 } from '../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
-import {
+import type { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
+import type {
   HelmChartActionBuilders,
   HelmChartVersionsActionBuilders,
   HelmVersionActionBuilders,
 } from './store/helm.action-builders';
-import { HelmVersion, MonocularChart, MonocularVersion } from './store/helm.types';
+import type { HelmVersion, MonocularChart, MonocularVersion } from './store/helm.types';
 
 /**
  * A strongly typed collection of Helm Catalog Entities.

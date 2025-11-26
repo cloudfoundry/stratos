@@ -1,9 +1,9 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BehaviorSubject, of } from 'rxjs';
 import { STORE_TEST_PROVIDERS, BaseTestModulesNoShared } from '@test-framework/core-test.helper';
-import { IFavoriteMetadata, UserFavorite, UserFavoriteManager } from '@stratosui/store';
+import { type IFavoriteMetadata, UserFavorite, UserFavoriteManager } from '@stratosui/store';
 import { ConfirmationDialogService } from '../../shared/components/confirmation-dialog.service';
 import { DialogConfirmComponent } from '../../shared/components/dialog-confirm/dialog-confirm.component';
 import { SessionService } from '../../shared/services/session.service';

@@ -1,8 +1,8 @@
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Inject, OnDestroy, signal, Injector  } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, Inject, type OnDestroy, signal, Injector  } from '@angular/core';
 import { AppProgressBarComponent } from '../../../shared/components/progress-bar/app-progress-bar.component';
 import { MAT_DIALOG_DATA, TailwindDialogRef } from '../../../shared/services/tailwind-dialog.service';
-import { Observable, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import { delay, first, startWith } from 'rxjs/operators';
 import { toObservable } from '@angular/core/rxjs-interop';
 

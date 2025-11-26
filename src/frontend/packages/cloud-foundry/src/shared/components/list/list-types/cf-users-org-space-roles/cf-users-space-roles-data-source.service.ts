@@ -1,24 +1,24 @@
 import { Store } from '@ngrx/store';
-import { getRowMetadata } from '@stratosui/store';
+import { getRowMetadata, type GeneralEntityAppState } from '@stratosui/store';
 
 import { GetAllOrganizationSpacesWithOrgs } from '../../../../../../../cloud-foundry/src/actions/organization.actions';
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import type { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   cfUserEntityType,
   organizationEntityType,
   spaceEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationKey } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import {
+import type {
   CurrentUserPermissionsService,
-} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
+} from '@stratosui/core';
 import {
   ListDataSource,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
-import { ISpace } from '../../../../../cf-api.types';
+} from '@stratosui/core';
+import type { IListConfig } from '@stratosui/core';
+import type { APIResource } from '../../../../../../../store/src/types/api.types';
+import type { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
+import type { ISpace } from '../../../../../cf-api.types';
 import { CfRolesService } from '../../../../../features/cf/users/manage-users/cf-roles.service';
 
 export class CfUsersSpaceRolesDataSourceService extends ListDataSource<APIResource<ISpace>> {
@@ -27,11 +27,11 @@ export class CfUsersSpaceRolesDataSourceService extends ListDataSource<APIResour
     cfGuid: string,
     orgGuid: string,
     spaceGuid: string,
-    store: Store<CFAppState>,
+    store: Store<GeneralEntityAppState>,
     userPerms: CurrentUserPermissionsService,
-    listConfig?: IListConfig<APIResource>
+    listConfig?: IListConfig<APIResource<ISpace>>
   ) {
-    const paginationKey = cfUserEntityType + '-' + orgGuid;
+    const paginationKey = `${cfUserEntityType}-${orgGuid}`;
     const action = new GetAllOrganizationSpacesWithOrgs(
       paginationKey,
       orgGuid,
@@ -51,7 +51,7 @@ export class CfUsersSpaceRolesDataSourceService extends ListDataSource<APIResour
           type: 'filter',
           field: 'entity.name'
         },
-        (entities: APIResource[], paginationState: PaginationEntityState) => {
+        (entities: APIResource<ISpace>[], _paginationState: PaginationEntityState) => {
           return entities.filter(e => {
             const validSpace = !(spaceGuid && spaceGuid !== e.metadata.guid);
             return validSpace;

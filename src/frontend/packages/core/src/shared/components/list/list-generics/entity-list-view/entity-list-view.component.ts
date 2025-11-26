@@ -1,8 +1,9 @@
-import { Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
+import type { GeneralEntityAppState } from '@stratosui/store';
 
-import { ListEntityConfig } from '../helpers/action-or-config-helpers';
-import { ListConfigProvider } from '../list-config-provider.types';
+import type { ListEntityConfig } from '../helpers/action-or-config-helpers';
+import type { ListConfigProvider } from '../list-config-provider.types';
 import { EntityConfigListConfigProvider } from '../list-providers/entity-config-list-config-provider';
 import { ListViewComponent } from '../list-view/list-view.component';
 
@@ -22,7 +23,7 @@ export class EntityListViewComponent implements OnInit {
 
   provider!: ListConfigProvider;
 
-  private store = inject(Store<any>);
+  private store = inject(Store<GeneralEntityAppState>);
 
   ngOnInit() {
     this.provider = new EntityConfigListConfigProvider(this.store, this.config);

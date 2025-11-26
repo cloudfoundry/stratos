@@ -1,11 +1,11 @@
 import { AsyncPipe } from '@angular/common';
-import {Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { Observable } from 'rxjs';
+import {Component, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom } from '@stratosui/core';
 import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
-import { KubernetesNamespace } from '../../../store/kube.types';
+import type { KubernetesNamespace } from '../../../store/kube.types';
 
 @Component({
   selector: 'app-kube-namespace-pod-count',

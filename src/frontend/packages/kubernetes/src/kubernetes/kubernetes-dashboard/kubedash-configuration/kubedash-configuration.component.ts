@@ -1,20 +1,23 @@
 import { HttpClient } from '@angular/common/http';
-import {Component, OnDestroy, signal, inject, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {Component, type OnDestroy, signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Observable, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map } from 'rxjs/operators';
-import { BooleanIndicatorComponent, MetadataItemComponent, CardProgressOverlayComponent } from '@stratosui/core';
-
-import { ConfirmationDialogConfig } from '../../../../../core/src/shared/components/confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
-import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
-import { PageHeaderModule } from '../../../../../core/src/shared/components/page-header/page-header.module';
-import { ProductNameComponent } from '../../../../../core/src/shared/components/product-name.ccomponent';
+import {
+  BooleanIndicatorComponent,
+  CardProgressOverlayComponent,
+  ConfirmationDialogConfig,
+  ConfirmationDialogService,
+  type IHeaderBreadcrumb,
+  MetadataItemComponent,
+  PageHeaderComponent,
+  ProductNameComponent
+} from '@stratosui/core';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { KubernetesService } from '../../services/kubernetes.service';
-import { KubeDashboardStatus } from '../../store/kubernetes.effects';
+import type { KubeDashboardStatus } from '../../store/kubernetes.effects';
 
 type MessageUpdater = (msg: string) => void;
 
@@ -30,7 +33,7 @@ type MessageUpdater = (msg: string) => void;
     BooleanIndicatorComponent,
     MetadataItemComponent,
     CardProgressOverlayComponent,
-    PageHeaderModule,
+    PageHeaderComponent,
     ProductNameComponent
   ],
   providers: [
@@ -153,7 +156,9 @@ export class KubedashConfigurationComponent implements OnDestroy {
       'Creating Service Account ...',
       'Service Account created', 'An error occurred creating the Service Account',
       this.serviceAccountBusy,
-      (msg) => this.serviceAccountMsg = msg
+      (msg) => {
+        this.serviceAccountMsg = msg;
+      }
     );
   }
 
@@ -168,7 +173,9 @@ export class KubedashConfigurationComponent implements OnDestroy {
       'Deleting Service Account ...',
       'Service Account deleted',
       'An error occurred deleting the Service Account', this.serviceAccountBusy,
-      (msg => this.serviceAccountMsg = msg));
+      (msg) => {
+        this.serviceAccountMsg = msg;
+      });
   }
 
   public installDashboard() {
@@ -183,7 +190,9 @@ export class KubedashConfigurationComponent implements OnDestroy {
       'Installing Kubernetes Dashboard ...',
       'Kubernetes Dashboard installed', 'An error occurred installing the Kubernetes Dashboard',
       this.dashboardUIBusy,
-      (msg) => this.dashboardUIMsg = msg
+      (msg) => {
+        this.dashboardUIMsg = msg;
+      }
     );
   }
 
@@ -199,7 +208,9 @@ export class KubedashConfigurationComponent implements OnDestroy {
       'Deleting Kubernetes Dashboard ...',
       'Kubernetes Dashboard deleted', 'An error occurred deleting the Kubernetes Dashboard',
       this.dashboardUIBusy,
-      (msg) => this.dashboardUIMsg = msg
+      (msg) => {
+        this.dashboardUIMsg = msg;
+      }
     );
   }
 
@@ -213,7 +224,7 @@ export class KubedashConfigurationComponent implements OnDestroy {
     msgUpdater: MessageUpdater) {
     const guid = this.kubeEndpointService.kubeGuid;
     const url = `/pp/v1/kubedash/${guid}/${op}`;
-    let obs;
+    let obs: import('rxjs').Observable<Object>;
     msgUpdater(busyMsg);
     busy.set(true);
     this.isBusy.set(true);
@@ -233,7 +244,7 @@ export class KubedashConfigurationComponent implements OnDestroy {
       this.refresh();
     }, (e) => {
       let msg = errorMsg;
-      if (e && e.error && e.error.error) {
+      if (e?.error?.error) {
         msg = e.error.error;
       }
       console.error(msg); // Replace with proper notification system if needed

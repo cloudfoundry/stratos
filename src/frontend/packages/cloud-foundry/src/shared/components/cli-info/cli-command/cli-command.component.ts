@@ -14,8 +14,6 @@ import { CodeBlockComponent } from '@stratosui/core';
 })
 export class CliCommandComponent {
 
-  constructor() { }
-
   @Input() name!: string;
   @Input() msg!: string;
   @Input() syntax!: string;

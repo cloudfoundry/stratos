@@ -1,11 +1,12 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { Component, type OnDestroy, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import { filter, first, tap } from 'rxjs/operators';
+import type { GeneralEntityAppState } from '@stratosui/store';
 
 import { PageHeaderComponent, StepComponent, SteppersComponent } from '@stratosui/core';
-import { CFAppState } from '@stratosui/cloud-foundry';
+import type { CFAppState } from '@stratosui/cloud-foundry';
 import { applicationEntityType } from '../../../cf-entity-types';
 import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { CreateApplicationStep1Component } from '../../../shared/components/create-application/create-application-step1/create-application-step1.component';
@@ -35,7 +36,7 @@ export class CreateApplicationComponent implements OnInit, OnDestroy {
 
   paginationStateSub?: Subscription;
 
-  private store = inject(Store<CFAppState>);
+  private store = inject(Store<GeneralEntityAppState>);
   public cfOrgSpaceService = inject(CfOrgSpaceDataService);
 
   ngOnInit() {
@@ -45,7 +46,7 @@ export class CreateApplicationComponent implements OnInit, OnDestroy {
     // With new tools (set initial/enable auto) this should be easier to fix
     const appWallPaginationState = this.store.select(selectCfPaginationState(applicationEntityType, CfAppsDataSource.paginationKey));
     this.paginationStateSub = appWallPaginationState.pipe(filter(pag => !!pag), first(), tap(pag => {
-      const { cf, org, space } = pag.clientPagination.filter.items;
+      const { cf, org, space } = pag.clientPagination.filter.items as { cf?: string; org?: string; space?: string };
       if (cf) {
         this.cfOrgSpaceService.cf.select.next(cf);
       }

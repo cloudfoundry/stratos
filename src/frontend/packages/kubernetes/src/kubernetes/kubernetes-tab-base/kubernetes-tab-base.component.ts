@@ -1,19 +1,20 @@
-import { CommonModule } from '@angular/common';
-import {Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import {Component, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { first, map, startWith } from 'rxjs/operators';
 
 import { PageHeaderComponent } from '@stratosui/core';
 import { LoadingPageComponent } from '@stratosui/core';
-import { StratosBaseCatalogEntity } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { UserFavoriteEndpoint } from '../../../../store/src/types/user-favorites.types';
+import type { EndpointModel, EntityInfo } from '@stratosui/store';
+import type { StratosBaseCatalogEntity } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import type { UserFavoriteEndpoint } from '../../../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../../../store/src/user-favorite-manager';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { KubernetesAnalysisService } from '../services/kubernetes.analysis.service';
 import { KubernetesService } from '../services/kubernetes.service';
-import { KubeResourceEntityDefinition } from '../store/kube.types';
+import type { KubeResourceEntityDefinition } from '../store/kube.types';
 import { kubeEntityCatalog } from './../kubernetes-entity-generator';
 
 @Component({
@@ -54,7 +55,6 @@ export class KubernetesTabBaseComponent implements OnInit {
   public endpointIds$: Observable<string[]>;  public kubeEndpointService = inject(KubernetesEndpointService);
   public userFavoriteManager = inject(UserFavoriteManager);
   public analysisService = inject(KubernetesAnalysisService);
-  private route = inject(ActivatedRoute);
 
 
 
@@ -99,15 +99,15 @@ export class KubernetesTabBaseComponent implements OnInit {
 
   ngOnInit() {
     this.isFetching$ = this.kubeEndpointService.endpoint$.pipe(
-      map((endpoint: any) => !endpoint),
+      map((endpoint: EntityInfo<EndpointModel>) => !endpoint),
       startWith(true)
     );
     this.favorite$ = this.kubeEndpointService.endpoint$.pipe(
       first(),
-      map((endpoint: any) => this.userFavoriteManager.getFavoriteEndpointFromEntity(endpoint.entity))
+      map((endpoint: EntityInfo<EndpointModel>) => this.userFavoriteManager.getFavoriteEndpointFromEntity(endpoint.entity))
     );
     this.endpointIds$ = this.kubeEndpointService.endpoint$.pipe(
-      map((endpoint: any) => [endpoint.entity.guid])
+      map((endpoint: EntityInfo<EndpointModel>) => [endpoint.entity.guid])
     );
   }
 }

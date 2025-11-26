@@ -174,7 +174,7 @@ export { recentlyVisitedSelector } from './selectors/recently-visitied.selectors
 export type { IRouterNavPayload, RouterQueryParams } from './actions/router.actions';
 export { RouterNav } from './actions/router.actions';
 export { PaginationMonitorFactory } from './monitors/pagination-monitor.factory';
-export type { EndpointAuthTypeConfig, EndpointType, IAuthForm, IEndpointAuthComponent } from './extension-types';
+export type { EndpointAuthTypeConfig, EndpointType, IAuthForm, IEndpointAuthComponent, EndpointAuthValues } from './extension-types';
 export {
   connectedEndpointsSelector,
   connectedEndpointsOfTypesSelector,
@@ -195,9 +195,10 @@ export {
   EndpointHealthCheck,
 } from './entity-catalog/entity-catalog.types';
 export { EntityService, isEntityBlocked } from './entity-service';
-export type { APIResource, EntityInfo, NormalizedResponse } from './types/api.types';
+export type { APIResource, APIResourceMetadata, EntityInfo, NormalizedResponse, NormalizedResponseEntities, ActionMergeFunction } from './types/api.types';
+export { createPartialAPIResource } from './types/api.types';
 export { getFullEndpointApiUrl } from './endpoint-utils';
-export type { PaginatedAction, BasePaginatedAction, PaginationClientFilter, PaginationParam } from './types/pagination.types';
+export type { PaginatedAction, BasePaginatedAction, PaginationClientFilter, PaginationParam, PaginationState } from './types/pagination.types';
 export { PaginationEntityState, isPaginatedAction } from './types/pagination.types';
 export { MAX_RECENT_COUNT } from './reducers/current-user-roles-reducer/recently-visited.reducer.helpers';
 export type { ActionState, RequestInfoState } from './reducers/api-request-reducer/types';
@@ -230,6 +231,7 @@ export {
 } from './selectors/current-user-role.selectors';
 export type { SessionData } from './types/auth.types';
 export { APIKeysEnabled, UserEndpointsEnabled } from './types/auth.types';
+export { systemInfoEntityType } from './helpers/stratos-entity-factory';
 export type { RouterRedirect } from './reducers/routing.reducer';
 export type { LocalAdminSetupData, UAASetupState } from './types/uaa-setup.types';
 export { GetAllApiKeys } from './actions/apiKey.actions';
@@ -240,6 +242,8 @@ export { EntitySchema } from './helpers/entity-schema';
 export type {
   ChartSeries,
   IMetricMatrixResult,
+  IMetricVectorResult,
+  IMetricSample,
   IMetrics,
   IMetricsData,
   MetricsFilterSeries,

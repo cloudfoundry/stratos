@@ -1,21 +1,23 @@
-import { NgZone } from '@angular/core';
+import type { NgZone } from '@angular/core';
 import { getTime, subMinutes } from 'date-fns';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, map, share, startWith } from 'rxjs/operators';
 
 import {
   InternalEventSeverity,
-  InternalEventsState,
-  InternalEventState,
-  InternalEventSubjectState,
+  type InternalEventsState,
+  type InternalEventState,
+  type InternalEventSubjectState,
 } from '../types/internal-events.types';
 
 export function newNonAngularInterval(ngZone: NgZone, intervalTime: number) {
   return new Observable<number>((observer) => {
-    let intervalTimer: any;
+    let intervalTimer: ReturnType<typeof setInterval> | undefined;
     let counter = 0;
     observer.add(() => {
-      clearInterval(intervalTimer);
+      if (intervalTimer) {
+        clearInterval(intervalTimer);
+      }
       counter = 0;
     });
     // Start the interval timer outside of angular

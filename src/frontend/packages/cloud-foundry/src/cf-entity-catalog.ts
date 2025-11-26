@@ -1,10 +1,10 @@
-import {
+import type {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
   APIResource,
   IFavoriteMetadata
 } from '@stratosui/store';
-import {
+import type {
   IService,
   IServiceBinding,
   IServiceBroker,
@@ -13,7 +13,7 @@ import {
   IServicePlanVisibility,
   IUserProvidedServiceInstance,
 } from './cf-api-svc.types';
-import {
+import type {
   CfEvent,
   IApp,
   IAppSummary,
@@ -30,33 +30,33 @@ import {
   ISpaceQuotaDefinition,
   IStack,
 } from './cf-api.types';
-import { ISpaceFavMetadata } from './cf-metadata-types';
-import { AppEnvVarActionBuilders } from './entity-action-builders/application-env-var.action-builders';
-import { AppStatsActionBuilders } from './entity-action-builders/application-stats.action-builders';
-import { AppSummaryActionBuilders } from './entity-action-builders/application-summary.action-builders';
-import { ApplicationActionBuilders } from './entity-action-builders/application.action-builders';
-import { BuildpackActionBuilders } from './entity-action-builders/buildpack.action-builders';
-import { CfEventActionBuilders } from './entity-action-builders/cf-event.action-builders';
-import { CfInfoDefinitionActionBuilders } from './entity-action-builders/cf-info.action-builders';
-import { DomainActionBuilders } from './entity-action-builders/domin.action-builder';
-import { FeatureFlagActionBuilders } from './entity-action-builders/feature-flag.action-builder';
-import { OrganizationActionBuilders } from './entity-action-builders/organization.action-builders';
-import { QuotaDefinitionActionBuilder } from './entity-action-builders/quota-definition.action-builders';
-import { RoutesActionBuilders } from './entity-action-builders/routes.action-builder';
-import { SecurityGroupBuilders } from './entity-action-builders/security-groups.action-builder';
-import { ServiceBindingActionBuilders } from './entity-action-builders/service-binding.action-builders';
-import { ServiceBrokerActionBuilders } from './entity-action-builders/service-broker.entity-builders';
-import { ServiceInstanceActionBuilders } from './entity-action-builders/service-instance.action.builders';
-import { ServicePlanVisibilityActionBuilders } from './entity-action-builders/service-plan-visibility.action-builders';
-import { ServicePlanActionBuilders } from './entity-action-builders/service-plan.action-builders';
-import { ServiceActionBuilders } from './entity-action-builders/service.entity-builders';
-import { SpaceQuotaDefinitionActionBuilders } from './entity-action-builders/space-quota.action-builders';
-import { SpaceActionBuilders } from './entity-action-builders/space.action-builders';
-import { StackActionBuilders } from './entity-action-builders/stack-action-builders';
-import { UserProvidedServiceActionBuilder } from './entity-action-builders/user-provided-service.action-builders';
-import { UserActionBuilders } from './entity-action-builders/user.action-builders';
-import { AppStat } from './store/types/app-metadata.types';
-import { CfUser } from './store/types/cf-user.types';
+import type { ISpaceFavMetadata } from './cf-metadata-types';
+import type { AppEnvVarActionBuilders } from './entity-action-builders/application-env-var.action-builders';
+import type { AppStatsActionBuilders } from './entity-action-builders/application-stats.action-builders';
+import type { AppSummaryActionBuilders } from './entity-action-builders/application-summary.action-builders';
+import type { ApplicationActionBuilders } from './entity-action-builders/application.action-builders';
+import type { BuildpackActionBuilders } from './entity-action-builders/buildpack.action-builders';
+import type { CfEventActionBuilders } from './entity-action-builders/cf-event.action-builders';
+import type { CfInfoDefinitionActionBuilders } from './entity-action-builders/cf-info.action-builders';
+import type { DomainActionBuilders } from './entity-action-builders/domin.action-builder';
+import type { FeatureFlagActionBuilders } from './entity-action-builders/feature-flag.action-builder';
+import type { OrganizationActionBuilders } from './entity-action-builders/organization.action-builders';
+import type { QuotaDefinitionActionBuilder } from './entity-action-builders/quota-definition.action-builders';
+import type { RoutesActionBuilders } from './entity-action-builders/routes.action-builder';
+import type { SecurityGroupBuilders } from './entity-action-builders/security-groups.action-builder';
+import type { ServiceBindingActionBuilders } from './entity-action-builders/service-binding.action-builders';
+import type { ServiceBrokerActionBuilders } from './entity-action-builders/service-broker.entity-builders';
+import type { ServiceInstanceActionBuilders } from './entity-action-builders/service-instance.action.builders';
+import type { ServicePlanVisibilityActionBuilders } from './entity-action-builders/service-plan-visibility.action-builders';
+import type { ServicePlanActionBuilders } from './entity-action-builders/service-plan.action-builders';
+import type { ServiceActionBuilders } from './entity-action-builders/service.entity-builders';
+import type { SpaceQuotaDefinitionActionBuilders } from './entity-action-builders/space-quota.action-builders';
+import type { SpaceActionBuilders } from './entity-action-builders/space.action-builders';
+import type { StackActionBuilders } from './entity-action-builders/stack-action-builders';
+import type { UserProvidedServiceActionBuilder } from './entity-action-builders/user-provided-service.action-builders';
+import type { UserActionBuilders } from './entity-action-builders/user.action-builders';
+import type { AppStat } from './store/types/app-metadata.types';
+import type { CfUser } from './store/types/cf-user.types';
 
 /**
  * A strongly typed collection of Cloud Foundry Catalog Entities.

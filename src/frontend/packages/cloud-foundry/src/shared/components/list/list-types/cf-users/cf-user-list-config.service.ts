@@ -1,15 +1,15 @@
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
+import { BehaviorSubject, combineLatest, type Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, switchMap, tap } from 'rxjs/operators';
 
-import { CFAppState } from '@stratosui/cloud-foundry';
-import { CurrentUserPermissionsService, ITableColumn, ITableText, IListAction, IListMultiFilterConfig, IMultiListAction, ListConfig, ListViewTypes } from '@stratosui/core';
-import { SetClientFilter, entityCatalog, selectPaginationState, APIResource, EntityInfo, PaginatedAction } from '@stratosui/store';
-import { IOrganization, ISpace } from '../../../../../cf-api.types';
+import type { CFAppState } from '@stratosui/cloud-foundry';
+import { CurrentUserPermissionsService, type ITableColumn, type ITableText, type IListAction, type IListMultiFilterConfig, type IMultiListAction, ListConfig, ListViewTypes } from '@stratosui/core';
+import { SetClientFilter, entityCatalog, selectPaginationState, type APIResource, type EntityInfo, type PaginatedAction, type GeneralEntityAppState } from '@stratosui/store';
+import type { IOrganization, ISpace } from '../../../../../cf-api.types';
 import { UsersRolesSetUsers } from '../../../../../actions/users-roles.actions';
 import { GetAllCfUsersAsAdmin } from '../../../../../actions/users.actions';
-import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
+import type { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
 import {
   canUpdateOrgSpaceRoles,
   createCfOrgSpaceSteppersUrl,
@@ -19,9 +19,9 @@ import {
   hasSpaceRoleWithinOrg,
   waitForCFPermissions,
 } from '../../../../../features/cf/cf.helpers';
-import { CfUser } from '../../../../../store/types/cf-user.types';
+import type { CfUser } from '../../../../../store/types/cf-user.types';
 import { CfUserPermissionsChecker } from '../../../../../user-permissions/cf-user-permissions-checkers';
-import { CfUserService } from './../../../../data-services/cf-user.service';
+import type { CfUserService } from './../../../../data-services/cf-user.service';
 import { CfOrgPermissionCellComponent } from './cf-org-permission-cell/cf-org-permission-cell.component';
 import { CfSpacePermissionCellComponent } from './cf-space-permission-cell/cf-space-permission-cell.component';
 import { CfUserDataSourceService } from './cf-user-data-source.service';
@@ -97,7 +97,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
       this.router.navigate([this.createManagerUsersUrl()], { queryParams: { user: user.metadata.guid } });
     },
     label: 'Manage Roles',
-    createVisible: (row$: Observable<APIResource>) => this.createCanUpdateOrgSpaceRoles()
+    createVisible: (_row$: Observable<APIResource>) => this.createCanUpdateOrgSpaceRoles()
   };
 
   manageMultiUserAction: IMultiListAction<APIResource<CfUser>> = {
@@ -195,7 +195,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
   }
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     private cfUserService: CfUserService,
     private router: Router,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
@@ -219,8 +219,8 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
             activeRouteCfOrgSpace.spaceGuid),
         )
       ),
-      tap(([cf, action]) => {
-        this.dataSource = new CfUserDataSourceService(store, action, this, userHasRoles);
+      tap(([_cf, action]) => {
+        this.dataSource = new CfUserDataSourceService(this.store, action, this as ListConfig<APIResource<CfUser>, APIResource<CfUser>>, userHasRoles);
 
         // Only show the filter (show users with/without roles) if the list of users can actually contain users without roles
         if (GetAllCfUsersAsAdmin.is(action)) {
@@ -231,7 +231,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
         }
 
       }),
-      map(([cf, action]) => cf && cf.state.initialised)
+      map(([cf, _action]) => cf?.state.initialised)
     );
     this.manageMultiUserAction.visible$ = this.createCanUpdateOrgSpaceRoles();
   }

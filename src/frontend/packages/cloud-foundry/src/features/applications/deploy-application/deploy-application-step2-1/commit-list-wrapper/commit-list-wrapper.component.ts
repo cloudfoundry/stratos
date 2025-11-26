@@ -1,11 +1,11 @@
 import { DatePipe } from '@angular/common';
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { GitCommit, GitSCMService } from '@stratosui/git';
-import { Observable } from 'rxjs';
+import { type GitCommit, GitSCMService } from '@stratosui/git';
+import type { Observable } from 'rxjs';
 import { filter, map, mergeMap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import type { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { ListComponent } from '../../../../../../../core/src/shared/components/list/list.component';
 import { ListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import {
@@ -31,16 +31,17 @@ import {
         return new GithubCommitsListConfigServiceDeploy(store, datePipe, scmService);
       },
       deps: [Store, DatePipe, GitSCMService]
-    }
+    },
+    DatePipe
   ],
 })
 export class CommitListWrapperComponent {
 
+  private readonly listConfig = inject<ListConfig<GitCommit>>(ListConfig);
+
   selectedCommit$: Observable<GitCommit>;
 
-  constructor(
-    private listConfig: ListConfig<GitCommit>
-  ) {
+  constructor() {
     const initialised$ = this.listConfig.getInitialised().pipe(
       filter(initialised => initialised)
     );

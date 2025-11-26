@@ -1,17 +1,17 @@
-import { Action, compose, Store } from '@ngrx/store';
-import { combineLatest, Observable } from 'rxjs';
+import { type Action, compose, type Store } from '@ngrx/store';
+import { combineLatest, type Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
-import { GeneralEntityAppState } from './app-state';
+import type { GeneralEntityAppState } from './app-state';
 import type { IEntityCatalog } from './entity-catalog/entity-catalog.interface';
-import { StratosBaseCatalogEntity } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { EntityActionBuilderEntityConfig } from './entity-catalog/entity-catalog.types';
-import { EntityFetch, EntityFetchHandler } from './entity-request-pipeline/entity-request-pipeline.types';
-import { EntityMonitor } from './monitors/entity-monitor';
-import { RequestInfoState, UpdatingSection } from './reducers/api-request-reducer/types';
+import type { StratosBaseCatalogEntity } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import type { EntityActionBuilderEntityConfig } from './entity-catalog/entity-catalog.types';
+import type { EntityFetch, EntityFetchHandler } from './entity-request-pipeline/entity-request-pipeline.types';
+import type { EntityMonitor } from './monitors/entity-monitor';
+import type { RequestInfoState, UpdatingSection } from './reducers/api-request-reducer/types';
 import { getEntityUpdateSections, getUpdateSectionById, selectEntity } from './selectors/api.selectors';
-import { EntityInfo } from './types/api.types';
-import { EntityRequestAction } from './types/request.types';
+import type { EntityInfo } from './types/api.types';
+import type { EntityRequestAction } from './types/request.types';
 
 export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
   if (!entityRequestInfo) {
@@ -42,7 +42,7 @@ const dispatcherFactory = <T>(
     const entityFetchHandler: EntityFetchHandler<T> = catalogEntity.getEntityFetchHandler?.();
     const fetchHandler = entityFetchHandler ?
       entityFetchHandler(store, updatedAction) :
-      (entity: T) => store.dispatch(updatedAction);
+      (_entity: T) => store.dispatch(updatedAction);
 
     // Fetch handler requires the entity, this may be missing or stale to update if required
     return fetchEntity ? (entity: T) => {
@@ -59,7 +59,7 @@ const dispatcherFactory = <T>(
 /**
  * Designed to be used in a service factory provider
  */
-export class EntityService<T = any> {
+export class EntityService<T = unknown> {
   public action: EntityRequestAction;
   constructor(
     store: Store<GeneralEntityAppState>,
@@ -70,7 +70,7 @@ export class EntityService<T = any> {
     this.action = this.getAction(actionOrConfig);
 
     // Defensive: Entity catalog lookup may return null if endpoint/entity type not registered yet
-    const catalogEntity = this.entityCatalog.getEntity(this.action);
+    const catalogEntity = this.entityCatalog.getEntity(this.action) as StratosBaseCatalogEntity | null;
     if (!catalogEntity) {
       throw new Error(
         `Entity service initialization failed - catalog entity not found for ` +
@@ -104,7 +104,7 @@ export class EntityService<T = any> {
       publishReplay(1),
       refCount(),
       tap(entityEmitHandler)
-    );
+    ) as Observable<EntityInfo<T>>;
 
     this.waitForEntity$ = this.entityObs$.pipe(
       filter((ent) => {
@@ -137,7 +137,7 @@ export class EntityService<T = any> {
   private getEntityObservable = (
     entityMonitor: EntityMonitor<T>,
     actionDispatch: EntityFetch<T>
-  ): Observable<EntityInfo> => {
+  ): Observable<EntityInfo<T>> => {
     const cleanEntityInfo$ = this.getCleanEntityInfoObs(entityMonitor);
 
     return entityMonitor.entityRequest$.pipe(
@@ -152,7 +152,7 @@ export class EntityService<T = any> {
     );
   };
 
-  private getCleanEntityInfoObs(entityMonitor: EntityMonitor<T>) {
+  private getCleanEntityInfoObs(entityMonitor: EntityMonitor<T>): Observable<EntityInfo<T>> {
     return combineLatest(
       entityMonitor.entityRequest$,
       entityMonitor.entity$
@@ -163,7 +163,7 @@ export class EntityService<T = any> {
       map(([entityRequestInfo, entity]) => ({
         entityRequestInfo,
         // If the entity is deleted ensure that we don't pass through a stale state
-        entity: entityRequestInfo.deleting && entityRequestInfo.deleting.deleted ? null : entity
+        entity: entityRequestInfo.deleting?.deleted ? null : entity
       }))
     );
   }
@@ -193,7 +193,7 @@ export class EntityService<T = any> {
       } = dispatcherConfigOrAction as EntityActionBuilderEntityConfig;
 
       // Defensive: Entity catalog lookup may return null if endpoint/entity type not registered yet
-      const catalogEntity = this.entityCatalog.getEntity(endpointType, entityType);
+      const catalogEntity = this.entityCatalog.getEntity(endpointType, entityType) as StratosBaseCatalogEntity | null;
       if (!catalogEntity) {
         throw new Error(
           `Cannot get action - catalog entity not found for ` +

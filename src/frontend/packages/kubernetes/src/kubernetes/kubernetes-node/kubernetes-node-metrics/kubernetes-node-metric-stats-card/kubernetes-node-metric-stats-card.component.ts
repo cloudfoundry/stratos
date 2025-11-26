@@ -1,9 +1,9 @@
 import { AsyncPipe, DecimalPipe } from '@angular/common';
-import {Component, Input, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { Observable, Subscription } from 'rxjs';
+import {Component, Input, type OnDestroy, type OnInit, inject, } from '@angular/core';
+import type { Observable, Subscription } from 'rxjs';
 
 import { BytesToHumanSize } from '@stratosui/core';
-import { KubeNodeMetric, KubernetesNodeService } from '../../../services/kubernetes-node.service';
+import { type KubeNodeMetric, KubernetesNodeService } from '../../../services/kubernetes-node.service';
 import { MetricStatistic } from '../../../store/kube.types';
 import { KubernetesNodeSimpleMetricComponent } from '../kubernetes-node-simple-metric/kubernetes-node-simple-metric.component';
 
@@ -41,16 +41,18 @@ export class KubernetesNodeMetricStatsCardComponent implements OnInit, OnDestroy
   ngOnInit() {
     const maxMetric = this.kubeNodeService.setupMetricObservable(this.metric, MetricStatistic.MAXIMUM);
     this.subscriptions.push(maxMetric.pollerSub);
-    this.max$ = maxMetric.entity$;
+    this.max$ = maxMetric.entity$ as Observable<number>;
 
     const meanMetric = this.kubeNodeService.setupMetricObservable(this.metric, MetricStatistic.AVERAGE);
     this.subscriptions.push(meanMetric.pollerSub);
-    this.mean$ = meanMetric.entity$;
+    this.mean$ = meanMetric.entity$ as Observable<number>;
   }
 
 
   ngOnDestroy() {
-    this.subscriptions.forEach(s => s.unsubscribe());
+    for (const s of this.subscriptions) {
+      s.unsubscribe();
+    }
   }
 
 }

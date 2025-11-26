@@ -1,10 +1,10 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import {
   BooleanIndicatorComponent,
-} from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
+} from '@stratosui/core';
 import { TableCellServiceActiveComponent } from './table-cell-service-active.component';
 
 describe('TableCellServiceActiveComponent', () => {

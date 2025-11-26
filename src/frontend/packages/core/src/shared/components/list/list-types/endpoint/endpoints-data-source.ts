@@ -1,14 +1,14 @@
 import { Store } from '@ngrx/store';
 import {
-  EntityMonitorFactory,
-  EndpointModel,
-  AppState,
-  InternalEventMonitorFactory,
-  PaginationMonitorFactory,
+  type EntityMonitorFactory,
+  type EndpointModel,
+  type AppState,
+  type InternalEventMonitorFactory,
+  type PaginationMonitorFactory,
   stratosEntityCatalog,
 } from '@stratosui/store';
 
-import { IListConfig } from '../../list.component.types';
+import type { IListConfig } from '../../list.component.types';
 import { BaseEndpointsDataSource } from './base-endpoints-data-source';
 
 export class EndpointsDataSource extends BaseEndpointsDataSource {

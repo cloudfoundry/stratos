@@ -5,24 +5,24 @@ import { Store } from '@ngrx/store';
 import { catchError, flatMap, mergeMap } from 'rxjs/operators';
 
 import { environment } from '../../../../core/src/environments/environment';
-import { AppState, entityCatalog, NormalizedResponse, WrapperRequestActionSuccess } from '../../../../store/src/public-api';
-import { ApiRequestTypes } from '../../../../store/src/reducers/api-request-reducer/request-helpers';
+import { type AppState, entityCatalog, type NormalizedResponse, WrapperRequestActionSuccess } from '../../../../store/src/public-api';
+import type { ApiRequestTypes } from '../../../../store/src/reducers/api-request-reducer/request-helpers';
 import { StartRequestAction, WrapperRequestActionFailed } from '../../../../store/src/types/request.types';
 import { KubeScoreReportHelper } from '../services/kubescore-report.helper';
 import { PopeyeReportHelper } from '../services/popeye-report.helper';
 import {
   DELETE_ANALYSIS_REPORT_TYPES,
-  DeleteAnalysisReport,
+  type DeleteAnalysisReport,
   GET_ANALYSIS_REPORT_BY_ID_TYPES,
   GET_ANALYSIS_REPORTS_BY_PATH_TYPES,
   GET_ANALYSIS_REPORTS_TYPES,
-  GetAnalysisReportById,
-  GetAnalysisReports,
-  GetAnalysisReportsByPath,
+  type GetAnalysisReportById,
+  type GetAnalysisReports,
+  type GetAnalysisReportsByPath,
   RUN_ANALYSIS_REPORT_TYPES,
-  RunAnalysisReport,
+  type RunAnalysisReport,
 } from './analysis.actions';
-import { AnalysisReport } from './kube.types';
+import type { AnalysisReport } from './kube.types';
 
 @Injectable({
   providedIn: 'root'
@@ -54,7 +54,7 @@ export class AnalysisEffects {
             entities: { [entityKey]: {} },
             result: []
           };
-          const items: any = response as Array<any>;
+          const items = response as AnalysisReport[];
           items.forEach((item: AnalysisReport) => {
             const id = item.id;
             res.entities[entityKey][id] = item;
@@ -69,7 +69,7 @@ export class AnalysisEffects {
             new WrapperRequestActionFailed(error.message, action, 'fetch', {
               endpointIds: [action.kubeGuid],
               url: error.url || url,
-              eventCode: error.status ? error.status + '' : '500',
+              eventCode: error.status ? `${error.status}` : '500',
               message: 'Kubernetes Analysis Report request error',
               error
             })
@@ -94,12 +94,13 @@ export class AnalysisEffects {
 
       return this.http.get(url, requestArgs).pipe(
         mergeMap(response => {
-          this.processReport(response);
+          const report = response as AnalysisReport;
+          this.processReport(report);
 
           const res: NormalizedResponse = {
             entities: {
               [entityKey]: {
-                [action.guid]: response
+                [action.guid]: report
               }
             },
             result: [action.guid]
@@ -113,7 +114,7 @@ export class AnalysisEffects {
             new WrapperRequestActionFailed(error.message, action, 'fetch', {
               endpointIds: [action.kubeGuid],
               url: error.url || url,
-              eventCode: error.status ? error.status + '' : '500',
+              eventCode: error.status ? `${error.status}` : '500',
               message: 'Kubernetes Analysis Report request error',
               error
             })
@@ -158,7 +159,7 @@ export class AnalysisEffects {
             new WrapperRequestActionFailed(error.message, action, 'fetch', {
               endpointIds: [action.kubeGuid],
               url: error.url || url,
-              eventCode: error.status ? error.status + '' : '500',
+              eventCode: error.status ? `${error.status}` : '500',
               message: 'Kubernetes Analysis Report request error',
               error
             })
@@ -198,7 +199,7 @@ export class AnalysisEffects {
             new WrapperRequestActionFailed(error.message, action, type, {
               endpointIds: [action.kubeGuid],
               url: error.url || url,
-              eventCode: error.status ? error.status + '' : '500',
+              eventCode: error.status ? `${error.status}` : '500',
               message: 'Kubernetes Analysis Report request error',
               error
             })
@@ -244,7 +245,7 @@ export class AnalysisEffects {
             new WrapperRequestActionFailed(error.message, action, type, {
               endpointIds: [action.kubeGuid],
               url: error.url || url,
-              eventCode: error.status ? error.status + '' : '500',
+              eventCode: error.status ? `${error.status}` : '500',
               message: 'Kubernetes Analysis Report request error',
               error
             })
@@ -256,23 +257,25 @@ export class AnalysisEffects {
   ));
 
 
-  private processReport(report: Record<string, any>): void {
+  private processReport(report: AnalysisReport): void {
     // Check the path of the report
-    if (report['path'].split('/').length !== 2) {
+    if (report.path.split('/').length !== 2) {
       return;
     }
 
-    switch (report['format']) {
-      case 'popeye':
-        const helper = new PopeyeReportHelper(report);
+    switch (report.format) {
+      case 'popeye': {
+        const helper = new PopeyeReportHelper(report as AnalysisReport & { report?: Record<string, unknown>; alerts?: Record<string, unknown> });
         helper.map();
         break;
-      case 'kubescore':
-        const kubeScoreHelper = new KubeScoreReportHelper(report);
+      }
+      case 'kubescore': {
+        const kubeScoreHelper = new KubeScoreReportHelper(report as AnalysisReport & { report?: Record<string, unknown>; alerts?: Record<string, unknown> });
         kubeScoreHelper.map();
         break;
+      }
       default:
-        console.warn('Do not know how to handle this report type: ', report['format']);
+        console.warn('Do not know how to handle this report type: ', report.format);
         break;
     }
   }

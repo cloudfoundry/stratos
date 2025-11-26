@@ -1,5 +1,5 @@
-import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import {
   MetadataItemComponent,
   CardWrapperComponent,
@@ -8,6 +8,7 @@ import {
   CardContentComponent
 } from '@stratosui/core';
 import { CloudFoundryEndpointService } from '../../../../features/cf/services/cloud-foundry-endpoint.service';
+import type { CfUser } from '../../../../store/types/cf-user.types';
 
 @Component({
   selector: 'app-card-cf-user-info',
@@ -24,12 +25,10 @@ import { CloudFoundryEndpointService } from '../../../../features/cf/services/cl
     CardContentComponent
   ]
 })
-export class CardCfUserInfoComponent implements OnInit {
+export class CardCfUserInfoComponent {
   public cfEndpointService = inject(CloudFoundryEndpointService);
 
-  ngOnInit() { }
-
-  isAdmin(user) {
-    return user && user.admin ? 'Yes' : 'No';
+  isAdmin(user: CfUser): string {
+    return user?.admin ? 'Yes' : 'No';
   }
 }

@@ -1,21 +1,21 @@
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import { CommonModule, AsyncPipe, DatePipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, type OnDestroy, type OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BaseChartDirective } from 'ng2-charts';
 
-import { combineLatest, Observable, of, Subscription } from 'rxjs';
+import { combineLatest, type Observable, of, type Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, pairwise, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import {
-  TailwindSnackBarService,
-  TailwindSnackBarRef,
+  type TailwindSnackBarService,
+  type TailwindSnackBarRef,
   StratosTab,
   StratosTabType,
-  CurrentUserPermissionsService,
+  type CurrentUserPermissionsService,
   safeUnsubscribe,
   ConfirmationDialogConfig,
-  ConfirmationDialogService,
+  type ConfirmationDialogService,
   CustomIconComponent,
   MetadataItemComponent,
   NoContentMessageComponent,
@@ -23,7 +23,12 @@ import {
   PollingIndicatorComponent,
   TileComponent,
   TileGridComponent,
-  TileGroupComponent
+  TileGroupComponent,
+  CardWrapperComponent,
+  CardHeaderComponent,
+  CardTitleComponent,
+  CardContentComponent,
+  CustomCardActionsComponent
 } from '@stratosui/core';
 import {
   cfEntityCatalog,
@@ -33,35 +38,37 @@ import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
   ApplicationMonitorService,
-  ApplicationService,
+  type ApplicationService,
   getGuids,
   CfCurrentUserPermissions,
   CardAppUsageComponent
 } from '@stratosui/cloud-foundry';
 import {
   RouterNav,
-  AppState,
+  type AppState,
   entityCatalog,
-  EntityService,
-  EntityServiceFactory,
-  PaginationMonitorFactory,
-  ActionState,
+  type EntityService,
+  type EntityServiceFactory,
+  type PaginationMonitorFactory,
+  type ActionState,
   getPaginationObservables,
   getCurrentPageRequestInfo,
-  PaginationObservables,
+  type PaginationObservables,
   selectDeletionInfo,
-  APIResource
+  type APIResource,
+  type EntityInfo,
+  type GeneralEntityAppState
 } from '@stratosui/store';
 import { fetchAutoscalerInfo, isAutoscalerEnabled } from '../../core/autoscaler-helpers/autoscaler-available';
 import { AutoscalerConstants } from '../../core/autoscaler-helpers/autoscaler-util';
 import {
-  AutoscalerPaginationParams,
+  type AutoscalerPaginationParams,
   DetachAppAutoscalerPolicyAction,
   GetAppAutoscalerAppMetricAction,
   GetAppAutoscalerPolicyAction,
   GetAppAutoscalerScalingHistoryAction,
 } from '../../store/app-autoscaler.actions';
-import {
+import type {
   AppAutoscaleMetricChart,
   AppAutoscalerEvent,
   AppAutoscalerMetricData,
@@ -77,7 +84,7 @@ import { CardAutoscalerDefaultComponent } from '../../shared/card-autoscaler-def
   link: 'autoscale',
   icon: 'meter',
   iconFont: 'stratos-icons',
-  hidden: (store: Store<AppState>, esf: EntityServiceFactory, activatedRoute: ActivatedRoute, cups: CurrentUserPermissionsService) => {
+  hidden: (_store: Store, esf: EntityServiceFactory, activatedRoute: ActivatedRoute, cups: CurrentUserPermissionsService) => {
     const endpointGuid = getGuids('cf')(activatedRoute) || window.location.pathname.split('/')[2];
     const appGuid = getGuids()(activatedRoute) || window.location.pathname.split('/')[3];
     const appEntService = cfEntityCatalog.application.store.getEntityService(appGuid, endpointGuid, {
@@ -126,6 +133,8 @@ import { CardAutoscalerDefaultComponent } from '../../shared/card-autoscaler-def
   standalone: true,
   imports: [
     CommonModule,
+    AsyncPipe,
+    DatePipe,
     BaseChartDirective,
     PageSubNavComponent,
     TileGridComponent,
@@ -136,7 +145,12 @@ import { CardAutoscalerDefaultComponent } from '../../shared/card-autoscaler-def
     CustomIconComponent,
     MetadataItemComponent,
     PollingIndicatorComponent,
-    NoContentMessageComponent
+    NoContentMessageComponent,
+    CardWrapperComponent,
+    CardHeaderComponent,
+    CardTitleComponent,
+    CardContentComponent,
+    CustomCardActionsComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -148,7 +162,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   specificDateColumns: string[] = ['from', 'to', 'init', 'min', 'max'];
   recurringScheduleColumns: string[] = ['effect', 'repeat', 'from', 'to', 'init', 'min', 'max'];
   scalingHistoryColumns: string[] = ['event', 'trigger', 'date', 'error'];
-  metricTypes: string[] = AutoscalerConstants.MetricTypes;
+  metricTypes: string[] = [...AutoscalerConstants.MetricTypes];
 
   appAutoscalerPolicyService!: EntityService<APIResource<AppAutoscalerPolicyLocal>>;
   public appAutoscalerScalingHistoryService!: PaginationObservables<APIResource<AppAutoscalerEvent>>;
@@ -167,22 +181,22 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
 
   private appAutoscalerPolicyErrorSub!: Subscription;
   private appAutoscalerScalingHistoryErrorSub!: Subscription;
-  private appAutoscalerPolicySnackBarRef!: TailwindSnackBarRef<any>;
-  private appAutoscalerScalingHistorySnackBarRef!: TailwindSnackBarRef<any>;
+  private appAutoscalerPolicySnackBarRef!: TailwindSnackBarRef<void>;
+  private appAutoscalerScalingHistorySnackBarRef!: TailwindSnackBarRef<void>;
   private scalingHistoryAction!: GetAppAutoscalerScalingHistoryAction;
 
   appAutoscalerAppMetrics = {};
 
   paramsMetrics: AutoscalerPaginationParams = {
-    'start-time': ((new Date()).getTime() - 60000).toString() + '000000',
-    'end-time': (new Date()).getTime().toString() + '000000',
+    'start-time': `${(Date.now()- 60000).toString()}000000`,
+    'end-time': `${Date.now().toString()}000000`,
     page: '1',
     'results-per-page': '1',
     'order-direction': 'desc'
   };
   paramsHistory: AutoscalerPaginationParams = {
     'start-time': '0',
-    'end-time': (new Date()).getTime().toString() + '000000',
+    'end-time': `${Date.now().toString()}000000`,
     page: '1',
     'results-per-page': '5',
     'order-direction': 'desc'
@@ -199,7 +213,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   }
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<GeneralEntityAppState>,
     private applicationService: ApplicationService,
     private entityServiceFactory: EntityServiceFactory,
     private paginationMonitorFactory: PaginationMonitorFactory,
@@ -237,13 +251,13 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       new GetAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid)
     );
     this.appAutoscalerPolicy$ = this.appAutoscalerPolicyService.entityObs$.pipe(
-      filter(({ entityRequestInfo }) => entityRequestInfo && !entityRequestInfo.fetching),
-      map(({ entity, }) => entity ? entity.entity : null),
+      filter((entityInfo: EntityInfo<APIResource<AppAutoscalerPolicyLocal>>) => !!entityInfo.entityRequestInfo && !entityInfo.entityRequestInfo.fetching),
+      map((entityInfo: EntityInfo<APIResource<AppAutoscalerPolicyLocal>>) => entityInfo.entity ? entityInfo.entity.entity : null),
       publishReplay(1),
       refCount()
     );
     this.appAutoscalerPolicySafe$ = this.appAutoscalerPolicyService.waitForEntity$.pipe(
-      map(({ entity }) => entity && entity.entity),
+      map(({ entity }: EntityInfo<APIResource<AppAutoscalerPolicyLocal>>) => entity?.entity),
       publishReplay(1),
       refCount()
     );
@@ -332,10 +346,10 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       if (!appAutoscalerPolicy) {
         return;
       }
-      this.paramsMetrics['start-time'] = ((new Date()).getTime() - 60000).toString() + '000000';
-      this.paramsMetrics['end-time'] = (new Date()).getTime().toString() + '000000';
+      this.paramsMetrics['start-time'] = `${(Date.now()- 60000).toString()}000000`;
+      this.paramsMetrics['end-time'] = `${Date.now().toString()}000000`;
       if (appAutoscalerPolicy.scaling_rules_map) {
-        this.appAutoscalerAppMetrics = Object.keys(appAutoscalerPolicy.scaling_rules_map).reduce((metricMap: Record<string, any>, metricName: string) => {
+        this.appAutoscalerAppMetrics = Object.keys(appAutoscalerPolicy.scaling_rules_map).reduce((metricMap: Record<string, Observable<AppAutoscalerMetricData[]>>, metricName: string) => {
           metricMap[metricName] = this.getAppMetric(metricName, appAutoscalerPolicy.scaling_rules_map[metricName], this.paramsMetrics);
           return metricMap;
         }, {});
@@ -355,7 +369,8 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
           return false;
         }
         // Don't show error if policy simply doesn't exist (404 with noPolicy flag)
-        if (response.response?.noPolicy) {
+        const responseData = response.response as { noPolicy?: boolean } | undefined;
+        if (responseData?.noPolicy) {
           return false;
         }
         // Don't show error if autoscaler is unavailable (expected when URL not configured)
@@ -468,7 +483,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   }
 
   fetchScalingHistory() {
-    this.paramsHistory['end-time'] = (new Date()).getTime().toString() + '000000';
+    this.paramsHistory['end-time'] = `${Date.now().toString()}000000`;
     this.store.dispatch(this.scalingHistoryAction);
   }
 
@@ -498,19 +513,20 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     }
   };
 
-  getGaugeData(metricData: any) {
+  getGaugeData(metricData: AppAutoscalerMetricData[]) {
     if (!metricData || !metricData[0]) {
       return { labels: [], datasets: [] };
     }
 
     // Null safety: ensure all nested properties exist
-    const entity = metricData[0]?.entity;
-    if (!entity?.latest?.target?.[0] || entity.chartMaxValue === undefined) {
+    const entity = metricData[0];
+    if (!entity) {
       return { labels: [], datasets: [] };
     }
 
-    const current = entity.latest.target[0];
-    const max = entity.chartMaxValue;
+    // For gauge data, we need to access the metric value
+    const current = Number(entity.value) || 0;
+    const max = Number(entity.chartMaxValue) || 100;
     const remaining = max - current;
 
     return {
@@ -518,7 +534,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       datasets: [{
         data: [current, remaining],
         backgroundColor: [
-          entity.latest.colorTarget?.[0] || '#2196F3', // Fallback color if missing
+          '#2196F3',
           '#E0E0E0'
         ]
       }]

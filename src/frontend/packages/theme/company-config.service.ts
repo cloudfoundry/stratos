@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { CompanyConfig } from './company-config.interface';
-import { StratosThemeService } from './theme.service';
+import type { HttpClient } from '@angular/common/http';
+import type { CompanyConfig } from './company-config.interface';
+import type { StratosThemeService } from './theme.service';
 
 // Default company configuration
 const defaultCompanyConfig: CompanyConfig = {
@@ -72,7 +72,7 @@ export class CompanyConfigService {
         this.setCompanyConfig(config);
         return;
       }
-    } catch (error) {
+    } catch (_error) {
       console.warn('Could not load company-config.json, trying environment-specific config');
     }
 
@@ -83,7 +83,7 @@ export class CompanyConfigService {
         this.setCompanyConfig(envConfig);
         return;
       }
-    } catch (error) {
+    } catch (_error) {
       console.warn('Could not load environment-specific config, using default');
     }
 
@@ -138,7 +138,7 @@ export class CompanyConfigService {
   private saveConfigToStorage(config: CompanyConfig) {
     try {
       localStorage.setItem('stratos-company-config', JSON.stringify(config));
-    } catch (error) {
+    } catch (_error) {
       console.warn('Could not save company config to localStorage');
     }
   }

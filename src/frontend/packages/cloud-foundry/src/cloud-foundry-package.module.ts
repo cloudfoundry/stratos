@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 
-import { MDAppModule } from '../../core/src/core/md.module';
-import { SharedModule } from '@stratosui/core';
+import { MDAppModule, SharedModule } from '@stratosui/core';
 import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
 import { generateCFEntities } from './cf-entity-generator';
 import { CfUserService } from './shared/data-services/cf-user.service';

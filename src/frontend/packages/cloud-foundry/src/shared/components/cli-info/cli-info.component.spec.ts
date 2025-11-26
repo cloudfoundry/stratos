@@ -1,13 +1,13 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { CoreModule } from '../../../../../core/src/core/core.module';
-import { MDAppModule } from '../../../../../core/src/core/md.module';
-import { CodeBlockComponent } from '../../../../../core/src/shared/components/code-block/code-block.component';
+import { CoreModule } from '@stratosui/core';
+import { MDAppModule } from '@stratosui/core';
+import { CodeBlockComponent } from '@stratosui/core';
 import {
   CopyToClipboardComponent,
-} from '../../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
+} from '@stratosui/core';
 import { CliInfoComponent } from './cli-info.component';
 
 describe('CliInfoComponent', () => {

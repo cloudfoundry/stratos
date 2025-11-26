@@ -1,28 +1,30 @@
-import { CommonModule } from '@angular/common';
-import {Component, ElementRef, OnDestroy, OnInit, ViewChild, signal, WritableSignal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import {Component, type ElementRef, type OnDestroy, type OnInit, ViewChild, signal, type WritableSignal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { combineLatest, Observable, of, Subscription } from 'rxjs';
+import { combineLatest, type Observable, of, type Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, pairwise, startWith, switchMap } from 'rxjs/operators';
 
-import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
-import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
-import { StepComponent } from '../../../../../core/src/shared/components/stepper/step/step.component';
-
-import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
-import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
-import { StepOnNextFunction, StepOnNextResult } from '../../../../../core/src/shared/components/stepper/step/step.component';
-import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
+import {
+  PageHeaderComponent,
+  SteppersComponent,
+  StepComponent,
+  EndpointsService,
+  safeUnsubscribe,
+  type StepOnNextFunction,
+  type StepOnNextResult
+} from '@stratosui/core';
+import type { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { helmEntityCatalog } from '../../../helm/helm-entity-catalog';
 import { ChartsService } from '../../../helm/monocular/shared/services/charts.service';
 import { createMonocularProviders } from '../../../helm/monocular/stratos-monocular-providers.helpers';
 import { getMonocularEndpoint, stratosMonocularEndpointGuid } from '../../../helm/monocular/stratos-monocular.helper';
-import { HelmChartReference, HelmInstallValues } from '../../../helm/store/helm.types';
+import type { HelmChartReference, HelmInstallValues } from '../../../helm/store/helm.types';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes-entity-factory';
 import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
-import { KubernetesNamespace } from '../../store/kube.types';
-import { ChartValuesConfig, ChartValuesEditorComponent } from './../chart-values-editor/chart-values-editor.component';
+import type { KubernetesNamespace } from '../../store/kube.types';
+import { type ChartValuesConfig, ChartValuesEditorComponent } from './../chart-values-editor/chart-values-editor.component';
 
 interface CreateReleaseForm {
   endpoint: FormControl<string>;
@@ -55,7 +57,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   paginationStateSub: Subscription;
 
   public cancelUrl: string;
-  kubeEndpoints$: Observable<any>;
+  kubeEndpoints$: Observable<{ name: string; guid: string }[]>;
   validate$: Observable<boolean>;
 
   details: FormGroup<CreateReleaseForm>;
@@ -107,7 +109,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     });
     this.details.controls.createNamespace.disable();
 
-    this.kubeEndpoints$ = this.endpointsService.connectedEndpointsOfTypes(KUBERNETES_ENDPOINT_TYPE);
+    this.kubeEndpoints$ = this.endpointsService.connectedEndpointsOfTypes(KUBERNETES_ENDPOINT_TYPE) as Observable<{ name: string; guid: string; }[]>;
 
     const allNamespaces$ = kubeEntityCatalog.namespace.store.getPaginationService(null).entities$.pipe(
       filter(namespaces => !!namespaces),
@@ -234,7 +236,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
         if (state.error) {
           return {
             success: false,
-            message: `Failed to create namespace '${this.details.controls.releaseNamespace.value}': ` + state.message
+            message: `Failed to create namespace '${this.details.controls.releaseNamespace.value}': ${state.message}`
           };
         }
         this.createdNamespace = true;

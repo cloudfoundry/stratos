@@ -1,7 +1,7 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom } from '@stratosui/core';
 
 @Component({
   selector: 'app-table-cell-event-timestamp',
@@ -10,7 +10,8 @@ import { TableCellCustom } from '../../../../../../../../core/src/shared/compone
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule
+    CommonModule,
+    DatePipe
   ]
 })
 export class TableCellEventTimestampComponent<T> extends TableCellCustom<T> { }

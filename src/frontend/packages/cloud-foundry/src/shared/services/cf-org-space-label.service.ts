@@ -1,17 +1,18 @@
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, type Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
 import {
-  APIResource,
+  type APIResource,
   endpointEntityType,
-  EndpointModel,
+  type EndpointModel,
   entityCatalog,
   selectEntity,
-  STRATOS_ENDPOINT_TYPE
+  STRATOS_ENDPOINT_TYPE,
+  type GeneralEntityAppState
 } from '@stratosui/store';
-import { IOrganization, ISpace } from '../../cf-api.types';
-import { CFAppState } from '../../cf-app-state';
+import type { IOrganization, ISpace } from '../../cf-api.types';
+import type { CFAppState } from '../../cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../cf-entity-types';
 import { haveMultiConnectedCfs } from '../../features/cf/cf.helpers';
 import { selectCfEntity } from '../../store/selectors/api.selectors';
@@ -30,7 +31,7 @@ export class CfOrgSpaceLabelService {
    * @param spaceGuid Only important if using getValue
    */
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     private cfGuid?: string,
     private orgGuid?: string,
     private spaceGuid?: string) {

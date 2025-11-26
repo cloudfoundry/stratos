@@ -1,6 +1,6 @@
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 
-import { NewAppCFDetails } from '../store/types/create-application.types';
+import type { NewAppCFDetails } from '../store/types/create-application.types';
 
 export const SET_CF_DETAILS = '[Create App Page] Set Cloud Foundry details';
 export const SET_NAME = '[Create App Page] Set name';
@@ -24,11 +24,9 @@ export class IsNewAppNameFree implements Action {
 }
 
 export class AppNameTaken implements Action {
-  constructor(private name: string) { }
   type = NAME_TAKEN;
 }
 
 export class AppNameFree implements Action {
-  constructor(private name: string) { }
   type = NAME_FREE;
 }

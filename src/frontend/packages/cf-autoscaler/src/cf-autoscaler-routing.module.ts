@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { RouterModule, type Routes } from '@angular/router';
 
 // Things in this path include add/edit policy stepper, policy metrics page and policy events page
 // They're include like this to ensure those parts are lazy loaded.

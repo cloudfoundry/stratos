@@ -1,8 +1,8 @@
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 
-import { BooleanIndicatorComponent } from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import { CfRoleChangeWithNames } from '../../../../../../../../cloud-foundry/src/store/types/users-roles.types';
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { BooleanIndicatorComponent } from '@stratosui/core';
+import type { CfRoleChangeWithNames } from '../../../../../../../../cloud-foundry/src/store/types/users-roles.types';
+import { TableCellCustom } from '@stratosui/core';
 
 @Component({
   selector: 'app-table-cell-confirm-role-add-rem',

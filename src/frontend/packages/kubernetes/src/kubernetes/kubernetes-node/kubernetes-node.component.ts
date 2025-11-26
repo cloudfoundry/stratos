@@ -1,12 +1,12 @@
 import { AsyncPipe } from '@angular/common';
 import {Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../core/src/core/endpoints.service';
 import { PageHeaderComponent } from '../../../../core/src/shared/components/page-header/page-header.component';
-import { IHeaderBreadcrumb } from '../../../../core/src/shared/components/page-header/page-header.types';
+import type { IHeaderBreadcrumb } from '../../../../core/src/shared/components/page-header/page-header.types';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { KubernetesNodeService } from '../services/kubernetes-node.service';

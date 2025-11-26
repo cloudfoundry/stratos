@@ -1,11 +1,11 @@
 import { AsyncPipe, NgClass } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, type OnInit} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CustomTooltipDirective } from '@stratosui/core';
-import { Observable, of } from 'rxjs';
+import { type Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { Chart } from '../shared/models/chart';
+import type { Chart } from '../shared/models/chart';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,

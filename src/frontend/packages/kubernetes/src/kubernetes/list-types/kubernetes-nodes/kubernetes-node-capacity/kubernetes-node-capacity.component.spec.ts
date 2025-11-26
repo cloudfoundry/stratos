@@ -1,14 +1,15 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { EntityServiceFactory } from '@stratosui/store';
 import { BaseTestModules } from '../../../../../../core/test-framework/core-test.helper';
+import type { KubernetesNode } from '../../../store/kube.types';
 import { KubernetesNodeCapacityComponent } from './kubernetes-node-capacity.component';
 
 describe('KubernetesNodeCapacityComponent', () => {
-  let component: KubernetesNodeCapacityComponent<any>;
-  let fixture: ComponentFixture<KubernetesNodeCapacityComponent<any>>;
+  let component: KubernetesNodeCapacityComponent<KubernetesNode>;
+  let fixture: ComponentFixture<KubernetesNodeCapacityComponent<KubernetesNode>>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -21,7 +22,7 @@ describe('KubernetesNodeCapacityComponent', () => {
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(KubernetesNodeCapacityComponent);
+    fixture = TestBed.createComponent(KubernetesNodeCapacityComponent<KubernetesNode>);
     component = fixture.componentInstance;
     component.row = {
       metadata: {
@@ -34,16 +35,17 @@ describe('KubernetesNodeCapacityComponent', () => {
         addresses: [],
         images: [],
         capacity: {
-          pods: 100,
+          pods: '100',
           memory: '100Ki',
-          cpu: 100,
+          cpu: '100',
         }
       },
       spec: {
         containers: [],
         nodeName: 'test',
         schedulerName: 'test',
-        initContainers: []
+        initContainers: [],
+        readinessGates: []
       }
     };
     fixture.detectChanges();

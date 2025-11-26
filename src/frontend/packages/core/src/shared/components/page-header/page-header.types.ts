@@ -1,4 +1,4 @@
-import { InternalEventSeverity } from '@stratosui/store';
+import type { InternalEventSeverity } from '@stratosui/store';
 
 export interface IHeaderBreadcrumbLink {
   value: string;

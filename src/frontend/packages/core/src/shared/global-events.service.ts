@@ -1,8 +1,8 @@
-import { Injectable, signal, computed, Injector, inject } from '@angular/core';
+import { Injectable, signal, Injector, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { StratosStatus, GeneralEntityAppState } from '@stratosui/store';
-import { toSignal, toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest, Observable, ReplaySubject } from 'rxjs';
+import { StratosStatus, type GeneralEntityAppState } from '@stratosui/store';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { combineLatest, type Observable, ReplaySubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, publishReplay, refCount, startWith } from 'rxjs/operators';
 
 export type GlobalEventTypes = 'warning' | 'error' | 'process' | 'complete';
@@ -148,7 +148,7 @@ export class GlobalEventService {
         nextType.type &&
         nextType.type !== currentPriority.eventType
       ) {
-        const priority = this.eventTypePriority.findIndex(priorities => nextType.type === priorities);
+        const priority = this.eventTypePriority.indexOf(nextType.type );
         if (currentPriority.priority === null || priority < currentPriority.priority) {
           return {
             eventType: nextType.type,
@@ -208,7 +208,7 @@ export class GlobalEventService {
       map(([configs, appState]) => {
         return configs.reduce((eventsAndPriority, config) => {
           const newEvents = this.getNewTriggeredEventsOrCached(config, appState);
-          if (newEvents && newEvents.length) {
+          if (newEvents?.length) {
             const newHighestPriority = this.getHighestPriorityEventType([
               { type: eventsAndPriority[1] },
               ...newEvents,
@@ -238,7 +238,7 @@ export class GlobalEventService {
           event.read = !!readEvents.get(event.key);
         });
         // Remove stale read markers
-        readEvents.forEach((a, key) => {
+        readEvents.forEach((_a, key) => {
           const oEvent = events.find(event => event.key === key);
           if (!oEvent) {
             this._readEvents.update(events => {

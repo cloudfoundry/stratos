@@ -4,11 +4,12 @@ import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import {CFAppState,
+import {type CFAppState,
   cfCurrentUserPermissionsService} from '@stratosui/cloud-foundry';
 import { CurrentUserPermissionsService } from '@stratosui/core';
 import {
   EntityCatalogTestModule,
+  type GeneralEntityAppState,
   TEST_CATALOGUE_ENTITIES,
   generateStratosEntities,
   EntityCatalogHelper,
@@ -48,7 +49,7 @@ describe('CfOrgUsersListConfigService', () => {
         {
           provide: CfOrgUsersListConfigService,
           useFactory: (
-            store: Store<CFAppState>,
+            store: Store<GeneralEntityAppState>,
             cfOrgService: CloudFoundryOrganizationService,
             cfUserService: CfUserService,
             router: Router,

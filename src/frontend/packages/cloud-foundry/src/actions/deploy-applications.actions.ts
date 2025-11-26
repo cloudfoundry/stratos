@@ -1,7 +1,7 @@
-import { Action } from '@ngrx/store';
-import { GitBranch, GitSCM } from '@stratosui/git';
+import type { Action } from '@ngrx/store';
+import type { GitBranch, GitSCM } from '@stratosui/git';
 
-import { DockerAppDetails, GitAppDetails, OverrideAppDetails, SourceType } from '../store/types/deploy-application.types';
+import type { DockerAppDetails, GitAppDetails, OverrideAppDetails, SourceType } from '../store/types/deploy-application.types';
 
 export const SET_APP_SOURCE_DETAILS = '[Deploy App] Application Source';
 export const CHECK_PROJECT_EXISTS = '[Deploy App] Check Project exists';
@@ -23,7 +23,7 @@ export class SetAppSourceDetails implements Action {
 }
 
 export class CheckProjectExists implements Action {
-  constructor(public scm: GitSCM, public projectName: any) { }
+  constructor(public scm: GitSCM, public projectName: string) { }
   type = CHECK_PROJECT_EXISTS;
 }
 
@@ -38,7 +38,7 @@ export class ProjectFetchFail implements Action {
 }
 
 export class ProjectExists implements Action {
-  constructor(public projectName: string, public projectData: any) { }
+  constructor(public projectName: string, public projectData: unknown) { }
   type = PROJECT_EXISTS;
 }
 
@@ -53,26 +53,25 @@ export class SaveAppOverrides implements Action {
 }
 
 export class StoreCFSettings implements Action {
-  constructor(public cloudFoundryDetails: any) { }
+  constructor(public cloudFoundryDetails: unknown) { }
   type = SET_DEPLOY_CF_SETTINGS;
 }
 
 export class DeleteDeployAppSection implements Action {
-  constructor() { }
   type = DELETE_DEPLOY_APP_SECTION;
 }
 
 export class SetBranch implements Action {
-  constructor(private branch: GitBranch) { }
+  constructor(public branch: GitBranch | null) { }
   type = SET_BRANCH;
 }
 
 export class SetDeployBranch implements Action {
-  constructor(private branch: string) { }
+  constructor(public branch: string) { }
   type = SET_DEPLOY_BRANCH;
 }
 
 export class SetDeployCommit implements Action {
-  constructor(private commit: string) { }
+  constructor(public commit: string) { }
   type = SET_DEPLOY_COMMIT;
 }

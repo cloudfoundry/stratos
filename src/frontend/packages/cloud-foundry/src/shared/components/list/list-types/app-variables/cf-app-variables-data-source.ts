@@ -1,15 +1,15 @@
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
-import { IListConfig, ListDataSource } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { CFAppState } from '../../../../../cf-app-state';
+import { type IListConfig, ListDataSource } from '@stratosui/core';
+import type { APIResource, GeneralEntityAppState } from '@stratosui/store';
+import type { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { appEnvVarsEntityType, applicationEntityType } from '../../../../../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../../../entity-relations/entity-relations.types';
-import { ApplicationService } from '../../../../../features/applications/application.service';
-import { AppEnvVarsState } from '../../../../../store/types/app-metadata.types';
+import type { ApplicationService } from '../../../../../features/applications/application.service';
+import type { AppEnvVarsState } from '../../../../../store/types/app-metadata.types';
 
 export interface ListAppEnvVar {
   name: string;
@@ -22,7 +22,7 @@ export class CfAppVariablesDataSource extends ListDataSource<ListAppEnvVar, APIR
   public appGuid: string;
 
   constructor(
-    store: Store<CFAppState>,
+    store: Store<GeneralEntityAppState>,
     appService: ApplicationService,
     listConfig: IListConfig<ListAppEnvVar>,
   ) {
@@ -39,7 +39,7 @@ export class CfAppVariablesDataSource extends ListDataSource<ListAppEnvVar, APIR
         if (!variables || variables.length === 0) {
           return [];
         }
-        const env: Record<string, any> = (variables[0]?.entity?.environment_json) ? variables[0].entity.environment_json : {};
+        const env: Record<string, unknown> = (variables[0]?.entity?.environment_json) ? variables[0].entity.environment_json : {};
         const rows = Object.keys(env).map(name => ({ name, value: env[name] as string }));
         return rows;
       }),

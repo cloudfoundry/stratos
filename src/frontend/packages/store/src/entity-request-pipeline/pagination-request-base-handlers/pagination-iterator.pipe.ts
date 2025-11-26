@@ -1,17 +1,17 @@
-import { HttpRequest } from '@angular/common/http';
-import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of, range } from 'rxjs';
+import type { HttpRequest } from '@angular/common/http';
+import type { Store } from '@ngrx/store';
+import { combineLatest, type Observable, of, range } from 'rxjs';
 import { first, map, mergeMap, reduce, switchMap } from 'rxjs/operators';
 
 import { UpdatePaginationMaxedState } from '../../actions/pagination.actions';
-import { AppState } from '../../app-state';
+import type { AppState } from '../../app-state';
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
-import { PaginatedAction, PaginationMaxedState } from '../../types/pagination.types';
-import { ActionDispatcher, JetstreamResponse, PagedJetstreamResponse } from '../entity-request-pipeline.types';
-import { PipelineHttpClient } from '../pipline-http-client.service';
+import type { PaginatedAction, PaginationMaxedState } from '../../types/pagination.types';
+import type { ActionDispatcher, JetstreamResponse, PagedJetstreamResponse } from '../entity-request-pipeline.types';
+import type { PipelineHttpClient } from '../pipline-http-client.service';
 
 
-export interface PaginationPageIteratorConfig<R = any, E = any> {
+export interface PaginationPageIteratorConfig<R = unknown, E = unknown> {
   // TODO This should also pass page size for apis that use start=&end= params.
   getPaginationParameters: (page: number) => Record<string, string>;
   getTotalPages: (initialResponses: JetstreamResponse<R>) => number;
@@ -29,7 +29,7 @@ export interface PaginationPageIteratorConfig<R = any, E = any> {
   canIgnoreMaxedState: (store: Store<AppState>) => Observable<boolean>;
 }
 
-export class PaginationPageIterator<R = any, E = any> {
+export class PaginationPageIterator<R = unknown, E = unknown> {
   constructor(
     private store: Store<AppState>,
     private httpClient: PipelineHttpClient,
@@ -84,7 +84,7 @@ export class PaginationPageIterator<R = any, E = any> {
         return {
           ...responses,
           [endpointId]: [
-            ...(responses[endpointId] as any[]),
+            ...(responses[endpointId] as unknown[]),
             page[endpointId]
           ]
         };
@@ -96,7 +96,7 @@ export class PaginationPageIterator<R = any, E = any> {
     Observable<[JetstreamResponse<R>, JetstreamResponse<R>[]]> {
 
     const createAllResults = () => combineLatest(of(initialResponse), this.getAllOtherPageRequests(totalPages));
-    if (totalResults === 0 || (this.paginationMaxedState && this.paginationMaxedState.ignoreMaxed)) {
+    if (totalResults === 0 || (this.paginationMaxedState?.ignoreMaxed)) {
       return createAllResults();
     }
 
@@ -119,7 +119,7 @@ export class PaginationPageIterator<R = any, E = any> {
   }
 
   private getValidNumber(num: number) {
-    return typeof num === 'number' && !isNaN(num) ? num : 0;
+    return typeof num === 'number' && !Number.isNaN(num) ? num : 0;
   }
 
   public mergeAllPagesEntities(): Observable<PagedJetstreamResponse> {

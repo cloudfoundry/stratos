@@ -1,11 +1,11 @@
-import { ListDataSource } from '../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { QParam } from './q-param';
+import { ListDataSource } from '@stratosui/core';
+import type { QParam } from './q-param';
 
 export abstract class CFListDataSource<T, A = T> extends ListDataSource<T, A> {
   protected setQParam(setQ: QParam, qs: QParam[]): boolean {
     const existing = qs.find((q: QParam) => q.key === setQ.key);
     let changed = true;
-    if (setQ.value && setQ.value.length) {
+    if (setQ.value?.length) {
       if (existing) {
         // Set existing value
         changed = existing.value !== setQ.value;

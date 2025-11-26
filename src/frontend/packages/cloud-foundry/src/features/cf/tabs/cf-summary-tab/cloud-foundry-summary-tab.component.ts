@@ -1,22 +1,24 @@
-import { CommonModule } from '@angular/common';
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
+
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, type Observable } from 'rxjs';
 import { filter, map, startWith } from 'rxjs/operators';
+import { GeneralEntityAppState } from '@stratosui/store';
 
 import {
+  CardNumberMetricComponent,
+  LoadingPageComponent,
   PageSubNavComponent,
+  TileComponent,
   TileGridComponent,
   TileGroupComponent,
-  TileComponent,
-  LoadingPageComponent,
-  CardNumberMetricComponent
 } from '@stratosui/core';
-import { CFAppState } from '../../../../cf-app-state';
+
+import { CardCfInfoComponent } from '../../../../shared/components/cards/card-cf-info/card-cf-info.component';
 import { goToAppWall } from '../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
-import { CardCfInfoComponent } from '../../../../shared/components/cards/card-cf-info/card-cf-info.component';
 import { CardCfRecentAppsComponent } from '../../../home/card-cf-recent-apps/card-cf-recent-apps.component';
 
 @Component({
@@ -26,7 +28,7 @@ import { CardCfRecentAppsComponent } from '../../../home/card-cf-recent-apps/car
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    CommonModule,
+    AsyncPipe,
     RouterModule,
     PageSubNavComponent,
     TileGridComponent,
@@ -35,11 +37,11 @@ import { CardCfRecentAppsComponent } from '../../../home/card-cf-recent-apps/car
     LoadingPageComponent,
     CardNumberMetricComponent,
     CardCfInfoComponent,
-    CardCfRecentAppsComponent
-  ]
+    CardCfRecentAppsComponent,
+  ],
 })
 export class CloudFoundrySummaryTabComponent {
-  private store = inject(Store<CFAppState>);
+  private store = inject(Store<GeneralEntityAppState>);
   public cfEndpointService = inject(CloudFoundryEndpointService);
 
   appLink: () => void;

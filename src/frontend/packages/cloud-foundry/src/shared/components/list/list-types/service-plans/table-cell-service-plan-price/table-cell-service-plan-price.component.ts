@@ -2,8 +2,8 @@
 import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 
 import { TableCellCustom } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { IServicePlan } from '../../../../../../cf-api-svc.types';
+import type { APIResource } from '@stratosui/store';
+import type { IServicePlan } from '../../../../../../cf-api-svc.types';
 import { canShowServicePlanCosts } from '../../../../../../features/service-catalog/services-helper';
 import { ServicePlanPriceComponent } from '../../../../service-plan-price/service-plan-price.component';
 

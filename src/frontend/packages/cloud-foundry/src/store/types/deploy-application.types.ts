@@ -1,7 +1,7 @@
-import { GitBranch } from '@stratosui/git';
+import type { GitBranch } from '@stratosui/git';
 
-import { ITileGraphic } from '../../../../core/src/shared/components/tile/tile-selector.types';
-import { NewAppCFDetails } from './create-application.types';
+import type { ITileGraphic } from '@stratosui/core';
+import type { NewAppCFDetails } from './create-application.types';
 
 export interface SourceType {
   name: string;
@@ -101,7 +101,7 @@ export interface ProjectExists {
   exists: boolean;
   error: boolean;
   name: string;
-  data?: any;
+  data?: unknown;
 }
 export interface DeployApplicationState {
   cloudFoundryDetails: NewAppCFDetails;

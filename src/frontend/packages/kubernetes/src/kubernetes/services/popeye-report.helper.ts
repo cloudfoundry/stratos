@@ -1,8 +1,31 @@
-import { ResourceAlert, ResourceAlertLevel, ResourceAlertMap } from './analysis-report.types';
+import { type ResourceAlert, ResourceAlertLevel, type ResourceAlertMap } from './analysis-report.types';
+
+interface PopeyeIssue {
+  level: number;
+  message: string;
+}
+
+interface PopeyeSanitizer {
+  sanitizer: string;
+  issues?: {
+    [resourcePath: string]: PopeyeIssue[];
+  };
+}
+
+interface PopeyeData {
+  sanitizers: PopeyeSanitizer[];
+}
+
+interface PopeyeReportContainer {
+  report?: {
+    popeye?: PopeyeData;
+  };
+  alerts?: ResourceAlertMap;
+}
 
 export class PopeyeReportHelper {
 
-  constructor(public report: Record<string, any>) { }
+  constructor(public report: PopeyeReportContainer) { }
 
   // Map the report to the alert format
   public map(): void {
@@ -10,20 +33,20 @@ export class PopeyeReportHelper {
       return;
     }
 
-    const popeye: any = this.report.report.popeye;
+    const popeye = this.report.report.popeye;
     // Go through the report and re-map
     const result = {} as ResourceAlertMap;
-    popeye.sanitizers.forEach((s: any) => {
+    popeye.sanitizers.forEach((s) => {
       // We just care about issues
       const resourceType = s.sanitizer;
       if (s.issues) {
         Object.keys(s.issues).forEach((resourcePath: string) => {
-          const issues: any[] = s.issues[resourcePath];
-          issues.forEach((issue: any) => {
+          const issues = s.issues[resourcePath];
+          issues.forEach((issue) => {
             // Level must be greater than 0 (OK)
             if (issue.level > 0) {
-              let namespace;
-              let name;
+              let namespace: string;
+              let name: string;
               if (resourcePath.indexOf('/') !== -1) {
                 // Has a namespace
                 namespace = resourcePath.split('/')[0];

@@ -1,5 +1,5 @@
-import { SetClientFilterKey } from '../../actions/pagination.actions';
-import { PaginationEntityState } from '../../types/pagination.types';
+import type { SetClientFilterKey } from '../../actions/pagination.actions';
+import type { PaginationEntityState } from '../../types/pagination.types';
 import { spreadClientPagination } from './pagination-reducer.helper';
 
 export function paginationSetClientFilterKey(state: PaginationEntityState, action: SetClientFilterKey) {

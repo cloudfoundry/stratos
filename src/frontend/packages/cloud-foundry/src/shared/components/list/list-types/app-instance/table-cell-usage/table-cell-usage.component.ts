@@ -1,7 +1,7 @@
-import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, type OnInit , ChangeDetectionStrategy } from '@angular/core';
 
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { UsageGaugeComponent } from '../../../../../../../../core/src/shared/components/usage-gauge/usage-gauge.component';
+import { TableCellCustom } from '@stratosui/core';
+import { UsageGaugeComponent } from '@stratosui/core';
 
 @Component({
   selector: 'app-table-cell-usage',
@@ -19,8 +19,8 @@ export class TableCellUsageComponent<T> extends TableCellCustom<T> implements On
   public label!: (row: T) => string;
 
   ngOnInit() {
-    this.value = this.config ? this.config.value : () => '0';
-    this.label = this.config ? this.config.label : () => '-';
+    this.value = this.config ? (this.config as any).value : () => '0';
+    this.label = this.config ? (this.config as any).label : () => '-';
   }
 
 }

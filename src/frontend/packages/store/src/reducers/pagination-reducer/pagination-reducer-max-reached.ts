@@ -1,7 +1,7 @@
-import { IgnorePaginationMaxedState, UpdatePaginationMaxedState } from '../../actions/pagination.actions';
+import type { IgnorePaginationMaxedState, UpdatePaginationMaxedState } from '../../actions/pagination.actions';
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
 import { LocalPaginationHelpers } from '../../helpers/local-list.helpers';
-import { PaginationEntityTypeState, PaginationState } from '../../types/pagination.types';
+import type { PaginationEntityTypeState, PaginationState } from '../../types/pagination.types';
 import { getDefaultPaginationEntityState } from './pagination-reducer-reset-pagination';
 
 export function paginationMaxReached(state: PaginationState, action: UpdatePaginationMaxedState): PaginationState {

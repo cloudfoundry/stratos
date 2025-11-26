@@ -1,16 +1,18 @@
-import { ChangeDetectionStrategy, AfterViewInit,
+import { ChangeDetectionStrategy, type AfterViewInit,
   Component,
-  ElementRef,
+  type ElementRef,
   EventEmitter,
   forwardRef,
   Input,
-  OnDestroy,
+  type OnDestroy,
   Output,
   ViewChild,
  } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { type ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 declare const monaco: typeof import('monaco-editor');
+
+export type IStandaloneCodeEditor = import('monaco-editor').editor.IStandaloneCodeEditor;
 
 export interface MonacoEditorModel {
   language?: string;
@@ -28,7 +30,7 @@ export interface MonacoEditorOptions {
   lineNumbers?: 'on' | 'off' | 'relative' | 'interval';
   scrollBeyondLastLine?: boolean;
   wordWrap?: 'off' | 'on' | 'wordWrapColumn' | 'bounded';
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 @Component({
@@ -50,12 +52,16 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
 
   @Input() options: MonacoEditorOptions = {};
   @Input() model?: MonacoEditorModel;
-  @Output() onInit = new EventEmitter<any>();
+  @Output() onInit = new EventEmitter<IStandaloneCodeEditor>();
 
-  private editor: any;
+  private editor?: IStandaloneCodeEditor;
   private value = '';
-  private onChange: (value: string) => void = () => {};
-  private onTouched: () => void = () => {};
+  private onChange: (value: string) => void = () => {
+    // ControlValueAccessor callback
+  };
+  private onTouched: () => void = () => {
+    // ControlValueAccessor callback
+  };
   private disabled = false;
   private resizeObserver?: ResizeObserver;
 
@@ -202,7 +208,7 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
     this.writeValue(value);
   }
 
-  public getEditor(): any {
+  public getEditor(): IStandaloneCodeEditor | undefined {
     return this.editor;
   }
 }

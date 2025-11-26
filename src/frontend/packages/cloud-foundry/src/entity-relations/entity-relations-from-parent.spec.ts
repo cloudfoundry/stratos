@@ -5,17 +5,17 @@ import { Store } from '@ngrx/store';
 import { first } from 'rxjs/operators';
 
 import { RequestTypes } from '@stratosui/store';
-import { AppState } from '@stratosui/store';
+import type { AppState } from '@stratosui/store';
 import { EntityCatalogTestModuleManualStore, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
 import { entityCatalog } from '@stratosui/store';
-import { EntityCatalogEntityConfig } from '@stratosui/store';
-import { APIResource } from '@stratosui/store';
-import { WrapperRequestActionSuccess } from '@stratosui/store';
-import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '@stratosui/store/testing';
+import type { EntityCatalogEntityConfig } from '@stratosui/store';
+import type { APIResource } from '@stratosui/store';
+import type { WrapperRequestActionSuccess } from '@stratosui/store';
+import { createBasicStoreModule, createEntityStoreState, type TestStoreEntity } from '@stratosui/store/testing';
 import { EntityRelationSpecHelper } from './entity-relations-spec-helper';
 import { GetAllOrganizationSpaces } from '../actions/organization.actions';
-import { ISpace } from '../cf-api.types';
-import { CFAppState } from '../cf-app-state';
+import type { ISpace } from '../cf-api.types';
+import type { CFAppState } from '../cf-app-state';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { generateCFEntities } from '../cf-entity-generator';
 import { organizationEntityType, spaceEntityType } from '../cf-entity-types';
@@ -31,7 +31,7 @@ describe('Entity Relations - populate from parent', () => {
   const cfGuid = 'populatePaginationFromParent-cf';
   const orgGuid = 'populatePaginationFromParent-org';
 
-  function setup(store) {
+  function setup(store: Partial<CFAppState>) {
     TestBed.configureTestingModule({
       imports: [
         {
@@ -60,7 +60,7 @@ describe('Entity Relations - populate from parent', () => {
     setup(store);
 
     return new Promise<void>((done, fail) => {
-      inject([Store], (iStore: Store<any>) => {
+      inject([Store], (iStore: Store) => {
         const testAction = new GetAllOrganizationSpaces(pagKey, orgGuid, cfGuid, [], true);
         populatePaginationFromParent(iStore, testAction).pipe(first())
           .subscribe(
@@ -103,10 +103,10 @@ describe('Entity Relations - populate from parent', () => {
         })),
       ]
     ]);
-    setup(createEntityStoreState(entityMap));
+    setup(createEntityStoreState(entityMap) as Partial<CFAppState>);
 
     return new Promise<void>((done, fail) => {
-      inject([Store], (iStore: Store<AppState>) => {
+      inject([Store], (iStore: Store) => {
         populatePaginationFromParent(iStore, new GetAllOrganizationSpaces(pagKey, orgGuid, cfGuid, [], true)).pipe(first())
           .subscribe((action: WrapperRequestActionSuccess) => {
             expect(action).toBeDefined();
@@ -115,7 +115,7 @@ describe('Entity Relations - populate from parent', () => {
             expect(action.totalResults).toBe(spaces.length);
             expect(action.totalPages).toBe(1);
             expect(action.response.result).toEqual(spaceGuids);
-            expect(action.response.entities[spaceEntityKey]).toEqual(spaces.reduce((map, space) => {
+            expect(action.response.entities[spaceEntityKey]).toEqual(spaces.reduce((map: Record<string, APIResource<ISpace>>, space) => {
               map[space.metadata.guid] = space;
               return map;
             }, {}));

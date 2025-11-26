@@ -1,11 +1,12 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, type OnInit } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
-import { ApplicationService } from '@stratosui/cloud-foundry';
-import { ListConfig, CustomIconComponent, PageHeaderModule, ListComponent } from '@stratosui/core';
+import { ApplicationService, type IApp } from '@stratosui/cloud-foundry';
+import { ListConfig, CustomIconComponent, PageHeaderComponent, ListComponent } from '@stratosui/core';
+import type { APIResource, EntityInfo } from '@stratosui/store';
 import {
   CfAppAutoscalerEventsConfigService,
 } from '../../shared/list-types/app-autoscaler-event/cf-app-autoscaler-events-config.service';
@@ -23,7 +24,7 @@ import {
   imports: [
     CommonModule,
     RouterModule,
-    PageHeaderModule,
+    PageHeaderComponent,
     ListComponent,
     CustomIconComponent,
   ]
@@ -42,7 +43,7 @@ export class AutoscalerScaleHistoryPageComponent implements OnInit {
 
   ngOnInit() {
     this.applicationName$ = this.applicationService.app$.pipe(
-      map(({ entity }) => entity ? entity.entity.name : null),
+      map(({ entity }: EntityInfo<APIResource<IApp>>) => entity ? entity.entity.name : null),
       publishReplay(1),
       refCount()
     );

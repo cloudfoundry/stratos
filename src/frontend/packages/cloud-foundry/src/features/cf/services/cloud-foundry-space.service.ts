@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of } from 'rxjs';
+import { combineLatest, type Observable, of } from 'rxjs';
 import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
-import { IApp, IOrgQuotaDefinition, IRoute, ISpace, ISpaceQuotaDefinition } from '../../../cf-api.types';
-import { CFAppState } from '../../../cf-app-state';
+import type { GeneralEntityAppState } from '../../../../../store/src/app-state';
+import type { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
+import type { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
+import type { IApp, IOrgQuotaDefinition, IRoute, ISpace, ISpaceQuotaDefinition } from '../../../cf-api.types';
+import type { CFAppState } from '../../../cf-app-state';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import {
   applicationEntityType,
@@ -19,15 +20,15 @@ import {
 import { getStartedAppInstanceCount } from '../../../cf.helpers';
 import { createEntityRelationKey } from '../../../entity-relations/entity-relations.types';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
-import {
+import type {
   CloudFoundryUserProvidedServicesService,
 } from '../../../shared/services/cloud-foundry-user-provided-services.service';
 import { SpaceUserRoleNames } from '../../../store/types/cf-user.types';
 import { fetchServiceInstancesCount } from '../../service-catalog/services-helper';
-import { ActiveRouteCfOrgSpace } from '../cf-page.types';
+import type { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
-import { CloudFoundryOrganizationService, createOrgQuotaDefinition } from './cloud-foundry-organization.service';
+import { type CloudFoundryOrganizationService, createOrgQuotaDefinition } from './cloud-foundry-organization.service';
 
 @Injectable({
   providedIn: 'root'
@@ -62,7 +63,7 @@ export class CloudFoundrySpaceService {
 
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     private cfUserService: CfUserService,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private cfEndpointService: CloudFoundryEndpointService,

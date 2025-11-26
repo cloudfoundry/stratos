@@ -1,8 +1,10 @@
-import {
+import type {
   AppAutoscalerPolicy,
   AppAutoscalerPolicyLocal,
+  AppRecurringSchedule,
   AppScalingRule,
   AppScalingTrigger,
+  AppSpecificDate,
 } from '../../store/app-autoscaler.types';
 import { AutoscalerConstants, getScaleType, isEqual } from './autoscaler-util';
 
@@ -14,11 +16,11 @@ export function autoscalerTransformArrayToMap(policy: AppAutoscalerPolicy) {
     scaling_rules_form: []
   };
   newPolicy.scaling_rules = newPolicy.scaling_rules || [];
-  newPolicy.scaling_rules.map((trigger) => {
+  newPolicy.scaling_rules.forEach((trigger) => {
     pushAndSortTrigger(newPolicy.scaling_rules_map, trigger.metric_type, trigger);
   });
   let maxThreshold = 0;
-  Object.keys(newPolicy.scaling_rules_map).map((metricName) => {
+  Object.keys(newPolicy.scaling_rules_map).forEach((metricName) => {
     if (newPolicy.scaling_rules_map[metricName].upper && newPolicy.scaling_rules_map[metricName].upper.length > 0) {
       maxThreshold = newPolicy.scaling_rules_map[metricName].upper[0].threshold;
       setUpperColor(newPolicy.scaling_rules_map[metricName].upper);
@@ -50,7 +52,7 @@ function setUpperColor(array: AppScalingRule[]) {
       }
       // let color16 = color10.toString(16)
       // if (color16.length === 1) color16 = '0' + color16
-      array[i].color = 'rgba(255, ' + color10 + ', 0, 0.6)'; // '#ff' + color16 + '00'
+      array[i].color = `rgba(255, ${color10}, 0, 0.6)`; // '#ff' + color16 + '00'
     }
   }
 }
@@ -70,7 +72,7 @@ function setLowerColor(array: AppScalingRule[]) {
       }
       // let color16 = color10.toString(16)
       // if (color16.length === 1) color16 = '0' + color16
-      array[i].color = 'rgba(51, ' + color10 + ', 255, 0.6)'; // '#33' + color16 + 'ff'
+      array[i].color = `rgba(51, ${color10}, 255, 0.6)`; // '#33' + color16 + 'ff'
     }
   }
 }
@@ -112,7 +114,7 @@ export function autoscalerTransformMapToArray(oldPolicy: AppAutoscalerPolicyLoca
   return newPolicy;
 }
 
-function hasNamedSchedule(schedule: any) {
+function hasNamedSchedule(schedule: AppRecurringSchedule[] | AppSpecificDate[] | undefined) {
   return schedule !== undefined && schedule !== null && schedule.length > 0;
 }
 

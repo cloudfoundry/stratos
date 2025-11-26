@@ -1,7 +1,7 @@
-import { CommonModule } from '@angular/common';
-import {Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import {Component, inject, } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
 import { ListComponent } from '../../../../core/src/shared/components/list/list.component';
@@ -9,7 +9,7 @@ import { EndpointListHelper } from '../../../../core/src/shared/components/list/
 import { ListConfig } from '../../../../core/src/shared/components/list/list.component.types';
 import { PageHeaderComponent } from '../../../../core/src/shared/components/page-header/page-header.component';
 import { RouterNav } from '../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../store/src/public-api';
+import type { AppState } from '../../../../store/src/public-api';
 import {
   KubernetesEndpointsListConfigService,
 } from '../list-types/kubernetes-endpoints/kubernetes-endpoints-list-config.service';

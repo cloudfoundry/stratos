@@ -1,4 +1,4 @@
-import { Directive, ElementRef, Input, OnChanges, SimpleChanges, Renderer2, inject } from '@angular/core';
+import { Directive, ElementRef, Input, type OnChanges, type SimpleChanges, Renderer2, } from '@angular/core';
 
 @Directive({
 selector: '[appTableCellStatus]',

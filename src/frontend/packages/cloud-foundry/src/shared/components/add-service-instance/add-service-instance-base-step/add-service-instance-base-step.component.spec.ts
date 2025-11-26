@@ -1,11 +1,10 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { PageHeaderModule } from '@stratosui/core/shared/components/page-header/page-header.module';
-import { SteppersModule } from '@stratosui/core/shared/components/stepper/steppers.module';
+import { PageHeaderModule, SteppersModule } from '@stratosui/core';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCfBaseTestModulesNoShared } from "@test-framework/cf";
 import { AddServiceInstanceBaseStepComponent } from "./add-service-instance-base-step.component";

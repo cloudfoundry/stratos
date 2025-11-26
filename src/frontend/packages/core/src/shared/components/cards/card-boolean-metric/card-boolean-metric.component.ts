@@ -1,7 +1,7 @@
-import { Component, Input, OnChanges, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, type OnChanges, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
-import { RouterNav, AppState } from '@stratosui/store';
+import { RouterNav, type AppState } from '@stratosui/store';
 
 @Component({
   selector: 'app-card-boolean-metric',
@@ -20,7 +20,7 @@ export class CardBooleanMetricComponent implements OnInit, OnChanges {
   @Input() label!: string;
   @Input() value!: string;
   @Input() textOnly = false;
-  @Input() link!: () => void | string;
+  @Input() link!: () => undefined | string;
 
   formattedValue!: string;
 

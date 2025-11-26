@@ -5,7 +5,7 @@
  * scheduler operations are pass-through. These functions maintain API
  * compatibility while operating in a zoneless environment.
  */
-import { SchedulerLike } from 'rxjs';
+import type { SchedulerLike } from 'rxjs';
 
 /**
  * Pass-through function for zoneless mode.

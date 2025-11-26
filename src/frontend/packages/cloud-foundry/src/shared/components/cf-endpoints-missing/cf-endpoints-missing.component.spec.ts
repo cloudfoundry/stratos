@@ -1,11 +1,11 @@
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { of as observableOf } from 'rxjs';
 
 import { createBasicStoreModule } from '@stratosui/store/testing';
-import { entityCatalog, TestEntityCatalog } from '@stratosui/store';
+import { entityCatalog, type TestEntityCatalog } from '@stratosui/store';
 import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
 import { generateCFEntities } from '../../../cf-entity-generator';
 import { CfEndpointsMissingComponent } from './cf-endpoints-missing.component';

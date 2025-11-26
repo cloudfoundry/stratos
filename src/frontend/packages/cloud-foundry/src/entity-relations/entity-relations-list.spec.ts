@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { EntitySchema } from '@stratosui/store';
 import { listEntityRelations } from './entity-relations';
-import { createEntityRelationKey, EntityInlineParentAction } from './entity-relations.types';
+import { createEntityRelationKey, type EntityInlineParentAction } from './entity-relations.types';
 
 const endpointType = 'endpointtype1';
 

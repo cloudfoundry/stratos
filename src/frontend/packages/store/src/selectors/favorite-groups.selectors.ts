@@ -1,16 +1,16 @@
 import { compose } from '@ngrx/store';
 
-import { InternalAppState, IRequestEntityTypeState } from '../app-state';
+import type { InternalAppState, IRequestEntityTypeState } from '../app-state';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { STRATOS_ENDPOINT_TYPE, userFavouritesEntityType } from '../helpers/stratos-entity-factory';
-import { IUserFavoriteGroup, IUserFavoritesGroups, IUserFavoritesGroupsState } from '../types/favorite-groups.types';
-import { IFavoriteMetadata, UserFavorite } from '../types/user-favorites.types';
+import type { IUserFavoriteGroup, IUserFavoritesGroups, IUserFavoritesGroupsState } from '../types/favorite-groups.types';
+import type { IFavoriteMetadata, UserFavorite } from '../types/user-favorites.types';
 import { getEndpointIDFromFavorite } from '../user-favorite-helpers';
 
 const favoritesEntityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, userFavouritesEntityType);
 
 export const favoriteEntitiesSelector = (state: InternalAppState):
-  IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>> => state.requestData[favoritesEntityKey];
+  IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>> => state.requestData[favoritesEntityKey] as IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>>;
 
 const favoriteGroupsStateSelector = (state: InternalAppState): IUserFavoritesGroupsState => state.userFavoritesGroups;
 

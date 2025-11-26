@@ -3,10 +3,10 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
-import { PaginationMonitorFactory, EntityCatalogHelper, EntityServiceFactory, EntityMonitorFactory } from '@stratosui/store';
+import { PaginationMonitorFactory, EntityCatalogHelper, } from '@stratosui/store';
 
 // Tailwind Material Replacements
-import { TailwindDialogService, TailwindDialogRef, TailwindDialogRefImpl } from '../shared/services/tailwind-dialog.service';
+import { TailwindDialogService, } from '../shared/services/tailwind-dialog.service';
 import { TailwindSnackBarService } from '../shared/services/tailwind-snackbar.service';
 import { TailwindErrorStateMatcher } from '../shared/services/tailwind-error-state-matcher';
 
@@ -16,22 +16,15 @@ import { BytesToHumanSize, MegaBytesToHumanSize } from './byte-formatters.pipe';
 import { ClickStopPropagationDirective } from './click-stop-propagation.directive';
 import { APP_TITLE, appTitleFactory } from './core.types';
 import { DotContentComponent } from './dot-content/dot-content.component';
-import { EndpointsService } from './endpoints.service';
 import { EntityFavoriteStarComponent } from './entity-favorite-star/entity-favorite-star.component';
-import { EventWatcherService } from './event-watcher/event-watcher.service';
 import { InfinityPipe } from './infinity.pipe';
 import { LogOutDialogComponent } from './log-out-dialog/log-out-dialog.component';
 import { MDAppModule } from './md.module';
-import { PageHeaderService } from './page-header-service/page-header.service';
 import { PageNotFoundComponentComponent } from './page-not-found-component/page-not-found-component.component';
 import { SafeImgPipe } from './safe-img.pipe';
 import { ShowHideButtonComponent } from './show-hide-button/show-hide-button.component';
 import { StatefulIconComponent } from './stateful-icon/stateful-icon.component';
 import { TruncatePipe } from './truncate.pipe';
-import { UserProfileService } from './user-profile.service';
-import { UserService } from './user.service';
-import { UtilsService } from './utils.service';
-import { WindowRef } from './window-ref/window-ref.service';
 
 @NgModule({
     imports: [
@@ -95,7 +88,6 @@ import { WindowRef } from './window-ref/window-ref.service';
     ]
 })
 export class CoreModule {
-  constructor() { }
 
 }
 

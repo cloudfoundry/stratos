@@ -1,10 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { ITableColumn } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { CFAppState } from '../../../../../cf-app-state';
-import { IBuildpack } from '../../../../../cf-api.types';
+import type { ITableColumn } from '@stratosui/core';
+import type { APIResource, GeneralEntityAppState } from '@stratosui/store';
+import type { CFAppState } from '../../../../../cf-app-state';
+import type { IBuildpack } from '../../../../../cf-api.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfBuildpackCardComponent } from './cf-buildpack-card/cf-buildpack-card.component';
@@ -14,7 +14,7 @@ import { CfBuildpacksDataSource } from './cf-buildpacks-data-source';
   providedIn: 'root'
 })
 export class CfBuildpacksListConfigService extends BaseCfListConfig<APIResource<IBuildpack>> {
-  private store = inject(Store<CFAppState>);
+  private store = inject(Store<GeneralEntityAppState>);
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
 
   cardComponent = CfBuildpackCardComponent;
@@ -53,8 +53,8 @@ export class CfBuildpacksListConfigService extends BaseCfListConfig<APIResource<
   }];
   constructor() {
     super();
-    this.dataSource = new CfBuildpacksDataSource(this.store, this.activeRouteCfOrgSpace.cfGuid, this as BaseCfListConfig<APIResource<IBuildpack>>);
+    this.dataSource = new CfBuildpacksDataSource(this.store, this.activeRouteCfOrgSpace.cfGuid, this as any);
   }
-  getColumns = () => this.columns;
-  getDataSource = () => this.dataSource;
+  getColumns = () => this.columns as any;
+  getDataSource = () => this.dataSource as any;
 }

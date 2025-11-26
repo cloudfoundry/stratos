@@ -16,7 +16,7 @@ export { ActiveRouteCfOrgSpace, ActiveRouteCfCell } from '../src/features/cf/cf-
 export { ApplicationStateService } from '../src/shared/services/application-state.service';
 export { ApplicationEnvVarsHelper } from '../src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 
-// CF-specific test helpers
+// CF-specific test helpers - export everything from helper files
 export * from './application-service-helper';
 export * from './cf-test-helper';
 export * from './cloud-foundry-endpoint-service.helper';

@@ -1,16 +1,16 @@
-import { CommonModule } from '@angular/common';
-import { AfterContentInit, Component, Input, OnDestroy, signal, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { type AfterContentInit, Component, Input, type OnDestroy, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf, Subject } from 'rxjs';
+import { type Observable, of as observableOf, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { CustomFormFieldComponent, MatLabelComponent, CustomSelectComponent, CustomOptionComponent, pathGet, StepOnNextResult } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
+import { CustomFormFieldComponent, MatLabelComponent, CustomSelectComponent, CustomOptionComponent, pathGet, type StepOnNextResult } from '@stratosui/core';
+import type { APIResource } from '@stratosui/store';
 import { SetCreateServiceInstanceApp } from '../../../../actions/create-service-instance.actions';
-import { CFAppState } from '../../../../cf-app-state';
-import { IServicePlan } from '../../../../cf-api-svc.types';
-import { IApp } from '../../../../cf-api.types';
-import { SchemaFormComponent, SchemaFormConfig } from '../../schema-form/schema-form.component';
+import type { CFAppState } from '../../../../cf-app-state';
+import type { IServicePlan } from '../../../../cf-api-svc.types';
+import type { IApp } from '../../../../cf-api.types';
+import { SchemaFormComponent, type SchemaFormConfig } from '../../schema-form/schema-form.component';
 
 interface BindAppsForm {
   apps: FormControl<string | null>;
@@ -45,7 +45,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   stepperForm!: FormGroup<BindAppsForm>;
   guideText = 'Specify the application to bind (Optional)';
   selectedServicePlan!: APIResource<IServicePlan>;
-  bindingParams: object = {};
+  bindingParams: Record<string, unknown> = {};
   schemaFormConfig!: SchemaFormConfig;
 
   // Lifecycle management for subscriptions
@@ -56,7 +56,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   }
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store,
     private fb: FormBuilder,
   ) {
     this.stepperForm = this.fb.group<BindAppsForm>({
@@ -95,20 +95,20 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
     if (!this.schemaFormConfig) {
       // Create new config
       this.schemaFormConfig = {
-        schema: pathGet('entity.schemas.service_binding.create.parameters', this.selectedServicePlan),
+        schema: pathGet('entity.schemas.service_binding.create.parameters', this.selectedServicePlan) as object,
       };
     } else {
       // Update existing config (retaining any existing config)
       this.schemaFormConfig = {
         ...this.schemaFormConfig,
         initialData: this.bindingParams,
-        schema: pathGet('entity.schemas.service_binding.create.parameters', this.selectedServicePlan)
+        schema: pathGet('entity.schemas.service_binding.create.parameters', this.selectedServicePlan) as object
       };
     }
   }
 
-  setBindingParams(data: any) {
-    this.bindingParams = data;
+  setBindingParams(data: unknown) {
+    this.bindingParams = data as Record<string, unknown>;
   }
 
   setParamValid(valid: boolean) {

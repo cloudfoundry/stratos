@@ -1,33 +1,34 @@
 import { TemplatePortal } from '@angular/cdk/portal';
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild  } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, type AfterViewInit, Component, Input, type OnDestroy, type TemplateRef, ViewChild  } from '@angular/core';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import {
   InternalEventSeverity,
-  IFavoriteMetadata,
-  UserFavorite,
+  type IFavoriteMetadata,
+  type UserFavorite,
   AddRecentlyVisitedEntityAction,
-  StratosStatus,
+  type StratosStatus,
   selectDashboardState,
   ToggleSideNav,
-  AppState,
+  type AppState,
   selectIsMobile,
-  UserProfileInfo,
+  type UserProfileInfo,
 } from '@stratosui/store';
 import { getTime } from 'date-fns';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, type Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { UserProfileService } from '../../../core/user-profile.service';
-import { IPageSideNavTab } from '../../../features/dashboard/page-side-nav/page-side-nav.component';
+import type { IPageSideNavTab } from '../../../features/dashboard/page-side-nav/page-side-nav.component';
 import { TabNavService } from '../../../tab-nav.service';
-import { GlobalEventService, IGlobalEvent } from '../../global-events.service';
+import {GlobalEventService} from '../../global-events.service';
+import type {IGlobalEvent} from '../../global-events.service';
 import { EndpointsService } from './../../../core/endpoints.service';
 import { environment } from './../../../environments/environment';
-import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
+import { BREADCRUMB_URL_PARAM, type IHeaderBreadcrumb, type IHeaderBreadcrumbLink } from './page-header.types';
 import { EntityFavoriteStarComponent } from '../../../core/entity-favorite-star/entity-favorite-star.component';
 import { ExtensionButtonsComponent } from '../extension-buttons/extension-buttons.component';
 import { RecentEntitiesComponent } from '../recent-entities/recent-entities.component';
@@ -68,7 +69,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public isHistoryMenuOpen = false;
   public isUserMenuOpen = false;
 
-  @ViewChild('pageHeaderTmpl', { static: true }) pageHeaderTmpl!: TemplateRef<any>;
+  @ViewChild('pageHeaderTmpl', { static: true }) pageHeaderTmpl!: TemplateRef<unknown>;
 
   @Input() hideSideNavButton = false;
 
@@ -202,7 +203,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
       map(profile => {
         let name = profile.userName;
         if (profile.name) {
-          name = profile.name.givenName + ' ' + profile.name.familyName;
+          name = `${profile.name.givenName} ${profile.name.familyName}`;
           name = name.trim();
         }
         return name ? name : profile.userName;

@@ -1,16 +1,16 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
+import { BehaviorSubject, type Observable, of as observableOf } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import {
-  CFAppState,
+  type CFAppState,
   serviceInstancesEntityType,
-  IService,
-  IServiceInstance,
+  type IService,
+  type IServiceInstance,
   cfEntityCatalog,
   cfEntityFactory,
   CfCurrentUserPermissions,
@@ -24,7 +24,7 @@ import { ServiceInstanceLastOpComponent } from '../../../../service-instance-las
 import {
   CurrentUserPermissionsService,
   ClickStopPropagationDirective,
-  AppChip,
+  type AppChip,
   AppChipsComponent,
   CardCell,
   MetaCardComponent,
@@ -34,10 +34,10 @@ import {
   MetaCardValueComponent,
   MultilineTitleComponent,
 } from '@stratosui/core';
-import { APIResource, MenuItem, ComponentEntityMonitorConfig } from '@stratosui/store';
+import { type APIResource, type MenuItem, ComponentEntityMonitorConfig , type GeneralEntityAppState } from '@stratosui/store';
 import {
   TableCellServiceBrokerComponent,
-  TableCellServiceBrokerComponentConfig,
+  type TableCellServiceBrokerComponentConfig,
   TableCellServiceBrokerComponentMode,
 } from '../../cf-services/table-cell-service-broker/table-cell-service-broker.component';
 
@@ -49,6 +49,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    AsyncPipe,
     RouterModule,
     MetaCardComponent,
     MetaCardTitleComponent,
@@ -68,7 +69,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   @Input('row')
   set row(row: APIResource<IServiceInstance>) {
     super.row = row;
-    if (row && row.entity && row.metadata) {
+    if (row?.entity && row.metadata) {
       this.serviceInstanceEntity = row;
       const schema = cfEntityFactory(serviceInstancesEntityType);
       this.entityConfig = new ComponentEntityMonitorConfig(row.metadata.guid, schema);
@@ -135,7 +136,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
         );
       }
 
-      this.servicePlanName = this.serviceInstanceEntity.entity.service_plan && this.serviceInstanceEntity.entity.service_plan.entity ?
+      this.servicePlanName = this.serviceInstanceEntity.entity.service_plan?.entity ?
         getServicePlanName(this.serviceInstanceEntity.entity.service_plan.entity)
         : null;
 
@@ -149,7 +150,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   }
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     private serviceActionHelperService: ServiceActionHelperService,
     private currentUserPermissionsService: CurrentUserPermissionsService,
   ) {

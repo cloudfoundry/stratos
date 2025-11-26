@@ -1,18 +1,18 @@
 import { ChangeDetectorRef, CUSTOM_ELEMENTS_SCHEMA, NgZone, provideZonelessChangeDetection } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, of as observableOf } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { APIResource, EndpointModel, GeneralAppState, ListView, PaginationEntityState } from '@stratosui/store';
+import { APIResource, type EndpointModel, GeneralAppState, type ListView, type PaginationEntityState } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { BaseTestModules } from '@test-framework/core-test.helper';
 
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { getFilterFunction } from './data-sources-controllers/local-filtering-sorting';
-import { IListDataSource } from './data-sources-controllers/list-data-source-types';
+import type { IListDataSource } from './data-sources-controllers/list-data-source-types';
 import { EndpointCardComponent } from './list-types/endpoint/endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from './list-types/endpoint/endpoint-list.helpers';
 import { EndpointsListConfigService } from './list-types/endpoint/endpoints-list-config.service';
@@ -42,7 +42,7 @@ class MockListConfig<T> implements ListConfig<T> {
         totalResults: 0
       },
       params: {},
-    } as any),
+    } as PaginationEntityState),
     page$: observableOf([]),
     isLoadingPage$: observableOf(false),
     maxedResults$: observableOf(false),
@@ -54,11 +54,11 @@ class MockListConfig<T> implements ListConfig<T> {
       string: '',
       items: {},
       filterKey: ''
-    } as any),
+    } as PaginationEntityState),
     sort$: observableOf({
       direction: 'asc',
       field: ''
-    } as any),
+    } as PaginationEntityState),
     connect: () => observableOf([]),
     disconnect: () => {},
     destroy: () => {},
@@ -70,7 +70,7 @@ class MockListConfig<T> implements ListConfig<T> {
     paginationKey: 'mock',
     entitySelectConfig: undefined,
     // Additional required properties for ListPaginationController
-    action: { type: 'MOCK_ACTION' } as any,
+    action: { type: 'MOCK_ACTION' } as IListDataSource<T>['action'],
     sourceScheme: undefined,
     getRowState: undefined,
     rowsState: undefined,
@@ -80,7 +80,7 @@ class MockListConfig<T> implements ListConfig<T> {
     getFilterFromParams: () => '',
     setMultiFilter: () => {},
     updateMetricsAction: () => {},
-  } as any);
+  } as IListDataSource<T>);
   getGlobalActions = () => [];
   getInitialised = null;
   getMultiActions = () => [];
@@ -115,14 +115,14 @@ describe('ListComponent', () => {
         schemas: [CUSTOM_ELEMENTS_SCHEMA]
       }).compileComponents();
 
-      const fixture = TestBed.createComponent<ListComponent<any>>(ListComponent);
+      const fixture = TestBed.createComponent<ListComponent<unknown>>(ListComponent);
       const component = fixture.componentInstance;
 
       // Override getInitialised to provide custom initialization observable
       const customGetInit = vi.fn().mockReturnValue(observableOf(true));
       component.config.getInitialised = customGetInit;
 
-      const componentDeTyped = (component as any);
+      const componentDeTyped = component as ListComponent<unknown> & { initialise: () => void };
       const initSpy = vi.spyOn(componentDeTyped, 'initialise');
 
       component.ngOnInit();

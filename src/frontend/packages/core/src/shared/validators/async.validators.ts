@@ -1,7 +1,8 @@
-import { AbstractControl, AsyncValidatorFn, ValidationErrors } from '@angular/forms';
+import type {AbstractControl} from '@angular/forms';
+import type {AsyncValidatorFn, ValidationErrors} from '@angular/forms';
 import { Observable, of, timer } from 'rxjs';
 import { map, catchError, switchMap, distinctUntilChanged } from 'rxjs/operators';
-import { UniquenessValidatorConfig, ValidationErrorKey } from './validation.types';
+import { type UniquenessValidatorConfig, ValidationErrorKey } from './validation.types';
 
 /**
  * Factory for async uniqueness validator
@@ -19,7 +20,7 @@ import { UniquenessValidatorConfig, ValidationErrorKey } from './validation.type
  * });
  * ```
  */
-export function createUniquenessValidator<T = any>(
+export function createUniquenessValidator<T = unknown>(
   config: UniquenessValidatorConfig<T>
 ): AsyncValidatorFn {
   const debounceMs = config.debounceMs ?? 300;
@@ -29,7 +30,7 @@ export function createUniquenessValidator<T = any>(
       return of(null);
     }
 
-    const value = config.caseSensitive
+    const _value = config.caseSensitive
       ? control.value.trim()
       : control.value.trim().toLowerCase();
 

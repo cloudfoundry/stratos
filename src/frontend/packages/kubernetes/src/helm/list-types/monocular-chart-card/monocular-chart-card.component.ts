@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component} from '@angular/core';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount } from 'rxjs/operators';
 
 import { CardCell } from '../../../../../core/src/shared/components/list/list.types';
 import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { HELM_ENDPOINT_TYPE, HELM_HUB_ENDPOINT_TYPE, HELM_REPO_ENDPOINT_TYPE } from '../../helm-entity-factory';
 import { ChartItemComponent } from '../../monocular/chart-item/chart-item.component';
-import { MonocularChart } from '../../store/helm.types';
+import type { MonocularChart } from '../../store/helm.types';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,

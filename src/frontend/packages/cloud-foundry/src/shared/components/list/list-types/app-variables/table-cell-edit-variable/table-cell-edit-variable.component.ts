@@ -2,7 +2,7 @@ import { Component , ChangeDetectionStrategy } from '@angular/core';
 
 import { TableCellCustom, TailwindDialogService } from '@stratosui/core';
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
-import { ListAppEnvVar } from '../cf-app-variables-data-source';
+import type { ListAppEnvVar } from '../cf-app-variables-data-source';
 
 @Component({
   selector: 'app-table-cell-edit-variable',

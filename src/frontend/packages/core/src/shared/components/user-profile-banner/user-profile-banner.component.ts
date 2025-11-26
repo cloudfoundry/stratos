@@ -1,6 +1,6 @@
 
 import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
-import { UserProfileInfo } from '@stratosui/store';
+import type { UserProfileInfo } from '@stratosui/store';
 import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
 
 @Component({
@@ -18,7 +18,7 @@ export class UserProfileBannerComponent {
   name!: string;
   email!: string;
   username!: string;
-  userProfile: any;
+  userProfile: unknown;
   canUseGravatar!: boolean;
 
   @Input()
@@ -31,7 +31,7 @@ export class UserProfileBannerComponent {
     this.userProfile = user;
     if (user) {
       this.username = user.userName;
-      this.name = user.name.givenName + ' ' + user.name.familyName;
+      this.name = `${user.name.givenName} ${user.name.familyName}`;
       this.name = this.name.trim();
 
       if (user.emails.length > 0) {

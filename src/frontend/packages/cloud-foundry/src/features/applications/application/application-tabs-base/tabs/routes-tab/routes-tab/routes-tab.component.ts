@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
-import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 
 import {
@@ -11,7 +11,7 @@ import {
   ListConfig,
   NoContentMessageComponent,
 } from '@stratosui/core';
-import { CFAppState } from '../../../../../../../cf-app-state';
+import type { CFAppState } from '../../../../../../../cf-app-state';
 import {
   CfAppRoutesListConfigService,
 } from '../../../../../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';

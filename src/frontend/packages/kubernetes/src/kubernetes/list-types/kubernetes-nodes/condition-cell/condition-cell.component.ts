@@ -1,8 +1,12 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, type OnInit } from '@angular/core';
 
 import { BooleanIndicatorComponent } from '../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
-import { KubernetesNode } from '../../../store/kube.types';
+import type { ConditionType, KubernetesNode } from '../../../store/kube.types';
+
+interface ConditionCellConfig {
+  conditionType: ConditionType;
+}
 
 @Component({
   selector: 'app-condition-cell',
@@ -19,13 +23,10 @@ export class ConditionCellComponent extends TableCellCustom<KubernetesNode> impl
 
   public inverse = false;
 
-  constructor() {
-    super();
-  }
-
   ngOnInit() {
-    const conditions = this.row.status.conditions.filter(c => c.type === this.config.conditionType);
-    if (conditions && conditions.length) {
+    const config = this.config as ConditionCellConfig;
+    const conditions = this.row.status.conditions.filter(c => c.type === config.conditionType);
+    if (conditions?.length) {
       const condition = conditions[0];
       switch (condition.status) {
         case 'True':

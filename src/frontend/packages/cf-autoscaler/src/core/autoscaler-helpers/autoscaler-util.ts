@@ -1,6 +1,6 @@
 import { addDays, format, setHours, setMinutes } from 'date-fns';
 
-import {
+import type {
   AppAutoscalerMetricDataPoint,
   AppAutoscalerMetricLegend,
   AppAutoscalerMetricMapInfo,
@@ -9,109 +9,135 @@ import {
 } from '../../store/app-autoscaler.types';
 
 
-export class AutoscalerConstants {
-  public static S2NS = 1000000000;
-  public static MetricTypes = ['memoryused', 'memoryutil', 'responsetime', 'throughput', 'cpu'];
-  public static MetricPercentageTypes = ['memoryutil'];
-  public static ScaleTypes = ['upper', 'lower'];
-  public static UpperOperators = ['>', '>='];
-  public static LowerOperators = ['<', '<='];
-  public static WeekdayOptions = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  public static MonthdayOptions = (() => {
-    const days = [];
-    for (let i = 0; i < 31; i++) {
-      days[i] = i + 1;
-    }
-    return days;
-  })();
-
-  public static normalColor = 'rgba(90,167,0,0.6)';
-  public static MomentFormateDate = 'yyyy-MM-dd';
-  public static MomentFormateDateTimeT = "yyyy-MM-dd'T'HH:mm";
-  public static MomentFormateTime = 'HH:mm';
-  public static MomentFormateTimeS = 'HH:mm:ss';
-
-  public static PolicyDefaultSetting = {
-    breach_duration_secs_default: 120,
-    breach_duration_secs_min: 60,
-    breach_duration_secs_max: 3600,
-    cool_down_secs_default: 300,
-    cool_down_secs_min: 60,
-    cool_down_secs_max: 3600,
-  };
-  public static PolicyDefaultTrigger = {
-    metric_type: 'memoryused',
-    breach_duration_secs: AutoscalerConstants.PolicyDefaultSetting.breach_duration_secs_default,
-    threshold: 10,
-    operator: '<=',
-    cool_down_secs: AutoscalerConstants.PolicyDefaultSetting.cool_down_secs_default,
-    adjustment: '-1'
-  };
-  public static PolicyDefaultRecurringSchedule = {
-    start_time: '10:00',
-    end_time: '18:00',
-    days_of_week: [
-      1, 2, 3
-    ],
-    instance_min_count: 1,
-    instance_max_count: 10,
-    initial_min_instance_count: 5
-  };
-  public static PolicyDefaultSpecificDate = {
-    start_date_time: format(setMinutes(setHours(addDays(new Date(), 1), 10), 0), AutoscalerConstants.MomentFormateDateTimeT),
-    end_date_time: format(setMinutes(setHours(addDays(new Date(), 1), 18), 0), AutoscalerConstants.MomentFormateDateTimeT),
-    instance_min_count: 1,
-    instance_max_count: 10,
-    initial_min_instance_count: 5
-  };
-
-  public static metricMap: { [metricName: string]: AppAutoscalerMetricMapInfo } = {
-    memoryused: {
-      unit_internal: 'MB',
-      interval: 40,
-    },
-    memoryutil: {
-      unit_internal: ' % ',
-      interval: 40,
-    },
-    responsetime: {
-      unit_internal: 'ms',
-      interval: 40,
-    },
-    throughput: {
-      unit_internal: 'rps',
-      interval: 40,
-    },
-    cpu: {
-      unit_internal: ' % ',
-      interval: 40,
-    }
-  };
-
-  public static getMetricUnit(metricType: string, unit?: string) {
-    if (AutoscalerConstants.metricMap[metricType]) {
-      return AutoscalerConstants.metricMap[metricType].unit_internal;
-    } else {
-      return unit || '';
-    }
+// Constants
+export const S2NS = 1000000000;
+export const MetricTypes = ['memoryused', 'memoryutil', 'responsetime', 'throughput', 'cpu'] as const;
+export const MetricPercentageTypes = ['memoryutil'] as const;
+export const ScaleTypes = ['upper', 'lower'] as const;
+export const UpperOperators = ['>', '>='] as const;
+export const LowerOperators = ['<', '<='] as const;
+export const WeekdayOptions = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
+export const MonthdayOptions = (() => {
+  const days: number[] = [];
+  for (let i = 0; i < 31; i++) {
+    days[i] = i + 1;
   }
+  return days;
+})();
 
-  public static getMetricInterval(metricType: string) {
-    if (AutoscalerConstants.metricMap[metricType]) {
-      return AutoscalerConstants.metricMap[metricType].interval;
-    } else {
-      return 40;
-    }
-  }
+export const normalColor = 'rgba(90,167,0,0.6)';
+export const MomentFormateDate = 'yyyy-MM-dd';
+export const MomentFormateDateTimeT = "yyyy-MM-dd'T'HH:mm";
+export const MomentFormateTime = 'HH:mm';
+export const MomentFormateTimeS = 'HH:mm:ss';
 
-  public static createMetricId(appGuid: string, metricType: string): string {
-    return appGuid + ':' + metricType;
-  }
+export const PolicyDefaultSetting = {
+  breach_duration_secs_default: 120,
+  breach_duration_secs_min: 60,
+  breach_duration_secs_max: 3600,
+  cool_down_secs_default: 300,
+  cool_down_secs_min: 60,
+  cool_down_secs_max: 3600,
+} as const;
 
-  public static getMetricFromMetricId(metricId: string): string {
-    return metricId.slice(metricId.indexOf(':') + 1, metricId.length);
+export const PolicyDefaultTrigger = {
+  metric_type: 'memoryused',
+  breach_duration_secs: PolicyDefaultSetting.breach_duration_secs_default,
+  threshold: 10,
+  operator: '<=',
+  cool_down_secs: PolicyDefaultSetting.cool_down_secs_default,
+  adjustment: '-1'
+} as const;
+
+export const PolicyDefaultRecurringSchedule = {
+  start_time: '10:00',
+  end_time: '18:00',
+  days_of_week: [
+    1, 2, 3
+  ] as number[],
+  instance_min_count: 1,
+  instance_max_count: 10,
+  initial_min_instance_count: 5
+};
+
+export const PolicyDefaultSpecificDate = {
+  start_date_time: format(setMinutes(setHours(addDays(new Date(), 1), 10), 0), MomentFormateDateTimeT),
+  end_date_time: format(setMinutes(setHours(addDays(new Date(), 1), 18), 0), MomentFormateDateTimeT),
+  instance_min_count: 1,
+  instance_max_count: 10,
+  initial_min_instance_count: 5
+} as const;
+
+export const metricMap: { [metricName: string]: AppAutoscalerMetricMapInfo } = {
+  memoryused: {
+    unit_internal: 'MB',
+    interval: 40,
+  },
+  memoryutil: {
+    unit_internal: ' % ',
+    interval: 40,
+  },
+  responsetime: {
+    unit_internal: 'ms',
+    interval: 40,
+  },
+  throughput: {
+    unit_internal: 'rps',
+    interval: 40,
+  },
+  cpu: {
+    unit_internal: ' % ',
+    interval: 40,
   }
+};
+
+export function getMetricUnit(metricType: string, unit?: string): string {
+  if (metricMap[metricType]) {
+    return metricMap[metricType].unit_internal;
+  }
+  return unit || '';
 }
+
+export function getMetricInterval(metricType: string): number {
+  if (metricMap[metricType]) {
+    return metricMap[metricType].interval;
+  }
+  return 40;
+}
+
+export function createMetricId(appGuid: string, metricType: string): string {
+  return `${appGuid}:${metricType}`;
+}
+
+export function getMetricFromMetricId(metricId: string): string {
+  return metricId.slice(metricId.indexOf(':') + 1, metricId.length);
+}
+
+// Backward compatibility object (can be removed if all usages are updated)
+export const AutoscalerConstants = {
+  S2NS,
+  MetricTypes,
+  MetricPercentageTypes,
+  ScaleTypes,
+  UpperOperators,
+  LowerOperators,
+  WeekdayOptions,
+  MonthdayOptions,
+  normalColor,
+  MomentFormateDate,
+  MomentFormateDateTimeT,
+  MomentFormateTime,
+  MomentFormateTimeS,
+  PolicyDefaultSetting,
+  PolicyDefaultTrigger,
+  PolicyDefaultRecurringSchedule,
+  PolicyDefaultSpecificDate,
+  metricMap,
+  getMetricUnit,
+  getMetricInterval,
+  createMetricId,
+  getMetricFromMetricId,
+} as const;
 
 export const PolicyAlert = {
   alertInvalidPolicyMinimumRange: 'The Minimum Instance Count must be an integer less than the Maximum Instance Count.',
@@ -142,27 +168,30 @@ export const PolicyAlert = {
   alertInvalidPolicyTriggerScheduleEmpty: 'At least one Scaling Rule or Schedule should be defined.',
 };
 
-export function isEqual(a: any, b: any): boolean {
+export function isEqual(a: unknown, b: unknown): boolean {
   if (typeof a !== typeof b) {
     return false;
-  } else {
-    if (typeof a === 'object') {
-      if (Object.keys(a).length !== Object.keys(b).length) {
-        return false;
-      }
-      let equal = true;
-      Object.keys(a).map((key) => {
-        equal = equal && isEqual(a[key], b[key]);
-      });
-      return equal;
-    } else {
-      return JSON.stringify(a) === JSON.stringify(b);
-    }
   }
+  if (typeof a === 'object' && typeof b === 'object') {
+    if (a === null || b === null) {
+      return a === b;
+    }
+    const keysA = Object.keys(a);
+    const keysB = Object.keys(b);
+    if (keysA.length !== keysB.length) {
+      return false;
+    }
+    let equal = true;
+    for (const key of keysA) {
+      equal = equal && isEqual((a as Record<string, unknown>)[key], (b as Record<string, unknown>)[key]);
+    }
+    return equal;
+  }
+  return JSON.stringify(a) === JSON.stringify(b);
 }
 
 export function getScaleType(operator: string): string {
-  if (AutoscalerConstants.LowerOperators.indexOf(operator) >= 0) {
+  if (AutoscalerConstants.LowerOperators.indexOf(operator as typeof AutoscalerConstants.LowerOperators[number]) >= 0) {
     return 'lower';
   } else {
     return 'upper';
@@ -196,20 +225,20 @@ function getLegendName(currentRule: AppScalingRule, latestRule: AppScalingRule, 
   }
 }
 
-function buildUpperLegendData(legendData: any, upper: AppScalingRule[], noLower: boolean): AppScalingRule {
+function buildUpperLegendData(legendData: AppAutoscalerMetricLegend[], upper: AppScalingRule[], noLower: boolean): AppScalingRule {
   let latestUl: AppScalingRule;
   upper.forEach((item, index) => {
     const name = getLegendName(item, latestUl, index === 0, false);
     legendData.push({
       name,
-      value: item.color
+      value: item.color || ''
     });
     latestUl = item;
   });
   if (noLower) {
     legendData.push({
       name: `${upper[0].metric_type} ${getOppositeOperator(latestUl.operator)} ${latestUl.threshold}`,
-      value: AutoscalerConstants.normalColor
+      value: normalColor
     });
   }
   return latestUl;

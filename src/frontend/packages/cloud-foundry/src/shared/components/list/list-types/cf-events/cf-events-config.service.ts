@@ -1,11 +1,11 @@
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { distinctUntilChanged, first, map } from 'rxjs/operators';
 
-import { arraysEqual, valueOrCommonFalsy, ITableColumn, IListConfig, ListConfig, ListViewTypes } from '@stratosui/core';
-import { AddParams, APIResource, PaginatedAction } from '@stratosui/store';
-import { CfEvent } from '../../../../../cf-api.types';
-import { CFAppState } from '../../../../../cf-app-state';
+import { arraysEqual, valueOrCommonFalsy, type ITableColumn, type IListConfig, ListConfig, ListViewTypes } from '@stratosui/core';
+import { AddParams, type APIResource, type PaginatedAction, type GeneralEntityAppState } from '@stratosui/store';
+import type { CfEvent } from '../../../../../cf-api.types';
+import type { CFAppState } from '../../../../../cf-app-state';
 import { QParam, QParamJoiners } from '../../../../q-param';
 import { CfEventsDataSource } from './cf-events-data-source';
 import { TableCellEventActeeComponent } from './table-cell-event-actee/table-cell-event-actee.component';
@@ -14,12 +14,12 @@ import { TableCellEventDetailComponent } from './table-cell-event-detail/table-c
 import { TableCellEventTimestampComponent } from './table-cell-event-timestamp/table-cell-event-timestamp.component';
 import { TableCellEventTypeComponent } from './table-cell-event-type/table-cell-event-type.component';
 
-export class CfEventsConfigService extends ListConfig<APIResource> implements IListConfig<APIResource<CfEvent>> {
+export class CfEventsConfigService extends ListConfig<APIResource<CfEvent>> implements IListConfig<APIResource<CfEvent>> {
 
   static acteeColumnId = 'actee';
   eventSource: CfEventsDataSource;
 
-  columns: Array<ITableColumn<APIResource>> = [
+  columns: Array<ITableColumn<APIResource<CfEvent>>> = [
     {
       columnId: 'actor', headerCell: () => 'Actor', cellComponent: TableCellEventActionComponent, cellFlex: '2'
     },
@@ -49,7 +49,7 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
   };
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     cfGuid?: string,
     orgGuid?: string,
     spaceGuid?: string,
@@ -70,10 +70,10 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
     );
   }
 
-  getGlobalActions = (): import('../../../../../../../core/src/shared/components/list/list.component.types').IGlobalListAction<APIResource>[] => null;
-  getMultiActions = (): import('../../../../../../../core/src/shared/components/list/list.component.types').IMultiListAction<APIResource>[] => null;
-  getSingleActions = (): import('../../../../../../../core/src/shared/components/list/list.component.types').IListAction<APIResource>[] => null;
-  getColumns = (): ITableColumn<APIResource>[] => this.columns;
+  getGlobalActions = (): import('../../../../../../../core/src/shared/components/list/list.component.types').IGlobalListAction<APIResource<CfEvent>>[] => null;
+  getMultiActions = (): import('../../../../../../../core/src/shared/components/list/list.component.types').IMultiListAction<APIResource<CfEvent>>[] => null;
+  getSingleActions = (): import('../../../../../../../core/src/shared/components/list/list.component.types').IListAction<APIResource<CfEvent>>[] => null;
+  getColumns = (): ITableColumn<APIResource<CfEvent>>[] => this.columns;
   getDataSource = (): CfEventsDataSource => this.eventSource;
   getMultiFiltersConfigs = (): import('../../../../../../../core/src/shared/components/list/list.component.types').IListMultiFilterConfig[] => [];
 
@@ -99,10 +99,10 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
       const acteeChanged = valueOrCommonFalsy(values.actee) !== valueOrCommonFalsy(currentFilters.actee);
       if (typeChanged || acteeChanged) {
         const newQ: string[] = [];
-        if (values.type && values.type.length) {
+        if (values.type?.length) {
           newQ.push(new QParam('type', values.type, QParamJoiners.in).toString());
         }
-        if (values.actee && values.actee.length) {
+        if (values.actee?.length) {
           newQ.push(new QParam('actee', values.actee, QParamJoiners.in).toString());
         }
         this.store.dispatch(new AddParams(action, this.eventSource.paginationKey, { q: newQ }));

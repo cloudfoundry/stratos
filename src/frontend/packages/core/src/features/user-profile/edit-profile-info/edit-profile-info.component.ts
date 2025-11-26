@@ -1,11 +1,11 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit  } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { AbstractControl, ReactiveFormsModule, FormBuilder, FormGroup, FormControl, ValidatorFn, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, type OnDestroy, type OnInit  } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { type AbstractControl, ReactiveFormsModule, FormBuilder, type FormGroup, FormControl, type ValidatorFn, Validators } from '@angular/forms';
 import { CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
 import { RouterModule } from '@angular/router';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '../../../shared/services/tailwind-error-state-matcher';
-import { UserProfileInfo, UserProfileInfoUpdates } from '@stratosui/store';
-import { Subscription } from 'rxjs';
+import type { UserProfileInfo, UserProfileInfoUpdates } from '@stratosui/store';
+import type { Subscription } from 'rxjs';
 import { delay, first, map, take, tap } from 'rxjs/operators';
 
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
@@ -13,7 +13,7 @@ import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos
 import { UserProfileService } from '../../../core/user-profile.service';
 import { ShowHideButtonComponent } from '../../../core/show-hide-button/show-hide-button.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
-import { StepComponent, StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
+import { StepComponent, type StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../shared/components/stepper/steppers/steppers.component';
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 
@@ -132,7 +132,7 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
   }
 
   confirmPasswordValidator(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any, } => {
+    return (control: AbstractControl): { [key: string]: unknown } | null => {
       const same = control.value === this.editProfileForm.value.newPassword;
       return same ? null : { passwordMatch: { value: control.value } };
     };
@@ -145,7 +145,7 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
     for (const key of Object.keys(this.editProfileForm.value)) {
       const control = this.editProfileForm.get(key);
       if (control && !control.pristine) {
-        (updates as any)[key] = this.editProfileForm.value[key as keyof EditProfileForm];
+        updates[key as keyof UserProfileInfoUpdates] = this.editProfileForm.value[key as keyof EditProfileForm];
       }
     }
     return this.userProfileService.updateProfile(this.profile, updates).pipe(

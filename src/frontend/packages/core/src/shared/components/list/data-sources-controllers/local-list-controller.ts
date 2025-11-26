@@ -1,18 +1,18 @@
-import { defaultClientPaginationPageSize, LocalPaginationHelpers, PaginationEntityState } from '@stratosui/store';
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { defaultClientPaginationPageSize, LocalPaginationHelpers, type PaginationEntityState } from '@stratosui/store';
+import { combineLatest, type Observable, of as observableOf } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
 import { distinctUntilChanged, map, shareReplay, switchMap, tap } from 'rxjs/operators';
 
-import { DataFunction } from './list-data-source';
+import type { DataFunction } from './list-data-source';
 import { splitCurrentPage } from './local-list-controller.helpers';
 
-export class LocalListController<T = any> {
+export class LocalListController<T = unknown> {
   public page$: Observable<T[]>;
   constructor(
     page$: Observable<T[]>,
     pagination$: Observable<PaginationEntityState>,
     private setResultCount: (pagination: PaginationEntityState, entities: (T | T[])[]) => void,
-    dataFunctions?: DataFunction<any>[]
+    dataFunctions?: DataFunction<unknown>[]
   ) {
     const pagesObservable$ = this.buildPagesObservable(page$, pagination$, dataFunctions);
     const currentPageIndexObservable$ = this.buildCurrentPageNumberObservable(pagination$);
@@ -28,7 +28,7 @@ export class LocalListController<T = any> {
   private buildPagesObservable(
     page$: Observable<T[]>,
     pagination$: Observable<PaginationEntityState>,
-    dataFunctions?: DataFunction<any>[]) {
+    dataFunctions?: DataFunction<unknown>[]) {
     // Updates whenever a page setting changes (current page, page size, sorting, etc) and not when
     const cleanPagination$ = pagination$.pipe(
       distinctUntilChanged((oldVal, newVal) => !this.paginationHasChanged(oldVal, newVal))
@@ -43,7 +43,7 @@ export class LocalListController<T = any> {
   private buildFullCleanPageObservable(
     cleanPage$: Observable<T[]>,
     cleanPagination$: Observable<PaginationEntityState>,
-    dataFunctions?: DataFunction<any>[]) {
+    dataFunctions?: DataFunction<unknown>[]) {
     const fullPageObs$ = combineLatest(
       cleanPagination$,
       cleanPage$
@@ -55,8 +55,8 @@ export class LocalListController<T = any> {
         if (!entities || !entities.length || Object.keys(paginationEntity.ids).length === 0) {
           return { paginationEntity, entities: [] };
         }
-        if (dataFunctions && dataFunctions.length) {
-          entities = dataFunctions.reduce((value, fn) => fn(value, paginationEntity), entities);
+        if (dataFunctions?.length) {
+          entities = dataFunctions.reduce((value, fn) => fn(value, paginationEntity), entities) as T[];
         }
         return { paginationEntity, entities };
       }),

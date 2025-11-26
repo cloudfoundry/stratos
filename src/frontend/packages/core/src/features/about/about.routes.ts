@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+import type { Routes } from '@angular/router';
 
 import { AboutPageComponent } from './about-page/about-page.component';
 import { DiagnosticsPageComponent } from './diagnostics-page/diagnostics-page.component';

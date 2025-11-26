@@ -1,14 +1,15 @@
-import { EntitySchema } from '../../helpers/entity-schema';
+import type { EntitySchema } from '../../helpers/entity-schema';
 import {
   BaseEntityRequestAction,
-  BaseEntityRequestConfig,
+  type BaseEntityRequestConfig,
+  type BaseEntityRequestMethods,
   BasePaginationRequestAction,
   EntityRequestActionConfig,
-  GetMultipleActionBuilder,
-  KnownEntityActionBuilder,
-  OrchestratedActionBuilder,
-  OrchestratedActionBuilderConfig,
-  OrchestratedActionBuilders,
+  type GetMultipleActionBuilder,
+  type KnownEntityActionBuilder,
+  type OrchestratedActionBuilder,
+  type OrchestratedActionBuilderConfig,
+  type OrchestratedActionBuilders,
   PaginationRequestActionConfig,
 } from '../action-orchestrator/action-orchestrator';
 
@@ -34,7 +35,7 @@ export class ActionBuilderConfigMapper {
     return Object.keys(builders).reduce((actionBuilders, key) => {
       return {
         ...actionBuilders,
-        [key]: ActionBuilderConfigMapper.getActionBuilder(builders[key] as any, key, endpointType, entityType, schemaGetter)
+        [key]: ActionBuilderConfigMapper.getActionBuilder(builders[key] as OrchestratedActionBuilder | EntityRequestActionConfig<OrchestratedActionBuilder>, key, endpointType, entityType, schemaGetter)
       };
     }, {} as OrchestratedActionBuilders);
   }
@@ -86,7 +87,7 @@ export class ActionBuilderConfigMapper {
   }
 
   static addHttpMethodFromActionKey(key: string, config: BaseEntityRequestConfig): BaseEntityRequestConfig {
-    const methodFromKey = ActionBuilderConfigMapper.actionKeyHttpMethodMapper[key] as any;
+    const methodFromKey = ActionBuilderConfigMapper.actionKeyHttpMethodMapper[key] as BaseEntityRequestMethods | undefined;
     return {
       ...config,
       // The passed httpMethod takes precedence when we're mapping the update action.

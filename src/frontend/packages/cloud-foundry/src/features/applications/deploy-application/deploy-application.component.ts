@@ -1,30 +1,30 @@
-import { Component, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, type OnDestroy, type OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf, of, Subscription } from 'rxjs';
+import { type Observable, of as observableOf, of, type Subscription } from 'rxjs';
 import { filter, first, map, tap } from 'rxjs/operators';
 import { AsyncPipe } from '@angular/common';
+import type { GeneralEntityAppState } from '@stratosui/store';
 
 import {
   DeleteDeployAppSection,
   StoreCFSettings,
 } from '../../../actions/deploy-applications.actions';
-import { CFAppState } from '@stratosui/cloud-foundry';
+import type { CFAppState } from '@stratosui/cloud-foundry';
 import { getCFEntityKey } from '../../../cf-entity-helpers';
 import { applicationEntityType } from '@stratosui/cloud-foundry';
 import {
   selectApplicationSource,
   selectCfDetails,
 } from '../../../store/selectors/deploy-application.selector';
-import { DeployApplicationSource, SourceType } from '../../../store/types/deploy-application.types';
+import type { DeployApplicationSource, SourceType } from '../../../store/types/deploy-application.types';
 import { RouterNav, selectPaginationState } from '@stratosui/store';
 import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { AUTO_SELECT_CF_URL_PARAM } from '../new-application-base-step/new-application-base-step.component';
 import { ApplicationDeploySourceTypes } from './deploy-application-steps.types';
-import { PageHeaderComponent, SteppersComponent, StepComponent } from '@stratosui/core';
-import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
+import { PageHeaderComponent, SteppersComponent, StepComponent, type StepOnNextFunction } from '@stratosui/core';
 import { CreateApplicationStep1Component } from '../../../shared/components/create-application/create-application-step1/create-application-step1.component';
 import { DeployApplicationStep2Component } from './deploy-application-step2/deploy-application-step2.component';
 import { DeployApplicationStep21Component } from './deploy-application-step2-1/deploy-application-step2-1.component';
@@ -65,21 +65,21 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   isRedeploy: boolean;
   selectedSourceType$: Observable<SourceType>;
   entityKey: string;
-  constructor(
-    private store: Store<CFAppState>,
-    private cfOrgSpaceService: CfOrgSpaceDataService,
-    private activatedRoute: ActivatedRoute,
-    appDeploySourceTypes: ApplicationDeploySourceTypes
-  ) {
+  private readonly store = inject(Store<GeneralEntityAppState>);
+  private readonly cfOrgSpaceService = inject(CfOrgSpaceDataService);
+  private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly appDeploySourceTypes = inject(ApplicationDeploySourceTypes);
+
+  constructor() {
     this.entityKey = getCFEntityKey(applicationEntityType);
     this.appGuid = this.activatedRoute.snapshot.queryParams.appGuid;
     this.isRedeploy = !!this.appGuid;
 
-    this.selectedSourceType$ = appDeploySourceTypes.getAutoSelectedType(activatedRoute);
+    this.selectedSourceType$ = this.appDeploySourceTypes.getAutoSelectedType(this.activatedRoute);
 
     this.skipConfig$ = this.store.select<DeployApplicationSource>(selectApplicationSource).pipe(
       map((appSource: DeployApplicationSource) => {
-        if (appSource && appSource.type) {
+        if (appSource?.type) {
           return appSource.type.id === 'giturl';
         }
         return false;
@@ -97,7 +97,9 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   };
 
   ngOnDestroy(): void {
-    this.initCfOrgSpaceService.forEach(p => p.unsubscribe());
+    for (const p of this.initCfOrgSpaceService) {
+      p.unsubscribe();
+    }
   }
 
   ngOnInit(): void {
@@ -120,7 +122,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
       // In case user has specified the query param manually
       this.initCfOrgSpaceService.push(this.store.select(selectCfDetails).pipe(
         filter(p => !p),
-        tap(p => {
+        tap(_p => {
           this.store.dispatch(new RouterNav({ path: ['applications', 'deploy'] }));
         })
       ).subscribe());
@@ -128,15 +130,15 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
       this.initCfOrgSpaceService.push(this.store.select(selectPaginationState(this.entityKey, CfAppsDataSource.paginationKey)).pipe(
         filter((pag) => !!pag),
         tap(pag => {
-          const { cf, org, space } = pag.clientPagination.filter.items;
-          if (cf) {
-            this.cfOrgSpaceService.cf.select.next(cf);
+          const items = pag.clientPagination.filter.items as { cf?: string; org?: string; space?: string };
+          if (items.cf) {
+            this.cfOrgSpaceService.cf.select.next(items.cf);
           }
-          if (org) {
-            this.cfOrgSpaceService.org.select.next(org);
+          if (items.org) {
+            this.cfOrgSpaceService.org.select.next(items.org);
           }
-          if (space) {
-            this.cfOrgSpaceService.space.select.next(space);
+          if (items.space) {
+            this.cfOrgSpaceService.space.select.next(items.space);
           }
         })
       ).subscribe());
@@ -151,7 +153,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     }
     return this.selectedSourceType$.pipe(
       first(),
-      map(selectedSourceType => `Deploy ${selectedSourceType ? 'from ' + selectedSourceType.name : ''}`)
+      map(selectedSourceType => `Deploy ${selectedSourceType ? `from ${selectedSourceType.name}` : ''}`)
     );
   };
 }

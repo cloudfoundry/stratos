@@ -1,8 +1,8 @@
 import { Store } from '@ngrx/store';
 
-import { IListConfig, ListDataSource } from '@stratosui/core';
-import { APIResource, getRowMetadata, PaginatedAction } from '@stratosui/store';
-import { CFAppState } from '../../../../../cf-app-state';
+import { type IListConfig, ListDataSource } from '@stratosui/core';
+import { type APIResource, getRowMetadata, type PaginatedAction, type GeneralEntityAppState } from '@stratosui/store';
+import type { CFAppState } from '../../../../../cf-app-state';
 import {
   serviceEntityType,
   serviceInstancesEntityType,
@@ -15,7 +15,7 @@ import {
 import {
   populateServicePlanExtraTyped,
 } from '../../../../../features/service-catalog/services-helper';
-import { IServicePlan } from '../../../../../cf-api-svc.types';
+import type { IServicePlan } from '../../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 
@@ -23,8 +23,8 @@ export class ServicePlansDataSource extends ListDataSource<APIResource<IServiceP
   constructor(
     cfGuid: string,
     serviceGuid: string,
-    store: Store<CFAppState>,
-    listConfig: IListConfig<APIResource>
+    store: Store<GeneralEntityAppState>,
+    listConfig: IListConfig<APIResource<IServicePlan>>
   ) {
 
     const paginationKey = createEntityRelationPaginationKey(serviceInstancesEntityType, serviceGuid);

@@ -1,32 +1,33 @@
-import { NgZone, signal } from '@angular/core';
+import { type NgZone, signal } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
-  ListFilter,
-  ListPagination,
-  ListSort,
-  GeneralAppState,
+  type ListFilter,
+  type ListPagination,
+  type ListSort,
+  type GeneralAppState,
   defaultClientPaginationPageSize,
   AddParams,
   SetClientFilter,
   SetClientPage,
   SetClientPageSize,
   SetPage,
-  PaginationClientFilter,
-  PaginationEntityState,
+  type PaginationClientFilter,
+  type PaginationEntityState,
 } from '@stratosui/store';
-import { asyncScheduler, BehaviorSubject, Observable } from 'rxjs';
+import { asyncScheduler, BehaviorSubject, type Observable } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
 import { bufferTime, distinctUntilChanged, filter, first, map, observeOn, tap } from 'rxjs/operators';
 
 import { enterZone, leaveZone } from '../../../../leaveEnterAngularZone';
-import { IListMultiFilterConfig } from '../list.component.types';
-import { IListDataSource, ListPaginationMultiFilterChange } from './list-data-source-types';
+import type { IListMultiFilterConfig } from '../list.component.types';
+import type {IListDataSource} from './list-data-source-types';
+import type {ListPaginationMultiFilterChange} from './list-data-source-types';
 
 export interface IListPaginationController<T> {
   pagination$: Observable<ListPagination>;
   filterByString: (filterString: string) => void;
   multiFilter: (filterConfig: IListMultiFilterConfig, filterValue: string) => void;
-  multiFilterChanges$: Observable<any>;
+  multiFilterChanges$: Observable<ListPaginationMultiFilterChange[]>;
   filter$: Observable<ListFilter>;
   sort: (listSort: ListSort) => void;
   sort$: Observable<ListSort>;
@@ -67,7 +68,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
       }
       // We don't want to dispatch actions if it's a no op (values are not different, falsies are treated as the same). This avoids other
       // chained actions from firing.
-      const cleanChanges = uniqueChanges.reduce((newCleanChanges: Record<string, any>, change: ListPaginationMultiFilterChange) => {
+      const cleanChanges = uniqueChanges.reduce((newCleanChanges: Record<string, string>, change: ListPaginationMultiFilterChange) => {
         const storeFilterParamValue = valueOrCommonFalsy(paginationEntityState.clientPagination.filter.items[change.key]);
         const newFilterParamValue = valueOrCommonFalsy(change.value);
         if (storeFilterParamValue !== newFilterParamValue) {
@@ -101,7 +102,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
 
   // Listen to changes to the multi filters and batch them up together. This avoids situations when there are multiple changes when one
   // filter resets other filters.
-  multiFilterChanges$: Observable<any>;
+  multiFilterChanges$: Observable<ListPaginationMultiFilterChange[]>;
 
   constructor(
     private store: Store<GeneralAppState>,
@@ -150,10 +151,10 @@ export class ListPaginationController<T> implements IListPaginationController<T>
           ));
         }
       } else {
-        const params = paginationEntityState.params as Record<string, any>;
+        const params = paginationEntityState.params as Record<string, unknown>;
         if (params['results-per-page'] !== pageSize) {
           this.store.dispatch(new AddParams(this.dataSource, this.dataSource.paginationKey, {
-            ['results-per-page']: pageSize,
+            "results-per-page": pageSize,
           }, this.dataSource.isLocal));
         }
       }
@@ -161,14 +162,14 @@ export class ListPaginationController<T> implements IListPaginationController<T>
   }
   sort = (listSort: ListSort) => {
     onPaginationEntityState(this.dataSource.pagination$, (paginationEntityState) => {
-      const params = paginationEntityState.params as Record<string, any>;
+      const params = paginationEntityState.params as Record<string, unknown>;
       if (
         params['order-direction-field'] !== listSort.field ||
         params['order-direction'] !== listSort.direction
       ) {
         this.store.dispatch(new AddParams(this.dataSource, this.dataSource.paginationKey, {
-          ['order-direction-field']: listSort.field,
-          ['order-direction']: listSort.direction
+          "order-direction-field": listSort.field,
+          "order-direction": listSort.direction
         }, this.dataSource.isLocal));
       }
     });
@@ -210,7 +211,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
     return dataSource.pagination$.pipe(
       filter(pag => !!pag),
       map(pag => {
-        const params = pag.params as Record<string, any>;
+        const params = pag.params as Record<string, unknown>;
         const pageSize = (dataSource.isLocal ? pag.clientPagination.pageSize : params['results-per-page'] as number)
           || defaultClientPaginationPageSize;
         const pageIndex = (dataSource.isLocal ? pag.clientPagination.currentPage : pag.currentPage) || 1;
@@ -230,7 +231,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
 
 }
 
-export function valueOrCommonFalsy(value: any, commonFalsy?: any): any {
+export function valueOrCommonFalsy(value: unknown, commonFalsy: unknown = ''): unknown {
   // Flatten some specific falsies into the same common value
   if (value === null || value === undefined || value === '') {
     return commonFalsy;

@@ -1,4 +1,4 @@
-import { ChartAttributes } from './chart';
+import type { ChartAttributes } from './chart';
 
 export class ChartVersion {
   id!: string;

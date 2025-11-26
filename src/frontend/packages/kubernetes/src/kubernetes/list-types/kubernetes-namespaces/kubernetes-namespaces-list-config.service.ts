@@ -1,16 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { filter } from 'rxjs/operators';
 
 import {
   createTableColumnFavorite,
 } from '../../../../../core/src/shared/components/list/list-table/table-cell-favorite/table-cell-favorite.component';
-import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
-import { IListConfig, ListViewTypes, IGlobalListAction, IMultiListAction, IListAction, IListMultiFilterConfig } from '../../../../../core/src/shared/components/list/list.component.types';
-import { AppState } from '../../../../../store/src/public-api';
-import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
-import { BaseKubeGuid } from '../../kubernetes-page.types';
-import { KubernetesNamespace } from '../../store/kube.types';
+import type { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
+import { type IListConfig, ListViewTypes, type IGlobalListAction, type IMultiListAction, type IListAction, type IListMultiFilterConfig } from '../../../../../core/src/shared/components/list/list.component.types';
+import type { AppState } from '../../../../../store/src/public-api';
+import { type IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
+import type { BaseKubeGuid } from '../../kubernetes-page.types';
+import type { KubernetesNamespace } from '../../store/kube.types';
 import { defaultHelmKubeListPageSize } from '../kube-helm-list-types';
 import { createKubeAgeColumn } from '../kube-list.helper';
 import { KUBERNETES_ENDPOINT_TYPE, kubernetesNamespacesEntityType } from './../../kubernetes-entity-factory';

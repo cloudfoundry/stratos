@@ -1,4 +1,4 @@
-import { Directive, ElementRef, Input, NgZone, OnChanges, inject } from '@angular/core';
+import { Directive, ElementRef, Input, NgZone, type OnChanges, inject } from '@angular/core';
 
 @Directive({
 selector: '[appFocus]',

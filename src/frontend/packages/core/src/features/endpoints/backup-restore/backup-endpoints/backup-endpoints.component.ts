@@ -1,21 +1,22 @@
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnDestroy, Injector  } from '@angular/core';
-import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, type OnDestroy, Injector  } from '@angular/core';
+import { ReactiveFormsModule, Validators, FormControl, FormGroup, type ValidatorFn, type AbstractControl, type ValidationErrors } from '@angular/forms';
 import { format } from 'date-fns';
-import { httpErrorResponseToSafeString, entityCatalog, stratosEntityCatalog, EndpointModel } from '@stratosui/store';
-import { Observable, of, Subject, Subscription } from 'rxjs';
+import { httpErrorResponseToSafeString, entityCatalog, stratosEntityCatalog, type EndpointModel } from '@stratosui/store';
+import { type Observable, of, Subject, type Subscription } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 import { toObservable } from '@angular/core/rxjs-interop';
 
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
-import { ITableListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source-types';
-import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
+import type { ITableListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source-types';
+import type { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
 import { TableComponent } from '../../../../shared/components/list/list-table/table.component';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { StepComponent } from '../../../../shared/components/stepper/step/step.component';
-import { StepOnNextFunction, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
+import type {StepOnNextFunction} from '../../../../shared/components/stepper/step/step.component';
+import type {StepOnNextResult} from '../../../../shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../../shared/components/stepper/steppers/steppers.component';
 import { ShowHideButtonComponent } from '../../../../core/show-hide-button/show-hide-button.component';
 import { BackupCheckboxCellComponent } from '../backup-checkbox-cell/backup-checkbox-cell.component';
@@ -39,6 +40,7 @@ interface BackupPasswordForm {
   standalone: true,
   imports: [
     CommonModule,
+    AsyncPipe,
     ReactiveFormsModule,
     PageHeaderComponent,
     SteppersComponent,
@@ -126,8 +128,8 @@ export class BackupEndpointsComponent implements OnDestroy {
     this.endpointDataSource = {
       isTableLoading$: endpointObs.fetchingEntities$,
       connect: () => endpoints$,
-      disconnect: () => { },
-      trackBy: (index: number, row: EndpointModel) => row.guid
+      disconnect: () => { /* No cleanup required */ },
+      trackBy: (_index: number, row: EndpointModel) => row.guid
     };
 
     this.disableSelectAll$ = toObservable(this.service.allChanged, { injector: this.injector });
@@ -191,11 +193,11 @@ export class BackupEndpointsComponent implements OnDestroy {
       });
     };
 
-    const backupFailure = (err: any) => {
+    const backupFailure = (err: Error) => {
       const errorMessage = httpErrorResponseToSafeString(err);
       result.next({
         success: false,
-        message: `Failed to create backup` + (errorMessage ? `: ${errorMessage}` : '')
+        message: `Failed to create backup${errorMessage ? `: ${errorMessage}` : ''}`
       });
       return of(false);
     };

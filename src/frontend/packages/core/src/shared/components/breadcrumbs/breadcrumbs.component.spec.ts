@@ -1,10 +1,10 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { BreadcrumbsComponent } from './breadcrumbs.component';
-import { BREADCRUMB_URL_PARAM, IBreadcrumb } from './breadcrumbs.types';
+import { BREADCRUMB_URL_PARAM, type IBreadcrumb } from './breadcrumbs.types';
 
 describe('BreadcrumbsComponent', () => {
   let component: BreadcrumbsComponent;

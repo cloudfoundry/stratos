@@ -1,7 +1,9 @@
-import { inject, Signal, computed } from '@angular/core';
+import { inject, type Signal, } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+
+import type { GeneralEntityAppState } from '../app-state';
 
 /**
  * Helper to create a signal from a selector in zoneless Angular applications.
@@ -25,11 +27,14 @@ import { Observable } from 'rxjs';
  * @returns Signal containing the selected state value
  */
 export function selectAsSignal<T>(
-  selector: (state: any) => T,
+  selector: (state: unknown) => T,
   options?: { initialValue?: T }
 ): Signal<T | undefined> {
-  const store = inject(Store);
-  return toSignal(store.select(selector), options as any);
+  const store = inject(Store<GeneralEntityAppState>);
+  const signalOptions = options?.initialValue !== undefined
+    ? { initialValue: options.initialValue }
+    : undefined;
+  return toSignal(store.select(selector), signalOptions);
 }
 
 /**
@@ -54,15 +59,15 @@ export function selectAsSignal<T>(
  * @param selectors - Object mapping keys to selector functions
  * @returns Object with the same keys, but values are signals
  */
-export function selectMultipleAsSignals<T extends Record<string, any>>(
-  selectors: { [K in keyof T]: (state: any) => T[K] }
+export function selectMultipleAsSignals<T extends Record<string, unknown>>(
+  selectors: { [K in keyof T]: (state: unknown) => T[K] }
 ): { [K in keyof T]: Signal<T[K] | undefined> } {
-  const store = inject(Store);
-  const result: any = {};
+  const store = inject(Store<GeneralEntityAppState>);
+  const result: Record<string, Signal<unknown | undefined>> = {};
   for (const [key, selector] of Object.entries(selectors)) {
     result[key] = toSignal(store.select(selector));
   }
-  return result;
+  return result as { [K in keyof T]: Signal<T[K] | undefined> };
 }
 
 /**
@@ -94,7 +99,10 @@ export function observableAsSignal<T>(
   observable: Observable<T>,
   options?: { initialValue?: T }
 ): Signal<T | undefined> {
-  return toSignal(observable, options as any);
+  const signalOptions = options?.initialValue !== undefined
+    ? { initialValue: options.initialValue }
+    : undefined;
+  return toSignal(observable, signalOptions);
 }
 
 /**
@@ -149,9 +157,9 @@ export function subscribeWithChangeDetection<T>(
  * @example
  * ```typescript
  * function createSignalFromSelector<T>(selector: SelectorFn<T>): Signal<T | undefined> {
- *   const store = inject(Store);
+ *   const store = inject(Store<GeneralEntityAppState>);
  *   return toSignal(store.select(selector));
  * }
  * ```
  */
-export type SelectorFn<T> = (state: any) => T;
+export type SelectorFn<T> = (state: unknown) => T;

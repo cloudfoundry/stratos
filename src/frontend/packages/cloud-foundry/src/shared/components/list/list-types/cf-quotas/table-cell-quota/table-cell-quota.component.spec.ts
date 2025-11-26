@@ -1,12 +1,12 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { RouterTestingModule } from '@angular/router/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { createBasicStoreModule } from '@stratosui/store/testing';
-import { APIResource } from '@stratosui/store/types/api.types';
+import type { APIResource } from '@stratosui/store';
 
-import { IQuotaDefinition } from '../../../../../../cf-api.types';
+import type { IQuotaDefinition } from '../../../../../../cf-api.types';
 import { TableCellQuotaComponent } from './table-cell-quota.component';
 
 describe('TableCellQuotaComponent', () => {

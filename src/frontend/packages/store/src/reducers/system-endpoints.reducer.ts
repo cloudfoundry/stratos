@@ -1,3 +1,5 @@
+import type { Action } from '@ngrx/store';
+
 import { SESSION_VERIFIED, VERIFY_SESSION } from '../actions/auth.actions';
 import {
   CONNECT_ENDPOINTS,
@@ -7,12 +9,12 @@ import {
   DISCONNECT_ENDPOINTS_FAILED,
   DISCONNECT_ENDPOINTS_SUCCESS,
 } from '../actions/endpoint.actions';
-import { METRIC_API_SUCCESS, MetricAPIQueryTypes, MetricsAPIActionSuccess } from '../actions/metrics-api.actions';
-import { IRequestEntityTypeState } from '../app-state';
-import { endpointConnectionStatus, EndpointModel } from '../types/endpoint.types';
+import { METRIC_API_SUCCESS, MetricAPIQueryTypes, type MetricsAPIActionSuccess } from '../actions/metrics-api.actions';
+import type { IRequestEntityTypeState } from '../app-state';
+import type { endpointConnectionStatus, EndpointModel } from '../types/endpoint.types';
 import { GET_SYSTEM_INFO, GET_SYSTEM_INFO_SUCCESS } from './../actions/system.actions';
 
-export function systemEndpointsReducer(state: IRequestEntityTypeState<EndpointModel>, action: any) {
+export function systemEndpointsReducer(state: IRequestEntityTypeState<EndpointModel>, action: Action): IRequestEntityTypeState<EndpointModel> {
   switch (action.type) {
     case VERIFY_SESSION:
     case GET_SYSTEM_INFO:
@@ -30,13 +32,13 @@ export function systemEndpointsReducer(state: IRequestEntityTypeState<EndpointMo
     case DISCONNECT_ENDPOINTS:
       return changeEndpointConnectionStatus(state, action, 'checking');
     case METRIC_API_SUCCESS:
-      return updateMetricsInfo(state, action);
+      return updateMetricsInfo(state, action as MetricsAPIActionSuccess) as IRequestEntityTypeState<EndpointModel>;
     default:
       return state;
   }
 }
 
-function fetchingEndpointInfo(state: any) {
+function fetchingEndpointInfo(state: IRequestEntityTypeState<EndpointModel>): IRequestEntityTypeState<EndpointModel> {
   const fetchingState = { ...state };
   let modified = false;
   getAllEndpointIds(fetchingState).forEach((guid: string) => {
@@ -52,14 +54,14 @@ function fetchingEndpointInfo(state: any) {
   return modified ? fetchingState : state;
 }
 
-function succeedEndpointInfo(state: any, action: any) {
+function succeedEndpointInfo(state: IRequestEntityTypeState<EndpointModel>, action: Action & { payload?: { endpoints?: Record<string, Record<string, EndpointModel>> }; sessionData?: { endpoints?: Record<string, Record<string, EndpointModel>> } }): IRequestEntityTypeState<EndpointModel> {
   const newState = { ...state };
   const payload = action.type === GET_SYSTEM_INFO_SUCCESS ? action.payload : action.sessionData;
   if (!payload || !payload.endpoints) {
     return state;
   }
   Object.keys(payload.endpoints).forEach((type: string) => {
-    getAllEndpointIds(newState[type], payload.endpoints[type]).forEach((guid: string) => {
+    getAllEndpointIds(newState, payload.endpoints[type]).forEach((guid: string) => {
       const endpointInfo = payload.endpoints[type][guid] as EndpointModel;
       newState[guid] = {
         ...newState[guid],
@@ -80,8 +82,8 @@ function endpointHasMetrics(endpoint: EndpointModel) {
 
 function changeEndpointConnectionStatus(
   state: IRequestEntityTypeState<EndpointModel>,
-  action: {
-    guid: string
+  action: Action & {
+    guid?: string
   },
   connectionStatus: endpointConnectionStatus
 ) {
@@ -97,7 +99,7 @@ function changeEndpointConnectionStatus(
   };
 }
 
-function getAllEndpointIds(endpoints: any = {}, payloadEndpoints: any = {}) {
+function getAllEndpointIds(endpoints: Record<string, EndpointModel> = {}, payloadEndpoints: Record<string, EndpointModel> = {}): Set<string> {
   return new Set(Object.keys(endpoints).concat(Object.keys(payloadEndpoints)));
 }
 

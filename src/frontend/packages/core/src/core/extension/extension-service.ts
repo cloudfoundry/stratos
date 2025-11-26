@@ -1,10 +1,10 @@
-import { inject, Injectable, ModuleWithProviders, NgModule } from '@angular/core';
-import { ActivatedRoute, Route, Router } from '@angular/router';
+import { inject, Injectable, type ModuleWithProviders, NgModule, type Type } from '@angular/core';
+import { type ActivatedRoute, type Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AppState, GeneralEntityAppState, EntityServiceFactory } from '@stratosui/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
-import { IPageSideNavTab } from '../../features/dashboard/page-side-nav/page-side-nav.component';
+import type { IPageSideNavTab } from '../../features/dashboard/page-side-nav/page-side-nav.component';
 import { CurrentUserPermissionsService } from '../permissions/current-user-permissions.service';
 
 export const extensionsActionRouteKey = 'extensionsActionsKey';
@@ -58,12 +58,12 @@ export type StratosRouteType = StratosTabType | StratosActionType;
 
 export interface StratosExtensionRoutes {
   path: string;
-  component: any;
+  component: Type<unknown>;
 }
 
 // Stores the extension metadata as defined by the decorators
 const extensionMetadata: {
-  loginComponent: any | null;
+  loginComponent: Type<unknown> | null;
   extensionRoutes: { [key: string]: StratosExtensionRoutes[] };
   tabs: { [key: string]: IPageSideNavTab[] };
   actions: { [key: string]: StratosActionMetadata[] };
@@ -78,21 +78,23 @@ const extensionMetadata: {
  * Decorator for a Tab extension
  */
 export function StratosTab(props: StratosTabMetadataConfig) {
-  return (target: any) => addExtensionTab(props.type, target, props);
+  return (target: Type<unknown>) => addExtensionTab(props.type, target, props);
 }
 
 /**
  * Decorator for an Action extension
  */
 export function StratosAction(props: StratosActionMetadata) {
-  return (target: any) => addExtensionAction(props.type, target, props);
+  return (target: Type<unknown>) => addExtensionAction(props.type, target, props);
 }
 
 export function StratosLoginComponent() {
-  return (target: any) => extensionMetadata.loginComponent = target;
+  return (target: Type<unknown>) => {
+    extensionMetadata.loginComponent = target;
+  };
 }
 
-function addExtensionTab(tab: StratosTabType, target: any, props: StratosTabMetadataConfig) {
+function addExtensionTab(tab: StratosTabType, target: Type<unknown>, props: StratosTabMetadataConfig) {
   if (!extensionMetadata.tabs[tab]) {
     extensionMetadata.tabs[tab] = [];
   }
@@ -109,7 +111,7 @@ function addExtensionTab(tab: StratosTabType, target: any, props: StratosTabMeta
   });
 }
 
-function addExtensionAction(action: StratosActionType, target: any, props: StratosActionMetadata) {
+function addExtensionAction(action: StratosActionType, target: Type<unknown>, props: StratosActionMetadata) {
   if (!extensionMetadata.actions[action]) {
     extensionMetadata.actions[action] = [];
     extensionMetadata.extensionRoutes[action] = [];
@@ -136,7 +138,7 @@ export class ExtensionService {
 
   // Declare extensions - this is a trick to ensure the Angular Build Optimiser does not
   // optimize out any extension components
-  public static declare(components: any[]): ModuleWithProviders<ExtEmptyModule> {
+  public static declare(_components: Type<unknown>[]): ModuleWithProviders<ExtEmptyModule> {
     return {
       ngModule: ExtEmptyModule
     };
@@ -167,7 +169,9 @@ export class ExtensionService {
     let needsReset = false;
     if (dashboardRoute) {
       // Move any stratos extension routes under the dashboard base route
-      while (this.moveExtensionRoute(routeConfig, dashboardRoute)) { }
+      while (this.moveExtensionRoute(routeConfig, dashboardRoute)) {
+        // Keep moving routes
+      }
       needsReset = true;
     }
 

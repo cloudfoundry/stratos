@@ -1,17 +1,17 @@
-import { AbstractControl, ValidatorFn } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import type { AbstractControl, ValidatorFn, ValidationErrors } from '@angular/forms';
+import type { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import { filter, first, map, tap } from 'rxjs/operators';
 
-import { StepOnNextResult } from '@stratosui/core';
-import { getPaginationKey, APIResource } from '@stratosui/store';
-import { ISpaceQuotaDefinition } from '../../cf-api.types';
-import { CFAppState } from '../../cf-app-state';
+import type { StepOnNextResult } from '@stratosui/core';
+import { getPaginationKey, type APIResource } from '@stratosui/store';
+import type { ISpaceQuotaDefinition } from '../../cf-api.types';
+import type { CFAppState } from '../../cf-app-state';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { organizationEntityType } from '../../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../entity-relations/entity-relations.types';
-import { ActiveRouteCfOrgSpace } from './cf-page.types';
+import type { ActiveRouteCfOrgSpace } from './cf-page.types';
 
 export class AddEditSpaceStepBase {
   fetchSpacesSubscription: Subscription;
@@ -24,7 +24,7 @@ export class AddEditSpaceStepBase {
   hasSpaceQuotas$: Observable<boolean>;
 
   constructor(
-    protected store: Store<CFAppState>,
+    protected store: Store,
     protected activatedRoute: ActivatedRoute,
     protected activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
   ) {
@@ -39,7 +39,9 @@ export class AddEditSpaceStepBase {
     ).entities$.pipe(
       filter(spaces => !!spaces),
       map(spaces => spaces.map(space => space.entity.name)),
-      tap(spaceNames => this.allSpacesInOrg = spaceNames),
+      tap(spaceNames => {
+        this.allSpacesInOrg = spaceNames;
+      }),
       first(),
     );
     this.fetchSpacesSubscription = this.allSpacesInOrg$.subscribe();
@@ -63,7 +65,7 @@ export class AddEditSpaceStepBase {
   }
 
   spaceNameTakenValidator = (): ValidatorFn => {
-    return (formField: AbstractControl): { [key: string]: any } => {
+    return (formField: AbstractControl): ValidationErrors | null => {
       const nameValid = this.validate(formField.value);
       return !nameValid ? { spaceNameTaken: { value: formField.value } } : null;
     };

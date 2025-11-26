@@ -7,7 +7,7 @@ import { Store } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { createBasicStoreModule } from '@stratosui/store/testing';
-import { CFAppState } from '@stratosui/cloud-foundry';
+import type { CFAppState } from '@stratosui/cloud-foundry';
 import { AppNameUniqueDirective } from './app-name-unique.directive';
 
 describe('AppNameUniqueDirective', () => {
@@ -24,7 +24,7 @@ describe('AppNameUniqueDirective', () => {
       ]
     });
   });
-  it('should create an instance', inject([Store, HttpClient], (store: Store<CFAppState>, http: HttpClient) => {
+  it('should create an instance', inject([Store, HttpClient], (store: Store, http: HttpClient) => {
     const directive = new AppNameUniqueDirective(store, http);
     expect(directive).toBeTruthy();
   }));

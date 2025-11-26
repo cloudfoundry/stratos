@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, Input, OnChanges  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, forwardRef, Input, type OnChanges  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export interface Segment {
   key: string;
-  value: any;
+  value: unknown;
   type: undefined | string;
   description: string;
   expanded: boolean;
@@ -16,13 +16,13 @@ export interface Segment {
   standalone: true,
   imports: [
     CommonModule,
-    JsonViewerComponent // Self-import for recursive rendering
+    forwardRef(() => JsonViewerComponent) // Self-import for recursive rendering
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class JsonViewerComponent implements OnChanges {
 
-  @Input() json: any;
+  @Input() json: unknown;
 
   @Input() root!: string;
 
@@ -62,7 +62,7 @@ export class JsonViewerComponent implements OnChanges {
 
     if (typeof this.json === 'object') {
       Object.keys(this.json).forEach(key => {
-        this.segments.push(this.parseKeyValue(key, this.json[key]));
+        this.segments.push(this.parseKeyValue(key, (this.json as Record<string, unknown>)[key]));
       });
     } else {
       this.segments.push(this.parseKeyValue(`(${typeof this.json})`, this.json));
@@ -79,12 +79,12 @@ export class JsonViewerComponent implements OnChanges {
     }
   }
 
-  private parseKeyValue(key: any, value: any): Segment {
+  private parseKeyValue(key: string, value: unknown): Segment {
     const segment: Segment = {
       key,
       value,
       type: undefined,
-      description: '' + value,
+      description: `${value}`,
       expanded: this.expanded
     };
 
@@ -103,7 +103,7 @@ export class JsonViewerComponent implements OnChanges {
       }
       case 'string': {
         segment.type = 'string';
-        segment.description = '"' + segment.value + '"';
+        segment.description = `"${segment.value}"`;
         break;
       }
       case 'undefined': {
@@ -118,12 +118,12 @@ export class JsonViewerComponent implements OnChanges {
           segment.description = 'null';
         } else if (Array.isArray(segment.value)) {
           segment.type = 'array';
-          segment.description = 'Array[' + segment.value.length + '] ' + JSON.stringify(segment.value);
+          segment.description = `Array[${segment.value.length}] ${JSON.stringify(segment.value)}`;
         } else if (segment.value instanceof Date) {
           segment.type = 'date';
         } else {
           segment.type = 'object';
-          segment.description = 'Object ' + JSON.stringify(segment.value);
+          segment.description = `Object ${JSON.stringify(segment.value)}`;
         }
         break;
       }

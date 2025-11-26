@@ -1,13 +1,13 @@
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
-import { Observable } from 'rxjs';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, type ElementRef, Input, type OnInit, ViewChild } from '@angular/core';
+import type { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
-import { ApplicationService, RunningInstancesComponent } from '@stratosui/cloud-foundry';
+import { type ApplicationService, RunningInstancesComponent, type IApp } from '@stratosui/cloud-foundry';
 import { MetadataItemComponent } from '@stratosui/core';
-import { EntityService, EntityServiceFactory, APIResource } from '@stratosui/store';
+import { EntityServiceFactory, type EntityService, type APIResource, type EntityInfo } from '@stratosui/store';
 import { GetAppAutoscalerPolicyAction } from '../../store/app-autoscaler.actions';
-import { AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
+import type { AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
 
 
 @Component({
@@ -35,24 +35,24 @@ export class CardAutoscalerDefaultComponent implements OnInit {
   }
 
   appAutoscalerPolicyService!: EntityService;
-  appAutoscalerPolicy$!: Observable<APIResource<AppAutoscalerPolicyLocal>>;
+  appAutoscalerPolicy$!: Observable<AppAutoscalerPolicyLocal | undefined>;
   applicationInstances$!: Observable<number>;
 
   @Input()
-  onUpdate: () => void = () => { }
+  onUpdate: () => void = () => { /* No-op callback */ }
 
   ngOnInit() {
-    this.appAutoscalerPolicyService = this.entityServiceFactory.create<APIResource<AppAutoscalerPolicyLocal>>(
+    this.appAutoscalerPolicyService = this.entityServiceFactory.create<AppAutoscalerPolicyLocal>(
       this.applicationService.appGuid,
       new GetAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid),
     );
     this.appAutoscalerPolicy$ = this.appAutoscalerPolicyService.entityObs$.pipe(
-      map(({ entity }) => {
-        return entity && entity.entity;
+      map((entityInfo: EntityInfo<AppAutoscalerPolicyLocal>) => {
+        return entityInfo.entity;
       })
     );
     this.applicationInstances$ = this.applicationService.app$.pipe(
-      map(({ entity }) => entity ? entity.entity.instances : null),
+      map(({ entity }: EntityInfo<APIResource<IApp>>) => entity ? entity.entity.instances : null),
       publishReplay(1),
       refCount()
     );

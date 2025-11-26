@@ -1,0 +1,9 @@
+@use './helper' as *;
+
+// Re-export all helper functions and variables
+@forward './helper';
+
+// Default stratos-theme function
+@function stratos-theme() {
+  @return stratos-default-theme();
+}

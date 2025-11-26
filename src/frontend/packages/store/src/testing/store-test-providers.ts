@@ -1,4 +1,4 @@
-import { Provider } from '@angular/core';
+import type { Provider } from '@angular/core';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { EntityServiceFactory } from '../entity-service-factory.service';
 import { EntityMonitorFactory } from '../monitors/entity-monitor.factory.service';
@@ -38,23 +38,31 @@ export function getStoreTestProviders(...additionalProviders: Provider[]): Provi
  * Mock factory creators for tests that need spy objects.
  * Note: These use a simple mock function implementation to avoid importing test dependencies.
  */
-const createMockFn = () => {
-  const fn: any = (...args: any[]) => fn.mock.results[fn.mock.results.length - 1]?.value;
+interface MockFunction {
+  (...args: unknown[]): unknown;
+  mock: { calls: unknown[][]; results: Array<{ value: unknown }> };
+  mockReturnValue: (value: unknown) => MockFunction;
+  mockImplementation: (impl: unknown) => MockFunction;
+  impl?: unknown;
+}
+
+const createMockFn = (): MockFunction => {
+  const fn: MockFunction = (..._args: unknown[]) => fn.mock.results[fn.mock.results.length - 1]?.value;
   fn.mock = { calls: [], results: [] };
-  fn.mockReturnValue = (value: any) => { fn.mock.results.push({ value }); return fn; };
-  fn.mockImplementation = (impl: any) => { fn.impl = impl; return fn; };
+  fn.mockReturnValue = (value: unknown) => { fn.mock.results.push({ value }); return fn; };
+  fn.mockImplementation = (impl: unknown) => { fn.impl = impl; return fn; };
   return fn;
 };
 
-export function createMockEntityServiceFactory(): any {
+export function createMockEntityServiceFactory(): { create: MockFunction } {
   return { create: createMockFn() };
 }
 
-export function createMockEntityMonitorFactory(): any {
+export function createMockEntityMonitorFactory(): { create: MockFunction; getMonitor: MockFunction } {
   return { create: createMockFn(), getMonitor: createMockFn() };
 }
 
-export function createMockPaginationMonitorFactory(): any {
+export function createMockPaginationMonitorFactory(): { create: MockFunction; getMonitor: MockFunction } {
   return { create: createMockFn(), getMonitor: createMockFn() };
 }
 

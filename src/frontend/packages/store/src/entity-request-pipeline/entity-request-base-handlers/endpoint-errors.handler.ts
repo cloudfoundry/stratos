@@ -1,11 +1,11 @@
 import { SendEventAction } from '../../actions/internal-events.actions';
-import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import type { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { endpointEntityType } from '../../helpers/stratos-entity-factory';
-import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
-import { InternalEventSeverity, InternalEventStateMetadata } from '../../types/internal-events.types';
-import { APISuccessOrFailedAction, EntityRequestAction } from '../../types/request.types';
-import { ActionDispatcher } from '../entity-request-pipeline.types';
-import { JetstreamError } from './handle-multi-endpoints.pipe';
+import type { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
+import { InternalEventSeverity, type InternalEventStateMetadata } from '../../types/internal-events.types';
+import { APISuccessOrFailedAction, type EntityRequestAction } from '../../types/request.types';
+import type { ActionDispatcher } from '../entity-request-pipeline.types';
+import type { JetstreamError } from './handle-multi-endpoints.pipe';
 
 export const endpointErrorsHandlerFactory = (actionDispatcher: ActionDispatcher) => (
   action: EntityRequestAction,

@@ -1,10 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { CfUserRelationTypes, GetCurrentCfUserRelationsComplete } from '../../../actions/permissions.actions';
 import {
-  IAllCfRolesState,
-  ICfRolesState,
-  IOrgRoleState,
-  ISpaceRoleState,
+  type IAllCfRolesState,
+  type ICfRolesState,
+  type IOrgRoleState,
+  type IOrgsRoleState,
+  type ISpaceRoleState,
+  type ISpacesRoleState,
   RoleEntities,
 } from '../../types/cf-current-user-roles.types';
 import { getDefaultCfEndpointRoles } from './current-cf-user-base-cf-role.reducer';
@@ -45,8 +47,8 @@ function getState(
     }
     allRoles.push({ guid, roles });
   }
-  const orgSpaceRoles = {
-    [orgOrSpace]: {}
+  const orgSpaceRoles: Partial<Pick<ICfRolesState, 'spaces' | 'organizations'>> = {
+    [orgOrSpace]: {} as ISpacesRoleState | IOrgsRoleState
   };
   if (orgOrSpace === RoleEntities.SPACES) {
     orgSpaceRoles.organizations = {
@@ -54,8 +56,9 @@ function getState(
     };
   }
   allRoles.forEach(role => {
-    orgSpaceRoles[orgOrSpace][role.guid] = role.roles;
-    if (orgOrSpace === RoleEntities.SPACES) {
+    const collection = orgSpaceRoles[orgOrSpace] as Record<string, ISpaceRoleState | IOrgRoleState>;
+    collection[role.guid] = role.roles;
+    if (orgOrSpace === RoleEntities.SPACES && orgSpaceRoles.organizations) {
       orgSpaceRoles.organizations[testOrgGuid].spaceGuids.push(role.guid);
     }
   });

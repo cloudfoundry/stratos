@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { StoreModule } from '@ngrx/store'; import { KubernetesCurrentNamespace } from './kube.types';
+import { StoreModule } from '@ngrx/store'; import type { KubernetesCurrentNamespace } from './kube.types';
 import { SET_CURRENT_NAMESPACE } from './kubernetes.actions';
 
 export const KUBERNETES_CURRENT_NAMESPACE = 'k8sCurrentNamespace';

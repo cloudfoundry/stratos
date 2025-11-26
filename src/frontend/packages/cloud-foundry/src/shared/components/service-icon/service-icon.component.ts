@@ -1,9 +1,9 @@
-import { Component, Input, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, type OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { CustomIconComponent } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { IService, IServiceExtra } from '../../../cf-api-svc.types';
+import type { APIResource } from '@stratosui/store';
+import type { IService, IServiceExtra } from '../../../cf-api-svc.types';
 
 @Component({
   selector: 'app-service-icon',
@@ -24,12 +24,11 @@ export class ServiceIconComponent implements OnInit {
   @Input() service: APIResource<IService>;
 
   @Input() addMenuPadding = false;
-  constructor() { }
 
   ngOnInit() {
-    if (this.service && this.service.entity) {
+    if (this.service?.entity) {
       this.extraInfo = this.service.entity.extra ? JSON.parse(this.service.entity.extra) : null;
-      if (this.extraInfo && this.extraInfo.imageUrl) {
+      if (this.extraInfo?.imageUrl) {
         this.image = this.extraInfo.imageUrl;
       }
     }

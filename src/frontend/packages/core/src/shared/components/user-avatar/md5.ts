@@ -4,7 +4,7 @@
 export class MD5 {
 
   private static _string: string;
-  private static x: Array<number> = <Array<number>>Array();
+  private static x: Array<number> = <Array<number>>[];
   private static k: number;
   private static AA: number;
   private static BB: number;
@@ -47,14 +47,14 @@ export class MD5 {
       lY4 = (lY & 0x40000000);
       lResult = (lX & 0x3FFFFFFF) + (lY & 0x3FFFFFFF);
 
-      if ( !!(lX4 & lY4) )
+      if ( (lX4 & lY4) )
       {
           return (lResult ^ 0x80000000 ^ lX8 ^ lY8);
       }
 
-      if ( !!(lX4 | lY4) )
+      if ( (lX4 | lY4) )
       {
-          if ( !!(lResult & 0x40000000) )
+          if ( (lResult & 0x40000000) )
           {
               return (lResult ^ 0xC0000000 ^ lX8 ^ lY8);
           }
@@ -79,26 +79,26 @@ export class MD5 {
 
   private static FF( a: number, b: number, c: number, d: number, x: number, s: number, ac: number ) : number
   {
-      a = this.AddUnsigned(a, this.AddUnsigned(this.AddUnsigned(this.F(b, c, d), x), ac));
-      return this.AddUnsigned(this.RotateLeft(a, s), b);
+      a = MD5.AddUnsigned(a, MD5.AddUnsigned(MD5.AddUnsigned(MD5.F(b, c, d), x), ac));
+      return MD5.AddUnsigned(MD5.RotateLeft(a, s), b);
   }
 
   private static GG( a: number, b: number, c: number, d: number, x: number, s: number, ac: number) : number
   {
-      a = this.AddUnsigned(a, this.AddUnsigned(this.AddUnsigned(this.G(b, c, d), x), ac));
-      return this.AddUnsigned(this.RotateLeft(a, s), b);
+      a = MD5.AddUnsigned(a, MD5.AddUnsigned(MD5.AddUnsigned(MD5.G(b, c, d), x), ac));
+      return MD5.AddUnsigned(MD5.RotateLeft(a, s), b);
   }
 
   private static HH( a: number, b: number, c: number, d: number, x: number, s: number, ac: number ) : number
   {
-      a = this.AddUnsigned(a, this.AddUnsigned(this.AddUnsigned(this.H(b, c, d), x), ac));
-      return this.AddUnsigned(this.RotateLeft(a, s), b);
+      a = MD5.AddUnsigned(a, MD5.AddUnsigned(MD5.AddUnsigned(MD5.H(b, c, d), x), ac));
+      return MD5.AddUnsigned(MD5.RotateLeft(a, s), b);
   }
 
   private static II(a: number, b: number, c: number, d: number, x: number, s: number, ac: number) : number
   {
-      a = this.AddUnsigned(a, this.AddUnsigned(this.AddUnsigned(this.I(b, c, d), x), ac));
-      return this.AddUnsigned(this.RotateLeft(a, s), b);
+      a = MD5.AddUnsigned(a, MD5.AddUnsigned(MD5.AddUnsigned(MD5.I(b, c, d), x), ac));
+      return MD5.AddUnsigned(MD5.RotateLeft(a, s), b);
   }
 
   private static ConvertToWordArray( string: string ) : Array<number>
@@ -139,7 +139,7 @@ export class MD5 {
       for ( lCount = 0; lCount <= 3; lCount++ )
       {
           lByte = (lValue >>> (lCount * 8)) & 255;
-          WordToHexValue_temp = "0" + lByte.toString(16);
+          WordToHexValue_temp = `0${lByte.toString(16)}`;
           WordToHexValue = WordToHexValue + WordToHexValue_temp.substr(WordToHexValue_temp.length - 2, 2);
       }
 
@@ -178,99 +178,99 @@ export class MD5 {
       return utftext;
   }
 
-  public static hash( string: any ) : string
+  public static hash( string: string ) : string
   {
       let temp: string;
 
       if ( typeof string !== 'string' )
           string = JSON.stringify(string);
 
-      this._string = this.Utf8Encode(string);
-      this.x = this.ConvertToWordArray(this._string);
+      MD5._string = MD5.Utf8Encode(string);
+      MD5.x = MD5.ConvertToWordArray(MD5._string);
 
-      this.a = 0x67452301;
-      this.b = 0xEFCDAB89;
-      this.c = 0x98BADCFE;
-      this.d = 0x10325476;
+      MD5.a = 0x67452301;
+      MD5.b = 0xEFCDAB89;
+      MD5.c = 0x98BADCFE;
+      MD5.d = 0x10325476;
 
-      for ( this.k = 0; this.k < this.x.length; this.k += 16 )
+      for ( MD5.k = 0; MD5.k < MD5.x.length; MD5.k += 16 )
       {
-          this.AA = this.a;
-          this.BB = this.b;
-          this.CC = this.c;
-          this.DD = this.d;
-          this.a = this.FF(this.a, this.b, this.c, this.d, this.x[this.k], this.S11, 0xD76AA478);
-          this.d = this.FF(this.d, this.a, this.b, this.c, this.x[this.k + 1], this.S12, 0xE8C7B756);
-          this.c = this.FF(this.c, this.d, this.a, this.b, this.x[this.k + 2], this.S13, 0x242070DB);
-          this.b = this.FF(this.b, this.c, this.d, this.a, this.x[this.k + 3], this.S14, 0xC1BDCEEE);
-          this.a = this.FF(this.a, this.b, this.c, this.d, this.x[this.k + 4], this.S11, 0xF57C0FAF);
-          this.d = this.FF(this.d, this.a, this.b, this.c, this.x[this.k + 5], this.S12, 0x4787C62A);
-          this.c = this.FF(this.c, this.d, this.a, this.b, this.x[this.k + 6], this.S13, 0xA8304613);
-          this.b = this.FF(this.b, this.c, this.d, this.a, this.x[this.k + 7], this.S14, 0xFD469501);
-          this.a = this.FF(this.a, this.b, this.c, this.d, this.x[this.k + 8], this.S11, 0x698098D8);
-          this.d = this.FF(this.d, this.a, this.b, this.c, this.x[this.k + 9], this.S12, 0x8B44F7AF);
-          this.c = this.FF(this.c, this.d, this.a, this.b, this.x[this.k + 10], this.S13, 0xFFFF5BB1);
-          this.b = this.FF(this.b, this.c, this.d, this.a, this.x[this.k + 11], this.S14, 0x895CD7BE);
-          this.a = this.FF(this.a, this.b, this.c, this.d, this.x[this.k + 12], this.S11, 0x6B901122);
-          this.d = this.FF(this.d, this.a, this.b, this.c, this.x[this.k + 13], this.S12, 0xFD987193);
-          this.c = this.FF(this.c, this.d, this.a, this.b, this.x[this.k + 14], this.S13, 0xA679438E);
-          this.b = this.FF(this.b, this.c, this.d, this.a, this.x[this.k + 15], this.S14, 0x49B40821);
-          this.a = this.GG(this.a, this.b, this.c, this.d, this.x[this.k + 1], this.S21, 0xF61E2562);
-          this.d = this.GG(this.d, this.a, this.b, this.c, this.x[this.k + 6], this.S22, 0xC040B340);
-          this.c = this.GG(this.c, this.d, this.a, this.b, this.x[this.k + 11], this.S23, 0x265E5A51);
-          this.b = this.GG(this.b, this.c, this.d, this.a, this.x[this.k], this.S24, 0xE9B6C7AA);
-          this.a = this.GG(this.a, this.b, this.c, this.d, this.x[this.k + 5], this.S21, 0xD62F105D);
-          this.d = this.GG(this.d, this.a, this.b, this.c, this.x[this.k + 10], this.S22, 0x2441453);
-          this.c = this.GG(this.c, this.d, this.a, this.b, this.x[this.k + 15], this.S23, 0xD8A1E681);
-          this.b = this.GG(this.b, this.c, this.d, this.a, this.x[this.k + 4], this.S24, 0xE7D3FBC8);
-          this.a = this.GG(this.a, this.b, this.c, this.d, this.x[this.k + 9], this.S21, 0x21E1CDE6);
-          this.d = this.GG(this.d, this.a, this.b, this.c, this.x[this.k + 14], this.S22, 0xC33707D6);
-          this.c = this.GG(this.c, this.d, this.a, this.b, this.x[this.k + 3], this.S23, 0xF4D50D87);
-          this.b = this.GG(this.b, this.c, this.d, this.a, this.x[this.k + 8], this.S24, 0x455A14ED);
-          this.a = this.GG(this.a, this.b, this.c, this.d, this.x[this.k + 13], this.S21, 0xA9E3E905);
-          this.d = this.GG(this.d, this.a, this.b, this.c, this.x[this.k + 2], this.S22, 0xFCEFA3F8);
-          this.c = this.GG(this.c, this.d, this.a, this.b, this.x[this.k + 7], this.S23, 0x676F02D9);
-          this.b = this.GG(this.b, this.c, this.d, this.a, this.x[this.k + 12], this.S24, 0x8D2A4C8A);
-          this.a = this.HH(this.a, this.b, this.c, this.d, this.x[this.k + 5], this.S31, 0xFFFA3942);
-          this.d = this.HH(this.d, this.a, this.b, this.c, this.x[this.k + 8], this.S32, 0x8771F681);
-          this.c = this.HH(this.c, this.d, this.a, this.b, this.x[this.k + 11], this.S33, 0x6D9D6122);
-          this.b = this.HH(this.b, this.c, this.d, this.a, this.x[this.k + 14], this.S34, 0xFDE5380C);
-          this.a = this.HH(this.a, this.b, this.c, this.d, this.x[this.k + 1], this.S31, 0xA4BEEA44);
-          this.d = this.HH(this.d, this.a, this.b, this.c, this.x[this.k + 4], this.S32, 0x4BDECFA9);
-          this.c = this.HH(this.c, this.d, this.a, this.b, this.x[this.k + 7], this.S33, 0xF6BB4B60);
-          this.b = this.HH(this.b, this.c, this.d, this.a, this.x[this.k + 10], this.S34, 0xBEBFBC70);
-          this.a = this.HH(this.a, this.b, this.c, this.d, this.x[this.k + 13], this.S31, 0x289B7EC6);
-          this.d = this.HH(this.d, this.a, this.b, this.c, this.x[this.k], this.S32, 0xEAA127FA);
-          this.c = this.HH(this.c, this.d, this.a, this.b, this.x[this.k + 3], this.S33, 0xD4EF3085);
-          this.b = this.HH(this.b, this.c, this.d, this.a, this.x[this.k + 6], this.S34, 0x4881D05);
-          this.a = this.HH(this.a, this.b, this.c, this.d, this.x[this.k + 9], this.S31, 0xD9D4D039);
-          this.d = this.HH(this.d, this.a, this.b, this.c, this.x[this.k + 12], this.S32, 0xE6DB99E5);
-          this.c = this.HH(this.c, this.d, this.a, this.b, this.x[this.k + 15], this.S33, 0x1FA27CF8);
-          this.b = this.HH(this.b, this.c, this.d, this.a, this.x[this.k + 2], this.S34, 0xC4AC5665);
-          this.a = this.II(this.a, this.b, this.c, this.d, this.x[this.k], this.S41, 0xF4292244);
-          this.d = this.II(this.d, this.a, this.b, this.c, this.x[this.k + 7], this.S42, 0x432AFF97);
-          this.c = this.II(this.c, this.d, this.a, this.b, this.x[this.k + 14], this.S43, 0xAB9423A7);
-          this.b = this.II(this.b, this.c, this.d, this.a, this.x[this.k + 5], this.S44, 0xFC93A039);
-          this.a = this.II(this.a, this.b, this.c, this.d, this.x[this.k + 12], this.S41, 0x655B59C3);
-          this.d = this.II(this.d, this.a, this.b, this.c, this.x[this.k + 3], this.S42, 0x8F0CCC92);
-          this.c = this.II(this.c, this.d, this.a, this.b, this.x[this.k + 10], this.S43, 0xFFEFF47D);
-          this.b = this.II(this.b, this.c, this.d, this.a, this.x[this.k + 1], this.S44, 0x85845DD1);
-          this.a = this.II(this.a, this.b, this.c, this.d, this.x[this.k + 8], this.S41, 0x6FA87E4F);
-          this.d = this.II(this.d, this.a, this.b, this.c, this.x[this.k + 15], this.S42, 0xFE2CE6E0);
-          this.c = this.II(this.c, this.d, this.a, this.b, this.x[this.k + 6], this.S43, 0xA3014314);
-          this.b = this.II(this.b, this.c, this.d, this.a, this.x[this.k + 13], this.S44, 0x4E0811A1);
-          this.a = this.II(this.a, this.b, this.c, this.d, this.x[this.k + 4], this.S41, 0xF7537E82);
-          this.d = this.II(this.d, this.a, this.b, this.c, this.x[this.k + 11], this.S42, 0xBD3AF235);
-          this.c = this.II(this.c, this.d, this.a, this.b, this.x[this.k + 2], this.S43, 0x2AD7D2BB);
-          this.b = this.II(this.b, this.c, this.d, this.a, this.x[this.k + 9], this.S44, 0xEB86D391);
+          MD5.AA = MD5.a;
+          MD5.BB = MD5.b;
+          MD5.CC = MD5.c;
+          MD5.DD = MD5.d;
+          MD5.a = MD5.FF(MD5.a, MD5.b, MD5.c, MD5.d, MD5.x[MD5.k], MD5.S11, 0xD76AA478);
+          MD5.d = MD5.FF(MD5.d, MD5.a, MD5.b, MD5.c, MD5.x[MD5.k + 1], MD5.S12, 0xE8C7B756);
+          MD5.c = MD5.FF(MD5.c, MD5.d, MD5.a, MD5.b, MD5.x[MD5.k + 2], MD5.S13, 0x242070DB);
+          MD5.b = MD5.FF(MD5.b, MD5.c, MD5.d, MD5.a, MD5.x[MD5.k + 3], MD5.S14, 0xC1BDCEEE);
+          MD5.a = MD5.FF(MD5.a, MD5.b, MD5.c, MD5.d, MD5.x[MD5.k + 4], MD5.S11, 0xF57C0FAF);
+          MD5.d = MD5.FF(MD5.d, MD5.a, MD5.b, MD5.c, MD5.x[MD5.k + 5], MD5.S12, 0x4787C62A);
+          MD5.c = MD5.FF(MD5.c, MD5.d, MD5.a, MD5.b, MD5.x[MD5.k + 6], MD5.S13, 0xA8304613);
+          MD5.b = MD5.FF(MD5.b, MD5.c, MD5.d, MD5.a, MD5.x[MD5.k + 7], MD5.S14, 0xFD469501);
+          MD5.a = MD5.FF(MD5.a, MD5.b, MD5.c, MD5.d, MD5.x[MD5.k + 8], MD5.S11, 0x698098D8);
+          MD5.d = MD5.FF(MD5.d, MD5.a, MD5.b, MD5.c, MD5.x[MD5.k + 9], MD5.S12, 0x8B44F7AF);
+          MD5.c = MD5.FF(MD5.c, MD5.d, MD5.a, MD5.b, MD5.x[MD5.k + 10], MD5.S13, 0xFFFF5BB1);
+          MD5.b = MD5.FF(MD5.b, MD5.c, MD5.d, MD5.a, MD5.x[MD5.k + 11], MD5.S14, 0x895CD7BE);
+          MD5.a = MD5.FF(MD5.a, MD5.b, MD5.c, MD5.d, MD5.x[MD5.k + 12], MD5.S11, 0x6B901122);
+          MD5.d = MD5.FF(MD5.d, MD5.a, MD5.b, MD5.c, MD5.x[MD5.k + 13], MD5.S12, 0xFD987193);
+          MD5.c = MD5.FF(MD5.c, MD5.d, MD5.a, MD5.b, MD5.x[MD5.k + 14], MD5.S13, 0xA679438E);
+          MD5.b = MD5.FF(MD5.b, MD5.c, MD5.d, MD5.a, MD5.x[MD5.k + 15], MD5.S14, 0x49B40821);
+          MD5.a = MD5.GG(MD5.a, MD5.b, MD5.c, MD5.d, MD5.x[MD5.k + 1], MD5.S21, 0xF61E2562);
+          MD5.d = MD5.GG(MD5.d, MD5.a, MD5.b, MD5.c, MD5.x[MD5.k + 6], MD5.S22, 0xC040B340);
+          MD5.c = MD5.GG(MD5.c, MD5.d, MD5.a, MD5.b, MD5.x[MD5.k + 11], MD5.S23, 0x265E5A51);
+          MD5.b = MD5.GG(MD5.b, MD5.c, MD5.d, MD5.a, MD5.x[MD5.k], MD5.S24, 0xE9B6C7AA);
+          MD5.a = MD5.GG(MD5.a, MD5.b, MD5.c, MD5.d, MD5.x[MD5.k + 5], MD5.S21, 0xD62F105D);
+          MD5.d = MD5.GG(MD5.d, MD5.a, MD5.b, MD5.c, MD5.x[MD5.k + 10], MD5.S22, 0x2441453);
+          MD5.c = MD5.GG(MD5.c, MD5.d, MD5.a, MD5.b, MD5.x[MD5.k + 15], MD5.S23, 0xD8A1E681);
+          MD5.b = MD5.GG(MD5.b, MD5.c, MD5.d, MD5.a, MD5.x[MD5.k + 4], MD5.S24, 0xE7D3FBC8);
+          MD5.a = MD5.GG(MD5.a, MD5.b, MD5.c, MD5.d, MD5.x[MD5.k + 9], MD5.S21, 0x21E1CDE6);
+          MD5.d = MD5.GG(MD5.d, MD5.a, MD5.b, MD5.c, MD5.x[MD5.k + 14], MD5.S22, 0xC33707D6);
+          MD5.c = MD5.GG(MD5.c, MD5.d, MD5.a, MD5.b, MD5.x[MD5.k + 3], MD5.S23, 0xF4D50D87);
+          MD5.b = MD5.GG(MD5.b, MD5.c, MD5.d, MD5.a, MD5.x[MD5.k + 8], MD5.S24, 0x455A14ED);
+          MD5.a = MD5.GG(MD5.a, MD5.b, MD5.c, MD5.d, MD5.x[MD5.k + 13], MD5.S21, 0xA9E3E905);
+          MD5.d = MD5.GG(MD5.d, MD5.a, MD5.b, MD5.c, MD5.x[MD5.k + 2], MD5.S22, 0xFCEFA3F8);
+          MD5.c = MD5.GG(MD5.c, MD5.d, MD5.a, MD5.b, MD5.x[MD5.k + 7], MD5.S23, 0x676F02D9);
+          MD5.b = MD5.GG(MD5.b, MD5.c, MD5.d, MD5.a, MD5.x[MD5.k + 12], MD5.S24, 0x8D2A4C8A);
+          MD5.a = MD5.HH(MD5.a, MD5.b, MD5.c, MD5.d, MD5.x[MD5.k + 5], MD5.S31, 0xFFFA3942);
+          MD5.d = MD5.HH(MD5.d, MD5.a, MD5.b, MD5.c, MD5.x[MD5.k + 8], MD5.S32, 0x8771F681);
+          MD5.c = MD5.HH(MD5.c, MD5.d, MD5.a, MD5.b, MD5.x[MD5.k + 11], MD5.S33, 0x6D9D6122);
+          MD5.b = MD5.HH(MD5.b, MD5.c, MD5.d, MD5.a, MD5.x[MD5.k + 14], MD5.S34, 0xFDE5380C);
+          MD5.a = MD5.HH(MD5.a, MD5.b, MD5.c, MD5.d, MD5.x[MD5.k + 1], MD5.S31, 0xA4BEEA44);
+          MD5.d = MD5.HH(MD5.d, MD5.a, MD5.b, MD5.c, MD5.x[MD5.k + 4], MD5.S32, 0x4BDECFA9);
+          MD5.c = MD5.HH(MD5.c, MD5.d, MD5.a, MD5.b, MD5.x[MD5.k + 7], MD5.S33, 0xF6BB4B60);
+          MD5.b = MD5.HH(MD5.b, MD5.c, MD5.d, MD5.a, MD5.x[MD5.k + 10], MD5.S34, 0xBEBFBC70);
+          MD5.a = MD5.HH(MD5.a, MD5.b, MD5.c, MD5.d, MD5.x[MD5.k + 13], MD5.S31, 0x289B7EC6);
+          MD5.d = MD5.HH(MD5.d, MD5.a, MD5.b, MD5.c, MD5.x[MD5.k], MD5.S32, 0xEAA127FA);
+          MD5.c = MD5.HH(MD5.c, MD5.d, MD5.a, MD5.b, MD5.x[MD5.k + 3], MD5.S33, 0xD4EF3085);
+          MD5.b = MD5.HH(MD5.b, MD5.c, MD5.d, MD5.a, MD5.x[MD5.k + 6], MD5.S34, 0x4881D05);
+          MD5.a = MD5.HH(MD5.a, MD5.b, MD5.c, MD5.d, MD5.x[MD5.k + 9], MD5.S31, 0xD9D4D039);
+          MD5.d = MD5.HH(MD5.d, MD5.a, MD5.b, MD5.c, MD5.x[MD5.k + 12], MD5.S32, 0xE6DB99E5);
+          MD5.c = MD5.HH(MD5.c, MD5.d, MD5.a, MD5.b, MD5.x[MD5.k + 15], MD5.S33, 0x1FA27CF8);
+          MD5.b = MD5.HH(MD5.b, MD5.c, MD5.d, MD5.a, MD5.x[MD5.k + 2], MD5.S34, 0xC4AC5665);
+          MD5.a = MD5.II(MD5.a, MD5.b, MD5.c, MD5.d, MD5.x[MD5.k], MD5.S41, 0xF4292244);
+          MD5.d = MD5.II(MD5.d, MD5.a, MD5.b, MD5.c, MD5.x[MD5.k + 7], MD5.S42, 0x432AFF97);
+          MD5.c = MD5.II(MD5.c, MD5.d, MD5.a, MD5.b, MD5.x[MD5.k + 14], MD5.S43, 0xAB9423A7);
+          MD5.b = MD5.II(MD5.b, MD5.c, MD5.d, MD5.a, MD5.x[MD5.k + 5], MD5.S44, 0xFC93A039);
+          MD5.a = MD5.II(MD5.a, MD5.b, MD5.c, MD5.d, MD5.x[MD5.k + 12], MD5.S41, 0x655B59C3);
+          MD5.d = MD5.II(MD5.d, MD5.a, MD5.b, MD5.c, MD5.x[MD5.k + 3], MD5.S42, 0x8F0CCC92);
+          MD5.c = MD5.II(MD5.c, MD5.d, MD5.a, MD5.b, MD5.x[MD5.k + 10], MD5.S43, 0xFFEFF47D);
+          MD5.b = MD5.II(MD5.b, MD5.c, MD5.d, MD5.a, MD5.x[MD5.k + 1], MD5.S44, 0x85845DD1);
+          MD5.a = MD5.II(MD5.a, MD5.b, MD5.c, MD5.d, MD5.x[MD5.k + 8], MD5.S41, 0x6FA87E4F);
+          MD5.d = MD5.II(MD5.d, MD5.a, MD5.b, MD5.c, MD5.x[MD5.k + 15], MD5.S42, 0xFE2CE6E0);
+          MD5.c = MD5.II(MD5.c, MD5.d, MD5.a, MD5.b, MD5.x[MD5.k + 6], MD5.S43, 0xA3014314);
+          MD5.b = MD5.II(MD5.b, MD5.c, MD5.d, MD5.a, MD5.x[MD5.k + 13], MD5.S44, 0x4E0811A1);
+          MD5.a = MD5.II(MD5.a, MD5.b, MD5.c, MD5.d, MD5.x[MD5.k + 4], MD5.S41, 0xF7537E82);
+          MD5.d = MD5.II(MD5.d, MD5.a, MD5.b, MD5.c, MD5.x[MD5.k + 11], MD5.S42, 0xBD3AF235);
+          MD5.c = MD5.II(MD5.c, MD5.d, MD5.a, MD5.b, MD5.x[MD5.k + 2], MD5.S43, 0x2AD7D2BB);
+          MD5.b = MD5.II(MD5.b, MD5.c, MD5.d, MD5.a, MD5.x[MD5.k + 9], MD5.S44, 0xEB86D391);
 
-          this.a = this.AddUnsigned(this.a, this.AA);
-          this.b = this.AddUnsigned(this.b, this.BB);
-          this.c = this.AddUnsigned(this.c, this.CC);
-          this.d = this.AddUnsigned(this.d, this.DD);
+          MD5.a = MD5.AddUnsigned(MD5.a, MD5.AA);
+          MD5.b = MD5.AddUnsigned(MD5.b, MD5.BB);
+          MD5.c = MD5.AddUnsigned(MD5.c, MD5.CC);
+          MD5.d = MD5.AddUnsigned(MD5.d, MD5.DD);
       }
 
-      temp = this.WordToHex(this.a) + this.WordToHex(this.b) + this.WordToHex(this.c) + this.WordToHex(this.d);
+      temp = MD5.WordToHex(MD5.a) + MD5.WordToHex(MD5.b) + MD5.WordToHex(MD5.c) + MD5.WordToHex(MD5.d);
       return temp.toLowerCase();
   }
 }

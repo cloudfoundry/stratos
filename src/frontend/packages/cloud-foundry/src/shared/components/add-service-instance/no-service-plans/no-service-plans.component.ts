@@ -1,4 +1,4 @@
-import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'app-no-service-plans',
@@ -8,11 +8,5 @@ import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: []
 })
-export class NoServicePlansComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit() {
-  }
-
+export class NoServicePlansComponent {
 }

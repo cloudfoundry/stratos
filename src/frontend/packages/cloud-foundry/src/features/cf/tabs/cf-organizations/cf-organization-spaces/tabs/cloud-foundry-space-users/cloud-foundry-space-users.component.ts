@@ -1,9 +1,9 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, type Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
 import {
@@ -14,7 +14,8 @@ import {
   PageSubNavComponent
 } from '@stratosui/core';
 import { CFFeatureFlagTypes } from '../../../../../../../cf-api.types';
-import { CFAppState } from '../../../../../../../cf-app-state';
+import type { CFAppState } from '../../../../../../../cf-app-state';
+import { GeneralEntityAppState } from '@stratosui/store';
 import {
   CfSpaceUsersListConfigService,
 } from '../../../../../../../shared/components/list/list-types/cf-space-users/cf-space-users-list-config.service';
@@ -47,11 +48,11 @@ import { CloudFoundryInviteUserLinkComponent } from '../../../../cf-organization
 export class CloudFoundrySpaceUsersComponent {
   public addRolesByUsernameLink$: Observable<{
     link: string,
-    params: { [name: string]: any }
+    params: Record<string, unknown>
   }>;
 
   constructor(
-    store: Store<CFAppState>,
+    store: Store<GeneralEntityAppState>,
     userPerms: CurrentUserPermissionsService,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {

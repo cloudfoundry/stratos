@@ -1,28 +1,29 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   ComponentFactoryResolver,
-  ComponentRef,
+  type ComponentRef,
   Input,
-  OnChanges,
-  OnInit,
-  SimpleChanges,
+  type OnChanges,
+  type OnInit,
+  type SimpleChanges,
   ViewChild,
   ViewContainerRef,
   ViewEncapsulation,
 } from '@angular/core';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { RowState } from '../../data-sources-controllers/list-data-source-types';
-import { ListExpandedComponentType } from '../../list.component.types';
-import { CardCell } from '../../list.types';
-import { ITableColumn } from '../table.types';
+import type { RowState } from '../../data-sources-controllers/list-data-source-types';
+import type { ListExpandedComponentType } from '../../list.component.types';
+import type { CardCell } from '../../list.types';
+import type { ITableColumn } from '../table.types';
 import { TableCellComponent } from '../table-cell/table-cell.component';
 import { TableRowExpandedService } from './table-row-expanded-service';
 import { CustomIconComponent } from '../../../../../shared/components/custom-material/custom-material.component';
+import { AppProgressBarComponent } from '../../../progress-bar/app-progress-bar.component';
 
 @Component({
 selector: 'app-table-row',
@@ -35,16 +36,17 @@ selector: 'app-table-row',
   imports: [
     CommonModule,
     CustomIconComponent,
-    TableCellComponent
+    TableCellComponent,
+    AppProgressBarComponent
   ]
 })
-export class TableRowComponent<T = any> implements OnInit, OnChanges {
+export class TableRowComponent<T = unknown> implements OnInit, OnChanges {
 
   @ViewChild('expandedComponent', { read: ViewContainerRef, static: true })
   expandedComponent!: ViewContainerRef;
 
   @Input() columns!: ITableColumn<T>[];
-  @Input() dataSource: any;
+  @Input() dataSource: unknown;
   @Input() rowState!: Observable<RowState>;
   @Input() expandComponent!: ListExpandedComponentType<T>;
   @Input() row!: T;
@@ -65,7 +67,7 @@ export class TableRowComponent<T = any> implements OnInit, OnChanges {
   public defaultMinRowHeight = '50px';
   public isExpanded = false;
 
-  private expandedComponentRef: ComponentRef<any>;
+  private expandedComponentRef: ComponentRef<CardCell<T>>;
 
   constructor(
     private componentFactoryResolver: ComponentFactoryResolver,
@@ -76,19 +78,19 @@ export class TableRowComponent<T = any> implements OnInit, OnChanges {
   ngOnInit() {
     if (this.rowState) {
       this.inErrorState$ = this.rowState.pipe(
-        map(state => state.error)
+        map(state => Boolean(state.error))
       );
       this.inWarningState$ = this.rowState.pipe(
-        map(state => state.warning)
+        map(state => Boolean(state.warning))
       );
       this.inInfoState$ = this.rowState.pipe(
-        map(state => state.info)
+        map(state => Boolean(state.info))
       );
       this.errorMessage$ = this.rowState.pipe(
-        map(state => state.message)
+        map(state => state.message || '')
       );
       this.isBlocked$ = this.rowState.pipe(
-        map(state => state.blocked || state.deleting)
+        map(state => Boolean(state.blocked || state.deleting))
       );
       this.isHighlighted$ = this.rowState.pipe(
         map(state => state.highlighted)
@@ -108,10 +110,10 @@ export class TableRowComponent<T = any> implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges) {
     // When row, columns, or other relevant inputs change, mark for check
     // This is necessary in zoneless mode with OnPush change detection
-    if (changes['row'] || changes['columns'] || changes['dataSource']) {
+    if (changes.row || changes.columns || changes.dataSource) {
       // Update expanded component if it exists with new row data
-      if (this.expandedComponentRef && changes['row']) {
-        const instance: CardCell<any> = this.expandedComponentRef.instance;
+      if (this.expandedComponentRef && changes.row) {
+        const instance: CardCell<T> = this.expandedComponentRef.instance;
         instance.row = this.row;
       }
       // Mark for check to ensure template expressions re-evaluate in zoneless mode
@@ -130,7 +132,7 @@ export class TableRowComponent<T = any> implements OnInit, OnChanges {
 
   private createComponent() {
     const component = this.getComponent();
-    return !!component ? this.expandedComponent.createComponent(component) : null;
+    return component ? this.expandedComponent.createComponent(component) : null;
   }
 
   public panelOpened() {
@@ -146,7 +148,7 @@ export class TableRowComponent<T = any> implements OnInit, OnChanges {
     if (!this.expandedComponentRef) {
       return;
     }
-    const instance: CardCell<any> = this.expandedComponentRef.instance;
+    const instance: CardCell<T> = this.expandedComponentRef.instance;
     instance.row = this.row; // This could be set again when `row` changes above
   }
 

@@ -5,9 +5,9 @@ import { expect, describe, it, afterEach } from 'vitest';
 // IMMEDIATE: Expose vitest globals to window for entity-catalog test detection
 // This MUST happen before any Angular/Store imports that check window.describe
 if (typeof window !== 'undefined') {
-  (window as any).describe = describe;
-  (window as any).it = it;
-  (window as any).expect = expect;
+  (window as unknown as Record<string, unknown>).describe = describe;
+  (window as unknown as Record<string, unknown>).it = it;
+  (window as unknown as Record<string, unknown>).expect = expect;
 }
 
 import '@angular/compiler';
@@ -17,23 +17,23 @@ import {
   platformBrowserTesting,
 } from '@angular/platform-browser/testing';
 import { getTestBed } from '@angular/core/testing';
-import { entityCatalog, TestEntityCatalog } from '@stratosui/store';
+import { entityCatalog, type TestEntityCatalog } from '@stratosui/store';
 
 // Polyfill: window.matchMedia for tests
 // Components that use media queries need matchMedia to be available
 if (typeof window.matchMedia === 'undefined') {
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
-    value: (query: string) => ({
+    value: (query: string): MediaQueryList => ({
       matches: false,
       media: query,
-      onchange: null,
+      onchange: null as ((this: MediaQueryList, ev: MediaQueryListEvent) => unknown) | null,
       addListener: () => { }, // deprecated but still used by some code
       removeListener: () => { }, // deprecated but still used by some code
       addEventListener: () => { },
       removeEventListener: () => { },
       dispatchEvent: () => true,
-    }),
+    } as MediaQueryList),
   });
 }
 

@@ -3,16 +3,14 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { differenceInMilliseconds, isBefore } from 'date-fns';
 
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import type { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
-import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
-import { IGlobalListAction, IListAction, IListConfig, IListMultiFilterConfig, IMultiListAction, ListConfig, ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
-import { ListDataSource } from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { MetricsRangeSelectorService } from '../../../../../core/src/shared/services/metrics-range-selector.service';
-import { ITimeRange } from '../../../../../core/src/shared/services/metrics-range-selector.types';
-import { APIResource } from '../../../../../store/src/types/api.types';
+import { MetricsRangeSelectorService, type ITableColumn, type IGlobalListAction, type IListAction, type IListConfig, type IListMultiFilterConfig, type IMultiListAction, type ITimeRange } from '@stratosui/core';
+import { ListConfig, ListViewTypes } from '@stratosui/core';
+import type { GeneralEntityAppState } from '../../../../../store/src/app-state';
+import type { APIResource } from '../../../../../store/src/types/api.types';
 import { MetricQueryType } from '../../../../../store/src/types/metric.types';
-import { AppAutoscalerEvent } from '../../../store/app-autoscaler.types';
+import type { AppAutoscalerEvent } from '../../../store/app-autoscaler.types';
 import { CfAppAutoscalerEventsDataSource } from './cf-app-autoscaler-events-data-source';
 import {
   TableCellAutoscalerEventChangeComponent,
@@ -60,9 +58,9 @@ export class CfAppAutoscalerEventsConfigService
           if (row.entity.message) {
             const change = row.entity.new_instances - row.entity.old_instances;
             if (change >= 0) {
-              return '+' + change + ' instance(s) because ' + row.entity.message;
+              return `+${change} instance(s) because ${row.entity.message}`;
             } else {
-              return change + ' instance(s) because ' + row.entity.message;
+              return `${change} instance(s) because ${row.entity.message}`;
             }
           } else {
             return row.entity.reason;
@@ -127,7 +125,7 @@ export class CfAppAutoscalerEventsConfigService
   }
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     private appService: ApplicationService,
     private datePipe: DatePipe,
     metricsRangeService: MetricsRangeSelectorService) {

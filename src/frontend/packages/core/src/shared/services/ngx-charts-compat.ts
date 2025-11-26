@@ -6,4 +6,6 @@
  */
 
 // No-op export to prevent build errors
-export const ɵɵariaProperty = () => {};
+export const ɵɵariaProperty = () => {
+  // Compatibility shim for ngx-charts
+};

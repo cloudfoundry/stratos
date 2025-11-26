@@ -1,7 +1,7 @@
-import { EntityRequestAction } from '@stratosui/store';
+import type { EntityRequestAction } from '@stratosui/store';
 
-import { MonocularPaginationAction } from '../../../helm/store/helm.actions';
-import { HelmUpgradeValues } from '../../../helm/store/helm.types';
+import type { MonocularPaginationAction } from '../../../helm/store/helm.actions';
+import type { HelmUpgradeValues } from '../../../helm/store/helm.types';
 import { KUBERNETES_ENDPOINT_TYPE, kubernetesEntityFactory } from '../../kubernetes-entity-factory';
 import {
   getHelmReleaseGraphId,

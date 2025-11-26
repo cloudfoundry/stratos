@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AuthOnlyAppState, AuthState } from '@stratosui/store';
 import { map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +15,7 @@ export class UserService {
 
   constructor(store: Store<AuthOnlyAppState>) {
     this.isAdmin$ = store.select(s => s.auth).pipe(
-      map((auth: AuthState) => auth.sessionData && auth.sessionData.user && auth.sessionData.user.admin));
+      map((auth: AuthState) => auth.sessionData?.user?.admin));
 
     this.isEndpointAdmin$ = store.select(s => s.auth).pipe(
       map((auth: AuthState) => {

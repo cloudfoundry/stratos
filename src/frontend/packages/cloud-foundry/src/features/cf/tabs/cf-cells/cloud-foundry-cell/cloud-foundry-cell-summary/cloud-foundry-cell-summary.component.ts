@@ -1,6 +1,6 @@
 import { Component , ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Observable } from 'rxjs';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import {
@@ -32,6 +32,7 @@ import { ListComponent } from '../../../../../../../../core/src/shared/component
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    AsyncPipe,
     CustomTooltipDirective,
     CardWrapperComponent,
     CardContentComponent,

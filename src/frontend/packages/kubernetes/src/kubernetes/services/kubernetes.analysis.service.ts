@@ -2,16 +2,16 @@ import { Injectable, computed, Injector, inject, runInInjectionContext } from '@
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { filter, first, map, pairwise, startWith, tap } from 'rxjs/operators';
 
 import { SnackBarService } from '../../../../core/src/shared/services/snackbar.service';
 import { ResetPaginationOfType } from '../../../../store/src/actions/pagination.actions';
-import { AppState } from '../../../../store/src/app-state';
-import { ListActionState, RequestInfoState } from '../../../../store/src/reducers/api-request-reducer/types';
+import type { AppState } from '../../../../store/src/app-state';
+import type { ListActionState, RequestInfoState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { kubeEntityCatalog } from '../kubernetes-entity-generator';
-import { GetAnalysisReports } from '../store/analysis.actions';
-import { AnalysisReport } from '../store/kube.types';
+import type { GetAnalysisReports } from '../store/analysis.actions';
+import type { AnalysisReport } from '../store/kube.types';
 import { getHelmReleaseDetailsFromGuid } from '../workloads/store/workloads-entity-factory';
 import { KubernetesEndpointService } from './kubernetes-endpoint.service';
 
@@ -40,7 +40,7 @@ export class KubernetesAnalysisService {
   public static isAnalysisEnabled(store: Store<AppState>): Observable<boolean> {
     // Is the backend plugin available?
     const enabled$ = store.select('auth').pipe(
-      map(auth => auth.sessionData.plugins && auth.sessionData.plugins.analysis)
+      map(auth => auth.sessionData.plugins?.analysis)
     );
     return enabled$.pipe(startWith(false));
   }
@@ -123,7 +123,7 @@ export class KubernetesAnalysisService {
     this.action = kubeEntityCatalog.analysisReport.actions.getMultiple(this.kubeGuid);
   }
 
-  public delete(endpointID: string, item: { id: string }): Observable<any> {
+  public delete(endpointID: string, item: { id: string }): Observable<RequestInfoState> {
     return kubeEntityCatalog.analysisReport.api.delete(endpointID, item.id);
   }
 
@@ -131,7 +131,7 @@ export class KubernetesAnalysisService {
     this.store.dispatch(new ResetPaginationOfType(this.action));
   }
 
-  public run(id: string, endpointID: string, namespace?: string, app?: string): Observable<any> {
+  public run(id: string, endpointID: string, namespace?: string, app?: string): Observable<RequestInfoState> {
     const obs$ = kubeEntityCatalog.analysisReport.api.run<RequestInfoState>(endpointID, id, namespace, app).pipe(
       pairwise(),
       filter(([oldE, newE]) => oldE.creating && !newE.creating),
@@ -140,7 +140,7 @@ export class KubernetesAnalysisService {
     );
     obs$.subscribe(() => {
       const type = id.charAt(0).toUpperCase() + id.substring(1);
-      let msg;
+      let msg: string;
       if (app) {
         msg = `${type} analysis started for workload '${app}'`;
       } else if (namespace) {

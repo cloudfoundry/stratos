@@ -1,7 +1,7 @@
-import { BaseRequestState } from '../../app-state';
-import { BaseEntityRequestAction } from '../../entity-catalog/action-orchestrator/action-orchestrator';
+import type { BaseRequestState } from '../../app-state';
+import type { BaseEntityRequestAction } from '../../entity-catalog/action-orchestrator/action-orchestrator';
 import { mergeState } from '../../helpers/reducer.helper';
-import { ISuccessRequestAction, WrapperRequestActionSuccess } from '../../types/request.types';
+import type { ISuccessRequestAction, WrapperRequestActionSuccess } from '../../types/request.types';
 import { isNullOrUndefined } from '../../utils';
 import {
   createRequestStateFromResponse,
@@ -52,7 +52,7 @@ export function succeedRequest(state: BaseRequestState, action: ISuccessRequestA
     );
 
     return newState;
-  } else if (action.response && action.response.entities) {
+  } else if (action.response?.entities) {
     return createRequestStateFromResponse(action.response, state);
   }
   return state;

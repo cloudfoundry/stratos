@@ -1,23 +1,27 @@
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { MatSort, Sort } from '../../../services/tailwind-material-replacements';
-import { ListSort } from '@stratosui/store';
-import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, type OnDestroy, type OnInit, ViewChild } from '@angular/core';
+import { TailwindSortDirective, type TailwindSort } from '../../../services/tailwind-sort.service';
+import type { ListSort } from '@stratosui/store';
+import { combineLatest as observableCombineLatest, type Observable, type Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-import { ITableListDataSource, RowState } from '../data-sources-controllers/list-data-source-types';
-import { IListPaginationController } from '../data-sources-controllers/list-pagination-controller';
-import { ListExpandedComponentType } from '../list.component.types';
+import type { ITableListDataSource, RowState } from '../data-sources-controllers/list-data-source-types';
+import type { IListPaginationController } from '../data-sources-controllers/list-pagination-controller';
+import type { ListExpandedComponentType } from '../list.component.types';
 import { TableCellActionsComponent } from './table-cell-actions/table-cell-actions.component';
-import { TableCellExpanderComponent, TableCellExpanderConfig } from './table-cell-expander/table-cell-expander.component';
+import { TableCellExpanderComponent, type TableCellExpanderConfig } from './table-cell-expander/table-cell-expander.component';
 import { TableCellSelectComponent } from './table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from './table-header-select/table-header-select.component';
 import { TableCellComponent } from './table-cell/table-cell.component';
 import { TableRowComponent } from './table-row/table-row.component';
 import { TableRowExpandedService } from './table-row/table-row-expanded-service';
-import { ITableColumn } from './table.types';
+import type { ITableColumn } from './table.types';
 
-const tableColumnSelect: ITableColumn<any> = {
+// Type aliases for compatibility
+type MatSort = TailwindSortDirective;
+type Sort = TailwindSort;
+
+const tableColumnSelect: ITableColumn<unknown> = {
   columnId: 'select',
   headerCellComponent: TableHeaderSelectComponent,
   cellComponent: TableCellSelectComponent,
@@ -25,14 +29,14 @@ const tableColumnSelect: ITableColumn<any> = {
   cellFlex: '0 0 60px'
 };
 
-const tableColumnExpander: ITableColumn<any> = {
+const tableColumnExpander: ITableColumn<unknown> = {
   columnId: 'expander',
   headerCellComponent: TableCellExpanderComponent,
   cellComponent: TableCellExpanderComponent,
   cellFlex: '0 0 47px',
 };
 
-const tableColumnAction: ITableColumn<any> = {
+const tableColumnAction: ITableColumn<unknown> = {
   columnId: 'actions',
   headerCell: () => '',
   cellComponent: TableCellActionsComponent,
@@ -59,7 +63,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
 
   private uberSub: Subscription;
 
-  @ViewChild(MatSort, { static: true }) sort: MatSort;
+  @ViewChild(TailwindSortDirective, { static: true }) sort: MatSort;
 
   constructor(private cdr: ChangeDetectorRef) { }
 
@@ -81,7 +85,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
     if (this.addSelect || this.expandComponent || this.addActions) {
       const newColumns = [...this.columns];
       if (this.addSelect) {
-        newColumns.splice(0, 0, tableColumnSelect);
+        newColumns.splice(0, 0, tableColumnSelect as ITableColumn<T>);
       }
       if (this.expandComponent) {
         newColumns.splice(0, 0, {
@@ -92,10 +96,10 @@ export class TableComponent<T> implements OnInit, OnDestroy {
             };
             return res;
           }
-        });
+        } as ITableColumn<T>);
       }
       if (this.addActions) {
-        newColumns.push(tableColumnAction);
+        newColumns.push(tableColumnAction as ITableColumn<T>);
       }
       this.columns = newColumns;
     }
@@ -114,8 +118,9 @@ export class TableComponent<T> implements OnInit, OnDestroy {
 
     const sortStoreToWidget = this.paginationController.sort$.pipe(
       tap((sort: ListSort) => {
-        if (this.sort.active !== sort.field || this.sort.direction !== sort.direction) {
-          this.sort.sort({
+        const matSort = this.sort as MatSort;
+        if (matSort.active !== sort.field || matSort.direction !== sort.direction) {
+          matSort.sort({
             id: sort.field,
             start: sort.direction as 'asc' | 'desc',
             disableClear: true

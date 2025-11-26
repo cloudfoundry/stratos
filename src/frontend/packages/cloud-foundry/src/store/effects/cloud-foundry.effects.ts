@@ -4,16 +4,17 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, flatMap, mergeMap } from 'rxjs/operators';
 
-import { environment } from '../../../../core/src/environments/environment.prod';
+import { environment } from '@stratosui/core';
 import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
-import { NormalizedResponse } from '../../../../store/src/types/api.types';
+import type { NormalizedResponse } from '../../../../store/src/types/api.types';
+import { createPartialMetadata } from '../../../../store/src/types/api.types';
 import {
   StartRequestAction,
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../../../../store/src/types/request.types';
-import { GET_CF_INFO, GetCFInfo } from '../../actions/cloud-foundry.actions';
-import { CFAppState } from '../../cf-app-state';
+import { GET_CF_INFO, type GetCFInfo } from '../../actions/cloud-foundry.actions';
+import type { CFAppState } from '../../cf-app-state';
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +24,7 @@ export class CloudFoundryEffects {
   constructor(
     private http: HttpClient,
     private actions$: Actions,
-    private store: Store<CFAppState>,
+    private store: Store,
     private appRef: ApplicationRef
   ) { }
 
@@ -40,9 +41,9 @@ export class CloudFoundryEffects {
       };
       const url = `/pp/${this.proxyAPIVersion}/proxy/v2/info`;
       return this.http
-        .get<{ [guid: string]: any }>(url, requestArgs)
+        .get<Record<string, unknown>>(url, requestArgs)
         .pipe(
-          mergeMap((info: { [guid: string]: any }) => {
+          mergeMap((info: Record<string, unknown>) => {
             const mappedData = {
               entities: { [cfInfoKey]: {} },
               result: []
@@ -51,7 +52,7 @@ export class CloudFoundryEffects {
 
             mappedData.entities[cfInfoKey][id] = {
               entity: info[id],
-              metadata: {}
+              metadata: createPartialMetadata()
             };
             mappedData.result.push(id);
             this.appRef.tick();
@@ -65,7 +66,7 @@ export class CloudFoundryEffects {
               new WrapperRequestActionFailed(error.message, action, actionType, {
                 endpointIds: [action.guid],
                 url: error.url || url,
-                eventCode: error.status ? error.status + '' : '500',
+                eventCode: error.status ? `${error.status}` : '500',
                 message: 'Cloud Foundry Info request error',
                 error
               })

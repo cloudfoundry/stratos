@@ -1,6 +1,6 @@
-import { ChartVersionAttributes } from './chart-version';
-import { Maintainer } from './maintainer';
-import { RepoAttributes } from './repo';
+import type { ChartVersionAttributes } from './chart-version';
+import type { Maintainer } from './maintainer';
+import type { RepoAttributes } from './repo';
 
 export class Chart {
   id!: string;

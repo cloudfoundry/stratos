@@ -1,21 +1,21 @@
-import { DatePipe } from '@angular/common';
+import type { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
-  GitCommit,
+  type GitCommit,
   gitEntityCatalog,
   GithubCommitsDataSource,
   GithubCommitsListConfigServiceBase,
-  GitMeta,
-  GitSCM,
-  GitSCMService,
-  GitSCMType,
+  type GitMeta,
+  type GitSCM,
+  type GitSCMService,
+  type GitSCMType,
 } from '@stratosui/git';
 import { getUnixTime } from 'date-fns';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { combineLatest, filter, first, map } from 'rxjs/operators';
 
-import { IListAction } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import type { IListAction } from '@stratosui/core';
 import { getCommitGuid } from '../../../../../../../git/src/store/git-entity-factory';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import {
@@ -25,8 +25,8 @@ import {
   SetDeployCommit,
   StoreCFSettings,
 } from '../../../../../actions/deploy-applications.actions';
-import { CFAppState } from '../../../../../cf-app-state';
-import { ApplicationService } from '../../../../../features/applications/application.service';
+import type { CFAppState } from '../../../../../cf-app-state';
+import type { ApplicationService } from '../../../../../features/applications/application.service';
 
 @Injectable({
   providedIn: 'root'

@@ -1,7 +1,7 @@
-import { APISuccessOrFailedAction } from '../../../../../store/src/types/request.types';
-import { ChangeCfUserRole } from '../../../actions/users.actions';
+import type { APISuccessOrFailedAction } from '../../../../../store/src/types/request.types';
+import type { ChangeCfUserRole } from '../../../actions/users.actions';
 import { CfPermissionStrings } from '../../../user-permissions/cf-user-permissions-checkers';
-import { IAllCfRolesState, ICfRolesState, IOrgRoleState, ISpaceRoleState } from '../../types/cf-current-user-roles.types';
+import type { IAllCfRolesState, ICfRolesState, IOrgRoleState, ISpaceRoleState } from '../../types/cf-current-user-roles.types';
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../../types/cf-user.types';
 import { defaultCfUserOrgRoleState } from './current-cf-user-roles-org.reducer';
 import { defaultCfUserSpaceRoleState } from './current-cf-user-roles-space.reducer';
@@ -19,10 +19,11 @@ export function updateAfterCfRoleChange(
   const entityType = changePerm.isSpace ? 'spaces' : 'organizations';
 
   const cf = state[changePerm.endpointGuid];
-  const entity: any = (cf as any)[entityType][changePerm.entityGuid] || createEmptyState(changePerm.isSpace, changePerm.orgGuid);
+  const cfEntityContainer = (cf as unknown as Record<string, Record<string, ISpaceRoleState | IOrgRoleState>>)[entityType];
+  const entity: ISpaceRoleState | IOrgRoleState = cfEntityContainer[changePerm.entityGuid] || createEmptyState(changePerm.isSpace, changePerm.orgGuid);
   const permissionType = userRoleNameToPermissionName(changePerm.permissionTypeKey);
 
-  if (entity && entity[permissionType] === isAdd) {
+  if (entity && (entity as unknown as Record<string, unknown>)[permissionType] === isAdd) {
     // No change, just return the state. Unlikely to happen
     return state;
   }

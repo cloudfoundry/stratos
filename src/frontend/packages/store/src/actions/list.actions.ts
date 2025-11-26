@@ -1,8 +1,8 @@
 // Replaced Angular Material sort with custom type
 export type SortDirection = 'asc' | 'desc' | '';
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 
-import { ListsState } from '../reducers/list.reducer';
+import type { ListsState } from '../reducers/list.reducer';
 import { defaultClientPaginationPageSize } from '../reducers/pagination-reducer/pagination-reducer-reset-pagination';
 
 
@@ -20,7 +20,7 @@ export class ListSort {
 export class ListFilter {
   string!: string;
   items!: {
-    [key: string]: any;
+    [key: string]: unknown;
   };
   filterKey?: string;
 }

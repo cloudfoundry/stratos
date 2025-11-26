@@ -1,8 +1,8 @@
 
 import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
 
-import { CardCell } from '../../../../../core/src/shared/components/list/list.types';
-import { KubeService } from '../../store/kube.types';
+import { CardCell } from '@stratosui/core';
+import type { KubeService } from '../../store/kube.types';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,

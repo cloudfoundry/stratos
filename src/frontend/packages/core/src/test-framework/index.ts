@@ -48,8 +48,7 @@ export {
   createEntityStoreState,
   populateStoreWithTestEndpoint,
   StoreTestingModule,
-  STORE_TEST_PROVIDERS,
-  CoreTestingModule
+  STORE_TEST_PROVIDERS
 } from '../../test-framework/core-test.helper';
 
 /**

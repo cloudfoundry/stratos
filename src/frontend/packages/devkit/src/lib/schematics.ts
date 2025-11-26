@@ -1,5 +1,5 @@
 import { normalize, split, tags, virtualFs, workspaces } from '@angular-devkit/core';
-import { Rule, SchematicsException, Tree } from '@angular-devkit/schematics';
+import { type Rule, SchematicsException, type Tree } from '@angular-devkit/schematics';
 
 
 export const Builders = {
@@ -33,7 +33,7 @@ export function validateProjectName(projectName: string) {
     const msg = tags.stripIndent`
     ${firstMessage}
     ${projectName}
-    ${Array(errorIndex + 1).join(' ') + '^'}
+    ${`${Array(errorIndex + 1).join(' ')}^`}
     `;
     throw new SchematicsException(msg);
   } else if (unsupportedProjectNames.indexOf(projectName) !== -1) {

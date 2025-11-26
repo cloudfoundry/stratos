@@ -1,13 +1,13 @@
 import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 import {
-  IActionMonitorComponentState,
+  type IActionMonitorComponentState,
   AppActionMonitorIconComponent,
 } from '../../../../../../core/src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
-import { KubeConfigFileCluster } from '../../kube-config.types';
+import type { KubeConfigFileCluster } from '../../kube-config.types';
 
 @Component({
 changeDetection: ChangeDetectionStrategy.OnPush,

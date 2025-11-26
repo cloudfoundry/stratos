@@ -1,23 +1,24 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ApplicationRef, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
+import { Action, Store } from '@ngrx/store';
 import { catchError, mergeMap, switchMap } from 'rxjs/operators';
+import { EMPTY } from 'rxjs';
 
 import {
-  AddApiKey,
+  type AddApiKey,
   API_KEY_ADD,
   API_KEY_DELETE,
   API_KEY_GET_ALL,
-  DeleteApiKey,
-  GetAllApiKeys,
+  type DeleteApiKey,
+  type GetAllApiKeys,
 } from '../actions/apiKey.actions';
-import { ApiKey } from '../apiKey.types';
-import { InternalAppState } from '../app-state';
+import type { ApiKey } from '../apiKey.types';
+import type { InternalAppState } from '../app-state';
 import { BrowserStandardEncoder } from '../browser-encoder';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { proxyAPIVersion } from '../jetstream';
-import { NormalizedResponse } from '../types/api.types';
+import type { NormalizedResponse } from '../types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
 
 const apiKeyUrlPath = `/pp/${proxyAPIVersion}/api_keys`;
@@ -47,7 +48,7 @@ export class ApiKeyEffect {
           comment: action.comment
         }
       })).pipe(
-        switchMap((newApiKey: ApiKey): any[] => {
+        switchMap((newApiKey: ApiKey) => {
           const guid = action.entity[0].getId(newApiKey);
           const entityKey = entityCatalog.getEntityKey(action);
           const response: NormalizedResponse<ApiKey> = {
@@ -60,16 +61,16 @@ export class ApiKeyEffect {
           };
           this.store.dispatch(new WrapperRequestActionSuccess(response, action, actionType));
           this.appRef.tick();
-          return [];
+          return EMPTY;
         }),
-        catchError((err: any): any[] => {
+        catchError((err: unknown) => {
           this.store.dispatch(new WrapperRequestActionFailed(this.convertErrorToString(err), action, actionType));
           this.appRef.tick();
-          return [];
+          return EMPTY;
         })
       );
     })
-  ));
+  ), { dispatch: false });
 
    delete = createEffect(() => this.actions$.pipe(
     ofType<DeleteApiKey>(API_KEY_DELETE),
@@ -85,19 +86,19 @@ export class ApiKeyEffect {
           }
         })
       }).pipe(
-        switchMap((): any[] => {
+        switchMap(() => {
           this.store.dispatch(new WrapperRequestActionSuccess(null, action, actionType));
           this.appRef.tick();
-          return [];
+          return EMPTY;
         }),
-        catchError((err: any): any[] => {
+        catchError((err: unknown) => {
           this.store.dispatch(new WrapperRequestActionFailed(this.convertErrorToString(err), action, actionType));
           this.appRef.tick();
-          return [];
+          return EMPTY;
         })
       );
     })
-  ));
+  ), { dispatch: false });
 
    getAll = createEffect(() => this.actions$.pipe(
     ofType<GetAllApiKeys>(API_KEY_GET_ALL),
@@ -105,7 +106,7 @@ export class ApiKeyEffect {
       const actionType = 'fetch';
       this.store.dispatch(new StartRequestAction(action, actionType));
       return this.http.get(apiKeyUrlPath).pipe(
-        switchMap((res: ApiKey[]): any[] => {
+        switchMap((res: ApiKey[]) => {
           const entityKey = entityCatalog.getEntityKey(action);
           const response: NormalizedResponse<ApiKey> = {
             entities: {
@@ -123,19 +124,19 @@ export class ApiKeyEffect {
 
           this.store.dispatch(new WrapperRequestActionSuccess(response, action, actionType));
           this.appRef.tick();
-          return [];
+          return EMPTY;
         }),
-        catchError((err: any): any[] => {
+        catchError((err: unknown) => {
           this.store.dispatch(new WrapperRequestActionFailed(this.convertErrorToString(err), action, actionType));
           this.appRef.tick();
-          return [];
+          return EMPTY;
         })
       );
     })
-  ));
+  ), { dispatch: false });
 
-  private convertErrorToString(err: any): string {
+  private convertErrorToString(err: unknown): string {
     // We should look into beefing this up / combining with generic error handling
-    return err && err.error ? err.error : 'Failed API Key action';
+    return (err as { error?: string })?.error ? (err as { error: string }).error : 'Failed API Key action';
   }
 }

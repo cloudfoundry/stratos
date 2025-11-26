@@ -1,5 +1,5 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 
 import { PollingIndicatorComponent } from '@stratosui/core';
 import { ApplicationPollingService } from '../application-polling.service';

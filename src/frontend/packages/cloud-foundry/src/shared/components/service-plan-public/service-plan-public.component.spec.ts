@@ -1,4 +1,4 @@
-import { ComponentFixture, ComponentFixtureAutoDetect, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, ComponentFixtureAutoDetect, TestBed } from '@angular/core/testing';
 import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
@@ -41,7 +41,7 @@ describe('ServicePlanPublicComponent', () => {
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServicePlanPublicComponent);
-    servicesService = TestBed.inject(ServicesService);
+    servicesService = TestBed.inject(ServicesService) as unknown as ServicesServiceMock;
     component = fixture.componentInstance;
     // Don't call detectChanges here - let each test control when it runs
     element = fixture.nativeElement;

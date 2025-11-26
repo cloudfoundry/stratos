@@ -1,5 +1,5 @@
-import { SetClientPage } from '../../actions/pagination.actions';
-import { PaginationEntityState } from '../../types/pagination.types';
+import type { SetClientPage } from '../../actions/pagination.actions';
+import type { PaginationEntityState } from '../../types/pagination.types';
 
 export function paginationSetClientPage(state: PaginationEntityState, action: SetClientPage): PaginationEntityState {
   if (state.clientPagination.currentPage === action.pageNumber) {

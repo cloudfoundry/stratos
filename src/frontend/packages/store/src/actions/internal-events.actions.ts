@@ -1,11 +1,11 @@
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 
 import {
   CLEAR_ENDPOINT_ERROR_EVENTS,
   CLEAR_EVENTS,
   InternalEventSeverity,
-  InternalEventState,
-  InternalEventStateMetadata,
+  type InternalEventState,
+  type InternalEventStateMetadata,
   SEND_EVENT,
 } from '../types/internal-events.types';
 

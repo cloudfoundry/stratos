@@ -1,22 +1,22 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterContentInit,
+import { ChangeDetectionStrategy, type AfterContentInit,
   Component,
   ElementRef,
   EventEmitter,
   Input,
-  OnDestroy,
-  OnInit,
+  type OnDestroy,
+  type OnInit,
   Output,
   ViewChild,
  } from '@angular/core';
-import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { ReactiveFormsModule, Validators, FormControl, } from '@angular/forms';
 import { CustomFormFieldComponent, AppErrorComponent, AppInputDirective } from '../../../components/custom-form-field/custom-form-field.component';
 import { CustomTooltipDirective } from '../../custom-tooltip/custom-tooltip.directive';
-import { Observable, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import { BooleanIndicatorComponent } from '../../boolean-indicator/boolean-indicator.component';
-import { StackedInputActionsState } from '../stacked-input-actions.component';
+import type { StackedInputActionsState } from '../stacked-input-actions.component';
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 
 export enum StackedInputActionResult {
@@ -85,7 +85,7 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
   }
 
   @Output() stateOut = new EventEmitter<StackedInputActionUpdate>();
-  @Output() remove = new EventEmitter<any>();
+  @Output() remove = new EventEmitter<unknown>();
 
   @ViewChild('inputElement', { static: true }) inputElement!: ElementRef;
 
@@ -162,14 +162,15 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
         this.state = incState;
         this.textFormControl.enable();
         break;
-      case StackedInputActionResult.OTHER_VALUES_UPDATED:
+      case StackedInputActionResult.OTHER_VALUES_UPDATED: {
         const oldValues = this.otherValues || [];
-        this.otherValues = incState.otherValues;
+        this.otherValues = incState.otherValues as string[];
         if (!this.compare(oldValues, this.otherValues)) {
           // Force validation
           this.textFormControl.setValue(this.textFormControl.value);
         }
         break;
+      }
     }
   }
 

@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform, inject } from '@angular/core';
+import { Pipe, type PipeTransform, inject } from '@angular/core';
 
 import { UtilsService } from '../../core/utils.service';
 
@@ -10,6 +10,8 @@ export class UsageBytesPipe implements PipeTransform {
   private utils = inject(UtilsService);
 
   transform(mb: number | number[]): string {
-    return this.utils.usageBytes(mb as any);
+    // Convert single number to array format expected by usageBytes
+    const usage = Array.isArray(mb) ? mb : [mb];
+    return this.utils.usageBytes(usage);
   }
 }

@@ -11,7 +11,7 @@ import {
 } from '@stratosui/core';
 import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import { ApplicationServiceMock, generateCfStoreModules } from '@test-framework/cf';
-import { CFAppState } from '../../../../../cf-app-state';
+import type { CFAppState } from '../../../../../cf-app-state';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { CfAppMapRoutesListConfigService } from './cf-app-map-routes-list-config.service';
 

@@ -1,34 +1,37 @@
 import { SendEventAction } from '../../actions/internal-events.actions';
 import { RecursiveDeleteFailed } from '../../effects/recursive-entity-delete.effect';
-import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import type { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { endpointEntityType } from '../../helpers/stratos-entity-factory';
-import { ApiRequestTypes, getFailApiRequestActions } from '../../reducers/api-request-reducer/request-helpers';
-import { GLOBAL_EVENT, InternalEventSeverity, InternalEventStateMetadata } from '../../types/internal-events.types';
-import { EntityRequestAction } from '../../types/request.types';
-import { ActionDispatcher } from '../entity-request-pipeline.types';
+import { type ApiRequestTypes, getFailApiRequestActions } from '../../reducers/api-request-reducer/request-helpers';
+import { GLOBAL_EVENT, InternalEventSeverity, type InternalEventStateMetadata } from '../../types/internal-events.types';
+import type { EntityRequestAction } from '../../types/request.types';
+import type { ActionDispatcher } from '../entity-request-pipeline.types';
 import { PipelineHttpClient } from '../pipline-http-client.service';
 
 
 export function jetstreamErrorHandler(
-  error: any,
+  error: unknown,
   action: EntityRequestAction,
   catalogEntity: StratosBaseCatalogEntity,
   requestType: ApiRequestTypes,
   actionDispatcher: ActionDispatcher,
   recursivelyDeleting: boolean
 ) {
+  // Type guard for error object
+  const errorObj = error as { url?: string; status?: number };
+
   // Don't dispatch error events for expected 404s (e.g., autoscaler plugin not installed)
-  const url = error.url || action.options.url;
-  const isExpected404 = error.status === 404 && url?.includes('/autoscaler/');
+  const url = errorObj.url || action.options.url;
+  const isExpected404 = errorObj.status === 404 && url?.includes('/autoscaler/');
 
   if (isExpected404) {
     // Skip event dispatch for expected autoscaler 404s - plugin may not be installed
-    const errorActions = getFailApiRequestActions(action, error, requestType, catalogEntity, {
+    const errorActions = getFailApiRequestActions(action, error as Error & { message: string }, requestType, catalogEntity, {
       endpointIds: [],
       url,
       eventCode: '404',
       message: 'Autoscaler plugin not available',
-      error
+      error: String(error)
     });
     if (recursivelyDeleting) {
       actionDispatcher(new RecursiveDeleteFailed(
@@ -47,42 +50,42 @@ export function jetstreamErrorHandler(
   const endpointIds: string[] = endpointString ? endpointString.split(',') : [];
 
   if (endpointString) {
-    endpointIds.forEach(endpoint =>
+    endpointIds.forEach(endpoint => {
       actionDispatcher(
         new SendEventAction<InternalEventStateMetadata>(endpointEntityType, endpoint, {
-          eventCode: error.status ? error.status + '' : '500',
+          eventCode: errorObj.status ? `${errorObj.status}` : '500',
           severity: InternalEventSeverity.ERROR,
           message: 'Jetstream API request error',
           metadata: {
             httpMethod: action.options.method as string,
             errorResponse: error,
-            url: error.url || action.options.url,
+            url: errorObj.url || action.options.url,
           },
         }),
-      ),
-    );
+      );
+    });
   } else {
     // See #4054, in theory we should never hit this as we always know the endpoint id's
     actionDispatcher(
       new SendEventAction<InternalEventStateMetadata>(GLOBAL_EVENT, catalogEntity.entityKey, {
-        eventCode: error.status ? error.status + '' : '500',
+        eventCode: errorObj.status ? `${errorObj.status}` : '500',
         severity: InternalEventSeverity.ERROR,
         message: 'Jetstream API request error',
         metadata: {
           httpMethod: action.options.method as string,
           errorResponse: error,
-          url: error.url || action.options.url,
+          url: errorObj.url || action.options.url,
         },
       }),
     );
   }
 
-  const errorActions = getFailApiRequestActions(action, error, requestType, catalogEntity, {
+  const errorActions = getFailApiRequestActions(action, error as Error & { message: string }, requestType, catalogEntity, {
     endpointIds,
-    url: error.url || action.options.url,
-    eventCode: error.status ? error.status + '' : '500',
+    url: errorObj.url || action.options.url,
+    eventCode: errorObj.status ? `${errorObj.status}` : '500',
     message: 'Jetstream API request error',
-    error
+    error: String(error)
   });
   if (recursivelyDeleting) {
     actionDispatcher(new RecursiveDeleteFailed(

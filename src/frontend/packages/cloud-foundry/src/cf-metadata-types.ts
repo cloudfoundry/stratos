@@ -1,4 +1,4 @@
-import { IFavoriteMetadata } from '../../store/src/types/user-favorites.types';
+import type { IFavoriteMetadata } from '../../store/src/types/user-favorites.types';
 
 export interface ISpaceFavMetadata extends IFavoriteMetadata {
   orgGuid: string;

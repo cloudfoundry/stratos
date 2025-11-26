@@ -1,7 +1,7 @@
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 
-import { ListAppEnvVar } from '../shared/components/list/list-types/app-variables/cf-app-variables-data-source';
-import { UpdateApplication } from './application.actions';
+import type { ListAppEnvVar } from '../shared/components/list/list-types/app-variables/cf-app-variables-data-source';
+import type { UpdateApplication } from './application.actions';
 
 export const AppVariables = {
   UPDATE: '[Application Variables] Update',
@@ -19,12 +19,12 @@ export class AppVariablesUpdate implements Action {
 
   protected createUpdateApplication(allEnvVars: ListAppEnvVar[], selectedItems: ListAppEnvVar[]): UpdateApplication {
     const updateApp: UpdateApplication = {
-      environment_json: {},
+      environment_json: {} as Record<string, unknown>,
     };
     for (const row of allEnvVars) {
       // Only include if we're ignoring the selection or it doesn't exist in the selected items
       if (!selectedItems || selectedItems.findIndex((item => item.name === row.name)) < 0) {
-        updateApp.environment_json[row.name] = row.value;
+        (updateApp.environment_json as Record<string, unknown>)[row.name] = row.value;
       }
     }
     return updateApp;
@@ -42,7 +42,7 @@ export class AppVariablesEdit extends AppVariablesUpdate {
   constructor(cfGuid: string, appGuid: string, allEnvVars: ListAppEnvVar[], editedEnvVar: ListAppEnvVar) {
     super(cfGuid, appGuid);
     this.updatedApplication = this.createUpdateApplication(allEnvVars, null);
-    this.updatedApplication.environment_json[editedEnvVar.name] = editedEnvVar.value;
+    (this.updatedApplication.environment_json as Record<string, unknown>)[editedEnvVar.name] = editedEnvVar.value;
   }
 }
 
@@ -50,7 +50,7 @@ export class AppVariablesAdd extends AppVariablesUpdate {
   constructor(cfGuid: string, appGuid: string, allEnvVars: ListAppEnvVar[], addedEnvVar: ListAppEnvVar) {
     super(cfGuid, appGuid);
     this.updatedApplication = this.createUpdateApplication(allEnvVars, null);
-    this.updatedApplication.environment_json[addedEnvVar.name] = addedEnvVar.value;
+    (this.updatedApplication.environment_json as Record<string, unknown>)[addedEnvVar.name] = addedEnvVar.value;
   }
 }
 

@@ -1,7 +1,7 @@
 import { of } from 'rxjs';
 
-import { IListDataSource, CardTypes, ITableColumn, IGlobalListAction, IListAction, IListConfig, IListMultiFilterConfig, IMultiListAction, ListViewTypes } from '@stratosui/core';
-import { ListView } from '@stratosui/store';
+import { type IListDataSource, type CardTypes, type ITableColumn, type IGlobalListAction, type IListAction, type IListConfig, type IListMultiFilterConfig, type IMultiListAction, ListViewTypes } from '@stratosui/core';
+import type { ListView } from '@stratosui/store';
 
 
 export class BaseCfListConfig<T> implements IListConfig<T> {
@@ -9,7 +9,7 @@ export class BaseCfListConfig<T> implements IListConfig<T> {
   isLocal = true;
   viewType = ListViewTypes.CARD_ONLY;
   defaultView = 'cards' as ListView;
-  cardComponent!: CardTypes<T>;
+  cardComponent!: CardTypes<T> | any;
   enableTextFilter = false;
   showCustomTime = false;
   getColumns = (): ITableColumn<T>[] => [];

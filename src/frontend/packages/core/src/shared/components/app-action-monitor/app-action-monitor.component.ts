@@ -1,20 +1,19 @@
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input, OnInit  } from '@angular/core';
-import { rootUpdatingKey, EntitySchema, EntityMonitorFactory } from '@stratosui/store';
-import { schema } from 'normalizr';
-import { never as observableNever, Observable, of as observableOf } from 'rxjs';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, Input, type OnInit  } from '@angular/core';
+import { rootUpdatingKey, type EntitySchema, EntityMonitorFactory } from '@stratosui/store';
+import { never as observableNever, type Observable, of as observableOf } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
 import {
   ActionMonitorComponentState,
   AppMonitorComponentTypes,
 } from '../app-action-monitor-icon/app-action-monitor-icon.component';
-import { ITableListDataSource } from '../list/data-sources-controllers/list-data-source-types';
+import type { ITableListDataSource } from '../list/data-sources-controllers/list-data-source-types';
 import {
-  ITableCellRequestMonitorIconConfig,
+  type ITableCellRequestMonitorIconConfig,
   TableCellRequestMonitorIconComponent,
 } from '../list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
-import { ITableColumn } from '../list/list-table/table.types';
+import type { ITableColumn } from '../list/list-table/table.types';
 import { TableComponent } from '../list/list-table/table.component';
 
 @Component({
@@ -57,7 +56,7 @@ export class AppActionMonitorComponent<T> implements OnInit {
    * Get the ID of the ROW
    */
   @Input()
-  public trackBy = ((index: number, item: T) => index.toString());
+  public trackBy = ((index: number, _item: T) => index.toString());
 
   @Input()
   public getCellConfig: (element: T) => ITableCellRequestMonitorIconConfig;
@@ -101,7 +100,9 @@ export class AppActionMonitorComponent<T> implements OnInit {
     this.allColumns = [...this.columns, monitorColumn];
     this.dataSource = {
       connect: () => this.replayData$,
-      disconnect: () => { },
+      disconnect: () => {
+        // No cleanup needed
+      },
       trackBy: (index, item) => {
         const fn = monitorColumn.cellConfig.getConfig(item).getId;
         if (fn) {

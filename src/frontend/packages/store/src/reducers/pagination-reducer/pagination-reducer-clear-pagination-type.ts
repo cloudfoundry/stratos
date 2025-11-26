@@ -1,4 +1,4 @@
-import { PaginationState } from '../../types/pagination.types';
+import type { PaginationState } from '../../types/pagination.types';
 import { getDefaultPaginationEntityState } from './pagination-reducer-reset-pagination';
 
 export function paginationClearAllTypes(state: PaginationState, entityKeys: string[]) {

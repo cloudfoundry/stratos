@@ -1,5 +1,5 @@
-import { SetPage } from '../../actions/pagination.actions';
-import { PaginationEntityState } from '../../types/pagination.types';
+import type { SetPage } from '../../actions/pagination.actions';
+import type { PaginationEntityState } from '../../types/pagination.types';
 
 export function paginationSetPage(state: PaginationEntityState, action: SetPage) {
   if (action.forceLocalPage) {

@@ -1,8 +1,8 @@
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
-import { HomeCardShortcut } from '../../../../store/src/entity-catalog/entity-catalog.types';
-import { EndpointModel } from '../../../../store/src/public-api';
-import { UserFavorite } from './../../../../store/src/types/user-favorites.types';
+import type { HomeCardShortcut } from '../../../../store/src/entity-catalog/entity-catalog.types';
+import type { EndpointModel } from '../../../../store/src/public-api';
+import type { UserFavorite } from './../../../../store/src/types/user-favorites.types';
 
 // Layout for a home page card
 

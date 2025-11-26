@@ -3,8 +3,8 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
-import { SET_CLIENT_FILTER, SetClientFilter, SetClientPage } from '../actions/pagination.actions';
-import { InternalAppState } from '../app-state';
+import { SET_CLIENT_FILTER, type SetClientFilter, SetClientPage } from '../actions/pagination.actions';
+import type { InternalAppState } from '../app-state';
 
 
 @Injectable()

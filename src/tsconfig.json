@@ -22,12 +22,7 @@
     "noImplicitAny": true,
     "strictBindCallApply": true,
     "skipLibCheck": true,
-    "types": [
-      "jasmine",
-      "jasminewd2",
-      "karma",
-      "vite"
-    ],
+    "types": ["node"],
     "typeRoots": [
       "../node_modules/@types",
       "./frontend/@types"
@@ -54,7 +49,16 @@
       "@stratosui/git": ["frontend/packages/git/src/public_api.ts"],
       "@stratosui/material-replacements": ["frontend/packages/core/src/shared/services/tailwind-material-replacements.ts"],
       "@test-framework": ["frontend/packages/core/test-framework/index.ts"],
+      "@test-framework/core-test.helper": ["frontend/packages/core/test-framework/core-test.helper.ts"],
+      "@test-framework/core-test.modules": ["frontend/packages/core/test-framework/core-test.modules.ts"],
+      "@test-framework/store-test-helper": ["frontend/packages/core/test-framework/index.ts"],
       "@test-framework/cf": ["frontend/packages/cloud-foundry/test-framework/index.ts"],
+      "@test-framework/cloud-foundry-endpoint-service.helper": ["frontend/packages/cloud-foundry/test-framework/cloud-foundry-endpoint-service.helper.ts"],
+      "@test-framework/application-service-helper": ["frontend/packages/cloud-foundry/test-framework/application-service-helper.ts"],
+      "@test-framework/user-service-helper": ["frontend/packages/cloud-foundry/test-framework/user-service-helper.ts"],
+      "@test-framework/cf-test-helper": ["frontend/packages/cloud-foundry/test-framework/cf-test-helper.ts"],
+      "@test-framework/cf/*": ["frontend/packages/cloud-foundry/test-framework/*"],
+      "@test-framework/*": ["frontend/packages/core/test-framework/*"],
       "@core/sass/*": ["frontend/packages/core/sass/*"]
     }
   }

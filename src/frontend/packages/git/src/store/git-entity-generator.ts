@@ -1,38 +1,37 @@
-import { BaseEndpointAuth } from '../../../core/src/core/endpoint-auth';
-import { urlValidationExpression } from '../../../core/src/core/utils.service';
+import { BaseEndpointAuth, urlValidationExpression } from '@stratosui/core';
 import {
   DISCONNECT_ENDPOINTS_SUCCESS,
-  DisconnectEndpoint,
+  type DisconnectEndpoint,
   UNREGISTER_ENDPOINTS_SUCCESS,
 } from '../../../store/src/actions/endpoint.actions';
-import { IRequestEntityTypeState } from '../../../store/src/app-state';
+import type { IRequestEntityTypeState } from '../../../store/src/app-state';
 import {
-  StratosBaseCatalogEntity,
+  type StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
 } from '../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import {
+import type {
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
 } from '../../../store/src/entity-catalog/entity-catalog.types';
-import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
+import type { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
 import { GitEndpointDetailsComponent } from '../shared/components/git-endpoint-details/git-endpoint-details.component';
 import { GitRegistrationComponent } from '../shared/components/git-registration/git-registration.component';
 import {
-  GitBranchActionBuilders,
+  type GitBranchActionBuilders,
   gitBranchActionBuilders,
-  GitCommitActionBuilders,
+  type GitCommitActionBuilders,
   gitCommitActionBuilders,
-  GitRepoActionBuilders,
+  type GitRepoActionBuilders,
   gitRepoActionBuilders,
 } from './git-action-builders';
 import { GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE, gitEntityFactory } from './git-entity-factory';
-import { GitBranch, GitCommit, GitEntity, GitRepo } from './git.public-types';
+import type { GitBranch, GitCommit, GitEntity, GitRepo } from './git.public-types';
 import { gitBranchesEntityType, gitCommitEntityType, gitRepoEntityType } from './git.types';
 
 
-function endpointDisconnectRemoveEntitiesReducer() {
-  return (state: IRequestEntityTypeState<any>, action: DisconnectEndpoint) => {
+function endpointDisconnectRemoveEntitiesReducer<T extends GitEntity>() {
+  return (state: IRequestEntityTypeState<T>, action: DisconnectEndpoint) => {
     switch (action.type) {
       case DISCONNECT_ENDPOINTS_SUCCESS:
       case UNREGISTER_ENDPOINTS_SUCCESS:
@@ -42,17 +41,17 @@ function endpointDisconnectRemoveEntitiesReducer() {
   };
 }
 
-function deleteEndpointEntities(
-  state: IRequestEntityTypeState<GitEntity>,
+function deleteEndpointEntities<T extends GitEntity>(
+  state: IRequestEntityTypeState<T>,
   endpointGuid: string
 ) {
-  return Object.keys(state).reduce((newEntities: IRequestEntityTypeState<GitEntity>, guid: string) => {
+  return Object.keys(state).reduce((newEntities: IRequestEntityTypeState<T>, guid: string) => {
     const entity = state[guid];
     if (entity.endpointGuid !== endpointGuid) {
       newEntities[guid] = entity;
     }
     return newEntities;
-  }, {} as IRequestEntityTypeState<GitEntity>);
+  }, {} as IRequestEntityTypeState<T>);
 }
 
 /**
@@ -66,18 +65,21 @@ class GitEntityCatalog {
   public commit: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     GitCommit,
+    GitCommitActionBuilders,
     GitCommitActionBuilders
   >;
 
   public repo: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     GitRepo,
+    GitRepoActionBuilders,
     GitRepoActionBuilders
   >;
 
   public branch: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     GitBranch,
+    GitBranchActionBuilders,
     GitBranchActionBuilders
   >;
 
@@ -160,7 +162,7 @@ class GitEntityCatalog {
       definition,
       {
         dataReducers: [
-          endpointDisconnectRemoveEntitiesReducer()
+          endpointDisconnectRemoveEntitiesReducer<GitCommit>()
         ],
         actionBuilders: gitCommitActionBuilders,
         entityBuilder: {
@@ -190,7 +192,7 @@ class GitEntityCatalog {
       definition,
       {
         dataReducers: [
-          endpointDisconnectRemoveEntitiesReducer()
+          endpointDisconnectRemoveEntitiesReducer<GitRepo>()
         ],
         actionBuilders: gitRepoActionBuilders,
       }
@@ -209,7 +211,7 @@ class GitEntityCatalog {
       definition,
       {
         dataReducers: [
-          endpointDisconnectRemoveEntitiesReducer()
+          endpointDisconnectRemoveEntitiesReducer<GitBranch>()
         ],
         actionBuilders: gitBranchActionBuilders,
       }

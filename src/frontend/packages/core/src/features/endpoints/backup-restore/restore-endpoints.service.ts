@@ -1,9 +1,9 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable, signal, computed, Injector } from '@angular/core';
+import { Injectable, signal, computed, Injector, type Signal } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { selectSessionData, GeneralEntityAppState, BrowserStandardEncoder, SessionData } from '@stratosui/store';
-import { combineLatest, Observable } from 'rxjs';
-import { filter, map, switchMap } from 'rxjs/operators';
+import { selectSessionData, type GeneralEntityAppState, BrowserStandardEncoder, type SessionData } from '@stratosui/store';
+import type { Observable } from 'rxjs';
+import { filter, map, } from 'rxjs/operators';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 
 interface BackupContent {
@@ -35,13 +35,13 @@ export class RestoreEndpointsService {
   unparsableFileContent: string | null = null;
 
   // Note: currentDbVersionSignal is initialized in constructor to provide injector context
-  private currentDbVersionSignal: any;
+  private currentDbVersionSignal!: Signal<number>;
 
   // Computed signals for validation
   public validDb = computed(() => {
     const fileValue = this._file();
     const currentDbVersion = this.currentDbVersionSignal();
-    return fileValue && fileValue.content && fileValue.content.dbVersion === currentDbVersion;
+    return fileValue?.content && fileValue.content.dbVersion === currentDbVersion;
   });
 
   public validFileContent = computed(() => {
@@ -82,8 +82,8 @@ export class RestoreEndpointsService {
     this.currentDbVersion$ = toObservable(this.currentDbVersionSignal, { injector: this.injector });
   }
 
-  setFile(file: any): Promise<string> {
-    return new Promise((resolve, reject) => {
+  setFile(file: File): Promise<string> {
+    return new Promise((resolve, _reject) => {
       const reader = new FileReader();
       reader.onload = () => {
         const res = reader.result as string;
@@ -121,7 +121,7 @@ export class RestoreEndpointsService {
     this.password = password;
   }
 
-  restoreBackup(): Observable<any> {
+  restoreBackup(): Observable<unknown> {
     const url = '/pp/v1/endpoints/restore';
     const fromObject = {};
     const params: HttpParams = new HttpParams({

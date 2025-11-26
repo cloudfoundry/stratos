@@ -1,18 +1,17 @@
-import { Injectable, Type } from '@angular/core';
-import { ISimpleListConfig } from '@stratosui/core';
+import { Injectable, type Type } from '@angular/core';
 
-import { PreviewableComponent } from '../../../core/src/shared/previewable-component';
+import type { ISimpleListConfig, PreviewableComponent } from '@stratosui/core';
 
-class ConfigHolder<T = any> {
+class ConfigHolder<T = unknown> {
 
   private configs: T = {} as T;
 
   set(name: string, config: T): void {
-    (this.configs as any)[name] = config;
+    (this.configs as Record<string, T>)[name] = config;
   }
 
-  get<Y = any>(name: string): Y {
-    return name ? (this.configs as any)[name] : undefined;
+  get<Y = unknown>(name: string): Y {
+    return name ? (this.configs as Record<string, Y>)[name] : undefined;
   }
 }
 
@@ -26,7 +25,7 @@ class ConfigHolder<T = any> {
 export class KubernetesUIConfigService {
 
   // List configurations
-  public listConfig = new ConfigHolder<ISimpleListConfig<any>>();
+  public listConfig = new ConfigHolder<ISimpleListConfig<unknown>>();
 
   // Side Panel Preview Resource components
   public previewComponent = new ConfigHolder<Type<PreviewableComponent>>();

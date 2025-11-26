@@ -1,28 +1,28 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { combineLatest, type Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { AppChipsComponent, arrayHelper, ConfirmationDialogService, CurrentUserPermissionsService } from '@stratosui/core';
-import { APIResource, entityCatalog } from '@stratosui/store';
+import { AppChipsComponent, arrayHelper, type AppChip, ConfirmationDialogService, CurrentUserPermissionsService } from '@stratosui/core';
+import { type APIResource, entityCatalog } from '@stratosui/store';
 import {
-  CFAppState,
+  type CFAppState,
   CF_ENDPOINT_TYPE,
   CfCurrentUserPermissions,
-  CfUser,
+  type CfUser,
   getSpaceRoles,
-  IOrganization,
-  ISpace,
-  IUserPermissionInSpace,
+  type IOrganization,
+  type ISpace,
+  type IUserPermissionInSpace,
   organizationEntityType,
   RemoveCfUserRole,
   selectCfEntity,
   spaceEntityType,
-  SpaceUserRoleNames
+  type SpaceUserRoleNames
 } from '@stratosui/cloud-foundry';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
-import { CfPermissionCellDirective, ICellPermissionList } from '../cf-permission-cell';
+import { CfPermissionCellDirective, type ICellPermissionList } from '../cf-permission-cell';
 
 @Component({
   selector: 'app-cf-space-permission-cell',
@@ -40,7 +40,7 @@ export class CfSpacePermissionCellComponent extends CfPermissionCellDirective<Sp
   missingRoles$: Observable<boolean | null>;
 
   constructor(
-    public store: Store<CFAppState>,
+    public store: Store,
     cfUserService: CfUserService,
     private userPerms: CurrentUserPermissionsService,
     confirmDialog: ConfirmationDialogService,
@@ -74,13 +74,13 @@ export class CfSpacePermissionCellComponent extends CfPermissionCellDirective<Sp
     return spaces$.pipe(
       // Switch to using the user entity
       switchMap(() => this.userEntity),
-      map(user => user.missingRoles || { space: [] as any[] }),
+      map(user => user.missingRoles || { space: [] as string[] }),
       map(missingRoles => missingRoles.space ? !!missingRoles.space.length : false),
       filter(areMissingRoles => !!areMissingRoles),
     );
   }
 
-  private prefixOrgName(permissionList: ICellPermissionList<SpaceUserRoleNames>[]): Observable<any> {
+  private prefixOrgName(permissionList: ICellPermissionList<SpaceUserRoleNames>[]): Observable<AppChip<ICellPermissionList<SpaceUserRoleNames>>[]> {
     // Find all unique org guids
     const orgGuids = permissionList.map(permission => permission.orgGuid).filter((value, index, self) => self.indexOf(value) === index);
     // Find names of all orgs

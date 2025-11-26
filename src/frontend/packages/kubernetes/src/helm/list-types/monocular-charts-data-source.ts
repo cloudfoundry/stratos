@@ -1,11 +1,11 @@
 import { Store } from '@ngrx/store';
 
 import { ListDataSource } from '../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { IListConfig } from '../../../../core/src/shared/components/list/list.component.types';
-import { AppState } from '../../../../store/src/public-api';
-import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
+import type { IListConfig } from '../../../../core/src/shared/components/list/list.component.types';
+import type { AppState } from '../../../../store/src/public-api';
+import type { PaginationEntityState } from '../../../../store/src/types/pagination.types';
 import { helmEntityCatalog } from '../helm-entity-catalog';
-import { MonocularChart } from '../store/helm.types';
+import type { MonocularChart } from '../store/helm.types';
 
 export class MonocularChartsDataSource extends ListDataSource<MonocularChart> {
 

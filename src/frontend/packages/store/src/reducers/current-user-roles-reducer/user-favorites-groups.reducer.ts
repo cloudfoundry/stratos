@@ -1,4 +1,4 @@
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 
 import {
   GetUserFavoritesAction,
@@ -10,11 +10,11 @@ import {
 import {
   getDefaultFavoriteGroup,
   getDefaultFavoriteGroupsState,
-  IUserFavoriteGroup,
-  IUserFavoritesGroups,
-  IUserFavoritesGroupsState,
+  type IUserFavoriteGroup,
+  type IUserFavoritesGroups,
+  type IUserFavoritesGroupsState,
 } from '../../types/favorite-groups.types';
-import { IFavoriteMetadata, UserFavorite } from '../../types/user-favorites.types';
+import type { IFavoriteMetadata, UserFavorite } from '../../types/user-favorites.types';
 import { getEndpointIDFromFavorite } from '../../user-favorite-helpers';
 
 export function userFavoriteGroupsReducer(

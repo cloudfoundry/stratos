@@ -1,15 +1,13 @@
-import { DatePipe } from '@angular/common';
+import type { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { GithubCommitsDataSource, GithubCommitsListConfigServiceBase, GitSCMService, GitSCMType } from '@stratosui/git';
+import { GithubCommitsDataSource, GithubCommitsListConfigServiceBase, GitSCMService, type GitSCMType } from '@stratosui/git';
 import { filter, first, map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import type { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { selectApplicationSource } from '../../../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
-import { DeployApplicationSource } from '../../../../../../../cloud-foundry/src/store/types/deploy-application.types';
-import {
-  TableCellRadioComponent,
-} from '../../../../../../../core/src/shared/components/list/list-table/table-cell-radio/table-cell-radio.component';
+import type { DeployApplicationSource } from '../../../../../../../cloud-foundry/src/store/types/deploy-application.types';
+import { TableCellRadioComponent } from '@stratosui/core';
 
 
 @Injectable({

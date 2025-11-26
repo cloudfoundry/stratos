@@ -1,11 +1,11 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, Inject, signal  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, type OnDestroy, Inject, signal  } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, type FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { TailwindDialogRef } from '../../../shared/services/tailwind-dialog.service';
 import { CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
 import { AppProgressBarComponent } from '../../../shared/components/progress-bar/app-progress-bar.component';
-import { entityCatalog, stratosEntityCatalog, NormalizedResponse, ApiKey, RequestInfoState } from '@stratosui/store';
-import { Subscription } from 'rxjs';
+import { entityCatalog, stratosEntityCatalog, type NormalizedResponse, type ApiKey, type RequestInfoState } from '@stratosui/store';
+import type { Subscription } from 'rxjs';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
 import { safeUnsubscribe } from '../../../core/utils.service';
@@ -65,7 +65,7 @@ export class AddApiKeyDialogComponent implements OnDestroy {
           this.hasErrored.set(`Failed to create key: ${state.message}`);
           this.isBusy.set(false);
         } else {
-          const response: NormalizedResponse<ApiKey> = state.response;
+          const response = state.response as NormalizedResponse<ApiKey>;
           const entityKey = entityCatalog.getEntityKey(stratosEntityCatalog.apiKey.actions.create(''));
           this.dialogRef.close(response.entities[entityKey][response.result[0]]);
         }

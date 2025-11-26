@@ -1,8 +1,8 @@
-import { Portal, PortalModule } from '@angular/cdk/portal';
+import { type Portal, PortalModule } from '@angular/cdk/portal';
 import { CommonModule } from '@angular/common';
 import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
 
-import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
+import type { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
 import { EntityFavoriteStarComponent } from '../../../core/entity-favorite-star/entity-favorite-star.component';
 import { SidePanelService } from '../../services/side-panel.service';
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
@@ -29,5 +29,5 @@ export class SidepanelPreviewComponent {
   @Input()
   favorite!: UserFavorite<IFavoriteMetadata>;
 
-  @Input() header?: Portal<any>;
+  @Input() header?: Portal<unknown>;
 }

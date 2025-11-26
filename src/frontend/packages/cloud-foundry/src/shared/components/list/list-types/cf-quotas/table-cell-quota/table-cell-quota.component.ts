@@ -1,9 +1,13 @@
-import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, type OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { TableCellCustom } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { IQuotaDefinition } from '../../../../../../cf-api.types';
+import type { APIResource } from '@stratosui/store';
+import type { IQuotaDefinition } from '../../../../../../cf-api.types';
+
+interface QuotaCellConfig {
+  baseUrl: string[];
+}
 
 @Component({
   selector: 'app-table-cell-quota',
@@ -15,12 +19,8 @@ import { IQuotaDefinition } from '../../../../../../cf-api.types';
     RouterModule
   ]
 })
-export class TableCellQuotaComponent extends TableCellCustom<APIResource<IQuotaDefinition>> implements OnInit {
+export class TableCellQuotaComponent extends TableCellCustom<APIResource<IQuotaDefinition>, QuotaCellConfig> implements OnInit {
   quotaUrl!: string[];
-
-  constructor() {
-    super();
-  }
 
   ngOnInit() {
     if (this.config?.baseUrl && Array.isArray(this.config.baseUrl)) {

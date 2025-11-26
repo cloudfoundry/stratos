@@ -9,8 +9,7 @@ import { NavExtensionRoutingModule } from './nav-extension.routing';
     CoreModule,
     SharedModule,
     NavExtensionRoutingModule,
-  ],
-  declarations: [
+    // Standalone components
     ExampleComponent
   ]
 })

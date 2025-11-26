@@ -2,18 +2,21 @@ import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { getIdFromRoute } from '../../../../../../core/src/core/utils.service';
-import { BASE_REDIRECT_QUERY } from '../../../../../../core/src/shared/components/stepper/stepper.types';
-import { TileConfigManager } from '../../../../../../core/src/shared/components/tile/tile-selector.helpers';
-import { ITileConfig, ITileData } from '../../../../../../core/src/shared/components/tile/tile-selector.types';
+import {
+  BASE_REDIRECT_QUERY,
+  getIdFromRoute,
+  PageHeaderComponent,
+  StepComponent,
+  SteppersComponent,
+  TileConfigManager,
+  TileSelectorComponent,
+  type ITileConfig,
+  type ITileData
+} from '@stratosui/core';
+import type { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { CSI_CANCEL_URL } from '../csi-mode.service';
 import { SERVICE_INSTANCE_TYPES } from './add-service-instance.types';
-import { PageHeaderComponent } from '../../../../../../core/src/shared/components/page-header/page-header.component';
-import { SteppersComponent } from '../../../../../../core/src/shared/components/stepper/steppers/steppers.component';
-import { StepComponent } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { TileSelectorComponent } from '../../../../../../core/src/shared/components/tile-selector/tile-selector.component';
 
 interface ICreateServiceTilesData extends ITileData {
   type: string;
@@ -75,7 +78,7 @@ export class AddServiceInstanceBaseStepComponent {
 
   constructor(
     private route: ActivatedRoute,
-    public store: Store<CFAppState>
+    public store: Store
   ) {
     this.bindApp = !!this.route.snapshot.data.bind;
     if (this.bindApp) {

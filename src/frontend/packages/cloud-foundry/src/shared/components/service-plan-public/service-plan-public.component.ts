@@ -1,15 +1,15 @@
 import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Observable } from 'rxjs';
+import { AsyncPipe, CommonModule } from '@angular/common';
+import type { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
 import {
   getServicePlanAccessibilityCardStatus,
 } from '../../../../../cloud-foundry/src/features/service-catalog/services-helper';
 import { ServicesService } from '../../../../../cloud-foundry/src/features/service-catalog/services.service';
-import { APIResource } from '../../../../../store/src/types/api.types';
+import type { APIResource } from '../../../../../store/src/types/api.types';
 import { StratosStatus } from '../../../../../store/src/types/shared.types';
-import { IServiceBroker, IServicePlan } from '../../../cf-api-svc.types';
+import type { IServiceBroker, IServicePlan } from '../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 
 @Component({
@@ -19,6 +19,7 @@ import { cfEntityCatalog } from '../../../cf-entity-catalog';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    AsyncPipe,
     CommonModule
   ]
 })

@@ -1,5 +1,5 @@
-import { Injectable, ComponentRef, ApplicationRef, Injector, EmbeddedViewRef, inject } from '@angular/core';
-import { Subject, Observable } from 'rxjs';
+import { Injectable, ApplicationRef, inject } from '@angular/core';
+import { Subject, type Observable } from 'rxjs';
 
 export interface TailwindSnackBarConfig {
   duration?: number;
@@ -7,43 +7,43 @@ export interface TailwindSnackBarConfig {
   panelClass?: string | string[];
 }
 
-export interface TailwindSnackBarRef<T> {
-  afterDismissed(): Observable<any>;
-  onAction(): Observable<any>;
+export interface TailwindSnackBarRef<_T> {
+  afterDismissed(): Observable<void>;
+  onAction(): Observable<void>;
   dismiss(): void;
   dismissWithAction(): void;
 }
 
 export class TailwindSnackBarRefImpl<T> implements TailwindSnackBarRef<T> {
-  private _afterDismissed = new Subject<any>();
-  private _onAction = new Subject<any>();
+  private _afterDismissed = new Subject<void>();
+  private _onAction = new Subject<void>();
 
   constructor(private removeCallback: () => void) {}
 
-  afterDismissed(): Observable<any> {
+  afterDismissed(): Observable<void> {
     return this._afterDismissed.asObservable();
   }
 
-  onAction(): Observable<any> {
+  onAction(): Observable<void> {
     return this._onAction.asObservable();
   }
 
   dismiss(): void {
     this.removeCallback();
-    this._afterDismissed.next(null);
+    this._afterDismissed.next();
     this._afterDismissed.complete();
   }
 
   dismissWithAction(): void {
-    this._onAction.next(null);
+    this._onAction.next();
     this.dismiss();
   }
 }
 
 export class TailwindSimpleSnackBar {
   constructor(
-    public snackBarRef: TailwindSnackBarRef<any>,
-    public data: any
+    public snackBarRef: TailwindSnackBarRef<unknown>,
+    public data: unknown
   ) {}
 
   dismiss(): void {
@@ -58,9 +58,8 @@ export class TailwindSnackBarService {
   private snackbars: HTMLElement[] = [];
 
   private appRef = inject(ApplicationRef);
-  private injector = inject(Injector);
 
-  open(message: string, action?: string, config?: TailwindSnackBarConfig): TailwindSnackBarRef<any> {
+  open(message: string, action?: string, config?: TailwindSnackBarConfig): TailwindSnackBarRef<unknown> {
     const snackbarElement = this.createSnackbarElement(message, action, config);
     const snackbarRef = new TailwindSnackBarRefImpl(() => this.removeSnackbar(snackbarElement));
 

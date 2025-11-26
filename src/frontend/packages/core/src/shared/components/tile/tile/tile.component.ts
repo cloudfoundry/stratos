@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, AfterContentInit, Input, ViewEncapsulation, HostBinding  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, type OnInit, type AfterContentInit, Input, ViewEncapsulation, } from '@angular/core';
 
 @Component({
   selector: 'app-tile',
@@ -12,11 +12,10 @@ export class TileComponent implements OnInit, AfterContentInit {
 
   @Input() size?: string;
 
-  @HostBinding('class.app-tile-1-3') private isOneThirdFixed = false;
-
-  constructor() { }
+  isOneThirdFixed = false;
 
   ngOnInit() {
+    // Component initialization
   }
 
   ngAfterContentInit() {

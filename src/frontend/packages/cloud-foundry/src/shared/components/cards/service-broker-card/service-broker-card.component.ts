@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { Component, OnDestroy , ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
@@ -15,9 +15,9 @@ import {
   BooleanIndicatorComponent,
   ClickStopPropagationDirective
 } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
+import type { APIResource } from '@stratosui/store';
 import { ServicesService } from '../../../../features/service-catalog/services.service';
-import { IServiceBroker } from '../../../../cf-api-svc.types';
+import type { IServiceBroker } from '../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 
 @Component({

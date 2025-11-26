@@ -1,28 +1,29 @@
-import { ChangeDetectionStrategy, Component, OnDestroy  } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, type OnDestroy  } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
+import { CustomFormFieldComponent, MatSuffixDirective } from '../../../../shared/components/custom-form-field/custom-form-field.component';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 import {
-  EndpointModel,
+  type EndpointModel,
   getFullEndpointApiUrl,
-  EntityCatalogSchemas,
-  IStratosEndpointDefinition,
+  type EntityCatalogSchemas,
+  type IStratosEndpointDefinition,
   stratosEntityCatalog,
   entityCatalog,
-  ActionState,
+  type ActionState,
 } from '@stratosui/store';
-import { Observable, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import { filter, first, map, pairwise, switchMap } from 'rxjs/operators';
 
-import { StepOnNextFunction, StepComponent, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
+import type {StepOnNextFunction} from '../../../../shared/components/stepper/step/step.component';
+import type {StepComponent, StepOnNextResult} from '../../../../shared/components/stepper/step/step.component';
 import { getSSOClientRedirectURI } from '../../endpoint-helpers';
 import { getIdFromRoute, safeUnsubscribe } from './../../../../core/utils.service';
-import { IStepperStep } from './../../../../shared/components/stepper/step/step.component';
+import type { IStepperStep } from './../../../../shared/components/stepper/step/step.component';
 import { UniqueDirective } from '../../../../shared/components/unique.directive';
-import { ProductNameComponent } from '../../../../shared/components/product-name.ccomponent';
+import { ProductNameComponent } from '../../../../shared/components/product-name.component';
 
 interface EndpointModelMap {
   [id: string]: EndpointModel;
@@ -47,7 +48,9 @@ interface EditEndpointForm {
   standalone: true,
   imports: [
     CommonModule,
+    AsyncPipe,
     ReactiveFormsModule,
+    MatSuffixDirective,
     CustomFormFieldComponent,
     CustomCheckboxComponent,
     CustomIconComponent,
@@ -162,14 +165,15 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
     }
   }
 
-  onNext: StepOnNextFunction = (index: number, step: StepComponent): Observable<StepOnNextResult> => {
+  onNext: StepOnNextFunction = (_index: number, _step: StepComponent): Observable<StepOnNextResult> => {
     return this.endpoint$.pipe(
       filter((endpoint): endpoint is EndpointModel => !!endpoint),
       first(),
       switchMap(endpoint => {
         const caCert = this.showCACertField ? this.editEndpoint.value.caCert : undefined;
         const skipSSL = this.showCACertField ? false : this.editEndpoint.value.skipSSL ?? false;
-        return ((stratosEntityCatalog.endpoint.api as any).update(
+        // Type assertion needed: update method exists but isn't in the public API type
+        return ((stratosEntityCatalog.endpoint.api as unknown as { update: (id: string, endpointId: string, endpoint: unknown) => Observable<ActionState> }).update(
           this.endpointID,
           this.endpointID, {
           endpointType: endpoint.cnsi_type,

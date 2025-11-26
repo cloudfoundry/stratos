@@ -1,29 +1,28 @@
 /* tslint:disable:max-line-length */
-import { DatePipe } from '@angular/common';
+import type { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { first, tap } from 'rxjs/operators';
+import type { Observable } from 'rxjs';
+import { first, map, tap } from 'rxjs/operators';
 
 import {
   BooleanIndicatorType,
-} from '../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import {
   TableCellBooleanIndicatorComponent,
-  TableCellBooleanIndicatorComponentConfig,
-} from '../../../../../../../core/src/shared/components/list/list-table/table-cell-boolean-indicator/table-cell-boolean-indicator.component';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import { ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
-import { FetchCFCellMetricsPaginatedAction } from '../../../../../actions/cf-metrics.actions';
-import { CFAppState } from '../../../../../cf-app-state';
+  type TableCellBooleanIndicatorComponentConfig,
+  type ITableColumn,
+  ListViewTypes,
+} from '@stratosui/core';
+import type { ListView } from '../../../../../../../store/src/actions/list.actions';
+import type { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
+import type { GeneralEntityAppState } from '@stratosui/store';
+import type { FetchCFCellMetricsPaginatedAction } from '../../../../../actions/cf-metrics.actions';
+import type { CFAppState } from '../../../../../cf-app-state';
 import { CfCellHelper } from '../../../../../features/cf/cf-cell.helpers';
-import {
+import type {
   CloudFoundryCellService,
 } from '../../../../../features/cf/tabs/cf-cells/cloud-foundry-cell/cloud-foundry-cell.service';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
-import { CfCellHealthDataSource, CfCellHealthEntry, CfCellHealthState } from './cf-cell-health-source';
+import { CfCellHealthDataSource, type CfCellHealthEntry, CfCellHealthState } from './cf-cell-health-source';
 
 // tslint:enable:max-line-length
 
@@ -40,7 +39,7 @@ export class CfCellHealthListConfigService extends BaseCfListConfig<CfCellHealth
     title: 'Cell Health History',
     noEntries: 'Cell has no health history'
   };
-  private init$: Observable<any>;
+  private init$: Observable<FetchCFCellMetricsPaginatedAction>;
 
   private boolIndicatorConfig: TableCellBooleanIndicatorComponentConfig<CfCellHealthEntry> = {
     isEnabled: (row: CfCellHealthEntry) =>
@@ -51,7 +50,7 @@ export class CfCellHealthListConfigService extends BaseCfListConfig<CfCellHealth
   };
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     cloudFoundryCellService: CloudFoundryCellService,
     private datePipe: DatePipe,
     private paginationMonitorFactory: PaginationMonitorFactory) {
@@ -60,7 +59,7 @@ export class CfCellHealthListConfigService extends BaseCfListConfig<CfCellHealth
     this.init$ = this.createMetricsAction(cloudFoundryCellService.cfGuid, cloudFoundryCellService.cellId).pipe(
       first(),
       tap(action => {
-        this.dataSource = new CfCellHealthDataSource(this.store, this as BaseCfListConfig<CfCellHealthEntry>, action);
+        this.dataSource = new CfCellHealthDataSource(this.store, this as unknown as BaseCfListConfig<CfCellHealthEntry>, action);
       })
     );
     this.showCustomTime = true;
@@ -71,7 +70,7 @@ export class CfCellHealthListConfigService extends BaseCfListConfig<CfCellHealth
     return cellHelper.createCellMetricAction(cfGuid, cellId);
   }
 
-  getInitialised = () => this.init$;
+  getInitialised = () => this.init$.pipe(map(() => true));
   getColumns = (): ITableColumn<CfCellHealthEntry>[] => [
     {
       columnId: 'dateTime',

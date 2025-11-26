@@ -1,12 +1,12 @@
-import { Observable, combineLatest } from 'rxjs';
+import { type Observable, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { getFullEndpointApiUrl, stratosEntityCatalog } from '@stratosui/store';
 import {
-  CurrentUserPermissionsService,
+  type CurrentUserPermissionsService,
   StratosCurrentUserPermissions,
-  UserProfileService,
-  SessionService
+  type UserProfileService,
+  type SessionService
 } from '@stratosui/core';
 
 type EndpointObservable = Observable<{

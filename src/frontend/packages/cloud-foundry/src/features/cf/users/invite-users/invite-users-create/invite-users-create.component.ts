@@ -1,21 +1,20 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { Component, type OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf } from 'rxjs';
+import { type Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import {
   StackedInputActionResult,
   StackedInputActionsComponent,
-  StackedInputActionsState,
-  StackedInputActionsUpdate,
-  StepOnNextFunction,
+  type StackedInputActionsState,
+  type StackedInputActionsUpdate,
+  type StepOnNextFunction,
 } from '@stratosui/core';
-import { APIResource, ClearPaginationOfType } from '@stratosui/store';
-import { IOrganization, ISpace } from '../../../../../cf-api.types';
-import { CFAppState } from '../../../../../cf-app-state';
+import { type APIResource, ClearPaginationOfType } from '@stratosui/store';
+import type { IOrganization, ISpace } from '../../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfUserEntityType } from '../../../../../cf-entity-types';
 import { CFEntityConfig } from '../../../../../cf-types';
@@ -51,7 +50,7 @@ export class InviteUsersCreateComponent implements OnInit {
   private users!: StackedInputActionsUpdate;
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private userInviteService: UserInviteService
   ) {

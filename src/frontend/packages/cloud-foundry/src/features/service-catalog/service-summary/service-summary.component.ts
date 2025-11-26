@@ -1,7 +1,7 @@
-import { CommonModule } from '@angular/common';
+import { AsyncPipe, CommonModule } from '@angular/common';
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import {
@@ -11,9 +11,9 @@ import {
   CardNumberMetricComponent
 } from '@stratosui/core';
 import { RouterNav } from '@stratosui/store';
-import { APIResource } from '@stratosui/store';
-import { CFAppState } from '../../../cf-app-state';
-import { IServiceInstance, IServicePlan } from '../../../cf-api-svc.types';
+import type { APIResource } from '@stratosui/store';
+import type { CFAppState } from '../../../cf-app-state';
+import type { IServiceInstance, IServicePlan } from '../../../cf-api-svc.types';
 import { ServicesService } from '../services.service';
 import { ServiceSummaryCardComponent } from '../../../shared/components/cards/service-summary-card/service-summary-card.component';
 import { ServiceBrokerCardComponent } from '../../../shared/components/cards/service-broker-card/service-broker-card.component';
@@ -26,6 +26,7 @@ import { ServiceRecentInstancesCardComponent } from '../../../shared/components/
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    AsyncPipe,
     CommonModule,
     TileGridComponent,
     TileGroupComponent,
@@ -43,7 +44,7 @@ export class ServiceSummaryComponent {
   instances$: Observable<APIResource<IServiceInstance>[]>;
   constructor(
     private servicesService: ServicesService,
-    private store: Store<CFAppState>,
+    private store: Store,
   ) {
 
     this.instances$ = servicesService.serviceInstances$;

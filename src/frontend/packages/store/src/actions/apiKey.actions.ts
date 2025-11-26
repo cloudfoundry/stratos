@@ -1,6 +1,6 @@
 import { apiKeyEntityType, STRATOS_ENDPOINT_TYPE, stratosEntityFactory } from '../helpers/stratos-entity-factory';
-import { PaginatedAction, PaginationParam } from '../types/pagination.types';
-import { EntityRequestAction } from '../types/request.types';
+import type { PaginatedAction, PaginationParam } from '../types/pagination.types';
+import type { EntityRequestAction } from '../types/request.types';
 
 export const API_KEY_ADD = '[API Key] Add API Key';
 export const API_KEY_DELETE = '[API Key] Delete API Key';

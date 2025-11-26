@@ -1,4 +1,4 @@
-import { IFavoriteTypeInfo } from './user-favorites.types';
+import type { IFavoriteTypeInfo } from './user-favorites.types';
 
 // Types used for maintaining the list of recent entities visited by the user
 

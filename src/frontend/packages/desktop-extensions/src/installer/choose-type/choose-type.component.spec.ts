@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
@@ -12,7 +12,7 @@ describe('ChooseTypeComponent', () => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       declarations: [ ChooseTypeComponent ]
-    }),
+    })
     .compileComponents();
   });
 

@@ -1,7 +1,7 @@
 import { HttpRequest } from '@angular/common/http';
 
 import { getActions } from '../../../store/src/actions/action.helper';
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
+import type { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import {
   organizationEntityType,
@@ -32,7 +32,7 @@ export class GetServicePlanVisibilities extends CFStartAction implements Paginat
   actions = getActions('Service Plan Visibilities', 'Get all');
   entity = [cfEntityFactory(servicePlanVisibilityEntityType)];
   entityType = servicePlanVisibilityEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   initialParams = {
     page: 1,
     'results-per-page': 100,

@@ -1,25 +1,25 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { TableCellEditComponent } from './table-cell-edit.component';
 import { CoreModule } from '../../../../../core/core.module';
-import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
+import type { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 
 describe('TableCellEditComponent', () => {
-  let component: TableCellEditComponent<any>;
-  let fixture: ComponentFixture<TableCellEditComponent<any>>;
+  let component: TableCellEditComponent<unknown>;
+  let fixture: ComponentFixture<TableCellEditComponent<unknown>>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      
+
       providers: [provideZonelessChangeDetection()],
-      
+
       imports: [
         CoreModule,
         TableCellEditComponent,
       ]
-    
+
     });
       TestBed.compileComponents();
   });
@@ -28,7 +28,7 @@ describe('TableCellEditComponent', () => {
     fixture = TestBed.createComponent(TableCellEditComponent);
     component = fixture.componentInstance;
     component.row = {};
-    component.dataSource = {} as IListDataSource<any>;
+    component.dataSource = {} as IListDataSource<unknown>;
     fixture.detectChanges();
   });
 

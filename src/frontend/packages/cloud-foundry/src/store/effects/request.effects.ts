@@ -8,13 +8,13 @@ import { SET_PAGE_BUSY } from '../../../../store/src/actions/pagination.actions'
 import { rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getAPIRequestDataState } from '../../../../store/src/selectors/api.selectors';
 import { getPaginationState } from '../../../../store/src/selectors/pagination.selectors';
-import { ICFAction, UpdateCfAction } from '../../../../store/src/types/request.types';
+import { type ICFAction, UpdateCfAction } from '../../../../store/src/types/request.types';
 import {
   CfValidateEntitiesComplete,
-  CfValidateEntitiesStart,
+  type CfValidateEntitiesStart,
   EntitiesPipelineActionTypes,
 } from '../../actions/relations-actions';
-import { CFAppState } from '../../cf-app-state';
+import type { CFAppState } from '../../cf-app-state';
 import { validateEntityRelations } from '../../entity-relations/entity-relations';
 
 /**
@@ -27,7 +27,7 @@ import { validateEntityRelations } from '../../entity-relations/entity-relations
 export class CfValidateEffects {
   constructor(
     private actions$: Actions,
-    private store: Store<CFAppState>,
+    private store: Store,
     private appRef: ApplicationRef
   ) { }
 
@@ -72,7 +72,7 @@ export class CfValidateEffects {
         mergeMap(validation => {
           const independentUpdates = validation.started;
           if (independentUpdates) {
-            this.update(apiAction, true, null);
+            this.update(apiAction as ICFAction, true, null);
           }
           return validation.completed.then(validatedApiResponse => ({
             validatedApiResponse,
@@ -93,7 +93,7 @@ export class CfValidateEffects {
       )
         .pipe(catchError((error: unknown): import('rxjs').Observable<never> => {
           console.warn(`Entity validation process failed`, error);
-          this.update(apiAction, false, error instanceof Error ? error.message : String(error));
+          this.update(apiAction as ICFAction, false, error instanceof Error ? error.message : String(error));
           this.appRef.tick();
           return EMPTY;
         }));
@@ -102,19 +102,19 @@ export class CfValidateEffects {
 
    completeEntities$ = createEffect(() => this.actions$.pipe(
     ofType<CfValidateEntitiesComplete>(EntitiesPipelineActionTypes.COMPLETE),
-    mergeMap((action): any[] => {
+    mergeMap((action): UpdateCfAction[] => {
       const completeAction: CfValidateEntitiesComplete = action;
-      const actions: any[] = [];
+      const actions: UpdateCfAction[] = [];
       if (completeAction.validationResult.started && completeAction.independentUpdates) {
-        this.update(completeAction.apiAction, false, null);
+        this.update(completeAction.apiAction as ICFAction, false, null);
       }
       this.appRef.tick();
       return actions;
     })));
 
 
-  update(apiAction: ICFAction | any, busy: boolean, error: string | null): void {
-    if ((apiAction as any).paginationKey) {
+  update(apiAction: ICFAction, busy: boolean, error: string | null): void {
+    if ('paginationKey' in apiAction && apiAction.paginationKey) {
       this.store.dispatch({
         type: SET_PAGE_BUSY,
         busy,

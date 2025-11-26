@@ -2,7 +2,8 @@
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CustomTooltipDirective, CustomIconComponent, TableCellCustom } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
+import type { APIResource } from '@stratosui/store';
+import type { CfEvent } from '../../../../../../cf-api.types';
 
 interface CellEVentActeeConfig {
   setActeeFilter: (actee: string) => void;
@@ -20,7 +21,7 @@ interface CellEVentActeeConfig {
     CustomTooltipDirective
 ]
 })
-export class TableCellEventActeeComponent extends TableCellCustom<APIResource, CellEVentActeeConfig> {
+export class TableCellEventActeeComponent extends TableCellCustom<APIResource<CfEvent>, CellEVentActeeConfig> {
 
   icon: {
     [type: string]: {

@@ -4,25 +4,24 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import { first, tap, timeout } from 'rxjs/operators';
 import { firstValueFrom } from 'rxjs';
 import { PermissionConfig, CurrentUserPermissionsService, StratosScopeStrings } from '@stratosui/core';
-import { AppTestModule } from '@stratosui/core/test-framework';
-import { createBasicStoreModule, createEntityStoreState, TestStoreEntity, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { createBasicStoreModule, createEntityStoreState, type TestStoreEntity, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import {
-  AppState,
+  type AppState,
   EntityCatalogTestModule,
   TEST_CATALOGUE_ENTITIES,
-  EntityCatalogEntityConfig,
+  type EntityCatalogEntityConfig,
   endpointEntityType,
   stratosEntityFactory,
   generateStratosEntities,
-  APIResource,
-  EndpointModel,
-  BaseEntityValues,
+  type APIResource,
+  type EndpointModel,
+  type BaseEntityValues,
   EntityServiceFactory,
   EntityCatalogHelper,
   EntityCatalogHelpers,
+  type PaginationState,
 } from '@stratosui/store';
-import { PaginationState } from '@stratosui/store/types/pagination.types';
-import { CFFeatureFlagTypes, IFeatureFlag } from '../../cf-api.types';
+import { CFFeatureFlagTypes, type IFeatureFlag } from '../../cf-api.types';
 import { cfEntityFactory } from '../../cf-entity-factory';
 import { generateCFEntities } from '../../cf-entity-generator';
 import { featureFlagEntityType } from '../../cf-entity-types';
@@ -39,7 +38,7 @@ const ffSchema = cfEntityFactory(featureFlagEntityType);
 
 describe('CurrentUserPermissionsService with CF checker', () => {
   let service: CurrentUserPermissionsService;
-  function createStoreState(): Partial<AppState<BaseEntityValues>> {
+  function createStoreState(): Partial<AppState<BaseEntityValues & Record<string, unknown>>> {
     // Data
     const endpoints: EndpointModel[] = [
       {
@@ -600,7 +599,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
     };
 
     // User roles
-    const initialState: Partial<AppState<BaseEntityValues>> = {
+    const initialState: Partial<AppState<BaseEntityValues & Record<string, unknown>>> = {
 
     };
     // Create request and requestData sections

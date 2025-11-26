@@ -1,8 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 
-import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
-import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
+import { ListComponent, ListConfig } from '@stratosui/core';
 import {
   ServiceInstancesListConfigService,
 } from '../../../shared/components/list/list-types/service-instances/service-instances-list-config.service';

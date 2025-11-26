@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+import type { Routes } from '@angular/router';
 
 import { KubeConsoleComponent } from './kube-terminal/kube-console.component';
 import {

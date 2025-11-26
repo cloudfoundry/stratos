@@ -1,24 +1,24 @@
 import { Inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { combineLatest, filter, first, map, pairwise, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
 import { APP_GUID, CF_GUID } from '@stratosui/core';
 import {
-  ActionState,
-  APIResource,
+  type ActionState,
+  type APIResource,
   endpointEntitiesSelector,
-  EntityInfo,
-  EntityService,
+  type EntityInfo,
+  type EntityService,
+  type GeneralEntityAppState,
   getCurrentPageRequestInfo,
-  PaginatedAction,
-  PaginationEntityState,
-  PaginationObservables,
+  type PaginationEntityState,
+  type PaginationObservables,
   rootUpdatingKey
 } from '@stratosui/store';
-import { AppMetadataTypes } from '../../actions/app-metadata.actions';
-import { GetApplication, UpdateApplication, UpdateExistingApplication } from '../../actions/application.actions';
-import { CFAppState } from '../../cf-app-state';
+import type { AppMetadataTypes } from '../../actions/app-metadata.actions';
+import { GetApplication, type UpdateApplication, UpdateExistingApplication } from '../../actions/application.actions';
+import type { CFAppState } from '../../cf-app-state';
 import {
   applicationEntityType,
   domainEntityType,
@@ -28,12 +28,12 @@ import {
   spaceEntityType,
   stackEntityType
 } from '../../cf-entity-types';
-import { IApp, IAppSummary, IDomain, IOrganization, ISpace, IStack } from '../../cf-api.types';
+import type { IApp, IAppSummary, IDomain, IOrganization, ISpace, IStack } from '../../cf-api.types';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { createEntityRelationKey } from '../../entity-relations/entity-relations.types';
-import { ApplicationStateData, ApplicationStateService } from '../../shared/services/application-state.service';
-import { AppStat } from '../../store/types/app-metadata.types';
-import {
+import type { ApplicationStateData, ApplicationStateService } from '../../shared/services/application-state.service';
+import type { AppStat } from '../../store/types/app-metadata.types';
+import type {
   ApplicationEnvVarsHelper,
   EnvVarStratosProject,
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
@@ -57,7 +57,7 @@ export interface ApplicationData {
   fetching: boolean;
   app: APIResource<IApp>;
   stack: APIResource<IStack>;
-  cf: any;
+  cf: unknown;
 }
 
 @Injectable({
@@ -71,7 +71,7 @@ export class ApplicationService {
   constructor(
     @Inject(CF_GUID) public cfGuid: string,
     @Inject(APP_GUID) public appGuid: string,
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     private appStateService: ApplicationStateService,
     private appEnvVarsService: ApplicationEnvVarsHelper,
   ) {
@@ -141,7 +141,7 @@ export class ApplicationService {
     // First set up all the base observables
     this.app$ = this.entityService.waitForEntity$;
     const moreWaiting$ = this.app$.pipe(
-      filter(entityInfo => !!(entityInfo.entity && entityInfo.entity.entity && entityInfo.entity.entity.cfGuid)),
+      filter(entityInfo => !!(entityInfo.entity?.entity?.cfGuid)),
       map(entityInfo => entityInfo.entity.entity));
     this.appSpace$ = moreWaiting$.pipe(
       first(),
@@ -207,7 +207,7 @@ export class ApplicationService {
 
     this.applicationState$ = this.waitForAppEntity$.pipe(
       combineLatest(this.appStats$.pipe(startWith(null))),
-      map(([appInfo, appStatsArray]: [EntityInfo, AppStat[]]) => {
+      map(([appInfo, appStatsArray]: [EntityInfo<APIResource<IApp>>, AppStat[]]) => {
         return this.appStateService.get(appInfo.entity.entity, appStatsArray || null);
       }), publishReplay(1), refCount());
 
@@ -255,11 +255,11 @@ export class ApplicationService {
     ), startWith(false), publishReplay(1), refCount());
 
     this.applicationUrl$ = this.appSummaryEntityService.entityObs$.pipe(
-      map(({ entity }) => entity),
+      map(({ entity }: EntityInfo<IAppSummary>) => entity),
       filter(app => !!app),
       map(applicationSummary => {
         const routes = applicationSummary.routes ? applicationSummary.routes : [];
-        const nonTCPRoutes = routes.filter(p => p && !isTCPRoute(p.port));
+        const nonTCPRoutes = routes.filter(p => p && !isTCPRoute(String(p.port)));
         return nonTCPRoutes[0] || null;
       }),
       map(entRoute => !!entRoute && !!entRoute && !!entRoute.domain ?
@@ -269,7 +269,7 @@ export class ApplicationService {
     );
   }
 
-  isEntityComplete(value: any, requestInfo: { fetching: boolean, }): boolean {
+  isEntityComplete(value: unknown, requestInfo: { fetching: boolean, }): boolean {
     if (requestInfo) {
       return !requestInfo.fetching;
     } else {

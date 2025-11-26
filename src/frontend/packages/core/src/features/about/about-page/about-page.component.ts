@@ -1,23 +1,25 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component,
-  ComponentFactory,
+  type ComponentFactory,
   ComponentFactoryResolver,
-  ComponentRef,
-  OnDestroy,
-  OnInit,
+  type ComponentRef,
+  type OnDestroy,
+  type OnInit,
   ViewChild,
   ViewContainerRef,
+  inject,
  } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { GeneralEntityAppState, AuthState, SessionData } from '@stratosui/store';
-import { Observable } from 'rxjs';
+import type {GeneralEntityAppState} from '@stratosui/store';
+import type {AuthState, SessionData} from '@stratosui/store';
+import type { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
+import {CustomizationService, type CustomizationsMetadata} from '../../../core/customizations.types';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { StratosTitleComponent } from '../../../shared/components/stratos-title/stratos-title.component';
-import { ProductNameComponent } from '../../../shared/components/product-name.ccomponent';
+import { ProductNameComponent } from '../../../shared/components/product-name.component';
 import { MetadataItemComponent } from '../../../shared/components/metadata-item/metadata-item.component';
 
 @Component({
@@ -44,14 +46,15 @@ export class AboutPageComponent implements OnInit, OnDestroy {
   @ViewChild('aboutInfoContainer', { read: ViewContainerRef, static: true }) aboutInfoContainer!: ViewContainerRef;
   @ViewChild('supportInfoContainer', { read: ViewContainerRef, static: true }) supportInfoContainer!: ViewContainerRef;
 
-  aboutInfoComponentRef!: ComponentRef<any>;
-  componentRef!: ComponentRef<any>;
+  aboutInfoComponentRef!: ComponentRef<unknown>;
+  componentRef!: ComponentRef<unknown>;
 
   customizations: CustomizationsMetadata;
 
+  private store = inject(Store<GeneralEntityAppState>);
+  private resolver = inject(ComponentFactoryResolver);
+
   constructor(
-    private store: Store<GeneralEntityAppState>,
-    private resolver: ComponentFactoryResolver,
     cs: CustomizationService,
   ) {
     this.customizations = cs.get();
@@ -59,12 +62,12 @@ export class AboutPageComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.sessionData$ = this.store.select(s => s.auth).pipe(
-      filter(auth => !!(auth && auth.sessionData)),
+      filter(auth => !!(auth?.sessionData)),
       map((auth: AuthState) => auth.sessionData)
     );
 
     this.userIsAdmin$ = this.sessionData$.pipe(
-      map(session => session.user && session.user.admin)
+      map(session => session.user?.admin)
     );
 
     this.versionNumber$ = this.sessionData$.pipe(
@@ -90,7 +93,7 @@ export class AboutPageComponent implements OnInit, OnDestroy {
   addAboutInfoComponent() {
     this.aboutInfoContainer.clear();
     if (this.customizations.aboutInfoComponent) {
-      const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(this.customizations.aboutInfoComponent);
+      const factory: ComponentFactory<unknown> = this.resolver.resolveComponentFactory(this.customizations.aboutInfoComponent);
       this.aboutInfoComponentRef = this.aboutInfoContainer.createComponent(factory);
     }
   }
@@ -98,7 +101,7 @@ export class AboutPageComponent implements OnInit, OnDestroy {
   addSupportInfo() {
     this.supportInfoContainer.clear();
     if (this.customizations.supportInfoComponent) {
-      const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(this.customizations.supportInfoComponent);
+      const factory: ComponentFactory<unknown> = this.resolver.resolveComponentFactory(this.customizations.supportInfoComponent);
       this.componentRef = this.supportInfoContainer.createComponent(factory);
     }
   }

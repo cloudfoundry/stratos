@@ -1,7 +1,7 @@
-import { Routes } from '@angular/router';
+import type { Routes } from '@angular/router';
 
-import { dynamicExtensionRoutesGuard } from '../../../../core/src/core/extension/dynamic-extension-routes';
-import { StratosActionType, StratosTabType } from '../../../../core/src/core/extension/extension-service';
+import { dynamicExtensionRoutesGuard, StratosActionType, StratosTabType } from '@stratosui/core';
+// PageNotFoundComponentComponent is not exported from @stratosui/core, keeping relative import
 import {
   PageNotFoundComponentComponent,
 } from '../../../../core/src/core/page-not-found-component/page-not-found-component.component';

@@ -9,11 +9,11 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
  * 4. Verify selector memoization behavior
  */
 
-import { Component, Signal, computed, provideZonelessChangeDetection } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Component, type Signal, computed, provideZonelessChangeDetection } from '@angular/core';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { InternalAppState } from '../app-state';
-import { EndpointModel } from '../types/endpoint.types';
+import type { InternalAppState } from '../app-state';
+import type { EndpointModel } from '../types/endpoint.types';
 import { selectAsSignal } from '../helpers/signal-selectors';
 import {
   endpointEntitiesSelector,
@@ -25,7 +25,7 @@ import { JsonPipe } from '@angular/common';
 
 describe('Selectors in Zoneless Mode', () => {
   let store: MockStore;
-  let fixture: ComponentFixture<any>;
+  let fixture: ComponentFixture<unknown>;
 
   const mockEndpoint: EndpointModel = {
     guid: 'endpoint-1',
@@ -33,7 +33,14 @@ describe('Selectors in Zoneless Mode', () => {
     cnsi_type: 'cf',
     api_endpoint: {
       Host: 'api.test.com',
-      Scheme: 'https'
+      Scheme: 'https',
+      ForceQuery: false,
+      Fragment: '',
+      Opaque: '',
+      Path: '',
+      RawPath: '',
+      RawQuery: '',
+      User: null
     },
     connectionStatus: 'connected',
     user: null,
@@ -120,7 +127,7 @@ describe('Selectors in Zoneless Mode', () => {
 
       // Update state
       const updatedEndpoint = {
-        ...mockEndpoint,
+        ...(mockEndpoint as EndpointModel),
         name: 'Updated Endpoint'
       };
       store.setState({
@@ -130,7 +137,7 @@ describe('Selectors in Zoneless Mode', () => {
             'endpoint-1': updatedEndpoint,
           }
         }
-      });
+      } as Partial<InternalAppState>);
 
       // In zoneless mode, signals automatically detect changes
       fixture.detectChanges();
@@ -246,7 +253,14 @@ describe('Advanced Signal Selector Patterns', () => {
     cnsi_type: 'cf',
     api_endpoint: {
       Host: 'api.test.com',
-      Scheme: 'https'
+      Scheme: 'https',
+      ForceQuery: false,
+      Fragment: '',
+      Opaque: '',
+      Path: '',
+      RawPath: '',
+      RawQuery: '',
+      User: null
     },
     connectionStatus: 'connected',
     user: null,
@@ -327,8 +341,8 @@ describe('Advanced Signal Selector Patterns', () => {
 
 // Export helper for testing signal selectors
 export function testSignalSelector<T>(
-  selector: (state: any) => T,
-  initialState: any,
+  selector: (state: InternalAppState) => T,
+  initialState: Partial<InternalAppState>,
 ): Signal<T | undefined> {
   TestBed.configureTestingModule({
     providers: [

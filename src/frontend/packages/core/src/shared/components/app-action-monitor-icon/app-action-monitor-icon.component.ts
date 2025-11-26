@@ -1,14 +1,14 @@
-import { Component, Input, OnInit, Output, inject, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, type OnInit, Output, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import {
-  EntityMonitor,
+  type EntityMonitor,
   EntityMonitorFactory,
-  ActionState,
-  RequestInfoState,
+  type ActionState,
+  type RequestInfoState,
   rootUpdatingKey,
-  EntitySchema,
+  type EntitySchema,
 } from '@stratosui/store';
-import { Observable, of } from 'rxjs';
+import { type Observable, of } from 'rxjs';
 import { distinctUntilChanged, map, pairwise, startWith, withLatestFrom } from 'rxjs/operators';
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 

@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, type OnInit  } from '@angular/core';
 
-import { Observable, of } from 'rxjs';
+import { type Observable, of } from 'rxjs';
 
 import { getFullEndpointApiUrl } from '../../../../../../store/src/endpoint-utils';
-import { EndpointModel } from '../../../../../../store/src/public-api';
-import { HomePageCardLayout, HomePageEndpointCard } from '../../home.types';
+import type { EndpointModel } from '../../../../../../store/src/public-api';
+import type {HomePageEndpointCard} from '../../home.types';
+import type {HomePageCardLayout} from '../../home.types';
 import { MetadataItemComponent } from '../../../../shared/components/metadata-item/metadata-item.component';
 
 @Component({

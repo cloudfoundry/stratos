@@ -1,4 +1,4 @@
-import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
+import type { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { GetAllStacks, GetStack } from '../actions/stack.action';
 
 export interface StackActionBuilders extends OrchestratedActionBuilders {
@@ -18,7 +18,7 @@ export const stackActionBuilders: StackActionBuilders = {
     endpointGuid: string,
   ) => new GetStack(guid, endpointGuid),
   getMultiple: (
-    paginationKey: string,
+    _paginationKey: string,
     endpointGuid: string,
   ) => new GetAllStacks(endpointGuid),
 };

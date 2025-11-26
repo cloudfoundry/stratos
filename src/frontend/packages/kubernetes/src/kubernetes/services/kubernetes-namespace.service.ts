@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { getIdFromRoute } from '../../../../core/src/core/utils.service';
 import { kubeEntityCatalog } from '../kubernetes-entity-generator';
-import { KubernetesNamespace } from '../store/kube.types';
+import type { KubernetesNamespace } from '../store/kube.types';
 import { KubernetesEndpointService } from './kubernetes-endpoint.service';
 
 @Injectable({

@@ -1,11 +1,9 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import {
-  AppState,
-  BaseEntityValues,
   entityCatalog,
   EntityServiceFactory,
   EntityCatalogHelper,
@@ -14,7 +12,7 @@ import {
   PaginationMonitorFactory,
   stratosEntityFactory,
   endpointEntityType,
-  NormalizedResponse,
+  type NormalizedResponse,
   WrapperRequestActionSuccess,
   EntityCatalogTestModuleManualStore,
   TEST_CATALOGUE_ENTITIES,
@@ -28,8 +26,8 @@ import { EditEndpointComponent } from './edit-endpoint.component';
 describe('EditEndpointComponent', () => {
   let component: EditEndpointComponent;
   let fixture: ComponentFixture<EditEndpointComponent>;
-  let activatedRoute: any;
-  let store: Store<AppState<BaseEntityValues>>;
+  let activatedRoute: { snapshot: { params: { id: string }; queryParams: Record<string, unknown> } };
+  let store: Store;
 
   beforeEach(async () => {
     // Create mutable route object with test endpoint GUID
@@ -83,7 +81,7 @@ describe('EditEndpointComponent', () => {
       api_endpoint: {
         Scheme: 'https',
         Opaque: '',
-        User: null,
+        User: null as unknown,
         Host: 'api.test.com',
         Path: '',
         RawPath: '',

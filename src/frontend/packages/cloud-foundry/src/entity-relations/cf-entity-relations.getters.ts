@@ -1,20 +1,20 @@
-import { HttpParams, HttpRequest } from '@angular/common/http';
+import type { HttpParams, HttpRequest } from '@angular/common/http';
 
 import {
-  InternalAppState,
+  type InternalAppState,
   entityCatalog,
-  StratosBaseCatalogEntity,
-  EntityCatalogEntityConfig,
+  type StratosBaseCatalogEntity,
+  type EntityCatalogEntityConfig,
   selectPaginationState,
   isPaginatedAction,
-  PaginatedAction,
-  PaginationParam,
-  EntityRequestAction
+  type PaginatedAction,
+  type PaginationParam,
+  type EntityRequestAction
 } from '@stratosui/store';
 import { getPaginationParams } from '../../../store/src/entity-request-pipeline/pagination-request-base-handlers/get-params.pipe';
 import { QParam } from '../shared/q-param';
 import { listEntityRelations } from './entity-relations';
-import { EntityInlineParentAction, isEntityInlineParentAction } from './entity-relations.types';
+import { type EntityInlineParentAction, isEntityInlineParentAction } from './entity-relations.types';
 
 function getEntityRelationsForEntityRequest(action: EntityInlineParentAction & EntityRequestAction) {
   return listEntityRelations(
@@ -41,7 +41,7 @@ function getEntityRelationsForPaginationRequest(action: EntityInlineParentAction
   );
 }
 
-export function addCfRelationParams(request: HttpRequest<any>, action: EntityRequestAction | PaginatedAction) {
+export function addCfRelationParams(request: HttpRequest<unknown>, action: EntityRequestAction | PaginatedAction) {
   const entityInlineParent = isEntityInlineParentAction(action);
   if (!entityInlineParent) {
     return request;
@@ -52,7 +52,7 @@ export function addCfRelationParams(request: HttpRequest<any>, action: EntityReq
     getEntityRelationsForEntityRequest(entityInlineParent as EntityInlineParentAction & EntityRequestAction);
   const update: Record<string, string> = {};
   if (relationInfo.maxDepth > 0) {
-    update['inline-relations-depth'] = (relationInfo.maxDepth > 2 ? 2 : relationInfo.maxDepth) + '';
+    update['inline-relations-depth'] = `${relationInfo.maxDepth > 2 ? 2 : relationInfo.maxDepth}`;
   }
   if (relationInfo.relations.length) {
     update['include-relations'] = relationInfo.relations.join(',');
@@ -64,7 +64,7 @@ export function addCfRelationParams(request: HttpRequest<any>, action: EntityReq
 
 function setQParams(requestParams: HttpParams, params: PaginationParam): HttpParams {
   // No params or no q params? Not interested
-  if (!params || !params.hasOwnProperty('q')) {
+  if (!params || !Object.hasOwn(params, 'q')) {
     return requestParams;
   }
 
@@ -93,10 +93,10 @@ function setQParams(requestParams: HttpParams, params: PaginationParam): HttpPar
 }
 
 export function addCfQParams(
-  request: HttpRequest<any>,
+  request: HttpRequest<unknown>,
   action: PaginatedAction,
   catalogEntity: StratosBaseCatalogEntity,
-  appState: InternalAppState): HttpRequest<any> {
+  appState: InternalAppState): HttpRequest<unknown> {
   // Clear any existing
   const newParams = request.params.delete('q');
 

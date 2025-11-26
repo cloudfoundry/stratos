@@ -1,13 +1,12 @@
 import {Component, Input, signal, inject, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of as observableOf, of } from 'rxjs';
+import { combineLatest, type Observable, of as observableOf, of } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
 
 import { FileInputComponent } from '../../../../../core/src/shared/components/file-input/file-input.component';
 import { CustomIconComponent } from '../../../../../core/src/shared/components/custom-material/custom-material.component';
-import {
+import type {
   ITableListDataSource,
   RowState,
 } from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
@@ -15,11 +14,10 @@ import {
   TableHeaderSelectComponent,
 } from '../../../../../core/src/shared/components/list/list-table/table-header-select/table-header-select.component';
 import { TableComponent } from '../../../../../core/src/shared/components/list/list-table/table.component';
-import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
+import type { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
 import { SnackBarService } from '../../../../../core/src/shared/services/snackbar.service';
-import { AppState } from '../../../../../store/src/public-api';
 import { KubeConfigHelper } from '../kube-config.helper';
-import { KubeConfigFileCluster } from '../kube-config.types';
+import type { KubeConfigFileCluster } from '../kube-config.types';
 import { KubeConfigTableCertComponent } from './kube-config-table-cert/kube-config-table-cert.component';
 import { KubeConfigTableNameComponent } from './kube-config-table-name/kube-config-table-name.component';
 import { KubeConfigTableSelectComponent } from './kube-config-table-select/kube-config-table-select.component';
@@ -52,9 +50,9 @@ export class KubeConfigSelectionComponent {
   public dataSource: KubeConfigTableListDataSource = {
     connect: () => this.helper.clusters$,
     disconnect: () => { },
-    trackBy: (index, row) => row.name,
+    trackBy: (_index, row) => row.name,
     isTableLoading$: observableOf(false),
-    getRowState: (row: KubeConfigFileCluster, schemaKey: string): Observable<RowState> => {
+    getRowState: (row: KubeConfigFileCluster, _schemaKey: string): Observable<RowState> => {
       return row ? row._state.asObservable() : observableOf({});
     },
     selectAllIndeterminate: false,
@@ -139,7 +137,7 @@ export class KubeConfigSelectionComponent {
   private _valid = signal<boolean>(false);
   valid$ = toObservable(this._valid);
 
-  canSetIntermediate = false;  private store = inject(Store<AppState>);
+  canSetIntermediate = false;  
   public helper = inject(KubeConfigHelper);
   private snackbarService = inject(SnackBarService);
 

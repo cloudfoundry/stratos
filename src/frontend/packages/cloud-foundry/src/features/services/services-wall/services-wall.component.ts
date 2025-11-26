@@ -1,19 +1,17 @@
-import { CommonModule, DatePipe } from '@angular/common';
+import { AsyncPipe, CommonModule, DatePipe } from '@angular/common';
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import type { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import {
   ServiceInstancesWallListConfigService,
 } from '../../../../../cloud-foundry/src/shared/components/list/list-types/services-wall/service-instances-wall-list-config.service';
 import { CfOrgSpaceDataService } from '../../../../../cloud-foundry/src/shared/data-services/cf-org-space-service.service';
 import { CloudFoundryService } from '../../../../../cloud-foundry/src/shared/data-services/cloud-foundry.service';
-import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
-import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
-import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
+import { ListComponent, ListConfig, PageHeaderComponent, NoContentMessageComponent } from '@stratosui/core';
 import { CSI_CANCEL_URL } from '../../../shared/components/add-service-instance/csi-mode.service';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
@@ -34,10 +32,12 @@ import { CfUserPermissionDirective } from '../../../shared/directives/cf-user-pe
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    AsyncPipe,
     CommonModule,
     RouterModule,
     PageHeaderComponent,
     ListComponent,
+    NoContentMessageComponent,
     CfEndpointsMissingComponent,
     CfUserPermissionDirective
   ]
@@ -53,7 +53,7 @@ export class ServicesWallComponent {
 
   constructor(
     public cloudFoundryService: CloudFoundryService,
-    public store: Store<CFAppState>,
+    public store: Store,
     public cfOrgSpaceService: CfOrgSpaceDataService) {
 
     this.canCreateServiceInstance = CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE;

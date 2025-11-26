@@ -2,7 +2,7 @@
 import { share, map } from 'rxjs/operators';
 import { ApplicationService } from './application.service';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 export class AppMonitorState {
 
@@ -29,8 +29,6 @@ export class AppMonitorState {
     mem: 'tentative',
     cpu: 'tentative',
   };
-
-  constructor() { }
 
   updateStatuses() {
     // Mem/Disk/CPU Usage Status

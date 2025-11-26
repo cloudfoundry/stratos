@@ -1,8 +1,8 @@
 import { Store } from '@ngrx/store';
 
-import { getRowMetadata, APIResource } from '@stratosui/store';
-import { ListDataSource, IListConfig } from '@stratosui/core';
-import { CFAppState, applicationEntityType, serviceBindingEntityType, serviceEntityType, serviceInstancesEntityType, servicePlanEntityType, ApplicationService, IServiceBinding, cfEntityCatalog } from '@stratosui/cloud-foundry';
+import { getRowMetadata, type APIResource, type GeneralEntityAppState } from '@stratosui/store';
+import { ListDataSource, type IListConfig } from '@stratosui/core';
+import { type CFAppState, applicationEntityType, serviceBindingEntityType, serviceEntityType, serviceInstancesEntityType, servicePlanEntityType, ApplicationService, type IServiceBinding, cfEntityCatalog } from '@stratosui/cloud-foundry';
 import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../../../entity-relations/entity-relations.types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 
@@ -22,7 +22,7 @@ export class AppServiceBindingDataSource extends ListDataSource<APIResource<ISer
       });
   }
 
-  constructor(store: Store<CFAppState>, appService: ApplicationService, listConfig?: IListConfig<APIResource<IServiceBinding>>) {
+  constructor(store: Store<GeneralEntityAppState>, appService: ApplicationService, listConfig?: IListConfig<APIResource<IServiceBinding>>) {
     const action = AppServiceBindingDataSource.createGetAllServiceBindings(appService.appGuid, appService.cfGuid);
     super({
       store,

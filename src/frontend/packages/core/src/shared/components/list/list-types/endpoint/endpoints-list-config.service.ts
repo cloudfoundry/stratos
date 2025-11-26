@@ -1,17 +1,17 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
-  ListView,
-  AppState,
-  InternalEventMonitorFactory,
-  EndpointModel,
-  PaginationEntityState,
+  type ListView,
+  type AppState,
+  type InternalEventMonitorFactory,
+  type EndpointModel,
+  type PaginationEntityState,
   SetClientFilter,
   entityCatalog,
-  EntityMonitorFactory,
-  PaginationMonitorFactory,
+  type EntityMonitorFactory,
+  type PaginationMonitorFactory,
   stratosEntityCatalog,
-  UserFavoriteManager,
+  type UserFavoriteManager,
 } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, of } from 'rxjs';
 import { debounceTime, filter, first, map } from 'rxjs/operators';
@@ -19,19 +19,19 @@ import { SessionService } from '../../../../services/session.service';
 import { CurrentUserPermissionsService } from '../../../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../../../core/permissions/stratos-user-permissions.checker';
 import { createTableColumnFavorite } from '../../list-table/table-cell-favorite/table-cell-favorite.component';
-import { ITableColumn } from '../../list-table/table.types';
+import type { ITableColumn } from '../../list-table/table.types';
 import {
-  IGlobalListAction,
-  IListAction,
-  IListConfig,
-  IListMultiFilterConfig,
-  IListMultiFilterConfigItem,
-  IMultiListAction,
+  type IGlobalListAction,
+  type IListAction,
+  type IListConfig,
+  type IListMultiFilterConfig,
+  type IListMultiFilterConfigItem,
+  type IMultiListAction,
   ListViewTypes,
 } from '../../list.component.types';
 import { BaseEndpointsDataSource } from './base-endpoints-data-source';
 import { EndpointCardComponent } from './endpoint-card/endpoint-card.component';
-import { EndpointListHelper } from './endpoint-list.helpers';
+import type { EndpointListHelper } from './endpoint-list.helpers';
 import { EndpointsDataSource } from './endpoints-data-source';
 import { TableCellEndpointAddressComponent } from './table-cell-endpoint-address/table-cell-endpoint-address.component';
 import { TableCellEndpointDetailsComponent } from './table-cell-endpoint-details/table-cell-endpoint-details.component';

@@ -1,7 +1,7 @@
-import { BaseRequestState } from '../../app-state';
-import { SetTreeDeleting } from '../../effects/recursive-entity-delete.effect';
-import { IFlatTree } from '../../helpers/schema-tree-traverse';
-import { DeleteActionState, getDefaultRequestState, RequestInfoState } from './types';
+import type { BaseRequestState } from '../../app-state';
+import type { SetTreeDeleting } from '../../effects/recursive-entity-delete.effect';
+import type { IFlatTree } from '../../helpers/schema-tree-traverse';
+import { type DeleteActionState, getDefaultRequestState, type RequestInfoState } from './types';
 
 export function setChildEntitiesAsDeleting(state: BaseRequestState, action: SetTreeDeleting) {
   const { tree } = action;

@@ -1,4 +1,4 @@
-import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
+import type { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { GetAppSummaryAction } from '../actions/app-metadata.actions';
 
 export interface AppSummaryActionBuilders extends OrchestratedActionBuilders {

@@ -1,12 +1,12 @@
-import { Component, Input, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
-import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { Component, Input, type OnDestroy, type OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { type AbstractControl, ReactiveFormsModule, type ValidatorFn, Validators, FormControl, FormGroup, type ValidationErrors } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
-import { CustomFormFieldComponent, CustomCheckboxComponent, FocusDirective, UnlimitedInputComponent, safeUnsubscribe } from '@stratosui/core';
+import { CustomFormFieldComponent, CustomCheckboxComponent, FocusDirective, UnlimitedInputComponent, safeUnsubscribe, AppInputDirective, AppErrorComponent, MatSuffixDirective } from '@stratosui/core';
 import { endpointEntityType } from '@stratosui/store';
-import { IQuotaDefinition } from '../../../cf-api.types';
+import type { IQuotaDefinition, ISpaceQuotaDefinition } from '../../../cf-api.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { createEntityRelationPaginationKey } from '../../../entity-relations/entity-relations.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
@@ -38,11 +38,14 @@ export interface SpaceQuotaFormValues {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
+    MatSuffixDirective,
     CustomCheckboxComponent,
     CustomFormFieldComponent,
     FocusDirective,
-    UnlimitedInputComponent
-]
+    UnlimitedInputComponent,
+    AppInputDirective,
+    AppErrorComponent
+  ]
 })
 export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
   quotasSubscription!: Subscription;
@@ -80,7 +83,7 @@ export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
   }
 
   setupForm() {
-    const quota: any = this.quota || {};
+    const quota: Partial<ISpaceQuotaDefinition> = this.quota || {};
 
     this.formGroup = new FormGroup({
       name: new FormControl(quota.name || '', {
@@ -109,14 +112,16 @@ export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
       .pipe(
         filter(o => !!o),
         map(o => o.map(org => org.entity.name)),
-        tap((o) => this.allQuotas = o)
+        tap((o) => {
+          this.allQuotas = o;
+        })
       );
 
     this.quotasSubscription = this.spaceQuotaDefinitions$.subscribe();
   }
 
   nameTakenValidator = (): ValidatorFn => {
-    return (formField: AbstractControl): { [key: string]: any } => {
+    return (formField: AbstractControl): ValidationErrors | null => {
       if (!this.validateNameTaken(formField.value)) {
         return { nameTaken: { value: formField.value } };
       }

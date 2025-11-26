@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { KubeAPIResource, KubernetesPod, KubeService, KubeStatus } from '../store/kube.types';
+import type { KubeAPIResource, KubernetesPod, KubeService, KubeStatus } from '../store/kube.types';
 
 export interface HelmRelease {
   endpointId: string;
@@ -17,9 +17,9 @@ export interface HelmRelease {
     notes: string;
     status: string;
   };
-  config: any;
+  config: Record<string, unknown>;
   chart: {
-    values: any;
+    values: Record<string, unknown>;
     metadata: {
       name: string;
       version: string;
@@ -78,6 +78,11 @@ export interface HelmReleaseRevision {
   description: string;
   status: string;
   revision: number;
+  chart: {
+    name: string;
+    version: string;
+    appVersion?: string;
+  };
 }
 
 export interface HelmReleaseHistory extends HelmReleaseEntity {
@@ -97,6 +102,6 @@ export class HelmReleaseGuid {
 }
 
 export interface HelmReleaseChartData {
-  podsChartData: { name: string; value: any; }[];
-  containersChartData: { name: string; value: any; }[];
+  podsChartData: { name: string; value: number; }[];
+  containersChartData: { name: string; value: number; }[];
 }

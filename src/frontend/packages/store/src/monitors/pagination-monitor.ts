@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
-import { denormalize, schema as normalizrSchema } from 'normalizr';
-import { asapScheduler, combineLatest, Observable, ReplaySubject } from 'rxjs';
+import { denormalize, type schema as normalizrSchema } from 'normalizr';
+import { asapScheduler, combineLatest, type Observable, ReplaySubject } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
 import {
   combineLatest as combineLatestOperator,
@@ -14,34 +14,34 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { AppState, GeneralEntityAppState, GeneralRequestDataState } from '../app-state';
+import type { AppState, GeneralEntityAppState, GeneralRequestDataState } from '../app-state';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
-import { StratosBaseCatalogEntity } from '../entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
-import { EntitySchema } from '../helpers/entity-schema';
+import type { StratosBaseCatalogEntity } from '../entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import type { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
+import type { EntitySchema } from '../helpers/entity-schema';
 import { LocalPaginationHelpers } from '../helpers/local-list.helpers';
-import { ActionState, ListActionState } from '../reducers/api-request-reducer/types';
+import type { ActionState, ListActionState } from '../reducers/api-request-reducer/types';
 import { getCurrentPageRequestInfo } from '../reducers/pagination-reducer/pagination-reducer.types';
 import { getAPIRequestDataState, selectEntities } from '../selectors/api.selectors';
 import { selectPaginationState } from '../selectors/pagination.selectors';
-import { PaginationEntityState } from '../types/pagination.types';
+import type { PaginationEntityState } from '../types/pagination.types';
 
 export class MultiActionListEntity {
-  static getEntity(entity: MultiActionListEntity | any) {
+  static getEntity(entity: MultiActionListEntity | unknown): unknown {
     if (entity instanceof MultiActionListEntity) {
       return entity.entity;
     }
     return entity;
   }
-  static getEntityKey(entity: MultiActionListEntity | any, defaultEntityKey: string = null) {
+  static getEntityKey(entity: MultiActionListEntity | unknown, defaultEntityKey: string = null): string {
     if (entity instanceof MultiActionListEntity) {
       return entity.entityKey;
     }
     return defaultEntityKey;
   }
-  constructor(public entity: any, public entityKey: string) { }
+  constructor(public entity: unknown, public entityKey: string) { }
 }
-export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppState> {
+export class PaginationMonitor<T = unknown, Y extends AppState = GeneralEntityAppState> {
 
   /**
    * Emits the current page of entities.
@@ -75,7 +75,10 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
     {
       isLocal = false,
       schemaKey = ''
-    }: any
+    }: {
+      isLocal?: boolean;
+      schemaKey?: string;
+    }
   ) {
     // This is a static on the pagination monitor rather than a member of StratosBaseCatalogEntity due to
     // a circular dependency on entityFactory from the getPageInfo function below.
@@ -95,7 +98,7 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
     if (!catalogEntity) {
       throw new Error(`Could not find catalog entity for endpoint type '${endpointType}' and entity type '${entityType}'`);
     }
-    this.schema = entityCatalog.getEntity(endpointType, entityType).getSchema(schemaKey);
+    this.schema = catalogEntity.getSchema(schemaKey);
     this.init(store, paginationKey, this.schema);
   }
 
@@ -106,7 +109,7 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
     if (!pagination) {
       return false;
     }
-    const currentPage = (pagination.ids as Record<number, any>)[pagination.currentPage];
+    const currentPage = (pagination.ids as Record<number, string[]>)[pagination.currentPage];
     const hasPageIds = !!currentPage;
     const requestInfo =
       pagination.pageRequests[pagination.clientPagination?.currentPage ?? pagination.currentPage];
@@ -171,10 +174,10 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
 
   private createPagIdObservable(
     pagination$: Observable<PaginationEntityState>
-  ) {
+  ): Observable<string[]> {
     return pagination$.pipe(
       distinctUntilChanged(this.isPageSameIsh),
-      map(pagination => (pagination.ids as Record<number, any>)[pagination.currentPage] || [])
+      map(pagination => (pagination.ids as Record<number, string[]>)[pagination.currentPage] || [])
     );
   }
 
@@ -197,9 +200,9 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
         const { page, pageSchema } = this.getPageInfo(pagination, pagination.currentPage, schema);
         return this.denormalizePage(page, pageSchema, allEntities);
       }),
-      tag('de-norming ' + schema.key),
+      tag(`de-norming ${schema.key}`),
       // See comment in createLocalPageObservable
-      multicast(() => new ReplaySubject<any>(1)),
+      multicast(() => new ReplaySubject<T[]>(1)),
       refCount(),
     );
   }
@@ -241,16 +244,16 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
       combineLatestOperator(entityObservable$),
       withLatestFrom(allEntitiesObservable$),
       map(([[pagination], allEntities]) => {
-        return this.getLocalEntities(pagination, allEntities, schema).filter((ent: any) => !!ent);
+        return this.getLocalEntities(pagination, allEntities, schema).filter((ent: unknown) => !!ent);
       }),
-      tag('de-norming-local ' + schema.key),
+      tag(`de-norming-local ${schema.key}`),
     );
 
     const isMultiAction$ = combineLatest(
       pagination$,
       fetching$
     ).pipe(
-      filter(([pagination, fetching]) => !fetching),
+      filter(([_pagination, fetching]) => !fetching),
       map(([pagination]) => {
         return Object.values(pagination.pageRequests).reduce((entityKeys, pageRequest) => {
           const { entityConfig } = pageRequest;
@@ -273,7 +276,7 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
         // data on new subscribers. For more info see
         // https://stackoverflow.com/questions/53798142/rxjs-unexpected-publishreplay-refcount-behaviour-after-refcount-goes-to-0
         // and https://stackoverflow.com/questions/42370097/how-to-force-publishreplay-to-resubscribe
-        multicast(() => new ReplaySubject<any>(1)),
+        multicast(() => new ReplaySubject<T[]>(1)),
         // publishReplay(1),
         refCount(),
       ),
@@ -287,17 +290,17 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
       if (pagination.forcedLocalPage) {
         const { page, pageSchema } = this.getPageInfo(pagination, pagination.forcedLocalPage, defaultSchema);
 
-        return this.denormalizePage(page, pageSchema, allEntities).map((entity: any) => new MultiActionListEntity(entity, pageSchema.key));
+        return this.denormalizePage(page, pageSchema, allEntities).map((entity: unknown) => new MultiActionListEntity(entity, pageSchema.key));
       }
       return pages.reduce((allPageEntities, pageNumber) => {
         const { page, pageSchema } = this.getPageInfo(pagination, pageNumber, defaultSchema);
         return [
           ...allPageEntities,
-          ...this.denormalizePage(page, pageSchema, allEntities).map((entity: any) => new MultiActionListEntity(entity, pageSchema.key))
+          ...this.denormalizePage(page, pageSchema, allEntities).map((entity: unknown) => new MultiActionListEntity(entity, pageSchema.key))
         ];
       }, []);
     } else {
-      const page = (pagination.ids as Record<number, any>)[pagination.currentPage] || [];
+      const page = (pagination.ids as Record<number, string[]>)[pagination.currentPage] || [];
       return page.length
         ? denormalize(page, [defaultSchema], allEntities)
         : [];
@@ -306,12 +309,12 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
 
   private denormalizePage(page: string[], schema: normalizrSchema.Entity, allEntities: GeneralRequestDataState) {
     return page.length
-      ? denormalize(page, [schema], allEntities).filter((ent: any) => !!ent)
+      ? denormalize(page, [schema], allEntities).filter((ent: unknown) => !!ent)
       : [];
   }
 
   private getPageInfo(pagination: PaginationEntityState, pageId: number | string, defaultSchema: normalizrSchema.Entity) {
-    const page = (pagination.ids as Record<string | number, any>)[pageId] || [];
+    const page = (pagination.ids as Record<string | number, string[]>)[pageId] || [];
     const pageState = pagination.pageRequests[pageId] || {} as ListActionState;
     const pageSchema = pageState.entityConfig ? entityCatalog.getEntity(
       pageState.entityConfig.endpointType,
@@ -338,7 +341,7 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
         y.pageRequests[y.currentPage].busy
       );
     const samePageIdList =
-      samePage && (x.ids as any)[x.currentPage] === (y.ids as any)[y.currentPage];
+      samePage && (x.ids as Record<number, string[]>)[x.currentPage] === (y.ids as Record<number, string[]>)[y.currentPage];
     return samePageIdList && samePageBusyState;
   }
 

@@ -1,10 +1,9 @@
-import {Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import {Component, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CustomTooltipDirective } from '@stratosui/core';
 
-import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
+import { CustomTooltipDirective, TableCellCustom } from '@stratosui/core';
 import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
-import { KubernetesNode } from '../../../store/kube.types';
+import type { KubernetesNode } from '../../../store/kube.types';
 
 @Component({
   selector: 'app-kubernetes-node-link',

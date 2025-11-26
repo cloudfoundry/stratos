@@ -1,8 +1,8 @@
-import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
+import type { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { GetAllOrgUsers } from '../actions/organization.actions';
 import { GetAllSpaceUsers } from '../actions/space.actions';
 import { GetAllCfUsersAsAdmin, GetCfUser } from '../actions/users.actions';
-import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
+import type { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
 export interface UserActionBuilders extends OrchestratedActionBuilders {
   get: (

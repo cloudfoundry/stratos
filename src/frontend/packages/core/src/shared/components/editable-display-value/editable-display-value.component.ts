@@ -17,8 +17,6 @@ export class EditableDisplayValueComponent {
 
   @Input() edit!: boolean;
   @Input() label!: string;
-  @Input() value: any;
-
-  constructor() { }
+  @Input() value: unknown;
 
 }

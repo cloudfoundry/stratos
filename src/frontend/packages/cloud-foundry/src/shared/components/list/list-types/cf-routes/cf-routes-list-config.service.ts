@@ -1,24 +1,24 @@
-import { DatePipe } from '@angular/common';
+import type { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { combineLatest, type Observable, of as observableOf } from 'rxjs';
 import { map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import {
+import type { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import type {
   CurrentUserPermissionsService,
-} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import {
+} from '@stratosui/core';
+import type { ConfirmationDialogService } from '@stratosui/core';
+import type {
   IListConfig,
   IListMultiFilterConfig,
-} from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CloudFoundryEndpointService } from '../../../../../features/cf/services/cloud-foundry-endpoint.service';
+} from '@stratosui/core';
+import type { APIResource, GeneralEntityAppState } from '@stratosui/store';
+import type { CloudFoundryEndpointService } from '../../../../../features/cf/services/cloud-foundry-endpoint.service';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfOrgSpaceDataService, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
 import { CfRoutesDataSource } from './cf-routes-data-source';
-import { ListCfRoute } from './cf-routes-data-source-base';
+import type { ListCfRoute } from './cf-routes-data-source-base';
 import { CfRoutesListConfigBase } from './cf-routes-list-config-base';
 
 
@@ -33,7 +33,7 @@ export class CfRoutesListConfigService extends CfRoutesListConfigBase implements
   getInitialised!: () => Observable<boolean>;
 
   constructor(
-    store: Store<CFAppState>,
+    store: Store<GeneralEntityAppState>,
     confirmDialog: ConfirmationDialogService,
     cfService: CloudFoundryEndpointService,
     datePipe: DatePipe,
@@ -59,12 +59,12 @@ export class CfRoutesListConfigService extends CfRoutesListConfigBase implements
   }
 
   private setupList(
-    store: Store<CFAppState>,
+    store: Store<GeneralEntityAppState>,
     cfService: CloudFoundryEndpointService,
     cfOrgSpaceService: CfOrgSpaceDataService) {
     this.dataSource = new CfRoutesDataSource(
       store,
-      this,
+      this as unknown as IListConfig<APIResource<ListCfRoute>>,
       cfService.cfGuid
     );
     this.getDataSource = () => this.dataSource;

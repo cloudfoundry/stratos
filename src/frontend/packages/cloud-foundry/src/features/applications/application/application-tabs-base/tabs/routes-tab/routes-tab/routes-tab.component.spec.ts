@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, NO_ERRORS_SCHEMA } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
@@ -29,7 +29,7 @@ describe('RoutesTabComponent', () => {
     const mockDataSource = {
       isLoadingPage$: of(false),
       pagination$: of({}),
-      filteredRows: [],
+      filteredRows: [] as unknown[],
       connect: vi.fn().mockReturnValue(of([])),
       disconnect: vi.fn(),
       destroy: vi.fn()
@@ -92,7 +92,7 @@ describe('RoutesTabComponent', () => {
     })
     .overrideComponent(RoutesTabComponent, {
       remove: {
-        providers: [{ provide: ListConfig, useFactory: {} as any, deps: [] }]
+        providers: [{ provide: ListConfig, useFactory: (() => ({})) as () => ListConfig<unknown, unknown>, deps: [] }]
       },
       add: {
         providers: [{ provide: ListConfig, useValue: mockListConfig }]

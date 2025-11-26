@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, forwardRef, ContentChildren, QueryList, AfterContentInit  } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, forwardRef, ContentChildren, type QueryList, type AfterContentInit  } from '@angular/core';
+import { type ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 
 export interface MatButtonToggleChange {
   source: CustomButtonToggleComponent | CustomButtonToggleGroupComponent;
-  value: any;
+  value: unknown;
 }
 
 @Component({
@@ -16,7 +16,7 @@ export interface MatButtonToggleChange {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomButtonToggleComponent {
-  @Input() value: any;
+  @Input() value: unknown;
   @Input() disabled = false;
   @Input() checked = false;
 
@@ -49,15 +49,19 @@ export class CustomButtonToggleGroupComponent implements ControlValueAccessor, A
   @Input() vertical = false;
   @Input() name!: string;
 
-  @Output() valueChange = new EventEmitter<any>();
+  @Output() valueChange = new EventEmitter<unknown>();
   @Output() change = new EventEmitter<MatButtonToggleChange>();
 
   @ContentChildren(CustomButtonToggleComponent) toggles: QueryList<CustomButtonToggleComponent>;
 
-  selectedValues: any[] = [];
+  selectedValues: unknown[] = [];
 
-  private _onChange = (value: any) => {};
-  private _onTouched = () => {};
+  private _onChange = (_value: unknown) => {
+    // ControlValueAccessor callback
+  };
+  private _onTouched = () => {
+    // ControlValueAccessor callback
+  };
 
   ngAfterContentInit() {
     this.toggles.forEach(toggle => {
@@ -103,7 +107,7 @@ export class CustomButtonToggleGroupComponent implements ControlValueAccessor, A
   }
 
   // ControlValueAccessor implementation
-  writeValue(value: any): void {
+  writeValue(value: unknown): void {
     if (this.multiple && Array.isArray(value)) {
       this.selectedValues = value;
     } else if (!this.multiple && value !== undefined) {
@@ -114,11 +118,11 @@ export class CustomButtonToggleGroupComponent implements ControlValueAccessor, A
     this.updateToggles();
   }
 
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: (value: unknown) => void): void {
     this._onChange = fn;
   }
 
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn: () => void): void {
     this._onTouched = fn;
   }
 

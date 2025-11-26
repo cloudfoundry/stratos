@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, Output, EventEmitter, TemplateRef, ContentChild  } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, Output, EventEmitter, type TemplateRef, ContentChild  } from '@angular/core';
 
 
 @Component({
@@ -120,7 +120,7 @@ export class CustomExpansionPanelComponent {
   @Output() opened = new EventEmitter<void>();
   @Output() closed = new EventEmitter<void>();
 
-  @ContentChild('header', { static: false }) headerTemplate!: TemplateRef<any>;
+  @ContentChild('header', { static: false }) headerTemplate!: TemplateRef<unknown>;
 
   constructor(private cdr: ChangeDetectorRef) {}
 

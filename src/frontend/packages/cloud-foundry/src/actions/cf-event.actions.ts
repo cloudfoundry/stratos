@@ -1,7 +1,7 @@
 import { HttpParams, HttpRequest } from '@angular/common/http';
 
 import { endpointEntityType } from '../../../store/src/helpers/stratos-entity-factory';
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
+import type { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { cfEventEntityType } from '../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../entity-relations/entity-relations.types';
@@ -39,7 +39,7 @@ export class GetAllCfEvents extends CFStartAction implements PaginatedAction {
 
   entity = [cfEntityFactory(cfEventEntityType)];
   entityType = cfEventEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   initialParams = {
     'order-direction': 'desc',
     'order-direction-field': GetAllCfEvents.sortField,

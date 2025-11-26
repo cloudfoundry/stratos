@@ -1,17 +1,22 @@
-import { CommonModule } from '@angular/common';
-import { CustomFormFieldComponent } from '@stratosui/core';
-import { Component, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
-import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { Component, type OnDestroy, type OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { type AbstractControl, ReactiveFormsModule, type ValidatorFn, type ValidationErrors, Validators, FormBuilder, FormControl, type FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
 
-import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { CFAppState } from '../../../../cf-app-state';
+import {
+  CustomFormFieldComponent,
+  CustomSelectComponent,
+  CustomOptionComponent,
+  AppInputDirective,
+  AppErrorComponent,
+  FocusDirective,
+  type StepOnNextFunction
+} from '@stratosui/core';
+import type { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
+import type { CFAppState } from '../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
@@ -34,6 +39,8 @@ interface CreateSpaceForm {
     CustomFormFieldComponent,
     CustomSelectComponent,
     CustomOptionComponent,
+    AppInputDirective,
+    AppErrorComponent,
     FocusDirective
   ]
 })
@@ -52,14 +59,14 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
     const nil: FormControl<null> = new FormControl<null>(null, { nonNullable: false });
 
     if (this.createSpaceForm) {
-      return (control.value === 0) ? nil as any : control;
+      return (control.value === 0) ? nil as FormControl<number | string | null> : control;
     } else {
-      return nil as any;
+      return nil as FormControl<number | string | null>;
     }
   }
 
   constructor(
-    store: Store<CFAppState>,
+    store: Store,
     activatedRoute: ActivatedRoute,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private fb: FormBuilder,
@@ -89,7 +96,7 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
   validate = () => !!this.createSpaceForm && this.createSpaceForm.valid;
 
   spaceNameTakenValidator = (): ValidatorFn => {
-    return (formField: AbstractControl): { [key: string]: any, } =>
+    return (formField: AbstractControl): ValidationErrors | null =>
       !this.validateNameTaken(formField.value) ? { spaceNameTaken: { value: formField.value } } : null;
   };
 
@@ -100,7 +107,7 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
       createSpace: {
         name: this.spaceName.value,
         organization_guid: this.orgGuid,
-        space_quota_definition_guid: quotaValue ? String(quotaValue) : undefined as any
+        space_quota_definition_guid: quotaValue ? String(quotaValue) : undefined
       },
       orgGuid: this.orgGuid
     }).pipe(

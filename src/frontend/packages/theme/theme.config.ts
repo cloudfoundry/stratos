@@ -227,7 +227,7 @@ export class ThemeService {
         const themeConfig = await response.json();
         this.setTheme(themeConfig);
       }
-    } catch (error) {
+    } catch (_error) {
       console.warn('Could not load theme configuration, using default theme');
     }
   }

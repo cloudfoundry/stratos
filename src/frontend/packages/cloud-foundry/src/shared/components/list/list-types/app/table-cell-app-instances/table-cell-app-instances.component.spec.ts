@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
@@ -7,8 +7,8 @@ import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-s
 import { RunningInstancesComponent } from '../../../../running-instances/running-instances.component';
 import { TableCellAppInstancesComponent } from "./table-cell-app-instances.component";
 describe('TableCellAppInstancesComponent', () => {
-  let component: TableCellAppInstancesComponent<any>;
-  let fixture: ComponentFixture<TableCellAppInstancesComponent<any>>;
+  let component: TableCellAppInstancesComponent<unknown>;
+  let fixture: ComponentFixture<TableCellAppInstancesComponent<unknown>>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

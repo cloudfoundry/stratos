@@ -1,16 +1,17 @@
-import { DatePipe } from '@angular/common';
+import type { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import type { GeneralEntityAppState } from '@stratosui/store';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import {
+import type { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import type {
   CurrentUserPermissionsService,
-} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { IServiceInstance } from '../../../../../cf-api-svc.types';
-import { CloudFoundrySpaceService } from '../../../../../features/cf/services/cloud-foundry-space.service';
-import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
+} from '@stratosui/core';
+import type { IListConfig } from '@stratosui/core';
+import type { APIResource } from '../../../../../../../store/src/types/api.types';
+import type { IServiceInstance } from '../../../../../cf-api-svc.types';
+import type { CloudFoundrySpaceService } from '../../../../../features/cf/services/cloud-foundry-space.service';
+import type { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import { CfServiceInstancesListConfigBase } from '../cf-services/cf-service-instances-list-config.base';
 import { CfSpacesServiceInstancesDataSource } from './cf-spaces-service-instances-data-source';
 
@@ -27,7 +28,7 @@ export class CfSpacesServiceInstancesListConfigService extends CfServiceInstance
   implements IListConfig<APIResource<IServiceInstance>>  {
 
   constructor(
-    store: Store<CFAppState>,
+    store: Store<GeneralEntityAppState>,
     cfSpaceService: CloudFoundrySpaceService,
     datePipe: DatePipe,
     currentUserPermissionsService: CurrentUserPermissionsService,
@@ -39,12 +40,12 @@ export class CfSpacesServiceInstancesListConfigService extends CfServiceInstance
       serviceActionHelperService,
       `/cloud-foundry/${cfSpaceService.cfGuid}/organizations/${cfSpaceService.orgGuid}/spaces/${cfSpaceService.spaceGuid}/service-instances`
     );
-    this.dataSource = new CfSpacesServiceInstancesDataSource(cfSpaceService.cfGuid, cfSpaceService.spaceGuid, this.store, this);
+    this.dataSource = new CfSpacesServiceInstancesDataSource(cfSpaceService.cfGuid, cfSpaceService.spaceGuid, store, this);
     this.serviceInstanceColumns.find(column => column.columnId === 'attachedApps').cellConfig = {
       breadcrumbs: 'space-services'
     };
   }
 
-  getDataSource = () => this.dataSource;
+  getDataSource = () => this.dataSource as any;
 
 }

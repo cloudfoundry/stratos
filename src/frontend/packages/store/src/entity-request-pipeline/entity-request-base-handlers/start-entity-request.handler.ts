@@ -1,5 +1,5 @@
 import { StartRequestAction } from '../../types/request.types';
-import { StartEntityRequestHandler } from '../entity-request-pipeline.types';
+import type { StartEntityRequestHandler } from '../entity-request-pipeline.types';
 
 export const startEntityHandler: StartEntityRequestHandler = (
   actionDispatcher,

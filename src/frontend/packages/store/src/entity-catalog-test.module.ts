@@ -2,8 +2,8 @@ import { Inject, NgModule } from '@angular/core';
 import { ReducerManager, Store } from '@ngrx/store';
 
 import { InitCatalogEntitiesAction } from './entity-catalog.actions';
-import { entityCatalog, TestEntityCatalog } from './entity-catalog/entity-catalog';
-import { StratosBaseCatalogEntity } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { entityCatalog, type TestEntityCatalog } from './entity-catalog/entity-catalog';
+import type { StratosBaseCatalogEntity } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { requestDataReducerFactory } from './reducers/api-request-data-reducer/request-data-reducer.factory';
 import { chainApiReducers, requestActions } from './reducers/api-request-reducers.generator.helpers';
 import { ENTITY_CATALOG_TOKEN } from './tokens/store-injection.tokens';
@@ -20,7 +20,7 @@ export const TEST_CATALOGUE_ENTITIES = '__TEST_CATALOGUE_ENTITIES__';
 })
 export class EntityCatalogTestModule {
   constructor(
-    store: Store<any>,
+    store: Store<unknown>,
     reducerManager: ReducerManager,
     @Inject(TEST_CATALOGUE_ENTITIES) entityGroups: StratosBaseCatalogEntity[],
   ) {
@@ -49,7 +49,7 @@ export class EntityCatalogTestModuleManualStore {
 }
 
 function baseEntityCatalogSetup(
-  store: Store<any>,
+  store: Store<unknown> | null,
   reducerManager: ReducerManager,
   entityGroups: StratosBaseCatalogEntity[]
 ) {
@@ -57,7 +57,9 @@ function baseEntityCatalogSetup(
   testEntityCatalog.clear();
 
   const entities = ([] as StratosBaseCatalogEntity[]).concat(...entityGroups);
-  entities.forEach(entity => entityCatalog.register(entity));
+  entities.forEach(entity => {
+    entityCatalog.register(entity);
+  });
 
   const dataReducer = requestDataReducerFactory(requestActions);
   const extraReducers = entityCatalog.getAllEntityRequestDataReducers();

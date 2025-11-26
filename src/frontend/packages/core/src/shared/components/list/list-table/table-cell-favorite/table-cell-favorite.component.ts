@@ -1,10 +1,11 @@
 
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@angular/core';
-import { IFavoriteMetadata, UserFavorite } from '@stratosui/store';
+import type {UserFavorite} from '@stratosui/store';
+import type {IFavoriteMetadata} from '@stratosui/store';
 
 import { EntityFavoriteStarComponent } from '../../../../../core/entity-favorite-star/entity-favorite-star.component';
 import { TableCellCustom } from '../../list.types';
-import { ITableColumn } from '../table.types';
+import type { ITableColumn } from '../table.types';
 
 /**
  * Configuration required by the {@link TableCellFavoriteComponent}.

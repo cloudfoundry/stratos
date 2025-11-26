@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit, OnChanges, SimpleChanges  } from '@angular/core';
+import { Component, Input, type OnInit, type OnChanges, type SimpleChanges  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -184,7 +184,7 @@ export class ProgressBarComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['color']) {
+    if (changes.color) {
       this.updateProgressBarClass();
     }
   }

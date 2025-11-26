@@ -1,28 +1,28 @@
-import { DatePipe } from '@angular/common';
+import type { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf } from 'rxjs';
+import { type Observable, of as observableOf } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
 import {
   CurrentUserPermissionsService,
   defaultPaginationPageSizeOptionsTable,
-  IGlobalListAction,
-  IListAction,
-  IListConfig,
-  IListMultiFilterConfig,
-  IMultiListAction,
-  ITableColumn,
-  ITableText,
-  ListDataSource,
+  type IGlobalListAction,
+  type IListAction,
+  type IListConfig,
+  type IListMultiFilterConfig,
+  type IMultiListAction,
+  type ITableColumn,
+  type ITableText,
+  type ListDataSource,
   ListViewTypes
 } from '@stratosui/core';
-import { APIResource, ListView } from '@stratosui/store';
-import { CFAppState } from '../../../../../cf-app-state';
-import { IServiceInstance } from '../../../../../cf-api-svc.types';
+import type { APIResource, GeneralEntityAppState, ListView } from '@stratosui/store';
+import type { CFAppState } from '../../../../../cf-app-state';
+import type { IServiceInstance } from '../../../../../cf-api-svc.types';
 import { isUserProvidedServiceInstance } from '../../../../../features/cf/cf.helpers';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
-import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
+import type { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import { CANCEL_ORG_ID_PARAM, CANCEL_SPACE_ID_PARAM, CSI_CANCEL_URL } from '../../../add-service-instance/csi-mode.service';
 import {
   TableCellAppCfOrgSpaceHeaderComponent,
@@ -129,7 +129,7 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
     createVisible: (row$: Observable<APIResource<IServiceInstance>>) =>
       row$.pipe(
         switchMap(
-          row => row && row.entity && row.entity.cfGuid && row.entity.space_guid ?
+          row => row?.entity?.cfGuid && row.entity.space_guid ?
             this.can(this.canDeleteCache, CfCurrentUserPermissions.SERVICE_INSTANCE_DELETE, row.entity.cfGuid, row.entity.space_guid) :
             observableOf(false)
         )
@@ -141,12 +141,12 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
     label: 'Unbind',
     description: 'Unbind Service Instance',
     createEnabled: (row$: Observable<APIResource<IServiceInstance>>) => row$.pipe(
-      map(row => !!(row && row.entity && row.entity.service_bindings && row.entity.service_bindings.length !== 0))
+      map(row => !!(row?.entity?.service_bindings && row.entity.service_bindings.length !== 0))
     ),
     createVisible: (row$: Observable<APIResource<IServiceInstance>>) =>
       row$.pipe(
         switchMap(
-          row => row && row.entity && row.entity.cfGuid && row.entity.space_guid ?
+          row => row?.entity?.cfGuid && row.entity.space_guid ?
             this.can(this.canDetachCache, CfCurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid) :
             observableOf(false)
         )
@@ -169,7 +169,7 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
     createVisible: (row$: Observable<APIResource<IServiceInstance>>) =>
       row$.pipe(
         switchMap(
-          row => row && row.entity && row.entity.cfGuid && row.entity.space_guid ?
+          row => row?.entity?.cfGuid && row.entity.space_guid ?
             this.can(this.canDetachCache, CfCurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid) :
             observableOf(false)
         )
@@ -186,7 +186,7 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
   }
 
   constructor(
-    protected store: Store<CFAppState>,
+    protected store: Store<GeneralEntityAppState>,
     protected datePipe: DatePipe,
     protected currentUserPermissionsService: CurrentUserPermissionsService,
     private serviceActionHelperService: ServiceActionHelperService,
@@ -215,6 +215,6 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
   getSingleActions = (): IListAction<APIResource<IServiceInstance>>[] => [this.listActionEdit, this.listActionDetach, this.listActionDelete];
   getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
   getColumns = (): ITableColumn<APIResource<IServiceInstance>>[] => this.serviceInstanceColumns;
-  getDataSource = (): ListDataSource<APIResource> | null => null;
+  getDataSource = (): any => null as any;
 
 }

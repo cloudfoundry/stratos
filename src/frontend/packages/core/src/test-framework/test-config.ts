@@ -1,4 +1,4 @@
-import { Provider, EnvironmentProviders } from '@angular/core';
+import type { Provider, EnvironmentProviders } from '@angular/core';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';

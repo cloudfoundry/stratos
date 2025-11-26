@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, Input, Renderer2, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
+import { type AfterViewInit, Component, type ElementRef, Input, Renderer2, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CustomIconComponent } from '../custom-material/custom-material.component';
@@ -46,7 +46,7 @@ export class NoContentMessageComponent implements AfterViewInit {
         const elem = document.getElementById(this.toolbarAlign);
         if (elem) {
           const right = document.body.clientWidth - elem.getBoundingClientRect().right - 3;
-          this.renderer.setStyle(this.toolBarLinkElement.nativeElement, 'right', right + 'px');
+          this.renderer.setStyle(this.toolBarLinkElement.nativeElement, 'right', `${right}px`);
           this.renderer.addClass(this.toolBarLinkElement.nativeElement, 'app-no-content-container__link--show');
         }
       }

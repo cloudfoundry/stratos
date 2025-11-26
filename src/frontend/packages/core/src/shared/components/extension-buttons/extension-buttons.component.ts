@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, Input, type OnInit } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 import { Store } from '@ngrx/store';
@@ -9,8 +9,8 @@ import { of } from 'rxjs';
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 import {
   getActionsFromExtensions,
-  StratosActionMetadata,
-  StratosActionType,
+  type StratosActionMetadata,
+  type StratosActionType,
 } from '../../../core/extension/extension-service';
 
 @Component({

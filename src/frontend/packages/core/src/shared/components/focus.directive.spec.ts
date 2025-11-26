@@ -1,7 +1,7 @@
 import { FocusDirective } from './focus.directive';
-import { TestBed, ComponentFixture } from '@angular/core/testing';
+import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { Component, DebugElement, provideZonelessChangeDetection } from '@angular/core';
+import { Component, type DebugElement, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { By } from '@angular/platform-browser';

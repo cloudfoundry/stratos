@@ -1,8 +1,8 @@
 import { inject } from '@angular/core';
-import { CanActivateFn } from '@angular/router';
+import type { CanActivateFn } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AppState, RouterNav } from '@stratosui/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { CurrentUserPermissionsService } from './permissions/current-user-permissions.service';

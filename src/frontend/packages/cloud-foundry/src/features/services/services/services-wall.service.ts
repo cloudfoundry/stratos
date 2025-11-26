@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { filter, map, publishReplay, refCount } from 'rxjs/operators';
 
-import { endpointEntityType, APIResource } from '@stratosui/store';
-import { IService } from '../../../cf-api-svc.types';
+import { endpointEntityType, type APIResource } from '@stratosui/store';
+import type { IService } from '../../../cf-api-svc.types';
 import { serviceEntityType } from '../../../cf-entity-types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { createEntityRelationPaginationKey } from '../../../entity-relations/entity-relations.types';

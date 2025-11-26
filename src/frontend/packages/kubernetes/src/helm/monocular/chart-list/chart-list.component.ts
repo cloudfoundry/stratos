@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
 
 
-import { Chart } from '../shared/models/chart';
+import type { Chart } from '../shared/models/chart';
 import { ChartItemComponent } from '../chart-item/chart-item.component';
 
 @Component({

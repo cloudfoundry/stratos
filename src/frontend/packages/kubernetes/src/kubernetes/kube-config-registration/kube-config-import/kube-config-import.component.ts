@@ -1,34 +1,34 @@
-import {Component, ComponentFactoryResolver, Injector, OnDestroy, signal, WritableSignal, inject, ChangeDetectionStrategy } from '@angular/core';
+import {Component, ComponentFactoryResolver, Injector, type OnDestroy, signal, type WritableSignal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 
 import { UntypedFormBuilder } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf, Subscription } from 'rxjs';
+import { type Observable, of as observableOf, type Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, pairwise, startWith, withLatestFrom } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
 import {
-  ConnectEndpointConfig,
-  ConnectEndpointData,
+  type ConnectEndpointConfig,
+  type ConnectEndpointData,
   ConnectEndpointService,
 } from '../../../../../core/src/features/endpoints/connect.service';
-import {
+import type {
   IActionMonitorComponentState,
 } from '../../../../../core/src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
-import {
+import type {
   ITableListDataSource,
   RowState,
 } from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { TableComponent } from '../../../../../core/src/shared/components/list/list-table/table.component';
-import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
-import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
-import { AppState } from '../../../../../store/src/public-api';
-import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
+import type { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
+import type { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
+import type { AppState } from '../../../../../store/src/public-api';
+import type { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes-entity-factory';
 import { KubeConfigAuthHelper } from '../kube-config-auth.helper';
-import { KubeConfigFileCluster, KubeConfigImportAction, KubeImportState } from '../kube-config.types';
+import type { KubeConfigFileCluster, KubeConfigImportAction, KubeImportState } from '../kube-config.types';
 import {
   KubeConfigTableImportStatusComponent,
 } from './kube-config-table-import-status/kube-config-table-import-status.component';
@@ -88,7 +88,7 @@ export class KubeConfigImportComponent implements OnDestroy {
     connect: () => this.data$,
     disconnect: () => { },
     // Ensure unique per entry to step (in case user went back step and updated)
-    trackBy: (index, item) => item.cluster.name + this.iteration,
+    trackBy: (_index, item) => item.cluster.name + this.iteration,
     isTableLoading$: this.data$.pipe(map(data => !(data && data.length > 0))),
     getRowState: (row: KubeConfigImportAction): Observable<RowState> => {
       return row ? row.state.asObservable() : observableOf({});
@@ -285,7 +285,7 @@ export class KubeConfigImportComponent implements OnDestroy {
           cluster: item,
           // Use signal wrapper for nested dynamic state - maintains .next() and .asObservable() API
           state: createSignalWrapper<RowState>({}),
-          actionState: createSignalWrapper<any>({}),
+          actionState: createSignalWrapper<IActionMonitorComponentState>({ busy: false, error: false, completed: false, message: '' }),
         };
         // Only include if the endpoint does not already exist
         if (!item._guid) {
@@ -304,7 +304,7 @@ export class KubeConfigImportComponent implements OnDestroy {
             // Use signal wrapper for nested dynamic state - maintains .next() and .asObservable() API
             state: createSignalWrapper<RowState>({}),
             depends: register,
-            actionState: createSignalWrapper<any>({}),
+            actionState: createSignalWrapper<IActionMonitorComponentState>({ busy: false, error: false, completed: false, message: '' }),
           });
         }
       }

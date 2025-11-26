@@ -1,7 +1,7 @@
 
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom } from '@stratosui/core';
 
 @Component({
   selector: 'app-table-cell-event-type',

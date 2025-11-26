@@ -1,47 +1,109 @@
-import { Action, Store } from '@ngrx/store';
+import type { Store } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 import { denormalize } from 'normalizr';
-import { Observable, of as observableOf } from 'rxjs';
+import { type Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, mergeMap, pairwise, skipWhile, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import { pathGet } from '@stratosui/core';
 import { environment } from '@stratosui/core';
 import {
   SetInitialParams,
-  APIResponse,
-  GeneralEntityAppState,
+  type APIResponse,
+  type GeneralEntityAppState,
   entityCatalog,
   isEntityBlocked,
-  EntitySchema,
+  type EntitySchema,
   pick,
-  RequestInfoState,
+  type RequestInfoState,
   getAPIRequestDataState,
   selectEntity,
   selectRequestInfo,
   selectPaginationState,
-  APIResource,
-  NormalizedResponse,
+  type APIResource,
+  type NormalizedResponse,
   isPaginatedAction,
-  PaginatedAction,
-  PaginationEntityState,
-  EntityRequestAction,
+  type PaginatedAction,
+  type PaginationEntityState,
+  type EntityRequestAction,
   WrapperRequestActionSuccess,
 } from '@stratosui/store';
-import { FetchRelationAction, FetchRelationPaginatedAction, FetchRelationSingleAction } from '../actions/relation.actions';
+import { type FetchRelationAction, FetchRelationPaginatedAction, FetchRelationSingleAction } from '../actions/relation.actions';
 import { EntityTreeRelation } from './entity-relation-tree';
 import { validationPostProcessor } from './entity-relations-post-processor';
 import { fetchEntityTree } from './entity-relations.tree';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
-  EntityInlineChildAction,
-  EntityInlineParentAction,
+  type EntityInlineChildAction,
+  type EntityInlineParentAction,
   isEntityInlineChildAction,
   ValidateEntityRelationsConfig,
-  ValidationResult,
+  type ValidationResult,
 } from './entity-relations.types';
 
 interface ValidateResultFetchingState {
   fetching: boolean;
+}
+
+/**
+ * Type guard to check if a value is an array
+ */
+function isEntityArray(val: unknown): val is unknown[] {
+  return Array.isArray(val);
+}
+
+/**
+ * Type guard to check if an object has metadata with guid
+ */
+function hasMetadata(obj: unknown): obj is { metadata: { guid: string } } {
+  return obj !== null && typeof obj === 'object' && 'metadata' in obj &&
+    typeof (obj as { metadata: unknown }).metadata === 'object' &&
+    (obj as { metadata: unknown }).metadata !== null &&
+    'guid' in (obj as { metadata: { guid: unknown } }).metadata;
+}
+
+/**
+ * Type guard to check if an object has cfGuid property
+ */
+function hasCfGuid(obj: unknown): obj is { cfGuid: string } {
+  return obj !== null && typeof obj === 'object' && 'cfGuid' in obj;
+}
+
+/**
+ * Type guard to check if an object has entity property
+ */
+function hasEntity(obj: unknown): obj is { entity: unknown } {
+  return obj !== null && typeof obj === 'object' && 'entity' in obj;
+}
+
+/**
+ * Type guard to check if a value is an APIResource
+ */
+function isAPIResource<T = unknown>(entity: unknown): entity is APIResource<T> {
+  return entity !== null &&
+         typeof entity === 'object' &&
+         'entity' in entity &&
+         'metadata' in entity;
+}
+
+/**
+ * Safely retrieve an entity from the entities dictionary
+ */
+function getEntityOfType<T = unknown>(
+  entities: unknown,
+  entityKey: string,
+  guid: string
+): T | null {
+  if (!entities || typeof entities !== 'object') {
+    return null;
+  }
+  const entitiesRecord = entities as Record<string, unknown>;
+  const entitiesOfType = entitiesRecord[entityKey];
+  if (!entitiesOfType || typeof entitiesOfType !== 'object') {
+    return null;
+  }
+  const entitiesOfTypeRecord = entitiesOfType as Record<string, unknown>;
+  return (entitiesOfTypeRecord[guid] as T) ?? null;
 }
 
 /**
@@ -72,7 +134,7 @@ class ValidateLoopConfig extends ValidateEntityRelationsConfig {
 class HandleRelationsConfig extends ValidateLoopConfig {
   parentEntity!: APIResource;
   childRelation!: EntityTreeRelation;
-  childEntities!: object | any[];
+  childEntities!: object | unknown[];
   childEntitiesUrl!: string;
 }
 
@@ -96,7 +158,12 @@ function createSingleAction(config: HandleRelationsConfig) {
 
 function createPaginationAction(config: HandleRelationsConfig) {
   const { cfGuid, parentRelation, parentEntity, childRelation, childEntitiesUrl, includeRelations, populateMissing } = config;
-  const parentGuid = parentEntity.metadata ? parentEntity.metadata.guid : parentEntity.entity.guid;
+  let parentGuid: string;
+  if (isAPIResource(parentEntity)) {
+    parentGuid = parentEntity.metadata ? parentEntity.metadata.guid : (hasEntity(parentEntity) && hasMetadata(parentEntity.entity) ? parentEntity.entity.metadata.guid : '');
+  } else {
+    throw new Error('Invalid parent entity: not an APIResource');
+  }
   return new FetchRelationPaginatedAction(
     cfGuid,
     parentGuid,
@@ -109,7 +176,7 @@ function createPaginationAction(config: HandleRelationsConfig) {
   );
 }
 
-function createEntityWatcher(store: Store<GeneralEntityAppState>, paramAction: EntityRequestAction, guid: string): Observable<ValidateResultFetchingState> {
+function createEntityWatcher(store: Store, paramAction: EntityRequestAction, guid: string): Observable<ValidateResultFetchingState> {
   return store.select(selectRequestInfo(entityCatalog.getEntityKey(paramAction), guid)).pipe(
     map((requestInfo: RequestInfoState) => {
       return { fetching: requestInfo ? requestInfo.fetching : true };
@@ -122,7 +189,7 @@ function createEntityWatcher(store: Store<GeneralEntityAppState>, paramAction: E
  */
 function createActionsForExistingEntities(config: HandleRelationsConfig): Action {
   const { allEntities, newEntities, childEntities, childRelation, action } = config;
-  const childEntitiesAsArray = childEntities as Array<any>;
+  const childEntitiesAsArray = childEntities as Array<unknown>;
 
   const paramAction = action || createAction(config);
   // We've got the value already, ensure we create a pagination section for them
@@ -147,11 +214,11 @@ function createActionsForExistingEntities(config: HandleRelationsConfig): Action
   );
 }
 
-function createValidationPaginationWatcher(store: Store<GeneralEntityAppState>, paramPaginationAction: PaginatedAction):
+function createValidationPaginationWatcher(store: Store, paramPaginationAction: PaginatedAction):
   Observable<ValidateResultFetchingState> {
   return store.select(selectPaginationState(entityCatalog.getEntityKey(paramPaginationAction), paramPaginationAction.paginationKey)).pipe(
     map((paginationState: PaginationEntityState) => {
-      const pageRequest = paginationState && paginationState.pageRequests && paginationState.pageRequests[paginationState.currentPage];
+      const pageRequest = paginationState?.pageRequests?.[paginationState.currentPage];
       return { fetching: pageRequest ? pageRequest.busy : true };
     })
   );
@@ -244,7 +311,7 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
       if (childEntities) {
         childEntities = childRelation.isArray ? childEntities : [childEntities];
       } else {
-        let childEntitiesAsArray;
+        let childEntitiesAsArray: string[] | null;
 
         if (childRelation.isArray) {
           const paginationState: PaginationEntityState = pathGet(
@@ -252,42 +319,52 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
             allPagination) as PaginationEntityState;
           childEntitiesAsArray = paginationState ? (paginationState.ids as Record<number, string[]>)[paginationState.currentPage] : null;
         } else {
-          const guid = pathGet(childRelation.path + '_guid', entity);
-          childEntitiesAsArray = [guid];
+          const guid = pathGet(`${childRelation.path}_guid`, entity);
+          childEntitiesAsArray = guid ? [guid as string] : null;
         }
 
         if (childEntitiesAsArray) {
           const guids = childEntitiesAsGuids(childEntitiesAsArray);
 
-          childEntities = [];
-          const allEntitiesOfType = allEntities ? allEntities[childRelation.entityKey] || {} : {};
-          const newEntitiesOfType = newEntities ? newEntities[childRelation.entityKey] || {} : {};
+          let tempChildEntities: unknown[] = [];
+          const allEntitiesOfType = allEntities ? (allEntities as Record<string, Record<string, unknown>>)[childRelation.entityKey] || {} : {};
+          const newEntitiesOfType = newEntities ? (newEntities as Record<string, Record<string, unknown>>)[childRelation.entityKey] || {} : {};
 
           for (const guid of guids) {
-            const foundEntity = newEntitiesOfType[guid] || allEntitiesOfType[guid];
+            const foundEntity = getEntityOfType(newEntities, childRelation.entityKey, guid) ||
+                               getEntityOfType(allEntities, childRelation.entityKey, guid);
             if (foundEntity) {
-              childEntities.push(foundEntity);
+              tempChildEntities.push(foundEntity);
             } else {
-              childEntities = null;
+              tempChildEntities = null;
               break;
             }
           }
+          childEntities = tempChildEntities;
         }
+
+        // Safely get cfGuid from entity
+        const entityCfGuid = isAPIResource(entity) && hasEntity(entity) && hasCfGuid(entity.entity) ? entity.entity.cfGuid : undefined;
+        const childEntitiesUrlValue = pathGet(`${childRelation.path}_url`, entity);
+
         results = [].concat(results, handleRelation({
           ...config,
-          cfGuid: cfGuid || entity.entity.cfGuid,
+          cfGuid: cfGuid || entityCfGuid,
           parentEntity: entity,
           childRelation,
-          childEntities,
-          childEntitiesUrl: pathGet(childRelation.path + '_url', entity),
+          childEntities: childEntities as (object | unknown[]),
+          childEntitiesUrl: (childEntitiesUrlValue as string) || '',
         }));
       }
 
       if (childEntities && childRelation.childRelations.length) {
+        // Safely get cfGuid from entity
+        const entityCfGuid = isAPIResource(entity) && hasEntity(entity) && hasCfGuid(entity.entity) ? entity.entity.cfGuid : undefined;
+
         results = [].concat(results, validationLoop({
           ...config,
-          cfGuid: cfGuid || entity.entity.cfGuid,
-          entities: childEntities,
+          cfGuid: cfGuid || entityCfGuid,
+          entities: (Array.isArray(childEntities) ? childEntities : []) as APIResource[],
           parentRelation: childRelation
         }));
       }
@@ -299,7 +376,7 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
 }
 
 function associateChildWithParent(
-  store: Store<GeneralEntityAppState>,
+  store: Store,
   action: EntityInlineChildAction,
   apiResponse: APIResponse): Observable<boolean> {
   let childValue: Observable<string | string[]>;
@@ -332,7 +409,10 @@ function associateChildWithParent(
       );
       if (apiResponse) {
         // Part of an api call. Assign to apiResponse which is added to store later
-        apiResponse.response.entities[catalogEntity.entityKey][action.parentGuid].entity[action.child.paramName] = value;
+        const parentEntityInResponse = apiResponse.response.entities[catalogEntity.entityKey][action.parentGuid];
+        if (hasEntity(parentEntityInResponse) && typeof parentEntityInResponse.entity === 'object' && parentEntityInResponse.entity !== null) {
+          (parentEntityInResponse.entity as Record<string, unknown>)[action.child.paramName] = value;
+        }
       } else {
         // Not part of an api call. We already have the entity in the store, so fire off event to link child with parent
         const response = {
@@ -358,7 +438,7 @@ function associateChildWithParent(
         if (!environment.production) {
           // Add for easier debugging
           /* tslint:disable-next-line:no-string-literal  */
-          (parentAction as any)['childEntityKey'] = action.child.entityKey;
+          (parentAction as unknown as Record<string, unknown>).childEntityKey = action.child.entityKey;
         }
 
 
@@ -371,12 +451,12 @@ function associateChildWithParent(
 }
 
 function handleValidationLoopResults(
-  store: Store<GeneralEntityAppState>,
+  store: Store,
   results: ValidateEntityResult[],
   apiResponse: APIResponse,
   action: EntityRequestAction
 ): ValidationResult {
-  const paginationFinished = new Array<Promise<boolean>>();
+  const paginationFinished: Promise<boolean>[] = [];
   results.forEach(request => {
     // Fetch any missing data
     if (!request.abortDispatch) {
@@ -484,8 +564,11 @@ export function listEntityRelations(action: EntityInlineParentAction, fromCache 
   };
 }
 
-function childEntitiesAsGuids(childEntitiesAsArray: any[]): string[] {
-  return childEntitiesAsArray ? childEntitiesAsArray.map(entity => pathGet('metadata.guid', entity) || entity) : null;
+function childEntitiesAsGuids(childEntitiesAsArray: unknown[]): string[] {
+  return childEntitiesAsArray ? childEntitiesAsArray.map(entity => {
+    const guid = pathGet('metadata.guid', entity);
+    return (guid || entity) as string;
+  }) : [];
 }
 
 /**
@@ -493,7 +576,7 @@ function childEntitiesAsGuids(childEntitiesAsArray: any[]): string[] {
  * create an action that can be used to populate the pagination section with the list from the parent
  * @export
  */
-export function populatePaginationFromParent(store: Store<GeneralEntityAppState>, action: PaginatedAction): Observable<Action> {
+export function populatePaginationFromParent(store: Store, action: PaginatedAction): Observable<Action> {
   const eicAction = isEntityInlineChildAction(action);
   if (!eicAction || !action.flattenPagination) {
     return observableOf(action);
@@ -538,30 +621,37 @@ export function populatePaginationFromParent(store: Store<GeneralEntityAppState>
     first(undefined, null),
     // At this point we should know that the parent entity is ready to be checked
     withLatestFrom(
-      store.select(selectEntity<any>(parentEntityKey, parentGuid)),
-      store.select(getAPIRequestDataState),
+      store.select(selectEntity<unknown>(parentEntityKey, parentGuid)),
+      store.select(getAPIRequestDataState) as Observable<unknown>,
     ),
-    map(([entityInfo, entity, allEntities]: [RequestInfoState, any, GeneralEntityAppState]) => {
-      if (!entity) {
+    map(([_entityInfo, entity, allEntitiesState]: [RequestInfoState, unknown, unknown]) => {
+      if (!entity || !isAPIResource(entity)) {
         return action; // Return action instead of undefined
       }
+      // Convert GeneralEntityAppState to the format expected by the config
+      const allEntities = allEntitiesState as unknown as Record<string, Record<string, unknown>>;
+
       // Find the property name (for instance a list of routes in a parent space would have param name `routes`)
       /* tslint:disable-next-line:no-string-literal  */
-      const entities = (parentEntitySchema.schema as Record<string, any>)['entity'] || {};
+      const entities = (parentEntitySchema.schema as Record<string, unknown>).entity || {};
       const params = Object.keys(entities);
       for (const paramName of params) {
-        const entitySchema: EntitySchema | [EntitySchema] = entities[paramName];
+        const entitySchema: EntitySchema | [EntitySchema] = (entities as Record<string, unknown>)[paramName] as EntitySchema | [EntitySchema];
         /* tslint:disable-next-line:no-string-literal  */
         const arraySafeEntitySchema: EntitySchema = Array.isArray(entitySchema) ? entitySchema[0] : entitySchema;
         if (arraySafeEntitySchema.entityType === action.entityType) {
           // Found it! Does the entity contain a value for the property name?
-          if (!entity.entity[paramName]) {
+          const entityData = entity.entity as Record<string, unknown>;
+          if (!entityData[paramName]) {
             return action; // Return action instead of undefined
           }
 
           const catalogEntity = entityCatalog.getEntity(eicAction);
           const entityKey = catalogEntity.entityKey;
-          const normedEntities = entity.entity[paramName].reduce((newNormedEntities: Record<string, Record<string, any>>, guidOrEntity: any) => {
+          const paramValue = entityData[paramName];
+          const paramValueArray = Array.isArray(paramValue) ? paramValue : [paramValue];
+
+          const normedEntities = paramValueArray.reduce((newNormedEntities: Record<string, Record<string, unknown>>, guidOrEntity: unknown) => {
             const guid = typeof (guidOrEntity) === 'string' ? guidOrEntity : catalogEntity.getGuidFromEntity(guidOrEntity);
             newNormedEntities[entityKey][guid] = guidOrEntity;
             return newNormedEntities;
@@ -575,8 +665,8 @@ export function populatePaginationFromParent(store: Store<GeneralEntityAppState>
             newEntities: normedEntities,
             apiResponse: null,
             parentEntities: null,
-            entities: entity.entity[paramName],
-            childEntities: entity.entity[paramName],
+            entities: paramValueArray as APIResource[],
+            childEntities: paramValueArray,
             cfGuid: action.endpointGuid,
             parentRelation: new EntityTreeRelation(parentEntitySchema, false, null, null, []),
             includeRelations: [createEntityRelationKey(parentEntitySchema.entityType, action.entityType)],

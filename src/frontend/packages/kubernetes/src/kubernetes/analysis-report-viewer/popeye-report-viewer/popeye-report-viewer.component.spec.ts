@@ -1,11 +1,11 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
 import { KubernetesAnalysisService } from '../../services/kubernetes.analysis.service';
-import { AnalysisReport } from '../../store/kube.types';
+import type { AnalysisReport } from '../../store/kube.types';
 import { PopeyeReportViewerComponent } from './popeye-report-viewer.component';
 
 describe('PopeyeReportViewerComponent', () => {

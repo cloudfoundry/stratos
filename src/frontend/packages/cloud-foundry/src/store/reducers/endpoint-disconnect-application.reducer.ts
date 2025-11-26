@@ -1,40 +1,55 @@
+import type { Action } from '@ngrx/store';
 import {
   DISCONNECT_ENDPOINTS_SUCCESS,
-  DisconnectEndpoint,
+  type DisconnectEndpoint,
   UNREGISTER_ENDPOINTS_SUCCESS,
 } from '../../../../store/src/actions/endpoint.actions';
-import { IRequestEntityTypeState } from '../../../../store/src/app-state';
-import { APIResource } from '../../../../store/src/types/api.types';
-import { StratosCFEntity } from '../../cf-api.types';
+import type { IRequestEntityTypeState } from '../../../../store/src/app-state';
+import type { APIResource } from '../../../../store/src/types/api.types';
+import type { StratosCFEntity } from '../../cf-api.types';
+
+// Type guard to check if entity has cfGuid
+function hasCfGuid(entity: unknown): entity is { cfGuid: string } {
+  return entity !== null && typeof entity === 'object' && 'cfGuid' in entity;
+}
+
+// Type guard to check if entity is an APIResource
+function isAPIResource<T>(entity: unknown): entity is APIResource<T> {
+  return entity !== null && typeof entity === 'object' && 'entity' in entity && 'metadata' in entity;
+}
 
 // #3704 - These can be removed after this ticket is completed
-export function endpointDisconnectRemoveEntitiesReducer() {
-  return (state: IRequestEntityTypeState<any>, action: DisconnectEndpoint) => {
+export function endpointDisconnectRemoveEntitiesReducer<T>() {
+  return (state: IRequestEntityTypeState<T>, action: Action): IRequestEntityTypeState<T> => {
+    const disconnectAction = action as unknown as DisconnectEndpoint;
     switch (action.type) {
       case DISCONNECT_ENDPOINTS_SUCCESS:
       case UNREGISTER_ENDPOINTS_SUCCESS:
-        return deletionApplicationFromEndpoint(state, action.guid);
+        return deletionApplicationFromEndpoint<T>(state, disconnectAction.guid);
     }
     return state;
   };
 }
 
-function deletionApplicationFromEndpoint(
-  state: IRequestEntityTypeState<APIResource<StratosCFEntity> | StratosCFEntity>,
+function deletionApplicationFromEndpoint<T>(
+  state: IRequestEntityTypeState<T>,
   endpointGuid: string
-): IRequestEntityTypeState<APIResource<StratosCFEntity> | StratosCFEntity> {
-  return Object.keys(state).reduce((newEntities: IRequestEntityTypeState<APIResource<StratosCFEntity> | StratosCFEntity>, guid: string) => {
-    const entity = state[guid] as StratosCFEntity;
-    const apiEntity = state[guid] as APIResource<StratosCFEntity>;
-    if (apiEntity.entity) {
-      if (apiEntity.entity.cfGuid !== endpointGuid && apiEntity.metadata.guid) {
+): IRequestEntityTypeState<T> {
+  return Object.keys(state).reduce((newEntities: IRequestEntityTypeState<T>, guid: string) => {
+    const entity = state[guid];
+    if (isAPIResource<unknown>(entity)) {
+      const innerEntity = entity.entity;
+      if (hasCfGuid(innerEntity) && innerEntity.cfGuid !== endpointGuid && entity.metadata?.guid) {
         newEntities[guid] = entity;
       }
-    } else {
+    } else if (hasCfGuid(entity)) {
       if (entity.cfGuid !== endpointGuid) {
         newEntities[guid] = entity;
       }
+    } else {
+      // Keep entities that don't have cfGuid (shouldn't filter them out)
+      newEntities[guid] = entity;
     }
     return newEntities;
-  }, {});
+  }, {} as IRequestEntityTypeState<T>);
 }

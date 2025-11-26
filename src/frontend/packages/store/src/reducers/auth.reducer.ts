@@ -1,20 +1,24 @@
+import type { Action } from '@ngrx/store';
+
 import {
   LOGIN,
   LOGIN_FAILED,
   LOGIN_SUCCESS,
-  LoginFailed,
+  type LoginFailed,
   LOGOUT_FAILED,
   RESET_AUTH,
   SESSION_INVALID,
   SESSION_VERIFIED,
   VERIFY_SESSION,
+  type VerifiedSession,
+  type InvalidSession,
 } from '../actions/auth.actions';
-import { RouterActions, RouterNav } from '../actions/router.actions';
-import { GET_SYSTEM_INFO_SUCCESS } from '../actions/system.actions';
-import { AuthOnlyAppState } from '../app-state';
-import { SessionData } from '../types/auth.types';
-import { LogoutFailed } from './../actions/auth.actions';
-import { RouterRedirect } from './routing.reducer';
+import { RouterActions, type RouterNav } from '../actions/router.actions';
+import { GET_SYSTEM_INFO_SUCCESS, type GetSystemSuccess } from '../actions/system.actions';
+import type { AuthOnlyAppState } from '../app-state';
+import type { SessionData } from '../types/auth.types';
+import type { LogoutFailed } from './../actions/auth.actions';
+import type { RouterRedirect } from './routing.reducer';
 
 export interface AuthUser {
   guid: string;
@@ -27,7 +31,7 @@ export interface AuthState {
   loggingIn: boolean;
   user: AuthUser;
   error: boolean;
-  errorResponse: any;
+  errorResponse: string | unknown;
   sessionData: SessionData;
   verifying: boolean;
   redirect?: RouterRedirect;
@@ -44,40 +48,45 @@ const defaultState: AuthState = {
   verifying: true,  // Start as true to prevent race condition during app init
 };
 
-export function authReducer(state: AuthState = defaultState, action: any): AuthState {
+export function authReducer(state: AuthState = defaultState, action: Action): AuthState {
   switch (action.type) {
     case LOGIN:
       return { ...state, loggingIn: true, loggedIn: false, error: false };
     case LOGIN_SUCCESS:
       return { ...state, loggingIn: false, loggedIn: true, error: false, errorResponse: undefined };
-    case LOGIN_FAILED:
+    case LOGIN_FAILED: {
       const loginFailed = action as LoginFailed;
       return { ...state, error: true, errorResponse: loginFailed.error, loggingIn: false, loggedIn: false };
-    case LOGOUT_FAILED:
+    }
+    case LOGOUT_FAILED: {
       const logoutFailed = action as LogoutFailed;
       console.error(logoutFailed.error);
       return { ...state, loggingIn: false, loggedIn: true, error: true, errorResponse: logoutFailed.error };
+    }
     case VERIFY_SESSION:
       return { ...state, error: false, errorResponse: undefined, verifying: true };
-    case SESSION_VERIFIED:
+    case SESSION_VERIFIED: {
+      const verifiedSession = action as VerifiedSession;
       return {
         ...state,
         error: false,
         errorResponse: '',
         sessionData: {
-          ...action.sessionData,
+          ...verifiedSession.sessionData,
           valid: true,
           uaaError: false,
           upgradeInProgress: false,
         },
         verifying: false
       };
-    case SESSION_INVALID:
+    }
+    case SESSION_INVALID: {
+      const invalidSession = action as InvalidSession;
       return {
         ...state,
         sessionData: {
-          valid: false, uaaError: action.uaaError, upgradeInProgress: action.upgradeInProgress,
-          domainMismatch: action.domainMismatch, ssoOptions: action.ssoOptions, sessionExpiresOn: null,
+          valid: false, uaaError: invalidSession.uaaError, upgradeInProgress: invalidSession.upgradeInProgress,
+          domainMismatch: invalidSession.domainMismatch, ssoOptions: invalidSession.ssoOptions, sessionExpiresOn: null,
           plugins: {
             demo: false
           },
@@ -85,24 +94,28 @@ export function authReducer(state: AuthState = defaultState, action: any): AuthS
         },
         verifying: false
       };
-    case RouterActions.GO:
-      const goToState: RouterNav = action;
+    }
+    case RouterActions.GO: {
+      const goToState = action as RouterNav;
       return {
         ...state,
         redirect: goToState.redirect || state.redirect
       };
+    }
     case RESET_AUTH:
       return defaultState;
-    case GET_SYSTEM_INFO_SUCCESS:
+    case GET_SYSTEM_INFO_SUCCESS: {
+      const systemSuccess = action as GetSystemSuccess;
       return {
         ...state,
         sessionData: {
           ...state.sessionData,
           endpoints: {
-            ...action.payload.endpoints
+            ...systemSuccess.payload.endpoints as unknown as typeof state.sessionData.endpoints
           }
         },
       };
+    }
     default:
       return state;
   }

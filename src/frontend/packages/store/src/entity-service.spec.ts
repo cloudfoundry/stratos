@@ -3,19 +3,19 @@ import { HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Action, Store } from '@ngrx/store';
+import { type Action, Store } from '@ngrx/store';
 import { filter, first, map, pairwise } from 'rxjs/operators';
 import { firstValueFrom } from 'rxjs';
 
-import { createEntityStore, TestStoreEntity } from '../testing/src/store-test-helper';
+import { createEntityStore, type TestStoreEntity } from '../testing/src/store-test-helper';
 import { APIResponse } from './actions/request.actions';
-import { GeneralAppState } from './app-state';
+import type { GeneralAppState } from './app-state';
 import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES } from './entity-catalog-test.module';
 import { entityCatalog } from './entity-catalog/entity-catalog';
 import { StratosBaseCatalogEntity } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { EntityCatalogEntityConfig, IStratosEndpointDefinition } from './entity-catalog/entity-catalog.types';
+import type { EntityCatalogEntityConfig, IStratosEndpointDefinition } from './entity-catalog/entity-catalog.types';
 import { failedEntityHandler } from './entity-request-pipeline/entity-request-base-handlers/fail-entity-request.handler';
-import { PipelineResult } from './entity-request-pipeline/entity-request-pipeline.types';
+import type { PipelineResult } from './entity-request-pipeline/entity-request-pipeline.types';
 import { EntityService } from './entity-service';
 import { EntityServiceFactory } from './entity-service-factory.service';
 import { EntitySchema } from './helpers/entity-schema';
@@ -23,10 +23,10 @@ import { STRATOS_ENDPOINT_TYPE } from './helpers/stratos-entity-factory';
 import { EntityMonitor } from './monitors/entity-monitor';
 import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
 import { completeApiRequest, startApiRequest } from './reducers/api-request-reducer/request-helpers';
-import { NormalizedResponse } from './types/api.types';
-import { EntityRequestAction, ICFAction } from './types/request.types';
+import type { NormalizedResponse } from './types/api.types';
+import type { EntityRequestAction, ICFAction } from './types/request.types';
 
-function getActionDispatcher(store: Store<any>) {
+function getActionDispatcher(store: Store<GeneralAppState>) {
   return (action: Action) => {
     store.dispatch(action);
   };
@@ -38,7 +38,7 @@ const entitySchema = new EntitySchema(entityType, endpointType);
 const createAction = (guid: string) => {
   return {
     actions: ['fa', 'k', 'e'],
-    options: new HttpRequest<any>('GET', 'b'),
+    options: new HttpRequest<unknown>('GET', 'b'),
     entityType: entitySchema.entityType,
     endpointType: entitySchema.endpointType,
     guid,

@@ -1,46 +1,45 @@
-import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { HttpClient, type HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { ApplicationRef, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { type Action, Store } from '@ngrx/store';
+import { type Observable, EMPTY } from 'rxjs';
 import { catchError, mergeMap } from 'rxjs/operators';
 
 import {
   CONNECT_ENDPOINTS,
-  ConnectEndpoint,
+  type ConnectEndpoint,
   DISCONNECT_ENDPOINTS,
   DisconnectEndpoint,
   EndpointActionComplete,
   GET_ENDPOINT,
   GET_ENDPOINTS,
-  GetAllEndpoints,
+  type GetAllEndpoints,
   GetAllEndpointsSuccess,
-  GetEndpoint,
+  type GetEndpoint,
   REGISTER_ENDPOINTS,
-  RegisterEndpoint,
+  type RegisterEndpoint,
   UNREGISTER_ENDPOINTS,
-  UnregisterEndpoint,
+  type UnregisterEndpoint,
 } from '../actions/endpoint.actions';
 import { SendClearEventAction } from '../actions/internal-events.actions';
 import { ClearPaginationOfEntity } from '../actions/pagination.actions';
-import { GET_SYSTEM_INFO_SUCCESS, GetSystemSuccess } from '../actions/system.actions';
-import { DispatchOnlyAppState } from '../app-state';
-import { BrowserStandardEncoder } from '../browser-encoder';
+import { GET_SYSTEM_INFO_SUCCESS, type GetSystemSuccess } from '../actions/system.actions';
+import type { DispatchOnlyAppState } from '../app-state';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
-import { EndpointType } from '../extension-types';
+import type { EndpointType } from '../extension-types';
 import { httpErrorResponseToSafeString } from '../jetstream';
-import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
+import type { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { stratosEntityCatalog } from '../stratos-entity-catalog';
-import { NormalizedResponse } from '../types/api.types';
-import { EndpointModel } from '../types/endpoint.types';
+import type { NormalizedResponse } from '../types/api.types';
+import type { EndpointModel } from '../types/endpoint.types';
 import {
-  EntityRequestAction,
+  type EntityRequestAction,
   StartRequestAction,
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../types/request.types';
-import { UPDATE_ENDPOINT, UpdateEndpoint } from './../actions/endpoint.actions';
-import { PaginatedAction } from './../types/pagination.types';
+import { UPDATE_ENDPOINT, type UpdateEndpoint } from './../actions/endpoint.actions';
+import type { PaginatedAction } from './../types/pagination.types';
 
 
 @Injectable({
@@ -85,7 +84,7 @@ export class EndpointsEffect {
 
       Object.keys(endpoints).forEach((type: string) => {
         const endpointsForType = endpoints[type];
-        Object.values(endpointsForType).forEach((endpointInfo: any) => {
+        Object.values(endpointsForType).forEach((endpointInfo: EndpointModel) => {
           mappedData.entities[entityKey][endpointInfo.guid] = {
             ...endpointInfo,
             connectionStatus: endpointInfo.user ? 'connected' : 'disconnected',
@@ -107,14 +106,14 @@ export class EndpointsEffect {
 
    connectEndpoint$ = createEffect(() => this.actions$.pipe(
     ofType<ConnectEndpoint>(CONNECT_ENDPOINTS),
-    mergeMap((action: ConnectEndpoint): any[] | Observable<any> => {
+    mergeMap((action: ConnectEndpoint): Observable<Action> => {
       // Special-case SSO login - redirect to the back-end
       if (action.authType === 'sso') {
         const loc = window.location.protocol + '//' + window.location.hostname +
-          (window.location.port ? ':' + window.location.port : '');
-        const ssoUrl = '/api/v1/tokens?guid=' + action.guid + '&state=' + encodeURIComponent(loc);
+          (window.location.port ? `:${window.location.port}` : '');
+        const ssoUrl = `/api/v1/tokens?guid=${action.guid}&state=${encodeURIComponent(loc)}`;
         window.location.assign(ssoUrl);
-        return [];
+        return EMPTY;
       }
 
       // All parameters should be sent in the form body
@@ -125,14 +124,14 @@ export class EndpointsEffect {
 
       // Add auth values to the body
       Object.keys(action.authValues).forEach((key: string) => {
-        body.set(key, (action.authValues as Record<string, any>)[key]);
+        body.set(key, (action.authValues as Record<string, string>)[key]);
       });
 
       // If there's a custom body provided, merge it
       if (action.body) {
-        const customBody = action.body as any;
+        const customBody = action.body as unknown as FormData;
         if (customBody instanceof FormData) {
-          customBody.forEach((value: any, key: string) => {
+          customBody.forEach((value: FormDataEntryValue, key: string) => {
             body.set(key, value);
           });
         }
@@ -142,11 +141,11 @@ export class EndpointsEffect {
         action,
         '/api/v1/tokens',
         new HttpParams(),
-        null as any,
+        null,
         action.endpointsType,
         body,
-        (response: any) => httpErrorResponseToSafeString(response) || 'Could not connect, please try again',
-      );
+        (response: HttpErrorResponse) => httpErrorResponseToSafeString(response) || 'Could not connect, please try again',
+      ) as Observable<Action>;
     })));
 
    disconnect$ = createEffect(() => this.actions$.pipe(
@@ -155,7 +154,7 @@ export class EndpointsEffect {
 
       return this.doEndpointAction(
         action,
-        '/api/v1/tokens/' + action.guid,
+        `/api/v1/tokens/${action.guid}`,
         null,
         null,
         action.endpointsType,
@@ -170,7 +169,7 @@ export class EndpointsEffect {
     mergeMap((action: UnregisterEndpoint) => {
       return this.doEndpointAction(
         action,
-        '/api/v1/endpoints/' + action.guid,
+        `/api/v1/endpoints/${action.guid}`,
         null,
         'delete',
         action.endpointsType,
@@ -197,10 +196,10 @@ export class EndpointsEffect {
       // Do not include sub_type in HttpParams if it doesn't exist (falsies get stringified and sent)
       if (action.endpointSubType) {
         /* tslint:disable-next-line:no-string-literal  */
-        paramsObj['sub_type'] = action.endpointSubType;
+        paramsObj.sub_type = action.endpointSubType;
       }
       // Encode all values in the form body
-      const body: any = new FormData();
+      const body = new FormData();
       Object.keys(paramsObj).forEach((key: string) => {
         body.set(key, paramsObj[key]);
       });
@@ -230,14 +229,14 @@ export class EndpointsEffect {
       };
 
       // Encode auth values in the body, not the query string
-      const body: any = new FormData();
+      const body = new FormData();
       Object.keys(paramsObj).forEach((key: string) => {
         body.set(key, String(paramsObj[key]));
       });
 
       return this.doEndpointAction(
         action,
-        '/api/v1/endpoints/' + action.id,
+        `/api/v1/endpoints/${action.id}`,
         new HttpParams({}),
         'update',
         action.endpointsType,
@@ -250,7 +249,7 @@ export class EndpointsEffect {
     let message = 'There was a problem updating the endpoint. ' +
       httpErrorResponseToSafeString(e);
     if (e.status === 403) {
-      message = `${message}. Please check \"Skip SSL validation for the endpoint\" if the certificate issuer is trusted`;
+      message = `${message}. Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted`;
     }
     return message;
   }
@@ -259,7 +258,7 @@ export class EndpointsEffect {
     let message = 'There was a problem creating the endpoint. Please ensure the endpoint address is correct and try again. ' +
       httpErrorResponseToSafeString(e);
     if (e.status === 403) {
-      message = `${e.error.error}. Please check \"Skip SSL validation for the endpoint\" if the certificate issuer is trusted`;
+      message = `${e.error.error}. Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted`;
     }
     return message;
   }
@@ -270,13 +269,13 @@ export class EndpointsEffect {
   private doEndpointAction(
     apiAction: EntityRequestAction | PaginatedAction,
     url: string,
-    params: HttpParams,
-    apiActionType: ApiRequestTypes = 'update',
+    params: HttpParams | null,
+    apiActionType: ApiRequestTypes | null = 'update',
     endpointType: EndpointType,
-    body?: any,
-    errorMessageHandler?: (e: any) => string,
+    body?: FormData | null,
+    errorMessageHandler?: ((e: HttpErrorResponse) => string) | null,
     method: string = 'POST',
-  ): Observable<any> {
+  ): Observable<Action> {
 
     const endpointEntityKey = entityCatalog.getEntityKey(apiAction);
     this.store.dispatch(new StartRequestAction(apiAction, apiActionType));
@@ -285,7 +284,7 @@ export class EndpointsEffect {
       body: body || {}
     }).pipe(
       mergeMap((endpoint: EndpointModel) => {
-        const actions = [];
+        const actions: Action[] = [];
         let response: NormalizedResponse<EndpointModel>;
         if (apiAction.actions[1]) {
           actions.push(new EndpointActionComplete(apiAction.actions[1], apiAction.guid, endpointType, endpoint));
@@ -322,10 +321,10 @@ export class EndpointsEffect {
         return actions;
       }
       ),
-      catchError((e: any) => {
-        const actions = [];
+      catchError((e: HttpErrorResponse) => {
+        const actions: Action[] = [];
         if (apiAction.actions[2]) {
-          actions.push({ type: apiAction.actions[2], guid: apiAction.guid });
+          actions.push({ type: apiAction.actions[2], guid: apiAction.guid } as Action);
         }
         const errorMessage = errorMessageHandler ? errorMessageHandler(e) : 'Could not perform action';
         actions.push(new WrapperRequestActionFailed(errorMessage, apiAction, apiActionType));

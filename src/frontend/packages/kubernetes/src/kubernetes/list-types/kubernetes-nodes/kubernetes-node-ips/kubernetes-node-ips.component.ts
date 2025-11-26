@@ -1,8 +1,6 @@
-import { ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
-import { CustomTooltipDirective } from '@stratosui/core';
-
-import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
-import { KubernetesAddressExternal, KubernetesAddressInternal, KubernetesNode } from '../../../store/kube.types';
+import { ChangeDetectionStrategy, Component, type OnInit} from '@angular/core';
+import { CustomTooltipDirective, TableCellCustom } from '@stratosui/core';
+import { KubernetesAddressExternal, KubernetesAddressInternal, type KubernetesNode } from '../../../store/kube.types';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -17,10 +15,6 @@ import { KubernetesAddressExternal, KubernetesAddressInternal, KubernetesNode } 
 export class KubernetesNodeIpsComponent extends TableCellCustom<KubernetesNode> implements OnInit {
 
   tooltip: string;
-
-  constructor() {
-    super();
-  }
 
   ngOnInit() {
     this.tooltip = this.row.status.addresses

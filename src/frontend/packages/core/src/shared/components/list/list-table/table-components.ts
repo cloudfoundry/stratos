@@ -8,9 +8,9 @@
  * - Better tree-shaking and build performance
  */
 
-import { Type } from '@angular/core';
+import type { Type } from '@angular/core';
 import { coreEndpointListDetailsComponents } from '../../../../features/endpoints/endpoint-helpers';
-import { TableCellCustom } from '../list.types';
+import type { TableCellCustom } from '../list.types';
 import {
   TableCellEndpointAddressComponent,
 } from '../list-types/endpoint/table-cell-endpoint-address/table-cell-endpoint-address.component';
@@ -39,7 +39,7 @@ import { TableHeaderSelectComponent } from './table-header-select/table-header-s
 import { TableRowComponent } from './table-row/table-row.component';
 
 // Define listTableCells here to avoid circular dependencies
-const listTableCells: Type<TableCellCustom<any>>[] = [
+const listTableCells: Type<TableCellCustom<unknown>>[] = [
   TableCellDefaultComponent,
   TableHeaderSelectComponent,
   TableCellSelectComponent,

@@ -1,23 +1,24 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
-import { AbstractControl, ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { Component, inject, type OnDestroy, type OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { ReactiveFormsModule, Validators, FormControl, type FormGroup, FormBuilder } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+import { combineLatest, type Observable, of as observableOf, type Subscription } from 'rxjs';
 import { filter, first, map, share, startWith, switchMap } from 'rxjs/operators';
+import type { GeneralEntityAppState } from '@stratosui/store';
 
-import { StepOnNextFunction } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
+import type { StepOnNextFunction } from '@stratosui/core';
+import type { APIResource } from '@stratosui/store';
 import { SaveAppOverrides } from '../../../../actions/deploy-applications.actions';
-import { CFAppState } from '../../../../cf-app-state';
+import type { CFAppState } from '../../../../cf-app-state';
 import {
   selectCfDetails,
   selectDeployAppState,
   selectSourceType,
 } from '../../../../store/selectors/deploy-application.selector';
-import { OverrideAppDetails, SourceType } from '../../../../store/types/deploy-application.types';
-import { IDomain } from '../../../../cf-api.types';
+import type { OverrideAppDetails, SourceType } from '../../../../store/types/deploy-application.types';
+import type { IDomain } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import {
   ApplicationEnvVarsHelper,
@@ -55,7 +56,7 @@ interface DeployOptionsForm {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
   ]
 })
 export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy {
@@ -66,18 +67,18 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
   deployOptionsForm: FormGroup<DeployOptionsForm>;
   subs: Subscription[] = [];
   appGuid!: string;
-  stepOpts: any;
+  stepOpts: unknown;
 
   public healthCheckTypes = ['http', 'port', 'process'];
   public sourceType$!: Observable<SourceType>;
   public DEPLOY_TYPES_IDS = DEPLOY_TYPES_IDS;
 
-  constructor(
-    private fb: FormBuilder,
-    private store: Store<CFAppState>,
-    private appEnvVarsService: ApplicationEnvVarsHelper,
-    private activatedRoute: ActivatedRoute
-  ) {
+  private readonly fb = inject(FormBuilder);
+  private readonly store = inject(Store<GeneralEntityAppState>);
+  private readonly appEnvVarsService = inject(ApplicationEnvVarsHelper);
+  private readonly activatedRoute = inject(ActivatedRoute);
+
+  constructor() {
     this.deployOptionsForm = this.fb.group<DeployOptionsForm>({
       name: new FormControl<string | null>(null),
       instances: new FormControl<number | null>(null, [
@@ -203,7 +204,9 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
   }
 
   ngOnDestroy() {
-    this.subs.forEach(sub => sub.unsubscribe());
+    for (const sub of this.subs) {
+      sub.unsubscribe();
+    }
   }
 
   formToObj(controls: DeployOptionsForm): OverrideAppDetails {
@@ -211,8 +214,8 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
       name: controls.name.value,
       buildpack: controls.buildpack.value,
       instances: controls.instances.value,
-      diskQuota: controls.disk_quota.value ? controls.disk_quota.value + 'MB' : null,
-      memQuota: controls.memory.value ? controls.memory.value + 'MB' : null,
+      diskQuota: controls.disk_quota.value ? `${controls.disk_quota.value}MB` : null,
+      memQuota: controls.memory.value ? `${controls.memory.value}MB` : null,
       doNotStart: controls.no_start.value,
       noRoute: controls.no_route.value,
       randomRoute: controls.random_route.value,
@@ -251,7 +254,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     controls.dockerUsername.setValue(overrides.dockerUsername);
   }
 
-  onEnter = (opts: any) => {
+  onEnter = (opts: unknown) => {
     this.stepOpts = opts;
   }
 

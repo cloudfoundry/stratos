@@ -1,10 +1,10 @@
 import { Store } from '@ngrx/store';
 
-import { ListDataSource, IListConfig } from '@stratosui/core';
-import { PaginationEntityState } from '@stratosui/store';
-import { CFAppState } from '../../../../../cf-app-state';
+import { ListDataSource, type IListConfig } from '@stratosui/core';
+import type { PaginationEntityState, GeneralEntityAppState } from '@stratosui/store';
+import type { CFAppState } from '../../../../../cf-app-state';
 import { featureFlagEntityType } from '../../../../../cf-entity-types';
-import { IFeatureFlag } from '../../../../../cf-api.types';
+import type { IFeatureFlag } from '../../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 
@@ -31,7 +31,7 @@ export class CfFeatureFlagsDataSource extends ListDataSource<IFeatureFlag> {
   static nameColumnId = 'name';
   static descriptionColumnId = 'description';
 
-  constructor(store: Store<CFAppState>, cfGuid: string, listConfig?: IListConfig<IFeatureFlag>) {
+  constructor(store: Store<GeneralEntityAppState>, cfGuid: string, listConfig?: IListConfig<IFeatureFlag>) {
     const action = cfEntityCatalog.featureFlag.actions.getMultiple(cfGuid);
     super({
       store,

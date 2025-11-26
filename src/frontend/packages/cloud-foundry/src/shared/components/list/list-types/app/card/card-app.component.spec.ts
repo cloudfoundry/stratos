@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { provideRouter } from '@angular/router';
@@ -9,7 +9,7 @@ import { StoreModule } from '@ngrx/store';
 import { SharedModule } from '@stratosui/core';
 import {
   PaginationMonitorFactory,
-  APIResourceMetadata,
+  type APIResourceMetadata,
   EntityCatalogTestModule,
   generateStratosEntities,
   TEST_CATALOGUE_ENTITIES,
@@ -21,7 +21,7 @@ import {
 } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CloudFoundryTestingModule, generateCFEntities } from '@test-framework/cf';
-import { IApp } from '../../../../../../cf-api.types';
+import type { IApp } from '../../../../../../cf-api.types';
 import { ApplicationStateService } from '../../../../../services/application-state.service';
 import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
 import { RunningInstancesComponent } from '../../../../running-instances/running-instances.component';

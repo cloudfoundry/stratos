@@ -1,13 +1,13 @@
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
-import {
+import type {
   OrchestratedActionBuilderConfig,
   OrchestratedActionBuilders,
 } from '../../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
-import { StratosCatalogEntity } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { IEntityMetadata, IStratosEntityDefinition } from '../../../../store/src/entity-catalog/entity-catalog.types';
-import { UserFavorite } from '../../../../store/src/types/user-favorites.types';
-import { KubernetesPodExpandedStatus } from '../services/kubernetes-expanded-state';
+import type { StratosCatalogEntity } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import type { IEntityMetadata, IStratosEntityDefinition } from '../../../../store/src/entity-catalog/entity-catalog.types';
+import type { UserFavorite } from '../../../../store/src/types/user-favorites.types';
+import type { KubernetesPodExpandedStatus } from '../services/kubernetes-expanded-state';
 
 // Map of endpoint ID to current namespace for that endpoint
 export interface KubernetesCurrentNamespace {
@@ -27,8 +27,8 @@ export const KubernetesDefaultState = {
 
 export interface BasicKubeAPIResource {
   metadata: Metadata;
-  status?: Record<string, unknown> | any;
-  spec?: Record<string, unknown> | any;
+  status?: Record<string, unknown>;
+  spec?: Record<string, unknown>;
   kubeGuid?: string; // Kubernetes endpoint GUID
 }
 
@@ -47,7 +47,7 @@ export interface IKubeResourceEntityDefinition extends IStratosEntityDefinition 
 
 export interface KubeResourceEntityDefinition<
   A extends IEntityMetadata = IEntityMetadata,
-  B = any,
+  B = unknown,
   C extends OrchestratedActionBuilderConfig = OrchestratedActionBuilders
   > {
   apiVersion: string;
@@ -83,7 +83,7 @@ export interface KubernetesStatefulSet extends BasicKubeAPIResource {
   spec: ServiceSpec;
 }
 
-export interface DeploymentSpec {
+export interface DeploymentSpec extends Record<string, unknown> {
   replicas: number;
   selector?: { matchLabels?: Labels; matchExpressions?: MatchExpression[] };
   template?: { metadata?: Metadata; spec?: PodSpec };
@@ -100,7 +100,7 @@ export interface KubernetesDeployment extends BasicKubeAPIResource {
   spec: ServiceSpec;
 }
 
-export interface ServiceStatus {
+export interface ServiceStatus extends Record<string, unknown> {
   loadBalancer: LoadBalancerStatus;
 }
 
@@ -112,7 +112,7 @@ export interface LoadBalancerIngress {
   hostname: string;
   ip: string;
 }
-export interface ServiceSpec {
+export interface ServiceSpec extends Record<string, unknown> {
   ports: Port[];
   clusterIP: string;
   type: string;
@@ -144,7 +144,7 @@ export interface KubernetesApp {
   chartName: string;
   appVersion: string;
 }
-export interface NodeStatus {
+export interface NodeStatus extends Record<string, unknown> {
   capacity?: Capacity;
   allocatable?: Allocatable;
   conditions: KubernetesCondition[];
@@ -273,11 +273,11 @@ export interface KubernetesNamespace extends BasicKubeAPIResource {
   status: BaseStatus;
 }
 
-export interface BaseStatus {
+export interface BaseStatus extends Record<string, unknown> {
   phase: KubernetesStatus;
 }
 
-export interface PodStatus {
+export interface PodStatus extends Record<string, unknown> {
   phase: KubernetesStatus;
   conditions?: KubernetesCondition[];
   message?: string;
@@ -322,7 +322,7 @@ export interface ContainerState {
   exitCode: number;
 }
 
-export interface PodSpec {
+export interface PodSpec extends Record<string, unknown> {
   volumes?: Volume[];
   containers: Container[];
   restartPolicy?: string;
@@ -569,6 +569,14 @@ export interface AnalysisReport {
   report?: Record<string, unknown>;
   title?: string;
   format?: string;
+  alerts?: Record<string, Array<{
+    apiVersion?: string;
+    kind: string;
+    message: string;
+    namespace: string;
+    name: string;
+    level: number;
+  }>>;
 }
 
 

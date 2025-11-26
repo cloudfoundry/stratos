@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
+import { AppChipsComponent } from '@stratosui/core';
 import { EntityMonitorFactory, EntityServiceFactory } from '@stratosui/store';
 import {
   generateCfBaseTestModulesNoShared,
@@ -34,28 +34,22 @@ describe('TableCellServiceInstanceTagsComponent', () => {
     component = fixture.componentInstance;
     component.row = {
       entity: {
-        active: true,
-        bindable: true,
-        description: 'test',
-        extra: '',
-        label: '',
-        info_url: '',
-        long_description: '',
-        plan_updateable: false,
-        tags: [],
-        url: '',
-        version: '',
-        service_instance: {
-          entity: {
-            tags: []
-          }
-        }
-      },
+        name: 'test-instance',
+        credentials: {},
+        space_guid: 'test-space-guid',
+        space_url: '/v2/spaces/test-space-guid',
+        type: 'user_provided_service_instance',
+        syslog_drain_url: '',
+        tags: ['test-tag-1', 'test-tag-2'],
+        service_bindings_url: '/v2/user_provided_service_instances/test-guid/service_bindings',
+        routes_url: '/v2/user_provided_service_instances/test-guid/routes',
+        route_service_url: ''
+      } as any,
       metadata: {
-        created_at: '',
-        guid: '',
-        updated_at: '',
-        url: ''
+        created_at: '2023-01-01T00:00:00Z',
+        guid: 'test-guid',
+        updated_at: '2023-01-01T00:00:00Z',
+        url: '/v2/user_provided_service_instances/test-guid'
       }
     };
     fixture.detectChanges();

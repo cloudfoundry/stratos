@@ -1,13 +1,19 @@
-import { DatePipe } from '@angular/common';
+import type { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
+import type { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
-
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import { IGlobalListAction, IListAction, IListConfig, IListMultiFilterConfig, IMultiListAction, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { AppState } from '../../../../../../../store/src/app-state';
-import { GitCommit } from '../../../../../store/git.public-types';
-import { GithubCommitsDataSource } from './github-commits-data-source';
+import {
+  type ITableColumn,
+  type IGlobalListAction,
+  type IListAction,
+  type IListConfig,
+  type IListMultiFilterConfig,
+  type IMultiListAction,
+  ListViewTypes
+} from '@stratosui/core';
+import type { AppState } from '../../../../../../../store/src/app-state';
+import type { GitCommit } from '../../../../../store/git.public-types';
+import type { GithubCommitsDataSource } from './github-commits-data-source';
 import { TableCellCommitAuthorComponent } from './table-cell-commit-author/table-cell-commit-author.component';
 
 

@@ -1,15 +1,17 @@
-import {Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import {Component, Input, inject, } from '@angular/core';
+import { DatePipe, SlicePipe } from '@angular/common';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
-import { ChartAttributes } from '../../shared/models/chart';
-import { ChartVersion } from '../../shared/models/chart-version';
+import type { ChartAttributes } from '../../shared/models/chart';
+import type { ChartVersion } from '../../shared/models/chart-version';
 import { ChartsService } from '../../shared/services/charts.service';
 
 @Component({
   selector: 'app-chart-details-versions',
   templateUrl: './chart-details-versions.component.html',
   styleUrls: ['./chart-details-versions.component.scss'],
-  standalone: true
+  standalone: true,
+  imports: [RouterLink, DatePipe, SlicePipe]
 })
 export class ChartDetailsVersionsComponent {
   @Input() versions!: ChartVersion[];

@@ -5,9 +5,9 @@ import { Observable, of, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 
 import { getMonocularEndpoint, stratosMonocularEndpointGuid } from '../../stratos-monocular.helper';
-import { Chart } from '../models/chart';
-import { ChartVersion } from '../models/chart-version';
-import { RepoAttributes } from '../models/repo';
+import type { Chart } from '../models/chart';
+import type { ChartVersion } from '../models/chart-version';
+import type { RepoAttributes } from '../models/repo';
 import { ConfigService } from './config.service';
 
 
@@ -22,7 +22,7 @@ export class ChartsService {
 
   constructor(
     private http: HttpClient,
-    config: ConfigService,
+    _config: ConfigService,
     private route: ActivatedRoute,
   ) {
     this.cacheCharts = {};
@@ -39,7 +39,7 @@ export class ChartsService {
       return url;
     }
     const parts = url.split('/');
-    const chartsvcIndex = parts.findIndex(part => part === 'chartsvc');
+    const chartsvcIndex = parts.indexOf('chartsvc');
     if (chartsvcIndex >= 0) {
       parts.splice(chartsvcIndex, 0, `monocular/${endpoint}`);
     }
@@ -144,7 +144,7 @@ export class ChartsService {
   }
 
   // Get the URL for obtaining a Chart's schema
-  getChartSchemaURL(chartVersion: ChartVersion, name: string, repo: RepoAttributes): string | null {
+  getChartSchemaURL(chartVersion: ChartVersion, _name: string, _repo: RepoAttributes): string | null {
     // We have the schema URL, so we can fetch that directly
     return chartVersion.attributes.schema ? `${this.hostname}${chartVersion.attributes.schema}` : null;
   }
@@ -155,25 +155,21 @@ export class ChartsService {
       // Check if url is absolute, if not assume it's a filename
       if (!firstUrl.startsWith('http://') && !firstUrl.startsWith('https://')) {
         const repoUrl = repo ? repo.url : '';
-        return repoUrl || this.getChartRepoUrl(chartVersion) + '/' + firstUrl;
+        return repoUrl || `${this.getChartRepoUrl(chartVersion)}/${firstUrl}`;
       }
     }
     return firstUrl;
   }
 
   private getFirstChartUrl(chart: ChartVersion): string {
-    if (chart && chart.attributes && chart.attributes.urls && chart.attributes.urls.length > 0) {
+    if (chart?.attributes?.urls && chart.attributes.urls.length > 0) {
       return chart.attributes.urls[0];
     }
     return '';
   }
 
   private getChartRepoUrl(chart: ChartVersion): string {
-    if (chart &&
-      chart.relationships &&
-      chart.relationships.chart &&
-      chart.relationships.chart.data &&
-      chart.relationships.chart.data.repo
+    if (chart?.relationships?.chart?.data?.repo
     ) {
       return chart.relationships.chart.data.repo.url;
     }

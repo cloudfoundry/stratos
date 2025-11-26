@@ -1,19 +1,19 @@
 import { Store } from '@ngrx/store';
-import { getRowMetadata } from '@stratosui/store';
+import { getRowMetadata, type GeneralEntityAppState } from '@stratosui/store';
 import { of } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 
 import {
   ListDataSource,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
+} from '@stratosui/core';
 import {
   getDefaultRowState,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
-import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
+} from '@stratosui/core';
+import type { IListConfig } from '@stratosui/core';
 import { endpointEntityType } from '../../../../../../../store/src/helpers/stratos-entity-factory';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+import type { APIResource } from '../../../../../../../store/src/types/api.types';
 import { GetOrganizationSpaceQuotaDefinitions } from '../../../../../actions/quota-definitions.actions';
-import { CFAppState } from '../../../../../cf-app-state';
+import type { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { spaceQuotaEntityType } from '../../../../../cf-entity-types';
@@ -21,7 +21,7 @@ import { createEntityRelationPaginationKey } from '../../../../../entity-relatio
 
 export class CfOrgSpaceQuotasDataSourceService extends ListDataSource<APIResource> {
 
-  constructor(store: Store<CFAppState>, orgGuid: string, cfGuid: string, listConfig?: IListConfig<APIResource>) {
+  constructor(store: Store<GeneralEntityAppState>, orgGuid: string, cfGuid: string, listConfig?: IListConfig<APIResource>) {
     const quotaPaginationKey = createEntityRelationPaginationKey(endpointEntityType, cfGuid);
     const action = new GetOrganizationSpaceQuotaDefinitions(quotaPaginationKey, orgGuid, cfGuid);
 

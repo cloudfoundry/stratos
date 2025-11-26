@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { APIResource } from '@stratosui/store/types/api.types';
+import type { APIResource } from '@stratosui/store';
 import { EventTabActorIconPipe } from './event-tab-actor-icon.pipe';
 import { TableCellEventActionComponent } from './table-cell-event-action.component';
 

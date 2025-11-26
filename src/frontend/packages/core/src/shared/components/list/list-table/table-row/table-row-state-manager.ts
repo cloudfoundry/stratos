@@ -1,6 +1,7 @@
 import { ReplaySubject } from 'rxjs';
 
-import { RowsState, RowState } from '../../data-sources-controllers/list-data-source-types';
+import type {RowsState} from '../../data-sources-controllers/list-data-source-types';
+import type {RowState} from '../../data-sources-controllers/list-data-source-types';
 
 /**
  * A manager that helps manage list table row state.
@@ -21,7 +22,7 @@ export class TableRowStateManager {
     this.syncObservableState();
   }
 
-  private mergeRowState(id: string, state: any) {
+  private mergeRowState(id: string, state: RowState) {
     const mergeIdState = {
       ...(this.rs[id] || {}),
       ...state

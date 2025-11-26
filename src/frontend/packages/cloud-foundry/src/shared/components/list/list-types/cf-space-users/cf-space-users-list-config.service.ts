@@ -1,16 +1,17 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Store } from '@ngrx/store'
+import type { GeneralEntityAppState } from '@stratosui/store';;
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import {
+import type { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import type {
   CurrentUserPermissionsService,
-} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
-import { CloudFoundryOrganizationService } from '../../../../../features/cf/services/cloud-foundry-organization.service';
-import { CloudFoundrySpaceService } from '../../../../../features/cf/services/cloud-foundry-space.service';
-import { CfUser } from '../../../../../store/types/cf-user.types';
-import { CfUserService } from '../../../../data-services/cf-user.service';
+} from '@stratosui/core';
+import type { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
+import type { CloudFoundryOrganizationService } from '../../../../../features/cf/services/cloud-foundry-organization.service';
+import type { CloudFoundrySpaceService } from '../../../../../features/cf/services/cloud-foundry-space.service';
+import type { CfUser } from '../../../../../store/types/cf-user.types';
+import type { CfUserService } from '../../../../data-services/cf-user.service';
 import { CfUserListConfigService } from '../cf-users/cf-user-list-config.service';
 
 @Injectable({
@@ -18,7 +19,7 @@ import { CfUserListConfigService } from '../cf-users/cf-user-list-config.service
 })
 export class CfSpaceUsersListConfigService extends CfUserListConfigService {
   constructor(
-    store: Store<CFAppState>,
+    store: Store<GeneralEntityAppState>,
     cfSpaceService: CloudFoundrySpaceService,
     cfOrgService: CloudFoundryOrganizationService,
     cfUserService: CfUserService,

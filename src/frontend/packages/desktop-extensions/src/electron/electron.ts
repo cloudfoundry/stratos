@@ -3,7 +3,7 @@
 
 // Only the bits we need
 export interface ElectronWindow extends Window {
-  require(module: string): any;
+  require(module: string): unknown;
 }
 
 export interface RendererInterface {
@@ -11,19 +11,19 @@ export interface RendererInterface {
 }
 
 interface EventEmitter {
-  addListener(event: string | symbol, listener: (...args: any[]) => void): this;
-  on(event: string | symbol, listener: (...args: any[]) => void): this;
-  once(event: string | symbol, listener: (...args: any[]) => void): this;
-  removeListener(event: string | symbol, listener: (...args: any[]) => void): this;
-  off(event: string | symbol, listener: (...args: any[]) => void): this;
+  addListener(event: string | symbol, listener: (...args: unknown[]) => void): this;
+  on(event: string | symbol, listener: (...args: unknown[]) => void): this;
+  once(event: string | symbol, listener: (...args: unknown[]) => void): this;
+  removeListener(event: string | symbol, listener: (...args: unknown[]) => void): this;
+  off(event: string | symbol, listener: (...args: unknown[]) => void): this;
   removeAllListeners(event?: string | symbol): this;
   setMaxListeners(n: number): this;
   getMaxListeners(): number;
-  emit(event: string | symbol, ...args: any[]): boolean;
+  emit(event: string | symbol, ...args: unknown[]): boolean;
   listenerCount(type: string | symbol): number;
   // Added in Node 6...
-  prependListener(event: string | symbol, listener: (...args: any[]) => void): this;
-  prependOnceListener(event: string | symbol, listener: (...args: any[]) => void): this;
+  prependListener(event: string | symbol, listener: (...args: unknown[]) => void): this;
+  prependOnceListener(event: string | symbol, listener: (...args: unknown[]) => void): this;
   eventNames(): Array<string | symbol>;
 }
 
@@ -53,17 +53,17 @@ export interface IpcRenderer extends EventEmitter {
    * `ipcRenderer.postMessage`.
    * If you do not need a respons to the message, consider using `ipcRenderer.send`.
    */
-  invoke(channel: string, ...args: any[]): Promise<any>;
+  invoke(channel: string, ...args: unknown[]): Promise<unknown>;
   /**
    * Listens to `channel`, when a new message arrives `listener` would be called with
    * `listener(event, args...)`.
    */
-  on(channel: string, listener: (event: IpcRendererEvent, ...args: any[]) => void): this;
+  on(channel: string, listener: (event: IpcRendererEvent, ...args: unknown[]) => void): this;
   /**
    * Adds a one time `listener` function for the event. This `listener` is invoked
    * only the next time a message is sent to `channel`, after which it is removed.
    */
-  once(channel: string, listener: (event: IpcRendererEvent, ...args: any[]) => void): this;
+  once(channel: string, listener: (event: IpcRendererEvent, ...args: unknown[]) => void): this;
   /**
    * Send a message to the main process, optionally transferring ownership of zero or
    * more `MessagePort` objects.
@@ -77,7 +77,7 @@ export interface IpcRenderer extends EventEmitter {
    * For more information on using `MessagePort` and `MessageChannel`, see the MDN
    * documentation.
    */
-  postMessage(channel: string, message: any, transfer?: MessagePort[]): void;
+  postMessage(channel: string, message: unknown, transfer?: MessagePort[]): void;
   /**
    * Removes all listeners, or those of the specified `channel`.
    */
@@ -86,7 +86,7 @@ export interface IpcRenderer extends EventEmitter {
    * Removes the specified `listener` from the listener array for the specified
    * `channel`.
    */
-  removeListener(channel: string, listener: (...args: any[]) => void): this;
+  removeListener(channel: string, listener: (...args: unknown[]) => void): this;
   /**
    * Send an asynchronous message to the main process via `channel`, along with
    * arguments. Arguments will be serialized with the Structured Clone Algorithm,
@@ -107,7 +107,7 @@ export interface IpcRenderer extends EventEmitter {
    * If you want to receive a single response from the main process, like the result
    * of a method call, consider using `ipcRenderer.invoke`.
    */
-  send(channel: string, ...args: any[]): void;
+  send(channel: string, ...args: unknown[]): void;
   /**
    * The value sent back by the `ipcMain` handler.
    *
@@ -128,16 +128,16 @@ export interface IpcRenderer extends EventEmitter {
    * renderer process until the reply is received, so use this method only as a last
    * resort. It's much better to use the asynchronous version, `invoke()`.
    */
-  sendSync(channel: string, ...args: any[]): any;
+  sendSync(channel: string, ...args: unknown[]): unknown;
   /**
    * Sends a message to a window with `webContentsId` via `channel`.
    */
-  sendTo(webContentsId: number, channel: string, ...args: any[]): void;
+  sendTo(webContentsId: number, channel: string, ...args: unknown[]): void;
   /**
    * Like `ipcRenderer.send` but the event will be sent to the `<webview>` element in
    * the host page instead of the main process.
    */
-  sendToHost(channel: string, ...args: any[]): void;
+  sendToHost(channel: string, ...args: unknown[]): void;
 }
 
 interface IpcRendererEvent extends Event {

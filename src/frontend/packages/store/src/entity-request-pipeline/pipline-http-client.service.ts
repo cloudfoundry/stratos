@@ -1,12 +1,12 @@
-import { HttpClient, HttpRequest, HttpResponse } from '@angular/common/http';
+import { HttpClient, type HttpRequest, HttpResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { filter, first, map, mergeMap } from 'rxjs/operators';
 
-import { InternalAppState } from '../app-state';
-import { StratosCatalogEndpointEntity } from '../entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { IStratosEndpointDefinition } from '../entity-catalog/entity-catalog.types';
+import type { InternalAppState } from '../app-state';
+import type { StratosCatalogEndpointEntity } from '../entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import type { IStratosEndpointDefinition } from '../entity-catalog/entity-catalog.types';
 import { cfAPIVersion, proxyAPIVersion } from '../jetstream';
 import { connectedEndpointsOfTypesSelector, endpointOfTypeSelector } from '../selectors/endpoint.selectors';
 
@@ -19,8 +19,8 @@ export class PipelineHttpClient {
   public httpClient = inject(HttpClient);
   private store = inject(Store<InternalAppState>);
 
-  private makeRequest<R>(
-    hr: HttpRequest<any>,
+  private makeRequest<_R>(
+    hr: HttpRequest<unknown>,
     endpointConfig: IStratosEndpointDefinition,
     endpointGuids: string | string[] = null,
     externalRequest = false
@@ -32,11 +32,11 @@ export class PipelineHttpClient {
   }
 
   private jetstreamRequest<R>(
-    hr: HttpRequest<any>,
+    hr: HttpRequest<unknown>,
     endpointConfig: IStratosEndpointDefinition,
     endpointGuids: string | string[]) {
     const url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${hr.url}`;
-    if (endpointGuids && endpointGuids.length) {
+    if (endpointGuids?.length) {
       const headers = hr.headers.set(PipelineHttpClient.EndpointHeader, endpointGuids);
       return this.httpClient.request<R>(hr.clone({ headers, url }));
     } else {
@@ -54,12 +54,12 @@ export class PipelineHttpClient {
     }
   }
 
-  private externalRequest<R>(hr: HttpRequest<any>) {
+  private externalRequest<R>(hr: HttpRequest<unknown>) {
     return this.httpClient.request<R>(hr);
   }
 
   public pipelineRequest<R>(
-    hr: HttpRequest<any>,
+    hr: HttpRequest<unknown>,
     endpointConfig: StratosCatalogEndpointEntity,
     endpointGuids: string | string[] = null,
     externalRequest = false

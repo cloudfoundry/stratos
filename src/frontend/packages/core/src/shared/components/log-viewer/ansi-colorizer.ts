@@ -17,12 +17,12 @@ export class AnsiColorizer {
   colorize(message: string, color: string, boldOn?: boolean): string {
     if (boldOn) {
       if (color) {
-        return '\x1B[1;3' + colorCodes[color] + 'm' + message + RESET;
+        return `\x1B[1;3${colorCodes[color]}m${message}${RESET}`;
       }
-      return '\x1B[1m' + message + RESET;
+      return `\x1B[1m${message}${RESET}`;
     }
     if (color) {
-      return '\x1B[3' + colorCodes[color] + 'm' + message + RESET;
+      return `\x1B[3${colorCodes[color]}m${message}${RESET}`;
     }
     return message;
   }

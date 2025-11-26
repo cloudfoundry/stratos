@@ -16,9 +16,9 @@ export abstract class EntityCatalogHelpers {
   }
 
   static SetEntityCatalogHelper(ecf: EntityCatalogHelper) {
-    this.Instance = ecf;
+    EntityCatalogHelpers.Instance = ecf;
   }
   static GetEntityCatalogHelper(): EntityCatalogHelper {
-    return this.Instance;
+    return EntityCatalogHelpers.Instance;
   }
 }

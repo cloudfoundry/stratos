@@ -1,7 +1,7 @@
-import { HttpRequest } from '@angular/common/http';
+import type { HttpRequest } from '@angular/common/http';
 import type { Action } from '@ngrx/store';
 
-import { BasePipelineRequestAction } from '../entity-catalog/action-orchestrator/action-orchestrator';
+import type { BasePipelineRequestAction } from '../entity-catalog/action-orchestrator/action-orchestrator';
 import type { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
 import type { ListActionState } from '../reducers/api-request-reducer/types';
 import type { EntityRequestAction } from './request.types';
@@ -13,9 +13,7 @@ export interface PaginationParam {
 
 export interface PaginationClientFilter {
   string: string;
-  items: {
-    [key: string]: any;
-  };
+  items: Record<string, unknown>;
   filterKey?: string;
 }
 
@@ -66,7 +64,7 @@ export class PaginationEntityState {
   isListPagination = false;
 }
 
-export function isPaginatedAction(obj: any): PaginatedAction {
+export function isPaginatedAction(obj: unknown): PaginatedAction {
   return obj && Object.keys(obj).indexOf('paginationKey') >= 0 && Object.keys(obj).indexOf('type') >= 0 ? obj as PaginatedAction : null;
 }
 
@@ -86,7 +84,7 @@ export interface PaginatedAction extends BasePaginatedAction, EntityRequestActio
   flattenPaginationMax?: boolean;
   initialParams?: PaginationParam;
   pageNumber?: number;
-  options?: HttpRequest<any>;
+  options?: HttpRequest<unknown>;
   skipValidation?: boolean;
   // Internal, used for local multi action lists
   __forcedPageNumber__?: number;

@@ -1,4 +1,4 @@
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 
 import { proxyAPIVersion } from '../jetstream';
 
@@ -13,7 +13,7 @@ export const MetricAPIQueryTypes = {
 };
 
 export interface MetricAPIResponse {
-  data: any;
+  data: unknown;
   status: string;
 }
 
@@ -38,7 +38,7 @@ export interface MetricsStratosInfo {
 export class MetricsAPIAction implements Action {
   public url;
   constructor(public endpointGuid: string, public query: string, public queryType = MetricAPIQueryTypes.TARGETS) {
-    this.url = `/pp/${proxyAPIVersion}/proxy/api/v1/` + query;
+    this.url = `/pp/${proxyAPIVersion}/proxy/api/v1/${query}`;
   }
   type = METRIC_API_START;
 }

@@ -1,25 +1,24 @@
-import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, type OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe, DatePipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TailwindDialogService } from '@stratosui/core';
-import { combineLatest as observableCombineLatest, Observable, of } from 'rxjs';
+import { combineLatest as observableCombineLatest, type Observable, of } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import {
   CurrentUserPermissionsService,
-} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { AppChip, AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { CardCell, IListRowCell } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { MetaCardComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
-import { MetaCardItemComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
-import { MetaCardKeyComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
-import { MetaCardValueComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
-import { MetaCardTitleComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
-import { ActionState } from '../../../../../../../../store/src/reducers/api-request-reducer/types';
-import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
-import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
+} from '@stratosui/core';
+import { type AppChip, AppChipsComponent } from '@stratosui/core';
+import { CardCell, type IListRowCell } from '@stratosui/core';
+import { MetaCardComponent } from '@stratosui/core';
+import { MetaCardItemComponent } from '@stratosui/core';
+import { MetaCardKeyComponent } from '@stratosui/core';
+import { MetaCardValueComponent } from '@stratosui/core';
+import { MetaCardTitleComponent } from '@stratosui/core';
+import type { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
+import type { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
 import { ComponentEntityMonitorConfig } from '../../../../../../../../store/src/types/shared.types';
-import {
+import type {
   IService,
   IServiceBinding,
   IServiceInstance,
@@ -35,7 +34,7 @@ import {
   getServicePlanName,
   getServiceSummaryUrl,
 } from '../../../../../../features/service-catalog/services-helper';
-import { AppEnvVarsState } from '../../../../../../store/types/app-metadata.types';
+import type { AppEnvVarsState } from '../../../../../../store/types/app-metadata.types';
 import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 import { ServiceIconComponent } from '../../../../service-icon/service-icon.component';
@@ -43,7 +42,7 @@ import { CSI_CANCEL_URL } from '../../../../add-service-instance/csi-mode.servic
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
 import {
   TableCellServiceBrokerComponent,
-  TableCellServiceBrokerComponentConfig,
+  type TableCellServiceBrokerComponentConfig,
   TableCellServiceBrokerComponentMode,
 } from '../../cf-services/table-cell-service-broker/table-cell-service-broker.component';
 
@@ -52,6 +51,12 @@ interface EnvVarData {
   key: string;
   value: string;
 }
+
+interface VcapService {
+  name: string;
+  [key: string]: unknown;
+}
+
 @Component({
   selector: 'app-app-service-binding-card',
   templateUrl: './app-service-binding-card.component.html',
@@ -60,6 +65,8 @@ interface EnvVarData {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    AsyncPipe,
+    DatePipe,
     RouterModule,
     MetaCardComponent,
     MetaCardTitleComponent,
@@ -171,7 +178,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
             return null;
           }
           const serviceInstance: IServiceInstance = si.entity.entity as IServiceInstance;
-          return serviceInstance && serviceInstance.service_plan && serviceInstance.service_plan.entity
+          return serviceInstance?.service_plan?.entity
             ? getServicePlanName(serviceInstance.service_plan.entity)
             : null;
         })
@@ -225,16 +232,20 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
       this.appService.appEnvVars.entities$)
       .pipe(
         first(),
-        map(([serviceLabel, serviceInstance, allEnvVars]) => {
-          const systemEnvJson = (allEnvVars as APIResource<AppEnvVarsState>[])?.[0]?.entity?.system_env_json;
+        map(([serviceLabel, serviceInstance, allEnvVars]): EnvVarData | null => {
+          const systemEnvJson = (allEnvVars as APIResource<AppEnvVarsState>[])?.[0]?.entity?.system_env_json as Record<string, Record<string, unknown>> | undefined;
           const serviceInstanceName = serviceInstance?.entity?.entity?.name;
 
-          return (systemEnvJson?.VCAP_SERVICES?.[serviceLabel] && serviceInstanceName) ? {
-            key: serviceInstanceName,
-            value: systemEnvJson.VCAP_SERVICES[serviceLabel].find((s: any) => s.name === serviceInstanceName)
-          } : null;
+          if (systemEnvJson?.VCAP_SERVICES && (systemEnvJson.VCAP_SERVICES as Record<string, unknown>)[serviceLabel] && serviceInstanceName) {
+            const vcapValue = ((systemEnvJson.VCAP_SERVICES as Record<string, unknown>)[serviceLabel] as VcapService[]).find((s: VcapService) => s.name === serviceInstanceName);
+            return vcapValue ? {
+              key: serviceInstanceName,
+              value: JSON.stringify(vcapValue)
+            } : null;
+          }
+          return null;
         }),
-        filter(p => !!p),
+        filter((p): p is EnvVarData => !!p),
       );
   }
 

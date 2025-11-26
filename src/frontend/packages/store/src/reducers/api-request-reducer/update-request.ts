@@ -1,6 +1,6 @@
-import { BaseRequestState } from '../../app-state';
-import { BaseEntityRequestAction } from '../../entity-catalog/action-orchestrator/action-orchestrator';
-import { IUpdateRequestAction } from '../../types/request.types';
+import type { BaseRequestState } from '../../app-state';
+import type { BaseEntityRequestAction } from '../../entity-catalog/action-orchestrator/action-orchestrator';
+import type { IUpdateRequestAction } from '../../types/request.types';
 import { isNullOrUndefined } from '../../utils';
 import { getEntityRequestState, mergeUpdatingState, setEntityRequestState } from './request-helpers';
 

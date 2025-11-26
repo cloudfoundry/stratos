@@ -1,9 +1,7 @@
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
-import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
-import { StepComponent } from '../../../../../core/src/shared/components/stepper/step/step.component';
+import { PageHeaderComponent, SteppersComponent, StepComponent } from '@stratosui/core';
 import { QUOTA_FROM_LIST } from '../../../shared/components/list/list-types/cf-quotas/cf-quotas-list-config.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';

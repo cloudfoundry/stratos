@@ -1,12 +1,12 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output, TemplateRef, ViewChild } from '@angular/core';
-import { IRouterNavPayload } from '@stratosui/store';
-import { Observable, of as observableOf } from 'rxjs';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, TemplateRef, ViewChild } from '@angular/core';
+import type { IRouterNavPayload } from '@stratosui/store';
+import { type Observable, of as observableOf } from 'rxjs';
 
 export interface IStepperStep {
   validate: Observable<boolean>;
   valid?: boolean;
   onNext: StepOnNextFunction;
-  onEnter?: (data?: any) => void;
+  onEnter?: (data?: unknown) => void;
 }
 
 export interface StepOnNextResult {
@@ -17,7 +17,7 @@ export interface StepOnNextResult {
   redirectPayload?: IRouterNavPayload;
   // Ignore the result of a successful `onNext` call. Handy when sometimes you want to avoid navigation/step change
   ignoreSuccess?: boolean;
-  data?: any;
+  data?: unknown;
 }
 
 export type StepOnNextFunction = (index: number, step: StepComponent) => Observable<StepOnNextResult>;
@@ -31,7 +31,7 @@ export type StepOnNextFunction = (index: number, step: StepComponent) => Observa
 })
 export class StepComponent {
 
-  public pOnEnter: (data?: any) => void;
+  public pOnEnter: (data?: unknown) => void;
   active = false;
   complete = false;
   error = false;
@@ -97,7 +97,7 @@ export class StepComponent {
   public destructiveStep = false;
 
   @ViewChild(TemplateRef, { static: true })
-  content!: TemplateRef<any>;
+  content!: TemplateRef<unknown>;
 
   @Input()
   skip = false;
@@ -109,13 +109,17 @@ export class StepComponent {
   onNext: StepOnNextFunction = () => observableOf({ success: true })
 
   @Input()
-  onEnter: (data: any) => void = () => { }
+  onEnter: (data: unknown) => void = () => {
+    // Lifecycle hook - override in parent
+  }
 
   @Input()
-  onLeave: (isNext?: boolean) => void = () => { }
+  onLeave: (isNext?: boolean) => void = () => {
+    // Lifecycle hook - override in parent
+  }
 
   constructor() {
-    this.pOnEnter = (data?: any) => {
+    this.pOnEnter = (data?: unknown) => {
       if (this.onEnter) {
         if (this.destructiveStep) {
           this.busy = true;

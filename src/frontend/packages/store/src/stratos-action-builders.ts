@@ -1,6 +1,6 @@
 import { AddApiKey, DeleteApiKey, GetAllApiKeys } from './actions/apiKey.actions';
 import {
-  AuthParams,
+  type AuthParams,
   ConnectEndpoint,
   DisconnectEndpoint,
   GetAllEndpoints,
@@ -9,7 +9,7 @@ import {
   UnregisterEndpoint,
   UpdateEndpoint,
 } from './actions/endpoint.actions';
-import { GetSystemInfo, GetSystemInfoAssociatedAction } from './actions/system.actions';
+import { GetSystemInfo, type GetSystemInfoAssociatedAction } from './actions/system.actions';
 import {
   GetUserFavoritesAction,
   RemoveUserFavoriteAction,
@@ -18,10 +18,10 @@ import {
   UpdateUserFavoriteMetadataAction,
 } from './actions/user-favourites.actions';
 import { FetchUserProfileAction, UpdateUserPasswordAction, UpdateUserProfileAction } from './actions/user-profile.actions';
-import { OrchestratedActionBuilders } from './entity-catalog/action-orchestrator/action-orchestrator';
-import { EndpointType } from './extension-types';
-import { IFavoriteMetadata, UserFavorite } from './types/user-favorites.types';
-import { UserProfileInfo, UserProfilePasswordUpdate } from './types/user-profile.types';
+import type { OrchestratedActionBuilders } from './entity-catalog/action-orchestrator/action-orchestrator';
+import type { EndpointType } from './extension-types';
+import type { IFavoriteMetadata, UserFavorite } from './types/user-favorites.types';
+import type { UserProfileInfo, UserProfilePasswordUpdate } from './types/user-profile.types';
 
 export interface EndpointActionBuilder extends OrchestratedActionBuilders {
   get: (
@@ -84,8 +84,8 @@ export const endpointActionBuilder: EndpointActionBuilder = {
   get: (guid: string) => new GetEndpoint(guid),
   getAll: (login: boolean) => new GetAllEndpoints(login),
   getMultiple: (
-    endpointGuid?: string,
-    paginationKey?: string,
+    _endpointGuid?: string,
+    _paginationKey?: string,
     args?: { login: boolean, }
   ) => new GetAllEndpoints(args ? args.login : false),
   connect: (
@@ -123,7 +123,7 @@ export const endpointActionBuilder: EndpointActionBuilder = {
   ),
   update: (
     guid: string,
-    endpointGuid: string,
+    _endpointGuid: string,
     args: {
       endpointType: EndpointType,
       // id: string,

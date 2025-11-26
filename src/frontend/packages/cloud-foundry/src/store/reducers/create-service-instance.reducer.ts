@@ -1,3 +1,4 @@
+import type { Action } from '@ngrx/store';
 import {
   SET_CREATE_SERVICE_INSTANCE,
   SET_ORG,
@@ -10,10 +11,22 @@ import {
   SET_SERVICE_INSTANCE_APP,
   RESET_CREATE_SERVICE_INSTANCE_STATE,
   RESET_CREATE_SERVICE_INSTANCE_STATE_ORG_SPACE,
-  SetCreateServiceInstanceApp,
+  type SetCreateServiceInstanceApp,
 } from '../../actions/create-service-instance.actions';
-import { CreateServiceInstanceState } from '../types/create-service-instance.types';
+import type { CreateServiceInstanceState } from '../types/create-service-instance.types';
 
+interface CreateServiceInstanceAction extends Action {
+  spaceGuid?: string;
+  cfGuid?: string;
+  orgGuid?: string;
+  spaceScoped?: boolean;
+  name?: string;
+  jsonParams?: unknown;
+  tags?: string[];
+  servicePlanGuid?: string;
+  serviceGuid?: string;
+  guid?: string;
+}
 
 const defaultState: CreateServiceInstanceState = {
   name: '',
@@ -23,13 +36,13 @@ const defaultState: CreateServiceInstanceState = {
   spaceScoped: false
 };
 
-const setCreateServiceInstanceCfDetails = (state: CreateServiceInstanceState, action: any) => ({
+const setCreateServiceInstanceCfDetails = (state: CreateServiceInstanceState, action: CreateServiceInstanceAction) => ({
   ...state,
   spaceGuid: action.spaceGuid,
   cfGuid: action.cfGuid,
   orgGuid: action.orgGuid,
 });
-const setCreateServiceInstance = (state: CreateServiceInstanceState, action: any) => ({
+const setCreateServiceInstance = (state: CreateServiceInstanceState, action: CreateServiceInstanceAction) => ({
   ...state,
   spaceScoped: action.spaceScoped,
   spaceGuid: action.spaceGuid,
@@ -38,13 +51,13 @@ const setCreateServiceInstance = (state: CreateServiceInstanceState, action: any
   tags: action.tags
 });
 
-const setSpaceScopedFlag = (state: CreateServiceInstanceState, action: any) => ({
+const setSpaceScopedFlag = (state: CreateServiceInstanceState, action: CreateServiceInstanceAction) => ({
   ...state,
   spaceScoped: action.spaceScoped,
   spaceGuid: action.spaceGuid
 });
 
-export function createServiceInstanceReducer(state: CreateServiceInstanceState = defaultState, action: any): CreateServiceInstanceState {
+export function createServiceInstanceReducer(state: CreateServiceInstanceState = defaultState, action: CreateServiceInstanceAction): CreateServiceInstanceState {
   switch (action.type) {
     case SET_SERVICE_PLAN:
       return { ...state, servicePlanGuid: action.servicePlanGuid };
@@ -56,9 +69,10 @@ export function createServiceInstanceReducer(state: CreateServiceInstanceState =
       return { ...state, serviceGuid: action.serviceGuid, servicePlanGuid: null };
     case SET_SERVICE_INSTANCE_GUID:
       return { ...state, serviceInstanceGuid: action.guid };
-    case SET_SERVICE_INSTANCE_APP:
+    case SET_SERVICE_INSTANCE_APP: {
       const scsia: SetCreateServiceInstanceApp = action as SetCreateServiceInstanceApp;
       return { ...state, bindAppGuid: scsia.appGuid, bindAppParams: scsia.params };
+    }
     case SET_SERVICE_INSTANCE_SPACE_SCOPED:
       return setSpaceScopedFlag(state, action);
     case SET_CREATE_SERVICE_INSTANCE:

@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CustomTooltipDirective, ProgressSpinnerComponent, TableCellCustom } from '@stratosui/core';
+import type { AnalysisReport } from '../../store/kube.types';
 
 @Component({
   selector: 'app-analysis-status-cell',
@@ -9,7 +10,7 @@ import { CustomTooltipDirective, ProgressSpinnerComponent, TableCellCustom } fro
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CustomTooltipDirective, ProgressSpinnerComponent]
 })
-export class AnalysisStatusCellComponent extends TableCellCustom<any> {
+export class AnalysisStatusCellComponent extends TableCellCustom<AnalysisReport> {
   // row property is inherited from TableCellCustom base class
   // No constructor needed - base class handles initialization
 }

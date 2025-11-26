@@ -1,24 +1,30 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
-import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { CustomFormFieldComponent } from '@stratosui/core';
+import { Component, type OnDestroy, type OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { ReactiveFormsModule, Validators, FormControl, type FormGroup, type AsyncValidatorFn, FormBuilder } from '@angular/forms';
+import {
+  CustomFormFieldComponent,
+  AppInputDirective,
+  AppErrorComponent,
+  ErrorStateMatcher,
+  ShowOnDirtyErrorStateMatcher,
+  CustomSlideToggleComponent,
+  StatefulIconComponent,
+  FocusDirective,
+  PageHeaderComponent,
+  StepComponent,
+  SteppersComponent,
+  type StepOnNextFunction
+} from '@stratosui/core';
 import { RouterModule } from '@angular/router';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf, Subscription } from 'rxjs';
+import { type Observable, of as observableOf, type Subscription } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
-import { CustomSlideToggleComponent } from '../../../../../core/src/shared/components/custom-slide-toggle/custom-slide-toggle.component';
 
 import { AppMetadataTypes } from '../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import { SetCFDetails, SetNewAppName } from '../../../../../cloud-foundry/src/actions/create-applications-page.actions';
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { StatefulIconComponent } from '../../../../../core/src/core/stateful-icon/stateful-icon.component';
-import { FocusDirective } from '../../../../../core/src/shared/components/focus.directive';
-import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
-import { StepComponent } from '../../../../../core/src/shared/components/stepper/step/step.component';
-import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
-import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
+import type { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import type { IApp } from '../../../cf-api.types';
 import {
   AppNameUniqueChecking,
   AppNameUniqueDirective,
@@ -44,9 +50,12 @@ interface EditApplicationForm {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    AsyncPipe,
     ReactiveFormsModule,
     RouterModule,
     CustomFormFieldComponent,
+    AppInputDirective,
+    AppErrorComponent,
     CustomSlideToggleComponent,
     PageHeaderComponent,
     SteppersComponent,
@@ -65,7 +74,7 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
 
   constructor(
     public applicationService: ApplicationService,
-    private store: Store<CFAppState>,
+    private store: Store,
     private fb: FormBuilder,
     private http: HttpClient,
   ) {
@@ -74,7 +83,7 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
       name: new FormControl('', {
         nonNullable: true,
         validators: [Validators.required],
-        asyncValidators: [this.uniqueNameValidator as any]
+        asyncValidators: [this.uniqueNameValidator.validate.bind(this.uniqueNameValidator) as AsyncValidatorFn]
       }),
       instances: new FormControl(0, {
         nonNullable: true,
@@ -92,9 +101,7 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
     });
   }
 
-  private app: any = {
-    entity: {}
-  };
+  private app: IApp<unknown> = {} as IApp<unknown>;
 
   private sub: Subscription;
 
@@ -106,20 +113,20 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
       take(1),
       map(app => app.app.entity)
     ).subscribe(app => {
-      this.app = app;
+      this.app = app as IApp<unknown>;
       this.store.dispatch(new SetCFDetails({
         cloudFoundry: this.applicationService.cfGuid,
         org: '',
-        space: this.app.space_guid,
+        space: this.app.space_guid as string,
       }));
 
-      this.store.dispatch(new SetNewAppName(this.app.name));
+      this.store.dispatch(new SetNewAppName(this.app.name as string));
       this.editAppForm.setValue({
-        name: this.app.name,
-        instances: this.app.instances,
-        memory: this.app.memory,
-        disk_quota: this.app.disk_quota,
-        enable_ssh: this.app.enable_ssh,
+        name: this.app.name as string,
+        instances: this.app.instances as number,
+        memory: this.app.memory as number,
+        disk_quota: this.app.disk_quota as number,
+        enable_ssh: this.app.enable_ssh as boolean,
       });
       // Don't want the values to change while the user is editing
       this.clearSub();
@@ -127,17 +134,17 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
   }
 
   updateApp: StepOnNextFunction = () => {
-    const updates: { [key: string]: any } = {};
+    const updates: Partial<IApp> = {};
     // We will only send the values that were actually edited
     const formValue = this.editAppForm.value;
     for (const key of Object.keys(formValue)) {
-      const control = (this.editAppForm.controls as any)[key];
+      const control = this.editAppForm.controls[key as keyof typeof this.editAppForm.controls];
       if (control && !control.pristine) {
-        updates[key] = (formValue as any)[key];
+        (updates as Record<string, unknown>)[key] = formValue[key as keyof typeof formValue];
       }
     }
 
-    let obs$: Observable<any>;
+    let obs$: Observable<{ success: boolean; message?: string; }>;
     if (Object.keys(updates).length) {
       // We had at least one value to change - send update action
       obs$ = this.applicationService.updateApplication(updates, [AppMetadataTypes.SUMMARY]).pipe(map(v => (

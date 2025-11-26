@@ -1,8 +1,8 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
-import { Component, Input, OnDestroy, computed, signal , ChangeDetectionStrategy } from '@angular/core';
-import { ReactiveFormsModule, FormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { Component, Input, type OnDestroy, signal , ChangeDetectionStrategy } from '@angular/core';
+import { ReactiveFormsModule, FormsModule, Validators, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
 
@@ -12,22 +12,22 @@ interface CreateEditServiceInstanceForm {
   syslog_drain_url: FormControl<string>;
   credentials: FormControl<string>;
   route_service_url: FormControl<string>;
-  tags: FormControl<any[]>;
+  tags: FormControl<string[]>;
 }
 
 interface BindExistingInstanceForm {
   serviceInstances: FormControl<string>;
 }
 
-import { StatefulIconComponent, safeUnsubscribe, urlValidationExpression, environment, StepOnNextResult, isValidJsonValidator } from '@stratosui/core';
+import { StatefulIconComponent, safeUnsubscribe, urlValidationExpression, environment, type StepOnNextResult, isValidJsonValidator, AppInputDirective, AppErrorComponent } from '@stratosui/core';
 import { AppNameUniqueDirective } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
 import { Store } from '@ngrx/store';
-import { combineLatest as obsCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+import { combineLatest as obsCombineLatest, type Observable, of as observableOf, type Subscription } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
-import { APIResource } from '@stratosui/store';
+import type { APIResource } from '@stratosui/store';
 
-import { IUserProvidedServiceInstanceData } from '../../../../actions/user-provided-service.actions';
-import { CFAppState } from '../../../../cf-app-state';
+import type { IUserProvidedServiceInstanceData } from '../../../../actions/user-provided-service.actions';
+import type { CFAppState } from '../../../../cf-app-state';
 import {
   serviceBindingEntityType,
   userProvidedServiceInstanceEntityType,
@@ -36,7 +36,7 @@ import { createEntityRelationKey } from '../../../../entity-relations/entity-rel
 import {
   selectCreateServiceInstance,
 } from '../../../../store/selectors/create-service-instance.selectors';
-import { IUserProvidedServiceInstance } from '../../../../cf-api-svc.types';
+import type { IUserProvidedServiceInstance } from '../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { AppNameUniqueChecking } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
 import { CloudFoundryUserProvidedServicesService } from '../../../services/cloud-foundry-user-provided-services.service';
@@ -59,7 +59,9 @@ const { proxyAPIVersion, cfAPIVersion } = environment;
     CustomSelectComponent,
     CustomOptionComponent,
     AppNameUniqueDirective,
-    StatefulIconComponent
+    StatefulIconComponent,
+    AppInputDirective,
+    AppErrorComponent
   ]
 })
 export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
@@ -68,10 +70,10 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
     private route: ActivatedRoute,
     private upsService: CloudFoundryUserProvidedServicesService,
     public modeService: CsiModeService,
-    private store: Store<CFAppState>,
+    private store: Store,
   ) {
     const { endpointId, serviceInstanceId } =
-      route && route.snapshot ? route.snapshot.params : { endpointId: null, serviceInstanceId: null };
+      route?.snapshot ? route.snapshot.params : { endpointId: null, serviceInstanceId: null };
     this.isUpdate = endpointId && serviceInstanceId;
 
     this.createEditServiceInstance = new FormGroup<CreateEditServiceInstanceForm>({
@@ -79,7 +81,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       syslog_drain_url: new FormControl('', { validators: [Validators.pattern(urlValidationExpression)], nonNullable: true }),
       credentials: new FormControl('', { validators: isValidJsonValidator(), nonNullable: true }),
       route_service_url: new FormControl('', { validators: [Validators.pattern(urlValidationExpression)], nonNullable: true }),
-      tags: new FormControl<any[]>([], { nonNullable: true }),
+      tags: new FormControl<string[]>([], { nonNullable: true }),
     });
     this.bindExistingInstance = new FormGroup<BindExistingInstanceForm>({
       serviceInstances: new FormControl('', { validators: [Validators.required], nonNullable: true }),
@@ -240,8 +242,8 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
 
   public getUniqueRequest = (name: string) => {
     const params = new HttpParams()
-      .set('q', 'name:' + name)
-      .append('q', 'space_guid:' + this.spaceGuid);
+      .set('q', `name:${name}`)
+      .append('q', `space_guid:${this.spaceGuid}`);
     const headers = new HttpHeaders({
       'x-cap-cnsi-list': this.cfGuid,
       'x-cap-passthrough': 'true'
@@ -274,14 +276,14 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       switchMap(([request, state]) => {
         const success = !request.error;
         const redirect = !request.error;
-        if (!!state.bindAppGuid && success) {
-          const newGuid = request.response.result[0];
+        if (!!state?.bindAppGuid && success) {
+          const newGuid = (request.response as { result: string[] }).result[0];
           return this.createApplicationServiceBinding(newGuid, state);
         }
         return observableOf({
           success,
           redirect,
-          message: success ? '' : 'Failed to create User Provided Service Instance. Reason: "' + request.message + '"'
+          message: success ? '' : `Failed to create User Provided Service Instance. Reason: "${request.message}"`
         });
       })
     );
@@ -289,19 +291,19 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
 
   private onNextBind(): Observable<StepOnNextResult> {
     return this.store.select(selectCreateServiceInstance).pipe(
-      switchMap(data => this.createApplicationServiceBinding(this.bindExistingInstance.controls.serviceInstances.value, data))
+      switchMap(data => this.createApplicationServiceBinding(this.bindExistingInstance.controls.serviceInstances.value, data!))
     );
   }
 
-  private createApplicationServiceBinding(serviceGuid: string, data: any): Observable<StepOnNextResult> {
-    return this.modeService.createApplicationServiceBinding(serviceGuid, data.cfGuid, data.bindAppGuid, data.bindAppParams)
+  private createApplicationServiceBinding(serviceGuid: string, data: { cfGuid?: string; bindAppGuid?: string; bindAppParams?: object }): Observable<StepOnNextResult> {
+    return this.modeService.createApplicationServiceBinding(serviceGuid, data.cfGuid!, data.bindAppGuid!, data.bindAppParams)
       .pipe(
         map(req => {
           if (!req.success) {
             return { success: false, message: `Failed to create service instance binding: ${req.message}` };
           } else {
             // Refetch env vars for app, since they have been changed by CF
-            cfEntityCatalog.appEnvVar.api.getMultiple(data.bindAppGuid, data.cfGuid);
+            cfEntityCatalog.appEnvVar.api.getMultiple(data.bindAppGuid!, data.cfGuid!);
             return { success: true, redirect: true };
           }
         })
@@ -370,7 +372,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
     }
   }
 
-  public removeTag(tag: any): void {
+  public removeTag(tag: { label: string }): void {
     const index = this.tags.indexOf(tag);
 
     if (index >= 0) {

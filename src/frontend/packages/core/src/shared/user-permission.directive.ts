@@ -1,8 +1,8 @@
-import { Directive, Input, OnDestroy, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
-import { combineLatest, Observable, Subscription } from 'rxjs';
+import { Directive, Input, type OnDestroy, type OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
+import { combineLatest, type Observable, type Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { PermissionTypes } from '../core/permissions/current-user-permissions.config';
+import type { PermissionTypes } from '../core/permissions/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../core/permissions/current-user-permissions.service';
 
 @Directive({

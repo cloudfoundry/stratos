@@ -1,7 +1,7 @@
-import { inject, Inject, Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { AppState } from '../../app-state';
+import type { AppState } from '../../app-state';
 import type { EntityServiceFactory } from '../../entity-service-factory.service';
 import type { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../reducers/pagination-reducer/pagination-reducer.helper';

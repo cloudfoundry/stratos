@@ -1,19 +1,19 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BaseChartDirective } from 'ng2-charts';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../../../cloud-foundry/src/features/applications/application.service';
-import { CardCell, IListRowCell } from '../../../../../../core/src/shared/components/list/list.types';
-import { AppState } from '../../../../../../store/src/app-state';
+import { CardCell, type IListRowCell } from '@stratosui/core';
+import type { AppState, GeneralEntityAppState } from '../../../../../../store/src/app-state';
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { APIResource } from '../../../../../../store/src/types/api.types';
+import type { APIResource } from '../../../../../../store/src/types/api.types';
 import { AutoscalerConstants, buildLegendData } from '../../../../core/autoscaler-helpers/autoscaler-util';
-import { AutoscalerPaginationParams, GetAppAutoscalerAppMetricAction } from '../../../../store/app-autoscaler.actions';
-import {
+import { type AutoscalerPaginationParams, GetAppAutoscalerAppMetricAction } from '../../../../store/app-autoscaler.actions';
+import type {
   AppAutoscalerMetricData,
   AppAutoscalerMetricDataPoint,
   AppScalingTrigger,
@@ -30,6 +30,8 @@ import { AppAutoscalerComboChartComponent } from './combo-chart/combo-chart.comp
   standalone: true,
   imports: [
     CommonModule,
+    AsyncPipe,
+    DatePipe,
     BaseChartDirective,
     AppAutoscalerComboChartComponent
   ]
@@ -58,11 +60,11 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
     domain: ['#01579b']
   };
 
-  public paramsMetricsEnd: number = (new Date()).getTime();
+  public paramsMetricsEnd: number = Date.now();
   public paramsMetricsStart: number = this.paramsMetricsEnd - 30 * 60 * 1000;
   public paramsMetrics: AutoscalerPaginationParams = {
-    'start-time': this.paramsMetricsStart + '000000',
-    'end-time': this.paramsMetricsEnd + '000000',
+    'start-time': `${this.paramsMetricsStart}000000`,
+    'end-time': `${this.paramsMetricsEnd}000000`,
     page: '1',
     'results-per-page': '10000000',
     'order-direction': 'asc'
@@ -74,11 +76,11 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
   set row(row: APIResource<AppScalingTrigger>) {
     super.row = row;
     if (row) {
-      if (row.entity.query && row.entity.query.params) {
+      if (row.entity.query?.params) {
         this.paramsMetricsStart = row.entity.query.params.start * 1000;
         this.paramsMetricsEnd = row.entity.query.params.end * 1000;
-        this.paramsMetrics['start-time'] = this.paramsMetricsStart + '000000';
-        this.paramsMetrics['end-time'] = this.paramsMetricsEnd + '000000';
+        this.paramsMetrics['start-time'] = `${this.paramsMetricsStart}000000`;
+        this.paramsMetrics['end-time'] = `${this.paramsMetricsEnd}000000`;
 
         this.appAutoscalerAppMetricLegend = this.getLegend2(row.entity);
         this.metricType = AutoscalerConstants.getMetricFromMetricId(row.metadata.guid);
@@ -89,7 +91,7 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
 
   constructor(
     private appService: ApplicationService,
-    private store: Store<AppState>,
+    private store: Store<GeneralEntityAppState>,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private cdr: ChangeDetectorRef
   ) {
@@ -102,7 +104,7 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
   getLegend2(trigger: AppScalingTrigger) {
     const legendColor = buildLegendData(trigger);
     const legendValue: AppAutoscalerMetricDataPoint[] = [];
-    legendColor.map((item) => {
+    legendColor.forEach((item) => {
       legendValue.push({
         name: item.name,
         value: 1

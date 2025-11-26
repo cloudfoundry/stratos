@@ -1,14 +1,14 @@
-import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Observable } from 'rxjs';
+import { Component, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import type { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 import {
   ApplicationMonitorService,
 } from '../../../../../../cloud-foundry/src/features/applications/application-monitor.service';
 import { ApplicationService } from '../../../../../../cloud-foundry/src/features/applications/application.service';
-import { UptimePipe } from '../../../../../../core/src/shared/pipes/uptime.pipe';
-import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
+import { UptimePipe } from '@stratosui/core';
+import { MetadataItemComponent } from '@stratosui/core';
 
 @Component({
   selector: 'app-card-app-uptime',

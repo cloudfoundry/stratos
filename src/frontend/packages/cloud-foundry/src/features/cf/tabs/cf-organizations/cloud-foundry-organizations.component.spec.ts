@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { of } from 'rxjs';
@@ -24,10 +24,25 @@ describe('CloudFoundryOrganizationsComponent', () => {
     createGetAllOrganizations: vi.fn()
   };
 
-  // Mock the static method
+  // Mock the static method - return a partial mock that satisfies PaginatedAction
   CloudFoundryEndpointService.createGetAllOrganizations = vi.fn(() => ({
-    type: 'GET_ALL_ORGANIZATIONS'
-  }));
+    type: 'GET_ALL_ORGANIZATIONS',
+    paginationKey: 'test-pagination-key',
+    entityType: 'organization',
+    endpointType: 'cf',
+    endpointGuid: 'test-cf-guid',
+    includeRelations: [],
+    populateMissing: true,
+    flattenPagination: true,
+    actions: ['GET_ORGANIZATIONS', 'GET_ORGANIZATIONS_SUCCESS', 'GET_ORGANIZATIONS_FAILED'],
+    initialParams: {
+      page: 1,
+      'results-per-page': 100,
+      'order-direction': 'desc',
+      'order-direction-field': 'name',
+      'order-by': 'name'
+    }
+  } as any));
 
   const mockCurrentUserPermissionsService = {
     can: vi.fn(() => of(true))

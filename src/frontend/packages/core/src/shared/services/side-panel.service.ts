@@ -1,14 +1,13 @@
 import { DOCUMENT } from '@angular/common';
 import {
-  ComponentFactory,
+  type ComponentFactory,
   ComponentFactoryResolver,
-  ComponentRef,
+  type ComponentRef,
   Inject,
   Injectable,
-  ViewContainerRef,
+  type Type,
+  type ViewContainerRef,
   signal,
-  computed,
-  Signal,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { filter, tap } from 'rxjs/operators';
@@ -66,7 +65,7 @@ export class SidePanelService {
    * Show the preview panel in the given mode
    */
   public showMode(
-    mode: SidePanelMode, component: object, props?: { [key: string]: any }, componentFactoryResolver?: ComponentFactoryResolver) {
+    mode: SidePanelMode, component: object, props?: { [key: string]: unknown }, componentFactoryResolver?: ComponentFactoryResolver) {
     if (!this.container) {
       throw new Error('SidePanelService: container must be set');
     }
@@ -79,14 +78,14 @@ export class SidePanelService {
   /**
    * Show the preview panel in a preview style - does not overlap title bar and colours are more muted
    */
-  public show(component: object, props?: { [key: string]: any }, componentFactoryResolver?: ComponentFactoryResolver) {
+  public show(component: object, props?: { [key: string]: unknown }, componentFactoryResolver?: ComponentFactoryResolver) {
     this.showMode(SidePanelMode.Normal, component, props, componentFactoryResolver);
   }
 
   /**
    * Show the preview panel in a modal style - full height overlaps title bar
    */
-  public showModal(component: object, props?: { [key: string]: any }, componentFactoryResolver?: ComponentFactoryResolver) {
+  public showModal(component: object, props?: { [key: string]: unknown }, componentFactoryResolver?: ComponentFactoryResolver) {
     this.showMode(SidePanelMode.Modal, component, props, componentFactoryResolver);
   }
 
@@ -113,18 +112,18 @@ export class SidePanelService {
 
   render(
     component: object,
-    props: { [key: string]: any },
+    props: { [key: string]: unknown },
     componentFactoryResolver: ComponentFactoryResolver = this.componentFactoryResolver
   ) {
     if (this.container.length) {
       this.container.remove(0);
     }
 
-    const factory: ComponentFactory<any> = componentFactoryResolver.resolveComponentFactory(component as any);
-    const componentRef: ComponentRef<any> = this.container.createComponent(factory);
+    const factory: ComponentFactory<unknown> = componentFactoryResolver.resolveComponentFactory(component as Type<unknown>);
+    const componentRef: ComponentRef<unknown> = this.container.createComponent(factory);
 
     if (props) {
-      componentRef.instance.setProps(props);
+      (componentRef.instance as { setProps?: (p: Record<string, unknown>) => void }).setProps?.(props);
     }
   }
 
@@ -136,7 +135,7 @@ export class SidePanelService {
   private setupRouterListener() {
     this.router.events.pipe(
       filter(() => !!this.container),
-      tap((e) => this.hide()))
+      tap((_e) => this.hide()))
       .subscribe();
   }
 }

@@ -2,7 +2,7 @@ import { InjectionToken } from '@angular/core';
 
 // Type aliases for Material Design replacements
 // MatSnackBar is exported from tailwind-snackbar.service
-export type MatSnackBarRef<T> = any; // Will be replaced with TailwindSnackBarRef<T>
+export type MatSnackBarRef<_T> = unknown; // Will be replaced with TailwindSnackBarRef<T>
 // SimpleSnackBar is exported from tailwind-snackbar.service
 
 // Re-export Tailwind services directly (no aliases)
@@ -17,25 +17,25 @@ export {
 export {
   TailwindDefaultErrorStateMatcher as DefaultErrorStateMatcher
 } from './tailwind-error-state-matcher';
-export type MatSidenav = any; // Will be replaced with TailwindSidenav
-export type MatSidenavContainer = any; // Will be replaced with TailwindSidenavService
+export { TailwindSidenav as MatSidenav } from './tailwind-sidenav.service';
+export type MatSidenavContainer = unknown; // Will be replaced with TailwindSidenavService
 // MatSort is exported from tailwind-sort.service
-export type MatSortHeader = any; // Will be replaced with TailwindSortHeaderDirective
+export type MatSortHeader = unknown; // Will be replaced with TailwindSortHeaderDirective
 // MatPaginator is exported from tailwind-paginator.service
 // PageEvent is exported from tailwind-paginator.service
-export type MatDrawer = any; // Will be replaced with TailwindSidenav
+export { TailwindSidenav as MatDrawer } from './tailwind-sidenav.service';
 
 // Additional Angular Material types
-export type MatChipInputEvent = any;
-export type MatRadioChange = any;
-export type MatCheckboxChange = any;
-export type MatIcon = any;
-export type Sort = any; // Will be replaced with TailwindSort
+export type MatChipInputEvent = unknown;
+export type MatRadioChange = unknown;
+export type MatCheckboxChange = unknown;
+export type MatIcon = unknown;
+export type Sort = unknown; // Will be replaced with TailwindSort
 
 // Angular Flex Layout types (replaced with Tailwind CSS classes)
-export type FlexLayoutModule = any;
-export type FlexModule = any;
-export type GridModule = any;
+export type FlexLayoutModule = unknown;
+export type FlexModule = unknown;
+export type GridModule = unknown;
 
 // Full Material component implementations
 export {
@@ -52,7 +52,7 @@ export {
 } from './tailwind-dialog.service';
 
 // Snackbar data token
-export const MAT_SNACK_BAR_DATA = new InjectionToken<any>('StratosSnackBarData');
+export const MAT_SNACK_BAR_DATA = new InjectionToken<unknown>('StratosSnackBarData');
 
 // Re-export our Tailwind implementations
 export {

@@ -1,4 +1,4 @@
-import { Directive, Input, ElementRef, Renderer2, OnDestroy, HostListener } from '@angular/core';
+import { Directive, Input, ElementRef, Renderer2, type OnDestroy, HostListener } from '@angular/core';
 
 @Directive({
   selector: '[matTooltip]',
@@ -13,8 +13,8 @@ export class CustomTooltipDirective implements OnDestroy {
   @Input('matTooltipDisabled') disabled: boolean = false;
 
   private tooltipElement: HTMLElement | null = null;
-  private showTimeout: any;
-  private hideTimeout: any;
+  private showTimeout: ReturnType<typeof setTimeout> | null = null;
+  private hideTimeout: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private elementRef: ElementRef,
@@ -22,7 +22,7 @@ export class CustomTooltipDirective implements OnDestroy {
   ) {}
 
   @HostListener('mouseenter', ['$event'])
-  onMouseEnter(event: MouseEvent) {
+  onMouseEnter(_event: MouseEvent) {
     if (!this.disabled && this.tooltipText && this.tooltipText.trim()) {
       this.clearTimeouts();
       this.showTimeout = setTimeout(() => {
@@ -32,7 +32,7 @@ export class CustomTooltipDirective implements OnDestroy {
   }
 
   @HostListener('mouseleave', ['$event'])
-  onMouseLeave(event: MouseEvent) {
+  onMouseLeave(_event: MouseEvent) {
     this.clearTimeouts();
     this.hideTimeout = setTimeout(() => {
       this.hideTooltip();

@@ -1,5 +1,6 @@
-import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
-import { UrlValidatorConfig, ValidationErrorKey } from './validation.types';
+import type {AbstractControl} from '@angular/forms';
+import type {ValidationErrors, ValidatorFn} from '@angular/forms';
+import { type UrlValidatorConfig, ValidationErrorKey } from './validation.types';
 
 /**
  * Default URL validator configuration
@@ -18,10 +19,10 @@ const DEFAULT_URL_CONFIG: UrlValidatorConfig = {
  */
 const URL_PATTERNS = {
   // Domain-based URL: http(s)://example.com or example.com
-  domain: /^(https?:\/\/)?([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)*[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\:[0-9]{1,5})?(\/.*)?$/,
+  domain: /^(https?:\/\/)?([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)*[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(:[0-9]{1,5})?(\/.*)?$/,
 
   // IP-based URL: http(s)://1.2.3.4 or 1.2.3.4
-  ipAddress: /^(https?:\/\/)?\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(\:[0-9]{1,5})?(\/.*)?$/,
+  ipAddress: /^(https?:\/\/)?\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:[0-9]{1,5})?(\/.*)?$/,
 
   // Protocol extraction
   protocol: /^([a-z][a-z0-9+.-]*):\/\//i,

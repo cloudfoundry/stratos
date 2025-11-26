@@ -1,8 +1,8 @@
 import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 
 import { TableCellCustom } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { IService, IServiceExtra } from '../../../../../../cf-api-svc.types';
+import type { APIResource } from '@stratosui/store';
+import type { IService, IServiceExtra } from '../../../../../../cf-api-svc.types';
 
 @Component({
   selector: 'app-table-cell-service-provider',

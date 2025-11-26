@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
@@ -14,10 +14,10 @@ import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import {
   EntityCatalogHelpers,
   EntityCatalogHelper,
-  EntityCatalogEntityConfig,
+  type EntityCatalogEntityConfig,
   endpointEntityType,
   stratosEntityFactory,
-  NormalizedResponse,
+  type NormalizedResponse,
   WrapperRequestActionSuccess,
   EntityServiceFactory,
   appReducers,

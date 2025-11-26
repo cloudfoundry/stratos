@@ -1,10 +1,10 @@
 import { AsyncPipe, DatePipe } from '@angular/common';
-import {Component, inject, ChangeDetectionStrategy } from '@angular/core';
-import { Observable } from 'rxjs';
+import {Component, inject, } from '@angular/core';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { MetadataItemComponent } from '@stratosui/core';
-import { CaaspNodeData, KubernetesEndpointService } from '../../../../services/kubernetes-endpoint.service';
+import { type CaaspNodeData, KubernetesEndpointService } from '../../../../services/kubernetes-endpoint.service';
 import { KubernetesNodeService } from '../../../../services/kubernetes-node.service';
 
 @Component({
@@ -34,7 +34,7 @@ export class KubernetesNodeSummaryCardComponent {
     this.caaspNode$ = this.kubeNodeService.nodeEntity$.pipe(
       map(node => {
         const nodeData = this.kubeEndpointService.getCaaspNodeData(node);
-        return !!nodeData.version ? nodeData : null;
+        return nodeData.version ? nodeData : null;
       }),
     );
 

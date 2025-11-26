@@ -1,7 +1,7 @@
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 
-import { EntityRequestAction } from '../types/request.types';
-import { IFavoriteMetadata, UserFavorite } from '../types/user-favorites.types';
+import type { EntityRequestAction } from '../types/request.types';
+import { type IFavoriteMetadata, UserFavorite } from '../types/user-favorites.types';
 
 export class EntityDeleteCompleteAction implements Action {
 

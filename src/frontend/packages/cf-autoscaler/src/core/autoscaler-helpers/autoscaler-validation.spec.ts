@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { AppRecurringSchedule, AppSpecificDate } from '../../store/app-autoscaler.types';
+import type { AppRecurringSchedule, AppSpecificDate } from '../../store/app-autoscaler.types';
 import {
   dateIsAfter,
   dateTimeIsSameOrAfter,

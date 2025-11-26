@@ -1,17 +1,18 @@
-import { CommonModule } from '@angular/common';
-import { Component, Injector, Input, OnDestroy, signal , ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { Component, inject, Injector, Input, type OnDestroy, signal , ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
   combineLatest as observableCombineLatest,
-  Observable,
+  type Observable,
   of as observableOf,
-  Subscription,
+  type Subscription,
 } from 'rxjs';
 import { filter, first, map, startWith } from 'rxjs/operators';
+import type { GeneralEntityAppState } from '@stratosui/store';
 
-import { safeUnsubscribe, LogViewerComponent, StepOnNextFunction, SnackBarService } from '@stratosui/core';
+import { safeUnsubscribe, LogViewerComponent, type StepOnNextFunction, SnackBarService } from '@stratosui/core';
 import { RouterNav } from '@stratosui/store';
-import { CFAppState } from '@stratosui/cloud-foundry';
+import type { CFAppState } from '@stratosui/cloud-foundry';
 import { DeleteDeployAppSection } from '../../../../actions/deploy-applications.actions';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { CfAppsDataSource } from '../../../../shared/components/list/list-types/app/cf-apps-data-source';
@@ -51,12 +52,12 @@ export class DeployApplicationStep3Component implements OnDestroy {
 
   public busy = false;
 
-  constructor(
-    private store: Store<CFAppState>,
-    private snackBarService: SnackBarService,
-    public cfOrgSpaceService: CfOrgSpaceDataService,
-    private injector: Injector
-  ) {
+  private readonly store = inject(Store<GeneralEntityAppState>);
+  private readonly snackBarService = inject(SnackBarService);
+  public readonly cfOrgSpaceService = inject(CfOrgSpaceDataService);
+  private readonly injector = inject(Injector);
+
+  constructor() {
     this.valid$ = observableOf(false);
     this.closeable$ = observableOf(false);
   }
@@ -100,7 +101,9 @@ export class DeployApplicationStep3Component implements OnDestroy {
         })
       );
 
-    this.busySub = this.deployer.status$.asObservable().subscribe(status => this.busy = status.deploying);
+    this.busySub = this.deployer.status$.asObservable().subscribe(status => {
+      this.busy = status.deploying;
+    });
 
     this.showOverlay$ = this.deployer.status$.asObservable().pipe(
       map(status => {

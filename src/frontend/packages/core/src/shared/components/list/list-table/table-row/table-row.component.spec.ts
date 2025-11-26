@@ -1,13 +1,13 @@
 import { CdkTableModule } from '@angular/cdk/table';
-import {  Component, DebugElement, provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {  Component, type DebugElement, provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of as observableOf } from 'rxjs';
 
 import { CoreModule } from '../../../../../core/core.module';
-import { ITableColumn } from '../table.types';
+import type { ITableColumn } from '../table.types';
 import { TableCellComponent } from '../table-cell/table-cell.component';
 import { TableRowExpandedService } from './table-row-expanded-service';
 import { TableRowComponent } from './table-row.component';
@@ -102,7 +102,7 @@ describe('TableRowComponent', () => {
       template: '<div>{{config?.testValue}}</div>'
     })
     class MockCellComponent {
-      config: any;
+      config: unknown;
     }
 
     beforeEach(() => {
@@ -113,7 +113,7 @@ describe('TableRowComponent', () => {
     it('should pass static cellConfig object to table-cell component', () => {
       // Arrange
       const staticConfig = { testValue: 'static-value', enabled: true };
-      const columns: ITableColumn<any>[] = [
+      const columns: ITableColumn<unknown>[] = [
         {
           columnId: 'test',
           cellComponent: MockCellComponent,
@@ -124,28 +124,28 @@ describe('TableRowComponent', () => {
 
       configComponent.columns = columns;
       configComponent.row = testRow;
-      configComponent.dataSource = {} as any;
+      configComponent.dataSource = {} as typeof configComponent.dataSource;
 
       // Act
       configFixture.detectChanges();
 
       // Assert
       const tableCellDebug: DebugElement = configFixture.debugElement.query(By.directive(TableCellComponent));
-      expect(tableCellDebug).toBeTruthy('TableCellComponent should be rendered');
+      expect(tableCellDebug, 'TableCellComponent should be rendered').toBeTruthy();
 
-      const tableCellInstance = tableCellDebug.componentInstance as TableCellComponent<any>;
+      const tableCellInstance = tableCellDebug.componentInstance as TableCellComponent<typeof testRow>;
       expect(tableCellInstance.config).toEqual(staticConfig);
       expect(tableCellInstance.config).not.toBe(columns[0]); // Should not be entire column,
     });
 
     it('should evaluate cellConfig function with row data', () => {
       // Arrange
-      const configFunction = vi.fn().mockImplementation((row: any) => ({
+      const configFunction = vi.fn().mockImplementation((row: { id: number; name: string; active: boolean }) => ({
         testValue: `dynamic-${row.id}`,
         enabled: row.active,
       }));
 
-      const columns: ITableColumn<any>[] = [
+      const columns: ITableColumn<unknown>[] = [
         {
           columnId: 'test',
           cellComponent: MockCellComponent,
@@ -156,7 +156,7 @@ describe('TableRowComponent', () => {
 
       configComponent.columns = columns;
       configComponent.row = testRow;
-      configComponent.dataSource = {} as any;
+      configComponent.dataSource = {} as typeof configComponent.dataSource;
 
       // Act
       configFixture.detectChanges();
@@ -164,7 +164,7 @@ describe('TableRowComponent', () => {
       // Assert
       expect(configFunction).toHaveBeenCalledWith(testRow);
       const tableCellDebug: DebugElement = configFixture.debugElement.query(By.directive(TableCellComponent));
-      const tableCellInstance = tableCellDebug.componentInstance as TableCellComponent<any>;
+      const tableCellInstance = tableCellDebug.componentInstance as TableCellComponent<unknown>;
 
       expect(tableCellInstance.config).toEqual({
         testValue: 'dynamic-42',
@@ -174,7 +174,7 @@ describe('TableRowComponent', () => {
 
     it('should handle missing cellConfig gracefully', () => {
       // Arrange
-      const columns: ITableColumn<any>[] = [
+      const columns: ITableColumn<unknown>[] = [
         {
           columnId: 'test',
           cellComponent: MockCellComponent
@@ -185,7 +185,7 @@ describe('TableRowComponent', () => {
 
       configComponent.columns = columns;
       configComponent.row = testRow;
-      configComponent.dataSource = {} as any;
+      configComponent.dataSource = {} as typeof configComponent.dataSource;
 
       // Act & Assert - should not throw
       expect(() => {
@@ -193,13 +193,13 @@ describe('TableRowComponent', () => {
       }).not.toThrow();
 
       const tableCellDebug: DebugElement = configFixture.debugElement.query(By.directive(TableCellComponent));
-      const tableCellInstance = tableCellDebug.componentInstance as TableCellComponent<any>;
+      const tableCellInstance = tableCellDebug.componentInstance as TableCellComponent<unknown>;
       expect(tableCellInstance.config).toBeUndefined();
     });
 
     it('should handle null cellConfig gracefully', () => {
       // Arrange
-      const columns: ITableColumn<any>[] = [
+      const columns: ITableColumn<unknown>[] = [
         {
           columnId: 'test',
           cellComponent: MockCellComponent,
@@ -210,7 +210,7 @@ describe('TableRowComponent', () => {
 
       configComponent.columns = columns;
       configComponent.row = testRow;
-      configComponent.dataSource = {} as any;
+      configComponent.dataSource = {} as typeof configComponent.dataSource;
 
       // Act & Assert - should not throw
       expect(() => {
@@ -218,17 +218,17 @@ describe('TableRowComponent', () => {
       }).not.toThrow();
 
       const tableCellDebug: DebugElement = configFixture.debugElement.query(By.directive(TableCellComponent));
-      const tableCellInstance = tableCellDebug.componentInstance as TableCellComponent<any>;
+      const tableCellInstance = tableCellDebug.componentInstance as TableCellComponent<unknown>;
       expect(tableCellInstance.config).toBeNull();
     });
 
     it('should re-evaluate function config when row changes', async () => {
       // Arrange
-      const configFunction = vi.fn().mockImplementation((row: any) => ({
+      const configFunction = vi.fn().mockImplementation((row: { id: number; name: string; active: boolean }) => ({
         testValue: `row-${row.id}`
       }));
 
-      const columns: ITableColumn<any>[] = [
+      const columns: ITableColumn<unknown>[] = [
         {
           columnId: 'test',
           cellComponent: MockCellComponent,
@@ -238,7 +238,7 @@ describe('TableRowComponent', () => {
 
       configComponent.columns = columns;
       configComponent.row = { id: 1 };
-      configComponent.dataSource = {} as any;
+      configComponent.dataSource = {} as typeof configComponent.dataSource;
 
       // Act - Initial render
       configFixture.detectChanges();
@@ -259,7 +259,7 @@ describe('TableRowComponent', () => {
 
     it('should not pass entire column object as config', () => {
       // Arrange
-      const columns: ITableColumn<any>[] = [
+      const columns: ITableColumn<unknown>[] = [
         {
           columnId: 'test',
           cellComponent: MockCellComponent,
@@ -272,20 +272,20 @@ describe('TableRowComponent', () => {
 
       configComponent.columns = columns;
       configComponent.row = testRow;
-      configComponent.dataSource = {} as any;
+      configComponent.dataSource = {} as typeof configComponent.dataSource;
 
       // Act
       configFixture.detectChanges();
 
       // Assert
       const tableCellDebug: DebugElement = configFixture.debugElement.query(By.directive(TableCellComponent));
-      const tableCellInstance = tableCellDebug.componentInstance as TableCellComponent<any>;
+      const tableCellInstance = tableCellDebug.componentInstance as TableCellComponent<unknown>;
 
       // Config should only contain cellConfig, not have columnId, cellFlex, sort, etc.
       expect(tableCellInstance.config).toEqual({ testValue: 'correct-config' });
-      expect((tableCellInstance.config as any)?.columnId).toBeUndefined();
-      expect((tableCellInstance.config as any)?.cellFlex).toBeUndefined();
-      expect((tableCellInstance.config as any)?.sort).toBeUndefined();
+      expect((tableCellInstance.config as Record<string, unknown>)?.columnId).toBeUndefined();
+      expect((tableCellInstance.config as Record<string, unknown>)?.cellFlex).toBeUndefined();
+      expect((tableCellInstance.config as Record<string, unknown>)?.sort).toBeUndefined();
     });
   });
 });

@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { selectSessionData, GeneralEntityAppState, UserEndpointsEnabled } from '@stratosui/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
 @Injectable({

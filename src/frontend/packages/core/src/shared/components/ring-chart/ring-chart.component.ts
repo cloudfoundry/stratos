@@ -1,7 +1,12 @@
-import { ChangeDetectionStrategy, Component, Input, OnChanges, OnInit, ViewEncapsulation  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, type OnChanges, type OnInit, ViewEncapsulation  } from '@angular/core';
 
-import { ChartConfiguration } from 'chart.js';
+import type { ChartConfiguration } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
+
+export interface RingChartDataItem {
+  name: string;
+  value: number;
+}
 
 @Component({
   selector: 'app-ring-chart',
@@ -16,9 +21,9 @@ import { BaseChartDirective } from 'ng2-charts';
 })
 export class RingChartComponent implements OnInit, OnChanges {
 
-  domain: any[] = [];
+  domain: string[] = [];
   chartJsData: ChartConfiguration['data'] = { labels: [], datasets: [] };
-  chartOptions: any = {
+  chartOptions: Record<string, unknown> = {
     responsive: true,
     maintainAspectRatio: false,
     cutout: '70%',
@@ -29,17 +34,23 @@ export class RingChartComponent implements OnInit, OnChanges {
     }
   };
 
-  @Input() data: any[] = [];
+  @Input() data: RingChartDataItem[] = [];
   @Input() label = 'Total';
-  @Input() scheme: any = 'cool';
-  @Input() customColors: any[] = [];
+  @Input() scheme: unknown = 'cool';
+  @Input() customColors: unknown[] = [];
 
-  @Input() onClick: ($event: Event) => void = () => { };
-  @Input() onActivate: ($event: Event) => void = () => { };
-  @Input() onDeactivate: ($event: Event) => void = () => { };
-  @Input() valueFormatting: (value: number) => any = value => value;
-  @Input() nameFormatting: (value: string) => any = label => label;
-  @Input() percentageFormatting: (value: number) => any = percentage => percentage;
+  @Input() onClick: ($event: Event) => void = () => {
+    // Event handler - override in parent
+  };
+  @Input() onActivate: ($event: Event) => void = () => {
+    // Event handler - override in parent
+  };
+  @Input() onDeactivate: ($event: Event) => void = () => {
+    // Event handler - override in parent
+  };
+  @Input() valueFormatting: (value: number) => string | number = value => value;
+  @Input() nameFormatting: (value: string) => string = label => label;
+  @Input() percentageFormatting: (value: number) => string | number = percentage => percentage;
 
   ngOnInit() {
     if (!this.data) {
@@ -72,7 +83,7 @@ export class RingChartComponent implements OnInit, OnChanges {
 
   getBackgroundColors(): string[] {
     if (this.customColors && this.customColors.length > 0) {
-      return this.customColors.map(c => c.value || c);
+      return this.customColors.map((c: any) => c.value || c);
     }
     // Default color scheme
     const defaultColors = ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA'];
@@ -84,7 +95,7 @@ export class RingChartComponent implements OnInit, OnChanges {
     return colors[index] || '#AAAAAA';
   }
 
-  getDomain(): any[] {
+  getDomain(): string[] {
     return this.data.map(d => d.name);
   }
 

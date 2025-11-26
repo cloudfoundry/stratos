@@ -15,7 +15,7 @@ export function loadMonacoEditor(): Promise<void> {
 
     // Configure Monaco paths
     (window as any).MonacoEnvironment = {
-      getWorkerUrl: function (moduleId: string, label: string) {
+      getWorkerUrl: (_moduleId: string, label: string) => {
         if (label === 'json') {
           return '/core/assets/monaco/vs/language/json/json.worker.js';
         }

@@ -1,16 +1,15 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnDestroy , ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { Component, type OnDestroy , ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest as obsCombineLatest, Observable, of as observableOf } from 'rxjs';
+import { combineLatest as obsCombineLatest, type Observable, of as observableOf } from 'rxjs';
 import { combineLatest, filter, first, map, startWith } from 'rxjs/operators';
 
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { PageHeaderComponent } from '../../../../../../core/src/shared/components/page-header/page-header.component';
 import { StepComponent } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import type { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../../../../core/src/shared/components/stepper/steppers/steppers.component';
-import { AppState } from '../../../../../../store/src/app-state';
 import {
   UsersRolesClear,
   UsersRolesExecuteChanges,
@@ -19,8 +18,8 @@ import {
 } from '../../../../actions/users-roles.actions';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { selectCfUsersRoles } from '../../../../store/selectors/cf-users-roles.selector';
-import { CfUser, IUserPermissionInOrg, IUserPermissionInSpace, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../store/types/cf-user.types';
-import { CfRoleChange } from '../../../../store/types/users-roles.types';
+import type { CfUser, IUserPermissionInOrg, IUserPermissionInSpace, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../store/types/cf-user.types';
+import type { CfRoleChange } from '../../../../store/types/users-roles.types';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
@@ -58,7 +57,7 @@ export class RemoveUserComponent implements OnDestroy {
   isBlocked$!: Observable<boolean>;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private cfUserService: CfUserService,
     private cfRolesService: CfRolesService,
@@ -137,8 +136,8 @@ export class RemoveUserComponent implements OnDestroy {
     });
   }
 
-  getRolesChanges(user: CfUser, orgs: any) {
-    const changes = [];
+  getRolesChanges(user: CfUser, orgs: Record<string, IUserPermissionInOrg>) {
+    const changes: CfRoleChange[] = [];
     const orgGuids = this.orgGuid ? [this.orgGuid] : Object.keys(orgs);
 
     for (const orgGuid of orgGuids) {

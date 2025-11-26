@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { ValuesPipe } from '../../../../../../../../core/src/shared/pipes/values.pipe';
+import { ValuesPipe } from '@stratosui/core';
 import { EventMetadataComponent } from './event-metadata.component';
 
 describe('EventMetadataComponent', () => {

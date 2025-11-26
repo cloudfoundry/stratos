@@ -1,17 +1,19 @@
 import { ChangeDetectionStrategy, Component  } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { Store } from '@ngrx/store';
 import {
   RouterNav,
-  GeneralEntityAppState,
+  type GeneralEntityAppState,
   entityCatalog,
   selectSessionData,
+  type StratosCatalogEndpointEntity,
 } from '@stratosui/store';
 import { map } from 'rxjs/operators';
+import type { Observable } from 'rxjs';
 
 import { BASE_REDIRECT_QUERY } from '../../../../shared/components/stepper/stepper.types';
-import { ITileConfig } from '../../../../shared/components/tile/tile-selector.types';
-import { BaseEndpointTileManager, ICreateEndpointTilesData } from './base-endpoint-tile-manager';
+import type { ITileConfig } from '../../../../shared/components/tile/tile-selector.types';
+import { BaseEndpointTileManager, type ICreateEndpointTilesData } from './base-endpoint-tile-manager';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { SteppersComponent } from '../../../../shared/components/stepper/steppers/steppers.component';
 import { StepComponent } from '../../../../shared/components/stepper/step/step.component';
@@ -25,6 +27,7 @@ import { TileSelectorComponent } from '../../../../shared/components/tile-select
   standalone: true,
   imports: [
     CommonModule,
+    AsyncPipe,
     PageHeaderComponent,
     SteppersComponent,
     StepComponent,
@@ -50,7 +53,7 @@ export class CreateEndpointBaseStepComponent extends BaseEndpointTileManager {
     const types = store.select(selectSessionData()).pipe(
       // Get a list of all known endpoint types
       map(sessionData => entityCatalog.getAllEndpointTypes(sessionData.config.enableTechPreview || false))
-    );
+    ) as Observable<StratosCatalogEndpointEntity[]>;
     super(types, store);
     this.store = store;
   }

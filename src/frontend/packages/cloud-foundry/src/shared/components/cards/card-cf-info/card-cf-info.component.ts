@@ -1,12 +1,12 @@
-import { Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Observable, Subscription } from 'rxjs';
+import { Component, type OnDestroy, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import type { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
 import { TailwindDialogService, MetadataItemComponent } from '@stratosui/core';
 import { fetchAutoscalerInfo } from '@stratosui/cf-autoscaler';
-import { EntityServiceFactory, APIResource, EntityInfo } from '@stratosui/store';
-import { ICfV2Info } from '../../../../cf-api.types';
+import { EntityServiceFactory, type APIResource, type EntityInfo } from '@stratosui/store';
+import type { ICfV2Info } from '../../../../cf-api.types';
 import { CloudFoundryEndpointService } from '../../../../features/cf/services/cloud-foundry-endpoint.service';
 import {
   UserInviteConfigurationDialogComponent,
@@ -58,17 +58,19 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
     );
   }
 
-  getApiEndpointUrl(apiEndpoint: any) {
+  getApiEndpointUrl(apiEndpoint: { Path?: string; Scheme: string; Host: string }) {
     const path = apiEndpoint.Path ? `/${apiEndpoint.Path}` : '';
     return `${apiEndpoint.Scheme}://${apiEndpoint.Host}${path}`;
   }
 
   ngOnDestroy(): void {
-    this.subs.forEach(s => s.unsubscribe());
+    for (const sub of this.subs) {
+      sub.unsubscribe();
+    }
   }
 
   private getMetadataFromInfo(entity: EntityInfo<APIResource<ICfV2Info>>) {
-    return entity && entity.entity && entity.entity.entity ? entity.entity.entity : null;
+    return entity?.entity?.entity ? entity.entity.entity : null;
   }
 
   private getDescription(entity: EntityInfo<APIResource<ICfV2Info>>): string {

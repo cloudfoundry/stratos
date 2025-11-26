@@ -24,8 +24,16 @@ export {
   MetadataCardTestComponents,
   BaseTestModulesNoShared,
   BaseTestModules,
-  AppTestModule
+  AppTestModule,
+  generateBaseTestStoreModules,
+  type TestStoreEntity,
+  testSCFEndpoint,
+  testSCFEndpointGuid,
+  testSessionData
 } from './core-test.helper';
 
 // Explicitly re-export zoneless test utilities
 export { configureZonelessTestBed } from './zoneless-testbed.helper';
+
+// Re-export CoreTestingModule for direct imports
+export { CoreTestingModule } from './core-test.modules';

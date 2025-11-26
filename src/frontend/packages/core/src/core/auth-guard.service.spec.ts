@@ -7,7 +7,7 @@ import { StoreModule, Store } from '@ngrx/store';
 
 import { authGuard } from './auth-guard.service';
 import { appReducers } from '@stratosui/store';
-import { InternalAppState } from '@stratosui/store';
+import type { InternalAppState } from '@stratosui/store';
 
 describe('authGuard', () => {
   let store: Store<InternalAppState>;

@@ -1,8 +1,8 @@
 import { HttpParams, HttpRequest } from '@angular/common/http';
 
 import { getActions } from '../../../store/src/actions/action.helper';
-import { PaginatedAction, PaginationParam } from '../../../store/src/types/pagination.types';
-import { ICFAction } from '../../../store/src/types/request.types';
+import type { PaginatedAction, PaginationParam } from '../../../store/src/types/pagination.types';
+import type { ICFAction } from '../../../store/src/types/request.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { serviceBindingEntityType } from '../cf-entity-types';
 import { CFStartAction } from './cf-action.types';
@@ -42,7 +42,7 @@ export class CreateServiceBinding extends CFStartAction implements ICFAction {
   entity = [cfEntityFactory(serviceBindingEntityType)];
   public endpointType = 'cf';
   entityType = serviceBindingEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
 }
 
 export class DeleteServiceBinding extends CFStartAction implements ICFAction {
@@ -68,7 +68,7 @@ export class DeleteServiceBinding extends CFStartAction implements ICFAction {
   ];
   entity = [cfEntityFactory(serviceBindingEntityType)];
   entityType = serviceBindingEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   removeEntityOnDelete = true;
 }
 
@@ -83,7 +83,7 @@ export class FetchAllServiceBindings extends CFStartAction implements PaginatedA
   actions = getActions('Service Bindings', 'Get All');
   entity = [cfEntityFactory(serviceBindingEntityType)];
   entityType = serviceBindingEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   initialParams: PaginationParam = {
     'order-direction': 'asc',
     page: 1,

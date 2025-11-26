@@ -1,22 +1,21 @@
 
 import {
   Component,
-  ComponentFactory,
-  ComponentFactoryResolver,
-  ComponentRef,
-  Injector,
-  ViewChild,
+  inject,
+  type ComponentRef,
   ViewContainerRef,
+  viewChild,
   ChangeDetectionStrategy
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
+import type { GeneralEntityAppState } from '@stratosui/store';
 
-import { StepOnNextFunction } from '@stratosui/core';
-import { GitCommit } from '@stratosui/git';
+import type { StepOnNextFunction } from '@stratosui/core';
+import type { GitCommit } from '@stratosui/git';
 import { SetDeployCommit } from '../../../../actions/deploy-applications.actions';
-import { CFAppState } from '../../../../cf-app-state';
+import type { CFAppState } from '../../../../cf-app-state';
 import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wrapper.component';
 
 @Component({
@@ -29,30 +28,25 @@ import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wr
 })
 export class DeployApplicationStep21Component {
 
+  private readonly store = inject(Store<GeneralEntityAppState>);
+
   validate!: Observable<boolean>;
   selectedCommit$!: Observable<GitCommit>;
 
-  @ViewChild('target', { read: ViewContainerRef, static: true })
-  target!: ViewContainerRef;
-  wrapperFactory: ComponentFactory<CommitListWrapperComponent>;
+  readonly target = viewChild.required('target', { read: ViewContainerRef });
   wrapperRef!: ComponentRef<CommitListWrapperComponent>;
 
-  constructor(
-    private store: Store<CFAppState>,
-    private componentFactoryResolver: ComponentFactoryResolver,
-    private injector: Injector
-  ) {
-    this.wrapperFactory = this.componentFactoryResolver.resolveComponentFactory(CommitListWrapperComponent);
+  constructor() {
   }
 
   onLeave = () => {
     this.wrapperRef.destroy();
-    this.target.clear();
+    this.target().clear();
   };
 
   onEnter = () => {
     // Wrap the list component in another component. This means it's recreated every time to include changes in the github repo
-    this.wrapperRef = this.target.createComponent(this.wrapperFactory);
+    this.wrapperRef = this.target().createComponent(CommitListWrapperComponent);
     const wrapper = this.wrapperRef.instance as CommitListWrapperComponent;
     this.selectedCommit$ = wrapper.selectedCommit$;
     this.validate = this.selectedCommit$.pipe(

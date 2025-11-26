@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UserProfileInfo } from '@stratosui/store';
+import type { UserProfileInfo } from '@stratosui/store';
 
 import { MD5 } from './md5';
 

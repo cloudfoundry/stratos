@@ -1,10 +1,10 @@
 import { AsyncPipe, CommonModule, TitleCasePipe } from '@angular/common';
-import { ChangeDetectorRef, Component, OnDestroy, OnInit, signal,
+import { ChangeDetectorRef, Component, type OnDestroy, type OnInit, signal,
   ChangeDetectionStrategy} from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { defer, EMPTY, Observable, of as observableOf, Subject } from 'rxjs';
+import { defer, type Observable, of as observableOf, Subject } from 'rxjs';
 import {
   catchError,
   delay,
@@ -28,7 +28,7 @@ import {
   SetCreateServiceInstanceServicePlan,
   SetServiceInstanceGuid,
 } from '../../../../../../cloud-foundry/src/actions/create-service-instance.actions';
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
+import type { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType, spaceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import {
   createEntityRelationKey,
@@ -43,19 +43,19 @@ import {
 import {
   selectCreateServiceInstance,
 } from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
-import { getIdFromRoute } from '../../../../../../core/src/core/utils.service';
-import { PageHeaderComponent } from '../../../../../../core/src/shared/components/page-header/page-header.component';
-import { StepComponent } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { SteppersComponent } from '../../../../../../core/src/shared/components/stepper/steppers/steppers.component';
-import { APIResource } from '../../../../../../store/src/types/api.types';
-import { IApp, ISpace } from '../../../../cf-api.types';
+import { getIdFromRoute } from '@stratosui/core';
+import { PageHeaderComponent } from '@stratosui/core';
+import { StepComponent } from '@stratosui/core';
+import { SteppersComponent } from '@stratosui/core';
+import type { APIResource } from '../../../../../../store/src/types/api.types';
+import type { IApp, ISpace } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { CreateApplicationStep1Component } from '../../create-application/create-application-step1/create-application-step1.component';
 import { SelectServiceComponent } from '../../select-service/select-service.component';
 import { SERVICE_INSTANCE_TYPES } from '../add-service-instance-base-step/add-service-instance.types';
 import { BindAppsStepComponent } from '../bind-apps-step/bind-apps-step.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
-import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
+import type { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
 import { SelectPlanStepComponent } from '../select-plan-step/select-plan-step.component';
@@ -125,7 +125,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   constructor(
     private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
     private activatedRoute: ActivatedRoute,
-    private store: Store<CFAppState>,
+    private store: Store,
     private cfOrgSpaceService: CfOrgSpaceDataService,
     private csiGuidsService: CsiGuidsService,
     public modeService: CsiModeService,
@@ -325,7 +325,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
         }, 0);
       }),
       take(1),
-      map(o => true),
+      map(_o => true),
       catchError(error => {
         console.error('setupForAppServiceMode: Failed to fetch application details or space information', {
           appId,
@@ -444,7 +444,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
           );
         }),
         take(1),
-        map(o => true),
+        map(_o => true),
         catchError(error => {
           console.error('configureForEditServiceInstanceMode: Failed to configure edit mode', {
             serviceInstanceId,
@@ -536,7 +536,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
         }
         this.cfOrgSpaceService.cf.select.next(endpointId);
       }),
-      map(o => true),
+      map(_o => true),
       catchError(error => {
         console.error('initialiseForMarketplaceMode: Failed to initialize marketplace mode', {
           endpointId,

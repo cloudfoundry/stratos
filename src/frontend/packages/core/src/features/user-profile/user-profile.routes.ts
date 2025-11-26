@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+import type { Routes } from '@angular/router';
 
 import { EditProfileInfoComponent } from './edit-profile-info/edit-profile-info.component';
 import { ProfileInfoComponent } from './profile-info/profile-info.component';

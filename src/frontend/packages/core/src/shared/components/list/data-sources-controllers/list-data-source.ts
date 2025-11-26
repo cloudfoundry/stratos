@@ -1,31 +1,31 @@
 import { DataSource } from '@angular/cdk/table';
 export type SortDirection = 'asc' | 'desc' | '';
-import { ApplicationRef, signal, Signal } from '@angular/core';
+import { ApplicationRef, signal, } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
   entityCatalog,
-  EntitySchema,
-  ListFilter,
-  ListSort,
-  MetricsAction,
-  AppState,
+  type EntitySchema,
+  type ListFilter,
+  type ListSort,
+  type MetricsAction,
+  type AppState,
   LocalPaginationHelpers,
   PaginationMonitor,
   getPaginationObservables,
-  PaginatedAction,
-  PaginationEntityState,
-  PaginationParam,
+  type PaginatedAction,
+  type PaginationEntityState,
+  type PaginationParam,
   IgnorePaginationMaxedState,
   SetResultCount,
 } from '@stratosui/store';
 import {
   BehaviorSubject,
   combineLatest,
-  Observable,
+  type Observable,
   of as observableOf,
   of,
-  OperatorFunction,
-  Subscription,
+  type OperatorFunction,
+  type Subscription,
 } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
 import {
@@ -42,18 +42,19 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { IListDataSourceConfig, MultiActionConfig } from './list-data-source-config';
+import { type IListDataSourceConfig, MultiActionConfig } from './list-data-source-config';
 import {
   EntitySelectConfig,
-  getRowUniqueId,
-  IEntitySelectItem,
-  IListDataSource,
-  ListPaginationMultiFilterChange,
-  RowsState,
-  RowState,
+  type getRowUniqueId,
+  type IEntitySelectItem,
+  type IListDataSource,
+  type ListPaginationMultiFilterChange,
+  type RowsState,
+  type RowState,
 } from './list-data-source-types';
 import { getDataFunctionList } from './local-filtering-sorting';
 import { LocalListController } from './local-list-controller';
+import type { ITableColumn } from '../list-table/table.types';
 
 export type DataFunctionDefinitionType = 'sort' | 'filter';
 
@@ -61,8 +62,8 @@ export class DataFunctionDefinition {
   type!: DataFunctionDefinitionType;
   orderKey?: string;
   field!: string;
-  static is(obj: any): obj is DataFunctionDefinition {
-    if (obj) {
+  static is(obj: unknown): obj is DataFunctionDefinition {
+    if (obj && typeof obj === 'object') {
       const typed = obj as DataFunctionDefinition;
       return !!(typed.type && typed.orderKey && typed.field);
     }
@@ -160,8 +161,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     private config: IListDataSourceConfig<A, T>,
   ) {
     super();
-    // ZONELESS: Inject ApplicationRef from config store's injector
-    this.appRef = config.store['injector']?.get(ApplicationRef);
+    // ZONELESS: Inject ApplicationRef from config injector
+    this.appRef = config.injector?.get(ApplicationRef);
     this.init(config);
     const paginationMonitor = new PaginationMonitor(
       this.store,
@@ -181,7 +182,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     const transformEntities = this.transformEntities || [];
     // Add any additional functions via an optional listConfig, such as sorting from the column definition
     const listColumns = this.config.listConfig ? this.config.listConfig.getColumns() : [];
-    listColumns.forEach((column: any) => {
+    listColumns.forEach((column: ITableColumn<T>) => {
       if (!column.sort) {
         return;
       }
@@ -192,9 +193,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       }
     });
 
-    const dataFunctions: DataFunction<any>[] = getDataFunctionList(transformEntities);
-    const transformedEntities$ = this.attachTransformEntity(entities$, this.transformEntity);
-    const setResultCount = (paginationEntity: PaginationEntityState, entities: any[]) => {
+    const dataFunctions: DataFunction<unknown>[] = getDataFunctionList(transformEntities);
+    const transformedEntities$ = this.attachTransformEntity(entities$ as Observable<A[]>, this.transformEntity);
+    const setResultCount = (paginationEntity: PaginationEntityState, entities: (T | T[])[]) => {
       const newLength = entities.length;
       const ids = paginationEntity.ids as Record<number, string[]>;
       if (
@@ -206,7 +207,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
     // NJ - We should avoid these kind on side-effect subscriptions
     this.transformedEntitiesSubscription = transformedEntities$.pipe(
-      tap(items => this.transformedEntities = items)
+      tap(items => {
+        this.transformedEntities = items;
+      })
     ).subscribe();
 
     this.isLoadingPage$ = paginationMonitor.fetchingCurrentPage$;
@@ -216,7 +219,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
     this.page$ = page$.pipe(
       withLatestFrom(this.isLoadingPage$.pipe(startWith(false))),
-      filter(([page, isLoading]) => !isLoading),
+      filter(([_page, isLoading]) => !isLoading),
       map(([page]) => page),
       publishReplay(1),
       refCount()
@@ -301,7 +304,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.transformEntities = config.transformEntities;
     this.rowsState = config.rowsState;
     this.getRowState = config.getRowState;
-    this.externalDestroy = config.destroy || (() => { });
+    this.externalDestroy = config.destroy || (() => {
+      // No cleanup needed
+    });
     this.addItem = this.getEmptyType();
     this.entityKey = this.sourceScheme.key;
     this.entityType = this.action.entityType;
@@ -312,14 +317,14 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       // This is a non-local data source so the results-per-page should match the initial page size. This will avoid making two calls
       // (one for the page size in the action and another when the initial page size is set)
       this.masterAction.initialParams = this.masterAction.initialParams || {};
-      (this.masterAction.initialParams as Record<string, any>)['results-per-page'] = this.config.listConfig.pageSizeOptions[0];
+      (this.masterAction.initialParams as Record<string, unknown>)['results-per-page'] = this.config.listConfig.pageSizeOptions[0];
     }
   }
   private setupAction(config: IListDataSourceConfig<A, T>) {
     if (config.schema instanceof MultiActionConfig) {
       if (!config.isLocal) {
         // We cannot do multi action lists for non-local lists
-        this.action = (config.schema as any)[0].paginationAction;
+        this.action = config.schema.schemaConfigs[0].paginationAction;
         this.masterAction = this.action as PaginatedAction;
       } else {
         this.action = config.schema.schemaConfigs.map((multiActionConfig, i) => ({
@@ -336,7 +341,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       this.entitySelectConfig = this.getEntitySelectConfig(config.schema);
     }
     /* tslint:disable-next-line:no-string-literal  */
-    if ((this.action as any)['length']) {
+    if (Array.isArray(this.action)) {
       this.action = (this.action as PaginatedAction[]).map(a => ({
         ...a,
         isList: true
@@ -389,12 +394,14 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   }
 
   private getRefreshFunction(config: IListDataSourceConfig<A, T>) {
-    if (config.listConfig && config.listConfig.hideRefresh) {
+    if (config.listConfig?.hideRefresh) {
       return null;
     }
     return config.refresh ? config.refresh : () => {
       if (Array.isArray(this.action)) {
-        this.action.forEach(action => this.store.dispatch(action));
+        this.action.forEach(action => {
+          this.store.dispatch(action);
+        });
       } else {
         this.store.dispatch(this.metricsAction || this.masterAction);
       }
@@ -546,7 +553,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     delete this.editRow;
   }
 
-  trackBy = (index: number, item: T): string | number => {
+  trackBy = (_index: number, item: T): string | number => {
     const id = this.getRowUniqueId(item);
     return id || JSON.stringify(item);
   }
@@ -568,16 +575,16 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     );
   }
 
-  public getFilterFromParams(pag: PaginationEntityState) {
+  public getFilterFromParams(_pag: PaginationEntityState) {
     // If data source is not local then this method must be overridden
     return '';
   }
-  public setFilterParam(filterParam: string, pag: PaginationEntityState) {
+  public setFilterParam(_filterParam: string, _pag: PaginationEntityState) {
     // If data source is not local then this method must be overridden
   }
 
-  public setMultiFilter(changes: ListPaginationMultiFilterChange[], params: PaginationParam) {
-
+  public setMultiFilter(_changes: ListPaginationMultiFilterChange[], _params: PaginationParam) {
+    // Override in subclass if needed
   }
 
   public updateMetricsAction(newAction: MetricsAction) {
@@ -602,7 +609,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     return this.pagination$.pipe(
       filter(pag => !!pag && !!pag.params),
       map(pag => {
-        const params = pag.params as Record<string, any>;
+        const params = pag.params as Record<string, unknown>;
         return {
           direction: params['order-direction'] as SortDirection,
           field: params['order-direction-field'] as string

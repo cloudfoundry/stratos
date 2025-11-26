@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { FormGroupDirective, NgForm, FormBuilder, FormControl } from '@angular/forms';
+import type {FormControl} from '@angular/forms';
+import type {FormGroupDirective, NgForm} from '@angular/forms';
 
 // Base interface for error state matchers
 export interface IErrorStateMatcher {
@@ -11,7 +12,7 @@ export interface IErrorStateMatcher {
 })
 export class TailwindErrorStateMatcher implements IErrorStateMatcher {
   isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
-    return !!(control && control.invalid && (control.dirty || control.touched || (form && form.submitted)));
+    return !!(control?.invalid && (control.dirty || control.touched || (form?.submitted)));
   }
 }
 
@@ -19,8 +20,8 @@ export class TailwindErrorStateMatcher implements IErrorStateMatcher {
   providedIn: 'root'
 })
 export class TailwindShowOnDirtyErrorStateMatcher implements IErrorStateMatcher {
-  isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
-    return !!(control && control.invalid && (control.dirty || control.touched));
+  isErrorState(control: FormControl | null, _form: FormGroupDirective | NgForm | null): boolean {
+    return !!(control?.invalid && (control.dirty || control.touched));
   }
 }
 
@@ -29,7 +30,7 @@ export class TailwindShowOnDirtyErrorStateMatcher implements IErrorStateMatcher 
 })
 export class TailwindDefaultErrorStateMatcher implements IErrorStateMatcher {
   isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
-    return !!(control && control.invalid && (control.dirty || control.touched || (form && form.submitted)));
+    return !!(control?.invalid && (control.dirty || control.touched || (form?.submitted)));
   }
 }
 

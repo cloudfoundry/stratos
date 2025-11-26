@@ -1,16 +1,16 @@
 import { Store } from '@ngrx/store';
 import {
-  DataFunctionDefinitionType,
+  type DataFunctionDefinitionType,
   ListDataSource,
 } from '@stratosui/core';
 import {
   extractActualListEntity,
 } from '@stratosui/core';
-import { IListConfig } from '@stratosui/core';
-import { AppState } from '@stratosui/store';
-import { PaginationEntityState } from '@stratosui/store';
+import type { IListConfig } from '@stratosui/core';
+import type { AppState } from '@stratosui/store';
+import type { PaginationEntityState } from '@stratosui/store';
 
-import { HelmRelease } from '../workload.types';
+import type { HelmRelease } from '../workload.types';
 import { workloadsEntityCatalog } from '../workloads-entity-catalog';
 
 const kubeEndpointFilter = (entities: HelmRelease[], paginationState: PaginationEntityState) => {
@@ -18,7 +18,7 @@ const kubeEndpointFilter = (entities: HelmRelease[], paginationState: Pagination
   const kubeId = paginationState.clientPagination.filter.items.kubeId;
   const namespace = paginationState.clientPagination.filter.items.namespace;
   return !kubeId && !namespace ? entities : entities.filter(e => {
-    e = extractActualListEntity(e);
+    e = extractActualListEntity(e) as HelmRelease;
     const validKubeId = !(kubeId && kubeId !== e.endpointId);
     const validNamespace = !(namespace && namespace !== e.namespace);
     return validKubeId && validNamespace;

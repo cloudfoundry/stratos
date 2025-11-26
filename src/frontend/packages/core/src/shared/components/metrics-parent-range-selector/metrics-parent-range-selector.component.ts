@@ -1,11 +1,11 @@
 
-import { ChangeDetectionStrategy, AfterContentInit, Component, ContentChildren, OnDestroy, QueryList  } from '@angular/core';
+import { ChangeDetectionStrategy, type AfterContentInit, Component, ContentChildren, type OnDestroy, type QueryList  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CardWrapperComponent } from '../cards/card/card.component';
 import { CustomFormFieldComponent } from '../custom-form-field/custom-form-field.component';
 import { CustomSelectComponent, CustomOptionComponent } from '../custom-select/custom-select.component';
-import { EntityMonitorFactory, IMetrics, MetricQueryType } from '@stratosui/store';
-import { Subscription } from 'rxjs';
+import { EntityMonitorFactory, type IMetrics, MetricQueryType } from '@stratosui/store';
+import type { Subscription } from 'rxjs';
 
 import { MetricsRangeSelectorManagerService } from '../../services/metrics-range-selector-manager.service';
 import { MetricsChartComponent } from '../metrics-chart/metrics-chart.component';

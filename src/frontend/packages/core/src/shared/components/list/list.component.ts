@@ -1,6 +1,6 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { AsyncPipe, CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterViewInit,
+import { ChangeDetectionStrategy, type AfterViewInit,
   ChangeDetectorRef,
   Component,
   EventEmitter,
@@ -9,18 +9,17 @@ import { ChangeDetectionStrategy, AfterViewInit,
   Injector,
   Input,
   NgZone,
-  OnChanges,
-  OnDestroy,
-  OnInit,
-  Optional,
+  type OnChanges,
+  type OnDestroy,
+  type OnInit,
   Output,
-  SimpleChanges,
-  TemplateRef,
+  type SimpleChanges,
+  type TemplateRef,
   ViewChild,
   signal,
  } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { FormsModule, NgForm, NgModel } from '@angular/forms';
+import { FormsModule, type NgForm, type NgModel } from '@angular/forms';
 import { MatPaginator, PageEvent } from '../../../shared/services/tailwind-material-replacements';
 export type SortDirection = 'asc' | 'desc' | '';
 import { Store } from '@ngrx/store';
@@ -29,17 +28,17 @@ import {
   SetPage,
   entityCatalog,
   getListStateObservables,
-  GeneralAppState,
-  ListFilter,
-  ListPagination,
-  ListSort,
-  ListView,
+  type GeneralAppState,
+  type ListFilter,
+  type ListPagination,
+  type ListSort,
+  type ListView,
   SetListViewAction,
-  EntityCatalogEntityConfig,
-  ActionState,
+  type EntityCatalogEntityConfig,
+  type ActionState,
   ResetPagination,
   ResetPaginationSortFilter,
-  PaginatedAction,
+  type PaginatedAction,
   defaultClientPaginationPageSize,
 } from '@stratosui/store';
 import {
@@ -47,9 +46,9 @@ import {
   BehaviorSubject,
   combineLatest as observableCombineLatest,
   isObservable,
-  Observable,
+  type Observable,
   of as observableOf,
-  Subscription,
+  type Subscription,
 } from 'rxjs';
 import {
   debounceTime,
@@ -69,22 +68,22 @@ import {
 
 import { safeUnsubscribe } from '../../../core/utils.service';
 import {
-  EntitySelectConfig,
+  type EntitySelectConfig,
   getDefaultRowState,
-  IListDataSource,
-  RowState,
+  type IListDataSource,
+  type RowState,
 } from './data-sources-controllers/list-data-source-types';
-import { IListPaginationController, ListPaginationController } from './data-sources-controllers/list-pagination-controller';
-import { ITableColumn } from './list-table/table.types';
+import { type IListPaginationController, ListPaginationController } from './data-sources-controllers/list-pagination-controller';
+import type { ITableColumn } from './list-table/table.types';
 import {
   defaultPaginationPageSizeOptionsCards,
   defaultPaginationPageSizeOptionsTable,
-  IGlobalListAction,
-  IListConfig,
-  IListFilter,
-  IListMultiFilterConfigItem,
-  IMultiListAction,
-  IOptionalAction,
+  type IGlobalListAction,
+  type IListConfig,
+  type IListFilter,
+  type IListMultiFilterConfigItem,
+  type IMultiListAction,
+  type IOptionalAction,
   ListConfig,
   ListViewTypes,
   MultiFilterManager,
@@ -136,11 +135,11 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
   @Input() addForm: NgForm;
 
-  @Input() customFilters: TemplateRef<any>;
+  @Input() customFilters: TemplateRef<unknown>;
 
-  @Input() noEntries: TemplateRef<any>;
+  @Input() noEntries: TemplateRef<unknown>;
 
-  @Input() noEntriesForCurrentFilter: TemplateRef<any>;
+  @Input() noEntriesForCurrentFilter: TemplateRef<unknown>;
 
   // List config when supplied as an attribute rather than a dependency
   @Input() listConfig: ListConfig<T>;
@@ -150,7 +149,6 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   entitySelectValue$ = this.entitySelectValueSubject.asObservable();
 
   pPaginator: MatPaginator;
-  private filterString!: string;
 
   @ViewChild(MatPaginator) set setPaginator(paginator: MatPaginator) {
     if (!paginator || this.paginationWidgetToStore) {
@@ -218,6 +216,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   sortColumns: ITableColumn<T>[] = [];
   filterColumns: IListFilter[] = [];
   private filterSelected: IListFilter;
+  filterString: string;
 
   private paginationWidgetToStore!: Subscription;
   private filterWidgetToStore!: Subscription;
@@ -234,7 +233,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   multiFilterManagers: MultiFilterManager<T>[];
 
   paginationController!: IListPaginationController<T>;
-  private multiFilterWidgetObservables = new Array<Subscription>();
+  private multiFilterWidgetObservables = [] as Subscription[];
 
   view$: Observable<ListView>;
 
@@ -327,8 +326,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       this.config?.getMultiActions() ?? []
     );
     this.hasSingleActions = (this.config?.getSingleActions() || []).length > 0;
-    this.columns = this.config?.getColumns()!;
-    this.dataSource = this.config?.getDataSource()!;
+    this.columns = this.config?.getColumns() ?? [];
+    this.dataSource = this.config?.getDataSource() as IListDataSource<T>;
     this.entitySelectConfig = this.dataSource.entitySelectConfig;
 
     this.dataSource.pagination$.pipe(
@@ -354,7 +353,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       map(([isAdding, isSelecting]) => isAdding || isSelecting)
     );
     // Set up an observable containing the current view (card/table)
-    this.listViewKey = this.dataSource.entityKey + '-' + this.dataSource.paginationKey;
+    this.listViewKey = `${this.dataSource.entityKey}-${this.dataSource.paginationKey}`;
     const { view, } = getListStateObservables(this.store, this.listViewKey);
     this.view$ = view.pipe(
       map(listView => {
@@ -379,12 +378,12 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     this.hasControls$ = this.view$.pipe(map((viewType) => {
       return !!(
         this.config?.viewType === 'both' ||
-        this.config?.text && this.config?.text.title ||
+        this.config?.text?.title ||
         this.addForm ||
-        this.globalActions && this.globalActions.length ||
-        this.multiActions && this.multiActions.length ||
+        this.globalActions?.length ||
+        this.multiActions?.length ||
         viewType === 'cards' && this.sortColumns && this.sortColumns.length ||
-        this.multiFilterManagers && this.multiFilterManagers.length ||
+        this.multiFilterManagers?.length ||
         this.config?.enableTextFilter
       );
     }));
@@ -393,7 +392,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     this.multiFilterChangesSub = this.paginationController.multiFilterChanges$.subscribe();
 
     const hasPages$ = this.dataSource.page$.pipe(
-      map(pag => !!(pag && pag.length)),
+      map(pag => !!(pag?.length)),
       distinctUntilChanged()
     );
 
@@ -406,7 +405,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     this.hidePaginator$ = observableCombineLatest(this.hasRows$, this.paginationController.pagination$).pipe(
       map(([hasRows, pagination]) => {
         const minPageSize = (
-          this.paginatorSettings.pageSizeOptions && this.paginatorSettings.pageSizeOptions.length ?
+          this.paginatorSettings.pageSizeOptions?.length ?
             this.paginatorSettings.pageSizeOptions[0] : -1
         );
         return !hasRows ||
@@ -423,7 +422,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       this.initialPageEvent = new PageEvent();
       this.initialPageEvent.pageIndex = pagination.pageIndex - 1;
       this.initialPageEvent.pageSize = pagination.pageSize;
-      if (this.paginatorSettings.pageSizeOptions.findIndex(pageSize => pageSize === pagination.pageSize) < 0) {
+      if (this.paginatorSettings.pageSizeOptions.indexOf(pagination.pageSize) < 0) {
         this.initialPageEvent.pageSize = this.paginatorSettings.pageSizeOptions[0];
         this.paginationController.pageSize(this.paginatorSettings.pageSizeOptions[0]);
       }
@@ -436,7 +435,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     }));
 
     this.sortColumns = (this.columns || []).filter((column: ITableColumn<T>) => {
-      return column && column.sort;
+      return column?.sort;
     });
 
     const sortStoreToWidget = this.paginationController.sort$.pipe(tap((sort: ListSort) => {
@@ -467,8 +466,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
         // downs (change org to one with one space results in that space being selected)
         Object.values(this.multiFilterManagers).forEach((filterManager: MultiFilterManager<T>, index: number) => {
           // If this is NOT the first... and we have the value to apply
-          if (index !== 0 || filterManager.hasValue(paginationFilter.items)) {
-            filterManager.applyValue(paginationFilter.items);
+          if (index !== 0 || filterManager.hasValue(paginationFilter.items as Record<string, string>)) {
+            filterManager.applyValue(paginationFilter.items as Record<string, string>);
             return;
           }
 
@@ -480,13 +479,13 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
               if (list && list.length === 1) {
                 filterManager.selectItem(list[0].value);
               } else {
-                filterManager.applyValue(paginationFilter.items);
+                filterManager.applyValue(paginationFilter.items as Record<string, string>);
               }
             });
             return;
           }
 
-          filterManager.applyValue(paginationFilter.items);
+          filterManager.applyValue(paginationFilter.items as Record<string, string>);
 
         });
       }),
@@ -495,11 +494,11 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     // Multi filters (e.g. cf/org/space)
     // - Pass any multi filter changes made by the user to the pagination controller and thus the store
     // - If the first multi filter has one value it's not shown, ensure it's automatically selected to ensure other filters are correct
-    this.multiFilterWidgetObservables = new Array<Subscription>();
+    this.multiFilterWidgetObservables = [] as Subscription[];
     this.paginationController.filter$.pipe(
       first(),
       tap(() => {
-        Object.values(this.multiFilterManagers).forEach((filterManager: MultiFilterManager<T>, index: number) => {
+        Object.values(this.multiFilterManagers).forEach((filterManager: MultiFilterManager<T>, _index: number) => {
           // Pipe changes in the widgets to the store
           // Handle both BehaviorSubject and Signal wrappers
           const select$ = 'asObservable' in filterManager.multiFilterConfig.select
@@ -571,13 +570,13 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       this.view$
     )
       .pipe(
-        filter(([pagination, busy, viewType]) => viewType !== 'table'),
+        filter(([_pagination, _busy, viewType]) => viewType !== 'table'),
         map(([pagination, busy, viewType]) => ({ pageIndex: pagination.pageIndex, busy, viewType })),
         distinctUntilChanged((x, y) => x.pageIndex === y.pageIndex && x.busy === y.busy && x.viewType === y.viewType),
         pairwise(),
         map(([oldVal, newVal]) => {
 
-          if (oldVal.viewType !== oldVal.viewType) {
+          if (oldVal.viewType !== newVal.viewType) {
             return 'none';
           }
           if (oldVal.pageIndex > newVal.pageIndex) {
@@ -655,7 +654,9 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     if (this.dataSource) {
       this.dataSource.destroy();
     }
-    this.pendingActions.forEach(sub => sub.unsubscribe());
+    this.pendingActions.forEach(sub => {
+      sub.unsubscribe();
+    });
   }
 
   private getDefaultListView(config: IListConfig<T>) {
@@ -671,7 +672,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
   public resetFilteringAndSort() {
     /* tslint:disable-next-line:no-string-literal  */
-    const pAction: PaginatedAction = (this.dataSource.action as any)['length'] ? (this.dataSource.action as any)[0] : this.dataSource.action;
+    const pAction: PaginatedAction = (this.dataSource.action as unknown[]).length ? (this.dataSource.action as PaginatedAction[])[0] : this.dataSource.action as PaginatedAction;
     this.store.dispatch(new ResetPaginationSortFilter(pAction));
 
     if (!this.dataSource.isLocal) {
@@ -812,7 +813,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   }
 
   private getRowStateGeneratorFromEntityMonitor(entityConfig: EntityCatalogEntityConfig, dataSource: IListDataSource<T>) {
-    return (row: any) => {
+    return (row: T) => {
       if (!entityConfig || !row) {
         return observableOf(getDefaultRowState());
       }
@@ -846,19 +847,19 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     return action.label || index.toString();
   }
 
-  trackByMultiFilterManager(index: number, manager: MultiFilterManager<T>): string {
+  trackByMultiFilterManager(_index: number, manager: MultiFilterManager<T>): string {
     return manager.filterKey;
   }
 
-  trackByFilterItem(index: number, item: IListMultiFilterConfigItem): string {
+  trackByFilterItem(_index: number, item: IListMultiFilterConfigItem): string {
     return item.value;
   }
 
-  trackByEntitySelectItem(index: number, item: any): number {
+  trackByEntitySelectItem(_index: number, item: { page: number }): number {
     return item.page;
   }
 
-  trackByFilter(index: number, filter: IListFilter): string {
+  trackByFilter(_index: number, filter: IListFilter): string {
     return filter.key;
   }
 

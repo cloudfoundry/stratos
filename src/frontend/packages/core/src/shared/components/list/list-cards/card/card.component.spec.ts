@@ -1,9 +1,9 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { MDAppModule } from '@stratosui/core';
-import { EntityInfo } from '@stratosui/store';
+import type { EntityInfo } from '@stratosui/store';
 import { createBasicStoreModule } from '@test-framework/core-test.helper';
 import { CoreTestingModule } from '@test-framework/core-test.modules';
 import { CardComponent, listCards } from './card.component';

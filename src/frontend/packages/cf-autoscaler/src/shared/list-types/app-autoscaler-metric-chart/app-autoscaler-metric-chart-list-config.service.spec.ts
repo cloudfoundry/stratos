@@ -16,7 +16,7 @@ import {
 } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { createBasicStoreModule } from '@stratosui/store/testing';
-import { MetricsRangeSelectorService } from '../../../../../core/src/shared/services/metrics-range-selector.service';
+import { MetricsRangeSelectorService } from '@stratosui/core';
 import { CfAutoscalerTestingModule } from '../../../cf-autoscaler-testing.module';
 import { AppAutoscalerMetricChartListConfigService } from './app-autoscaler-metric-chart-list-config.service';
 

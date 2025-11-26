@@ -1,21 +1,21 @@
-import { ModuleWithProviders } from '@angular/core';
+import type { ModuleWithProviders } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Store, StoreModule, StoreRootModule } from '@ngrx/store';
+import { Store, StoreModule, type StoreRootModule } from '@ngrx/store';
 import {
   appReducers,
-  AppState,
-  BaseEntityValues,
+  type AppState,
+  type BaseEntityValues,
   endpointEntityType,
-  EndpointModel,
+  type EndpointModel,
   entityCatalog,
-  EntityCatalogEntityConfig,
+  type EntityCatalogEntityConfig,
   getDefaultPaginationEntityState,
   getDefaultRequestState,
   getDefaultRolesRequestState,
-  NormalizedResponse,
+  type NormalizedResponse,
   rootUpdatingKey,
-  SessionData,
-  SessionDataEndpoint,
+  type SessionData,
+  type SessionDataEndpoint,
   stratosEntityFactory,
   WrapperRequestActionSuccess,
 } from '@stratosui/store';
@@ -215,7 +215,7 @@ function getDefaultInitialTestStratosStoreState() {
   };
 }
 
-function getDefaultInitialTestStoreState(): AppState<BaseEntityValues> {
+function getDefaultInitialTestStoreState(): AppState<BaseEntityValues & Record<string, unknown>> {
   return {
     ...getDefaultInitialTestStratosStoreState(),
     pagination: {
@@ -346,7 +346,7 @@ function getDefaultInitialTestStoreState(): AppState<BaseEntityValues> {
 }
 
 export function createBasicStoreModule(
-  initialState: Partial<AppState<BaseEntityValues>> = getDefaultInitialTestStoreState()
+  initialState: Partial<AppState<BaseEntityValues & Record<string, unknown>>> = getDefaultInitialTestStoreState()
 ): ModuleWithProviders<StoreRootModule> {
   return StoreModule.forRoot(
     appReducers,

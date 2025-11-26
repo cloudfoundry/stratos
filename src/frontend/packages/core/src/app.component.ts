@@ -1,8 +1,9 @@
-import { DOCUMENT } from '@angular/common';
-import { AfterContentInit, ChangeDetectionStrategy, Component, HostBinding, Inject, OnDestroy, OnInit } from '@angular/core';
+import { AsyncPipe, CommonModule, DOCUMENT, NgClass } from '@angular/common';
+import { type AfterContentInit, ChangeDetectionStrategy, Component, HostBinding, Inject, type OnDestroy, type OnInit, inject } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { AuthOnlyAppState, ThemeService, VerifySession } from '@stratosui/store';
-import { Observable } from 'rxjs';
+import { type AuthOnlyAppState, ThemeService, VerifySession } from '@stratosui/store';
+import type { Observable } from 'rxjs';
 import { create } from 'rxjs-spy';
 
 import { StratosThemeService } from '../../theme/theme.service';
@@ -14,7 +15,13 @@ import { LoggedInService } from './logged-in.service';
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    AsyncPipe,
+    NgClass
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
@@ -23,19 +30,19 @@ export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
   public animationsDisabled = false;
   public userId$: Observable<string>;
 
-  constructor(
-    private loggedInService: LoggedInService,
-    private store: Store<AuthOnlyAppState>,
-    public themeService: ThemeService,
-    private stratosThemeService: StratosThemeService,
-    @Inject(DOCUMENT) private document: Document,
-  ) {
+  private loggedInService = inject(LoggedInService);
+  private store = inject(Store<AuthOnlyAppState>);
+  public themeService = inject<ThemeService>(ThemeService);
+  private stratosThemeService = inject(StratosThemeService);
+  private document = inject(DOCUMENT);
+
+  constructor() {
     // Dispatch initial session verification BEFORE routing starts
     // This prevents the authGuard from blocking indefinitely waiting for verifying=false
     this.store.dispatch(new VerifySession());
 
     // We use the username to key the session storage. We could replace this with the users id?
-    this.userId$ = this.store.select(state => state.auth.sessionData && state.auth.sessionData.user ? state.auth.sessionData.user.name : null);
+    this.userId$ = this.store.select(state => state.auth.sessionData?.user ? state.auth.sessionData.user.name : null);
     if (!environment.production) {
       if (environment.showObsDebug || environment.disablePolling) {
         const spy = create();
@@ -77,5 +84,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
     this.loggedInService.destroy();
   }
 
-  ngAfterContentInit() { }
+  ngAfterContentInit() {
+    // Lifecycle hook - no initialization required
+  }
 }

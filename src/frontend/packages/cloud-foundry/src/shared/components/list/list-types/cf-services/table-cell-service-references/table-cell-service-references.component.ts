@@ -1,8 +1,8 @@
 import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 
 import { ClickStopPropagationDirective, TableCellCustom } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { IService, IServiceExtra } from '../../../../../../cf-api-svc.types';
+import type { APIResource } from '@stratosui/store';
+import type { IService, IServiceExtra } from '../../../../../../cf-api-svc.types';
 
 @Component({
   selector: 'app-table-cell-service-references',
@@ -33,7 +33,7 @@ export class TableCellServiceReferencesComponent extends TableCellCustom<APIReso
     return !!(this.getDocumentationUrl());
   }
   getDocumentationUrl() {
-    return this.extraInfo && this.extraInfo.documentationUrl;
+    return this.extraInfo?.documentationUrl;
   }
 
   hasSupportUrl() {
@@ -41,7 +41,7 @@ export class TableCellServiceReferencesComponent extends TableCellCustom<APIReso
   }
 
   getSupportUrl() {
-    return this.extraInfo && this.extraInfo.supportUrl;
+    return this.extraInfo?.supportUrl;
   }
 
 }

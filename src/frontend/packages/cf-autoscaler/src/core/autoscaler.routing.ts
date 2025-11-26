@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { RouterModule, type Routes } from '@angular/router';
 
 import { dynamicExtensionRoutesGuard } from '../../../core/src/core/extension/dynamic-extension-routes';
 import { StratosActionType } from '../../../core/src/core/extension/extension-service';

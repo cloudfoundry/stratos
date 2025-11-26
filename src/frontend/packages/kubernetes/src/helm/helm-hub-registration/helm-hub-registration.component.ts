@@ -2,9 +2,9 @@ import { ChangeDetectionStrategy, Component} from '@angular/core';
 import { filter, map, pairwise } from 'rxjs/operators';
 
 import { StepComponent } from '../../../../core/src/shared/components/stepper/step/step.component';
-import { StepOnNextFunction } from '../../../../core/src/shared/components/stepper/step/step.component';
+import type { StepOnNextFunction } from '../../../../core/src/shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../../core/src/shared/components/stepper/steppers/steppers.component';
-import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
+import type { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { stratosEntityCatalog } from '../../../../store/src/stratos-entity-catalog';
 import { HELM_ENDPOINT_TYPE, HELM_HUB_ENDPOINT_TYPE } from '../helm-entity-factory';
 

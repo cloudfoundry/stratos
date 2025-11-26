@@ -7,7 +7,7 @@ import { MetaCardTitleComponent } from '@stratosui/core';
 import { MetaCardValueComponent } from '@stratosui/core';
 import { MultilineTitleComponent } from '@stratosui/core';
 
-import { KubeService } from '../../../store/kube.types';
+import type { KubeService } from '../../../store/kube.types';
 import { KubernetesServicePortsComponent } from '../../kubernetes-service-ports/kubernetes-service-ports.component';
 
 @Component({
@@ -27,7 +27,4 @@ import { KubernetesServicePortsComponent } from '../../kubernetes-service-ports/
   ]
 })
 export class KubeServiceCardComponent extends CardCell<KubeService> {
-  constructor() {
-    super();
-  }
 }

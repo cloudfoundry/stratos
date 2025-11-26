@@ -1,4 +1,4 @@
-import { LogItem } from '../../../applications/application/application-tabs-base/tabs/log-stream-tab/log-stream-tab.component';
+import type { LogItem } from '../../../applications/application/application-tabs-base/tabs/log-stream-tab/log-stream-tab.component';
 
 export interface CounterEvent {
   name: string;

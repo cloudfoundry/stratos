@@ -1,14 +1,14 @@
-import { HttpClient } from '@angular/common/http';
-import { ApplicationRef, Injectable } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
+import type { HttpClient } from '@angular/common/http';
+import { type ApplicationRef, Injectable } from '@angular/core';
+import { type Actions, createEffect, ofType } from '@ngrx/effects';
+import type { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
-import { AppState } from '../../../store/src/app-state';
-import { entityCatalog, NormalizedResponse, WrapperRequestActionSuccess } from '../../../store/src/public-api';
-import { EntityRequestAction, StartRequestAction, WrapperRequestActionFailed } from '../../../store/src/types/request.types';
-import { GitCommit } from '../public_api';
-import {
+import type { AppState } from '../../../store/src/app-state';
+import { entityCatalog, type NormalizedResponse, WrapperRequestActionSuccess } from '../../../store/src/public-api';
+import { type EntityRequestAction, StartRequestAction, WrapperRequestActionFailed } from '../../../store/src/types/request.types';
+import type { GitCommit } from '../public_api';
+import type {
   FetchBranchesForProject,
   FetchBranchForProject,
   FetchCommit,

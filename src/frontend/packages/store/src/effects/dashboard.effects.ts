@@ -2,7 +2,7 @@ import { ApplicationRef, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { map } from 'rxjs/operators';
 
-import { HYDRATE_DASHBOARD_STATE, HydrateDashboardStateAction } from '../actions/dashboard-actions';
+import { HYDRATE_DASHBOARD_STATE, type HydrateDashboardStateAction } from '../actions/dashboard-actions';
 import { ThemeService } from '../theme.service';
 
 

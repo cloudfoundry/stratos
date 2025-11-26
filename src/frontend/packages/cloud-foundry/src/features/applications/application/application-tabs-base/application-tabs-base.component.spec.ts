@@ -1,5 +1,5 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -7,8 +7,8 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 
 import { ApplicationServiceMock, generateCfStoreModules, ApplicationStateService, ApplicationEnvVarsHelper, populateStoreWithTestEndpoint } from '@test-framework/cf';
-import {ApplicationService, CFAppState, IApp, IOrganization, ISpace, CfCurrentUserPermissions} from '@stratosui/cloud-foundry';
-import { APIResource, EntityInfo, RequestInfoState, EndpointModel, endpointEntitiesSelector, UserFavoriteManager } from '@stratosui/store';
+import {ApplicationService, type CFAppState, IApp, IOrganization, ISpace, CfCurrentUserPermissions} from '@stratosui/cloud-foundry';
+import { APIResource, EntityInfo, RequestInfoState, type EndpointModel, endpointEntitiesSelector, UserFavoriteManager } from '@stratosui/store';
 import {
   EndpointsService,
   CurrentUserPermissionsService
@@ -19,7 +19,7 @@ import { ApplicationTabsBaseComponent } from './application-tabs-base.component'
 describe('ApplicationTabsBaseComponent', () => {
   let component: ApplicationTabsBaseComponent;
   let fixture: ComponentFixture<ApplicationTabsBaseComponent>;
-  let store: Store<CFAppState>;
+  let store: Store;
   let applicationServiceMock: ApplicationServiceMock;
 
   beforeEach(async () => {
@@ -63,14 +63,13 @@ describe('ApplicationTabsBaseComponent', () => {
       api_endpoint: {
         Scheme: 'https',
         Opaque: '',
-        User: null,
+        User: {},
         Host: 'api.mock.cf',
         Path: '',
         RawPath: '',
         ForceQuery: false,
         RawQuery: '',
-        Fragment: '',
-        RawFragment: ''
+        Fragment: ''
       },
       authorization_endpoint: '',
       token_endpoint: '',
@@ -86,7 +85,12 @@ describe('ApplicationTabsBaseComponent', () => {
       sso_allowed: false,
       sub_type: '',
       metadata: {},
-      logged_in_as_admin: false
+      metricsAvailable: false,
+      creator: {
+        name: 'test-creator',
+        admin: false,
+        system: false
+      }
     };
 
     const endpointsSubject = new BehaviorSubject<{ [guid: string]: EndpointModel }>({
@@ -117,14 +121,14 @@ describe('ApplicationTabsBaseComponent', () => {
 
     // Override store.select to return our mocked endpoints observable
     const originalSelect = store.select.bind(store);
-    store.select = vi.fn().mockImplementation((selector: any) => {
+    vi.spyOn(store, 'select').mockImplementation((selector: any) => {
       // Return mocked endpoints for the endpoint selector
       if (selector === endpointEntitiesSelector) {
         return endpointsSubject.asObservable();
       }
       // Fall back to original select for other selectors
       return originalSelect(selector);
-    }) as any;
+    });
 
     fixture = TestBed.createComponent(ApplicationTabsBaseComponent);
     component = fixture.componentInstance;

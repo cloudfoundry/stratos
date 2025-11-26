@@ -3,8 +3,8 @@ import { HttpRequest } from '@angular/common/http';
 import { getActions } from '../../../store/src/actions/action.helper';
 import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
 import { endpointEntityType } from '../../../store/src/helpers/stratos-entity-factory';
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { ICFAction } from '../../../store/src/types/request.types';
+import type { PaginatedAction } from '../../../store/src/types/pagination.types';
+import type { ICFAction } from '../../../store/src/types/request.types';
 import { stackEntityType } from '../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
 import { createEntityRelationKey } from '../entity-relations/entity-relations.types';
@@ -29,7 +29,7 @@ export class GetStack extends CFStartAction implements ICFAction {
   ];
   entity = [entityCatalog.getEntity(CF_ENDPOINT_TYPE, stackEntityType).getSchema()];
   entityType = stackEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
 }
 export class GetAllStacks extends CFStartAction implements PaginatedAction {
   constructor(public endpointGuid: string) {
@@ -44,7 +44,7 @@ export class GetAllStacks extends CFStartAction implements PaginatedAction {
   actions = getActions('Stack', 'Fetch all');
   entity = [entityCatalog.getEntity(CF_ENDPOINT_TYPE, stackEntityType).getSchema()];
   entityType = stackEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   initialParams = {
     page: 1,
     'results-per-page': 100,

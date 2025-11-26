@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component} from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { PreviewableComponent } from '@stratosui/core';
-import { Observable } from 'rxjs';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import type { PreviewableComponent } from '@stratosui/core';
+import type { Observable } from 'rxjs';
 
 import { KubernetesAnalysisService } from '../../../services/kubernetes.analysis.service';
 import { AnalysisInfoCardComponent } from './analysis-info-card/analysis-info-card.component';
@@ -25,9 +25,9 @@ import { SidepanelPreviewComponent } from '@stratosui/core';
 })
 export class KubernetesAnalysisInfoComponent implements PreviewableComponent {
 
-  analyzers$: Observable<any>;
+  analyzers$: Observable<unknown>;
 
-  setProps(props: { [key: string]: any, }) {
-    this.analyzers$ = props.analyzers$;
+  setProps(props: { [key: string]: unknown }) {
+    this.analyzers$ = props.analyzers$ as Observable<unknown>;
   }
 }

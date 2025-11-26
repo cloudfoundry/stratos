@@ -1,14 +1,14 @@
 import { compose } from '@ngrx/store';
 
 import {
-  PermissionValues,
+  type PermissionValues,
   selectCurrentUserGlobalHasScopes,
   selectCurrentUserRolesState,
 } from '../../../../store/src/selectors/current-user-role.selectors';
-import { ICurrentUserRolesState } from '../../../../store/src/types/current-user-roles.types';
+import type { ICurrentUserRolesState } from '../../../../store/src/types/current-user-roles.types';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
-import { CfPermissionStrings, CfScopeStrings } from '../../user-permissions/cf-user-permissions-checkers';
-import {
+import type { CfPermissionStrings, CfScopeStrings } from '../../user-permissions/cf-user-permissions-checkers';
+import type {
   IAllCfRolesState,
   ICfRolesState,
   IGlobalRolesState,
@@ -31,7 +31,7 @@ const selectSpaceWithRoleFromOrg = (role: CfPermissionStrings, orgId: string) =>
   const { spaceGuids } = org;
   return spaceGuids.reduce((array: string[], spaceGuid: string) => {
     const space = spaces[spaceGuid];
-    if (space && (space as any)[role]) {
+    if (space && (space as unknown as Record<string, boolean>)[role]) {
       array.push(spaceGuid);
     }
     return array;
@@ -43,7 +43,7 @@ export const selectCurrentUserCFEndpointRolesState = (endpointGuid: string) =>
   (state: IAllCfRolesState) => state ? state[endpointGuid] : null;
 
 export const selectCurrentUserCFGlobalRolesStates = (state: ICfRolesState) => state ? state.global : null;
-export const selectCurrentUserCFGlobalRolesState = (role: PermissionValues) => (state: IGlobalRolesState) => (state as Record<string, any>)[role] || false;
+export const selectCurrentUserCFGlobalRolesState = (role: PermissionValues) => (state: IGlobalRolesState) => (state as unknown as Record<string, boolean>)[role] || false;
 export const selectCurrentUserCFOrgsRolesState = (state: ICfRolesState) => state.organizations;
 export const selectCurrentUserCFSpacesRolesState = (state: ICfRolesState) => state.spaces;
 export const selectCurrentUserCFGlobalScopesState = (state: IGlobalRolesState) => state ? state.scopes : [];

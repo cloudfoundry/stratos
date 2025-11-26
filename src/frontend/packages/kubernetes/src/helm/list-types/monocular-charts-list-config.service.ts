@@ -1,21 +1,20 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { filter } from 'rxjs/operators';
 
-import { ITableColumn } from '../../../../core/src/shared/components/list/list-table/table.types';
+import type { ITableColumn } from '../../../../core/src/shared/components/list/list-table/table.types';
 import {
-  IListConfig,
-  IListMultiFilterConfig,
+  type IListConfig,
+  type IListMultiFilterConfig,
   ListViewTypes,
-  IGlobalListAction,
-  IMultiListAction,
-  IListAction,
+  type IGlobalListAction,
+  type IMultiListAction,
+  type IListAction,
 } from '../../../../core/src/shared/components/list/list.component.types';
-import { ListView } from '../../../../store/src/actions/list.actions';
-import { AppState } from '../../../../store/src/public-api';
+import type { ListView } from '../../../../store/src/actions/list.actions';
+import type { AppState } from '../../../../store/src/public-api';
 import { defaultHelmKubeListPageSize } from '../../kubernetes/list-types/kube-helm-list-types';
 import { ChartsService } from '../monocular/shared/services/charts.service';
-import { MonocularChart } from '../store/helm.types';
+import type { MonocularChart } from '../store/helm.types';
 import { MonocularChartCardComponent } from './monocular-chart-card/monocular-chart-card.component';
 import { MonocularChartsDataSource } from './monocular-charts-data-source';
 

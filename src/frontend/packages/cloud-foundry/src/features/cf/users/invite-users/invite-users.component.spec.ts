@@ -3,7 +3,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { InviteUsersComponent } from './invite-users.component';
-import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
+import type { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 
 describe('InviteUsersComponent', () => {
   let component: InviteUsersComponent;

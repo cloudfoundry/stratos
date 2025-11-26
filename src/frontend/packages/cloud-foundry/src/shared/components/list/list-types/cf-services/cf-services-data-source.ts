@@ -1,15 +1,15 @@
 import { Store } from '@ngrx/store';
 
-import { getDataFunctionList, IListConfig, ListDataSource } from '@stratosui/core';
-import { APIResource, endpointEntityType, entityCatalog, getRowMetadata, PaginationEntityState } from '@stratosui/store';
-import { CFAppState } from '../../../../../cf-app-state';
+import { getDataFunctionList, type IListConfig, ListDataSource } from '@stratosui/core';
+import { type APIResource, endpointEntityType, entityCatalog, type GeneralEntityAppState, getRowMetadata, type PaginationEntityState } from '@stratosui/store';
+import type { CFAppState } from '../../../../../cf-app-state';
 import { serviceEntityType } from '../../../../../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../../../entity-relations/entity-relations.types';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 
 export class CfServicesDataSource extends ListDataSource<APIResource> {
-  constructor(store: Store<CFAppState>, endpointGuid: string, listConfig?: IListConfig<APIResource>) {
+  constructor(store: Store<GeneralEntityAppState>, endpointGuid: string, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(endpointEntityType);
     const getServicesAction = cfEntityCatalog.service.actions.getMultiple(endpointGuid, paginationKey, {});
     super({
@@ -32,8 +32,8 @@ export class CfServicesDataSource extends ListDataSource<APIResource> {
             }]
           )
 
-          const labels = filterByLabel(entities, paginationState)
-          const tags = filterByTags(entities, paginationState)
+          const labels = filterByLabel(entities, paginationState) as APIResource[]
+          const tags = filterByTags(entities, paginationState) as APIResource[]
 
           // Create a Set to eliminate duplicates based on metadata.guid
           const uniqueEntitiesMap = new Map<string, APIResource>();
@@ -56,7 +56,7 @@ export class CfServicesDataSource extends ListDataSource<APIResource> {
         (entities: APIResource[], paginationState: PaginationEntityState) => {
           const cfGuid = paginationState.clientPagination.filter.items.cf;
           return entities.filter(e => {
-            const validCF = !(cfGuid && cfGuid !== e.entity.cfGuid);
+            const validCF = !(cfGuid && cfGuid !== (e.entity as { cfGuid?: string }).cfGuid);
             return validCF;
           });
         }

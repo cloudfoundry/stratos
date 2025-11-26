@@ -1,23 +1,23 @@
-import { Action, Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Action, Store } from '@ngrx/store';
+import type { Observable } from 'rxjs';
 
 import {
-  EntityCatalogEntityConfig,
+  type EntityCatalogEntityConfig,
   getPaginationKey,
-  APIResponse,
-  GeneralEntityAppState,
-  GeneralRequestDataState,
-  IRequestTypeState,
-  EntityRequestAction,
+  type APIResponse,
+  type GeneralEntityAppState,
+  type GeneralRequestDataState,
+  type IRequestTypeState,
+  type EntityRequestAction,
 } from '@stratosui/store';
-import { EntityTreeRelation } from './entity-relation-tree';
+import type { EntityTreeRelation } from './entity-relation-tree';
 
 export class ValidateEntityRelationsConfig<T extends GeneralEntityAppState = GeneralEntityAppState> {
   /**
    * The guid of the cf. If this is null or not known we'll try to extract it from the list of parentEntities
    */
   cfGuid!: string;
-  store!: Store<T>;
+  store!: Store;
   /**
    * Entities store. Used to determine if we already have the entity/entities and to watch when fetching entities
    */
@@ -87,7 +87,7 @@ export interface EntityInlineChildAction {
   endpointGuid: string;
 }
 
-export function isEntityInlineChildAction(anything: any): EntityInlineChildAction {
+export function isEntityInlineChildAction(anything: unknown): EntityInlineChildAction {
   const inlineChildAction = anything as EntityInlineChildAction;
   return inlineChildAction &&
     !!inlineChildAction.parentGuid &&
@@ -106,8 +106,8 @@ export interface EntityInlineParentAction extends EntityRequestAction {
   populateMissing: boolean;
 }
 
-export function isEntityInlineParentAction(anything: any): EntityInlineParentAction {
-  return anything && !!anything.includeRelations && anything.populateMissing !== undefined ? anything as EntityInlineParentAction : null;
+export function isEntityInlineParentAction(anything: unknown): EntityInlineParentAction {
+  return anything && !!(anything as EntityInlineParentAction).includeRelations && (anything as EntityInlineParentAction).populateMissing !== undefined ? anything as EntityInlineParentAction : null;
 }
 
 

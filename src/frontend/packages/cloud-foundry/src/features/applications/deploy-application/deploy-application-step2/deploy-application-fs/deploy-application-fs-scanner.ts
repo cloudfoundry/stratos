@@ -3,7 +3,7 @@ import { GitIgnoreFilter } from '../../deploy-application-ignorefiles';
 const archiveRegex = /\.(tar|zip|tar.gz)$/i;
 
 export interface FileScannerFolderContext {
-  files: string[];
+  files: File[];
   folders: {
     [key: string]: FileScannerFolderContext
   };
@@ -18,9 +18,9 @@ export interface FileScannerInfo {
   excludes: string[];
   root: FileScannerFolderContext;
   summaryType: FileScannerInfoType;
-  summaryItem: any;
-  manifestFile: any;
-  cfIgnoreFile: any;
+  summaryItem: File | null;
+  manifestFile: File | null;
+  cfIgnoreFile: File | null;
 }
 
 export class DeployApplicationFSScanner implements FileScannerInfo {
@@ -29,16 +29,16 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
   public total = 0;
   public files = 0;
   public folders = 0;
-  public excludes: any[] = [];
-  public root: { files: any[]; folders: any } = {
+  public excludes: string[] = [];
+  public root: FileScannerFolderContext = {
     files: [],
     folders: {}
   };
   public summaryType: FileScannerInfoType = 'file';
-  public summaryItem: any;
+  public summaryItem: File | null = null;
 
-  public manifestFile: any;
-  public cfIgnoreFile: any;
+  public manifestFile: File | null = null;
+  public cfIgnoreFile: File | null = null;
 
   constructor(public fileExcludes: string, public rootFolderName?: string) {
     if (fileExcludes) {
@@ -50,8 +50,8 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
     return archiveRegex.test(fileName);
   }
 
-  file(context: FileScannerFolderContext, file: any, path: string) {
-    let fullName = path + '/' + file.name;
+  file(context: FileScannerFolderContext, file: File, path: string) {
+    let fullName = `${path}/${file.name}`;
     if (fullName.indexOf('/') === 0) {
       fullName = fullName.substr(1);
     }
@@ -69,7 +69,7 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
     }
   }
 
-  folder(context: FileScannerFolderContext, name: string, fullName: string): FileScannerFolderContext {
+  folder(context: FileScannerFolderContext, name: string, fullName: string): FileScannerFolderContext | undefined {
     if (context.folders[name]) {
       return context.folders[name];
     }
@@ -83,7 +83,7 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
       return undefined;
     }
     this.folders++;
-    const newContext: { folders: any; files: any[] } = {
+    const newContext: FileScannerFolderContext = {
       folders: {},
       files: []
     };
@@ -94,7 +94,7 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
   /**
    * Add a file to the list - will add necessary folders and check to see if the file should be excluded
    */
-  addFile(file: any) {
+  addFile(file: File & { webkitRelativePath: string }) {
     // Make the folder for the file
     const fileParts = file.webkitRelativePath.split('/');
     let context = this.root;
@@ -102,7 +102,7 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
     if (fileParts.length > 1) {
       for (let i = 0; i < fileParts.length - 1; i++) {
         if (!(this.rootFolderName && i === 0 && fileParts[i] === this.rootFolderName)) {
-          fullPath += '/' + fileParts[i];
+          fullPath += `/${fileParts[i]}`;
           context = this.folder(context, fileParts[i], fullPath);
           if (!context) {
             // Ignored folder
@@ -129,11 +129,10 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
     }
   }
 
-  readItemContents(item: any): Promise<string> {
-    const scanner = this;
+  readItemContents(item: FileSystemFileEntry): Promise<string> {
     return new Promise((resolve, reject) => {
-      item.file((file: any) => {
-        scanner.readFileContents(file).then((data: string) => {
+      item.file((file: File) => {
+        this.readFileContents(file).then((data: string) => {
           resolve(data);
         }).catch(() => {
           reject();
@@ -142,7 +141,7 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
     });
   }
 
-  readFileContents(file: any): Promise<string> {
+  readFileContents(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result as string);

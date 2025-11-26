@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import {Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 
@@ -8,7 +8,7 @@ import { AnalysisReportSelectorComponent } from '../../../../analysis-report-vie
 import { AnalysisReportViewerComponent } from '../../../../analysis-report-viewer/analysis-report-viewer.component';
 
 import { KubernetesAnalysisService } from '../../../../services/kubernetes.analysis.service';
-import { AnalysisReport } from '../../../../store/kube.types';
+import type { AnalysisReport } from '../../../../store/kube.types';
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
 
 @Component({
@@ -33,7 +33,7 @@ export class HelmReleaseAnalysisTabComponent {
 
   path: string;
 
-  currentReport: AnalysisReport | null = null;
+  currentReport: string | null = null;
 
   noReportsAvailable = false;  public analaysisService = inject(KubernetesAnalysisService);
   public helmReleaseHelper = inject(HelmReleaseHelperService);
@@ -48,10 +48,10 @@ export class HelmReleaseAnalysisTabComponent {
 
   }
 
-  public analysisChanged(report: any) {
+  public analysisChanged(report: { id: string }) {
     if (report.id !== this.currentReport) {
       this.currentReport = report.id;
-      this.analaysisService.getByID(this.helmReleaseHelper.endpointGuid, report.id).subscribe((r: any) => this.reportSignal.set(r));
+      this.analaysisService.getByID(this.helmReleaseHelper.endpointGuid, report.id).subscribe((r: AnalysisReport) => this.reportSignal.set(r));
     }
   }
 

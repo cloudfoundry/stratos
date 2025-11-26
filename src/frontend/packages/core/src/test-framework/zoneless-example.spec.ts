@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Component, signal } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -298,7 +298,7 @@ describe('Zoneless Example Tests', () => {
       detectChanges(fixture);
 
       // Verify empty list initially
-      let items = getAllElements(fixture, '.item');
+      const items = getAllElements(fixture, '.item');
       expect(items.length).toBe(0);
 
       // Best practice: Build items array first, then update component once

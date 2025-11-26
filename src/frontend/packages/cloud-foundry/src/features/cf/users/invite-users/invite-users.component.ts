@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 
 import { PageHeaderComponent } from '@stratosui/core';

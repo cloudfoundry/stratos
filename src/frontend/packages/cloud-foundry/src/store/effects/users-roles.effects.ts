@@ -2,33 +2,33 @@ import { HttpClient } from '@angular/common/http';
 import { ApplicationRef, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { combineLatest as observableCombineLatest, combineLatest, EMPTY, Observable, of as observableOf, of } from 'rxjs';
+import { combineLatest as observableCombineLatest, combineLatest, EMPTY, type Observable, of as observableOf, of } from 'rxjs';
 import { catchError, filter, first, map, mergeMap, pairwise, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 import {
   ResetPagination,
   entityCatalog,
-  ActionState,
+  type ActionState,
   selectSessionData,
-  SessionDataEndpoint,
-  PaginatedAction,
-  ICFAction
+  type SessionDataEndpoint,
+  type PaginatedAction,
+  type ICFAction
 } from '@stratosui/store';
 import { UpdateCfAction } from '../../../../store/src/types/request.types';
-import { GET_CURRENT_CF_USER_RELATION, GetCurrentCfUserRelations } from '../../actions/permissions.actions';
-import { UsersRolesActions, UsersRolesClearUpdateState, UsersRolesExecuteChanges } from '../../actions/users-roles.actions';
+import { GET_CURRENT_CF_USER_RELATION, type GetCurrentCfUserRelations } from '../../actions/permissions.actions';
+import { UsersRolesActions, type UsersRolesClearUpdateState, type UsersRolesExecuteChanges } from '../../actions/users-roles.actions';
 import { AddCfUserRole, ChangeCfUserRole, RemoveCfUserRole } from '../../actions/users.actions';
-import { CFAppState } from '../../cf-app-state';
+import type { CFAppState } from '../../cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import {
   ManageUsersSetUsernamesHelper,
 } from '../../features/cf/users/manage-users/manage-users-set-usernames/manage-users-set-usernames.component';
-import { CfUserService } from '../../shared/data-services/cf-user.service';
+import type { CfUserService } from '../../shared/data-services/cf-user.service';
 import { fetchCfUserRole } from '../../user-permissions/cf-user-roles-fetch';
 import { selectCfUsersRoles } from '../selectors/cf-users-roles.selector';
 import { OrgUserRoleNames } from '../types/cf-user.types';
-import { CfRoleChange, UsersRolesState } from '../types/users-roles.types';
+import type { CfRoleChange, UsersRolesState } from '../types/users-roles.types';
 
 @Injectable({
   providedIn: 'root'
@@ -38,7 +38,7 @@ export class UsersRolesEffects {
   constructor(
     private httpClient: HttpClient,
     private actions$: Actions,
-    private store: Store<CFAppState>,
+    private store: Store,
     private cfUserService: CfUserService,
     private appRef: ApplicationRef
   ) { }
@@ -61,8 +61,8 @@ export class UsersRolesEffects {
 
   clearEntityUpdates$ = createEffect(() => this.actions$.pipe(
     ofType<UsersRolesClearUpdateState>(UsersRolesActions.ClearUpdateState),
-    mergeMap((action): any[] => {
-      const actions: any[] = [];
+    mergeMap((action): UpdateCfAction[] => {
+      const actions: UpdateCfAction[] = [];
       action.changedRoles.forEach(change => {
         const apiAction: ICFAction = {
           guid: change.spaceGuid ? change.spaceGuid : change.orgGuid,
@@ -146,7 +146,7 @@ export class UsersRolesEffects {
           return of([]);
         }),
         mergeMap((listActions: PaginatedAction[]) => {
-          if (listActions && listActions.length) {
+          if (listActions?.length) {
             this.appRef.tick();
             return listActions.map(listAction => new ResetPagination(listAction, listAction.paginationKey));
           }
@@ -170,7 +170,7 @@ export class UsersRolesEffects {
     action: UsersRolesExecuteChanges,
     usersRoles: UsersRolesState,
     nonOrgUserChanges: CfRoleChange[]
-  ): Observable<any> {
+  ): Observable<boolean[]> {
     // Execute changes... depending on if there's any org user change and if that org user change is added (do users change first) or
     // removed (do users change last)
     if (orgUserChanges.length) {

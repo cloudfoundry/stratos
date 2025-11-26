@@ -1,5 +1,5 @@
-import { GetCurrentCfUserRelationsComplete } from '../../../actions/permissions.actions';
-import { IOrgsRoleState } from '../../types/cf-current-user-roles.types';
+import type { GetCurrentCfUserRelationsComplete } from '../../../actions/permissions.actions';
+import type { IOrgsRoleState } from '../../types/cf-current-user-roles.types';
 import { addNewCfRoles, removeOldCfRoles } from './current-cf-user-reducer.helpers';
 import { currentCfUserOrgRoleReducer } from './current-cf-user-roles-org.reducer';
 

@@ -1,29 +1,32 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe, DatePipe } from '@angular/common';
+import { Component, type OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Store } from '@ngrx/store'
+import type { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { applicationEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
-import { ApplicationStateComponent } from '../../../../../../../../core/src/shared/components/application-state/application-state.component';
-import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { MetaCardComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
-import { MetaCardItemComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
-import { MetaCardKeyComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
-import { MetaCardTitleComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
-import { MetaCardValueComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
-import { MultilineTitleComponent } from '../../../../../../../../core/src/shared/components/multiline-title/multiline-title.component';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../store/src/types/shared.types';
-import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
+import {
+  ApplicationStateComponent,
+  CardCell,
+  MetaCardComponent,
+  MetaCardItemComponent,
+  MetaCardKeyComponent,
+  MetaCardTitleComponent,
+  MetaCardValueComponent,
+  MultilineTitleComponent
+} from '@stratosui/core';
+import type { GeneralEntityAppState } from '@stratosui/store';
+import type { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { ComponentEntityMonitorConfig, type StratosStatus } from '../../../../../../../../store/src/types/shared.types';
+import type { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
-import { IApp, ISpace } from '../../../../../../cf-api.types';
+import type { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
+import { applicationEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
+import type { IApp, ISpace } from '../../../../../../cf-api.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
-import { ApplicationStateData, ApplicationStateService } from '../../../../../services/application-state.service';
+import { type ApplicationStateData, ApplicationStateService } from '../../../../../services/application-state.service';
 import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
 import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
 import { RunningInstancesComponent } from '../../../../running-instances/running-instances.component';
@@ -36,6 +39,8 @@ import { RunningInstancesComponent } from '../../../../running-instances/running
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    AsyncPipe,
+    DatePipe,
     RouterModule,
     MetaCardComponent,
     MetaCardTitleComponent,
@@ -59,7 +64,7 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
   public favorite: UserFavorite<IFavoriteMetadata>;
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     private appStateService: ApplicationStateService,
     private userFavoriteManager: UserFavoriteManager
   ) {

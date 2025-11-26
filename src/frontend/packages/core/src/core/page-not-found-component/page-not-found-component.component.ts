@@ -10,8 +10,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 })
 export class PageNotFoundComponentComponent {
 
-  constructor() { }
-
   home() {
     window.location.assign('/');
   }

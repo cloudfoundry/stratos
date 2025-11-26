@@ -1,5 +1,5 @@
 
-import { ChangeDetectionStrategy, Component, Input, OnInit, ViewEncapsulation  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, type OnInit, ViewEncapsulation  } from '@angular/core';
 
 @Component({
   selector: 'app-details-card',
@@ -12,8 +12,6 @@ import { ChangeDetectionStrategy, Component, Input, OnInit, ViewEncapsulation  }
 })
 export class DetailsCardComponent implements OnInit {
 
-  constructor() { }
-
   @Input()
   title!: string;
 
@@ -21,6 +19,7 @@ export class DetailsCardComponent implements OnInit {
   busy!: boolean;
 
   ngOnInit() {
+    // Component initialization
   }
 
 }

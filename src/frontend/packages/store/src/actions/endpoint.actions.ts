@@ -1,11 +1,11 @@
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 
-import { EndpointType } from '../extension-types';
+import type { EndpointType } from '../extension-types';
 import { endpointEntityType, STRATOS_ENDPOINT_TYPE, stratosEntityFactory } from '../helpers/stratos-entity-factory';
-import { NormalizedResponse } from '../types/api.types';
-import { endpointListKey, EndpointModel, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
-import { PaginatedAction } from '../types/pagination.types';
-import { EntityRequestAction } from '../types/request.types';
+import type { NormalizedResponse } from '../types/api.types';
+import { endpointListKey, type EndpointModel, type INewlyConnectedEndpointInfo } from '../types/endpoint.types';
+import type { PaginatedAction } from '../types/pagination.types';
+import type { EntityRequestAction } from '../types/request.types';
 
 export const GET_ENDPOINTS = '[Endpoints] Get all';
 export const GET_ENDPOINTS_SUCCESS = '[Endpoints] Get all success';
@@ -84,10 +84,12 @@ abstract class MultipleBaseEndpointAction extends BaseEndpointAction implements 
 export interface AuthParamsUsernamePassword {
   username: string;
   password: string;
+  [key: string]: string;
 }
 
 export interface AuthParamsToken {
   token: string;
+  [key: string]: string;
 }
 
 // All supported auth params types
@@ -220,7 +222,7 @@ export class RegisterEndpoint extends SingleBaseEndpointAction {
   ) {
     super(
       REGISTER_ENDPOINTS,
-      '<New Endpoint>' + name,
+      `<New Endpoint>${name}`,
       registerEndpointType
     );
   }

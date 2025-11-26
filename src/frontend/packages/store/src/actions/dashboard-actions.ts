@@ -1,7 +1,7 @@
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 
-import { DashboardState, defaultDashboardState } from '../types/dashboard.types';
-import { StratosTheme } from '../types/theme.types';
+import { type DashboardState, defaultDashboardState } from '../types/dashboard.types';
+import type { StratosTheme } from '../types/theme.types';
 
 export const OPEN_SIDE_NAV = '[Dashboard] Open side nav';
 export const CLOSE_SIDE_NAV = '[Dashboard] Close side nav';
@@ -23,17 +23,14 @@ export const SET_PLUGIN_DASHBOARD_VALUE = '[Dashboard] Set Plugin Dashboard Valu
 export const SET_DASHBOARD_STATE_VALUE = '[Dashboard] Set Dashboard State Value';
 
 export class OpenSideNav implements Action {
-  constructor() { }
   type = OPEN_SIDE_NAV;
 }
 
 export class CloseSideNav implements Action {
-  constructor() { }
   type = CLOSE_SIDE_NAV;
 }
 
 export class ToggleSideNav implements Action {
-  constructor() { }
   type = TOGGLE_SIDE_NAV;
 }
 
@@ -76,8 +73,8 @@ export class SetThemeAction implements Action {
 }
 
 export class SetDashboardStateValueAction implements Action {
-  constructor(public prop: string, public value: any) {
-    if (!defaultDashboardState.hasOwnProperty(prop)) {
+  constructor(public prop: string, public value: unknown) {
+    if (!Object.hasOwn(defaultDashboardState, prop)) {
       console.warn(`SetDashboardStateValueAction: Unknown property ${prop}`);
     }
   }

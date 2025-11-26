@@ -1,7 +1,7 @@
-import { combineLatest, Observable, of } from 'rxjs';
+import { combineLatest, type Observable, of } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 
-import { PermissionConfig, PermissionConfigType, PermissionTypes } from './current-user-permissions.config';
+import type { PermissionConfig, PermissionConfigType, PermissionTypes } from './current-user-permissions.config';
 
 export interface IConfigGroups {
   [permissionType: string]: IConfigGroup;
@@ -28,7 +28,7 @@ export interface ICurrentUserPermissionsChecker {
   getSimpleCheck: (
     permissionConfig: PermissionConfig,
     endpointGuid?: string,
-    ...args: any[]
+    ...args: unknown[]
   ) => Observable<boolean>;
   /**
    * Used when the permission config contains multiple things to check
@@ -36,7 +36,7 @@ export interface ICurrentUserPermissionsChecker {
   getComplexCheck: (
     permissionConfig: PermissionConfig[],
     permission: PermissionTypes,
-    ...args: any[]
+    ...args: unknown[]
   ) => IPermissionCheckCombiner[];
   /**
    * If no checker provides simple

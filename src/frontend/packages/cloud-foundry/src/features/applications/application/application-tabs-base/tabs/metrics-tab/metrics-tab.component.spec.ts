@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, Component, input } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { EntityMonitorFactory } from '@stratosui/store';
@@ -13,8 +13,8 @@ import { ApplicationService } from '@stratosui/cloud-foundry';
   standalone: true
 })
 class MockMetricsChartComponent {
-  metricsConfig = input<any>();
-  chartConfig = input<any>();
+  metricsConfig = input<unknown>();
+  chartConfig = input<unknown>();
 }
 
 @Component({

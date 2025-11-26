@@ -1,12 +1,9 @@
-import {Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import {Component, ChangeDetectionStrategy } from '@angular/core';
 
-import { ActivatedRoute } from '@angular/router';
-
-import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
+import { ListComponent, ListConfig } from '@stratosui/core';
 import {
   KubernetesNamespacesListConfigService,
 } from '../../list-types/kubernetes-namespaces/kubernetes-namespaces-list-config.service';
-import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
 
 @Component({
   selector: 'app-kubernetes-namespaces-tab',
@@ -22,5 +19,5 @@ import { ListComponent } from '../../../../../core/src/shared/components/list/li
     useClass: KubernetesNamespacesListConfigService,
   }]
 })
-export class KubernetesNamespacesTabComponent {  private activatedRoute = inject(ActivatedRoute);
+export class KubernetesNamespacesTabComponent {  
 }

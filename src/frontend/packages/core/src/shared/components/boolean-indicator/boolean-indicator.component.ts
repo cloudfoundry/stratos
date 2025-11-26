@@ -67,7 +67,7 @@ export class BooleanIndicatorComponent {
     this.cdr.markForCheck();
   }
 
-  private icons = {
+  private icons: Record<string, string> = {
     Yes: 'check_circle',
     Enabled: 'check_circle',
     Healthy: 'check_circle',
@@ -131,7 +131,7 @@ export class BooleanIndicatorComponent {
     }
     const text = this.getText({ isTrue, inverse });
     return {
-      icon: (this.icons as any)[text],
+      icon: this.icons[text] || this.icons.Unknown,
       text,
       isTrue: inverse ? !isTrue : isTrue,
       subtle

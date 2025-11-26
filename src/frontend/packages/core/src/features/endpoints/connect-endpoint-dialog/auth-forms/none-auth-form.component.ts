@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { IAuthForm } from '@stratosui/store';
+import type { FormGroup } from '@angular/forms';
+import type { IAuthForm } from '@stratosui/store';
 
 /**
  * Type definition for the None Auth Form
  * No fields are required as this auth type requires no user input
  */
-export interface NoneAuthFormValue {}
+export type NoneAuthFormValue = {}
 
 @Component({
   selector: 'app-none-auth-form',

@@ -1,13 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, Injector, Input, OnDestroy, OnInit, Renderer2, Signal, signal, ViewChild, WritableSignal } from '@angular/core';
-import { toSignal, toObservable } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, Injector, Input, type OnDestroy, Renderer2, signal, ViewChild, } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { AppState } from '@stratosui/store';
-import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+import { combineLatest, type Observable, of as observableOf, type Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { RowState } from '../../data-sources-controllers/list-data-source-types';
-import { IListAction, ListConfig } from '../../list.component.types';
+import type { RowState } from '../../data-sources-controllers/list-data-source-types';
+import { ListConfig } from '../../list.component.types';
+import type {IListAction} from '../../list.component.types';
 import { TableCellCustom } from '../../list.types';
 
 // Signal wrapper to provide BehaviorSubject-like API for dynamic creation
@@ -70,8 +71,7 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
   private documentClickListener?: () => void;
   private rowStateSubscription?: Subscription;
 
-  constructor(
-    private store: Store<AppState>,
+  constructor(_store: Store<AppState>,
     public listConfig: ListConfig<T>,
     private injector: Injector,
     private elementRef: ElementRef,
@@ -81,7 +81,7 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
     this.actions = listConfig.getSingleActions();
   }
 
-  initialise(row: any) {
+  initialise(row: T) {
     if (this.obs) {
       return this.updateActionButtons(row);
     }

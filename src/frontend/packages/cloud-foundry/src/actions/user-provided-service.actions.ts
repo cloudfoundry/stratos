@@ -1,10 +1,10 @@
 import { HttpRequest } from '@angular/common/http';
 
 import { getActions } from '../../../store/src/actions/action.helper';
-import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
+import type { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { endpointEntityType } from '../../../store/src/helpers/stratos-entity-factory';
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { ICFAction } from '../../../store/src/types/request.types';
+import type { PaginatedAction } from '../../../store/src/types/pagination.types';
+import type { ICFAction } from '../../../store/src/types/request.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import {
   applicationEntityType,
@@ -17,7 +17,7 @@ import {
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
-  EntityInlineParentAction,
+  type EntityInlineParentAction,
 } from '../entity-relations/entity-relations.types';
 import { QParam, QParamJoiners } from '../shared/q-param';
 import { CFStartAction } from './cf-action.types';
@@ -51,7 +51,7 @@ export class GetAllUserProvidedServices extends CFStartAction implements Paginat
   actions = getActions('User Provided Services', 'Get all User Provided Services');
   entity = [cfEntityFactory(userProvidedServiceInstanceEntityType)];
   entityType = userProvidedServiceInstanceEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   initialParams = {
     page: 1,
     'results-per-page': 100,
@@ -80,7 +80,7 @@ export class GetUserProvidedService extends CFStartAction implements EntityInlin
   actions = getActions('User Provided Service', 'Get User Provided Service');
   entity = cfEntityFactory(userProvidedServiceInstanceEntityType);
   entityType = userProvidedServiceInstanceEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
 }
 export interface IUserProvidedServiceInstanceDataCredentials {
   [name: string]: string;
@@ -127,7 +127,7 @@ export class CreateUserProvidedServiceInstance extends CFStartAction implements 
   actions = getActions('User Provided Service', 'Create User Provided Service');
   entity = [cfEntityFactory(userProvidedServiceInstanceEntityType)];
   entityType = userProvidedServiceInstanceEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
 }
 
 export class UpdateUserProvidedServiceInstance extends CFStartAction implements ICFAction {
@@ -164,7 +164,7 @@ export class UpdateUserProvidedServiceInstance extends CFStartAction implements 
   actions = getActions('User Provided Service', 'Update User Provided Service');
   entity = [cfEntityFactory(userProvidedServiceInstanceEntityType)];
   entityType = userProvidedServiceInstanceEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   updatingKey = UpdateUserProvidedServiceInstance.updateServiceInstance;
 }
 
@@ -179,7 +179,7 @@ export class DeleteUserProvidedInstance extends CFStartAction implements ICFActi
   actions = getActions('User Provided Service', 'Delete User Provided Service');
   entity = cfEntityFactory(userProvidedServiceInstanceEntityType);
   entityType = userProvidedServiceInstanceEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   clearPaginationEntityKeys = [serviceBindingEntityType];
   removeEntityOnDelete = true;
 }

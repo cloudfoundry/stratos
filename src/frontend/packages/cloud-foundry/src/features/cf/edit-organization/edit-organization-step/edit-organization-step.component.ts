@@ -1,14 +1,14 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
-import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { Component, type OnDestroy, type OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { type AbstractControl, ReactiveFormsModule, type ValidatorFn, Validators, FormBuilder, FormControl, type FormGroup, type ValidationErrors } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import { filter, map, pairwise, take, tap } from 'rxjs/operators';
 
-import { CustomFormFieldComponent, safeUnsubscribe, FocusDirective, StepOnNextFunction, CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
-import { endpointEntityType, PaginationMonitorFactory, ActionState, getPaginationObservables, APIResource } from '@stratosui/store';
-import { IOrganization, IOrgQuotaDefinition } from '../../../../cf-api.types';
-import { CFAppState } from '../../../../cf-app-state';
+import { CustomFormFieldComponent, safeUnsubscribe, FocusDirective, type StepOnNextFunction, CustomSelectComponent, CustomOptionComponent, AppInputDirective, AppErrorComponent } from '@stratosui/core';
+import { endpointEntityType, PaginationMonitorFactory, type ActionState, getPaginationObservables, type APIResource, type GeneralEntityAppState } from '@stratosui/store';
+import type { IOrganization, IOrgQuotaDefinition } from '../../../../cf-api.types';
+import type { CFAppState } from '../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../cf-entity-factory';
 import { organizationEntityType } from '../../../../cf-entity-types';
@@ -21,7 +21,7 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
 import { CloudFoundryOrganizationService } from '../../services/cloud-foundry-organization.service';
 
 
-const enum OrgStatus {
+enum OrgStatus {
   ACTIVE = 'active',
   SUSPENDED = 'suspended'
 }
@@ -48,7 +48,9 @@ interface EditOrganizationForm {
     CustomFormFieldComponent,
     CustomSelectComponent,
     CustomOptionComponent,
-    FocusDirective
+    FocusDirective,
+    AppInputDirective,
+    AppErrorComponent
   ]
 })
 export class EditOrganizationStepComponent implements OnInit, OnDestroy {
@@ -71,7 +73,7 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
   get quotaDefinition(): FormControl<string | null> { return this.editOrgName ? this.editOrgName.get('quotaDefinition') as FormControl<string | null> : new FormControl(null); }
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private cfOrgService: CloudFoundryOrganizationService,
     private fb: FormBuilder
@@ -89,7 +91,7 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
       take(1),
       tap(n => {
         this.originalName = n.name;
-        this.status = n.status === OrgStatus.ACTIVE ? true : false;
+        this.status = n.status  === OrgStatus.ACTIVE;
         this.currentStatus = n.status;
 
         this.editOrgName.patchValue({
@@ -103,7 +105,7 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
   }
 
   nameTakenValidator = (): ValidatorFn => {
-    return (formField: AbstractControl): { [key: string]: any } => {
+    return (formField: AbstractControl): ValidationErrors | null => {
       const nameValid = this.validate(formField.value);
       return !nameValid ? { nameTaken: { value: formField.value } } : null;
     };
@@ -111,7 +113,7 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     const action = CloudFoundryEndpointService.createGetAllOrganizations(this.cfGuid);
-    this.allOrgsInEndpoint$ = getPaginationObservables<APIResource>(
+    this.allOrgsInEndpoint$ = getPaginationObservables<APIResource<IOrganization>>(
       {
         store: this.store,
         action,
@@ -125,7 +127,9 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
     ).entities$.pipe(
       filter(o => !!o),
       map(o => o.map(org => org.entity.name)),
-      tap((o) => this.allOrgsInEndpoint = o)
+      tap((o) => {
+        this.allOrgsInEndpoint = o;
+      })
     );
     this.fetchOrgsSub = this.allOrgsInEndpoint$.subscribe();
 

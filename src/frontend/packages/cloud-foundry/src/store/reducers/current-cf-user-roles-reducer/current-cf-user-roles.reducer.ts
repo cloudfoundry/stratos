@@ -1,16 +1,16 @@
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 
 import {
   SESSION_VERIFIED,
-  VerifiedSession,
+  type VerifiedSession,
   CONNECT_ENDPOINTS_SUCCESS,
   DISCONNECT_ENDPOINTS_SUCCESS,
-  EndpointActionComplete,
+  type EndpointActionComplete,
   REGISTER_ENDPOINTS_SUCCESS,
   UNREGISTER_ENDPOINTS_SUCCESS,
-  APISuccessOrFailedAction
+  type APISuccessOrFailedAction
 } from '@stratosui/store';
-import { EntityUserRolesReducer } from '../../../../../store/src/entity-request-pipeline/entity-request-pipeline.types';
+import type { EntityUserRolesReducer } from '../../../../../store/src/entity-request-pipeline/entity-request-pipeline.types';
 import {
   currentUserRolesRequestStateReducer,
   RolesRequestStateStage,
@@ -21,12 +21,12 @@ import {
   GET_CURRENT_CF_USER_RELATIONS,
   GET_CURRENT_CF_USER_RELATIONS_FAILED,
   GET_CURRENT_CF_USER_RELATIONS_SUCCESS,
-  GetCfUserRelations,
-  GetCurrentCfUserRelationsComplete,
+  type GetCfUserRelations,
+  type GetCurrentCfUserRelationsComplete,
 } from '../../../actions/permissions.actions';
 import { DELETE_SPACE_SUCCESS } from '../../../actions/space.actions';
 import { ADD_CF_ROLE_SUCCESS, REMOVE_CF_ROLE_SUCCESS } from '../../../actions/users.actions';
-import { IAllCfRolesState } from '../../types/cf-current-user-roles.types';
+import type { IAllCfRolesState } from '../../types/cf-current-user-roles.types';
 import { currentUserBaseCFRolesReducer } from './current-cf-user-base-cf-role.reducer';
 import { cfRoleInfoFromSessionReducer, updateNewlyConnectedCfEndpoint } from './current-cf-user-role-session.reducer';
 import { updateAfterCfRoleChange } from './current-cf-user-roles-changed.reducers';
@@ -42,9 +42,10 @@ export const currentCfUserRolesReducer: EntityUserRolesReducer<IAllCfRolesState>
   action: Action
 ): IAllCfRolesState => {
   switch (action.type) {
-    case GET_CURRENT_CF_USER_RELATION_SUCCESS:
+    case GET_CURRENT_CF_USER_RELATION_SUCCESS: {
       const gcursAction = action as GetCurrentCfUserRelationsComplete;
       return currentUserBaseCFRolesReducer(state, gcursAction);
+    }
     case SESSION_VERIFIED:
       return cfRoleInfoFromSessionReducer(state, action as VerifiedSession);
     case REGISTER_ENDPOINTS_SUCCESS:

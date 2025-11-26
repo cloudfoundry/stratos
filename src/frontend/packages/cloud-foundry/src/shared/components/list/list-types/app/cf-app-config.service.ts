@@ -1,27 +1,27 @@
-import { DatePipe } from '@angular/common';
+import type { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import {
-  UtilsService,
+  type UtilsService,
   createTableColumnFavorite,
-  ITableColumn,
-  ITableText,
-  IGlobalListAction,
-  IListAction,
-  IListConfig,
-  IListMultiFilterConfig,
-  IMultiListAction,
+  type ITableColumn,
+  type ITableText,
+  type IGlobalListAction,
+  type IListAction,
+  type IListConfig,
+  type IListMultiFilterConfig,
+  type IMultiListAction,
   ListConfig,
   ListViewTypes,
 } from '@stratosui/core';
-import { APIResource, IFavoriteMetadata, ListView, UserFavorite } from '@stratosui/store';
+import { type APIResource, type IFavoriteMetadata, type ListView, UserFavorite, type GeneralEntityAppState } from '@stratosui/store';
 // eslint-disable-next-line @stratosui/no-relative-imports
-import { IApp } from '../../../../../cf-api.types';
+import type { IApp } from '../../../../../cf-api.types';
 // eslint-disable-next-line @stratosui/no-relative-imports
-import { CFAppState } from '../../../../../cf-app-state';
+import type { CFAppState } from '../../../../../cf-app-state';
 // eslint-disable-next-line @stratosui/no-relative-imports
 import { applicationEntityType } from '../../../../../cf-entity-types';
 import { CfOrgSpaceDataService, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
@@ -45,7 +45,7 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
 
   constructor(
     private datePipe: DatePipe,
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     private utilsService: UtilsService,
     private cfOrgSpaceService: CfOrgSpaceDataService,
   ) {
@@ -94,7 +94,7 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
     {
       columnId: 'disk_quota', headerCell: () => 'Disk Quota',
       cellDefinition: {
-        getValue: (row: APIResource) => `${this.utilsService.mbToHumanSize(row.entity.disk_quota)}`
+        getValue: (row: APIResource<IApp>) => `${this.utilsService.mbToHumanSize((row.entity as IApp).disk_quota)}`
       },
       cellFlex: '1',
       sort: {
@@ -106,7 +106,7 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
     {
       columnId: 'memory', headerCell: () => 'Memory',
       cellDefinition: {
-        getValue: (row: APIResource) => `${this.utilsService.mbToHumanSize(row.entity.memory)}`
+        getValue: (row: APIResource<IApp>) => `${this.utilsService.mbToHumanSize((row.entity as IApp).memory)}`
       },
       cellFlex: '1',
       sort: {

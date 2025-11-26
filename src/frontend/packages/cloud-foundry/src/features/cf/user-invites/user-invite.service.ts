@@ -1,18 +1,20 @@
-import { HttpClient } from '@angular/common/http';
+import type { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { TailwindSnackBarService } from '@stratosui/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { combineLatest, type Observable, of as observableOf } from 'rxjs';
 import { catchError, filter, map, switchMap } from 'rxjs/operators';
 
-import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
-import { environment } from '../../../../../core/src/environments/environment.prod';
-import { ConfirmationDialogConfig } from '../../../../../core/src/shared/components/confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
+import {
+  type CurrentUserPermissionsService,
+  environment,
+  ConfirmationDialogConfig,
+  type ConfirmationDialogService
+} from '@stratosui/core';
 import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
-import { CFAppState } from '../../../cf-app-state';
+import type { CFAppState } from '../../../cf-app-state';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
-import { ActiveRouteCfOrgSpace } from '../cf-page.types';
+import type { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { waitForCFPermissions } from '../cf.helpers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 
@@ -70,7 +72,7 @@ export class UserInviteConfigureService {
     formData.append('client_secret', clientSecret);
     const url = `/pp/${proxyAPIVersion}/invite/${cfGUID}`;
     const obs$ = this.http.post(url, formData).pipe(
-      map(v => {
+      map(_v => {
         stratosEntityCatalog.systemInfo.api.getSystemInfo();
         return {
           error: false
@@ -78,7 +80,7 @@ export class UserInviteConfigureService {
       }),
       catchError(err => {
         let message = 'Failed to configure User Invitation';
-        if (err && err.error && err.error.error) {
+        if (err?.error?.error) {
           message = err.error.error;
         }
         return observableOf({
@@ -99,7 +101,7 @@ export class UserInviteConfigureService {
     this.confirmDialog.open(confirmation, () => {
       const url = `/pp/${proxyAPIVersion}/invite/${cfGUID}`;
       this.http.delete(url).pipe(
-        map(v => {
+        map(_v => {
           stratosEntityCatalog.systemInfo.api.getSystemInfo();
           return {
             error: false,
@@ -108,7 +110,7 @@ export class UserInviteConfigureService {
         }),
         catchError(err => {
           let message = 'Failed to configure User Invitation';
-          if (err && err.error && err.error.error) {
+          if (err?.error?.error) {
             message = err.error.error;
           }
           return observableOf({
@@ -192,7 +194,7 @@ export class UserInviteService {
       })),
       catchError(err => observableOf({
         error: true,
-        errorMessage: err && err.error && err.error.error ?
+        errorMessage: err?.error?.error ?
           err.error.error :
           `Failed to either create ${emails.length === 1 ? 'user' : 'users'} or add basic roles`,
         failed_invites: [],

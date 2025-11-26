@@ -1,12 +1,12 @@
-import { Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Component, Input, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import type { Observable } from 'rxjs';
 import { startWith } from 'rxjs/operators';
 
 import { ApplicationStateComponent, TableCellCustom } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { IApp } from '../../../../../../cf-api.types';
+import type { APIResource } from '@stratosui/store';
+import type { IApp } from '../../../../../../cf-api.types';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
-import { ApplicationStateData, ApplicationStateService } from '../../../../../services/application-state.service';
+import { type ApplicationStateData, ApplicationStateService } from '../../../../../services/application-state.service';
 
 @Component({
   selector: 'app-table-cell-app-status',

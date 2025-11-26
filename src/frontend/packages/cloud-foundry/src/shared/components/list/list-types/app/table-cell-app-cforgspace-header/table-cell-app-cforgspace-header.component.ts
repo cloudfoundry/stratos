@@ -1,8 +1,9 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { CFAppState } from '../../../../../../cf-app-state';
+import type { GeneralEntityAppState } from '@stratosui/store';
+import type { CFAppState } from '../../../../../../cf-app-state';
 import { TableCellAppCfOrgSpaceBase } from '../TableCellAppCfOrgSpaceBase';
 
 @Component({
@@ -17,7 +18,7 @@ import { TableCellAppCfOrgSpaceBase } from '../TableCellAppCfOrgSpaceBase';
 })
 export class TableCellAppCfOrgSpaceHeaderComponent extends TableCellAppCfOrgSpaceBase {
 
-  constructor(store: Store<CFAppState>) {
+  constructor(store: Store<GeneralEntityAppState>) {
     super(store);
     this.init();
   }

@@ -1,20 +1,20 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { StoreModule } from '@ngrx/store';
 
 import {
   ApplicationStateIconComponent,
-} from '../../../../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.component';
+} from '@stratosui/core';
 import {
   ApplicationStateIconPipe,
-} from '../../../../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.pipe';
+} from '@stratosui/core';
 import {
   ApplicationStateComponent,
-} from '../../../../../../../../core/src/shared/components/application-state/application-state.component';
-import { PaginationMonitorFactory, APIResource } from '@stratosui/store';
+} from '@stratosui/core';
+import { PaginationMonitorFactory, type APIResource } from '@stratosui/store';
 import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { IApp } from '../../../../../../cf-api.types';
+import type { IApp } from '../../../../../../cf-api.types';
 import { ApplicationStateService } from '../../../../../services/application-state.service';
 import { TableCellAppStatusComponent } from "./table-cell-app-status.component";
 describe('TableCellAppStatusComponent', () => {

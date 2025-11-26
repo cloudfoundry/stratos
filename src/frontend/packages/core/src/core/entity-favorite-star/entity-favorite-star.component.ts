@@ -1,8 +1,8 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { Component, inject, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CustomTooltipDirective } from '../../shared/components/custom-tooltip/custom-tooltip.directive';
-import { UserFavoriteManager, IFavoriteMetadata, UserFavorite } from '@stratosui/store';
-import { Observable } from 'rxjs';
+import { UserFavoriteManager, type IFavoriteMetadata, type UserFavorite } from '@stratosui/store';
+import type { Observable } from 'rxjs';
 import { first, tap } from 'rxjs/operators';
 
 import { ConfirmationDialogConfig } from '../../shared/components/confirmation-dialog.config';
@@ -65,7 +65,7 @@ export class EntityFavoriteStarComponent {
     }
   }
 
-  private pToggleFavorite = (res?: any) => {
+  private pToggleFavorite = (_res?: unknown) => {
     this.userFavoriteManager.toggleFavorite(this.pFavourite);
   }
 }

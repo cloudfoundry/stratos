@@ -1,8 +1,8 @@
-import { Injectable, ComponentRef, ApplicationRef, Injector, EmbeddedViewRef, createComponent, EnvironmentInjector, Type, InjectionToken } from '@angular/core';
-import { Subject, Observable } from 'rxjs';
+import { Injectable, type ComponentRef, type ApplicationRef, Injector, type EmbeddedViewRef, createComponent, type EnvironmentInjector, type Type, InjectionToken } from '@angular/core';
+import { Subject, type Observable } from 'rxjs';
 
 // Define the MAT_DIALOG_DATA token for providing dialog data
-export const MAT_DIALOG_DATA = new InjectionToken<any>('MAT_DIALOG_DATA');
+export const MAT_DIALOG_DATA = new InjectionToken<unknown>('MAT_DIALOG_DATA');
 
 // Dialog positioning options
 export type DialogPosition = 'center' | 'top' | 'custom';
@@ -15,14 +15,14 @@ export interface DialogPositionConfig {
 }
 
 // Abstract class for dialog ref to enable DI
-export abstract class TailwindDialogRef<T = any, R = any> {
+export abstract class TailwindDialogRef<T = unknown, R = unknown> {
   abstract afterClosed(): Observable<R | undefined>;
   abstract afterOpened(): Observable<void>;
   abstract close(dialogResult?: R): void;
   abstract componentInstance: T;
 }
 
-export interface TailwindDialogConfig<D = any> {
+export interface TailwindDialogConfig<D = unknown> {
   data?: D;
   width?: string;
   height?: string;
@@ -43,11 +43,11 @@ export interface TailwindDialogConfig<D = any> {
   animationTiming?: 'material-standard' | 'material-deceleration' | 'material-acceleration' | 'ease-in-out';
 }
 
-export class TailwindDialogRefImpl<T = any, R = any> extends TailwindDialogRef<T, R> {
+export class TailwindDialogRefImpl<T = unknown, R = unknown> extends TailwindDialogRef<T, R> {
   private _afterClosed = new Subject<R | undefined>();
   private _afterOpened = new Subject<void>();
   public componentInstance: T;
-  private removeCallback: (result?: R) => void;
+  public removeCallback: (result?: R) => void;
   private _previouslyFocusedElement: HTMLElement | null = null;
 
   constructor(
@@ -104,14 +104,14 @@ export class TailwindDialogService {
     private environmentInjector: EnvironmentInjector
   ) {}
 
-  open<T, D = any, R = any>(
+  open<T, D = unknown, R = unknown>(
     component: Type<T>,
     config?: TailwindDialogConfig<D>
   ): TailwindDialogRef<T, R> {
     // Store currently focused element for later restoration
     const dialogRef = new TailwindDialogRefImpl<T, R>(
-      null as any, // Will be set after component creation
-      null as any  // Will be set below
+      null as unknown as T, // Will be set after component creation
+      null as unknown as (result?: R) => void  // Will be set below
     );
     dialogRef._storePreviousFocus();
 
@@ -132,19 +132,19 @@ export class TailwindDialogService {
     });
 
     // Update dialog ref with component instance
-    (dialogRef as any).componentInstance = componentRef.instance;
+    (dialogRef as TailwindDialogRefImpl<T, R>).componentInstance = componentRef.instance;
 
     // Create dialog container
     const dialogContainer = this.createDialogContainer(componentRef, config);
 
     // Set the remove callback
-    (dialogRef as any).removeCallback = (result?: R) => this.removeDialog(dialogContainer, componentRef);
+    (dialogRef as TailwindDialogRefImpl<T, R>).removeCallback = (_result?: R) => this.removeDialog(dialogContainer, componentRef);
 
     // Attach component to application
     this.appRef.attachView(componentRef.hostView);
 
     // Add to DOM
-    const domElem = (componentRef.hostView as EmbeddedViewRef<any>).rootNodes[0] as HTMLElement;
+    const domElem = (componentRef.hostView as EmbeddedViewRef<unknown>).rootNodes[0] as HTMLElement;
     dialogContainer.querySelector('.dialog-content')?.appendChild(domElem);
     document.body.appendChild(dialogContainer);
     this.openDialogs.push(dialogContainer);
@@ -164,41 +164,7 @@ export class TailwindDialogService {
     return dialogRef;
   }
 
-  private getAnimationClasses(config?: TailwindDialogConfig): {
-    duration: string;
-    timing: string;
-    backdropDuration: string;
-    exitDuration: number;
-  } {
-    // Determine animation duration
-    const durationMap = {
-      'fast': { duration: 'duration-150', backdropDuration: 'duration-200', exitMs: 150 },
-      'normal': { duration: 'duration-300', backdropDuration: 'duration-300', exitMs: 250 },
-      'slow': { duration: 'duration-500', backdropDuration: 'duration-400', exitMs: 400 }
-    };
-
-    const animDuration = config?.animationDuration || 'normal';
-    const durations = durationMap[animDuration];
-
-    // Determine timing function
-    const timingMap = {
-      'material-standard': 'ease-[cubic-bezier(0.4,0.0,0.2,1)]',
-      'material-deceleration': 'ease-[cubic-bezier(0.0,0.0,0.2,1)]',
-      'material-acceleration': 'ease-[cubic-bezier(0.4,0.0,1,1)]',
-      'ease-in-out': 'ease-in-out'
-    };
-
-    const timing = timingMap[config?.animationTiming || 'material-standard'];
-
-    return {
-      duration: durations.duration,
-      timing,
-      backdropDuration: durations.backdropDuration,
-      exitDuration: durations.exitMs
-    };
-  }
-
-  private createDialogContainer<T>(componentRef: ComponentRef<T>, config?: TailwindDialogConfig): HTMLElement {
+  private createDialogContainer<T>(_componentRef: ComponentRef<T>, config?: TailwindDialogConfig): HTMLElement {
     const overlay = document.createElement('div');
 
     // Calculate z-index for stacking multiple dialogs
@@ -402,7 +368,7 @@ export class TailwindDialogService {
     dialog.addEventListener('keydown', keydownListener);
 
     // Store listener for cleanup
-    (dialog as any)._focusTrapListener = keydownListener;
+    (dialog as HTMLElement & { _focusTrapListener?: (event: KeyboardEvent) => void })._focusTrapListener = keydownListener;
   }
 
   private focusFirstElement(dialogContainer: HTMLElement): void {
@@ -437,10 +403,10 @@ export class TailwindDialogService {
     }
 
     // Clean up focus trap listener
-    const dialog = dialogContainer.querySelector('[role="dialog"]') as HTMLElement;
-    if (dialog && (dialog as any)._focusTrapListener) {
-      dialog.removeEventListener('keydown', (dialog as any)._focusTrapListener);
-      delete (dialog as any)._focusTrapListener;
+    const dialog = dialogContainer.querySelector('[role="dialog"]') as HTMLElement & { _focusTrapListener?: (event: KeyboardEvent) => void };
+    if (dialog && dialog._focusTrapListener) {
+      dialog.removeEventListener('keydown', dialog._focusTrapListener);
+      delete dialog._focusTrapListener;
     }
 
     // Detach component

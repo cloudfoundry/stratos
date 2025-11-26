@@ -1,11 +1,10 @@
 import { Injectable } from '@angular/core';
-import { entityCatalog, EndpointHealthCheck, EndpointModel } from '@stratosui/store';
+import { entityCatalog, type EndpointHealthCheck, type EndpointModel } from '@stratosui/store';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EndpointHealthChecks {
-  constructor() { }
   private healthChecks: EndpointHealthCheck[] = [];
 
   public registerHealthCheck(healthCheck: EndpointHealthCheck) {

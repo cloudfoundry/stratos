@@ -1,7 +1,7 @@
-import { HttpBackend, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
+import type { HttpBackend, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 import { stratosMonocularEndpointGuid } from './monocular/stratos-monocular.helper';
 

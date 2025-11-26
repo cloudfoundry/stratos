@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@angular/core';
 import { GITHUB_API_URL } from '../github.helpers';
 import { GitHubSCM } from './github-scm';
 import { GitLabSCM } from './gitlab-scm';
-import { GitSCM } from './scm';
+import type { GitSCM } from './scm';
 
 // Supported Git SCM providers
 export type GitSCMType = 'github' | 'gitlab';

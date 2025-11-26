@@ -1,7 +1,13 @@
 import { ChangeDetectionStrategy, Component} from '@angular/core';
 
-import { PreviewableComponent } from '../../../../../core/src/shared/previewable-component';
+import type { PreviewableComponent } from '../../../../../core/src/shared/previewable-component';
 import { SidepanelPreviewComponent } from '../../../../../core/src/shared/components/sidepanel-preview/sidepanel-preview.component';
+import type { ResourceAlert } from '../../services/analysis-report.types';
+
+interface ResourceWithKind {
+  kind: string;
+  [key: string]: unknown;
+}
 
 @Component({
 changeDetection: ChangeDetectionStrategy.OnPush,
@@ -17,13 +23,11 @@ export class ResourceAlertPreviewComponent implements PreviewableComponent {
 
   title!: string;
 
-  resource: any;
-  alerts: any;
+  resource!: ResourceWithKind;
+  alerts!: ResourceAlert[];
 
-  constructor() { }
-
-  setProps(props: { [key: string]: any, }): void {
-    this.resource = props.resource;
+  setProps(props: { [key: string]: unknown }): void {
+    this.resource = props.resource as ResourceWithKind;
     this.title = `${this.resource.kind} Alerts`;
   }
 

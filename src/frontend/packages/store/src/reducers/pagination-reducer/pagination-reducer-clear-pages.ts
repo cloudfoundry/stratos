@@ -1,5 +1,7 @@
-import { PaginationState } from '../../types/pagination.types';
-export function paginationClearPages(state: PaginationState, action: any) {
+import type { BasePaginationAction } from '../../actions/pagination.actions';
+import type { PaginationState } from '../../types/pagination.types';
+
+export function paginationClearPages(state: PaginationState, action: BasePaginationAction & { entityKey: string; paginationKey: string }): PaginationState {
   if (!state[action.entityKey] || !state[action.entityKey][action.paginationKey]) {
     return state;
   }

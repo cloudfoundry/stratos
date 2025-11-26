@@ -1,14 +1,14 @@
 import { Component , ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
 import { CustomTooltipDirective, TailwindSnackBarService } from '@stratosui/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, type Observable } from 'rxjs';
 import { filter, first, map, pairwise, startWith, tap } from 'rxjs/operators';
 
 import { ConfirmationDialogConfig, ConfirmationDialogService } from '@stratosui/core';
-import { RouterNav, AppState, entityCatalog, selectDeletionInfo } from '@stratosui/store';
+import { RouterNav, type AppState, entityCatalog, selectDeletionInfo } from '@stratosui/store';
 import { spaceEntityType } from '../../../../../../../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../../cf-types';
 import { CfCurrentUserPermissions } from '../../../../../../../user-permissions/cf-user-permissions-checkers';
@@ -59,7 +59,7 @@ export class CloudFoundrySpaceSummaryComponent {
     public cfOrgService: CloudFoundryOrganizationService,
     public cfSpaceService: CloudFoundrySpaceService,
     private confirmDialog: ConfirmationDialogService,
-    private store: Store<AppState>,
+    private store: Store,
     private snackBar: TailwindSnackBarService,
   ) {
     this.detailsLoading$ = combineLatest([

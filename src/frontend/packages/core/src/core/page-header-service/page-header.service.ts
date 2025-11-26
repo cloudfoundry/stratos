@@ -5,8 +5,6 @@ import { Injectable } from '@angular/core';
 })
 export class PageHeaderService {
 
-  constructor() { }
-
   headerActive: boolean = false;
 
 }

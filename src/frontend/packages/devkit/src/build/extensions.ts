@@ -1,8 +1,8 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import { NormalModuleReplacementPlugin, WatchIgnorePlugin } from 'webpack';
 
-import { StratosConfig } from '../lib/stratos.config.js';
+import type { StratosConfig } from '../lib/stratos.config.js';
 
 const importModuleRegex = /src\/frontend\/packages\/core\/src\/custom-import.module.ts/;
 
@@ -19,10 +19,8 @@ const isWindows = process.platform === 'win32';
 
 export class ExtensionsHandler {
 
-  constructor() { }
-
   // Write out the _custom-import.module.ts file importing all of the required extensions
-  public apply(webpackConfig: any, config: StratosConfig, options: any) {
+  public apply(webpackConfig: { plugins: unknown[] }, config: StratosConfig, options: { main: string }) {
 
     // Generate the module file to import the appropriate extensions
     const dir = path.join(config.rootDir, path.dirname(options.main));
@@ -31,16 +29,16 @@ export class ExtensionsHandler {
     fs.writeFileSync(overrideFile, '// This file is auto-generated - DO NOT EDIT\n\n');
     fs.appendFileSync(overrideFile, 'import { NgModule } from \'@angular/core\';\n');
 
-    const moduleImports = {
+    const moduleImports: { imports: string[] } = {
       imports: []
     };
 
-    const routingModuleImports = {
+    const routingModuleImports: { imports: string[] } = {
       imports: []
     };
 
     config.getExtensions().forEach(e => {
-      let modules = [];
+      const modules = [];
       if (e.module) {
         moduleImports.imports.push(e.module);
         modules.push(e.module);
@@ -50,13 +48,13 @@ export class ExtensionsHandler {
         modules.push(e.routingModule)
       }
 
-      fs.appendFileSync(overrideFile, 'import { ' + modules.join(', ') + ' } from \'' + e.package + '\';\n');
+      fs.appendFileSync(overrideFile, `import { ${modules.join(', ')} } from '${e.package}';\n`);
     });
 
     this.writeModule(overrideFile, 'CustomImportModule', moduleImports);
     this.writeModule(overrideFile, 'CustomRoutingImportModule', routingModuleImports);
 
-    let regex;
+    let regex: RegExp;
     // On windows, use an absolute path with backslashes escaped
     if (isWindows) {
       let p = path.resolve(path.join(dir, 'custom-import.module.ts'));
@@ -76,12 +74,12 @@ export class ExtensionsHandler {
     ));
   }
 
-  private writeModule(file: string, name: string, imports: any) {
+  private writeModule(file: string, name: string, imports: { imports: string[] }) {
     fs.appendFileSync(file, '\n@NgModule(\n');
     let json = JSON.stringify(imports, null, 2);
     json = json.replace(/['"]+/g, '');
     fs.appendFileSync(file, json);
     fs.appendFileSync(file, ')\n');
-    fs.appendFileSync(file, 'export class ' + name + ' {}\n\n');
+    fs.appendFileSync(file, `export class ${name} {}\n\n`);
   }
 }

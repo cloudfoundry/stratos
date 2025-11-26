@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ContentChild, Input, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ContentChild, Input, type OnInit, type TemplateRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { MetaCardKeyComponent } from '../meta-card-key/meta-card-key.component';
@@ -32,7 +32,7 @@ export class MetaCardItemComponent implements OnInit {
   @ContentChild(MetaCardValueComponent, { static: true })
   value!: MetaCardValueComponent;
 
-  @ViewChild('content', { static: true }) content!: TemplateRef<any>;
+  @ViewChild('content', { static: true }) content!: TemplateRef<unknown>;
 
   @Input() customStyle = this.defaultStyle;
 

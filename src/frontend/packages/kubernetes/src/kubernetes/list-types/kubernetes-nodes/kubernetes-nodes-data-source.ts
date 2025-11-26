@@ -1,17 +1,17 @@
 import { Store } from '@ngrx/store';
 
 import {
-  DataFunction,
-  DataFunctionDefinition,
-  ListDataSource,
-} from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { IListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
+  type DataFunction,
+  type DataFunctionDefinition,
+  type IListConfig,
+  ListDataSource
+} from '@stratosui/core';
 import { getPaginationKey } from '../../../../../store/src/actions/pagination.actions';
-import { AppState } from '../../../../../store/src/public-api';
+import type { AppState } from '../../../../../store/src/public-api';
 import { kubernetesNodesEntityType } from '../../kubernetes-entity-factory';
 import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
-import { BaseKubeGuid } from '../../kubernetes-page.types';
-import { KubernetesNode } from '../../store/kube.types';
+import type { BaseKubeGuid } from '../../kubernetes-page.types';
+import type { KubernetesNode } from '../../store/kube.types';
 
 export class KubernetesNodesDataSource extends ListDataSource<KubernetesNode> {
 

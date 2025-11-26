@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 
@@ -12,10 +12,10 @@ import {
   MetaCardValueComponent,
   MultilineTitleComponent
 } from '@stratosui/core';
-import { APIResource, EntityServiceFactory, RouterNav } from '@stratosui/store';
+import { APIResource, EntityServiceFactory, RouterNav , GeneralEntityAppState } from '@stratosui/store';
 
-import { CFAppState } from '../../../../../../cf-app-state';
-import { IService, IServiceExtra } from '../../../../../../cf-api-svc.types';
+import type { CFAppState } from '../../../../../../cf-app-state';
+import type { IService, IServiceExtra } from '../../../../../../cf-api-svc.types';
 import { getServiceName } from '../../../../../../features/service-catalog/services-helper';
 import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
 import { ServiceIconComponent } from '../../../../service-icon/service-icon.component';
@@ -23,7 +23,7 @@ import { TableCellServiceActiveComponent } from '../table-cell-service-active/ta
 import { TableCellServiceBindableComponent } from '../table-cell-service-bindable/table-cell-service-bindable.component';
 import {
   TableCellServiceBrokerComponent,
-  TableCellServiceBrokerComponentConfig,
+  type TableCellServiceBrokerComponentConfig,
   TableCellServiceBrokerComponentMode,
 } from '../table-cell-service-broker/table-cell-service-broker.component';
 import { TableCellServiceCfBreadcrumbsComponent } from '../table-cell-service-cf-breadcrumbs/table-cell-service-cf-breadcrumbs.component';
@@ -43,6 +43,7 @@ export interface ServiceTag {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    AsyncPipe,
     MetaCardComponent,
     MetaCardItemComponent,
     MetaCardKeyComponent,
@@ -91,7 +92,7 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
   }
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
   ) {
     super();
   }

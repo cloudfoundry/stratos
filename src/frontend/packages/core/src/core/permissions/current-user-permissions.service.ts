@@ -1,10 +1,10 @@
 import { Inject, Injectable, Optional } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { stratosEntityCatalog, InternalAppState } from '@stratosui/store';
-import { combineLatest, Observable, of } from 'rxjs';
+import { combineLatest, type Observable, of } from 'rxjs';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 
-import {
+import type {
   CurrentUserPermissions,
   PermissionConfig,
   PermissionConfigLink,
@@ -12,8 +12,8 @@ import {
 } from './current-user-permissions.config';
 import {
   BaseCurrentUserPermissionsChecker,
-  ICurrentUserPermissionsChecker,
-  IPermissionCheckCombiner,
+  type ICurrentUserPermissionsChecker,
+  type IPermissionCheckCombiner,
 } from './current-user-permissions.types';
 import { StratosUserPermissionsChecker } from './stratos-user-permissions.checker';
 
@@ -47,9 +47,9 @@ export class CurrentUserPermissionsService {
   public can(
     action: CurrentUserPermissions | PermissionConfigType,
     endpointGuid?: string,
-    ...args: any[]
+    ...args: unknown[]
   ): Observable<boolean> {
-    let actionConfig;
+    let actionConfig: PermissionConfig[] | PermissionConfig | undefined;
     if (typeof action === 'string') {
       const permConfigType = this.getPermissionConfig(action);
       if (!permConfigType) {
@@ -68,7 +68,7 @@ export class CurrentUserPermissionsService {
   private getCanObservable(
     actionConfig: PermissionConfig[] | PermissionConfig,
     endpointGuid: string,
-    ...args: any[]): Observable<boolean> {
+    ...args: unknown[]): Observable<boolean> {
     if (Array.isArray(actionConfig)) {
       return this.getComplexPermission(actionConfig, endpointGuid, ...args);
     } else if (actionConfig) {
@@ -84,7 +84,7 @@ export class CurrentUserPermissionsService {
     return null;
   }
 
-  private getSimplePermission(actionConfig: PermissionConfig, endpointGuid: string, ...args: any[]): Observable<boolean> {
+  private getSimplePermission(actionConfig: PermissionConfig, endpointGuid: string, ...args: unknown[]): Observable<boolean> {
     return this.findChecker<Observable<boolean>>(
       (checker: ICurrentUserPermissionsChecker) => checker.getSimpleCheck(actionConfig, endpointGuid, ...args),
       'permissions check',
@@ -93,7 +93,7 @@ export class CurrentUserPermissionsService {
     );
   }
 
-  private getComplexPermission(permissionConfig: PermissionConfig[], endpointGuid?: string, ...args: any[]) {
+  private getComplexPermission(permissionConfig: PermissionConfig[], endpointGuid?: string, ...args: unknown[]) {
     const checks = this.getComplexChecks(permissionConfig, endpointGuid, ...args);
     return this.combineChecks(checks);
   }
@@ -101,7 +101,7 @@ export class CurrentUserPermissionsService {
   private getComplexChecks(
     permissionConfig: PermissionConfig[],
     endpointGuid: string,
-    ...args: any[]
+    ...args: unknown[]
   ): IPermissionCheckCombiner[] {
     return this.findChecker<IPermissionCheckCombiner[]>(
       (checker: ICurrentUserPermissionsChecker) => checker.getComplexCheck(permissionConfig, endpointGuid, ...args),

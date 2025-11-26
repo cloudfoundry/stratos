@@ -1,7 +1,7 @@
-import { EndpointActionComplete } from '../../actions/endpoint.actions';
-import { ResetPagination } from '../../actions/pagination.actions';
+import type { EndpointActionComplete } from '../../actions/endpoint.actions';
+import type { ResetPagination } from '../../actions/pagination.actions';
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
-import { PaginationEntityState, PaginationEntityTypeState, PaginationState } from '../../types/pagination.types';
+import type { PaginationEntityState, PaginationEntityTypeState, PaginationState } from '../../types/pagination.types';
 
 export const defaultClientPaginationPageSize = 9;
 

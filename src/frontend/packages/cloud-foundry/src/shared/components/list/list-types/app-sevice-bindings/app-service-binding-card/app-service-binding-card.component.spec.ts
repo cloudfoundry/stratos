@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, importProvidersFrom, APP_INITIALIZER } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach } from 'vitest';
@@ -8,10 +8,10 @@ import {
   ConfirmationDialogService
 } from '@stratosui/core';
 import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
-import { EntityCatalogHelper, EntityCatalogHelpers, EntityMonitorFactory, PaginationMonitorFactory, EntityServiceFactory, APIResource } from '@stratosui/store';
+import { EntityCatalogHelper, EntityCatalogHelpers, EntityMonitorFactory, PaginationMonitorFactory, EntityServiceFactory, type APIResource } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS, createBasicStoreModule } from '@stratosui/store/testing';
 import { ApplicationServiceMock, CloudFoundryTestingModule, CF_BASE_TEST_PROVIDERS } from "@test-framework/cf";
-import { IServiceInstance } from '../../../../../../cf-api-svc.types';
+import type { IServiceInstance } from '../../../../../../cf-api-svc.types';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 import { ApplicationStateService } from '../../../../../services/application-state.service';

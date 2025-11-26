@@ -1,8 +1,8 @@
-import { EndpointActionComplete } from '../../../../../store/src/actions/endpoint.actions';
-import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
-import { APISuccessOrFailedAction } from '../../../../../store/src/types/request.types';
+import type { EndpointActionComplete } from '../../../../../store/src/actions/endpoint.actions';
+import type { EndpointModel } from '../../../../../store/src/types/endpoint.types';
+import type { APISuccessOrFailedAction } from '../../../../../store/src/types/request.types';
 import { CF_ENDPOINT_TYPE } from '../../../cf-types';
-import { IAllCfRolesState } from '../../types/cf-current-user-roles.types';
+import type { IAllCfRolesState } from '../../types/cf-current-user-roles.types';
 import { getDefaultCfEndpointRoles } from './current-cf-user-base-cf-role.reducer';
 
 export function removeEndpointCfRoles(state: IAllCfRolesState, action: EndpointActionComplete) {
@@ -79,14 +79,15 @@ function removeOrgOrSpaceRoles(
   orgOrSpaceId: string,
   type: 'organizations' | 'spaces'
 ): IAllCfRolesState {
-  if (!(state[endpointGuid] as any)[type][orgOrSpaceId]) {
+  const cfEndpoint = state[endpointGuid] as unknown as Record<string, Record<string, unknown>>;
+  if (!cfEndpoint[type][orgOrSpaceId]) {
     return state;
   }
   // Remove orgOrSpaceId
   const {
     [orgOrSpaceId]: omit,
     ...newTypeState
-  } = (state[endpointGuid] as any)[type];
+  } = cfEndpoint[type];
 
   const newState = {
     ...state,

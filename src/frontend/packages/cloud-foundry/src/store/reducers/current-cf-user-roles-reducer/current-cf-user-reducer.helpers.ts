@@ -1,11 +1,11 @@
-import { APIResource } from '../../../../../store/src/types/api.types';
-import { CfUserRelationTypes, GetCurrentCfUserRelationsComplete } from '../../../actions/permissions.actions';
+import type { APIResource } from '../../../../../store/src/types/api.types';
+import type { CfUserRelationTypes, GetCurrentCfUserRelationsComplete } from '../../../actions/permissions.actions';
 
 interface IKeyedByIDObject<T> {
   [id: string]: T;
 }
 
-type roleFinalReducer<T, Y = any> = (
+type roleFinalReducer<T, Y = unknown> = (
   state: T,
   relationType: CfUserRelationTypes,
   userHasRelation: boolean,

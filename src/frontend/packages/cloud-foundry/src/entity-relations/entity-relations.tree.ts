@@ -1,6 +1,6 @@
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import { EntityTreeRelation } from './entity-relation-tree';
-import { createEntityRelationKey, EntityInlineParentAction, EntityTree } from './entity-relations.types';
+import { createEntityRelationKey, type EntityInlineParentAction, type EntityTree } from './entity-relations.types';
 
 const entityTreeCache: {
   [entityKey: string]: EntityTree
@@ -10,7 +10,7 @@ function generateCacheKey(entityKey: string, action: EntityInlineParentAction): 
   const relationKey = Array.isArray(action.includeRelations) ?
     [...action.includeRelations].sort((a, b) => a.localeCompare(b)).join(',') :
     '';
-  return entityKey + '+' + relationKey;
+  return `${entityKey}+${relationKey}`;
 }
 
 export function fetchEntityTree(action: EntityInlineParentAction, fromCache = true): EntityTree {
@@ -37,12 +37,12 @@ function createEntityTree(entity: EntitySchema, isArray: boolean) {
     isArray,
     null,
     '',
-    new Array<EntityTreeRelation>()
+    [] as EntityTreeRelation[]
   );
   const entityTree = {
     maxDepth: 0,
     rootRelation: rootEntityRelation,
-    requiredParamNames: new Array<string>(),
+    requiredParamNames: [] as string[],
   };
   buildEntityTree(entityTree, rootEntityRelation);
   return entityTree;
@@ -51,17 +51,17 @@ function createEntityTree(entity: EntitySchema, isArray: boolean) {
 function buildEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, schemaObj?: EntitySchema, path: string = '') {
   const rootEntitySchema = schemaObj || entityRelation.entity.schema;
   Object.keys(rootEntitySchema).forEach(key => {
-    const schemaOrArray = (rootEntitySchema as Record<string, any>)[key];
+    const schemaOrArray = (rootEntitySchema as Record<string, unknown>)[key];
     const isArray = Array.isArray(schemaOrArray);
     const entitySchema = isArray ? schemaOrArray[0] : schemaOrArray;
-    const newPath = path ? path + '.' + key : key;
+    const newPath = path ? `${path}.${key}` : key;
     if (entitySchema instanceof EntitySchema) {
       const newEntityRelation = new EntityTreeRelation(
         entitySchema,
         isArray,
         key,
         newPath,
-        new Array<EntityTreeRelation>()
+        [] as EntityTreeRelation[]
       );
       entityRelation.childRelations.push(newEntityRelation);
       buildEntityTree(tree, newEntityRelation, null, '');
@@ -73,7 +73,7 @@ function buildEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, s
 
 export function parseEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, includeRelations: string[] = [], )
   : EntityTreeRelation[] {
-  const newChildRelations = new Array<EntityTreeRelation>();
+  const newChildRelations: EntityTreeRelation[] = [];
   entityRelation.childRelations.forEach((relation: EntityTreeRelation) => {
     const parentChildKey = createEntityRelationKey(entityRelation.entityType, relation.entity.relationKey || relation.entityType);
     if (includeRelations.indexOf(parentChildKey) >= 0) {

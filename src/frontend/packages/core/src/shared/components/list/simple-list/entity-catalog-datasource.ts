@@ -1,5 +1,5 @@
 import { Store } from '@ngrx/store';
-import { StratosBaseCatalogEntity, EntityPipelineEntity, UserFavorite } from '@stratosui/store';
+import { type StratosBaseCatalogEntity, type EntityPipelineEntity, UserFavorite } from '@stratosui/store';
 
 import { ListDataSource } from '../data-sources-controllers/list-data-source';
 import { createTableColumnFavorite } from '../list-table/table-cell-favorite/table-cell-favorite.component';
@@ -8,14 +8,14 @@ import { ListConfig, ListViewTypes } from '../list.component.types';
 export interface GetMultipleActionConfig {
   endpointGuid?: string;
   paginationKey?: string;
-  extraArgs?: Record<any, any>;
+  extraArgs?: Record<string, unknown>;
 }
 export class CatalogEntityDrivenListDataSource<T extends EntityPipelineEntity> extends ListDataSource<T> {
   public listConfig: ListConfig<T>;
   constructor(
     catalogEntity: StratosBaseCatalogEntity,
-    { endpointGuid, paginationKey = catalogEntity.entityKey + '-list', extraArgs }: GetMultipleActionConfig,
-    store: Store<any>,
+    { endpointGuid, paginationKey = `${catalogEntity.entityKey}-list`, extraArgs }: GetMultipleActionConfig,
+    store: Store,
   ) {
     const tableConfig = catalogEntity.definition.tableConfig;
     const schema = catalogEntity.getSchema();
@@ -27,7 +27,7 @@ export class CatalogEntityDrivenListDataSource<T extends EntityPipelineEntity> e
     listConfig.viewType = ListViewTypes.TABLE_ONLY;
     listConfig.isLocal = true;
     listConfig.enableTextFilter = true;
-    const title = !tableConfig || tableConfig && tableConfig.showHeader ? catalogEntity.definition.labelPlural : null;
+    const title = !tableConfig || tableConfig?.showHeader ? catalogEntity.definition.labelPlural : null;
     listConfig.text = {
       noEntries: `There are no ${catalogEntity.definition.labelPlural.toLowerCase()}`
     };
@@ -37,13 +37,13 @@ export class CatalogEntityDrivenListDataSource<T extends EntityPipelineEntity> e
     listConfig.getColumns = () => {
       const linBuilders = tableConfig ? tableConfig.rowBuilders : [];
       return [
-        ...linBuilders.map((builder, i) => ({
+        ...linBuilders.map((builder, _i) => ({
           columnId: builder[0],
           cellDefinition: {
-            getLink: (e: any) => {
+            getLink: (_e: T) => {
               return null;
             },
-            getValue: (e: any) => {
+            getValue: (e: T) => {
               return builder[1](e, this.store);
             }
           },

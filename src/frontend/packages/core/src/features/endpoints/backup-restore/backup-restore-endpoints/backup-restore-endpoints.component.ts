@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component  } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState, RouterNav } from '@stratosui/store';
+import { type AppState, RouterNav } from '@stratosui/store';
 
-import { ITileConfig, ITileData } from '../../../../shared/components/tile/tile-selector.types';
+import { ITileConfig, type ITileData } from '../../../../shared/components/tile/tile-selector.types';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { SteppersComponent } from '../../../../shared/components/stepper/steppers/steppers.component';
 import { StepComponent } from '../../../../shared/components/stepper/step/step.component';
@@ -32,7 +32,7 @@ export class BackupRestoreEndpointsComponent {
 
   set selectedTile(tile: ITileConfig<IAppTileData>) {
     if (tile) {
-      const url = 'endpoints/backup-restore/' + tile.data.type;
+      const url = `endpoints/backup-restore/${tile.data.type}`;
       this.store.dispatch(new RouterNav({ path: url }));
     }
   }

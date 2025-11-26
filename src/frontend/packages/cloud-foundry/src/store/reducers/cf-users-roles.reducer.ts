@@ -1,23 +1,23 @@
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 
 import {
   UsersRolesActions,
-  UsersRolesSetChanges,
-  UsersRolesSetIsRemove,
-  UsersRolesSetIsSetByUsername,
-  UsersRolesSetOrg,
-  UsersRolesSetOrgRole,
-  UsersRolesSetSpaceRole,
-  UsersRolesSetUsers,
+  type UsersRolesSetChanges,
+  type UsersRolesSetIsRemove,
+  type UsersRolesSetIsSetByUsername,
+  type UsersRolesSetOrg,
+  type UsersRolesSetOrgRole,
+  type UsersRolesSetSpaceRole,
+  type UsersRolesSetUsers,
 } from '../../actions/users-roles.actions';
 import {
   createUserRoleInOrg,
   createUserRoleInSpace,
-  IUserPermissionInOrg,
-  IUserPermissionInSpace,
+  type IUserPermissionInOrg,
+  type IUserPermissionInSpace,
   OrgUserRoleNames,
 } from '../types/cf-user.types';
-import { UsersRolesState } from '../types/users-roles.types';
+import type { UsersRolesState } from '../types/users-roles.types';
 
 export function createDefaultOrgRoles(orgGuid: string, orgName: string): IUserPermissionInOrg {
   return {
@@ -55,7 +55,7 @@ const defaultState: UsersRolesState = {
 
 export function cfUsersRolesReducer(state: UsersRolesState = defaultState, action: Action): UsersRolesState {
   switch (action.type) {
-    case UsersRolesActions.SetUsers:
+    case UsersRolesActions.SetUsers: {
       const setUsersAction = action as UsersRolesSetUsers;
       const orgGuid = state.newRoles ? state.newRoles.orgGuid : '';
       const orgName = state.newRoles ? state.newRoles.name : '';
@@ -67,15 +67,17 @@ export function cfUsersRolesReducer(state: UsersRolesState = defaultState, actio
         newRoles: createDefaultOrgRoles(orgGuid, orgName),
         usernameOrigin: setUsersAction.origin
       };
+    }
     case UsersRolesActions.Clear:
       return defaultState;
-    case UsersRolesActions.SetOrg:
+    case UsersRolesActions.SetOrg: {
       const setOrgAction = action as UsersRolesSetOrg;
       return {
         ...state,
         newRoles: createDefaultOrgRoles(setOrgAction.orgGuid, setOrgAction.orgName)
       };
-    case UsersRolesActions.SetOrgRole:
+    }
+    case UsersRolesActions.SetOrgRole: {
       const setOrgRoleAction = action as UsersRolesSetOrgRole;
       return setRole(
         state,
@@ -87,7 +89,8 @@ export function cfUsersRolesReducer(state: UsersRolesState = defaultState, actio
         setOrgRoleAction.setRole,
         state.isSetByUsername
       );
-    case UsersRolesActions.SetSpaceRole:
+    }
+    case UsersRolesActions.SetSpaceRole: {
       const setSpaceRoleAction = action as UsersRolesSetSpaceRole;
       return setRole(
         state,
@@ -99,12 +102,14 @@ export function cfUsersRolesReducer(state: UsersRolesState = defaultState, actio
         setSpaceRoleAction.setRole,
         state.isSetByUsername
       );
-    case UsersRolesActions.SetChanges:
+    }
+    case UsersRolesActions.SetChanges: {
       const setChangesAction = action as UsersRolesSetChanges;
       return {
         ...state,
         changedRoles: setChangesAction.changes
       };
+    }
     case UsersRolesActions.FlipSetRoles:
       return {
         ...state,
@@ -115,24 +120,26 @@ export function cfUsersRolesReducer(state: UsersRolesState = defaultState, actio
           };
         })
       };
-    case UsersRolesActions.SetIsRemove:
+    case UsersRolesActions.SetIsRemove: {
       const isRemoveAction = action as UsersRolesSetIsRemove;
       return {
         ...state,
         isRemove: isRemoveAction.isRemove
       };
-    case UsersRolesActions.SetIsSetByUsername:
+    }
+    case UsersRolesActions.SetIsSetByUsername: {
       const isSetByUsernameAction = action as UsersRolesSetIsSetByUsername;
       return {
         ...state,
         isSetByUsername: isSetByUsernameAction.isSetByUsername
       };
+    }
   }
   return state;
 }
 
 function setPermission(roles: IUserPermissionInOrg | IUserPermissionInSpace, role: string, applyRole: boolean): boolean {
-  if ((roles.permissions as any)[role] === applyRole) {
+  if ((roles.permissions as Record<string, boolean>)[role] === applyRole) {
     return false;
   }
   roles.permissions = {
@@ -196,9 +203,10 @@ function setSpaceRole(
   if (!orgRoles.spaces[spaceGuid]) {
     orgRoles.spaces[spaceGuid] = createDefaultSpaceRoles(orgGuid, orgName, spaceGuid, spaceName);
   }
-  const spaceRoles = orgRoles.spaces[spaceGuid] = {
+  orgRoles.spaces[spaceGuid] = {
     ...orgRoles.spaces[spaceGuid]
   };
+  const spaceRoles = orgRoles.spaces[spaceGuid];
   orgRoles = setPermission(spaceRoles, role, applyRole) ? orgRoles : null;
   // If the user has applied any space role they must also have the org user role applied too.
   if (orgRoles && applyRole && !isSetByUsername) {

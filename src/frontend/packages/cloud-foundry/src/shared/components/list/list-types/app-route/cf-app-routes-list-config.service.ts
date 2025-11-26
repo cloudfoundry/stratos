@@ -1,13 +1,13 @@
-import { DatePipe } from '@angular/common';
+import type { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest } from 'rxjs';
 import { switchMap, take } from 'rxjs/operators';
 
-import { ConfirmationDialogService, CurrentUserPermissionsService, IGlobalListAction, IListConfig } from '@stratosui/core';
-import { APIResource, RouterNav } from '@stratosui/store';
-import { CFAppState } from '../../../../../cf-app-state';
-import { ApplicationService } from '../../../../../features/applications/application.service';
+import type { ConfirmationDialogService, CurrentUserPermissionsService, IGlobalListAction, IListConfig } from '@stratosui/core';
+import { type APIResource, RouterNav } from '@stratosui/store';
+import type { CFAppState } from '../../../../../cf-app-state';
+import type { ApplicationService } from '../../../../../features/applications/application.service';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfAppRoutesListConfigServiceBase } from './cf-app-routes-list-config-base';
 

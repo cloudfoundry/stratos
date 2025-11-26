@@ -1,5 +1,5 @@
 import { provideHttpClient } from '@angular/common/http';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
@@ -10,7 +10,7 @@ import { CurrentUserPermissionsService } from '@stratosui/core';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
 
-import { CFAppState } from '../../../../../cf-app-state';
+import type { CFAppState } from '../../../../../cf-app-state';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { ManageUsersSetUsernamesComponent } from './manage-users-set-usernames.component';
@@ -18,7 +18,7 @@ import { ManageUsersSetUsernamesComponent } from './manage-users-set-usernames.c
 describe('ManageUsersSetUsernamesComponent', () => {
   let component: ManageUsersSetUsernamesComponent;
   let fixture: ComponentFixture<ManageUsersSetUsernamesComponent>;
-  let store: MockStore<CFAppState>;
+  let store: MockStore;
   const cfGuid = 'cfGuid';
 
   beforeEach(async () => {
@@ -63,7 +63,7 @@ describe('ManageUsersSetUsernamesComponent', () => {
           error: false
         }
       }
-    } as any;
+    } as Partial<CFAppState>;
 
     await TestBed.configureTestingModule({
       imports: [

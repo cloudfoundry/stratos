@@ -6,11 +6,15 @@
 
 // Extensions
 export * from './core/extension/extension-service';
+export { dynamicExtensionRoutesGuard, DynamicExtensionRoutes } from './core/extension/dynamic-extension-routes';
 
 // Utils
-export { getIdFromRoute, pathGet, safeStringToObj, urlValidationExpression, truthyIncludingZeroString } from './core/utils.service';
+export { getIdFromRoute, pathGet, safeStringToObj, urlValidationExpression, truthyIncludingZeroString, createGuid } from './core/utils.service';
 export { environment } from './environments/environment';
 export { isValidJsonValidator } from './shared/form-validators';
+
+// Validators
+export * from './shared/validators';
 
 // Customization
 export * from './core/customizations.types';
@@ -26,7 +30,7 @@ export { AppTestModule, MetadataCardTestComponents } from './test-framework/core
 // LoginPageComponent
 export { LoginPageComponent } from './features/login/login-page/login-page.component';
 
-export { ProfileSettingsTypes } from './shared/components/profile-settings/profile-settings.component';
+export { ProfileSettingsComponent, ProfileSettingsTypes } from './shared/components/profile-settings/profile-settings.component';
 
 // Tailwind Material Replacements
 export * from './shared/services/tailwind-material-replacements';
@@ -50,7 +54,7 @@ export { AppProgressBarComponent } from './shared/components/progress-bar/app-pr
 // Shared Components
 export { PageHeaderComponent } from './shared/components/page-header/page-header.component';
 export { SteppersComponent } from './shared/components/stepper/steppers/steppers.component';
-export { StepComponent, StepOnNextFunction } from './shared/components/stepper/step/step.component';
+export { StepComponent, StepOnNextFunction, type StepOnNextResult } from './shared/components/stepper/step/step.component';
 export { PageSubNavComponent } from './shared/components/page-sub-nav/page-sub-nav.component';
 export { PageSubNavSectionComponent } from './shared/components/page-sub-nav-section/page-sub-nav-section.component';
 export { IPageSideNavTab } from './features/dashboard/page-side-nav/page-side-nav.component';
@@ -81,6 +85,8 @@ export {
   CustomButtonDirective,
   MatInputDirective,
   AppInputDirective,
+  AppInputDirective as InputDirective, // Alias for convenience
+  AppErrorComponent,
   MatSuffixDirective,
   MatLabelComponent
 } from './shared/components/custom-form-field/custom-form-field.component';
@@ -117,12 +123,15 @@ export { MonacoEditorComponent, MonacoEditorModel, MonacoEditorOptions } from '.
 export { TileGridComponent } from './shared/components/tile/tile-grid/tile-grid.component';
 export { TileGroupComponent } from './shared/components/tile/tile-group/tile-group.component';
 export { TileComponent } from './shared/components/tile/tile/tile.component';
+export { TileConfigManager } from './shared/components/tile/tile-selector.helpers';
 
 // UI Components
 export { LoadingPageComponent } from './shared/components/loading-page/loading-page.component';
 export { StatefulIconComponent } from './core/stateful-icon/stateful-icon.component';
+export { FileInputComponent } from './shared/components/file-input/file-input.component';
+export { ShowHideButtonComponent } from './core/show-hide-button/show-hide-button.component';
 export { AppChipsComponent, AppChip, IAppChip } from './shared/components/chips/chips.component';
-export { BooleanIndicatorComponent } from './shared/components/boolean-indicator/boolean-indicator.component';
+export { BooleanIndicatorComponent, BooleanIndicatorType } from './shared/components/boolean-indicator/boolean-indicator.component';
 export { CopyToClipboardComponent } from './shared/components/copy-to-clipboard/copy-to-clipboard.component';
 export { NoContentMessageComponent } from './shared/components/no-content-message/no-content-message.component';
 export { UploadProgressIndicatorComponent } from './shared/components/upload-progress-indicator/upload-progress-indicator.component';
@@ -137,6 +146,8 @@ export { EntityFavoriteStarComponent } from './core/entity-favorite-star/entity-
 export { DotContentComponent } from './core/dot-content/dot-content.component';
 export { AppMonitorComponentTypes } from './shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
 export { AppActionMonitorComponent } from './shared/components/app-action-monitor/app-action-monitor.component';
+export { ProductNameComponent } from './shared/components/product-name.component';
+export { UsageGaugeComponent } from './shared/components/usage-gauge/usage-gauge.component';
 
 // List Components
 export { ListComponent } from './shared/components/list/list.component';
@@ -151,7 +162,7 @@ export { ActionSchemaConfig, MultiActionConfig } from './shared/components/list/
 export * from './shared/components/list/data-sources-controllers/list-pagination-controller';
 export { ActionListConfigProvider } from './shared/components/list/list-generics/list-providers/action-list-config-provider';
 export { TableRowStateManager } from './shared/components/list/list-table/table-row/table-row-state-manager';
-export { CardTypes } from './shared/components/list/list-cards/card/card.component';
+export { CardComponent, CardTypes } from './shared/components/list/list-cards/card/card.component';
 export { CardMultiActionComponents, CardDynamicComponent } from './shared/components/list/list-cards/card.component.types';
 
 // Utility Components
@@ -179,11 +190,12 @@ export {
   CustomCardFooterComponent
 } from './shared/components/custom-card/custom-card.component';
 
-// Stepper Types
-export * from './shared/components/stepper/step/step.component';
+// Stepper and Page Header Types (components are exported above at lines 54-57)
 export * from './shared/components/stepper/stepper.types';
 export * from './shared/components/page-header/page-header.types';
-export * from './shared/components/page-header/page-header.module';
+// Note: PageHeaderModule and SteppersModule are no longer exported here
+// The standalone components (PageHeaderComponent, SteppersComponent, StepComponent)
+// are exported directly above and should be used instead
 
 // Pipes
 export { BytesToHumanSize } from './core/byte-formatters.pipe';
@@ -200,6 +212,7 @@ export { ClickStopPropagationDirective } from './core/click-stop-propagation.dir
 export { CustomTooltipDirective } from './shared/components/custom-tooltip/custom-tooltip.directive';
 export { FocusDirective } from './shared/components/focus.directive';
 export { TableCellStatusDirective } from './shared/components/list/list-table/table-cell-status.directive';
+export { UniqueDirective } from './shared/components/unique.directive';
 
 // Dialog Services and Config
 export { ConfirmationDialogService } from './shared/components/confirmation-dialog.service';
@@ -217,6 +230,8 @@ export { BaseCurrentUserPermissionsChecker, ICurrentUserPermissionsChecker, IPer
 export { StratosCurrentUserPermissions, StratosScopeStrings } from './core/permissions/stratos-user-permissions.checker';
 export { UserProfileService } from './core/user-profile.service';
 export { SessionService } from './shared/services/session.service';
+export { LongRunningOperationsService } from './shared/services/long-running-op.service';
+export { DispatchSequencer, type DispatchSequencerAction } from './core/dispatch-sequencer';
 
 // Helper Classes
 export { arrayHelper } from './core/helper-classes/array.helper';
@@ -236,8 +251,9 @@ export { HomePageCardLayout, HomePageEndpointCard, LinkMetadata } from './featur
 
 // Endpoints
 export * from './features/endpoints/create-endpoint/create-endpoint-helper';
-export { CreateEndpointModule } from './features/endpoints/create-endpoint/create-endpoint.module';
 export { CreateEndpointBaseStepComponent } from './features/endpoints/create-endpoint/create-endpoint-base-step/create-endpoint-base-step.component';
+export { CreateEndpointConnectComponent } from './features/endpoints/create-endpoint/create-endpoint-connect/create-endpoint-connect.component';
+export { ConnectEndpointService, ConnectEndpointConfig, ConnectEndpointData } from './features/endpoints/connect.service';
 export { BaseEndpointAuth, EndpointAuthTypeNames } from './core/endpoint-auth';
 
 // List Types and Components
@@ -246,8 +262,23 @@ export * from './shared/components/list/list-table/table.types';
 export * from './shared/components/list/data-sources-controllers/local-filtering-sorting';
 export { TableCellEndpointNameComponent } from './shared/components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
 export { EndpointListDetailsComponent } from './shared/components/list/list-types/endpoint/endpoint-list.helpers';
+export { BaseEndpointsDataSource, syncPaginationSection } from './shared/components/list/list-types/endpoint/base-endpoints-data-source';
 export { createTableColumnFavorite } from './shared/components/list/list-table/table-cell-favorite/table-cell-favorite.component';
 export { ITableCellRequestMonitorIconConfig } from './shared/components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
+export { TableCellSidePanelComponent } from './shared/components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
+export type { TableCellSidePanelConfig } from './shared/components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
+
+// Table Cell Components
+export { TableCellRadioComponent, type TableCellRadioConfig } from './shared/components/list/list-table/table-cell-radio/table-cell-radio.component';
+export { TableCellEditComponent } from './shared/components/list/list-table/table-cell-edit/table-cell-edit.component';
+export { TableCellBooleanIndicatorComponent, type TableCellBooleanIndicatorComponentConfig } from './shared/components/list/list-table/table-cell-boolean-indicator/table-cell-boolean-indicator.component';
+
+// Endpoint List Components
+export { EndpointCardComponent } from './shared/components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
+export { EndpointsListConfigService } from './shared/components/list/list-types/endpoint/endpoints-list-config.service';
+
+// List Helper
+export * from './shared/components/list/list.helper';
 
 // Meta Card Components
 export { MetaCardComponent } from './shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
@@ -271,3 +302,7 @@ export { MetricsParentRangeSelectorComponent } from './shared/components/metrics
 export { MetricsRangeSelectorComponent } from './shared/components/metrics-range-selector/metrics-range-selector.component';
 export { MetricsLineChartConfig, MetricsChartTypes, IMetricsConfig, IMetricsChartConfig } from './shared/components/metrics-chart/metrics-chart.types';
 export { ChartDataTypes, getMetricsChartConfigBuilder, MetricsChartHelpers } from './shared/components/metrics-chart/metrics.component.helpers';
+
+// Metrics Services and Types
+export { MetricsRangeSelectorService } from './shared/services/metrics-range-selector.service';
+export { ITimeRange, StoreMetricTimeRange, DurationTuple } from './shared/services/metrics-range-selector.types';

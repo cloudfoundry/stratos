@@ -1,12 +1,14 @@
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, type OnInit } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
-import { Observable } from 'rxjs';
+import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
+import type { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
 import { ApplicationService } from '@stratosui/cloud-foundry';
 import { CustomIconComponent, PageHeaderComponent, SteppersComponent, StepComponent } from '@stratosui/core';
+import type { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
+import type { IApp } from '../../../../cloud-foundry/src/cf-api.types';
 import { EditAutoscalerPolicyStep1Component } from './edit-autoscaler-policy-step1/edit-autoscaler-policy-step1.component';
 import { EditAutoscalerPolicyStep2Component } from './edit-autoscaler-policy-step2/edit-autoscaler-policy-step2.component';
 import { EditAutoscalerPolicyStep3Component } from './edit-autoscaler-policy-step3/edit-autoscaler-policy-step3.component';
@@ -19,7 +21,7 @@ import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
   styleUrls: ['./edit-autoscaler-policy.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
-    { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher },
+    { provide: TailwindErrorStateMatcher, useClass: TailwindShowOnDirtyErrorStateMatcher },
     EditAutoscalerPolicyService
   ],
   standalone: true,
@@ -52,7 +54,10 @@ export class EditAutoscalerPolicyComponent implements OnInit {
 
   ngOnInit() {
     this.applicationName$ = this.applicationService.app$.pipe(
-      map(({ entity }) => entity ? entity.entity.name : null),
+      map((appInfo: EntityInfo<APIResource<IApp>>) => {
+        const entity = appInfo.entity;
+        return entity && 'entity' in entity ? entity.entity.name : null;
+      }),
       publishReplay(1),
       refCount()
     );

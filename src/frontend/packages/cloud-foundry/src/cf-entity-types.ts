@@ -1,5 +1,5 @@
-import { IRequestEntityTypeState, APIResource, BaseEntityValues } from '@stratosui/store';
-import {
+import type { IRequestEntityTypeState, APIResource, BaseEntityValues } from '@stratosui/store';
+import type {
   IService,
   IServiceBinding,
   IServiceBroker,
@@ -8,22 +8,24 @@ import {
   IServicePlanVisibility,
   IUserProvidedServiceInstance,
 } from './cf-api-svc.types';
-import {
+import type {
   IApp,
   IAppSummary,
   IBuildpack,
+  ICfV2Info,
   IDomain,
   IFeatureFlag,
   IOrganization,
   IOrgQuotaDefinition,
+  IPrivateDomain,
   IRoute,
   ISecurityGroup,
   ISpace,
   ISpaceQuotaDefinition,
   IStack,
 } from './cf-api.types';
-import { AppStats } from './store/types/app-metadata.types';
-import { CfUser } from './store/types/cf-user.types';
+import type { AppEnvVarsState, AppStats } from './store/types/app-metadata.types';
+import type { CfUser } from './store/types/cf-user.types';
 
 export const applicationEntityType = 'application';
 export const stackEntityType = 'stack';
@@ -74,14 +76,16 @@ interface CFEntityValues {
   cfServicePlanVisibility: IRequestEntityTypeState<APIResource<IServicePlanVisibility>>;
   cfServiceBroker: IRequestEntityTypeState<APIResource<IServiceBroker>>;
   cfBuildpack: IRequestEntityTypeState<IBuildpack>;
-  cfEnvironmentVars: IRequestEntityTypeState<any>;
+  cfEnvironmentVars: IRequestEntityTypeState<AppEnvVarsState>;
   cfStats: IRequestEntityTypeState<AppStats>;
   cfUserProvidedServiceInstance: IRequestEntityTypeState<IUserProvidedServiceInstance>;
-  cfCloudFoundryInfo: IRequestEntityTypeState<any>;
-  cfPrivate_domains: IRequestEntityTypeState<any>;
+  cfCloudFoundryInfo: IRequestEntityTypeState<ICfV2Info>;
+  cfPrivate_domains: IRequestEntityTypeState<IPrivateDomain>;
   cfQuota_definition: IRequestEntityTypeState<APIResource<IOrgQuotaDefinition>>;
   cfSpace_quota_definition: IRequestEntityTypeState<APIResource<ISpaceQuotaDefinition>>;
   cfSummary: IRequestEntityTypeState<IAppSummary>;
 }
 
-export interface CFRequestDataState extends CFEntityValues, BaseEntityValues { }
+export interface CFRequestDataState extends CFEntityValues, BaseEntityValues {
+  [key: string]: unknown;
+}

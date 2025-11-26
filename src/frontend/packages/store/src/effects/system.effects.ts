@@ -4,10 +4,10 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
-import { GET_SYSTEM_INFO, GetSystemInfo, GetSystemSuccess } from '../actions/system.actions';
-import { InternalAppState } from '../app-state';
+import { GET_SYSTEM_INFO, type GetSystemInfo, GetSystemSuccess } from '../actions/system.actions';
+import type { InternalAppState } from '../app-state';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
-import { SystemInfo } from '../types/system.types';
+import type { SystemInfo } from '../types/system.types';
 
 
 @Injectable({
@@ -37,7 +37,7 @@ export class SystemEffects {
             new GetSystemSuccess(info, action.login, associatedAction),
             new WrapperRequestActionSuccess({ entities: {}, result: [] }, action)
           ];
-        }), catchError((e) => {
+        }), catchError((_e) => {
           this.appRef.tick();
           return [
             { type: action.actions[2] },

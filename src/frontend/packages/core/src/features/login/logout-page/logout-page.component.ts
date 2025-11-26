@@ -1,9 +1,9 @@
-import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { CardWrapperComponent } from '@stratosui/core';
 import { Store } from '@ngrx/store';
-import { Logout, AppState } from '@stratosui/store';
-import { Observable } from 'rxjs';
+import { Logout, type AppState } from '@stratosui/store';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { IntroScreenComponent } from '../../../shared/components/intro-screen/intro-screen.component';

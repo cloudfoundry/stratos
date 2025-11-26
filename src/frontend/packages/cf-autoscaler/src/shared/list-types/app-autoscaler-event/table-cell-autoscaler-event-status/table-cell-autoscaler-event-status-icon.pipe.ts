@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, type PipeTransform } from '@angular/core';
 
 @Pipe({
   name: 'tableCellAutoscalerEventStatusIcon',
@@ -6,7 +6,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class TableCellAutoscalerEventStatusIconPipe implements PipeTransform {
 
-  private result(outputType: string, value: number, cssClass: string, icon: string, label: string) {
+  private result(outputType: string, _value: number, cssClass: string, icon: string, label: string) {
     switch (outputType) {
       case 'class':
         return cssClass;

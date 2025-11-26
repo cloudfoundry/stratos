@@ -1,5 +1,5 @@
-import { Injectable, Optional, signal, computed, Signal } from '@angular/core';
-import { StratosTheme, defaultTheme, darkTheme } from './theme.config';
+import { Injectable, signal, } from '@angular/core';
+import { type StratosTheme, defaultTheme, } from './theme.config';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 
@@ -173,7 +173,7 @@ export class StratosThemeService {
         this._theme.set({ ...defaultTheme, ...themeConfig });
         return;
       }
-    } catch (error) {
+    } catch (_error) {
       // Silently fall back to default theme
     }
 
@@ -184,7 +184,7 @@ export class StratosThemeService {
   private saveThemeToStorage(theme: StratosTheme) {
     try {
       localStorage.setItem(this.THEME_STORAGE_KEY, JSON.stringify(theme));
-    } catch (error) {
+    } catch (_error) {
       console.warn('Could not save theme to localStorage');
     }
   }
@@ -202,7 +202,7 @@ export class StratosThemeService {
   }
 
   toggleTheme() {
-    const currentMode = this._themeMode();
+    const _currentMode = this._themeMode();
     // Toggle between light and dark (ignore system for toggle)
     const isDark = this._isDarkMode();
     const newMode: ThemeMode = isDark ? 'light' : 'dark';
@@ -252,7 +252,7 @@ export class StratosThemeService {
       if (saved && ['light', 'dark', 'system'].includes(saved)) {
         return saved as ThemeMode;
       }
-    } catch (error) {
+    } catch (_error) {
       console.warn('Could not load theme mode from localStorage');
     }
     // Default to system preference
@@ -262,7 +262,7 @@ export class StratosThemeService {
   private saveThemeModeToStorage(mode: ThemeMode) {
     try {
       localStorage.setItem(this.THEME_MODE_KEY, mode);
-    } catch (error) {
+    } catch (_error) {
       console.warn('Could not save theme mode to localStorage');
     }
   }

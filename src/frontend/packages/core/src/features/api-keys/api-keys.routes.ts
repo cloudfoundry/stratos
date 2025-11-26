@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+import type { Routes } from '@angular/router';
 
 import { ApiKeysPageComponent } from './api-keys-page/api-keys-page.component';
 

@@ -1,15 +1,13 @@
 import { Injectable } from '@angular/core';
-import { MetricQueryType, MetricQueryConfig, MetricsAction, IMetrics } from '@stratosui/store';
+import { MetricQueryType, MetricQueryConfig, type MetricsAction, type IMetrics } from '@stratosui/store';
 import { sub, getUnixTime } from 'date-fns';
 
-import { ITimeRange, StoreMetricTimeRange } from './metrics-range-selector.types';
+import type { ITimeRange, StoreMetricTimeRange } from './metrics-range-selector.types';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MetricsRangeSelectorService {
-
-  constructor() { }
 
   public defaultTimeValue: string;
   public times: ITimeRange[] = [
@@ -59,7 +57,7 @@ export class MetricsRangeSelectorService {
     const now = new Date();
 
     // Map unit string to date-fns duration object key
-    const duration: any = {};
+    const duration: Record<string, number> = {};
     if (unit === 'minute') duration.minutes = amount;
     else if (unit === 'hour') duration.hours = amount;
     else if (unit === 'day') duration.days = amount;
@@ -99,7 +97,7 @@ export class MetricsRangeSelectorService {
         };
       } else {
         return {
-          timeRange: metrics.query && metrics.query.params && metrics.query.params.window ?
+          timeRange: metrics.query?.params?.window ?
             times.find(time => time.value === metrics.query.params.window) :
             this.getDefaultTimeRange(times)
         };

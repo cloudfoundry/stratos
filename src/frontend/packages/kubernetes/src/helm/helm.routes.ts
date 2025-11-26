@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+import type { Routes } from '@angular/router';
 
 import { MonocularChartViewComponent } from './chart-view/monocular.component';
 import { MonocularTabBaseComponent } from './monocular-tab-base/monocular-tab-base.component';

@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -13,7 +13,7 @@ import {
   CATALOGUE_ENTITIES,
   generateStratosEntities,
   entityCatalog,
-  TestEntityCatalog,
+  type TestEntityCatalog,
   ENTITY_CATALOG_TOKEN
 } from '@stratosui/store';
 import { createBasicStoreModule } from '@test-framework';

@@ -1,4 +1,4 @@
-import { RolesRequestState } from '../../../../store/src/types/current-user-roles.types';
+import type { RolesRequestState } from '../../../../store/src/types/current-user-roles.types';
 
 export enum RoleEntities {
   ORGS = 'organizations',

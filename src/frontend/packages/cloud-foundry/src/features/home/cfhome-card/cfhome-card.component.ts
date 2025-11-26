@@ -1,13 +1,13 @@
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { Component, Input, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, type Observable } from 'rxjs';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
 import { BASE_REDIRECT_QUERY } from '@stratosui/core';
-import { RouterNav, PaginationMonitorFactory, EndpointModel, ActionState, APIResource } from '@stratosui/store';
-import { IApp } from '../../../cf-api.types';
-import { CFAppState } from '../../../cf-app-state';
+import { RouterNav, PaginationMonitorFactory, type EndpointModel, type ActionState, type APIResource, type GeneralEntityAppState } from '@stratosui/store';
+import type { IApp } from '../../../cf-api.types';
+import type { CFAppState } from '../../../cf-app-state';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import {
   ApplicationDeploySourceTypes,
@@ -16,12 +16,12 @@ import {
 } from '../../applications/deploy-application/deploy-application-steps.types';
 import {
   AUTO_SELECT_CF_URL_PARAM,
-  IAppTileData,
+  type IAppTileData,
 } from '../../applications/new-application-base-step/new-application-base-step.component';
 import { ActiveRouteCfOrgSpace } from '../../cf/cf-page.types';
 import { goToAppWall } from '../../cf/cf.helpers';
 import { appDataSort, CloudFoundryEndpointService } from '../../cf/services/cloud-foundry-endpoint.service';
-import { HomePageCardLayout, HomePageEndpointCard, ITileConfig } from '@stratosui/core';
+import { HomePageCardLayout, type HomePageEndpointCard, ITileConfig } from '@stratosui/core';
 import { TileGridComponent } from '@stratosui/core';
 import { TileGroupComponent } from '@stratosui/core';
 import { TileComponent } from '@stratosui/core';
@@ -97,7 +97,7 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
   showDeployAppTiles = false;
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     private pmf: PaginationMonitorFactory,
     appDeploySourceTypes: ApplicationDeploySourceTypes,
     private cdr: ChangeDetectorRef,
@@ -155,7 +155,7 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
 
     this.appLink = () => goToAppWall(this.store, this.guid);
 
-    const appsPagObs = cfEntityCatalog.application.store.getPaginationService(this.guid);
+    const appsPagObs = cfEntityCatalog.application.store.getPaginationService(this.guid, null);
 
     // When the apps are loaded, fetch the app stats
     this.hasNoApps$ = appsPagObs.entities$.pipe(

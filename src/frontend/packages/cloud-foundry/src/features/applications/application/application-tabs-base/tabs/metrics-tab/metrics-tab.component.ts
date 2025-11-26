@@ -3,12 +3,12 @@ import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import {
   MetricsChartComponent,
   MetricsParentRangeSelectorComponent,
-  MetricsConfig,
-  MetricsLineChartConfig,
+  type MetricsConfig,
+  type MetricsLineChartConfig,
   ChartDataTypes,
   getMetricsChartConfigBuilder
 } from '@stratosui/core';
-import { MetricQueryConfig, IMetricMatrixResult, IMetricApplication } from '@stratosui/store';
+import { MetricQueryConfig, type IMetricMatrixResult, type IMetricApplication } from '@stratosui/store';
 import { FetchApplicationChartMetricsAction } from '../../../../../../actions/cf-metrics.actions';
 import { ApplicationService } from '../../../../application.service';
 

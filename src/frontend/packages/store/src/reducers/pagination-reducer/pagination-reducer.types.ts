@@ -1,7 +1,7 @@
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
-import { PaginationEntityState } from '../../types/pagination.types';
-import { ListActionState } from '../api-request-reducer/types';
+import type { PaginationEntityState } from '../../types/pagination.types';
+import type { ListActionState } from '../api-request-reducer/types';
 
 
 export const resultPerPageParam = 'results-per-page';

@@ -1,14 +1,15 @@
-import { DatePipe } from '@angular/common';
+import type { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import type { GeneralEntityAppState } from '@stratosui/store';
 import { publishReplay, refCount } from 'rxjs/operators';
-import { CurrentUserPermissionsService, ConfirmationDialogService, IListConfig } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
+import type { CurrentUserPermissionsService, ConfirmationDialogService, IListConfig } from '@stratosui/core';
+import type { APIResource } from '@stratosui/store';
 
-import { CFAppState } from '../../../../../cf-app-state';
-import { CloudFoundrySpaceService } from '../../../../../features/cf/services/cloud-foundry-space.service';
+import type { CFAppState } from '../../../../../cf-app-state';
+import type { CloudFoundrySpaceService } from '../../../../../features/cf/services/cloud-foundry-space.service';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
-import { CfRoutesListConfigBase } from '../cf-routes/cf-routes-list-config-base';
+import { CfRoutesListConfigBase, type ListCfRoute } from '../cf-routes/cf-routes-list-config-base';
 import { CfSpaceRoutesDataSource } from './cf-space-routes-data-source';
 
 
@@ -21,7 +22,7 @@ export class CfSpaceRoutesListConfigService extends CfRoutesListConfigBase imple
   getDataSource!: () => CfSpaceRoutesDataSource;
 
   constructor(
-    store: Store<CFAppState>,
+    store: Store<GeneralEntityAppState>,
     confirmDialog: ConfirmationDialogService,
     cfSpaceService: CloudFoundrySpaceService,
     datePipe: DatePipe,
@@ -41,11 +42,11 @@ export class CfSpaceRoutesListConfigService extends CfRoutesListConfigBase imple
   }
 
   private setupList(
-    store: Store<CFAppState>,
+    store: Store<GeneralEntityAppState>,
     cfSpaceService: CloudFoundrySpaceService, ) {
     this.dataSource = new CfSpaceRoutesDataSource(
       store,
-      this,
+      this as unknown as IListConfig<APIResource<ListCfRoute>>,
       cfSpaceService.spaceGuid,
       cfSpaceService.cfGuid,
     );

@@ -1,7 +1,7 @@
 import { compose } from '@ngrx/store';
 
-import { DashboardOnlyAppState } from '../app-state';
-import { DashboardState } from '../types/dashboard.types';
+import type { DashboardOnlyAppState } from '../app-state';
+import type { DashboardState } from '../types/dashboard.types';
 
 const getSideNavState = (dashboardState: DashboardState) => dashboardState.sidenavOpen;
 const getIsMobile = (dashboardState: DashboardState) => dashboardState.isMobile;

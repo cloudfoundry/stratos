@@ -1,5 +1,5 @@
-import { Chart } from '../monocular/shared/models/chart';
-import { ChartVersion } from '../monocular/shared/models/chart-version';
+import type { Chart } from '../monocular/shared/models/chart';
+import type { ChartVersion } from '../monocular/shared/models/chart-version';
 
 export interface MonocularRepository {
   name: string;

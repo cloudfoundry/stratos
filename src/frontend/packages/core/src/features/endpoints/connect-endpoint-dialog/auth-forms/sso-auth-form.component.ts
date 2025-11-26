@@ -1,12 +1,10 @@
 import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
-import { ReactiveFormsModule,FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { IAuthForm } from '@stratosui/store';
+import { ReactiveFormsModule,type FormGroup } from '@angular/forms';
+import type { IAuthForm } from '@stratosui/store';
 
-import { ProductNameComponent } from '../../../../shared/components/product-name.ccomponent';
+import { ProductNameComponent } from '../../../../shared/components/product-name.component';
 
-interface SsoAuthFormValues {
-  // SSO form has an empty authValues group - no additional fields required
-}
+type SsoAuthFormValues = {}
 
 interface SsoAuthForm {
   authValues: FormGroup<SsoAuthFormValues>;

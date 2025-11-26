@@ -1,4 +1,4 @@
-import { AppRoutingOnlyAppState } from '../app-state';
+import type { AppRoutingOnlyAppState } from '../app-state';
 
 export interface RoutingEvent {
   id: number;

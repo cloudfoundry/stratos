@@ -1,4 +1,4 @@
-import { HTTP_INTERCEPTORS, HttpBackend, HttpClient, HttpInterceptor } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpBackend, HttpClient, type HttpInterceptor } from '@angular/common/http';
 
 import { HttpInterceptingHandler, MonocularInterceptor } from '../monocular.interceptor';
 import { ChartsService } from './shared/services/charts.service';

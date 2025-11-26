@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, TemplateRef, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, type TemplateRef, inject } from '@angular/core';
 
 import { StratosStatus } from '@stratosui/store';
 import { CustomIconComponent } from '../../shared/components/custom-material/custom-material.component';
@@ -11,7 +11,7 @@ interface IconDefinition {
 }
 
 interface IconTemplateDefinition {
-  template: TemplateRef<any>;
+  template: TemplateRef<unknown>;
 }
 
 type StatefulIconDefinition = IconDefinition | IconTemplateDefinition;

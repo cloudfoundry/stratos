@@ -2,8 +2,7 @@ import { AsyncPipe, CommonModule, TitleCasePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
-  ComponentFactoryResolver,
-  OnDestroy,
+  type OnDestroy,
   signal,
   ViewChild,
   ViewContainerRef,
@@ -13,7 +12,7 @@ import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
+import { combineLatest as observableCombineLatest, type Observable, type Subscription } from 'rxjs';
 import {
   distinctUntilChanged,
   filter,
@@ -30,7 +29,7 @@ import {
 import {
   SetCreateServiceInstanceServicePlan,
 } from '../../../../../../cloud-foundry/src/actions/create-service-instance.actions';
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
+import type { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import {
   canShowServicePlanCosts,
   getServicePlanAccessibilityCardStatus,
@@ -40,20 +39,20 @@ import {
 import {
   selectCreateServiceInstance,
 } from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
-import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
-import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
-import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
-import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
-import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { APIResource } from '../../../../../../store/src/types/api.types';
-import { StratosStatus } from '../../../../../../store/src/types/shared.types';
-import { IServicePlan } from '../../../../cf-api-svc.types';
-import { ServicePlanPriceComponent } from '../../service-plan-price/service-plan-price.component';
-import { ServicePlanPublicComponent } from '../../service-plan-public/service-plan-public.component';
+import { safeUnsubscribe } from '@stratosui/core';
+import { CardStatusComponent } from '@stratosui/core';
+import { FocusDirective } from '@stratosui/core';
+import { MetadataItemComponent } from '@stratosui/core';
+import type { StepOnNextResult } from '@stratosui/core';
+import type { APIResource } from '../../../../../../store/src/types/api.types';
+import type { StratosStatus } from '../../../../../../store/src/types/shared.types';
+import type { IServicePlan } from '../../../../cf-api-svc.types';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
-import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
+import type { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiModeService } from '../csi-mode.service';
 import { NoServicePlansComponent } from '../no-service-plans/no-service-plans.component';
+import { ServicePlanPriceComponent } from '../../service-plan-price/service-plan-price.component';
+import { ServicePlanPublicComponent } from '../../service-plan-public/service-plan-public.component';
 
 interface SelectPlanForm {
   servicePlans: FormControl<string>;
@@ -98,10 +97,9 @@ export class SelectPlanStepComponent implements OnDestroy {
   displayNames: { [guid: string]: string } = {};
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store,
     private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
-    activatedRoute: ActivatedRoute,
-    private componentFactoryResolver: ComponentFactoryResolver,
+    _activatedRoute: ActivatedRoute,
     private modeService: CsiModeService
 
   ) {
@@ -199,10 +197,7 @@ export class SelectPlanStepComponent implements OnDestroy {
   }
 
   private createNoPlansComponent() {
-    const component = this.componentFactoryResolver.resolveComponentFactory(
-      NoServicePlansComponent
-    );
-    return this.noPlansDiv.createComponent(component);
+    return this.noPlansDiv.createComponent(NoServicePlansComponent);
   }
   private clearNoPlans() {
     return this.noPlansDiv.clear();

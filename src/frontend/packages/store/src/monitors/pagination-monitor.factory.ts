@@ -1,9 +1,9 @@
-import { inject, Inject, Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { AppState } from '../app-state';
+import type { AppState } from '../app-state';
 import type { IEntityCatalog } from '../entity-catalog/entity-catalog.interface';
-import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
+import type { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
 import { ENTITY_CATALOG_TOKEN } from '../tokens/store-injection.tokens';
 import { PaginationMonitor } from './pagination-monitor';
 
@@ -19,7 +19,7 @@ export class PaginationMonitorFactory {
     @Inject(ENTITY_CATALOG_TOKEN) private entityCatalog: IEntityCatalog
   ) {}
 
-  public create<T = any>(
+  public create<T = unknown>(
     paginationKey: string,
     entityConfig: EntityCatalogEntityConfig,
     isLocal: boolean
@@ -29,7 +29,7 @@ export class PaginationMonitorFactory {
     if (!catalogEntity) {
       throw new Error(`Could not find catalog entity for endpoint type '${endpointType}' and entity type '${entityType}'`);
     }
-    const cacheKey = paginationKey + catalogEntity.entityKey;
+    const cacheKey = paginationKey + (catalogEntity as { entityKey: string }).entityKey;
     if (this.monitorCache[cacheKey]) {
       return this.monitorCache[cacheKey] as PaginationMonitor<T>;
     } else {

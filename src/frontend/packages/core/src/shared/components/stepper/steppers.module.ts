@@ -6,6 +6,8 @@ import { StepComponent } from './step/step.component';
 import { StepperFormComponent } from './stepper-form/stepper-form.component';
 import { SteppersComponent } from './steppers/steppers.component';
 
+// This module is deprecated - use the standalone components directly instead
+// Kept for backward compatibility with test files only
 @NgModule({
     imports: [
         CommonModule,
@@ -14,6 +16,7 @@ import { SteppersComponent } from './steppers/steppers.component';
         StepComponent,
         StepperFormComponent
     ],
+    declarations: [],
     exports: [
         SteppersComponent,
         StepComponent,

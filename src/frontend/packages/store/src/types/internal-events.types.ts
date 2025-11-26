@@ -6,9 +6,7 @@ export const CLEAR_EVENTS = '[Internal Event] Clear';
 
 export const CLEAR_ENDPOINT_ERROR_EVENTS = '[Internal Event] Clear Endpoint Errors';
 
-export interface InternalEventState<T = {
-  [key: string]: any;
-}> {
+export interface InternalEventState<T = Record<string, unknown>> {
   message?: string;
   timestamp?: number;
   eventCode: string;
@@ -18,8 +16,9 @@ export interface InternalEventState<T = {
 
 export interface InternalEventStateMetadata {
   httpMethod: string;
-  errorResponse: any;
+  errorResponse: unknown;
   url: string;
+  [key: string]: unknown; // Index signature for Record<string, unknown> compatibility
 }
 
 export interface APIEventState extends InternalEventState {

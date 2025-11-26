@@ -1,8 +1,8 @@
-import { BuilderContext, BuilderOutput, createBuilder } from '@angular-devkit/architect';
-import { JsonObject } from '@angular-devkit/core';
-import { buildApplication, ApplicationBuilderOptions } from '@angular-devkit/build-angular';
-import { execSync } from 'child_process';
-import * as path from 'path';
+import { type BuilderContext, type BuilderOutput, createBuilder } from '@angular-devkit/architect';
+import type { JsonObject } from '@angular-devkit/core';
+import { buildApplication, type ApplicationBuilderOptions } from '@angular-devkit/build-angular';
+import { execSync } from 'node:child_process';
+import * as path from 'node:path';
 
 export interface StratosApplicationBuilderOptions extends ApplicationBuilderOptions {
   /**
@@ -34,7 +34,7 @@ async function runPreBuild(
     path.join(context.workspaceRoot, 'build/build-orchestrator.js');
 
   // Check if script exists
-  const fs = require('fs');
+  const fs = require('node:fs');
   if (!fs.existsSync(script)) {
     context.logger.warn(`⚠️  Pre-build script not found: ${script}`);
     context.logger.warn('⚠️  Continuing without pre-build...');
@@ -103,8 +103,8 @@ export default createBuilder<StratosApplicationBuilderOptions & JsonObject>(
 
       // Remove our custom options before passing to Angular builder
       const buildOptions = { ...options };
-      delete (buildOptions as any).preBuildScript;
-      delete (buildOptions as any).skipPreBuild;
+      delete (buildOptions as Record<string, unknown>).preBuildScript;
+      delete (buildOptions as Record<string, unknown>).skipPreBuild;
 
       // Execute Angular's application builder (returns async iterable)
       for await (const result of buildApplication(buildOptions, context)) {

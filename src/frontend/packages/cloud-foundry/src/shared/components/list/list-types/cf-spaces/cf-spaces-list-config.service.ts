@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { CFAppState, ISpace } from '@stratosui/cloud-foundry';
-import { ITableColumn } from '@stratosui/core';
-import { IGlobalListAction, IListAction, IListConfig, IListMultiFilterConfig, IMultiListAction, ListViewTypes } from '@stratosui/core';
-import { ListView } from '@stratosui/store';
-import { APIResource } from '@stratosui/store';
-import { CloudFoundryOrganizationService } from '../../../../../features/cf/services/cloud-foundry-organization.service';
+import type { CFAppState, ISpace } from '@stratosui/cloud-foundry';
+import type { ITableColumn } from '@stratosui/core';
+import { type IGlobalListAction, type IListAction, type IListConfig, type IListMultiFilterConfig, type IMultiListAction, ListViewTypes } from '@stratosui/core';
+import type { ListView, GeneralEntityAppState } from '@stratosui/store';
+import type { APIResource } from '@stratosui/store';
+import type { CloudFoundryOrganizationService } from '../../../../../features/cf/services/cloud-foundry-organization.service';
 import { CfSpaceCardComponent } from './cf-space-card/cf-space-card.component';
 import { CfSpacesDataSourceService } from './cf-spaces-data-source.service';
 
@@ -43,7 +43,7 @@ export class CfSpacesListConfigService implements IListConfig<APIResource<ISpace
   }];
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     cfOrgService: CloudFoundryOrganizationService,
   ) {
     this.dataSource = new CfSpacesDataSourceService(cfOrgService.cfGuid, cfOrgService.orgGuid, this.store, this);
@@ -54,5 +54,5 @@ export class CfSpacesListConfigService implements IListConfig<APIResource<ISpace
   getMultiActions = (): IMultiListAction<APIResource<ISpace>>[] => [];
   getSingleActions = (): IListAction<APIResource<ISpace>>[] => [];
   getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
-  getDataSource = (): CfSpacesDataSourceService => this.dataSource;
+  getDataSource = (): any => this.dataSource as any;
 }

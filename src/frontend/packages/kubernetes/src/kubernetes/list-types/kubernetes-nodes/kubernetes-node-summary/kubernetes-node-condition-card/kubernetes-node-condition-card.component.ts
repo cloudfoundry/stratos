@@ -1,10 +1,10 @@
 import {Component, inject, ChangeDetectionStrategy } from '@angular/core';
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CardWrapperComponent, CardHeaderComponent, CardTitleComponent, CardContentComponent } from '@stratosui/core';
 
-import { CaaspNodeData, KubernetesEndpointService } from '../../../../services/kubernetes-endpoint.service';
+import { type CaaspNodeData, KubernetesEndpointService } from '../../../../services/kubernetes-endpoint.service';
 import { KubernetesNodeService } from '../../../../services/kubernetes-node.service';
 import { KubernetesNodeConditionComponent } from './kubernetes-node-condition/kubernetes-node-condition.component';
 

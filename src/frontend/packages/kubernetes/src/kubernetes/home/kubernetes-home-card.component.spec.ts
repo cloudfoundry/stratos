@@ -1,10 +1,10 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
-import { EndpointModel } from '../../../../store/src/types/endpoint.types';
+import type { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesBaseTestModules } from '../kubernetes.testing.module';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';

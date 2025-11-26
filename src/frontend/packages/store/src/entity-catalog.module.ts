@@ -1,9 +1,9 @@
-import { Inject, ModuleWithProviders, NgModule } from '@angular/core';
+import { Inject, type ModuleWithProviders, NgModule } from '@angular/core';
 import { ReducerManager, Store } from '@ngrx/store';
 
 import { InitCatalogEntitiesAction } from './entity-catalog.actions';
 import { entityCatalog } from './entity-catalog/entity-catalog';
-import { StratosBaseCatalogEntity } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import type { StratosBaseCatalogEntity } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { requestDataReducerFactory } from './reducers/api-request-data-reducer/request-data-reducer.factory';
 import { chainApiReducers, requestActions } from './reducers/api-request-reducers.generator.helpers';
 
@@ -30,7 +30,7 @@ export const CATALOGUE_ENTITIES = '__CATALOGUE_ENTITIES__';
 @NgModule({})
 export class EntityCatalogFeatureModule {
   constructor(
-    store: Store<any>,
+    store: Store<unknown>,
     reducerManager: ReducerManager,
     @Inject(CATALOGUE_ENTITIES) entityGroups: StratosBaseCatalogEntity[][]
   ) {
@@ -38,7 +38,9 @@ export class EntityCatalogFeatureModule {
     const entities = entityGroups.flat();
 
     // Register all entities with the global catalog (synchronous Map.set operations)
-    entities.forEach(entity => entityCatalog.register(entity));
+    entities.forEach(entity => {
+      entityCatalog.register(entity);
+    });
 
     // NOTE: Validation has been moved to AppModule constructor to run once after ALL feature modules load.
     // This eliminates false-positive warnings from validation running in the first EntityCatalogFeatureModule

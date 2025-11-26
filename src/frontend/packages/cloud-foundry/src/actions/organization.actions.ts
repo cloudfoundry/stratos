@@ -1,9 +1,9 @@
 import { HttpParams, HttpRequest } from '@angular/common/http';
 
 import { getActions } from '../../../store/src/actions/action.helper';
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { ICFAction } from '../../../store/src/types/request.types';
-import { IUpdateOrganization } from '../cf-api.types';
+import type { PaginatedAction } from '../../../store/src/types/pagination.types';
+import type { ICFAction } from '../../../store/src/types/request.types';
+import type { IUpdateOrganization } from '../cf-api.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import {
   cfUserEntityType,
@@ -15,8 +15,8 @@ import {
 import { CFEntityConfig } from '../cf-types';
 import {
   createEntityRelationPaginationKey,
-  EntityInlineChildAction,
-  EntityInlineParentAction,
+  type EntityInlineChildAction,
+  type EntityInlineParentAction,
 } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
 import { createDefaultCfUserRelations } from './users.actions';
@@ -64,7 +64,7 @@ export class GetOrganization extends CFStartAction implements ICFAction, EntityI
   ];
   entity = [cfEntityFactory(organizationEntityType)];
   entityType = organizationEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
 }
 
 export class GetAllOrganizationSpaces extends CFStartAction implements PaginatedAction, EntityInlineParentAction, EntityInlineChildAction {
@@ -86,7 +86,7 @@ export class GetAllOrganizationSpaces extends CFStartAction implements Paginated
   actions = [GET_ORGANIZATION_SPACES, GET_ORGANIZATION_SPACES_SUCCESS, GET_ORGANIZATION_SPACES_FAILED];
   entity = cfEntityFactory(spaceEntityType);
   entityType = spaceEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   flattenPagination = true;
   initialParams = {
     'results-per-page': 100,
@@ -124,7 +124,7 @@ export class GetAllOrganizationDomains extends CFStartAction implements Paginate
   actions = [GET_ORGANIZATION_DOMAINS, GET_ORGANIZATION_DOMAINS_SUCCESS, GET_ORGANIZATION_DOMAINS_FAILED];
   entity = cfEntityFactory(domainEntityType);
   entityType = domainEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   flattenPagination = true;
   initialParams = {
     'results-per-page': 100,
@@ -155,7 +155,7 @@ export class GetAllOrganizations extends CFStartAction implements PaginatedActio
   ];
   entity = [cfEntityFactory(organizationEntityType)];
   entityType = organizationEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   initialParams = {
     page: 1,
     'results-per-page': 100,
@@ -185,7 +185,7 @@ export class DeleteOrganization extends CFStartAction implements ICFAction {
   actions = [DELETE_ORGANIZATION, DELETE_ORGANIZATION_SUCCESS, DELETE_ORGANIZATION_FAILED];
   entity = [cfEntityFactory(organizationEntityType)];
   entityType = organizationEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   removeEntityOnDelete = true;
 }
 
@@ -202,7 +202,7 @@ export class CreateOrganization extends CFStartAction implements ICFAction {
   actions = getActions('Organizations', 'Create Org');
   entity = [cfEntityFactory(organizationEntityType)];
   entityType = organizationEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   guid: string;
 }
 
@@ -220,7 +220,7 @@ export class UpdateOrganization extends CFStartAction implements ICFAction {
   actions = getActions('Organizations', 'Update Org');
   entity = [cfEntityFactory(organizationEntityType)];
   entityType = organizationEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   updatingKey = UpdateOrganization.UpdateExistingOrg;
 }
 
@@ -248,7 +248,7 @@ export class GetAllOrgUsers extends CFStartAction implements PaginatedAction, En
   ];
   entity = [cfEntityFactory(cfUserEntityType)];
   entityType = cfUserEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   initialParams = {
     page: 1,
     'results-per-page': 100,

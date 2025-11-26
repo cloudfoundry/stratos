@@ -1,7 +1,7 @@
-import { OrchestratedActionBuilders } from '../../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
-import { EndpointModel } from '../../../../store/src/public-api';
+import type { OrchestratedActionBuilders } from '../../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
+import type { EndpointModel } from '../../../../store/src/public-api';
 import { GetHelmChartVersions, GetHelmVersions, GetMonocularCharts, HelmInstall, HelmSynchronise } from './helm.actions';
-import { HelmInstallValues } from './helm.types';
+import type { HelmInstallValues } from './helm.types';
 
 export interface HelmChartActionBuilders extends OrchestratedActionBuilders {
   getMultiple: () => GetMonocularCharts;
@@ -38,8 +38,8 @@ export interface HelmChartVersionsActionBuilders extends OrchestratedActionBuild
 
 export const helmChartVersionsActionBuilders: HelmChartVersionsActionBuilders = {
   getMultiple: (
-    endpointGuid: string,
-    paginationKey: string,
+    _endpointGuid: string,
+    _paginationKey: string,
     extraArgs: {
       monocularEndpoint: string,
       repoName: string,

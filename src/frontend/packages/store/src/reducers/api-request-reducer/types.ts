@@ -1,6 +1,6 @@
 import type { EntityCatalogEntityConfig } from '../../entity-catalog/entity-catalog.types';
 
-export const enum RequestSectionKeys {
+export enum RequestSectionKeys {
   CF = 'cf',
   Other = 'other'
 }
@@ -37,6 +37,7 @@ export interface ListActionState extends ActionState {
 
 export interface DeleteActionState extends ActionState {
   deleted: boolean;
+  [key: string]: unknown; // Index signature for Record<string, unknown> compatibility
 }
 
 export const getDefaultActionState = (): ActionState => ({
@@ -52,9 +53,8 @@ export const defaultDeletingActionState = {
   deleted: false
 };
 
-export interface UpdatingSection {
+export interface UpdatingSection extends Record<string, ActionState> {
   [rootUpdatingKey]: ActionState;
-  [key: string]: ActionState;
 }
 export interface RequestInfoState {
   fetching: boolean;
@@ -62,11 +62,11 @@ export interface RequestInfoState {
   creating: boolean;
   deleting: DeleteActionState;
   error: boolean;
-  response?: any;
+  response?: unknown;
   message: string;
 }
 
-const defaultRequestState = {
+const defaultRequestState: RequestInfoState = {
   fetching: false,
   updating: {
     [rootUpdatingKey]: getDefaultActionState()
@@ -74,7 +74,7 @@ const defaultRequestState = {
   creating: false,
   error: false,
   deleting: { ...defaultDeletingActionState },
-  response: null as any,
+  response: null,
   message: ''
 };
 

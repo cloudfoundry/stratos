@@ -1,22 +1,23 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
-import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { Component, type OnDestroy, type OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { type AbstractControl, ReactiveFormsModule, type ValidatorFn, Validators, FormBuilder, FormControl, type FormGroup, type ValidationErrors } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
-import { CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, FocusDirective, StepOnNextFunction } from '@stratosui/core';
+import { CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, FocusDirective, type StepOnNextFunction, AppInputDirective, AppErrorComponent } from '@stratosui/core';
 import {
-  APIResource,
+  type APIResource,
   endpointEntityType,
   entityCatalog,
   getPaginationObservables,
-  PaginationMonitorFactory
+  PaginationMonitorFactory,
+  type GeneralEntityAppState
 } from '@stratosui/store';
 import { CreateOrganization } from '../../../../actions/organization.actions';
-import { IOrganization, IOrgQuotaDefinition } from '../../../../cf-api.types';
-import { CFAppState } from '../../../../cf-app-state';
+import type { IOrgQuotaDefinition, IOrganization } from '../../../../cf-api.types';
+import type { CFAppState } from '../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { organizationEntityType } from '../../../../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
@@ -41,7 +42,9 @@ interface CreateOrganizationForm {
     CustomFormFieldComponent,
     CustomSelectComponent,
     CustomOptionComponent,
-    FocusDirective
+    FocusDirective,
+    AppInputDirective,
+    AppErrorComponent
   ]
 })
 export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
@@ -60,7 +63,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
   get quotaDefinition(): FormControl<string | null> { return this.addOrg ? this.addOrg.get('quotaDefinition') as FormControl<string | null> : new FormControl(null); }
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     activatedRoute: ActivatedRoute,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private fb: FormBuilder,
@@ -74,7 +77,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
       quotaDefinition: new FormControl<string | null>(null),
     });
     const action = CloudFoundryEndpointService.createGetAllOrganizations(this.cfGuid);
-    this.orgs$ = getPaginationObservables<APIResource>(
+    this.orgs$ = getPaginationObservables<APIResource<IOrganization>>(
       {
         store: this.store,
         action,
@@ -88,7 +91,9 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
     ).entities$.pipe(
       filter(o => !!o),
       map(o => o.map(org => org.entity.name)),
-      tap((o) => this.allOrgs = o)
+      tap((o) => {
+        this.allOrgs = o;
+      })
     );
 
     const quotaPaginationKey = createEntityRelationPaginationKey(endpointEntityType, this.cfGuid);
@@ -109,7 +114,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
   }
 
   nameTakenValidator = (): ValidatorFn => {
-    return (formField: AbstractControl): { [key: string]: any, } =>
+    return (formField: AbstractControl): ValidationErrors | null =>
       !this.validateNameTaken(formField.value) ? { nameTaken: { value: formField.value } } : null;
   };
 

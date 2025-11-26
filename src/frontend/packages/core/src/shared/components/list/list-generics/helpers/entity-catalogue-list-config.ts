@@ -1,10 +1,11 @@
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
-import {
+import type {
   StratosBaseCatalogEntity,
 } from '../../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { EntityPipelineEntity } from '../../../../../../../store/src/entity-request-pipeline/pipeline.types';
+import type { EntityPipelineEntity } from '../../../../../../../store/src/entity-request-pipeline/pipeline.types';
+import type { GeneralAppState } from '../../../../../../../store/src/app-state';
 import { UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
 import { createTableColumnFavorite } from '../../list-table/table-cell-favorite/table-cell-favorite.component';
 import { ListConfig, ListViewTypes } from '../../list.component.types';
@@ -12,7 +13,7 @@ import { ListConfig, ListViewTypes } from '../../list.component.types';
 export class CatalogEntityDrivenListConfig<T extends EntityPipelineEntity> extends ListConfig<T> {
   constructor(
     catalogEntity: StratosBaseCatalogEntity,
-    store: Store<any>
+    store: Store<GeneralAppState>
   ) {
     super();
 
@@ -20,7 +21,7 @@ export class CatalogEntityDrivenListConfig<T extends EntityPipelineEntity> exten
     this.viewType = ListViewTypes.TABLE_ONLY;
     this.isLocal = true;
     this.enableTextFilter = true;
-    const title = !tableConfig || tableConfig && tableConfig.showHeader ? catalogEntity.definition.labelPlural : null;
+    const title = !tableConfig || tableConfig?.showHeader ? catalogEntity.definition.labelPlural : null;
     this.text = {
       noEntries: `There are no ${catalogEntity.definition.labelPlural.toLowerCase()}`
     };
@@ -30,10 +31,10 @@ export class CatalogEntityDrivenListConfig<T extends EntityPipelineEntity> exten
     this.getColumns = () => {
       const linBuilders = tableConfig ? tableConfig.rowBuilders : [];
       return [
-        ...linBuilders.map((builder, i) => ({
+        ...linBuilders.map((builder, _i) => ({
           columnId: builder[0],
           cellDefinition: {
-            getLink: (e: T): string | null => {
+            getLink: (_e: T): string | null => {
               return null;
             },
             getValue: (e: T): string | Observable<string> => {

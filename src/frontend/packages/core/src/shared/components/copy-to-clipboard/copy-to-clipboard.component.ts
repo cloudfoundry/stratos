@@ -1,5 +1,5 @@
 import { DOCUMENT, CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Inject, Input, OnInit  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, Input, type OnInit  } from '@angular/core';
 
 @Component({
   selector: 'app-copy-to-clipboard',
@@ -31,7 +31,9 @@ export class CopyToClipboardComponent implements OnInit {
   ngOnInit() {
     try {
       this.canCopy = this.document.queryCommandSupported('copy');
-    } finally { }
+    } finally {
+      // Cleanup not needed
+    }
   }
 
   copyToClipboard(event: MouseEvent = null) {
@@ -61,8 +63,10 @@ export class CopyToClipboardComponent implements OnInit {
     try {
       this.copySuccessful = document.execCommand('copy');
       this.copySuccessWait = true;
-      setTimeout(() => this.copySuccessWait = false, 2000);
-    } catch (err) {
+      setTimeout(() => {
+        this.copySuccessWait = false;
+      }, 2000);
+    } catch (_err) {
       console.warn('Failed to copy to clipboard');
     }
 

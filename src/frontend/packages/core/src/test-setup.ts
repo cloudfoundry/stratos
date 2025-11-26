@@ -5,15 +5,15 @@ import { expect, describe, it, afterEach } from 'vitest';
 // IMMEDIATE: Expose vitest globals to window for entity-catalog test detection
 // This MUST happen before any Angular/Store imports that check window.describe
 if (typeof window !== 'undefined') {
-  (window as any).describe = describe;
-  (window as any).it = it;
-  (window as any).expect = expect;
+  (window as unknown as Record<string, unknown>).describe = describe;
+  (window as unknown as Record<string, unknown>).it = it;
+  (window as unknown as Record<string, unknown>).expect = expect;
 
   // IMMEDIATE: Suppress console.error for Monaco and other test warnings
   // This must be set up BEFORE any component initialization
   if (typeof console !== 'undefined' && console.error) {
     const originalConsoleError = console.error.bind(console);
-    console.error = function (...args: any[]) {
+    console.error = (...args: unknown[]) => {
       const firstArg = args[0];
       const message = typeof firstArg === 'string' ? firstArg : String(firstArg || '');
       const messageStr = JSON.stringify(firstArg || '');
@@ -27,7 +27,7 @@ if (typeof window !== 'undefined') {
         return; // Silently skip Chart.js error
       }
       // Filter ECONNREFUSED errors
-      if (args[0]?.code === 'ECONNREFUSED' || (firstArg && firstArg.errors && firstArg.errors[0]?.code === 'ECONNREFUSED')) {
+      if ((args[0] as { code?: string })?.code === 'ECONNREFUSED' || (firstArg && (firstArg as { errors?: Array<{ code?: string }> }).errors && (firstArg as { errors: Array<{ code?: string }> }).errors[0]?.code === 'ECONNREFUSED')) {
         return; // Silently skip connection refused errors during test cleanup
       }
       // Filter WebSocket connection errors in tests
@@ -41,7 +41,7 @@ if (typeof window !== 'undefined') {
 
   // IMMEDIATE: Setup WebSocket mock for tests that use log streaming
   // This prevents actual WebSocket connection attempts during testing
-  if (typeof window !== 'undefined' && typeof (window as any).WebSocket === 'undefined') {
+  if (typeof window !== 'undefined' && typeof (window as unknown as Record<string, unknown>).WebSocket === 'undefined') {
     class MockWebSocket {
       static CONNECTING = 0;
       static OPEN = 1;
@@ -49,10 +49,10 @@ if (typeof window !== 'undefined') {
       static CLOSED = 3;
 
       readyState = MockWebSocket.CLOSED;
-      onopen: ((event: any) => void) | null = null;
-      onclose: ((event: any) => void) | null = null;
-      onerror: ((event: any) => void) | null = null;
-      onmessage: ((event: any) => void) | null = null;
+      onopen: ((event: unknown) => void) | null = null;
+      onclose: ((event: unknown) => void) | null = null;
+      onerror: ((event: unknown) => void) | null = null;
+      onmessage: ((event: unknown) => void) | null = null;
 
       constructor(public url: string) {
         // Simulate immediate connection failure in test environment
@@ -67,7 +67,7 @@ if (typeof window !== 'undefined') {
         }, 0);
       }
 
-      send(data: any): void {
+      send(data: unknown): void {
         // No-op in test environment
       }
 
@@ -78,14 +78,14 @@ if (typeof window !== 'undefined') {
         }
       }
 
-      addEventListener(type: string, listener: any): void {
+      addEventListener(type: string, listener: (event: unknown) => void): void {
         if (type === 'open') this.onopen = listener;
         if (type === 'close') this.onclose = listener;
         if (type === 'error') this.onerror = listener;
         if (type === 'message') this.onmessage = listener;
       }
 
-      removeEventListener(type: string, listener: any): void {
+      removeEventListener(type: string, listener: (event: unknown) => void): void {
         if (type === 'open' && this.onopen === listener) this.onopen = null;
         if (type === 'close' && this.onclose === listener) this.onclose = null;
         if (type === 'error' && this.onerror === listener) this.onerror = null;
@@ -93,7 +93,7 @@ if (typeof window !== 'undefined') {
       }
     }
 
-    (window as any).WebSocket = MockWebSocket;
+    (window as unknown as Record<string, unknown>).WebSocket = MockWebSocket;
   }
 
   // IMMEDIATE: Setup Monaco Editor mock before any component initialization
@@ -127,16 +127,17 @@ if (typeof window !== 'undefined') {
     },
   };
 
-  (window as any).monaco = monacoMock;
+  (window as unknown as Record<string, unknown>).monaco = monacoMock;
 
   // Mock the AMD require function used by Chart Values Editor
-  (window as any).require = (modules: string[], callback: () => void) => {
+  const mockRequire = (modules: string[], callback: () => void) => {
     // Immediately call callback for YAML language support
     if (modules.includes('vs/language/yaml/monaco.contribution')) {
       setTimeout(callback, 0);
     }
   };
-  (window as any).require.config = () => {};
+  mockRequire.config = () => {};
+  (window as unknown as Record<string, unknown>).require = mockRequire;
 }
 
 import '@angular/compiler';
@@ -148,7 +149,7 @@ import {
   platformBrowserTesting,
 } from '@angular/platform-browser/testing';
 import { getTestBed } from '@angular/core/testing';
-import { entityCatalog, TestEntityCatalog } from '@stratosui/store';
+import { entityCatalog, type TestEntityCatalog } from '@stratosui/store';
 
 
 // Polyfill: window.matchMedia for tests
@@ -174,7 +175,7 @@ if (typeof window.matchMedia === 'undefined') {
 // queryCommandSupported is deprecated but still used in legacy code
 // In test environment (jsdom), we need to provide a mock implementation
 if (typeof document !== 'undefined' && !document.queryCommandSupported) {
-  document.queryCommandSupported = function (command: string): boolean {
+  document.queryCommandSupported = (command: string): boolean => {
     // Return true for 'copy' command which is used by copy-to-clipboard component
     // Return false for other deprecated commands
     return command === 'copy';
@@ -189,8 +190,8 @@ if (typeof HTMLCanvasElement !== 'undefined') {
   const originalGetContext = HTMLCanvasElement.prototype.getContext;
   HTMLCanvasElement.prototype.getContext = function (
     contextType: string,
-    ...args: any[]
-  ): any {
+    ...args: unknown[]
+  ): RenderingContext | null {
     // First try to use the native implementation
     if (originalGetContext) {
       const context = originalGetContext.call(this, contextType, ...args);
@@ -239,7 +240,7 @@ function createMockCanvasContext2D(): CanvasRenderingContext2D {
     rect: () => { },
     clip: () => { },
     createLinearGradient: () => ({ addColorStop: () => { } } as CanvasGradient),
-    createPattern: () => null as any,
+    createPattern: () => null,
     createRadialGradient: () => ({ addColorStop: () => { } } as CanvasGradient),
     arcTo: () => { },
     canvas: {} as HTMLCanvasElement,

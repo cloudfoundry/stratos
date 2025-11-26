@@ -7,12 +7,12 @@ import { isHttpErrorResponse } from '../jetstream';
 import {
   SETUP_GET_SCOPES,
   SETUP_SAVE_CONFIG,
-  SetupConsoleGetScopes,
+  type SetupConsoleGetScopes,
   SetupFailed,
-  SetupSaveConfig,
+  type SetupSaveConfig,
   SetupSuccess,
 } from './../actions/setup.actions';
-import { LocalAdminSetupData, UaaSetupData } from './../types/uaa-setup.types';
+import type { LocalAdminSetupData, UaaSetupData } from './../types/uaa-setup.types';
 
 
 @Injectable({
@@ -40,7 +40,7 @@ export class UAASetupEffect {
           this.appRef.tick();
           return new SetupSuccess(data);
         }),
-        catchError((err, caught) => {
+        catchError((err, _caught) => {
           this.appRef.tick();
           return [new SetupFailed(`Failed to save configuration. ${this.fetchError(err)}`)];
         })
@@ -58,14 +58,14 @@ export class UAASetupEffect {
           this.appRef.tick();
           return new SetupSuccess(data);
         }),
-        catchError((err, caught) => {
+        catchError((err, _caught) => {
           this.appRef.tick();
           return [new SetupFailed(`Failed to setup Administrator scope. ${this.fetchError(err)}`)];
         })
       );
     })));
 
-  private fetchError(err: any): string {
+  private fetchError(err: unknown): string {
     const httpResponse = isHttpErrorResponse(err);
     if (httpResponse) {
       if (httpResponse.error.error) {
@@ -74,13 +74,13 @@ export class UAASetupEffect {
       try {
         const body = JSON.parse(httpResponse.error);
         return body;
-      } catch (err) { }
+      } catch (_err) { }
     }
     return '';
   }
 
 
-  private getParams(setupData: any): any {
+  private getParams(setupData: UaaSetupData | LocalAdminSetupData): HttpParams {
     let params = new HttpParams();
     if ((setupData as UaaSetupData).console_client) {
       const uaaSetupData = setupData as UaaSetupData;

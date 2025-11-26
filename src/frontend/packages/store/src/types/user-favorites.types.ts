@@ -1,6 +1,6 @@
 import { entityCatalog } from '../entity-catalog/entity-catalog';
-import { IEntityMetadata, IStratosEntityBuilder, IStratosEntityDefinition } from '../entity-catalog/entity-catalog.types';
-import { StratosBaseCatalogEntity } from './../entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import type { IEntityMetadata, IStratosEntityBuilder, IStratosEntityDefinition } from '../entity-catalog/entity-catalog.types';
+import type { StratosBaseCatalogEntity } from './../entity-catalog/entity-catalog-entity/entity-catalog-entity';
 
 export const userFavoritesPaginationKey = 'userFavorites';
 
@@ -73,7 +73,7 @@ export class UserFavorite<T extends IEntityMetadata = IEntityMetadata> implement
     // Set the guid for this favorite
     this.buildFavoriteStoreEntityGuid();
     this.catalogEntity = entityCatalog.getEntity(this.endpointType, this.entityType);
-    if (this.catalogEntity && this.catalogEntity.builders && this.catalogEntity.builders.entityBuilder) {
+    if (this.catalogEntity?.builders?.entityBuilder) {
       this.entityBuilder = this.catalogEntity.builders.entityBuilder;
     } else {
       this.entityBuilder = {} as IStratosEntityBuilder<IEntityMetadata>;
@@ -119,12 +119,12 @@ export class UserFavorite<T extends IEntityMetadata = IEntityMetadata> implement
 
   // Get the type name, e.g. 'Application'
   public getPrettyTypeName(): string {
-    return this.catalogEntity && this.catalogEntity.definition ? this.catalogEntity.definition.label : 'Unknown';
+    return this.catalogEntity?.definition ? this.catalogEntity.definition.label : 'Unknown';
   }
 
   // Get icon data for the favorite
   public getIcon(): FavoriteIconData {
-    const defn = this.catalogEntity && this.catalogEntity.definition ? this.catalogEntity.definition : {} as IStratosEntityDefinition;
+    const defn = this.catalogEntity?.definition ? this.catalogEntity.definition : {} as IStratosEntityDefinition;
     return {
       icon: defn.icon || 'help',
       iconFont: defn.iconFont

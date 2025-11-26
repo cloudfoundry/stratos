@@ -1,17 +1,17 @@
-import { CommonModule } from '@angular/common';
-import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { CustomFormFieldComponent, MatLabelComponent, AppInputDirective, AppErrorComponent } from '@stratosui/core';
 import { AfterContentInit, Component, Input, OnDestroy, signal,
   ChangeDetectionStrategy} from '@angular/core';
-import { AbstractControl, ValidatorFn, Validators, ReactiveFormsModule, FormsModule, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { AbstractControl, ValidatorFn, Validators, ReactiveFormsModule, FormsModule, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 
 import { Store } from '@ngrx/store';
 import {
   combineLatest as observableCombineLatest,
-  Observable,
+  type Observable,
   of as observableOf,
-  Subscription,
+  type Subscription,
 } from 'rxjs';
 import {
   combineLatest,
@@ -32,13 +32,13 @@ import {
   SetCreateServiceInstanceOrg,
   SetServiceInstanceGuid,
 } from '../../../../../../cloud-foundry/src/actions/create-service-instance.actions';
-import { pathGet, safeStringToObj } from '../../../../../../core/src/core/utils.service';
-import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { getDefaultRequestState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { APIResource, NormalizedResponse } from '../../../../../../store/src/types/api.types';
+import { pathGet, safeStringToObj } from '@stratosui/core';
+import type { StepOnNextResult } from '@stratosui/core';
+import { getDefaultRequestState, type RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
+import type { APIResource, NormalizedResponse } from '../../../../../../store/src/types/api.types';
 import { UpdateServiceInstance } from '../../../../actions/service-instances.actions';
-import { IServiceInstance, IServicePlan } from '../../../../cf-api-svc.types';
-import { CFAppState } from '../../../../cf-app-state';
+import type { IServiceInstance, IServicePlan } from '../../../../cf-api-svc.types';
+import type { CFAppState } from '../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { serviceInstancesEntityType } from '../../../../cf-entity-types';
 import { selectCfRequestInfo, selectCfUpdateInfo } from '../../../../store/selectors/api.selectors';
@@ -46,11 +46,11 @@ import {
   selectCreateServiceInstance,
   selectCreateServiceInstanceSpaceGuid,
 } from '../../../../store/selectors/create-service-instance.selectors';
-import { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
+import type { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
 import { LongRunningCfOperationsService } from '../../../data-services/long-running-cf-op.service';
-import { SchemaFormComponent, SchemaFormConfig } from '../../schema-form/schema-form.component';
+import { SchemaFormComponent, type SchemaFormConfig } from '../../schema-form/schema-form.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
-import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
+import type { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
 
@@ -80,7 +80,9 @@ interface CreateNewInstanceForm {
     MatLabelComponent,
     CustomSelectComponent,
     CustomOptionComponent,
-    SchemaFormComponent
+    SchemaFormComponent,
+    AppInputDirective,
+    AppErrorComponent
   ]
 })
 export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit {
@@ -139,12 +141,12 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
 
   nameTakenValidator = (): ValidatorFn => {
-    return (formField: AbstractControl): { [key: string]: any, } =>
+    return (formField: AbstractControl): { [key: string]: unknown } | null =>
       !this.checkName(formField.value) ? { nameTaken: { value: formField.value } } : null;
   };
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store,
     private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
     private csiGuidsService: CsiGuidsService,
     public modeService: CsiModeService,
@@ -174,7 +176,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
     this.serviceInstancesInit$ = this.serviceInstances$.pipe(
       filter(p => !!p),
-      map(o => false),
+      map(_o => false),
       startWith(false)
     );
     this.hasInstances$ = this.serviceInstances$.pipe(
@@ -210,8 +212,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
   onEnter = (selectedServicePlan: APIResource<IServicePlan>) => {
     const schema = this.modeService.isEditServiceInstanceMode() ?
-      pathGet('entity.schemas.service_instance.update.parameters', selectedServicePlan) :
-      pathGet('entity.schemas.service_instance.create.parameters', selectedServicePlan);
+      pathGet('entity.schemas.service_instance.update.parameters', selectedServicePlan) as object :
+      pathGet('entity.schemas.service_instance.create.parameters', selectedServicePlan) as object;
 
     if (!this.schemaFormConfig) {
       // Create new config
@@ -249,7 +251,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.subscriptions.push(this.setupFormValidatorData());
   };
 
-  setServiceParams(data: any) {
+  setServiceParams(data: object) {
     this.serviceParams = data;
   }
 
@@ -306,7 +308,9 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   setOrg = (guid: string) => this.store.dispatch(new SetCreateServiceInstanceOrg(guid));
 
   ngOnDestroy() {
-    this.subscriptions.forEach(s => s.unsubscribe());
+    for (const sub of this.subscriptions) {
+      sub.unsubscribe();
+    }
   }
 
   ngAfterContentInit() {
@@ -402,7 +406,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   };
 
   private setServiceInstanceGuid = (request: RequestInfoState): string | undefined =>
-    this.bindExistingInstance ? this.selectExistingInstanceForm.controls.serviceInstance.value : request.response?.result?.[0];
+    this.bindExistingInstance ? this.selectExistingInstanceForm.controls.serviceInstance.value : (request.response as NormalizedResponse)?.result?.[0];
 
   private setupValidate() {
     // For a new service instance the step is valid if the form and service params are both valid
@@ -411,7 +415,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
         this.serviceParamsValid,
         this.createNewInstanceForm.statusChanges
       ]).pipe(
-        map(([serviceParamsValid, b]) => this._validate.set(serviceParamsValid && this.createNewInstanceForm.valid))
+        map(([serviceParamsValid, _b]) => this._validate.set(serviceParamsValid && this.createNewInstanceForm.valid))
       ).subscribe()
     );
     // For existing service instance the step is valid if the form is (there's no service params)
@@ -496,7 +500,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
     this.store.dispatch(action);
     return checkUpdate$.pipe(
-      switchMap(o => create$),
+      switchMap(_o => create$),
       filter(a => !a.creating),
       switchMap(a => {
         const updating = a.updating ? a.updating[UpdateServiceInstance.updateServiceInstance] : null;

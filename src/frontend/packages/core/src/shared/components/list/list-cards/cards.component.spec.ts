@@ -1,12 +1,12 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Type, provideZonelessChangeDetection } from '@angular/core';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
+import { type Type, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { EntityInfo } from '@stratosui/store';
-import { IListDataSource, CardCell } from '@stratosui/core';
+import type { EntityInfo } from '@stratosui/store';
+import type { IListDataSource, CardCell } from '@stratosui/core';
 import { CardsComponent } from './cards.component';
 
 describe('CardsComponent', () => {

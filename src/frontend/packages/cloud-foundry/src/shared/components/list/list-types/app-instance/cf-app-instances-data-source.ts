@@ -1,18 +1,19 @@
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
-import { ListDataSource, IListConfig } from '@stratosui/core';
-import { AppStat, AppStats } from '../../../../../store/types/app-metadata.types';
-import { CFAppState } from '../../../../../cf-app-state';
+import { ListDataSource, type IListConfig } from '@stratosui/core';
+import type { GeneralEntityAppState } from '@stratosui/store';
+import type { AppStat, AppStats } from '../../../../../store/types/app-metadata.types';
+import type { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { applicationEntityType, appStatsEntityType } from '../../../../../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../../../entity-relations/entity-relations.types';
-import { ListAppInstance, ListAppInstanceUsage } from './app-instance-types';
+import type { ListAppInstance, ListAppInstanceUsage } from './app-instance-types';
 
 export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, AppStats> {
 
   constructor(
-    store: Store<CFAppState>,
+    store: Store<GeneralEntityAppState>,
     cfGuid: string,
     appGuid: string,
     listConfig: IListConfig<ListAppInstance>
@@ -32,13 +33,13 @@ export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, Ap
         },
         paginationKey,
         transformEntities: [{ type: 'filter', field: 'value.state' }],
-        transformEntity: map((instancesData: any): ListAppInstance[] => {
+        transformEntity: map((instancesData: unknown): ListAppInstance[] => {
           if (!instancesData) {
             return [];
           }
 
           // Extract from array if needed
-          let data = Array.isArray(instancesData) ? instancesData[0] : instancesData;
+          const data = Array.isArray(instancesData) ? instancesData[0] : instancesData;
 
           if (!data || typeof data !== 'object') {
             return [];
@@ -59,7 +60,7 @@ export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, Ap
             const indexStr = guidParts.length > 0 ? guidParts[guidParts.length - 1] : '0';
             const indexNum = parseInt(indexStr, 10);
 
-            if (!isNaN(indexNum)) {
+            if (!Number.isNaN(indexNum)) {
               res.push({
                 index: indexNum,
                 usage: this.calcUsage(instance),
@@ -73,7 +74,7 @@ export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, Ap
               const instance: AppStat = instances[key];
               if (instance && typeof instance === 'object') {
                 const indexNum = parseInt(key, 10);
-                if (!isNaN(indexNum)) {
+                if (!Number.isNaN(indexNum)) {
                   res.push({
                     index: indexNum,
                     usage: this.calcUsage(instance),
@@ -102,7 +103,7 @@ export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, Ap
       hasStats: false
     };
 
-    if (instanceStats.stats && instanceStats.stats.usage) {
+    if (instanceStats.stats?.usage) {
       usage.mem = instanceStats.stats.usage.mem / instanceStats.stats.mem_quota;
       usage.disk = instanceStats.stats.usage.disk / instanceStats.stats.disk_quota;
       usage.cpu = instanceStats.stats.usage.cpu;

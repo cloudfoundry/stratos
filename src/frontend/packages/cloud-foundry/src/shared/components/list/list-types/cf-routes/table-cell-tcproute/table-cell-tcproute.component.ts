@@ -1,9 +1,9 @@
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 
-import { BooleanIndicatorComponent } from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { ListCfRoute } from '../cf-routes-data-source-base';
+import { BooleanIndicatorComponent } from '@stratosui/core';
+import { TableCellCustom } from '@stratosui/core';
+import type { APIResource } from '../../../../../../../../store/src/types/api.types';
+import type { ListCfRoute } from '../cf-routes-data-source-base';
 
 @Component({
   selector: 'app-table-cell-tcp-route',

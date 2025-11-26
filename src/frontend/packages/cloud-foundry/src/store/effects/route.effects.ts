@@ -3,10 +3,10 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
-import { RouteEvents, UnmapRoute } from '../../actions/route.actions';
-import { CFAppState } from '../../cf-app-state';
+import { RouteEvents, type UnmapRoute } from '../../actions/route.actions';
+import type { CFAppState } from '../../cf-app-state';
 import { ClearPaginationOfEntity } from '../../../../store/src/actions/pagination.actions';
-import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
+import type { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +15,7 @@ export class RouteEffect {
 
   constructor(
     private actions$: Actions,
-    private store: Store<CFAppState>,
+    private store: Store,
     private appRef: ApplicationRef
   ) { }
 

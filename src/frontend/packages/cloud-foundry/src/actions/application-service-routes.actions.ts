@@ -1,8 +1,8 @@
 import { HttpRequest } from '@angular/common/http';
 
 import { getActions } from '../../../store/src/actions/action.helper';
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { ICFAction } from '../../../store/src/types/request.types';
+import type { PaginatedAction } from '../../../store/src/types/pagination.types';
+import type { ICFAction } from '../../../store/src/types/request.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import {
   applicationEntityType,
@@ -15,8 +15,8 @@ import { CFEntityConfig } from '../cf-types';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
-  EntityInlineChildAction,
-  EntityInlineParentAction,
+  type EntityInlineChildAction,
+  type EntityInlineParentAction,
 } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
 
@@ -58,7 +58,7 @@ export class GetAppRoutes extends CFStartAction implements EntityInlineParentAct
   };
   entity = [cfEntityFactory(routeEntityType)];
   entityType = routeEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   flattenPagination = true;
   parentGuid: string;
   parentEntityConfig = new CFEntityConfig(applicationEntityType);
@@ -91,7 +91,7 @@ export class GetAppServiceBindings extends CFStartAction implements PaginatedAct
   };
   entity = [cfEntityFactory(serviceBindingEntityType)];
   entityType = serviceBindingEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   flattenPagination = true;
 }
 
@@ -112,6 +112,6 @@ export class AssignRouteToApplication extends CFStartAction
   actions = [ASSIGN_ROUTE, ASSIGN_ROUTE_SUCCESS, ASSIGN_ROUTE_FAILED];
   entity = [applicationEntitySchema];
   entityType = applicationEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   updatingKey = 'Assigning-Route';
 }

@@ -1,9 +1,10 @@
 import { Store } from '@ngrx/store';
 import { ListDataSource } from '@stratosui/core';
-import { IListConfig } from '@stratosui/core';
-import { AppState } from '@stratosui/store';
+import type { IListConfig } from '@stratosui/core';
+import type { AppState } from '@stratosui/store';
+import type { PaginatedAction } from '@stratosui/store';
 
-import { KubeService } from '../../store/kube.types';
+import type { KubeService } from '../../store/kube.types';
 import { GetHelmReleases } from '../store/workloads.actions';
 
 export class HelmReleaseServicesDataSource extends ListDataSource<KubeService> {
@@ -11,15 +12,15 @@ export class HelmReleaseServicesDataSource extends ListDataSource<KubeService> {
   constructor(
     store: Store<AppState>,
     listConfig: IListConfig<KubeService>,
-    endpointGuid: string,
-    releaseTitle: string
+    _endpointGuid: string,
+    _releaseTitle: string
   ) {
-    const action = new GetHelmReleases() as any;
+    const action = new GetHelmReleases() as unknown as PaginatedAction;
     super({
       store,
       action,
-      schema: action.entity[0],
-      getRowUniqueId: (row: KubeService) => action.entity[0].getId(row),
+      schema: (action.entity as any)[0],
+      getRowUniqueId: (row: KubeService) => (action.entity as any)[0].getId(row),
       paginationKey: action.paginationKey,
       isLocal: true,
       listConfig,

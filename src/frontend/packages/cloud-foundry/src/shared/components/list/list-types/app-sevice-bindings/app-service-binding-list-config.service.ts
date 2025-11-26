@@ -1,11 +1,11 @@
-import { DatePipe } from '@angular/common';
+import type { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { switchMap } from 'rxjs/operators';
 
-import { CurrentUserPermissionsService, DataFunctionDefinition, ITableColumn, IGlobalListAction, IListAction, IListMultiFilterConfig, IMultiListAction, ListViewTypes } from '@stratosui/core';
-import { ListView, RouterNav, APIResource } from '@stratosui/store';
-import { CFAppState, IServiceBinding, ApplicationService, isServiceInstance, isUserProvidedServiceInstance, CfCurrentUserPermissions, ServiceActionHelperService } from '@stratosui/cloud-foundry';
+import { CurrentUserPermissionsService, type DataFunctionDefinition, type ITableColumn, type IGlobalListAction, type IListAction, type IListMultiFilterConfig, type IMultiListAction, ListViewTypes } from '@stratosui/core';
+import { type ListView, RouterNav, type APIResource, type GeneralEntityAppState } from '@stratosui/store';
+import { type CFAppState, type IServiceBinding, ApplicationService, isServiceInstance, isUserProvidedServiceInstance, CfCurrentUserPermissions, ServiceActionHelperService } from '@stratosui/cloud-foundry';
 import { CSI_CANCEL_URL } from '../../../add-service-instance/csi-mode.service';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { TableCellServiceInstanceTagsComponent } from '../cf-spaces-service-instances/table-cell-service-instance-tags/table-cell-service-instance-tags.component';
@@ -87,7 +87,7 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
         headerCell: () => 'Name',
         cellDefinition: {
           getValue: (row) => {
-            return row && row.entity && row.entity.service_instance && row.entity.service_instance.entity
+            return row?.entity?.service_instance?.entity
               ? row.entity.service_instance.entity.name
               : '';
           }
@@ -103,7 +103,7 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
               return '';
             }
             const si = isServiceInstance(row.entity.service_instance.entity);
-            return si && si.service_plan && si.service_plan.entity && si.service_plan.entity.service && si.service_plan.entity.service.entity
+            return si?.service_plan?.entity?.service?.entity
               ? si.service_plan.entity.service.entity.label
               : 'User Service';
           },
@@ -119,7 +119,7 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
               return null;
             }
             const si = isServiceInstance(row.entity.service_instance.entity);
-            return si && si.service_plan && si.service_plan.entity ? si.service_plan.entity.name : null;
+            return si?.service_plan?.entity ? si.service_plan.entity.name : null;
           }
         },
         cellFlex: '1'
@@ -147,7 +147,7 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
 
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     private appService: ApplicationService,
     private datePipe: DatePipe,
     protected currentUserPermissionsService: CurrentUserPermissionsService,

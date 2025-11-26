@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, type OnDestroy, type OnInit } from '@angular/core';
+import { type AbstractControl, FormBuilder, type FormControl, type FormGroup, ReactiveFormsModule, type ValidationErrors, type ValidatorFn, Validators } from '@angular/forms';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, type Observable, type Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 
 import { ApplicationService } from '@stratosui/cloud-foundry';
 import { safeUnsubscribe, TileGridComponent, TileGroupComponent, TileComponent } from '@stratosui/core';
@@ -20,7 +20,7 @@ import {
   inValidMetricType,
   numberWithFractionOrExceedRange,
 } from '../../../core/autoscaler-helpers/autoscaler-validation';
-import { AppAutoscalerInvalidPolicyError, AppAutoscalerPolicyLocal } from '../../../store/app-autoscaler.types';
+import type { AppAutoscalerInvalidPolicyError, AppAutoscalerPolicyLocal } from '../../../store/app-autoscaler.types';
 import { EditAutoscalerPolicyDirective } from '../edit-autoscaler-policy-base-step';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 
@@ -57,9 +57,9 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   policyAlert = PolicyAlert;
   metricTypes = AutoscalerConstants.MetricTypes;
   filteredMetricTypes$: Observable<string[]>;
-  private metricUnitSubject = new BehaviorSubject(this.metricTypes[0]);
+  private metricUnitSubject = new BehaviorSubject<string>(this.metricTypes[0]);
   metricUnit$: Observable<string>;
-  operatorTypes = AutoscalerConstants.UpperOperators.concat(AutoscalerConstants.LowerOperators);
+  operatorTypes = [...AutoscalerConstants.UpperOperators, ...AutoscalerConstants.LowerOperators] as const;
   editTriggerForm: FormGroup<EditTriggerForm>;
   // appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
 
@@ -98,7 +98,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
 
     this.metricUnit$ = this.metricUnitSubject.asObservable();
 
-    this.subs.push(this.editTriggerForm.get('metric_type').valueChanges.pipe(
+    this.subs.push(this.editTriggerForm.get('metric_type')!.valueChanges.pipe(
       map((value: string) => this.getMetricUnit(value)),
     ).subscribe((unit: string) => {
       this.metricUnitSubject.next(unit);
@@ -169,7 +169,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   }
 
   validateTriggerMetricType(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any, } => {
+    return (control: AbstractControl): ValidationErrors | null => {
       if (!this.editTriggerForm) {
         return null;
       }
@@ -184,7 +184,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   }
 
   validateTriggerOperator(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any, } => {
+    return (control: AbstractControl): ValidationErrors | null => {
       if (this.editTriggerForm) {
         this.editScaleType = getScaleType(control.value);
         this.editTriggerForm.controls.threshold.updateValueAndValidity();
@@ -194,12 +194,12 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   }
 
   validateTriggerThreshold(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any, } => {
+    return (control: AbstractControl): ValidationErrors | null => {
       if (!this.editTriggerForm) {
         return null;
       }
       const errors: AppAutoscalerInvalidPolicyError = {};
-      if (AutoscalerConstants.MetricPercentageTypes.indexOf(this.editMetricType) >= 0) {
+      if (AutoscalerConstants.MetricPercentageTypes.indexOf(this.editMetricType as any) >= 0) {
         if (numberWithFractionOrExceedRange(control.value, 1, 100, true)) {
           errors.alertInvalidPolicyTriggerThreshold100 = { value: control.value };
         }
@@ -214,7 +214,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   }
 
   validateTriggerAdjustment(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any, } => {
+    return (control: AbstractControl): ValidationErrors | null => {
       if (!this.editTriggerForm) {
         return null;
       }
@@ -228,7 +228,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   }
 
   validateTriggerAdjustmentType(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any, } => {
+    return (control: AbstractControl): ValidationErrors | null => {
       if (this.editTriggerForm) {
         this.editAdjustmentType = control.value;
         this.editTriggerForm.controls.adjustment.updateValueAndValidity();

@@ -1,7 +1,7 @@
 import { HttpRequest } from '@angular/common/http';
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 
-import { APIResource } from '../../../store/src/types/api.types';
+import type { APIResource } from '../../../store/src/types/api.types';
 import { organizationEntityType, spaceEntityType } from '../cf-entity-types';
 
 export const GET_AUDITED_ORG_CURRENT_CF_USER_RELATIONS = '[Current User] Get audited org Relations';
@@ -72,7 +72,7 @@ export class GetCfUserRelations implements Action {
 export class GetCurrentCfUserRelations implements Action {
   public type = GET_CURRENT_CF_USER_RELATION;
   public actions: string[];
-  public options: HttpRequest<any>;
+  public options: HttpRequest<unknown>;
   constructor(public guid: string, public relationType: CfUserRelationTypes, public endpointGuid: string) {
     const typeOptions = this.types[relationType];
     this.options = new HttpRequest(
@@ -138,7 +138,7 @@ export class GetCurrentCfUserRelations implements Action {
   };
 }
 
-export class GetCurrentCfUserRelationsComplete<T = any> {
+export class GetCurrentCfUserRelationsComplete<T = unknown> {
   public type = GET_CURRENT_CF_USER_RELATION_SUCCESS;
   constructor(
     public relationType: CfUserRelationTypes, public endpointGuid: string, public data: APIResource<T>[]

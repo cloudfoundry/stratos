@@ -1,20 +1,19 @@
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, type ElementRef, Input, type OnDestroy, type OnInit, ViewChild } from '@angular/core';
 import {
   BehaviorSubject,
   combineLatest as observableCombineLatest,
   fromEvent as observableFromEvent,
   interval as observableInterval,
   NEVER,
-  Observable,
+  type Observable,
   of,
-  Subscription,
+  type Subscription,
 } from 'rxjs';
 import {
   buffer,
   catchError,
   combineLatest,
-  defaultIfEmpty,
   distinctUntilChanged,
   filter,
   map,
@@ -54,11 +53,11 @@ interface ConnectionErrorInfo {
 })
 export class LogViewerComponent implements OnInit, OnDestroy {
 
-  @Input() filter: (a: any) => void;
+  @Input() filter: (a: unknown) => void;
 
   @Input() status!: Observable<number>;
 
-  @Input() logStream: Observable<any>;
+  @Input() logStream: Observable<unknown>;
 
   @ViewChild('container', { static: true }) container!: ElementRef;
 
@@ -121,7 +120,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
               this.statusMessage$.next({ message: '' });
               console.log('Log stream connected successfully');
               break;
-            case -1:
+            case -1: {
               // Connection failed permanently
               this.connectionAttempts++;
               const errorMsg = this.getDetailedErrorMessage();
@@ -139,7 +138,8 @@ export class LogViewerComponent implements OnInit, OnDestroy {
               });
               console.error('Log stream connection failed:', this.lastConnectionError);
               break;
-            case -2:
+            }
+            case -2: {
               // Retrying connection
               this.connectionAttempts++;
               const retryMsg = `Connection lost. Retrying (attempt ${this.connectionAttempts}/${this.maxReconnectAttempts})...`;
@@ -149,6 +149,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
               });
               console.warn('Log stream retrying connection:', retryMsg);
               break;
+            }
             default:
               this.statusMessage$.next({ message: '' });
               break;
@@ -188,7 +189,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
     // we will determine that the user scrolled off the bottom, when in fact this is due to the resize event
     this.resizeSub = observableFromEvent(window, 'resize').pipe(
       combineLatest(this.isLocked$))
-      .subscribe(([event, locked]) => {
+      .subscribe(([_event, locked]) => {
         if (locked) {
           this.scrollToBottom();
         }
@@ -206,7 +207,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
 
     const buffer$ = observableInterval().pipe(
       combineLatest(this.isHighThroughput$),
-      throttle(([t, high]) => {
+      throttle(([_t, high]) => {
         return observableInterval(
           high ? this.highThroughputBufferIntervalMS : 0
         );
@@ -233,22 +234,22 @@ export class LogViewerComponent implements OnInit, OnDestroy {
             const elementString = logs
               .map(log => {
                 try {
-                  const formatted = this.colorizer.ansiColorsToHtml(log);
+                  const formatted = this.colorizer.ansiColorsToHtml(log as string);
                   return `<div>${formatted}</div>`;
                 } catch (colorErr) {
                   console.error('Error colorizing log:', log, colorErr);
-                  return `<div>${this.escapeHtml(log)}</div>`;
+                  return `<div>${this.escapeHtml(log as string)}</div>`;
                 }
               })
               .join('');
-            let removedElement;
+            let removedElement: HTMLDivElement | null;
             if (this.logLinesCount > this.maxLogLines) {
               removedElement = this.binElement();
             }
             const ele =
               removedElement || (document.createElement('div') as HTMLDivElement);
             if (logs.length > 1) {
-              ele.setAttribute(this.countAttribute, '' + logs.length);
+              ele.setAttribute(this.countAttribute, `${logs.length}`);
             }
             ele.innerHTML = elementString;
             contentElement.append(ele);
@@ -286,7 +287,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
       );
 
     this.listeningSub = observableCombineLatest(this.isLocked$, addedLogs$).pipe(
-      tap(([isLocked, logs]) => {
+      tap(([isLocked, _logs]) => {
         try {
           if (isLocked) {
             containerElement.scrollTop = contentElement.clientHeight;

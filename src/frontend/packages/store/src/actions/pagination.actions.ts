@@ -1,7 +1,7 @@
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 
-import { EntityCatalogEntityConfig, extractEntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
-import { PaginatedAction, PaginationClientFilter, PaginationParam, PaginationState } from '../types/pagination.types';
+import { type EntityCatalogEntityConfig, extractEntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
+import type { PaginatedAction, PaginationClientFilter, PaginationParam, PaginationState } from '../types/pagination.types';
 
 export const CLEAR_PAGINATION_OF_TYPE = '[Pagination] Clear all pages of type';
 export const CLEAR_PAGINATION_OF_ENTITY = '[Pagination] Clear pagination of entity';
@@ -32,7 +32,7 @@ export function getPaginationKey(type: string, id: string, endpointGuid?: string
   return endpointGuid ? `${endpointGuid}:${key}` : key;
 }
 
-abstract class BasePaginationAction {
+export abstract class BasePaginationAction {
   public entityConfig: EntityCatalogEntityConfig;
 
   constructor(pEntityConfig: Partial<EntityCatalogEntityConfig>) {
@@ -41,9 +41,6 @@ abstract class BasePaginationAction {
 }
 
 export class ClearPaginationOfType extends BasePaginationAction implements Action {
-  constructor(pEntityConfig: Partial<EntityCatalogEntityConfig>) {
-    super(pEntityConfig);
-  }
   type = CLEAR_PAGINATION_OF_TYPE;
 }
 
@@ -72,9 +69,6 @@ export class ResetPaginationSortFilter extends BasePaginationAction implements A
 }
 
 export class ResetPaginationOfType extends BasePaginationAction implements Action {
-  constructor(pEntityConfig: Partial<EntityCatalogEntityConfig>) {
-    super(pEntityConfig);
-  }
   type = RESET_PAGINATION_OF_TYPE;
 }
 

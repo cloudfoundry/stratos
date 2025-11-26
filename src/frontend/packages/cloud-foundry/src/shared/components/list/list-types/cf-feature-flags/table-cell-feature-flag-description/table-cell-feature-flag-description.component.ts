@@ -1,7 +1,7 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import { TableCellCustom } from '@stratosui/core';
-import { IFeatureFlag } from '@stratosui/cloud-foundry';
+import type { IFeatureFlag } from '@stratosui/cloud-foundry';
 
 import { FeatureFlagDescriptions } from '../cf-feature-flags-data-source';
 

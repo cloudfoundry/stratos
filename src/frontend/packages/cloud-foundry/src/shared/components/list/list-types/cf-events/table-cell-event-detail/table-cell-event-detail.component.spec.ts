@@ -1,10 +1,10 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { ValuesPipe } from '../../../../../../../../core/src/shared/pipes/values.pipe';
-import { APIResource } from '@stratosui/store/types/api.types';
-import { CfEvent } from '../../../../../../cf-api.types';
+import { ValuesPipe } from '@stratosui/core';
+import type { APIResource } from '@stratosui/store';
+import type { CfEvent } from '../../../../../../cf-api.types';
 import { EventMetadataComponent } from '../event-metadata/event-metadata.component';
 import { TableCellEventDetailComponent } from './table-cell-event-detail.component';
 

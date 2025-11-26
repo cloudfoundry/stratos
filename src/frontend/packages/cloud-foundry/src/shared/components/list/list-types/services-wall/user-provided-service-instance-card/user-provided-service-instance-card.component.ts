@@ -1,12 +1,12 @@
 import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, of as observableOf } from 'rxjs';
 
 import {
-  CFAppState,
+  type CFAppState,
   userProvidedServiceInstanceEntityType,
-  IUserProvidedServiceInstance,
+  type IUserProvidedServiceInstance,
   cfEntityFactory,
   CfCurrentUserPermissions,
   ServiceActionHelperService,
@@ -26,7 +26,7 @@ import {
   MetaCardValueComponent,
   MultilineTitleComponent,
 } from '@stratosui/core';
-import { APIResource, MenuItem, ComponentEntityMonitorConfig } from '@stratosui/store';
+import { APIResource, MenuItem, ComponentEntityMonitorConfig , GeneralEntityAppState } from '@stratosui/store';
 
 
 @Component({
@@ -37,6 +37,7 @@ selector: 'app-user-provided-service-instance-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    AsyncPipe,
     MetaCardComponent,
     MetaCardTitleComponent,
     MetaCardItemComponent,
@@ -115,7 +116,7 @@ export class UserProvidedServiceInstanceCardComponent extends CardCell<APIResour
   }
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     private serviceActionHelperService: ServiceActionHelperService,
     private currentUserPermissionsService: CurrentUserPermissionsService
   ) {

@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { filter, first, map, pairwise } from 'rxjs/operators';
 
 import { ConfirmationDialogConfig, ConfirmationDialogService } from '@stratosui/core';
-import { RouterNav, RouterQueryParams, EntityCatalogEntityConfig, EntityService, ActionState, APIResource } from '@stratosui/store';
-import { CFAppState } from '../../cf-app-state';
+import { RouterNav, type RouterQueryParams, type EntityCatalogEntityConfig, EntityService, type ActionState, type APIResource, type GeneralEntityAppState } from '@stratosui/store';
+import type { CFAppState } from '../../cf-app-state';
 import { serviceInstancesEntityType } from '../../cf-entity-types';
-import { IServiceBinding } from '../../cf-api-svc.types';
+import type { IServiceBinding } from '../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { SERVICE_INSTANCE_TYPES } from '../components/add-service-instance/add-service-instance-base-step/add-service-instance.types';
@@ -20,7 +20,7 @@ export class ServiceActionHelperService {
 
   constructor(
     private confirmDialog: ConfirmationDialogService,
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
   ) { }
 
   detachServiceBinding = (
@@ -75,7 +75,7 @@ export class ServiceActionHelperService {
     };
 
     const action = userProvided ?
-      cfEntityCatalog.userProvidedService.actions.remove(serviceInstanceGuid, endpointGuid, serviceInstancesEntityConfig) :
+      cfEntityCatalog.userProvidedService.actions.remove(serviceInstanceGuid, endpointGuid, serviceInstancesEntityConfig as unknown as Record<string, unknown>) :
       cfEntityCatalog.serviceInstance.actions.remove(serviceInstanceGuid, endpointGuid);
 
     const confirmation = new ConfirmationDialogConfig(

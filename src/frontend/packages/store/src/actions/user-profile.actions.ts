@@ -1,7 +1,7 @@
 import { STRATOS_ENDPOINT_TYPE, stratosEntityFactory, userProfileEntityType } from '../helpers/stratos-entity-factory';
 import { rootUpdatingKey } from '../reducers/api-request-reducer/types';
-import { EntityRequestAction } from '../types/request.types';
-import { UserProfileInfo, UserProfilePasswordUpdate } from '../types/user-profile.types';
+import type { EntityRequestAction } from '../types/request.types';
+import type { UserProfileInfo, UserProfilePasswordUpdate } from '../types/user-profile.types';
 
 export const GET_USERPROFILE = '[UserProfile] Get';
 export const UPDATE_USERPROFILE = '[UserProfile] Update';

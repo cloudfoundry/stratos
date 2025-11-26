@@ -5,17 +5,17 @@ import { Store } from '@ngrx/store';
 import { catchError, mergeMap, switchMap } from 'rxjs/operators';
 
 import {
-  FetchUserProfileAction,
+  type FetchUserProfileAction,
   GET_USERPROFILE,
   UPDATE_USERPASSWORD,
   UPDATE_USERPROFILE,
-  UpdateUserPasswordAction,
-  UpdateUserProfileAction,
+  type UpdateUserPasswordAction,
+  type UpdateUserProfileAction,
 } from '../actions/user-profile.actions';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { proxyAPIVersion } from '../jetstream';
-import { UserProfileInfo } from '../types/user-profile.types';
-import { DispatchOnlyAppState } from './../app-state';
+import type { UserProfileInfo } from '../types/user-profile.types';
+import type { DispatchOnlyAppState } from './../app-state';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
 
 
@@ -46,7 +46,7 @@ export class UserProfileEffect {
             }, action)
           ];
         }),
-        catchError((e: any) => {
+        catchError((_e: unknown) => {
           this.appRef.tick();
           return [
             new WrapperRequestActionFailed('Could not get User Profile Info', action),
@@ -67,7 +67,7 @@ export class UserProfileEffect {
       }
 
       return this.httpClient.put(`/pp/${proxyAPIVersion}/users/${userGuid}`, action.profile, { headers }).pipe(
-        mergeMap((info: UserProfileInfo) => {
+        mergeMap((_info: UserProfileInfo) => {
           this.appRef.tick();
           return [
             new WrapperRequestActionSuccess({
@@ -76,7 +76,7 @@ export class UserProfileEffect {
             }, action),
           ];
         }),
-        catchError((e: any) => {
+        catchError((_e: unknown) => {
           this.appRef.tick();
           return [
             new WrapperRequestActionFailed('Could not update User Profile Info', action),
@@ -94,7 +94,7 @@ export class UserProfileEffect {
         'x-stratos-password-new': action.passwordChanges.password
       };
       return this.httpClient.put(`/pp/${proxyAPIVersion}/users/${userGuid}/password`, action.passwordChanges, { headers }).pipe(
-        switchMap((info: UserProfileInfo) => {
+        switchMap((_info: UserProfileInfo) => {
           this.appRef.tick();
           return [
             new WrapperRequestActionSuccess({
@@ -103,7 +103,7 @@ export class UserProfileEffect {
             }, action)
           ];
         }),
-        catchError((e: any) => {
+        catchError((_e: unknown) => {
           this.appRef.tick();
           return [
             new WrapperRequestActionFailed('Could not update User Password', action),

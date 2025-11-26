@@ -1,5 +1,5 @@
-import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
-import { GitMeta } from '../shared/scm/scm';
+import type { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
+import type { GitMeta } from '../shared/scm/scm';
 import {
   FetchBranchesForProject,
   FetchBranchForProject,
@@ -30,22 +30,32 @@ export interface GitCommitActionBuilders extends OrchestratedActionBuilders {
   get: (
     guid: string,
     endpointGuid: string,
-    meta: GitMeta
+    meta?: GitMeta
   ) => FetchCommit;
-  getMultiple: (commitSha: string, endpointGuid: string, projectMeta: GitMeta) => FetchCommits;
+  getMultiple: (commitSha: string, endpointGuid: string, projectMeta?: GitMeta) => FetchCommits;
 }
 
 export const gitCommitActionBuilders: GitCommitActionBuilders = {
   get: (
-    guid: string,
-    endpointGuid: string,
-    meta: GitMeta
-  ) => new FetchCommit(meta.scm, meta.scm.endpointGuid, meta.commitSha, meta.projectName),
+    _guid: string,
+    _endpointGuid: string,
+    meta?: GitMeta
+  ) => {
+    if (!meta) {
+      throw new Error('GitMeta is required for gitCommitActionBuilders.get');
+    }
+    return new FetchCommit(meta.scm, meta.scm.endpointGuid, meta.commitSha, meta.projectName);
+  },
   getMultiple: (
     commitSha: string,
-    endpointGuid: string,
-    commitMeta: GitMeta
-  ) => new FetchCommits(commitMeta.scm, commitMeta.scm.endpointGuid, commitMeta.projectName, commitSha)
+    _endpointGuid: string,
+    commitMeta?: GitMeta
+  ) => {
+    if (!commitMeta) {
+      throw new Error('GitMeta is required for gitCommitActionBuilders.getMultiple');
+    }
+    return new FetchCommits(commitMeta.scm, commitMeta.scm.endpointGuid, commitMeta.projectName, commitSha);
+  }
 };
 
 export interface GitBranchActionBuilders extends OrchestratedActionBuilders {
@@ -55,7 +65,7 @@ export interface GitBranchActionBuilders extends OrchestratedActionBuilders {
   get: (
     guid: string,
     endpointId: string,
-    meta: GitMeta
+    meta?: GitMeta
   ) => FetchBranchForProject;
   /**
    * endpointGuid & paginationKey are optional
@@ -63,19 +73,29 @@ export interface GitBranchActionBuilders extends OrchestratedActionBuilders {
   getMultiple: (
     endpointGuid: string,
     paginationKey: string,
-    meta: GitMeta
+    meta?: GitMeta
   ) => FetchBranchesForProject;
 }
 
 export const gitBranchActionBuilders: GitBranchActionBuilders = {
   get: (
     guid: string,
-    endpointId: string,
-    meta: GitMeta
-  ) => new FetchBranchForProject(meta.scm, meta.scm.endpointGuid, meta.projectName, guid, meta.branchName),
-  getMultiple: (
-    endpointGuid: string = null,
-    paginationKey: string = null,
+    _endpointId: string,
     meta?: GitMeta
-  ) => new FetchBranchesForProject(meta.scm, meta.scm.endpointGuid, meta.projectName)
+  ) => {
+    if (!meta) {
+      throw new Error('GitMeta is required for gitBranchActionBuilders.get');
+    }
+    return new FetchBranchForProject(meta.scm, meta.scm.endpointGuid, meta.projectName, guid, meta.branchName);
+  },
+  getMultiple: (
+    _endpointGuid: string = null,
+    _paginationKey: string = null,
+    meta?: GitMeta
+  ) => {
+    if (!meta) {
+      throw new Error('GitMeta is required for gitBranchActionBuilders.getMultiple');
+    }
+    return new FetchBranchesForProject(meta.scm, meta.scm.endpointGuid, meta.projectName);
+  }
 };

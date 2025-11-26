@@ -1,5 +1,5 @@
 import { entityCatalog } from '../entity-catalog/entity-catalog';
-import { PaginationEntityState } from '../types/pagination.types';
+import type { PaginationEntityState } from '../types/pagination.types';
 
 export class LocalPaginationHelpers {
 
@@ -14,7 +14,7 @@ export class LocalPaginationHelpers {
     if (pagination.forcedLocalPage) {
       const forcedPage = pagination.pageRequests?.[pagination.forcedLocalPage];
       // SI Wall, 2 CFs, Select SI only, Filter to Org, Switch CFs, pagination has been reset so no page
-      return forcedPage && forcedPage.maxed;
+      return forcedPage?.maxed;
     }
     if (!pagination.pageRequests) {
       return false;

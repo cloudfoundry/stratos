@@ -1,21 +1,21 @@
-import { HttpClient } from '@angular/common/http';
-import { Action, Store } from '@ngrx/store';
-import { combineLatest, Observable, of } from 'rxjs';
+import type { HttpClient } from '@angular/common/http';
+import type { Store, Action } from '@ngrx/store';
+import { combineLatest, type Observable, of } from 'rxjs';
 import { catchError, first, map, pairwise, share, skipWhile, switchMap, tap } from 'rxjs/operators';
 
 import {
-  AppState,
+  type AppState,
   entityCatalog,
-  EntityUserRolesEndpoint,
-  EntityUserRolesFetch,
+  type EntityUserRolesEndpoint,
+  type EntityUserRolesFetch,
   BaseHttpClientFetcher,
   flattenPagination,
-  PaginationFlattener,
-  ActionState,
+  type PaginationFlattener,
+  type ActionState,
   connectedEndpointsOfTypesSelector,
   selectPaginationState,
-  PaginationEntityState,
-  BasePaginatedAction,
+  type PaginationEntityState,
+  type BasePaginatedAction,
 } from '@stratosui/store';
 import {
   CfUserRelationTypes,
@@ -28,10 +28,10 @@ import {
 } from '../actions/permissions.actions';
 import { cfEntityCatalog } from '../cf-entity-catalog';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
-import { CFResponse } from '../store/types/cf-api.types';
+import type { CFResponse } from '../store/types/cf-api.types';
 
 const createEndpointArray = (
-  store: Store<AppState>,
+  store: Store,
   endpoints: string[] | EntityUserRolesEndpoint[]
 ): Observable<EntityUserRolesEndpoint[]> => {
   // If there's no endpoints get all from store. Alternatively fetch specific endpoint id's from store
@@ -50,7 +50,7 @@ const createEndpointArray = (
 
 export const cfUserRolesFetch: EntityUserRolesFetch = (
   endpoints: string[] | EntityUserRolesEndpoint[],
-  store: Store<AppState>,
+  store: Store,
   httpClient: HttpClient
 ) => {
   return createEndpointArray(store, endpoints).pipe(
@@ -58,7 +58,9 @@ export const cfUserRolesFetch: EntityUserRolesFetch = (
       const isAllAdmins = cfEndpoints.every(endpoint => !!endpoint.user.admin);
       // If all endpoints are connected as admin, there's no permissions to fetch. So only update the permission state to initialised
       if (isAllAdmins) {
-        cfEndpoints.forEach(endpoint => store.dispatch(new GetCfUserRelations(endpoint.guid, GET_CURRENT_CF_USER_RELATIONS_SUCCESS)));
+        cfEndpoints.forEach(endpoint => {
+          store.dispatch(new GetCfUserRelations(endpoint.guid, GET_CURRENT_CF_USER_RELATIONS_SUCCESS));
+        });
       } else {
         // If some endpoints are not connected as admin, go out and fetch the current user's specific roles
         const flagsAndRoleRequests = dispatchRoleRequests(cfEndpoints, store, httpClient);
@@ -83,7 +85,7 @@ interface IEndpointConnectionInfo {
 
 function dispatchRoleRequests(
   endpoints: EntityUserRolesEndpoint[],
-  store: Store<AppState>,
+  store: Store,
   httpClient: HttpClient
 ): CfsRequestState {
   const requests: CfsRequestState = {};
@@ -135,7 +137,7 @@ function handleCfRequests(requests: CfsRequestState): Observable<boolean>[] {
   return allCompleted;
 }
 
-function fetchCfUserRoles(endpoint: IEndpointConnectionInfo, store: Store<AppState>, httpClient: HttpClient): Observable<boolean>[] {
+function fetchCfUserRoles(endpoint: IEndpointConnectionInfo, store: Store, httpClient: HttpClient): Observable<boolean>[] {
   return Object.values(CfUserRelationTypes).map((type: CfUserRelationTypes) => {
     const relAction = new GetCurrentCfUserRelations(endpoint.userGuid, type, endpoint.guid);
     return fetchCfUserRole(store, relAction, httpClient);
@@ -151,7 +153,7 @@ class PermissionFlattener extends BaseHttpClientFetcher<CFResponse> implements P
 
   public mergePages = (res: CFResponse[]): CFResponse => {
     const firstRes = res.shift();
-    const final = res.reduce((finalRes: CFResponse, currentRes: CFResponse) => {
+    const final = res.reduce((finalRes: CFResponse, _currentRes: CFResponse) => {
       finalRes.resources = [
         ...finalRes.resources,
       ];
@@ -163,7 +165,7 @@ class PermissionFlattener extends BaseHttpClientFetcher<CFResponse> implements P
   public clearResults = (res: CFResponse): Observable<CFResponse> => of(res);
 }
 
-export function fetchCfUserRole(store: Store<AppState>, action: GetCurrentCfUserRelations, httpClient: HttpClient): Observable<boolean> {
+export function fetchCfUserRole(store: Store, action: GetCurrentCfUserRelations, httpClient: HttpClient): Observable<boolean> {
   const url = `pp/v1/proxy/v2/users/${action.guid}/${action.relationType}`;
   const params = {
     headers: {
@@ -188,12 +190,12 @@ export function fetchCfUserRole(store: Store<AppState>, action: GetCurrentCfUser
       return true;
     }),
     first(),
-    catchError(err => of(false)),
+    catchError(_err => of(false)),
     share()
   );
 }
 
-const fetchPaginationStateFromAction = (store: Store<AppState>, action: BasePaginatedAction) => {
+const fetchPaginationStateFromAction = (store: Store, action: BasePaginatedAction) => {
   const entityKey = entityCatalog.getEntityKey(action);
   return store.select(selectPaginationState(entityKey, action.paginationKey));
 };
@@ -201,11 +203,11 @@ const fetchPaginationStateFromAction = (store: Store<AppState>, action: BasePagi
 /**
  * Using the given action wait until the associated pagination section changes from busy to not busy
  */
-const createPaginationCompleteWatcher = (store: Store<AppState>, action: BasePaginatedAction): Observable<boolean> =>
+const createPaginationCompleteWatcher = (store: Store, action: BasePaginatedAction): Observable<boolean> =>
   fetchPaginationStateFromAction(store, action).pipe(
     map((paginationState: PaginationEntityState) => {
       const pageRequest: ActionState =
-        paginationState && paginationState.pageRequests && paginationState.pageRequests[paginationState.currentPage];
+        paginationState?.pageRequests?.[paginationState.currentPage];
       return pageRequest ? pageRequest.busy : true;
     }),
     pairwise(),

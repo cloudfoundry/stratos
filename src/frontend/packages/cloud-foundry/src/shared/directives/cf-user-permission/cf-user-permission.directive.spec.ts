@@ -1,5 +1,5 @@
 import { Component, provideZonelessChangeDetection } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { provideMockStore } from '@ngrx/store/testing';
@@ -19,7 +19,7 @@ import { CfUserPermissionDirective } from './cf-user-permission.directive';
   `
 })
 class TestUserPermissionComponent {
-  permission: any;
+  permission: unknown;
 }
 
 describe('CfUserPermissionDirective', () => {

@@ -3,20 +3,20 @@ import { Store } from '@ngrx/store';
 import {
   selectSessionData,
   APIKeysEnabled,
-  GeneralEntityAppState,
+  type GeneralEntityAppState,
   getCurrentUserStratosHasScope,
   getCurrentUserStratosRole,
-  PermissionValues,
+  type PermissionValues,
 } from '@stratosui/store';
-import { Observable, of } from 'rxjs';
+import { type Observable, of } from 'rxjs';
 import { filter, switchMap } from 'rxjs/operators';
 
-import { IPermissionConfigs, PermissionConfig, PermissionTypes } from './current-user-permissions.config';
+import { type IPermissionConfigs, PermissionConfig, type PermissionTypes } from './current-user-permissions.config';
 import {
   BaseCurrentUserPermissionsChecker,
-  IConfigGroups,
-  ICurrentUserPermissionsChecker,
-  IPermissionCheckCombiner,
+  type IConfigGroups,
+  type ICurrentUserPermissionsChecker,
+  type IPermissionCheckCombiner,
 } from './current-user-permissions.types';
 
 export enum StratosCurrentUserPermissions {
@@ -79,10 +79,6 @@ export const stratosPermissionConfigs: IPermissionConfigs = {
 
 export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChecker implements ICurrentUserPermissionsChecker {
   private store = inject(Store<GeneralEntityAppState>);
-
-  constructor() {
-    super();
-  }
 
   getPermissionConfig(action: string) {
     return stratosPermissionConfigs[action];
@@ -148,7 +144,7 @@ export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChe
 
   public getComplexCheck(
     permissionConfig: PermissionConfig[],
-    ...args: any[]
+    ..._args: unknown[]
   ): IPermissionCheckCombiner[] {
     const groupedChecks = this.groupConfigs(permissionConfig);
     const res = Object.keys(groupedChecks).map((permission: PermissionTypes) => {
@@ -158,12 +154,14 @@ export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChe
           return {
             checks: this.getInternalScopesChecks(configGroup),
           };
+        default:
+          return null;
       }
     });
     // Checker must handle all configs
     return res.every(check => !!check) ? res : null;
   }
-  public getFallbackCheck(endpointGuid: string, endpointType: string): Observable<boolean> {
+  public getFallbackCheck(_endpointGuid: string, _endpointType: string): Observable<boolean> {
     return null;
   }
 

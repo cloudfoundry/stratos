@@ -6,16 +6,18 @@ import type { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog
 import type { ActionState, RequestInfoState, UpdatingSection } from '../reducers/api-request-reducer/types';
 import type { APIResource } from '../types/api.types';
 
-export const getEntityById = <T>(guid: string) => (entities: any): T => {
+export const getEntityById = <T>(guid: string) => (entities: Record<string, T>): T => {
   return entities[guid];
 };
 
 export const getNestedEntityWithKeys = <T>(entityKeys: string[]) => (
-  entities: any
+  entities: Record<string, unknown>
 ): T => {
-  let entity = entities;
-  entityKeys.forEach(k => entity = entity[k]);
-  return entity;
+  let entity: unknown = entities;
+  entityKeys.forEach(k => {
+    entity = (entity as Record<string, unknown>)[k];
+  });
+  return entity as T;
 };
 
 export const getEntityDeleteSections = (request: RequestInfoState) => {
@@ -24,13 +26,13 @@ export const getEntityDeleteSections = (request: RequestInfoState) => {
 
 export const getEntityUpdateSections = (
   request: RequestInfoState
-): UpdatingSection => {
+): UpdatingSection | null => {
   return request ? request.updating : null;
 };
 
 export const getUpdateSectionById = (guid: string) => (
-  updating: any
-): ActionState => {
+  updating: Record<string, ActionState> | null
+): ActionState | null => {
   return updating ? updating[guid] : null;
 };
 
@@ -100,7 +102,7 @@ export function selectNestedEntity<T = APIResource[]>(
 // T => APIResource || base entity (e.g. EndpointModel)
 export function getRequestEntityKey<T>(entityKey: string) {
   return (state: IRequestTypeState): IRequestEntityKeyState<T> => {
-    return state?.[entityKey] || {} as IRequestEntityKeyState<T>;
+    return (state?.[entityKey] || {}) as IRequestEntityKeyState<T>;
   };
 }
 

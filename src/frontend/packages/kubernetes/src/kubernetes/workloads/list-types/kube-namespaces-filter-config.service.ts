@@ -1,14 +1,14 @@
-import { Injectable, OnDestroy, signal, WritableSignal, computed, Injector, inject, runInInjectionContext } from '@angular/core';
+import { Injectable, type OnDestroy, signal, type WritableSignal, computed, Injector, inject, runInInjectionContext } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { safeUnsubscribe } from '@stratosui/core';
 import {
-  AppState,
+  type AppState,
   connectedEndpointsOfTypesSelector,
-  EndpointModel,
+  type EndpointModel,
   getCurrentPageRequestInfo
 } from '@stratosui/store';
-import { Observable, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import {
   distinctUntilChanged,
   filter,
@@ -22,7 +22,7 @@ import {
 } from 'rxjs/operators';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes-entity-factory';
 import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
-import { KubernetesNamespace } from '../../store/kube.types';
+import type { KubernetesNamespace } from '../../store/kube.types';
 
 // Helper function to create a signal wrapper compatible with IListMultiFilterConfig
 // The wrapper provides BehaviorSubject-like API (.next, .getValue, .asObservable)
@@ -54,7 +54,7 @@ function createSignalWrapper<T>(initialValue: T) {
   };
 }
 
-export interface KubernetesNamespacesFilterItem<T = any> {
+export interface KubernetesNamespacesFilterItem<T = EndpointModel | KubernetesNamespace> {
   list$: Observable<T[]>;
   loading$: Observable<boolean>;
   select: ReturnType<typeof createSignalWrapper<string>>;

@@ -1,13 +1,13 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { Component, type OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { BehaviorSubject, combineLatest, type Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
-import { IHeaderBreadcrumb, PageHeaderComponent } from '@stratosui/core';
-import { EndpointModel, EntityService, getFullEndpointApiUrl, stratosEntityCatalog } from '@stratosui/store';
+import { type IHeaderBreadcrumb, PageHeaderComponent } from '@stratosui/core';
+import { type EndpointModel, type EntityService, getFullEndpointApiUrl, stratosEntityCatalog } from '@stratosui/store';
 import { ApplicationService } from '@stratosui/cloud-foundry';
 import { CliCommandComponent } from '../../../shared/components/cli-info/cli-command/cli-command.component';
-import { CFAppCLIInfoContext, CliInfoComponent } from '../../../shared/components/cli-info/cli-info.component';
+import { type CFAppCLIInfoContext, CliInfoComponent } from '../../../shared/components/cli-info/cli-info.component';
 
 @Component({
   selector: 'app-cli-info-application',

@@ -1,9 +1,8 @@
 import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
+import { type FormControl, type FormGroup, ReactiveFormsModule, } from '@angular/forms';
 
-import { FileInputComponent } from '../../../../../core/src/shared/components/file-input/file-input.component';
-import { CustomTabGroupComponent, CustomTabComponent } from '../../../../../core/src/shared/components/custom-tabs/custom-tabs.component';
-import { EndpointAuthValues, IEndpointAuthComponent } from '../../../../../store/src/extension-types';
+import { CustomTabComponent, CustomTabGroupComponent, FileInputComponent } from '@stratosui/core';
+import type { EndpointAuthValues, IEndpointAuthComponent } from '../../../../../store/src/extension-types';
 
 interface CertsAuthForm {
   cert: FormControl<string>;
@@ -20,14 +19,14 @@ interface CertsAuthForm {
     ReactiveFormsModule,
     CustomTabGroupComponent,
     CustomTabComponent,
-    FileInputComponent,
+    FileInputComponent
   ]
 })
 export class KubernetesCertsAuthFormComponent implements IEndpointAuthComponent {
   @Input() formGroup: FormGroup<CertsAuthForm>;
 
 
-  public getValues(values: EndpointAuthValues): EndpointAuthValues {
+  public getValues(_values: EndpointAuthValues): EndpointAuthValues {
     return {};
   }
 

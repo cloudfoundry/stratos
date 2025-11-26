@@ -1,10 +1,10 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { Store } from '@ngrx/store';
-import { RouterNav, GeneralEntityAppState } from '@stratosui/store';
+import { RouterNav, type GeneralEntityAppState } from '@stratosui/store';
 
 import { BASE_REDIRECT_QUERY } from '../../../shared/components/stepper/stepper.types';
-import { ITileConfig, ITileData } from '../../../shared/components/tile/tile-selector.types';
+import { ITileConfig, type ITileData } from '../../../shared/components/tile/tile-selector.types';
 import { APP_TITLE } from './../../../core/core.types';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { ShowPageHeaderComponent } from '../../../shared/components/page-header/show-page-header/show-page-header.component';
@@ -12,7 +12,7 @@ import { SteppersComponent } from '../../../shared/components/stepper/steppers/s
 import { StepComponent } from '../../../shared/components/stepper/step/step.component';
 import { TileSelectorTileComponent } from '../../../shared/components/tile-selector-tile/tile-selector-tile.component';
 import { StratosTitleComponent } from '../../../shared/components/stratos-title/stratos-title.component';
-import { ProductNameComponent } from '../../../shared/components/product-name.ccomponent';
+import { ProductNameComponent } from '../../../shared/components/product-name.component';
 
 @Component({
 selector: 'app-setup-welcome',

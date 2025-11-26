@@ -1,3 +1,5 @@
+import type { Action } from '@ngrx/store';
+import type { GitBranch } from '@stratosui/git';
 import {
   CHECK_PROJECT_EXISTS,
   DELETE_DEPLOY_APP_SECTION,
@@ -6,14 +8,26 @@ import {
   PROJECT_FETCH_FAILED,
   SAVE_APP_DETAILS,
   SAVE_APP_OVERRIDE_DETAILS,
-  SaveAppDetails,
+  type SaveAppDetails,
   SET_APP_SOURCE_DETAILS,
   SET_BRANCH,
   SET_DEPLOY_BRANCH,
   SET_DEPLOY_CF_SETTINGS,
   SET_DEPLOY_COMMIT,
 } from '../../actions/deploy-applications.actions';
-import { DeployApplicationState } from '../types/deploy-application.types';
+import type { NewAppCFDetails } from '../types/create-application.types';
+import type { DeployApplicationState, OverrideAppDetails, SourceType } from '../types/deploy-application.types';
+
+interface DeployAppAction extends Action {
+  sourceType?: SourceType;
+  cloudFoundryDetails?: unknown;
+  projectName?: string;
+  projectData?: unknown;
+  error?: string;
+  appOverrideDetails?: unknown;
+  branch?: GitBranch | string;
+  commit?: string;
+}
 
 const defaultState: DeployApplicationState = {
   cloudFoundryDetails: null,
@@ -29,7 +43,7 @@ const defaultState: DeployApplicationState = {
   }
 };
 
-export function deployAppReducer(state: DeployApplicationState = defaultState, action: any): DeployApplicationState {
+export function deployAppReducer(state: DeployApplicationState = defaultState, action: DeployAppAction): DeployApplicationState {
   switch (action.type) {
     case SET_APP_SOURCE_DETAILS:
       return {
@@ -42,7 +56,7 @@ export function deployAppReducer(state: DeployApplicationState = defaultState, a
     case SET_DEPLOY_CF_SETTINGS:
       return {
         ...state,
-        cloudFoundryDetails: action.cloudFoundryDetails
+        cloudFoundryDetails: action.cloudFoundryDetails as NewAppCFDetails
       };
     case CHECK_PROJECT_EXISTS:
       return {
@@ -85,7 +99,7 @@ export function deployAppReducer(state: DeployApplicationState = defaultState, a
           data: action.error
         }
       };
-    case SAVE_APP_DETAILS:
+    case SAVE_APP_DETAILS: {
       const saveAppDetails = action as SaveAppDetails;
       return {
         ...state,
@@ -95,11 +109,12 @@ export function deployAppReducer(state: DeployApplicationState = defaultState, a
           dockerDetails: saveAppDetails.docker || state.applicationSource.dockerDetails,
         }
       };
+    }
     case SAVE_APP_OVERRIDE_DETAILS:
       return {
         ...state,
         applicationOverrides: {
-          ...action.appOverrideDetails
+          ...(action.appOverrideDetails as OverrideAppDetails)
         }
       };
     case SET_BRANCH:
@@ -109,7 +124,7 @@ export function deployAppReducer(state: DeployApplicationState = defaultState, a
           ...state.applicationSource,
           gitDetails: {
             ...state.applicationSource.gitDetails,
-            branch: action.branch
+            branch: action.branch as GitBranch
           }
         }
       };
@@ -120,7 +135,7 @@ export function deployAppReducer(state: DeployApplicationState = defaultState, a
           ...state.applicationSource,
           gitDetails: {
             ...state.applicationSource.gitDetails,
-            branchName: action.branch
+            branchName: action.branch as string
           }
         }
       };

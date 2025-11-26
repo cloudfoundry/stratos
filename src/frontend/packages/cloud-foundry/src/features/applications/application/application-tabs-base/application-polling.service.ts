@@ -1,10 +1,10 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable, type NgZone } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
-import { filter, first, map, startWith, take, tap } from 'rxjs/operators';
+import type { Observable, Subscription } from 'rxjs';
+import { filter, map, startWith, take, tap } from 'rxjs/operators';
 
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
-import { AppState } from '../../../../../../store/src/app-state';
+import type { AppState } from '../../../../../../store/src/app-state';
 import { selectDashboardState } from '../../../../../../store/src/selectors/dashboard.selectors';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ApplicationService } from '../../application.service';
@@ -25,7 +25,7 @@ export class ApplicationPollingService {
 
   constructor(
     public applicationService: ApplicationService,
-    private store: Store<AppState>,
+    private store: Store,
     private ngZone: NgZone,
   ) {
     this.isEnabled$ = this.store.select(selectDashboardState).pipe(
@@ -83,7 +83,7 @@ export class ApplicationPollingService {
       take(1),
     ).subscribe(resource => {
       cfEntityCatalog.appSummary.api.get(appGuid, cfGuid);
-      if (resource && resource.entity && resource.entity.entity && resource.entity.entity.state === 'STARTED') {
+      if (resource?.entity?.entity && resource.entity.entity.state === 'STARTED') {
         cfEntityCatalog.appStats.api.getMultiple(appGuid, cfGuid);
       }
     });

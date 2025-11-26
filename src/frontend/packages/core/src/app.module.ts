@@ -1,16 +1,16 @@
-import { ApplicationRef, Injectable, NgModule, provideZonelessChangeDetection } from '@angular/core';
+import { ApplicationRef, inject, Injectable, NgModule, provideZonelessChangeDetection } from '@angular/core';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { Params, RouteReuseStrategy, RouterStateSnapshot } from '@angular/router';
+import { type Params, RouteReuseStrategy, type RouterStateSnapshot } from '@angular/router';
 import { FullRouterStateSerializer, RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
 import { Store } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { getGitHubAPIURL, GITHUB_API_URL } from '@stratosui/git';
 import {
   SetRecentlyVisitedEntityAction,
-  GeneralEntityAppState,
-  GeneralRequestDataState,
+  type GeneralEntityAppState,
+  type GeneralRequestDataState,
   EntityCatalogModule,
   entityCatalog,
   EntityCatalogHelper,
@@ -24,9 +24,9 @@ import {
   AppStoreModule,
   stratosEntityCatalog,
   generateStratosEntities,
-  EndpointModel,
-  IFavoriteMetadata,
-  UserFavorite,
+  type EndpointModel,
+  type IFavoriteMetadata,
+  type UserFavorite,
   UserFavoriteManager
 } from '@stratosui/store';
 import { StratosThemeModule } from '../../theme/theme.module';
@@ -125,11 +125,9 @@ class AppStoreDebugModule { }
  * DO NOT REORDER imports without understanding entity registration dependencies.
  */
 @NgModule({
-  declarations: [
-    AppComponent
-  ],
   imports: [
     // Standalone Components
+    AppComponent,
     NoEndpointsNonAdminComponent,
     // Modules
     // CRITICAL: Core Stratos entities MUST register first - required by all feature modules
@@ -173,14 +171,15 @@ class AppStoreDebugModule { }
   bootstrap: [AppComponent]
 })
 export class AppModule {
+  private store = inject(Store<GeneralEntityAppState>);
+  private userFavoriteManager = inject(UserFavoriteManager);
+  private appRef = inject(ApplicationRef);
+
   constructor(
     ext: ExtensionService,
-    private store: Store<GeneralEntityAppState>,
     eventService: GlobalEventService,
-    private userFavoriteManager: UserFavoriteManager,
     ech: EntityCatalogHelper,
-    customizationService: CustomizationService,
-    private appRef: ApplicationRef
+    customizationService: CustomizationService
   ) {
     EntityCatalogHelpers.SetEntityCatalogHelper(ech);
 
@@ -313,8 +312,8 @@ export class AppModule {
             return;
           }
           const entityKey = entityCatalog.getEntityKey(recentEntity);
-          if (entities[entityKey] && entities[entityKey][recentEntity.entityId]) {
-            const entity = entities[entityKey][recentEntity.entityId];
+          if ((entities as Record<string, Record<string, unknown>>)[entityKey]?.[recentEntity.entityId]) {
+            const entity = (entities as Record<string, Record<string, unknown>>)[entityKey][recentEntity.entityId];
             const entityToMetadata = this.userFavoriteManager.getEntityMetadata(recentEntity, entity);
             const name = entityToMetadata?.name;
             if (name && name !== recentEntity.name) {
@@ -334,7 +333,7 @@ export class AppModule {
     // Configure navigation behavior - hide CF-specific menu items when no CF endpoints are connected
     customizationService.set({
       ...customizationService.get(),
-      alwaysShowNavForEndpointTypes: (epType) => false
+      alwaysShowNavForEndpointTypes: (_epType) => false
     });
   }
 
@@ -347,11 +346,11 @@ export class AppModule {
         endpointType: STRATOS_ENDPOINT_TYPE
       }) : entityCatalog.getEntityKey(favorite);
 
-      if (!entities[entityKey]) {
+      if (!(entities as Record<string, Record<string, unknown>>)[entityKey]) {
         return;
       }
 
-      const entity = entities[entityKey][favorite.entityId || favorite.endpointId];
+      const entity = (entities as Record<string, Record<string, unknown>>)[entityKey][favorite.entityId || favorite.endpointId];
       if (entity) {
         const newMetadata = this.userFavoriteManager.getEntityMetadata(favorite, entity);
         if (this.metadataHasChanged(favorite.metadata, newMetadata)) {

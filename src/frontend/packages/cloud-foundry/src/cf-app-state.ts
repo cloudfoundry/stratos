@@ -1,9 +1,9 @@
 import { AppState } from '../../store/src/app-state';
-import { CFRequestDataState } from './cf-entity-types';
-import { CreateNewApplicationState } from './store/types/create-application.types';
-import { DeployApplicationState } from './store/types/deploy-application.types';
-import { CreateServiceInstanceState } from './store/types/create-service-instance.types';
-import { UsersRolesState } from './store/types/users-roles.types';
+import type { CFRequestDataState } from './cf-entity-types';
+import type { CreateNewApplicationState } from './store/types/create-application.types';
+import type { DeployApplicationState } from './store/types/deploy-application.types';
+import type { CreateServiceInstanceState } from './store/types/create-service-instance.types';
+import type { UsersRolesState } from './store/types/users-roles.types';
 
 // Care about CF entities? Use this one. CF version of app-state.ts equivalents
 export abstract class CFAppState extends AppState<CFRequestDataState> {

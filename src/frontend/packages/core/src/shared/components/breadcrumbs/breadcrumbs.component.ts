@@ -2,7 +2,7 @@
 import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 
-import { BREADCRUMB_URL_PARAM, IBreadcrumb, IBreadcrumbLink } from './breadcrumbs.types';
+import { BREADCRUMB_URL_PARAM, type IBreadcrumb, type IBreadcrumbLink } from './breadcrumbs.types';
 import { CustomIconComponent } from '../custom-material/custom-material.component';
 
 @Component({

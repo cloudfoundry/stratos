@@ -3,7 +3,7 @@ import { EntitySchema } from '../helpers/entity-schema';
 import { endpointEntityType, stratosEntityFactory } from '../helpers/stratos-entity-factory';
 import { TestEntityCatalog } from './entity-catalog';
 import { StratosCatalogEndpointEntity, StratosCatalogEntity } from './entity-catalog-entity/entity-catalog-entity';
-import { EntityCatalogSchemas, IStratosEndpointDefinition } from './entity-catalog.types';
+import type { EntityCatalogSchemas, IStratosEndpointDefinition } from './entity-catalog.types';
 
 describe('EntityCatalogService', () => {
   let entityCatalog: TestEntityCatalog;

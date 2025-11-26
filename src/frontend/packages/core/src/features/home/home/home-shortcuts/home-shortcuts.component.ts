@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 
 import { RouterModule } from '@angular/router';
 
-import { HomeCardShortcut } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
+import type { HomeCardShortcut } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 
 @Component({

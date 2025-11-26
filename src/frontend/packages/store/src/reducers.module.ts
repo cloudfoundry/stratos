@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { ActionReducerMap, StoreModule } from '@ngrx/store';
+import { type ActionReducerMap, StoreModule } from '@ngrx/store';
 
 import { LocalStorageService } from './helpers/local-storage-service';
 import { requestReducer } from './reducers/api-request-reducers.generator';

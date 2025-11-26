@@ -1,22 +1,23 @@
 import { ChangeDetectionStrategy, Component  } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { MatCheckboxChange } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { ReactiveFormsModule, Validators, FormControl, FormGroup } from '@angular/forms';
+import type { MatCheckboxChange } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { Store } from '@ngrx/store';
-import { stratosEntityCatalog, GeneralEntityAppState, httpErrorResponseToSafeString } from '@stratosui/store';
-import { Observable, of, Subject } from 'rxjs';
+import { stratosEntityCatalog, type GeneralEntityAppState, httpErrorResponseToSafeString } from '@stratosui/store';
+import { type Observable, of, Subject } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
 import { getEventFiles } from '../../../../core/browser-helper';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
-import { StepOnNextFunction, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
+import type {StepOnNextFunction} from '../../../../shared/components/stepper/step/step.component';
+import type {StepOnNextResult} from '../../../../shared/components/stepper/step/step.component';
 import { RestoreEndpointsService } from '../restore-endpoints.service';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { SteppersComponent } from '../../../../shared/components/stepper/steppers/steppers.component';
 import { StepComponent } from '../../../../shared/components/stepper/step/step.component';
 import { ShowHideButtonComponent } from '../../../../core/show-hide-button/show-hide-button.component';
-import { ProductNameComponent } from '../../../../shared/components/product-name.ccomponent';
+import { ProductNameComponent } from '../../../../shared/components/product-name.component';
 
 @Component({
   selector: 'app-restore-endpoints',
@@ -28,6 +29,7 @@ import { ProductNameComponent } from '../../../../shared/components/product-name
   standalone: true,
   imports: [
     CommonModule,
+    AsyncPipe,
     ReactiveFormsModule,
     PageHeaderComponent,
     SteppersComponent,
@@ -44,8 +46,7 @@ export class RestoreEndpointsComponent {
   passwordForm!: FormGroup;
   show = false;
 
-  constructor(
-    private store: Store<GeneralEntityAppState>,
+  constructor(_store: Store<GeneralEntityAppState>,
     public service: RestoreEndpointsService,
     private confirmDialog: ConfirmationDialogService,
   ) {
@@ -100,11 +101,11 @@ export class RestoreEndpointsComponent {
       });
     };
 
-    const backupFailure = (err: any) => {
+    const backupFailure = (err: Error) => {
       const errorMessage = httpErrorResponseToSafeString(err);
       result.next({
         success: false,
-        message: `Failed to restore backup` + (errorMessage ? `: ${errorMessage}` : '')
+        message: `Failed to restore backup${errorMessage ? `: ${errorMessage}` : ''}`
       });
       return of(false);
     };

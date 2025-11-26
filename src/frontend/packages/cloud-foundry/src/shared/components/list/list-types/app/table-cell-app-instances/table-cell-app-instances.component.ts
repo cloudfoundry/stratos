@@ -1,6 +1,6 @@
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom } from '@stratosui/core';
 import { RunningInstancesComponent } from '../../../../running-instances/running-instances.component';
 
 @Component({

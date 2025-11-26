@@ -1,5 +1,5 @@
-import { RemoveParams } from '../../actions/pagination.actions';
-import { PaginationEntityState } from '../../types/pagination.types';
+import type { RemoveParams } from '../../actions/pagination.actions';
+import type { PaginationEntityState } from '../../types/pagination.types';
 
 export function paginationRemoveParams(state: PaginationEntityState, action: RemoveParams) {
 
@@ -11,7 +11,7 @@ export function paginationRemoveParams(state: PaginationEntityState, action: Rem
   };
 
   action.params.forEach((key) => {
-    if (removeParamsState.params.hasOwnProperty(key)) {
+    if (Object.hasOwn(removeParamsState.params, key)) {
       delete removeParamsState.params[key];
     }
   });

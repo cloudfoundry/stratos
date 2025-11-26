@@ -1,15 +1,15 @@
-import {
+import type {
   EntityCatalogEntityConfig,
   EntityMonitorFactory,
   PaginationMonitor,
   PaginationMonitorFactory,
 } from '@stratosui/store';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 
 import { TableRowStateManager } from './list-table/table-row/table-row-state-manager';
 
 export type ListRowStateSetUpManager = (
-  paginationMonitor: PaginationMonitor<any>,
+  paginationMonitor: PaginationMonitor<unknown>,
   entityMonitorFactory: EntityMonitorFactory,
   rowStateManager: TableRowStateManager
 ) => Subscription;

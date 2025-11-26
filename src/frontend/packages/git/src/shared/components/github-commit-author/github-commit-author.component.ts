@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
-import { GitCommit } from '@stratosui/git';
+import type { GitCommit } from '@stratosui/git';
 
 @Component({
   selector: 'app-github-commit-author',

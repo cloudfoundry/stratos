@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule,FormBuilder } from '@angular/forms';
+import { type FormControl, type FormGroup, ReactiveFormsModule,} from '@angular/forms';
 
-import { IAuthForm } from '../../../../../store/src/extension-types';
+import type { IAuthForm } from '../../../../../store/src/extension-types';
 
 interface ServiceAccountAuthForm {
   token: FormControl<string>;

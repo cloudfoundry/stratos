@@ -6,6 +6,8 @@ import { PageHeaderEventsComponent } from './page-header-events/page-header-even
 import { PageHeaderComponent } from './page-header.component';
 import { ShowPageHeaderComponent } from './show-page-header/show-page-header.component';
 
+// This module is deprecated - use the standalone components directly instead
+// Kept for backward compatibility with test files only
 @NgModule({
   imports: [
     CoreModule,

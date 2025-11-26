@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
@@ -8,7 +8,7 @@ import { BaseTestModulesNoShared } from '../../../../../core/test-framework/core
 import { SharedModule } from '@stratosui/core';
 import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { generateStratosEntities } from '../../../../../store/src/stratos-entity-generator';
-import { entityCatalog, TestEntityCatalog } from '../../../../../store/src/public-api';
+import { entityCatalog, type TestEntityCatalog } from '../../../../../store/src/public-api';
 
 import { HelmTestingModule } from '../../helm-testing.module';
 import { MockChartService } from '../../monocular/shared/services/chart.service.mock';
@@ -17,11 +17,28 @@ import { CatalogTabComponent } from './catalog-tab.component';
 import { helmEntityCatalog } from '../../helm-entity-catalog';
 import { generateHelmEntities } from '../../helm-entity-generator';
 
+interface MockPaginationService {
+  entities$: BehaviorSubject<unknown[]>;
+  fetchingEntities$: BehaviorSubject<boolean>;
+  pagination$: BehaviorSubject<unknown>;
+  hasEntities$: BehaviorSubject<boolean>;
+  totalEntities$: BehaviorSubject<number>;
+  isMultiAction$: BehaviorSubject<boolean>;
+}
+
+interface MockChartMonitor {
+  currentPage$: BehaviorSubject<unknown[]>;
+  pagination$: BehaviorSubject<{ clientPagination: { filter: { string: string; items: Record<string, unknown> } } }>;
+  fetchingEntities$: BehaviorSubject<boolean>;
+  hasEntities$: BehaviorSubject<boolean>;
+  totalEntities$: BehaviorSubject<number>;
+}
+
 describe('CatalogTabComponent', () => {
   let component: CatalogTabComponent;
   let fixture: ComponentFixture<CatalogTabComponent>;
-  let mockPaginationService: any;
-  let mockChartMonitor: any;
+  let mockPaginationService: MockPaginationService;
+  let mockChartMonitor: MockChartMonitor;
 
   beforeEach(async () => {
     // Manually register catalog entities before TestBed setup
@@ -61,8 +78,8 @@ describe('CatalogTabComponent', () => {
     };
 
     // Mock the catalog methods to return our persistent observables
-    vi.spyOn(stratosEntityCatalog.endpoint.store.getAll, 'getPaginationService').mockReturnValue(mockPaginationService);
-    vi.spyOn(helmEntityCatalog.chart.store, 'getPaginationMonitor').mockReturnValue(mockChartMonitor);
+    vi.spyOn(stratosEntityCatalog.endpoint.store.getAll, 'getPaginationService').mockReturnValue(mockPaginationService as any);
+    vi.spyOn(helmEntityCatalog.chart.store, 'getPaginationMonitor').mockReturnValue(mockChartMonitor as any);
 
     await TestBed.configureTestingModule({
       imports: [

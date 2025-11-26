@@ -1,5 +1,5 @@
-import { APIResource } from '@stratosui/store';
-import { IApp } from './cf-api.types';
+import type { APIResource } from '@stratosui/store';
+import type { IApp } from './cf-api.types';
 import { CfApplicationState } from './store/types/application.types';
 
 export function getStartedAppInstanceCount(apps: APIResource<IApp>[]): number {
@@ -12,9 +12,9 @@ export function getStartedAppInstanceCount(apps: APIResource<IApp>[]): number {
     .reduce((x, sum) => x + sum, 0);
 }
 
-export function getEntityFlattenedList<T>(property: string, entities: APIResource<any>[]): T[] {
+export function getEntityFlattenedList<T>(property: string, entities: APIResource<Record<string, unknown>>[]): T[] {
   const all = entities
     .map(s => s.entity[property])
     .filter(s => !!s);
-  return ([] as T[]).concat(...all);
+  return ([] as T[]).concat(...(all as T[][]));
 }

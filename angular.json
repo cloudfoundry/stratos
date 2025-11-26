@@ -283,18 +283,6 @@
               "tsConfig": "src/frontend/packages/extension/tsconfig.lib.prod.json"
             }
           }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "src/tsconfig.json"
-            ],
-            "tslintConfig": "src/frontend/packages/extension/tslint.json",
-            "files": [
-              "src/frontend/packages/extension/src/**/*.ts"
-            ]
-          }
         }
       }
     },

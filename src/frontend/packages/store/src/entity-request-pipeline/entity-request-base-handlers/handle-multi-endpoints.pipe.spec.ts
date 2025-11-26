@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { of } from 'rxjs';
 
-import { JetStreamErrorResponse } from '../../jetstream';
-import { JetstreamResponse } from '../entity-request-pipeline.types';
+import type { JetStreamErrorResponse } from '../../jetstream';
+import type { JetstreamResponse } from '../entity-request-pipeline.types';
 import { handleJetstreamResponsePipeFactory, JetstreamError } from './handle-multi-endpoints.pipe';
 
 describe('handle-multi-endpoint-pipe', () => {

@@ -39,7 +39,7 @@ export { CfCurrentUserPermissions, cfCurrentUserPermissionsService } from './use
 export * from './entity-relations/entity-relations-spec-helper';
 
 // Entity Relations
-export { createEntityRelationPaginationKey } from './entity-relations/entity-relations.types';
+export { createEntityRelationPaginationKey, createEntityRelationKey } from './entity-relations/entity-relations.types';
 
 // CF Types
 export { CF_ENDPOINT_TYPE } from './cf-types';

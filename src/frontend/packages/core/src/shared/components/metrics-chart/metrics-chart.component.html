@@ -1,30 +1,47 @@
 <app-card class="metrics-chart__card">
   <div class="metrics-chart__outer">
     <div class="metrics-chart__header">
-      <h2 class="metrics-chart__title" *ngIf="title">{{title}}</h2>
+      @if (title) {
+        <h2 class="metrics-chart__title">{{title}}</h2>
+      }
       <ng-content select="app-metrics-range-selector"></ng-content>
     </div>
-    <app-spinner *ngIf="isRefreshing$ | async" [diameter]="20" class="metrics-chart__refreshing"></app-spinner>
-    <app-progress-bar *ngIf="isFetching$ | async" class="metrics-chart__loading" color="primary" mode="indeterminate">
-    </app-progress-bar>
-    <div class="metrics-chart" *ngIf="!(isFetching$ | async)">
-      <div class="metrics-chart" *ngIf="results$ | async as results" [ngSwitch]="chartConfig.chartType">
-        <div class="metrics-chart" *ngIf="results.length; else other_content">
-          <canvas *ngSwitchCase="chartTypes.LINE" baseChart
-            [data]="chartJsData"
-            [type]="'line'"
-            [options]="chartOptions">
-          </canvas>
-          <span *ngSwitchDefault> {{ chartConfig.chartType }} chart type not found </span>
-        </div>
+    @if (isRefreshing$ | async) {
+      <app-spinner [diameter]="20" class="metrics-chart__refreshing"></app-spinner>
+    }
+    @if (isFetching$ | async) {
+      <app-progress-bar class="metrics-chart__loading" color="primary" mode="indeterminate">
+      </app-progress-bar>
+    }
+    @if (!(isFetching$ | async)) {
+      <div class="metrics-chart">
+        @if (results$ | async; as results) {
+          @switch (chartConfig.chartType) {
+            @case (chartTypes.LINE) {
+              @if (results.length) {
+                <div class="metrics-chart">
+                  <canvas baseChart
+                    [data]="chartJsData"
+                    [type]="'line'"
+                    [options]="chartOptions">
+                  </canvas>
+                </div>
+              } @else {
+                <div class="no-content">No results found
+                  @if (!title) {
+                    <div class="no-content__name">
+                      {{ chartConfig.yAxisLabel }}
+                    </div>
+                  }
+                </div>
+              }
+            }
+            @default {
+              <span> {{ chartConfig.chartType }} chart type not found </span>
+            }
+          }
+        }
       </div>
-    </div>
+    }
   </div>
 </app-card>
-<ng-template #other_content>
-  <div class="no-content">No results found
-    <div class="no-content__name" *ngIf="!title">
-      {{ chartConfig.yAxisLabel }}
-    </div>
-  </div>
-</ng-template>

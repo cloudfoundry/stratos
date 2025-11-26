@@ -6,14 +6,14 @@
  */
 
 import {
-  StratosBaseCatalogEntity,
+  type StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
-  StratosEndpointExtensionDefinition,
-  IStratosEntityDefinition,
-  IStratosEndpointDefinition,
+  type StratosEndpointExtensionDefinition,
+  type IStratosEntityDefinition,
+  type IStratosEndpointDefinition,
   EntityCatalogEntityConfig,
-  EntityCatalogSchemas,
+  type EntityCatalogSchemas,
   endpointEntityType,
   EntitySchema,
 } from '@stratosui/store';

@@ -1,16 +1,21 @@
 import { of } from 'rxjs';
 
 import {
+  type IGlobalListAction,
+  type IListAction,
+  type IListMultiFilterConfig,
+  type IMultiListAction,
+  type ISimpleListConfig,
+  type ITableColumn,
+  ListViewTypes,
   TableCellSidePanelComponent,
-  TableCellSidePanelConfig,
-} from '../../../../../core/src/shared/components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
-import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
-import { ISimpleListConfig, ListViewTypes, IGlobalListAction, IMultiListAction, IListAction, IListMultiFilterConfig } from '../../../../../core/src/shared/components/list/list.component.types';
+  type TableCellSidePanelConfig
+} from '@stratosui/core';
 import {
   KubernetesResourceViewerComponent,
-  KubernetesResourceViewerConfig,
+  type KubernetesResourceViewerConfig,
 } from '../../kubernetes-resource-viewer/kubernetes-resource-viewer.component';
-import { KubeService } from '../../store/kube.types';
+import type { KubeService } from '../../store/kube.types';
 import { defaultHelmKubeListPageSize } from '../kube-helm-list-types';
 import { createKubeAgeColumn } from '../kube-list.helper';
 import { KubernetesServicePortsComponent } from '../kubernetes-service-ports/kubernetes-service-ports.component';
@@ -78,7 +83,4 @@ export abstract class BaseKubernetesServicesListConfig implements ISimpleListCon
 }
 
 export class KubernetesServicesListConfig extends BaseKubernetesServicesListConfig {
-  constructor() {
-    super();
-  }
 }

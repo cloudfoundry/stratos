@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
-import { Observable, Subject, Subscription, takeUntil } from 'rxjs';
+import { ChangeDetectorRef, Component, type ElementRef, Input, type OnDestroy, type OnInit, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
+import { type Observable, Subject, type Subscription, takeUntil } from 'rxjs';
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
 
@@ -25,7 +25,7 @@ export class SshViewerComponent implements OnInit, OnDestroy {
   errorMessage: string;
 
   @Input()
-  sshStream!: Observable<any>;
+  sshStream!: Observable<unknown>;
 
   @Input()
   sshInput!: Subject<string>;
@@ -57,7 +57,7 @@ export class SshViewerComponent implements OnInit, OnDestroy {
 
     this.resizeSubscription = this.resizer.resizeEvent$
       .pipe(takeUntil(this.destroy$))
-      .subscribe(r => {
+      .subscribe(_r => {
         if (this.xtermFitAddon) {
           this.resize();
         }
@@ -110,7 +110,9 @@ export class SshViewerComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
 
     // Clear all pending timers
-    this.resizeTimers.forEach(timerId => clearTimeout(timerId));
+    this.resizeTimers.forEach(timerId => {
+      clearTimeout(timerId);
+    });
     this.resizeTimers = [];
 
     // Unsubscribe from all subscriptions
@@ -158,7 +160,7 @@ export class SshViewerComponent implements OnInit, OnDestroy {
             this.errorMessage = eMsg;
           }
         },
-        (err) => {
+        (_err) => {
           this.disconnect();
         },
         () => {

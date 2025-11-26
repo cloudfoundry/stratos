@@ -1,5 +1,6 @@
-import { BaseEntityRequestAction } from '../../entity-catalog/action-orchestrator/action-orchestrator';
-import { IStartRequestAction } from '../../types/request.types';
+import type { BaseRequestState } from '../../app-state';
+import type { BaseEntityRequestAction } from '../../entity-catalog/action-orchestrator/action-orchestrator';
+import type { IStartRequestAction } from '../../types/request.types';
 import { isNullOrUndefined } from '../../utils';
 import {
   getEntityRequestState,
@@ -8,7 +9,7 @@ import {
   setEntityRequestState,
 } from './request-helpers';
 
-export function startRequest(state: any, action: IStartRequestAction) {
+export function startRequest(state: BaseRequestState, action: IStartRequestAction): BaseRequestState {
   if (isNullOrUndefined(action.apiAction.guid)) {
     return state;
 

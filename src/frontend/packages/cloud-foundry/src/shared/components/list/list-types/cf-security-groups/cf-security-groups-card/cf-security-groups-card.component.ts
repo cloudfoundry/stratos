@@ -1,10 +1,10 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
+import { Component, type OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import {
   BooleanIndicatorComponent,
-  AppChip,
+  type AppChip,
   AppChipsComponent,
   CardCell,
   MetaCardComponent,
@@ -14,8 +14,8 @@ import {
   MetaCardValueComponent,
   MultilineTitleComponent
 } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { IRule, IRuleType, ISpace } from '../../../../../../cf-api.types';
+import type { APIResource } from '@stratosui/store';
+import { type IRule, IRuleType, type ISpace, type ISecurityGroup } from '../../../../../../cf-api.types';
 import { CloudFoundryEndpointService } from '../../../../../../features/cf/services/cloud-foundry-endpoint.service';
 
 @Component({
@@ -26,6 +26,7 @@ import { CloudFoundryEndpointService } from '../../../../../../features/cf/servi
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    DatePipe,
     RouterModule,
     MetaCardComponent,
     MetaCardTitleComponent,
@@ -37,7 +38,7 @@ import { CloudFoundryEndpointService } from '../../../../../../features/cf/servi
     AppChipsComponent,
   ]
 })
-export class CfSecurityGroupsCardComponent extends CardCell<APIResource<any>> implements OnInit {
+export class CfSecurityGroupsCardComponent extends CardCell<APIResource<ISecurityGroup>> implements OnInit {
 
   tags: AppChip<IRule>[] = [];
   private typeColors: Record<string, string> = {

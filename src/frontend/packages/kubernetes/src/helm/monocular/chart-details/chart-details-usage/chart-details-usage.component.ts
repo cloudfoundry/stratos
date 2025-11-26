@@ -1,12 +1,12 @@
 import { AsyncPipe } from '@angular/common';
-import {Component, Input, OnInit, ViewEncapsulation, inject, ChangeDetectionStrategy } from '@angular/core';
+import {Component, Input, type OnInit, ViewEncapsulation, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CustomTooltipDirective, MatIconRegistry } from '@stratosui/core';
 import { TailwindSnackBarService } from '@stratosui/core';
 import { DomSanitizer } from '@angular/platform-browser';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { EndpointsService } from '../../../../../../core/src/core/endpoints.service';
-import { Chart } from '../../shared/models/chart';
+import type { Chart } from '../../shared/models/chart';
 import { getMonocularEndpoint } from '../../stratos-monocular.helper';
 
 @Component({
@@ -17,7 +17,7 @@ import { getMonocularEndpoint } from '../../stratos-monocular.helper';
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [AsyncPipe, CustomTooltipDirective]
+  imports: [RouterLink, AsyncPipe, CustomTooltipDirective]
 })
 export class ChartDetailsUsageComponent implements OnInit {
   @Input() chart!: Chart;

@@ -1,4 +1,4 @@
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 
 export const SET_SERVICE_PLAN = '[Create SI] Set Plan';
 export const SET_ORG = '[Create SI] Set Org';
@@ -39,7 +39,7 @@ export class SetCreateServiceInstanceServiceGuid implements Action {
 }
 
 export class SetCreateServiceInstanceApp implements Action {
-  constructor(public appGuid: string = null, public params: {}) {
+  constructor(public appGuid: string = null, public params: Record<string, unknown>) {
   }
   type = SET_SERVICE_INSTANCE_APP;
 }
@@ -59,11 +59,9 @@ export class SetCreateServiceInstance implements Action {
 }
 
 export class ResetCreateServiceInstanceState implements Action {
-  constructor() { }
   type = RESET_CREATE_SERVICE_INSTANCE_STATE;
 }
 export class ResetCreateServiceInstanceOrgAndSpaceState implements Action {
-  constructor() { }
   type = RESET_CREATE_SERVICE_INSTANCE_STATE_ORG_SPACE;
 }
 export class SetCreateServiceInstanceCFDetails implements Action {

@@ -1,8 +1,8 @@
 import { compose } from '@ngrx/store';
 
-import { CurrentUserRolesAppState } from '../app-state';
-import { ICurrentUserRolesState, IStratosRolesState } from '../types/current-user-roles.types';
-import { UserScopeStrings } from '../types/endpoint.types';
+import type { CurrentUserRolesAppState } from '../app-state';
+import type { ICurrentUserRolesState, IStratosRolesState } from '../types/current-user-roles.types';
+import type { UserScopeStrings } from '../types/endpoint.types';
 
 export type PermissionValues = string;
 
@@ -12,7 +12,7 @@ const selectCurrentUserStratosRolesState = (state: ICurrentUserRolesState) => st
 
 const selectCurrentUserStratosRoles = (role: PermissionValues) => (state: Omit<IStratosRolesState, 'scopes'>) => {
   // Note - should not cover `scopes`
-  return (state as Record<string, any>)[role] || false;
+  return (state as Record<string, boolean | undefined>)[role] || false;
 };
 
 export const selectCurrentUserGlobalHasScopes = (scope: UserScopeStrings) => (scopes: UserScopeStrings[]) => scopes.includes(scope);

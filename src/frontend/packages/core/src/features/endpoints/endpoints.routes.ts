@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+import type { Routes } from '@angular/router';
 
 import { dynamicExtensionRoutesGuard } from '../../core/extension/dynamic-extension-routes';
 import { StratosActionType } from '../../core/extension/extension-service';

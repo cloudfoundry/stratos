@@ -1,11 +1,11 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, Output, EventEmitter, forwardRef, ViewChild, ElementRef, TemplateRef, ContentChildren, QueryList, AfterContentInit, AfterViewInit, HostListener, OnDestroy  } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, Output, EventEmitter, forwardRef, ViewChild, ElementRef, ContentChildren, QueryList, type AfterContentInit, type AfterViewInit, HostListener, type OnDestroy  } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 
 
 export interface MatSelectChange {
   source: CustomSelectComponent;
-  value: any;
+  value: unknown;
 }
 
 @Component({
@@ -16,7 +16,7 @@ export interface MatSelectChange {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomOptionComponent implements AfterViewInit {
-  @Input() value: any;
+  @Input() value: unknown;
   @Input() label?: string;
   @Input() disabled = false;
   @Input() selected = false;
@@ -38,7 +38,7 @@ export class CustomOptionComponent implements AfterViewInit {
   }
 
   get displayText(): string {
-    return this.label || this._displayText || this.value;
+    return this.label || this._displayText || String(this.value);
   }
 
   select(event?: MouseEvent) {
@@ -81,29 +81,33 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   @Input() autoSelectSingleOption = true; // Auto-select when only one option exists
 
   @Input()
-  get value(): any {
+  get value(): unknown {
     return this.multiple ? this.selectedValues : this.selectedValues[0];
   }
-  set value(val: any) {
+  set value(val: unknown) {
     this.writeValue(val);
   }
 
   @Output() selectionChange = new EventEmitter<MatSelectChange>();
-  @Output() valueChange = new EventEmitter<any>();
+  @Output() valueChange = new EventEmitter<unknown>();
 
   @ContentChildren(CustomOptionComponent) options: QueryList<CustomOptionComponent>;
   @ViewChild('selectTrigger', { static: true }) selectTrigger!: ElementRef;
   @ViewChild('selectOptions', { static: false }) selectOptions?: ElementRef;
 
   isOpen = false;
-  selectedValues: any[] = [];
+  selectedValues: unknown[] = [];
   displayValue = '';
   dropdownTop = '0px';
   dropdownLeft = '0px';
   dropdownWidth = '0px';
 
-  private _onChange = (value: any) => {};
-  private _onTouched = () => {};
+  private _onChange = (_value: unknown) => {
+    // ControlValueAccessor callback
+  };
+  private _onTouched = () => {
+    // ControlValueAccessor callback
+  };
   private _subscriptions: Subscription[] = [];
 
   constructor(private cdr: ChangeDetectorRef) {}
@@ -128,7 +132,9 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
 
   ngOnDestroy() {
     // Clean up subscriptions
-    this._subscriptions.forEach(sub => sub.unsubscribe());
+    this._subscriptions.forEach(sub => {
+      sub.unsubscribe();
+    });
   }
 
   private subscribeToOptions() {
@@ -214,9 +220,9 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
     } else {
       if (this.options) {
         const selectedOption = this.options.find(opt => opt.value === this.selectedValues[0]);
-        this.displayValue = selectedOption ? selectedOption.displayText : this.selectedValues[0];
+        this.displayValue = selectedOption ? selectedOption.displayText : (this.selectedValues[0] as string);
       } else {
-        this.displayValue = this.selectedValues[0];
+        this.displayValue = this.selectedValues[0] as string;
       }
     }
     this.cdr.markForCheck();
@@ -231,7 +237,7 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   }
 
   // ControlValueAccessor implementation
-  writeValue(value: any): void {
+  writeValue(value: unknown): void {
     if (this.multiple && Array.isArray(value)) {
       this.selectedValues = value || [];
     } else if (!this.multiple && value !== undefined && value !== null) {
@@ -243,11 +249,11 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
     this.updateOptions();
   }
 
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: (value: unknown) => void): void {
     this._onChange = fn;
   }
 
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn: () => void): void {
     this._onTouched = fn;
   }
 

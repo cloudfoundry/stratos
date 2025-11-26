@@ -1,7 +1,7 @@
-import { DataSource } from '@angular/cdk/table';
-import { Signal } from '@angular/core';
-import { Action } from '@ngrx/store';
-import {
+import type { DataSource } from '@angular/cdk/table';
+import type { Signal } from '@angular/core';
+import type { Action } from '@ngrx/store';
+import type {
   IRequestEntityTypeState,
   MetricsAction,
   EntitySchema,
@@ -12,7 +12,7 @@ import {
   ListSort,
   EntityCatalogEntityConfig,
 } from '@stratosui/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 export interface IEntitySelectItem {
   page: number;
@@ -158,7 +158,7 @@ export interface RowState {
   deleting?: boolean;
   warning?: boolean;
   disabled?: boolean;
-  [customState: string]: any;
+  [customState: string]: unknown;
 }
 
 export const getDefaultRowState = (): RowState => ({

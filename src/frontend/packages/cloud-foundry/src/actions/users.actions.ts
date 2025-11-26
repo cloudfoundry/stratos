@@ -1,18 +1,18 @@
 import { HttpRequest } from '@angular/common/http';
 
 import { getActions } from '../../../store/src/actions/action.helper';
-import { EntitySchema } from '../../../store/src/helpers/entity-schema';
+import type { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import { endpointEntityType } from '../../../store/src/helpers/stratos-entity-factory';
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { EntityRequestAction } from '../../../store/src/types/request.types';
+import type { PaginatedAction } from '../../../store/src/types/pagination.types';
+import type { EntityRequestAction } from '../../../store/src/types/request.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../cf-entity-types';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
-  EntityInlineParentAction,
+  type EntityInlineParentAction,
 } from '../entity-relations/entity-relations.types';
-import { CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../store/types/cf-user.types';
+import { CfUserRoleParams, type OrgUserRoleNames, type SpaceUserRoleNames } from '../store/types/cf-user.types';
 import { CFStartAction } from './cf-action.types';
 
 export const GET_ALL_CF_USERS = '[Users] Get all';
@@ -60,7 +60,7 @@ export class GetAllCfUsersAsAdmin extends CFStartAction implements PaginatedActi
   actions = [GET_ALL_CF_USERS, GET_ALL_CF_USERS_SUCCESS, GET_ALL_CF_USERS_FAILED];
   entity = [cfEntityFactory(cfUserEntityType)];
   entityType = cfUserEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   initialParams = {
     page: 1,
     'results-per-page': 100,
@@ -69,8 +69,8 @@ export class GetAllCfUsersAsAdmin extends CFStartAction implements PaginatedActi
   };
   flattenPagination = true;
   flattenPaginationMax = true;
-  static is(action: any): boolean {
-    return !!action.isGetAllUsersAsAdmin;
+  static is(action: unknown): boolean {
+    return !!(action as { isGetAllUsersAsAdmin?: boolean }).isGetAllUsersAsAdmin;
   }
 }
 
@@ -122,10 +122,10 @@ export class ChangeCfUserRole extends CFStartAction implements EntityRequestActi
   guid: string;
   entity: EntitySchema;
   entityType: string;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   updatingKey: string;
 
-  static generateUpdatingKey<T>(permissionType: OrgUserRoleNames | SpaceUserRoleNames, userGuid: string) {
+  static generateUpdatingKey<_T>(permissionType: OrgUserRoleNames | SpaceUserRoleNames, userGuid: string) {
     return `${permissionType}/${userGuid}`;
   }
 
@@ -225,13 +225,13 @@ export class GetCfUser extends CFStartAction {
     super();
     this.options = new HttpRequest(
       'GET',
-      'users/' + guid
+      `users/${guid}`
     );
   }
   actions = getActions('Users', 'Fetch User');
   entity = [cfEntityFactory(cfUserEntityType)];
   entityType = cfUserEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
 }
 
 

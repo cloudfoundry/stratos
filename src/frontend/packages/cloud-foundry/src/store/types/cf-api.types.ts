@@ -1,24 +1,24 @@
-import { APIResource } from '../../../../store/src/types/api.types';
+import type { APIResource } from '../../../../store/src/types/api.types';
 
 
-export function createEmptyCfResponse<T = any>(): CFResponse<T> {
+export function createEmptyCfResponse<T = unknown>(): CFResponse<T> {
   return {
     total_results: 0,
     total_pages: 0,
     prev_url: '',
     next_url: '',
-    resources: new Array<APIResource<T>>()
+    resources: [] as APIResource<T>[]
   };
 }
 
-export interface CfAPIResource<T = any> extends APIResource {
+export interface CfAPIResource<_T = unknown> extends APIResource {
   entity: {
-    [entityKey: string]: any,
+    [entityKey: string]: unknown,
     cfGuid: string
   };
 }
 
-export interface PaginationResponse<T = any> {
+export interface PaginationResponse<T = unknown> {
   total_results: number;
   total_pages: number;
   prev_url: string;
@@ -26,5 +26,5 @@ export interface PaginationResponse<T = any> {
   resources: T[];
 }
 
-export interface CFResponse<T = any> extends PaginationResponse<APIResource<T>> {
+export interface CFResponse<T = unknown> extends PaginationResponse<APIResource<T>> {
 }

@@ -1,14 +1,15 @@
 import { format } from 'date-fns';
 
-import { UtilsService, AnsiColorizer } from '@stratosui/core';
-import { FireHoseItem, HTTP_METHODS } from './cloud-foundry-firehose.types';
+import { type UtilsService, AnsiColorizer } from '@stratosui/core';
+import { type FireHoseItem, HTTP_METHODS } from './cloud-foundry-firehose.types';
 
 /**
  * Formats log messages from the Cloud Foundry firehose
  */
 
 /* eslint-disable no-control-regex */
-const ANSI_ESCAPE_MATCHER = new RegExp('\x1B\\[([0-9;]*)m', 'g');
+// biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape sequence matcher requires control characters
+const ANSI_ESCAPE_MATCHER = /\x1B\[([0-9;]*)m/g;
 /* eslint-enable no-control-regex */
 
 // Format the messages from the Cloud Foundry firehose
@@ -31,7 +32,9 @@ export class CloudFoundryFirehoseFormatter {
 
   // Enable or disable all filters
   public showAll(all: boolean) {
-    Object.keys(this.hoseFilters).forEach((filter: keyof typeof this.hoseFilters) => this.hoseFilters[filter] = all);
+    Object.keys(this.hoseFilters).forEach((filter: keyof typeof this.hoseFilters) => {
+      this.hoseFilters[filter] = all;
+    });
   }
 
   /**
@@ -63,8 +66,8 @@ export class CloudFoundryFirehoseFormatter {
         default:
           filtered = this.handleOtherEvent(jsonString);
       }
-    } catch (error) {
-      console.error('Failed to filter jsonMessage from WebSocket: ' + jsonString);
+    } catch (_error) {
+      console.error(`Failed to filter jsonMessage from WebSocket: ${jsonString}`);
       filtered = jsonString;
     }
 
@@ -73,7 +76,7 @@ export class CloudFoundryFirehoseFormatter {
 
   private buildOriginString(cfEvent: FireHoseItem, colour: string, bold?: boolean) {
     return this.buildTimestampString(cfEvent) + ': ' +
-      this.colorizer.colorize('[' + cfEvent.deployment + '/' + cfEvent.origin + '/' + cfEvent.job + ']', colour, bold);
+      this.colorizer.colorize(`[${cfEvent.deployment}/${cfEvent.origin}/${cfEvent.job}]`, colour, bold);
   }
 
   private buildTimestampString(cfEvent: FireHoseItem) {
@@ -112,7 +115,7 @@ export class CloudFoundryFirehoseFormatter {
       ', Content-Length: ' + this.colorizer.colorize(this.utils.bytesToHumanSize(httpStartStop.contentLength.toString()), 'green') +
       ', User-Agent: ' + this.colorizer.colorize(httpStartStop.userAgent, 'green') +
       ', Remote-Address: ' + this.colorizer.colorize(httpStartStop.remoteAddress, 'green') + '\n';
-    return this.buildOriginString(cfEvent, 'magenta') + ' ' + httpEventString;
+    return `${this.buildOriginString(cfEvent, 'magenta')} ${httpEventString}`;
   }
 
   handleAppLog(cfEvent: FireHoseItem): string {
@@ -120,13 +123,13 @@ export class CloudFoundryFirehoseFormatter {
       return '';
     }
     const message = cfEvent.logMessage;
-    let colour;
+    let colour: string | undefined;
     if (message.message_type === 2) {
       colour = 'red';
     }
-    const messageSource = this.colorizer.colorize('[' + message.source_type + '.' + message.source_instance + ']', 'green', true);
-    const messageString = this.colorizer.colorize(atob(message.message), colour, false) + '\n';
-    return this.buildOriginString(cfEvent, 'green') + ' ' + messageSource + ' ' + messageString;
+    const messageSource = this.colorizer.colorize(`[${message.source_type}.${message.source_instance}]`, 'green', true);
+    const messageString = `${this.colorizer.colorize(atob(message.message), colour, false)}\n`;
+    return `${this.buildOriginString(cfEvent, 'green')} ${messageSource} ${messageString}`;
   }
 
   handleMetricEvent(cfEvent: FireHoseItem): string {
@@ -135,8 +138,8 @@ export class CloudFoundryFirehoseFormatter {
     }
     const valueMetric = cfEvent.valueMetric;
     const valueMetricString = this.emphasizeName(valueMetric.name, 'blue') + ': ' +
-      this.colorizer.colorize(valueMetric.value + ' ' + valueMetric.unit, 'green', true) + '\n';
-    return this.buildOriginString(cfEvent, 'blue') + ' ' + valueMetricString;
+      this.colorizer.colorize(`${valueMetric.value} ${valueMetric.unit}`, 'green', true) + '\n';
+    return `${this.buildOriginString(cfEvent, 'blue')} ${valueMetricString}`;
   }
 
   handleCounterEvent(cfEvent: FireHoseItem): string {
@@ -154,7 +157,7 @@ export class CloudFoundryFirehoseFormatter {
     const counterEventString = this.emphasizeName(counterEvent.name, 'yellow') +
       ': delta = ' + this.colorizer.colorize(delta, 'green', true) +
       ', total = ' + this.colorizer.colorize(total, 'green', true) + '\n';
-    return this.buildOriginString(cfEvent, 'yellow') + ' ' + counterEventString;
+    return `${this.buildOriginString(cfEvent, 'yellow')} ${counterEventString}`;
   }
 
   handleContainerMetricsEvent(cfEvent: FireHoseItem): string {
@@ -164,13 +167,13 @@ export class CloudFoundryFirehoseFormatter {
     const containerMetric = cfEvent.containerMetric;
     const metricString = 'App: ' + containerMetric.applicationId + '/' + containerMetric.instanceIndex +
       ' ' + this.colorizer.colorize('[', 'cyan', true) + this.colorizer.colorize('CPU: ', 'cyan', true) +
-      this.colorizer.colorize(Math.round(containerMetric.cpuPercentage * 100) + '%', 'green', true) +
+      this.colorizer.colorize(`${Math.round(containerMetric.cpuPercentage * 100)}%`, 'green', true) +
       ', ' + this.colorizer.colorize('Memory: ', 'cyan', true) +
       this.colorizer.colorize(this.utils.bytesToHumanSize(containerMetric.memoryBytes.toString()), 'green', true) +
       ', ' + this.colorizer.colorize('Disk: ', 'cyan', true) +
       this.colorizer.colorize(this.utils.bytesToHumanSize(containerMetric.diskBytes.toString()), 'green', true) +
       this.colorizer.colorize(']', 'cyan', true);
-    return this.buildOriginString(cfEvent, 'cyan') + ' ' + metricString + '\n';
+    return `${this.buildOriginString(cfEvent, 'cyan')} ${metricString}\n`;
   }
 
   handleErrorEvent(cfEvent: FireHoseItem): string {
@@ -181,7 +184,7 @@ export class CloudFoundryFirehoseFormatter {
     const errorString = 'ERROR: Source: ' + this.colorizer.colorize(errorObj.source, 'red', true) +
       ', Code: ' + this.colorizer.colorize(errorObj.code.toString(), 'red', true) +
       ', Message: ' + this.colorizer.colorize(errorObj.message, 'red', true);
-    return this.buildOriginString(cfEvent, 'red', true) + ' ' + errorString + '\n';
+    return `${this.buildOriginString(cfEvent, 'red', true)} ${errorString}\n`;
   }
 
   handleOtherEvent(jsonString: string): string {

@@ -1,10 +1,10 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { marked } from 'marked';
-import { Observable, of as observableOf } from 'rxjs';
+import { type Observable, of as observableOf } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
-import { ChartVersion } from '../../shared/models/chart-version';
+import type { ChartVersion } from '../../shared/models/chart-version';
 import { ChartsService } from '../../shared/services/charts.service';
 import { LoaderComponent } from '../../loader/loader.component';
 
@@ -35,8 +35,10 @@ export class ChartDetailsReadmeComponent {
 
   constructor() {
     this.renderer.link = ({ href, title, text }) => `<a target="_blank" title="${title}" href="${href}">${text}</a>`;
-    this.renderer.code = ({ text, lang, escaped }: { text: string; lang?: string; escaped?: boolean }) => `<code>${text}</code>`;
-    this.loadingDelay = setTimeout(() => this.loading = true, 100);
+    this.renderer.code = ({ text }: { text: string; lang?: string; escaped?: boolean }) => `<code>${text}</code>`;
+    this.loadingDelay = setTimeout(() => {
+      this.loading = true;
+    }, 100);
   }
 
   // TODO: See #150 - This should not require loading the specific version and then the readme

@@ -1,15 +1,11 @@
-import { Store } from '@ngrx/store';
+import type { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
-
-import {
-  ListDataSource,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { AppState } from '../../../../../../../store/src/app-state';
+import { ListDataSource, type IListConfig } from '@stratosui/core';
+import type { AppState } from '../../../../../../../store/src/app-state';
 import { GitEntitySchema } from '../../../../../store/git-entity-factory';
 import { gitEntityCatalog } from '../../../../../store/git-entity-generator';
-import { GitCommit } from '../../../../../store/git.public-types';
-import { GitMeta, GitSCM } from '../../../../scm/scm';
+import type { GitCommit } from '../../../../../store/git.public-types';
+import type { GitMeta, GitSCM } from '../../../../scm/scm';
 
 
 export class GithubCommitsDataSource extends ListDataSource<GitCommit> {

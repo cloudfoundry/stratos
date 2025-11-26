@@ -1,6 +1,6 @@
-import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit , ChangeDetectionStrategy } from '@angular/core';
-import { Observable } from 'rxjs';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { Component, Input, type OnInit , ChangeDetectionStrategy } from '@angular/core';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { cfEntityCatalog } from '../../../cf-entity-catalog';

@@ -1,10 +1,10 @@
 import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 import { of as observableOf } from 'rxjs';
 
-import { AppChip, AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { IServiceInstance, IUserProvidedServiceInstance } from '../../../../../../cf-api-svc.types';
+import { type AppChip, AppChipsComponent } from '@stratosui/core';
+import { TableCellCustom } from '@stratosui/core';
+import type { APIResource } from '../../../../../../../../store/src/types/api.types';
+import type { IServiceInstance, IUserProvidedServiceInstance } from '../../../../../../cf-api-svc.types';
 
 function isUserProvidedServiceInstance(
   entity: IServiceInstance | IUserProvidedServiceInstance
@@ -30,7 +30,7 @@ export class TableCellServiceInstanceTagsComponent
   @Input('row')
   override set row(row: APIResource<IServiceInstance> | APIResource<IUserProvidedServiceInstance>) {
     this.pRow = row;
-    if (row && row.entity) {
+    if (row?.entity) {
       this.tags.length = 0;
       // Only user-provided service instances have tags
       if (isUserProvidedServiceInstance(row.entity) && row.entity.tags) {

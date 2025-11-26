@@ -1,11 +1,11 @@
-import { HttpRequest } from '@angular/common/http';
+import type { HttpRequest } from '@angular/common/http';
 
 import { applicationEntityType } from '../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { ApiRequestTypes } from '../../../store/src/reducers/api-request-reducer/request-helpers';
-import { PaginatedAction, PaginationParam } from '../../../store/src/types/pagination.types';
-import { EntityRequestAction } from '../../../store/src/types/request.types';
-import { AppAutoscalerCredential, AppAutoscalerPolicyLocal, AppScalingTrigger } from './app-autoscaler.types';
+import type { ApiRequestTypes } from '../../../store/src/reducers/api-request-reducer/request-helpers';
+import type { PaginatedAction, PaginationParam } from '../../../store/src/types/pagination.types';
+import type { EntityRequestAction } from '../../../store/src/types/request.types';
+import type { AppAutoscalerCredential, AppAutoscalerPolicyLocal, AppScalingTrigger } from './app-autoscaler.types';
 import {
   appAutoscalerAppMetricEntityType,
   appAutoscalerCredentialEntityType,
@@ -142,7 +142,7 @@ export class GetAppAutoscalerPolicyTriggerAction implements PaginatedAction {
   entity = [autoscalerEntityFactory(appAutoscalerPolicyTriggerEntityType)];
   entityType = appAutoscalerPolicyTriggerEntityType;
   endpointType = AUTOSCALER_ENDPOINT_TYPE;
-  options!: HttpRequest<any>;
+  options!: HttpRequest<unknown>;
   query: AutoscalerQuery = {
     metric: 'policy'
   };
@@ -187,7 +187,7 @@ export class GetAppAutoscalerScalingHistoryAction implements PaginatedAction {
   entity = [autoscalerEntityFactory(appAutoscalerScalingHistoryEntityType)];
   entityType = appAutoscalerScalingHistoryEntityType;
   endpointType = AUTOSCALER_ENDPOINT_TYPE;
-  options!: HttpRequest<any>;
+  options!: HttpRequest<unknown>;
   initialParams: AutoscalerPaginationParams = {
     'order-direction-field': GetAppAutoscalerScalingHistoryAction.sortField,
     'order-direction': 'desc',

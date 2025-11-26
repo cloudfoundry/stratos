@@ -1,19 +1,19 @@
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 
 import {
   CONNECT_ENDPOINTS_SUCCESS,
   DISCONNECT_ENDPOINTS_SUCCESS,
-  DisconnectEndpoint,
+  type DisconnectEndpoint,
   UNREGISTER_ENDPOINTS_SUCCESS,
 } from '../actions/endpoint.actions';
-import { SendClearEndpointEventsAction, SendClearEventAction, SendEventAction } from '../actions/internal-events.actions';
+import type { SendClearEndpointEventsAction, SendClearEventAction, SendEventAction } from '../actions/internal-events.actions';
 import { endpointEntityType } from '../helpers/stratos-entity-factory';
 import {
   CLEAR_ENDPOINT_ERROR_EVENTS,
   CLEAR_EVENTS,
   GLOBAL_EVENT,
-  InternalEventsState,
-  InternalEventState,
+  type InternalEventsState,
+  type InternalEventState,
   SEND_EVENT,
 } from '../types/internal-events.types';
 import { UPDATE_ENDPOINT_SUCCESS } from './../actions/endpoint.actions';

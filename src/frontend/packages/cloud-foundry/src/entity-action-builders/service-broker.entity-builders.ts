@@ -1,17 +1,17 @@
-import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
+import type { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { GetServiceBroker, GetServiceBrokers } from '../actions/service-broker.actions';
-import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
+import type { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
 export interface ServiceBrokerActionBuilders extends OrchestratedActionBuilders {
   get: (
     guid: string,
     endpointGuid: string,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
   ) => GetServiceBroker;
   getMultiple: (
     endpointGuid: string,
     paginationKey: string,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
   ) => GetServiceBrokers;
 }
 

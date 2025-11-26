@@ -2,14 +2,14 @@ import { Store } from '@ngrx/store';
 
 import {
   BaseEndpointsDataSource,
-  syncPaginationSection,
-} from '../../../../../core/src/shared/components/list/list-types/endpoint/base-endpoints-data-source';
-import { IListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
+  type IListConfig,
+  syncPaginationSection
+} from '@stratosui/core';
 import { GetAllEndpoints } from '../../../../../store/src/actions/endpoint.actions';
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
-import { InternalEventMonitorFactory } from '../../../../../store/src/monitors/internal-event-monitor.factory';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { AppState, EndpointModel } from '../../../../../store/src/public-api';
+import type { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
+import type { InternalEventMonitorFactory } from '../../../../../store/src/monitors/internal-event-monitor.factory';
+import type { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
+import type { AppState, EndpointModel } from '../../../../../store/src/public-api';
 
 export class KubernetesEndpointsDataSource extends BaseEndpointsDataSource {
 

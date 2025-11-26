@@ -1,5 +1,5 @@
-import { OrchestratedActionBuilders } from '../../../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
-import { HelmUpgradeValues } from '../../../helm/store/helm.types';
+import type { OrchestratedActionBuilders } from '../../../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
+import type { HelmUpgradeValues } from '../../../helm/store/helm.types';
 import {
   GetHelmRelease,
   GetHelmReleaseGraph,

@@ -1,25 +1,26 @@
-import { signal, WritableSignal } from '@angular/core';
+import { signal, type WritableSignal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { format, formatDistance } from 'date-fns';
-import { Observable, of } from 'rxjs';
+import { type Observable, of } from 'rxjs';
 import { first } from 'rxjs/operators';
 
-import { ListDataSource } from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
+import type { ListDataSource } from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import {
   TableCellRadioComponent,
 } from '../../../../../core/src/shared/components/list/list-table/table-cell-radio/table-cell-radio.component';
-import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
+import type { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
 import {
   defaultPaginationPageSizeOptionsTable,
-  IGlobalListAction,
-  IListAction,
-  IListConfig,
-  IListMultiFilterConfig,
-  IMultiListAction,
+  type IGlobalListAction,
+  type IListAction,
+  type IListConfig,
+  type IListMultiFilterConfig,
+  type IMultiListAction,
   ListViewTypes,
 } from '../../../../../core/src/shared/components/list/list.component.types';
-import { MonocularVersion } from '../../../helm/store/helm.types';
+import type { AppState } from '../../../../../store/src/public-api';
+import type { MonocularVersion } from '../../../helm/store/helm.types';
 import { HelmReleaseVersionsDataSource } from './release-version-data-source';
 
 const typeFilterKey = 'versionType';
@@ -56,9 +57,9 @@ export class ReleaseUpgradeVersionsListConfig implements IListConfig<MonocularVe
 
   private multiFiltersConfigs: IListMultiFilterConfig[];
 
-  getGlobalActions: () => IGlobalListAction<any>[];
-  getMultiActions: () => IMultiListAction<any>[];
-  getSingleActions: () => IListAction<any>[];
+  getGlobalActions: () => IGlobalListAction<MonocularVersion>[];
+  getMultiActions: () => IMultiListAction<MonocularVersion>[];
+  getSingleActions: () => IListAction<MonocularVersion>[];
 
   columns: Array<ITableColumn<MonocularVersion>> = [
     {
@@ -104,7 +105,7 @@ export class ReleaseUpgradeVersionsListConfig implements IListConfig<MonocularVe
   getDataSource = () => this.versionsDataSource;
 
   constructor(
-    store: Store<any>,
+    store: Store<AppState>,
     repoName: string,
     chartName: string,
     version: string,
@@ -134,7 +135,7 @@ export class ReleaseUpgradeVersionsListConfig implements IListConfig<MonocularVe
         }
       ]),
       loading$: of(false),
-      select: createSignalWrapper<any>(undefined)
+      select: createSignalWrapper<string | undefined>(undefined)
     }];
 
     // Auto-select first non-development version

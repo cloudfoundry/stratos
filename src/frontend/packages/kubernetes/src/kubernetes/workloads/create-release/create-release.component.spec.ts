@@ -1,10 +1,10 @@
-import { HTTP_INTERCEPTORS, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, type HttpEvent, type HttpHandler, type HttpInterceptor, type HttpRequest, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA, provideZonelessChangeDetection } from '@angular/core';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute, provideRouter } from '@angular/router';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 import { AppTestModule } from '../../../../../core/test-framework/core-test.helper';
@@ -20,14 +20,14 @@ import { CreateReleaseComponent } from './create-release.component';
 
 // Mock HTTP Interceptor for testing
 class MockHttpInterceptor implements HttpInterceptor {
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+  intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     return next.handle(req);
   }
 }
 
 // Mock ChartValuesEditorComponent to avoid injection context issues
 import { Component, Input } from '@angular/core';
-import { ChartValuesConfig } from '../chart-values-editor/chart-values-editor.component';
+import type { ChartValuesConfig } from '../chart-values-editor/chart-values-editor.component';
 
 @Component({
   selector: 'app-chart-values-editor',

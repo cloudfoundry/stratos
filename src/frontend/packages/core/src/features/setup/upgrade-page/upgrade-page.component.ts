@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component  } from '@angular/core';
 
 import { IntroScreenComponent } from '../../../shared/components/intro-screen/intro-screen.component';
 import { StratosTitleComponent } from '../../../shared/components/stratos-title/stratos-title.component';
-import { ProductNameComponent } from '../../../shared/components/product-name.ccomponent';
+import { ProductNameComponent } from '../../../shared/components/product-name.component';
 
 @Component({
   selector: 'app-upgrade-page',
@@ -17,7 +17,5 @@ import { ProductNameComponent } from '../../../shared/components/product-name.cc
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UpgradePageComponent {
-
-  constructor() { }
 
 }

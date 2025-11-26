@@ -1,6 +1,6 @@
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
-import { DataFunction, DataFunctionDefinition } from '../data-sources-controllers/list-data-source';
+import type { DataFunction, DataFunctionDefinition } from '../data-sources-controllers/list-data-source';
 
 export interface ICellAsyncValue {
   pathToObs: string;
@@ -21,16 +21,16 @@ export interface ICellDefinition<T> {
   // Automatically turns the cell into a link
   getLink?: (row: T, schemaKey?: string) => string;
   // Used in conjunction with asyncValue
-  getAsyncLink?: (value: any, schemaKey?: string) => string;
+  getAsyncLink?: (value: unknown, schemaKey?: string) => string;
   newTab?: boolean;
   asyncValue?: ICellAsyncValue;
   showShortLink?: boolean;
 }
 
-export type CellConfigFunction<T> = (row: T) => any;
+export type CellConfigFunction<T> = (row: T) => unknown;
 export interface ITableColumn<T> {
   columnId: string;
-  cellComponent?: any;
+  cellComponent?: unknown;
   cellDefinition?: ICellDefinition<T>; // This takes president over cellComponent
   /**
    * Configuration object or function for custom cell components.
@@ -86,7 +86,7 @@ export interface ITableColumn<T> {
    */
   cellConfig?: object | CellConfigFunction<T>;
   headerCell?: () => string; // Either headerCell OR headerCellComponent should be defined
-  headerCellComponent?: any;
+  headerCellComponent?: unknown;
   /**
    * Has to be a known class in table.component.scss
    */

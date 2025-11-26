@@ -1,7 +1,7 @@
 
-import { AfterContentInit, ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { type AfterContentInit, ChangeDetectionStrategy, Component, EventEmitter, Input, type OnDestroy, type OnInit, Output } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormControl, FormGroup } from '@angular/forms';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject, type Subscription } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import {
   CustomFormFieldComponent,
@@ -9,7 +9,9 @@ import {
   ShowOnDirtyErrorStateMatcher,
   TailwindJsonSchemaFormModule,
   safeStringToObj,
-  isValidJsonValidator
+  isValidJsonValidator,
+  AppInputDirective,
+  AppErrorComponent
 } from '@stratosui/core';
 
 interface SchemaJsonForm {
@@ -18,7 +20,7 @@ interface SchemaJsonForm {
 
 // Simple JsonPointer replacement
 class JsonPointer {
-  static parse(path: any): string[] {
+  static parse(path: unknown): string[] {
     if (!path) return [];
     const pathStr = path.toString();
     if (pathStr === '') return [];
@@ -47,8 +49,10 @@ export class SchemaFormConfig {
     FormsModule,
     ReactiveFormsModule,
     CustomFormFieldComponent,
-    TailwindJsonSchemaFormModule
-],
+    TailwindJsonSchemaFormModule,
+    AppInputDirective,
+    AppErrorComponent
+  ],
   providers: [
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
   ]
@@ -119,7 +123,9 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
   }
 
   ngOnDestroy() {
-    this.subs.forEach(sub => sub.unsubscribe());
+    for (const sub of this.subs) {
+      sub.unsubscribe();
+    }
   }
 
   onSchemaViewChanged() {
@@ -143,12 +149,13 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
     return !this.jsonForm.controls.json.value || this.jsonForm.controls.json.valid;
   }
 
-  private filterSchema = (schema?: { [key: string]: any }): { [key: string]: any } | null | undefined => {
+  private filterSchema = (schema?: object): { [key: string]: unknown } | null | undefined => {
     if (!schema) {
       return;
     }
-    const filterSchema = Object.keys(schema).reduce((obj: { [key: string]: any }, key) => {
-      if (key !== '$schema') { obj[key] = schema[key]; }
+    const typedSchema = schema as { [key: string]: unknown };
+    const filterSchema = Object.keys(typedSchema).reduce((obj: { [key: string]: unknown }, key) => {
+      if (key !== '$schema') { obj[key] = typedSchema[key]; }
       return obj;
     }, {});
     return Object.keys(filterSchema).length > 0 ? filterSchema : null;

@@ -1,47 +1,48 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { Component, type OnDestroy, type OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Store } from '@ngrx/store'
+import type { GeneralEntityAppState } from '@stratosui/store';;
+import { combineLatest as observableCombineLatest, type Observable, of as observableOf, type Subscription } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
+import type { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { spaceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
-import { ISpaceFavMetadata } from '../../../../../../../../cloud-foundry/src/cf-metadata-types';
+import type { ISpaceFavMetadata } from '../../../../../../../../cloud-foundry/src/cf-metadata-types';
 import {
   CurrentUserPermissionsService,
-} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { InfinityPipe } from '../../../../../../../../core/src/core/infinity.pipe';
-import { MbToHumanSizePipe } from '../../../../../../../../core/src/shared/pipes/mb-to-human-size.pipe';
-import { truthyIncludingZeroString } from '../../../../../../../../core/src/core/utils.service';
-import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
+} from '@stratosui/core';
+import { InfinityPipe } from '@stratosui/core';
+import { MbToHumanSizePipe } from '@stratosui/core';
+import { truthyIncludingZeroString } from '@stratosui/core';
+import { ConfirmationDialogConfig } from '@stratosui/core';
+import { ConfirmationDialogService } from '@stratosui/core';
+import { CardCell } from '@stratosui/core';
 import {
   MetaCardComponent,
-} from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
+} from '@stratosui/core';
 import {
   MetaCardItemComponent,
-} from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
+} from '@stratosui/core';
 import {
   MetaCardKeyComponent,
-} from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
+} from '@stratosui/core';
 import {
   MetaCardTitleComponent,
-} from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
+} from '@stratosui/core';
 import {
   MetaCardValueComponent,
-} from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
-import { MultilineTitleComponent } from '../../../../../../../../core/src/shared/components/multiline-title/multiline-title.component';
+} from '@stratosui/core';
+import { MultilineTitleComponent } from '@stratosui/core';
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { EndpointUser } from '../../../../../../../../store/src/types/endpoint.types';
-import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
-import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../store/src/types/shared.types';
-import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
+import type { APIResource } from '../../../../../../../../store/src/types/api.types';
+import type { EndpointUser } from '../../../../../../../../store/src/types/endpoint.types';
+import type { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
+import { ComponentEntityMonitorConfig, type StratosStatus } from '../../../../../../../../store/src/types/shared.types';
+import type { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
-import { IApp, ISpace } from '../../../../../../cf-api.types';
+import type { IApp, ISpace } from '../../../../../../cf-api.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { getStartedAppInstanceCount } from '../../../../../../cf.helpers';
@@ -63,6 +64,7 @@ import { CfUserService } from '../../../../../data-services/cf-user.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    AsyncPipe,
     MetaCardComponent,
     MetaCardItemComponent,
     MetaCardKeyComponent,
@@ -93,7 +95,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
   constructor(
     private cfUserService: CfUserService,
     public cfEndpointService: CloudFoundryEndpointService,
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     private cfOrgService: CloudFoundryOrganizationService,
     private currentUserPermissionsService: CurrentUserPermissionsService,
     private confirmDialog: ConfirmationDialogService,
@@ -187,7 +189,9 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
   }
 
   ngOnDestroy() {
-    this.subscriptions.forEach(p => p.unsubscribe());
+    for (const sub of this.subscriptions) {
+      sub.unsubscribe();
+    }
   }
 
   edit = () => {

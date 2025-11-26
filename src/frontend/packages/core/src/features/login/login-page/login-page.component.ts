@@ -1,12 +1,12 @@
-import { Component, OnInit, ChangeDetectionStrategy, computed, ApplicationRef } from '@angular/core';
+import { Component, type OnInit, ChangeDetectionStrategy, computed, ApplicationRef, inject } from '@angular/core';
 import { NgForm, FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { AsyncPipe, CommonModule, NgClass, NgStyle } from '@angular/common';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Actions, ofType } from '@ngrx/effects';
-import { InternalAppState, RouterRedirect, Login, VerifySession, AuthState } from '@stratosui/store';
+import { type InternalAppState, type RouterRedirect, Login, VerifySession, type AuthState } from '@stratosui/store';
 import { LOGIN_SUCCESS } from '../../../../../store/src/actions/auth.actions';
-import { Observable, combineLatest, BehaviorSubject } from 'rxjs';
+import { type Observable, combineLatest, BehaviorSubject } from 'rxjs';
 import { map, startWith, distinctUntilChanged, shareReplay, filter, tap, switchMap, take } from 'rxjs/operators';
 import { StratosThemeService } from '../../../../../theme/theme.service';
 
@@ -22,12 +22,22 @@ import { ShowHideButtonComponent } from '../../../core/show-hide-button/show-hid
   imports: [
     CommonModule,
     FormsModule,
+    AsyncPipe,
+    NgClass,
+    NgStyle,
     IntroScreenComponent,
     ShowHideButtonComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoginPageComponent implements OnInit {
+
+  // Dependency injection - MUST be first
+  private store = inject(Store<Pick<InternalAppState, 'endpoints' | 'auth'>>);
+  private themeService = inject(StratosThemeService);
+  private router = inject(Router);
+  private actions$ = inject(Actions);
+  private appRef = inject(ApplicationRef);
 
   // Theme-related signals
   public loginBackground = computed(() => {
@@ -119,7 +129,7 @@ export class LoginPageComponent implements OnInit {
   );
 
   readonly ssoLogin$ = this.auth$.pipe(
-    map(auth => !!(auth.sessionData && auth.sessionData.ssoOptions)),
+    map(auth => !!(auth.sessionData?.ssoOptions)),
     distinctUntilChanged()
   );
 
@@ -144,7 +154,7 @@ export class LoginPageComponent implements OnInit {
       }
 
       if (auth.error && (!auth.sessionData || !auth.sessionData.valid) &&
-          !(auth.sessionData && auth.sessionData.ssoOptions)) {
+          !(auth.sessionData?.ssoOptions)) {
         return this.getErrorMessage(auth);
       }
 
@@ -154,7 +164,9 @@ export class LoginPageComponent implements OnInit {
 
       return '';
     }),
-    tap(msg => this.message = msg),
+    tap(msg => {
+      this.message = msg;
+    }),
     distinctUntilChanged()
   );
 
@@ -176,13 +188,7 @@ export class LoginPageComponent implements OnInit {
     this.redirectAttemptsSubject$.next(0);
   }
 
-  constructor(
-    private store: Store<Pick<InternalAppState, 'endpoints' | 'auth'>>,
-    private themeService: StratosThemeService,
-    private router: Router,
-    private actions$: Actions,
-    private appRef: ApplicationRef
-  ) {}
+  constructor() {}
 
   ngOnInit() {
     // Initialize the BehaviorSubject with current value
@@ -298,10 +304,10 @@ export class LoginPageComponent implements OnInit {
 
       // Success! Clear attempts since we successfully redirected
       this.clearRedirectAttempts();
-    } catch (error) {
+    } catch (_error) {
       // Hard redirect as fallback
       const queryString = Object.keys(queryParams).length > 0
-        ? '?' + Object.entries(queryParams).map(([k, v]) => `${k}=${encodeURIComponent(v as string)}`).join('&')
+        ? `?${Object.entries(queryParams).map(([k, v]) => `${k}=${encodeURIComponent(v as string)}`).join('&')}`
         : '';
       window.location.href = targetPath + queryString;
     }
@@ -315,7 +321,7 @@ export class LoginPageComponent implements OnInit {
       tap((auth): void => {
         const redirect: RouterRedirect = auth.redirect;
         const returnUrl = this.formSSOredirectURL(redirect);
-        window.open('/pp/v1/auth/sso_login?state=' + encodeURIComponent(returnUrl), '_self');
+        window.open(`/pp/v1/auth/sso_login?state=${encodeURIComponent(returnUrl)}`, '_self');
       }),
       map((): null => null)
     );
@@ -324,10 +330,10 @@ export class LoginPageComponent implements OnInit {
   private formSSOredirectURL(redirect: RouterRedirect): string {
     const queryKeys = redirect ? Object.keys(redirect.queryParams) : undefined;
     return window.location.protocol + '//' + window.location.hostname +
-      (window.location.port ? ':' + window.location.port : '') +
+      (window.location.port ? `:${window.location.port}` : '') +
       (redirect ?
         redirect.path +
-        (queryKeys && queryKeys.length > 0 ? '?' + queryKeys.map(k => k + '=' + redirect.queryParams[k]).join('&') : '') : '/');
+        (queryKeys && queryKeys.length > 0 ? `?${queryKeys.map(k => `${k}=${redirect.queryParams[k]}`).join('&')}` : '') : '/');
   }
 
   private getErrorMessage(auth: AuthState): string {
@@ -339,16 +345,20 @@ export class LoginPageComponent implements OnInit {
       return '';
     }
 
-    if (auth.errorResponse.status === 401) {
-      const authError = auth.errorResponse.error?.error;
-      if (authError && authError !== 'Bad credentials') {
-        return authError;
-      }
-      return 'Username and password combination incorrect. Please try again.';
-    }
+    if (typeof auth.errorResponse === 'object' && auth.errorResponse && 'status' in auth.errorResponse) {
+      const errorResponse = auth.errorResponse as { status: number; error?: { error?: string } };
 
-    if (auth.errorResponse.status >= 500 && auth.errorResponse.status < 600) {
-      return `Couldn't check credentials, please try again. If the problem persists please contact an administrator`;
+      if (errorResponse.status === 401) {
+        const authError = errorResponse.error?.error;
+        if (authError && authError !== 'Bad credentials') {
+          return authError;
+        }
+        return 'Username and password combination incorrect. Please try again.';
+      }
+
+      if (errorResponse.status >= 500 && errorResponse.status < 600) {
+        return `Couldn't check credentials, please try again. If the problem persists please contact an administrator`;
+      }
     }
 
     return `Couldn't log in, please try again.`;

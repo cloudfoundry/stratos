@@ -1,16 +1,16 @@
-import { CommonModule } from '@angular/common';
-import { AfterContentInit, Component, Input, OnInit, ViewChild,
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { type AfterContentInit, Component, Input, type OnInit, ViewChild,
   ChangeDetectionStrategy} from '@angular/core';
-import { FormsModule, NgForm } from '@angular/forms';
+import { FormsModule, type NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { asapScheduler, Observable, of } from 'rxjs';
+import { asapScheduler, type Observable, of } from 'rxjs';
 import { map, observeOn, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { CustomSelectComponent, CustomOptionComponent, FocusDirective, StepOnNextFunction } from '@stratosui/core';
+import { CustomSelectComponent, CustomOptionComponent, FocusDirective, type StepOnNextFunction } from '@stratosui/core';
 import { SetCFDetails } from '../../../../actions/create-applications-page.actions';
-import { ISpace } from '../../../../cf-api.types';
-import { CFAppState } from '../../../../cf-app-state';
+import type { ISpace } from '../../../../cf-api.types';
+import type { CFAppState } from '../../../../cf-app-state';
 import { getSpacesFromOrgWithRole } from '../../../../store/selectors/cf-current-user-role.selectors';
 import { CfPermissionStrings } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
@@ -34,7 +34,7 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   @Input()
   isMarketplaceMode!: boolean;
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store,
     public cfOrgSpaceService: CfOrgSpaceDataService,
     public route: ActivatedRoute
   ) { }

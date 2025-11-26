@@ -1,7 +1,7 @@
 
-import { Component, Input, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, type OnDestroy, type OnInit , ChangeDetectionStrategy, inject } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 import {
@@ -11,10 +11,11 @@ import {
   CustomOptionComponent,
   ListComponent,
   ListConfig,
+  MatSuffixDirective,
   safeUnsubscribe
 } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { CfEventsConfigService } from '../list/list-types/cf-events/cf-events-config.service';
+import type { APIResource } from '@stratosui/store';
+import type { CfEventsConfigService } from '../list/list-types/cf-events/cf-events-config.service';
 
 /**
  * Typed form interface for CF Events list filters
@@ -36,8 +37,9 @@ interface EventsFilterForm {
     CustomSelectComponent,
     CustomOptionComponent,
     AppInputDirective,
+    MatSuffixDirective,
     ListComponent
-]
+  ]
 })
 export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
 
@@ -46,7 +48,6 @@ export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
    */
   @Input() typeMustContain!: string;
 
-  filtersFormGroup: FormGroup<EventsFilterForm>;
   typeValues: string[] = [
     'app.crash',
     'audit.app.copy-bits',
@@ -136,15 +137,15 @@ export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
   private config: CfEventsConfigService;
   private initialSet = false;
   public hasActeeFilter = false;
+  filtersFormGroup: FormGroup<EventsFilterForm>;
 
-  constructor(
-    listConfig: ListConfig<APIResource>,
-  ) {
+  constructor() {
+    const listConfig = inject(ListConfig<APIResource>);
     this.filtersFormGroup = new FormGroup<EventsFilterForm>({
       actee: new FormControl<string | null>(null),
       type: new FormControl<string[] | null>(null),
     });
-    this.config = (listConfig as any as CfEventsConfigService);
+    this.config = (listConfig as unknown as CfEventsConfigService);
 
     // Set initial filter values
     this.subs.push(

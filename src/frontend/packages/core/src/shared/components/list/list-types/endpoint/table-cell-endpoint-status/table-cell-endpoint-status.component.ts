@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, type OnInit  } from '@angular/core';
 
-import { entityCatalog, EndpointModel } from '@stratosui/store';
+import { entityCatalog, type EndpointModel } from '@stratosui/store';
 
 import { TableCellCustom } from '../../../list.types';
 import { CustomIconComponent } from '../../../../../../shared/components/custom-material/custom-material.component';
@@ -36,7 +36,7 @@ export class TableCellEndpointStatusComponent extends TableCellCustom<EndpointMo
 
   ngOnInit() {
     const ep = entityCatalog.getEndpoint(this.row.cnsi_type, this.row.sub_type);
-    if (!!ep) {
+    if (ep) {
       this.connectable = !ep.definition.unConnectable;
     }
   }

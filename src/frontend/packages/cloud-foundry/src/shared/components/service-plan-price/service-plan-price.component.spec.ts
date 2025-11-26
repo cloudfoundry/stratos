@@ -1,10 +1,10 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
-import { MDAppModule } from '../../../../../core/src/core/md.module';
+import { MDAppModule } from '@stratosui/core';
 import { ServicePlanPriceComponent } from './service-plan-price.component';
 
 describe('ServicePlanPriceComponent', () => {

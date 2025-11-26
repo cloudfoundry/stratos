@@ -1,32 +1,32 @@
-import { IMetricsData, ChartSeries } from '@stratosui/store';
+import type { IMetricsData, ChartSeries, IMetricMatrixResult, IMetricVectorResult, IMetricSample } from '@stratosui/store';
 
-import { MetricsConfig } from './metrics-chart.component';
+import type { MetricsConfig } from './metrics-chart.component';
 
 function dateLessThanUnix(date: Date, unix: number) {
   const unixDate = date.getTime() / 1000;
   return unixDate < unix;
 }
 export class MetricsChartManager {
-  static mapMatrix<T = any>(metrics: IMetricsData, metricsConfig: MetricsConfig): ChartSeries[] {
+  static mapMatrix<T = unknown>(metrics: IMetricsData<IMetricMatrixResult>, metricsConfig: MetricsConfig): ChartSeries<T>[] {
     return metrics.result.map<ChartSeries<T>>(
       result => ({
         name: metricsConfig.getSeriesName(result),
-        metadata: result.metric,
-        series: result.values.map((val: any) => ({
-          name: metricsConfig.mapSeriesItemName ? metricsConfig.mapSeriesItemName(val[0]) : val[0],
-          value: metricsConfig.mapSeriesItemValue ? metricsConfig.mapSeriesItemValue(val[1]) : val[1]
+        metadata: result.metric as Record<string, unknown>,
+        series: result.values.map((val: IMetricSample) => ({
+          name: (metricsConfig.mapSeriesItemName ? metricsConfig.mapSeriesItemName(val[0]) : val[0]) as string | Date,
+          value: (metricsConfig.mapSeriesItemValue ? metricsConfig.mapSeriesItemValue(val[1]) : val[1]) as T
         }))
       })
     );
   }
-  static mapVector<T = any>(metrics: IMetricsData, metricsConfig: MetricsConfig): ChartSeries[] {
+  static mapVector<T = unknown>(metrics: IMetricsData<IMetricVectorResult>, metricsConfig: MetricsConfig): ChartSeries<T>[] {
     return metrics.result.map<ChartSeries<T>>(
       result => ({
         name: metricsConfig.getSeriesName(result),
-        metadata: result.metric,
+        metadata: result.metric as Record<string, unknown>,
         series: [{
-          name: metricsConfig.mapSeriesItemName ? metricsConfig.mapSeriesItemName(result.value[0]) : result.value[0],
-          value: metricsConfig.mapSeriesItemValue ? metricsConfig.mapSeriesItemValue(result.value[1]) : result.value[1]
+          name: (metricsConfig.mapSeriesItemName ? metricsConfig.mapSeriesItemName(result.value[0]) : result.value[0]) as string | Date,
+          value: (metricsConfig.mapSeriesItemValue ? metricsConfig.mapSeriesItemValue(result.value[1]) : result.value[1]) as T
         }]
       })
     );
@@ -54,7 +54,7 @@ export class MetricsChartManager {
           pos++;
         } else {
           newSeries.push({
-            name: metricConfig.mapSeriesItemName ? metricConfig.mapSeriesItemName(t) : t + '',
+            name: metricConfig.mapSeriesItemName ? metricConfig.mapSeriesItemName(t) : `${t}`,
             value: 0
           });
         }

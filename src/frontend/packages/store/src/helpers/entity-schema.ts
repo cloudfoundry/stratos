@@ -1,4 +1,4 @@
-import { Schema, schema } from 'normalizr';
+import { type Schema, schema } from 'normalizr';
 
 import { EntityCatalogHelpers } from '../entity-catalog/entity-catalog.helper';
 import type { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';

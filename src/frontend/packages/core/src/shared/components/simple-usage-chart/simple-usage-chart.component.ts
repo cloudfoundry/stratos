@@ -1,10 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, Input, ViewChild  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, type ElementRef, Input, ViewChild  } from '@angular/core';
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
-import { ChartConfiguration } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 
-import { IChartData, IChartThresholds, ISimpleUsageChartData, IUsageColor } from './simple-usage-chart.types';
+import type { IChartData, IChartThresholds, ISimpleUsageChartData, IUsageColor } from './simple-usage-chart.types';
 import { CustomIconComponent } from '../custom-material/custom-material.component';
 
 @Component({
@@ -52,7 +51,7 @@ export class SimpleUsageChartComponent {
     }
   };
 
-  public chartOptions: any = {
+  public chartOptions: Record<string, unknown> = {
     responsive: true,
     maintainAspectRatio: false,
     cutout: '70%',
@@ -149,7 +148,7 @@ export class SimpleUsageChartComponent {
     const percentage = (used / total) * 100;
     // I'm sure this can be tidies up - NJ
     if (this.thresholds) {
-      if (this.thresholds.hasOwnProperty('danger')) {
+      if (Object.hasOwn(this.thresholds, 'danger')) {
         if (this.thresholds.inverted) {
           if (percentage < this.thresholds.danger) {
             return this.getColorScheme('danger');
@@ -159,7 +158,7 @@ export class SimpleUsageChartComponent {
         }
       }
 
-      if (this.thresholds.hasOwnProperty('warning')) {
+      if (Object.hasOwn(this.thresholds, 'warning')) {
         if (this.thresholds.inverted) {
           if (percentage < this.thresholds.warning) {
             return this.getColorScheme('warning');

@@ -16,9 +16,9 @@ describe('CsiModeService', () => {
         queryParams: {},
         queryParamMap: {
           get: vi.fn().mockReturnValue(null),
-        } as any,
-      } as any,
-    };
+        },
+      },
+    } as unknown as Partial<ActivatedRoute>;
 
     mockRouter = {
       getCurrentNavigation: vi.fn().mockReturnValue(null),

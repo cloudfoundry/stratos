@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output  } from '@angular/core';
 
-import { ITileConfig, ITileData, ITileGraphic } from '../tile/tile-selector.types';
+import type { ITileConfig, ITileData, ITileGraphic } from '../tile/tile-selector.types';
 import { CustomIconComponent } from '../custom-material/custom-material.component';
 
 @Component({

@@ -1,13 +1,13 @@
 import {
   entityCatalog,
   stratosEntityCatalog,
-  EndpointModel,
-  AuthParams,
+  type EndpointModel,
+  type AuthParams,
   ConnectEndpoint,
-  EndpointType,
-  ActionState,
+  type EndpointType,
+  type ActionState,
 } from '@stratosui/store';
-import { combineLatest, Observable, of, Subject, Subscription } from 'rxjs';
+import { combineLatest, type Observable, of, Subject, type Subscription } from 'rxjs';
 import { delay, distinctUntilChanged, filter, map, pairwise, startWith, switchMap, tap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../core/endpoints.service';
@@ -96,7 +96,7 @@ export class ConnectEndpointService {
 
     this.connected$ = stratosEntityCatalog.endpoint.store.getEntityMonitor(this.config.guid).entity$.pipe(
       map(endpoint => {
-        const isConnected = !!(endpoint && endpoint.api_endpoint && endpoint.user);
+        const isConnected = !!(endpoint?.api_endpoint && endpoint.user);
         return [isConnected, endpoint] as [boolean, EndpointModel];
       })
     );

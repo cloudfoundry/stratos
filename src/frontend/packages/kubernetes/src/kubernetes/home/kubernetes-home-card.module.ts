@@ -1,4 +1,4 @@
-import { ComponentFactoryResolver, NgModule } from '@angular/core';
+import { type ComponentFactoryResolver, NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { CoreModule } from '@stratosui/core';

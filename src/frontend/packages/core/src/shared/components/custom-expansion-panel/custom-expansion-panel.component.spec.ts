@@ -1,7 +1,7 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { CustomExpansionPanelComponent, CustomExpansionPanelHeaderComponent } from './custom-expansion-panel.component';
-import { DebugElement, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { type DebugElement, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { By } from '@angular/platform-browser';
 
 // Configure TestBed once before all tests
@@ -31,7 +31,7 @@ describe('CustomExpansionPanelComponent', () => {
     component[key] = value;
     // Manually mark the component instance for check to trigger change detection in OnPush mode
     // Access the change detector ref via the component instance
-    const cdr = (component as any).cdr;
+    const cdr = (component as unknown as { cdr?: { markForCheck?: () => void } }).cdr;
     if (cdr && typeof cdr.markForCheck === 'function') {
       cdr.markForCheck();
     }

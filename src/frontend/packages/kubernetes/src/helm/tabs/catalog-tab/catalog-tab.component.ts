@@ -1,23 +1,25 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { Component, type OnDestroy, signal, inject, } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest, Observable, Subscription } from 'rxjs';
+import { combineLatest, type Observable, type Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, startWith } from 'rxjs/operators';
 
 import { ListComponent } from '@stratosui/core';
 
 import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
 import { SetClientFilter } from '../../../../../store/src/actions/pagination.actions';
-import { AppState } from '../../../../../store/src/app-state';
-import { EndpointModel } from '../../../../../store/src/public-api';
+import type { AppState } from '../../../../../store/src/app-state';
+import type { EndpointModel } from '../../../../../store/src/public-api';
+import type { PaginationEntityState } from '../../../../../store/src/types/pagination.types';
 import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { helmEntityCatalog } from '../../helm-entity-catalog';
 import { HELM_ENDPOINT_TYPE, HELM_HUB_ENDPOINT_TYPE } from '../../helm-entity-factory';
 import { MonocularChartsListConfig } from '../../list-types/monocular-charts-list-config.service';
 import { CustomFormFieldComponent } from '../../../../../core/src/shared/components/custom-form-field/custom-form-field.component';
+import type { Chart } from '../../monocular/shared/models/chart';
 
 const REPO_FILTER_NAME = 'repository';
 
@@ -89,7 +91,7 @@ export class CatalogTabComponent implements OnDestroy {
       distinctUntilChanged(),
       map(([repos, repoFilter]: [unknown[], string]) => {
         const unique = (repos || []).reduce<{ artifactHubRepos: Record<string, boolean>; stratosRepos: Record<string, boolean> }>(
-          (res, repo: any) => {
+          (res, repo: Chart) => {
             const repoName = repo?.attributes?.repo?.name;
             if (!repoName || (repoFilter && !repoName.startsWith(repoFilter))) {
               return res;
@@ -132,7 +134,7 @@ export class CatalogTabComponent implements OnDestroy {
     this.filteredRepo = repoName;
     helmEntityCatalog.chart.store.getPaginationMonitor().pagination$.pipe(
       first(undefined, { clientPagination: { filter: { string: '', items: {} } } }) // Provide default pagination to prevent EmptyError
-    ).subscribe((pagination: any) => {
+    ).subscribe((pagination: PaginationEntityState) => {
       const action = helmEntityCatalog.chart.actions.getMultiple();
       this.store.dispatch(new SetClientFilter(action, action.paginationKey, {
         string: pagination.clientPagination?.filter?.string ?? '',

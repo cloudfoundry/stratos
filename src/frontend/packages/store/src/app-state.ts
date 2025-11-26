@@ -13,17 +13,17 @@ import type { RoutingHistory } from './types/routing.type';
 import type { UAASetupState } from './types/uaa-setup.types';
 
 export interface IRequestTypeState {
-  [entityKey: string]: any;
+  [entityKey: string]: unknown;
 }
 export interface IRequestEntityTypeState<T> {
   [guid: string]: T;
 }
 
 export type BaseRequestState = Record<string, IRequestEntityTypeState<RequestInfoState>>;
-export type BaseRequestDataState = Record<string, IRequestEntityTypeState<any>>;
+export type BaseRequestDataState = Record<string, IRequestEntityTypeState<unknown>>;
 
 export abstract class AppState<
-  T extends Record<string, any> = any
+  T extends Record<string, unknown> = Record<string, unknown>
   > {
   auth!: AuthState;
   uaaSetup!: UAASetupState;
@@ -41,7 +41,7 @@ export abstract class AppState<
 }
 
 export interface GeneralRequestDataState {
-  [name: string]: any;
+  [name: string]: unknown;
 }
 
 export interface GeneralAppRequestDataState extends BaseEntityValues, GeneralRequestDataState { }

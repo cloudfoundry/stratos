@@ -1,8 +1,8 @@
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import type { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   applicationEntityType,
   organizationEntityType,
@@ -10,14 +10,15 @@ import {
 } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import {
   ListDataSource,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
+} from '@stratosui/core';
+import type { IListConfig } from '@stratosui/core';
 import { MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
-import { IMetricApplication, MetricQueryType } from '../../../../../../../store/src/types/metric.types';
+import type { GeneralEntityAppState } from '../../../../../../../store/src/app-state';
+import type { APIResource } from '../../../../../../../store/src/types/api.types';
+import type { IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
+import { type IMetricApplication, MetricQueryType } from '../../../../../../../store/src/types/metric.types';
 import { FetchCFMetricsPaginatedAction } from '../../../../../actions/cf-metrics.actions';
-import { IApp } from '../../../../../cf-api.types';
+import type { IApp } from '../../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { createEntityRelationKey } from '../../../../../entity-relations/entity-relations.types';
@@ -35,7 +36,7 @@ export class CfCellAppsDataSource
   private appEntityServices: { [appGuid: string]: Observable<APIResource<IApp>> };
 
   constructor(
-    store: Store<CFAppState>,
+    store: Store<GeneralEntityAppState>,
     cfGuid: string,
     cellId: string,
     listConfig: IListConfig<CfCellApp>,

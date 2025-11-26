@@ -1,16 +1,17 @@
-import { Component, Input, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, type OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { AsyncPipe, CommonModule, DatePipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 import { BREADCRUMB_URL_PARAM, ApplicationStateIconComponent } from '@stratosui/core';
-import { StratosStatus } from '@stratosui/store';
-import { CFAppState } from '../../../../cf-app-state';
-import { ApplicationStateData, ApplicationStateService } from '../../../../shared/services/application-state.service';
+import type { StratosStatus, APIResource } from '@stratosui/store';
+import type { CFAppState } from '../../../../cf-app-state';
+import { type ApplicationStateData, ApplicationStateService } from '../../../../shared/services/application-state.service';
 import { ApplicationService } from '../../../applications/application.service';
 import { ActiveRouteCfOrgSpace } from '../../../cf/cf-page.types';
+import type { IApp } from '../../../../cf-api-svc.types';
 
 
 @Component({
@@ -29,7 +30,7 @@ import { ActiveRouteCfOrgSpace } from '../../../cf/cf-page.types';
 })
 export class CompactAppCardComponent implements OnInit {
 
-  @Input() app!: any;
+  @Input() app!: APIResource<IApp> | { metadata: { guid: string }; entity: Record<string, unknown> };
 
   @Input() endpoint!: string;
 
@@ -40,11 +41,10 @@ export class CompactAppCardComponent implements OnInit {
 
   appStatus$!: Observable<StratosStatus>;
 
-  bcType!: any;
+  bcType!: Record<string, string>;
 
 
-  constructor(
-    private store: Store<CFAppState>,
+  constructor(_store: Store,
     private appStateService: ApplicationStateService,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
 
@@ -61,10 +61,11 @@ export class CompactAppCardComponent implements OnInit {
       return;
     }
 
-    const initState = this.appStateService.get(this.app.entity, null);
+    const appEntity = this.app.entity as IApp;
+    const initState = this.appStateService.get(appEntity, null);
     this.applicationState$ = ApplicationService.getApplicationState(
       this.appStateService,
-      this.app.entity,
+      appEntity,
       this.app.metadata.guid,
       this.endpoint
     ).pipe(
@@ -77,10 +78,10 @@ export class CompactAppCardComponent implements OnInit {
 
   private setBreadcrumbType = (activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) => {
     let bcType = 'cf';
-    if (!!activeRouteCfOrgSpace.cfGuid) {
-      if (!!activeRouteCfOrgSpace.orgGuid) {
+    if (activeRouteCfOrgSpace.cfGuid) {
+      if (activeRouteCfOrgSpace.orgGuid) {
         bcType = 'org';
-        if (!!activeRouteCfOrgSpace.spaceGuid) {
+        if (activeRouteCfOrgSpace.spaceGuid) {
           bcType = 'space-summary';
         }
       }

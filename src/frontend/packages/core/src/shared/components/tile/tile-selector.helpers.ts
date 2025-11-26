@@ -1,4 +1,4 @@
-import { ITileConfig, ITileData, ITileGraphic } from './tile-selector.types';
+import { ITileConfig, type ITileData, type ITileGraphic } from './tile-selector.types';
 
 /**
  * deprecated

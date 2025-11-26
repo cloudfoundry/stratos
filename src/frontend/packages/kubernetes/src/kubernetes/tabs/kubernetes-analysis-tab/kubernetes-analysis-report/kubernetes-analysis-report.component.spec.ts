@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -11,7 +11,7 @@ import { KubernetesAnalysisReportComponent } from './kubernetes-analysis-report.
 describe('KubernetesAnalysisReportComponent', () => {
   let component: KubernetesAnalysisReportComponent;
   let fixture: ComponentFixture<KubernetesAnalysisReportComponent>;
-  let mockAnalysisService: any;
+  let mockAnalysisService: { getByID: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     // Create mock analysis service with getByID method that returns mock data

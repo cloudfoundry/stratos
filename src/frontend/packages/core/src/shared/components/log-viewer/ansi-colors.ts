@@ -1,7 +1,7 @@
-/* eslint-disable no-control-regex */
-const ansiEscapeMatcher = new RegExp('(?:\x1B\\[[0-9;]*m[\n]*)+', 'g');
-const ansiEscapeExtractor = new RegExp('\x1B\\[([0-9;]*)m([\n]*)', 'g');
-/* eslint-enable no-control-regex */
+// biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape sequences are intentional for terminal color parsing
+const ansiEscapeMatcher = /(?:\x1B\[[0-9;]*m[\n]*)+/g;
+// biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape sequences are intentional for terminal color parsing
+const ansiEscapeExtractor = /\x1B\[([0-9;]*)m([\n]*)/g;
 
 // Map of ANSI foreground color codes to color names
 const fgAnsiToNames: Record<number, string> = {
@@ -18,7 +18,7 @@ const fgAnsiToNames: Record<number, string> = {
 // Map of ANSI background color codes to color names
 const bgAnsiToNames: Record<number, string> = {};
 for (const ansiColor in fgAnsiToNames) {
-  if (!fgAnsiToNames.hasOwnProperty(ansiColor)) {
+  if (!Object.hasOwn(fgAnsiToNames, ansiColor)) {
     continue;
   }
   const colorCode = parseInt(ansiColor, 10);
@@ -31,8 +31,6 @@ export class AnsiColors {
   currentFg: number | null = null;
   currentBg: number | null = null;
   boldOn = false;
-
-  constructor() {}
 
   reset() {
     this.currentFg = null;
@@ -131,18 +129,18 @@ export class AnsiColors {
     }
   }
 
-  ansiGroupParser(match: string, graphicModes: string, lineFeeds: string): string {
+  ansiGroupParser(_match: string, graphicModes: string, lineFeeds: string): string {
     let ret = '';
     if (lineFeeds) {
-      ret += -lineFeeds.length + ';';
+      ret += `${-lineFeeds.length};`;
     }
     if (!graphicModes) {
       // An empty mode string means reset all
-      return ret + '0;';
+      return `${ret}0;`;
     }
 
     // Non empty modes processed as normal
-    return ret + graphicModes + ';';
+    return `${ret + graphicModes};`;
   }
 
   ansiColorsToHtml(str: string): string {

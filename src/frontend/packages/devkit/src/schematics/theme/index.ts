@@ -5,10 +5,10 @@ import {
   chain,
   mergeWith,
   move,
-  Rule,
-  SchematicContext,
+  type Rule,
+  type SchematicContext,
   SchematicsException,
-  Tree,
+  type Tree,
   url,
 } from '@angular-devkit/schematics';
 
@@ -21,12 +21,12 @@ import {
   validateProjectName,
 } from '../../lib/schematics.js';
 import { Versions } from './../../lib/schematics.js';
-import { ThemeOptionsSchema } from './schema.js';
+import type { ThemeOptionsSchema } from './schema.js';
 
 // Reference: https://github.com/angular/angular-cli/tree/master/packages/schematics/angular
 
 function addThemeToWorkspaceFile(
-  options: ThemeOptionsSchema,
+  _options: ThemeOptionsSchema,
   projectRoot: string,
   projectName: string,
   distRoot: string,
@@ -54,7 +54,7 @@ function addThemeToWorkspaceFile(
 }
 
 export default function (options: ThemeOptionsSchema): Rule {
-  return async (host: Tree, context: SchematicContext) => {
+  return async (host: Tree, _context: SchematicContext) => {
     if (!options.name) {
       throw new SchematicsException(`Invalid options, "name" is required.`);
     }
@@ -73,7 +73,7 @@ export default function (options: ThemeOptionsSchema): Rule {
     const workspace = await getWorkspace(host);
     const newProjectRoot = workspace.extensions.newProjectRoot as (string | undefined) || '';
 
-    const scopeFolder = scopeName ? strings.dasherize(scopeName) + '/' : '';
+    const scopeFolder = scopeName ? `${strings.dasherize(scopeName)}/` : '';
     const folderName = `${scopeFolder}${strings.dasherize(options.name)}`;
     const projectRoot = join(normalize(newProjectRoot), folderName);
     const distRoot = `dist/${folderName}`;

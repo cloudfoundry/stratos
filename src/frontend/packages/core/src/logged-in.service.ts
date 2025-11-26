@@ -3,7 +3,7 @@ import { Inject, Injectable, NgZone } from '@angular/core';
 import { TailwindDialogService } from './shared/services/tailwind-dialog.service';
 import { Store } from '@ngrx/store';
 import { VerifySession, selectDashboardState, DashboardState, AppState, AuthState } from '@stratosui/store';
-import { combineLatest, fromEvent, interval, merge, Subscription } from 'rxjs';
+import { combineLatest, fromEvent, interval, merge, type Subscription } from 'rxjs';
 import { tap, withLatestFrom } from 'rxjs/operators';
 
 import { LogOutDialogComponent } from './core/log-out-dialog/log-out-dialog.component';

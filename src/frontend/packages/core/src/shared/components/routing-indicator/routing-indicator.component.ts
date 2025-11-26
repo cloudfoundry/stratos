@@ -1,7 +1,7 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { NavigationCancel, NavigationEnd, NavigationStart, Router } from '@angular/router';
-import { interval, Observable, of as observableOf } from 'rxjs';
+import { interval, type Observable, of as observableOf } from 'rxjs';
 import { filter, map, startWith, switchMap, delay, tap } from 'rxjs/operators';
 
 @Component({
@@ -52,7 +52,9 @@ export class RoutingIndicatorComponent {
     return interval(80).pipe(
       delay(500),
       map(() => getValue()),
-      tap(() => this.started = true)
+      tap(() => {
+        this.started = true;
+      })
     );
   }
   // Fakes a natual loading indicator
@@ -65,7 +67,8 @@ export class RoutingIndicatorComponent {
         return top;
       }
       if (value >= slowDownValue) {
-        return value += this.getRandomNumber(0.1, 0.6);
+        value += this.getRandomNumber(0.1, 0.6);
+        return value;
       }
       const increase = this.getRandomNumber(minStep, maxStep);
       value = Math.min(value + increase, top);

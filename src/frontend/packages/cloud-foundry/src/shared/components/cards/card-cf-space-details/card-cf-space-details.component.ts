@@ -1,12 +1,13 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe, DatePipe } from '@angular/common';
+import { Component, type OnDestroy, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
+import type { GeneralEntityAppState } from '@stratosui/store';
 
 import { safeUnsubscribe, MetadataItemComponent, BooleanIndicatorComponent, SnackBarService } from '@stratosui/core';
-import { RouterNav, AppState } from '@stratosui/store';
+import { RouterNav, type AppState } from '@stratosui/store';
 import { CloudFoundrySpaceService } from '../../../../features/cf/services/cloud-foundry-space.service';
 
 @Component({
@@ -17,6 +18,8 @@ import { CloudFoundrySpaceService } from '../../../../features/cf/services/cloud
   standalone: true,
   imports: [
     CommonModule,
+    AsyncPipe,
+    DatePipe,
     RouterModule,
     MetadataItemComponent,
     BooleanIndicatorComponent
@@ -24,7 +27,7 @@ import { CloudFoundrySpaceService } from '../../../../features/cf/services/cloud
 })
 export class CardCfSpaceDetailsComponent implements OnDestroy {
   public cfSpaceService = inject(CloudFoundrySpaceService);
-  private store = inject(Store<AppState>);
+  private store = inject(Store<GeneralEntityAppState>);
   private router = inject(Router);
   private snackBarService = inject(SnackBarService);
 

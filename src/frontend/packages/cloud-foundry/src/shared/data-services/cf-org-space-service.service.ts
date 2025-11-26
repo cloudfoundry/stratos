@@ -1,7 +1,6 @@
-import { computed, Injectable, OnDestroy, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Injectable, type OnDestroy, signal } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, type Observable, of, type Subscription } from 'rxjs';
 import {
   distinctUntilChanged,
   filter,
@@ -14,24 +13,25 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { ListPaginationMultiFilterChange, safeUnsubscribe, valueOrCommonFalsy } from '@stratosui/core';
+import { type ListPaginationMultiFilterChange, safeUnsubscribe, valueOrCommonFalsy } from '@stratosui/core';
 import {
-  APIResource,
+  type APIResource,
   connectedEndpointsOfTypesSelector,
-  EndpointModel,
+  type EndpointModel,
+  type GeneralEntityAppState,
   getCurrentPageRequestInfo,
   getPaginationObservables,
-  PaginatedAction,
-  PaginationEntityState,
+  type PaginatedAction,
+  type PaginationEntityState,
   PaginationMonitorFactory,
-  PaginationParam,
+  type PaginationParam,
   ResetPagination,
   SetParams
 } from '@stratosui/store';
-import { CFAppState } from '../../cf-app-state';
+import type { CFAppState } from '../../cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../cf-entity-types';
 import { createEntityRelationKey } from '../../entity-relations/entity-relations.types';
-import { IOrganization, ISpace } from '../../cf-api.types';
+import type { IOrganization, ISpace } from '../../cf-api.types';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { cfEntityFactory } from '../../cf-entity-factory';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
@@ -49,7 +49,7 @@ export function createCfOrgSpaceFilterConfig(key: string, label: string, cfOrgSp
     key,
     label,
     ...cfOrgSpaceItem,
-    list$: cfOrgSpaceItem.list$.pipe(map((entities: any[]) => {
+    list$: cfOrgSpaceItem.list$.pipe(map((entities: Array<{ name: string; guid: string }>) => {
       return entities.map(entity => ({
         label: entity.name,
         item: entity,
@@ -59,14 +59,14 @@ export function createCfOrgSpaceFilterConfig(key: string, label: string, cfOrgSp
   };
 }
 
-export interface CfOrgSpaceItem<T = any> {
+export interface CfOrgSpaceItem<T = unknown> {
   list$: Observable<T[]>;
   loading$: Observable<boolean>;
   // Signal-based selection with backward compatibility via BehaviorSubject wrapper
   select: BehaviorSubject<string>;
 }
 
-export const enum CfOrgSpaceSelectMode {
+export enum CfOrgSpaceSelectMode {
   /**
    * When a parent selection changes and it contains only one child automatically select it, otherwise clear child selection
    */
@@ -78,7 +78,7 @@ export const enum CfOrgSpaceSelectMode {
 }
 
 export const createCfOrSpaceMultipleFilterFn = (
-  store: Store<CFAppState>,
+  store: Store<GeneralEntityAppState>,
   action: PaginatedAction,
   setQParam: (setQ: QParam, qs: QParam[]) => boolean,
   preResetUpdate?: () => void
@@ -91,8 +91,8 @@ export const createCfOrSpaceMultipleFilterFn = (
     const qParamObject = QParam.fromStrings(qParamStrings);
 
     const startingCfGuid = valueOrCommonFalsy(action.endpointGuid);
-    const startingOrgGuid = valueOrCommonFalsy(qParamObject.find((q: QParam) => q.key === 'organization_guid'), {}).value;
-    const startingSpaceGuid = valueOrCommonFalsy(qParamObject.find((q: QParam) => q.key === 'space_guid'), {}).value;
+    const startingOrgGuid = valueOrCommonFalsy((qParamObject.find((q: QParam) => q.key === 'organization_guid') as QParam | undefined)?.value);
+    const startingSpaceGuid = valueOrCommonFalsy((qParamObject.find((q: QParam) => q.key === 'space_guid') as QParam | undefined)?.value);
 
     const qChanges = changes.reduce((qs: QParam[], change) => {
       switch (change.key) {
@@ -112,8 +112,8 @@ export const createCfOrSpaceMultipleFilterFn = (
     }, qParamObject);
 
     const cfGuidChanged = startingCfGuid !== valueOrCommonFalsy(action.endpointGuid);
-    const orgChanged = startingOrgGuid !== valueOrCommonFalsy(qChanges.find((q: QParam) => q.key === 'organization_guid'), {}).value;
-    const spaceChanged = startingSpaceGuid !== valueOrCommonFalsy(qChanges.find((q: QParam) => q.key === 'space_guid'), {}).value;
+    const orgChanged = startingOrgGuid !== valueOrCommonFalsy((qChanges.find((q: QParam) => q.key === 'organization_guid') as QParam | undefined)?.value);
+    const spaceChanged = startingSpaceGuid !== valueOrCommonFalsy((qChanges.find((q: QParam) => q.key === 'space_guid') as QParam | undefined)?.value);
 
     if (preResetUpdate) {
       preResetUpdate();
@@ -164,14 +164,14 @@ export class CfOrgSpaceDataService implements OnDestroy {
   /*
    * Observable that provides initial values for drop downs, output will be parsed through initialValuesMap before emitted on first
    */
-  public initialValues$!: Observable<any>;
+  public initialValues$!: Observable<InitialValues | unknown>;
   /**
    * Map values from `initialValues$` to supply initial values for drop downs
    */
-  public initialValuesMap!: (param: any) => InitialValues;
+  public initialValuesMap!: (param: unknown) => InitialValues;
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     public paginationMonitorFactory: PaginationMonitorFactory,
   ) {
     this.createCf();
@@ -276,7 +276,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
         const selectedOrg = orgs.find(org => {
           return org.metadata.guid === selectedOrgGuid;
         });
-        if (selectedOrg && selectedOrg.entity && selectedOrg.entity.spaces) {
+        if (selectedOrg?.entity?.spaces) {
           return selectedOrg.entity.spaces.map(space => {
             const entity = { ...space.entity };
             entity.guid = space.metadata.guid;
@@ -321,11 +321,14 @@ export class CfOrgSpaceDataService implements OnDestroy {
     orgKey: string,
     spaceKey: string,
   ) {
-    this.initialValuesMap = (p: PaginationEntityState) => ({
-      cf: p.clientPagination?.filter?.items[cfKey],
-      org: p.clientPagination?.filter?.items[orgKey],
-      space: p.clientPagination?.filter?.items[spaceKey]
-    });
+    this.initialValuesMap = (p: unknown): InitialValues => {
+      const paginationState = p as PaginationEntityState;
+      return {
+        cf: paginationState.clientPagination?.filter?.items[cfKey] as string,
+        org: paginationState.clientPagination?.filter?.items[orgKey] as string,
+        space: paginationState.clientPagination?.filter?.items[spaceKey] as string
+      };
+    };
     this.initialValues$ = this.paginationMonitorFactory.create(
       paginatedAction.paginationKey,
       cfEntityFactory(paginatedAction.entityType),
@@ -337,7 +340,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
 
   private getInitialValues(): Observable<InitialValues> {
     const initialValues$ = this.initialValues$ || of({ cf: undefined, org: undefined, space: undefined });
-    const defaultMap = (a: any) => a;
+    const defaultMap = (a: unknown) => a as InitialValues;
     const initialValuesMap = this.initialValuesMap || defaultMap;
     return initialValues$.pipe(
       first(),
@@ -364,7 +367,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
       distinctUntilChanged(),
       filter(cf => cfTapped || cf !== initialCf),
       withLatestFrom(this.org.list$),
-      tap(([selectedCF, orgs]) => {
+      tap(([_selectedCF, orgs]) => {
         cfTapped = true;
         if (
           !!orgs.length &&
@@ -387,7 +390,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
       distinctUntilChanged(),
       filter(org => orgTapped || org !== initialOrg),
       withLatestFrom(this.space.list$),
-      tap(([selectedOrg, spaces]) => {
+      tap(([_selectedOrg, spaces]) => {
         orgTapped = true;
         if (
           !!spaces.length &&

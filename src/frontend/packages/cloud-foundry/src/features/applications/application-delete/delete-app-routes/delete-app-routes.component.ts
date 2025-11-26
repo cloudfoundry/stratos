@@ -1,11 +1,11 @@
-import { Component, EventEmitter, OnDestroy, Output, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, EventEmitter, type OnDestroy, Output, inject, ChangeDetectionStrategy } from '@angular/core';
 
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 
 import { ListComponent } from '../../../../../../core/src/shared/components/list/list.component';
 import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
-import { APIResource } from '../../../../../../store/src/types/api.types';
-import { IServiceBinding } from '../../../../cf-api-svc.types';
+import type { APIResource } from '../../../../../../store/src/types/api.types';
+import type { IServiceBinding } from '../../../../cf-api-svc.types';
 import { AppDeleteRoutesListConfigService } from './app-delete-routes-list-config.service';
 
 @Component({

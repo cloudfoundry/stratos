@@ -1,8 +1,7 @@
-import { ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
+import { ChangeDetectionStrategy, Component, type OnInit} from '@angular/core';
 
-import { AppChip, AppChipsComponent } from '../../../../../../core/src/shared/components/chips/chips.component';
-import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
-import { KubeAPIResource, PodLabel } from '../../../store/kube.types';
+import { type AppChip, AppChipsComponent, TableCellCustom } from '@stratosui/core';
+import type { KubeAPIResource, PodLabel } from '../../../store/kube.types';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -12,18 +11,14 @@ import { KubeAPIResource, PodLabel } from '../../../store/kube.types';
   standalone: true,
   imports: [AppChipsComponent]
 })
-export class KubernetesPodTagsComponent<T> extends TableCellCustom<KubeAPIResource> implements OnInit {
+export class KubernetesPodTagsComponent<_T> extends TableCellCustom<KubeAPIResource> implements OnInit {
 
   tags: AppChip<PodLabel>[] = [];
-
-  constructor() {
-    super();
-  }
 
   ngOnInit() {
     const labels = this.row.metadata.labels;
     for (const label in labels) {
-      if (labels.hasOwnProperty(label)) {
+      if (Object.hasOwn(labels, label)) {
         this.tags.push({
           value: `${label}:${labels[label]}`,
           key: {

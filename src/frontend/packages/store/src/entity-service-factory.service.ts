@@ -1,13 +1,13 @@
-import { inject, Inject, Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { GeneralEntityAppState } from './app-state';
+import type { GeneralEntityAppState } from './app-state';
 import type { IEntityCatalog } from './entity-catalog/entity-catalog.interface';
-import { EntityActionBuilderEntityConfig } from './entity-catalog/entity-catalog.types';
+import type { EntityActionBuilderEntityConfig } from './entity-catalog/entity-catalog.types';
 import { EntityService } from './entity-service';
-import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
+import type { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
 import { ENTITY_CATALOG_TOKEN } from './tokens/store-injection.tokens';
-import { EntityRequestAction } from './types/request.types';
+import type { EntityRequestAction } from './types/request.types';
 
 @Injectable()
 export class EntityServiceFactory {
@@ -48,12 +48,13 @@ export class EntityServiceFactory {
     );
     if (isConfig) {
       // Get the get action from the entity catalog.
-      const actionBuilder = this.entityCatalog.getEntity(config.endpointType, config.entityType).actionOrchestrator.getActionBuilder('get');
+      const catalogEntity = this.entityCatalog.getEntity(config.endpointType, config.entityType) as { actionOrchestrator: { getActionBuilder: (key: string) => (guid: string, endpointGuid: string, metadata: Record<string, unknown>) => unknown } };
+      const actionBuilder = catalogEntity.actionOrchestrator.getActionBuilder('get');
       return new EntityService<T>(this.store, entityMonitor, actionBuilder(
         config.entityGuid,
         config.endpointGuid,
         config.actionMetadata || {}
-      ), this.entityCatalog);
+      ) as EntityRequestAction, this.entityCatalog);
     }
     return new EntityService<T>(this.store, entityMonitor, action, this.entityCatalog);
   }

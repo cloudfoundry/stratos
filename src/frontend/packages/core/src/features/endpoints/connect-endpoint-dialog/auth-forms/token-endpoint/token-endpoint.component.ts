@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { CustomFormFieldComponent } from '../../../../../shared/components/custom-form-field/custom-form-field.component';
+import { ReactiveFormsModule, type FormControl, type FormGroup } from '@angular/forms';
+import { CustomFormFieldComponent, MatSuffixDirective } from '../../../../../shared/components/custom-form-field/custom-form-field.component';
 
-import { IAuthForm } from '@stratosui/store';
+import type { IAuthForm } from '@stratosui/store';
 import { CustomIconComponent } from '../../../../../shared/components/custom-material/custom-material.component';
 
 interface TokenAuthForm {
@@ -16,6 +16,7 @@ interface TokenAuthForm {
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    MatSuffixDirective,
     CustomFormFieldComponent,
     CustomIconComponent
   ],
@@ -26,5 +27,5 @@ export class TokenEndpointComponent implements IAuthForm {
 
   @Input() formGroup!: FormGroup<TokenAuthForm>;
 
-  @Input() config: any = {};
+  @Input() config: Record<string, unknown> = {};
 }

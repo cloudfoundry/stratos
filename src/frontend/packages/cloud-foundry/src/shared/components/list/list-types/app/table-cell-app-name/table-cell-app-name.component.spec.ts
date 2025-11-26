@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
@@ -13,8 +13,8 @@ import { generateCFEntities } from '@test-framework/cf';
 
 import { TableCellAppNameComponent } from './table-cell-app-name.component';
 describe('TableCellAppNameComponent', () => {
-  let component: TableCellAppNameComponent<any>;
-  let fixture: ComponentFixture<TableCellAppNameComponent<any>>;
+  let component: TableCellAppNameComponent<unknown>;
+  let fixture: ComponentFixture<TableCellAppNameComponent<unknown>>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

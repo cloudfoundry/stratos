@@ -2,7 +2,7 @@ import { HttpRequest } from '@angular/common/http';
 
 import { getActions } from '../../../store/src/actions/action.helper';
 import { endpointEntityType } from '../../../store/src/helpers/stratos-entity-factory';
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
+import type { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { featureFlagEntityType } from '../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../entity-relations/entity-relations.types';
@@ -22,7 +22,7 @@ export class GetAllFeatureFlags extends CFStartAction implements PaginatedAction
   entityType = featureFlagEntityType;
   entity = [cfEntityFactory(featureFlagEntityType)];
   actions = getActions('Feature Flags', 'Fetch all');
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   flattenPagination = true;
   initialParams = {
     page: 1,

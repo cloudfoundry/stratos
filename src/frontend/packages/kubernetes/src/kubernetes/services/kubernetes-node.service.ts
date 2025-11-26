@@ -1,17 +1,18 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount } from 'rxjs/operators';
 
 import { getIdFromRoute } from '../../../../core/src/core/utils.service';
 import { MetricQueryConfig, MetricsAction } from '../../../../store/src/actions/metrics.actions';
-import { EntityMonitorFactory } from '../../../../store/src/monitors/entity-monitor.factory.service';
-import { AppState } from '../../../../store/src/public-api';
-import { EntityInfo } from '../../../../store/src/types/api.types';
+import type { EntityMonitorFactory } from '../../../../store/src/monitors/entity-monitor.factory.service';
+import type { AppState } from '../../../../store/src/public-api';
+import type { EntityInfo } from '../../../../store/src/types/api.types';
+import type { IMetrics } from '../../../../store/src/types/base-metric.types';
 import { MetricQueryType } from '../../../../store/src/types/metric.types';
 import { kubeEntityCatalog } from '../kubernetes-entity-generator';
-import { KubernetesNode, MetricStatistic } from '../store/kube.types';
+import type { KubernetesNode, MetricStatistic } from '../store/kube.types';
 import { FetchKubernetesMetricsAction } from '../store/kubernetes.actions';
 import { KubernetesEndpointService } from './kubernetes-endpoint.service';
 
@@ -60,14 +61,14 @@ export class KubernetesNodeService {
     const query = `${metricStatistic}(${metricStatistic}_over_time(${metric}{kubernetes_io_hostname="${this.nodeName}"${containerFilter}}[1h]))`;
     const metricsAction = new FetchKubernetesMetricsAction(this.nodeName, this.kubeGuid, query);
     const metricsId = MetricsAction.buildMetricKey(this.nodeName, new MetricQueryConfig(query), true, MetricQueryType.QUERY);
-    const metricsMonitor = this.entityMonitorFactory.create<any>(metricsId, metricsAction);
+    const metricsMonitor = this.entityMonitorFactory.create<IMetrics>(metricsId, metricsAction);
     this.store.dispatch(metricsAction);
     const pollSub = metricsMonitor.poll(30000, () => this.store.dispatch(metricsAction),
       request => ({ busy: request.fetching, error: request.error, message: request.message }))
       .subscribe();
     return {
       entity$: metricsMonitor.entity$.pipe(filter(metrics => !!metrics), map(metrics => {
-        const result = metrics.data && metrics.data.result;
+        const result = metrics.data?.result as Array<{ value: [number, string] }> | undefined;
         if (!!result && result.length === 1) {
           return result[0].value[1];
         } else {

@@ -1,15 +1,15 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Observable, of } from 'rxjs';
+import type { ActivatedRoute } from '@angular/router';
+import { type Observable, of } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { PermissionConfig, CurrentUserPermissionsService } from '@stratosui/core';
-import { GitSCM, GitSCMService, GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE } from '@stratosui/git';
+import { PermissionConfig, type CurrentUserPermissionsService } from '@stratosui/core';
+import { type GitSCM, type GitSCMService, GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE } from '@stratosui/git';
 import { getFullEndpointApiUrl, stratosEntityCatalog } from '@stratosui/store';
 
 import { CFFeatureFlagTypes } from '../../../cf-api.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
-import { SourceType } from '../../../store/types/deploy-application.types';
+import type { SourceType } from '../../../store/types/deploy-application.types';
 import { CfPermissionTypes } from '../../../user-permissions/cf-user-permissions-checkers';
 
 export enum DEPLOY_TYPES_IDS {

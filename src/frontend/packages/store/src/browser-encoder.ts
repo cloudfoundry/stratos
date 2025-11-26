@@ -1,4 +1,4 @@
-import { HttpParameterCodec } from '@angular/common/http';
+import type { HttpParameterCodec } from '@angular/common/http';
 
 export class BrowserStandardEncoder implements HttpParameterCodec {
   encodeKey(key: string): string {

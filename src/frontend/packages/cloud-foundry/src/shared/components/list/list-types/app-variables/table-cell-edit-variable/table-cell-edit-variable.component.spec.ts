@@ -1,10 +1,10 @@
-import { ListAppEnvVar } from '../cf-app-variables-data-source';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import type { ListAppEnvVar } from '../cf-app-variables-data-source';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { TableCellEditVariableComponent } from './table-cell-edit-variable.component';
-import { IListDataSource } from '../../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
+import type { IListDataSource } from '@stratosui/core';
 
 describe('TableCellEditVariableComponent', () => {
   let component: TableCellEditVariableComponent;

@@ -1,28 +1,28 @@
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, type OnDestroy } from '@angular/core';
+import { ReactiveFormsModule, Validators, FormBuilder, FormControl, type FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { gitRepositoryUrlValidator, normalizeUrl } from '../../../../../core/src/shared/validators';
+import type { Observable, Subscription } from 'rxjs';
+import { filter, first, map, pairwise } from 'rxjs/operators';
 import {
   CreateEndpointHelperComponent,
+  EndpointsService,
+  getIdFromRoute,
+  StepComponent,
+  type StepOnNextFunction,
+  SteppersComponent,
+  SessionService,
+  CurrentUserPermissionsService,
+  UserProfileService,
+  SnackBarService,
+  gitRepositoryUrlValidator,
+  type ConnectEndpointConfig,
+  CreateEndpointConnectComponent,
+  UniqueDirective
 } from '@stratosui/core';
-import { Observable, Subscription } from 'rxjs';
-import { filter, first, map, pairwise } from 'rxjs/operators';
-
-import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
-import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
-import { ConnectEndpointConfig } from '../../../../../core/src/features/endpoints/connect.service';
-import { CreateEndpointConnectComponent } from '../../../../../core/src/features/endpoints/create-endpoint/create-endpoint-connect/create-endpoint-connect.component';
-import { StepComponent, StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
-import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
-import { UniqueDirective } from '../../../../../core/src/shared/components/unique.directive';
-import { SessionService } from '../../../../../core/src/shared/services/session.service';
-import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
-import { UserProfileService } from '../../../../../core/src/core/user-profile.service';
-import { SnackBarService } from '../../../../../core/src/shared/services/snackbar.service';
 import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
 import { entityCatalog } from '../../../../../store/src/public-api';
-import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
+import type { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE } from '../../../store/git-entity-factory';
 import { GitSCMService } from '../../scm/scm.service';
@@ -276,7 +276,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
       return urlTrimmed;
     }
     const ready = urlTrimmed[urlTrimmed.length - 1] === '/' ? urlTrimmed.substring(0, urlTrimmed.length - 1) : urlTrimmed;
-    return ready + '/' + defn.urlSuffix;
+    return `${ready}/${defn.urlSuffix}`;
   }
 
   toggleCreateSystemEndpoint() {

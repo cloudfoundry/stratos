@@ -1,8 +1,8 @@
 
-import {Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import {Component, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 
-import { MetricsChartComponent, MetricsConfig } from '../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
-import { MetricsLineChartConfig } from '../../../../../core/src/shared/components/metrics-chart/metrics-chart.types';
+import { MetricsChartComponent, type MetricsConfig } from '../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
+import type { MetricsLineChartConfig } from '../../../../../core/src/shared/components/metrics-chart/metrics-chart.types';
 import {
   ChartDataTypes,
   getMetricsChartConfigBuilder,
@@ -10,9 +10,9 @@ import {
 import { MetricsParentRangeSelectorComponent } from '../../../../../core/src/shared/components/metrics-parent-range-selector/metrics-parent-range-selector.component';
 import { TileComponent } from '../../../../../core/src/shared/components/tile/tile/tile.component';
 import { TileGroupComponent } from '../../../../../core/src/shared/components/tile/tile-group/tile-group.component';
-import { ChartSeries, IMetricMatrixResult } from '../../../../../store/src/types/base-metric.types';
+import type { ChartSeries, IMetricMatrixResult } from '../../../../../store/src/types/base-metric.types';
 import { formatAxisCPUTime, formatCPUTime } from '../../kubernetes-metrics.helpers';
-import { IKubernetesMetric } from '../../kubernetes-metric.types';
+import type { IKubernetesMetric } from '../../kubernetes-metric.types';
 import { KubeNodeMetric, KubernetesNodeService } from '../../services/kubernetes-node.service';
 import { FetchKubernetesChartMetricsAction } from '../../store/kubernetes.actions';
 import { KubernetesNodeMetricStatsCardComponent } from './kubernetes-node-metric-stats-card/kubernetes-node-metric-stats-card.component';
@@ -91,7 +91,7 @@ export class KubernetesNodeMetricsComponent implements OnInit {
           });
         },
         null,
-        (value: string) => value + ' MB'
+        (value: string) => `${value} MB`
       ),
       chartConfigBuilder(
         new FetchKubernetesChartMetricsAction(

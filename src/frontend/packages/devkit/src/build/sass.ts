@@ -1,5 +1,5 @@
-import * as path from 'path';
-import { StratosConfig } from '../lib/stratos.config.js';
+import * as path from 'node:path';
+import type { StratosConfig } from '../lib/stratos.config.js';
 
 /**
  * Sass Handler
@@ -12,16 +12,14 @@ import { StratosConfig } from '../lib/stratos.config.js';
  */
 export class SassHandler {
 
-  constructor() { }
-
   //  Set options on the Webpack sass-loader plugin to use us as a custom importer
-  public apply(webpackConfig: any, config: StratosConfig) {
+  public apply(webpackConfig: { module: { rules: any[] } }, config: StratosConfig) {
     // Find the node-saas plugin and add a custom import resolver
-    webpackConfig.module.rules.forEach(rule => {
+    webpackConfig.module.rules.forEach((rule: any) => {
       if (rule.rules !== undefined) {
-        rule.rules.forEach(innerRule => {
+        rule.rules.forEach((innerRule: any) => {
           if (innerRule.use !== undefined) {
-            innerRule.use.forEach(p => {
+            innerRule.use.forEach((p: any) => {
               if (p.loader && p.loader.indexOf('sass-loader') > 0) {
                 // Ensure options exists
                 if (!p.options) p.options = {};
@@ -44,12 +42,11 @@ export class SassHandler {
   }
 
   private customSassImport(config: StratosConfig) {
-    const that = this;
-    return (url, resourcePath) => {
+    return (url: any, _resourcePath: any) => {
       if (url === '~@stratosui/theme/extensions') {
         // Generate SCSS to appy theming to the packages that need to be themed
         return {
-          contents: that.getThemingForPackages(config)
+          contents: this.getThemingForPackages(config)
         };
       } else if (url === '~@stratosui/theme') {
         return {
@@ -62,7 +59,7 @@ export class SassHandler {
         let pkgName = '';
         if (pkgParts[0].indexOf('@') === 0) {
           // Package name has a scope
-          pkgName = pkgParts.shift() + '/' + pkgParts.shift();
+          pkgName = `${pkgParts.shift()}/${pkgParts.shift()}`;
         } else {
           pkgName = pkgParts.shift();
         }
@@ -71,7 +68,7 @@ export class SassHandler {
         const knownPath = config.resolveKnownPackage(pkgName);
         if (knownPath) {
           return {
-            file: path.join(knownPath, pkgPath + '.scss')
+            file: path.join(knownPath, `${pkgPath}.scss`)
           };
         }
       }

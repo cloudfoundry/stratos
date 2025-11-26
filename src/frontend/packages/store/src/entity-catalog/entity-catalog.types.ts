@@ -34,7 +34,7 @@ export interface EntityCatalogEntityConfig {
   schemaKey?: string;
 }
 
-export interface ActionBuilderConfig<T extends Record<any, any> = Record<any, any>> {
+export interface ActionBuilderConfig<T extends Record<string, unknown> = Record<string, unknown>> {
   actionMetadata?: T;
   entityGuid: string;
   endpointGuid?: string;
@@ -91,12 +91,12 @@ export interface IStratosBaseEntityDefinition<T = EntitySchema | EntityCatalogSc
   /**
    * Show custom content in the endpoints list. Should be Type<EndpointListDetailsComponent>
    */
-  readonly listDetailsComponent?: any;
+  readonly listDetailsComponent?: unknown;
   readonly parentType?: string;
   readonly subTypes?: Omit<IStratosBaseEntityDefinition, 'schema' | 'subTypes'>[];
   readonly paginationConfig?: PaginationPageIteratorConfig;
-  readonly tableConfig?: EntityTableConfig<any>;
-  readonly registrationComponent?: any;
+  readonly tableConfig?: EntityTableConfig<unknown>;
+  readonly registrationComponent?: unknown;
   /**
    * Hook that will fire before an entity is emitted by an entity service. This could be used, for example, entity validation
    */
@@ -161,9 +161,9 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
   readonly globalErrorMessageHandler?: ApiErrorMessageHandler;
   readonly healthCheck?: EndpointHealthCheck;
   // Used for favorites - given an entity, get the endpoint ID of the endpoint it belongs to
-  readonly getEndpointIdFromEntity?: (entity: any) => string;
+  readonly getEndpointIdFromEntity?: (entity: unknown) => string;
   readonly favoriteFromEntity?: <M extends IEntityMetadata = IEntityMetadata>(
-    entity: any, entityKey: string, userFavoriteManager: UserFavoriteManager
+    entity: unknown, entityKey: string, userFavoriteManager: UserFavoriteManager
   ) => UserFavorite<M>;
   /**
    * Allows the endpoint to fetch user roles, for example when the user loads Stratos or connects an endpoint of this type
@@ -186,7 +186,7 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
 }
 
 export interface StratosEndpointExtensionDefinition extends Omit<IStratosEndpointDefinition, 'schema'> { }
-export interface EntityTableConfig<T = any> {
+export interface EntityTableConfig<T = unknown> {
   rowBuilders: EntityRowBuilder<T>[];
   showHeader?: boolean;
 }
@@ -197,7 +197,7 @@ export interface EntityTableConfig<T = any> {
  */
 export interface IStratosEntityDefinition<
   T = EntitySchema | EntityCatalogSchemas,
-  E = any,
+  E = unknown,
   I = E
   > extends IStratosBaseEntityDefinition<T> {
   readonly endpoint: StratosEndpointExtensionDefinition;
@@ -216,7 +216,7 @@ export interface IStratosEntityDefinition<
   readonly nonJetstreamRequestHandler?: NonJetstreamRequestHandler;
 }
 
-export class NonJetstreamRequestHandler<T = any> {
+export class NonJetstreamRequestHandler<T = unknown> {
   isSuccess!: (request: T) => boolean;
   getErrorCode?: (request: T) => string;
 }
@@ -229,7 +229,7 @@ export interface IStratosEntityActions extends Partial<IStratosEntityWithIcons> 
 }
 export type EntityRowBuilder<T> = [string, (entity: T, store?: Store<GeneralEntityAppState>) => string | Observable<string>];
 
-export interface IStratosEntityBuilder<T extends IEntityMetadata, Y = any> {
+export interface IStratosEntityBuilder<T extends IEntityMetadata, Y = unknown> {
   getMetadata(entity: Y): T;
   // TODO This should be used in the entities schema.
   getGuid(entity: Y): string;

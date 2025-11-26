@@ -29,12 +29,12 @@ export interface AppInstanceUsage {
 }
 
 export interface AppEnvVarsState {
-  application_env_json?: any;
+  application_env_json?: Record<string, unknown>;
   environment_json?: {
-    STRATOS_PROJECT?: any;
+    STRATOS_PROJECT?: unknown;
   };
-  running_env_json?: any;
-  staging_env_json?: any;
-  system_env_json?: any;
-  name?: any;
+  running_env_json?: Record<string, unknown>;
+  staging_env_json?: Record<string, unknown>;
+  system_env_json?: Record<string, unknown>;
+  name?: string;
 }

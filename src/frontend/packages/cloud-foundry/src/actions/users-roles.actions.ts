@@ -1,7 +1,7 @@
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 
-import { CfUser } from '../store/types/cf-user.types';
-import { CfRoleChange } from '../store/types/users-roles.types';
+import type { CfUser } from '../store/types/cf-user.types';
+import type { CfRoleChange } from '../store/types/users-roles.types';
 
 export const UsersRolesActions = {
   SetUsers: '[Users Roles] Set users',
@@ -24,7 +24,6 @@ export class UsersRolesSetUsers implements Action {
 
 export class UsersRolesFlipSetRoles implements Action {
   type = UsersRolesActions.FlipSetRoles;
-  constructor() { }
 }
 
 export class UsersRolesSetIsRemove implements Action {
@@ -56,7 +55,6 @@ export class UsersRolesSetSpaceRole implements Action {
 
 export class UsersRolesClear implements Action {
   type = UsersRolesActions.Clear;
-  constructor() { }
 }
 
 export class UsersRolesClearUpdateState implements Action {

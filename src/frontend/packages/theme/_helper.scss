@@ -1,0 +1,89 @@
+// Stratos Theme Helper - Tailwind CSS compatibility layer
+// Provides stub implementations for legacy theme extensions
+
+@use "sass:map";
+@use "sass:color";
+
+// Default nav colors (used by legacy theme extensions)
+$side-nav-light-text: #fff !default;
+$side-nav-light-bg: #1e293b !default;  // Tailwind slate-800
+$side-nav-light-hover: #334155 !default;  // Tailwind slate-700
+$side-nav-light-active: #475569 !default;  // Tailwind slate-600
+
+// ANSI color palette (used by terminal views)
+$ansi-color-palette: (
+  black: #000,
+  red: #ef4444,
+  green: #22c55e,
+  yellow: #f59e0b,
+  blue: #3b82f6,
+  magenta: #a855f7,
+  cyan: #06b6d4,
+  white: #fff
+) !default;
+
+// Stub base themes for extensions that reference them
+$stratos-theme: () !default;
+$stratos-dark-theme: () !default;
+$desktop-theme: () !default;
+$oss-dark-theme: () !default;
+
+// Main helper function - provides theme map for extensions
+@function stratos-theme-helper($theme: null) {
+  @return (
+    theme: $theme,
+    app-theme: (
+      app-background-color: var(--app-bg),
+      app-background-text-color: var(--app-text),
+      side-nav: (
+        background: $side-nav-light-bg,
+        text: $side-nav-light-text,
+        active: $side-nav-light-active,
+        active-text: $side-nav-light-text,
+        hover: $side-nav-light-hover,
+        hover-text: $side-nav-light-text
+      ),
+      status: (
+        success: var(--color-success),
+        info: var(--color-info),
+        warning: var(--color-warning),
+        danger: var(--color-danger),
+        tentative: #6b7280,
+        busy: var(--color-primary),
+        text: #fff
+      ),
+      subdued-color: #64748b,
+      ansi-colors: $ansi-color-palette,
+      header-background-color: var(--header-bg),
+      header-foreground-color: var(--header-text),
+      header-border-color: var(--header-border),
+      stratos-title-show-text: false,
+      header-background-span: false,
+      underflow-background-color: var(--color-primary),
+      underflow-foreground-color: #fff,
+      link-color: var(--color-primary),
+      link-active-color: var(--color-primary),
+      user-avatar-background-color: var(--color-primary),
+      user-avatar-foreground-color: #fff,
+      user-avatar-underflow-invert-colors: true,
+      user-avatar-header-invert-colors: true,
+      intro-screen-background-color: var(--login-bg)
+    )
+  );
+}
+
+// Default theme functions for compatibility
+@function stratos-default-theme() {
+  @return (
+    default: stratos-theme-helper(),
+    dark: stratos-theme-helper()
+  );
+}
+
+@function stratos-default-light-theme() {
+  @return stratos-theme-helper();
+}
+
+@function stratos-default-dark-theme() {
+  @return stratos-theme-helper();
+}

@@ -1,23 +1,20 @@
+import { CommonModule } from '@angular/common';
 import { Component, signal , ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 
-import { ListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { EnumerateComponent, ListComponent, ListConfig } from '@stratosui/core';
+import { EntityMonitorFactory, PaginationMonitorFactory, type APIResource, type GeneralEntityAppState } from '@stratosui/store';
 import { UsersRolesSetUsers } from '../../../../../actions/users-roles.actions';
-import { CFAppState } from '../../../../../cf-app-state';
+import type { CFAppState } from '../../../../../cf-app-state';
 import {
   CfSelectUsersListConfigService,
 } from '../../../../../shared/components/list/list-types/cf-select-users/cf-select-users-list-config.service';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
-import { CfUser } from '../../../../../store/types/cf-user.types';
+import type { CfUser } from '../../../../../store/types/cf-user.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfRolesService } from '../cf-roles.service';
-import { EnumerateComponent } from '../../../../../../../core/src/shared/components/enumerate/enumerate.component';
-import { ListComponent } from '../../../../../../../core/src/shared/components/list/list.component';
 
 @Component({
   selector: 'app-manage-users-select',
@@ -26,6 +23,7 @@ import { ListComponent } from '../../../../../../../core/src/shared/components/l
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    CommonModule,
     EnumerateComponent,
     ListComponent,
   ],
@@ -33,7 +31,7 @@ import { ListComponent } from '../../../../../../../core/src/shared/components/l
     {
       provide: ListConfig,
       useFactory: (
-        store: Store<CFAppState>,
+        store: Store<GeneralEntityAppState>,
         activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
         cfUserService: CfUserService,
         paginationMonitorFactory: PaginationMonitorFactory,
@@ -56,8 +54,7 @@ export class UsersRolesSelectComponent {
   valid$ = signal<boolean>(false);
 
   constructor(
-    private store: Store<CFAppState>,
-    private listConfig: ListConfig<APIResource<CfUser>>,
+    private store: Store<GeneralEntityAppState>,listConfig: ListConfig<APIResource<CfUser>>,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     public cfRolesService: CfRolesService
   ) {

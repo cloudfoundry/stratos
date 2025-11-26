@@ -1,10 +1,10 @@
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { catchError, filter, map, publishReplay, refCount, startWith } from 'rxjs/operators';
 
-import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
-import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
+import type { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
+import type { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { GetAppAutoscalerInfoAction } from '../../store/app-autoscaler.actions';
-import { AutoscalerInfo } from '../../store/app-autoscaler.types';
+import type { AutoscalerInfo } from '../../store/app-autoscaler.types';
 
 export const fetchAutoscalerInfo = (
   endpointGuid: string,

@@ -1,6 +1,6 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, type HttpErrorResponse } from '@angular/common/http';
 import {Component, Input, signal, inject, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { CustomCheckboxComponent } from '../../../../../../core/src/shared/components/custom-checkbox/custom-checkbox.component';
 import { ProgressSpinnerComponent } from '../../../../../../core/src/shared/components/progress-spinner/progress-spinner.component';
@@ -8,7 +8,7 @@ import { timeout } from 'rxjs/operators';
 
 import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
 import { KubeConfigHelper } from '../../kube-config.helper';
-import { KubeConfigFileCluster } from '../../kube-config.types';
+import type { KubeConfigFileCluster } from '../../kube-config.types';
 
 type CertResponse = {
   Status: number;
@@ -55,7 +55,7 @@ export class KubeConfigTableCertComponent extends TableCellCustom<KubeConfigFile
           // Success, no cert required
           (res: CertResponse) => this.update(res.Required),
           // Failed, check for specific cert required error
-          (e: HttpErrorResponse) => this.update(false)
+          (_e: HttpErrorResponse) => this.update(false)
         );
       }
     }

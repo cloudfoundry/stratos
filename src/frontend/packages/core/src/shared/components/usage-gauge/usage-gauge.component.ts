@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, Input  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, type OnInit, Input  } from '@angular/core';
 
 import { PercentagePipe } from '../../pipes/percentage.pipe';
 
@@ -30,8 +30,8 @@ export class UsageGaugeComponent implements OnInit {
   // Change bar color to error if this threshold is reached
   @Input() public errorAt!: number;
 
-  constructor() { }
-
-  ngOnInit() { }
+  ngOnInit() {
+    // Component initialization
+  }
 
 }

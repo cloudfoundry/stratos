@@ -3,10 +3,9 @@ import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
-import { CFAppState, spaceEntityType, createEntityRelationPaginationKey, cfEntityCatalog } from '@stratosui/cloud-foundry';
-import { CurrentUserPermissionsService, ConfirmationDialogService, IListConfig } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { TableCellRadioComponent } from '../../../../../../../core/src/shared/components/list/list-table/table-cell-radio/table-cell-radio.component';
+import { CFAppState, spaceEntityType, createEntityRelationPaginationKey, cfEntityCatalog, IRoute, IApp } from '@stratosui/cloud-foundry';
+import { CurrentUserPermissionsService, ConfirmationDialogService, IListConfig, TableCellRadioComponent } from '@stratosui/core';
+import type { APIResource } from '@stratosui/store';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { CfAppRoutesListConfigServiceBase } from './cf-app-routes-list-config-base';
 
@@ -48,9 +47,12 @@ export class CfAppMapRoutesListConfigService extends CfAppRoutesListConfigServic
       columnId: 'radio',
       cellComponent: TableCellRadioComponent,
       cellConfig: {
-        isDisabled: (row: APIResource): boolean => row && row.entity && row.entity.apps && row.entity.apps.find(
-          (a: APIResource) => a.metadata.guid === appService.appGuid
-        )
+        isDisabled: (row: APIResource<IRoute>): boolean => {
+          const routeEntity = row?.entity as IRoute;
+          return !!(routeEntity?.apps as APIResource<IApp>[])?.find(
+            (a: APIResource<IApp>) => a.metadata.guid === appService.appGuid
+          );
+        }
       },
       class: 'table-column-select',
       cellFlex: '0 0 60px'

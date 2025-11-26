@@ -1,10 +1,10 @@
 import { Store } from '@ngrx/store';
 import { ListDataSource } from '@stratosui/core';
-import { IListConfig } from '@stratosui/core';
-import { AppState } from '@stratosui/store';
+import type { IListConfig } from '@stratosui/core';
+import type { AppState } from '@stratosui/store';
 
 import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
-import { KubernetesPod } from '../../store/kube.types';
+import type { KubernetesPod } from '../../store/kube.types';
 
 
 export class HelmReleasePodsDataSource extends ListDataSource<KubernetesPod> {

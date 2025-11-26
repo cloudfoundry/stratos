@@ -1,12 +1,11 @@
-import {Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import {Component, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { MatIconRegistry } from '@stratosui/core';
 import { DomSanitizer } from '@angular/platform-browser';
-import { ActivatedRoute, Params, Router } from '@angular/router';
+import { ActivatedRoute, type Params, Router } from '@angular/router';
 
-import { Chart } from '../shared/models/chart';
+import type { Chart } from '../shared/models/chart';
 import { ChartsService } from '../shared/services/charts.service';
-import { ConfigService } from '../shared/services/config.service';
 import { ReposService } from '../shared/services/repos.service';
 import { LoaderComponent } from '../loader/loader.component';
 import { PanelComponent } from '../panel/panel.component';
@@ -41,12 +40,12 @@ export class ChartsComponent implements OnInit {
   filters = [
     {
       title: 'Repository',
-      onSelect: i => this.onSelectRepo(i),
+      onSelect: (i: number) => this.onSelectRepo(i),
       items: [{ title: 'All', value: 'all', selected: true }]
     },
     {
       title: 'Order By',
-      onSelect: i => this.onSelectOrderBy(i),
+      onSelect: (i: number) => this.onSelectOrderBy(i),
       items: [
         { title: 'Name', value: 'name', selected: true },
         { title: 'Created At', value: 'created', selected: false }
@@ -63,7 +62,6 @@ export class ChartsComponent implements OnInit {
   private reposService = inject(ReposService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private config = inject(ConfigService);
   private mdIconRegistry = inject(MatIconRegistry);
   private sanitizer = inject(DomSanitizer);
 
@@ -186,7 +184,9 @@ export class ChartsComponent implements OnInit {
   }
 
   // TODO: See #150 - is this to be implemented?
-  updateMetaTags(): void { }
+  updateMetaTags(): void {
+    // Not yet implemented
+  }
 
   capitalize(input: string) {
     return input.charAt(0).toUpperCase() + input.slice(1);

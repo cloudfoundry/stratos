@@ -1,11 +1,11 @@
 import { ApplicationRef, Injectable, NgZone } from '@angular/core';
-import { MetricsAction, MetricQueryType, EntityMonitor, IMetrics } from '@stratosui/store';
-import { Subject, Subscription } from 'rxjs';
+import { MetricsAction, MetricQueryType, EntityMonitor, type IMetrics } from '@stratosui/store';
+import { Subject, type Subscription } from 'rxjs';
 import { debounceTime, takeWhile, tap } from 'rxjs/operators';
 import { isValid, isEqual } from 'date-fns';
 
 import { MetricsRangeSelectorService } from './metrics-range-selector.service';
-import { ITimeRange } from './metrics-range-selector.types';
+import type { ITimeRange } from './metrics-range-selector.types';
 
 @Injectable({
   providedIn: 'root'

@@ -7,11 +7,11 @@ import { EntityDeleteCompleteAction } from '../actions/entity.delete.actions';
 import { baseRequestPipelineFactory } from '../entity-request-pipeline/base-single-entity-request.pipeline';
 import { basePaginatedRequestPipeline } from '../entity-request-pipeline/entity-pagination-request-pipeline';
 import { apiRequestPipelineFactory } from '../entity-request-pipeline/entity-request-pipeline';
-import { PipelineHttpClient } from '../entity-request-pipeline/pipline-http-client.service';
-import { PaginatedAction } from '../types/pagination.types';
-import { ICFAction, WrapperRequestActionSuccess } from '../types/request.types';
+import type { PipelineHttpClient } from '../entity-request-pipeline/pipline-http-client.service';
+import type { PaginatedAction } from '../types/pagination.types';
+import type { ICFAction, WrapperRequestActionSuccess } from '../types/request.types';
 import { ApiActionTypes, RequestTypes } from './../actions/request.actions';
-import { InternalAppState } from './../app-state';
+import type { InternalAppState } from './../app-state';
 
 @Injectable({
   providedIn: 'root'
@@ -52,7 +52,7 @@ export class APIEffect {
   apiDeleteRequest$ = createEffect(() => this.actions$.pipe(
     ofType<WrapperRequestActionSuccess>(RequestTypes.SUCCESS),
     withLatestFrom(this.store),
-    mergeMap(([action, appState]: [WrapperRequestActionSuccess, InternalAppState]): any[] => {
+    mergeMap(([action, _appState]: [WrapperRequestActionSuccess, InternalAppState]): EntityDeleteCompleteAction[] => {
       if (action.requestType === 'delete') {
         const deleteAction = EntityDeleteCompleteAction.parse(action.apiAction);
         if (deleteAction) {

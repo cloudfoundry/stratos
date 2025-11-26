@@ -1,16 +1,15 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnDestroy , ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { Component, type OnDestroy , ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf, of } from 'rxjs';
+import { type Observable, of as observableOf, of } from 'rxjs';
 import { combineLatest, filter, first, map } from 'rxjs/operators';
 
-import { PageHeaderComponent, StepComponent, StepOnNextFunction, SteppersComponent } from '@stratosui/core';
+import { PageHeaderComponent, StepComponent, type StepOnNextFunction, SteppersComponent } from '@stratosui/core';
 import { UsersRolesClear, UsersRolesExecuteChanges, UsersRolesSetUsers } from '../../../../actions/users-roles.actions';
-import { CFAppState } from '../../../../cf-app-state';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { selectCfUsersRoles, selectCfUsersRolesPicked } from '../../../../store/selectors/cf-users-roles.selector';
-import { CfUser } from '../../../../store/types/cf-user.types';
+import type { CfUser } from '../../../../store/types/cf-user.types';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { CfRolesService } from './cf-roles.service';
@@ -49,7 +48,7 @@ export class UsersRolesComponent implements OnDestroy {
   title$!: Observable<string>;
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private cfUserService: CfUserService,
     private route: ActivatedRoute

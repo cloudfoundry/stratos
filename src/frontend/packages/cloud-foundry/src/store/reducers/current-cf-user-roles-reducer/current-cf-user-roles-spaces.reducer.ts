@@ -1,5 +1,5 @@
-import { GetCurrentCfUserRelationsComplete } from '../../../actions/permissions.actions';
-import { ISpacesRoleState } from '../../types/cf-current-user-roles.types';
+import type { GetCurrentCfUserRelationsComplete } from '../../../actions/permissions.actions';
+import type { ISpacesRoleState } from '../../types/cf-current-user-roles.types';
 import { addNewCfRoles, removeOldCfRoles } from './current-cf-user-reducer.helpers';
 import { currentCfUserSpaceRoleReducer } from './current-cf-user-roles-space.reducer';
 

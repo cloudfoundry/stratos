@@ -1,18 +1,18 @@
-import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
+import type { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { GetAllServices, GetService } from '../actions/service.actions';
 import { GetAllServicesForSpace } from '../actions/space.actions';
-import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
+import type { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
 export interface ServiceActionBuilders extends OrchestratedActionBuilders {
   get: (
     guid: string,
     endpointGuid: string,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
   ) => GetService;
   getMultiple: (
     endpointGuid: string,
     paginationKey: string,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
   ) => GetAllServices;
   getAllInSpace: (
     endpointGuid: string,

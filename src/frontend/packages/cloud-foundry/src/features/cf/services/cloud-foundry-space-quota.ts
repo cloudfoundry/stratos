@@ -1,9 +1,9 @@
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
-import { APIResource } from '../../../../../store/src/types/api.types';
+import type { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
+import type { APIResource } from '../../../../../store/src/types/api.types';
 import { StratosStatus } from '../../../../../store/src/types/shared.types';
-import { IApp, ISpace } from '../../../cf-api.types';
+import type { IApp, ISpace } from '../../../cf-api.types';
 import { spaceEntityType } from '../../../cf-entity-types';
 import { getStartedAppInstanceCount } from '../../../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
@@ -28,8 +28,8 @@ export class SpaceQuotaHelper extends OrgSpaceQuotaHelper<ISpace> {
   protected getOrgOrSpaceCardStatus = (space: APIResource<ISpace>, apps: APIResource<IApp>[]): StratosStatus => {
     const spaceQuota = space.entity.space_quota_definition;
     // Ensure we check each on in turn
-    return this.handleQuotaStatus(space.entity.routes && space.entity.routes.length, spaceQuota.entity.total_routes) ||
-      this.handleQuotaStatus(space.entity.service_instances && space.entity.service_instances.length, spaceQuota.entity.total_services) ||
+    return this.handleQuotaStatus(space.entity.routes?.length, spaceQuota.entity.total_routes) ||
+      this.handleQuotaStatus(space.entity.service_instances?.length, spaceQuota.entity.total_services) ||
       this.handleQuotaStatus(getStartedAppInstanceCount(apps), spaceQuota.entity.app_instance_limit) ||
       this.handleQuotaStatus(this.cfEndpointService.getMetricFromApps(apps, 'memory'), spaceQuota.entity.memory_limit) ?
       StratosStatus.WARNING :

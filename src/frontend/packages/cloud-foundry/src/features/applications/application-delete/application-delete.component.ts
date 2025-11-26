@@ -1,12 +1,12 @@
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, ReplaySubject } from 'rxjs';
+import { combineLatest, type Observable, ReplaySubject } from 'rxjs';
 import { filter, first, map, pairwise, shareReplay, startWith, switchMap, tap } from 'rxjs/operators';
 
 import {
   AppMonitorComponentTypes,
-  ITableColumn,
+  type ITableColumn,
   LoadingPageComponent,
   PageHeaderComponent,
   StepComponent,
@@ -14,22 +14,22 @@ import {
 } from '@stratosui/core';
 import {
   RouterNav,
-  GeneralEntityAppState,
+  type GeneralEntityAppState,
   entityCatalog,
-  EntityMonitor,
-  PaginationMonitor,
+  type EntityMonitor,
+  type PaginationMonitor,
   PaginationMonitorFactory,
-  RequestInfoState,
-  APIResource,
+  type RequestInfoState,
+  type APIResource,
 } from '@stratosui/store';
 import {
   applicationEntityType,
   routeEntityType,
   serviceInstancesEntityType,
   userProvidedServiceInstanceEntityType,
-  IServiceBinding,
-  IApp,
-  IRoute,
+  type IServiceBinding,
+  type IApp,
+  type IRoute,
   cfEntityCatalog,
   CF_ENDPOINT_TYPE,
   CfAppRoutesListConfigService,
@@ -63,7 +63,7 @@ import {
     AppServiceBindingListConfigService
   ]
 })
-export class ApplicationDeleteComponent<T> {
+export class ApplicationDeleteComponent<_T> {
   relatedEntities$: Observable<{ instances: APIResource<IServiceBinding>[], routes: APIResource<IRoute>[]; }>;
   public deleteStarted = false;
   public instanceDeleteColumns: ITableColumn<APIResource<IServiceBinding>>[] = [
@@ -170,7 +170,7 @@ export class ApplicationDeleteComponent<T> {
   public upsiCatalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, userProvidedServiceInstanceEntityType);
 
   constructor(
-    private store: Store<GeneralEntityAppState>,
+    private store: Store,
     private applicationService: ApplicationService,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private datePipe: DatePipe
@@ -304,12 +304,12 @@ export class ApplicationDeleteComponent<T> {
       map((request) => ({ success: request.deleting.deleted })),
       tap(({ success }) => {
         if (success) {
-          if (this.selectedRoutes && this.selectedRoutes.length) {
+          if (this.selectedRoutes?.length) {
             this.selectedRoutes.forEach(route => {
               cfEntityCatalog.route.api.delete(route.metadata.guid, this.applicationService.cfGuid, this.applicationService.appGuid);
             });
           }
-          if (this.selectedServiceInstances && this.selectedServiceInstances.length) {
+          if (this.selectedServiceInstances?.length) {
             this.selectedServiceInstances.forEach(instance => {
               if (isUserProvidedServiceInstance(instance.entity.service_instance.entity)) {
                 cfEntityCatalog.userProvidedService.api.remove(instance.entity.service_instance_guid, this.applicationService.cfGuid);

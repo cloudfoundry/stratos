@@ -1,28 +1,28 @@
-import { DatePipe } from '@angular/common';
+import type { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf } from 'rxjs';
+import { type Observable, of as observableOf } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
 import {
   CurrentUserPermissionsService,
   defaultPaginationPageSizeOptionsTable,
-  IGlobalListAction,
-  IListAction,
-  IListConfig,
-  IListMultiFilterConfig,
-  IMultiListAction,
-  ITableColumn,
-  ITableText,
-  ListDataSource,
+  type IGlobalListAction,
+  type IListAction,
+  type IListConfig,
+  type IListMultiFilterConfig,
+  type IMultiListAction,
+  type ITableColumn,
+  type ITableText,
+  type ListDataSource,
   ListViewTypes
 } from '@stratosui/core';
-import { APIResource, ListView } from '@stratosui/store';
-import { CFAppState } from '../../../../../cf-app-state';
-import { IUserProvidedServiceInstance } from '../../../../../cf-api-svc.types';
-import { CloudFoundrySpaceService } from '../../../../../features/cf/services/cloud-foundry-space.service';
+import type { APIResource, ListView, GeneralEntityAppState } from '@stratosui/store';
+import type { CFAppState } from '../../../../../cf-app-state';
+import type { IUserProvidedServiceInstance } from '../../../../../cf-api-svc.types';
+import type { CloudFoundrySpaceService } from '../../../../../features/cf/services/cloud-foundry-space.service';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
-import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
+import type { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import {
   CANCEL_ORG_ID_PARAM,
   CANCEL_SPACE_ID_PARAM,
@@ -125,7 +125,7 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
     createVisible: (row$: Observable<APIResource<IUserProvidedServiceInstance>>) =>
       row$.pipe(
         switchMap(
-          row => row && row.entity && row.entity.cfGuid && row.entity.space_guid ?
+          row => row?.entity?.cfGuid && row.entity.space_guid ?
             this.can(this.canDeleteCache, CfCurrentUserPermissions.SERVICE_INSTANCE_DELETE, row.entity.cfGuid, row.entity.space_guid) :
             observableOf(false)
         )
@@ -137,11 +137,11 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
     label: 'Unbind',
     description: 'Unbind Service Instance',
     createEnabled: (row$: Observable<APIResource<IUserProvidedServiceInstance>>) =>
-      row$.pipe(map(row => !!(row && row.entity && row.entity.service_bindings && row.entity.service_bindings.length !== 0))),
+      row$.pipe(map(row => !!(row?.entity?.service_bindings && row.entity.service_bindings.length !== 0))),
     createVisible: (row$: Observable<APIResource<IUserProvidedServiceInstance>>) =>
       row$.pipe(
         switchMap(
-          row => row && row.entity && row.entity.cfGuid && row.entity.space_guid ?
+          row => row?.entity?.cfGuid && row.entity.space_guid ?
             this.can(this.canDetachCache, CfCurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid) :
             observableOf(false)
         )
@@ -165,7 +165,7 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
     createVisible: (row$: Observable<APIResource<IUserProvidedServiceInstance>>) =>
       row$.pipe(
         switchMap(
-          row => row && row.entity && row.entity.cfGuid && row.entity.space_guid ?
+          row => row?.entity?.cfGuid && row.entity.space_guid ?
             this.can(this.canDetachCache, CfCurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid) :
             observableOf(false)
         )
@@ -182,13 +182,13 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
   }
 
   constructor(
-    protected store: Store<CFAppState>,
+    protected store: Store<GeneralEntityAppState>,
     private cfSpaceService: CloudFoundrySpaceService,
     protected datePipe: DatePipe,
     protected currentUserPermissionsService: CurrentUserPermissionsService,
     private serviceActionHelperService: ServiceActionHelperService
   ) {
-    this.dataSource = new CfSpacesUserServiceInstancesDataSource(cfSpaceService.cfGuid, cfSpaceService.spaceGuid, this.store, this);
+    this.dataSource = new CfSpacesUserServiceInstancesDataSource(cfSpaceService.cfGuid, cfSpaceService.spaceGuid, this.store, this) as any;
     this.serviceInstanceColumns.find(column => column.columnId === 'attachedApps').cellConfig = {
       breadcrumbs: 'space-user-services'
     };

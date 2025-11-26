@@ -18,7 +18,7 @@ export interface TableCellIconComponentConfig<T> {
     CommonModule
   ]
 })
-export class TableCellIconComponent<T = any> extends TableCellCustom<T, TableCellIconComponentConfig<T>> {
+export class TableCellIconComponent<T = unknown> extends TableCellCustom<T, TableCellIconComponentConfig<T>> {
 
   constructor(private cdr: ChangeDetectorRef) {
     super();

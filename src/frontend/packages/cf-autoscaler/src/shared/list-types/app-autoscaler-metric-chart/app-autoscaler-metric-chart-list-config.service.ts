@@ -2,21 +2,19 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { differenceInMilliseconds, isBefore } from 'date-fns';
 
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import type { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
 import {
   BaseCfListConfig,
 } from '../../../../../cloud-foundry/src/shared/components/list/list-types/base-cf/base-cf-list-config';
-import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
-import { IGlobalListAction, IListAction, IListMultiFilterConfig, IMultiListAction, ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
-import { ListDataSource } from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { MetricsRangeSelectorService } from '../../../../../core/src/shared/services/metrics-range-selector.service';
-import { ITimeRange } from '../../../../../core/src/shared/services/metrics-range-selector.types';
-import { ListView } from '../../../../../store/src/actions/list.actions';
-import { APIResource } from '../../../../../store/src/types/api.types';
+import { MetricsRangeSelectorService, type ITableColumn, type IGlobalListAction, type IListAction, type IListMultiFilterConfig, type IMultiListAction, type ITimeRange } from '@stratosui/core';
+import { ListViewTypes } from '@stratosui/core';
+import type { ListView } from '../../../../../store/src/actions/list.actions';
+import type { GeneralEntityAppState } from '../../../../../store/src/app-state';
+import type { APIResource } from '../../../../../store/src/types/api.types';
 import { MetricQueryType } from '../../../../../store/src/types/metric.types';
 import { AutoscalerConstants } from '../../../core/autoscaler-helpers/autoscaler-util';
-import { AppScalingTrigger } from '../../../store/app-autoscaler.types';
+import type { AppScalingTrigger } from '../../../store/app-autoscaler.types';
 import {
   AppAutoscalerMetricChartCardComponent,
 } from './app-autoscaler-metric-chart-card/app-autoscaler-metric-chart-card.component';
@@ -86,7 +84,7 @@ export class AppAutoscalerMetricChartListConfigService extends BaseCfListConfig<
   }
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     private appService: ApplicationService,
     metricsRangeService: MetricsRangeSelectorService) {
     super();

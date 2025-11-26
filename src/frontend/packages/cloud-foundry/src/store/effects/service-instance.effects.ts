@@ -3,7 +3,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { EMPTY } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 
-import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
+import type { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
 import { DELETE_SERVICE_INSTANCE_ACTIONS } from '../../actions/service-instances.actions';
 import { LongRunningCfOperationsService } from '../../shared/data-services/long-running-cf-op.service';
 
@@ -23,7 +23,7 @@ export class ServiceInstanceEffects {
    updateSummary$ = createEffect(() => this.actions$.pipe(
     ofType<APISuccessOrFailedAction>(DELETE_SERVICE_INSTANCE_ACTIONS[2]),
     mergeMap((action): typeof EMPTY => {
-      if (this.longRunningOpService.isLongRunning({ message: action.response })) {
+      if (this.longRunningOpService.isLongRunning({ message: typeof action.response === 'string' ? action.response : '' })) {
         this.longRunningOpService.handleLongRunningDeleteService(action.apiAction.guid, action.apiAction.endpointGuid);
       }
       this.appRef.tick();

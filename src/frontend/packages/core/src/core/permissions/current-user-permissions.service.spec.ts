@@ -3,13 +3,13 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { firstValueFrom } from 'rxjs';
 import {
-  AppState,
-  BaseEntityValues,
-  EntityCatalogEntityConfig,
+  type AppState,
+  type BaseEntityValues,
+  type EntityCatalogEntityConfig,
   EntityCatalogTestModule,
   EntityServiceFactory,
-  EndpointModel,
-  PaginationState,
+  type EndpointModel,
+  type PaginationState,
   TEST_CATALOGUE_ENTITIES,
   endpointEntityType,
   generateStratosEntities,
@@ -18,7 +18,7 @@ import {
 import {
   createBasicStoreModule,
   createEntityStoreState,
-  TestStoreEntity,
+  type TestStoreEntity,
   STORE_TEST_PROVIDERS,
 } from '@stratosui/store/testing';
 import { AppTestModule } from '@test-framework';
@@ -31,7 +31,7 @@ describe('CurrentUserPermissionsService', () => {
   let service: CurrentUserPermissionsService;
 
 
-  function createStoreState(): Partial<AppState<BaseEntityValues>> {
+  function createStoreState(): Partial<AppState<BaseEntityValues & Record<string, unknown>>> {
     // Data
     const endpoints: EndpointModel[] = [
       {
@@ -152,7 +152,7 @@ describe('CurrentUserPermissionsService', () => {
     };
 
     // User roles
-    const initialState: Partial<AppState<BaseEntityValues>> = {
+    const initialState: Partial<AppState<BaseEntityValues & Record<string, unknown>>> = {
 
     };
 

@@ -1,6 +1,6 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-enumerate',
@@ -13,6 +13,6 @@ import { Observable } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EnumerateComponent {
-  @Input() collection!: Observable<any[]>;
+  @Input() collection!: Observable<unknown[]>;
   @Input() labelPath!: string;
 }

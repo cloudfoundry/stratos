@@ -1,6 +1,6 @@
 import { defineConfig } from 'vitest/config';
 import angular from '@analogjs/vite-plugin-angular';
-import { join } from 'path';
+import { join } from 'node:path';
 
 export default defineConfig({
   plugins: [angular()],

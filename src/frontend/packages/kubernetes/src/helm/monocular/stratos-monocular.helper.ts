@@ -1,6 +1,6 @@
 import { ActivatedRoute } from '@angular/router';
 
-import { Chart } from './shared/models/chart';
+import type { Chart } from './shared/models/chart';
 
 
 /**

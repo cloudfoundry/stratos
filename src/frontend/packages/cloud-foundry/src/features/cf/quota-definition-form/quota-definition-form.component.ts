@@ -1,18 +1,21 @@
 
-import { Component, Input, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
-import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { Component, Input, type OnDestroy, type OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { type AbstractControl, ReactiveFormsModule, type ValidatorFn, Validators, FormControl, FormGroup, type ValidationErrors } from '@angular/forms';
+import type { Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
 import {
+  AppErrorComponent,
+  AppInputDirective,
   CustomCheckboxComponent,
   CustomFormFieldComponent,
   FocusDirective,
+  MatSuffixDirective,
   UnlimitedInputComponent,
   safeUnsubscribe
 } from '@stratosui/core';
 import { endpointEntityType } from '@stratosui/store';
-import { IQuotaDefinition } from '../../../cf-api.types';
+import type { IQuotaDefinition } from '../../../cf-api.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { createEntityRelationPaginationKey } from '../../../entity-relations/entity-relations.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
@@ -43,11 +46,14 @@ export interface QuotaFormValues {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
+    MatSuffixDirective,
+    AppErrorComponent,
+    AppInputDirective,
     CustomFormFieldComponent,
     CustomCheckboxComponent,
     FocusDirective,
     UnlimitedInputComponent
-]
+  ]
 })
 export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
   quotasSubscription!: Subscription;
@@ -81,7 +87,7 @@ export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
   }
 
   setupForm() {
-    const quota: any = this.quota || {};
+    const quota: Partial<IQuotaDefinition> = this.quota || {};
 
     this.formGroup = new FormGroup({
       name: new FormControl(quota.name || '', { nonNullable: true, validators: [Validators.required, this.nameTakenValidator()] }),
@@ -104,14 +110,16 @@ export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
       .entities$.pipe(
         filter(o => !!o),
         map(o => o.map(org => org.entity.name)),
-        tap((o: string[]) => this.allQuotas = o)
+        tap((o: string[]) => {
+          this.allQuotas = o;
+        })
       );
 
     this.quotasSubscription = quotaDefinitions$.subscribe();
   }
 
   nameTakenValidator = (): ValidatorFn => {
-    return (formField: AbstractControl): { [key: string]: any } => {
+    return (formField: AbstractControl): ValidationErrors | null => {
       if (!this.validateNameTaken(formField.value)) {
         return { nameTaken: { value: formField.value } };
       }

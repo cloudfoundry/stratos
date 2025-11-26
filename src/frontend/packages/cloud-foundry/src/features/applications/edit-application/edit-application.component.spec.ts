@@ -1,11 +1,11 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideMockStore } from '@ngrx/store/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { TabNavService } from '@stratosui/core';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { ApplicationStateService } from '@stratosui/shared';
+import { ApplicationStateService } from '@stratosui/cloud-foundry';
 import { generateTestApplicationServiceProvider } from '@test-framework/application-service-helper';
 import { ApplicationService } from '../application.service';
 import { ApplicationEnvVarsHelper } from '../application/application-tabs-base/tabs/build-tab/application-env-vars.service';

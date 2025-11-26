@@ -1,7 +1,7 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
-import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
+import type { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import { TableCellCustom } from '../../list.types';
 
 @Component({

@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, OnChanges , ChangeDetectionStrategy } from '@angular/core';
+import { Component, type OnInit, Input, type OnChanges, type SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 
 
 @Component({
@@ -11,14 +11,14 @@ import { Component, OnInit, Input, OnChanges , ChangeDetectionStrategy } from '@
 })
 export class ViewBuildpackComponent implements OnInit, OnChanges {
 
-  constructor() { }
-
   @Input() buildPack!: string;
   isWebLink!: boolean;
 
-  ngOnInit() { }
+  ngOnInit() {
+    // Component initialization - buildpack detection handled in ngOnChanges
+  }
 
-  ngOnChanges(values: any) {
+  ngOnChanges(values: SimpleChanges) {
     if (values.buildPack.firstChange || values.buildPack.currentValue !== values.buildPack.previousValue) {
       const buildPack = values.buildPack.currentValue;
       let url = typeof buildPack !== 'undefined' && buildPack ? buildPack : '';

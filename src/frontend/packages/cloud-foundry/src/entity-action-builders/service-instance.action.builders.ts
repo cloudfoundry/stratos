@@ -1,4 +1,4 @@
-import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
+import type { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import {
   CreateServiceInstance,
   DeleteServiceInstance,
@@ -8,7 +8,7 @@ import {
 } from '../actions/service-instances.actions';
 import { GetServicePlanServiceInstances } from '../actions/service-plan.actions';
 import { GetServiceInstancesForSpace } from '../actions/space.actions';
-import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
+import type { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
 export interface CreateUpdateActionMeta {
   name: string;
@@ -22,26 +22,27 @@ export interface ServiceInstanceActionBuilders extends OrchestratedActionBuilder
   get: (
     guid: string,
     endpointGuid: string,
-    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
+    extraArgs?: Record<string, unknown>
   ) => GetServiceInstance;
   remove: (
     guid: string,
     endpointGuid: string,
+    extraArgs?: Record<string, unknown>
   ) => DeleteServiceInstance;
   create: (
     createId: string,
     endpointGuid: string,
-    meta: CreateUpdateActionMeta
+    extraArgs?: Record<string, unknown>
   ) => CreateServiceInstance;
   update: (
     guid: string,
     endpointGuid: string,
-    meta: CreateUpdateActionMeta
+    extraArgs?: Record<string, unknown>
   ) => UpdateServiceInstance;
   getMultiple: (
     endpointGuid: string,
     paginationKey: string,
-    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
+    extraArgs?: Record<string, unknown>
   ) => GetServiceInstances;
   getAllInServicePlan: (
     servicePlanGuid: string,
@@ -77,29 +78,35 @@ export const serviceInstanceActionBuilders: ServiceInstanceActionBuilders = {
   create: (
     createId,
     endpointGuid: string,
-    meta: CreateUpdateActionMeta
-  ) => new CreateServiceInstance(
-    createId,
-    endpointGuid,
-    meta.name,
-    meta.servicePlanGuid,
-    meta.spaceGuid,
-    meta.params,
-    meta.tags
-  ),
+    meta?: CreateUpdateActionMeta | Record<string, unknown>
+  ) => {
+    const typedMeta = meta as CreateUpdateActionMeta;
+    return new CreateServiceInstance(
+      createId,
+      endpointGuid,
+      typedMeta.name,
+      typedMeta.servicePlanGuid,
+      typedMeta.spaceGuid,
+      typedMeta.params,
+      typedMeta.tags
+    );
+  },
   update: (
     guid,
     endpointGuid: string,
-    meta: CreateUpdateActionMeta
-  ) => new UpdateServiceInstance(
-    guid,
-    endpointGuid,
-    meta.name,
-    meta.servicePlanGuid,
-    meta.spaceGuid,
-    meta.params,
-    meta.tags
-  ),
+    meta?: CreateUpdateActionMeta | Record<string, unknown>
+  ) => {
+    const typedMeta = meta as CreateUpdateActionMeta;
+    return new UpdateServiceInstance(
+      guid,
+      endpointGuid,
+      typedMeta.name,
+      typedMeta.servicePlanGuid,
+      typedMeta.spaceGuid,
+      typedMeta.params,
+      typedMeta.tags
+    );
+  },
   getMultiple: (
     endpointGuid: string,
     paginationKey,

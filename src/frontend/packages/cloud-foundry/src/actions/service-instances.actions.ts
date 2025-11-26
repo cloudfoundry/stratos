@@ -1,8 +1,8 @@
 import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 
 import { getActions } from '../../../store/src/actions/action.helper';
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { ICFAction } from '../../../store/src/types/request.types';
+import type { PaginatedAction } from '../../../store/src/types/pagination.types';
+import type { ICFAction } from '../../../store/src/types/request.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import {
   applicationEntityType,
@@ -15,7 +15,7 @@ import {
   servicePlanEntityType,
   spaceEntityType,
 } from '../cf-entity-types';
-import { createEntityRelationKey, EntityInlineParentAction } from '../entity-relations/entity-relations.types';
+import { createEntityRelationKey, type EntityInlineParentAction } from '../entity-relations/entity-relations.types';
 import { QParam, QParamJoiners } from '../shared/q-param';
 import { CFStartAction } from './cf-action.types';
 
@@ -55,7 +55,7 @@ export class GetServiceInstances
   entity = [cfEntityFactory(serviceInstancesWithSpaceEntityType)];
   entityType = serviceInstancesEntityType;
   schemaKey = serviceInstancesWithSpaceEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   initialParams = {
     page: 1,
     'results-per-page': 100,
@@ -85,7 +85,7 @@ export class GetServiceInstance
   entity = [cfEntityFactory(serviceInstancesWithSpaceEntityType)];
   schemaKey = serviceInstancesWithSpaceEntityType;
   entityType = serviceInstancesEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
 }
 
 export class DeleteServiceInstance extends CFStartAction implements ICFAction {
@@ -112,7 +112,7 @@ export class DeleteServiceInstance extends CFStartAction implements ICFAction {
   actions = DELETE_SERVICE_INSTANCE_ACTIONS;
   entity = [cfEntityFactory(serviceInstancesEntityType)];
   entityType = serviceInstancesEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   clearPaginationEntityKeys = [serviceBindingEntityType];
   removeEntityOnDelete = true;
 }
@@ -157,7 +157,7 @@ export class CreateServiceInstance extends CFStartAction implements ICFAction {
   actions = getActions('Service Instances', 'Create Service Instance');
   entity = [cfEntityFactory(serviceInstancesEntityType)];
   entityType = serviceInstancesEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
 }
 
 export class UpdateServiceInstance extends CreateServiceInstance {
@@ -201,7 +201,7 @@ export class ListServiceBindingsForInstance
   actions = getActions('Service Instances', 'Get all service bindings for instance');
   entity = [cfEntityFactory(serviceBindingNoBindingsEntityType)];
   entityType = serviceBindingEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   initialParams = {
     page: 1,
     'results-per-page': 100,

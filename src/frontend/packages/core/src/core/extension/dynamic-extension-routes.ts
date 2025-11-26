@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, CanActivateFn, Router, RouterStateSnapshot } from '@angular/router';
-import { Observable } from 'rxjs';
+import { type ActivatedRouteSnapshot, type CanActivateFn, Router, type RouterStateSnapshot, type Route } from '@angular/router';
+import type { Observable } from 'rxjs';
 
-import { getRoutesFromExtensions, StratosRouteType } from './extension-service';
+import { getRoutesFromExtensions, type StratosRouteType } from './extension-service';
 
 /**
  * This is used to dynamically add an extension's routes - since we can't do this
@@ -19,19 +19,20 @@ import { getRoutesFromExtensions, StratosRouteType } from './extension-service';
  */
 
 // Helper functions for route manipulation
-function getChildRoutes(r: any) {
+function getChildRoutes(r: Route | undefined | null): Route[] {
   if (!r) {
     return [];
   }
-  const loadedRoutes = r._loadedConfig ? r._loadedConfig.routes : [];
+  const loadedRoutes = (r as { _loadedConfig?: { routes?: Route[] } })._loadedConfig?.routes || [];
   return r.children ? r.children : loadedRoutes;
 }
 
-function setChildRoutes(r: any, newRoutes: any): void {
+function setChildRoutes(r: Route | undefined | null, newRoutes: Route[]): void {
   if (!r) {
     return;
   }
-  const loadedRoutes = r._loadedConfig ? r._loadedConfig : {};
+  const routeWithConfig = r as { _loadedConfig?: { routes?: Route[] } };
+  const loadedRoutes = routeWithConfig._loadedConfig || {};
   if (r.children) {
     r.children = newRoutes;
   } else {
@@ -51,7 +52,7 @@ export const dynamicExtensionRoutesGuard: CanActivateFn = (
 
   // Does the parent root have metadata to tell us what route group this is?
   // i.e. are there extension routes we need to try and add?
-  if (route.routeConfig.data && route.routeConfig.data.stratosRouteGroup) {
+  if (route.routeConfig.data?.stratosRouteGroup) {
     const tabGroup = route.routeConfig.data.stratosRouteGroup;
 
     // Add the missing routes
@@ -80,7 +81,7 @@ export class DynamicExtensionRoutes {
     const childRoutes = getChildRoutes(route.parent.routeConfig);
     let newChildRoutes = childRoutes.splice(0, childRoutes.length - 1);
 
-    if (route.routeConfig.data && route.routeConfig.data.stratosRouteGroup) {
+    if (route.routeConfig.data?.stratosRouteGroup) {
       const tabGroup = route.routeConfig.data.stratosRouteGroup;
       const newRoutes = getRoutesFromExtensions(tabGroup as StratosRouteType);
       newChildRoutes = newChildRoutes.concat(newRoutes);

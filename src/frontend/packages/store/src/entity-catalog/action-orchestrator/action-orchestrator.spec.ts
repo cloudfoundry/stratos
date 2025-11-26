@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { PaginatedAction } from '../../types/pagination.types';
-import { EntityRequestAction } from '../../types/request.types';
-import { ActionOrchestrator, OrchestratedActionBuilders } from './action-orchestrator';
+import type { PaginatedAction } from '../../types/pagination.types';
+import type { EntityRequestAction } from '../../types/request.types';
+import { ActionOrchestrator, type OrchestratedActionBuilders } from './action-orchestrator';
 import { getPaginationAction, getRequestAction, hasActions } from './action-orchestrator.spec.helpers';
 
 

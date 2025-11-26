@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output  } from '@angular/core';
 
-import { ITileConfig } from '../tile/tile-selector.types';
+import type { ITileConfig } from '../tile/tile-selector.types';
 import { TileSelectorTileComponent } from '../tile-selector-tile/tile-selector-tile.component';
 
 @Component({
@@ -52,8 +52,6 @@ export class TileSelectorComponent {
 
   @Output() selection = new EventEmitter<ITileConfig>();
   public selected: ITileConfig;
-
-  constructor() { }
 
   public toggleMore() {
     this.showingMore = !this.showingMore;

@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
@@ -21,7 +21,7 @@ describe('CloudFoundrySpaceAppsComponent', () => {
     const mockDataSource = {
       isLoadingPage$: of(false),
       pagination$: of({}),
-      filteredRows: [],
+      filteredRows: [] as unknown[],
       connect: vi.fn().mockReturnValue(of([])),
       disconnect: vi.fn(),
       destroy: vi.fn()
@@ -63,7 +63,7 @@ describe('CloudFoundrySpaceAppsComponent', () => {
     })
     .overrideComponent(CloudFoundrySpaceAppsComponent, {
       remove: {
-        providers: [{ provide: ListConfig, useClass: {} as any }]
+        providers: [{ provide: ListConfig, useClass: class {} as typeof ListConfig }]
       },
       add: {
         providers: [{ provide: ListConfig, useValue: mockListConfig }]

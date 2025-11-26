@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, OnInit  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, type OnInit  } from '@angular/core';
 
 import { IntroScreenComponent } from '../../../shared/components/intro-screen/intro-screen.component';
 import { StratosTitleComponent } from '../../../shared/components/stratos-title/stratos-title.component';
-import { ProductNameComponent } from '../../../shared/components/product-name.ccomponent';
+import { ProductNameComponent } from '../../../shared/components/product-name.component';
 
 @Component({
   selector: 'app-domain-mismatch',
@@ -18,9 +18,8 @@ import { ProductNameComponent } from '../../../shared/components/product-name.cc
 })
 export class DomainMismatchComponent implements OnInit {
 
-  constructor() { }
-
   ngOnInit() {
+    // Component initialization - no setup required
   }
 
 }

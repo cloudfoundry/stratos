@@ -1,10 +1,10 @@
 import { AsyncPipe } from '@angular/common';
-import {Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import {Component, Input, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { SidePanelService } from '@stratosui/core';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { KubernetesAnalysisService, KubernetesAnalysisType } from '../../services/kubernetes.analysis.service';
+import { KubernetesAnalysisService, type KubernetesAnalysisType } from '../../services/kubernetes.analysis.service';
 import {
   KubernetesAnalysisInfoComponent,
 } from '../../tabs/kubernetes-analysis-tab/kubernetes-analysis-info/kubernetes-analysis-info.component';

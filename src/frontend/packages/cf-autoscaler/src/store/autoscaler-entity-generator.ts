@@ -1,14 +1,13 @@
 import {
-  StratosBaseCatalogEntity,
+  type StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
-  IStratosEndpointDefinition,
-  StratosEndpointExtensionDefinition,
+  type StratosEndpointExtensionDefinition,
   metricEntityType,
-  APIResource,
-  IFavoriteMetadata
+  type APIResource,
+  type IFavoriteMetadata
 } from '@stratosui/store';
-import { AppAutoscalerEvent, AppAutoscalerHealth, AppAutoscalerPolicy, AppScalingTrigger } from './app-autoscaler.types';
+import type { AppAutoscalerEvent, AppAutoscalerHealth, AppAutoscalerPolicy, AppScalingTrigger } from './app-autoscaler.types';
 import {
   appAutoscalerAppMetricEntityType,
   appAutoscalerCredentialEntityType,
@@ -117,7 +116,7 @@ function generateAppMetricEntity(endpointDefinition: StratosEndpointExtensionDef
     schema: autoscalerEntityFactory(appAutoscalerAppMetricEntityType),
     endpoint: endpointDefinition
   };
-  return new StratosCatalogEntity<IFavoriteMetadata, APIResource<any>>(definition);
+  return new StratosCatalogEntity<IFavoriteMetadata, APIResource<unknown>>(definition);
 }
 
 function generateMetricEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
@@ -128,5 +127,5 @@ function generateMetricEntity(endpointDefinition: StratosEndpointExtensionDefini
     labelPlural: 'Autoscaler Metrics',
     endpoint: endpointDefinition,
   };
-  return new StratosCatalogEntity<IFavoriteMetadata, APIResource<any>>(definition);
+  return new StratosCatalogEntity<IFavoriteMetadata, APIResource<unknown>>(definition);
 }

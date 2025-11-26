@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { generateCFEntities } from '@stratosui/cloud-foundry';
-import { CATALOGUE_ENTITIES, EntityCatalogFeatureModule, entityCatalog, TestEntityCatalog, EntityCatalogProvidersModule } from '@stratosui/store';
+import { CATALOGUE_ENTITIES, EntityCatalogFeatureModule, entityCatalog, type TestEntityCatalog, EntityCatalogProvidersModule } from '@stratosui/store';
 import { generateASEntities } from './store/autoscaler-entity-generator';
 
 @NgModule({

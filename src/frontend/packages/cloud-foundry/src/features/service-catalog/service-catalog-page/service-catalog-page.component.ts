@@ -1,6 +1,6 @@
-import { CommonModule } from '@angular/common';
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
-import { Observable } from 'rxjs';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { Component, inject, } from '@angular/core';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { ListComponent, ListConfig, PageHeaderComponent } from '@stratosui/core';

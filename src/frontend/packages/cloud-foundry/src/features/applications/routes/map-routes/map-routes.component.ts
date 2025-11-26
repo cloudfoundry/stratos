@@ -1,13 +1,13 @@
-import { Component, Input, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { Component, Input, type OnDestroy, type OnInit , ChangeDetectionStrategy } from '@angular/core';
+import type { BehaviorSubject, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 import { ListConfig, ListComponent } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
+import type { APIResource } from '@stratosui/store';
 import {
   CfAppMapRoutesListConfigService,
 } from '../../../../shared/components/list/list-types/app-route/cf-app-map-routes-list-config.service';
-import { CfAppRoutesDataSource } from '../../../../shared/components/list/list-types/app-route/cf-app-routes-data-source';
+import type { CfAppRoutesDataSource } from '../../../../shared/components/list/list-types/app-route/cf-app-routes-data-source';
 import { ApplicationService } from '../../application.service';
 
 @Component({
@@ -27,7 +27,7 @@ import { ApplicationService } from '../../application.service';
   ]
 })
 export class MapRoutesComponent implements OnInit, OnDestroy {
-  paginationSubscription: any;
+  paginationSubscription: Subscription | undefined;
   subscription!: Subscription;
   @Input() selectedRoute$!: BehaviorSubject<APIResource>;
 

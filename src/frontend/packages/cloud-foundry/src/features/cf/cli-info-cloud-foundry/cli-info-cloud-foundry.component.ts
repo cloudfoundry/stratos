@@ -1,22 +1,20 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit, Optional , ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { Component, type OnInit, Optional , ChangeDetectionStrategy } from '@angular/core';
 
 import { CustomTooltipDirective } from '@stratosui/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
+import { BehaviorSubject, combineLatest, type Observable, of as observableOf } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
-import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
-import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
+import { PageHeaderComponent, type IHeaderBreadcrumb } from '@stratosui/core';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
-import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
-import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
+import type { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
+import type { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { getPreviousRoutingState } from '../../../../../store/src/types/routing.type';
-import { IOrganization, ISpace } from '../../../cf-api.types';
-import { CFAppState } from '../../../cf-app-state';
+import type { IOrganization, ISpace } from '../../../cf-api.types';
 import { CliCommandComponent } from '../../../shared/components/cli-info/cli-command/cli-command.component';
-import { CFAppCLIInfoContext, CliInfoComponent } from '../../../shared/components/cli-info/cli-info.component';
+import { type CFAppCLIInfoContext, CliInfoComponent } from '../../../shared/components/cli-info/cli-info.component';
 import { CfUserPermissionDirective } from '../../../shared/directives/cf-user-permission/cf-user-permission.directive';
 import {
   CloudFoundryUserProvidedServicesService,
@@ -59,15 +57,13 @@ export class CliInfoCloudFoundryComponent implements OnInit {
   orgGuid!: string;
   spaceGuid!: string;
 
-  cfEndpointEntityService: any;
+  cfEndpointEntityService!: CloudFoundryEndpointService;
   public previousUrl!: string;
-  public previousQueryParams!: {
-    [key: string]: string;
-  };
+  public previousQueryParams!: Record<string, string>;
 
   public context$!: Observable<CFAppCLIInfoContext>;
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
-  public route$!: Observable<{ url: string, queryParams: any }>;
+  public route$!: Observable<{ url: string, queryParams: Record<string, unknown> }>;
 
   public endpointOrgSpace$!: Observable<[
     EntityInfo<EndpointModel>,
@@ -76,7 +72,7 @@ export class CliInfoCloudFoundryComponent implements OnInit {
   ]>;
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store,
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private cfEndpointService: CloudFoundryEndpointService,
     @Optional() private cfOrgService: CloudFoundryOrganizationService,
@@ -94,7 +90,7 @@ export class CliInfoCloudFoundryComponent implements OnInit {
     // Will auto unsubscribe as we are using 'first'
     this.route$.pipe(first()).subscribe(route => {
       this.previousUrl = route.url;
-      this.previousQueryParams = route.queryParams;
+      this.previousQueryParams = route.queryParams as Record<string, string>;
     });
 
     this.setupObservables();
@@ -117,8 +113,8 @@ export class CliInfoCloudFoundryComponent implements OnInit {
     this.route$ = this.store.select(getPreviousRoutingState).pipe(
       map(route => {
         return {
-          url: route && route.state ? route.state.url : defaultBackLink,
-          queryParams: route && route.state && route.state.queryParams ? route.state.queryParams : {}
+          url: route?.state ? route.state.url : defaultBackLink,
+          queryParams: route?.state?.queryParams ? route.state.queryParams : {}
         };
       })
     );

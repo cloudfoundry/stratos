@@ -1,24 +1,26 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, AfterContentInit,
+import { ChangeDetectionStrategy, type AfterContentInit,
   Component,
   ContentChildren,
   Input,
-  OnDestroy,
-  OnInit,
-  QueryList,
+  type OnDestroy,
+  type OnInit,
+  type QueryList,
   ViewEncapsulation,
+  ChangeDetectorRef,
  } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { TailwindSnackBarService, TailwindSnackBarRef } from '../../../services/tailwind-snackbar.service';
+import {TailwindSnackBarService} from '../../../services/tailwind-snackbar.service';
+import type {TailwindSnackBarRef} from '../../../services/tailwind-snackbar.service';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { getPreviousRoutingState, IRouterNavPayload, RouterNav, AppState } from '@stratosui/store';
-import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+import { getPreviousRoutingState, type IRouterNavPayload, RouterNav, type AppState } from '@stratosui/store';
+import { combineLatest, Observable, of as observableOf, type Subscription } from 'rxjs';
 import { catchError, first, map, switchMap } from 'rxjs/operators';
 
 import { BASE_REDIRECT_QUERY } from '../stepper.types';
 import { SteppersService } from '../steppers.service';
-import { StepComponent, StepOnNextResult } from './../step/step.component';
+import { StepComponent, type StepOnNextResult } from './../step/step.component';
 import { DotContentComponent } from '../../../../core/dot-content/dot-content.component';
 
 @Component({
@@ -56,15 +58,14 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   stepValidateSub: Subscription = null;
 
-  private enterData: any;
-  private snackBarRef!: TailwindSnackBarRef<any>;
+  private enterData: unknown;
+  private snackBarRef!: TailwindSnackBarRef<unknown>;
 
   currentIndex = 0;
   cancelQueryParams$: Observable<{
     [key: string]: string;
   }>;
-  constructor(
-    private steppersService: SteppersService,
+  constructor(_steppersService: SteppersService,
     private store: Store<AppState>,
     private snackBar: TailwindSnackBarService,
     private route: ActivatedRoute,
@@ -86,10 +87,14 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     );
   }
 
-  ngOnInit() { }
+  ngOnInit() {
+    // Component initialization
+  }
 
   ngOnDestroy() {
-    this.hiddenSubs.forEach(sub => sub.unsubscribe());
+    this.hiddenSubs.forEach(sub => {
+      sub.unsubscribe();
+    });
     this.unsubscribeNext();
     if (this.snackBarRef) {
       this.snackBar.dismiss();
@@ -101,7 +106,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     this.setActive(0);
 
     this.allSteps.forEach((step => {
-      this.hiddenSubs.push(step.onHidden.subscribe((hidden) => {
+      this.hiddenSubs.push(step.onHidden.subscribe((_hidden) => {
         this.filterSteps();
       }));
       // Listen for validation changes to trigger change detection
@@ -239,7 +244,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     // Iterate through steps until we find a valid one
     while (true) {
       // Can this step be activated (exists in nonSkippedSteps)?
-      const found = nonSkipSteps.findIndex(step => step === this.steps[index]) >= 0;
+      const found = nonSkipSteps.indexOf(this.steps[index]) >= 0;
       if (found) {
         // Yes, step is valid
         return index;
@@ -300,7 +305,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     return true;
   }
 
-  getIconLigature(step: StepComponent, index: number): string {
+  getIconLigature(_step: StepComponent, _index: number): string {
     return 'done';
   }
 

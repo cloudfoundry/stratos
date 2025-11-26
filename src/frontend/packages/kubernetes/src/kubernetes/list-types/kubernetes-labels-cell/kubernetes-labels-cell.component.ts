@@ -1,8 +1,7 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, type OnInit } from '@angular/core';
 
-import { AppChip, AppChipsComponent } from '../../../../../core/src/shared/components/chips/chips.component';
-import { TableCellCustom } from '../../../../../core/src/shared/components/list/list.types';
-import { KubeAPIResource } from '../../store/kube.types';
+import { type AppChip, AppChipsComponent, TableCellCustom } from '@stratosui/core';
+import type { KubeAPIResource } from '../../store/kube.types';
 
 
 @Component({
@@ -16,10 +15,6 @@ import { KubeAPIResource } from '../../store/kube.types';
 export class KubernetesLabelsCellComponent extends TableCellCustom<KubeAPIResource> implements OnInit {
 
   chipsConfig: AppChip<KubeAPIResource>[];
-
-  constructor() {
-    super();
-  }
 
   ngOnInit() {
     this.chipsConfig = Object.entries(this.row.metadata.labels).map(([key, value]) => ({

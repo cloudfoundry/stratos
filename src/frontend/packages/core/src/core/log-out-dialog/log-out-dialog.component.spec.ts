@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -16,11 +16,11 @@ describe('LogOutDialogComponent', () => {
   let element: HTMLElement;
   let router: Router;
 
-  class TailwindDialogRefMock extends TailwindDialogRef {
+  class TailwindDialogRefMock extends TailwindDialogRef<LogOutDialogComponent> {
     close = vi.fn();
     afterClosed = vi.fn();
     afterOpened = vi.fn();
-    componentInstance = null;
+    componentInstance: LogOutDialogComponent = null as unknown as LogOutDialogComponent;
   }
 
   const dialogDataMock = {

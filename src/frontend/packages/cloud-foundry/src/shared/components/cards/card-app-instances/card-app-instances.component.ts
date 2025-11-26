@@ -1,7 +1,7 @@
-import { Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild , ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ElementRef, Input, type OnDestroy, type OnInit, Renderer2, ViewChild , ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { combineLatest, Observable, Subscription } from 'rxjs';
+import { combineLatest, type Observable, type Subscription } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
 
 import {
@@ -11,14 +11,15 @@ import {
   ConfirmationDialogService,
   CurrentUserPermissionsService,
   CustomFormFieldComponent,
-  TailwindSnackBarRef,
+  type TailwindSnackBarRef,
   TailwindSnackBarService
 } from '@stratosui/core';
-import { StratosStatus } from '@stratosui/store';
+import type { StratosStatus } from '@stratosui/store';
 import { AppMetadataTypes } from '../../../../actions/app-metadata.actions';
 import { ApplicationService } from '../../../../features/applications/application.service';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { RunningInstancesComponent } from '../../running-instances/running-instances.component';
+import type { IApp } from '../../../../cf-api.types';
 
 const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig('Set Instance count to 0',
   'Are you sure you want to set the instance count to 0?', 'Confirm', true);
@@ -43,7 +44,7 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
   // Should the card show the actions to scale/down the number of instances?
   @Input() showActions = false;
 
-  @Input() busy: any;
+  @Input() busy: Observable<boolean>;
 
   @ViewChild('instanceField', { static: true }) instanceField!: ElementRef;
 
@@ -52,8 +53,7 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
   public canEditApp$: Observable<boolean>;
 
   constructor(
-    public appService: ApplicationService,
-    private renderer: Renderer2,
+    public appService: ApplicationService,_renderer: Renderer2,
     private confirmDialog: ConfirmationDialogService,
     private snackBar: TailwindSnackBarService,
     cups: CurrentUserPermissionsService
@@ -78,13 +78,13 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
 
   public isEditing = false;
 
-  public editValue: any;
+  public editValue: number;
 
   // Observable on the running instances count for the application
   public runningInstances$!: Observable<number>;
 
-  private app: any;
-  private snackBarRef!: TailwindSnackBarRef<any>;
+  private app: IApp;
+  private snackBarRef!: TailwindSnackBarRef<unknown>;
 
   ngOnInit() {
     this.sub = this.appService.application$.subscribe(app => {
@@ -102,11 +102,11 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
     }
   }
 
-  scaleUp(current: number) {
+  scaleUp(_current: number) {
     this.setInstanceCount(this.currentCount + 1);
   }
 
-  scaleDown(current: number) {
+  scaleDown(_current: number) {
     this.setInstanceCount(this.currentCount - 1);
   }
 
@@ -121,7 +121,7 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
   finishEdit(ok: boolean) {
     this.isEditing = false;
     if (ok) {
-      this.setInstanceCount(parseInt(this.editValue, 10));
+      this.setInstanceCount(typeof this.editValue === 'string' ? parseInt(this.editValue, 10) : this.editValue);
     }
   }
 

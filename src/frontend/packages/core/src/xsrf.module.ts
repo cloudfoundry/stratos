@@ -1,13 +1,13 @@
 import {
-  HttpEvent,
-  HttpHandlerFn,
-  HttpInterceptorFn,
-  HttpRequest,
+  type HttpEvent,
+  type HttpHandlerFn,
+  type HttpInterceptorFn,
+  type HttpRequest,
   HttpResponse,
-  HttpXsrfTokenExtractor,
+  type HttpXsrfTokenExtractor,
 } from '@angular/common/http';
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 const STRATOS_XSRF_HEADER_NAME = 'X-XSRF-Token';

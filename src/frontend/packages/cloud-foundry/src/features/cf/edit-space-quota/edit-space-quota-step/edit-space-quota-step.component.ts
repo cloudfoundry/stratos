@@ -1,12 +1,12 @@
-import { Component, OnDestroy, ViewChild , ChangeDetectionStrategy } from '@angular/core';
+import { Component, type OnDestroy, ViewChild , ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import { filter, map, pairwise, tap } from 'rxjs/operators';
 
-import { safeUnsubscribe, StepOnNextFunction } from '@stratosui/core';
-import { ActionState, APIResource, AppState } from '@stratosui/store';
-import { ISpaceQuotaDefinition } from '../../../../cf-api.types';
+import { safeUnsubscribe, type StepOnNextFunction } from '@stratosui/core';
+import type { ActionState, APIResource, AppState } from '@stratosui/store';
+import type { ISpaceQuotaDefinition } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
@@ -39,7 +39,7 @@ export class EditSpaceQuotaStepComponent implements OnDestroy {
   form!: SpaceQuotaDefinitionFormComponent;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store,
     private activatedRoute: ActivatedRoute,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
@@ -57,7 +57,9 @@ export class EditSpaceQuotaStepComponent implements OnDestroy {
       {}
     ).waitForEntity$.pipe(
       map(data => data.entity),
-      tap((resource) => this.quota = resource.entity)
+      tap((resource) => {
+        this.quota = resource.entity;
+      })
     );
 
     this.spaceQuotaSubscription = this.spaceQuotaDefinition$.subscribe();

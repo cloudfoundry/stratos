@@ -1,16 +1,16 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { Action, Store } from '@ngrx/store';
+import { type Action, Store } from '@ngrx/store';
 import { ClearPaginationOfEntity, ClearPaginationOfType } from '@stratosui/store';
-import { ApiRequestTypes } from '@stratosui/store';
+import type { ApiRequestTypes } from '@stratosui/store';
 import { connectedEndpointsOfTypesSelector } from '@stratosui/store';
 import { of } from 'rxjs';
 import { catchError, first, flatMap, map, mergeMap, switchMap } from 'rxjs/operators';
 
 import { environment } from '../../../../core/src/environments/environment';
 import { isJetstreamError } from '../../../../store/src/jetstream';
-import { AppState, entityCatalog, NormalizedResponse, WrapperRequestActionSuccess } from '../../../../store/src/public-api';
+import { type AppState, entityCatalog, type NormalizedResponse, WrapperRequestActionSuccess, type EndpointModel } from '../../../../store/src/public-api';
 import { StartRequestAction, WrapperRequestActionFailed } from '../../../../store/src/types/request.types';
 import {
   KUBERNETES_ENDPOINT_TYPE,
@@ -20,13 +20,13 @@ import {
 import { KubernetesPodExpandedStatusHelper } from '../services/kubernetes-expanded-state';
 import {
   DELETE_KUBE_RESOURCE,
-  DeleteKubernetesResource,
+  type DeleteKubernetesResource,
   GET_KUBE_RESOURCES,
   GET_KUBE_RESOURCES_IN_NAMESPACE,
-  GetKubernetesResources,
-  GetKubernetesResourcesInNamespace,
+  type GetKubernetesResources,
+  type GetKubernetesResourcesInNamespace,
 } from './kube-resource.actions';
-import {
+import type {
   BasicKubeAPIResource,
   IKubeResourceEntityDefinition,
   KubeAPIResource,
@@ -36,11 +36,12 @@ import {
   KubernetesPod,
   KubernetesStatefulSet,
   KubeService,
+  KubeServiceAccount,
 } from './kube.types';
 import {
   CREATE_NAMESPACE,
-  CreateKubernetesNamespace,
-  GeKubernetesDeployments,
+  type CreateKubernetesNamespace,
+  type GeKubernetesDeployments,
   GET_KUBE_DASHBOARD,
   GET_KUBE_DEPLOYMENT,
   GET_KUBE_POD,
@@ -54,20 +55,20 @@ import {
   GET_PODS_ON_NODE_INFO,
   GET_SERVICE_INFO,
   GET_SERVICES_IN_NAMESPACE_INFO,
-  GetKubernetesDashboard,
-  GetKubernetesNamespace,
-  GetKubernetesNamespaces,
-  GetKubernetesNode,
-  GetKubernetesNodes,
-  GetKubernetesPod,
-  GetKubernetesPods,
-  GetKubernetesPodsInNamespace,
-  GetKubernetesPodsOnNode,
-  GetKubernetesServices,
-  GetKubernetesServicesInNamespace,
-  GetKubernetesStatefulSets,
-  KubeAction,
-  KubePaginationAction,
+  type GetKubernetesDashboard,
+  type GetKubernetesNamespace,
+  type GetKubernetesNamespaces,
+  type GetKubernetesNode,
+  type GetKubernetesNodes,
+  type GetKubernetesPod,
+  type GetKubernetesPods,
+  type GetKubernetesPodsInNamespace,
+  type GetKubernetesPodsOnNode,
+  type GetKubernetesServices,
+  type GetKubernetesServicesInNamespace,
+  type GetKubernetesStatefulSets,
+  type KubeAction,
+  type KubePaginationAction,
 } from './kubernetes.actions';
 
 export interface KubeDashboardContainer {
@@ -95,7 +96,7 @@ export interface KubeDashboardStatus {
     name: string;
     scheme: string;
   };
-  serviceAccount: any;
+  serviceAccount: KubeServiceAccount;
 }
 
 @Injectable({
@@ -144,7 +145,7 @@ export class KubernetesEffects {
             new WrapperRequestActionFailed(error.message, action, 'fetch', {
               endpointIds: [action.kubeGuid],
               url: error.url || url,
-              eventCode: error.status ? error.status + '' : '500',
+              eventCode: error.status ? `${error.status}` : '500',
               message: 'Kubernetes Dashboard request error',
               error
             })
@@ -288,7 +289,7 @@ export class KubernetesEffects {
     ofType<GetKubernetesResources>(GET_KUBE_RESOURCES),
     flatMap((action: GetKubernetesResources) => {
       const catalog = entityCatalog.getEntity(action.endpointType, action.entityType);
-      if (catalog && catalog.definition) {
+      if (catalog?.definition) {
         const defn = catalog.definition as IKubeResourceEntityDefinition;
         if (defn.apiVersion && defn.apiName) {
           return this.processListAction<KubeAPIResource>(
@@ -307,7 +308,7 @@ export class KubernetesEffects {
     ofType<GetKubernetesResources>(GET_KUBE_RESOURCES_IN_NAMESPACE),
     flatMap((action: GetKubernetesResourcesInNamespace) => {
       const catalog = entityCatalog.getEntity(action.endpointType, action.entityType);
-      if (catalog && catalog.definition) {
+      if (catalog?.definition) {
         const defn = catalog.definition as IKubeResourceEntityDefinition;
         if (defn.apiVersion && defn.apiName) {
           return this.processListAction<KubeAPIResource>(
@@ -323,15 +324,15 @@ export class KubernetesEffects {
 
   // =======================================================================================
 
-  
+
   deleteKubeResource$ = createEffect(() => this.actions$.pipe(
     ofType<DeleteKubernetesResource>(DELETE_KUBE_RESOURCE),
     flatMap(action => {
       const catalog = entityCatalog.getEntity(action.endpointType, action.entityType);
-      if (catalog && catalog.definition) {
+      if (catalog?.definition) {
         const defn = catalog.definition as IKubeResourceEntityDefinition;
         if (defn.apiVersion && defn.apiName) {
-          let apiURL;
+          let apiURL: string;
           if (action.namespace) {
             apiURL = `/pp/${this.proxyAPIVersion}/proxy${defn.apiVersion}/namespaces/${action.namespace}/${defn.apiName}/${action.name}`;
           } else {
@@ -366,7 +367,7 @@ export class KubernetesEffects {
       of([action.kubeGuid]) :
       this.store.select(connectedEndpointsOfTypesSelector(KUBERNETES_ENDPOINT_TYPE)).pipe(
         first(),
-        map(endpoints => Object.values(endpoints).map((endpoint: any) => endpoint.guid))
+        map(endpoints => Object.values(endpoints).map((endpoint: EndpointModel) => endpoint.guid))
       );
     let pKubeIds: string[] = [];
 
@@ -377,7 +378,7 @@ export class KubernetesEffects {
         const headers = new HttpHeaders({ 'x-cap-cnsi-list': pKubeIds });
         const requestArgs = {
           headers,
-          params: null as any
+          params: null as HttpParams | null
         };
         const paginationAction = action as KubePaginationAction;
         if (paginationAction.initialParams) {
@@ -394,14 +395,14 @@ export class KubernetesEffects {
         } as NormalizedResponse;
 
         const items: Array<T> = Object.entries(allRes).reduce((combinedRes, [kubeId, res]) => {
-          const resObj = res as any;
+          const resObj = res as { items?: T[] };
           if (!resObj.items) {
             // The request to this endpoint has failed. Note - throwing this hides any other failures,
             // however we follow the same approach elsewhere
             throw res;
           }
-          resObj.items.forEach((item: any) => {
-            item.metadata.kubeId = kubeId;
+          resObj.items.forEach((item: T) => {
+            (item as BasicKubeAPIResource).metadata.kubeId = kubeId;
             combinedRes.push(item);
           });
           return combinedRes;
@@ -456,7 +457,7 @@ export class KubernetesEffects {
   private processSingleItemAction<T extends BasicKubeAPIResource>(
     action: KubeAction,
     url: string,
-    body?: any) {
+    body?: unknown) {
     const requestType: ApiRequestTypes = body ? 'create' : 'fetch';
     this.store.dispatch(new StartRequestAction(action, requestType));
     const headers = new HttpHeaders({
@@ -552,20 +553,21 @@ export class KubernetesEffects {
       );
   }
 
-  private createKubeErrorMessage(err: any): string {
+  private createKubeErrorMessage(err: unknown): string {
     if (err) {
-      if (err.error && err.error.message) {
+      const error = err as { error?: { message?: string }; message?: string };
+      if (error.error?.message) {
         // Kube error
-        return err.error.message;
-      } else if (err.message) {
+        return error.error.message;
+      } else if (error.message) {
         // Http error
-        return err.message;
+        return error.message;
       }
     }
     return 'Kubernetes API request error';
   }
 
-  private createKubeError(err: any): { status: string, message: string, } {
+  private createKubeError(err: unknown): { status: string, message: string, } {
     const jetstreamError = isJetstreamError(err);
     if (jetstreamError) {
       // Wrapped error
@@ -574,8 +576,9 @@ export class KubernetesEffects {
         message: this.createKubeErrorMessage(jetstreamError.errorResponse)
       };
     }
+    const error = err as { status?: number };
     return {
-      status: err && err.status ? err.status + '' : '500',
+      status: error?.status ? `${error.status}` : '500',
       message: this.createKubeErrorMessage(err)
     };
   }

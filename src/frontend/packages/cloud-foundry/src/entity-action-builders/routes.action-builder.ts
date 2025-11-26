@@ -1,11 +1,11 @@
-import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
+import type { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { GetAppRoutes } from '../actions/application-service-routes.actions';
-import { CreateRoute, DeleteRoute, GetAllRoutes, NewRoute, UnmapRoute } from '../actions/route.actions';
+import { CreateRoute, DeleteRoute, GetAllRoutes, type NewRoute, UnmapRoute } from '../actions/route.actions';
 import { GetSpaceRoutes } from '../actions/space.actions';
-import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
+import type { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
 export interface RoutesActionBuilders extends OrchestratedActionBuilders {
-  create: (id: string, endpointGuid: string, route: NewRoute) => CreateRoute;
+  create: (id: string, endpointGuid: string, extraArgs?: Record<string, unknown>) => CreateRoute;
   delete: (
     guid: string,
     endpointGuid: string,
@@ -17,7 +17,7 @@ export interface RoutesActionBuilders extends OrchestratedActionBuilders {
   getMultiple: (
     endpointGuid: string,
     paginationKey: string,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    extraArgs?: Record<string, unknown>
   ) => GetAllRoutes;
   unmap: (
     guid: string,
@@ -42,10 +42,10 @@ export interface RoutesActionBuilders extends OrchestratedActionBuilders {
 }
 
 export const routesActionBuilders: RoutesActionBuilders = {
-  create: (id: string, endpointGuid: string, route: NewRoute) => new CreateRoute(
+  create: (id: string, endpointGuid: string, route?: Record<string, unknown>) => new CreateRoute(
     id,
     endpointGuid,
-    route
+    route as NewRoute
   ),
   delete: (
     guid: string,

@@ -1,9 +1,8 @@
-import { ChangeDetectionStrategy, AfterContentInit,
+import { ChangeDetectionStrategy, type AfterContentInit,
   Component,
   ContentChildren,
-  HostBinding,
-  OnInit,
-  QueryList,
+  type OnInit,
+  type QueryList,
   ViewEncapsulation,
  } from '@angular/core';
 
@@ -20,19 +19,17 @@ import { TileComponent } from '../tile/tile.component';
 })
 export class TileGroupComponent implements OnInit, AfterContentInit {
 
-  constructor() { }
-
-  @HostBinding('class.tile-group-gutters') private hasGutters = true;
-
-  @HostBinding('class.tile-group-6-cols') private isSixColumn = false;
-  @HostBinding('class.tile-group-4-cols') private isFourColumn = false;
-  @HostBinding('class.tile-group-3-cols') private isThreeColumn = false;
-  @HostBinding('class.tile-group-2-cols') private isTwoColumn = false;
-  @HostBinding('class.tile-group-1-cols') private isOneColumn = false;
-
   @ContentChildren(TileComponent) tiles!: QueryList<TileComponent>;
 
-  ngOnInit() { }
+  isSixColumn = false;
+  isFourColumn = false;
+  isThreeColumn = false;
+  isTwoColumn = false;
+  isOneColumn = false;
+
+  ngOnInit() {
+    // Component initialization
+  }
 
   ngAfterContentInit() {
     this.isSixColumn = (this.tiles.length === 6);

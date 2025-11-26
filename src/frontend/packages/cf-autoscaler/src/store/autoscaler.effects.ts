@@ -1,23 +1,24 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import type { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { Action, Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { type Actions, createEffect, ofType } from '@ngrx/effects';
+import type { Action } from '@ngrx/store';
+import type { Store } from '@ngrx/store';
+import type { Observable } from 'rxjs';
 import { catchError, mergeMap, withLatestFrom } from 'rxjs/operators';
 
-import { PaginationResponse } from '../../../cloud-foundry/src/store/types/cf-api.types';
+import type { PaginationResponse } from '../../../cloud-foundry/src/store/types/cf-api.types';
 import { environment } from '@stratosui/core';
 import {
-  AppState,
+  type AppState,
   entityCatalog,
   isHttpErrorResponse,
-  ApiRequestTypes,
+  type ApiRequestTypes,
   selectPaginationState,
-  APIResource,
-  NormalizedResponse,
-  PaginatedAction,
-  PaginationEntityState,
-  PaginationParam,
+  type APIResource,
+  type NormalizedResponse,
+  type PaginatedAction,
+  type PaginationEntityState,
+  type PaginationParam,
   StartRequestAction,
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
@@ -36,27 +37,27 @@ import {
   APP_AUTOSCALER_POLICY_TRIGGER,
   APP_AUTOSCALER_SCALING_HISTORY,
   AUTOSCALER_INFO,
-  AutoscalerPaginationParams,
-  AutoscalerQuery,
+  type AutoscalerPaginationParams,
+  type AutoscalerQuery,
   CREATE_APP_AUTOSCALER_POLICY,
-  CreateAppAutoscalerPolicyAction,
+  type CreateAppAutoscalerPolicyAction,
   DELETE_APP_AUTOSCALER_CREDENTIAL,
-  DeleteAppAutoscalerCredentialAction,
+  type DeleteAppAutoscalerCredentialAction,
   DETACH_APP_AUTOSCALER_POLICY,
-  DetachAppAutoscalerPolicyAction,
+  type DetachAppAutoscalerPolicyAction,
   FETCH_APP_AUTOSCALER_METRIC,
-  GetAppAutoscalerHealthAction,
-  GetAppAutoscalerInfoAction,
-  GetAppAutoscalerMetricAction,
+  type GetAppAutoscalerHealthAction,
+  type GetAppAutoscalerInfoAction,
+  type GetAppAutoscalerMetricAction,
   GetAppAutoscalerPolicyAction,
-  GetAppAutoscalerPolicyTriggerAction,
-  GetAppAutoscalerScalingHistoryAction,
+  type GetAppAutoscalerPolicyTriggerAction,
+  type GetAppAutoscalerScalingHistoryAction,
   UPDATE_APP_AUTOSCALER_CREDENTIAL,
   UPDATE_APP_AUTOSCALER_POLICY,
-  UpdateAppAutoscalerCredentialAction,
-  UpdateAppAutoscalerPolicyAction,
+  type UpdateAppAutoscalerCredentialAction,
+  type UpdateAppAutoscalerPolicyAction,
 } from './app-autoscaler.actions';
-import {
+import type {
   AppAutoscalerCredential,
   AppAutoscalerEvent,
   AppAutoscalerFetchPolicyFailedResponse,
@@ -70,16 +71,17 @@ import {
 const { proxyAPIVersion } = environment;
 const commonPrefix = `/pp/${proxyAPIVersion}/autoscaler`;
 
-function extractAutoscalerError(error: any): string {
+function extractAutoscalerError(error: unknown): string {
   const httpResponse: HttpErrorResponse = isHttpErrorResponse(error);
   if (httpResponse) {
     return httpResponse.error ? httpResponse.error.error : JSON.stringify(httpResponse.error);
   }
-  return error._body;
+  return (error as { _body?: string })._body ?? '';
 }
 
-function createAutoscalerErrorMessage(requestType: string, error: any): string {
-  return `Unable to ${requestType}: ${error.status} ${extractAutoscalerError(error) || ''}`;
+function createAutoscalerErrorMessage(requestType: string, error: unknown): string {
+  const status = (error as { status?: number }).status ?? '';
+  return `Unable to ${requestType}: ${status} ${extractAutoscalerError(error) || ''}`;
 }
 
 @Injectable({
@@ -89,7 +91,7 @@ export class AutoscalerEffects {
   constructor(
     private http: HttpClient,
     private actions$: Actions,
-    private store: Store<AppState>,
+    private store: Store,
   ) { }
 
 
@@ -211,7 +213,7 @@ export class AutoscalerEffects {
         .delete(`${commonPrefix}/apps/${action.guid}/policy`, {
           headers: this.addHeaders(action.endpointGuid)
         }).pipe(
-          mergeMap(response => {
+          mergeMap(_response => {
             const entity = entityCatalog.getEntity(action);
             const mappedData = {
               entities: { [entity.entityKey]: {} },
@@ -276,7 +278,7 @@ export class AutoscalerEffects {
         .delete(`${commonPrefix}/apps/${action.guid}/credential`, {
           headers: this.addHeaders(action.endpointGuid)
         }).pipe(
-          mergeMap(response => {
+          mergeMap(_response => {
             const entity = entityCatalog.getEntity(action);
             const mappedData = {
               entities: { [entity.entityKey]: {} },
@@ -318,7 +320,7 @@ export class AutoscalerEffects {
         params[resultPerPageParam] = resultPerPageParamDefault.toString();
       }
       const {
-        ['order-direction-field']: removed,
+        "order-direction-field": removed,
         ...cleanParams
       } = params;
 
@@ -363,10 +365,10 @@ export class AutoscalerEffects {
         }).pipe(
           mergeMap(response => {
             const data = response;
-            const mappedData = {
+            const mappedData: NormalizedResponse<APIResource<AppAutoscalerMetricDataLocal>> = {
               entities: { [entity.entityKey]: {} },
               result: []
-            } as NormalizedResponse;
+            };
             this.addMetric(
               entity.entityKey, mappedData, action.guid, action.metricName, data, parseInt(action.initialParams['start-time'], 10),
               parseInt(action.initialParams['end-time'], 10), action.skipFormat, action.trigger);
@@ -496,7 +498,7 @@ export class AutoscalerEffects {
     mappedData.result.push(id);
   }
 
-  transformData(key: string, mappedData: NormalizedResponse, guid: string, data: any) {
+  transformData(key: string, mappedData: NormalizedResponse, guid: string, data: unknown) {
     mappedData.entities[key][guid] = {
       entity: data,
       metadata: {
@@ -507,9 +509,9 @@ export class AutoscalerEffects {
   }
 
   transformEventData(key: string, mappedData: NormalizedResponse, appGuid: string, data: PaginationResponse<AppAutoscalerEvent>) {
-    mappedData.entities[key] = [];
+    mappedData.entities[key] = {};
     data.resources.forEach((item) => {
-      const id = AutoscalerConstants.createMetricId(appGuid, item.timestamp + '');
+      const id = AutoscalerConstants.createMetricId(appGuid, `${item.timestamp}`);
       mappedData.entities[key][id] = {
         entity: item,
         metadata: {
@@ -524,7 +526,7 @@ export class AutoscalerEffects {
 
   transformTriggerData(
     key: string, mappedData: NormalizedResponse, data: AppAutoscalerPolicyLocal, query: AutoscalerQuery, appGuid: string) {
-    mappedData.entities[key] = Object.keys(data.scaling_rules_map).reduce((entity: Record<string, any>, metricType: string) => {
+    mappedData.entities[key] = Object.keys(data.scaling_rules_map).reduce((entity: Record<string, unknown>, metricType: string) => {
       const id = AutoscalerConstants.createMetricId(appGuid, metricType);
       data.scaling_rules_map[metricType].query = query;
       entity[id] = {
@@ -534,7 +536,7 @@ export class AutoscalerEffects {
         }
       };
       return entity;
-    }, []);
+    }, {} as Record<string, unknown>);
     mappedData.result = Object.keys(mappedData.entities[key]);
   }
 
@@ -552,7 +554,7 @@ export class AutoscalerEffects {
     const stringifiedInitialParams = this.stringifyPagParams(initialParams);
 
     const {
-      ['order-direction']: order = null,
+      "order-direction": order = null,
       ...cleanParams
     } = {
       ...stringifiedInitialParams,
@@ -570,7 +572,7 @@ export class AutoscalerEffects {
       return {};
     }
     return Object.keys(params).reduce((pagParams, key) => {
-      if (params.hasOwnProperty(key)) {
+      if (Object.hasOwn(params, key)) {
         const value = params[key];
         if (Array.isArray(value)) {
           pagParams[key] = value;

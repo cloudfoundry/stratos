@@ -1,4 +1,5 @@
-import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+import type {AbstractControl} from '@angular/forms';
+import type {ValidationErrors, ValidatorFn} from '@angular/forms';
 
 /**
  * Compose multiple validators with AND logic (all must pass)

@@ -1,10 +1,10 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { IFavoriteMetadata, UserFavorite } from '@stratosui/store';
+import { type IFavoriteMetadata, UserFavorite } from '@stratosui/store';
 
 import { BaseTestModulesNoShared, STORE_TEST_PROVIDERS } from '@test-framework/core-test.helper';
-import { TableCellFavoriteComponent, TableCellFavoriteComponentConfig } from './table-cell-favorite.component';
+import { TableCellFavoriteComponent, type TableCellFavoriteComponentConfig } from './table-cell-favorite.component';
 
 interface TestEntity {
   id: string;
@@ -186,7 +186,10 @@ describe('TableCellFavoriteComponent', () => {
 
     it('should handle config with missing createUserFavorite function', () => {
       const testEntity: TestEntity = { id: 'invalid-config-test', name: 'Invalid Config Test' };
-      const invalidConfig = { wrongProperty: 'value' } as any;
+      const invalidConfig: TableCellFavoriteComponentConfig<TestEntity, TestMetadata> = {
+        wrongProperty: 'value',
+        createUserFavorite: undefined as never
+      } as TableCellFavoriteComponentConfig<TestEntity, TestMetadata>;
 
       // Suppress the expected console.error since this is testing error handling
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});

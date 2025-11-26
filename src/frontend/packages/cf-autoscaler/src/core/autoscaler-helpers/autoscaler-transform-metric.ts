@@ -1,8 +1,8 @@
 import { format } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
 
-import { PaginationResponse } from '../../../../cloud-foundry/src/store/types/cf-api.types';
-import {
+import type { PaginationResponse } from '../../../../cloud-foundry/src/store/types/cf-api.types';
+import type {
   AppAutoscalerMetricBasicInfo,
   AppAutoscalerMetricData,
   AppAutoscalerMetricDataLine,
@@ -140,7 +140,7 @@ function transformMetricData(
 
 function buildMetricColorData(metricData: AppAutoscalerMetricDataPoint[], trigger: AppScalingTrigger): AppAutoscalerMetricDataPoint[] {
   const colorTarget: AppAutoscalerMetricDataPoint[] = [];
-  metricData.map((item) => {
+  metricData.forEach((item) => {
     colorTarget.push({
       name: item.name,
       value: getColor(trigger, item.value),
@@ -213,11 +213,12 @@ function getColorCommon(triggerRules: AppScalingRule[], value: number, isLower?:
   return '';
 }
 
-function getColor(trigger: AppScalingTrigger, value: any): string {
-  if (Number.isNaN(value)) {
+function getColor(trigger: AppScalingTrigger, value: number | string): string {
+  const numValue = typeof value === 'string' ? Number.parseFloat(value) : value;
+  if (Number.isNaN(numValue)) {
     return AutoscalerConstants.normalColor;
   }
-  return getColorCommon(trigger.upper, value) || getColorCommon(trigger.lower, value, true) || AutoscalerConstants.normalColor;
+  return getColorCommon(trigger.upper, numValue) || getColorCommon(trigger.lower, numValue, true) || AutoscalerConstants.normalColor;
 }
 
 function getMetricBasicInfo(
@@ -256,7 +257,7 @@ function getMaxThreshod(rules: AppScalingRule[]) {
 }
 
 function getChartMax(trigger: AppScalingTrigger, maxValue: number, metricName: string): number {
-  if (AutoscalerConstants.MetricPercentageTypes.indexOf(metricName) >= 0) {
+  if (AutoscalerConstants.MetricPercentageTypes.indexOf(metricName as typeof AutoscalerConstants.MetricPercentageTypes[number]) >= 0) {
     return 100;
   }
   const thresholdCount = trigger.upper.length + trigger.lower.length;

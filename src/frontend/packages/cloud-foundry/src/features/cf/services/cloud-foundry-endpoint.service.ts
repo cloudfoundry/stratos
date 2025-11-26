@@ -1,26 +1,27 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import { filter, first, map, publishReplay, refCount } from 'rxjs/operators';
 
 import {
-  EntityService,
+  type EntityService,
   endpointEntityType,
-  PaginationMonitorFactory,
+  type PaginationMonitorFactory,
   getPaginationObservables,
-  PaginationObservables,
+  type PaginationObservables,
   stratosEntityCatalog,
-  APIResource,
-  EntityInfo,
-  EndpointModel,
-  EndpointUser,
-  PaginatedAction,
+  type APIResource,
+  type EntityInfo,
+  type EndpointModel,
+  type EndpointUser,
+  type PaginatedAction,
+  type GeneralEntityAppState,
 } from '@stratosui/store';
 import { GetAllApplications } from '../../../actions/application.actions';
 import { GetAllRoutes } from '../../../actions/route.actions';
 import { GetSpaceRoutes } from '../../../actions/space.actions';
-import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../cf-api.types';
-import { CFAppState } from '../../../cf-app-state';
+import type { IApp, ICfV2Info, IOrganization, ISpace } from '../../../cf-api.types';
+import type { CFAppState } from '../../../cf-app-state';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../cf-entity-factory';
 import {
@@ -37,7 +38,7 @@ import {
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { QParam, QParamJoiners } from '../../../shared/q-param';
 import { CfApplicationState } from '../../../store/types/application.types';
-import { ActiveRouteCfOrgSpace } from '../cf-page.types';
+import type { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { fetchTotalResults } from '../cf.helpers';
 
 export function appDataSort(app1: APIResource<IApp>, app2: APIResource<IApp>): number {
@@ -100,7 +101,7 @@ export class CloudFoundryEndpointService {
     return getAllOrganizationsAction;
   }
 
-  public static fetchAppCount(store: Store<CFAppState>, pmf: PaginationMonitorFactory, cfGuid: string, orgGuid?: string, spaceGuid?: string)
+  public static fetchAppCount(store: Store<GeneralEntityAppState>, pmf: PaginationMonitorFactory, cfGuid: string, orgGuid?: string, spaceGuid?: string)
     : Observable<number> {
     const parentSchemaKey = spaceGuid ? spaceEntityType : orgGuid ? organizationEntityType : 'cf';
     const uniqueKey = spaceGuid || orgGuid || cfGuid;
@@ -117,7 +118,7 @@ export class CloudFoundryEndpointService {
   }
 
   public static fetchRouteCount(
-    store: Store<CFAppState>,
+    store: Store<GeneralEntityAppState>,
     pmf: PaginationMonitorFactory,
     cfGuid: string,
     orgGuid?: string,
@@ -141,12 +142,12 @@ export class CloudFoundryEndpointService {
   }
 
   // Fetch the cound of organisations in a Cloud Foundry
-  public static fetchOrgCount(store: Store<CFAppState>, pmf: PaginationMonitorFactory, cfGuid: string): Observable<number> {
+  public static fetchOrgCount(store: Store<GeneralEntityAppState>, pmf: PaginationMonitorFactory, cfGuid: string): Observable<number> {
     const getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizations(cfGuid);
     return fetchTotalResults(getAllOrgsAction, store, pmf);
   }
 
-  public static fetchOrgs(store: Store<CFAppState>, pmf: PaginationMonitorFactory, cfGuid: string):
+  public static fetchOrgs(store: Store<GeneralEntityAppState>, pmf: PaginationMonitorFactory, cfGuid: string):
     Observable<APIResource<IOrganization>[]> {
     const getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizations(cfGuid);
     return getPaginationObservables<APIResource<IOrganization>>({
@@ -162,7 +163,7 @@ export class CloudFoundryEndpointService {
 
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     private cfUserService: CfUserService,
     private pmf: PaginationMonitorFactory,
   ) {
@@ -187,13 +188,12 @@ export class CloudFoundryEndpointService {
   }
 
   constructAppObs() {
-    this.appsPagObs = cfEntityCatalog.application.store.getPaginationService(this.cfGuid);
+    this.appsPagObs = cfEntityCatalog.application.store.getPaginationService(this.cfGuid, null);
   }
 
   private constructSecondaryObservable() {
     this.hasSSHAccess$ = this.info$.pipe(
-      map(p => !!(p.entity.entity &&
-        p.entity.entity.app_ssh_endpoint &&
+      map(p => !!(p.entity.entity?.app_ssh_endpoint &&
         p.entity.entity.app_ssh_host_key_fingerprint &&
         p.entity.entity.app_ssh_oauth_client))
     );
@@ -229,7 +229,7 @@ export class CloudFoundryEndpointService {
   public getMetricFromApps(apps: APIResource<IApp>[], statMetric: string): number {
     return apps ? apps
       .filter(a => a.entity && a.entity.state !== CfApplicationState.STOPPED)
-      .map(a => (a.entity as Record<string, any>)[statMetric] * a.entity.instances)
+      .map(a => ((a.entity as unknown as Record<string, unknown>)[statMetric] as number) * a.entity.instances)
       .reduce((a, t) => a + t, 0) : 0;
   }
 
@@ -242,7 +242,7 @@ export class CloudFoundryEndpointService {
   }
 
   fetchApps() {
-    cfEntityCatalog.application.api.getMultiple(this.cfGuid);
+    cfEntityCatalog.application.api.getMultiple(this.cfGuid, null);
   }
 
 }

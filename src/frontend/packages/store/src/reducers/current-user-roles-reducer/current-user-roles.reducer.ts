@@ -1,17 +1,17 @@
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 
-import { SESSION_VERIFIED, VerifiedSession } from '../../actions/auth.actions';
+import { SESSION_VERIFIED, type VerifiedSession } from '../../actions/auth.actions';
 import {
   GET_CURRENT_USER_RELATIONS,
   GET_CURRENT_USER_RELATIONS_FAILED,
   GET_CURRENT_USER_RELATIONS_SUCCESS,
 } from '../../actions/permissions.actions';
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
-import { SessionUser } from '../../types/auth.types';
+import type { SessionUser } from '../../types/auth.types';
 import {
   getDefaultRolesRequestState,
-  ICurrentUserRolesState,
-  RolesRequestState,
+  type ICurrentUserRolesState,
+  type RolesRequestState,
 } from '../../types/current-user-roles.types';
 
 const getDefaultState = () => ({
@@ -45,9 +45,10 @@ function coreCurrentUserRolesReducer(state: ICurrentUserRolesState, action: Acti
         ...state,
         state: currentUserRolesRequestStateReducer(state.state, RolesRequestStateStage.FAILURE)
       };
-    case SESSION_VERIFIED:
+    case SESSION_VERIFIED: {
       const svAction = action as VerifiedSession;
       return applyInternalScopes(state, svAction.sessionData?.user);
+    }
   }
   return state;
 }

@@ -1,4 +1,4 @@
-import { UserScopeStrings } from './endpoint.types';
+import type { UserScopeStrings } from './endpoint.types';
 
 export interface RolesRequestState {
   initialised: boolean;
@@ -22,7 +22,7 @@ export interface IStratosRolesState {
 export interface ICurrentUserRolesState {
   internal: IStratosRolesState;
   endpoints: {
-    [endpointType: string]: any;
+    [endpointType: string]: unknown;
   };
   state: RolesRequestState;
 }

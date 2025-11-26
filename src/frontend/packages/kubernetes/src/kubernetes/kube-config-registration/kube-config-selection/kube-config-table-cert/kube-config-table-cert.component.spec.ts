@@ -1,14 +1,14 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { of } from 'rxjs';
+import { of, type Observable } from 'rxjs';
 
 import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
 import { KubeConfigHelper } from '../../kube-config.helper';
 import { KubeConfigTableCertComponent } from './kube-config-table-cert.component';
-import { KubeConfigFileCluster } from '../../kube-config.types';
+import type { KubeConfigFileCluster } from '../../kube-config.types';
 
 describe('KubeConfigTableCertComponent', () => {
   let component: KubeConfigTableCertComponent;
@@ -21,8 +21,8 @@ describe('KubeConfigTableCertComponent', () => {
       update: vi.fn((cluster: KubeConfigFileCluster) => {
         // Mock update method - no-op or simple validation
         return of(cluster);
-      }),
-      checkValidity: vi.fn(() => of({})),
+      }) as (cluster: KubeConfigFileCluster) => Observable<KubeConfigFileCluster>,
+      checkValidity: vi.fn(() => of({} as KubeConfigFileCluster)),
       clustersChanged: vi.fn(),
     };
 

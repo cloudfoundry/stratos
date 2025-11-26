@@ -1,14 +1,15 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import {
-  ChangeDetectionStrategy, Component,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
   ComponentFactoryResolver,
-  ComponentRef,
+  type ComponentRef,
   Input,
-  OnDestroy,
-  OnInit,
+  type OnDestroy,
+  type OnInit,
   ViewChild,
   ViewContainerRef,
-  ChangeDetectorRef,
 } from '@angular/core';
 import { CustomTooltipDirective } from '../../../../custom-tooltip/custom-tooltip.directive';
 import { RouterModule } from '@angular/router';
@@ -16,25 +17,25 @@ import { Store } from '@ngrx/store';
 import {
   getFullEndpointApiUrl,
   entityCatalog,
-  MenuItem,
+  type MenuItem,
   StratosStatus,
-  StratosCatalogEndpointEntity,
-  EndpointModel,
-  UserFavoriteEndpoint,
+  type StratosCatalogEndpointEntity,
+  type EndpointModel,
+  type UserFavoriteEndpoint,
   UserFavoriteManager,
   RouterNav,
-  AppState,
+  type AppState,
 } from '@stratosui/store';
-import { combineLatest, Observable, of, ReplaySubject, Subscription } from 'rxjs';
+import { combineLatest, type Observable, of, ReplaySubject, type Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../../../core/endpoints.service';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
-import { coreEndpointListDetailsComponents } from '../../../../../../features/endpoints/endpoint-helpers';
 import { createMetaCardMenuItemSeparator } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
-import { BaseEndpointsDataSource } from '../base-endpoints-data-source';
-import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
+import type { BaseEndpointsDataSource } from '../base-endpoints-data-source';
+import { EndpointListHelper } from '../endpoint-list.helpers';
+import type { EndpointListDetailsComponent } from '../endpoint-list.helpers';
 import { CopyToClipboardComponent } from './../../../../copy-to-clipboard/copy-to-clipboard.component';
 import { SessionService } from '../../../../../services/session.service';
 import { CurrentUserPermissionsService } from '../../../../../../core/permissions/current-user-permissions.service';
@@ -191,8 +192,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     private componentFactoryResolver: ComponentFactoryResolver,
     private userFavoriteManager: UserFavoriteManager,
     private currentUserPermissionsService: CurrentUserPermissionsService,
-    private sessionService: SessionService,
-    private cdr: ChangeDetectorRef,
+    private sessionService: SessionService,_cdr: ChangeDetectorRef,
   ) {
     super();
     this.endpointIds$ = this.endpointIds.asObservable();
@@ -234,7 +234,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
     if (!this.component) {
       const res =
-        this.endpointListHelper.createEndpointDetails(e.listDetailsComponent, this.endpointDetails, this.componentFactoryResolver);
+        this.endpointListHelper.createEndpointDetails(e.listDetailsComponent as typeof EndpointListDetailsComponent, this.endpointDetails, this.componentFactoryResolver);
       this.componentRef = res.componentRef;
       this.component = res.component;
     }

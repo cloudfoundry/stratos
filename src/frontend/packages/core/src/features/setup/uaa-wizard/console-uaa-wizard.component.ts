@@ -1,14 +1,14 @@
-import { ChangeDetectionStrategy, Component, Inject, OnInit, ViewEncapsulation, signal  } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, Inject, type OnInit, ViewEncapsulation, signal, inject  } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import {
   VerifySession,
   SetupConsoleGetScopes,
   SetupSaveConfig,
-  AuthState,
-  UAASetupState,
-  InternalAppState,
+  type AuthState,
+  type UAASetupState,
+  type InternalAppState,
 } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { delay, filter, map, skipWhile, take } from 'rxjs/operators';
@@ -24,13 +24,13 @@ interface UAAWizardForm {
 }
 
 import { APP_TITLE } from '../../../core/core.types';
-import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
+import type { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { getSSOClientRedirectURI } from '../../endpoints/endpoint-helpers';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { ShowPageHeaderComponent } from '../../../shared/components/page-header/show-page-header/show-page-header.component';
 import { SteppersComponent } from '../../../shared/components/stepper/steppers/steppers.component';
 import { StepComponent } from '../../../shared/components/stepper/step/step.component';
-import { ProductNameComponent } from '../../../shared/components/product-name.ccomponent';
+import { ProductNameComponent } from '../../../shared/components/product-name.component';
 import { ShowHideButtonComponent } from '../../../core/show-hide-button/show-hide-button.component';
 import { LoadingPageComponent } from '../../../shared/components/loading-page/loading-page.component';
 
@@ -55,11 +55,11 @@ import { LoadingPageComponent } from '../../../shared/components/loading-page/lo
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConsoleUaaWizardComponent implements OnInit {
+  private store = inject(Store<Pick<InternalAppState, 'uaaSetup' | 'auth'>>);
+  public title = inject(APP_TITLE);
+  public clientRedirectURI: string;
 
-  private clientRedirectURI: string;
-
-  constructor(
-    private store: Store<Pick<InternalAppState, 'uaaSetup' | 'auth'>>, @Inject(APP_TITLE) public title: string) {
+  constructor() {
     // Client Redirect URI for SSO
     this.clientRedirectURI = getSSOClientRedirectURI();
   }
@@ -125,7 +125,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
       }),
       delay(2000),
       take(10),
-      filter(([uaa, auth]: [UAASetupState, AuthState]) => {
+      filter(([_uaa, auth]: [UAASetupState, AuthState]) => {
         const validUAASessionData = auth.sessionData && !auth.sessionData.uaaError;
         if (!validUAASessionData) {
           this.store.dispatch(new VerifySession());
@@ -136,7 +136,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
         if (!state[0].error) {
           // Do a hard reload of the app
           const loc = window.location;
-          const reload = loc.protocol + '//' + loc.host;
+          const reload = `${loc.protocol}//${loc.host}`;
           window.location.assign(reload);
         } else {
           this.applyingSetup.set(false);
@@ -159,14 +159,16 @@ export class ConsoleUaaWizardComponent implements OnInit {
       useSSO: new FormControl(false, { nonNullable: true }),
     });
 
-    let observer: any;
+    let observer: { next: (value: boolean) => void } | undefined;
     this.validateUAAForm = new Observable(o => {
-      observer = o;
+      observer = o as { next: (value: boolean) => void };
       observer.next(false);
     });
 
     this.uaaForm.valueChanges.subscribe(() => {
-      observer.next(this.uaaForm.valid);
+      if (observer) {
+        observer.next(this.uaaForm.valid);
+      }
     });
 
   }

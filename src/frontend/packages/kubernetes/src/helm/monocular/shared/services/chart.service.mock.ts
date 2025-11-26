@@ -1,6 +1,6 @@
-import { Observable, of as observableOf } from 'rxjs';
-import { Chart } from '../models/chart';
-import { ChartVersion } from '../models/chart-version';
+import { type Observable, of as observableOf } from 'rxjs';
+import type { Chart } from '../models/chart';
+import type { ChartVersion } from '../models/chart-version';
 
 
 const mockChart: Chart = {
@@ -107,7 +107,7 @@ export class MockChartService {
     return observableOf([]);
   }
 
-  public getChartIconURL() {
+  public getChartIconURL(): string | null {
     return null;
   }
 

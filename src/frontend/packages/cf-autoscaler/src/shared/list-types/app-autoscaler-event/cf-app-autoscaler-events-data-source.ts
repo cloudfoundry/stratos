@@ -1,21 +1,20 @@
 import { Store } from '@ngrx/store';
-import { getRowMetadata } from '@stratosui/store';
+import { getRowMetadata, type GeneralEntityAppState } from '@stratosui/store';
 
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { ListDataSource } from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { IListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
-import { MetricsRangeSelectorService } from '../../../../../core/src/shared/services/metrics-range-selector.service';
+import type { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import { ListDataSource } from '@stratosui/core';
+import { MetricsRangeSelectorService, type IListConfig } from '@stratosui/core';
 import { AddParams } from '../../../../../store/src/actions/pagination.actions';
-import { APIResource } from '../../../../../store/src/types/api.types';
+import type { APIResource } from '../../../../../store/src/types/api.types';
 import { GetAppAutoscalerScalingHistoryAction } from '../../../store/app-autoscaler.actions';
-import { AppAutoscalerEvent } from '../../../store/app-autoscaler.types';
+import type { AppAutoscalerEvent } from '../../../store/app-autoscaler.types';
 import { appAutoscalerScalingHistoryEntityType, autoscalerEntityFactory } from '../../../store/autoscaler-entity-factory';
 
 
 export class CfAppAutoscalerEventsDataSource extends ListDataSource<APIResource<AppAutoscalerEvent>> {
-  declare action: any;
+  declare action: GetAppAutoscalerScalingHistoryAction;
   constructor(
-    store: Store<CFAppState>,
+    store: Store<GeneralEntityAppState>,
     cfGuid: string,
     appGuid: string,
     listConfig: IListConfig<APIResource<AppAutoscalerEvent>>,
@@ -40,8 +39,8 @@ export class CfAppAutoscalerEventsDataSource extends ListDataSource<APIResource<
         },
         handleTimeWindowChange: (newAction: GetAppAutoscalerScalingHistoryAction) => {
           this.store.dispatch(new AddParams(newAction, this.paginationKey, {
-            'start-time': newAction.query.params.start + '000000000',
-            'end-time': newAction.query.params.end + '000000000',
+            'start-time': `${newAction.query.params.start}000000000`,
+            'end-time': `${newAction.query.params.end}000000000`,
           }));
         }
       }

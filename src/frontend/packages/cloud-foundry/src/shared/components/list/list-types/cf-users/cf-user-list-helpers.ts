@@ -1,4 +1,4 @@
-import { CfUser } from '../../../../../store/types/cf-user.types';
+import type { CfUser } from '../../../../../store/types/cf-user.types';
 
 
 export const userListUserVisibleKey = 'showUsers';

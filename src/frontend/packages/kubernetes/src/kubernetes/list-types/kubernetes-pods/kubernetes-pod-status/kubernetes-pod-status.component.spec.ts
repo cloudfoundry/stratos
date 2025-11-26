@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { KubernetesPod, KubernetesStatus } from '../../../store/kube.types';
+import { type KubernetesPod, KubernetesStatus } from '../../../store/kube.types';
 import { KubernetesPodStatusComponent } from './kubernetes-pod-status.component';
 
 describe('KubernetesPodStatusComponent', () => {

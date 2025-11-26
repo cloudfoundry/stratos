@@ -1,22 +1,23 @@
 import { Store } from '@ngrx/store';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import type { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   BaseEndpointsDataSource,
   syncPaginationSection,
-} from '../../../../../../../core/src/shared/components/list/list-types/endpoint/base-endpoints-data-source';
-import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { InternalEventMonitorFactory } from '../../../../../../../store/src/monitors/internal-event-monitor.factory';
-import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
+  type IListConfig,
+} from '@stratosui/core';
+import type { GeneralEntityAppState } from '../../../../../../../store/src/app-state';
+import type { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
+import type { InternalEventMonitorFactory } from '../../../../../../../store/src/monitors/internal-event-monitor.factory';
+import type { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { stratosEntityCatalog } from '../../../../../../../store/src/stratos-entity-catalog';
-import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
+import type { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
 
 export class CFEndpointsDataSource extends BaseEndpointsDataSource {
-  declare store: Store<CFAppState>;
+  declare store: Store<GeneralEntityAppState>;
 
   constructor(
-    store: Store<CFAppState>,
+    store: Store<GeneralEntityAppState>,
     listConfig: IListConfig<EndpointModel>,
     paginationMonitorFactory: PaginationMonitorFactory,
     entityMonitorFactory: EntityMonitorFactory,

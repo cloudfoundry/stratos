@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import {  signal, provideZonelessChangeDetection } from '@angular/core';
 
@@ -17,7 +17,7 @@ describe('StratosTitleComponent', () => {
         loginSubtitle: 'Test Subtitle',
         logo: '/test-logo.png'
       }
-    } as any);
+    } as Parameters<typeof signal>[0]);
 
     const mockThemeService = {
       theme: mockTheme.asReadonly(),

@@ -1,14 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestEntityCatalog } from './entity-catalog/entity-catalog';
 import { EntityServiceFactory } from './entity-service-factory.service';
-import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
-import { Store } from '@ngrx/store';
-import { GeneralEntityAppState } from './app-state';
+import type { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
+import type { Store } from '@ngrx/store';
+import type { GeneralEntityAppState } from './app-state';
 
 describe('EntityServiceFactoryService', () => {
   let service: EntityServiceFactory;
-  let mockStore: any;
-  let mockEntityMonitorFactory: any;
+  let mockStore: Partial<Store<GeneralEntityAppState>>;
+  let mockEntityMonitorFactory: Partial<EntityMonitorFactory>;
   let mockEntityCatalog: TestEntityCatalog;
 
   beforeEach(() => {
@@ -16,7 +16,7 @@ describe('EntityServiceFactoryService', () => {
     mockStore = {} as Store<GeneralEntityAppState>;
     mockEntityMonitorFactory = {
       create: vi.fn(),
-    } as any;
+    };
     mockEntityCatalog = new TestEntityCatalog();
 
     // Create service directly with mocked dependencies

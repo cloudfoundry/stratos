@@ -1,23 +1,24 @@
 import { ApplicationRef, inject, Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, CanActivateFn, RouterStateSnapshot } from '@angular/router';
+import type {ActivatedRouteSnapshot, RouterStateSnapshot} from '@angular/router';
+import type {CanActivateFn} from '@angular/router';
 import { Store } from '@ngrx/store';
 import {
   endpointEntitiesSelector,
   endpointStatusSelector,
   EndpointOnlyAppState,
   EntityCatalogHelpers,
-  IRequestEntityTypeState,
-  IEndpointFavMetadata,
+  type IRequestEntityTypeState,
+  type IEndpointFavMetadata,
   UserFavorite,
   entityCatalog,
   AuthState,
   RouterNav,
-  EndpointHealthCheck,
+  type EndpointHealthCheck,
   EndpointModel,
   EndpointState,
 } from '@stratosui/store';
-import { combineLatest as observableCombineLatest, Observable, of } from 'rxjs';
-import { catchError, filter, first, map, skipWhile, switchMap, take, tap, timeout, withLatestFrom } from 'rxjs/operators';
+import { combineLatest as observableCombineLatest, type Observable, of } from 'rxjs';
+import { catchError, filter, first, map, take, withLatestFrom } from 'rxjs/operators';
 
 import { endpointHasMetricsByAvailable } from '../features/endpoints/endpoint-helpers';
 import { SessionService } from '../shared/services/session.service';
@@ -44,7 +45,7 @@ export class EndpointsService {
       const catalogEntity = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
       if (!catalogEntity) {
         console.warn(
-          `Endpoint catalog entity not found for type: ${endpoint.cnsi_type}${endpoint.sub_type ? ', subtype: ' + endpoint.sub_type : ''}. ` +
+          `Endpoint catalog entity not found for type: ${endpoint.cnsi_type}${endpoint.sub_type ? `, subtype: ${endpoint.sub_type}` : ''}. ` +
           `Endpoint type may not be registered yet. Returning empty link.`
         );
         return '';
@@ -59,7 +60,7 @@ export class EndpointsService {
         return '';
       }
 
-      const metadata = catalogEntity.builders.entityBuilder.getMetadata(endpoint);
+      const metadata = catalogEntity.builders.entityBuilder.getMetadata(endpoint) as IEndpointFavMetadata;
       const fav = new UserFavorite<IEndpointFavMetadata>(
         endpoint.guid,
         endpoint.cnsi_type,
@@ -78,10 +79,8 @@ export class EndpointsService {
   }
 
   constructor(
-    private store: Store<EndpointOnlyAppState>,
-    private userService: UserService,
-    private endpointHealthChecks: EndpointHealthChecks,
-    private sessionService: SessionService,
+    private store: Store<EndpointOnlyAppState>,_userService: UserService,
+    private endpointHealthChecks: EndpointHealthChecks,_sessionService: SessionService,
     private appRef: ApplicationRef
   ) {
     // TIMING FIX: Defer entity catalog validation until application is stable
@@ -113,7 +112,7 @@ export class EndpointsService {
             const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
             if (!epType) {
               console.warn(
-                `Endpoint catalog entity not found for ${endpoint.cnsi_type}${endpoint.sub_type ? '/' + endpoint.sub_type : ''}. ` +
+                `Endpoint catalog entity not found for ${endpoint.cnsi_type}${endpoint.sub_type ? `/${endpoint.sub_type}` : ''}. ` +
                 `This endpoint will be excluded from connected endpoints list until its type is registered. ` +
                 `Run window.__STRATOS_ENTITY_CATALOG__.getDiagnostics() for details.`
               );
@@ -123,7 +122,7 @@ export class EndpointsService {
             // Defensive: Verify definition exists before accessing properties
             if (!epType.definition) {
               console.warn(
-                `Endpoint definition missing for ${endpoint.cnsi_type}${endpoint.sub_type ? '/' + endpoint.sub_type : ''}. ` +
+                `Endpoint definition missing for ${endpoint.cnsi_type}${endpoint.sub_type ? `/${endpoint.sub_type}` : ''}. ` +
                 `This may indicate an incomplete entity registration.`
               );
               return false;
@@ -154,8 +153,7 @@ export class EndpointsService {
     );
 
     this.disablePersistenceFeatures$ = this.store.select('auth').pipe(
-      map((auth) => auth.sessionData &&
-        auth.sessionData['plugin-config'] &&
+      map((auth) => auth.sessionData?.['plugin-config'] &&
         auth.sessionData['plugin-config'].disablePersistenceFeatures === 'true'
       ),
       catchError((error): Observable<boolean> => {
@@ -180,7 +178,7 @@ export class EndpointsService {
       // The warnings about missing k8s/metrics endpoints are false positives
       // for packages that don't require those endpoint types
       // Test env detection: Vitest exposes window.describe in test-setup.ts
-      const isTestEnv = typeof (window as any).describe !== 'undefined';
+      const isTestEnv = typeof (window as unknown as { describe?: unknown }).describe !== 'undefined';
       if (!isTestEnv && validation.warnings.length > 0) {
         console.warn('Entity Catalog Validation Warnings:', validation.warnings);
       }
@@ -206,7 +204,11 @@ export class EndpointsService {
         console.error('Error checking all endpoints:', error);
         return of({} as IRequestEntityTypeState<EndpointModel>);
       })
-    ).subscribe(endpoints => Object.keys(endpoints).forEach(guid => this.checkEndpoint(endpoints[guid])));
+    ).subscribe(endpoints => {
+      Object.keys(endpoints).forEach(guid => {
+        this.checkEndpoint(endpoints[guid]);
+      });
+    });
   }
 
 
@@ -247,7 +249,7 @@ export class EndpointsService {
               const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
               if (!epType) {
                 console.warn(
-                  `Endpoint catalog entity not found for type: ${endpoint.cnsi_type}${endpoint.sub_type ? ', subtype: ' + endpoint.sub_type : ''}. ` +
+                  `Endpoint catalog entity not found for type: ${endpoint.cnsi_type}${endpoint.sub_type ? `, subtype: ${endpoint.sub_type}` : ''}. ` +
                   `Excluding from results until type is registered.`
                 );
                 return false;
@@ -282,7 +284,7 @@ export class EndpointsService {
 
 // Functional guard for endpoints check
 export const endpointsGuard: CanActivateFn = (
-  route: ActivatedRouteSnapshot,
+  _route: ActivatedRouteSnapshot,
   routeState: RouterStateSnapshot
 ): Observable<boolean> => {
   const store = inject(Store<EndpointOnlyAppState>);

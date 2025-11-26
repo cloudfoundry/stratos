@@ -1,6 +1,6 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, importProvidersFrom, NO_ERRORS_SCHEMA } from '@angular/core';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
@@ -44,8 +44,8 @@ describe('UsersRolesModifyComponent', () => {
 
     const mockCfRolesService = {
       loading$: new BehaviorSubject<boolean>(false).asObservable(),
-      existingRoles$: new BehaviorSubject<any>({}).asObservable(),
-      newRoles$: new BehaviorSubject<any>({}).asObservable(),
+      existingRoles$: new BehaviorSubject<Record<string, unknown>>({}).asObservable(),
+      newRoles$: new BehaviorSubject<Record<string, unknown>>({}).asObservable(),
       fetchOrg: vi.fn().mockReturnValue(of(mockOrgEntity)),
       fetchOrgEntity: vi.fn().mockReturnValue(of(mockOrgEntity.entity)),
       fetchOrgs: vi.fn().mockReturnValue(of([mockOrgEntity.entity])),
@@ -68,7 +68,7 @@ describe('UsersRolesModifyComponent', () => {
           EntityCatalogTestModule,
           CloudFoundryReducersModule,
           StoreModule.forRoot(appReducers, {
-            initialState: generateCfTopLevelStoreEntities() as any,
+            initialState: generateCfTopLevelStoreEntities() as Record<string, unknown>,
             runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
           })
         ),

@@ -21,9 +21,9 @@ console.log('[WORKSPACE SETUP] All imports complete');
 // This ensures entity-catalog test detection works
 console.log('[WORKSPACE SETUP] Exposing vitest globals to window...');
 if (typeof window !== 'undefined') {
-  (window as any).describe = describe;
-  (window as any).it = it;
-  (window as any).expect = expect;
+  (window as unknown as Record<string, unknown>).describe = describe;
+  (window as unknown as Record<string, unknown>).it = it;
+  (window as unknown as Record<string, unknown>).expect = expect;
   console.log('[WORKSPACE SETUP] Vitest globals exposed to window');
 } else {
   console.log('[WORKSPACE SETUP] WARNING: window is undefined!');
@@ -148,7 +148,7 @@ if (typeof window !== 'undefined' && typeof WebSocket !== 'undefined') {
   }
 
   // Replace WebSocket with mock
-  (window as any).WebSocket = MockWebSocket;
+  (window as unknown as Record<string, unknown>).WebSocket = MockWebSocket;
 }
 
 @NgModule({

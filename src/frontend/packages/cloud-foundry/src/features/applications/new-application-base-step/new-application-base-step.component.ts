@@ -1,12 +1,12 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { CFAppState } from '@stratosui/cloud-foundry';
-import { PageHeaderComponent, StepComponent, SteppersComponent, BASE_REDIRECT_QUERY, ITileConfig, ITileData, TileSelectorComponent } from '@stratosui/core';
+import type { CFAppState } from '@stratosui/cloud-foundry';
+import { PageHeaderComponent, StepComponent, SteppersComponent, BASE_REDIRECT_QUERY, ITileConfig, type ITileData, TileSelectorComponent } from '@stratosui/core';
 import { RouterNav } from '@stratosui/store';
 import {
   ApplicationDeploySourceTypes,
@@ -70,7 +70,7 @@ export class NewApplicationBaseStepComponent {
   }
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store,
     appDeploySourceTypes: ApplicationDeploySourceTypes,
     private activatedRoute: ActivatedRoute,
   ) {

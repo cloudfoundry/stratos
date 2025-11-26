@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach } from 'vitest';
 
@@ -17,8 +17,8 @@ import {
 import { ApplicationDeleteComponent } from './application-delete.component';
 
 describe('ApplicationDeleteComponent', () => {
-  let component: ApplicationDeleteComponent<any>;
-  let fixture: ComponentFixture<ApplicationDeleteComponent<any>>;
+  let component: ApplicationDeleteComponent<unknown>;
+  let fixture: ComponentFixture<ApplicationDeleteComponent<unknown>>;
   const appId = '1';
   const cfId = '2';
 

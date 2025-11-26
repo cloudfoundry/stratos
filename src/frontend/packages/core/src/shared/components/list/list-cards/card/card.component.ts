@@ -1,13 +1,13 @@
-import { Component, ComponentFactoryResolver, ComponentRef, Input, Type, ViewChild, ViewContainerRef, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ComponentFactoryResolver, type ComponentRef, Input, type Type, ViewChild, ViewContainerRef, inject, ChangeDetectionStrategy } from '@angular/core';
 import { MultiActionListEntity } from '@stratosui/store';
 
-import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
-import { CardCell } from '../../list.types';
+import type { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
+import type { CardCell } from '../../list.types';
 import { CardDynamicComponent, CardMultiActionComponents } from '../card.component.types';
 
 // Initialize as empty array to avoid circular dependency issues
 // Cards will be registered at runtime
-export const listCards: any[] = [];
+export const listCards: Type<unknown>[] = [];
 export type CardTypes<T> = Type<CardCell<T>> | CardMultiActionComponents | CardDynamicComponent<T>;
 
 interface ISetupData<T> {
@@ -24,7 +24,7 @@ interface ISetupData<T> {
   imports: []
 })
 export class CardComponent<T> {
-  private componentRef!: ComponentRef<any>;
+  private componentRef!: ComponentRef<CardCell<T>>;
   private pComponent!: CardTypes<T>;
   private pDataSource!: IListDataSource<T>;
 
@@ -80,7 +80,7 @@ export class CardComponent<T> {
     this.updateComponentInputs(dataSource, entityKey, entity);
   }
 
-  private updateComponentInputs(dataSource: any, entityKey: any, entity: any) {
+  private updateComponentInputs(dataSource: IListDataSource<T>, entityKey: string | undefined, entity: T) {
     if (this.cardComponent) {
       this.cardComponent.row = entity;
       this.cardComponent.dataSource = dataSource;
@@ -105,13 +105,13 @@ export class CardComponent<T> {
     const { entityKey, entity } = this.getEntity(item);
     if (component instanceof CardMultiActionComponents) {
       return {
-        component: entityKey ? component.getComponent(entityKey) : null,
+        component: (entityKey ? component.getComponent(entityKey) : null) as Type<CardCell<T>>,
         entityKey,
         entity
       };
     } else if (component instanceof CardDynamicComponent) {
       return {
-        component: component.getComponent(entity),
+        component: component.getComponent(entity) as Type<CardCell<T>>,
         entity
       };
     }
@@ -121,11 +121,11 @@ export class CardComponent<T> {
     };
   }
 
-  private getEntity(item: T | MultiActionListEntity) {
+  private getEntity(item: T | MultiActionListEntity): { entity: T; entityKey?: string } {
     if (item instanceof MultiActionListEntity) {
       return {
         entityKey: item.entityKey,
-        entity: item.entity
+        entity: item.entity as T
       };
     }
     return {

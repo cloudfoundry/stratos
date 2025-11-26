@@ -1,13 +1,12 @@
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 
-import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import {
-  EndpointMissingMessageParts,
+  type EndpointMissingMessageParts,
   EndpointsMissingComponent,
 } from '../../../../../core/src/shared/components/endpoints-missing/endpoints-missing.component';
 import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
-import { NoContentMessageComponent } from '../../../../../core/src/shared/components/no-content-message/no-content-message.component';
+import { NoContentMessageComponent } from '@stratosui/core';
 
 @Component({
 selector: 'app-cf-endpoints-missing',
@@ -19,22 +18,22 @@ selector: 'app-cf-endpoints-missing',
 })
 export class CfEndpointsMissingComponent extends EndpointsMissingComponent {
 
-  noneRegisteredText: EndpointMissingMessageParts = {
+  protected override noneRegisteredText: EndpointMissingMessageParts = {
     firstLine: 'There are no registered Cloud Foundry endpoints',
     secondLine: {
       text: 'Use the Endpoints view to register'
     },
   };
 
-  noneConnectedText: EndpointMissingMessageParts = {
+  protected override noneConnectedText: EndpointMissingMessageParts = {
     firstLine: 'There are no connected Cloud Foundry endpoints',
     secondLine: {
       text: 'Use the Endpoints view to connect'
     },
   };
 
-  showToolbarHint = false;
-  showNoConnected = true;
+  override showToolbarHint = false;
+  protected override showNoConnected = true;
 
   constructor(cloudFoundryService: CloudFoundryService) {
     super();

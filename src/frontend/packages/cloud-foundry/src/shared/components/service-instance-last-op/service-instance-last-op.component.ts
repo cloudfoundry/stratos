@@ -1,9 +1,9 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 
 import { BooleanIndicatorComponent } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { IServiceInstance } from '../../../cf-api-svc.types';
+import type { APIResource } from '@stratosui/store';
+import type { IServiceInstance } from '../../../cf-api-svc.types';
 
 @Component({
   selector: 'app-service-instance-last-op',
@@ -13,6 +13,7 @@ import { IServiceInstance } from '../../../cf-api-svc.types';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    DatePipe,
     BooleanIndicatorComponent
   ]
 })

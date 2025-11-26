@@ -1,13 +1,12 @@
 import { AsyncPipe, TitleCasePipe } from '@angular/common';
 import {Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
-import { CustomTooltipDirective } from '@stratosui/core';
 import { isBefore, isAfter } from 'date-fns';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { CardCell } from '../../../../../../core/src/shared/components/list/list.types';
+import { CardCell, CustomTooltipDirective } from '@stratosui/core';
 import { kubeEntityCatalog } from '../../../kubernetes-entity-generator';
-import { Container, ContainerState, ContainerStatus, InitContainer, KubernetesPod } from '../../../store/kube.types';
+import type { Container, ContainerState, ContainerStatus, InitContainer, KubernetesPod } from '../../../store/kube.types';
 
 export interface ContainerForTable {
   isInit: boolean;

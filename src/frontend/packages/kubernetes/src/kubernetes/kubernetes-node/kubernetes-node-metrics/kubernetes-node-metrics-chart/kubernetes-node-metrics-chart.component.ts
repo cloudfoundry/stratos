@@ -1,12 +1,12 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, type OnInit} from '@angular/core';
 import { CustomCardComponent, CustomCardHeaderComponent, CustomCardContentComponent } from '../../../../../../core/src/shared/components/custom-card/custom-card.component';
 import { CardWrapperComponent } from '../../../../../../core/src/shared/components/cards/card/card.component';
 
-import { MetricsChartComponent, MetricsConfig } from '../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
-import { MetricsLineChartConfig } from '../../../../../../core/src/shared/components/metrics-chart/metrics-chart.types';
+import { MetricsChartComponent, type MetricsConfig } from '../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
+import type { MetricsLineChartConfig } from '../../../../../../core/src/shared/components/metrics-chart/metrics-chart.types';
 import { MetricsChartHelpers } from '../../../../../../core/src/shared/components/metrics-chart/metrics.component.helpers';
-import { IMetricMatrixResult } from '../../../../../../store/src/types/base-metric.types';
-import { IMetricApplication } from '../../../../../../store/src/types/metric.types';
+import type { IMetricMatrixResult } from '../../../../../../store/src/types/base-metric.types';
+import type { IMetricApplication } from '../../../../../../store/src/types/metric.types';
 import { FetchKubernetesMetricsAction } from '../../../store/kubernetes.actions';
 
 @Component({
@@ -40,13 +40,15 @@ export class KubernetesNodeMetricsChartComponent implements OnInit {
 
   public instanceChartConfig: MetricsLineChartConfig;
   public instanceMetricConfig: MetricsConfig<IMetricMatrixResult<IMetricApplication>>;
-  constructor() { }
 
   ngOnInit() {
     this.instanceChartConfig = MetricsChartHelpers.buildChartConfig(this.yAxisLabel);
-    const query = `${this.metricName}{instance="${this.nodeName}"}[1h]&time=${(new Date()).getTime() / 1000}`;
+    const query = `${this.metricName}{instance="${this.nodeName}"}[1h]&time=${Date.now()/ 1000}`;
     this.instanceMetricConfig = {
-      getSeriesName: result => (result.metric as any).name ? (result.metric as any).name : (result.metric as any).id || result.metric.__name__ || 'unknown',
+      getSeriesName: result => {
+        const metric = result.metric as IMetricApplication & { name?: string; id?: string };
+        return metric.name || metric.id || result.metric.__name__ || 'unknown';
+      },
       mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
       sort: MetricsChartHelpers.sortBySeriesName,
       mapSeriesItemValue: this.getmapSeriesItemValue(),
@@ -61,7 +63,7 @@ export class KubernetesNodeMetricsChartComponent implements OnInit {
   private getmapSeriesItemValue() {
     switch (this.seriesTranslation) {
       case 'mb':
-        return (bytes) => bytes / 1000000;
+        return (bytes: number) => bytes / 1000000;
       default:
         return undefined;
     }

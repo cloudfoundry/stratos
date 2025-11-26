@@ -4,14 +4,17 @@ import { ActivatedRoute, provideRouter } from '@angular/router';
 import { Store, StoreModule } from '@ngrx/store';
 
 import { CoreModule, SharedModule } from '@stratosui/core';
-import { EntityServiceFactory, EntityMonitorFactory, PaginationMonitorFactory, appReducers } from '@stratosui/store';
+import { EntityServiceFactory, EntityMonitorFactory, PaginationMonitorFactory, appReducers, type GeneralEntityAppState } from '@stratosui/store';
 import { testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
 import { AppTestModule, generateBaseTestStoreModules } from '@test-framework';
 
 // Re-export test endpoint utilities for convenience
 export { testSCFEndpointGuid, populateStoreWithTestEndpoint };
 
-import { CFAppState } from '../src/cf-app-state';
+// Re-export types for convenience
+export { ActiveRouteCfOrgSpace };
+
+import type { CFAppState } from '../src/cf-app-state';
 import { CloudFoundryTestingModule } from '../src/cloud-foundry-test.module';
 import { ActiveRouteCfOrgSpace } from '../src/features/cf/cf-page.types';
 import { CloudFoundryEndpointService } from '../src/features/cf/services/cloud-foundry-endpoint.service';
@@ -19,7 +22,10 @@ import { UserInviteConfigureService, UserInviteService } from '../src/features/c
 import { CfOrgSpaceDataService } from '../src/shared/data-services/cf-org-space-service.service';
 import { CfUserService } from '../src/shared/data-services/cf-user.service';
 import { CloudFoundryService } from '../src/shared/data-services/cloud-foundry.service';
-import { createUserRoleInOrg } from '../src/store/types/cf-user.types';
+import { type CfUser, createUserRoleInOrg } from '../src/store/types/cf-user.types';
+import type { NewAppCFDetails } from '../src/store/types/create-application.types';
+import type { DeployApplicationSource, ProjectExists } from '../src/store/types/deploy-application.types';
+import type { CfRoleChange } from '../src/store/types/users-roles.types';
 import { CfUserServiceTestProvider } from './user-service-helper';
 
 export const cfEndpointServiceProviderDeps = [
@@ -91,7 +97,7 @@ export function generateTestCfUserServiceProvider(guid = testSCFEndpointGuid) {
   return {
     provide: CfUserService,
     useFactory: (
-      store: Store<CFAppState>,
+      store: Store<GeneralEntityAppState>,
       paginationMonitorFactory: PaginationMonitorFactory,
     ) => {
       return new CfUserService(
@@ -108,7 +114,7 @@ export function generateTestCfServiceProvider() {
   return {
     provide: CloudFoundryService,
     useFactory: (
-      store: Store<CFAppState>,
+      store: Store,
     ) => {
       const appService = new CloudFoundryService();
       return appService;
@@ -120,7 +126,7 @@ export function generateTestCfServiceProvider() {
 export function generateCfTopLevelStoreEntities() {
   return {
     createApplication: {
-      cloudFoundryDetails: null,
+      cloudFoundryDetails: null as NewAppCFDetails | null,
       name: '',
       nameCheck: {
         checking: false,
@@ -136,22 +142,22 @@ export function generateCfTopLevelStoreEntities() {
       spaceScoped: false
     },
     deployApplication: {
-      cloudFoundryDetails: null,
+      cloudFoundryDetails: null as NewAppCFDetails | null,
       applicationSource: {
         type: {
           id: '',
           name: ''
         }
-      },
+      } as DeployApplicationSource,
       projectExists: {
         checking: false,
         exists: false,
         name: '',
         error: false
-      }
+      } as ProjectExists
     },
     manageUsersRoles: {
-      users: [],
+      users: [] as CfUser[],
       cfGuid: '',
       newRoles: {
         name: '',
@@ -164,7 +170,7 @@ export function generateCfTopLevelStoreEntities() {
           undefined
         )
       },
-      changedRoles: []
+      changedRoles: [] as CfRoleChange[]
     },
   };
 }

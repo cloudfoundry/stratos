@@ -1,8 +1,8 @@
 import { compose } from '@ngrx/store';
 
-import { AppState } from '../app-state';
-import { PaginationEntityTypeState } from '../types/pagination.types';
-import { PaginationEntityState, PaginationState } from '../types/pagination.types';
+import type { AppState } from '../app-state';
+import type { PaginationEntityTypeState } from '../types/pagination.types';
+import type { PaginationEntityState, PaginationState } from '../types/pagination.types';
 
 export function isIdInPagination(entityId: string, entityKey: string, paginationKey: string) {
   return compose(
@@ -26,11 +26,11 @@ export function checkPagesForId(entityId: string) {
       return false;
     }
     return !!Object.keys(paginationState.ids).reduce((flatPages: string[], pageId) => {
-      const page = (paginationState.ids as Record<string, any>)[pageId];
+      const page = (paginationState.ids as Record<string, unknown>)[pageId];
       if (page && Array.isArray(page)) {
         return [
           ...flatPages,
-          ...(paginationState.ids as Record<string, any>)[pageId]
+          ...(paginationState.ids as Record<string, string[]>)[pageId]
         ];
       }
       return flatPages;

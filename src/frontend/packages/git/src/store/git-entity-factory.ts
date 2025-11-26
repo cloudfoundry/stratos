@@ -1,7 +1,7 @@
-import { schema } from 'normalizr';
+import type { schema } from 'normalizr';
 
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
-import { GitBranch, GitCommit, GitRepo } from './git.public-types';
+import type { GitBranch, GitCommit, GitRepo } from './git.public-types';
 import { gitBranchesEntityType, gitCommitEntityType, gitRepoEntityType } from './git.types';
 
 export const GIT_ENDPOINT_TYPE = 'git';
@@ -11,9 +11,9 @@ export enum GIT_ENDPOINT_SUB_TYPES {
   GITLAB = 'gitlab',
 }
 
-export const getCommitGuid = (scmType: string, projectName: string, sha: string): string => scmType + '--' + projectName + '--' + sha;
-export const getRepositoryGuid = (scmType: string, projectName: string): string => scmType + '--' + projectName;
-export const getBranchGuid = (scmType: string, projectName: string, brName: string): string => scmType + '--' + projectName + '--' + brName;
+export const getCommitGuid = (scmType: string, projectName: string, sha: string): string => `${scmType}--${projectName}--${sha}`;
+export const getRepositoryGuid = (scmType: string, projectName: string): string => `${scmType}--${projectName}`;
+export const getBranchGuid = (scmType: string, projectName: string, brName: string): string => `${scmType}--${projectName}--${brName}`;
 
 const entityCache: {
   [key: string]: EntitySchema;

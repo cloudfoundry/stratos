@@ -1,16 +1,15 @@
-import { CommonModule } from '@angular/common';
-import { AfterContentInit, ChangeDetectionStrategy, Component, OnDestroy, computed, effect, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { AsyncPipe, CommonModule } from '@angular/common';
+import { type AfterContentInit, ChangeDetectionStrategy, Component, type OnDestroy, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of as observableOf, Subject } from 'rxjs';
+import { combineLatest, type Observable, of as observableOf, Subject } from 'rxjs';
 import { catchError, filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 
-import { CustomFormFieldComponent, MatLabelComponent, CustomSelectComponent, CustomOptionComponent, StepOnNextResult } from '@stratosui/core';
-import { PaginationMonitorFactory, APIResource } from '@stratosui/store';
+import { CustomFormFieldComponent, MatLabelComponent, CustomSelectComponent, CustomOptionComponent, type StepOnNextResult } from '@stratosui/core';
+import { PaginationMonitorFactory, type APIResource, type GeneralEntityAppState } from '@stratosui/store';
 import { SetCreateServiceInstanceServiceGuid } from '../../../actions/create-service-instance.actions';
-import { IService } from '../../../cf-api-svc.types';
-import { CFAppState } from '../../../cf-app-state';
+import type { IService } from '../../../cf-api-svc.types';
+import type { CFAppState } from '../../../cf-app-state';
 import { cfEntityFactory } from '../../../cf-entity-factory';
 import { serviceEntityType } from '../../../cf-entity-types';
 import { ServicesWallService } from '../../../features/services/services/services-wall.service';
@@ -39,6 +38,7 @@ interface SelectServiceForm {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    AsyncPipe,
     CommonModule,
     ReactiveFormsModule,
     CustomFormFieldComponent,
@@ -49,7 +49,7 @@ interface SelectServiceForm {
   ]
 })
 export class SelectServiceComponent implements OnDestroy, AfterContentInit {
-  private store = inject(Store<CFAppState>);
+  private store = inject(Store<GeneralEntityAppState>);
   private paginationMonitorFactory = inject(PaginationMonitorFactory);
   private csiGuidService = inject(CsiGuidsService);
   private servicesWallService = inject(ServicesWallService);
@@ -64,13 +64,6 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
   // Lifecycle management for subscriptions
   private destroyed$ = new Subject<void>();
   public errorMessage: string | null = null;
-
-  // Effect to track form validation status - runs in injection context
-  private readonly formValidationEffect = effect(() => {
-    // Track form status via signal
-    const isValid = this.stepperForm.controls.service.valid;
-    this.validate.set(isValid);
-  });
 
   constructor() {
     this.stepperForm = new FormGroup<SelectServiceForm>({
@@ -105,7 +98,9 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
     );
 
     this.services$ = cfSpaceGuid$.pipe(
-      tap(([cfGuid]) => this.cfGuid = cfGuid),
+      tap(([cfGuid]) => {
+        this.cfGuid = cfGuid;
+      }),
       switchMap(([cfGuid, spaceGuid]) => this.servicesWallService.getServicesInSpace(cfGuid, spaceGuid)),
       filter(p => !!p),
       map(services => services.sort((a, b) => a?.entity?.label?.localeCompare(b?.entity?.label || '') || 0)),
@@ -132,7 +127,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
       this.services$,
       this.stepperForm.controls.service.statusChanges
     ]).pipe(
-      map(([services, change]) => services.filter(a => a?.metadata?.guid === this.stepperForm.controls.service.value)[0]),
+      map(([services, _change]) => services.filter(a => a?.metadata?.guid === this.stepperForm.controls.service.value)[0]),
       filter(p => !!p),
       takeUntil(this.destroyed$)
     );

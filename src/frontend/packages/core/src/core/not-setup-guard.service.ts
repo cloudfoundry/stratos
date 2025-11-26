@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { CanActivateFn } from '@angular/router';
+import type { CanActivateFn } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { RouterNav, AppState } from '@stratosui/store';
-import { Observable, of as observableOf } from 'rxjs';
+import { type Observable, of as observableOf } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 
 import { environment } from '../environments/environment';
@@ -16,7 +16,7 @@ export const notSetupGuard: CanActivateFn = (): Observable<boolean> => {
 
   const url = `/api/${proxyAPIVersion}/auth/verify`;
   return http.get(url).pipe(
-    map(v => {
+    map(_v => {
       // If the requests succeeds, then the user has a session, so everything must be setup already
       return false;
     }),

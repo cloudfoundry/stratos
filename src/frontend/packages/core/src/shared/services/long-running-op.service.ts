@@ -8,8 +8,8 @@ import { AppState } from '@stratosui/store';
 export class LongRunningOperationsService {
   protected store = inject(Store<AppState>);
 
-  isLongRunning(request: Partial<{ message: string }>) {
-    return (request.message || '').startsWith('Long Running Operation still active');
+  isLongRunning(request: { message?: string } | null | undefined) {
+    return (request?.message || '').startsWith('Long Running Operation still active');
   }
 
 }

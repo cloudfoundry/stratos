@@ -32,7 +32,7 @@ export interface EndpointModel {
   name: string;
   skip_ssl_validation?: boolean;
   caCert?: string,
-  endpoint_metadata?: any;
+  endpoint_metadata?: Record<string, unknown>;
   token_endpoint?: string;
   client_id?: string;
   user?: EndpointUser;
@@ -42,7 +42,7 @@ export interface EndpointModel {
     metrics_environment?: string;
     metrics_targets?: MetricsAPITargets;
     metrics_stratos?: MetricsStratosInfo;
-    userInviteAllowed?: 'true' | any;
+    userInviteAllowed?: 'true' | string;
   };
   system_shared_token: boolean;
   sso_allowed: boolean;

@@ -1,15 +1,15 @@
-import { CommonModule } from '@angular/common';
-import { Component, Input, OnDestroy , ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { Component, Input, type OnDestroy , ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { Observable, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
-import { ProgressSpinnerComponent } from '../../../../../../../../core/src/shared/components/progress-spinner/progress-spinner.component';
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { EntityService } from '../../../../../../../../store/src/entity-service';
-import { IMetricMatrixResult, IMetrics } from '../../../../../../../../store/src/types/base-metric.types';
-import { IMetricCell } from '../../../../../../../../store/src/types/metric.types';
-import { ListAppInstance } from '../app-instance-types';
+import { ProgressSpinnerComponent } from '@stratosui/core';
+import { TableCellCustom } from '@stratosui/core';
+import type { EntityService } from '../../../../../../../../store/src/entity-service';
+import type { IMetricMatrixResult, IMetrics } from '../../../../../../../../store/src/types/base-metric.types';
+import type { IMetricCell } from '../../../../../../../../store/src/types/metric.types';
+import type { ListAppInstance } from '../app-instance-types';
 
 @Component({
   selector: 'app-table-cell-cf-cell-usage',

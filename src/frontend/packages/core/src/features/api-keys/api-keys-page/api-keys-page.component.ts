@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component  } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { TailwindDialogService } from '../../../shared/services/tailwind-dialog.service';
-import { stratosEntityCatalog } from '@stratosui/store';
-import { Observable, Subject } from 'rxjs';
+import { stratosEntityCatalog, type ApiKey } from '@stratosui/store';
+import { type Observable, Subject } from 'rxjs';
 import { first, map, startWith } from 'rxjs/operators';
 
 import { ApiKeyListConfigService } from '../../../shared/components/list/list-types/apiKeys/apiKey-list-config.service';
@@ -12,7 +12,7 @@ import { AddApiKeyDialogComponent } from '../add-api-key-dialog/add-api-key-dial
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { ListComponent } from '../../../shared/components/list/list.component';
 import { NoContentMessageComponent } from '../../../shared/components/no-content-message/no-content-message.component';
-import { ProductNameComponent } from '../../../shared/components/product-name.ccomponent';
+import { ProductNameComponent } from '../../../shared/components/product-name.component';
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 
 @Component({
@@ -40,7 +40,7 @@ export class ApiKeysPageComponent {
 
   /* tslint:disable:ban-types  */
   // This is intentionally typed, property can be null and there's different logic associated with it
-  public hasKeys$: Observable<Boolean>;
+  public hasKeys$: Observable<boolean>;
   /* tslint:enable */
 
   constructor(
@@ -63,13 +63,13 @@ export class ApiKeysPageComponent {
   }
 
   private showDialog(): Observable<string> {
-    return this.dialog.open(AddApiKeyDialogComponent, {
+    return this.dialog.open<AddApiKeyDialogComponent, undefined, ApiKey>(AddApiKeyDialogComponent, {
       disableClose: true,
     }).afterClosed().pipe(
-      map(newApiKey => {
-        if (newApiKey && newApiKey.guid) {
+      map((newApiKey: ApiKey | undefined) => {
+        if (newApiKey?.guid) {
           stratosEntityCatalog.apiKey.api.getMultiple();
-          return newApiKey;
+          return newApiKey.guid;
         }
         return null;
       })

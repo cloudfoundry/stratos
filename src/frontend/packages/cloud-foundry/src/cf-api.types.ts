@@ -1,6 +1,6 @@
-import { APIResource } from '../../store/src/types/api.types';
-import { IService, IServiceBinding } from './cf-api-svc.types';
-import { CfUser } from './store/types/cf-user.types';
+import type { APIResource } from '../../store/src/types/api.types';
+import type { IService, IServiceBinding } from './cf-api-svc.types';
+import type { CfUser } from './store/types/cf-user.types';
 
 export interface StratosCFEntity {
   cfGuid: string;
@@ -24,19 +24,19 @@ export interface IQuotaDefinition {
 }
 
 export interface IRoute<T = unknown> {
-  host: string;
-  path: string;
-  domain_guid: string;
-  space_guid: string;
-  service_instance_guid?: any;
-  port?: any;
-  domain_url: string;
+  host?: string;
+  path?: string;
+  domain_guid?: string;
+  space_guid?: string;
+  service_instance_guid?: string | null;
+  port?: number | null;
+  domain_url?: string;
   domain?: APIResource<IDomain>;
-  space_url: string;
+  space_url?: string;
   space?: APIResource<ISpace>;
-  apps_url: string;
+  apps_url?: string;
   apps?: T extends string ? string[] : APIResource<IApp>[];
-  route_mappings_url: string;
+  route_mappings_url?: string;
   guid?: string;
   cfGuid?: string;
 }
@@ -49,14 +49,14 @@ export interface IAppSummaryRoute {
   guid: string;
   host: string;
   path: string;
-  port?: any;
+  port?: number | null;
 }
 
 export interface ISpace {
   name: string;
   organization_guid: string;
-  space_quota_definition_guid?: any;
-  isolation_segment_guid?: any;
+  space_quota_definition_guid?: string | null;
+  isolation_segment_guid?: string | null;
   allow_ssh: boolean;
   organization_url: string;
   organization?: APIResource<IOrganization>;
@@ -65,14 +65,14 @@ export interface ISpace {
   managers_url: string;
   managers?: APIResource<IDeveloper>[];
   auditors_url: string;
-  auditors?: any[];
+  auditors?: APIResource<IDeveloper>[];
   apps_url: string;
   apps?: APIResource<IApp>[];
   routes_url: string;
   domains_url: string;
   domains?: APIResource<IDomain>[];
   service_instances_url: string;
-  service_instances?: any[];
+  service_instances?: APIResource<unknown>[];
   app_events_url: string;
   events_url?: string;
   security_groups_url: string;
@@ -112,7 +112,7 @@ export interface IApp<T = unknown> {
   production?: boolean;
   space_guid: string;
   stack_guid?: string;
-  buildpack?: any;
+  buildpack?: string | null;
   detected_buildpack?: string;
   detected_buildpack_guid?: string;
   environment_json?: IEnvironmentjson;
@@ -122,18 +122,18 @@ export interface IApp<T = unknown> {
   disk_quota?: number;
   state?: string;
   version?: string;
-  command?: any;
+  command?: string | null;
   console?: boolean;
-  debug?: any;
+  debug?: string | null;
   staging_task_id?: string;
   package_state?: string;
   health_check_type?: string;
-  health_check_timeout?: any;
-  health_check_http_endpoint?: any;
-  staging_failed_reason?: any;
-  staging_failed_description?: any;
+  health_check_timeout?: number | null;
+  health_check_http_endpoint?: string | null;
+  staging_failed_reason?: string | null;
+  staging_failed_description?: string | null;
   diego?: boolean;
-  docker_image?: any;
+  docker_image?: string | null;
   docker_credentials?: IDockercredentials;
   package_updated_at?: string;
   detected_start_command?: string;
@@ -154,8 +154,8 @@ export interface IApp<T = unknown> {
 }
 
 export interface IDockercredentials {
-  username?: any;
-  password?: any;
+  username?: string;
+  password?: string;
 }
 
 export interface IEnvironmentjson {
@@ -165,7 +165,7 @@ export interface IEnvironmentjson {
 export interface IDeveloper {
   admin: boolean;
   active: boolean;
-  default_space_guid?: any;
+  default_space_guid?: string | null;
   spaces_url: string;
   organizations_url: string;
   managed_organizations_url: string;
@@ -180,7 +180,7 @@ export interface IOrganization<T = unknown> {
   billing_enabled?: boolean;
   quota_definition_guid?: string;
   status?: string;
-  default_isolation_segment_guid?: any;
+  default_isolation_segment_guid?: string | null;
   quota_definition_url?: string;
   spaces_url?: string;
   domains?: APIResource<IDomain>[];
@@ -220,8 +220,8 @@ export interface ICfV2Info {
   description: string;
   authorization_endpoint: string;
   token_endpoint: string;
-  min_cli_version?: any;
-  min_recommended_cli_version?: any;
+  min_cli_version?: string | null;
+  min_recommended_cli_version?: string | null;
   api_version: string;
   app_ssh_endpoint: string;
   app_ssh_host_key_fingerprint: string;
@@ -325,7 +325,7 @@ export interface IAppSummary {
   production: boolean;
   space_guid: string;
   stack_guid: string;
-  buildpack?: any;
+  buildpack?: string | null;
   detected_buildpack: string;
   detected_buildpack_guid: string;
   environment_json: {};
@@ -334,22 +334,22 @@ export interface IAppSummary {
   disk_quota: number;
   state: string;
   version: string;
-  command?: any;
+  command?: string | null;
   console: boolean;
-  debug?: any;
+  debug?: string | null;
   staging_task_id: string;
   package_state: string;
   health_check_type: string;
-  health_check_timeout?: any;
+  health_check_timeout?: number | null;
   health_check_http_endpoint: string;
-  staging_failed_reason?: any;
-  staging_failed_description?: any;
+  staging_failed_reason?: string | null;
+  staging_failed_description?: string | null;
   diego: boolean;
-  docker_image?: any;
+  docker_image?: string | null;
   package_updated_at: Date;
   detected_start_command: string;
   enable_ssh: boolean;
-  ports?: any;
+  ports?: number[] | null;
 }
 
 
@@ -362,7 +362,7 @@ export interface CfEvent {
   actee_type: string;
   actee_name: string;
   timestamp: string;
-  metadata: { [name: string]: any, };
+  metadata: Record<string, unknown>;
   space_guid?: string;
   organization_guid?: string;
 }

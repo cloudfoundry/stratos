@@ -1,22 +1,22 @@
-import { inject, Injector, runInInjectionContext } from '@angular/core';
+import { type Injector, runInInjectionContext } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { EntityCatalogEntityConfig } from '@stratosui/store';
+import type { EntityCatalogEntityConfig, GeneralAppState } from '@stratosui/store';
 
-import {
+import type {
   StratosBaseCatalogEntity,
 } from '../../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { entityCatalog } from '../../../../../../../store/src/public-api';
-import { isPaginatedAction, PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
+import { isPaginatedAction, type PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
-import { IListDataSourceConfig } from '../../data-sources-controllers/list-data-source-config';
-import { IListConfig } from '../../list.component.types';
+import type { IListDataSourceConfig } from '../../data-sources-controllers/list-data-source-config';
+import type { IListConfig } from '../../list.component.types';
 
 export type ListActionOrConfig = PaginatedAction | ListEntityConfig;
 
 interface GetMultipleActionConfig {
   endpointGuid?: string;
   paginationKey?: string;
-  extraArgs?: Record<any, any>;
+  extraArgs?: Record<string, unknown>;
 }
 
 /**
@@ -31,7 +31,7 @@ export class ListDataSourceFromActionOrConfig<A, T> extends ListDataSource<T, A>
   constructor(
     actionOrConfig: ListActionOrConfig,
     listConfig: IListConfig<T>,
-    store: Store<any>,
+    store: Store<GeneralAppState>,
     dataSourceConfig?: Partial<IListDataSourceConfig<A, T>>
   ) {
     const { action, catalogEntity } = ListActionOrConfigHelpers.createListAction(actionOrConfig);
@@ -71,7 +71,7 @@ export class ListActionOrConfigHelpers {
   } {
     const action = isPaginatedAction(actionOrConfig) || ListActionOrConfigHelpers.actionFromConfig(actionOrConfig as ListEntityConfig);
     const catalogEntity = entityCatalog.getEntity(action);
-    action.paginationKey = action.paginationKey || catalogEntity.entityKey + '-list';
+    action.paginationKey = action.paginationKey || `${catalogEntity.entityKey}-list`;
     return {
       action,
       catalogEntity
@@ -82,7 +82,7 @@ export class ListActionOrConfigHelpers {
    * Create a data source config to be used by a data source
    */
   static createDataSourceConfig<A, T>(
-    store: Store<any>,
+    store: Store<GeneralAppState>,
     actionOrConfig: ListActionOrConfig,
     listConfig: IListConfig<T>,
     dsOverrides?: Partial<IListDataSourceConfig<A, T>>
@@ -104,7 +104,7 @@ export class ListActionOrConfigHelpers {
   }
 
   static createDataSource<A, T>(
-    store: Store<any>,
+    store: Store<GeneralAppState>,
     actionOrConfig: ListActionOrConfig,
     listConfig: IListConfig<T>,
     dsOverrides?: Partial<IListDataSourceConfig<A, T>>,

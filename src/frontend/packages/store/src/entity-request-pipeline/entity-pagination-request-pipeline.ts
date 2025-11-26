@@ -1,35 +1,36 @@
-import { HttpRequest } from '@angular/common/http';
-import { Action, Store } from '@ngrx/store';
-import { isObservable, Observable, of } from 'rxjs';
+import type { HttpRequest } from '@angular/common/http';
+import type { Action, Store } from '@ngrx/store';
+import { isObservable, type Observable, of } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
 
-import { AppState, InternalAppState } from '../app-state';
+import type { AppState, InternalAppState } from '../app-state';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
-import {
+import type {
   StratosBaseCatalogEntity,
   StratosCatalogEntity,
 } from '../entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { IStratosEntityDefinition } from '../entity-catalog/entity-catalog.types';
+import type { IStratosEntityDefinition } from '../entity-catalog/entity-catalog.types';
 import { selectPaginationState } from '../selectors/pagination.selectors';
-import { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
+import type { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
 import {
   handleJetstreamResponsePipeFactory,
   handleNonJetstreamResponsePipeFactory,
 } from './entity-request-base-handlers/handle-multi-endpoints.pipe';
 import { makeRequestEntityPipe } from './entity-request-base-handlers/make-request-entity-request.pipe';
 import { mapMultiEndpointResponses } from './entity-request-base-handlers/map-multi-endpoint.pipes';
-import {
+import type {
   BasePipelineConfig,
   EntityRequestPipeline,
+  JetstreamResponse,
   PagedJetstreamResponse,
   PipelineResult,
 } from './entity-request-pipeline.types';
 import { getPaginationParamsPipe } from './pagination-request-base-handlers/get-params.pipe';
 import { PaginationPageIterator } from './pagination-request-base-handlers/pagination-iterator.pipe';
 import { isJetstreamRequest, singleRequestToPaged } from './pipeline-helpers';
-import { PipelineHttpClient } from './pipline-http-client.service';
+import type { PipelineHttpClient } from './pipline-http-client.service';
 
-function getRequestObjectObservable(request: HttpRequest<any> | Observable<HttpRequest<any>>): Observable<HttpRequest<any>> {
+function getRequestObjectObservable(request: HttpRequest<unknown> | Observable<HttpRequest<unknown>>): Observable<HttpRequest<unknown>> {
   return isObservable(request) ? request : of(request);
 }
 
@@ -39,7 +40,7 @@ function getPrePaginatedRequestFunction(catalogEntity: StratosBaseCatalogEntity)
 }
 
 function getCompletePaginationAction(action: PaginatedAction, state: PaginationEntityState) {
-  return state && state.currentPage ? {
+  return state?.currentPage ? {
     ...action,
     pageNumber: state.currentPage
   } : action;
@@ -48,7 +49,7 @@ function getCompletePaginationAction(action: PaginatedAction, state: PaginationE
 function getRequestObservable(
   httpClient: PipelineHttpClient,
   action: PaginatedAction,
-  request: HttpRequest<any>,
+  request: HttpRequest<unknown>,
   paginationPageIterator?: PaginationPageIterator
 ): Observable<PagedJetstreamResponse> {
   if (action.flattenPagination && !paginationPageIterator) {
@@ -131,7 +132,7 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
         new PaginationPageIterator(
           store,
           httpClient,
-          requestObject,
+          requestObject as HttpRequest<JetstreamResponse<unknown>>,
           completePaginationAction,
           actionDispatcher,
           flattenerConfig,

@@ -1,7 +1,8 @@
-import { BuilderContext, BuilderOutput, createBuilder } from '@angular-devkit/architect';
-import { JsonObject } from '@angular-devkit/core';
+import { type BuilderContext, type BuilderOutput, createBuilder } from '@angular-devkit/architect';
+import type { JsonObject } from '@angular-devkit/core';
+// @ts-expect-error - fs-extra doesn't have types but skipLibCheck handles this
 import * as FS from 'fs-extra';
-import * as Path from 'path';
+import * as Path from 'node:path';
 
 import { Packages } from '../lib/packages.js';
 

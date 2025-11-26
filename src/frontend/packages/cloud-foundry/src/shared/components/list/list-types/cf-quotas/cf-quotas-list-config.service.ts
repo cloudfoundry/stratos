@@ -1,21 +1,21 @@
-import { DatePipe } from '@angular/common';
+import type { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 
 import {
   ConfirmationDialogConfig,
   ConfirmationDialogService,
   CurrentUserPermissionsService,
-  IListAction,
-  ITableColumn,
+  type IListAction,
+  type ITableColumn,
   ListViewTypes
 } from '@stratosui/core';
-import { APIResource, RouterNav } from '@stratosui/store';
+import { type APIResource, RouterNav, type GeneralEntityAppState } from '@stratosui/store';
 import { DeleteQuotaDefinition } from '../../../../../actions/quota-definitions.actions';
-import { CFAppState } from '../../../../../cf-app-state';
-import { IQuotaDefinition } from '../../../../../cf-api.types';
-import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
+import type { CFAppState } from '../../../../../cf-app-state';
+import type { IQuotaDefinition } from '../../../../../cf-api.types';
+import type { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfQuotasDataSourceService } from './cf-quotas-data-source.service';
@@ -33,7 +33,7 @@ export class CfQuotasListConfigService extends BaseCfListConfig<APIResource<IQuo
   canDelete: Observable<boolean>;
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     private datePipe: DatePipe,
     private confirmDialog: ConfirmationDialogService,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
@@ -74,7 +74,7 @@ export class CfQuotasListConfigService extends BaseCfListConfig<APIResource<IQuo
       columnId: 'createdAt',
       headerCell: () => 'Creation',
       cellDefinition: {
-        getValue: (row: APIResource) => `${this.datePipe.transform(row.metadata.created_at, 'medium')}`
+        getValue: (row: APIResource<IQuotaDefinition>) => `${this.datePipe.transform(row.metadata.created_at, 'medium')}`
       },
       sort: {
         type: 'sort',
@@ -85,14 +85,14 @@ export class CfQuotasListConfigService extends BaseCfListConfig<APIResource<IQuo
   ];
 
   private listActionDelete: IListAction<APIResource<IQuotaDefinition>> = {
-    action: (item: APIResource) => this.deleteSingleQuota(item),
+    action: (item: APIResource<IQuotaDefinition>) => this.deleteSingleQuota(item),
     label: 'Delete',
     description: 'Delete quota',
     createVisible: () => this.canDelete
   };
 
   private listActionEdit: IListAction<APIResource<IQuotaDefinition>> = {
-    action: (item: APIResource) => this.editSingleQuota(item),
+    action: (item: APIResource<IQuotaDefinition>) => this.editSingleQuota(item),
     label: 'Edit',
     description: 'Edit quota',
     createVisible: () => this.canEdit

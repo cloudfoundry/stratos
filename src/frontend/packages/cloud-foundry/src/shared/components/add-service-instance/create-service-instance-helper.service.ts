@@ -1,14 +1,14 @@
 import { Inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { CF_GUID } from '@stratosui/core';
-import { APIResource, getPaginationObservables, PaginationMonitorFactory } from '@stratosui/store';
-import { CFAppState } from '../../../cf-app-state';
+import { type APIResource, getPaginationObservables, PaginationMonitorFactory, type GeneralEntityAppState } from '@stratosui/store';
+import type { CFAppState } from '../../../cf-app-state';
 import { serviceInstancesEntityType, servicePlanVisibilityEntityType } from '../../../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../entity-relations/entity-relations.types';
-import { IService, IServiceBroker, IServiceInstance, IServicePlan, IServicePlanVisibility } from '../../../cf-api-svc.types';
+import type { IService, IServiceBroker, IServiceInstance, IServicePlan, IServicePlanVisibility } from '../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../cf-entity-factory';
 import { getServiceName, getServicePlans } from '../../../features/service-catalog/services-helper';
@@ -22,7 +22,7 @@ export class CreateServiceInstanceHelper {
   public marketPlaceMode = false;
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     public serviceGuid: string,
     @Inject(CF_GUID) public cfGuid: string,
     private paginationMonitorFactory: PaginationMonitorFactory
@@ -78,8 +78,10 @@ export class CreateServiceInstanceHelper {
   };
 
   getServiceInstancesForService = (servicePlanGuid: string = null, spaceGuid: string = null, cfGuid: string = null) => {
-    let action;
-    let paginationKey;
+    let action: ReturnType<typeof cfEntityCatalog.serviceInstance.actions.getAllInSpace> |
+                ReturnType<typeof cfEntityCatalog.serviceInstance.actions.getAllInServicePlan> |
+                ReturnType<typeof cfEntityCatalog.serviceInstance.actions.getMultiple>;
+    let paginationKey: string;
     if (spaceGuid) {
       paginationKey = createEntityRelationPaginationKey(serviceInstancesEntityType, `${spaceGuid}-${servicePlanGuid}`);
       const q = [new QParam('service_plan_guid', servicePlanGuid, QParamJoiners.colon).toString()];

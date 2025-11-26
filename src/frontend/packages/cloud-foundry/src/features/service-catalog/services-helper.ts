@@ -1,15 +1,16 @@
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf } from 'rxjs';
+import type { GeneralEntityAppState } from '@stratosui/store';
+import { type Observable, of as observableOf } from 'rxjs';
 import { combineLatest, filter, first, map, share, switchMap } from 'rxjs/operators';
 
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { getIdFromRoute, safeStringToObj } from '../../../../core/src/core/utils.service';
-import { EntityService } from '../../../../store/src/entity-service';
-import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
-import { APIResource } from '../../../../store/src/types/api.types';
+import { getIdFromRoute, safeStringToObj } from '@stratosui/core';
+import type { EntityService } from '../../../../store/src/entity-service';
+import type { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
+import type { APIResource } from '../../../../store/src/types/api.types';
 import { StratosStatus } from '../../../../store/src/types/shared.types';
-import {
+import type {
   IService,
   IServiceBroker,
   IServiceExtra,
@@ -18,21 +19,21 @@ import {
   IServicePlanExtra,
   IServicePlanVisibility,
 } from '../../cf-api-svc.types';
-import { CFAppState } from '../../cf-app-state';
+import type { CFAppState } from '../../cf-app-state';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { organizationEntityType, servicePlanEntityType, spaceEntityType } from '../../cf-entity-types';
 import { QParam, QParamJoiners } from '../../shared/q-param';
 import { fetchTotalResults } from '../cf/cf.helpers';
-import { ServicePlanAccessibility } from './services.service';
+import type { ServicePlanAccessibility } from './services.service';
 
 export const getSvcAvailability = (
   servicePlan: APIResource<IServicePlan>,
   serviceBroker: APIResource<IServiceBroker>,
   allServicePlanVisibilities: APIResource<IServicePlanVisibility>[]) => {
-  const svcAvailability: { isPublic: boolean; spaceScoped: boolean; hasVisibilities: boolean; guid: string; spaceGuid: any } = {
+  const svcAvailability: { isPublic: boolean; spaceScoped: boolean; hasVisibilities: boolean; guid: string; spaceGuid: string | null } = {
     isPublic: false, spaceScoped: false, hasVisibilities: false, guid: servicePlan.metadata.guid, spaceGuid: null
   };
-  if (serviceBroker && serviceBroker.entity.space_guid) {
+  if (serviceBroker?.entity.space_guid) {
     svcAvailability.spaceScoped = true;
     svcAvailability.spaceGuid = serviceBroker.entity.space_guid;
   } else {
@@ -72,7 +73,7 @@ export const fetchServiceInstancesCount = (
   cfGuid: string,
   orgGuid: string = null,
   spaceGuid: string = null,
-  store: Store<CFAppState>,
+  store: Store<GeneralEntityAppState>,
   paginationMonitorFactory: PaginationMonitorFactory): Observable<number> => {
   const parentSchemaKey = spaceGuid ? spaceEntityType : orgGuid ? organizationEntityType : 'cf';
   const uniqueKey = spaceGuid || orgGuid || cfGuid;
@@ -97,8 +98,8 @@ export const getServiceName = (serviceEntity: APIResource<IService>): string => 
   let extraInfo: IServiceExtra = null;
   try {
     extraInfo = serviceEntity.entity.extra ? JSON.parse(serviceEntity.entity.extra) : null;
-  } catch (e) { }
-  return extraInfo && extraInfo.displayName ? extraInfo.displayName : serviceEntity.entity.label;
+  } catch (_e) { }
+  return extraInfo?.displayName ? extraInfo.displayName : serviceEntity.entity.label;
 };
 
 export const getServiceSummaryUrl = (cfGuid: string, serviceGuid: string): string =>
@@ -125,7 +126,7 @@ export const getServicePlans = (
 };
 
 export const getServicePlanName = (plan: { name: string, extraTyped?: IServicePlanExtra, }): string =>
-  plan.extraTyped && plan.extraTyped.displayName ? plan.extraTyped.displayName : plan.name;
+  plan.extraTyped?.displayName ? plan.extraTyped.displayName : plan.name;
 
 export const getServicePlanAccessibility = (
   servicePlan: APIResource<IServicePlan>,

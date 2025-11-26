@@ -1,7 +1,7 @@
-import { Action, ActionReducer } from '@ngrx/store';
+import type { Action, ActionReducer } from '@ngrx/store';
 import { produce } from 'immer';
 import { RequestTypes } from '../actions/request.actions';
-import { IRequestArray } from './api-request-reducer/types';
+import type { IRequestArray } from './api-request-reducer/types';
 
 export const requestActions = [
   RequestTypes.START,
@@ -10,11 +10,11 @@ export const requestActions = [
   RequestTypes.UPDATE
 ] as IRequestArray;
 
-export interface ExtraApiReducers<T = any> {
+export interface ExtraApiReducers<T = unknown> {
   [entityKey: string]: ActionReducer<T>[];
 }
 
-export function chainApiReducers<T = any>(
+export function chainApiReducers<T = unknown>(
   baseReducer: ActionReducer<Record<string, T>>,
   extraReducers: ExtraApiReducers<T>
 ) {
@@ -30,7 +30,7 @@ export function chainApiReducers<T = any>(
   );
 }
 
-export function chainReducers<T = any>(
+export function chainReducers<T = unknown>(
   extraReducers: ExtraApiReducers<T>
 ) {
   return (state: Record<string, T>, action: Action) => produce(

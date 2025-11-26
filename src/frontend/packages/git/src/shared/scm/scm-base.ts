@@ -1,9 +1,8 @@
-import { Observable, of } from 'rxjs';
+import { type Observable, of } from 'rxjs';
 import { first, map } from 'rxjs/operators';
-
+import { environment } from '@stratosui/core';
 import { HttpOptions } from '../../../../core/src/core/core.types';
-import { environment } from '../../../../core/src/environments/environment';
-import { EndpointModel } from '../../../../store/src/public-api';
+import type { EndpointModel } from '../../../../store/src/public-api';
 import { stratosEntityCatalog } from '../../../../store/src/stratos-entity-catalog';
 
 

@@ -1,25 +1,25 @@
 // tslint:disable:max-line-length
 import { Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { first, tap } from 'rxjs/operators';
+import { Store } from '@ngrx/store'
+import type { GeneralEntityAppState } from '@stratosui/store';;
+import type { Observable } from 'rxjs';
+import { first, map, tap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import type { FetchCFCellMetricsPaginatedAction } from '../../../../../actions/cf-metrics.actions';
+import type { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   BooleanIndicatorType,
-} from '../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import {
   TableCellBooleanIndicatorComponent,
-  TableCellBooleanIndicatorComponentConfig,
-} from '../../../../../../../core/src/shared/components/list/list-table/table-cell-boolean-indicator/table-cell-boolean-indicator.component';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import { ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
-import { IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
-import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
+  type TableCellBooleanIndicatorComponentConfig,
+  type ITableColumn,
+  ListViewTypes,
+} from '@stratosui/core';
+import type { ListView } from '../../../../../../../store/src/actions/list.actions';
+import type { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
+import type { IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
+import type { IMetricCell } from '../../../../../../../store/src/types/metric.types';
 import { CfCellHelper } from '../../../../../features/cf/cf-cell.helpers';
-import { ActiveRouteCfCell } from '../../../../../features/cf/cf-page.types';
+import type { ActiveRouteCfCell } from '../../../../../features/cf/cf-page.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCellsDataSource } from './cf-cells-data-source';
 
@@ -40,7 +40,7 @@ export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResu
     filter: 'Search by id',
     noEntries: 'There are no cells'
   };
-  private init$: Observable<any>;
+  private init$: Observable<FetchCFCellMetricsPaginatedAction>;
 
   private boolIndicatorConfig: TableCellBooleanIndicatorComponentConfig<IMetricVectorResult<IMetricCell>> = {
     // "0 signifies healthy, and 1 signifies unhealthy"
@@ -107,7 +107,7 @@ export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResu
   ];
 
   constructor(
-    store: Store<CFAppState>,
+    store: Store<GeneralEntityAppState>,
     private activeRouteCfCell: ActiveRouteCfCell,
     paginationMonitorFactory: PaginationMonitorFactory) {
     super();
@@ -120,7 +120,7 @@ export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResu
     );
   }
 
-  getInitialised = () => this.init$;
+  getInitialised = (): Observable<boolean> => this.init$.pipe(map(() => true));
   getColumns = () => this.columns;
   getDataSource = () => this.dataSource;
 }

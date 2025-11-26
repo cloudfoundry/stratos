@@ -1,9 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 
-import { CoreModule } from '@stratosui/core';
-import { TailwindJsonSchemaFormModule } from '../../../core/src/shared/components/tailwind-json-schema-form/tailwind-json-schema-form.module';
-import { SharedModule } from '@stratosui/core';
+import { CoreModule, SharedModule, TailwindJsonSchemaFormModule } from '@stratosui/core';
 import { ApplicationStateService } from './services/application-state.service';
 import { ApplicationEnvVarsHelper } from '../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundry-user-provided-services.service';

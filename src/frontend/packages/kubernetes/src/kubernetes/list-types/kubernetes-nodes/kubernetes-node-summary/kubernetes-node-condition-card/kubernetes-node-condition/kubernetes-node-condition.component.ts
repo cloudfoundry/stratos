@@ -1,11 +1,11 @@
 import { AsyncPipe, NgStyle } from '@angular/common';
-import {Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { Observable } from 'rxjs';
+import {Component, Input, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import type { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { BooleanIndicatorComponent } from '@stratosui/core';
 import { KubernetesNodeService } from '../../../../../services/kubernetes-node.service';
-import { ConditionType, ConditionTypeLabels, KubernetesCondition } from '../../../../../store/kube.types';
+import { ConditionType, ConditionTypeLabels, type KubernetesCondition } from '../../../../../store/kube.types';
 
 @Component({
   selector: 'app-kubernetes-node-condition',

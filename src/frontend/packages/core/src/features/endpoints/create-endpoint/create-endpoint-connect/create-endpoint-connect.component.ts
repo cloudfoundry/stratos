@@ -1,14 +1,15 @@
 
-import { ChangeDetectionStrategy, Component, OnDestroy  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, type OnDestroy  } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
-import { Observable, of } from 'rxjs';
+import { type Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../core/endpoints.service';
 import { BlurDirective } from '../../../../shared/components/blur.directive';
 import { MarkdownPreviewComponent } from '../../../../shared/components/markdown-preview/markdown-preview.component';
-import { IStepperStep, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
+import type {IStepperStep} from '../../../../shared/components/stepper/step/step.component';
+import type {StepOnNextResult} from '../../../../shared/components/stepper/step/step.component';
 import { SidePanelService } from '../../../../shared/services/side-panel.service';
 import { ConnectEndpointComponent } from '../../connect-endpoint/connect-endpoint.component';
 import { ConnectEndpointConfig, ConnectEndpointService } from '../../connect.service';

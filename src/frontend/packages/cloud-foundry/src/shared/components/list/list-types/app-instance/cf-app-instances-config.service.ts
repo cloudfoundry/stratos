@@ -1,37 +1,39 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest as combineLatestObs, Observable } from 'rxjs';
+import { combineLatest as combineLatestObs, type Observable } from 'rxjs';
 import { combineLatest, map, switchMap } from 'rxjs/operators';
 import {
   CurrentUserPermissionsService,
-  UtilsService,
+  type UtilsService,
   ConfirmationDialogConfig,
   ConfirmationDialogService,
   getIntegerFieldSortFunction,
-  ITableColumn,
-  IGlobalListAction,
-  IListAction,
-  IListConfig,
-  IMultiListAction,
+  type ITableColumn,
+  type IGlobalListAction,
+  type IListAction,
+  type IListConfig,
+  type IMultiListAction,
+  type IListMultiFilterConfig,
   ListViewTypes,
 } from '@stratosui/core';
 import {
   EntityServiceFactory,
   PaginationMonitorFactory,
   MetricQueryConfig,
-  IMetricMatrixResult,
-  IMetrics,
-  IMetricApplication,
+  type IMetricMatrixResult,
+  type IMetrics,
+  type IMetricApplication,
   MetricQueryType,
+  type GeneralEntityAppState,
 } from '@stratosui/store';
 import { DeleteApplicationInstance } from '../../../../../actions/application.actions';
 import { FetchApplicationMetricsAction } from '../../../../../actions/cf-metrics.actions';
-import { CFAppState } from '../../../../../cf-app-state';
-import { ApplicationService } from '../../../../../features/applications/application.service';
+import type { CFAppState } from '../../../../../cf-app-state';
+import type { ApplicationService } from '../../../../../features/applications/application.service';
 import { CfCellHelper } from '../../../../../features/cf/cf-cell.helpers';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
-import { ListAppInstance } from './app-instance-types';
+import type { ListAppInstance } from './app-instance-types';
 import { CfAppInstancesDataSource } from './cf-app-instances-data-source';
 import { TableCellCfCellComponent } from './table-cell-cf-cell/table-cell-cf-cell.component';
 import { TableCellUsageComponent } from './table-cell-usage/table-cell-usage.component';
@@ -59,7 +61,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
       cellDefinition: {
         getValue: (row) => `${row.index}`
       },
-      sort: getIntegerFieldSortFunction('index'),
+      sort: getIntegerFieldSortFunction('index') as any,
       cellFlex: '1'
     },
     {
@@ -149,8 +151,8 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
   };
   private initialised$: Observable<boolean>;
 
-  private listActionTerminate: IListAction<any> = {
-    action: (item: any) => {
+  private listActionTerminate: IListAction<ListAppInstance> = {
+    action: (item: ListAppInstance) => {
       const confirmation = new ConfirmationDialogConfig(
         'Terminate Instance?',
         `Are you sure you want to terminate instance ${item.index}?`,
@@ -167,8 +169,8 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     createVisible: () => this.canEditApp$
   };
 
-  private listActionSsh: IListAction<any> = {
-    action: (item: any) => {
+  private listActionSsh: IListAction<ListAppInstance> = {
+    action: (item: ListAppInstance) => {
       const index = item.index;
       const sshRoute = (
         `/applications/${this.appService.cfGuid}/${this.appService.appGuid}/ssh/${index}`
@@ -183,8 +185,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
           combineLatest(this.appService.appSpace$),
           map(([app, space]) => {
             return !!(
-              row &&
-              row.value &&
+              row?.value &&
               row.value.state === 'RUNNING' &&
               app &&
               app.entity &&
@@ -208,7 +209,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
   private canEditApp$: Observable<boolean>;
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     private appService: ApplicationService,
     private utilsService: UtilsService,
     private router: Router,
@@ -254,7 +255,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
   getSingleActions = (): IListAction<ListAppInstance>[] => this.singleActions;
   getColumns = (): ITableColumn<ListAppInstance>[] => this.columns;
   getDataSource = () => this.instancesSource;
-  getMultiFiltersConfigs = (): any[] => [];
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
   getInitialised = (): Observable<boolean> => this.initialised$;
 
   private createMetricsResults(entityServiceFactory: EntityServiceFactory) {

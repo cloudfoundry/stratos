@@ -1,8 +1,8 @@
 import { HttpRequest } from '@angular/common/http';
 
 import { getActions } from '../../../store/src/actions/action.helper';
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { EntityRequestAction } from '../../../store/src/types/request.types';
+import type { PaginatedAction } from '../../../store/src/types/pagination.types';
+import type { EntityRequestAction } from '../../../store/src/types/request.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { serviceBrokerEntityType } from '../cf-entity-types';
 import { CFStartAction } from './cf-action.types';
@@ -23,7 +23,7 @@ export class GetServiceBrokers extends CFStartAction implements PaginatedAction 
   actions = getActions('Service Brokers', 'Get all');
   entity = [cfEntityFactory(serviceBrokerEntityType)];
   entityType = serviceBrokerEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   initialParams = {
     page: 1,
     'results-per-page': 100,
@@ -48,5 +48,5 @@ export class GetServiceBroker extends CFStartAction implements EntityRequestActi
   actions = getActions('Service Brokers', 'Get specific by ID');
   entity = [cfEntityFactory(serviceBrokerEntityType)];
   entityType = serviceBrokerEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
 }

@@ -1,6 +1,6 @@
 import { compose } from '@ngrx/store';
 
-import { RequestInfoState } from '../../../../store/src/reducers/api-request-reducer/types';
+import type { RequestInfoState } from '../../../../store/src/reducers/api-request-reducer/types';
 import {
   getAPIRequestDataState,
   getAPIRequestInfoState,
@@ -9,7 +9,7 @@ import {
   getRequestEntityKey,
   getUpdateSectionById,
 } from '../../../../store/src/selectors/api.selectors';
-import { APIResource, APIResourceMetadata } from '../../../../store/src/types/api.types';
+import type { APIResource, APIResourceMetadata } from '../../../../store/src/types/api.types';
 import { getCFEntityKey } from '../../cf-entity-helpers';
 
 export function selectCfRequestInfo(entityType: string, entityGuid: string) {
@@ -45,15 +45,15 @@ export function selectCfEntity<T = APIResource>(
   );
 }
 
-const getValueOrNull = (object: any, key: string): any =>
+const getValueOrNull = <T = unknown>(object: Record<string, T> | null | undefined, key: string): T | null =>
   object ? (object[key] ? object[key] : null) : null;
 export const getAPIResourceMetadata = (
   resource: APIResource
-): APIResourceMetadata => getValueOrNull(resource, 'metadata');
-export const getAPIResourceEntity = (resource: APIResource): any =>
-  getValueOrNull(resource, 'entity');
+): APIResourceMetadata => getValueOrNull<APIResourceMetadata>(resource as unknown as Record<string, APIResourceMetadata>, 'metadata');
+export const getAPIResourceEntity = (resource: APIResource): unknown =>
+  getValueOrNull(resource as unknown as Record<string, unknown>, 'entity');
 export const getMetadataGuid = (metadata: APIResourceMetadata): string =>
-  getValueOrNull(metadata, 'guid');
+  getValueOrNull(metadata as unknown as Record<string, string>, 'guid');
 export const getAPIResourceGuid = compose(
   getMetadataGuid,
   getAPIResourceMetadata

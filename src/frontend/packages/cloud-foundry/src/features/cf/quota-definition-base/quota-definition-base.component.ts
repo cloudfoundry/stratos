@@ -1,16 +1,16 @@
-import { ActivatedRoute } from '@angular/router';
+import type { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of, Subscription } from 'rxjs';
+import { combineLatest, type Observable, of, type Subscription } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
-import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
-import { AppState } from '../../../../../store/src/app-state';
+import type { IHeaderBreadcrumb } from '@stratosui/core';
+import type { AppState } from '../../../../../store/src/app-state';
 import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
-import { APIResource } from '../../../../../store/src/types/api.types';
-import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
-import { IOrganization, IOrgQuotaDefinition, ISpace, ISpaceQuotaDefinition } from '../../../cf-api.types';
+import type { APIResource } from '../../../../../store/src/types/api.types';
+import type { EndpointModel } from '../../../../../store/src/types/endpoint.types';
+import type { IOrganization, IOrgQuotaDefinition, ISpace, ISpaceQuotaDefinition } from '../../../cf-api.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
-import { ActiveRouteCfOrgSpace } from '../cf-page.types';
+import type { ActiveRouteCfOrgSpace } from '../cf-page.types';
 
 export class QuotaDefinitionBaseComponent {
   breadcrumbs$!: Observable<IHeaderBreadcrumb[]>;
@@ -25,7 +25,7 @@ export class QuotaDefinitionBaseComponent {
   orgSubscriber!: Subscription;
 
   constructor(
-    protected store: Store<AppState>,
+    protected store: Store,
     protected activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     protected activatedRoute: ActivatedRoute,
   ) {
@@ -69,10 +69,10 @@ export class QuotaDefinitionBaseComponent {
   }
 
   protected getBreadcrumbs(
-    endpoint: EndpointModel,
-    org: APIResource<IOrganization>,
-    space: APIResource<ISpace>
-  ): any {
-    return null;
+    _endpoint: EndpointModel,
+    _org: APIResource<IOrganization>,
+    _space: APIResource<ISpace>
+  ): IHeaderBreadcrumb[] {
+    return [];
   }
 }

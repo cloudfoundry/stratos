@@ -1,18 +1,19 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
-  SessionData,
-  EntityService,
-  AuthState,
+  type SessionData,
+  type EntityService,
+  type AuthState,
   stratosEntityCatalog,
-  AppState,
-  ActionState,
+  type AppState,
+  type ActionState,
   getDefaultActionState,
-  UserProfileInfo,
-  UserProfileInfoEmail,
-  UserProfileInfoUpdates,
+  type UserProfileInfo,
+  type UserProfileInfoEmail,
+  type UserProfileInfoUpdates,
+  type EntityInfo,
 } from '@stratosui/store';
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { combineLatest, type Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 
@@ -35,7 +36,7 @@ export class UserProfileService {
     private store: Store<AppState>,
   ) {
     this.userGuid$ = this.store.select(s => s.auth).pipe(
-      filter((auth: AuthState) => !!(auth && auth.sessionData)),
+      filter((auth: AuthState) => !!(auth?.sessionData)),
       map((auth: AuthState) => auth.sessionData),
       filter((sessionData: SessionData) => !!sessionData.user),
       first(),
@@ -51,7 +52,7 @@ export class UserProfileService {
 
     this.userProfile$ = this.entityService.pipe(
       switchMap(service => service.waitForEntity$),
-      map(({ entity }) => entity),
+      map(({ entity }: EntityInfo<UserProfileInfo>) => entity),
       filter(data => data && !!data.id)
     );
     this.isFetching$ = this.entityService.pipe(

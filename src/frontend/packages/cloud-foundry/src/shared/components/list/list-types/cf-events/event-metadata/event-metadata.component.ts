@@ -1,5 +1,5 @@
-import { CommonModule } from '@angular/common';
-import { Component, Inject, Input, OnInit, Optional , ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, JsonPipe } from '@angular/common';
+import { Component, Inject, Input, type OnInit, Optional , ChangeDetectionStrategy } from '@angular/core';
 import { TailwindDialogService, MAT_DIALOG_DATA } from '@stratosui/core';
 
 @Component({
@@ -9,7 +9,8 @@ import { TailwindDialogService, MAT_DIALOG_DATA } from '@stratosui/core';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule
+    CommonModule,
+    JsonPipe
   ]
 })
 export class EventMetadataComponent implements OnInit {
@@ -17,7 +18,7 @@ export class EventMetadataComponent implements OnInit {
   static maxValuesLength = 500;
   static maxKeys = 5;
 
-  @Input() metadata!: { [name: string]: any, };
+  @Input() metadata!: Record<string, unknown>;
   @Input() canShowPopup = true;
   showPopup = false;
   isPopup = false;
@@ -25,7 +26,7 @@ export class EventMetadataComponent implements OnInit {
   constructor(
     private dialog: TailwindDialogService,
     @Optional() @Inject(MAT_DIALOG_DATA) public data?: {
-      metadata: { [name: string]: string, },
+      metadata: Record<string, unknown>;
     },
   ) {
 
@@ -38,14 +39,16 @@ export class EventMetadataComponent implements OnInit {
 
   ngOnInit() {
     if (this.canShowPopup) {
+      const totalLength = Object.values(this.metadata).reduce((count: number, value: unknown): number => {
+        if ((count as number) > EventMetadataComponent.maxValuesLength) {
+          return count;
+        }
+        return (count as number) + (value ? JSON.stringify(value).length : 0);
+      }, 0);
+
       this.showPopup =
         Object.keys(this.metadata).length > EventMetadataComponent.maxKeys ||
-        Object.values(this.metadata).reduce((count, value) => {
-          if (count > EventMetadataComponent.maxValuesLength) {
-            return count;
-          }
-          return count + (value ? JSON.stringify(value).length : 0);
-        }, 0) > EventMetadataComponent.maxValuesLength;
+        (totalLength as number) > EventMetadataComponent.maxValuesLength;
     }
   }
 

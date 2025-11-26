@@ -17,8 +17,6 @@ import { CustomIconComponent } from '../../../shared/components/custom-material/
 })
 export class UploadProgressIndicatorComponent {
 
-  constructor() { }
-
   @Input() value!: number;
 
 }

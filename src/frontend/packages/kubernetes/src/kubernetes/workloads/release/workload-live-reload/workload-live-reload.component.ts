@@ -1,4 +1,4 @@
-import {Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import {Component, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CustomSlideToggleComponent } from '@stratosui/core';
 
 import { HelmReleaseSocketService } from '../helm-release-tab-base/helm-release-socket-service';
@@ -21,7 +21,7 @@ export class WorkloadLiveReloadComponent implements OnInit {
     this.checked = this.socketService.isStarted();
   }
 
-  public onChange(event: any) {
+  public onChange(event: { checked: boolean }) {
     this.socketService.pause(!event.checked);
   }
 

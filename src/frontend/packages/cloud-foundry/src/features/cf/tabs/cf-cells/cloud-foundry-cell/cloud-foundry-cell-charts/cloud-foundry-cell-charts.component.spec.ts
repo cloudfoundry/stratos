@@ -1,12 +1,12 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { EntityServiceFactory, MetricQueryConfig, MetricQueryType } from '@stratosui/store';
-import { MetricsConfig, MetricsChartTypes, MetricsLineChartConfig, MetricsChartHelpers } from '@stratosui/core';
+import { EntityServiceFactory, MetricQueryConfig, type MetricQueryType } from '@stratosui/store';
+import { type MetricsConfig, MetricsChartTypes, type MetricsLineChartConfig, MetricsChartHelpers } from '@stratosui/core';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CloudFoundryTestingModule } from '../../../../../../cloud-foundry-test.module';
 import { ActiveRouteCfCell } from '../../../../cf-page.types';
@@ -18,8 +18,8 @@ class MockCloudFoundryCellService {
   cfGuid = 'cfGuid';
   cellId = 'cellId';
 
-  buildMetricConfig = (queryString: string, queryRange: MetricQueryType): MetricsConfig<any> => ({
-    getSeriesName: (result: any) => `${result}`,
+  buildMetricConfig = (queryString: string, queryRange: MetricQueryType): MetricsConfig<unknown> => ({
+    getSeriesName: (result: unknown) => `${result}`,
     mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
     metricsAction: new FetchCFCellMetricsAction(
       'guid',

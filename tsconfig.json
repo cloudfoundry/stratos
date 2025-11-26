@@ -3,5 +3,13 @@
   "compilerOptions": {
     "downlevelIteration": true,
     "skipLibCheck": true
-  }
+  },
+  "exclude": [
+    "build/**",
+    "e2e/**",
+    "dist/**",
+    "node_modules/**",
+    "**/*.spec.ts",
+    "**/*.test.ts"
+  ]
 }

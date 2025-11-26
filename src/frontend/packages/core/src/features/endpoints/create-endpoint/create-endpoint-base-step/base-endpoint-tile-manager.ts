@@ -1,15 +1,15 @@
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of } from 'rxjs';
+import { combineLatest, type Observable, of } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 import {
-  GeneralEntityAppState,
-  IStratosEndpointDefinition,
-  StratosCatalogEndpointEntity,
+  type GeneralEntityAppState,
+  type IStratosEndpointDefinition,
+  type StratosCatalogEndpointEntity,
   stratosEntityCatalog,
 } from '@stratosui/store';
 
 import { TileConfigManager } from '../../../../shared/components/tile/tile-selector.helpers';
-import { ITileConfig, ITileData } from '../../../../shared/components/tile/tile-selector.types';
+import type { ITileConfig, ITileData } from '../../../../shared/components/tile/tile-selector.types';
 
 export interface ICreateEndpointTilesData extends ITileData {
   type: string;
@@ -113,8 +113,8 @@ export abstract class BaseEndpointTileManager {
                 },
               {
                 type: endpoint.type,
-                parentType: endpoint.parentType,
-                component: endpoint.registrationComponent,
+                parentType: endpoint.parentType as string,
+                component: endpoint.registrationComponent as string | number,
               }
             );
           });

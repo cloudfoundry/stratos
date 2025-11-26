@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { ISimpleListConfig } from '@stratosui/core';
+import type { ISimpleListConfig } from '@stratosui/core';
 
 interface KubernetesListConfig {
-  [name: string]: ISimpleListConfig<any>;
+  [name: string]: ISimpleListConfig<unknown>;
 }
 
 // Holder for list configurations
@@ -16,11 +16,11 @@ export class KubernetesListConfigService {
 
   private configs: KubernetesListConfig = {};
 
-  set(name: string, config: ISimpleListConfig<any>) {
+  set(name: string, config: ISimpleListConfig<unknown>) {
     this.configs[name] = config;
   }
 
-  get<T= any>(name: string): ISimpleListConfig<T> {
-    return name ? this.configs[name] : undefined;
+  get<T = unknown>(name: string): ISimpleListConfig<T> | undefined {
+    return name ? this.configs[name] as ISimpleListConfig<T> : undefined;
   }
 }

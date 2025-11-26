@@ -1,12 +1,12 @@
-import { StratosCatalogEntity } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { IFavoriteMetadata } from '../../../../store/src/types/user-favorites.types';
-import {
+import type { StratosCatalogEntity } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import type { IFavoriteMetadata } from '../../../../store/src/types/user-favorites.types';
+import type {
   WorkloadGraphBuilders,
   WorkloadReleaseBuilders,
   WorkloadResourceBuilders,
   WorkloadResourceHistoryBuilders,
 } from './store/workload-action-builders';
-import { HelmRelease, HelmReleaseGraph, HelmReleaseHistory, HelmReleaseResources } from './workload.types';
+import type { HelmRelease, HelmReleaseGraph, HelmReleaseHistory, HelmReleaseResources } from './workload.types';
 
 /**
  * A strongly typed collection of Workload Catalog Entities.

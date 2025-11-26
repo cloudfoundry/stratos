@@ -1,26 +1,27 @@
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, Subscription } from 'rxjs';
+import { combineLatest, type Observable, type Subscription } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 import {
   safeUnsubscribe,
-  ListPaginationMultiFilterChange,
-  RowsState,
-  IListConfig,
+  type ListPaginationMultiFilterChange,
+  type RowsState,
+  type IListConfig,
   TableRowStateManager
 } from '@stratosui/core';
 import {
   getRowMetadata,
-  AppState,
+  type AppState,
   entityCatalog,
   PaginationMonitor,
-  APIResource,
-  PaginatedAction,
-  PaginationParam
+  type APIResource,
+  type PaginatedAction,
+  type PaginationParam,
+  type GeneralEntityAppState
 } from '@stratosui/store';
 
-import { CFAppState } from '../../../../../cf-app-state';
+import type { CFAppState } from '../../../../../cf-app-state';
 import { routeEntityType } from '../../../../../cf-entity-types';
-import { IRoute } from '../../../../../cf-api.types';
+import type { IRoute } from '../../../../../cf-api.types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { getRoute, isTCPRoute } from '../../../../../features/applications/routes/routes.helper';
@@ -52,8 +53,8 @@ export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResourc
    * Use the generic route state which enables the route busy ux
    */
   constructor(
-    store: Store<CFAppState>,
-    listConfig: IListConfig<APIResource>,
+    store: Store<GeneralEntityAppState>,
+    listConfig: IListConfig<APIResource<ListCfRoute>>,
     cfGuid: string,
     action: PaginatedAction,
     isLocal: boolean,
@@ -68,16 +69,19 @@ export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResourc
     );
 
     super({
-      store,
+      store: store as Store<AppState>,
       action,
       schema: cfEntityFactory(routeEntityType),
       getRowUniqueId: getRowMetadata,
       paginationKey: action.paginationKey,
       isLocal,
-      listConfig,
+      listConfig: listConfig as IListConfig<APIResource<ListCfRoute>>,
       rowsState,
       destroy: () => safeUnsubscribe(sub),
-      transformEntities: [{ type: 'filter', field: 'entity.url' }, cfOrgSpaceFilter],
+      transformEntities: [
+        { type: 'filter', field: 'entity.url' },
+        cfOrgSpaceFilter as (entities: APIResource<ListCfRoute>[], paginationState: any) => APIResource<ListCfRoute>[]
+      ],
       transformEntity: map(routes => {
         // Supplement route object with additional fields. This allows better sorting and searching
         if (!routes || routes.length === 0) {
@@ -89,8 +93,8 @@ export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResourc
           }
           const entity: ListCfRoute = {
             ...route.entity,
-            url: getRoute(route.entity.port, route.entity.host, route.entity.path, true, false, route.entity.domain.entity.name),
-            isTCPRoute: isTCPRoute(route.entity.port)
+            url: getRoute(route.entity.port, route.entity.host ?? '', route.entity.path ?? '', true, false, route.entity.domain?.entity?.name ?? ''),
+            isTCPRoute: isTCPRoute(route.entity.port ?? null)
           };
 
           if (appGuid && route.entity.apps) {
@@ -120,7 +124,7 @@ export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResourc
    * Create a row state manager that will set the route row state to busy/blocked/deleting etc
    */
   private static createRowState(
-    store: Store<AppState>,
+    store: Store<GeneralEntityAppState>,
     paginationKey: string,
     genericRouteState: boolean,
     isLocal: boolean): { rowsState: Observable<RowsState>, sub: Subscription } {
@@ -138,12 +142,12 @@ export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResourc
     }
   }
 
-  private static getRowStateManager(store: Store<AppState>, paginationKey: string, isLocal: boolean): {
+  private static getRowStateManager(store: Store<GeneralEntityAppState>, paginationKey: string, isLocal: boolean): {
     rowStateManager: TableRowStateManager,
     sub: Subscription
   } {
     const rowStateManager = new TableRowStateManager();
-    const paginationMonitor = new PaginationMonitor(
+    const paginationMonitor = new PaginationMonitor<APIResource<IRoute>>(
       store,
       paginationKey,
       {
@@ -153,7 +157,7 @@ export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResourc
       isLocal
     );
 
-    const sub = this.setUpManager(
+    const sub = CfRoutesDataSourceBase.setUpManager(
       paginationMonitor,
       rowStateManager
     );
@@ -165,7 +169,7 @@ export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResourc
 
   // This pattern might be worth pulling out into a more general helper if we use it again.
   private static setUpManager(
-    paginationMonitor: PaginationMonitor<APIResource>,
+    paginationMonitor: PaginationMonitor<APIResource<IRoute>>,
     rowStateManager: TableRowStateManager
   ) {
     return paginationMonitor.currentPage$.pipe(

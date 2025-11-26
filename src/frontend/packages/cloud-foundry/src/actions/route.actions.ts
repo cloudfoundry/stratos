@@ -1,14 +1,14 @@
 import { HttpParams, HttpRequest } from '@angular/common/http';
 
 import { getActions } from '../../../store/src/actions/action.helper';
-import { PaginatedAction, PaginationParam } from '../../../store/src/types/pagination.types';
-import { ICFAction } from '../../../store/src/types/request.types';
+import type { PaginatedAction, PaginationParam } from '../../../store/src/types/pagination.types';
+import type { ICFAction } from '../../../store/src/types/request.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { applicationEntityType, domainEntityType, routeEntityType, spaceEntityType } from '../cf-entity-types';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
-  EntityInlineParentAction,
+  type EntityInlineParentAction,
 } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
 
@@ -29,7 +29,7 @@ export const RouteEvents = {
   UNMAP_ROUTE_FAILED: '[Application Routes] Unmap route failed'
 };
 
-export interface NewRoute {
+export interface NewRoute extends Record<string, unknown> {
   domain_guid: string;
   space_guid: string;
   host?: string;
@@ -42,7 +42,7 @@ export abstract class BaseRouteAction extends CFStartAction implements ICFAction
   actions!: string[];
   entity = [cfEntityFactory(routeEntityType)];
   entityType = routeEntityType;
-  options!: HttpRequest<any>;
+  options!: HttpRequest<unknown>;
   constructor(public guid: string, public endpointGuid: string, public appGuid?: string) {
     super();
   }
@@ -52,7 +52,7 @@ export class CreateRoute extends BaseRouteAction {
   constructor(guid: string, endpointGuid: string, route: NewRoute) {
     super(guid, endpointGuid);
     const generatePort = (!route.host && route.port) && route.port === -1;
-    this.options = new HttpRequest<any>(
+    this.options = new HttpRequest<unknown>(
       'POST',
       'routes',
       {
@@ -145,7 +145,7 @@ export class GetAllRoutes extends CFStartAction implements PaginatedAction, Enti
   }
   entity = [cfEntityFactory(routeEntityType)];
   entityType = routeEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   actions = getActions('Routes', 'Fetch all');
   initialParams: PaginationParam = {
     'results-per-page': 100,

@@ -1,12 +1,12 @@
 import { Injectable, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
+import { combineLatest as observableCombineLatest, type Observable, of as observableOf } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { getIdFromRoute } from '../../../../core/src/core/utils.service';
-import { EntityService } from '../../../../store/src/entity-service';
-import { APIResource } from '../../../../store/src/types/api.types';
-import {
+import { getIdFromRoute } from '@stratosui/core';
+import type { EntityService } from '../../../../store/src/entity-service';
+import type { APIResource } from '../../../../store/src/types/api.types';
+import type {
   IService,
   IServiceBroker,
   IServiceExtra,
@@ -41,8 +41,8 @@ export class ServicesService {
   isSpaceScoped$: Observable<SpaceScopedService>;
   allServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
   serviceInstances$: Observable<APIResource<IServiceInstance>[]>;
-  serviceGuid: any;
-  cfGuid: any;
+  serviceGuid: string;
+  cfGuid: string;
   serviceBrokers$: Observable<APIResource<IServiceBroker>[]>;
   serviceBroker$: Observable<APIResource<IServiceBroker>>;
   servicePlanVisibilities$: Observable<APIResource<IServicePlanVisibility>[]>;
@@ -82,11 +82,11 @@ export class ServicesService {
   );
 
   getServiceProviderName = () => observableCombineLatest(this.serviceExtraInfo$, this.service$).pipe(
-    map(([extraInfo]) => extraInfo && extraInfo.providerDisplayName ? extraInfo.providerDisplayName : '')
+    map(([extraInfo]) => extraInfo?.providerDisplayName ? extraInfo.providerDisplayName : '')
   );
 
   getServiceDescription = () => observableCombineLatest(this.serviceExtraInfo$, this.service$).pipe(
-    map(([extraInfo, service]) => extraInfo && extraInfo.longDescription ? extraInfo.longDescription : service.entity.description)
+    map(([extraInfo, service]) => extraInfo?.longDescription ? extraInfo.longDescription : service.entity.description)
   );
 
   getDocumentationUrl = () => this.serviceExtraInfo$.pipe(

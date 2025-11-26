@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { CustomCheckboxComponent } from '../../../custom-checkbox/custom-checkbox.component';
 
 import { TableCellCustom } from '../../list.types';

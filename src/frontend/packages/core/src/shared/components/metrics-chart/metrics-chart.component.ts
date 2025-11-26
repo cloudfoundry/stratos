@@ -1,33 +1,38 @@
-import { ChangeDetectionStrategy, AfterContentInit, Component, ContentChild, Input, OnDestroy, OnInit  } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ChartConfiguration } from 'chart.js';
+import { ChangeDetectionStrategy, type AfterContentInit, Component, ContentChild, Input, type OnDestroy, type OnInit  } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import type { ChartConfiguration } from 'chart.js';
 import { Store } from '@ngrx/store';
 import {
-  MetricsAction,
-  EntityMonitor,
-  ChartSeries,
-  IMetrics,
+  type MetricsAction,
+  type EntityMonitor,
+  type ChartSeries,
+  type IMetrics,
+  type IMetricsData,
+  type IMetricMatrixResult,
+  type IMetricVectorResult,
   MetricResultTypes,
-  MetricsFilterSeries,
+  type MetricsFilterSeries,
   AppState,
   EntityMonitorFactory,
 } from '@stratosui/store';
-import { combineLatest, Observable, Subscription, timer } from 'rxjs';
+import { combineLatest, type Observable, type Subscription, timer } from 'rxjs';
 import { debounce, distinctUntilChanged, map, startWith } from 'rxjs/operators';
 import { BaseChartDirective } from 'ng2-charts';
 
 import { CardWrapperComponent } from '../cards/card/card.component';
 import { MetricsRangeSelectorComponent } from '../metrics-range-selector/metrics-range-selector.component';
-import { MetricsChartTypes, MetricsLineChartConfig, YAxisTickFormattingFunc } from './metrics-chart.types';
+import { MetricsChartTypes, type MetricsLineChartConfig, type YAxisTickFormattingFunc } from './metrics-chart.types';
 import { MetricsChartManager } from './metrics.component.manager';
+import { AppSpinnerComponent } from '../progress-spinner/app-spinner.component';
+import { AppProgressBarComponent } from '../progress-bar/app-progress-bar.component';
 
 const MAX_SERIES_IN_TOOLTIP = 16;
 
-export interface MetricsConfig<T = any> {
+export interface MetricsConfig<T = unknown> {
   metricsAction: MetricsAction;
   getSeriesName: (item: T) => string;
-  mapSeriesItemName?: (value: any) => string | Date;
-  mapSeriesItemValue?: (value: any) => any;
+  mapSeriesItemName?: (value: unknown) => string | Date;
+  mapSeriesItemValue?: (value: unknown) => unknown;
   filterSeries?: MetricsFilterSeries;
   sort?: (a: ChartSeries<T>, b: ChartSeries<T>) => number;
   tooltipValueFormatter?: YAxisTickFormattingFunc;
@@ -41,7 +46,9 @@ export interface MetricsConfig<T = any> {
   imports: [
     CommonModule,
     BaseChartDirective,
-    CardWrapperComponent
+    CardWrapperComponent,
+    AppSpinnerComponent,
+    AppProgressBarComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -67,7 +74,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
 
   private timeSelectorSub!: Subscription;
 
-  public results$!: Observable<IMetrics<any> | ChartSeries<any>[] | null>;
+  public results$!: Observable<IMetrics<unknown> | ChartSeries<unknown>[] | null>;
   public chartJsData: ChartConfiguration['data'] = { labels: [], datasets: [] };
   public chartOptions: ChartConfiguration['options'] = {
     responsive: true,
@@ -172,7 +179,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
       this.results$,
       this.metricsMonitor.isFetchingEntity$.pipe(startWith(true))
     ).pipe(
-      debounce(([results, fetching]) => {
+      debounce(([_results, fetching]) => {
         return !fetching ? timer(800) : timer(0);
       }),
       map(([results, fetching]) => results && fetching),
@@ -205,14 +212,12 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   }
 
   private mapMetricsToChartData(metrics: IMetrics, metricsConfig: MetricsConfig) {
-    if (metrics && metrics.data) {
+    if (metrics?.data) {
       switch (metrics.data.resultType) {
         case MetricResultTypes.MATRIX:
-          return MetricsChartManager.mapMatrix(metrics.data, metricsConfig);
+          return MetricsChartManager.mapMatrix(metrics.data as IMetricsData<IMetricMatrixResult>, metricsConfig);
         case MetricResultTypes.VECTOR:
-          return MetricsChartManager.mapVector(metrics.data, metricsConfig);
-        case MetricResultTypes.SCALAR:
-        case MetricResultTypes.STRING:
+          return MetricsChartManager.mapVector(metrics.data as IMetricsData<IMetricVectorResult>, metricsConfig);
         default:
           throw new Error(`Could not find chart data mapper for metrics type ${metrics.data.resultType}`);
       }
@@ -226,7 +231,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
     this.store.dispatch(action);
   }
 
-  public getTooltipName(model: { name: { toLocaleString: () => any; }; }) {
+  public getTooltipName(model: { name: { toLocaleString: () => string; }; }) {
     return model.name.toLocaleString();
   }
 
@@ -234,7 +239,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
     return this.metricsConfig.tooltipValueFormatter ? this.metricsConfig.tooltipValueFormatter(model.value) : model.value;
   }
 
-  public getSeriesTooltipModel(model: any) {
+  public getSeriesTooltipModel(model: unknown[]) {
     if (model.length <= MAX_SERIES_IN_TOOLTIP) {
       return model;
     }
@@ -244,7 +249,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
     return truncated;
   }
 
-  private convertToChartJsData(metricsArray: ChartSeries<any>[]) {
+  private convertToChartJsData(metricsArray: ChartSeries<unknown>[]) {
     if (!metricsArray || !metricsArray.length) {
       this.chartJsData = { labels: [], datasets: [] };
       return;
@@ -276,9 +281,9 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
 
       return {
         label: series.name,
-        data: data,
+        data: data as number[],
         borderColor: colors[index % colors.length],
-        backgroundColor: colors[index % colors.length] + '20',
+        backgroundColor: `${colors[index % colors.length]}20`,
         fill: false,
         tension: 0.1
       };

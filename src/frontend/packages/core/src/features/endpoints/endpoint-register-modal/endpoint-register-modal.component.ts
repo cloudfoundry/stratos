@@ -1,28 +1,30 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component,
-  ComponentFactory,
+  type ComponentFactory,
   ComponentFactoryResolver,
-  ComponentRef,
+  type ComponentRef,
   EventEmitter,
   Injector,
-  OnDestroy,
-  OnInit,
+  type OnDestroy,
+  type OnInit,
   Output,
+  type Type,
   ViewChild,
   ViewContainerRef,
  } from '@angular/core';
-import { ActivatedRoute, ActivatedRouteSnapshot, Params } from '@angular/router';
+import { ActivatedRoute, type ActivatedRouteSnapshot, type Params } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { of } from 'rxjs';
+import { of, type Observable } from 'rxjs';
 import {
-  GeneralEntityAppState,
+  type GeneralEntityAppState,
   entityCatalog,
   selectSessionData,
+  type StratosCatalogEndpointEntity,
 } from '@stratosui/store';
 import { map } from 'rxjs/operators';
 
-import { ITileConfig } from '../../../shared/components/tile/tile-selector.types';
-import { BaseEndpointTileManager, ICreateEndpointTilesData } from '../create-endpoint/create-endpoint-base-step/base-endpoint-tile-manager';
+import type { ITileConfig } from '../../../shared/components/tile/tile-selector.types';
+import { BaseEndpointTileManager, type ICreateEndpointTilesData } from '../create-endpoint/create-endpoint-base-step/base-endpoint-tile-manager';
 import { TileSelectorComponent } from '../../../shared/components/tile-selector/tile-selector.component';
 
 @Component({
@@ -38,13 +40,13 @@ import { TileSelectorComponent } from '../../../shared/components/tile-selector/
 })
 export class EndpointRegisterModalComponent extends BaseEndpointTileManager implements OnInit, OnDestroy {
   @Output() closeModalEvent = new EventEmitter<void>();
-  @Output() endpointRegistered = new EventEmitter<any>();
+  @Output() endpointRegistered = new EventEmitter<unknown>();
 
   @ViewChild('endpointFormContainer', { read: ViewContainerRef, static: false }) 
   endpointFormContainer: ViewContainerRef;
 
   selectedEndpointInfo: ITileConfig<ICreateEndpointTilesData> | null = null;
-  componentRef: ComponentRef<any>;
+  componentRef: ComponentRef<unknown>;
 
   constructor(
     protected store: Store<GeneralEntityAppState>,
@@ -54,7 +56,7 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
     const types = store.select(selectSessionData()).pipe(
       // Get a list of all known endpoint types
       map(sessionData => entityCatalog.getAllEndpointTypes(sessionData.config.enableTechPreview || false))
-    );
+    ) as Observable<StratosCatalogEndpointEntity[]>;
     super(types, store);
     
     // Add escape key listener
@@ -112,7 +114,7 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
     const endpoint = entityCatalog.getEndpoint(epType, epSubType);
     console.log('Found endpoint definition:', endpoint);
 
-    if (endpoint && endpoint.definition.registrationComponent) {
+    if (endpoint?.definition.registrationComponent) {
       try {
         // Create mock route parameters like the original create-endpoint component
         const mockParams: Params = {
@@ -145,8 +147,8 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
           parent: this.injector
         });
 
-        const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(
-          endpoint.definition.registrationComponent
+        const factory: ComponentFactory<unknown> = this.resolver.resolveComponentFactory(
+          endpoint.definition.registrationComponent as Type<unknown>
         );
         
         // Create the component with the custom injector
@@ -219,12 +221,12 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
   private hookIntoComponentSuccess() {
     // Try to hook into various success patterns
     if (this.componentRef?.instance) {
-      const instance = this.componentRef.instance;
-      
+      const instance = this.componentRef.instance as Record<string, unknown>;
+
       // Check for onNext method (stepper pattern)
-      if (instance.onNext) {
-        const originalOnNext = instance.onNext.bind(instance);
-        instance.onNext = () => {
+      if (typeof instance['onNext'] === 'function') {
+        const originalOnNext = (instance['onNext'] as () => unknown).bind(instance);
+        instance['onNext'] = () => {
           const result = originalOnNext();
           this.handleRegistrationResult(result);
           return result;
@@ -232,33 +234,35 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
       }
 
       // Check for success events
-      if (instance.success && typeof instance.success.subscribe === 'function') {
-        instance.success.subscribe(() => {
+      const success = instance['success'];
+      if (success && typeof (success as { subscribe?: unknown })['subscribe'] === 'function') {
+        (success as { subscribe: (callback: () => void) => void }).subscribe(() => {
           this.onEndpointRegistered();
         });
       }
-      
+
       // Check for registration complete events
-      if (instance.registrationComplete && typeof instance.registrationComplete.subscribe === 'function') {
-        instance.registrationComplete.subscribe(() => {
+      const registrationComplete = instance['registrationComplete'];
+      if (registrationComplete && typeof (registrationComplete as { subscribe?: unknown })['subscribe'] === 'function') {
+        (registrationComplete as { subscribe: (callback: () => void) => void }).subscribe(() => {
           this.onEndpointRegistered();
         });
       }
     }
   }
 
-  private handleRegistrationResult(result: any) {
-    if (result && typeof result.subscribe === 'function') {
+  private handleRegistrationResult(result: unknown) {
+    if (result && typeof (result as { subscribe?: unknown })['subscribe'] === 'function') {
       // Handle observable result
-      result.subscribe((response: any) => {
+      (result as { subscribe: (callback: (response: unknown) => void) => void }).subscribe((response: unknown) => {
         console.log('Registration response:', response);
-        if (response && response.success) {
+        if (response && (response as { success?: boolean })['success']) {
           this.onEndpointRegistered();
         }
       });
-    } else if (result && typeof result.then === 'function') {
+    } else if (result && typeof (result as { then?: unknown })['then'] === 'function') {
       // Handle promise result
-      result.then((success: boolean) => {
+      (result as { then: (callback: (success: boolean) => void) => void }).then((success: boolean) => {
         console.log('Registration result:', success);
         if (success) {
           this.onEndpointRegistered();

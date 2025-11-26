@@ -1,18 +1,23 @@
-import { OperatorFunction } from 'rxjs';
+import type { OperatorFunction } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
 
-import { DeleteActionState, RequestInfoState } from './reducers/api-request-reducer/types';
+import type { DeleteActionState, RequestInfoState } from './reducers/api-request-reducer/types';
 
 // Helper operators
 
+interface FetchableState {
+  fetching: boolean;
+  error?: boolean | string;
+}
+
 // Monitors an entity fetch operation and generates a single boolean to
 // indicate if the fetch succeeded without an error
-export function entityFetchedWithoutError<T>(): OperatorFunction<T, boolean> {
+export function entityFetchedWithoutError<T extends FetchableState>(): OperatorFunction<T, boolean> {
   return input$ => input$.pipe(
     pairwise(),
-    filter(([oldV, newV]) => (oldV as any).fetching && !(newV as any).fetching),
+    filter(([oldV, newV]) => oldV.fetching && !newV.fetching),
     map(([, newV]) => newV),
-    map(f => !(f as any).error)
+    map(f => !f.error)
   );
 }
 
@@ -22,9 +27,9 @@ export function entityDeletedWithoutError<T extends RequestInfoState>(): Operato
   return input$ => input$.pipe(
     map((status: RequestInfoState) => status.deleting),
     pairwise(),
-    filter(([oldV, newV]) => (oldV as any).busy && !(newV as any).busy),
+    filter(([oldV, newV]) => oldV.busy && !newV.busy),
     map(([, newV]) => newV),
-    map(f => !(f as any).error)
+    map(f => !f.error)
   );
 }
 
@@ -33,7 +38,7 @@ export function entityDeleted<T extends RequestInfoState>(): OperatorFunction<T,
   return input$ => input$.pipe(
     map((status: RequestInfoState) => status.deleting),
     pairwise(),
-    filter(([oldV, newV]) => (oldV as any).busy && !(newV as any).busy),
+    filter(([oldV, newV]) => oldV.busy && !newV.busy),
     map(([, newV]) => newV),
   );
 }

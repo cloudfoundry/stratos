@@ -1,10 +1,10 @@
-import { Component, EventEmitter, Input, OnInit, Output , ChangeDetectionStrategy } from '@angular/core';
+import { Component, EventEmitter, Input, type OnInit, Output , ChangeDetectionStrategy } from '@angular/core';
 import { AsyncPipe, CommonModule } from '@angular/common';
-import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, type Observable, of } from 'rxjs';
 import { filter, map, startWith, tap } from 'rxjs/operators';
 
-import { PaginationObservables, APIResource } from '@stratosui/store';
-import { IApp } from '../../../cf-api.types';
+import type { PaginationObservables, APIResource } from '@stratosui/store';
+import type { IApp } from '../../../cf-api.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { appDataSort } from '../../cf/services/cloud-foundry-endpoint.service';
 import {
@@ -41,7 +41,7 @@ export class CardCfRecentAppsComponent implements OnInit {
   public recentApps$: Observable<APIResource<IApp>[]>;
   @Input() allApps$!: Observable<APIResource<IApp>[]>;
   @Input() loading$!: Observable<boolean>;
-  @Output() refresh = new EventEmitter<any>();
+  @Output() refresh = new EventEmitter<void>();
   @Input() endpoint!: string;
   @Input() mode!: string;
   @Input() showDate = true;
@@ -52,7 +52,7 @@ export class CardCfRecentAppsComponent implements OnInit {
 
   public canRefresh = false;
 
-  public placeholders: any[];
+  public placeholders: Array<{ metadata: { guid: string }; entity: Record<string, unknown> }>;
 
   appsPagObs!: PaginationObservables<APIResource<IApp>>;
 
@@ -70,14 +70,14 @@ export class CardCfRecentAppsComponent implements OnInit {
     this.placeholders = this.createPlaceholders(RECENT_ITEMS_COUNT);
   }
 
-  private createPlaceholders(count: number): any[] {
+  private createPlaceholders(count: number): Array<{ metadata: { guid: string }; entity: Record<string, unknown> }> {
     return Array.from({ length: count }, (_, i) => ({
       metadata: { guid: `placeholder-${i}` },
       entity: {}
     }));
   }
 
-  trackByAppGuid(index: number, app: any): string {
+  trackByAppGuid(index: number, app: APIResource<IApp> | { metadata: { guid: string }; entity: Record<string, unknown> }): string {
     return app?.metadata?.guid || String(index);
   }
 
@@ -88,7 +88,7 @@ export class CardCfRecentAppsComponent implements OnInit {
       return;
     }
     this.canRefresh = this.refresh.observers.length > 0;
-    this.appsPagObs = cfEntityCatalog.application.store.getPaginationService(this.endpoint);
+    this.appsPagObs = cfEntityCatalog.application.store.getPaginationService(this.endpoint, null);
     if (!this.allApps$) {
       this.allApps$ = this.appsPagObs.entities$;
       this.loading$ = this.appsPagObs.fetchingEntities$;

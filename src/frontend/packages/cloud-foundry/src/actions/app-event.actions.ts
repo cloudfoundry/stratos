@@ -1,6 +1,6 @@
 import { HttpParams, HttpRequest } from '@angular/common/http';
 
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
+import type { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { cfEventEntityType } from '../cf-entity-types';
 import { QParam, QParamJoiners } from '../shared/q-param';
@@ -15,7 +15,7 @@ export const AppGetAllEvents = {
 export class GetAllAppEvents extends CFStartAction implements PaginatedAction {
   private static sortField = 'timestamp'; // This is the field that 'order-direction' is applied to. Cannot be changed
 
-  constructor(public paginationKey: string, public appGuid: string, public endpointGuid) {
+  constructor(public paginationKey: string, public appGuid: string, public endpointGuid: string) {
     super();
     this.options = new HttpRequest(
       'GET',
@@ -37,7 +37,7 @@ export class GetAllAppEvents extends CFStartAction implements PaginatedAction {
 
   entity = [cfEntityFactory(cfEventEntityType)];
   entityType = cfEventEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   initialParams = {
     'order-direction': 'desc',
     'order-direction-field': GetAllAppEvents.sortField,

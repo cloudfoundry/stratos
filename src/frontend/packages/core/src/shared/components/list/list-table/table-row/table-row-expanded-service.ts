@@ -10,11 +10,15 @@ export class TableRowExpandedService {
   } = {};
 
   public expandAll() {
-    Object.keys(this.expanded).forEach(id => this.expanded[id] = true);
+    Object.keys(this.expanded).forEach(id => {
+      this.expanded[id] = true;
+    });
   }
 
   public collapseAll() {
-    Object.keys(this.expanded).forEach(id => this.expanded[id] = false);
+    Object.keys(this.expanded).forEach(id => {
+      this.expanded[id] = false;
+    });
   }
 
   public expand(id: string) {

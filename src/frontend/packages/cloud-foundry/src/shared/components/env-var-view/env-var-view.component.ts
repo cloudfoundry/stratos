@@ -1,6 +1,6 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, JsonPipe } from '@angular/common';
 import { Component, Inject , ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, TailwindDialogRef, CodeBlockComponent } from '@stratosui/core';
+import { MAT_DIALOG_DATA, type TailwindDialogRef, CodeBlockComponent } from '@stratosui/core';
 
 
 @Component({
@@ -11,6 +11,7 @@ import { MAT_DIALOG_DATA, TailwindDialogRef, CodeBlockComponent } from '@stratos
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    JsonPipe,
     CodeBlockComponent
   ]
 })
@@ -19,12 +20,12 @@ export class EnvVarViewComponent {
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: {
       key: string,
-      value: any
+      value: unknown
     },
     @Inject('TailwindDialogRef') public dialogRef: TailwindDialogRef<EnvVarViewComponent>
   ) { }
 
-  isObject(test: any): boolean {
+  isObject(test: unknown): boolean {
     return typeof test === 'object';
   }
 

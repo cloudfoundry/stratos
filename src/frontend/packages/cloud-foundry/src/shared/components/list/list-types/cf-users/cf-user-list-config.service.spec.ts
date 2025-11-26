@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import {CFAppState,
+import {type CFAppState,
   cfCurrentUserPermissionsService} from '@stratosui/cloud-foundry';
 import { CurrentUserPermissionsService } from '@stratosui/core';
 import {
@@ -13,6 +13,7 @@ import {
   generateStratosEntities,
   EntityCatalogHelper,
   EntityCatalogHelpers,
+  type GeneralEntityAppState,
 } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import {
@@ -48,7 +49,7 @@ describe('CfUserListConfigService', () => {
         {
           provide: CfUserListConfigService,
           useFactory: (
-            store: Store<CFAppState>,
+            store: Store<GeneralEntityAppState>,
             cfUserService: CfUserService,
             router: Router,
             activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,

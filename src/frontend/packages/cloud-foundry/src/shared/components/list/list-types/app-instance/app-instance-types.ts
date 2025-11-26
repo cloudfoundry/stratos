@@ -1,4 +1,4 @@
-import { AppStat } from '../../../../../store/types/app-metadata.types';
+import type { AppStat } from '../../../../../store/types/app-metadata.types';
 
 export interface ListAppInstanceUsage {
   mem: number;

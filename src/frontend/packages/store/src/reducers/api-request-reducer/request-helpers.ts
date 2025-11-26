@@ -1,23 +1,23 @@
-import { Store } from '@ngrx/store';
+import type { Store } from '@ngrx/store';
 
-import { APIResponse } from '../../actions/request.actions';
-import { BaseRequestState, GeneralAppState } from '../../app-state';
-import { BaseEntityRequestAction } from '../../entity-catalog/action-orchestrator/action-orchestrator';
+import type { APIResponse } from '../../actions/request.actions';
+import type { BaseRequestState, GeneralAppState } from '../../app-state';
+import type { BaseEntityRequestAction } from '../../entity-catalog/action-orchestrator/action-orchestrator';
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
-import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import type { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { mergeState } from '../../helpers/reducer.helper';
-import { NormalizedResponse } from '../../types/api.types';
-import { PaginatedAction } from '../../types/pagination.types';
+import type { NormalizedResponse } from '../../types/api.types';
+import type { PaginatedAction } from '../../types/pagination.types';
 import {
   APISuccessOrFailedAction,
-  EntityRequestAction,
-  ICFAction,
-  InternalEndpointError,
+  type EntityRequestAction,
+  type ICFAction,
+  type InternalEndpointError,
   StartRequestAction,
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../../types/request.types';
-import { defaultDeletingActionState, getDefaultRequestState, RequestInfoState, rootUpdatingKey } from './types';
+import { defaultDeletingActionState, getDefaultRequestState, type RequestInfoState, rootUpdatingKey } from './types';
 
 export function getEntityRequestState(
   state: BaseRequestState,
@@ -34,7 +34,7 @@ export function getEntityRequestState(
 
 export function setEntityRequestState(
   state: BaseRequestState,
-  requestState: any,
+  requestState: RequestInfoState,
   actionOrKey: BaseEntityRequestAction | string,
   guid: string = (actionOrKey as BaseEntityRequestAction).guid
 ) {
@@ -112,7 +112,7 @@ export function modifyRequestWithRequestType(requestState: RequestInfoState, typ
 /**
  * Merge the content of a new object into another object
  */
-export function mergeObject(coreObject: any, newObject: any) {
+export function mergeObject<T extends Record<string, unknown>>(coreObject: T, newObject: Partial<T>): T {
   return {
     ...coreObject,
     ...newObject
@@ -122,16 +122,20 @@ export function mergeObject(coreObject: any, newObject: any) {
 /**
  * Merge the content of a new object into a property of another's
  */
-export function mergeInnerObject(key: string, state: any, newObject: any) {
+export function mergeInnerObject<T extends Record<string, unknown>>(key: string, state: T, newObject: Record<string, unknown>): T {
   return {
     ...state,
-    [key]: mergeObject(state[key], newObject)
-  };
+    [key]: mergeObject(state[key] as Record<string, unknown>, newObject)
+  } as T;
 }
 
-export function mergeUpdatingState(apiAction: any, updatingState: any, newUpdatingState: any) {
+export function mergeUpdatingState(
+  apiAction: BaseEntityRequestAction,
+  updatingState: import('./types').UpdatingSection,
+  newUpdatingState: Partial<import('./types').ActionState>
+): import('./types').UpdatingSection {
   const updateKey = apiAction.updatingKey || rootUpdatingKey;
-  return mergeInnerObject(updateKey, updatingState, newUpdatingState);
+  return mergeInnerObject(updateKey, updatingState as Record<string, unknown>, newUpdatingState as Record<string, unknown>) as import('./types').UpdatingSection;
 }
 
 export function generateDefaultState(keys: Array<string>, initialSections?: {
@@ -141,7 +145,7 @@ export function generateDefaultState(keys: Array<string>, initialSections?: {
 
   keys.forEach((key: string) => {
     defaultState[key] = {};
-    if (initialSections && initialSections[key] && initialSections[key].length) {
+    if (initialSections?.[key]?.length) {
       initialSections[key].forEach((sectionKey: string) => {
         defaultState[key][sectionKey] = getDefaultRequestState();
       });
@@ -179,7 +183,7 @@ export function completeApiRequest<T extends GeneralAppState = GeneralAppState>(
 export function failApiRequest<T extends GeneralAppState = GeneralAppState>(
   store: Store<T>,
   apiAction: EntityRequestAction,
-  error: any,
+  error: Error & { message: string },
   catalogEntity: StratosBaseCatalogEntity,
   requestType: ApiRequestTypes = 'fetch',
   internalEndpointError?: InternalEndpointError
@@ -197,7 +201,7 @@ export function failApiRequest<T extends GeneralAppState = GeneralAppState>(
 
 export function getFailApiRequestActions(
   apiAction: EntityRequestAction,
-  error: any,
+  error: Error & { message: string },
   requestType: ApiRequestTypes = 'fetch',
   catalogEntity: StratosBaseCatalogEntity,
   internalEndpointError?: InternalEndpointError,

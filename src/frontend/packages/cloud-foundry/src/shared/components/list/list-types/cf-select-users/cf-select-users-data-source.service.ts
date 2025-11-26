@@ -1,23 +1,23 @@
 import { Store } from '@ngrx/store';
-import { getRowMetadata } from '@stratosui/store';
+import { getRowMetadata, type GeneralEntityAppState } from '@stratosui/store';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import type { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { cfUserEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import {
   ListDataSource,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import {
+} from '@stratosui/core';
+import type {
   TableRowStateManager,
-} from '../../../../../../../core/src/shared/components/list/list-table/table-row/table-row-state-manager';
-import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
+} from '@stratosui/core';
+import type { IListConfig } from '@stratosui/core';
+import type { APIResource } from '../../../../../../../store/src/types/api.types';
+import type { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 
 export class CfSelectUsersDataSourceService extends ListDataSource<APIResource> {
   constructor(
-    cfGuid: string,
-    store: Store<CFAppState>,
+    _cfGuid: string,
+    store: Store<GeneralEntityAppState>,
     getAllUsersAction: PaginatedAction,
     listConfig: IListConfig<APIResource>,
     rowStateManager: TableRowStateManager,

@@ -1,6 +1,6 @@
-import { Type } from '@angular/core';
-import { UntypedFormGroup } from '@angular/forms';
-import { Schema, schema } from 'normalizr';
+import type { Type } from '@angular/core';
+import type { UntypedFormGroup } from '@angular/forms';
+import type { Schema, schema } from 'normalizr';
 
 // Allowable endpoint types
 export type EndpointType = 'cf' | 'metrics' | string;
@@ -10,14 +10,14 @@ export interface EndpointAuthTypeConfig {
   value: string;
   formType?: string;
   types: Array<EndpointType>;
-  form?: any;
-  data?: any;
+  form?: Record<string, unknown> | UntypedFormGroup;
+  data?: Record<string, unknown>;
   component: Type<IAuthForm>;
   help?: string;
   /**
    * Generic property for any additional config
    */
-  config?: any;
+  config?: Record<string, unknown>;
 }
 
 /**
@@ -28,7 +28,7 @@ export interface IAuthForm {
   /**
    * Generic property for any additional config
    */
-  config?: any;
+  config?: Record<string, unknown>;
 }
 
 export interface EndpointAuthValues { [key: string]: string; }

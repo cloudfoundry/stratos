@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component} from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 
 import { SteppersComponent, StepComponent } from '@stratosui/core';
 import { KubeConfigSelectionComponent } from './kube-config-selection/kube-config-selection.component';

@@ -1,27 +1,28 @@
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterViewInit,
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, type AfterViewInit,
   Component,
-  ComponentFactory,
+  type ComponentFactory,
   ComponentFactoryResolver,
-  ComponentRef,
+  type ComponentRef,
   NgZone,
-  OnDestroy,
-  OnInit,
+  type OnDestroy,
+  type OnInit,
   ViewChild,
   ViewContainerRef,
  } from '@angular/core';
 import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { EndpointOnlyAppState, RouterNav, selectDashboardState, selectSessionData, stratosEntityCatalog, endpointStatusSelector } from '@stratosui/store';
-import { combineLatest, Observable, of, Subscription } from 'rxjs';
+import { type EndpointOnlyAppState, RouterNav, selectDashboardState, selectSessionData, stratosEntityCatalog, endpointStatusSelector } from '@stratosui/store';
+import { combineLatest, type Observable, of, type Subscription } from 'rxjs';
 import { delay, filter, first, map, switchMap, tap } from 'rxjs/operators';
 
-import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
+import {CustomizationService} from '../../../core/customizations.types';
+import type {CustomizationsMetadata} from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
 import {
   getActionsFromExtensions,
-  StratosActionMetadata,
+  type StratosActionMetadata,
   StratosActionType,
 } from '../../../core/extension/extension-service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
@@ -54,6 +55,7 @@ import { CustomIconComponent } from '../../../shared/components/custom-material/
   standalone: true,
   imports: [
     CommonModule,
+    AsyncPipe,
     RouterModule,
     CustomIconComponent,
     CustomTooltipDirective,
@@ -73,8 +75,8 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
   public isInitialised$: Observable<boolean>;
 
   @ViewChild('customNoEndpointsContainer', { read: ViewContainerRef, static: true }) customNoEndpointsContainer!: ViewContainerRef;
-  @ViewChild(ListComponent, { static: false }) listComponent: ListComponent<any>;
-  customContentComponentRef!: ComponentRef<any>;
+  @ViewChild(ListComponent, { static: false }) listComponent: ListComponent<unknown>;
+  customContentComponentRef!: ComponentRef<unknown>;
 
   private snackBarText = {
     message: `There are no connected endpoints, connect with your personal credentials to get started.`,
@@ -213,7 +215,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
           }
           if (!haveRegistered && this.customizations.noEndpointsComponent) {
             try {
-              const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(this.customizations.noEndpointsComponent);
+              const factory: ComponentFactory<unknown> = this.resolver.resolveComponentFactory(this.customizations.noEndpointsComponent);
               this.customContentComponentRef = this.customNoEndpointsContainer.createComponent(factory);
             } catch (error) {
               console.error('Error creating custom no-endpoints component:', error);

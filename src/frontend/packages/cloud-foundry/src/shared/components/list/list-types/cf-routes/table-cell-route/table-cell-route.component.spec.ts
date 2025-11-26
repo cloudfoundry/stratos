@@ -1,9 +1,9 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { appReducers, APIResource } from '@stratosui/store';
-import { ListCfRoute } from '../cf-routes-data-source-base';
+import { appReducers, type APIResource } from '@stratosui/store';
+import type { ListCfRoute } from '../cf-routes-data-source-base';
 import { TableCellRouteComponent } from './table-cell-route.component';
 
 describe('TableCellRouteComponent', () => {

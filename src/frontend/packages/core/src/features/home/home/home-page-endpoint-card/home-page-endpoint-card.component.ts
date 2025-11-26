@@ -1,14 +1,15 @@
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterViewInit,
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, type AfterViewInit,
   Compiler,
   Component,
+  type ComponentFactory,
   ComponentFactoryResolver,
-  ComponentRef,
+  type ComponentRef,
   EventEmitter,
   Injector,
   Input,
-  OnDestroy,
-  OnInit,
+  type OnDestroy,
+  type OnInit,
   Output,
   ViewChild,
   ViewContainerRef,
@@ -16,23 +17,25 @@ import { ChangeDetectionStrategy, AfterViewInit,
  } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
-import { combineLatest, Observable, of, Subscription } from 'rxjs';
+import { combineLatest, type Observable, of, type Subscription } from 'rxjs';
 import { filter, first, map, timeout } from 'rxjs/operators';
 
-import {
+import type {
   EntityCatalogSchemas,
   IStratosEndpointDefinition,
 } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
-import { EndpointModel, entityCatalog } from '../../../../../../store/src/public-api';
+import type { StratosCatalogEndpointEntity } from '../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { type EndpointModel, entityCatalog } from '../../../../../../store/src/public-api';
 import { UserFavoriteManager } from '../../../../../../store/src/user-favorite-manager';
+import type { UserFavorite } from '../../../../../../store/src/types/user-favorites.types';
 import { EntityFavoriteStarComponent } from '../../../../core/entity-favorite-star/entity-favorite-star.component';
 import { MultilineTitleComponent } from '../../../../shared/components/multiline-title/multiline-title.component';
 import { SidePanelMode, SidePanelService } from '../../../../shared/services/side-panel.service';
 import { FavoritesSidePanelComponent } from '../favorites-side-panel/favorites-side-panel.component';
 import { FavoritesMetaCardComponent } from '../favorites-meta-card/favorites-meta-card.component';
 import { HomeShortcutsComponent } from '../home-shortcuts/home-shortcuts.component';
-import { UserFavoriteEndpoint } from './../../../../../../store/src/types/user-favorites.types';
-import { HomePageCardLayout, HomePageEndpointCard, LinkMetadata } from './../../home.types';
+import type { UserFavoriteEndpoint } from './../../../../../../store/src/types/user-favorites.types';
+import type { HomePageCardLayout, HomePageEndpointCard, LinkMetadata } from './../../home.types';
 import {
   DefaultEndpointHomeComponent,
 } from './../default-endpoint-home-component/default-endpoint-home-component.component';
@@ -86,7 +89,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
 
   @Output() loaded = new EventEmitter<HomePageEndpointCardComponent>();
 
-  favorites$: Observable<any>;
+  favorites$: Observable<unknown>;
 
   private _layout = signal<HomePageCardLayout>(null);
   public layoutSignal = this._layout.asReadonly();
@@ -94,7 +97,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
 
   links$: Observable<LinkMetadata>;
 
-  entity: any;
+  entity: StratosCatalogEndpointEntity<any, any, any, any> | null;
 
   definition: IStratosEndpointDefinition<EntityCatalogSchemas>;
 
@@ -137,10 +140,10 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
   ngAfterViewInit() {
     // Dynamically load the component for the Home Card for this endopoint
     const endpointEntity = entityCatalog.getEndpoint(this.endpoint.cnsi_type, this.endpoint.sub_type);
-    if (endpointEntity && endpointEntity.definition.homeCard && endpointEntity.definition.homeCard.component) {
+    if (endpointEntity?.definition.homeCard?.component) {
       this.createCard(endpointEntity);
     } else {
-      this.createCard(undefined);
+      this.createCard(null);
     }
   }
 
@@ -157,8 +160,9 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
     }
 
     this.links$ = combineLatest([this.favorites$, this.layout$]).pipe(
-      filter(([favs, layout]) => !!layout),
-      map(([favs, layout]) => {
+      filter(([_favs, layout]) => !!layout),
+      map(([favsUnknown, layout]) => {
+        let favs = favsUnknown as UserFavorite[];
         // Get the list of shortcuts for the endpoint for the given endpoint ID
         const shortcutsFn = this.definition?.homeCard?.shortcuts;
         const allShortcuts = shortcutsFn ? shortcutsFn(this.endpoint.guid) || [] : [];
@@ -195,7 +199,9 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
 
         // If nothing can be favorited and there are no shotrcuts then hide the right-hand side panel
         if (!this.hasFavEntities && shortcuts.length === 0) {
-          setTimeout(() => this.fullView = true, 0);
+          setTimeout(() => {
+            this.fullView = true;
+          }, 0);
         }
         return {
           favs,
@@ -217,19 +223,24 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
   // Layout has changed
   public updateLayout() {
     this._layout.set(this.layout);
-    if (this.ref && this.ref.instance) {
+    if (this.ref?.instance) {
       this.ref.instance.layout = this.pLayout;
     }
   }
 
-  async createCard(endpointEntity: any) {
+  async createCard(endpointEntity: StratosCatalogEndpointEntity<any, any, any, any> | null) {
     this.customCard.clear();
 
-    let component: any;
+    let component: ComponentFactory<HomePageEndpointCard>;
     if (!endpointEntity) {
       component = this.componentFactoryResolver.resolveComponentFactory(DefaultEndpointHomeComponent);
     } else {
-      component = await endpointEntity.definition.homeCard.component(this.compiler, this.injector);
+      const definition = endpointEntity.definition;
+      if (definition.homeCard?.component) {
+        component = await definition.homeCard.component(this.compiler, this.injector);
+      } else {
+        component = this.componentFactoryResolver.resolveComponentFactory(DefaultEndpointHomeComponent);
+      }
     }
 
     this.ref = this.customCard.createComponent(component);

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, type OnInit } from '@angular/core';
 
 
 @Component({
@@ -11,13 +11,12 @@ import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core
 })
 export class DialogErrorComponent implements OnInit {
 
-  constructor() { }
-
   @Input() message!: string;
 
   @Input() show!: boolean;
 
   ngOnInit() {
+    // Component initialization
   }
 
 }

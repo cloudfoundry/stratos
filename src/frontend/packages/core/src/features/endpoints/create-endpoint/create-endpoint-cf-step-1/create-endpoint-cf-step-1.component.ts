@@ -1,31 +1,31 @@
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterContentInit, Component, Input } from '@angular/core';
-import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, type AfterContentInit, Component, Input, inject } from '@angular/core';
+import { ReactiveFormsModule, Validators, FormBuilder, type FormControl, type FormGroup } from '@angular/forms';
 import { cfEndpointUrlValidator, normalizeUrl } from '../../../../shared/validators';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
-import { CustomFormFieldComponent, AppErrorComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
+import { CustomFormFieldComponent, AppErrorComponent, MatSuffixDirective } from '../../../../shared/components/custom-form-field/custom-form-field.component';
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 import { ActivatedRoute } from '@angular/router';
 import {
-  ActionState,
+  type ActionState,
   stratosEntityCatalog,
   entityCatalog,
-  StratosCatalogEndpointEntity
+  type StratosCatalogEndpointEntity
 } from '@stratosui/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { filter, map, pairwise, startWith } from 'rxjs/operators';
 
 import { getIdFromRoute } from '../../../../core/utils.service';
-import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+import type { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { SessionService } from '../../../../shared/services/session.service';
 import { CurrentUserPermissionsService } from '../../../../core/permissions/current-user-permissions.service';
 import { UserProfileService } from '../../../../core/user-profile.service';
 import { SnackBarService } from '../../../../shared/services/snackbar.service';
-import { ConnectEndpointConfig } from '../../connect.service';
+import type { ConnectEndpointConfig } from '../../connect.service';
 import { getSSOClientRedirectURI } from '../../endpoint-helpers';
 import { CreateEndpointHelperComponent } from '../create-endpoint-helper';
 import { UniqueDirective } from '../../../../shared/components/unique.directive';
-import { ProductNameComponent } from '../../../../shared/components/product-name.ccomponent';
+import { ProductNameComponent } from '../../../../shared/components/product-name.component';
 
 interface CreateEndpointForm {
   nameField: FormControl<string>;
@@ -45,7 +45,9 @@ interface CreateEndpointForm {
   standalone: true,
   imports: [
     CommonModule,
+    AsyncPipe,
     ReactiveFormsModule,
+    MatSuffixDirective,
     CustomFormFieldComponent,
     AppErrorComponent,
     CustomCheckboxComponent,
@@ -90,10 +92,11 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   showAdvancedOptions = false;
   lastSkipSSLValue = false;
 
+  private fb = inject(FormBuilder);
+  private activatedRoute = inject(ActivatedRoute);
+  private snackBarService = inject(SnackBarService);
+
   constructor(
-    private fb: FormBuilder,
-    activatedRoute: ActivatedRoute,
-    private snackBarService: SnackBarService,
     sessionService: SessionService,
     currentUserPermissionsService: CurrentUserPermissionsService,
     userProfileService: UserProfileService
@@ -112,8 +115,8 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
       caCertField: this.fb.nonNullable.control('', []),
     });
 
-    const epType = getIdFromRoute(activatedRoute, 'type');
-    const epSubType = getIdFromRoute(activatedRoute, 'subtype');
+    const epType = getIdFromRoute(this.activatedRoute, 'type');
+    const epSubType = getIdFromRoute(this.activatedRoute, 'subtype');
     this.endpoint = entityCatalog.getEndpoint(epType, epSubType);
     this.setUrlValidation(this.endpoint);
 

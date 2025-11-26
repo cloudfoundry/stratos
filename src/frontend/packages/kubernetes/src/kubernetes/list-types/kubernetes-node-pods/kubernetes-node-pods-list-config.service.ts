@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { AppState } from '../../../../../store/src/public-api';
-import { BaseKubeGuid } from '../../kubernetes-page.types';
+import type { AppState } from '../../../../../store/src/public-api';
+import type { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesNodeService } from '../../services/kubernetes-node.service';
 import { BaseKubernetesPodsListConfigService } from '../kubernetes-pods/kubernetes-pods-list-config.service';
 import { KubernetesNodePodsDataSource } from './kubernetes-node-pods-data-source';

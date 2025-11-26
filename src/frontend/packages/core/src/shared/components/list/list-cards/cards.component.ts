@@ -1,11 +1,11 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 import { MultiActionListEntity } from '@stratosui/store';
 
-import { IListDataSource } from '../data-sources-controllers/list-data-source-types';
+import type { IListDataSource } from '../data-sources-controllers/list-data-source-types';
 import { CardCell } from '../list.types';
 import { CardComponent } from './card/card.component';
-import { CardTypes } from './card/card.component';
+import type { CardTypes } from './card/card.component';
 
 @Component({
   selector: 'app-cards',
@@ -27,32 +27,32 @@ export class CardsComponent<T> {
   set component(cardCell: CardTypes<T>) {
     this.pComponent = cardCell;
     /* tslint:disable-next-line */
-    this.columns = (cardCell as any)['columns'];
+    this.columns = (cardCell as unknown as { columns: number }).columns;
   }
 
-  public trackByFn(index: number, item: any | MultiActionListEntity) {
+  public trackByFn(index: number, item: T | MultiActionListEntity): string | number {
     if (!this.dataSource) {
       return index;
     }
     if (this.isMultiActionItem(item)) {
-      return this.dataSource.trackBy(index, item.entity);
+      return this.dataSource.trackBy(index, item.entity as T);
     }
-    return this.dataSource.trackBy(index, item);
+    return this.dataSource.trackBy(index, item as T);
   }
 
   public multiActionTrackBy() {
-    return (index: number, item: any | MultiActionListEntity) => {
+    return (index: number, item: T | MultiActionListEntity): string | number | null => {
       if (!this.dataSource) {
         return null;
       }
       if (this.isMultiActionItem(item)) {
-        return this.dataSource.trackBy(index, item.entity);
+        return this.dataSource.trackBy(index, item.entity as T);
       }
-      return this.dataSource.trackBy(index, item);
+      return this.dataSource.trackBy(index, item as T);
     };
   }
 
-  public isMultiActionItem(component: any | MultiActionListEntity) {
+  public isMultiActionItem(component: T | MultiActionListEntity) {
     return component instanceof MultiActionListEntity;
   }
 }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, type ElementRef, Input, type OnDestroy, type OnInit, ViewChild  } from '@angular/core';
 
 import { CopyToClipboardComponent } from '../copy-to-clipboard/copy-to-clipboard.component';
 

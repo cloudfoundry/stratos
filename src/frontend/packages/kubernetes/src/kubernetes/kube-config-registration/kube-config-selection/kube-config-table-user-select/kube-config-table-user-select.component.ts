@@ -1,11 +1,11 @@
-import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
 
 import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
 import { KubeConfigHelper } from '../../kube-config.helper';
-import { KubeConfigFileCluster } from '../../kube-config.types';
+import type { KubeConfigFileCluster } from '../../kube-config.types';
 
 @Component({
 selector: 'app-kube-config-table-user-select',
@@ -24,10 +24,6 @@ export class KubeConfigTableUserSelectComponent extends TableCellCustom<KubeConf
   hasUser = false;
   selected: string;
   private helper = inject(KubeConfigHelper);
-
-  constructor() {
-    super();
-  }
 
   ngOnInit() {
     this.selected = this.row._user || '';

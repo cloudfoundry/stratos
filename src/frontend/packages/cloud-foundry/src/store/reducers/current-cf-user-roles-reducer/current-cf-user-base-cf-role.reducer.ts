@@ -1,8 +1,8 @@
-import { APIResource } from '../../../../../store/src/types/api.types';
+import type { APIResource } from '../../../../../store/src/types/api.types';
 import { getDefaultRolesRequestState } from '../../../../../store/src/types/current-user-roles.types';
-import { CfUserRelationTypes, GetCurrentCfUserRelationsComplete } from '../../../actions/permissions.actions';
-import { ISpace } from '../../../cf-api.types';
-import { IAllCfRolesState, ICfRolesState, IOrgsRoleState } from '../../types/cf-current-user-roles.types';
+import { CfUserRelationTypes, type GetCurrentCfUserRelationsComplete } from '../../../actions/permissions.actions';
+import type { ISpace } from '../../../cf-api.types';
+import type { IAllCfRolesState, ICfRolesState, IOrgsRoleState } from '../../types/cf-current-user-roles.types';
 import { createCfOrgRoleStateState } from './current-cf-user-roles-org.reducer';
 import { currentCfUserOrgRolesReducer } from './current-cf-user-roles-orgs.reducer';
 import { currentCfUserSpaceRolesReducer } from './current-cf-user-roles-spaces.reducer';
@@ -53,7 +53,7 @@ function currentUserCFRolesReducer(
     return {
       ...state,
       spaces: currentCfUserSpaceRolesReducer(state.spaces, action),
-      organizations: assignSpaceToOrg(state.organizations, action.data)
+      organizations: assignSpaceToOrg(state.organizations, action.data as unknown as APIResource<ISpace>[])
     };
   }
   return state;

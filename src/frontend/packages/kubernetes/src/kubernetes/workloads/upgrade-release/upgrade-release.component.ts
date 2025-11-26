@@ -2,23 +2,24 @@ import { AsyncPipe } from '@angular/common';
 import {Component, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of } from 'rxjs';
+import { combineLatest, type Observable, of } from 'rxjs';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
-import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
-import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import {
+  ListComponent,
+  PageHeaderComponent,
   StepComponent,
-  StepOnNextFunction,
-  StepOnNextResult,
-} from '../../../../../core/src/shared/components/stepper/step/step.component';
-import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
-import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
+  type StepOnNextFunction,
+  type StepOnNextResult,
+  SteppersComponent
+} from '@stratosui/core';
+import type { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
+import type { AppState } from '../../../../../store/src/public-api';
 import { ChartsService } from '../../../helm/monocular/shared/services/charts.service';
 import { createMonocularProviders } from '../../../helm/monocular/stratos-monocular-providers.helpers';
 import { stratosMonocularEndpointGuid } from '../../../helm/monocular/stratos-monocular.helper';
-import { HelmUpgradeValues, MonocularVersion } from '../../../helm/store/helm.types';
-import { ChartValuesConfig, ChartValuesEditorComponent } from '../chart-values-editor/chart-values-editor.component';
+import type { HelmUpgradeValues, MonocularVersion } from '../../../helm/store/helm.types';
+import { type ChartValuesConfig, ChartValuesEditorComponent } from '../chart-values-editor/chart-values-editor.component';
 import { HelmReleaseHelperService } from '../release/tabs/helm-release-helper.service';
 import { HelmReleaseGuid } from '../workload.types';
 import { workloadsEntityCatalog } from './../workloads-entity-catalog';
@@ -69,7 +70,7 @@ export class UpgradeReleaseComponent {
   public showAdvancedOptions = false;
 
   private chartUrl: string;
-  private store = inject(Store<any>);
+  private store = inject(Store<AppState>);
   public helper = inject(HelmReleaseHelperService);
   private chartsService = inject(ChartsService);
 
@@ -95,7 +96,7 @@ export class UpgradeReleaseComponent {
 
       // First step is valid when a version has been selected
       this.validate$ = this.listConfig.versionsDataSource.selectedRows$.pipe(
-        map((rows: Map<string, any>) => {
+        map((rows: Map<string, MonocularVersion>) => {
           if (rows && rows.size === 1) {
             this.version = rows.values().next().value;
             return true;
@@ -148,7 +149,7 @@ export class UpgradeReleaseComponent {
     this.showAdvancedOptions = !this.showAdvancedOptions;
   }
 
-  doUpgrade: StepOnNextFunction = (index: number, step: StepComponent) => {
+  doUpgrade: StepOnNextFunction = (index: number, _step: StepComponent) => {
     // If we are showing the advanced options, don't upgrade if we aer not on the last step
     if (this.showAdvancedOptions && index === 1) {
       return of({ success: true });

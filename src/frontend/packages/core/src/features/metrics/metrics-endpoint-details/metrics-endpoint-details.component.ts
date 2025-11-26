@@ -1,14 +1,15 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input, signal  } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { MetricsStratosAction, AppState, EndpointModel } from '@stratosui/store';
-import { combineLatest, Observable } from 'rxjs';
+import { MetricsStratosAction, type AppState, type EndpointModel } from '@stratosui/store';
+import { combineLatest, type Observable } from 'rxjs';
 import { distinctUntilChanged, filter, map, publishReplay, refCount, tap } from 'rxjs/operators';
 
 import { EndpointListDetailsComponent } from '../../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import { mapMetricsData } from '../metrics.helpers';
-import { MetricsEndpointProvider, MetricsService } from '../services/metrics-service';
+import {MetricsService} from '../services/metrics-service';
+import type {MetricsEndpointProvider} from '../services/metrics-service';
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 
 interface MetricsDetailsInfo {

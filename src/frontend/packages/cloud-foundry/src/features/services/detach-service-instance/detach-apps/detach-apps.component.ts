@@ -1,11 +1,11 @@
 
-import { Component, EventEmitter, OnDestroy, Output, inject, ChangeDetectionStrategy } from '@angular/core';
-import { Observable, of as observableOf, Subscription } from 'rxjs';
+import { Component, EventEmitter, type OnDestroy, Output, inject, ChangeDetectionStrategy } from '@angular/core';
+import { type Observable, of as observableOf, type Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { ListComponent, ListConfig } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { IServiceBinding } from '../../../../cf-api-svc.types';
+import type { APIResource } from '@stratosui/store';
+import type { IServiceBinding } from '../../../../cf-api-svc.types';
 import {
   DetachAppsListConfigService,
 } from '../../../../shared/components/list/list-types/detach-apps/detach-apps-list-config.service';

@@ -1,30 +1,51 @@
-import { Store } from '@ngrx/store';
+import type { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
 import {
-  APIResponse,
-  GeneralEntityAppState,
-  GeneralRequestDataState,
-  IRequestEntityTypeState,
+  type APIResponse,
+  type GeneralEntityAppState,
+  type GeneralRequestDataState,
+  type IRequestEntityTypeState,
   entityCatalog,
   selectPaginationState,
-  APIResource,
-  PaginatedAction,
-  PaginationEntityState,
+  type APIResource,
+  type PaginatedAction,
+  type PaginationEntityState,
   WrapperRequestActionSuccess
 } from '@stratosui/store';
 import { deepMergeState, mergeEntity } from '../../../../store/src/helpers/reducer.helper';
-import { GetOrganization } from '../../actions/organization.actions';
-import { GetSpace } from '../../actions/space.actions';
+import type { GetOrganization } from '../../actions/organization.actions';
+import type { GetSpace } from '../../actions/space.actions';
 import { getCFEntityKey } from '../../cf-entity-helpers';
 import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
-import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../../store/types/cf-user.types';
+import { type CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../../store/types/cf-user.types';
 import {
   createEntityRelationPaginationKey,
-  ValidateEntityResult,
-  ValidateResultFetchingState,
+  type ValidateEntityResult,
+  type ValidateResultFetchingState,
 } from '../entity-relations.types';
+
+/**
+ * Type guard to check if value is a string array
+ */
+function isStringArray(val: unknown): val is string[] {
+  return Array.isArray(val) && val.every(item => typeof item === 'string');
+}
+
+/**
+ * Type guard to check if object has entity property
+ */
+function hasEntity(obj: unknown): obj is { entity: unknown } {
+  return obj !== null && typeof obj === 'object' && 'entity' in obj;
+}
+
+/**
+ * Type guard to check if object has guid property
+ */
+function hasGuid(obj: unknown): obj is { guid: unknown } {
+  return obj !== null && typeof obj === 'object' && 'guid' in obj;
+}
 
 /**
  * Add roles from (org|space)\[role\]\[user\] into user\[role\]
@@ -33,23 +54,35 @@ function updateUser(
   apiUsers: IRequestEntityTypeState<APIResource<CfUser>>,
   existingUsers: IRequestEntityTypeState<APIResource<CfUser>>,
   newUsers: IRequestEntityTypeState<APIResource<CfUser>>,
-  orgOrSpace: any,
+  orgOrSpace: Record<string, unknown>,
   orgSpaceParamName: string,
   userParamName: string): IRequestEntityTypeState<APIResource<CfUser>> {
-  if (orgOrSpace[orgSpaceParamName]) {
-    orgOrSpace[orgSpaceParamName].forEach((userGuid: string) => {
+  const paramValue = orgOrSpace[orgSpaceParamName];
+  if (paramValue && isStringArray(paramValue)) {
+    paramValue.forEach((userGuid: string) => {
       const existingUser = apiUsers[userGuid] || existingUsers[userGuid];
-      const existingRoles = (existingUser.entity as Record<string, any>)[userParamName] || [];
+      if (!existingUser || !hasEntity(existingUser)) {
+        return;
+      }
+      const userEntity = existingUser.entity;
+      if (typeof userEntity !== 'object' || userEntity === null) {
+        return;
+      }
+      const userEntityRecord = userEntity as unknown as Record<string, unknown>;
+      const existingRoles = userEntityRecord[userParamName];
+      const existingRolesArray = isStringArray(existingRoles) ? existingRoles : [];
 
-      if (existingRoles.indexOf(orgOrSpace.guid) < 0) {
-        newUsers[userGuid] = mergeEntity({
+      const orgOrSpaceGuid = hasGuid(orgOrSpace) ? orgOrSpace.guid : null;
+      if (orgOrSpaceGuid && typeof orgOrSpaceGuid === 'string' && existingRolesArray.indexOf(orgOrSpaceGuid) < 0) {
+        const mergedEntity = mergeEntity({
           entity: {
             [userParamName]: [
-              ...existingRoles,
-              orgOrSpace.guid
+              ...existingRolesArray,
+              orgOrSpaceGuid
             ]
           }
-        }, newUsers[userGuid] || existingUser);
+        } as unknown as Record<string, unknown>, (newUsers[userGuid] || existingUser) as unknown as Record<string, unknown>);
+        newUsers[userGuid] = mergedEntity as unknown as APIResource<CfUser>;
       } else {
         newUsers[userGuid] = existingUser;
       }
@@ -65,7 +98,7 @@ function updateUser(
  * the role array is missing. It's for those cases that we then bring across the role from the org to the user.
  */
 export function orgSpacePostProcess(
-  store: Store<GeneralEntityAppState>,
+  store: Store,
   action: GetOrganization | GetSpace,
   apiResponse: APIResponse,
   allEntities: GeneralRequestDataState): ValidateEntityResult {
@@ -75,31 +108,39 @@ export function orgSpacePostProcess(
     return null;
   }
   const { entityKey: cfOrgOrSpaceEntityKey } = catalogEntity;
-  const orgOrSpace = entities[cfOrgOrSpaceEntityKey][action.guid];
+  const orgOrSpaceEntity = (entities as Record<string, Record<string, unknown>>)[cfOrgOrSpaceEntityKey]?.[action.guid];
+  if (!orgOrSpaceEntity || !hasEntity(orgOrSpaceEntity)) {
+    return null;
+  }
+  const orgOrSpace = orgOrSpaceEntity;
+  const orgOrSpaceEntityRecord = orgOrSpace.entity as Record<string, unknown>;
+
   const userCatalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
   const { entityKey: cfUserEntityKey } = userCatalogEntity;
-  const users = entities[cfUserEntityKey];
-  const existingUsers = allEntities[cfUserEntityKey];
+  const usersData = entities[cfUserEntityKey];
+  const users = (usersData || {}) as IRequestEntityTypeState<APIResource<CfUser>>;
+  const existingUsersData = allEntities[cfUserEntityKey];
+  const existingUsers = (existingUsersData || {}) as IRequestEntityTypeState<APIResource<CfUser>>;
 
-  const newUsers = {};
+  const newUsers: IRequestEntityTypeState<APIResource<CfUser>> = {};
   if (cfOrgOrSpaceEntityKey === getCFEntityKey(organizationEntityType)) {
-    updateUser(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.USER, CfUserRoleParams.ORGANIZATIONS);
-    updateUser(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.MANAGER, CfUserRoleParams.MANAGED_ORGS);
-    updateUser(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.BILLING_MANAGERS,
+    updateUser(users, existingUsers, newUsers, orgOrSpaceEntityRecord, OrgUserRoleNames.USER, CfUserRoleParams.ORGANIZATIONS);
+    updateUser(users, existingUsers, newUsers, orgOrSpaceEntityRecord, OrgUserRoleNames.MANAGER, CfUserRoleParams.MANAGED_ORGS);
+    updateUser(users, existingUsers, newUsers, orgOrSpaceEntityRecord, OrgUserRoleNames.BILLING_MANAGERS,
       CfUserRoleParams.BILLING_MANAGER_ORGS);
-    updateUser(users, existingUsers, newUsers, orgOrSpace.entity, OrgUserRoleNames.AUDITOR, CfUserRoleParams.AUDITED_ORGS);
+    updateUser(users, existingUsers, newUsers, orgOrSpaceEntityRecord, OrgUserRoleNames.AUDITOR, CfUserRoleParams.AUDITED_ORGS);
   } else if (cfOrgOrSpaceEntityKey === getCFEntityKey(spaceEntityType)) {
-    updateUser(users, existingUsers, newUsers, orgOrSpace.entity, SpaceUserRoleNames.DEVELOPER, CfUserRoleParams.SPACES);
-    updateUser(users, existingUsers, newUsers, orgOrSpace.entity, SpaceUserRoleNames.MANAGER, CfUserRoleParams.MANAGED_SPACES);
-    updateUser(users, existingUsers, newUsers, orgOrSpace.entity, SpaceUserRoleNames.AUDITOR, CfUserRoleParams.AUDITED_SPACES);
+    updateUser(users, existingUsers, newUsers, orgOrSpaceEntityRecord, SpaceUserRoleNames.DEVELOPER, CfUserRoleParams.SPACES);
+    updateUser(users, existingUsers, newUsers, orgOrSpaceEntityRecord, SpaceUserRoleNames.MANAGER, CfUserRoleParams.MANAGED_SPACES);
+    updateUser(users, existingUsers, newUsers, orgOrSpaceEntityRecord, SpaceUserRoleNames.AUDITOR, CfUserRoleParams.AUDITED_SPACES);
   }
   if (!Object.keys(newUsers).length) {
-    return;
+    return null;
   }
   if (apiResponse) {
     // The apiResponse will make it into the store, as this is an api.effect validation
     apiResponse.response.entities = deepMergeState(apiResponse.response.entities, { [cfUserEntityKey]: newUsers });
-    return;
+    return null;
   } else {
 
     // The apiResponse will NOT make it into the store, as this is a general validation. So create a mock event to push to store

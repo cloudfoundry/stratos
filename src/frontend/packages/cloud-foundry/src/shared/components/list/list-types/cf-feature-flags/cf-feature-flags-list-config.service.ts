@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { ITableColumn, IListFilter, ListViewTypes } from '@stratosui/core';
-import { ListView } from '@stratosui/store';
-import { CFAppState, IFeatureFlag, ActiveRouteCfOrgSpace } from '@stratosui/cloud-foundry';
+import { type ITableColumn, type IListFilter, ListViewTypes } from '@stratosui/core';
+import type { ListView, GeneralEntityAppState } from '@stratosui/store';
+import { type CFAppState, type IFeatureFlag, ActiveRouteCfOrgSpace } from '@stratosui/cloud-foundry';
 
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfFeatureFlagsDataSource } from './cf-feature-flags-data-source';
@@ -15,12 +15,12 @@ import { TableCellFeatureFlagStateComponent } from './table-cell-feature-flag-st
   providedIn: 'root'
 })
 export class CfFeatureFlagsListConfigService extends BaseCfListConfig<IFeatureFlag> {
-  private store = inject(Store<CFAppState>);
+  private store = inject(Store<GeneralEntityAppState>);
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
 
   constructor() {
     super();
-    this.dataSource = new CfFeatureFlagsDataSource(this.store, this.activeRouteCfOrgSpace.cfGuid!, this as any);
+    this.dataSource = new CfFeatureFlagsDataSource(this.store, this.activeRouteCfOrgSpace.cfGuid!, this);
   }
 
   dataSource: CfFeatureFlagsDataSource;

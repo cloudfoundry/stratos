@@ -1,9 +1,10 @@
-import { BaseEntityRequestAction } from '../../entity-catalog/action-orchestrator/action-orchestrator';
-import { IFailedRequestAction } from '../../types/request.types';
+import type { BaseRequestState } from '../../app-state';
+import type { BaseEntityRequestAction } from '../../entity-catalog/action-orchestrator/action-orchestrator';
+import type { IFailedRequestAction } from '../../types/request.types';
 import { isNullOrUndefined } from '../../utils';
 import { getEntityRequestState, mergeUpdatingState, setEntityRequestState } from './request-helpers';
 
-export function failRequest(state: any, action: IFailedRequestAction) {
+export function failRequest(state: BaseRequestState, action: IFailedRequestAction): BaseRequestState {
   if (isNullOrUndefined(action.apiAction.guid)) {
     return state;
   }

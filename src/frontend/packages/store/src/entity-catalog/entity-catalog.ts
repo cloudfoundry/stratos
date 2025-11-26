@@ -1,18 +1,18 @@
 /// <reference types="vite" />
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 
-import { IRequestEntityTypeState } from '../app-state';
+import type { IRequestEntityTypeState } from '../app-state';
 import { STRATOS_ENDPOINT_TYPE } from '../helpers/stratos-entity-factory';
-import { ExtraApiReducers } from '../reducers/api-request-reducers.generator.helpers';
-import { ICurrentUserRolesState } from '../types/current-user-roles.types';
-import { OrchestratedActionBuilders } from './action-orchestrator/action-orchestrator';
+import type { ExtraApiReducers } from '../reducers/api-request-reducers.generator.helpers';
+import type { ICurrentUserRolesState } from '../types/current-user-roles.types';
+import type { OrchestratedActionBuilders } from './action-orchestrator/action-orchestrator';
 import {
   StratosBaseCatalogEntity,
-  StratosCatalogEndpointEntity,
-  StratosCatalogEntity,
+  type StratosCatalogEndpointEntity,
+  type StratosCatalogEntity,
 } from './entity-catalog-entity/entity-catalog-entity';
 import { EntityCatalogHelpers } from './entity-catalog.helper';
-import { EntityCatalogEntityConfig, IEntityMetadata, IStratosBaseEntityDefinition } from './entity-catalog.types';
+import type { EntityCatalogEntityConfig, IEntityMetadata, IStratosBaseEntityDefinition } from './entity-catalog.types';
 
 // Debug logging configuration - can be enabled via window.__STRATOS_ENTITY_CATALOG_DEBUG__
 interface EntityCatalogDebugConfig {
@@ -22,9 +22,18 @@ interface EntityCatalogDebugConfig {
   logMissingEntities: boolean;
 }
 
+// Type guard for window debug config
+function isDebugConfig(obj: unknown): obj is {
+  logLookups?: boolean;
+  logRegistrations?: boolean;
+  logMissingEntities?: boolean;
+} {
+  return obj !== null && typeof obj === 'object';
+}
+
 function getDebugConfig(): EntityCatalogDebugConfig {
-  const windowConfig = (window as any).__STRATOS_ENTITY_CATALOG_DEBUG__;
-  if (windowConfig) {
+  const windowConfig = (window as unknown as Record<string, unknown>).__STRATOS_ENTITY_CATALOG_DEBUG__;
+  if (windowConfig && isDebugConfig(windowConfig)) {
     return {
       enabled: true,
       logLookups: windowConfig.logLookups !== false,
@@ -62,7 +71,7 @@ export class EntityCatalog {
     const entityTypes = Array.from(this.entities.keys());
 
     const entitiesByEndpoint = new Map<string, string[]>();
-    this.entities.forEach((entity, key) => {
+    this.entities.forEach((entity, _key) => {
       const endpointType = entity.definition.endpoint?.type || 'unknown';
       if (!entitiesByEndpoint.has(endpointType)) {
         entitiesByEndpoint.set(endpointType, []);
@@ -75,7 +84,7 @@ export class EntityCatalog {
         totalEndpoints: this.endpoints.size,
         totalEntities: this.entities.size,
         lookupSuccessRate: this.lookupStats.success + this.lookupStats.failure > 0
-          ? ((this.lookupStats.success / (this.lookupStats.success + this.lookupStats.failure)) * 100).toFixed(2) + '%'
+          ? `${((this.lookupStats.success / (this.lookupStats.success + this.lookupStats.failure)) * 100).toFixed(2)}%`
           : 'N/A'
       },
       registeredEndpoints: endpointTypes,
@@ -108,7 +117,7 @@ export class EntityCatalog {
     // Group entities by endpoint type for better diagnostics
     const entitiesByEndpoint = new Map<string, string[]>();
 
-    this.entities.forEach((entity, key) => {
+    this.entities.forEach((entity, _key) => {
       const endpointType = entity.definition.endpoint?.type;
       if (endpointType && endpointType !== STRATOS_ENDPOINT_TYPE && !endpointTypeSet.has(endpointType)) {
         if (!entitiesByEndpoint.has(endpointType)) {
@@ -147,7 +156,8 @@ export class EntityCatalog {
   private getEntitiesForEndpoint(endpointType: string): string[] {
     const entities: string[] = [];
     this.entities.forEach((entity) => {
-      if (entity.definition.endpoint?.type === endpointType) {
+      const endpoint = entity.definition.endpoint;
+      if (endpoint && typeof endpoint === 'object' && 'type' in endpoint && endpoint.type === endpointType) {
         entities.push(entity.definition.type);
       }
     });
@@ -267,7 +277,7 @@ export class EntityCatalog {
     if (this.endpoints.has(endpoint.entityKey)) {
       // Suppress duplicate warnings in test environment to reduce noise
       // Test setup can cause harmless duplicate registrations
-      const isTestEnv = typeof (window as any).describe !== 'undefined';
+      const isTestEnv = typeof (window as unknown as Record<string, unknown>).describe !== 'undefined';
       if (!isTestEnv) {
         console.warn(`Duplicate endpoint catalog entity found. ID: ${endpoint.entityKey} - Type: ${endpoint.definition.type}`);
       }
@@ -284,17 +294,21 @@ export class EntityCatalog {
       const { type } = entity.definition;
       // Suppress duplicate warnings in test environment to reduce noise
       // Test setup can cause harmless duplicate registrations
-      const isTestEnv = typeof (window as any).describe !== 'undefined';
+      const isTestEnv = typeof (window as unknown as Record<string, unknown>).describe !== 'undefined';
       if (!isTestEnv) {
+        const endpoint = entity.definition.endpoint;
+        const endpointType = endpoint && typeof endpoint === 'object' && 'type' in endpoint ? endpoint.type : 'unknown';
         console.warn(
-          `Duplicate catalog entity found. ID: ${entity.entityKey} - Type: ${type} - Endpoint: ${entity.definition.endpoint.type}`
+          `Duplicate catalog entity found. ID: ${entity.entityKey} - Type: ${type} - Endpoint: ${endpointType}`
         );
       }
     } else {
       this.entities.set(entity.entityKey, entity);
       if (this.debugConfig.enabled && this.debugConfig.logRegistrations) {
+        const endpoint = entity.definition.endpoint;
+        const endpointType = endpoint && typeof endpoint === 'object' && 'type' in endpoint ? endpoint.type : 'unknown';
         console.log(
-          `[EntityCatalog] Registered entity: ${entity.definition.type} for endpoint ${entity.definition.endpoint.type} (key: ${entity.entityKey})`
+          `[EntityCatalog] Registered entity: ${entity.definition.type} for endpoint ${endpointType} (key: ${entity.entityKey})`
         );
       }
     }
@@ -330,18 +344,18 @@ export class EntityCatalog {
     return this.entities.get(id);
   }
 
-  private getEntitySubType(entity: StratosBaseCatalogEntity, subtypeType: string) {
-    const subTypes = entity.definition.subTypes as IStratosBaseEntityDefinition[];
-    if (!subTypes) {
+  private getEntitySubType(entity: StratosBaseCatalogEntity, subtypeType: string): StratosBaseCatalogEntity | null {
+    const subTypes = entity.definition.subTypes as IStratosBaseEntityDefinition[] | undefined;
+    if (!subTypes || !Array.isArray(subTypes)) {
       return null;
     }
-    const subtype = subTypes.find(subType => subType.type === subtypeType);
+    const subtype = subTypes.find(subType => subType && typeof subType === 'object' && 'type' in subType && subType.type === subtypeType);
     if (!subtype) {
       return null;
     }
     const definition = entity.definition;
     const {
-      subTypes: omitted,
+      subTypes: _omitted,
       ...parent
     } = definition;
     // Ensure the subtype inherits parent
@@ -357,21 +371,17 @@ export class EntityCatalog {
     entityType?: string,
     subType?: string
   ): EntityCatalogEntityConfig {
-    const config = endpointTypeOrConfig as EntityCatalogEntityConfig;
-    if (!config) {
-      return {
-        endpointType: null,
-        entityType: null,
-        subType: null
-      };
+    // Check if it's a config object
+    if (typeof endpointTypeOrConfig === 'object' &&
+        endpointTypeOrConfig !== null &&
+        'entityType' in endpointTypeOrConfig) {
+      return endpointTypeOrConfig;
     }
-    if (config && config.entityType) {
-      return config;
-    }
+    // Otherwise treat as string parameters
     return {
       endpointType: endpointTypeOrConfig as string,
-      entityType,
-      subType
+      entityType: entityType ?? null,
+      subType: subType ?? null
     };
   }
 
@@ -391,35 +401,62 @@ export class EntityCatalog {
     }
   }
 
-  public getEntityFromKey(entityKey: string) {
-    return this.entities.get(entityKey) || this.endpoints.get(entityKey);
+  // Overload: Returns typed entity when generic parameters provided
+  public getEntityFromKey<
+    T extends IEntityMetadata = IEntityMetadata,
+    Y = unknown,
+    AB extends OrchestratedActionBuilders = OrchestratedActionBuilders
+  >(entityKey: string): StratosBaseCatalogEntity<T, Y, AB, AB> | undefined;
+  // Overload: Returns unknown when used without explicit types
+  public getEntityFromKey(entityKey: string): StratosBaseCatalogEntity | undefined;
+  // Implementation
+  public getEntityFromKey<
+    T extends IEntityMetadata = IEntityMetadata,
+    Y = unknown,
+    AB extends OrchestratedActionBuilders = OrchestratedActionBuilders
+  >(entityKey: string): StratosBaseCatalogEntity<T, Y, AB, AB> | undefined {
+    const entity = this.entities.get(entityKey) || this.endpoints.get(entityKey);
+    return entity as StratosBaseCatalogEntity<T, Y, AB, AB> | undefined;
   }
 
+  // Overload: Typed entity with config object
   public getEntity<
     T extends IEntityMetadata = IEntityMetadata,
-    Y = any,
+    Y = unknown,
     AB extends OrchestratedActionBuilders = OrchestratedActionBuilders
   >(
     entityConfig: EntityCatalogEntityConfig
-  ): StratosBaseCatalogEntity<T, Y, AB, AB>;
+  ): StratosBaseCatalogEntity<T, Y, AB, AB> | null;
+  // Overload: Typed entity with string parameters
   public getEntity<
     T extends IEntityMetadata = IEntityMetadata,
-    Y = any,
+    Y = unknown,
     AB extends OrchestratedActionBuilders = OrchestratedActionBuilders,
     >(
       endpointType: string,
       entityType: string,
       subType?: string
-    ): StratosBaseCatalogEntity<T, Y, AB, AB>;
+    ): StratosBaseCatalogEntity<T, Y, AB, AB> | null;
+  // Overload: Untyped entity with config (returns base type)
+  public getEntity(
+    entityConfig: EntityCatalogEntityConfig
+  ): StratosBaseCatalogEntity | null;
+  // Overload: Untyped entity with string parameters (returns base type)
+  public getEntity(
+    endpointType: string,
+    entityType: string,
+    subType?: string
+  ): StratosBaseCatalogEntity | null;
+  // Implementation
   public getEntity<
     T extends IEntityMetadata = IEntityMetadata,
-    Y = any,
+    Y = unknown,
     AB extends OrchestratedActionBuilders = OrchestratedActionBuilders,
     >(
       endpointTypeOrConfig: string | EntityCatalogEntityConfig,
       entityType?: string,
       subType?: string
-    ): StratosBaseCatalogEntity<T, Y, AB, AB> {
+    ): StratosBaseCatalogEntity<T, Y, AB, AB> | null {
     try {
       const config = this.getConfig(endpointTypeOrConfig, entityType, subType);
 
@@ -504,54 +541,126 @@ export class EntityCatalog {
 
   public getEntityKey(endpointType: string, entityType: string): string;
   public getEntityKey(entityConfig: EntityCatalogEntityConfig): string;
-  public getEntityKey(endpointTypeOrConfig: string | EntityCatalogEntityConfig, entityType?: string) {
+  public getEntityKey(endpointTypeOrConfig: string | EntityCatalogEntityConfig, entityType?: string): string {
     const config = this.getConfig(endpointTypeOrConfig, entityType);
     if (config && config.entityType) {
-      return EntityCatalogHelpers.buildEntityKey(config.entityType, config.endpointType);
+      return EntityCatalogHelpers.buildEntityKey(config.entityType, config.endpointType ?? '');
     }
-    return EntityCatalogHelpers.buildEntityKey(entityType, endpointTypeOrConfig as string);
+    return EntityCatalogHelpers.buildEntityKey(entityType ?? '', endpointTypeOrConfig as string);
   }
 
-  public getEndpoint(endpointType: string, subType?: string) {
-    return this.getEntity(
+  // Overload: Typed endpoint entity
+  public getEndpoint<
+    T extends IEntityMetadata = IEntityMetadata,
+    Y = unknown,
+    AB extends OrchestratedActionBuilders = OrchestratedActionBuilders
+  >(endpointType: string, subType?: string): StratosCatalogEndpointEntity<T, Y, AB, AB> | null;
+  // Overload: Untyped endpoint entity (returns base type)
+  public getEndpoint(endpointType: string, subType?: string): StratosCatalogEndpointEntity | null;
+  // Implementation
+  public getEndpoint<
+    T extends IEntityMetadata = IEntityMetadata,
+    Y = unknown,
+    AB extends OrchestratedActionBuilders = OrchestratedActionBuilders
+  >(endpointType: string, subType?: string): StratosCatalogEndpointEntity<T, Y, AB, AB> | null {
+    return this.getEntity<T, Y, AB>(
       endpointType,
       EntityCatalogHelpers.endpointType,
       subType
-    ) as StratosCatalogEndpointEntity;
+    ) as StratosCatalogEndpointEntity<T, Y, AB, AB> | null;
   }
 
-  public getAllEntitiesForEndpointType(endpointType: string) {
-    return this.getAllEntitiesTypes().filter(entities => entities.definition.endpoint.type === endpointType);
+  // Overload: Typed entities for endpoint
+  public getAllEntitiesForEndpointType<
+    T extends IEntityMetadata = IEntityMetadata,
+    Y = unknown,
+    AB extends OrchestratedActionBuilders = OrchestratedActionBuilders
+  >(endpointType: string): StratosCatalogEntity<T, Y, AB, AB>[];
+  // Overload: Untyped entities for endpoint (returns base type)
+  public getAllEntitiesForEndpointType(endpointType: string): StratosCatalogEntity[];
+  // Implementation
+  public getAllEntitiesForEndpointType<
+    T extends IEntityMetadata = IEntityMetadata,
+    Y = unknown,
+    AB extends OrchestratedActionBuilders = OrchestratedActionBuilders
+  >(endpointType: string): StratosCatalogEntity<T, Y, AB, AB>[] {
+    return this.getAllEntitiesTypes<T, Y, AB>().filter(entity => {
+      const endpoint = entity.definition.endpoint;
+      return endpoint && typeof endpoint === 'object' && 'type' in endpoint && endpoint.type === endpointType;
+    });
   }
 
-  public getAllEntitiesTypes() {
-    return Array.from(this.entities.values());
+  // Overload: Typed entities
+  public getAllEntitiesTypes<
+    T extends IEntityMetadata = IEntityMetadata,
+    Y = unknown,
+    AB extends OrchestratedActionBuilders = OrchestratedActionBuilders
+  >(): StratosCatalogEntity<T, Y, AB, AB>[];
+  // Overload: Untyped entities (returns base type)
+  public getAllEntitiesTypes(): StratosCatalogEntity[];
+  // Implementation
+  public getAllEntitiesTypes<
+    T extends IEntityMetadata = IEntityMetadata,
+    Y = unknown,
+    AB extends OrchestratedActionBuilders = OrchestratedActionBuilders
+  >(): StratosCatalogEntity<T, Y, AB, AB>[] {
+    return Array.from(this.entities.values()) as StratosCatalogEntity<T, Y, AB, AB>[];
   }
 
-  public getAllBaseEndpointTypes() {
-    return Array.from(this.endpoints.values());
+  // Overload: Typed endpoint entities
+  public getAllBaseEndpointTypes<
+    T extends IEntityMetadata = IEntityMetadata,
+    Y = unknown,
+    AB extends OrchestratedActionBuilders = OrchestratedActionBuilders
+  >(): StratosCatalogEndpointEntity<T, Y, AB, AB>[];
+  // Overload: Untyped endpoint entities (returns base type)
+  public getAllBaseEndpointTypes(): StratosCatalogEndpointEntity<IEntityMetadata, unknown, OrchestratedActionBuilders, OrchestratedActionBuilders>[];
+  // Implementation
+  public getAllBaseEndpointTypes<
+    T extends IEntityMetadata = IEntityMetadata,
+    Y = unknown,
+    AB extends OrchestratedActionBuilders = OrchestratedActionBuilders
+  >(): StratosCatalogEndpointEntity<T, Y, AB, AB>[] {
+    return Array.from(this.endpoints.values()) as unknown as StratosCatalogEndpointEntity<T, Y, AB, AB>[];
   }
 
-  public getAllEndpointTypes(techPreviewEnabled = false): StratosCatalogEndpointEntity[] {
+  // Overload: Typed endpoint entities
+  public getAllEndpointTypes<
+    T extends IEntityMetadata = IEntityMetadata,
+    Y = unknown,
+    AB extends OrchestratedActionBuilders = OrchestratedActionBuilders
+  >(techPreviewEnabled?: boolean): StratosCatalogEndpointEntity<T, Y, AB, AB>[];
+  // Overload: Untyped endpoint entities (returns base type)
+  public getAllEndpointTypes(techPreviewEnabled?: boolean): StratosCatalogEndpointEntity<IEntityMetadata, unknown, OrchestratedActionBuilders, OrchestratedActionBuilders>[];
+  // Implementation
+  public getAllEndpointTypes<
+    T extends IEntityMetadata = IEntityMetadata,
+    Y = unknown,
+    AB extends OrchestratedActionBuilders = OrchestratedActionBuilders
+  >(techPreviewEnabled = false): StratosCatalogEndpointEntity<T, Y, AB, AB>[] {
     try {
       const baseEndpoints = Array.from(this.endpoints.values())
         .filter(item => !item.definition.techPreview || item.definition.techPreview && techPreviewEnabled);
       return baseEndpoints.reduce((allEndpoints, baseEndpoint) => {
-        allEndpoints.push(baseEndpoint);
-        if (baseEndpoint.definition.subTypes) {
-          baseEndpoint.definition.subTypes.forEach(subType => {
+        allEndpoints.push(baseEndpoint as unknown as StratosCatalogEndpointEntity<T, Y, AB, AB>);
+        const subTypes = baseEndpoint.definition.subTypes;
+        if (subTypes && Array.isArray(subTypes)) {
+          subTypes.forEach(subType => {
             try {
-              const endpoint = this.getEndpoint(baseEndpoint.definition.type, subType.type);
-              if (endpoint) {
-                allEndpoints.push(endpoint);
+              if (subType && typeof subType === 'object' && 'type' in subType) {
+                const endpoint = this.getEndpoint<T, Y, AB>(baseEndpoint.definition.type, subType.type);
+                if (endpoint) {
+                  allEndpoints.push(endpoint);
+                }
               }
             } catch (error) {
-              console.warn(`Error getting endpoint subtype: ${baseEndpoint.definition.type}/${subType.type}`, error);
+              const subTypeName = subType && typeof subType === 'object' && 'type' in subType ? subType.type : 'unknown';
+              console.warn(`Error getting endpoint subtype: ${baseEndpoint.definition.type}/${subTypeName}`, error);
             }
           });
         }
         return allEndpoints;
-      }, [] as StratosCatalogEndpointEntity[]);
+      }, [] as StratosCatalogEndpointEntity<T, Y, AB, AB>[]);
     } catch (error) {
       console.error('Error getting all endpoint types:', error);
       return [];
@@ -569,7 +678,7 @@ export class EntityCatalog {
         };
       }
       return allEntityReducers;
-    }, {} as ExtraApiReducers<IRequestEntityTypeState<any>>);
+    }, {} as ExtraApiReducers<IRequestEntityTypeState<unknown>>);
   }
 
   public getAllCurrentUserReducers(state: ICurrentUserRolesState, action: Action): ICurrentUserRolesState {
@@ -579,7 +688,7 @@ export class EntityCatalog {
       if (endpoint.definition.userRolesReducer) {
         const endpointState = endpoint.definition.userRolesReducer(state.endpoints[endpoint.type], action);
         oneChanged = oneChanged || !!endpointState;
-        if (!!endpointState) {
+        if (endpointState) {
           state = {
             ...state,
             endpoints: {
@@ -615,18 +724,18 @@ export class TestEntityCatalog extends EntityCatalog {
 /* tslint:disable-next-line:no-string-literal  */
 // Detect test environment (Karma or Vitest)
 // Note: We check for test globals without importing test dependencies to avoid bundling test code
-const isTestEnvironment = (typeof window !== 'undefined' && !!(window as any)['__karma__']) ||
-                          (typeof window !== 'undefined' && typeof (window as any).describe === 'function') ||
+const isTestEnvironment = (typeof window !== 'undefined' && !!(window as unknown as Record<string, unknown>).__karma__) ||
+                          (typeof window !== 'undefined' && typeof (window as unknown as Record<string, unknown>).describe === 'function') ||
                           (typeof import.meta !== 'undefined' && import.meta.env?.MODE === 'test');
 export const entityCatalog: EntityCatalog = isTestEnvironment ? new TestEntityCatalog() : new EntityCatalog();
 
 // Expose diagnostics globally for debugging
 if (typeof window !== 'undefined') {
-  (window as any).__STRATOS_ENTITY_CATALOG__ = {
+  (window as unknown as Record<string, unknown>).__STRATOS_ENTITY_CATALOG__ = {
     getDiagnostics: () => entityCatalog.getDiagnostics(),
     validateCatalog: () => entityCatalog.validateCatalog(),
     enableDebug: (config?: Partial<EntityCatalogDebugConfig>) => {
-      (window as any).__STRATOS_ENTITY_CATALOG_DEBUG__ = {
+      (window as unknown as Record<string, unknown>).__STRATOS_ENTITY_CATALOG_DEBUG__ = {
         logLookups: true,
         logRegistrations: true,
         logMissingEntities: true,
@@ -635,7 +744,7 @@ if (typeof window !== 'undefined') {
       console.log('Entity Catalog debug mode enabled. Reload the application to see debug logs.');
     },
     disableDebug: () => {
-      delete (window as any).__STRATOS_ENTITY_CATALOG_DEBUG__;
+      delete (window as unknown as Record<string, unknown>).__STRATOS_ENTITY_CATALOG_DEBUG__;
       console.log('Entity Catalog debug mode disabled.');
     }
   };

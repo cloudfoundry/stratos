@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
+import { ChangeDetectionStrategy, Component, type OnInit} from '@angular/core';
 
-import { AnalysisReport } from '../../store/kube.types';
-import { IReportViewer } from '../analysis-report-viewer.component';
+import type { AnalysisReport } from '../../store/kube.types';
+import type { IReportViewer } from '../analysis-report-viewer.component';
 
 @Component({
 changeDetection: ChangeDetectionStrategy.OnPush,
@@ -24,8 +24,6 @@ export class KubeScoreReportViewerComponent implements OnInit, IReportViewer {
 
   report!: AnalysisReport;
   processed: Array<{ _checks: unknown[]; _name: string }> = [];
-
-  constructor() { }
 
   ngOnInit() {
     this.processed = [];

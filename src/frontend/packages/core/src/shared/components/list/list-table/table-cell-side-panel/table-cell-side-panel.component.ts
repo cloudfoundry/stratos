@@ -2,11 +2,11 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentFactory
 
 import { SidePanelService } from '../../../../services/side-panel.service';
 import { TableCellCustom } from '../../list.types';
-import { CellConfigFunction } from '../table.types';
+import type { CellConfigFunction } from '../table.types';
 
 export interface TableCellSidePanelConfig<T> {
   text: string;
-  sidePanelComponent: any; // PreviewableComponent
+  sidePanelComponent: unknown; // PreviewableComponent
   sidePanelConfig: T;
 }
 
@@ -17,7 +17,7 @@ export interface TableCellSidePanelConfig<T> {
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true
 })
-export class TableCellSidePanelComponent<T = any, A = any> extends TableCellCustom<T, object | CellConfigFunction<T>> {
+export class TableCellSidePanelComponent<T = unknown, A = unknown> extends TableCellCustom<T, object | CellConfigFunction<T>> {
 
   public actualConfig!: TableCellSidePanelConfig<A>;
 
@@ -45,8 +45,8 @@ export class TableCellSidePanelComponent<T = any, A = any> extends TableCellCust
 
   showSidePanel() {
     this.previewPanel.show(
-      this.actualConfig.sidePanelComponent,
-      this.actualConfig.sidePanelConfig,
+      this.actualConfig.sidePanelComponent as object,
+      this.actualConfig.sidePanelConfig as { [key: string]: unknown },
       this.componentFactoryResolver
     );
   }
@@ -55,10 +55,14 @@ export class TableCellSidePanelComponent<T = any, A = any> extends TableCellCust
     if (typeof (this.config) === 'function') {
       if (this.row && this.config) {
         const configFn = this.config as CellConfigFunction<T>;
-        this.actualConfig = configFn(this.row);
+        this.actualConfig = configFn(this.row) as TableCellSidePanelConfig<A>;
       }
     } else {
-      this.actualConfig = this.config as TableCellSidePanelConfig<A>;
+      this.actualConfig = (this.config || {
+        text: '',
+        sidePanelComponent: null,
+        sidePanelConfig: null
+      }) as TableCellSidePanelConfig<A>;
     }
     this.cdr.markForCheck();
   }

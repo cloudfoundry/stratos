@@ -1,13 +1,13 @@
-import { IRequestEntityTypeState } from '../../../../store/src/app-state';
-import { APIResource } from '../../../../store/src/types/api.types';
-import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
+import type { IRequestEntityTypeState } from '../../../../store/src/app-state';
+import type { APIResource } from '../../../../store/src/types/api.types';
+import type { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
 import {
   CREATE_SERVICE_BINDING_ACTION_SUCCESS,
-  CreateServiceBinding,
+  type CreateServiceBinding,
   DELETE_SERVICE_BINDING_ACTION_SUCCESS,
-  DeleteServiceBinding,
+  type DeleteServiceBinding,
 } from '../../actions/service-bindings.actions';
-import { IServiceBinding, IServiceInstance, IUserProvidedServiceInstance } from '../../cf-api-svc.types';
+import type { IServiceBinding, IServiceInstance, IUserProvidedServiceInstance } from '../../cf-api-svc.types';
 import { getCFEntityKey } from '../../cf-entity-helpers';
 import { serviceBindingEntityType } from '../../cf-entity-types';
 
@@ -17,9 +17,9 @@ export function serviceInstanceReducer<T extends IServiceInstance | IUserProvide
 ): IRequestEntityTypeState<APIResource<T>> {
   switch (action.type) {
     case DELETE_SERVICE_BINDING_ACTION_SUCCESS:
-      return handleDelete(state, action.apiAction as DeleteServiceBinding);
+      return handleDelete(state as IRequestEntityTypeState<APIResource>, action.apiAction as DeleteServiceBinding) as IRequestEntityTypeState<APIResource<T>>;
     case CREATE_SERVICE_BINDING_ACTION_SUCCESS:
-      return handleCreateBinding(state, action);
+      return handleCreateBinding(state as IRequestEntityTypeState<APIResource>, action) as IRequestEntityTypeState<APIResource<T>>;
     default:
       return state;
   }
@@ -28,22 +28,22 @@ export function serviceInstanceReducer<T extends IServiceInstance | IUserProvide
 function handleCreateBinding(state: IRequestEntityTypeState<APIResource>, action: APISuccessOrFailedAction) {
   const bindingAction = action.apiAction as CreateServiceBinding;
   const cfServiceBindingEntityKey = getCFEntityKey(serviceBindingEntityType);
-  const newServiceBindingEntity = (
-    action.response.entities[cfServiceBindingEntityKey][action.response.result[0]] as
-    APIResource<IServiceBinding>);
+  const response = action.response as { entities: { [key: string]: { [guid: string]: APIResource<IServiceBinding> } }, result: string[] };
+  const newServiceBindingEntity = response.entities[cfServiceBindingEntityKey][response.result[0]] as APIResource<IServiceBinding>;
   const serviceInstanceGuid = bindingAction.serviceInstanceGuid;
   const serviceBindingGuid = newServiceBindingEntity.metadata.guid;
-  const serviceInstanceEntity = state[serviceInstanceGuid];
+  const serviceInstanceEntity = state[serviceInstanceGuid] as APIResource<IServiceInstance | IUserProvidedServiceInstance>;
   if (!serviceInstanceEntity) {
     return state;
   }
+  const entity = serviceInstanceEntity.entity as IServiceInstance | IUserProvidedServiceInstance;
   return {
     ...state,
     [serviceInstanceGuid]: {
       ...serviceInstanceEntity,
       entity: {
-        ...serviceInstanceEntity.entity,
-        service_bindings: [].concat(serviceInstanceEntity.entity.service_bindings, serviceBindingGuid)
+        ...entity,
+        service_bindings: [].concat(entity.service_bindings as any, serviceBindingGuid)
       }
     }
   };
@@ -52,23 +52,24 @@ function handleCreateBinding(state: IRequestEntityTypeState<APIResource>, action
 function handleDelete(state: IRequestEntityTypeState<APIResource>, action: DeleteServiceBinding) {
   const serviceInstanceGuid = action.serviceInstanceGuid;
   const serviceBindingGuid = action.guid;
-  const serviceInstanceEntity = state[serviceInstanceGuid];
+  const serviceInstanceEntity = state[serviceInstanceGuid] as APIResource<IServiceInstance | IUserProvidedServiceInstance>;
   if (!serviceInstanceEntity) {
     return state;
   }
+  const entity = serviceInstanceEntity.entity as IServiceInstance | IUserProvidedServiceInstance;
   return {
     ...state,
     [serviceInstanceGuid]: {
       ...serviceInstanceEntity,
       entity: {
-        ...serviceInstanceEntity.entity,
-        service_bindings: removeBinding(serviceInstanceEntity.entity.service_bindings, serviceBindingGuid)
+        ...entity,
+        service_bindings: removeBinding(entity.service_bindings as any as string[], serviceBindingGuid) as any
       }
     }
   };
 }
 
-function removeBinding(bindings: any[], guid: string) {
+function removeBinding(bindings: string[] | undefined, guid: string): string[] | undefined {
   return bindings ? bindings.filter(b => b !== guid) : bindings;
 }
 

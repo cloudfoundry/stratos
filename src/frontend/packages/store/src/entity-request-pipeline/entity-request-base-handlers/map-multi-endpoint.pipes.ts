@@ -1,17 +1,18 @@
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 import { normalize } from 'normalizr';
 
+import type { IRequestEntityTypeState } from '../../app-state';
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
-import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { IStratosEntityDefinition } from '../../entity-catalog/entity-catalog.types';
-import { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
-import { NormalizedResponse } from '../../types/api.types';
-import { EntityRequestAction } from '../../types/request.types';
-import { PipelineResult } from '../entity-request-pipeline.types';
+import type { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import type { IStratosEntityDefinition } from '../../entity-catalog/entity-catalog.types';
+import type { ApiRequestTypes } from '../../reducers/api-request-reducer/request-helpers';
+import type { NormalizedResponse } from '../../types/api.types';
+import type { EntityRequestAction } from '../../types/request.types';
+import type { PipelineResult } from '../entity-request-pipeline.types';
 import { getSuccessMapper } from '../pipeline-helpers';
 import { endpointErrorsHandlerFactory } from './endpoint-errors.handler';
 import { patchActionWithForcedConfig } from './forced-action-type.helpers';
-import { HandledMultiEndpointResponse, JetstreamError, MultiEndpointResponse } from './handle-multi-endpoints.pipe';
+import type { HandledMultiEndpointResponse, JetstreamError, MultiEndpointResponse } from './handle-multi-endpoints.pipe';
 import { multiEndpointResponseMergePipe } from './merge-multi-endpoint-data.pipe';
 
 const baseErrorHandler = () => 'Api Request Failed';
@@ -23,11 +24,11 @@ function createErrorMessage(definition: IStratosEntityDefinition, errors: Jetstr
 
 function getEntities(
   endpointResponse: {
-    normalizedEntities: NormalizedResponse<any>;
+    normalizedEntities: NormalizedResponse<unknown>;
     endpointGuid: string;
   },
   action: EntityRequestAction
-): { [entityKey: string]: any[] } {
+): Record<string, IRequestEntityTypeState<unknown>> {
   return Object.keys(endpointResponse.normalizedEntities.entities).reduce(
     (newEntities, entityKey) => {
       const innerCatalogEntity = entityCatalog.getEntityFromKey(entityKey) as StratosBaseCatalogEntity;
@@ -47,20 +48,25 @@ function getEntities(
             ...newEntitiesOfType,
             [newGuid]: entity
           };
-        }, {} as Record<string, any>
-      ) : Object.values(endpointResponse.normalizedEntities.entities[entityKey]);
+        }, {} as Record<string, unknown>
+      ) : endpointResponse.normalizedEntities.entities[entityKey] as IRequestEntityTypeState<unknown>;
       return {
         ...newEntities,
         [entityKey]: entities
       };
-    }, {});
+    }, {} as Record<string, IRequestEntityTypeState<unknown>>);
 }
 
 // TODO: Type the output of this pipe. #3976
 function getNormalizedEntityData(
-  entities: any[],
+  entities: unknown[],
   action: EntityRequestAction,
-  catalogEntity: StratosBaseCatalogEntity) {
+  catalogEntity: StratosBaseCatalogEntity | null) {
+  if (!catalogEntity) {
+    throw new Error(
+      `Cannot normalize entity data: catalog entity not found for endpoint '${action.endpointType}' and entity '${action.entityType}'`
+    );
+  }
   // Can patchActionWithForcedConfig be done outside of the pipe?
   // This pipe shouldn't have to worry about the multi entity lists.
   const patchedAction = patchActionWithForcedConfig(action);
@@ -71,11 +77,17 @@ function getNormalizedEntityData(
 
 export function mapMultiEndpointResponses(
   action: EntityRequestAction,
-  catalogEntity: StratosBaseCatalogEntity,
+  catalogEntity: StratosBaseCatalogEntity | null,
   requestType: ApiRequestTypes,
   multiEndpointResponses: HandledMultiEndpointResponse,
   actionDispatcher: (actionToDispatch: Action) => void
 ): PipelineResult {
+  if (!catalogEntity) {
+    return {
+      success: false,
+      errorMessage: `Cannot process multi-endpoint response: catalog entity not found for endpoint '${action.endpointType}' and entity '${action.entityType}'`
+    };
+  }
   const endpointErrorHandler = endpointErrorsHandlerFactory(actionDispatcher);
   endpointErrorHandler(
     action,
@@ -84,7 +96,7 @@ export function mapMultiEndpointResponses(
     multiEndpointResponses.errors
   );
 
-  if (multiEndpointResponses.errors && multiEndpointResponses.errors.length) {
+  if (multiEndpointResponses.errors?.length) {
     const errorMessage = createErrorMessage(catalogEntity.definition as IStratosEntityDefinition, multiEndpointResponses.errors);
     return {
       success: false,
@@ -92,8 +104,8 @@ export function mapMultiEndpointResponses(
     };
   } else {
     const responses = multiEndpointResponses.successes
-      .map((responseData: MultiEndpointResponse<any>) => ({
-        normalizedEntities: getNormalizedEntityData(responseData.entities, action, catalogEntity),
+      .map((responseData: MultiEndpointResponse<unknown>) => ({
+        normalizedEntities: getNormalizedEntityData(responseData.entities as unknown[], action, catalogEntity),
         endpointGuid: responseData.endpointGuid,
         totalResults: responseData.totalResults,
         totalPages: responseData.totalPages
@@ -109,8 +121,8 @@ export function mapMultiEndpointResponses(
           },
           totalPages: endpointResponse.totalPages,
           totalResults: endpointResponse.totalResults,
-          success: null as any
-        };
+          success: true
+        } as PipelineResult;
       });
     const response = multiEndpointResponseMergePipe(responses);
     return {

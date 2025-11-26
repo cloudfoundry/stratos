@@ -1,14 +1,14 @@
-import { Component, OnInit, ViewChild, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, signal } from '@angular/core';
+import { Component, type OnInit, ViewChild, type OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, signal } from '@angular/core';
 
-import { NgModel } from '@angular/forms';
+import type { NgModel } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { format } from 'date-fns';
-import { EMPTY, NEVER, Observable, Subject, of, timer, throwError } from 'rxjs';
-import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
-import { catchError, debounceTime, first, map, share, startWith, switchMap, tap, retry, retryWhen, delayWhen, take } from 'rxjs/operators';
+import { EMPTY, NEVER, type Observable, Subject, of, timer, } from 'rxjs';
+import makeWebSocketObservable, { type GetWebSocketResponses } from 'rxjs-websockets';
+import { catchError, debounceTime, first, map, share, startWith, switchMap, tap, retryWhen, delayWhen, take } from 'rxjs/operators';
 
 import { AnsiColorizer, LogViewerComponent } from '@stratosui/core';
-import { CFAppState } from '@stratosui/cloud-foundry';
+import type { CFAppState } from '@stratosui/cloud-foundry';
 import { ApplicationService } from '../../../../application.service';
 
 
@@ -40,14 +40,16 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
   public messages!: Observable<string>;
   private connectionStatusSubject = new Subject<number>();
   public connectionStatus!: Observable<number>;
-  private socketError = false;
   private connectionAttempts = 0;
   private maxRetries = 3;
   private retryDelayMs = 2000;
-  private lastError: ConnectionError | null = null;
 
   // Signal for connection status tracking
   connectionStatusSignal = signal<number>(0);
+
+  // Error tracking
+  lastError: ConnectionError | null = null;
+  socketError = false;
 
   @ViewChild('searchFilter', { static: false }) searchFilter: NgModel;
 
@@ -56,8 +58,7 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
   private colorizer = new AnsiColorizer();
 
   constructor(
-    private applicationService: ApplicationService,
-    private store: Store<CFAppState>,
+    private applicationService: ApplicationService,_store: Store,
     private cdr: ChangeDetectorRef
   ) {
     this.filter = this.jsonFilter.bind(this);
@@ -133,7 +134,7 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
           }),
           delayWhen(() => {
             // Exponential backoff: 2s, 4s, 8s
-            const delay = this.retryDelayMs * Math.pow(2, this.connectionAttempts - 1);
+            const delay = this.retryDelayMs * 2 ** (this.connectionAttempts - 1);
             console.log(`Retrying WebSocket connection in ${delay}ms...`);
             return timer(delay);
           }),
@@ -142,7 +143,7 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
         catchError(e => {
           const errorMessage = this.parseWebSocketError(e);
           console.error(
-            'WebSocket connection failed permanently: ' + errorMessage
+            `WebSocket connection failed permanently: ${errorMessage}`
           );
           this.socketError = true;
           this.lastError = {
@@ -212,13 +213,18 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
   /**
    * Parse WebSocket error to provide user-friendly error messages
    */
-  private parseWebSocketError(error: any): string {
+  private parseWebSocketError(error: unknown): string {
     if (!error) {
       return 'Unknown connection error';
     }
 
+    // Type guard for error with type and target properties
+    const hasTypeAndTarget = (err: unknown): err is { type: string; target: unknown } => {
+      return typeof err === 'object' && err !== null && 'type' in err && 'target' in err;
+    };
+
     // Check for common error patterns
-    if (error.type === 'error' && error.target instanceof WebSocket) {
+    if (hasTypeAndTarget(error) && error.type === 'error' && error.target instanceof WebSocket) {
       const readyState = error.target.readyState;
 
       switch (readyState) {
@@ -233,23 +239,31 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
       }
     }
 
+    // Type guard for error with message property
+    const hasMessage = (err: unknown): err is { message: string } => {
+      return typeof err === 'object' && err !== null && 'message' in err && typeof (err as { message: unknown }).message === 'string';
+    };
+
     // SSL/Certificate errors
-    if (error.message?.includes('certificate') || error.message?.includes('SSL')) {
+    if (hasMessage(error) && (error.message.includes('certificate') || error.message.includes('SSL'))) {
       return 'SSL certificate error. Please accept the self-signed certificate for local development.';
     }
 
     // Network errors
-    if (error.message?.includes('NetworkError') || error.message?.includes('network')) {
+    if (hasMessage(error) && (error.message.includes('NetworkError') || error.message.includes('network'))) {
       return 'Network error - unable to reach backend service';
     }
 
     // Timeout errors
-    if (error.message?.includes('timeout')) {
+    if (hasMessage(error) && error.message.includes('timeout')) {
       return 'Connection timeout - backend service not responding';
     }
 
     // Default to error message or generic message
-    return error.message || error.toString() || 'WebSocket connection failed';
+    if (hasMessage(error)) {
+      return error.message;
+    }
+    return typeof error === 'object' && error !== null ? error.toString() : 'WebSocket connection failed';
   }
 
   jsonFilter(jsonString: string) {
@@ -259,9 +273,9 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
         return;
       }
 
-      let msgColour;
-      let sourceColour;
-      let bold;
+      let msgColour: string | undefined;
+      let sourceColour: string | undefined;
+      let bold: boolean | undefined;
 
       // CF timestamps are in nanoseconds
       const msStamp = Math.round(messageObj.timestamp / 1000000);
@@ -273,16 +287,16 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
         sourceColour = 'yellow';
       }
       const messageSource =
-        this.colorizer.colorize('[' + messageObj.source_type + '.' + messageObj.source_instance + ']', sourceColour, true);
+        this.colorizer.colorize(`[${messageObj.source_type}.${messageObj.source_instance}]`, sourceColour, true);
 
       if (messageObj.message_type === 2) {
         msgColour = 'red';
         bold = true;
       }
-      const messageString = this.colorizer.colorize(decodeURIComponent(escape(atob(messageObj.message))), msgColour, bold) + '\n';
-      return timeStamp + ': ' + messageSource + ' ' + messageString;
+      const messageString = `${this.colorizer.colorize(decodeURIComponent(escape(atob(messageObj.message))), msgColour, bold)}\n`;
+      return `${timeStamp}: ${messageSource} ${messageString}`;
     } catch (error) {
-      console.error('Failed to filter jsonMessage from WebSocket: ' + JSON.stringify(error));
+      console.error(`Failed to filter jsonMessage from WebSocket: ${JSON.stringify(error)}`);
       return jsonString;
     }
   }

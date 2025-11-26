@@ -1,6 +1,6 @@
-import { EntitySchema } from '../../../../../store/src/helpers/entity-schema';
+import type { EntitySchema } from '../../../../../store/src/helpers/entity-schema';
 import { addKubernetesEntitySchema, KubernetesEntitySchema } from '../../kubernetes-entity-factory';
-import { HelmRelease, HelmReleaseGraph, HelmReleaseResources } from '../workload.types';
+import type { HelmRelease, HelmReleaseGraph, HelmReleaseResources } from '../workload.types';
 
 export const helmReleaseEntityKey = 'helmRelease';
 export const helmReleasePodEntityType = 'helmReleasePod';
@@ -55,7 +55,9 @@ entityCache[helmReleaseHistoryEntityType] = new KubernetesEntitySchema(
   { idAttribute: getHelmReleaseResourceIdByObj }
 );
 
-Object.entries(entityCache).forEach(([key, workloadSchema]) => addKubernetesEntitySchema(key, workloadSchema));
+for (const [key, workloadSchema] of Object.entries(entityCache)) {
+  addKubernetesEntitySchema(key, workloadSchema);
+}
 
 
 export const createHelmReleaseEntities = (): { [cacheName: string]: EntitySchema, } => {

@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach } from 'vitest';
@@ -9,7 +9,8 @@ import { BaseKubeGuid } from '../../../../kubernetes-page.types';
 import { KubernetesBaseTestModules } from '../../../../kubernetes.testing.module';
 import { KubernetesEndpointService } from '../../../../services/kubernetes-endpoint.service';
 import { KubernetesNodeService } from '../../../../services/kubernetes-node.service';
-import { KubernetesNode } from '../../../../store/kube.types';
+import type { KubernetesNode } from '../../../../store/kube.types';
+import { ConditionStatus, ConditionType } from '../../../../store/kube.types';
 import { KubernetesNodeConditionCardComponent } from './kubernetes-node-condition-card.component';
 import { KubernetesNodeConditionComponent } from './kubernetes-node-condition/kubernetes-node-condition.component';
 
@@ -32,14 +33,16 @@ describe('KubernetesNodeConditionCardComponent', () => {
     status: {
       conditions: [
         {
-          type: 'Ready',
-          status: 'True',
-          lastHeartbeatTime: '2025-11-13T00:00:00Z',
-          lastTransitionTime: '2025-11-13T00:00:00Z',
+          type: ConditionType.Ready,
+          status: ConditionStatus.True,
+          lastHeartbeatTime: new Date('2025-11-13T00:00:00Z'),
+          lastTransitionTime: new Date('2025-11-13T00:00:00Z'),
           reason: 'KubeletReady',
           message: 'kubelet is posting ready status'
         }
       ],
+      addresses: [],
+      images: [],
       nodeInfo: {
         kubeletVersion: 'v1.28.0',
         kubeProxyVersion: 'v1.28.0',
@@ -52,14 +55,21 @@ describe('KubernetesNodeConditionCardComponent', () => {
         machineID: 'test-machine-id',
         systemUUID: 'test-system-uuid'
       }
+    },
+    spec: {
+      containers: [],
+      nodeName: 'test-node',
+      schedulerName: 'default-scheduler',
+      initContainers: [],
+      readinessGates: []
     }
-  } as any;
+  };
 
   const mockKubernetesNodeService = {
     nodeName: 'test-node',
     kubeGuid: 'test-guid',
     nodeEntity$: of(mockNode),
-    node$: of({ entity: mockNode, entityRequestInfo: {} } as any)
+    node$: of({ entity: mockNode, entityRequestInfo: {} })
   };
 
   beforeEach(async () => {

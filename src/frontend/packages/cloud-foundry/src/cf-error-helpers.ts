@@ -1,4 +1,4 @@
-import { JetStreamErrorResponse, jetStreamErrorResponseToSafeString } from '../../store/src/jetstream';
+import { type JetStreamErrorResponse, jetStreamErrorResponseToSafeString } from '../../store/src/jetstream';
 
 export interface CfErrorObject {
   code: number;
@@ -9,13 +9,14 @@ export interface CfErrorObject {
 /**
  * This is the raw response when making a request to a cf. Could be an error object created by cf, a stratos error string or anything
  */
-export type CfErrorResponse = CfErrorObject | string | any;
+export type CfErrorResponse = CfErrorObject | string | unknown;
 
-function isCfError(errorResponse: CfErrorResponse): CfErrorObject {
-  return !!errorResponse &&
-    !!errorResponse.code &&
-    !!errorResponse.description &&
-    !!errorResponse.error_code ?
+function isCfError(errorResponse: CfErrorResponse): CfErrorObject | null {
+  if (!errorResponse || typeof errorResponse !== 'object') {
+    return null;
+  }
+  const err = errorResponse as Record<string, unknown>;
+  return err.code && err.description && err.error_code ?
     errorResponse as CfErrorObject :
     null;
 }

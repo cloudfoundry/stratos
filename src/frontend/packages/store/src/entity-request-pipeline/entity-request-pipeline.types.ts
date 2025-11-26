@@ -1,23 +1,23 @@
-import { HttpClient, HttpRequest } from '@angular/common/http';
-import { Action, Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { HttpClient, HttpRequest } from '@angular/common/http';
+import type { Action, Store } from '@ngrx/store';
+import type { Observable } from 'rxjs';
 
-import { AppState, GeneralEntityAppState, InternalAppState } from '../app-state';
-import {
+import type { AppState, GeneralEntityAppState, InternalAppState } from '../app-state';
+import type {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
 } from '../entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { JetStreamErrorResponse } from '../jetstream';
-import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
-import { EntityInfo, NormalizedResponse } from '../types/api.types';
-import { EndpointUser } from '../types/endpoint.types';
-import { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
-import { EntityRequestAction } from '../types/request.types';
-import { JetstreamError } from './entity-request-base-handlers/handle-multi-endpoints.pipe';
-import { PipelineHttpClient } from './pipline-http-client.service';
+import type { JetStreamErrorResponse } from '../jetstream';
+import type { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
+import type { EntityInfo, NormalizedResponse } from '../types/api.types';
+import type { EndpointUser } from '../types/endpoint.types';
+import type { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
+import type { EntityRequestAction } from '../types/request.types';
+import type { JetstreamError } from './entity-request-base-handlers/handle-multi-endpoints.pipe';
+import type { PipelineHttpClient } from './pipline-http-client.service';
 
 export type ActionDispatcher<T extends Action = Action> = (action: T) => void;
-export interface JetstreamResponse<T = any> {
+export interface JetstreamResponse<T = unknown> {
   [endpointGuid: string]: T;
 }
 
@@ -38,7 +38,7 @@ export type SucceedOrFailEntityRequestHandler = (
 ) => void;
 
 export type EndEntityRequestPipe<
-  T = any,
+  T = unknown,
   > = (
     actionDispatcher: ActionDispatcher,
     requestType: ApiRequestTypes,
@@ -47,10 +47,10 @@ export type EndEntityRequestPipe<
   ) => void;
 
 export type MakeEntityRequestPipe<
-  T = any,
+  T = unknown,
   > = (
     httpClient: PipelineHttpClient,
-    request: HttpRequest<any> | Observable<HttpRequest<any>>,
+    request: HttpRequest<unknown> | Observable<HttpRequest<unknown>>,
     endpointConfig: StratosCatalogEndpointEntity,
     endpointGuids: string | string[],
     externalRequest?: boolean
@@ -58,19 +58,19 @@ export type MakeEntityRequestPipe<
 
 export type BuildEntityRequestPipe = (
   requestType: ApiRequestTypes,
-  requestOptions: HttpRequest<any>,
+  requestOptions: HttpRequest<unknown>,
   catalogEntity: StratosBaseCatalogEntity,
-  store: Store<any>,
-) => HttpRequest<any> | Observable<HttpRequest<any>>;
+  store: Store<AppState>,
+) => HttpRequest<unknown> | Observable<HttpRequest<unknown>>;
 
 export type NormalizeEntityRequestResponsePipe<
-  T = any,
+  T = unknown,
   > = (
     catalogEntity: StratosBaseCatalogEntity,
   ) => NormalizedResponse<T>;
 
-export type EntityRequestHandler = (...args: any[]) => void;
-export type EntityRequestPipe = (...args: any[]) => any;
+export type EntityRequestHandler = (...args: unknown[]) => void;
+export type EntityRequestPipe = (...args: unknown[]) => unknown;
 
 export interface PipelineResult {
   success: boolean;
@@ -87,7 +87,7 @@ export type EntityRequestPipeline<> = (
 ) => Observable<PipelineResult>;
 
 
-export type SuccessfulApiResponseDataMapper<O = any, I = O> = (
+export type SuccessfulApiResponseDataMapper<O = unknown, I = O> = (
   response: I,
   endpointGuid: string,
   guid: string,
@@ -97,17 +97,17 @@ export type SuccessfulApiResponseDataMapper<O = any, I = O> = (
 ) => O;
 
 export type PreApiRequest = (
-  request: HttpRequest<any>,
+  request: HttpRequest<unknown>,
   action: EntityRequestAction,
   catalogEntity: StratosBaseCatalogEntity
-) => HttpRequest<any> | Observable<HttpRequest<any>>;
+) => HttpRequest<unknown> | Observable<HttpRequest<unknown>>;
 
 export type PrePaginationApiRequest = (
-  request: HttpRequest<any>,
+  request: HttpRequest<unknown>,
   action: PaginatedAction,
   catalogEntity: StratosBaseCatalogEntity,
   appState: InternalAppState
-) => HttpRequest<any> | Observable<HttpRequest<any>>;
+) => HttpRequest<unknown> | Observable<HttpRequest<unknown>>;
 
 export type ApiErrorMessageHandler = (
   errors: JetstreamError[]
@@ -119,7 +119,7 @@ export interface BasePipelineConfig<T extends AppState = InternalAppState, Y ext
   action: Y;
   appState: T;
 }
-export interface PagedJetstreamResponse<T = any> {
+export interface PagedJetstreamResponse<T = unknown> {
   [endpointId: string]: T[] | JetStreamErrorResponse[];
 }
 
@@ -133,8 +133,8 @@ export type EntitiesInfoHandler = (
   ) => void;
 
 
-export type EntityFetch<T = any> = (entity: T) => void;
-export type EntityFetchHandler<T = any> = (store: Store<GeneralEntityAppState>, action: EntityRequestAction) => EntityFetch<T>;
+export type EntityFetch<T = unknown> = (entity: T) => void;
+export type EntityFetchHandler<T = unknown> = (store: Store<GeneralEntityAppState>, action: EntityRequestAction) => EntityFetch<T>;
 export type EntitiesFetchHandler = (store: Store<GeneralEntityAppState>, actions: PaginatedAction[]) => () => void;
 
 export interface EntityUserRolesEndpoint {
@@ -148,4 +148,4 @@ export type EntityUserRolesFetch = (
   httpClient: HttpClient
 ) => Observable<boolean>;
 
-export type EntityUserRolesReducer<T = any> = (state: T, action: Action) => T;
+export type EntityUserRolesReducer<T = unknown> = (state: T, action: Action) => T;

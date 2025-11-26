@@ -1,8 +1,8 @@
 import { NgModule } from '@angular/core';
 import {
   CoreModule,
-  CustomizationService,
-  CustomizationsMetadata,
+  type CustomizationService,
+  type CustomizationsMetadata,
   ExtensionService,
   MDAppModule,
   SharedModule,
@@ -27,9 +27,8 @@ const AcmeCustomizations: CustomizationsMetadata = {
     ExtensionService.declare([
       AppTabExtensionComponent,
       AppActionExtensionComponent,
-    ])
-  ],
-  declarations: [
+    ]),
+    // Standalone components
     AcmeLoginComponent,
     AppTabExtensionComponent,
     AppActionExtensionComponent,

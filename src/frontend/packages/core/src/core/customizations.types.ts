@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, type Type } from '@angular/core';
 
 /**
  * Optional customizations
@@ -8,9 +8,9 @@ export interface CustomizationsMetadata {
   copyright?: string;
   logoText?: string;
   appName?: string;
-  aboutInfoComponent?: any;
-  supportInfoComponent?: any;
-  noEndpointsComponent?: any;
+  aboutInfoComponent?: Type<unknown>;
+  supportInfoComponent?: Type<unknown>;
+  noEndpointsComponent?: Type<unknown>;
   alwaysShowNavForEndpointTypes?: (epType: string) => boolean;
 }
 
@@ -21,7 +21,9 @@ export class CustomizationService {
 
   private customizationMetadata: CustomizationsMetadata = {};
 
-  set = (cm: CustomizationsMetadata) => this.customizationMetadata = cm;
+  set = (cm: CustomizationsMetadata) => {
+    this.customizationMetadata = cm;
+  };
   get = () => this.customizationMetadata;
 
   setAppNameFromTitle() {

@@ -1,11 +1,10 @@
 import { Store } from '@ngrx/store';
-import { OperatorFunction } from 'rxjs';
+import type { OperatorFunction } from 'rxjs';
 
-import { ListDataSource } from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { IListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
-import { AppState } from '../../../../../store/src/public-api';
-import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
-import { KubeService } from '../../store/kube.types';
+import { type IListConfig, ListDataSource } from '@stratosui/core';
+import type { AppState } from '../../../../../store/src/public-api';
+import type { PaginatedAction } from '../../../../../store/src/types/pagination.types';
+import type { KubeService } from '../../store/kube.types';
 
 export class BaseKubernetesServicesDataSource extends ListDataSource<KubeService> {
 
@@ -13,13 +12,13 @@ export class BaseKubernetesServicesDataSource extends ListDataSource<KubeService
     store: Store<AppState>,
     action: PaginatedAction,
     listConfig: IListConfig<KubeService>,
-    transformEntity: OperatorFunction<KubeService[], any> = null
+    transformEntity: OperatorFunction<KubeService[], KubeService[]> | null = null
   ) {
     super({
       store,
       action,
-      schema: action.entity[0],
-      getRowUniqueId: (row) => action.entity[0].getId(row),
+      schema: (action.entity as any)[0],
+      getRowUniqueId: (row) => (action.entity as any)[0].getId(row),
       paginationKey: action.paginationKey,
       transformEntity,
       isLocal: true,

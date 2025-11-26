@@ -1,6 +1,6 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
-import { Observable } from 'rxjs';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { Component, type OnInit , ChangeDetectionStrategy } from '@angular/core';
+import type { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
 import {
@@ -10,9 +10,9 @@ import {
   CardTitleComponent,
   CardContentComponent
 } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
+import type { APIResource } from '@stratosui/store';
 import { ServicesService } from '../../../../features/service-catalog/services.service';
-import { IServiceInstance } from '../../../../cf-api-svc.types';
+import type { IServiceInstance } from '../../../../cf-api-svc.types';
 import { CompactServiceInstanceCardComponent } from '../compact-service-instance-card/compact-service-instance-card.component';
 
 const RECENT_ITEMS_COUNT = 10;

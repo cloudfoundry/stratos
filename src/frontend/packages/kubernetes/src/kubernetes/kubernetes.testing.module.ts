@@ -10,7 +10,7 @@ import {
   entityCatalog,
   EntityCatalogFeatureModule,
   EntityCatalogProvidersModule,
-  TestEntityCatalog,
+  type TestEntityCatalog,
 } from '@stratosui/store';
 import { generateStratosEntities } from '../../../store/src/stratos-entity-generator';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';

@@ -1,12 +1,12 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import {
+import type {
   IListDataSource,
 } from '../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
-import { KubeConfigFileCluster } from '../../kube-config.types';
+import type { KubeConfigFileCluster } from '../../kube-config.types';
 import { KubeConfigTableNameComponent } from './kube-config-table-name.component';
 
 describe('KubeConfigTableName', () => {

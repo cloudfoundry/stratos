@@ -1,15 +1,15 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe, DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import {Component, ComponentFactoryResolver, OnDestroy, signal, computed, inject, ChangeDetectionStrategy, Injector, runInInjectionContext } from '@angular/core';
+import {Component, ComponentFactoryResolver, type OnDestroy, signal, computed, inject, ChangeDetectionStrategy, Injector, runInInjectionContext } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ConfirmationDialogConfig, ConfirmationDialogService, SidePanelService } from '@stratosui/core';
 import { ClearPaginationOfType } from '@stratosui/store';
 import { RouterNav } from '@stratosui/store';
-import { AppState } from '@stratosui/store';
-import { combineLatest, Observable } from 'rxjs';
-import { distinctUntilChanged, filter, first, map, publishReplay, refCount, startWith } from 'rxjs/operators';
+import type { AppState } from '@stratosui/store';
+import type { Observable } from 'rxjs';
+import { distinctUntilChanged, filter, first, map, } from 'rxjs/operators';
 
 import {
   PageSubNavComponent,
@@ -32,11 +32,21 @@ import {
   ResourceAlertPreviewComponent,
 } from '../../../../analysis-report-viewer/resource-alert-preview/resource-alert-preview.component';
 import { KubernetesAnalysisService } from '../../../../services/kubernetes.analysis.service';
-import { HelmReleaseChartData } from '../../../workload.types';
+import type { AnalysisReport } from '../../../../store/kube.types';
+import type { HelmReleaseChartData, HelmReleaseGraphNode } from '../../../workload.types';
 import { workloadsEntityCatalog } from '../../../workloads-entity-catalog';
 import { getIcon } from '../../icon-helper';
-import { HelmReleaseHelperService } from '../helm-release-helper.service';
-import { ResourceAlert } from './../../../../services/analysis-report.types';
+import { HelmReleaseHelperService, type InternalHelmUpgrade } from '../helm-release-helper.service';
+import type { ResourceAlert } from './../../../../services/analysis-report.types';
+
+interface ReleaseResource {
+  kind: string;
+  label: string;
+  count: number;
+  statuses: string[];
+  icon: string;
+  alerts: ResourceAlert[];
+}
 
 @Component({
   selector: 'app-helm-release-summary-tab',
@@ -46,6 +56,8 @@ import { ResourceAlert } from './../../../../services/analysis-report.types';
   standalone: true,
   imports: [
     CommonModule,
+    AsyncPipe,
+    DatePipe,
     RouterModule,
     PageSubNavComponent,
     LoadingPageComponent,
@@ -72,8 +84,8 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   private readonly DEFAULT_LOADING_MESSAGE = 'Retrieving Release Details';
   public loadingMessage = this.DEFAULT_LOADING_MESSAGE;
 
-  public podsChartData: any[] = [];
-  public containersChartData: any[] = [];
+  public podsChartData: { name: string; value: number }[] = [];
+  public containersChartData: { name: string; value: number }[] = [];
 
   private successChartColor = '#4DD3A7';
   private completedChartColour = '#7aa3e5';
@@ -112,13 +124,12 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
 
   private deleted = false;
   public chartData$: Observable<HelmReleaseChartData>;
-  public resources$: Observable<any[]>;
+  public resources$: Observable<ReleaseResource[]>;
 
   // Cached analysis report
-  private analysisReport: any;
+  private analysisReport: AnalysisReport | null = null;
 
   private analysisReportId = signal<string | null>(null);
-  private analysisReportUpdated$ = toObservable(this.analysisReportId).pipe(distinctUntilChanged());
   private componentFactoryResolver = inject(ComponentFactoryResolver);
   public helmReleaseHelper = inject(HelmReleaseHelperService);
   private store = inject(Store<AppState>);
@@ -152,23 +163,23 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
 
       this.chartData$ = this.helmReleaseHelper.fetchReleaseChartStats().pipe(
         distinctUntilChanged(),
-        map((chartData: any) => ({
+        map((chartData: HelmReleaseChartData) => ({
           ...chartData,
-          containersChartData: chartData.containersChartData.sort((a: any, b: any) => a.name.localeCompare(b.name)),
-          podsChartData: chartData.podsChartData.sort((a: any, b: any) => a.name.localeCompare(b.name))
+          containersChartData: chartData.containersChartData.sort((a, b) => a.name.localeCompare(b.name)),
+          podsChartData: chartData.podsChartData.sort((a, b) => a.name.localeCompare(b.name))
         })
         )
       );
 
-      this.hasUpgrade$ = this.helmReleaseHelper.hasUpgrade().pipe(map((v: any) => v ? v.version : null));
+      this.hasUpgrade$ = this.helmReleaseHelper.hasUpgrade().pipe(map((v: InternalHelmUpgrade | null) => v ? v.version : null));
 
       // Can upgrade if the Chart is available
-      this.canUpgrade$ = this.helmReleaseHelper.hasUpgrade(true).pipe(map((v: any) => !!v));
+      this.canUpgrade$ = this.helmReleaseHelper.hasUpgrade(true).pipe(map((v: InternalHelmUpgrade | null) => !!v));
 
       // Convert release graph to signal
       const releaseGraphSignal = toSignal(
         this.helmReleaseHelper.fetchReleaseGraph(),
-        { initialValue: { nodes: {} } as any }
+        { initialValue: { nodes: {}, links: {}, endpointId: '', releaseTitle: '' } }
       );
 
       // Compute resources based on graph and analysis report
@@ -176,17 +187,18 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
         const graph = releaseGraphSignal();
         const _ = this.analysisReportId(); // Dependency on analysis report changes
 
-        const resources: Record<string, any> = {};
+        const resources: Record<string, ReleaseResource> = {};
         // Collect the resources
-        if (graph && graph.nodes) {
-          Object.values(graph.nodes).forEach((node: any) => {
+        if (graph?.nodes) {
+          Object.values(graph.nodes).forEach((node: HelmReleaseGraphNode) => {
             if (!resources[node.data.kind]) {
               resources[node.data.kind] = {
                 kind: node.data.kind,
                 label: `${node.data.kind}s`,
                 count: 0,
                 statuses: [],
-                icon: getIcon(node.data.kind)
+                icon: getIcon(node.data.kind).name,
+                alerts: []
               };
             }
             resources[node.data.kind].count++;
@@ -194,7 +206,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
           });
         }
         this.applyAnalysis(resources, this.analysisReport);
-        return Object.values(resources).sort((a: any, b: any) => a.kind.localeCompare(b.kind));
+        return Object.values(resources).sort((a, b) => a.kind.localeCompare(b.kind));
       });
 
       this.resources$ = toObservable(resourcesComputed);
@@ -203,7 +215,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
       // Convert chart data to signal
       const chartDataSignal = toSignal(
         this.chartData$,
-        { initialValue: null as any }
+        { initialValue: null as HelmReleaseChartData | null }
       );
 
       // Compute hasResources
@@ -236,13 +248,13 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
 
   }
 
-  public analysisChanged(report: any) {
+  public analysisChanged(report: { id: string } | null) {
     if (report === null) {
       // No report selected
       this.analysisReport = null;
       this.analysisReportId.set(null);
     } else {
-      this.analyzerService.getByID(this.helmReleaseHelper.endpointGuid, report.id).subscribe((results: any) => {
+      this.analyzerService.getByID(this.helmReleaseHelper.endpointGuid, report.id).subscribe((results: AnalysisReport) => {
         this.analysisReport = results;
         this.analysisReportId.set(report.id);
       });
@@ -271,7 +283,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
       const endpointAndName = this.helmReleaseHelper.guid.replace(':', '/').replace(':', '/');
       this.startDelete();
       this.httpClient.delete(`/pp/v1/helm/releases/${endpointAndName}`).subscribe({
-        error: (err: any) => {
+        error: (err: unknown) => {
           this.endDelete();
           this.snackbarService.show('Failed to delete release', 'Close');
           console.error('Failed to delete release: ', err);
@@ -310,15 +322,17 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
 
   public getClusterName(): Observable<string> {
     return this.store.select(endpointsEntityRequestDataSelector(this.helmReleaseHelper.endpointGuid)).pipe(
-      filter((e: any) => !!e),
-      map((e: any) => e.name),
+      filter((e: { name: string } | undefined) => !!e),
+      map((e: { name: string }) => e.name),
       first()
     );
   }
 
-  private applyAnalysis(resources: any, report: any) {
+  private applyAnalysis(resources: Record<string, ReleaseResource>, report: AnalysisReport | null) {
     // Clear out existing alerts for all resources
-    Object.values(resources).forEach((resource: any) => resource.alerts = []);
+    for (const resource of Object.values(resources)) {
+      resource.alerts = [];
+    }
 
     if (report && Object.keys(resources).length > 0) {
       Object.values(report.alerts).forEach((group: ResourceAlert[]) => {
@@ -336,7 +350,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
     }
   }
 
-  public showAlerts(alerts: any, resource: any) {
+  public showAlerts(alerts: ResourceAlert[], resource: { kind: string; label: string; count: number; statuses: string[]; icon: string; alerts: ResourceAlert[] }) {
     this.previewPanel.show(
       ResourceAlertPreviewComponent,
       {

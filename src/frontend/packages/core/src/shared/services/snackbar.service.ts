@@ -1,8 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { first } from 'rxjs/operators';
 
-import { SnackBarReturnComponent } from '../components/snackbar-return/snackbar-return.component';
-import { TailwindSnackBarService, TailwindSnackBarRef } from './tailwind-snackbar.service';
+import { TailwindSnackBarService, type TailwindSnackBarRef } from './tailwind-snackbar.service';
 
 /**
  * Service for showing snackbars
@@ -13,7 +12,7 @@ import { TailwindSnackBarService, TailwindSnackBarRef } from './tailwind-snackba
   providedIn: 'root',
 })
 export class SnackBarService {
-  private snackBars: TailwindSnackBarRef<any>[] = [];
+  private snackBars: TailwindSnackBarRef<unknown>[] = [];
 
   public snackBar = inject(TailwindSnackBarService);
 
@@ -21,7 +20,7 @@ export class SnackBarService {
   // If closeMessage is supplied a button to dismiss the snack bar is shown and the duration is ignored
   // If closeMessage is not supplied, no close button is shown and the snack bar will hide after the specified duration (default 5s)
   // If forceDuration is supplied then regardless of closeMessage the duration is used
-  public show(message: string, closeMessage?: string, duration = 5000, forceDuration = false): TailwindSnackBarRef<any> {
+  public show(message: string, closeMessage?: string, duration = 5000, forceDuration = false): TailwindSnackBarRef<unknown> {
     const snackbarRef = this.snackBar.open(message, closeMessage, {
       duration: forceDuration ? duration : (closeMessage ? 0 : duration)
     });
@@ -34,9 +33,9 @@ export class SnackBarService {
   // The snack bar will disappear after the given duration if this is specified
   public showWithLink(
     message: string,
-    returnUrl: string | string[],
+    _returnUrl: string | string[],
     returnLabel: string,
-    duration?: number): TailwindSnackBarRef<any> {
+    duration?: number): TailwindSnackBarRef<unknown> {
     // For now, use simple snackbar - can be enhanced later for component support
     const fullMessage = `${message} - ${returnLabel}`;
     const snackbarRef = this.snackBar.open(fullMessage, 'Dismiss', {
@@ -48,10 +47,12 @@ export class SnackBarService {
 
   // Hide the open snack bars
   public hide() {
-    this.snackBars.forEach(snackBar => snackBar.dismiss());
+    this.snackBars.forEach(snackBar => {
+      snackBar.dismiss();
+    });
   }
 
-  private trackSnackBar(snackBar: TailwindSnackBarRef<any>) {
+  private trackSnackBar(snackBar: TailwindSnackBarRef<unknown>) {
     this.snackBars.push(snackBar);
     snackBar.afterDismissed().pipe(first()).subscribe(() => this.snackBars.shift());
   }

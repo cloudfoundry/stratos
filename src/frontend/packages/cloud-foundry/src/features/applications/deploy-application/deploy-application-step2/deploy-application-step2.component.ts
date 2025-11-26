@@ -1,18 +1,18 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe, DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild,
+import { type AfterContentInit, Component, inject, Input, type OnDestroy, type OnInit, ViewChild,
   ChangeDetectionStrategy} from '@angular/core';
-import { FormsModule, NgForm } from '@angular/forms';
+import { FormsModule, type NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { GitBranch, GitCommit, gitEntityCatalog, GitRepo, GitSCM, GitSCMService, GitSCMType } from '@stratosui/git';
+import { type GitBranch, type GitCommit, gitEntityCatalog, type GitRepo, type GitSCM, GitSCMService, type GitSCMType } from '@stratosui/git';
 import {
   combineLatest,
   combineLatest as observableCombineLatest,
-  Observable,
+  type Observable,
   of as observableOf,
   of,
-  Subscription,
+  type Subscription,
   timer as observableTimer,
 } from 'rxjs';
 import {
@@ -30,6 +30,7 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs/operators';
+import type { GeneralEntityAppState } from '@stratosui/store';
 
 import {
   ProjectDoesntExist,
@@ -38,7 +39,7 @@ import {
   SetBranch,
   SetDeployBranch,
 } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
+import type { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import {
   selectDeployAppState,
   selectDeployBranchName,
@@ -48,24 +49,26 @@ import {
   selectSourceType,
 } from '../../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
 import { TruncatePipe } from '../../../../../../core/src/core/truncate.pipe';
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import type { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { getCommitGuid } from '../../../../../../git/src/store/git-entity-factory';
-import { DeployApplicationState, SourceType } from '../../../../store/types/deploy-application.types';
+import type { DeployApplicationState, SourceType } from '../../../../store/types/deploy-application.types';
 import { ApplicationDeploySourceTypes, DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
-import { GitSuggestedRepo } from './../../../../../../git/src/store/git.public-types';
+import type { GitSuggestedRepo } from './../../../../../../git/src/store/git.public-types';
 import { GithubProjectExistsDirective } from '../github-project-exists.directive';
 import { DeployApplicationFsComponent } from './deploy-application-fs/deploy-application-fs.component';
 
 
 
 @Component({
-selector: 'app-deploy-application-step2',
+  selector: 'app-deploy-application-step2',
   templateUrl: './deploy-application-step2.component.html',
   styleUrls: ['./deploy-application-step2.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    AsyncPipe,
+    DatePipe,
     FormsModule,
     TruncatePipe,
     GithubProjectExistsDirective,
@@ -89,7 +92,7 @@ export class DeployApplicationStep2Component
   sourceTypeGithub$!: Observable<boolean>;
   sourceTypeNeedsUpload$!: Observable<boolean>;
   // tslint:disable-next-line:ban-types
-  canDeployType$!: Observable<Boolean>;
+  canDeployType$!: Observable<boolean>;
   isLoading$!: Observable<boolean>;
 
   // Local FS data when file or folder upload
@@ -107,7 +110,7 @@ export class DeployApplicationStep2Component
 
   scm: GitSCM;
 
-  cachedSuggestions = {};
+  cachedSuggestions: { [key: string]: GitSuggestedRepo[] } = {};
 
   // We don't have any repositories to suggest initially - need user to start typing
   suggestedRepos$!: Observable<GitSuggestedRepo[]>;
@@ -126,22 +129,24 @@ export class DeployApplicationStep2Component
   @ViewChild('sourceSelectionForm', { static: true }) sourceSelectionForm: NgForm;
   subscriptions: Array<Subscription> = [];
 
-  @ViewChild('fsChooser') fsChooser: any;
+  @ViewChild('fsChooser') fsChooser: DeployApplicationFsComponent;
 
   ngOnDestroy() {
-    this.subscriptions.forEach(p => p.unsubscribe());
+    for (const p of this.subscriptions) {
+      p.unsubscribe();
+    }
     if (this.commitSubscription) {
       this.commitSubscription.unsubscribe();
     }
   }
 
-  constructor(
-    private store: Store<CFAppState>,
-    private route: ActivatedRoute,
-    private scmService: GitSCMService,
-    private httpClient: HttpClient,
-    private appDeploySourceTypes: ApplicationDeploySourceTypes
-  ) {
+  private readonly store = inject(Store<GeneralEntityAppState>);
+  private readonly route = inject(ActivatedRoute);
+  private readonly scmService = inject(GitSCMService);
+  private readonly httpClient = inject(HttpClient);
+  private readonly appDeploySourceTypes = inject(ApplicationDeploySourceTypes);
+
+  constructor() {
   }
 
   onNext: StepOnNextFunction = () => {
@@ -253,7 +258,7 @@ export class DeployApplicationStep2Component
   private setupForGit() {
     this.projectInfo$ = this.store.select(selectProjectExists).pipe(
       filter(p => !!p),
-      map(p => (!!p.exists && !!p.data) ? p.data : null),
+      map(p => (!!p.exists && !!p.data) ? p.data as GitRepo : null),
       tap(p => {
         if (!!p && !this.isRedeploy) {
           this.store.dispatch(new SetDeployBranch(p.default_branch));
@@ -285,7 +290,7 @@ export class DeployApplicationStep2Component
             branch => branch.name === branchName
           );
         }),
-        map(([branches, branchName]) => branches),
+        map(([branches, _branchName]) => branches),
         publishReplay(1),
         refCount()
       );
@@ -315,7 +320,9 @@ export class DeployApplicationStep2Component
             this.commitSubscription = commitEntityService.waitForEntity$.pipe(
               first(),
               map(p => p.entity),
-              tap(p => this.commitInfo = p),
+              tap(p => {
+                this.commitInfo = p;
+              }),
             ).subscribe();
           }
         }
@@ -331,7 +338,7 @@ export class DeployApplicationStep2Component
         this.sourceType = sourceTypes.find(s => s.id === p.id && (p.endpointGuid ? s.endpointGuid === p.endpointGuid : true));
 
         const newScm = this.scmService.getSCM(this.sourceType.id as GitSCMType, this.sourceType.endpointGuid);
-        if (!!newScm) {
+        if (newScm) {
           // User selected one of the SCM options
           if (this.scm && newScm.getType() !== this.scm.getType()) {
             // User changed the SCM type, so reset the project and branch
@@ -372,16 +379,20 @@ export class DeployApplicationStep2Component
       return observableOf([] as GitSuggestedRepo[]);
     }
 
-    const cacheName = this.scm.getType() + ':' + name;
-    if ((this.cachedSuggestions as { [key: string]: any })[cacheName]) {
-      return observableOf((this.cachedSuggestions as { [key: string]: any })[cacheName]);
+    const cacheName = `${this.scm.getType()}:${name}`;
+    if (this.cachedSuggestions[cacheName]) {
+      return observableOf(this.cachedSuggestions[cacheName]);
     }
 
     return observableTimer(500).pipe(
       take(1),
       switchMap(() => this.scm.getMatchingRepositories(this.httpClient, name)),
-      catchError(e => observableOf(null)),
-      tap(suggestions => (this.cachedSuggestions as { [key: string]: any })[cacheName] = suggestions),
+      catchError(_e => observableOf(null)),
+      tap(suggestions => {
+        if (suggestions) {
+          this.cachedSuggestions[cacheName] = suggestions;
+        }
+      }),
     );
   }
 

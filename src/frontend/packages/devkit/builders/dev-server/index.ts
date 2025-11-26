@@ -1,7 +1,7 @@
-import { BuilderContext, BuilderOutput, createBuilder } from '@angular-devkit/architect';
-import { JsonObject } from '@angular-devkit/core';
-import { executeDevServerBuilder, DevServerBuilderOptions, DevServerBuilderOutput } from '@angular-devkit/build-angular';
-import { Observable } from 'rxjs';
+import { createBuilder } from '@angular-devkit/architect';
+import type { JsonObject } from '@angular-devkit/core';
+import { executeDevServerBuilder, type DevServerBuilderOptions, type DevServerBuilderOutput } from '@angular-devkit/build-angular';
+import type { Observable } from 'rxjs';
 
 export interface StratosDevServerBuilderOptions extends DevServerBuilderOptions {
   // Inherits all dev server options from Angular

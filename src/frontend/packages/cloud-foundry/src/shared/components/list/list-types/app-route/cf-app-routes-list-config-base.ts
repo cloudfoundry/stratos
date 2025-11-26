@@ -1,21 +1,22 @@
-import { DatePipe } from '@angular/common';
+import type { DatePipe } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 import { publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { ConfirmationDialogService, CurrentUserPermissionsService, IListConfig } from '@stratosui/core';
-import { APIResource, PaginatedAction } from '@stratosui/store';
+import type { ConfirmationDialogService, CurrentUserPermissionsService, IListConfig } from '@stratosui/core';
+import type { APIResource, PaginatedAction } from '@stratosui/store';
 // eslint-disable-next-line @stratosui/no-relative-imports
-import { GetAppRoutes } from '../../../../../actions/application-service-routes.actions';
+import type { GetAppRoutes } from '../../../../../actions/application-service-routes.actions';
 // eslint-disable-next-line @stratosui/no-relative-imports
-import { CFAppState } from '../../../../../cf-app-state';
+import type { CFAppState } from '../../../../../cf-app-state';
 // eslint-disable-next-line @stratosui/no-relative-imports
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 // eslint-disable-next-line @stratosui/no-relative-imports
-import { ApplicationService } from '../../../../../features/applications/application.service';
+import type { ApplicationService } from '../../../../../features/applications/application.service';
 // eslint-disable-next-line @stratosui/no-relative-imports
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfRoutesListConfigBase } from '../cf-routes/cf-routes-list-config-base';
+import type { ListCfRoute } from '../cf-routes/cf-routes-data-source-base';
 import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
 
 export abstract class CfAppRoutesListConfigServiceBase extends CfRoutesListConfigBase implements IListConfig<APIResource> {
@@ -69,7 +70,7 @@ export abstract class CfAppRoutesListConfigServiceBase extends CfRoutesListConfi
           store,
           appService,
           getRoutesAction || getAppRoutesAction,
-          this,
+          this as unknown as IListConfig<APIResource<ListCfRoute>>,
           genericRouteState
         );
       }

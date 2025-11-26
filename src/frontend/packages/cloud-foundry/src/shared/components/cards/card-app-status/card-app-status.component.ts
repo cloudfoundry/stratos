@@ -1,9 +1,9 @@
-import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Component, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { ApplicationStateComponent, CardStatusComponent } from '@stratosui/core';
-import { StratosStatus } from '@stratosui/store';
+import type { StratosStatus } from '@stratosui/store';
 import { ApplicationService } from '../../../../features/applications/application.service';
 
 @Component({

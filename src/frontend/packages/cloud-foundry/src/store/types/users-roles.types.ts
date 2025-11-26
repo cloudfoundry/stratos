@@ -1,4 +1,4 @@
-import { CfUser, CfUserRoleParams, IUserPermissionInOrg, OrgUserRoleNames, SpaceUserRoleNames } from './cf-user.types';
+import { type CfUser, CfUserRoleParams, type IUserPermissionInOrg, OrgUserRoleNames, SpaceUserRoleNames } from './cf-user.types';
 
 export interface UsersRolesState {
   cfGuid: string;

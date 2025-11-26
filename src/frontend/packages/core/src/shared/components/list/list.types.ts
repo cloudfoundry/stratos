@@ -1,10 +1,10 @@
-import { Component, Directive, Input } from '@angular/core';
-import { Observable } from 'rxjs';
+import { type Component, Directive, Input } from '@angular/core';
+import type { Observable } from 'rxjs';
 
-import { IListDataSource, RowState } from './data-sources-controllers/list-data-source-types';
+import type { IListDataSource, RowState } from './data-sources-controllers/list-data-source-types';
 
 @Directive()
-export abstract class TableCellCustom<T, C = any> {
+export abstract class TableCellCustom<T, C = unknown> {
   protected pDataSource: IListDataSource<T>;
   set dataSource(dataSource: IListDataSource<T>) {
     this.pDataSource = dataSource;

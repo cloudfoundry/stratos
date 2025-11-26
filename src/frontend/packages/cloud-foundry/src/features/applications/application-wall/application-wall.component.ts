@@ -1,13 +1,14 @@
 import { animate, query, style, transition, trigger } from '@angular/animations';
-import { CommonModule, DatePipe } from '@angular/common';
-import { Component, OnDestroy , ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, DatePipe, AsyncPipe } from '@angular/common';
+import { Component, type OnDestroy , ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { ListComponent, ListConfig, NoContentMessageComponent, PageHeaderComponent } from '@stratosui/core';
-import { CFAppState } from '../../../cf-app-state';
+import type { CFAppState } from '../../../cf-app-state';
+import type { GeneralEntityAppState } from '@stratosui/store';
 import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { CfAppConfigService } from '../../../shared/components/list/list-types/app/cf-app-config.service';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
@@ -24,6 +25,7 @@ import { goToAppWall } from '../../cf/cf.helpers';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    AsyncPipe,
     RouterModule,
     PageHeaderComponent,
     ListComponent,
@@ -61,7 +63,7 @@ export class ApplicationWallComponent implements OnDestroy {
 
   constructor(
     public cloudFoundryService: CloudFoundryService,
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     public cfOrgSpaceService: CfOrgSpaceDataService,
     activatedRoute: ActivatedRoute,
   ) {
@@ -83,5 +85,6 @@ export class ApplicationWallComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    // Component cleanup - no resources to dispose
   }
 }

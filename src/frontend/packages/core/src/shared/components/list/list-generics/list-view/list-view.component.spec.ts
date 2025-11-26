@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -8,8 +8,8 @@ import { CoreModule, SharedModule } from '@stratosui/core';
 import { ListViewComponent } from './list-view.component';
 
 describe('ListViewComponent', () => {
-  let component: ListViewComponent<any>;
-  let fixture: ComponentFixture<ListViewComponent<any>>;
+  let component: ListViewComponent<unknown>;
+  let fixture: ComponentFixture<ListViewComponent<unknown>>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({

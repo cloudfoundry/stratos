@@ -1,4 +1,5 @@
-import { EntitySchema, metricEntityType, APIResource } from '@stratosui/store';
+import { type EntitySchema, metricEntityType, type APIResource } from '@stratosui/store';
+import type { Schema } from 'normalizr';
 import {
   CFApplicationEntitySchema,
   CFEntitySchema,
@@ -41,7 +42,7 @@ import {
   userProvidedServiceInstanceEntityType,
 } from './cf-entity-types';
 import { getAPIResourceGuid } from './store/selectors/api.selectors';
-import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from './store/types/cf-user.types';
+import { type CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from './store/types/cf-user.types';
 
 const entityCache: {
   [key: string]: EntitySchema;
@@ -317,7 +318,7 @@ entityCache[featureFlagEntityType] = FeatureFlagSchema;
 const ServiceBrokerSchema = new CFEntitySchema(serviceBrokerEntityType, {}, { idAttribute: getAPIResourceGuid });
 entityCache[serviceBrokerEntityType] = ServiceBrokerSchema;
 
-function createUserOrgSpaceSchema(schemaKey: string, entity: any, relationKey: string): EntitySchema {
+function createUserOrgSpaceSchema(schemaKey: string, entity: Schema, relationKey: string): EntitySchema {
   return new CFEntitySchema(schemaKey, entity, { idAttribute: getAPIResourceGuid }, relationKey);
 }
 

@@ -1,22 +1,15 @@
-import { Component, Inject, InjectionToken , ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { FormBuilder, type FormGroup, type FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 
 interface UserInviteConfigForm {
   clientID: FormControl<string>;
   clientSecret: FormControl<string>;
 }
-import { AppProgressBarComponent } from '@stratosui/core';
-import { TailwindSnackBarService } from '@stratosui/core';
-import { TailwindDialogRef } from '@stratosui/core';
-import { DialogErrorComponent } from '@stratosui/core';
-
-// Temporary injection token to replace MAT_DIALOG_DATA
-export const DIALOG_DATA = new InjectionToken<any>('DialogData');
-import { Observable, Subscription } from 'rxjs';
+import { AppProgressBarComponent, TailwindSnackBarService, TailwindDialogRef, DialogErrorComponent, MAT_DIALOG_DATA } from '@stratosui/core';
+import type { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 
-import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { UserInviteConfigureService } from '../user-invite.service';
 
 
@@ -41,9 +34,6 @@ export class UserInviteConfigurationDialogComponent {
   valid$!: Observable<boolean>;
   canSubmit$!: Observable<boolean>;
 
-
-  private update$: Observable<ActionState>;
-
   isBusy$!: Observable<boolean>;
 
   connectingSub!: Subscription;
@@ -60,10 +50,10 @@ export class UserInviteConfigurationDialogComponent {
 
   constructor(
     public fb: FormBuilder,
-    @Inject('TailwindDialogRef') public dialogRef: TailwindDialogRef<UserInviteConfigurationDialogComponent>,
+    public dialogRef: TailwindDialogRef<UserInviteConfigurationDialogComponent>,
     public snackBar: TailwindSnackBarService,
     public userInviteConfigureService: UserInviteConfigureService,
-    @Inject(DIALOG_DATA) public data: {
+    @Inject(MAT_DIALOG_DATA) public data: {
       guid: string
     }
   ) {
@@ -80,9 +70,9 @@ export class UserInviteConfigurationDialogComponent {
       this.endpointForm.value.clientSecret ?? '')
       .pipe(
         first()
-      ).subscribe((v: any) => {
+      ).subscribe((v: { error?: boolean; errorMessage?: string }) => {
         if (v.error) {
-          this.snackBar.open(v.errorMessage, 'Close');
+          this.snackBar.open(v.errorMessage ?? 'Configuration error', 'Close');
         } else {
           this.dialogRef.close();
         }

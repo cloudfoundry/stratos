@@ -1,14 +1,14 @@
-import { Type, WritableSignal } from '@angular/core';
-import { ActionState, defaultClientPaginationPageSize, ListView } from '@stratosui/store';
-import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
+import type { Type, WritableSignal } from '@angular/core';
+import { type ActionState, defaultClientPaginationPageSize, type ListView } from '@stratosui/store';
+import { type BehaviorSubject, combineLatest, type Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, startWith, switchMap } from 'rxjs/operators';
 
-import { ITimeRange } from '../../services/metrics-range-selector.types';
-import { ListDataSource } from './data-sources-controllers/list-data-source';
-import { IListDataSource } from './data-sources-controllers/list-data-source-types';
-import { CardTypes } from './list-cards/card/card.component';
-import { ITableColumn, ITableText } from './list-table/table.types';
-import { CardCell, TableCellCustom } from './list.types';
+import type { ITimeRange } from '../../services/metrics-range-selector.types';
+import type { ListDataSource } from './data-sources-controllers/list-data-source';
+import type { IListDataSource } from './data-sources-controllers/list-data-source-types';
+import type { CardTypes } from './list-cards/card/card.component';
+import type { ITableColumn, ITableText } from './list-table/table.types';
+import { type CardCell, TableCellCustom } from './list.types';
 
 // Re-export for external use
 export { TableCellCustom };
@@ -89,7 +89,7 @@ export interface IListConfig<T> {
   /**
    * The card component used in card view
    */
-  cardComponent?: CardTypes<T>;
+  cardComponent?: Type<CardCell<T>>;
   /**
    * The component to show when expanding a row
    */
@@ -135,9 +135,9 @@ export interface IListMultiFilterConfig {
   list$: Observable<IListMultiFilterConfigItem[]>;
   loading$: Observable<boolean>;
   // Phase 3: Updated to support both BehaviorSubject and Signal with compatibility methods
-  select: BehaviorSubject<any> | (WritableSignal<any> & {
-    next: (value: any) => void;
-    asObservable: () => Observable<any>;
+  select: BehaviorSubject<string> | (WritableSignal<string> & {
+    next: (value: string) => void;
+    asObservable: () => Observable<string>;
   });
   autoSelectFirst?: boolean;
 }
@@ -151,7 +151,7 @@ export interface IListFilter {
 
 export interface IListMultiFilterConfigItem {
   label: string;
-  item: any;
+  item: unknown;
   value: string;
 }
 
@@ -164,7 +164,7 @@ export class ListConfig<T, A = T> implements IListConfig<T> {
   viewType = ListViewTypes.BOTH;
   text: ITableText | null = null;
   enableTextFilter = false;
-  cardComponent: any | null = null;
+  cardComponent: Type<CardCell<T>> | null = null;
   defaultView = 'table' as ListView;
   allowSelection = false;
   getGlobalActions = (): IGlobalListAction<T>[] => null;
@@ -177,7 +177,7 @@ export class ListConfig<T, A = T> implements IListConfig<T> {
   getInitialised = () => observableOf(true);
 }
 
-export interface IBaseListAction<T> {
+export interface IBaseListAction<_T> {
   icon?: string;
   label: string;
   description?: string;
@@ -259,11 +259,11 @@ export class MultiFilterManager<T> {
     );
   }
 
-  public applyValue(multiFilters: Record<string, any>): void {
+  public applyValue(multiFilters: Record<string, string>): void {
     this.selectItem(multiFilters[this.multiFilterConfig.key]);
   }
 
-  public hasValue(multiFilters: Record<string, any>): boolean {
+  public hasValue(multiFilters: Record<string, string>): boolean {
     return !!multiFilters[this.multiFilterConfig.key];
   }
 
@@ -277,8 +277,8 @@ export class MultiFilterManager<T> {
       if (itemValue === undefined || items.find(i => i.value === itemValue)) {
         this.value = itemValue;
         // Handle both BehaviorSubject (has .next) and Signal wrappers (have .next for compatibility)
-        const select = this.multiFilterConfig.select as any;
-        if (select && typeof select.next === 'function') {
+        const select = this.multiFilterConfig.select;
+        if (select && 'next' in select && typeof select.next === 'function') {
           select.next(itemValue);
         }
       }

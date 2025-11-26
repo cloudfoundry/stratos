@@ -1,4 +1,4 @@
-import { EndpointModel, EndpointUser } from './endpoint.types';
+import type { EndpointModel, EndpointUser } from './endpoint.types';
 
 export interface SystemInfo {
   version: {

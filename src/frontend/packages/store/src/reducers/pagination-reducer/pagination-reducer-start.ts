@@ -1,7 +1,8 @@
-import { EntityCatalogEntityConfig } from '../../entity-catalog/entity-catalog.types';
-import { PaginationEntityState } from '../../types/pagination.types';
+import type { EntityCatalogEntityConfig } from '../../entity-catalog/entity-catalog.types';
+import type { PaginatedAction, PaginationEntityState } from '../../types/pagination.types';
+import type { IStartRequestAction } from '../../types/request.types';
 
-export function paginationStart(state: PaginationEntityState, action: any): PaginationEntityState {
+export function paginationStart(state: PaginationEntityState, action: IStartRequestAction & { apiAction: PaginatedAction }): PaginationEntityState {
   const page = action.apiAction.__forcedPageNumber__ || action.apiAction.pageNumber || state.currentPage;
   const entityConfig = action.apiAction.__forcedPageEntityConfig__ as EntityCatalogEntityConfig;
 

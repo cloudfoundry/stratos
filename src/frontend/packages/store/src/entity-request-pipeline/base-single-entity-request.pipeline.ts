@@ -1,12 +1,12 @@
-import { Action, Store } from '@ngrx/store';
-import { Observable, of } from 'rxjs';
+import type { Action, Store } from '@ngrx/store';
+import { type Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { AppState, InternalAppState } from '../app-state';
+import type { AppState, InternalAppState } from '../app-state';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
-import { StratosBaseCatalogEntity } from '../entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { IStratosEntityDefinition } from '../entity-catalog/entity-catalog.types';
-import { EntityRequestAction } from '../types/request.types';
+import type { StratosBaseCatalogEntity } from '../entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import type { IStratosEntityDefinition } from '../entity-catalog/entity-catalog.types';
+import type { EntityRequestAction } from '../types/request.types';
 import { buildRequestEntityPipe } from './entity-request-base-handlers/build-entity-request.pipe';
 import {
   handleJetstreamResponsePipeFactory,
@@ -14,9 +14,9 @@ import {
 } from './entity-request-base-handlers/handle-multi-endpoints.pipe';
 import { makeRequestEntityPipe } from './entity-request-base-handlers/make-request-entity-request.pipe';
 import { mapMultiEndpointResponses } from './entity-request-base-handlers/map-multi-endpoint.pipes';
-import { BasePipelineConfig, EntityRequestPipeline, PipelineResult } from './entity-request-pipeline.types';
+import type { BasePipelineConfig, EntityRequestPipeline, PipelineResult } from './entity-request-pipeline.types';
 import { isJetstreamRequest, singleRequestToPaged } from './pipeline-helpers';
-import { PipelineHttpClient } from './pipline-http-client.service';
+import type { PipelineHttpClient } from './pipline-http-client.service';
 
 export interface SingleRequestPipelineConfig<T extends AppState = InternalAppState> extends BasePipelineConfig<T> {
   action: EntityRequestAction;

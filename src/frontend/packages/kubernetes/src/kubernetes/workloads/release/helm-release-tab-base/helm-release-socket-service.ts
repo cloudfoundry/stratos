@@ -1,17 +1,17 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, type OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { of, Subject, Subscription } from 'rxjs';
-import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
+import { of, Subject, type Subscription } from 'rxjs';
+import makeWebSocketObservable, { type GetWebSocketResponses } from 'rxjs-websockets';
 import { catchError, map, share, switchMap } from 'rxjs/operators';
 
 import { SnackBarService } from '../../../../../../core/src/shared/services/snackbar.service';
-import { AppState, entityCatalog, WrapperRequestActionSuccess } from '../../../../../../store/src/public-api';
-import { EntityRequestAction } from '../../../../../../store/src/types/request.types';
+import { type AppState, entityCatalog, WrapperRequestActionSuccess } from '../../../../../../store/src/public-api';
+import type { EntityRequestAction } from '../../../../../../store/src/types/request.types';
 import { kubeEntityCatalog } from '../../../kubernetes-entity-generator';
 import { KubernetesPodExpandedStatusHelper } from '../../../services/kubernetes-expanded-state';
-import { BasicKubeAPIResource, KubernetesPod } from '../../../store/kube.types';
-import { KubePaginationAction } from '../../../store/kubernetes.actions';
-import { HelmReleaseGraph, HelmReleasePod, HelmReleaseService } from '../../workload.types';
+import type { BasicKubeAPIResource, KubernetesPod } from '../../../store/kube.types';
+import type { KubePaginationAction } from '../../../store/kubernetes.actions';
+import type { HelmReleaseGraph, HelmReleasePod, HelmReleaseService } from '../../workload.types';
 import { workloadsEntityCatalog } from '../../workloads-entity-catalog';
 import { HelmReleaseHelperService } from '../tabs/helm-release-helper.service';
 
@@ -25,11 +25,18 @@ interface SocketMessage {
   type: SocketEventTypes;
 }
 
+interface WebSocketManifestMessage {
+  kind: string;
+  data: unknown;
+  endpointId?: string;
+  releaseTitle?: string;
+}
+
 @Injectable()
 export class HelmReleaseSocketService implements OnDestroy {
 
   private sub: Subscription;
-  private sendToSocket = new Subject<any>();
+  private sendToSocket = new Subject<string>();
   public isPaused = false;
 
   constructor(
@@ -52,9 +59,9 @@ export class HelmReleaseSocketService implements OnDestroy {
       `${protocol}://${host}/pp/v1/helm/releases/${releaseRef}/status`
     );
 
-    const socket$ = makeWebSocketObservable(streamUrl).pipe(catchError((e: any): import('rxjs').Observable<never> => {
+    const socket$ = makeWebSocketObservable(streamUrl).pipe(catchError((e: Error): import('rxjs').Observable<never> => {
       console.error(
-        'Error while connecting to socket: ' + JSON.stringify(e)
+        `Error while connecting to socket: ${JSON.stringify(e)}`
       );
       return of([]) as unknown as import('rxjs').Observable<never>;
     }),
@@ -66,7 +73,7 @@ export class HelmReleaseSocketService implements OnDestroy {
         return getResponses(this.sendToSocket);
       }),
       map((message: string) => message),
-      catchError((e: any): import('rxjs').Observable<never> => {
+      catchError((e: Error): import('rxjs').Observable<never> => {
         console.error('Workload WS error: ', e);
         return of([]) as unknown as import('rxjs').Observable<never>;
       })
@@ -78,7 +85,7 @@ export class HelmReleaseSocketService implements OnDestroy {
       if (!jsonString || typeof jsonString !== 'string' || jsonString.trim() === '') {
         return;
       }
-      let messageObj;
+      let messageObj: WebSocketManifestMessage;
       try {
         messageObj = JSON.parse(jsonString);
       } catch (e) {
@@ -87,9 +94,9 @@ export class HelmReleaseSocketService implements OnDestroy {
       }
       if (messageObj) {
         if (messageObj.kind === 'ReleasePrefix') {
-          prefix = messageObj.data;
+          prefix = messageObj.data as string;
         } else if (messageObj.kind === 'Graph') {
-          const graph: HelmReleaseGraph = messageObj.data;
+          const graph: HelmReleaseGraph = (messageObj.data || { nodes: {}, links: [] }) as HelmReleaseGraph;
           graph.endpointId = this.helmReleaseHelper.endpointGuid;
           graph.releaseTitle = this.helmReleaseHelper.releaseTitle;
           const releaseGraphAction = workloadsEntityCatalog.graph.actions.get(graph.releaseTitle, graph.endpointId);
@@ -101,7 +108,7 @@ export class HelmReleaseSocketService implements OnDestroy {
 
           // Store ALL resources for the release
           if (prefix) {
-            manifest.forEach((resource: any) => {
+            (manifest as Array<BasicKubeAPIResource & { kind: string }>).forEach((resource: BasicKubeAPIResource & { kind: string }) => {
               const entityType = this.getEntityTypeForResource(resource.kind);
               if (entityType) {
                 if (!resources[entityType]) {
@@ -115,11 +122,11 @@ export class HelmReleaseSocketService implements OnDestroy {
               let action: KubePaginationAction;
               if (entityType === 'pod') {
                 resourcesOfType = resourcesOfType || [];
-                resourcesOfType = (resourcesOfType as any[]).map((pod: KubernetesPod) =>
+                resourcesOfType = (resourcesOfType as KubernetesPod[]).map((pod: KubernetesPod) =>
                   KubernetesPodExpandedStatusHelper.updatePodWithExpandedStatus(pod)
                 ) as BasicKubeAPIResource[];
               }
-              action = (kubeEntityCatalog as any)[entityType].actions.getInWorkload(
+              action = (kubeEntityCatalog as unknown as Record<string, { actions: { getInWorkload: (endpointGuid: string, namespace: string, releaseTitle: string) => KubePaginationAction } }>)[entityType].actions.getInWorkload(
                 this.helmReleaseHelper.endpointGuid,
                 this.helmReleaseHelper.namespace,
                 this.helmReleaseHelper.releaseTitle
@@ -211,35 +218,41 @@ export class HelmReleaseSocketService implements OnDestroy {
     this.snackbarService.hide();
   }
 
-  private addResource(action: EntityRequestAction, data: any) {
+  private addResource(action: EntityRequestAction, data: HelmReleaseGraph | WebSocketManifestMessage) {
     const catalogEntity = entityCatalog.getEntity(action);
-    const response: any = {
+    const response: {
+      entities: Record<string, Record<string, unknown>>;
+      result: string[];
+    } = {
       entities: {
         [catalogEntity.entityKey]: {
           [action.guid as string]: data
         }
       },
       result: [
-        action.guid
+        action.guid as string
       ]
     };
     const successWrapper = new WrapperRequestActionSuccess(response, action);
     this.store.dispatch(successWrapper);
   }
 
-  private populateList(action: KubePaginationAction, resources: any[]) {
+  private populateList(action: KubePaginationAction, resources: BasicKubeAPIResource[]) {
     const entity = entityCatalog.getEntity(action);
-    const newResources: any = {};
-    resources.forEach((resource: any) => {
-      const newResource: HelmReleasePod | HelmReleaseService = {
+    const newResources: Record<string, HelmReleasePod | HelmReleaseService> = {};
+    resources.forEach((resource: BasicKubeAPIResource) => {
+      const newResource = {
+        metadata: resource.metadata,
+        status: resource.status,
+        spec: resource.spec,
+        kubeGuid: action.kubeGuid,
         endpointId: action.kubeGuid,
         releaseTitle: this.helmReleaseHelper.releaseTitle,
-        ...resource
-      };
+      } as HelmReleasePod | HelmReleaseService;
       newResource.metadata.kubeId = action.kubeGuid;
       // The service entity from manifest is missing this, but apply here to ensure any others are caught
       newResource.metadata.namespace = this.helmReleaseHelper.namespace;
-      const entityId = (action.entity as any)[0].getId(resource);
+      const entityId = (action.entity as { getId: (resource: BasicKubeAPIResource) => string }[])[0].getId(resource);
       newResources[entityId] = newResource;
     });
 

@@ -1,6 +1,6 @@
-import { ROUTER_NAVIGATION, RouterNavigationAction } from '@ngrx/router-store';
+import { ROUTER_NAVIGATION, type RouterNavigationAction } from '@ngrx/router-store';
 
-import { defaultRoutingState, RoutingHistory } from '../types/routing.type';
+import { defaultRoutingState, type RoutingHistory } from '../types/routing.type';
 
 export interface RouterRedirect {
   path: string;
@@ -11,7 +11,7 @@ export interface RouterRedirect {
 
 export function routingReducer(state: RoutingHistory = defaultRoutingState, action: RouterNavigationAction) {
   switch (action.type) {
-    case ROUTER_NAVIGATION:
+    case ROUTER_NAVIGATION: {
       // Check that the route actually changed - don't update the state if it did not
       // This catches the case for the Dynamic Extensions where we have to redirect to the route
       // Which would otherwise set the previous state to the same state as the current state
@@ -33,6 +33,7 @@ export function routingReducer(state: RoutingHistory = defaultRoutingState, acti
           state: action.payload.routerState
         }
       };
+    }
 
     default:
       return state;

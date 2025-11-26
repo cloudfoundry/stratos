@@ -1,30 +1,29 @@
 import { AsyncPipe } from '@angular/common';
 import {Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { getIdFromRoute } from '../../../../core/src/core/utils.service';
-import { MetricsChartComponent, MetricsConfig } from '../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
-import { MetricsLineChartConfig } from '../../../../core/src/shared/components/metrics-chart/metrics-chart.types';
 import {
+  getIdFromRoute,
+  MetricsChartComponent,
+  type MetricsConfig,
+  type MetricsLineChartConfig,
   ChartDataTypes,
   getMetricsChartConfigBuilder,
-} from '../../../../core/src/shared/components/metrics-chart/metrics.component.helpers';
-import {
   MetricsParentRangeSelectorComponent,
-} from '../../../../core/src/shared/components/metrics-parent-range-selector/metrics-parent-range-selector.component';
-import { PageHeaderComponent } from '../../../../core/src/shared/components/page-header/page-header.component';
-import { IHeaderBreadcrumb } from '../../../../core/src/shared/components/page-header/page-header.types';
-import { EntityInfo } from '../../../../store/src/types/api.types';
-import { ChartSeries, IMetricMatrixResult } from '../../../../store/src/types/base-metric.types';
+  PageHeaderComponent,
+  type IHeaderBreadcrumb
+} from '@stratosui/core';
+import type { EntityInfo } from '../../../../store/src/types/api.types';
+import type { ChartSeries, IMetricMatrixResult } from '../../../../store/src/types/base-metric.types';
 import { kubeEntityCatalog } from '../kubernetes-entity-generator';
 import { formatAxisCPUTime, formatCPUTime } from '../kubernetes-metrics.helpers';
-import { IKubernetesMetric } from '../kubernetes-metric.types';
+import type { IKubernetesMetric } from '../kubernetes-metric.types';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { KubernetesService } from '../services/kubernetes.service';
-import { KubernetesPod } from '../store/kube.types';
+import type { KubernetesPod } from '../store/kube.types';
 import { FetchKubernetesMetricsAction } from '../store/kubernetes.actions';
 
 @Component({
@@ -100,7 +99,7 @@ export class PodMetricsComponent {
           });
         },
         null,
-        (value: string) => value + ' MB'
+        (value: string) => `${value} MB`
       ),
       cpuChartConfigBuilder(
         new FetchKubernetesMetricsAction(
@@ -129,7 +128,7 @@ export class PodMetricsComponent {
         ChartDataTypes.BYTES,
         null,
         null,
-        (value: string) => value + ' MB'
+        (value: string) => `${value} MB`
       ),
       networkChartConfigBuilder(
         new FetchKubernetesMetricsAction(
@@ -141,7 +140,7 @@ export class PodMetricsComponent {
         ChartDataTypes.BYTES,
         null,
         null,
-        (value: string) => value + ' MB'
+        (value: string) => `${value} MB`
       )
     ];
 
@@ -151,7 +150,7 @@ export class PodMetricsComponent {
 
         // check if this is being invoked from the node path
         const nodeName = getIdFromRoute(this.activatedRoute, 'nodeName');
-        if (!!nodeName) {
+        if (nodeName) {
           return [{
             breadcrumbs: [
               { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}/nodes` },
@@ -160,7 +159,7 @@ export class PodMetricsComponent {
           }];
         }
         // check if this is being invoked from the namespace path
-        if (!!this.namespaceName) {
+        if (this.namespaceName) {
           return [{
             breadcrumbs: [
               { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}/namespaces` },
@@ -170,7 +169,7 @@ export class PodMetricsComponent {
         }
         // Finally, check if this is being invoked from the helm-release path
         const releaseName = getIdFromRoute(this.activatedRoute, 'releaseName');
-        if (!!releaseName) {
+        if (releaseName) {
           return [{
             breadcrumbs: [
               { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}/apps` },

@@ -1,6 +1,6 @@
-import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, type OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Observable, Subject } from 'rxjs';
+import { type Observable, Subject } from 'rxjs';
 import { catchError, filter, map, share, switchMap } from 'rxjs/operators';
 import websocketConnect from 'rxjs-websockets';
 
@@ -54,8 +54,8 @@ export class CloudFoundryFirehoseComponent implements OnInit {
       map((message: string) => message)
     );
     this.messages.pipe(
-      catchError((e) => {
-        return [] as any;
+      catchError((_e) => {
+        return [] as never[];
       }),
       share(),
       filter(l => !!l)

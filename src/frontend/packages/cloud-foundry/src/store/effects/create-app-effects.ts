@@ -1,15 +1,15 @@
+import { HttpClient } from '@angular/common/http';
 import { ApplicationRef, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { of as observableOf, throwError as observableThrowError } from 'rxjs';
 import { catchError, map, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { environment } from '../../../../core/src/environments/environment.prod';
-import { AppNameFree, AppNameTaken, CHECK_NAME, IsNewAppNameFree } from '../../actions/create-applications-page.actions';
-import { CFAppState } from '../../cf-app-state';
+import { environment } from '@stratosui/core';
+import { AppNameFree, AppNameTaken, CHECK_NAME, type IsNewAppNameFree } from '../../actions/create-applications-page.actions';
+import type { CFAppState } from '../../cf-app-state';
 import { selectNewAppCFDetails } from '../selectors/create-application.selectors';
-import { CreateNewApplicationState, NewAppCFDetails } from '../types/create-application.types';
-import { HttpClient } from '@angular/common/http';
+import type { CreateNewApplicationState, NewAppCFDetails } from '../types/create-application.types';
 
 
 
@@ -19,7 +19,7 @@ export class CreateAppPageEffects {
   constructor(
     private http: HttpClient,
     private actions$: Actions,
-    private store: Store<CFAppState>,
+    private store: Store,
     private appRef: ApplicationRef
   ) {
     this.proxyAPIVersion = environment.proxyAPIVersion;
@@ -46,11 +46,11 @@ export class CreateAppPageEffects {
             throw observableThrowError('Taken');
           }
           this.appRef.tick();
-          return new AppNameFree(action.name);
+          return new AppNameFree();
         }),
         catchError((_err: unknown) => {
           this.appRef.tick();
-          return observableOf(new AppNameTaken(action.name));
+          return observableOf(new AppNameTaken());
         }));
     })));
 }

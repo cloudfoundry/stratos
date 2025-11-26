@@ -1,13 +1,13 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 
-import { Observable, of as observableOf } from 'rxjs';
+import { type Observable, of as observableOf } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 import {
   BooleanIndicatorComponent,
   AppChipsComponent,
-  AppChip,
+  type AppChip,
   MetaCardComponent,
   MetaCardItemComponent,
   MetaCardKeyComponent,
@@ -15,12 +15,12 @@ import {
   MetaCardValueComponent,
   ClickStopPropagationDirective
 } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
+import type { APIResource } from '@stratosui/store';
 import { ServicesService } from '../../../../features/service-catalog/services.service';
-import {
+import type {
   ServiceTag,
 } from '../../list/list-types/cf-services/cf-service-card/cf-service-card.component';
-import { IService } from '../../../../cf-api-svc.types';
+import type { IService } from '../../../../cf-api-svc.types';
 import { ServiceIconComponent } from '../../service-icon/service-icon.component';
 
 
@@ -53,7 +53,7 @@ export class ServiceSummaryCardComponent {
 
     this.service$.pipe(
       tap(service => {
-        if (service && service.entity && service.entity.tags) {
+        if (service?.entity?.tags) {
           this.tags = service.entity.tags.map(t => ({
             value: t,
             hideClearButton$: observableOf(true)

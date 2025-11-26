@@ -1,4 +1,4 @@
-import { TestBed, TestModuleMetadata } from '@angular/core/testing';
+import { TestBed, type TestModuleMetadata } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 
 /**

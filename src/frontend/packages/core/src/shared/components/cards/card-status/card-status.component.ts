@@ -1,6 +1,6 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 import { StratosStatus } from '@stratosui/store';
 
@@ -33,7 +33,6 @@ export function determineCardStatus(value: number, limit: number): StratosStatus
 export class CardStatusComponent {
   @Input() status$!: Observable<StratosStatus>;
 
-  private cardStatus = StratosStatus;
-
-  constructor() { }
+  // Expose StratosStatus enum to template
+  cardStatus = StratosStatus;
 }

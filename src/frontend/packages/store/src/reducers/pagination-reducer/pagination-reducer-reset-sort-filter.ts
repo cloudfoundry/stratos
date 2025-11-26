@@ -1,6 +1,6 @@
-import { ResetPaginationSortFilter } from '../../actions/pagination.actions';
+import type { ResetPaginationSortFilter } from '../../actions/pagination.actions';
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
-import { PaginationEntityState, PaginationState } from '../../types/pagination.types';
+import type { PaginationEntityState, PaginationState } from '../../types/pagination.types';
 
 export function paginationResetSortAndFilter(state: PaginationState, action: ResetPaginationSortFilter): PaginationState {
   const { pAction } = action;
@@ -16,7 +16,7 @@ export function paginationResetSortAndFilter(state: PaginationState, action: Res
     clientPagination: {
       ...pSection.clientPagination,
       filter: {
-        items: [],
+        items: {},
         string: ''
       },
     },

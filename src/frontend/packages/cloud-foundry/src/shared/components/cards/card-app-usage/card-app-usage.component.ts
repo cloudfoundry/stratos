@@ -1,6 +1,6 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { Component, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { combineLatest as observableCombineLatest, type Observable } from 'rxjs';
 import { map, share, startWith } from 'rxjs/operators';
 
 import { ApplicationMonitorService } from '../../../../features/applications/application-monitor.service';
@@ -38,7 +38,7 @@ export class CardAppUsageComponent implements OnInit {
   private appService = inject(ApplicationService);
   private appMonitor = inject(ApplicationMonitorService);
 
-  appData$!: Observable<any>;
+  appData$!: Observable<{ monitor: unknown; isRunning: boolean; status: StratosStatus }>;
   status$!: Observable<StratosStatus>;
 
   ngOnInit() {
@@ -49,7 +49,7 @@ export class CardAppUsageComponent implements OnInit {
       map(([monitor, isRunning]) => ({
         monitor,
         isRunning,
-        status: !isRunning ? 'tentative' : pathGet('status.usage', monitor)
+        status: !isRunning ? StratosStatus.TENTATIVE : (pathGet('status.usage', monitor) as StratosStatus)
       })),
       share()
     );

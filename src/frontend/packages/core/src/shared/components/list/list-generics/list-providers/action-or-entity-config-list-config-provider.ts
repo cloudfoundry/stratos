@@ -1,12 +1,13 @@
-import { Injector } from '@angular/core';
+import type { Injector } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { EntityPipelineEntity } from '@stratosui/store';
-import { IListDataSourceConfig } from '../../data-sources-controllers/list-data-source-config';
-import { IListConfig } from '../../list.component.types';
-import { ListActionOrConfig, ListActionOrConfigHelpers } from '../helpers/action-or-config-helpers';
+import type { EntityPipelineEntity, GeneralAppState } from '@stratosui/store';
+import type { IListDataSourceConfig } from '../../data-sources-controllers/list-data-source-config';
+import type { IListConfig } from '../../list.component.types';
+import { type ListActionOrConfig, ListActionOrConfigHelpers } from '../helpers/action-or-config-helpers';
 import { CatalogEntityDrivenListConfig } from '../helpers/entity-catalogue-list-config';
-import { ListConfigProvider, ListConfigUpdate, ListDataSourceConfigUpdate } from '../list-config-provider.types';
+import type {ListConfigProvider} from '../list-config-provider.types';
+import type {ListConfigUpdate, ListDataSourceConfigUpdate} from '../list-config-provider.types';
 
 /**
  * Create a List provider (list config and data source) using either a paginated action or a list entity config
@@ -17,7 +18,7 @@ export class ActionOrConfigListConfigProvider<T extends EntityPipelineEntity, A 
   private overrideDataSourceConfig!: Partial<IListDataSourceConfig<A, T>>;
 
   constructor(
-    private store: Store<any>,
+    private store: Store<GeneralAppState>,
     private actionOrConfig: ListActionOrConfig,
     private injector?: Injector
   ) { }

@@ -1,3 +1,4 @@
+import type { Action } from '@ngrx/store';
 import {
   CHECK_NAME,
   NAME_FREE,
@@ -5,7 +6,7 @@ import {
   SET_CF_DETAILS,
   SET_NAME,
 } from '../../actions/create-applications-page.actions';
-import { CreateNewApplicationState } from '../types/create-application.types';
+import type { CreateNewApplicationState, NewAppCFDetails } from '../types/create-application.types';
 
 
 const defaultState: CreateNewApplicationState = {
@@ -18,11 +19,11 @@ const defaultState: CreateNewApplicationState = {
   }
 };
 
-export function createAppReducer(state: CreateNewApplicationState = defaultState, action: any): CreateNewApplicationState {
+export function createAppReducer(state: CreateNewApplicationState = defaultState, action: Action & { name?: string; cloudFoundryDetails?: unknown }): CreateNewApplicationState {
   switch (action.type) {
     case SET_CF_DETAILS:
       return {
-        ...state, cloudFoundryDetails: action.cloudFoundryDetails
+        ...state, cloudFoundryDetails: action.cloudFoundryDetails as NewAppCFDetails
       };
     case SET_NAME:
       return {

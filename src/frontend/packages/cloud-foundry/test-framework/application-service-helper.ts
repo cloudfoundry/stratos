@@ -1,15 +1,15 @@
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf, of, BehaviorSubject } from 'rxjs';
+import { type Observable, of as observableOf, of, BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { EntityService, RequestInfoState, APIResource, EntityInfo } from '@stratosui/store';
+import type { EntityService, RequestInfoState, APIResource, EntityInfo, GeneralEntityAppState } from '@stratosui/store';
 import { ApplicationService } from '@stratosui/cloud-foundry';
-import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../src/cf-api.types';
-import { CFAppState } from '../src/cf-app-state';
-import { ApplicationData } from '../src/features/applications/application.service';
-import { ApplicationEnvVarsHelper, EnvVarStratosProject } from '../src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { ApplicationStateData, ApplicationStateService } from '../src/shared/services/application-state.service';
-import { AppStat } from '../src/store/types/app-metadata.types';
+import type { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../src/cf-api.types';
+import type { CFAppState } from '../src/cf-app-state';
+import type { ApplicationData } from '../src/features/applications/application.service';
+import { ApplicationEnvVarsHelper, type EnvVarStratosProject } from '../src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { type ApplicationStateData, ApplicationStateService } from '../src/shared/services/application-state.service';
+import type { AppStat } from '../src/store/types/app-metadata.types';
 
 function createEntity<T>(entity: T): APIResource<T> {
   return {
@@ -77,7 +77,7 @@ export class ApplicationServiceMock {
   appSummary$: Observable<EntityInfo<APIResource<IAppSummary>>> = observableOf({
     entityRequestInfo: { fetching: false }
   } as EntityInfo<APIResource<IAppSummary>>);
-  appStats$: Observable<AppStat[]> = observableOf(new Array<AppStat>());
+  appStats$: Observable<AppStat[]> = observableOf([] as AppStat[]);
   applicationStratProject$: Observable<EnvVarStratosProject> =
     observableOf({ deploySource: { type: 'github', timestamp: 0, commit: '', endpointGuid: ''  }, deployOverrides: null});
   isFetchingApp$: Observable<boolean> = observableOf(false);
@@ -85,7 +85,7 @@ export class ApplicationServiceMock {
   isUpdatingEnvVars$: Observable<boolean> = observableOf(false);
   waitForAppEntity$: Observable<EntityInfo<APIResource<IApp>>> = this.app$;
   appEnvVars = {
-    entities$: observableOf(new Array<APIResource<any>>())
+    entities$: observableOf([] as APIResource<any>[])
   };
   applicationState$: Observable<ApplicationStateData> = observableOf({
     label: '',
@@ -108,7 +108,7 @@ export function generateTestApplicationServiceProvider(appGuid: string, cfGuid: 
   return {
     provide: ApplicationService,
     useFactory: (
-      store: Store<CFAppState>,
+      store: Store<GeneralEntityAppState>,
       applicationStateService: ApplicationStateService,
       applicationEnvVarsService: ApplicationEnvVarsHelper,
     ) => {

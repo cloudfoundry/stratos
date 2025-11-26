@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
+import type { ActivatedRoute } from '@angular/router';
+import type { Subscription } from 'rxjs';
 
 export function getIdFromRoute(activatedRoute: ActivatedRoute, id: string) {
   if (activatedRoute.snapshot.params[id]) {
@@ -48,11 +48,9 @@ export class UtilsService {
      */
   public urlValidationExpression = urlValidationExpression;
 
-  constructor() { }
-
   precisionIfUseful(size: number, precision: number = 1): number {
     // Type guard: ensure size is a valid number
-    if (size == null || typeof size !== 'number' || !isFinite(size)) {
+    if (size == null || typeof size !== 'number' || !Number.isFinite(size)) {
       return 0;
     }
 
@@ -71,7 +69,7 @@ export class UtilsService {
     }
 
     // Type guard: ensure mb is a valid number
-    if (typeof mb !== 'number' || isNaN(mb)) {
+    if (typeof mb !== 'number' || Number.isNaN(mb)) {
       return '';
     }
 
@@ -86,12 +84,12 @@ export class UtilsService {
     }
 
     if (mb >= 1048576) {
-      return this.precisionIfUseful(mb / 1048576) + ' TB';
+      return `${this.precisionIfUseful(mb / 1048576)} TB`;
     }
     if (mb >= 1024) {
-      return this.precisionIfUseful(mb / 1024) + ' GB';
+      return `${this.precisionIfUseful(mb / 1024)} GB`;
     }
-    return this.precisionIfUseful(mb) + ' MB';
+    return `${this.precisionIfUseful(mb)} MB`;
   }
 
   bytesToHumanSize(value: string): string {
@@ -103,7 +101,7 @@ export class UtilsService {
     const bytes = parseInt(value, 10);
 
     // Type guard: ensure parsing succeeded
-    if (isNaN(bytes)) {
+    if (Number.isNaN(bytes)) {
       return '';
     }
 
@@ -119,15 +117,15 @@ export class UtilsService {
 
     // Calculate appropriate unit
     if (bytes >= 1099511627776) {
-      return this.precisionIfUseful(bytes / 1099511627776) + ' TB';
+      return `${this.precisionIfUseful(bytes / 1099511627776)} TB`;
     } else if (bytes >= 1073741824) {
-      return this.precisionIfUseful(bytes / 1073741824) + ' GB';
+      return `${this.precisionIfUseful(bytes / 1073741824)} GB`;
     } else if (bytes >= 1048576) {
-      return this.precisionIfUseful(bytes / 1048576) + ' MB';
+      return `${this.precisionIfUseful(bytes / 1048576)} MB`;
     } else if (bytes >= 1024) {
-      return this.precisionIfUseful(bytes / 1024) + ' kB';
+      return `${this.precisionIfUseful(bytes / 1024)} kB`;
     } else {
-      return this.precisionIfUseful(bytes) + ' B';
+      return `${this.precisionIfUseful(bytes)} B`;
     }
   }
 
@@ -143,7 +141,7 @@ export class UtilsService {
     // Type guard: ensure both values are valid numbers
     if (used == null || total == null ||
         typeof used !== 'number' || typeof total !== 'number' ||
-        !isFinite(used) || !isFinite(total) ||
+        !Number.isFinite(used) || !Number.isFinite(total) ||
         total === 0) {
       return '-';
     }
@@ -168,7 +166,7 @@ export class UtilsService {
       usedDisplay = this.getReducedValue(used, usedNumber).toFixed(totalPrecision);
     }
 
-    return usedDisplay + (usedNumber ? ' ' + this.units[usedNumber] : '') + ' / ' + totalDisplay + ' ' + this.units[value];
+    return `${usedDisplay + (usedNumber ? ` ${this.units[usedNumber]}` : '')} / ${totalDisplay} ${this.units[value]}`;
   }
 
   /**
@@ -177,7 +175,7 @@ export class UtilsService {
    * @returns formatted uptime string
    */
   formatUptime(uptime: number): string {
-    if (uptime === undefined || uptime === null || isNaN(uptime)) {
+    if (uptime === undefined || uptime === null || Number.isNaN(uptime)) {
       return '-';
     }
 
@@ -201,16 +199,16 @@ export class UtilsService {
 
   percent(value: number, decimals: number = 2): string {
     // Type guard: ensure value is a valid number
-    if (value == null || typeof value !== 'number' || isNaN(value)) {
+    if (value == null || typeof value !== 'number' || Number.isNaN(value)) {
       return '';
     }
 
     const val = (value * 100).toFixed(decimals);
-    return val + '%';
+    return `${val}%`;
   }
 
   private getReducedValue(value: number, multiplier: number): number {
-    return (value / Math.pow(1024, Math.floor(multiplier)));
+    return (value / 1024 ** Math.floor(multiplier));
   }
 
   private getDefaultPrecision(precision: number): number {
@@ -224,7 +222,7 @@ export class UtilsService {
     return Math.floor(Math.log(value) / Math.log(1024));
   }
 
-  private getFormattedTime(isPlural: boolean, value: string | number, unit: string): string {
+  private getFormattedTime(_isPlural: boolean, value: string | number, unit: string): string {
     // i18n
     // const formatString = isPlural ? 'dateTime.plural.format' : 'dateTime.singular.format';
     // return $translate.instant(formatString, { value: value, unit: unit });
@@ -235,9 +233,9 @@ export class UtilsService {
     if (count === 0) {
       return '';
     } else if (count === 1) {
-      return this.getFormattedTime(false, count, single) + ' ';
+      return `${this.getFormattedTime(false, count, single)} `;
     } else {
-      return this.getFormattedTime(true, count, plural) + ' ';
+      return `${this.getFormattedTime(true, count, plural)} `;
     }
   }
 }
@@ -245,29 +243,31 @@ export class UtilsService {
 /**
  * Return the value in the object for the given dot separated param path
  */
-export function pathGet(path: string, object: any): any {
+export function pathGet(path: string, object: unknown): unknown {
   const params = path.split('.');
 
   let index = 0;
   const length = params.length;
+  let current: Record<string, unknown> = object as Record<string, unknown>;
 
-  while (object !== null && object !== undefined && index < length) {
-    object = object[params[index++]];
+  while (current !== null && current !== undefined && index < length) {
+    current = current[params[index++]] as Record<string, unknown>;
   }
-  return (index && index === length) ? object : undefined;
+  return (index && index === length) ? current : undefined;
 }
 
-export function pathSet(path: string, object: any, value: any) {
+export function pathSet(path: string, object: unknown, value: unknown) {
   const params = path.split('.');
 
   let index = 0;
   const length = params.length - 1;
+  let current: Record<string, unknown> = object as Record<string, unknown>;
 
-  while (object !== null && object !== undefined && index < length) {
-    object = object[params[index++]];
+  while (current !== null && current !== undefined && index < length) {
+    current = current[params[index++]] as Record<string, unknown>;
   }
   if ((index && index === length)) {
-    object[params[index++]] = value;
+    current[params[index++]] = value;
   }
 }
 
@@ -281,7 +281,7 @@ export function safeStringToObj<T = object>(value: string): T {
       }
       return jsonObj;
     }
-  } catch (e) {
+  } catch (_e) {
     return null;
   }
   return null;
@@ -295,13 +295,13 @@ export const safeUnsubscribe = (...subs: Subscription[]) => {
   });
 };
 
-export const truthyIncludingZero = (obj: any): boolean => !!obj || obj === 0;
-export const truthyIncludingZeroString = (obj: any): string => truthyIncludingZero(obj) ? obj.toString() : null;
+export const truthyIncludingZero = (obj: unknown): boolean => !!obj || obj === 0;
+export const truthyIncludingZeroString = (obj: unknown): string => truthyIncludingZero(obj) ? String(obj) : null;
 
 /**
  * Real basic, shallow check
  */
-export const arraysEqual = (a: any[], b: any[]): boolean => {
+export const arraysEqual = (a: unknown[], b: unknown[]): boolean => {
   // Both falsy
   if (!a && !b) {
     return true;

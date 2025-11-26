@@ -1,12 +1,12 @@
 
-import { Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CardWrapperComponent } from '@stratosui/core';
 import { of } from 'rxjs';
 import { catchError, first } from 'rxjs/operators';
 
-import { Chart } from '../../shared/models/chart';
-import { ChartVersion } from '../../shared/models/chart-version';
-import { Maintainer } from '../../shared/models/maintainer';
+import type { Chart } from '../../shared/models/chart';
+import type { ChartVersion } from '../../shared/models/chart-version';
+import type { Maintainer } from '../../shared/models/maintainer';
 import { ChartsService } from '../../shared/services/charts.service';
 import { ChartDetailsUsageComponent } from '../chart-details-usage/chart-details-usage.component';
 import { ChartDetailsVersionsComponent } from '../chart-details-versions/chart-details-versions.component';

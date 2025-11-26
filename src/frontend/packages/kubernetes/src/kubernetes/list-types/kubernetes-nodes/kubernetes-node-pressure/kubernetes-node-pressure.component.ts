@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
+import { ChangeDetectionStrategy, Component, type OnInit} from '@angular/core';
 
-import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
-import { ConditionType, ConditionTypeLabels, KubernetesNode } from '../../../store/kube.types';
+import { TableCellCustom } from '@stratosui/core';
+import { ConditionType, ConditionTypeLabels, type KubernetesNode } from '../../../store/kube.types';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -13,10 +13,6 @@ import { ConditionType, ConditionTypeLabels, KubernetesNode } from '../../../sto
 export class KubernetesNodePressureComponent extends TableCellCustom<KubernetesNode> implements OnInit {
 
   errors: string[] = [];
-
-  constructor() {
-    super();
-  }
 
   ngOnInit() {
     const conditions = this.row.status.conditions;

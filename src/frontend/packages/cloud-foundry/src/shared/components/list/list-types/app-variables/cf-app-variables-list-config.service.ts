@@ -13,16 +13,16 @@ import {
   IMultiListAction,
   ITableColumn,
   ListViewTypes,
+  TableCellEditComponent,
 } from '@stratosui/core';
-import { entityCatalog } from '@stratosui/store';
-import { TableCellEditComponent } from '../../../../../../../core/src/shared/components/list/list-table/table-cell-edit/table-cell-edit.component';
+import { entityCatalog, GeneralEntityAppState } from '@stratosui/store';
 import { UpdateExistingApplication } from '../../../../../actions/application.actions';
-import { CFAppState } from '../../../../../cf-app-state';
+import type { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { applicationEntityType } from '../../../../../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { CfAppVariablesDataSource, ListAppEnvVar } from './cf-app-variables-data-source';
+import { CfAppVariablesDataSource, type ListAppEnvVar } from './cf-app-variables-data-source';
 import { TableCellEditVariableComponent } from './table-cell-edit-variable/table-cell-edit-variable.component';
 
 
@@ -33,7 +33,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
   envVarsDataSource: CfAppVariablesDataSource;
 
   private multiListActionDelete: IMultiListAction<ListAppEnvVar> = {
-    action: (items: ListAppEnvVar[]) => {
+    action: (_items: ListAppEnvVar[]) => {
       return this.dispatchDeleteAction(Array.from(this.envVarsDataSource.selectedRows().values()));
     },
     icon: 'delete',
@@ -148,7 +148,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
   getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     private appService: ApplicationService,
     private confirmDialog: ConfirmationDialogService,
   ) {

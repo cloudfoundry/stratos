@@ -1,12 +1,12 @@
-import { Portal } from '@angular/cdk/portal';
-import { Injectable, signal, Signal, computed, inject } from '@angular/core';
+import type { Portal } from '@angular/cdk/portal';
+import { Injectable, signal, type Signal, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, type Observable } from 'rxjs';
 import { filter, map, startWith } from 'rxjs/operators';
 
-import { IPageSideNavTab } from './features/dashboard/page-side-nav/page-side-nav.component';
-import { IHeaderBreadcrumbLink } from './shared/components/page-header/page-header.types';
+import type { IPageSideNavTab } from './features/dashboard/page-side-nav/page-side-nav.component';
+import type { IHeaderBreadcrumbLink } from './shared/components/page-header/page-header.types';
 
 @Injectable({
   providedIn: 'root'
@@ -76,7 +76,7 @@ export class TabNavService {
       ),
       this.tabNavs$
     ]).pipe(
-      map(([event, tabs]) => this.getCurrentTabHeader(tabs)),
+      map(([_event, tabs]) => this.getCurrentTabHeader(tabs)),
     );
   }
 

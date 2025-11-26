@@ -1,20 +1,21 @@
-import { Component, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, type OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of } from 'rxjs';
+import { combineLatest, type Observable, of } from 'rxjs';
 import { first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
 import {
   CustomFormFieldComponent,
   PermissionConfig,
   CurrentUserPermissionsService,
-  StackedInputActionConfig,
+  type StackedInputActionConfig,
   StackedInputActionsComponent,
-  StackedInputActionsState,
-  StackedInputActionsUpdate,
-  StepOnNextFunction,
+  type StackedInputActionsState,
+  type StackedInputActionsUpdate,
+  type StepOnNextFunction,
+  AppInputDirective,
 } from '@stratosui/core';
 import {
   UsersRolesSetIsRemove,
@@ -22,8 +23,8 @@ import {
   UsersRolesSetUsers,
 } from '../../../../../actions/users-roles.actions';
 import { CFFeatureFlagTypes } from '../../../../../cf-api.types';
-import { CFAppState } from '../../../../../cf-app-state';
-import { CfUser } from '../../../../../store/types/cf-user.types';
+import { GeneralEntityAppState } from '@stratosui/store';
+import type { CfUser } from '../../../../../store/types/cf-user.types';
 import { CfPermissionTypes } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { waitForCFPermissions } from '../../../cf.helpers';
@@ -49,7 +50,8 @@ export class ManageUsersSetUsernamesHelper {
     CommonModule,
     FormsModule,
     CustomFormFieldComponent,
-    StackedInputActionsComponent
+    StackedInputActionsComponent,
+    AppInputDirective
   ]
 })
 export class ManageUsersSetUsernamesComponent implements OnInit {
@@ -76,7 +78,7 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
   public stateIn$: Observable<StackedInputActionsState[]>;
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     userPerms: CurrentUserPermissionsService,
   ) {
@@ -130,7 +132,7 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
     this.stepValid.set(usernames.valid);
   }
 
-  setIsRemove(event: {source: any, value: boolean}) {
+  setIsRemove(event: {source: unknown, value: boolean}) {
     this.store.dispatch(new UsersRolesSetIsRemove(event.value));
     this.currentValue = event.value;
   }

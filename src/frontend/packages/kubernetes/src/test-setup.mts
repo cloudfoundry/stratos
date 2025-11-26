@@ -5,9 +5,9 @@ import { expect, describe, it, afterEach } from 'vitest';
 // IMMEDIATE: Expose vitest globals to window for entity-catalog test detection
 // This MUST happen before any Angular/Store imports that check window.describe
 if (typeof window !== 'undefined') {
-  (window as any).describe = describe;
-  (window as any).it = it;
-  (window as any).expect = expect;
+  (window as unknown as Record<string, unknown>).describe = describe;
+  (window as unknown as Record<string, unknown>).it = it;
+  (window as unknown as Record<string, unknown>).expect = expect;
 }
 
 import '@angular/compiler';
@@ -24,10 +24,10 @@ import { getTestBed } from '@angular/core/testing';
 if (typeof window.matchMedia === 'undefined') {
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
-    value: (query: string) => ({
+    value: (query: string): MediaQueryList => ({
       matches: false,
       media: query,
-      onchange: null,
+      onchange: null as ((this: MediaQueryList, ev: MediaQueryListEvent) => unknown) | null,
       addListener: () => { }, // deprecated but still used by some code
       removeListener: () => { }, // deprecated but still used by some code
       addEventListener: () => { },
@@ -39,7 +39,7 @@ if (typeof window.matchMedia === 'undefined') {
 
 // Mock Monaco editor for tests
 // Components that use Monaco editor expect a global monaco object
-if (typeof (window as any).monaco === 'undefined') {
+if (typeof (window as unknown as Record<string, unknown>).monaco === 'undefined') {
   const mockEditor = {
     getValue: () => '',
     setValue: (value: string) => { },
@@ -52,10 +52,10 @@ if (typeof (window as any).monaco === 'undefined') {
     setModel: (model: any) => { },
   };
 
-  (window as any).monaco = {
+  (window as unknown as Record<string, unknown>).monaco = {
     editor: {
       create: () => mockEditor,
-      getModel: () => null,
+      getModel: (): null => null,
       createModel: () => ({}),
       setTheme: () => { },
     },
@@ -72,7 +72,7 @@ if (typeof (window as any).monaco === 'undefined') {
   };
 
   // Mock require for YAML language support
-  (window as any).require = (deps: string[], callback: () => void) => {
+  (window as unknown as Record<string, unknown>).require = (deps: string[], callback: () => void): void => {
     // Immediately invoke callback for YAML language support
     if (deps.includes('vs/language/yaml/monaco.contribution')) {
       setTimeout(callback, 0);

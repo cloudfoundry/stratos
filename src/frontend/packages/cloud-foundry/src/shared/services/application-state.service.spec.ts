@@ -3,10 +3,11 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { ApplicationStateService } from './application-state.service';
+import type { AppStat } from '../../store/types/app-metadata.types';
 describe('ApplicationStateService', () => {
 
-  const $translate = { instant: (label) => label };
-  let cfAppStateService;
+  const $translate = { instant: (label: string) => label };
+  let cfAppStateService: ApplicationStateService;
 
   beforeEach(async () => {
     TestBed.configureTestingModule({
@@ -27,19 +28,25 @@ describe('ApplicationStateService', () => {
 
   describe('check friendly names and indicators', () => {
 
-    function makeTestData(appState, packageState, instanceStates?) {
-      const summary = {
+    function makeTestData(appState: string, packageState: string, instanceStates?: string[]) {
+      const summary: {
+        state: string;
+        package_state: string;
+        package_updated_at: string | undefined;
+        running_instances: number;
+        instances: number | undefined;
+      } = {
         state: appState,
         package_state: packageState,
         package_updated_at: undefined,
         running_instances: 0,
         instances: instanceStates ? instanceStates.length : undefined,
       };
-      let instances = [];
+      let instances: AppStat[] | undefined = [];
       let running = 0;
       if (instanceStates) {
-        instanceStates.forEach(s => {
-          instances.push({ state: s });
+        instanceStates.forEach((s: string) => {
+          instances!.push({ state: s } as AppStat);
           if (s === 'RUNNING') { running++; }
         });
       } else {

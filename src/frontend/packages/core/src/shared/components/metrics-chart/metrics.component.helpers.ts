@@ -1,7 +1,7 @@
-import { ChartSeries, MetricsFilterSeries, IMetricMatrixResult, MetricsAction } from '@stratosui/store';
+import type { ChartSeries, MetricsFilterSeries, IMetricMatrixResult, MetricsAction } from '@stratosui/store';
 
-import { MetricsConfig } from './metrics-chart.component';
-import { YAxisTickFormattingFunc, MetricsLineChartConfig } from './metrics-chart.types';
+import type { MetricsConfig } from './metrics-chart.component';
+import { type YAxisTickFormattingFunc, MetricsLineChartConfig } from './metrics-chart.types';
 
 export class MetricsChartHelpers {
   static getDateSeriesName(value: number) {
@@ -22,7 +22,7 @@ export class MetricsChartHelpers {
     const lineChartConfig = new MetricsLineChartConfig();
     lineChartConfig.xAxisLabel = 'Time';
     lineChartConfig.yAxisLabel = yLabel;
-    if (!!yAxisTickFormatter) {
+    if (yAxisTickFormatter) {
       lineChartConfig.yAxisTickFormatting = yAxisTickFormatter;
     }
     return lineChartConfig;
@@ -33,7 +33,7 @@ export enum ChartDataTypes {
   CPU_PERCENT = 'cpu_percent',
   CPU_TIME = 'cpu_time',
 }
-export function getMetricsChartConfigBuilder<T = any>(getSeriesName: (result: IMetricMatrixResult<T>) => string) {
+export function getMetricsChartConfigBuilder<T = unknown>(getSeriesName: (result: IMetricMatrixResult<T>) => string) {
   return (
     metricsAction: MetricsAction,
     yAxisLabel: string,
@@ -45,7 +45,7 @@ export function getMetricsChartConfigBuilder<T = any>(getSeriesName: (result: IM
     tooltipValueFormatter);
 }
 
-export function buildMetricsChartConfig<T = any>(
+export function buildMetricsChartConfig<T = unknown>(
   metricsAction: MetricsAction,
   yAxisLabel: string,
   getSeriesName: (result: IMetricMatrixResult<T>) => string,
@@ -71,7 +71,7 @@ export function buildMetricsChartConfig<T = any>(
   ];
 }
 
-function getServiceItemValueMapper(chartDataType: ChartDataTypes | null): ((value: any) => string) | null {
+function getServiceItemValueMapper(chartDataType: ChartDataTypes | null): ((value: unknown) => string) | null {
   switch (chartDataType) {
     case ChartDataTypes.BYTES:
       // Megabytes - this should really be dynamic based on the value

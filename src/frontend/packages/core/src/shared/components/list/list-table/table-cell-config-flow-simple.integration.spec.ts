@@ -8,9 +8,9 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
  * without requiring full TestBed setup for rendering verification.
  */
 
-import { ITableColumn } from './table.types';
+import type { ITableColumn, CellConfigFunction } from './table.types';
 import { TableCellFavoriteComponent, createTableColumnFavorite } from './table-cell-favorite/table-cell-favorite.component';
-import { IFavoriteMetadata, UserFavorite, entityCatalog, TestEntityCatalog } from '@stratosui/store';
+import { type IFavoriteMetadata, UserFavorite, entityCatalog, type TestEntityCatalog } from '@stratosui/store';
 import { generateMockCFEntities } from '../../../../../test-framework/mock-catalog-entities';
 
 describe('Table CellConfig Integration - Column Definition Flow', () => {
@@ -54,7 +54,12 @@ describe('Table CellConfig Integration - Column Definition Flow', () => {
       const staticConfig = {
         customProperty: 'test-value',
         dataField: 'name',
-        formatter: (value: any) => value.toUpperCase(),
+        formatter: (value: unknown) => {
+          if (typeof value === 'string') {
+            return value.toUpperCase();
+          }
+          return String(value).toUpperCase();
+        },
       };
 
       const column: ITableColumn<TestEntity> = {
@@ -66,7 +71,7 @@ describe('Table CellConfig Integration - Column Definition Flow', () => {
 
       expect(column.cellConfig).toBeTruthy();
       expect(column.cellConfig).toEqual(staticConfig);
-      expect((column.cellConfig as any).customProperty).toBe('test-value');
+      expect((column.cellConfig as Record<string, unknown>).customProperty).toBe('test-value');
     });
 
     it('should handle column without cellConfig', () => {
@@ -101,7 +106,9 @@ describe('Table CellConfig Integration - Column Definition Flow', () => {
       };
 
       expect(column.cellConfig).toEqual(complexConfig);
-      expect((column.cellConfig as any).metadata.label).toBe('Complex Field');
+      const cellConfig = column.cellConfig as Record<string, unknown>;
+      const metadata = cellConfig.metadata as Record<string, unknown>;
+      expect(metadata.label).toBe('Complex Field');
     });
 
     it('should handle null and undefined cellConfig', () => {
@@ -164,7 +171,8 @@ describe('Table CellConfig Integration - Column Definition Flow', () => {
       };
 
       // Verify function can be called with entity
-      const generatedConfig = (column.cellConfig as any)(entity);
+      type ConfigFn = (ent: TestEntity) => { displayName: string; entityId: string; isActive: boolean };
+      const generatedConfig = (column.cellConfig as ConfigFn)(entity);
       expect(generatedConfig.displayName).toBe('TEST ENTITY');
       expect(generatedConfig.entityId).toBe('1');
       expect(generatedConfig.isActive).toBe(true);
@@ -189,8 +197,9 @@ describe('Table CellConfig Integration - Column Definition Flow', () => {
       const entity1 = { id: '1', name: 'Entity 1' };
       const entity2 = { id: '2', name: 'Entity 2' };
 
-      const config1 = (column.cellConfig as any)(entity1);
-      const config2 = (column.cellConfig as any)(entity2);
+      type TypeConfigFn = (entity: TestEntity) => { type: string };
+      const config1 = (column.cellConfig as TypeConfigFn)(entity1);
+      const config2 = (column.cellConfig as TypeConfigFn)(entity2);
 
       expect(config1.type).toBe('premium');
       expect(config2.type).toBe('standard');
@@ -217,7 +226,7 @@ describe('Table CellConfig Integration - Column Definition Flow', () => {
       );
 
       expect(favoriteColumn.cellConfig).toBeTruthy();
-      const config = favoriteColumn.cellConfig as any;
+      const config = favoriteColumn.cellConfig as Record<string, unknown>;
       expect(typeof config.createUserFavorite).toBe('function');
     });
 
@@ -231,7 +240,8 @@ describe('Table CellConfig Integration - Column Definition Flow', () => {
         name: 'Test Entity'
       };
 
-      const config = favoriteColumn.cellConfig as any;
+      type FavoriteConfigType = { createUserFavorite: (entity: TestEntity) => UserFavorite<TestFavoriteMetadata> };
+      const config = favoriteColumn.cellConfig as FavoriteConfigType;
       const favorite = config.createUserFavorite(entity);
 
       expect(favorite).toBeTruthy();
@@ -279,7 +289,7 @@ describe('Table CellConfig Integration - Column Definition Flow', () => {
       ];
 
       expect(columns.length).toBe(3);
-      expect((columns[0].cellConfig as any).type).toBe('static');
+      expect((columns[0].cellConfig as Record<string, unknown>).type).toBe('static');
       expect(typeof columns[1].cellConfig).toBe('function');
       expect(columns[2].cellConfig).toBeUndefined();
     });
@@ -311,7 +321,7 @@ describe('Table CellConfig Integration - Column Definition Flow', () => {
 
       // Verify favorite column properties are correct
       expect(columns[1].cellComponent).toBe(TableCellFavoriteComponent);
-      const favoriteConfig = columns[1].cellConfig as any;
+      const favoriteConfig = columns[1].cellConfig as Record<string, unknown>;
       expect(typeof favoriteConfig.createUserFavorite).toBe('function');
     });
   });
@@ -331,7 +341,7 @@ describe('Table CellConfig Integration - Column Definition Flow', () => {
     });
 
     it('should preserve cellConfig even if it has unexpected properties', () => {
-      const weirdConfig: any = {
+      const weirdConfig: object | CellConfigFunction<TestEntity> = {
         customProp1: 'value1',
         customProp2: 12345,
         customProp3: { nested: 'object' },
@@ -347,7 +357,9 @@ describe('Table CellConfig Integration - Column Definition Flow', () => {
       };
 
       expect(column.cellConfig).toEqual(weirdConfig);
-      expect((column.cellConfig as any).customProp3.nested).toBe('object');
+      const cellConfig = column.cellConfig as Record<string, unknown>;
+      const customProp3 = cellConfig.customProp3 as Record<string, unknown>;
+      expect(customProp3.nested).toBe('object');
     });
 
     it('should handle function that throws error gracefully in column definition', () => {
@@ -367,7 +379,8 @@ describe('Table CellConfig Integration - Column Definition Flow', () => {
 
       // Function is stored, error would occur at runtime during cell rendering
       const entity = { id: '1', name: 'Test' };
-      expect(() => (column.cellConfig as any)(entity)).toThrowError('Config generation failed');
+      type ErrorConfigFn = (entity: TestEntity) => unknown;
+      expect(() => (column.cellConfig as ErrorConfigFn)(entity)).toThrowError('Config generation failed');
     });
   });
 
@@ -405,9 +418,9 @@ describe('Table CellConfig Integration - Column Definition Flow', () => {
     });
 
     it('should allow cellConfig to be any type without modification', () => {
-      const stringConfig: any = 'string-config';
-      const numberConfig: any = 42;
-      const boolConfig: any = true;
+      const stringConfig: object | CellConfigFunction<TestEntity> = 'string-config' as unknown as object;
+      const numberConfig: object | CellConfigFunction<TestEntity> = 42 as unknown as object;
+      const boolConfig: object | CellConfigFunction<TestEntity> = true as unknown as object;
 
       const col1: ITableColumn<TestEntity> = {
         columnId: 'col1',
@@ -453,7 +466,7 @@ describe('Table CellConfig Integration - Column Definition Flow', () => {
       expect(favoriteColumn.cellConfig).toBeDefined();
 
       // Verify cellConfig has createUserFavorite function
-      const config = favoriteColumn.cellConfig as any;
+      const config = favoriteColumn.cellConfig as Record<string, unknown>;
       expect(typeof config.createUserFavorite).toBe('function');
 
       // Test that createUserFavorite works correctly
@@ -462,7 +475,8 @@ describe('Table CellConfig Integration - Column Definition Flow', () => {
         name: 'Test Application'
       };
 
-      const favorite = config.createUserFavorite(testEntity);
+      type CreateFavoriteFn = (entity: TestEntity) => UserFavorite<TestFavoriteMetadata>;
+      const favorite = (config.createUserFavorite as CreateFavoriteFn)(testEntity);
       expect(favorite.entityId).toBe('entity-123');
       expect(favorite.endpointType).toBe('cf');
       expect(favorite.entityType).toBe('application');
@@ -505,11 +519,12 @@ describe('Table CellConfig Integration - Column Definition Flow', () => {
       expect(columns.length).toBe(4);
 
       // Column 1: static object config
-      expect((columns[0].cellConfig as any).editable).toBe(false);
+      expect((columns[0].cellConfig as Record<string, unknown>).editable).toBe(false);
 
       // Column 2: function config
       const entity = { id: '1', name: 'Test' };
-      const nameConfig = (columns[1].cellConfig as any)(entity);
+      type NameConfigFn = (entity: TestEntity) => { editable: boolean; value: string };
+      const nameConfig = (columns[1].cellConfig as NameConfigFn)(entity);
       expect(nameConfig.editable).toBe(true);
 
       // Column 3: no config
@@ -517,7 +532,7 @@ describe('Table CellConfig Integration - Column Definition Flow', () => {
 
       // Column 4: favorite with proper config
       expect(columns[3].columnId).toBe('favorite');
-      expect((columns[3].cellConfig as any).createUserFavorite).toBeDefined();
+      expect((columns[3].cellConfig as Record<string, unknown>).createUserFavorite).toBeDefined();
     });
   });
 });

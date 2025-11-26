@@ -1,31 +1,34 @@
-import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
-import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
+import type { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
+import type { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
 import {
   CreateUserProvidedServiceInstance,
   DeleteUserProvidedInstance,
   GetAllUserProvidedServices,
   GetUserProvidedService,
-  IUserProvidedServiceInstanceData,
+  type IUserProvidedServiceInstanceData,
   UpdateUserProvidedServiceInstance,
 } from '../actions/user-provided-service.actions';
-import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
+import type { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
 
 export interface UserProvidedServiceActionBuilder extends OrchestratedActionBuilders {
   get: (
     guid: string,
     endpointGuid: string,
-    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
+    extraArgs?: Record<string, unknown>
   ) => GetUserProvidedService;
   create: (
+    createTrackingId: string,
     endpointGuid: string,
-    guid: string,
-    data: IUserProvidedServiceInstanceData,
-    proxyPaginationEntityConfig?: EntityCatalogEntityConfig) => CreateUserProvidedServiceInstance;
+    extraArgs?: {
+      data?: IUserProvidedServiceInstanceData;
+      proxyPaginationEntityConfig?: EntityCatalogEntityConfig;
+    }
+  ) => CreateUserProvidedServiceInstance;
   remove: (
     guid: string,
     endpointGuid: string,
-    proxyPaginationEntityConfig?: EntityCatalogEntityConfig
+    extraArgs?: Record<string, unknown>
   ) => DeleteUserProvidedInstance;
   update: (
     guid: string,
@@ -34,9 +37,9 @@ export interface UserProvidedServiceActionBuilder extends OrchestratedActionBuil
     proxyPaginationEntityConfig?: EntityCatalogEntityConfig
   ) => UpdateUserProvidedServiceInstance;
   getMultiple: (
-    paginationKey?: string,
-    endpointGuid?: string,
-    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
+    endpointGuid: string,
+    paginationKey: string,
+    extraArgs?: Record<string, unknown>
   ) => GetAllUserProvidedServices;
   getAllInSpace: (
     endpointGuid: string,
@@ -56,14 +59,21 @@ export const userProvidedServiceActionBuilder: UserProvidedServiceActionBuilder 
   remove: (
     guid: string,
     endpointGuid: string,
-    proxyPaginationEntityConfig?: EntityCatalogEntityConfig
-  ) => new DeleteUserProvidedInstance(endpointGuid, guid, proxyPaginationEntityConfig),
+    proxyPaginationEntityConfig?: EntityCatalogEntityConfig | Record<string, unknown>
+  ) => new DeleteUserProvidedInstance(endpointGuid, guid, proxyPaginationEntityConfig as EntityCatalogEntityConfig),
   create: (
+    createTrackingId: string,
     endpointGuid: string,
-    guid: string,
-    data: IUserProvidedServiceInstanceData,
-    proxyPaginationEntityConfig?: EntityCatalogEntityConfig) =>
-    new CreateUserProvidedServiceInstance(endpointGuid, guid, data, proxyPaginationEntityConfig),
+    extraArgs?: {
+      data?: IUserProvidedServiceInstanceData;
+      proxyPaginationEntityConfig?: EntityCatalogEntityConfig;
+    }
+  ) => new CreateUserProvidedServiceInstance(
+    endpointGuid,
+    createTrackingId,
+    extraArgs?.data,
+    extraArgs?.proxyPaginationEntityConfig
+  ),
   update: (
     guid: string,
     endpointGuid: string,

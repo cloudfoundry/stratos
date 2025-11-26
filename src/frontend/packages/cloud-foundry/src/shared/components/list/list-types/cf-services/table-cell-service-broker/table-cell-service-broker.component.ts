@@ -1,12 +1,12 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
 
 import { TableCellCustom } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { IServiceBroker, IService } from '../../../../../../cf-api-svc.types';
+import type { APIResource } from '@stratosui/store';
+import type { IServiceBroker, IService } from '../../../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
 
 export enum TableCellServiceBrokerComponentMode {

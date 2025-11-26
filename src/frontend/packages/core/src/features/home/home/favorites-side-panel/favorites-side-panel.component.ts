@@ -1,8 +1,8 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component  } from '@angular/core';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
-import { PreviewableComponent } from '../../../../shared/previewable-component';
+import type { PreviewableComponent } from '../../../../shared/previewable-component';
 import { SidepanelPreviewComponent } from '../../../../shared/components/sidepanel-preview/sidepanel-preview.component';
 import { FavoritesMetaCardComponent } from '../favorites-meta-card/favorites-meta-card.component';
 
@@ -20,12 +20,12 @@ import { FavoritesMetaCardComponent } from '../favorites-meta-card/favorites-met
 })
 export class FavoritesSidePanelComponent implements PreviewableComponent {
 
-  favorites$: Observable<any>;
+  favorites$: Observable<unknown> = {} as Observable<unknown>;
   name!: string;
 
-  setProps(props: { [key: string]: any; }): void {
-    this.favorites$ = props.favorites$;
-    this.name = props.endpoint.name;
+  setProps(props: { [key: string]: unknown; }): void {
+    this.favorites$ = props['favorites$'] as Observable<unknown>;
+    this.name = (props['endpoint'] as { name: string }).name;
   }
 
 }

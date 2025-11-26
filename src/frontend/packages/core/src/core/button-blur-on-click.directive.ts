@@ -1,4 +1,4 @@
-import { Directive, ElementRef, HostListener, inject, Renderer2 } from '@angular/core';
+import { Directive, ElementRef, HostListener, inject, } from '@angular/core';
 
 /* tslint:disable:directive-selector */
 
@@ -8,7 +8,6 @@ import { Directive, ElementRef, HostListener, inject, Renderer2 } from '@angular
 })
 export class ButtonBlurOnClickDirective {
   private elRef = inject(ElementRef);
-  private renderer = inject(Renderer2);
 
   @HostListener('click') onClick() {
     this.elRef.nativeElement.blur();

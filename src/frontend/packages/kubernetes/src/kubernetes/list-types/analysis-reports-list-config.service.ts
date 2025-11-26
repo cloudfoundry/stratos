@@ -1,23 +1,23 @@
 import { Injectable, NgZone } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { ITableColumn } from '@stratosui/core';
+import type { ITableColumn } from '@stratosui/core';
 import {
-  IListAction,
-  IListConfig,
-  IListMultiFilterConfig,
+  type IListAction,
+  type IListConfig,
+  type IListMultiFilterConfig,
   ListViewTypes,
-  IGlobalListAction,
-  IMultiListAction,
+  type IGlobalListAction,
+  type IMultiListAction,
 } from '@stratosui/core';
 import { formatDistance } from 'date-fns';
-import { Observable, of } from 'rxjs';
+import { type Observable, of } from 'rxjs';
 
-import { ListView } from '../../../../store/src/actions/list.actions';
-import { AppState } from '../../../../store/src/public-api';
+import type { ListView } from '../../../../store/src/actions/list.actions';
+import type { AppState } from '../../../../store/src/public-api';
 import { defaultHelmKubeListPageSize } from '../../kubernetes/list-types/kube-helm-list-types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { KubernetesAnalysisService } from '../services/kubernetes.analysis.service';
-import { AnalysisReport } from '../store/kube.types';
+import type { AnalysisReport } from '../store/kube.types';
 import { AnalysisReportsDataSource } from './analysis-reports-list-source';
 import { AnalysisStatusCellComponent } from './analysis-status-cell/analysis-status-cell.component';
 
@@ -111,7 +111,7 @@ export class AnalysisReportsListConfig implements IListConfig<AnalysisReport> {
     label: 'Delete',
     icon: 'delete',
     description: ``,
-    createEnabled: (row$: Observable<AnalysisReport>) => of(true)
+    createEnabled: (_row$: Observable<AnalysisReport>) => of(true)
   };
 
   private singleActions = [

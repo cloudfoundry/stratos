@@ -1,10 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, Injector, Input, OnInit, runInInjectionContext, Signal, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, Injector, Input, type OnInit, runInInjectionContext, type Signal, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import type { Observable } from 'rxjs';
 
-import { RowState } from '../../data-sources-controllers/list-data-source-types';
+import type { RowState } from '../../data-sources-controllers/list-data-source-types';
 import { TableCellCustom } from '../../list.types';
 
 @Component({
@@ -47,7 +46,7 @@ export class TableCellSelectComponent<T> extends TableCellCustom<T> implements O
         effect(() => {
           const state = this.rowStateSignal?.();
           this.disableSignal.set(state?.disabled);
-          this.tooltipSignal.set(state?.disabled ? state.disabledReason : null);
+          this.tooltipSignal.set(state?.disabled ? (state.disabledReason as string) : null);
         });
       });
     }

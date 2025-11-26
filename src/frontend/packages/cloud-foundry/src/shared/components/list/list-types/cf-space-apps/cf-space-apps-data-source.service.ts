@@ -1,19 +1,20 @@
 import { Store } from '@ngrx/store';
-import { getRowMetadata, APIResource } from '@stratosui/store';
-import { ListDataSource, IListConfig } from '@stratosui/core';
+import { getRowMetadata, type APIResource, type GeneralEntityAppState } from '@stratosui/store';
+import { ListDataSource, type IListConfig } from '@stratosui/core';
 
-import { CFAppState } from '../../../../../cf-app-state';
+import type { CFAppState } from '../../../../../cf-app-state';
+import type { IApp } from '../../../../../cf-api.types';
 import { applicationEntityType, spaceEntityType } from '../../../../../cf-entity-types';
 import {
   createEntityRelationPaginationKey,
 } from '../../../../../entity-relations/entity-relations.types';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
-import { CloudFoundrySpaceService } from '../../../../../features/cf/services/cloud-foundry-space.service';
+import type { CloudFoundrySpaceService } from '../../../../../features/cf/services/cloud-foundry-space.service';
 
-export class CfSpaceAppsDataSource extends ListDataSource<APIResource> {
-  constructor(store: Store<CFAppState>, cfSpaceService: CloudFoundrySpaceService, listConfig?: IListConfig<APIResource>) {
-    const paginationKey = createEntityRelationPaginationKey(spaceEntityType, cfSpaceService.spaceGuid) + '-tab';
+export class CfSpaceAppsDataSource extends ListDataSource<APIResource<IApp>> {
+  constructor(store: Store<GeneralEntityAppState>, cfSpaceService: CloudFoundrySpaceService, listConfig?: IListConfig<APIResource<IApp>>) {
+    const paginationKey = `${createEntityRelationPaginationKey(spaceEntityType, cfSpaceService.spaceGuid)}-tab`;
     const action = cfEntityCatalog.application.actions.getAllInSpace(
       cfSpaceService.spaceGuid,
       cfSpaceService.cfGuid,

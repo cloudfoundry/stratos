@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, type PipeTransform } from '@angular/core';
 
 @Pipe({
   name: 'bytesToHumanSize',
@@ -14,7 +14,7 @@ export class BytesToHumanSize implements PipeTransform {
     const bytes = parseInt(value, 10);
 
     // Type guard: ensure parsing succeeded
-    if (isNaN(bytes)) {
+    if (Number.isNaN(bytes)) {
       return '';
     }
 
@@ -30,22 +30,22 @@ export class BytesToHumanSize implements PipeTransform {
 
     // Calculate appropriate unit
     if (bytes >= 1099511627776) {
-      return precisionIfUseful(bytes / 1099511627776) + ' TB';
+      return `${precisionIfUseful(bytes / 1099511627776)} TB`;
     } else if (bytes >= 1073741824) {
-      return precisionIfUseful(bytes / 1073741824) + ' GB';
+      return `${precisionIfUseful(bytes / 1073741824)} GB`;
     } else if (bytes >= 1048576) {
-      return precisionIfUseful(bytes / 1048576) + ' MB';
+      return `${precisionIfUseful(bytes / 1048576)} MB`;
     } else if (bytes >= 1024) {
-      return precisionIfUseful(bytes / 1024) + ' kB';
+      return `${precisionIfUseful(bytes / 1024)} kB`;
     } else {
-      return precisionIfUseful(bytes) + ' B';
+      return `${precisionIfUseful(bytes)} B`;
     }
   }
 }
 
 function precisionIfUseful(size: number, precision: number = 1): number {
   // Type guard: ensure size is a valid number
-  if (size == null || typeof size !== 'number' || !isFinite(size)) {
+  if (size == null || typeof size !== 'number' || !Number.isFinite(size)) {
     return 0;
   }
 
@@ -71,7 +71,7 @@ export class MegaBytesToHumanSize implements PipeTransform {
     const mbs = parseInt(value, 10);
 
     // Type guard: ensure parsing succeeded
-    if (isNaN(mbs)) {
+    if (Number.isNaN(mbs)) {
       return '';
     }
 
@@ -87,11 +87,11 @@ export class MegaBytesToHumanSize implements PipeTransform {
 
     // Calculate appropriate unit
     if (mbs >= 1048576) {
-      return precisionIfUseful(mbs / 1048576) + ' TB';
+      return `${precisionIfUseful(mbs / 1048576)} TB`;
     } else if (mbs >= 1024) {
-      return precisionIfUseful(mbs / 1024) + ' GB';
+      return `${precisionIfUseful(mbs / 1024)} GB`;
     } else {
-      return precisionIfUseful(mbs) + ' MB';
+      return `${precisionIfUseful(mbs)} MB`;
     }
   }
 }

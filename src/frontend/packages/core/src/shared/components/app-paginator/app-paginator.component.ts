@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
-import { TailwindPaginator, TailwindPageEvent } from '../../services/tailwind-paginator.service';
+import type { TailwindPageEvent } from '../../services/tailwind-paginator.service';
 
 @Component({
   selector: 'app-paginator',

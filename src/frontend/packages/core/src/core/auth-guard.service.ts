@@ -1,8 +1,9 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, RouterStateSnapshot } from '@angular/router';
+import type {RouterStateSnapshot} from '@angular/router';
+import type {CanActivateFn} from '@angular/router';
 import { Store } from '@ngrx/store';
 import { RouterNav, InternalAppState } from '@stratosui/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
 export function queryParamMap(): { [key: string]: string } {

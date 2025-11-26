@@ -2,8 +2,9 @@ import { Component , ChangeDetectionStrategy } from '@angular/core';
 
 import { CustomIconComponent, CustomTooltipDirective } from '@stratosui/core';
 
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { TableCellCustom } from '@stratosui/core';
+import type { APIResource } from '../../../../../../../../store/src/types/api.types';
+import type { CfEvent } from '../../../../../../cf-api.types';
 import { EventTabActorIconPipe } from './event-tab-actor-icon.pipe';
 
 @Component({
@@ -18,4 +19,4 @@ import { EventTabActorIconPipe } from './event-tab-actor-icon.pipe';
     EventTabActorIconPipe
   ]
 })
-export class TableCellEventActionComponent extends TableCellCustom<APIResource> { }
+export class TableCellEventActionComponent extends TableCellCustom<APIResource<CfEvent>> { }

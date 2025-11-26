@@ -1,19 +1,20 @@
-import { CommonModule } from '@angular/common';
-import { AfterContentInit, Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { type AfterContentInit, Component, Input, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, Subject } from 'rxjs';
+import { type Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
+import type { GeneralEntityAppState } from '@stratosui/store';
 
 import {
   AppActionMonitorComponent,
   AppMonitorComponentTypes,
-  ITableColumn,
-  ITableCellRequestMonitorIconConfig,
+  type ITableColumn,
+  type ITableCellRequestMonitorIconConfig,
 } from '@stratosui/core';
-import { entityCatalog, APIResource } from '@stratosui/store';
+import { entityCatalog, type APIResource } from '@stratosui/store';
 import { UsersRolesClearUpdateState } from '../../../../../actions/users-roles.actions';
 import { ChangeCfUserRole } from '../../../../../actions/users.actions';
-import { CFAppState } from '../../../../../cf-app-state';
+import type { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../../../../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
@@ -25,8 +26,8 @@ import {
 } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
 import { selectCfUsersRoles, selectCfUsersRolesChangedRoles } from '../../../../../store/selectors/cf-users-roles.selector';
-import { CfUser, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../store/types/cf-user.types';
-import { CfRoleChangeWithNames, UserRoleLabels } from '../../../../../store/types/users-roles.types';
+import type { CfUser, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../store/types/cf-user.types';
+import { type CfRoleChangeWithNames, UserRoleLabels } from '../../../../../store/types/users-roles.types';
 import { ManageUsersSetUsernamesHelper } from '../manage-users-set-usernames/manage-users-set-usernames.component';
 
 @Component({
@@ -41,7 +42,7 @@ import { ManageUsersSetUsernamesHelper } from '../manage-users-set-usernames/man
   ]
 })
 export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
-  private store = inject(Store<CFAppState>);
+  private store = inject(Store<GeneralEntityAppState>);
   private cfUserService = inject(CfUserService);
 
   @Input() setUsernames = false;
@@ -123,7 +124,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
 
   onEnter = () => {
     // Kick off an update
-    this.updateChanges.next(new Date().getTime());
+    this.updateChanges.next(Date.now());
     // Ensure that any entity we're going to show the state for is clear of any previous or unrelated errors
     this.store.select(selectCfUsersRoles).pipe(
       first(),

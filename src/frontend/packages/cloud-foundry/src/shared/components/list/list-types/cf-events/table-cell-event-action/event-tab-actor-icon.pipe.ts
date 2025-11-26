@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, type PipeTransform } from '@angular/core';
 
 @Pipe({
   name: 'eventTabActorIcon',
@@ -6,7 +6,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class EventTabActorIconPipe implements PipeTransform {
 
-  transform(actor: string, args?: any): any {
+  transform(actor: string, _args?: unknown): string {
     switch (actor) {
       case 'user':
         return 'person';

@@ -1,10 +1,13 @@
-import { Action, Store } from '@ngrx/store';
-import { EntitySchema, PaginatedAction, AppState } from '@stratosui/store';
-import { Observable, OperatorFunction } from 'rxjs';
+import type { Injector } from '@angular/core';
+import {Store} from '@ngrx/store';
+import type {Action} from '@ngrx/store';
+import type {PaginatedAction} from '@stratosui/store';
+import type {EntitySchema, AppState} from '@stratosui/store';
+import type { Observable, OperatorFunction } from 'rxjs';
 
-import { IListConfig } from '../list.component.types';
-import { DataFunction, DataFunctionDefinition } from './list-data-source';
-import { getRowUniqueId, RowsState, RowState } from './list-data-source-types';
+import type { IListConfig } from '../list.component.types';
+import type { DataFunction, DataFunctionDefinition } from './list-data-source';
+import type { getRowUniqueId, RowsState, RowState } from './list-data-source-types';
 
 /**
  * Allows a list to manage separate actions and/or separate entity types.
@@ -39,6 +42,7 @@ export class ActionSchemaConfig {
 
 export interface IListDataSourceConfig<A, T> {
   store: Store<AppState>;
+  injector?: Injector;
   /**
    * An action that, when called, will populate the entries required to show the current state of the list. For example, this action will
    * be dispatched when the page number changes in a non-local list.

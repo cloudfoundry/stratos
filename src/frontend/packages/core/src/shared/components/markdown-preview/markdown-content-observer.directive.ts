@@ -1,4 +1,4 @@
-import { Directive, ElementRef, EventEmitter, Output, OnDestroy, NgZone, inject } from '@angular/core';
+import { Directive, ElementRef, EventEmitter, Output, type OnDestroy, NgZone, inject } from '@angular/core';
 
 @Directive({
   selector: '[appMarkdownContentObserver]',
@@ -13,7 +13,7 @@ export class MarkdownContentObserverDirective implements OnDestroy {
 
   constructor() {
     this.observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation, index) => {
+      mutations.forEach((mutation, _index) => {
         if (mutation.type === 'childList') {
           this.ngZone.runOutsideAngular(() => {
             this.innerHtmlRendered.emit();

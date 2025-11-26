@@ -2,9 +2,9 @@ import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core
 import { Store } from '@ngrx/store';
 
 import { TableCellCustom } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { IService } from '../../../../../../cf-api-svc.types';
-import { CFAppState } from '../../../../../../cf-app-state';
+import type { APIResource, GeneralEntityAppState } from '@stratosui/store';
+import type { IService } from '../../../../../../cf-api-svc.types';
+import type { CFAppState } from '../../../../../../cf-app-state';
 import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
 import { CfOrgSpaceLinksComponent } from '../../../../../components/cf-org-space-links/cf-org-space-links.component';
 
@@ -21,7 +21,7 @@ import { CfOrgSpaceLinksComponent } from '../../../../../components/cf-org-space
 export class TableCellServiceCfBreadcrumbsComponent extends TableCellCustom<APIResource<IService>> {
 
   cfOrgSpace!: CfOrgSpaceLabelService;
-  private store = inject(Store<CFAppState>);
+  private store = inject(Store<GeneralEntityAppState>);
 
   @Input()
   set row(pService: APIResource<IService>) {
@@ -30,10 +30,6 @@ export class TableCellServiceCfBreadcrumbsComponent extends TableCellCustom<APIR
       return;
     }
     this.cfOrgSpace = new CfOrgSpaceLabelService(this.store, pService.entity.cfGuid);
-  }
-
-  constructor() {
-    super();
   }
 
   getSpaceBreadcrumbs = () => ({ breadcrumbs: 'services-wall' });

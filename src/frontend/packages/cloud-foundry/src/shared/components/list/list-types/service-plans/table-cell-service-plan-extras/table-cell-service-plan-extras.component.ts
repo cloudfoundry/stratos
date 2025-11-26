@@ -1,9 +1,9 @@
 
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { IServicePlan } from '../../../../../../cf-api-svc.types';
+import { TableCellCustom } from '@stratosui/core';
+import type { APIResource } from '../../../../../../../../store/src/types/api.types';
+import type { IServicePlan } from '../../../../../../cf-api-svc.types';
 
 @Component({
   selector: 'app-table-cell-service-plan-extras',

@@ -1,5 +1,5 @@
 import { Validators } from '@angular/forms';
-import { EndpointAuthTypeConfig, EndpointType } from '@stratosui/store';
+import type { EndpointAuthTypeConfig, EndpointType } from '@stratosui/store';
 
 import {
   CredentialsAuthFormComponent,
@@ -27,7 +27,7 @@ export abstract class BaseEndpointAuth {
       username: ['', Validators.required],
       password: ['', Validators.required],
     },
-    types: new Array<EndpointType>(),
+    types: [] as EndpointType[],
     component: CredentialsAuthFormComponent,
   };
 
@@ -37,7 +37,7 @@ export abstract class BaseEndpointAuth {
     form: {
       token: ['', Validators.required],
     },
-    types: new Array<EndpointType>(),
+    types: [] as EndpointType[],
     component: TokenEndpointComponent
   };
 
@@ -47,7 +47,7 @@ export abstract class BaseEndpointAuth {
     form: {
       token: ['', Validators.required],
     },
-    types: new Array<EndpointType>(),
+    types: [] as EndpointType[],
     component: TokenEndpointComponent
   };
 
@@ -55,7 +55,7 @@ export abstract class BaseEndpointAuth {
     name: 'Single Sign-On (SSO)',
     value: EndpointAuthTypeNames.SSO,
     form: {},
-    types: new Array<EndpointType>(),
+    types: [] as EndpointType[],
     component: SSOAuthFormComponent
   };
 
@@ -63,7 +63,7 @@ export abstract class BaseEndpointAuth {
     name: 'No Authentication',
     value: EndpointAuthTypeNames.NONE,
     form: {},
-    types: new Array<EndpointType>(),
+    types: [] as EndpointType[],
     component: NoneAuthFormComponent
   };
 }

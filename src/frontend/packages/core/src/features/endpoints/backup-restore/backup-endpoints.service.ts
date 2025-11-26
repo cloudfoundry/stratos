@@ -1,17 +1,17 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, signal, Injector } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { GeneralEntityAppState, BrowserStandardEncoder, EndpointModel, entityCatalog } from '@stratosui/store';
-import { Observable } from 'rxjs';
+import { type GeneralEntityAppState, BrowserStandardEncoder, type EndpointModel, entityCatalog } from '@stratosui/store';
+import type { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import { toObservable } from '@angular/core/rxjs-interop';
 
 import {
-  BackupEndpointConfigUI,
+  type BackupEndpointConfigUI,
   BackupEndpointConnectionTypes,
-  BackupEndpointsConfig,
+  type BackupEndpointsConfig,
   BackupEndpointTypes,
-  BaseEndpointConfig,
+  type BaseEndpointConfig,
 } from './backup-restore.types';
 
 interface BackupRequest {
@@ -34,8 +34,7 @@ export class BackupEndpointsService {
   state: BackupEndpointsConfig<BackupEndpointConfigUI> = {};
   password!: string;
 
-  constructor(
-    private store: Store<GeneralEntityAppState>,
+  constructor(_store: Store<GeneralEntityAppState>,
     private http: HttpClient,
     private injector: Injector
   ) {
@@ -143,7 +142,7 @@ export class BackupEndpointsService {
     //   first(),
     // );
     return this.http.post(url, this.createBodyToSend(), { params }).pipe(
-      map((res: any) => new Blob([JSON.stringify(res)])),
+      map((res: unknown) => new Blob([JSON.stringify(res)])),
       first(),
     );
   }

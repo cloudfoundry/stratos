@@ -1,9 +1,9 @@
 import { animate, style, transition, trigger } from '@angular/animations';
-import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { EntitySchema, EntityMonitor, EntityMonitorFactory } from '@stratosui/store';
-import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
-import { filter, first, map } from 'rxjs/operators';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { Component, Input, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { type EntitySchema, EntityMonitor, EntityMonitorFactory } from '@stratosui/store';
+import { BehaviorSubject, combineLatest, type Observable, } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Component({
 selector: 'app-loading-page',

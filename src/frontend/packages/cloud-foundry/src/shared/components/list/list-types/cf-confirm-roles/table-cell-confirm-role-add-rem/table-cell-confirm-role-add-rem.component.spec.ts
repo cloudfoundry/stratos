@@ -1,11 +1,11 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { MDAppModule } from '../../../../../../../../core/src/core/md.module';
+import { MDAppModule } from '@stratosui/core';
 import {
   BooleanIndicatorComponent,
-} from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
+} from '@stratosui/core';
 import { OrgUserRoleNames } from '../../../../../../store/types/cf-user.types';
 import { TableCellConfirmRoleAddRemComponent } from './table-cell-confirm-role-add-rem.component';
 

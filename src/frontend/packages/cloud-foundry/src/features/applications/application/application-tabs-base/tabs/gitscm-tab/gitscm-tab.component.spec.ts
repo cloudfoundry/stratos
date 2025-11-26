@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, NO_ERRORS_SCHEMA, importProvidersFrom } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
@@ -11,7 +11,7 @@ import {
   EntityMonitorFactory,
   PaginationMonitorFactory,
   entityCatalog,
-  TestEntityCatalog,
+  type TestEntityCatalog,
   generateStratosEntities,
   EntityCatalogTestModule,
   TEST_CATALOGUE_ENTITIES,

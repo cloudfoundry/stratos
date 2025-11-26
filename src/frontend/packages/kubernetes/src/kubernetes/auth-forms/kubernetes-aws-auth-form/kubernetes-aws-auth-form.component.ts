@@ -1,9 +1,8 @@
 import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
+import { type FormControl, type FormGroup, ReactiveFormsModule, } from '@angular/forms';
 
-import { IAuthForm } from '../../../../../store/src/extension-types';
-import { ShowHideButtonComponent } from '../../../../../core/src/core/show-hide-button/show-hide-button.component';
-import { CustomFormFieldComponent } from '../../../../../core/src/shared/components/custom-form-field/custom-form-field.component';
+import { CustomFormFieldComponent, ShowHideButtonComponent } from '@stratosui/core';
+import type { IAuthForm } from '../../../../../store/src/extension-types';
 
 interface AWSAuthForm {
   cluster: FormControl<string>;

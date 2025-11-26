@@ -1,7 +1,7 @@
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit, inject } from '@angular/core';
+import { CommonModule, AsyncPipe, SlicePipe } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, type OnInit, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 import { ClickStopPropagationDirective } from '../../../core/click-stop-propagation.directive';
 
@@ -31,6 +31,8 @@ export class AppChip<T = string> implements IAppChip<T> {
   standalone: true,
   imports: [
     CommonModule,
+    AsyncPipe,
+    SlicePipe,
     RouterModule,
     ClickStopPropagationDirective
   ],

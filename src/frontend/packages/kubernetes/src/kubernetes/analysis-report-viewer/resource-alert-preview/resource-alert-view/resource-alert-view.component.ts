@@ -1,4 +1,14 @@
 import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import type { ResourceAlert } from '../../../services/analysis-report.types';
+
+interface AlertGroup {
+  name: string;
+  alerts: Array<ResourceAlert & { path: string }>;
+}
+
+interface AlertDataInput {
+  alerts?: ResourceAlert[];
+}
 
 @Component({
 changeDetection: ChangeDetectionStrategy.OnPush,
@@ -9,21 +19,21 @@ changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ResourceAlertViewComponent {
 
-  alertInfo;
+  alertInfo!: AlertGroup[];
 
   @Input()
-  set alerts(data: any) {
+  set alerts(data: ResourceAlert[] | AlertDataInput) {
     if (data) {
-      const alerts = data.alerts ? data.alerts : data;
+      const alerts = Array.isArray(data) ? data : (data as AlertDataInput).alerts || [];
       this.alertInfo = this.normalize(alerts);
     }
   }
 
   @Input() showHeader = true;
 
-  normalize(data) {
+  normalize(data: ResourceAlert[]): AlertGroup[] {
     // Normalize the alerts into groups
-    const normalized = {};
+    const normalized: Record<string, Array<ResourceAlert & { path: string }>> = {};
     data.forEach(item => {
       const path = item.namespace ? `${item.namespace}/${item.name}` : item.name;
       if (!normalized[path]) {
@@ -35,7 +45,7 @@ export class ResourceAlertViewComponent {
       });
     });
 
-    const arr = [];
+    const arr: AlertGroup[] = [];
     Object.keys(normalized).forEach(group => {
       arr.push({
         name: group,

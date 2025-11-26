@@ -1,13 +1,13 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
 import { PageHeaderComponent } from '../../../../../../../../core/src/shared/components/page-header/page-header.component';
 import { LoadingPageComponent } from '../../../../../../../../core/src/shared/components/loading-page/loading-page.component';
-import { IPageSideNavTab } from '../../../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
-import { IHeaderBreadcrumb } from '../../../../../../../../core/src/shared/components/page-header/page-header.types';
+import type { IPageSideNavTab } from '../../../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
+import type { IHeaderBreadcrumb } from '../../../../../../../../core/src/shared/components/page-header/page-header.types';
 import { metricEntityType } from '../../../../../../../../store/src/helpers/stratos-entity-factory';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { getActiveRouteCfCellProvider } from '../../../../cf.helpers';

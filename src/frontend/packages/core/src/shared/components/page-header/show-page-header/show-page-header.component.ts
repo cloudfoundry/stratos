@@ -1,5 +1,5 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { PortalModule } from '@angular/cdk/portal';
 
 import { TabNavService } from '../../../../tab-nav.service';

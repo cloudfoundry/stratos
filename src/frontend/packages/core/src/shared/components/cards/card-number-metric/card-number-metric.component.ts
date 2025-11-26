@@ -1,10 +1,10 @@
-import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { Component, EventEmitter, Input, type OnChanges, type OnInit, Output, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
-import { RouterNav, AppState, StratosStatus } from '@stratosui/store';
+import { RouterNav, type AppState, StratosStatus } from '@stratosui/store';
 import { UtilsService } from '@stratosui/core';
 import { CardStatusComponent, determineCardStatus } from '../card-status/card-status.component';
 
@@ -14,6 +14,17 @@ enum AlertLevel {
   Warning,
   Error,
   Unknown,
+}
+
+interface Alert {
+  level: AlertLevel;
+  [key: string]: unknown;
+}
+
+interface AlertInfo {
+  info: number;
+  warning: number;
+  error: number;
 }
 
 @Component({
@@ -39,18 +50,18 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   @Input() showUsage = false;
   @Input() textOnly = false;
   @Input() labelAtTop = false;
-  @Input() link!: () => void | string;
-  @Output() showAlerts = new EventEmitter<any>();
+  @Input() link!: () => undefined | string;
+  @Output() showAlerts = new EventEmitter<AlertInfo>();
   @Input() mode!: string;
 
   @Input('alerts')
-  set alerts(alerts: any[]) {
+  set alerts(alerts: Alert[]) {
     if (alerts) {
       this.processAlerts(alerts);
     }
   }
 
-  alertInfo: any;
+  alertInfo!: AlertInfo;
 
   formattedValue!: string;
   formattedLimit!: string;
@@ -130,15 +141,15 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
     }
   }
 
-  processAlerts(alerts: any[]) {
+  processAlerts(alerts: Alert[]) {
     this.alertInfo = {
       info: 0,
       warning: 0,
       error: 0
     };
 
-    alerts.forEach((alert: any) => {
-      switch (alert.level as AlertLevel) {
+    alerts.forEach((alert: Alert) => {
+      switch (alert.level) {
         case AlertLevel.Warning:
           this.alertInfo.warning++;
           break;

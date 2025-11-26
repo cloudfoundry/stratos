@@ -1,25 +1,31 @@
-import { Injector, signal, WritableSignal } from '@angular/core';
+import { type Injector, signal, type WritableSignal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable, of as observableOf, Subject, Subscription } from 'rxjs';
+import { type Observable, of as observableOf, Subject, type Subscription } from 'rxjs';
 import websocketConnect from 'rxjs-websockets';
 import { catchError, combineLatest, filter, first, map, mergeMap, share, switchMap, tap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import type { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
 import { selectCfEntity } from '../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import { selectDeployAppState } from '../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
 import {
-  AppData,
-  DeployApplicationSource,
-  DeployApplicationState,
-  OverrideAppDetails,
+  type AppData,
+  type DeployApplicationSource,
+  type DeployApplicationState,
+  type OverrideAppDetails,
   SocketEventTypes,
 } from '../../../../../cloud-foundry/src/store/types/deploy-application.types';
-import { environment } from '../../../../../core/src/environments/environment.prod';
-import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
-import { FileScannerInfo } from './deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
+import { environment } from '@stratosui/core';
+import type { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
+import type { FileScannerInfo } from './deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
 import { DEPLOY_TYPES_IDS } from './deploy-application-steps.types';
+
+interface WebSocketMessage {
+  type: SocketEventTypes;
+  message: string;
+  timestamp?: number;
+}
 
 // Helper function to create a signal wrapper compatible with BehaviorSubject API
 // The wrapper provides BehaviorSubject-like API (.next, .getValue, .asObservable)
@@ -109,7 +115,7 @@ export class DeployApplicationDeployer {
   cfGuid!: string;
   orgGuid!: string;
   spaceGuid!: string;
-  applicationSource: any;
+  applicationSource: DeployApplicationSource | FileScannerInfo | null = null;
   applicationOverrides!: OverrideAppDetails;
 
   // Signal wrappers with BehaviorSubject-compatible API for backward compatibility
@@ -127,18 +133,18 @@ export class DeployApplicationDeployer {
   // Are we deploying?
   deploying = false;
 
-  private inputStream: any;
+  private inputStream: Subject<string | ArrayBuffer>;
 
   private isOpen = false;
 
   public fsFileInfo!: FileScannerInfo;
 
-  private fileTransfers: any;
+  private fileTransfers: Array<File & { fullPath: string }> = [];
   private fileTransferStatus!: FileTransferStatus;
-  private currentFileTransfer: any;
+  private currentFileTransfer: File & { fullPath: string } | undefined;
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store,
     public cfOrgSpaceService: CfOrgSpaceDataService,
     private injector: Injector,
   ) {
@@ -201,7 +207,7 @@ export class DeployApplicationDeployer {
         return observableOf(appDetails).pipe(combineLatest(orgSubscription, spaceSubscription));
       }),
       first(),
-      tap(([appDetail, org, space]) => {
+      tap(([appDetail, org, space]: [DeployApplicationState, any, any]) => {
         this.cfGuid = appDetail.cloudFoundryDetails.cloudFoundry;
         this.orgGuid = appDetail.cloudFoundryDetails.org;
         this.spaceGuid = appDetail.cloudFoundryDetails.space;
@@ -215,15 +221,15 @@ export class DeployApplicationDeployer {
           `?org=${org.entity.name}&space=${space.entity.name}${appId}`
         );
 
-        this.inputStream = new Subject<string>();
+        this.inputStream = new Subject<string | ArrayBuffer>();
         const buffer = websocketConnect(streamUrl)
           .pipe(
             switchMap((get) => get(this.inputStream)),
-            catchError((e: any): any[] => {
+            catchError((_e: Error): [] => {
               return [];
             }),
             filter(l => !!l),
-            map(log => JSON.parse(log)),
+            map(log => JSON.parse(typeof log === 'string' ? log : new TextDecoder().decode(log as ArrayBuffer))),
             tap((log) => {
               // Deal with control messages
               if (log.type !== SocketEventTypes.DATA) {
@@ -260,7 +266,7 @@ export class DeployApplicationDeployer {
     // After the source has been sent, acknowledge the wait
     const msg = {
       message: '',
-      timestamp: Math.round((new Date()).getTime() / 1000),
+      timestamp: Math.round(Date.now()/ 1000),
       type: SocketEventTypes.SOURCE_WAIT_ACK
     };
     this.inputStream.next(JSON.stringify(msg));
@@ -269,7 +275,7 @@ export class DeployApplicationDeployer {
   sendAppOverride = (appOverrides: OverrideAppDetails) => {
     const msg = {
       message: JSON.stringify(appOverrides),
-      timestamp: Math.round((new Date()).getTime() / 1000),
+      timestamp: Math.round(Date.now()/ 1000),
       type: SocketEventTypes.OVERRIDES_SUPPLIED
     };
     return JSON.stringify(msg);
@@ -301,7 +307,7 @@ export class DeployApplicationDeployer {
 
     const msg = {
       message: JSON.stringify(gitscm),
-      timestamp: Math.round((new Date()).getTime() / 1000),
+      timestamp: Math.round(Date.now()/ 1000),
       type: SocketEventTypes.SOURCE_GITSCM
     };
     return JSON.stringify(msg);
@@ -316,7 +322,7 @@ export class DeployApplicationDeployer {
 
     const msg = {
       message: JSON.stringify(gitUrl),
-      timestamp: Math.round((new Date()).getTime() / 1000),
+      timestamp: Math.round(Date.now()/ 1000),
       type: SocketEventTypes.SOURCE_GITURL
     };
     return JSON.stringify(msg);
@@ -332,7 +338,7 @@ export class DeployApplicationDeployer {
 
     const msg = {
       message: JSON.stringify(dockerInfo),
-      timestamp: Math.round((new Date()).getTime() / 1000),
+      timestamp: Math.round(Date.now()/ 1000),
       type: SocketEventTypes.SOURCE_DOCKER_IMG
     };
     return JSON.stringify(msg);
@@ -341,13 +347,13 @@ export class DeployApplicationDeployer {
   sendCloseAcknowledgement = () => {
     const msg = {
       message: '{}',
-      timestamp: Math.round((new Date()).getTime() / 1000),
+      timestamp: Math.round(Date.now()/ 1000),
       type: SocketEventTypes.CLOSE_ACK
     };
     return JSON.stringify(msg);
   };
 
-  processWebSocketMessage = (log: any) => {
+  processWebSocketMessage = (log: WebSocketMessage) => {
     switch (log.type) {
       case SocketEventTypes.MANIFEST:
         this.streamTitle = 'Starting deployment...';
@@ -398,22 +404,28 @@ export class DeployApplicationDeployer {
         this.onClose(log, 'Deploy Failed!',
           'Failed to deploy app!');
         break;
-      case SocketEventTypes.SOURCE_REQUIRED:
-        const sourceInfo = this.sendProjectInfo(this.applicationSource);
-        if (!sourceInfo) {
-          this.onClose(log, 'Deploy Failed - Unknown source type',
-            'Failed to deploy the app - unknown source type');
+      case SocketEventTypes.SOURCE_REQUIRED: {
+        if ('type' in this.applicationSource) {
+          const sourceInfo = this.sendProjectInfo(this.applicationSource);
+          if (!sourceInfo) {
+            this.onClose(log, 'Deploy Failed - Unknown source type',
+              'Failed to deploy the app - unknown source type');
+          } else {
+            this.inputStream.next(sourceInfo);
+          }
         } else {
-          this.inputStream.next(sourceInfo);
+          this.onClose(log, 'Deploy Failed - Missing source type',
+            'Failed to deploy the app - source type not provided');
         }
         break;
-      case SocketEventTypes.OVERRIDES_REQUIRED:
+      }
+      case SocketEventTypes.OVERRIDES_REQUIRED: {
         const overrides = this.sendAppOverride(this.applicationOverrides);
         this.inputStream.next(overrides);
         break;
+      }
       case SocketEventTypes.EVENT_CLONED:
       case SocketEventTypes.EVENT_FETCHED_MANIFEST:
-      case SocketEventTypes.MANIFEST:
         break;
       case SocketEventTypes.SOURCE_FILE_ACK:
         this.sendNextFile();
@@ -437,7 +449,7 @@ export class DeployApplicationDeployer {
       // Send file metadata
       const msg = {
         message: file.fullPath,
-        timestamp: Math.round((new Date()).getTime() / 1000),
+        timestamp: Math.round(Date.now()/ 1000),
         type: SocketEventTypes.SOURCE_FILE
       };
 
@@ -458,20 +470,20 @@ export class DeployApplicationDeployer {
     }
   }
 
-  private onClose(log: any, title: string, error: any) {
+  private onClose(log: WebSocketMessage, title: string | null, errorMsg: string | null) {
     if (title) {
       this.streamTitle = title;
     }
     this.deploying = false;
     this.updateStatus(
-      error,
-      error ? `${error}\nReason: ${log.message}` : undefined
+      !!errorMsg,
+      errorMsg ? errorMsg : undefined
     );
   }
 
   // File Upload
   sendLocalSourceMetadata() {
-    const metadata: { files: any[]; folders: any[] } = {
+    const metadata: { files: Array<File & { fullPath: string }>; folders: string[] } = {
       files: [],
       folders: []
     };
@@ -499,26 +511,33 @@ export class DeployApplicationDeployer {
     // Send the source metadata
     return JSON.stringify({
       message: JSON.stringify(transferMetadata),
-      timestamp: Math.round((new Date()).getTime() / 1000),
+      timestamp: Math.round(Date.now()/ 1000),
       type: SocketEventTypes.SOURCE_FOLDER
     });
   }
 
   // Flatten files and folders
-  collectFoldersAndFiles(metadata: any, base: string, folder: any) {
+  collectFoldersAndFiles(
+    metadata: { files: Array<File & { fullPath: string }>; folders: string[] },
+    base: string | null,
+    folder: { files?: File[]; folders?: Record<string, { files?: File[]; folders?: Record<string, unknown> }> }
+  ) {
     if (folder.files) {
-      folder.files.forEach((file: any) => {
-        file.fullPath = base ? base + '/' + file.name : file.name;
-        metadata.files.push(file);
+      folder.files.forEach((file: File) => {
+        const fileWithPath = file as File & { fullPath: string };
+        fileWithPath.fullPath = base ? `${base}/${file.name}` : file.name;
+        metadata.files.push(fileWithPath);
       });
     }
 
     if (folder.folders) {
       Object.keys(folder.folders).forEach(name => {
-        const sub = folder.folders[name];
-        const fullPath = base ? base + '/' + name : name;
+        const sub = folder.folders?.[name];
+        const fullPath = base ? `${base}/${name}` : name;
         metadata.folders.push(fullPath);
-        this.collectFoldersAndFiles(metadata, fullPath, sub);
+        if (sub) {
+          this.collectFoldersAndFiles(metadata, fullPath, sub);
+        }
       });
     }
   }

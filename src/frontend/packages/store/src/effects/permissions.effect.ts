@@ -5,16 +5,16 @@ import { Action, Store } from '@ngrx/store';
 import { combineLatest, EMPTY, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
-import { CONNECT_ENDPOINTS_SUCCESS, EndpointActionComplete } from '../actions/endpoint.actions';
+import { CONNECT_ENDPOINTS_SUCCESS, type EndpointActionComplete } from '../actions/endpoint.actions';
 import {
   GET_CURRENT_USER_RELATIONS,
   GET_CURRENT_USER_RELATIONS_FAILED,
   GET_CURRENT_USER_RELATIONS_SUCCESS,
-  GetCurrentUsersRelations,
+  type GetCurrentUsersRelations,
 } from '../actions/permissions.actions';
-import { AppState } from '../app-state';
+import type { AppState } from '../app-state';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
-import { EntityUserRolesEndpoint } from '../entity-request-pipeline/entity-request-pipeline.types';
+import type { EntityUserRolesEndpoint } from '../entity-request-pipeline/entity-request-pipeline.types';
 
 const successAction: Action = { type: GET_CURRENT_USER_RELATIONS_SUCCESS };
 const failedAction: Action = { type: GET_CURRENT_USER_RELATIONS_FAILED };
@@ -30,7 +30,7 @@ export class PermissionsEffects {
 
    getCurrentUsersPermissions$ = createEffect(() => this.actions$.pipe(
     ofType<GetCurrentUsersRelations>(GET_CURRENT_USER_RELATIONS),
-    switchMap(action => {
+    switchMap(_action => {
       const allRequestsCompleted = entityCatalog.getAllBaseEndpointTypes().reduce((res, endpointType) => {
         if (endpointType.definition.userRolesFetch) {
           res.push(endpointType.definition.userRolesFetch([], this.store, this.httpClient));

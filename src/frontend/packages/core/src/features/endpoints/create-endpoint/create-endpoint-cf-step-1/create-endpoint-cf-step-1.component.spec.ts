@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
@@ -8,7 +8,8 @@ import {
   generateStratosEntities,
   EntityCatalogHelper,
   EntityCatalogHelpers,
-  StratosCatalogEndpointEntity
+  StratosCatalogEndpointEntity,
+  type TestEntityCatalog
 } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 
@@ -20,7 +21,7 @@ describe('CreateEndpointCfStep1Component', () => {
 
   beforeEach(async () => {
     // Clear and register entities BEFORE TestBed configuration for Angular 20
-    (entityCatalog as any).clear();
+    (entityCatalog as TestEntityCatalog).clear();
     const entities = generateStratosEntities();
     entities.forEach(entity => entityCatalog.register(entity));
 

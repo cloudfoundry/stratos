@@ -1,19 +1,20 @@
-import { CommonModule } from '@angular/common';
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 import {
-  CurrentUserPermissionsService,
   ActionListConfigProvider,
-  ListViewTypes,
+  CurrentUserPermissionsService,
   ListViewComponent,
-  PageSubNavComponent
+  ListViewTypes,
+  PageSubNavComponent,
 } from '@stratosui/core';
-import { ListView, APIResource } from '@stratosui/store';
-import { IOrganization } from '../../../../cf-api.types';
+import { APIResource, GeneralAppState, ListView } from '@stratosui/store';
+
+import type { IOrganization } from '../../../../cf-api.types';
 import { CfOrgCardComponent } from '../../../../shared/components/list/list-types/cf-orgs/cf-org-card/cf-org-card.component';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
@@ -22,14 +23,14 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
   selector: 'app-cloud-foundry-organizations',
   templateUrl: './cloud-foundry-organizations.component.html',
   styleUrls: ['./cloud-foundry-organizations.component.scss'],
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
   imports: [
-    CommonModule,
+    AsyncPipe,
     RouterModule,
     PageSubNavComponent,
-    ListViewComponent
-  ]
+    ListViewComponent,
+  ],
 })
 export class CloudFoundryOrganizationsComponent {
   public canAddOrg$: Observable<boolean>;
@@ -39,7 +40,7 @@ export class CloudFoundryOrganizationsComponent {
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
     currentUserPermissionsService: CurrentUserPermissionsService,
-    private store: Store<any>,
+    private store: Store<GeneralAppState>,
   ) {
     this.canAddOrg$ = currentUserPermissionsService.can(CfCurrentUserPermissions.ORGANIZATION_CREATE, this.cfEndpointService.cfGuid);
 

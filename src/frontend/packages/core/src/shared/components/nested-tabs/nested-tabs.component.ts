@@ -1,8 +1,8 @@
 
-import { ChangeDetectionStrategy, Component, Input, OnInit  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, type OnInit  } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
-import { TabNavItem } from '../../../tab-nav.types';
+import type { TabNavItem } from '../../../tab-nav.types';
 
 @Component({
   selector: 'app-nested-tabs',
@@ -18,10 +18,9 @@ export class NestedTabsComponent implements OnInit {
 
   @Input()
   tabs: TabNavItem[] = [];
-  constructor() {
 
+  ngOnInit() {
+    // Component initialization
   }
-
-  ngOnInit() { }
 
 }

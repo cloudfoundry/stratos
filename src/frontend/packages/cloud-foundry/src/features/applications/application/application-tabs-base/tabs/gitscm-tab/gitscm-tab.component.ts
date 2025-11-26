@@ -1,9 +1,9 @@
-import { CommonModule, DatePipe } from '@angular/common';
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { TailwindSnackBarService, TailwindSnackBarRef } from '@stratosui/core';
+import { CommonModule, AsyncPipe, DatePipe } from '@angular/common';
+import { Component, type OnDestroy, type OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { TailwindSnackBarService, type TailwindSnackBarRef } from '@stratosui/core';
 import { Store } from '@ngrx/store';
-import { GitCommit, gitEntityCatalog, GitMeta, GitRepo, GitSCMService, GitSCMType, SCMIcon, GithubCommitAuthorComponent } from '@stratosui/git';
-import { Observable, Subscription } from 'rxjs';
+import { type GitCommit, gitEntityCatalog, type GitMeta, type GitRepo, GitSCMService, type GitSCMType, type SCMIcon, GithubCommitAuthorComponent } from '@stratosui/git';
+import type { Observable, Subscription } from 'rxjs';
 import {
   distinctUntilChanged,
   filter,
@@ -17,15 +17,15 @@ import {
 } from 'rxjs/operators';
 
 import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
-import {
+import type {
   NoContentMessageLine,
 } from '../../../../../../../../core/src/shared/components/no-content-message/no-content-message.component';
-import { CFAppState } from '../../../../../../cf-app-state';
+import type { CFAppState } from '../../../../../../cf-app-state';
 import {
   GithubCommitsListConfigServiceAppTab,
 } from '../../../../../../shared/components/list/list-types/github-commits/github-commits-list-config-app-tab.service';
 import { ApplicationService } from '../../../../application.service';
-import { EnvVarStratosProject } from '../build-tab/application-env-vars.service';
+import type { EnvVarStratosProject } from '../build-tab/application-env-vars.service';
 import { LoadingPageComponent } from '../../../../../../../../core/src/shared/components/loading-page/loading-page.component';
 import { TileGridComponent } from '../../../../../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
 import { TileGroupComponent } from '../../../../../../../../core/src/shared/components/tile/tile-group/tile-group.component';
@@ -43,6 +43,8 @@ import { TruncatePipe } from '../../../../../../../../core/src/core/truncate.pip
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    AsyncPipe,
+    DatePipe,
     LoadingPageComponent,
     TileGridComponent,
     TileGroupComponent,
@@ -78,7 +80,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
   public isHead$!: Observable<boolean>;
 
   private gitSCMRepoErrorSub!: Subscription;
-  private snackBarRef: TailwindSnackBarRef<any>;
+  private snackBarRef!: TailwindSnackBarRef<unknown>;
 
   public noContentFirstLine = 'Unable to fetch details';
   public noContentSecondLine: NoContentMessageLine = {

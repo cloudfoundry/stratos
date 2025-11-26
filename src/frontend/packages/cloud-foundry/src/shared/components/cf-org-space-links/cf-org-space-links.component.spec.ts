@@ -1,5 +1,5 @@
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -7,7 +7,7 @@ import { of } from 'rxjs';
 
 import { CoreModule } from '@stratosui/core';
 import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { CfOrgSpaceLabelService } from '../../services/cf-org-space-label.service';
+import type { CfOrgSpaceLabelService } from '../../services/cf-org-space-label.service';
 import { CfOrgSpaceLinksComponent } from "./cf-org-space-links.component";
 
 describe('CfOrgSpaceLinksComponent', () => {
@@ -36,11 +36,17 @@ describe('CfOrgSpaceLinksComponent', () => {
       getOrgURL: vi.fn().mockReturnValue(['/org/path']),
       getSpaceName: vi.fn().mockReturnValue(of('SpaceName')),
       getSpaceURL: vi.fn().mockReturnValue(['/space/path']),
-      multipleConnectedEndpoints$: of(false)
+      getLabel: vi.fn().mockReturnValue(of('Org/Space')),
+      getValue: vi.fn().mockReturnValue(of('OrgName/SpaceName')),
+      multipleConnectedEndpoints$: of(false),
+      cf$: of({ name: 'CfName', guid: 'cf-guid' } as any),
+      org$: of({ entity: { name: 'OrgName' } } as any),
+      space$: of({ entity: { name: 'SpaceName' } } as any),
+      store: {} as any
     };
     fixture = TestBed.createComponent(CfOrgSpaceLinksComponent);
     component = fixture.componentInstance;
-    component.service = service;
+    component.service = service as unknown as CfOrgSpaceLabelService;
     fixture.detectChanges();
   });
 
@@ -63,12 +69,18 @@ describe('CfOrgSpaceLinksComponent', () => {
         getOrgURL: vi.fn().mockReturnValue(['/org/path']),
         getSpaceName: vi.fn().mockReturnValue(of('SpaceName')),
         getSpaceURL: vi.fn().mockReturnValue(['/space/path']),
-        multipleConnectedEndpoints$: of(true)
+        getLabel: vi.fn().mockReturnValue(of('CF/Org/Space')),
+        getValue: vi.fn().mockReturnValue(of('CfName/OrgName/SpaceName')),
+        multipleConnectedEndpoints$: of(true),
+        cf$: of({ name: 'CfName', guid: 'cf-guid' } as any),
+        org$: of({ entity: { name: 'OrgName' } } as any),
+        space$: of({ entity: { name: 'SpaceName' } } as any),
+        store: {} as any
       };
       // Recreate the component with the new service
       fixture = TestBed.createComponent(CfOrgSpaceLinksComponent);
       component = fixture.componentInstance;
-      component.service = service;
+      component.service = service as unknown as CfOrgSpaceLabelService;
       fixture.detectChanges();
     });
 

@@ -1,13 +1,14 @@
 import { NgModule } from '@angular/core';
-import { Router } from '@angular/router';
-import { Store } from '@ngrx/store';
+import type { Router } from '@angular/router';
+import type { Store } from '@ngrx/store';
 
 import { GetSystemInfo } from '../../store/src/actions/system.actions';
 import { DesktopLoginComponent } from './desktop-login/desktop-login.component';
 import { ElectronService } from './electron/electron.service';
 
 @NgModule({
-  declarations: [
+  imports: [
+    // Standalone components
     DesktopLoginComponent,
   ],
   providers: [
@@ -39,7 +40,7 @@ export class DesktopModule {
     if (!this.pElectronService.isElectronApp) {
       return;
     }
-    this.pElectronService.ipcRenderer.addListener('endpointsChanged', (sender, args) => {
+    this.pElectronService.ipcRenderer.addListener('endpointsChanged', (_sender, _args) => {
       this.store.dispatch(new GetSystemInfo());
     });
   }

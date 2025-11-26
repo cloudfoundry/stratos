@@ -1,7 +1,7 @@
 import { HttpParams } from '@angular/common/http';
 
 import { resultPerPageParam, resultPerPageParamDefault } from '../../reducers/pagination-reducer/pagination-reducer.types';
-import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../types/pagination.types';
+import type { PaginatedAction, PaginationEntityState, PaginationParam } from '../../types/pagination.types';
 
 export function getPaginationParams(paginationState: PaginationEntityState): PaginationParam {
   return paginationState
@@ -21,7 +21,7 @@ function setRequestParams(
   }
 
   return Object.keys(params).reduce((allParams, key) => {
-    return allParams.set(key, params[key] + '');
+    return allParams.set(key, `${params[key]}`);
   }, requestParams);
 }
 

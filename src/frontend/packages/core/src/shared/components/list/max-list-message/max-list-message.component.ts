@@ -1,13 +1,13 @@
-import { Component, EventEmitter, Input, OnDestroy, Output, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, type OnDestroy, Output, signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { Store } from '@ngrx/store';
-import { entityCatalog, EntityCatalogEntityConfig, PaginationPageIteratorConfig, AppState } from '@stratosui/store';
-import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
+import { entityCatalog, type EntityCatalogEntityConfig, type PaginationPageIteratorConfig, type AppState } from '@stratosui/store';
+import { BehaviorSubject, combineLatest, type Observable, type Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { safeUnsubscribe } from '../../../../core/utils.service';
-import { NoContentMessageComponent, NoContentMessageLine } from '../../no-content-message/no-content-message.component';
-import { ITableTextMaxed } from '../list-table/table.types';
+import { NoContentMessageComponent, type NoContentMessageLine } from '../../no-content-message/no-content-message.component';
+import type { ITableTextMaxed } from '../list-table/table.types';
 
 @Component({
   selector: 'app-max-list-message',

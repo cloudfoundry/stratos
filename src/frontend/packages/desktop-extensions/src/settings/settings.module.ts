@@ -8,10 +8,9 @@ import { SettingsRoutingModule } from './settings.routing';
   imports: [
     CoreModule,
     SharedModule,
-    SettingsRoutingModule
-  ],
-  declarations: [
+    SettingsRoutingModule,
+    // Standalone components
     DesktopSettingsComponent
-  ],
+  ]
 })
 export class DesktopSettingsModule { }

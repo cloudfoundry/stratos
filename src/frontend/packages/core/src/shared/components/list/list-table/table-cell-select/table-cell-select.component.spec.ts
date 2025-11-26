@@ -1,17 +1,17 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { CoreModule } from '../../../../../core/core.module';
-import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
+import type { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import { TableCellSelectComponent } from './table-cell-select.component';
 import { of as observableOf } from 'rxjs';
 
 describe('TableCellSelectComponent', () => {
-  let component: TableCellSelectComponent<any>;
-  let fixture: ComponentFixture<TableCellSelectComponent<any>>;
+  let component: TableCellSelectComponent<unknown>;
+  let fixture: ComponentFixture<TableCellSelectComponent<unknown>>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -38,8 +38,8 @@ describe('TableCellSelectComponent', () => {
     component.rowState = observableOf({});
     component.dataSource = {
       selectedRows: () => new Map(),
-      getRowUniqueId: (row: any) => ''
-    } as unknown as IListDataSource<any>;
+      getRowUniqueId: (row: unknown) => ''
+    } as unknown as IListDataSource<unknown>;
     fixture.detectChanges();
   });
 

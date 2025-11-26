@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
@@ -6,8 +6,8 @@ import { BaseTestModules, STORE_TEST_PROVIDERS } from "@test-framework/core-test
 import { AppActionMonitorComponent } from './app-action-monitor.component';
 
 describe('AppActionMonitorComponent', () => {
-  let component: AppActionMonitorComponent<any>;
-  let fixture: ComponentFixture<AppActionMonitorComponent<any>>;
+  let component: AppActionMonitorComponent<unknown>;
+  let fixture: ComponentFixture<AppActionMonitorComponent<unknown>>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({

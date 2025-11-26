@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -8,7 +8,8 @@ import {
   generateStratosEntities,
   EntityCatalogHelper,
   EntityCatalogHelpers,
-  InternalEventMonitorFactory
+  InternalEventMonitorFactory,
+  type TestEntityCatalog
 } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@test-framework';
 import { ErrorPageComponent } from './error-page.component';
@@ -19,7 +20,7 @@ describe('ErrorPageComponent', () => {
 
   beforeEach(async () => {
     // Clear and register entities BEFORE TestBed configuration for Angular 20
-    (entityCatalog as any).clear();
+    (entityCatalog as TestEntityCatalog).clear();
     const entities = generateStratosEntities();
     entities.forEach(entity => entityCatalog.register(entity));
 

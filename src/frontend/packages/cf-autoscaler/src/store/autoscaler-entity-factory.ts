@@ -1,4 +1,4 @@
-import { Schema, schema } from 'normalizr';
+import type { Schema, schema } from 'normalizr';
 
 import { getAPIResourceGuid } from '../../../cloud-foundry/src/store/selectors/api.selectors';
 import { EntitySchema, metricEntityType } from '@stratosui/store';

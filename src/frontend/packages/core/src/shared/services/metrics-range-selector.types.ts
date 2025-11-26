@@ -1,4 +1,4 @@
-import { MetricQueryType } from '@stratosui/store';
+import type { MetricQueryType } from '@stratosui/store';
 
 export type DurationTuple = [number, string];
 export interface ITimeRange {

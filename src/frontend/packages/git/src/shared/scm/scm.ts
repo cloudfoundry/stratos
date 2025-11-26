@@ -1,9 +1,9 @@
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import type { HttpClient } from '@angular/common/http';
+import type { Observable } from 'rxjs';
 
-import { GitBranch, GitCommit, GitRepo, GitSuggestedRepo } from '../../store/git.public-types';
-import { GitApiRequest } from './scm-base';
-import { GitSCMType } from './scm.service';
+import type { GitBranch, GitCommit, GitRepo, GitSuggestedRepo } from '../../store/git.public-types';
+import type { GitApiRequest } from './scm-base';
+import type { GitSCMType } from './scm.service';
 
 export interface SCMIcon {
   iconName: string;
@@ -22,15 +22,15 @@ export interface GitSCM {
   getBranch(httpClient: HttpClient, projectName: string, branchId: string): Observable<GitBranch>;
   getBranches(httpClient: HttpClient, projectName: string): Observable<GitBranch[]>;
   getCommit(httpClient: HttpClient, projectName: string, commitSha: string): Observable<GitCommit>;
-  convertCommit(commit: any): GitCommit;
+  convertCommit(commit: unknown): GitCommit;
   getCommits(httpClient: HttpClient, projectName: string, commitSha: string): Observable<GitCommit[]>;
   getCommitApi(projectName: string, commitSha: string): Observable<GitApiRequest>;
   getCompareCommitURL(projectUrl: string, commitSha1: string, commitSha2: string): string;
   getMatchingRepositories(httpClient: HttpClient, projectName: string): Observable<GitSuggestedRepo[]>;
-  parseErrorAsString(error: any): string;
+  parseErrorAsString(error: unknown): string;
 }
 
-export interface GitMeta {
+export interface GitMeta extends Record<string, unknown> {
   projectName: string;
   scm: GitSCM; // FIXME: Remove from action, see #4245
   commitSha?: string;

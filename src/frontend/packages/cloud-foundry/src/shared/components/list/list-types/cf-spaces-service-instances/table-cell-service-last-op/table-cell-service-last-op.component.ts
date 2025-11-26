@@ -1,9 +1,9 @@
 
-import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, type OnInit , ChangeDetectionStrategy } from '@angular/core';
 
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { IServiceInstance } from '../../../../../../cf-api-svc.types';
+import { TableCellCustom } from '@stratosui/core';
+import type { APIResource } from '../../../../../../../../store/src/types/api.types';
+import type { IServiceInstance } from '../../../../../../cf-api-svc.types';
 import { userProvidedServiceInstanceEntityType } from '../../../../../../cf-entity-types';
 import { ServiceInstanceLastOpComponent } from '../../../../service-instance-last-op/service-instance-last-op.component';
 
@@ -20,7 +20,7 @@ import { ServiceInstanceLastOpComponent } from '../../../../service-instance-las
 export class TableCellServiceLastOpComponent extends TableCellCustom<APIResource<IServiceInstance>> implements OnInit {
 
   // tslint:disable-next-line:ban-types
-  isUserProvidedServiceInstance!: Boolean;
+  isUserProvidedServiceInstance!: boolean;
 
   ngOnInit() {
     this.isUserProvidedServiceInstance = this.entityKey === userProvidedServiceInstanceEntityType;

@@ -1,6 +1,7 @@
-import { MetricQueryConfig, MetricsAction, MetricsChartAction } from '../../../store/src/actions/metrics.actions';
+import type { MetricQueryConfig } from '../../../store/src/actions/metrics.actions';
+import { MetricsAction, MetricsChartAction } from '../../../store/src/actions/metrics.actions';
 import { MetricQueryType } from '../../../store/src/types/metric.types';
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
+import type { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
 
 class CfMetricsAction extends MetricsAction {
@@ -45,7 +46,7 @@ export class FetchCFCellMetricsAction extends CfMetricsAction {
     public query: MetricQueryConfig,
     queryType: MetricQueryType = MetricQueryType.QUERY,
     isSeries = true) {
-    super(cfGuid + '-' + cellId, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf/cells`, null, queryType, isSeries);
+    super(`${cfGuid}-${cellId}`, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf/cells`, null, queryType, isSeries);
   }
 }
 

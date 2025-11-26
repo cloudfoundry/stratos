@@ -2,13 +2,13 @@
 export type SortDirection = 'asc' | 'desc' | '';
 
 import { getPaginationKey } from '../../../../store/src/actions/pagination.actions';
-import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
-import { ApiRequestTypes } from '../../../../store/src/reducers/api-request-reducer/request-helpers';
-import { PaginationParam } from '../../../../store/src/types/pagination.types';
+import type { EntitySchema } from '../../../../store/src/helpers/entity-schema';
+import type { ApiRequestTypes } from '../../../../store/src/reducers/api-request-reducer/request-helpers';
+import type { PaginationParam } from '../../../../store/src/types/pagination.types';
 import { KUBERNETES_ENDPOINT_TYPE, kubernetesEntityFactory } from '../kubernetes-entity-factory';
 import { getGuidFromKubePod } from './kube.getIds';
-import { BasicKubeAPIResource } from './kube.types';
-import { KubePaginationAction, KubeSingleEntityAction } from './kubernetes.actions';
+import type { BasicKubeAPIResource } from './kube.types';
+import type { KubePaginationAction, KubeSingleEntityAction } from './kubernetes.actions';
 
 
 export const GET_KUBE_RESOURCES = '[KUBERNETES Endpoint] Get Resources';
@@ -93,7 +93,7 @@ export class GetKubernetesResourcesInNamespace extends GetKubernetesResources {
 export class GetKubernetesResourcesInWorkload extends GetKubernetesResources {
   constructor(entityType: string, kubeGuid: string, namespace: string, releaseTitle: string) {
     super(entityType, kubeGuid);
-    this.paginationKey = getPaginationKey(entityType, namespace + ':' + releaseTitle, kubeGuid);
+    this.paginationKey = getPaginationKey(entityType, `${namespace}:${releaseTitle}`, kubeGuid);
   }
   type = GET_KUBE_RESOURCES_IN_WORKLOAD;
   actions = [
@@ -108,8 +108,7 @@ export class DeleteKubernetesResource implements KubeSingleEntityAction {
   public entity: EntitySchema[];
 
   constructor(
-    public entityType: string,
-    private resource: BasicKubeAPIResource,
+    public entityType: string,resource: BasicKubeAPIResource,
     public kubeGuid: string,
     public name: string,
     public namespace?: string

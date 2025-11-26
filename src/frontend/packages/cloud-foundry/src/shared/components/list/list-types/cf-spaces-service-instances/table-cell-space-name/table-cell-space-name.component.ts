@@ -1,10 +1,10 @@
-import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, type OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 import { TableCellCustom } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { IServiceInstance } from '../../../../../../cf-api-svc.types';
+import type { APIResource } from '@stratosui/store';
+import type { IServiceInstance } from '../../../../../../cf-api-svc.types';
 
 @Component({
   selector: 'app-table-cell-space-name',

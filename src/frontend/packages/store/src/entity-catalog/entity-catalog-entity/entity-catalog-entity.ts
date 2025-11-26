@@ -20,10 +20,10 @@ import { APISuccessOrFailedAction } from '../../types/request.types';
 import type { EntityRequestAction } from '../../types/request.types';
 import type { IEndpointFavMetadata, UserFavorite } from '../../types/user-favorites.types';
 import {
-  ActionBuilderAction,
+  type ActionBuilderAction,
   ActionOrchestrator,
-  OrchestratedActionBuilderConfig,
-  OrchestratedActionBuilders,
+  type OrchestratedActionBuilderConfig,
+  type OrchestratedActionBuilders,
 } from '../action-orchestrator/action-orchestrator';
 import { EntityCatalogHelpers } from '../entity-catalog.helper';
 import type {
@@ -36,7 +36,7 @@ import type {
   StratosEndpointExtensionDefinition,
 } from '../entity-catalog.types';
 import { ActionBuilderConfigMapper } from './action-builder-config.mapper';
-import { ActionDispatchers, EntityCatalogEntityStoreHelpers } from './entity-catalog-entity-store-helpers';
+import { type ActionDispatchers, EntityCatalogEntityStoreHelpers } from './entity-catalog-entity-store-helpers';
 import type { EntityCatalogEntityStore } from './entity-catalog-entity.types';
 import type { NonOptionalKeys, RemoveIndex } from './type.helpers';
 
@@ -47,8 +47,8 @@ export type KnownActionBuilders<ABC extends OrchestratedActionBuilders> = Pick<
 
 export interface EntityCatalogBuilders<
   T extends IEntityMetadata = IEntityMetadata,
-  Y = any,
-  AB extends OrchestratedActionBuilderConfig = OrchestratedActionBuilders,
+  Y = unknown,
+  AB extends OrchestratedActionBuilderConfig | OrchestratedActionBuilders = OrchestratedActionBuilders,
   > {
   entityBuilder?: IStratosEntityBuilder<T, Y>;
   // Allows extensions to modify entities data in the store via none API Effect or unrelated actions.
@@ -60,8 +60,8 @@ type DefinitionTypes = IStratosEntityDefinition<EntityCatalogSchemas> |
   IStratosBaseEntityDefinition<EntityCatalogSchemas>;
 export class StratosBaseCatalogEntity<
   T extends IEntityMetadata = IEntityMetadata,
-  Y = any,
-  AB extends OrchestratedActionBuilderConfig = OrchestratedActionBuilderConfig,
+  Y = unknown,
+  AB extends OrchestratedActionBuilderConfig | OrchestratedActionBuilders = OrchestratedActionBuilders,
   // This typing may cause an issue down the line.
   ABC extends OrchestratedActionBuilders = AB extends OrchestratedActionBuilders ? AB : OrchestratedActionBuilders,
   > {
@@ -183,7 +183,7 @@ export class StratosBaseCatalogEntity<
   }
 
   public getGuidFromEntity(entity: Y) {
-    if (this.builders.entityBuilder && this.builders.entityBuilder.getGuid) {
+    if (this.builders.entityBuilder?.getGuid) {
       return this.builders.entityBuilder.getGuid(entity);
     }
     return null;
@@ -207,7 +207,7 @@ export class StratosBaseCatalogEntity<
     action: EntityRequestAction,
     actionString: 'start' | 'success' | 'failure' | 'complete'
   ) {
-    if (action && action.actions) {
+    if (action?.actions) {
       switch (actionString) {
         case 'success':
           return action.actions[1];
@@ -243,7 +243,7 @@ export class StratosBaseCatalogEntity<
     actionString: 'start' | 'success' | 'failure' | 'complete',
     actionOrActionBuilderKey?: EntityRequestAction | string,
     requestType?: string,
-    response?: any
+    response?: unknown
   ): APISuccessOrFailedAction {
     if (typeof actionOrActionBuilderKey === 'string') {
       return new APISuccessOrFailedAction(this.getRequestType(actionString, actionOrActionBuilderKey), null, response);
@@ -280,17 +280,11 @@ export class StratosBaseCatalogEntity<
 
 export class StratosCatalogEntity<
   T extends IEntityMetadata = IEntityMetadata,
-  Y = any,
-  AB extends OrchestratedActionBuilderConfig = OrchestratedActionBuilders,
+  Y = unknown,
+  AB extends OrchestratedActionBuilderConfig | OrchestratedActionBuilders = OrchestratedActionBuilders,
   ABC extends OrchestratedActionBuilders = AB extends OrchestratedActionBuilders ? AB : OrchestratedActionBuilders,
   > extends StratosBaseCatalogEntity<T, Y, AB, ABC> {
   public declare definition: IStratosEntityDefinition<EntityCatalogSchemas, Y, ABC>;
-  constructor(
-    entity: IStratosEntityDefinition,
-    config?: EntityCatalogBuilders<T, Y, AB>
-  ) {
-    super(entity, config);
-  }
 
   public getPaginationConfig(): PaginationPageIteratorConfig {
     return this.definition.paginationConfig ?
@@ -319,7 +313,12 @@ export class StratosCatalogEntity<
   }
 }
 
-export class StratosCatalogEndpointEntity extends StratosBaseCatalogEntity<IEndpointFavMetadata, EndpointModel> {
+export class StratosCatalogEndpointEntity<
+  T extends IEntityMetadata = IEndpointFavMetadata,
+  Y = EndpointModel,
+  AB extends OrchestratedActionBuilderConfig | OrchestratedActionBuilders = OrchestratedActionBuilders,
+  ABC extends OrchestratedActionBuilders = AB extends OrchestratedActionBuilders ? AB : OrchestratedActionBuilders,
+> extends StratosBaseCatalogEntity<T, Y, AB, ABC> {
   static readonly baseEndpointRender: IStratosEntityBuilder<IEndpointFavMetadata, EndpointModel> = {
     getMetadata: endpoint => ({
       name: endpoint.name,
@@ -332,7 +331,7 @@ export class StratosCatalogEndpointEntity extends StratosBaseCatalogEntity<IEndp
   public declare definition: IStratosEndpointDefinition<EntityCatalogSchemas>;
   constructor(
     entity: StratosEndpointExtensionDefinition | IStratosEndpointDefinition,
-    getLink?: (favorite: UserFavorite<IEndpointFavMetadata>) => string
+    getLink?: (favorite: UserFavorite<T>) => string
   ) {
     // For endpoint entities, preserve the endpoint type in the 'type' property
     // This is used by the entity catalog to identify the endpoint type (e.g., 'cf', 'metrics')
@@ -342,7 +341,7 @@ export class StratosCatalogEndpointEntity extends StratosBaseCatalogEntity<IEndp
     // In StratosBaseCatalogEntity constructor, isEndpoint = !baseEntity.endpoint (line 76)
     // If 'endpoint' property exists, the entity will be registered in the entities map
     // instead of the endpoints map, breaking endpoint entity lookups
-    const { endpoint: _, ...entityWithoutEndpoint } = entity as any;
+    const { endpoint: _, ...entityWithoutEndpoint } = entity as IStratosEndpointDefinition & { endpoint?: unknown };
     const fullEntity: IStratosEndpointDefinition = {
       ...entityWithoutEndpoint,
       schema: {
@@ -352,22 +351,22 @@ export class StratosCatalogEndpointEntity extends StratosBaseCatalogEntity<IEndp
     super(fullEntity, {
       entityBuilder: {
         ...StratosCatalogEndpointEntity.baseEndpointRender,
-        getLink: getLink || StratosCatalogEndpointEntity.baseEndpointRender.getLink
-      }
+        getLink: (getLink || StratosCatalogEndpointEntity.baseEndpointRender.getLink) as (favorite: UserFavorite<T>) => string
+      } as unknown as IStratosEntityBuilder<T, Y>
     });
   }
 
-  public setListComponent(component: any) {
+  public setListComponent(component: unknown) {
     // Can only be set once
     if (!this.definition.listDetailsComponent) {
-      (this.definition as any).listDetailsComponent = component;
+      (this.definition as unknown as Record<string, unknown>).listDetailsComponent = component;
     }
   }
 
   public setAuthTypes(authTypes: EndpointAuthTypeConfig[]) {
     // Can only be set once
     if (!this.definition.authTypes || this.definition.authTypes.length === 0) {
-      (this.definition as any).authTypes = authTypes;
+      (this.definition as unknown as Record<string, unknown>).authTypes = authTypes;
     }
   }
 

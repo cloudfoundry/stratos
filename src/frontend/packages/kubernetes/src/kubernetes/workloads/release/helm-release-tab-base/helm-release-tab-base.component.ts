@@ -1,16 +1,12 @@
-import {Component, OnDestroy, inject, ChangeDetectionStrategy } from '@angular/core';
+import {Component, type OnDestroy, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { PageHeaderComponent } from '../../../../../../core/src/shared/components/page-header/page-header.component';
-
-import { IPageSideNavTab } from '../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
-import { SessionService } from '../../../../../../core/src/shared/services/session.service';
-import { SnackBarService } from '../../../../../../core/src/shared/services/snackbar.service';
+import { PageHeaderComponent, SessionService, SnackBarService, type IPageSideNavTab } from '@stratosui/core';
 import { kubeEntityCatalog } from '../../../kubernetes-entity-generator';
 import { KubernetesAnalysisService } from '../../../services/kubernetes.analysis.service';
-import { KubeResourceEntityDefinition } from '../../../store/kube.types';
+import type { KubeResourceEntityDefinition } from '../../../store/kube.types';
 import { HelmReleaseGuid } from '../../workload.types';
 import { HelmReleaseHelperService } from '../tabs/helm-release-helper.service';
 import { HelmReleaseSocketService } from './helm-release-socket-service';

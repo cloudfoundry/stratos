@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { StratosAction, StratosActionType } from '@stratosui/core';
+import { Component, type OnInit } from '@angular/core';
+import { PageHeaderComponent, StratosAction, StratosActionType } from '@stratosui/core';
 
 @StratosAction({
   type: StratosActionType.Applications,
@@ -11,11 +11,12 @@ import { StratosAction, StratosActionType } from '@stratosui/core';
 selector: 'app-app-action-extension',
   templateUrl: './app-action-extension.component.html',
   styleUrls: ['./app-action-extension.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    PageHeaderComponent
+  ]
 })
 export class AppActionExtensionComponent implements OnInit {
-
-  constructor() { }
 
   ngOnInit() {
   }

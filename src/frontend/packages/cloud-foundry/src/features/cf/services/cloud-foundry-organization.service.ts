@@ -1,20 +1,20 @@
 import { Injectable } from '@angular/core';
-import { Route } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
-import {
+import type { GeneralEntityAppState, PaginationMonitorFactory } from '@stratosui/store';
+import type { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
+import type {
   IApp,
   IOrganization,
   IOrgQuotaDefinition,
   IPrivateDomain,
+  IRoute,
   ISpace,
   ISpaceQuotaDefinition,
 } from '../../../cf-api.types';
-import { CFAppState } from '../../../cf-app-state';
+import type { CFAppState } from '../../../cf-app-state';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import {
   domainEntityType,
@@ -26,12 +26,10 @@ import {
 import { getEntityFlattenedList, getStartedAppInstanceCount } from '../../../cf.helpers';
 import { createEntityRelationKey } from '../../../entity-relations/entity-relations.types';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
-import {
-  CloudFoundryUserProvidedServicesService,
-} from '../../../shared/services/cloud-foundry-user-provided-services.service';
+import { CloudFoundryUserProvidedServicesService } from '../../../shared/services/cloud-foundry-user-provided-services.service';
 import { OrgUserRoleNames } from '../../../store/types/cf-user.types';
 import { fetchServiceInstancesCount } from '../../service-catalog/services-helper';
-import { ActiveRouteCfOrgSpace } from '../cf-page.types';
+import type { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 
@@ -72,7 +70,7 @@ export class CloudFoundryOrganizationService {
   quotaDefinition$!: Observable<IOrgQuotaDefinition>;
   totalMem$!: Observable<number>;
   privateDomains$!: Observable<APIResource<IPrivateDomain>[]>;
-  routes$!: Observable<APIResource<Route>[]>;
+  routes$!: Observable<APIResource<IRoute>[]>;
   serviceInstancesCount$!: Observable<number>;
   userProvidedServiceInstancesCount$!: Observable<number>;
   routesCount$!: Observable<number>;
@@ -86,7 +84,7 @@ export class CloudFoundryOrganizationService {
 
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     private cfUserService: CfUserService,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private cfEndpointService: CloudFoundryEndpointService,
@@ -156,7 +154,7 @@ export class CloudFoundryOrganizationService {
   }
 
   private initialiseSpaceObservables() {
-    this.routes$ = this.spaces$.pipe(this.getFlattenedList('routes'));
+    this.routes$ = this.spaces$.pipe(this.getFlattenedList<APIResource<IRoute>>('routes'));
   }
 
   private initialiseAppObservables() {
@@ -198,7 +196,7 @@ export class CloudFoundryOrganizationService {
   private initialiseOrgObservables() {
     this.spaces$ = this.org$.pipe(map(o => o.entity.entity.spaces), filter(o => !!o));
     this.privateDomains$ = this.org$.pipe(map(o => o.entity.entity.private_domains));
-    this.quotaDefinition$ = this.org$.pipe(map(o => o.entity.entity.quota_definition && o.entity.entity.quota_definition.entity));
+    this.quotaDefinition$ = this.org$.pipe(map(o => o.entity.entity.quota_definition?.entity));
     this.quotaLink$ = this.org$.pipe(map(o => {
       const quotaDefinition = o.entity.entity.quota_definition;
 
@@ -212,7 +210,7 @@ export class CloudFoundryOrganizationService {
     }));
   }
 
-  private getFlattenedList(property: string): (source: Observable<APIResource<any>[]>) => Observable<any> {
-    return map(entities => getEntityFlattenedList(property, entities));
+  private getFlattenedList<T>(property: string): (source: Observable<APIResource<ISpace>[]>) => Observable<T[]> {
+    return map(entities => getEntityFlattenedList<T>(property, entities as unknown as APIResource<Record<string, unknown>>[]));
   }
 }

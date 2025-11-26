@@ -1,14 +1,13 @@
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, type OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
-import { CustomIconComponent } from '@stratosui/core';
-import { ListComponent } from '../../../../core/src/shared/components/list/list.component';
-import { ListConfig } from '../../../../core/src/shared/components/list/list.component.types';
-import { PageHeaderComponent } from '../../../../core/src/shared/components/page-header/page-header.component';
+import { CustomIconComponent, ListComponent, ListConfig, PageHeaderComponent } from '@stratosui/core';
+import type { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
+import type { IApp } from '../../../../cloud-foundry/src/cf-api.types';
 import {
   AppAutoscalerMetricChartListConfigService,
 } from '../../shared/list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-list-config.service';
@@ -47,7 +46,10 @@ export class AutoscalerMetricPageComponent implements OnInit {
 
   ngOnInit() {
     this.applicationName$ = this.applicationService.app$.pipe(
-      map(({ entity }) => entity ? entity.entity.name : null),
+      map((appInfo: EntityInfo<APIResource<IApp>>) => {
+        const entity = appInfo.entity;
+        return entity && 'entity' in entity ? entity.entity.name : null;
+      }),
       publishReplay(1),
       refCount()
     );

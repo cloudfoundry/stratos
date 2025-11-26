@@ -1,12 +1,12 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe, DatePipe, SlicePipe } from '@angular/common';
+import { Component, type OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { GitCommit, gitEntityCatalog, GitRepo, GitSCMService, GitSCMType, SCMIcon } from '@stratosui/git';
-import { combineLatest as observableCombineLatest, Observable, of as observableOf, of } from 'rxjs';
+import { type GitCommit, gitEntityCatalog, type GitRepo, GitSCMService, type GitSCMType, type SCMIcon } from '@stratosui/git';
+import { combineLatest as observableCombineLatest, type Observable, of as observableOf, of } from 'rxjs';
 import { combineLatest, delay, distinct, filter, first, map, mergeMap, startWith, switchMap, tap } from 'rxjs/operators';
 
-import { CFAppState } from '@stratosui/cloud-foundry';
+import type { CFAppState } from '@stratosui/cloud-foundry';
 import {
   CurrentUserPermissionsService,
   ConfirmationDialogConfig,
@@ -20,22 +20,23 @@ import {
   MbToHumanSizePipe,
   UptimePipe,
 } from '@stratosui/core';
-import { ResetPagination, getFullEndpointApiUrl, ActionState, EntityInfo } from '@stratosui/store';
+import { ResetPagination, getFullEndpointApiUrl, type ActionState, type EntityInfo, type APIResource } from '@stratosui/store';
 import { AppMetadataTypes } from '../../../../../../actions/app-metadata.actions';
 import { UpdateExistingApplication } from '../../../../../../actions/application.actions';
-import { IAppSummary } from '../../../../../../cf-api.types';
+import type { IApp, IAppSummary } from '../../../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
 import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfUserPermissionDirective } from '../../../../../../shared/directives/cf-user-permission/cf-user-permission.directive';
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
-import { ApplicationData, ApplicationService } from '../../../../application.service';
+import type { ApplicationData } from '../../../../application.service';
+import { ApplicationService } from '../../../../application.service';
 import { DEPLOY_TYPES_IDS } from '../../../../deploy-application/deploy-application-steps.types';
 import { ApplicationPollComponent } from '../../application-poll/application-poll.component';
 import { CardAppStatusComponent } from '../../../../../../shared/components/cards/card-app-status/card-app-status.component';
 import { CardAppInstancesComponent } from '../../../../../../shared/components/cards/card-app-instances/card-app-instances.component';
 import { CardAppUptimeComponent } from '../../../../../../shared/components/cards/card-app-uptime/card-app-uptime.component';
 import { ViewBuildpackComponent } from './view-buildpack/view-buildpack.component';
-import { EnvVarStratosProjectSource } from './application-env-vars.service';
+import type { EnvVarStratosProjectSource } from './application-env-vars.service';
 
 const isDockerHubRegEx = /^([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+):([a-zA-Z0-9_.-]+)/g;
 
@@ -75,6 +76,9 @@ interface CustomEnvVarStratosProjectSource extends EnvVarStratosProjectSource {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    AsyncPipe,
+    DatePipe,
+    SlicePipe,
     RouterModule,
     PageSubNavComponent,
     PageSubNavSectionComponent,
@@ -102,7 +106,7 @@ export class BuildTabComponent implements OnInit {
   constructor(
     public applicationService: ApplicationService,
     private scmService: GitSCMService,
-    private store: Store<CFAppState>,
+    private store: Store,
     private route: ActivatedRoute,
     private router: Router,
     private confirmDialog: ConfirmationDialogService,
@@ -110,8 +114,6 @@ export class BuildTabComponent implements OnInit {
   ) { }
 
   cardTwoFetching$!: Observable<boolean>;
-
-  public async: any;
 
   getFullApiUrl = getFullEndpointApiUrl;
 
@@ -174,7 +176,7 @@ export class BuildTabComponent implements OnInit {
       this.applicationService.application$
     ).pipe(
       map(([project, app]) => {
-        if (!!project) {
+        if (project) {
           const deploySource: CustomEnvVarStratosProjectSource = { ...project.deploySource };
 
           // Legacy
@@ -203,7 +205,7 @@ export class BuildTabComponent implements OnInit {
         }
       }),
       switchMap((deploySource: CustomEnvVarStratosProjectSource) => {
-        const res: Observable<any>[] = [
+        const res: Observable<CustomEnvVarStratosProjectSource | EntityInfo<GitCommit> | null>[] = [
           of(deploySource),
         ];
         if (deploySource && deploySource.type === 'gitscm') {
@@ -237,7 +239,7 @@ export class BuildTabComponent implements OnInit {
   }
 
   private updatingSectionBusy(section: ActionState) {
-    return section && section.busy;
+    return section?.busy;
   }
 
   private createDockerImageUrl(dockerImage: string): string {
@@ -271,7 +273,7 @@ export class BuildTabComponent implements OnInit {
             this.pollEntityService('stopping', 'STOPPED').pipe(first())
           );
         }),
-        mergeMap(([appData, updateData]) => {
+        mergeMap(([appData, _updateData]) => {
           this.applicationService.updateApplication({ state: 'STARTED' }, [], appData.app.entity);
           return this.pollEntityService('starting', 'STARTED').pipe(first());
         }),
@@ -328,22 +330,29 @@ export class BuildTabComponent implements OnInit {
       () => cfEntityCatalog.application.api.restage(appGuid, cfGuid),
       'starting',
       'STARTED',
-      () => { }
+      () => {
+        // No action required on completion
+      }
     );
   }
 
-  pollEntityService(state: any, stateString: string): Observable<any> {
+  pollEntityService(state: string, stateString: string): Observable<{ entity: APIResource<IApp> }> {
     return this.applicationService.entityService
       .poll(1000, state).pipe(
         delay(1),
         filter(({ resource }) => {
           return resource.entity.state === stateString;
         }),
+        map(entityInfo => ({
+          entity: entityInfo.resource
+        }))
       );
   }
 
   startApplication() {
-    this.updateApp(appStartConfirmation, 'starting', 'STARTED', () => { });
+    this.updateApp(appStartConfirmation, 'starting', 'STARTED', () => {
+      // No action required on completion
+    });
   }
 
   redirectToDeletePage() {

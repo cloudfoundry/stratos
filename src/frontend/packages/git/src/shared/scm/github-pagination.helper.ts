@@ -1,8 +1,7 @@
-import { HttpClient, HttpResponse } from '@angular/common/http';
-import { PaginationFlattener } from '@stratosui/store';
-import { Observable } from 'rxjs';
-
-import { HttpOptions } from '../../../../core/src/core/core.types';
+import type { HttpClient, HttpResponse } from '@angular/common/http';
+import type { PaginationFlattener } from '@stratosui/store';
+import type { Observable } from 'rxjs';
+import type { HttpOptions } from '../../../../core/src/core/core.types';
 
 // --------------- Note ----------------
 // There are two types of pagination github uses
@@ -17,7 +16,7 @@ import { HttpOptions } from '../../../../core/src/core/core.types';
 /**
  * Body of a github pagination response (pagination info inside body)
  */
-type GithubPaginationResponse<T = any> = {
+type GithubPaginationResponse<T = unknown> = {
   incomplete_results: boolean,
   items: T[],
   total_count: number,
@@ -26,7 +25,7 @@ type GithubPaginationResponse<T = any> = {
 /**
  * Body of a github pagination response (pagination info is in header)
  */
-type GithubPaginationArrayResponse<T = any> = T[];
+type GithubPaginationArrayResponse<T = unknown> = T[];
 
 export const GITHUB_PER_PAGE_PARAM = 'per_page';
 export const GITHUB_PER_PAGE_PARAM_VALUE = 100;
@@ -79,7 +78,7 @@ export class GithubFlattenerPaginationConfig<T> implements PaginationFlattener<T
     };
     return [requestOption];
   };
-  clearResults = (res: GithubPaginationResponse<T>, allResults: number) => {
+  clearResults = (_res: GithubPaginationResponse<T>, _allResults: number) => {
     throw new Error('Not Implemented');
   };
 }
@@ -154,7 +153,7 @@ export class GithubFlattenerForArrayPaginationConfig<T>
     };
     return [requestOption];
   };
-  clearResults = (res: HttpResponse<GithubPaginationArrayResponse<T>>, allResults: number) => {
+  clearResults = (_res: HttpResponse<GithubPaginationArrayResponse<T>>, _allResults: number) => {
     throw new Error('Not Implemented');
   };
 }

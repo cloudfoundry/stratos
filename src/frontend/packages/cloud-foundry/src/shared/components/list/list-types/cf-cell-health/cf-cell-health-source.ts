@@ -1,14 +1,15 @@
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import type { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   ListDataSource,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { IMetricMatrixResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
-import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
-import { FetchCFCellMetricsPaginatedAction } from '../../../../../actions/cf-metrics.actions';
+} from '@stratosui/core';
+import type { IListConfig } from '@stratosui/core';
+import type { GeneralEntityAppState } from '../../../../../../../store/src/app-state';
+import type { IMetricMatrixResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
+import type { IMetricCell } from '../../../../../../../store/src/types/metric.types';
+import type { FetchCFCellMetricsPaginatedAction } from '../../../../../actions/cf-metrics.actions';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 
 export interface CfCellHealthEntry {
@@ -28,7 +29,7 @@ export class CfCellHealthDataSource extends ListDataSource<CfCellHealthEntry, IM
   static appIdPath = 'metric.application_id';
 
   constructor(
-    store: Store<CFAppState>,
+    store: Store<GeneralEntityAppState>,
     listConfig: IListConfig<CfCellHealthEntry>,
     action: FetchCFCellMetricsPaginatedAction,
   ) {

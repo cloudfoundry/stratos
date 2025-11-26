@@ -1,26 +1,24 @@
-import { Directive, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { AbstractControl, NG_VALIDATORS, Validator } from '@angular/forms';
+import { Directive, forwardRef, Input, type OnChanges, type SimpleChanges } from '@angular/core';
+import { type AbstractControl, NG_VALIDATORS, type Validator } from '@angular/forms';
 
 @Directive({
   selector: '[appUnique]',
-  providers: [{ provide: NG_VALIDATORS, useExisting: UniqueDirective, multi: true }],
+  providers: [{ provide: NG_VALIDATORS, useExisting: forwardRef(() => UniqueDirective), multi: true }],
   standalone: true
 })
 export class UniqueDirective implements Validator, OnChanges {
   private _control!: AbstractControl;
 
-  constructor() { }
-
-  @Input() appUnique!: any[];
+  @Input() appUnique!: unknown[];
 
   ngOnChanges(changes: SimpleChanges): void {
     // When the appUnique input changes, re-validate the control
-    if (changes['appUnique'] && this._control) {
+    if (changes.appUnique && this._control) {
       this._control.updateValueAndValidity();
     }
   }
 
-  validate(c: AbstractControl): { [key: string]: any, } {
+  validate(c: AbstractControl): { [key: string]: unknown } | null {
     // Store reference to control so we can trigger re-validation in ngOnChanges
     this._control = c;
 

@@ -45,7 +45,7 @@ export type NeverKeys<T extends object> = Exclude<
  * Pick all properties who's function has the specified return type U
  */
 export type FilteredByReturnType<
-  T extends { [key: string]: (...args: any[]) => any },
+  T extends { [key: string]: (...args: unknown[]) => unknown },
   U
 > = {
   [P in keyof T]: ReturnType<T[P]> extends U ? T[P] : never;
@@ -55,7 +55,7 @@ export type FilteredByReturnType<
  * Pick all properties who's function do not have the specified return type U
  */
 export type FilteredByNotReturnType<
-  T extends { [key: string]: (...args: any[]) => any },
+  T extends { [key: string]: (...args: unknown[]) => unknown },
   U
 > = {
   [P in keyof T]: ReturnType<T[P]> extends U ? never : T[P];
@@ -63,7 +63,7 @@ export type FilteredByNotReturnType<
 
 // Note - Adding }[keyof T] to [P in keyof T] types should filter out properties of type `never`, however this fails with generics!
 export type FilteredByValueType<
-  T extends { [key: string]: (...args: any[]) => any },
+  T extends { [key: string]: (...args: unknown[]) => unknown },
   U
 > = {
   [P in keyof T]: T[P] extends U ? never : T[P];

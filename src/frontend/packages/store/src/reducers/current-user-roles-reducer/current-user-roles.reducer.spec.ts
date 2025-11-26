@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { getDefaultRolesRequestState, ICurrentUserRolesState } from '../../types/current-user-roles.types';
+import { getDefaultRolesRequestState, type ICurrentUserRolesState } from '../../types/current-user-roles.types';
 import { currentUserRolesReducer } from './current-user-roles.reducer';
 
 describe('currentUserRolesReducer', () => {

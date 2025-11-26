@@ -1,7 +1,7 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 
-import { MetricsConfig, MetricsChartComponent, MetricsLineChartConfig, MetricsParentRangeSelectorComponent } from '@stratosui/core';
-import { IMetricMatrixResult, IMetricCell, MetricQueryType } from '@stratosui/store';
+import { type MetricsConfig, MetricsChartComponent, type MetricsLineChartConfig, MetricsParentRangeSelectorComponent } from '@stratosui/core';
+import { type IMetricMatrixResult, type IMetricCell, MetricQueryType } from '@stratosui/store';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 
 @Component({

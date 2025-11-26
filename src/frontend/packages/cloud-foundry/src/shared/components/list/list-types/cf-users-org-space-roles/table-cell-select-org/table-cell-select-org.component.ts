@@ -1,17 +1,17 @@
-import { CommonModule } from '@angular/common';
-import { CustomFormFieldComponent, MatInputDirective } from '@stratosui/core';
-import { Component, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { CustomFormFieldComponent, } from '@stratosui/core';
+import { Component, type OnDestroy, type OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
 import { UsersRolesSetOrg } from '../../../../../../../../cloud-foundry/src/actions/users-roles.actions';
-import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { IOrganization } from '../../../../../../cf-api.types';
+import type { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
+import { TableCellCustom } from '@stratosui/core';
+import type { APIResource } from '../../../../../../../../store/src/types/api.types';
+import type { IOrganization } from '../../../../../../cf-api.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../../features/cf/cf-page.types';
 import { CfRolesService } from '../../../../../../features/cf/users/manage-users/cf-roles.service';
 import { selectCfUsersRolesOrgGuid } from '../../../../../../store/selectors/cf-users-roles.selector';
@@ -41,7 +41,7 @@ export class TableCellSelectOrgComponent extends TableCellCustom<APIResource<IOr
   orgGuidChangedSub: Subscription;
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private cfRolesService: CfRolesService,
   ) {

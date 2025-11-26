@@ -1,12 +1,12 @@
 import { Directive, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
+import { BehaviorSubject, type Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { AppChip, ConfirmationDialogConfig, ConfirmationDialogService, TableCellCustom } from '@stratosui/core';
-import { APIResource, selectSessionData } from '@stratosui/store';
-import { CFAppState, CfUser, IUserRole, UserRoleLabels } from '@stratosui/cloud-foundry';
-import { CfUserService } from '../../../../data-services/cf-user.service';
+import { type APIResource, selectSessionData } from '@stratosui/store';
+import { type CFAppState, type CfUser, type IUserRole, UserRoleLabels } from '@stratosui/cloud-foundry';
+import type { CfUserService } from '../../../../data-services/cf-user.service';
 
 
 export interface ICellPermissionList<T> extends IUserRole<T> {
@@ -18,6 +18,14 @@ export interface ICellPermissionList<T> extends IUserRole<T> {
   cfGuid: string;
   orgGuid: string;
   spaceGuid?: string;
+}
+
+export interface ICellPermissionConfig {
+  cfGuid: string;
+  cfOrgSpace?: unknown;
+  org$?: Observable<unknown>;
+  spaces$?: Observable<unknown>;
+  isOrgLevel?: boolean;
 }
 
 @Directive()
@@ -33,7 +41,7 @@ export abstract class CfPermissionCellDirective<T> extends TableCellCustom<APIRe
   }
 
   @Input()
-  set config(config: any) {
+  set config(config: ICellPermissionConfig) {
     super.config = config;
     this.configSubject.next(config);
   }
@@ -42,13 +50,13 @@ export abstract class CfPermissionCellDirective<T> extends TableCellCustom<APIRe
   protected guid: string;
 
   protected rowSubject = new BehaviorSubject<APIResource<CfUser>>(null);
-  private configSubject = new BehaviorSubject<any>(null);
+  private configSubject = new BehaviorSubject<ICellPermissionConfig | null>(null);
   protected config$ = this.configSubject.asObservable().pipe(
     filter(config => !!config)
-  );
+  ) as Observable<ICellPermissionConfig>;
 
   constructor(
-    public store: Store<CFAppState>,
+    public store: Store,
     private confirmDialog: ConfirmationDialogService,
     public cfUserService: CfUserService
   ) {
@@ -107,9 +115,9 @@ export abstract class CfPermissionCellDirective<T> extends TableCellCustom<APIRe
     return perm.name ? `${perm.name}: ${perm.string}` : perm.string;
   }
 
-  protected removePermission(cellPermission: ICellPermissionList<T>, updateConnectedUser: boolean) {
+  protected removePermission(_cellPermission: ICellPermissionList<T>, _updateConnectedUser: boolean) {
 
   }
 
-  protected canRemovePermission = (cfGuid: string, orgGuid: string, spaceGuid: string): Observable<boolean> => observableOf(false);
+  protected canRemovePermission = (_cfGuid: string, _orgGuid: string, _spaceGuid: string): Observable<boolean> => observableOf(false);
 }

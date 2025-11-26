@@ -1,13 +1,13 @@
 import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of } from 'rxjs';
+import { combineLatest, type Observable, of } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
 
-import { GeneralEntityAppState, IRequestEntityTypeState } from './app-state';
-import { StratosBaseCatalogEntity } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import type { GeneralEntityAppState, IRequestEntityTypeState } from './app-state';
+import type { StratosBaseCatalogEntity } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { EntityCatalogHelpers } from './entity-catalog/entity-catalog.helper';
-import { IEntityMetadata, IStratosEntityDefinition } from './entity-catalog/entity-catalog.types';
-import { EndpointModel, entityCatalog } from './public-api';
+import type { IEntityMetadata, IStratosEntityDefinition } from './entity-catalog/entity-catalog.types';
+import { type EndpointModel, entityCatalog } from './public-api';
 import { endpointEntitiesSelector } from './selectors/endpoint.selectors';
 import {
   errorFetchingFavoritesSelector,
@@ -17,13 +17,13 @@ import {
 } from './selectors/favorite-groups.selectors';
 import { isFavorite } from './selectors/favorite.selectors';
 import { stratosEntityCatalog } from './stratos-entity-catalog';
-import { IUserFavoritesGroups } from './types/favorite-groups.types';
+import type { IUserFavoritesGroups } from './types/favorite-groups.types';
 import {
-  IEndpointFavMetadata,
-  IFavoriteMetadata,
-  IFavoriteTypeInfo,
+  type IEndpointFavMetadata,
+  type IFavoriteMetadata,
+  type IFavoriteTypeInfo,
   UserFavorite,
-  UserFavoriteEndpoint,
+  type UserFavoriteEndpoint,
 } from './types/user-favorites.types';
 
 
@@ -177,7 +177,7 @@ export class UserFavoriteManager {
   /**
    * For a given favorite, return the corresponding metadata
    */
-  public getEntityMetadata(favorite: IFavoriteTypeInfo, entity: any) {
+  public getEntityMetadata(favorite: IFavoriteTypeInfo, entity: unknown) {
     const catalogEntity = entityCatalog.getEntity(favorite.endpointType, favorite.entityType);
     if (!catalogEntity) {
       // Only warn for non-endpoint entities. Endpoint lookups may use fallback logic in the catalog
@@ -193,9 +193,9 @@ export class UserFavoriteManager {
     return catalogEntity.builders?.entityBuilder?.getMetadata(entity) || null;
   }
 
-   private buildFavoriteFromCatalogEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
+   private buildFavoriteFromCatalogEntity<T extends IEntityMetadata = IEntityMetadata, Y = unknown>(
     catalogEntity: StratosBaseCatalogEntity<T, Y>,
-    entity: any,
+    entity: Y,
     endpointId: string
   ) {
     if (!catalogEntity) {
@@ -226,7 +226,7 @@ export class UserFavoriteManager {
 
   // Get a favorite for the given entity
   public getFavorite<Y extends IEntityMetadata = IEntityMetadata>(
-    entity: any,
+    entity: unknown,
     entityType: string,
     endpointType: string
   ) {
@@ -249,7 +249,7 @@ export class UserFavoriteManager {
     return null;
   }
 
-  private getFavoriteFromEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
+  private getFavoriteFromEntity<T extends IEntityMetadata = IEntityMetadata, Y = unknown>(
     entityType: string,
     endpointType: string,
     endpointId: string,

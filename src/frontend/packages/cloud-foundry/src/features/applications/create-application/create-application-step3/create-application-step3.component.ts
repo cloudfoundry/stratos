@@ -1,19 +1,20 @@
-import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { AbstractControl, ReactiveFormsModule, FormControl, FormGroup, Validators, FormBuilder } from '@angular/forms';
+import { Component, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { type AbstractControl, ReactiveFormsModule, FormControl, FormGroup, Validators, } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { combineLatest, type Observable, of as observableOf } from 'rxjs';
 import { catchError, filter, first, map, mergeMap, pairwise, switchMap, tap } from 'rxjs/operators';
+import type { GeneralEntityAppState } from '@stratosui/store';
 
-import { CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, ErrorStateMatcher, ShowOnDirtyErrorStateMatcher, StepOnNextFunction } from '@stratosui/core';
-import { RouterNav, ActionState, getDefaultRequestState, RequestInfoState, APIResource } from '@stratosui/store';
-import { CFAppState, domainEntityType, organizationEntityType } from '@stratosui/cloud-foundry';
-import { IDomain } from '../../../../cf-api.types';
+import { CustomFormFieldComponent, AppInputDirective, AppErrorComponent, CustomSelectComponent, CustomOptionComponent, ErrorStateMatcher, ShowOnDirtyErrorStateMatcher, type StepOnNextFunction } from '@stratosui/core';
+import { RouterNav, type ActionState, getDefaultRequestState, type RequestInfoState, type APIResource, type EntityInfo } from '@stratosui/store';
+import { type CFAppState, domainEntityType, organizationEntityType } from '@stratosui/cloud-foundry';
+import type { IDomain, IOrganization } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { createEntityRelationKey } from '../../../../entity-relations/entity-relations.types';
 import { createGetApplicationAction } from '../../application.service';
 import { selectNewAppState } from '../../../../store/effects/create-app-effects';
-import { CreateNewApplicationState } from '../../../../store/types/create-application.types';
+import type { CreateNewApplicationState } from '../../../../store/types/create-application.types';
 
 interface DomainHostForm {
   domain: FormControl<string>;
@@ -30,6 +31,8 @@ interface DomainHostForm {
     CommonModule,
     ReactiveFormsModule,
     CustomFormFieldComponent,
+    AppInputDirective,
+    AppErrorComponent,
     CustomSelectComponent,
     CustomOptionComponent
   ],
@@ -38,7 +41,7 @@ interface DomainHostForm {
   ]
 })
 export class CreateApplicationStep3Component implements OnInit {
-  private store = inject(Store<CFAppState>);
+  private store = inject(Store<GeneralEntityAppState>);
 
   setDomainHost: FormGroup<DomainHostForm>;
 
@@ -53,7 +56,7 @@ export class CreateApplicationStep3Component implements OnInit {
 
   domains$!: Observable<APIResource<IDomain>[] | undefined>;
 
-  message: any = null;
+  message: string | null = null;
 
   newAppData!: CreateNewApplicationState;
   onNext: StepOnNextFunction = () => {
@@ -72,10 +75,10 @@ export class CreateApplicationStep3Component implements OnInit {
         const createdRoute = !app.error && !route.error && route.message !== 'NO_ROUTE';
         // Then assign it to the application
         const obs$ = createdRoute ?
-          this.associateRoute(app.response.result[0], route.response.result[0], cloudFoundry) :
+          this.associateRoute((app.response as any).result[0], (route.response as any).result[0], cloudFoundry) :
           observableOf(null);
         return obs$.pipe(
-          map(() => app.response.result[0] as string)
+          map(() => (app.response as any).result[0] as string)
         );
       }),
       map(appGuid => {
@@ -167,7 +170,7 @@ export class CreateApplicationStep3Component implements OnInit {
 
   ngOnInit() {
     this.domains$ = this.store.select(selectNewAppState).pipe(
-      filter(state => state.cloudFoundryDetails && state.cloudFoundryDetails.cloudFoundry && state.cloudFoundryDetails.org),
+      filter(state => !!state.cloudFoundryDetails?.cloudFoundry && !!state.cloudFoundryDetails?.org && !!state.cloudFoundryDetails?.space),
       mergeMap(state => {
         this.hostControl().setValue(state.name.split(' ').join('-').toLowerCase());
         this.hostControl().markAsDirty();
@@ -181,7 +184,7 @@ export class CreateApplicationStep3Component implements OnInit {
             populateMissing: true
           }
         ).waitForEntity$.pipe(
-          map(({ entity }) => {
+          map(({ entity }: EntityInfo<APIResource<IOrganization>>) => {
             if (!this.domainControl().value && entity.entity.domains && entity.entity.domains.length) {
               this.domainControl().setValue(entity.entity.domains[0].metadata.guid);
               this.hostControl().enable();

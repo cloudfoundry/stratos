@@ -2,15 +2,15 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ComponentRef,
+  type ComponentRef,
   Input,
-  OnDestroy,
-  Type,
+  type OnDestroy,
+  type Type,
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
 
-import { AnalysisReport } from '../store/kube.types';
+import type { AnalysisReport } from '../store/kube.types';
 import { KubeScoreReportViewerComponent } from './kube-score-report-viewer/kube-score-report-viewer.component';
 import { PopeyeReportViewerComponent } from './popeye-report-viewer/popeye-report-viewer.component';
 
@@ -23,6 +23,7 @@ selector: 'app-analysis-report-viewer',
   templateUrl: './analysis-report-viewer.component.html',
   styleUrls: ['./analysis-report-viewer.component.scss'],
   standalone: true,
+  imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AnalysisReportViewerComponent implements OnDestroy {

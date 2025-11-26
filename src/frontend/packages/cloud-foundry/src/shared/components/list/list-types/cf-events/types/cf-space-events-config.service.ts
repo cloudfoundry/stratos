@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { IListConfig } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { CFAppState } from '../../../../../../cf-app-state';
-import { CloudFoundrySpaceService } from '../../../../../../features/cf/services/cloud-foundry-space.service';
+import type { IListConfig } from '@stratosui/core';
+import type { APIResource , GeneralEntityAppState } from '@stratosui/store';
+import type { CFAppState } from '../../../../../../cf-app-state';
+import type { CloudFoundrySpaceService } from '../../../../../../features/cf/services/cloud-foundry-space.service';
 import { CfEventsConfigService } from '../cf-events-config.service';
 
 
@@ -13,7 +13,7 @@ import { CfEventsConfigService } from '../cf-events-config.service';
 })
 export class CfSpaceEventsConfigService extends CfEventsConfigService implements IListConfig<APIResource> {
 
-  constructor(store: Store<CFAppState>, spaceService: CloudFoundrySpaceService) {
+  constructor(store: Store<GeneralEntityAppState>, spaceService: CloudFoundrySpaceService) {
     super(
       store,
       spaceService.cfGuid,

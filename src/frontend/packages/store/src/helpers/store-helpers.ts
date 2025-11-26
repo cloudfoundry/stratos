@@ -1,12 +1,12 @@
-import { Store } from '@ngrx/store';
-import { combineLatest, Observable } from 'rxjs';
+import type { Store } from '@ngrx/store';
+import { combineLatest, type Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { AppState } from '../app-state';
+import type { AppState } from '../app-state';
 import { MultiActionListEntity } from '../monitors/pagination-monitor';
 import { errorFetchingFavoritesSelector, fetchingFavoritesSelector } from '../selectors/favorite-groups.selectors';
-import { APIResource } from '../types/api.types';
-import { IFavoritesInfo } from '../types/user-favorites.types';
+import type { APIResource } from '../types/api.types';
+import type { IFavoritesInfo } from '../types/user-favorites.types';
 
 
 export function getFavoriteInfoObservable(store: Store<AppState>): Observable<IFavoritesInfo> {
@@ -23,7 +23,7 @@ export function getFavoriteInfoObservable(store: Store<AppState>): Observable<IF
 
 export const getRowMetadata = (entity: APIResource | MultiActionListEntity) => {
   if (entity instanceof MultiActionListEntity) {
-    return entity.entity.metadata ? entity.entity.metadata.guid : null;
+    return (entity.entity as { metadata?: { guid?: string } }).metadata ? (entity.entity as { metadata?: { guid?: string } }).metadata.guid : null;
   }
-  return entity.metadata ? entity.metadata.guid : null;
+  return (entity as { metadata?: { guid?: string } }).metadata ? (entity as { metadata?: { guid?: string } }).metadata.guid : null;
 };

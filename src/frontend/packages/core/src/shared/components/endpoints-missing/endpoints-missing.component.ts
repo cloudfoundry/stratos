@@ -1,9 +1,9 @@
-import { AfterViewInit, Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
+import { type AfterViewInit, Component, Input, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { combineLatest as observableCombineLatest, type Observable } from 'rxjs';
 import { delay, map, startWith } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../core/endpoints.service';
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { NoContentMessageComponent } from '../no-content-message/no-content-message.component';
 
 export interface EndpointMissingMessageParts {

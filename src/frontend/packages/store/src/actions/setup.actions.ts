@@ -1,5 +1,5 @@
-import { Action } from '@ngrx/store';
-import { UaaSetupData, LocalAdminSetupData } from '../types/uaa-setup.types';
+import type { Action } from '@ngrx/store';
+import type { UaaSetupData, LocalAdminSetupData } from '../types/uaa-setup.types';
 
 export const SETUP_GET_SCOPES = '[Setup] Setup get scopes';
 export const SETUP_SAVE_CONFIG = '[Setup] Setup save';

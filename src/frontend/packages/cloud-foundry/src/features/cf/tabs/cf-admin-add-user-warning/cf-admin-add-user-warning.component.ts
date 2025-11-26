@@ -1,11 +1,13 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
 
+import { CardWrapperComponent } from '@stratosui/core';
 import { GetAllCfUsersAsAdmin } from '../../../../actions/users.actions';
-import { CFAppState } from '../../../../cf-app-state';
+import type { CFAppState } from '../../../../cf-app-state';
+import type { GeneralEntityAppState } from '@stratosui/store';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { waitForCFPermissions } from '../../cf.helpers';
@@ -17,7 +19,9 @@ import { waitForCFPermissions } from '../../cf.helpers';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule
+    CommonModule,
+    AsyncPipe,
+    CardWrapperComponent
   ]
 })
 export class CfAdminAddUserWarningComponent {
@@ -26,7 +30,7 @@ export class CfAdminAddUserWarningComponent {
   show$: Observable<boolean>;
 
   constructor(
-    store: Store<CFAppState>,
+    store: Store<GeneralEntityAppState>,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     cfUserService: CfUserService
   ) {

@@ -1,4 +1,4 @@
-import { StratosBaseCatalogEntity, entityCatalog, EntityCatalogEntityConfig} from '@stratosui/store';
+import { type StratosBaseCatalogEntity, entityCatalog, type EntityCatalogEntityConfig} from '@stratosui/store';
 
 export interface EntityCatalogHelperConfig {
   catalogEntities?: [EntityCatalogEntityConfig, StratosBaseCatalogEntity][];

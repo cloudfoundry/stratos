@@ -1,12 +1,12 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { combineLatest, Observable, of as observableOf, of } from 'rxjs';
+import { type HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { combineLatest, type Observable, of as observableOf, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { Md5 } from 'ts-md5';
 
-import { GitBranch, GitCommit, GitRepo, GitSuggestedRepo } from '../../store/git.public-types';
-import { GitSCM, SCMIcon } from './scm';
-import { BaseSCM, GitApiRequest } from './scm-base';
-import { GitSCMType } from './scm.service';
+import type { GitBranch, GitCommit, GitRepo, GitSuggestedRepo } from '../../store/git.public-types';
+import type { GitSCM, SCMIcon } from './scm';
+import { BaseSCM, type GitApiRequest } from './scm-base';
+import type { GitSCMType } from './scm.service';
 
 const gitLabAPIUrl = 'https://gitlab.com/api/v4';
 const GITLAB_PER_PAGE_PARAM = 'per_page';
@@ -120,10 +120,8 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
         }
       })),
       map((data: unknown) => {
-        const commits: GitCommit[] = [];
         const commitData = data as unknown[];
-        commitData.forEach((c: unknown) => commits.push(this.convertCommit(c)));
-        return commits;
+        return commitData.map((c: unknown) => this.convertCommit(c));
       })
     );
   }
@@ -237,7 +235,7 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
 
   parseErrorAsString(error: unknown): string {
     const errorResponse = error as { status?: number };
-    return 'Git request failed' + (errorResponse.status ? `(${errorResponse.status})` : '');
+    return `Git request failed${errorResponse.status ? `(${errorResponse.status})` : ''}`;
   }
 
 }

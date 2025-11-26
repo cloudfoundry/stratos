@@ -1,6 +1,6 @@
-import { Observable, of as observableOf } from 'rxjs';
+import { type Observable, of as observableOf } from 'rxjs';
 
-import { getDefaultRequestState, APIResource, EntityInfo } from '@stratosui/store';
+import { getDefaultRequestState, type APIResource, type EntityInfo } from '@stratosui/store';
 
 export class CloudFoundryOrganizationServiceMock {
   org$: Observable<EntityInfo<APIResource<any>>> = observableOf(

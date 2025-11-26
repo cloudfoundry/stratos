@@ -1,9 +1,9 @@
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 
 import { STRATOS_ENDPOINT_TYPE, stratosEntityFactory, systemInfoEntityType } from '../helpers/stratos-entity-factory';
-import { EntityRequestAction } from '../types/request.types';
-import { SystemInfo } from '../types/system.types';
-import { GetAllEndpoints, GetEndpoint } from './endpoint.actions';
+import type { EntityRequestAction } from '../types/request.types';
+import type { SystemInfo } from '../types/system.types';
+import { GetAllEndpoints, type GetEndpoint } from './endpoint.actions';
 
 export const GET_SYSTEM_INFO = '[System] Get info';
 export const GET_SYSTEM_INFO_SUCCESS = '[System] Get info success';

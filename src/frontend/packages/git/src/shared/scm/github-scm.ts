@@ -1,19 +1,19 @@
-import { HttpClient } from '@angular/common/http';
+import type { HttpClient } from '@angular/common/http';
 import { flattenPagination } from '@stratosui/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
-import { GitBranch, GitCommit, GitRepo } from '../../store/git.public-types';
-import { GitSuggestedRepo } from './../../store/git.public-types';
+import type { GitBranch, GitCommit, GitRepo } from '../../store/git.public-types';
+import type { GitSuggestedRepo } from './../../store/git.public-types';
 import {
   GITHUB_PER_PAGE_PARAM,
   GITHUB_PER_PAGE_PARAM_VALUE,
   GithubFlattenerForArrayPaginationConfig,
   GithubFlattenerPaginationConfig,
 } from './github-pagination.helper';
-import { GitSCM, SCMIcon } from './scm';
-import { BaseSCM, GitApiRequest } from './scm-base';
-import { GitSCMType } from './scm.service';
+import type { GitSCM, SCMIcon } from './scm';
+import { BaseSCM, type GitApiRequest } from './scm-base';
+import type { GitSCMType } from './scm.service';
 
 export class GitHubSCM extends BaseSCM implements GitSCM {
 
@@ -126,7 +126,7 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
     const message = super.parseErrorAsString(error);
     const errorResponse = error as { status?: number };
     return errorResponse.status === 403 && message.startsWith('API rate limit exceeded for') ?
-      'Git ' + message.substring(0, message.indexOf('(')) :
-      'Git request failed' + (errorResponse.status ? `(${errorResponse.status})` : '');
+      `Git ${message.substring(0, message.indexOf('('))}` :
+      `Git request failed${errorResponse.status ? `(${errorResponse.status})` : ''}`;
   }
 }

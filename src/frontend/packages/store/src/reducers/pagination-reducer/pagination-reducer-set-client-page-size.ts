@@ -1,5 +1,5 @@
-import { SetClientPageSize } from '../../actions/pagination.actions';
-import { PaginationEntityState } from '../../types/pagination.types';
+import type { SetClientPageSize } from '../../actions/pagination.actions';
+import type { PaginationEntityState } from '../../types/pagination.types';
 
 export function paginationSetClientPageSize(state: PaginationEntityState, action: SetClientPageSize) {
   if (action.pageSize === state.clientPagination.pageSize) {

@@ -1,5 +1,5 @@
-import { ActionState } from '../reducers/api-request-reducer/types';
-import { IFavoriteMetadata, UserFavorite } from './user-favorites.types';
+import type { ActionState } from '../reducers/api-request-reducer/types';
+import type { IFavoriteMetadata, UserFavorite } from './user-favorites.types';
 
 export interface IUserFavoritesGroupsState extends ActionState {
   groups: IUserFavoritesGroups;

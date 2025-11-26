@@ -55,7 +55,7 @@ export class GitIgnoreFilter {
       .filter((line: string) => {
         return line && line[0] !== '#';
       })
-      .reduce((lists: any, line: string) => {
+      .reduce((lists: [string[], string[]], line: string) => {
         const isNegative = line[0] === '!';
         if (isNegative) {
           line = line.slice(1);
@@ -70,20 +70,20 @@ export class GitIgnoreFilter {
         }
         return lists;
       }, [[], []])
-      .map((list: any) => {
+      .map((list: string[]) => {
         return list
           .sort()
           .map((pattern: string) => prepareRegexes(pattern))
-          .reduce((ls: any, prepared: any) => {
+          .reduce((ls: [string[], string[]], prepared: [string, string]) => {
             ls[0].push(prepared[0]);
             ls[1].push(prepared[1]);
             return ls;
-          }, [[], [], []]);
+          }, [[], []]);
       })
-      .map((item: any) => {
+      .map((item: [string[], string[]]) => {
         return [
-          item[0].length > 0 ? new RegExp('^((' + item[0].join(')|(') + '))') : new RegExp('$^'),
-          item[1].length > 0 ? new RegExp('^((' + item[1].join(')|(') + '))') : new RegExp('$^')
+          item[0].length > 0 ? new RegExp(`^((${item[0].join(')|(')}))`) : /$^/,
+          item[1].length > 0 ? new RegExp(`^((${item[1].join(')|(')}))`) : /$^/
         ];
       });
   }
@@ -107,16 +107,16 @@ export class GitIgnoreFilter {
       .split('/')
       .map((item: string, index: number) => {
         if (index) {
-          return '([\\/]?(' + prepareRegexPattern(item) + '\\b|$))';
+          return `([\\/]?(${prepareRegexPattern(item)}\\b|$))`;
         } else {
-          return '(' + prepareRegexPattern(item) + '\\b)';
+          return `(${prepareRegexPattern(item)}\\b)`;
         }
       })
       .join('');
   }
 
   private escapeRegex(pattern: string) {
-    return pattern.replace(/[\-\[\]\/\{\}\(\)\+\?\.\\\^\$\|]/g, '\\$&');
+    return pattern.replace(/[-[\]/{}()+?.\\^$|]/g, '\\$&');
   }
 
 }

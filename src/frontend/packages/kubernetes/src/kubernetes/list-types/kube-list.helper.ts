@@ -1,8 +1,7 @@
 import { formatDistance } from 'date-fns';
 
-import { DataFunction } from '../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { ITableColumn } from '../../../../core/src/shared/components/list/list-table/table.types';
-import { BasicKubeAPIResource, ConditionType, KubernetesNode } from '../store/kube.types';
+import type { DataFunction, ITableColumn } from '@stratosui/core';
+import type { BasicKubeAPIResource, ConditionType, KubernetesNode } from '../store/kube.types';
 
 export function getConditionSort(condition: ConditionType): DataFunction<KubernetesNode> {
   return (entities, paginationState) => {

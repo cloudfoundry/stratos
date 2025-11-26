@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 
-import { ExtensionService } from '../../core/src/core/extension/extension-service';
+import { ExtensionService } from '@stratosui/core';
 import { AutoscalerTabExtensionComponent } from './features/autoscaler-tab-extension/autoscaler-tab-extension.component';
 
 

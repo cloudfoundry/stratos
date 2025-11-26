@@ -1,12 +1,12 @@
-import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
+import type { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import {
   DeleteOrganization,
   GetAllOrganizations,
   GetOrganization,
   UpdateOrganization,
 } from '../actions/organization.actions';
-import { IUpdateOrganization } from '../cf-api.types';
-import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
+import type { IUpdateOrganization } from '../cf-api.types';
+import type { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
 export interface OrganizationActionBuilders extends OrchestratedActionBuilders {
   get: (
@@ -20,7 +20,7 @@ export interface OrganizationActionBuilders extends OrchestratedActionBuilders {
     { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
   ) => GetAllOrganizations;
   remove: (guid: string, endpointGuid: string) => DeleteOrganization;
-  update: (guid: string, endpointGuid: string, updatedOrg: IUpdateOrganization) => UpdateOrganization;
+  update: (guid: string, endpointGuid: string, updatedOrg?: IUpdateOrganization) => UpdateOrganization;
 }
 
 export const organizationActionBuilders: OrganizationActionBuilders = {

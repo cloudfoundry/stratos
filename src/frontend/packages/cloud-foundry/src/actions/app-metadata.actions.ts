@@ -1,7 +1,7 @@
 import { HttpRequest } from '@angular/common/http';
 
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { ICFAction } from '../../../store/src/types/request.types';
+import type { PaginatedAction } from '../../../store/src/types/pagination.types';
+import type { ICFAction } from '../../../store/src/types/request.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { appEnvVarsEntityType, applicationEntityType, appStatsEntityType, appSummaryEntityType } from '../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../entity-relations/entity-relations.types';
@@ -14,7 +14,7 @@ export enum AppMetadataTypes {
 }
 
 export class GetAppStatsAction extends CFStartAction implements PaginatedAction, ICFAction {
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   paginationKey: string;
   constructor(
     public guid: string,
@@ -42,7 +42,7 @@ export class GetAppStatsAction extends CFStartAction implements PaginatedAction,
 }
 
 export class GetAppEnvVarsAction extends CFStartAction implements PaginatedAction, ICFAction {
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   paginationKey: string;
   constructor(
     public guid: string,
@@ -70,7 +70,7 @@ export class GetAppEnvVarsAction extends CFStartAction implements PaginatedActio
 }
 
 export class GetAppSummaryAction extends CFStartAction implements ICFAction {
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   paginationKey!: string;
   constructor(
     public guid: string,

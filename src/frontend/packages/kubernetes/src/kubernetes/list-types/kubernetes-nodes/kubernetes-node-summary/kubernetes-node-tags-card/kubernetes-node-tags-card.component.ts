@@ -1,10 +1,10 @@
 import { AsyncPipe } from '@angular/common';
-import {Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import {Component, Input, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CardWrapperComponent, CardHeaderComponent, CardTitleComponent, CardContentComponent } from '@stratosui/core';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { AppChip, AppChipsComponent } from '../../../../../../../core/src/shared/components/chips/chips.component';
+import { type AppChip, AppChipsComponent } from '../../../../../../../core/src/shared/components/chips/chips.component';
 import { KubernetesNodeService } from '../../../../services/kubernetes-node.service';
 
 @Component({
@@ -35,12 +35,12 @@ export class KubernetesNodeTagsCardComponent implements OnInit {
 
   ngOnInit(): void {
     this.chipTags$ = this.kubeNodeService.nodeEntity$.pipe(
-      map(node => this.getTags((node.metadata as any)[this.mode])),
+      map(node => this.getTags((node.metadata as unknown as Record<string, Record<string, string>>)[this.mode])),
     );
   }
 
 
-  private getTags(tags: Record<string, any>): AppChip[] {
+  private getTags(tags: Record<string, string>): AppChip[] {
     const labelEntries = Object.entries(tags);
     return labelEntries.map(t => ({
       value: `${t[0]}:${t[1]}`

@@ -1,11 +1,11 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
 import { entityCatalog } from '@stratosui/store';
 import { KubeConfigHelper } from '../../kube-config.helper';
-import { KubeConfigFileCluster } from '../../kube-config.types';
+import type { KubeConfigFileCluster } from '../../kube-config.types';
 import { KubeConfigTableUserSelectComponent } from './kube-config-table-user-select.component';
 
 describe('KubeConfigTableUserSelectComponent', () => {

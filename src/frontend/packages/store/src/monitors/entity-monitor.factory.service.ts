@@ -1,9 +1,10 @@
-import { inject, Inject, Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { AppState } from '../app-state';
+import type { AppState } from '../app-state';
 import type { IEntityCatalog } from '../entity-catalog/entity-catalog.interface';
-import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
+import type { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
+import type { EntitySchema } from '../helpers/entity-schema';
 import { ENTITY_CATALOG_TOKEN } from '../tokens/store-injection.tokens';
 import { EntityMonitor } from './entity-monitor';
 
@@ -11,7 +12,7 @@ import { EntityMonitor } from './entity-monitor';
 export class EntityMonitorFactory {
 
   private monitorCache: {
-    [key: string]: EntityMonitor
+    [key: string]: EntityMonitor<unknown>
   } = {};
 
   constructor(
@@ -27,7 +28,7 @@ export class EntityMonitorFactory {
     const { endpointType, entityType, schemaKey, subType } = entityConfig;
     const cacheKey = id + endpointType + entityType + schemaKey + subType;
     if (this.monitorCache[cacheKey]) {
-      return this.monitorCache[cacheKey];
+      return this.monitorCache[cacheKey] as EntityMonitor<T>;
     } else {
       const catalogEntity = this.entityCatalog.getEntity(entityConfig);
       if (!catalogEntity) {
@@ -36,8 +37,8 @@ export class EntityMonitorFactory {
       const monitor = new EntityMonitor<T>(
         this.store,
         id,
-        catalogEntity.entityKey,
-        catalogEntity.getSchema(entityConfig.schemaKey),
+        (catalogEntity as { entityKey: string }).entityKey,
+        (catalogEntity as { getSchema: (key?: string) => EntitySchema }).getSchema(entityConfig.schemaKey),
         startWithNull
       );
       this.monitorCache[cacheKey] = monitor;

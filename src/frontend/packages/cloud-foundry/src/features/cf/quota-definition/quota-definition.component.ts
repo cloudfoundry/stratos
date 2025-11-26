@@ -1,13 +1,26 @@
-import { CommonModule } from '@angular/common';
-import { Component , ChangeDetectionStrategy } from '@angular/core';
-import { ActivatedRoute, RouterModule } from '@angular/router';
-
-import { CustomTooltipDirective, CurrentUserPermissionsService, PageHeaderComponent, IHeaderBreadcrumb, PageSubNavComponent, BooleanIndicatorComponent, LoadingPageComponent, CardNumberMetricComponent, TileGridComponent, TileGroupComponent, TileComponent } from '@stratosui/core';
+import { AsyncPipe } from '@angular/common';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, of, Subscription } from 'rxjs';
+import { type Observable, of, type Subscription } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
-import { AppState, APIResource, EndpointModel } from '@stratosui/store';
-import { IOrganization, IOrgQuotaDefinition, ISpace } from '../../../cf-api.types';
+
+import {
+  BooleanIndicatorComponent,
+  CardNumberMetricComponent,
+  CurrentUserPermissionsService,
+  CustomTooltipDirective,
+  type IHeaderBreadcrumb,
+  LoadingPageComponent,
+  PageHeaderComponent,
+  PageSubNavComponent,
+  TileComponent,
+  TileGridComponent,
+  TileGroupComponent
+} from '@stratosui/core';
+import type { APIResource, EndpointModel } from '@stratosui/store';
+
+import type { IOrganization, IOrgQuotaDefinition, ISpace } from '../../../cf-api.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
@@ -26,8 +39,8 @@ export const QUOTA_ORG_GUID = 'org';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
-    RouterModule,
+    AsyncPipe,
+    RouterLink,
     CustomTooltipDirective,
     PageHeaderComponent,
     PageSubNavComponent,
@@ -56,7 +69,7 @@ export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
   public isCf = false;
 
   constructor(
-    protected store: Store<AppState>,
+    protected store: Store,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     activatedRoute: ActivatedRoute,
     currentUserPermissionsService: CurrentUserPermissionsService

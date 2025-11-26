@@ -1,20 +1,21 @@
-import { CommonModule } from '@angular/common';
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, type Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
 import {
   CurrentUserPermissionsService,
-} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ListComponent } from '../../../../../../../core/src/shared/components/list/list.component';
-import { ListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { NoContentMessageComponent } from '../../../../../../../core/src/shared/components/no-content-message/no-content-message.component';
-import { PageSubNavComponent } from '../../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
+  ListComponent,
+  ListConfig,
+  NoContentMessageComponent,
+  PageSubNavComponent,
+} from '@stratosui/core';
+import { GeneralEntityAppState } from '@stratosui/store';
+
 import { CFFeatureFlagTypes } from '../../../../../cf-api.types';
-import { CFAppState } from '../../../../../cf-app-state';
 import {
   CfOrgUsersListConfigService,
 } from '../../../../../shared/components/list/list-types/cf-org-users/cf-org-users-list-config.service';
@@ -28,31 +29,33 @@ import { CloudFoundryInviteUserLinkComponent } from '../cf-invite-user-link/clou
   selector: 'app-cloud-foundry-organization-users',
   templateUrl: './cloud-foundry-organization-users.component.html',
   styleUrls: ['./cloud-foundry-organization-users.component.scss'],
-  providers: [{
-    provide: ListConfig,
-    useClass: CfOrgUsersListConfigService
-  }],
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
   imports: [
-    CommonModule,
+    AsyncPipe,
     RouterModule,
     PageSubNavComponent,
     ListComponent,
     NoContentMessageComponent,
     CfAdminAddUserWarningComponent,
-    CloudFoundryInviteUserLinkComponent
-  ]
+    CloudFoundryInviteUserLinkComponent,
+  ],
+  providers: [
+    {
+      provide: ListConfig,
+      useClass: CfOrgUsersListConfigService,
+    },
+  ],
 })
 export class CloudFoundryOrganizationUsersComponent {
 
   public addRolesByUsernameLink$: Observable<{
     link: string,
-    params: { [name: string]: any }
+    params: Record<string, unknown>
   }>;
 
   constructor(
-    store: Store<CFAppState>,
+    store: Store<GeneralEntityAppState>,
     userPerms: CurrentUserPermissionsService,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {

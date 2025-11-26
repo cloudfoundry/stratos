@@ -1,5 +1,5 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, provideZonelessChangeDetection, ViewChild } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { firstValueFrom, from as observableFrom, Subject } from 'rxjs';

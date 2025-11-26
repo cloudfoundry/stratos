@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { filter, map, pairwise } from 'rxjs/operators';
 
-import { SpaceScopedService } from '../../../../../cloud-foundry/src/features/service-catalog/services.service';
-import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
-import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
+import type { SpaceScopedService } from '../../../../../cloud-foundry/src/features/service-catalog/services.service';
+import { getIdFromRoute } from '@stratosui/core';
+import type { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 
 export enum CreateServiceInstanceMode {
@@ -14,7 +14,7 @@ export enum CreateServiceInstanceMode {
   EDIT_SERVICE_INSTANCE_MODE = 'editServiceInstanceMode'
 }
 
-export const enum CreateServiceFormMode {
+export enum CreateServiceFormMode {
   CreateServiceInstance = 'create-service-instance',
   BindServiceInstance = 'bind-service-instance',
 }
@@ -93,7 +93,7 @@ export class CsiModeService {
         showSelectService: false,
       };
       this.spaceScopedDetails = {
-        isSpaceScoped: activatedRoute.snapshot.queryParams.isSpaceScoped === 'true' ? true : false,
+        isSpaceScoped: activatedRoute.snapshot.queryParams.isSpaceScoped  === 'true',
         spaceGuid: activatedRoute.snapshot.queryParams.spaceGuid,
         orgGuid: activatedRoute.snapshot.queryParams.orgGuid,
       };
@@ -189,9 +189,7 @@ export class CsiModeService {
       // - doesn't work that well for marketplace/service create instance --> success (should go to marketplace/service/instance)
       // - if user has refreshed on stepper (previous url was login) use the old cancelUrl best-guess value
       const currentNavigation = router.getCurrentNavigation();
-      if (currentNavigation &&
-        currentNavigation.previousNavigation &&
-        currentNavigation.previousNavigation.finalUrl &&
+      if (currentNavigation?.previousNavigation?.finalUrl &&
         currentNavigation.previousNavigation.finalUrl.toString() !== '/login'
       ) {
         this.cancelUrl = currentNavigation.previousNavigation.finalUrl.toString();

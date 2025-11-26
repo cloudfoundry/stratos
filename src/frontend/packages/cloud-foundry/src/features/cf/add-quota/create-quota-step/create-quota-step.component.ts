@@ -1,10 +1,10 @@
 import { Component, ViewChild , ChangeDetectionStrategy } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import type { FormGroup } from '@angular/forms';
+import type { Subscription } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
 
-import { StepOnNextFunction } from '@stratosui/core';
-import { RequestInfoState } from '@stratosui/store';
+import type { StepOnNextFunction } from '@stratosui/core';
+import type { RequestInfoState } from '@stratosui/store';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';

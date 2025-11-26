@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectorRef } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { of } from 'rxjs';
@@ -6,6 +6,7 @@ import { Store } from '@ngrx/store';
 
 import { PaginationMonitorFactory } from '@stratosui/store';
 import { ApplicationDeploySourceTypes } from '../../applications/deploy-application/deploy-application-steps.types';
+import { HomePageCardLayout } from '@stratosui/core';
 import { CFHomeCardComponent } from "./cfhome-card.component";
 
 describe('CFHomeCardComponent', () => {
@@ -62,7 +63,7 @@ describe('CFHomeCardComponent', () => {
     component = fixture.componentInstance;
     // Set required inputs before detectChanges
     component.guid = 'test-guid';
-    component.layout = { x: 1, y: 1 } as any;
+    component.layout = new HomePageCardLayout(1, 1);
     // Don't call detectChanges() to avoid complex initialization
   });
 

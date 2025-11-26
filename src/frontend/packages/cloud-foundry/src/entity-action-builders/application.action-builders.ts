@@ -1,5 +1,5 @@
-import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
-import { AppMetadataTypes } from '../actions/app-metadata.actions';
+import type { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
+import type { AppMetadataTypes } from '../actions/app-metadata.actions';
 import { AssignRouteToApplication } from '../actions/application-service-routes.actions';
 import {
   CreateNewApplication,
@@ -7,32 +7,32 @@ import {
   GetAllApplications,
   GetApplication,
   RestageApplication,
-  UpdateApplication,
+  type UpdateApplication,
   UpdateExistingApplication,
 } from '../actions/application.actions';
 import { GetAllAppsInSpace } from '../actions/space.actions';
-import { IApp } from '../cf-api.types';
-import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
+import type { IApp } from '../cf-api.types';
+import type { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
 export interface ApplicationActionBuilders extends OrchestratedActionBuilders {
   get: (
     guid: string,
     endpointGuid: string,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    extraArgs?: Record<string, unknown>
   ) => GetApplication;
-  remove: (guid: string, endpointGuid: string) => DeleteApplication;
-  create: (id: string, endpointGuid: string, application: IApp) => CreateNewApplication;
+  remove: (guid: string, endpointGuid: string, extraArgs?: Record<string, unknown>) => DeleteApplication;
+  create: (id: string, endpointGuid: string, extraArgs?: Record<string, unknown>) => CreateNewApplication;
   update: (
     guid: string,
     endpointGuid: string,
-    updatedApplication: UpdateApplication,
+    updatedApplication?: UpdateApplication,
     existingApplication?: IApp,
     updateEntities?: AppMetadataTypes[]
   ) => UpdateExistingApplication;
   getMultiple: (
     endpointGuid: string,
-    paginationKey?: string,
-    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
+    paginationKey: string,
+    extraArgs?: Record<string, unknown>
   ) => GetAllApplications;
   restage: (guid: string, endpointGuid: string) => RestageApplication;
   assignRoute: (endpointGuid: string, routeGuid: string, applicationGuid: string) => AssignRouteToApplication;
@@ -53,7 +53,7 @@ export const applicationActionBuilder: ApplicationActionBuilders = {
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetApplication(guid, endpointGuid, includeRelations, populateMissing),
   remove: (guid: string, endpointGuid: string) => new DeleteApplication(guid, endpointGuid),
-  create: (id: string, endpointGuid: string, application: IApp) => new CreateNewApplication(id, endpointGuid, application),
+  create: (id: string, endpointGuid: string, application?: IApp | Record<string, unknown>) => new CreateNewApplication(id, endpointGuid, application as IApp),
   update: (
     guid: string,
     endpointGuid: string,

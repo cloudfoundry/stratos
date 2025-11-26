@@ -1,13 +1,13 @@
 
-import { Component, OnDestroy, ViewChild , ChangeDetectionStrategy } from '@angular/core';
+import { Component, type OnDestroy, ViewChild , ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
-import { safeUnsubscribe, StepOnNextFunction } from '@stratosui/core';
-import { AppState, ActionState, APIResource } from '@stratosui/store';
-import { IOrgQuotaDefinition } from '../../../../cf-api.types';
+import { safeUnsubscribe, type StepOnNextFunction } from '@stratosui/core';
+import type { AppState, ActionState, APIResource } from '@stratosui/store';
+import type { IOrgQuotaDefinition } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
@@ -39,7 +39,7 @@ export class EditQuotaStepComponent implements OnDestroy {
   form!: QuotaDefinitionFormComponent;
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store,
     private activatedRoute: ActivatedRoute,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
   ) {
@@ -53,13 +53,15 @@ export class EditQuotaStepComponent implements OnDestroy {
     this.quotaDefinition$ = cfEntityCatalog.quotaDefinition.store.getEntityService(this.quotaGuid, this.cfGuid, {}).waitForEntity$.pipe(
       first(),
       map(data => data.entity),
-      tap((resource) => this.quota = resource.entity)
+      tap((resource) => {
+        this.quota = resource.entity;
+      })
     );
 
     this.quotaSubscription = this.quotaDefinition$.subscribe();
   }
 
-  validate = () => this.form && this.form.valid();
+  validate = () => this.form?.valid();
 
   submit: StepOnNextFunction = () =>
     cfEntityCatalog.quotaDefinition.api.update<ActionState>(this.quotaGuid, this.cfGuid, this.form.formGroup.getRawValue()).pipe(

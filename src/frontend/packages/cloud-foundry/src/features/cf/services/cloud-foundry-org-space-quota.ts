@@ -1,12 +1,19 @@
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { combineLatest, type Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { truthyIncludingZero } from '../../../../../core/src/core/utils.service';
+import { truthyIncludingZeroString } from '@stratosui/core';
+
+// Helper function for truthyIncludingZero that accepts numbers
+const truthyIncludingZero = (value: number | null | undefined): boolean => {
+  return value === 0 || !!value;
+};
+
+// determineCardStatus is not exported from @stratosui/core, keeping relative import
 import { determineCardStatus } from '../../../../../core/src/shared/components/cards/card-status/card-status.component';
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
-import { APIResource } from '../../../../../store/src/types/api.types';
+import type { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
+import type { APIResource } from '../../../../../store/src/types/api.types';
 import { StratosStatus } from '../../../../../store/src/types/shared.types';
-import { IApp, IOrganization, ISpace } from '../../../cf-api.types';
+import type { IApp, IOrganization, ISpace, IQuotaDefinition } from '../../../cf-api.types';
 import { CFEntityConfig } from '../../../cf-types';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 
@@ -62,14 +69,16 @@ export abstract class OrgSpaceQuotaHelper<T = IOrganization | ISpace> {
 
   private hasQuotas(): Observable<boolean> {
     return this.orgOrSpace$.pipe(
-      map(resource =>
-        !!(resource.entity as Record<string, any>)[this.quotaPropertyName] && (
-          truthyIncludingZero((resource.entity as Record<string, any>)[this.quotaPropertyName].entity.total_routes) ||
-          truthyIncludingZero((resource.entity as Record<string, any>)[this.quotaPropertyName].entity.total_services) ||
-          truthyIncludingZero((resource.entity as Record<string, any>)[this.quotaPropertyName].entity.total_private_domains) ||
-          truthyIncludingZero((resource.entity as Record<string, any>)[this.quotaPropertyName].entity.app_instance_limit) ||
-          truthyIncludingZero((resource.entity as Record<string, any>)[this.quotaPropertyName].entity.memory_limit))
-      )
+      map(resource => {
+        const entity = resource.entity as Record<string, unknown>;
+        const quota = entity[this.quotaPropertyName] as { entity: IQuotaDefinition } | undefined;
+        return !!quota && (
+          truthyIncludingZero(quota.entity.total_routes) ||
+          truthyIncludingZero(quota.entity.total_services) ||
+          truthyIncludingZero(quota.entity.total_private_domains) ||
+          truthyIncludingZero(quota.entity.app_instance_limit) ||
+          truthyIncludingZero(quota.entity.memory_limit))
+      })
     );
   }
 

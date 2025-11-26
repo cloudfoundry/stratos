@@ -1,5 +1,5 @@
 import { Injectable, EventEmitter } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Subject, type Observable } from 'rxjs';
 
 export interface TailwindSidenavConfig {
   mode?: 'over' | 'push' | 'side';
@@ -16,6 +16,10 @@ export class TailwindSidenav {
   position: 'start' | 'end' = 'start';
   disableClose = false;
   autoFocus = true;
+
+  // Material compatibility properties
+  closedStart = new Subject<void>();
+  _modeChanged = new Subject<void>();
 
   get opened(): boolean {
     return this._opened;
@@ -38,6 +42,7 @@ export class TailwindSidenav {
   }
 
   close(): Promise<void> {
+    this.closedStart.next();
     this.opened = false;
     return Promise.resolve();
   }

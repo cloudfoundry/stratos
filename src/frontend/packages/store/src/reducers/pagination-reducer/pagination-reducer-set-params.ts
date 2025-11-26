@@ -1,10 +1,10 @@
-import { SetInitialParams, SetParams } from '../../actions/pagination.actions';
-import { PaginationEntityState } from '../../types/pagination.types';
+import type { SetInitialParams, SetParams } from '../../actions/pagination.actions';
+import type { PaginationEntityState, PaginationParam } from '../../types/pagination.types';
 import { removeEmptyParams } from './pagination-reducer.helper';
 import { resultPerPageParam, resultPerPageParamDefault } from './pagination-reducer.types';
 
 export function paginationSetParams(state: PaginationEntityState, action: SetInitialParams | SetParams): PaginationEntityState {
-  let params;
+  let params: PaginationParam;
   if (action.overwrite) {
     // Overwrite any existing values
     params = {

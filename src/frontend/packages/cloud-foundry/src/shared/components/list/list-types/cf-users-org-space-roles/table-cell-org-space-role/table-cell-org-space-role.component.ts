@@ -1,9 +1,14 @@
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { ISpace } from '../../../../../../cf-api.types';
+import { TableCellCustom } from '@stratosui/core';
+import type { APIResource } from '../../../../../../../../store/src/types/api.types';
+import type { ISpace } from '../../../../../../cf-api.types';
 import { CfRoleCheckboxComponent } from '../../../../cf-role-checkbox/cf-role-checkbox.component';
+
+export interface CfOrgSpaceRoleConfig {
+  role: string;
+  isSpace: boolean;
+}
 
 @Component({
   selector: 'app-table-cell-org-space-role',
@@ -15,4 +20,4 @@ import { CfRoleCheckboxComponent } from '../../../../cf-role-checkbox/cf-role-ch
     CfRoleCheckboxComponent
   ]
 })
-export class TableCellRoleOrgSpaceComponent extends TableCellCustom<APIResource<ISpace>> { }
+export class TableCellRoleOrgSpaceComponent extends TableCellCustom<APIResource<ISpace>, CfOrgSpaceRoleConfig> { }

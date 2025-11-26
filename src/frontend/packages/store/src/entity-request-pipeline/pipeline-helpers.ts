@@ -1,6 +1,6 @@
-import { StratosBaseCatalogEntity } from '../entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { IStratosEntityDefinition } from '../entity-catalog/entity-catalog.types';
-import { JetstreamResponse, PagedJetstreamResponse } from './entity-request-pipeline.types';
+import type { StratosBaseCatalogEntity } from '../entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import type { IStratosEntityDefinition } from '../entity-catalog/entity-catalog.types';
+import type { JetstreamResponse, PagedJetstreamResponse } from './entity-request-pipeline.types';
 
 export function isJetstreamRequest(definition: IStratosEntityDefinition): boolean {
   return !definition.nonJetstreamRequest && !definition.nonJetstreamRequestHandler;
@@ -14,7 +14,7 @@ export function getSuccessMapper(catalogEntity: StratosBaseCatalogEntity) {
   return definition.successfulRequestDataMapper || definition.endpoint.globalSuccessfulRequestDataMapper || null;
 }
 
-export function singleRequestToPaged(response: JetstreamResponse<any>): PagedJetstreamResponse {
+export function singleRequestToPaged(response: JetstreamResponse<unknown>): PagedJetstreamResponse {
   if (!response) {
     return null;
   }

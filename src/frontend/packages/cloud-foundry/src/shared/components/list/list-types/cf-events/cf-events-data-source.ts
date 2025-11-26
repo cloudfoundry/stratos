@@ -1,23 +1,24 @@
 import { Store } from '@ngrx/store';
-import { getRowMetadata } from '@stratosui/store';
+import { getRowMetadata, type GeneralEntityAppState } from '@stratosui/store';
 
 import {
   ListDataSource,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { CFAppState } from '../../../../../cf-app-state';
+} from '@stratosui/core';
+import type { IListConfig } from '@stratosui/core';
+import type { APIResource } from '../../../../../../../store/src/types/api.types';
+import type { CfEvent } from '../../../../../cf-api.types';
+import type { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { cfEventEntityType } from '../../../../../cf-entity-types';
 import { QParam, QParamJoiners } from '../../../../q-param';
 
-export class CfEventsDataSource extends ListDataSource<APIResource> {
+export class CfEventsDataSource extends ListDataSource<APIResource<CfEvent>> {
 
   constructor(
-    store: Store<CFAppState>,
+    store: Store<GeneralEntityAppState>,
     cfGuid: string,
-    listConfig: IListConfig<APIResource>,
+    listConfig: IListConfig<APIResource<CfEvent>>,
     orgGuid?: string,
     spaceGuid?: string,
     actee?: string,

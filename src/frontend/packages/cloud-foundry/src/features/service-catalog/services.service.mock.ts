@@ -5,6 +5,32 @@ export class ServicesServiceMock {
   cfGuid = 'test-cf-guid';
   serviceGuid = 'test-service-guid';
   servicePlanVisibilities$ = observableOf([]);
+  serviceEntityService: any = null;
+  serviceExtraInfo$ = observableOf({
+    displayName: 'app-autoscaler',
+    imageUrl: 'test',
+    longDescription: '',
+    providerDisplayName: '',
+    documentationUrl: '',
+    supportUrl: ''
+  });
+  allServiceInstances$ = observableOf([]);
+  serviceBrokers$ = observableOf([{
+    entity: {
+      name: 'app-autoscaler',
+      broker_url: 'https://app-autoscaler-broker.cf-dev.io',
+      auth_username: 'admin',
+      space_guid: null,
+      guid: 'a55f1a04-e3a3-4a89-92ee-94e3f96103f3',
+      cfGuid: '7d5e510b-8396-4db0-a91c-6abdc390c9d1'
+    },
+    metadata: {
+      guid: 'a55f1a04-e3a3-4a89-92ee-94e3f96103f3',
+      url: '/v2/service_brokers/a55f1a04-e3a3-4a89-92ee-94e3f96103f3',
+      created_at: '2017-11-27T17:07:02Z',
+      updated_at: '2017-11-27T17:07:02Z'
+    }
+  }]);
   service$ = observableOf(
     {
       entity: {
@@ -48,7 +74,7 @@ export class ServicesServiceMock {
       free: true,
       description: 'Shared service for app-autoscaler',
       service_guid: 'f88cdd0e-82e1-429c-be8b-7ab43644c3f4',
-      extra: null,
+      extra: null as string | null,
       unique_id: '826fcda4-80e1-11e7-aead-9372473ff564-plan-shared',
       public: true,
       bindable: true,
@@ -72,7 +98,7 @@ export class ServicesServiceMock {
       free: true,
       description: 'Shared service for app-autoscaler',
       service_guid: 'f88cdd0e-82e1-429c-be8b-7ab43644c3f4',
-      extra: null,
+      extra: null as string | null,
       unique_id: '826fcda4-80e1-11e7-aead-9372473ff564-plan-shared',
       public: true,
       bindable: true,
@@ -95,27 +121,16 @@ export class ServicesServiceMock {
   isSpaceScoped$ = observableOf({
     isSpaceScoped: false
   });
-  serviceBroker$ = observableOf({
-    entity: {
-      name: 'app-autoscaler',
-      broker_url: 'https://app-autoscaler-broker.cf-dev.io',
-      auth_username: 'admin',
-      space_guid: null,
-      guid: 'a55f1a04-e3a3-4a89-92ee-94e3f96103f3',
-      cfGuid: '7d5e510b-8396-4db0-a91c-6abdc390c9d1'
-    },
-    metadata: {
-      guid: 'a55f1a04-e3a3-4a89-92ee-94e3f96103f3',
-      url: '/v2/service_brokers/a55f1a04-e3a3-4a89-92ee-94e3f96103f3',
-      created_at: '2017-11-27T17:07:02Z',
-      updated_at: '2017-11-27T17:07:02Z'
-    }
-  });
+  serviceBroker$ = this.serviceBrokers$.pipe() as any;
   getServicePlanVisibilities = () => observableOf([]);
   getVisibleServicePlans = () => this.servicePlans$;
   getServicePlanAccessibility = () => observableOf({
     isPublic: true
   })
+  getServiceBrokerById = (guid: string) => this.serviceBrokers$.pipe() as any;
+  getServiceTags = () => observableOf([]);
+  hasDocumentationUrl = () => observableOf(false);
+  hasSupportUrl = () => observableOf(false);
 
 
   getDocumentationUrl = () => '';

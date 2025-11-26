@@ -1,10 +1,10 @@
-import { Component, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { Component, Input, type OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { BehaviorSubject, combineLatest, type Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
-import { AppChip, AppChipsComponent, TableCellCustom } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { CfRoute, IApp } from '@stratosui/cloud-foundry';
+import { type AppChip, AppChipsComponent, TableCellCustom } from '@stratosui/core';
+import type { APIResource } from '@stratosui/store';
+import type { CfRoute, IApp } from '@stratosui/cloud-foundry';
 
 @Component({
   selector: 'app-table-cell-route-apps-attached',
@@ -19,7 +19,7 @@ import { CfRoute, IApp } from '@stratosui/cloud-foundry';
 })
 export class TableCellRouteAppsAttachedComponent extends TableCellCustom<APIResource<CfRoute>> implements OnInit {
   boundApps$!: Observable<AppChip[]>;
-  config$ = new BehaviorSubject<any>(null);
+  config$ = new BehaviorSubject<{ breadcrumbs?: string } | null>(null);
   row$ = new BehaviorSubject<APIResource<CfRoute> | null>(null);
 
   @Input('config')

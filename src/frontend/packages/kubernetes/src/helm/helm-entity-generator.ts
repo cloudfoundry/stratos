@@ -1,19 +1,19 @@
 import { Store } from '@ngrx/store';
-import { Observable, of } from 'rxjs';
+import { type Observable, of } from 'rxjs';
 import { catchError, filter, first, map } from 'rxjs/operators';
 
 import { urlValidationExpression } from '../../../core/src/core/utils.service';
-import { IListAction } from '../../../core/src/shared/components/list/list.component.types';
-import { AppState } from '../../../store/src/app-state';
+import type { IListAction } from '../../../core/src/shared/components/list/list.component.types';
+import type { AppState } from '../../../store/src/app-state';
 import {
-  StratosBaseCatalogEntity,
+  type StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
 } from '../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { StratosEndpointExtensionDefinition } from '../../../store/src/entity-catalog/entity-catalog.types';
-import { EndpointModel } from '../../../store/src/public-api';
+import type { StratosEndpointExtensionDefinition } from '../../../store/src/entity-catalog/entity-catalog.types';
+import type { EndpointModel } from '../../../store/src/public-api';
 import { stratosEntityCatalog } from '../../../store/src/stratos-entity-catalog';
-import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
+import type { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
 import { helmEntityCatalog } from './helm-entity-catalog';
 import {
   HELM_ENDPOINT_TYPE,
@@ -26,14 +26,14 @@ import {
 } from './helm-entity-factory';
 import { HelmHubRegistrationComponent } from './helm-hub-registration/helm-hub-registration.component';
 import {
-  HelmChartActionBuilders,
+  type HelmChartActionBuilders,
   helmChartActionBuilders,
-  HelmChartVersionsActionBuilders,
+  type HelmChartVersionsActionBuilders,
   helmChartVersionsActionBuilders,
-  HelmVersionActionBuilders,
+  type HelmVersionActionBuilders,
   helmVersionActionBuilders,
 } from './store/helm.action-builders';
-import { HelmVersion, MonocularChart, MonocularVersion } from './store/helm.types';
+import type { HelmVersion, MonocularChart, MonocularVersion } from './store/helm.types';
 
 
 export function generateHelmEntities(): StratosBaseCatalogEntity[] {
@@ -57,7 +57,7 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
         unConnectable: true,
         techPreview: false,
         authTypes: [],
-        endpointListActions: (store: Store<AppState>): IListAction<EndpointModel>[] => {
+        endpointListActions: (_store: Store<AppState>): IListAction<EndpointModel>[] => {
           return [{
             action: (item: EndpointModel) => {
               helmEntityCatalog.chart.api.synchronise(item).pipe(

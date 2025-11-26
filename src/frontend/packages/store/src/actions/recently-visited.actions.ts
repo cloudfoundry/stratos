@@ -1,6 +1,6 @@
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 
-import { IRecentlyVisitedEntity } from '../types/recently-visited.types';
+import type { IRecentlyVisitedEntity } from '../types/recently-visited.types';
 
 export class AddRecentlyVisitedEntityAction implements Action {
   static ACTION_TYPE = '[Recently visited] Add';

@@ -1,14 +1,14 @@
 import { Store } from '@ngrx/store';
 
-import { ListDataSource, IListConfig } from '@stratosui/core';
-import { getRowMetadata, APIResource } from '@stratosui/store';
-import { CFAppState } from '../../../../../cf-app-state';
+import { ListDataSource, type IListConfig } from '@stratosui/core';
+import { getRowMetadata, type APIResource, type GeneralEntityAppState } from '@stratosui/store';
+import type { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { stackEntityType } from '../../../../../cf-entity-types';
 
 export class CfStacksDataSource extends ListDataSource<APIResource> {
-  constructor(store: Store<CFAppState>, cfGuid: string, listConfig?: IListConfig<APIResource>) {
+  constructor(store: Store<GeneralEntityAppState>, cfGuid: string, listConfig?: IListConfig<APIResource>) {
     const action = cfEntityCatalog.stack.actions.getMultiple(null, cfGuid);
     super({
       store,

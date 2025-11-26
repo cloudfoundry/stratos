@@ -1,8 +1,8 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
-import { Logger } from './log.js';
-import { StratosConfig } from './stratos.config.js';
+import type { Logger } from './log.js';
+import type { StratosConfig } from './stratos.config.js';
 
 // Helper for packages
 
@@ -11,7 +11,7 @@ export interface PackageInfo {
   name: string;
   dir: string;
   stratos: boolean;
-  json: any;
+  json: PackageJson;
   ignore: boolean;
   extension?: ExtensionMetadata;
   theme: boolean;
@@ -25,6 +25,8 @@ export interface PackageJson {
   name: string;
   stratos?: StratosPakageMetadata;
   scripts: { [key: string]: string };
+  dependencies?: { [key: string]: string };
+  peerDependencies?: { [key: string]: string };
 }
 
 // Custom stratos metadata that can be in the package.json file
@@ -63,13 +65,13 @@ export interface AssetMetadata {
 }
 
 // Helpers for getting list of dirs in a dir
-const isDirectory = source => {
+const isDirectory = (source: string): boolean => {
   const realPath = fs.realpathSync(source);
   const stats = fs.lstatSync(realPath);
   return stats.isDirectory();
 }
 
-const getDirectories = source => {
+const getDirectories = (source: string): string[] => {
   if (!fs.existsSync(source)) {
     return [];
   }
@@ -99,12 +101,12 @@ export class Packages {
     if (fs.existsSync(pkgFile)) {
       try {
         pkg = JSON.parse(fs.readFileSync(pkgFile, 'utf8').toString());
-      } catch (e) { }
+      } catch (_e) { }
     }
     return pkg;
   }
 
-  constructor(public config: StratosConfig, public nodeModulesFolder: string, public localPackagesFolder) { }
+  constructor(public config: StratosConfig, public nodeModulesFolder: string, public localPackagesFolder: string) { }
 
   public setLogger(logger: Logger) {
     this.logger = logger;
@@ -117,7 +119,7 @@ export class Packages {
   }
 
   // Look for packages
-  public scan(packageJson: any) {
+  public scan(packageJson: PackageJson) {
     this.pkgReadMap = new Map<string, PackageInfo>();
 
     if (packageJson.peerDependencies) {
@@ -140,7 +142,9 @@ export class Packages {
       if (pkgFile !== null) {
         this.addPackage(pkgDir, true);
       } else {
-        getDirectories(pkgDir).forEach(pDir => this.addPackage(pDir, true));
+        getDirectories(pkgDir).forEach(pDir => {
+          this.addPackage(pDir, true);
+        });
       }
     });
 
@@ -149,12 +153,12 @@ export class Packages {
       // Theme was not set, so find the first theme that is not the default theme
       const theme = this.packages.find(pkg => pkg.theme && pkg.name !== DEFAULT_THEME);
       if (!theme) {
-        this.theme = this.packageMap[DEFAULT_THEME];
+        this.theme = this.packageMap.get(DEFAULT_THEME);
       } else {
         this.theme = theme;
       }
     } else {
-      this.theme = this.packageMap[this.config.stratosConfig.theme];
+      this.theme = this.packageMap.get((this.config.stratosConfig as any).theme);
     }
 
     // Ensure that the theme is last in the list, so that its resources are copied last
@@ -164,13 +168,13 @@ export class Packages {
       this.packages.push(items[0]);
     }
 
-    const excludeMap = {};
-    const excludes = this.config.stratosConfig.packages.exclude as string[];
+    const excludeMap: Record<string, boolean> = {};
+    const excludes = ((this.config.stratosConfig as any).packages?.exclude as string[]) || [];
     excludes.forEach(e => {
       excludeMap[e] = true;
     });
 
-    const remove = {};
+    const remove: Record<string, PackageInfo> = {};
     // We have the excludes and the set of packages - remove any that have the excludes as dependencies
     this.packages.forEach(pkg => {
       if (this.hasExcludedDepenedncey(pkg, excludeMap)) {
@@ -182,10 +186,12 @@ export class Packages {
     this.packages = this.packages.filter(p => !remove[p.name]);
 
     this.log('Packages:');
-    this.packages.forEach(pkg => this.log(` + ${pkg.name}`));
+    this.packages.forEach(pkg => {
+      this.log(` + ${pkg.name}`);
+    });
   }
 
-  private hasExcludedDepenedncey(pkg: any, exclude: any): boolean {
+  private hasExcludedDepenedncey(pkg: PackageInfo, exclude: Record<string, boolean>): boolean {
 
     // Check peer dependencies
     if (pkg.json.peerDependencies) {
@@ -200,11 +206,11 @@ export class Packages {
     return false;
   }
 
-  public addPackage(pkgName, isLocal = false) {
-    if (this.pkgReadMap[pkgName]) {
+  public addPackage(pkgName: string, isLocal = false) {
+    if (this.pkgReadMap.get(pkgName)) {
       return;
     }
-    this.pkgReadMap[pkgName] = true;
+    this.pkgReadMap.set(pkgName, true as any);
 
     let pkgDir = pkgName;
     if (!isLocal) {
@@ -218,7 +224,9 @@ export class Packages {
       if (this.includePackage(pkgFile)) {
         // Process all of the peer dependencies first
         if (pkgFile.peerDependencies) {
-          Object.keys(pkgFile.peerDependencies).forEach(dep => this.addPackage(dep));
+          Object.keys(pkgFile.peerDependencies).forEach(dep => {
+            this.addPackage(dep);
+          });
         }
         const pkg = this.processPackage(pkgFile, pkgDir);
         this.add(pkg);
@@ -227,10 +235,10 @@ export class Packages {
   }
 
   private add(item: PackageInfo) {
-    if (!this.packageMap[item.name]) {
+    if (!this.packageMap.get(item.name)) {
       // We don't already have this package
       this.packages.push(item);
-      this.packageMap[item.name] = item;
+      this.packageMap.set(item.name, item);
     }
   }
 
@@ -260,13 +268,14 @@ export class Packages {
     }
 
     // Use the include set if one is specified
-    if (this.config.stratosConfig.packages.include) {
-      return this.config.stratosConfig.packages.include.includes(pkg.name);
+    const packages = (this.config.stratosConfig as any).packages;
+    if (packages?.include) {
+      return (packages.include as string[]).includes(pkg.name);
     }
 
     // Remove any excluded extensions
-    if (this.config.stratosConfig.packages.exclude) {
-      return !this.config.stratosConfig.packages.exclude.includes(pkg.name);
+    if (packages?.exclude) {
+      return !(packages.exclude as string[]).includes(pkg.name);
     }
 
     return true;
@@ -280,7 +289,7 @@ export class Packages {
       stratos: !!pkg.stratos,
       json: pkg,
       ignore: pkg.stratos ? pkg.stratos.ignore || false : false,
-      theme: pkg.stratos && pkg.stratos.theme,
+      theme: pkg.stratos?.theme,
       theming: this.getThemingConfig(pkg, folder),
       assets: this.getAssets(pkg, folder),
       backendPlugins: pkg.stratos ? pkg.stratos.backend || [] : [],
@@ -299,8 +308,8 @@ export class Packages {
   }
 
   // Get any theming metadata - this allows a package to theme its own components using the theme
-  private getThemingConfig(pkg: PackageJson, packagePath: string): ThemingMetadata {
-    if (pkg.stratos && pkg.stratos.theming) {
+  private getThemingConfig(pkg: PackageJson, _packagePath: string): ThemingMetadata {
+    if (pkg.stratos?.theming) {
       const refParts = pkg.stratos.theming.split('#');
       if (refParts.length === 2) {
         const themingConfig: ThemingMetadata = {
@@ -308,12 +317,12 @@ export class Packages {
           package: pkg.name,
           scss: refParts[0],
           mixin: refParts[1],
-          importPath: '~' + pkg.name + '/' + refParts[0]
+          importPath: `~${pkg.name}/${refParts[0]}`
         };
-        this.log('Found themed package: ' + pkg.name + ' (' + pkg.stratos.theming + ')');
+        this.log(`Found themed package: ${pkg.name} (${pkg.stratos.theming})`);
         return themingConfig;
       } else {
-        this.log('Invalid theming reference: ' + pkg.stratos.theming);
+        this.log(`Invalid theming reference: ${pkg.stratos.theming}`);
       }
     }
 
@@ -324,7 +333,7 @@ export class Packages {
   private getAssets(pkg: PackageJson, packagePath: string): AssetMetadata[] {
     const assets: AssetMetadata[] = [];
     // Check for assets
-    if (pkg.stratos && pkg.stratos.assets) {
+    if (pkg.stratos?.assets) {
       Object.keys(pkg.stratos.assets).forEach(src => {
         let abs = path.join(packagePath, src);
         abs = path.resolve(abs);

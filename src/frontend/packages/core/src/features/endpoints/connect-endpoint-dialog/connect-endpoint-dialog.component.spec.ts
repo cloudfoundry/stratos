@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Validators, FormControl } from '@angular/forms';
@@ -16,7 +16,7 @@ import { TailwindDialogRef, MAT_DIALOG_DATA } from '@stratosui/core';
 import { AppTestModule } from '@test-framework/core-test.helper';
 import { SidePanelService } from '../../../shared/services/side-panel.service';
 import { ConnectEndpointComponent } from '../connect-endpoint/connect-endpoint.component';
-import { ConnectEndpointConfig } from '../connect.service';
+import type { ConnectEndpointConfig } from '../connect.service';
 import { CredentialsAuthFormComponent } from './auth-forms/credentials-auth-form.component';
 import { ConnectEndpointDialogComponent } from './connect-endpoint-dialog.component';
 
@@ -45,7 +45,7 @@ const testEndpoint = new StratosCatalogEndpointEntity({
         username: new FormControl('', [Validators.required]),
         password: new FormControl('', [Validators.required])
           },
-      types: new Array<string>(),
+      types: [] as string[],
       component: CredentialsAuthFormComponent
     }
   ],

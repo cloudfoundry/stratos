@@ -1,15 +1,15 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, DetachedRouteHandle, RouteReuseStrategy } from '@angular/router';
+import { type ActivatedRouteSnapshot, type DetachedRouteHandle, RouteReuseStrategy } from '@angular/router';
 
 import { AppComponent } from './app.component';
 import { DashboardBaseComponent } from './features/dashboard/dashboard-base/dashboard-base.component';
 
 @Injectable()
 export class CustomReuseStrategy extends RouteReuseStrategy {
-  shouldDetach(route: ActivatedRouteSnapshot): boolean { return false; }
-  store(route: ActivatedRouteSnapshot, detachedTree: DetachedRouteHandle): void { }
-  shouldAttach(route: ActivatedRouteSnapshot): boolean { return false; }
-  retrieve(route: ActivatedRouteSnapshot): DetachedRouteHandle { return null; }
+  shouldDetach(_route: ActivatedRouteSnapshot): boolean { return false; }
+  store(_route: ActivatedRouteSnapshot, _detachedTree: DetachedRouteHandle): void { }
+  shouldAttach(_route: ActivatedRouteSnapshot): boolean { return false; }
+  retrieve(_route: ActivatedRouteSnapshot): DetachedRouteHandle { return null; }
 
   shouldReuseRoute(future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot): boolean {
     const isDashboard = curr.component === DashboardBaseComponent && future.component === DashboardBaseComponent;

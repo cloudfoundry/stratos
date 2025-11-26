@@ -3,7 +3,7 @@ import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/co
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { StoreModule } from '@ngrx/store';
 

@@ -1,8 +1,8 @@
 
-import { Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { AbstractControl, ControlContainer, FormGroupDirective, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, Input, type OnInit, inject, } from '@angular/core';
+import { type AbstractControl, ControlContainer, FormGroupDirective, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CustomCheckboxComponent } from '../custom-checkbox/custom-checkbox.component';
-import { CustomFormFieldComponent } from '../custom-form-field/custom-form-field.component';
+import { CustomFormFieldComponent, MatSuffixDirective } from '../custom-form-field/custom-form-field.component';
 
 const UNLIMITED = -1;
 
@@ -19,6 +19,7 @@ const UNLIMITED = -1;
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    MatSuffixDirective,
     CustomFormFieldComponent,
     CustomCheckboxComponent
 ]
@@ -27,7 +28,7 @@ export class UnlimitedInputComponent implements OnInit {
   public ctrlContainer = inject(FormGroupDirective);
 
   @Input() name!: string;
-  @Input() value: any;
+  @Input() value: unknown;
   @Input() required!: boolean;
   @Input() type!: string;
   @Input() placeholder!: string;
@@ -36,7 +37,7 @@ export class UnlimitedInputComponent implements OnInit {
 
   unlimited!: boolean;
   formControl!: AbstractControl;
-  initialValue: any;
+  initialValue: unknown;
 
   onChange() {
     if (this.unlimited) {
@@ -60,7 +61,7 @@ export class UnlimitedInputComponent implements OnInit {
     }
   }
 
-  setInitialValues(value: any) {
+  setInitialValues(value: unknown) {
     this.initialValue = value;
     this.unlimited = value === UNLIMITED;
     this.onChange();

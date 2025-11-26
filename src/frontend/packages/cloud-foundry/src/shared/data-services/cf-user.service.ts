@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of as observableOf, of, ReplaySubject } from 'rxjs';
-import { filter, first, map, multicast, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
+import { combineLatest, type Observable, of as observableOf, of, ReplaySubject } from 'rxjs';
+import { filter, first, map, publishReplay, refCount, shareReplay, startWith, switchMap } from 'rxjs/operators';
 
 import {
   entityCatalog,
@@ -10,18 +10,19 @@ import {
   getDefaultPaginationEntityState,
   getPaginationObservables,
   getCurrentPageRequestInfo,
-  PaginationObservables,
-  APIResource,
-  PaginatedAction,
+  type PaginationObservables,
+  type APIResource,
+  type PaginatedAction,
+  type GeneralEntityAppState,
 } from '@stratosui/store';
-import { CFAppState } from '../../cf-app-state';
+import type { CFAppState } from '../../cf-app-state';
 import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../entity-relations/entity-relations.types';
 import { getCurrentUserCFGlobalStates } from '../../store/selectors/cf-current-user-role.selectors';
-import { IOrganization, ISpace } from '../../cf-api.types';
+import type { IOrganization, ISpace } from '../../cf-api.types';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { cfEntityFactory } from '../../cf-entity-factory';
-import { ActiveRouteCfOrgSpace } from '../../features/cf/cf-page.types';
+import type { ActiveRouteCfOrgSpace } from '../../features/cf/cf-page.types';
 import {
   fetchTotalResults,
   filterEntitiesByGuid,
@@ -36,13 +37,13 @@ import {
 } from '../../features/cf/cf.helpers';
 import { selectCfPaginationState } from '../../store/selectors/pagination.selectors';
 import {
-  CfUser,
+  type CfUser,
   createUserRoleInOrg,
   createUserRoleInSpace,
-  IUserPermissionInOrg,
-  IUserPermissionInSpace,
-  UserRoleInOrg,
-  UserRoleInSpace,
+  type IUserPermissionInOrg,
+  type IUserPermissionInSpace,
+  type UserRoleInOrg,
+  type UserRoleInSpace,
 } from '../../store/types/cf-user.types';
 
 @Injectable({
@@ -54,7 +55,7 @@ export class CfUserService {
   users: { [guid: string]: Observable<APIResource<CfUser>>; } = {};
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     public paginationMonitorFactory: PaginationMonitorFactory,
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
   ) { }
@@ -90,12 +91,12 @@ export class CfUserService {
 
         // Include only the users from the required endpoint
         // (Think this is now a no-op as the actions have since been fixed to return only users from a single cf but keeping for the moment)
-        return !!users ? users.filter(p => p.entity.cfGuid === endpointGuid) : null;
+        return users ? users.filter(p => p.entity.cfGuid === endpointGuid) : null;
       }),
       filter(users => filterEmpty ? !!users : true)
     );
 
-  getUser = (endpointGuid: string, userGuid: string): Observable<any> => {
+  getUser = (endpointGuid: string, userGuid: string): Observable<APIResource<CfUser>> => {
     // Attempt to get user from all users first, this better covers the case when a non-admin can't hit /users
     return this.getUsers(endpointGuid, false).pipe(
       switchMap(users => {
@@ -203,7 +204,7 @@ export class CfUserService {
     return res;
   }
 
-  private populatedArray(array?: Array<any>): boolean {
+  private populatedArray(array?: Array<unknown>): boolean {
     return array && !!array.length;
   }
 
@@ -314,7 +315,7 @@ export class CfUserService {
               this.activeRouteCfOrgSpace.orgGuid,
               this.activeRouteCfOrgSpace.spaceGuid
             ).pipe(
-              map(allUsersAction => getPaginationObservables({
+              map(allUsersAction => getPaginationObservables<APIResource<CfUser>>({
                 store: this.store,
                 action: allUsersAction,
                 paginationMonitor: this.paginationMonitorFactory.create(
@@ -332,7 +333,7 @@ export class CfUserService {
               currentPage: 1,
               pageRequests: {
                 ...defaultPag.pageRequests,
-                [1]: {
+                1: {
                   busy: false,
                   error: true,
                   message: 'Fetching users at this level is not permitted'
@@ -348,8 +349,7 @@ export class CfUserService {
             });
           }
         }),
-        multicast(() => new ReplaySubject<any>(1)),
-        refCount()
+        shareReplay(1)
       );
     }
     return this.allUsers$;
@@ -377,8 +377,7 @@ export class CfUserService {
       const hasAllUsers$ = this.store.select(selectCfPaginationState(cfUserEntityConfig.type, allCfUsersAction.paginationKey)).pipe(
         filter(paginationState =>
           !paginationState || // No pagination state... list has never loaded
-          (paginationState.pageRequests &&
-            paginationState.pageRequests[paginationState.currentPage] &&
+          (paginationState.pageRequests?.[paginationState.currentPage] &&
             !paginationState.pageRequests[paginationState.currentPage].busy) || // Have list, not loading
           !paginationState.pageRequests[paginationState.currentPage] // Had list, not loading
         ),

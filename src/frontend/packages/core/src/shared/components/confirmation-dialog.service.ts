@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { TailwindDialogService } from '../services/tailwind-dialog.service';
 import { take } from 'rxjs/operators';
 
-import { ConfirmationDialogConfig } from './confirmation-dialog.config';
+import type { ConfirmationDialogConfig } from './confirmation-dialog.config';
 import { DialogConfirmComponent } from './dialog-confirm/dialog-confirm.component';
 
 @Injectable({
@@ -12,12 +12,14 @@ export class ConfirmationDialogService {
 
   private dialog = inject(TailwindDialogService);
 
-  open(dialog: ConfirmationDialogConfig, doFn: (res?: any) => void): void {
-    this.openWithCancel(dialog, doFn, () => {});
+  open(dialog: ConfirmationDialogConfig, doFn: (res?: unknown) => void): void {
+    this.openWithCancel(dialog, doFn, () => {
+      // No-op on cancel
+    });
   }
 
   // Open the dialog and report back to the function for both okay and cancel
-  openWithCancel(dialog: ConfirmationDialogConfig, doFn: (res?: any) => void, cancelFn: (res?: any) => void): void {
+  openWithCancel(dialog: ConfirmationDialogConfig, doFn: (res?: unknown) => void, cancelFn: (res?: unknown) => void): void {
 
     const dialogRef = this.dialog.open(DialogConfirmComponent, {
       maxWidth: '400px',

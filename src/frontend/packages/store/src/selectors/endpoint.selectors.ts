@@ -1,9 +1,9 @@
 import { compose } from '@ngrx/store';
 
-import { InternalAppState, IRequestEntityTypeState } from '../app-state';
+import type { InternalAppState, IRequestEntityTypeState } from '../app-state';
 import { EntityCatalogHelpers } from '../entity-catalog/entity-catalog.helper';
 import { endpointEntityType, STRATOS_ENDPOINT_TYPE } from '../helpers/stratos-entity-factory';
-import { EndpointModel, EndpointState } from '../types/endpoint.types';
+import type { EndpointModel, EndpointState } from '../types/endpoint.types';
 import { selectEntities, selectEntity, selectRequestInfo } from './api.selectors';
 
 // The custom status section

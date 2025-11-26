@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, ViewEncapsulation} from '@angular/core';
 
-import { BytesToHumanSize } from '@stratosui/core';
-import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
+import { BytesToHumanSize, TableCellCustom } from '@stratosui/core';
 
 
 @Component({
@@ -14,10 +13,6 @@ import { TableCellCustom } from '../../../../../../core/src/shared/components/li
   imports: [BytesToHumanSize]
 })
 export class KubernetesNodeCapacityComponent<T> extends TableCellCustom<T> {
-
-  constructor() {
-    super();
-  }
 
   public getMemory(memoryCapacity: string) {
     if (memoryCapacity.endsWith('Ki')) {

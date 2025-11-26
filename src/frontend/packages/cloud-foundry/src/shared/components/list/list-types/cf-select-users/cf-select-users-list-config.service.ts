@@ -1,34 +1,31 @@
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { combineLatest, type Observable, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import type { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import type { GeneralEntityAppState } from '@stratosui/store';
 import {
-  TableRowStateManager,
-} from '../../../../../../../core/src/shared/components/list/list-table/table-row/table-row-state-manager';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import {
-  IGlobalListAction,
-  IListAction,
-  IListConfig,
-  IListMultiFilterConfig,
-  IMultiListAction,
+  type TableRowStateManager,
+  type ITableColumn,
+  type IGlobalListAction,
+  type IListAction,
+  type IListConfig,
+  type IListMultiFilterConfig,
+  type IMultiListAction,
   ListViewTypes,
-} from '../../../../../../../core/src/shared/components/list/list.component.types';
-import {
   ListRowSateHelper,
-  ListRowStateSetUpManager,
-} from '../../../../../../../core/src/shared/components/list/list.helper';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitor } from '../../../../../../../store/src/monitors/pagination-monitor';
-import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
-import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
+  type ListRowStateSetUpManager,
+} from '@stratosui/core';
+import type { ListView } from '../../../../../../../store/src/actions/list.actions';
+import type { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
+import type { PaginationMonitor } from '../../../../../../../store/src/monitors/pagination-monitor';
+import type { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
+import type { APIResource } from '../../../../../../../store/src/types/api.types';
+import type { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
+import type { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
 import { waitForCFPermissions } from '../../../../../features/cf/cf.helpers';
-import { CfUser, CfUserMissingRoles } from '../../../../../store/types/cf-user.types';
-import { CfUserService } from '../../../../data-services/cf-user.service';
+import type { CfUser, CfUserMissingRoles } from '../../../../../store/types/cf-user.types';
+import type { CfUserService } from '../../../../data-services/cf-user.service';
 import { CfSelectUsersDataSourceService } from './cf-select-users-data-source.service';
 
 export class CfSelectUsersListConfigService implements IListConfig<APIResource<CfUser>> {
@@ -60,7 +57,7 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
   private initialised: Observable<boolean>;
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     private cfGuid: string,
     cfUserService: CfUserService,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
@@ -81,8 +78,8 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
             activeRouteCfOrgSpace.spaceGuid)
         )
       ),
-      tap(([cf, action]) => this.createDataSource(action)),
-      map(([cf]) => cf && cf.state.initialised),
+      tap(([_cf, action]) => this.createDataSource(action)),
+      map(([cf]) => cf?.state.initialised),
       publishReplay(1),
       refCount()
     );
@@ -90,17 +87,18 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
 
   private cfUserRowStateSetUpManager: ListRowStateSetUpManager = (
     paginationMonitor: PaginationMonitor<APIResource<CfUser>>,
-    entityMonitorFactory: EntityMonitorFactory,
+    _entityMonitorFactory: EntityMonitorFactory,
     rowStateManager: TableRowStateManager
   ) => {
     return paginationMonitor.currentPage$.pipe(
       distinctUntilChanged(),
-      switchMap(entities => entities
-        .map(entity => {
+      switchMap(entities => {
+        entities.forEach(entity => {
           const hasMissingRoles = this.hasMissingRoles(entity.entity.missingRoles);
           rowStateManager.updateRowState(entity.metadata.guid, { warning: hasMissingRoles });
-        })
-      ),
+        });
+        return entities;
+      }),
     ).subscribe();
   }
 
@@ -144,6 +142,6 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
   getMultiActions = (): IMultiListAction<APIResource<CfUser>>[] => [];
   getSingleActions = (): IListAction<APIResource<CfUser>>[] => [];
   getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
-  getDataSource = (): CfSelectUsersDataSourceService => this.dataSource;
+  getDataSource = () => this.dataSource as any;
   getInitialised = (): Observable<boolean> => this.initialised;
 }

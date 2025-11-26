@@ -1,20 +1,20 @@
-import { HttpClient, HttpRequest, HttpResponse } from '@angular/common/http';
-import { forkJoin, Observable, of as observableOf, of } from 'rxjs';
+import type { HttpClient, HttpRequest, HttpResponse } from '@angular/common/http';
+import { forkJoin, type Observable, of as observableOf, of } from 'rxjs';
 import { first, map, mergeMap, switchMap } from 'rxjs/operators';
 
 import { UpdatePaginationMaxedState } from '../actions/pagination.actions';
-import { ActionDispatcher } from '../entity-request-pipeline/entity-request-pipeline.types';
+import type { ActionDispatcher } from '../entity-request-pipeline/entity-request-pipeline.types';
 
 
 // TODO: See #4208. This should be replaced with
 // src/frontend/packages/store/src/entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe.ts
 
-export interface PaginationFlattener<T = any, C = any> {
+export interface PaginationFlattener<T = unknown, C = unknown> {
   getTotalPages: (res: C) => number;
   getTotalResults: (res: C) => number;
   mergePages: (res: C[]) => T;
-  fetch: (...args: any[]) => Observable<C>;
-  buildFetchParams: (i: number) => any[];
+  fetch: (...args: unknown[]) => Observable<C>;
+  buildFetchParams: (i: number) => unknown[];
   clearResults: (res: C, allResults: number) => Observable<C>;
 }
 
@@ -22,10 +22,10 @@ export class BaseHttpClientFetcher<T> {
   constructor(
     private httpClient: HttpClient,
     public url: string,
-    public requestOptions: { [key: string]: any },
+    public requestOptions: { [key: string]: unknown },
     private pageUrlParam: string
   ) { }
-  public fetch(url: string, options: { [key: string]: any }) {
+  public fetch(url: string, options: { [key: string]: unknown }) {
     return this.httpClient.get<T>(
       url,
       options
@@ -35,7 +35,7 @@ export class BaseHttpClientFetcher<T> {
     const requestOption = {
       ...this.requestOptions,
       params: {
-        ...(this.requestOptions.params || {}),
+        ...(this.requestOptions.params as Record<string, unknown> || {}),
         [this.pageUrlParam]: i.toString()
       }
     };
@@ -46,16 +46,16 @@ export class BaseHttpClientFetcher<T> {
 export class BaseHttpFetcher {
   constructor(
     private http: HttpClient,
-    private requestOptions: HttpRequest<any>,
+    private requestOptions: HttpRequest<unknown>,
     private pageUrlParam: string
   ) { }
 
-  public fetch(options: HttpRequest<any>): Observable<any> {
+  public fetch(options: HttpRequest<unknown>): Observable<unknown> {
     return this.http.request(options);
   }
 
   public buildFetchParams(i: number) {
-    const requestOption = { ...this.requestOptions } as HttpRequest<any>;
+    const requestOption = { ...this.requestOptions } as HttpRequest<unknown>;
     requestOption.params.set(this.pageUrlParam, i.toString());
     return [requestOption];
   }

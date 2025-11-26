@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 export type SortDirection = 'asc' | 'desc' | '';
 import { Store } from '@ngrx/store';
-import { ApiKey, stratosEntityCatalog, ListView, AppState } from '@stratosui/store';
+import { type ApiKey, stratosEntityCatalog, type ListView, type AppState } from '@stratosui/store';
 import { format } from 'date-fns';
 
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
-import { ITableColumn } from '../../list-table/table.types';
-import { IGlobalListAction, IListAction, IListConfig, IListMultiFilterConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
+import type { ITableColumn } from '../../list-table/table.types';
+import { type IGlobalListAction, type IListAction, type IListConfig, type IListMultiFilterConfig, type IMultiListAction, ListViewTypes } from '../../list.component.types';
 import { ApiKeyDataSource } from './apiKey-data-source';
 
 @Injectable({

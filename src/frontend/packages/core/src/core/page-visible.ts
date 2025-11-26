@@ -14,12 +14,22 @@ class VisibilityStatusConstant {
   static UNLOADED = 'unloaded';
 }
 
+// Extended document interface for vendor-prefixed visibility API properties
+interface ExtendedDocument {
+  readonly hidden?: boolean;
+  readonly msHidden?: boolean;
+  readonly webkitHidden?: boolean;
+  readonly visibilityState?: string;
+  readonly msVisibilityState?: string;
+  readonly webkitVisibilityState?: string;
+}
+
 export class PageVisible {
   private hidden!: string;
   private visibilityState!: string;
   // private visibilityChanged: string;
 
-  constructor(@Inject(DOCUMENT) private document: Document) {
+  constructor(@Inject(DOCUMENT) _document: Document) {
     this.defineBrowserSupport();
   }
 
@@ -46,23 +56,24 @@ export class PageVisible {
   // }
 
   private isHidden(): boolean {
-    return (document as any)[this.hidden];
+    return (document as ExtendedDocument)[this.hidden as keyof ExtendedDocument] as boolean;
   }
 
   private getVisibilityState(): string {
-    return (document as any)[this.visibilityState];
+    return (document as ExtendedDocument)[this.visibilityState as keyof ExtendedDocument] as string;
   }
 
   private defineBrowserSupport() {
-    if (typeof (document as any)[HiddenKeyConstant.DEFAULT] !== 'undefined') { // Opera 12.10 and Firefox 18 and later support
+    const doc = document as ExtendedDocument;
+    if (typeof doc[HiddenKeyConstant.DEFAULT as keyof ExtendedDocument] !== 'undefined') { // Opera 12.10 and Firefox 18 and later support
       this.hidden = HiddenKeyConstant.DEFAULT;
       this.visibilityState = 'visibilityState';
       // this.visibilityChanged = 'visibilitychange';
-    } else if (typeof (document as any)[HiddenKeyConstant.MS] !== 'undefined') {
+    } else if (typeof doc[HiddenKeyConstant.MS as keyof ExtendedDocument] !== 'undefined') {
       this.hidden = HiddenKeyConstant.MS;
       this.visibilityState = 'msVisibilityState';
       // this.visibilityChanged = 'msvisibilitychange';
-    } else if (typeof (document as any)[HiddenKeyConstant.WEB_KIT] !== 'undefined') {
+    } else if (typeof doc[HiddenKeyConstant.WEB_KIT as keyof ExtendedDocument] !== 'undefined') {
       this.hidden = HiddenKeyConstant.WEB_KIT;
       this.visibilityState = 'webkitVisibilityState';
       // this.visibilityChanged = 'webkitvisibilitychange';

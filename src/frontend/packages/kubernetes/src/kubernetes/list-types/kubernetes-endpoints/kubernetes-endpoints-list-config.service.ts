@@ -1,21 +1,21 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
-import {
+import type { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
+import type {
   BaseEndpointsDataSource,
 } from '../../../../../core/src/shared/components/list/list-types/endpoint/base-endpoints-data-source';
 import {
   EndpointCardComponent,
 } from '../../../../../core/src/shared/components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
-import {
+import type {
   EndpointsListConfigService,
 } from '../../../../../core/src/shared/components/list/list-types/endpoint/endpoints-list-config.service';
-import { IListConfig, ListViewTypes, IGlobalListAction, IMultiListAction, IListAction, IListMultiFilterConfig } from '../../../../../core/src/shared/components/list/list.component.types';
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
-import { InternalEventMonitorFactory } from '../../../../../store/src/monitors/internal-event-monitor.factory';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { AppState, EndpointModel } from '../../../../../store/src/public-api';
+import { type IListConfig, ListViewTypes, type IGlobalListAction, type IMultiListAction, type IListAction, type IListMultiFilterConfig } from '../../../../../core/src/shared/components/list/list.component.types';
+import type { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
+import type { InternalEventMonitorFactory } from '../../../../../store/src/monitors/internal-event-monitor.factory';
+import type { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
+import type { AppState, EndpointModel } from '../../../../../store/src/public-api';
 import { KubernetesEndpointsDataSource } from './kubernetes-endpoints-data-source';
 
 @Injectable({

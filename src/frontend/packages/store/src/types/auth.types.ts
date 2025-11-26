@@ -64,7 +64,7 @@ export interface SessionData {
   sessionExpiresOn: number;
   domainMismatch?: boolean;
   diagnostics?: Diagnostics;
-  ['plugin-config']?: PluginConfig;
+  "plugin-config"?: PluginConfig;
   plugins: {
     demo: boolean,
     [pluginName: string]: boolean,
@@ -81,7 +81,7 @@ export interface SessionDataEnvelope {
 export interface Diagnostics {
   deploymentType?: string;
   gitClientVersion?: string;
-  databaseMigrations?: any;
+  databaseMigrations?: Record<string, unknown>;
   helmName?: string;
   helmRevision?: string;
   helmChartVersion?: string;

@@ -1,47 +1,48 @@
-import { CommonModule } from '@angular/common';
-import { Component, NgZone, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { Component, NgZone, type OnDestroy, type OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { GitSCMService, GitSCMType } from '@stratosui/git';
-import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
+import { GitSCMService, type GitSCMType } from '@stratosui/git';
+import { combineLatest as observableCombineLatest, type Observable, type Subscription } from 'rxjs';
 import { filter, first, map, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import {
   EndpointsService,
   getActionsFromExtensions,
   getTabsFromExtensions,
-  StratosActionMetadata,
+  type StratosActionMetadata,
   StratosActionType,
   StratosTabType,
   CurrentUserPermissionsService,
   safeUnsubscribe,
-  IPageSideNavTab,
+  type IPageSideNavTab,
   LoadingPageComponent,
   PageHeaderComponent,
-  IHeaderBreadcrumb
+  type IHeaderBreadcrumb
 } from '@stratosui/core';
 import {
   RouterNav,
   entityCatalog,
-  EntitySchema,
-  ActionState,
+  type EntitySchema,
+  type ActionState,
   endpointEntitiesSelector,
-  APIResource,
-  EndpointModel,
-  IFavoriteMetadata,
-  UserFavoriteManager
+  type APIResource,
+  type EndpointModel,
+  type IFavoriteMetadata,
+  UserFavoriteManager,
+  type UserFavorite
 } from '@stratosui/store';
 import {
-  CFAppState,
+  type CFAppState,
   applicationEntityType,
   UpdateExistingApplication,
-  IApp,
-  IOrganization,
-  ISpace,
+  type IApp,
+  type IOrganization,
+  type ISpace,
   CF_ENDPOINT_TYPE,
   ApplicationService,
   CfCurrentUserPermissions,
-  ApplicationStateData
+  type ApplicationStateData
 } from '@stratosui/cloud-foundry';
 import { ApplicationPollingService } from './application-polling.service';
 
@@ -62,7 +63,7 @@ import { ApplicationPollingService } from './application-polling.service';
 export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   public appState$!: Observable<ApplicationStateData>;
   public schema: EntitySchema;
-  public favorite$: Observable<any>;
+  public favorite$: Observable<UserFavorite<IFavoriteMetadata> | null>;
 
   isBusyUpdating$!: Observable<{ updating: boolean; }>;
 
@@ -70,9 +71,9 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   constructor(
     public applicationService: ApplicationService,
-    private store: Store<CFAppState>,
+    private store: Store,
     private endpointsService: EndpointsService,
-    private ngZone: NgZone,
+    _ngZone: NgZone,
     private currentUserPermissionsService: CurrentUserPermissionsService,
     scmService: GitSCMService,
     private userFavoriteManager: UserFavoriteManager,
@@ -135,16 +136,15 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
     // Add any tabs from extensions
     const tabs = getTabsFromExtensions(StratosTabType.Application);
-    tabs.map((extensionTab) => {
+    for (const extensionTab of tabs) {
       this.tabLinks.push(extensionTab);
-    });
+    }
 
     // Ensure Git SCM tab gets updated if the app is redeployed from a different SCM Type
     this.stratosProjectSub = this.applicationService.applicationStratProject$
       .subscribe(stratProject => {
         if (
-          stratProject &&
-          stratProject.deploySource &&
+          stratProject?.deploySource &&
           (stratProject.deploySource.type === 'github' || stratProject.deploySource.type === 'gitscm')
         ) {
           const gitscm = stratProject.deploySource.scm || stratProject.deploySource.type;
@@ -255,7 +255,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   }
 
   private updatingSectionBusy(section: ActionState) {
-    return section && section.busy;
+    return section?.busy;
   }
 
   ngOnInit() {

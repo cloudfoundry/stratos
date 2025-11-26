@@ -1,4 +1,4 @@
-import { IFavoriteMetadata, UserFavorite } from '../types/user-favorites.types';
+import type { IFavoriteMetadata, UserFavorite } from '../types/user-favorites.types';
 import { isFavoriteSelector } from './favorite-groups.selectors';
 
 export function isFavorite(favorite: UserFavorite<IFavoriteMetadata>) {

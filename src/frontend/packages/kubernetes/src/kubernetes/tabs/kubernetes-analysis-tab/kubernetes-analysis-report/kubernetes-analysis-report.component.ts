@@ -1,18 +1,22 @@
-import {Component, OnInit, signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import {Component, type OnInit, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { IHeaderBreadcrumbLink } from '@stratosui/core';
-import { Observable, of, Subject } from 'rxjs';
+import type { IHeaderBreadcrumbLink } from '@stratosui/core';
+import { type Observable, of, Subject } from 'rxjs';
 import { catchError, first, map, startWith } from 'rxjs/operators';
 
 import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
 import { KubernetesAnalysisService } from '../../../services/kubernetes.analysis.service';
 import { getParentURL } from '../../../services/route.helper';
-import { PageHeaderModule } from '@stratosui/core';
 import { PageSubNavComponent } from '@stratosui/core';
 import { LoadingPageComponent } from '@stratosui/core';
 import { AnalysisReportViewerComponent } from '../../../analysis-report-viewer/analysis-report-viewer.component';
+import type { AnalysisReport } from '../../../store/kube.types';
+
+interface ErrorMessage {
+  firstLine: string;
+}
 
 @Component({
   selector: 'app-kubernetes-analysis-report',
@@ -22,7 +26,6 @@ import { AnalysisReportViewerComponent } from '../../../analysis-report-viewer/a
   standalone: true,
   imports: [
     CommonModule,
-    PageHeaderModule,
     PageSubNavComponent,
     LoadingPageComponent,
     AnalysisReportViewerComponent
@@ -30,8 +33,8 @@ import { AnalysisReportViewerComponent } from '../../../analysis-report-viewer/a
 })
 export class KubernetesAnalysisReportComponent implements OnInit {
 
-  report$: Observable<any>;
-  private errorMsg = new Subject<any>();
+  report$: Observable<AnalysisReport | false>;
+  private errorMsg = new Subject<string | ErrorMessage>();
   errorMsg$ = this.errorMsg.pipe(startWith(''));
   isLoading$: Observable<boolean>;
 
@@ -69,17 +72,17 @@ export class KubernetesAnalysisReportComponent implements OnInit {
     }
 
     this.report$ = this.analysisService.getByID(this.kubeEndpointService.baseKube.guid, this.id).pipe(
-      map((response: any) => {
+      map((response: AnalysisReport) => {
         if (!response.type) {
           this.error();
-          return false;
+          return false as const;
         }
         this.errorMsg.next('');
         return response;
       }),
-      catchError((e, c) => {
+      catchError((_e, _c) => {
         this.error();
-        return of(false);
+        return of(false as const);
       })
     );
 
@@ -90,15 +93,17 @@ export class KubernetesAnalysisReportComponent implements OnInit {
 
     // When the report has loaded, update the name in the breadcrumbs
     this.report$.pipe(first()).subscribe(report => {
-      this.breadcrumbsSignal.set([
-        { value: 'Analysis', routerLink: getParentURL(this.route, 2) },
-        { value: report.name },
-      ]);
+      if (report && typeof report === 'object' && 'name' in report) {
+        this.breadcrumbsSignal.set([
+          { value: 'Analysis', routerLink: getParentURL(this.route, 2) },
+          { value: report.name },
+        ]);
+      }
     });
   }
 
   error() {
-    const msg = { firstLine: 'Failed to load Analysis Report' };
+    const msg: ErrorMessage = { firstLine: 'Failed to load Analysis Report' };
     this.errorMsg.next(msg);
   }
 }

@@ -18,6 +18,7 @@ export class QParam {
       if (testSplit.length === 2) {
         return [testSplit[0], testSplit[1], joiner];
       }
+      return undefined;
     }, null as []);
     if (qParamComponents && qParamComponents.length === 3) {
       const legitJoiner = Object.values(QParamJoiners).find(joiner => joiner === qParamComponents[2]);

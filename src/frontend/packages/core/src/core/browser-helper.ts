@@ -1,6 +1,6 @@
 export const getEventTarget = (event: Event): EventTarget | null => {
   // Ensure we work on Firefox as well as Chrome etc
-  return event.target || (event as any).srcElement;
+  return event.target || (event as unknown as { srcElement?: EventTarget }).srcElement || null;
 };
 
 export const getEventFiles = (event: Event): FileList | null => {

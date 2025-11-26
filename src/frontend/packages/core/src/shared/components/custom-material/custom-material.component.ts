@@ -99,7 +99,7 @@ export class CustomDialogTitleComponent {
   standalone: true
 })
 export class MatDatepickerDirective {
-  @Input() matDatepicker: any;
+  @Input() matDatepicker: unknown;
 }
 
 // Custom Datepicker Component (Basic)
@@ -114,8 +114,9 @@ export class CustomDatepickerComponent {
   @Input() selected!: Date;
   @Output() selectedChange = new EventEmitter<Date>();
 
-  onDateChange(event: any) {
-    const date = new Date(event.target.value);
+  onDateChange(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const date = new Date(target.value);
     this.selected = date;
     this.selectedChange.emit(date);
   }
@@ -131,7 +132,7 @@ export class CustomDatepickerComponent {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomDatepickerInputComponent {
-  @Input() matDatepicker: any;
+  @Input() matDatepicker: unknown;
   @Output() valueChange = new EventEmitter<Date>();
   private _value!: Date;
 
@@ -143,8 +144,9 @@ export class CustomDatepickerInputComponent {
     this._value = val;
   }
 
-  onInput(event: any) {
-    const date = new Date(event.target.value);
+  onInput(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const date = new Date(target.value);
     this.value = date;
     this.valueChange.emit(date);
   }
@@ -160,10 +162,10 @@ export class CustomDatepickerInputComponent {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomDatepickerToggleComponent {
-  @Input() for: any;
+  @Input() for: { open?: () => void } | undefined;
 
   toggle() {
-    if (this.for && this.for.open) {
+    if (this.for?.open) {
       this.for.open();
     }
   }

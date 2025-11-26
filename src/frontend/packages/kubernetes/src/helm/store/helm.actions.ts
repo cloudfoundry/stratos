@@ -1,8 +1,8 @@
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 
-import { EndpointModel } from '../../../../store/src/public-api';
-import { PaginatedAction } from '../../../../store/src/types/pagination.types';
-import { EntityRequestAction } from '../../../../store/src/types/request.types';
+import type { EndpointModel } from '../../../../store/src/public-api';
+import type { PaginatedAction } from '../../../../store/src/types/pagination.types';
+import type { EntityRequestAction } from '../../../../store/src/types/request.types';
 import {
   HELM_ENDPOINT_TYPE,
   helmEntityFactory,
@@ -10,7 +10,7 @@ import {
   monocularChartsEntityType,
   monocularChartVersionsEntityType,
 } from '../helm-entity-factory';
-import { HelmInstallValues } from './helm.types';
+import type { HelmInstallValues } from './helm.types';
 
 export const GET_MONOCULAR_CHARTS = '[Monocular] Get Charts';
 export const GET_MONOCULAR_CHARTS_SUCCESS = '[Monocular] Get Charts Success';
@@ -68,7 +68,7 @@ export class HelmInstall implements EntityRequestAction {
   entityType = monocularChartsEntityType;
   guid: string;
   constructor(public values: HelmInstallValues) {
-    this.guid = '<New Release>' + this.values.releaseName;
+    this.guid = `<New Release>${this.values.releaseName}`;
   }
 }
 

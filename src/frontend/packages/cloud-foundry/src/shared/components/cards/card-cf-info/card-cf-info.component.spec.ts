@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
@@ -6,7 +6,7 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { STORE_TEST_PROVIDERS, createBasicStoreModule } from '@stratosui/store/testing';
-import { EntityServiceFactory, EntityMonitorFactory, PaginationMonitorFactory, entityCatalog, TestEntityCatalog, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
+import { EntityServiceFactory, EntityMonitorFactory, PaginationMonitorFactory, entityCatalog, type TestEntityCatalog, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { TailwindDialogService } from '@stratosui/core';
 import { generateTestCfEndpointService } from '@test-framework/cf';
 import { generateASEntities } from '@stratosui/cf-autoscaler';

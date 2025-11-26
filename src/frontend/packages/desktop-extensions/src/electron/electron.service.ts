@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { ElectronWindow, IpcRenderer, RendererInterface } from './electron';
+import type { ElectronWindow, IpcRenderer, RendererInterface } from './electron';
 
 declare let window: ElectronWindow;
 
@@ -8,12 +8,12 @@ declare let window: ElectronWindow;
   providedIn: 'root',
 })
 export class ElectronService {
-  private pElectron: RendererInterface;
+  private pElectron: RendererInterface | null = null;
 
-  private get electron(): RendererInterface {
+  private get electron(): RendererInterface | null {
     if (!this.pElectron) {
-      if (window && window.require) {
-        this.pElectron = window.require('electron');
+      if (window?.require) {
+        this.pElectron = window.require('electron') as RendererInterface;
         return this.pElectron;
       }
       return null;
@@ -31,7 +31,7 @@ export class ElectronService {
     return !!window.navigator.userAgent.match(/Electron/);
   }
 
-  public get ipcRenderer(): IpcRenderer {
+  public get ipcRenderer(): IpcRenderer | null {
     return this.electron ? this.electron.ipcRenderer : null;
   }
 

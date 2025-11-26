@@ -1,15 +1,16 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
-import { filter, first, map } from 'rxjs/operators';
+import { BehaviorSubject, type Observable, of as observableOf } from 'rxjs';
+import { first, map } from 'rxjs/operators';
 
-import { IListConfig, IListMultiFilterConfig, ITableColumn, ITableText, ListViewTypes } from '@stratosui/core';
-import { APIResource, connectedEndpointsOfTypesSelector, ListView } from '@stratosui/store';
-import { CFAppState } from '../../../../../cf-app-state';
+import { type IListConfig, type IListMultiFilterConfig, type ITableColumn, type ITableText, ListViewTypes } from '@stratosui/core';
+import { type APIResource, connectedEndpointsOfTypesSelector, type ListView, type GeneralEntityAppState } from '@stratosui/store';
+import type { CFAppState } from '../../../../../cf-app-state';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
-import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
+import type { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
 import { haveMultiConnectedCfs } from '../../../../../features/cf/cf.helpers';
-import { CfOrgSpaceItem, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
+import { type CfOrgSpaceItem, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
+import type { IService } from '../../../../../cf-api-svc.types';
 import { CfServiceCardComponent } from './cf-service-card/cf-service-card.component';
 import { CfServicesDataSource } from './cf-services-data-source';
 import { TableCellServiceActiveComponent } from './table-cell-service-active/table-cell-service-active.component';
@@ -30,10 +31,10 @@ import { TableCellServiceTagsComponent } from './table-cell-service-tags/table-c
 @Injectable({
   providedIn: 'root'
 })
-export class CfServicesListConfigService implements IListConfig<APIResource> {
+export class CfServicesListConfigService implements IListConfig<APIResource<IService>> {
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
     this.dataSource = new CfServicesDataSource(this.store, activeRouteCfOrgSpace.cfGuid, this);
@@ -81,12 +82,12 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
     }
   };
 
-  columns: ITableColumn<APIResource<any>>[] = [{
+  columns: ITableColumn<APIResource<IService>>[] = [{
     columnId: 'label',
     headerCell: () => 'Name',
     cellDefinition: {
       valuePath: 'entity.label',
-      getLink: (service: APIResource<any>) => `/marketplace/${service.entity.cfGuid}/${service.metadata.guid}`
+      getLink: (service: APIResource<IService>) => `/marketplace/${service.entity.cfGuid}/${service.metadata.guid}`
     },
     sort: {
       type: 'sort',
@@ -121,7 +122,7 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
     columnId: 'plans',
     headerCell: () => 'Plans',
     cellDefinition: {
-      getValue: (service: APIResource<any>) => service.entity.service_plans.length
+      getValue: (service: APIResource<IService>) => service.entity.service_plans.length as any
     },
     cellFlex: '1'
   }, {
@@ -167,11 +168,11 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
   }];
   private init$: Observable<boolean>;
 
-  getColumns = (): ITableColumn<APIResource<any>>[] => this.columns;
-  getGlobalActions = (): import('../../../../../../../core/src/shared/components/list/list.component.types').IGlobalListAction<APIResource<any>>[] => [];
-  getMultiActions = (): import('../../../../../../../core/src/shared/components/list/list.component.types').IMultiListAction<APIResource<any>>[] => [];
-  getSingleActions = (): import('../../../../../../../core/src/shared/components/list/list.component.types').IListAction<APIResource<any>>[] => [];
+  getColumns = (): ITableColumn<APIResource<IService>>[] => this.columns;
+  getGlobalActions = (): import('../../../../../../../core/src/shared/components/list/list.component.types').IGlobalListAction<APIResource<IService>>[] => [];
+  getMultiActions = (): import('../../../../../../../core/src/shared/components/list/list.component.types').IMultiListAction<APIResource<IService>>[] => [];
+  getSingleActions = (): import('../../../../../../../core/src/shared/components/list/list.component.types').IListAction<APIResource<IService>>[] => [];
   getMultiFiltersConfigs = (): IListMultiFilterConfig[] => this.multiFilterConfigs;
-  getDataSource = (): CfServicesDataSource => this.dataSource;
+  getDataSource = (): any => this.dataSource as any;
   getInitialised = (): Observable<boolean> => this.init$;
 }

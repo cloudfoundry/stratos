@@ -1,6 +1,6 @@
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 
-import { SessionData } from '../types/auth.types';
+import type { SessionData } from '../types/auth.types';
 
 export const LOGIN = '[Auth] Login';
 export const LOGIN_SUCCESS = '[Auth] Login success';
@@ -27,7 +27,7 @@ export class LoginSuccess implements Action {
 }
 
 export class LoginFailed implements Action {
-  constructor(public error: any) { }
+  constructor(public error: unknown) { }
   type = LOGIN_FAILED;
 }
 
@@ -68,6 +68,6 @@ export class LogoutSuccess implements Action {
 }
 
 export class LogoutFailed implements Action {
-  constructor(public error: any) { }
+  constructor(public error: unknown) { }
   type = LOGOUT_FAILED;
 }

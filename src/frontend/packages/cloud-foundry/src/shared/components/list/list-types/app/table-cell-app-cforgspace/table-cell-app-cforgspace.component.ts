@@ -1,9 +1,9 @@
 import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { IApp, ISpace } from '../../../../../../cf-api.types';
+import type { APIResource, GeneralEntityAppState } from '@stratosui/store';
+import type { CFAppState } from '../../../../../../cf-app-state';
+import type { IApp, ISpace } from '../../../../../../cf-api.types';
 import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
 import { TableCellAppCfOrgSpaceBase } from '../TableCellAppCfOrgSpaceBase';
 
@@ -28,7 +28,7 @@ export class TableCellAppCfOrgSpaceComponent extends TableCellAppCfOrgSpaceBase 
   }
 
   constructor() {
-    super(inject(Store<CFAppState>));
+    super(inject(Store<GeneralEntityAppState>));
   }
 
 }

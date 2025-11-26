@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 
-import { PaginationMonitor } from '../../../../store/src/monitors/pagination-monitor';
-import { EndpointModel } from '../../../../store/src/public-api';
+import type { PaginationMonitor } from '../../../../store/src/monitors/pagination-monitor';
+import type { EndpointModel } from '../../../../store/src/public-api';
 import { stratosEntityCatalog } from '../../../../store/src/stratos-entity-catalog';
-import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
+import type { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { KUBERNETES_ENDPOINT_TYPE } from '../kubernetes-entity-factory';
 
 @Injectable({

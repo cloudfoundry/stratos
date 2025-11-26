@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { Observable, of } from 'rxjs';
+import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
+import { type Observable, of } from 'rxjs';
 
 export interface TailwindIconConfig {
   name: string;
@@ -37,7 +37,7 @@ export class TailwindIconRegistry {
     return this;
   }
 
-  addSvgIconSetInNamespace(namespace: string, url: SafeResourceUrl | string): this {
+  addSvgIconSetInNamespace(_namespace: string, url: SafeResourceUrl | string): this {
     return this.addSvgIconSet(url);
   }
 
@@ -55,11 +55,11 @@ export class TailwindIconRegistry {
     return this;
   }
 
-  addSvgIconSetLiteralInNamespace(namespace: string, literal: SafeResourceUrl): this {
+  addSvgIconSetLiteralInNamespace(_namespace: string, literal: SafeResourceUrl): this {
     return this.addSvgIconSetLiteral(literal);
   }
 
-  registerFontClassAlias(alias: string, className: string = alias): this {
+  registerFontClassAlias(alias: string, _className: string = alias): this {
     // Store font class aliases for icon rendering
     return this;
   }
@@ -77,7 +77,7 @@ export class TailwindIconRegistry {
     return this;
   }
 
-  getSvgIconFromUrl(url: SafeResourceUrl): Observable<SVGElement> {
+  getSvgIconFromUrl(_url: SafeResourceUrl): Observable<SVGElement> {
     // In a full implementation, this would fetch the SVG from the URL
     return of(this._createSvgElement('<svg></svg>'));
   }

@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, Optional } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, type OnDestroy, type OnInit, Optional, inject } from '@angular/core';
 
 import { MAT_DIALOG_DATA } from '../../shared/services/tailwind-material-replacements';
 import { TailwindDialogRef } from '../../shared/services/tailwind-dialog.service';
 import { Router } from '@angular/router';
-import { interval, Subscription } from 'rxjs';
+import { interval, type Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { AppProgressBarComponent } from '../../shared/components/progress-bar/app-progress-bar.component';
 
@@ -18,12 +18,12 @@ import { AppProgressBarComponent } from '../../shared/components/progress-bar/ap
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LogOutDialogComponent implements OnInit, OnDestroy {
-  constructor(
-    @Inject('TailwindDialogRef') public dialogRef: TailwindDialogRef<LogOutDialogComponent>,
-    @Optional() @Inject(MAT_DIALOG_DATA) public data: any,
-    private router: Router,
-    private cdr: ChangeDetectorRef
-  ) { }
+  public dialogRef = inject<TailwindDialogRef<LogOutDialogComponent>>('TailwindDialogRef' as any);
+  public data = inject<{ expiryDate: number }>(MAT_DIALOG_DATA, { optional: true }) || { expiryDate: 0 };
+  private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
+
+  constructor() { }
 
   private autoLogout!: Subscription;
   private countDown!: number;

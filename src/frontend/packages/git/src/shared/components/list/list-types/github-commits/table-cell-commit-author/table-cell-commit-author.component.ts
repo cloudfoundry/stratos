@@ -1,7 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-
-
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom } from '@stratosui/core';
 import { GithubCommitAuthorComponent } from '../../../../github-commit-author/github-commit-author.component';
 
 @Component({

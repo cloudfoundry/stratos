@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 
 import { SendEventAction } from '../../actions/internal-events.actions';
 import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { EntitySchema } from '../../helpers/entity-schema';
 import { InternalEventSeverity } from '../../types/internal-events.types';
-import { APISuccessOrFailedAction, EntityRequestAction } from '../../types/request.types';
+import { APISuccessOrFailedAction, type EntityRequestAction } from '../../types/request.types';
 import { endpointErrorsHandlerFactory } from './endpoint-errors.handler';
 import { JetstreamError } from './handle-multi-endpoints.pipe';
 
@@ -69,6 +69,6 @@ describe('endpoint-error-handler', () => {
     expect(eventAction.eventState.severity).toBe(InternalEventSeverity.ERROR);
     expect(eventAction.eventState.message).toBe('test');
     expect(eventAction.eventState.metadata.url).toBe(error.url);
-    expect(eventAction.eventState.metadata.errorResponse.errorResponse).toEqual(error.jetstreamErrorResponse);
+    expect((eventAction.eventState.metadata as { errorResponse: { errorResponse: unknown } }).errorResponse.errorResponse).toEqual(error.jetstreamErrorResponse);
   });
 });

@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, forwardRef, Input, signal , ChangeDetectionStrategy } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { type ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { filter, first } from 'rxjs/operators';
 
 import { BytesToHumanSize } from '../../../../../../../core/src/core/byte-formatters.pipe';
 import { getEventFiles } from '../../../../../../../core/src/core/browser-helper';
 import { MetadataItemComponent } from '../../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
-import { FileScannerInfo } from './deploy-application-fs-scanner';
+import type { FileScannerInfo } from './deploy-application-fs-scanner';
 import { DeployApplicationFsUtils } from './deploy-application-fs-utils';
 
 @Component({
@@ -31,7 +31,6 @@ import { DeployApplicationFsUtils } from './deploy-application-fs-utils';
 export class DeployApplicationFsComponent implements ControlValueAccessor {
 
   private propagateChange!: (fsi: FileScannerInfo) => void;
-  constructor() { }
 
   @Input() sourceType!: string;
 
@@ -40,7 +39,7 @@ export class DeployApplicationFsComponent implements ControlValueAccessor {
   sourceData = signal<FileScannerInfo | undefined>(undefined);
 
   // Handle result of a file input form field selection
-  onFileChange(event: any) {
+  onFileChange(event: Event) {
     const files = getEventFiles(event);
     const utils = new DeployApplicationFsUtils();
     utils.handleFileInputSelection(files).pipe(
@@ -54,14 +53,17 @@ export class DeployApplicationFsComponent implements ControlValueAccessor {
 
   // ControlValueAccessor interface - allows us to act as a control in the form for validation purposes
 
-  writeValue(obj: any): void {
+  writeValue(_obj: FileScannerInfo): void {
+    // ControlValueAccessor implementation - no action required
   }
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: (fsi: FileScannerInfo) => void): void {
     this.propagateChange = fn;
   }
-  registerOnTouched(fn: any): void {
+  registerOnTouched(_fn: () => void): void {
+    // ControlValueAccessor implementation - no action required
   }
-  setDisabledState?(isDisabled: boolean): void {
+  setDisabledState?(_isDisabled: boolean): void {
+    // ControlValueAccessor implementation - no action required
   }
 
 }

@@ -1,21 +1,21 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, of as observableOf } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
-import { AppChip, AppChipsComponent, arrayHelper, ConfirmationDialogService, CurrentUserPermissionsService } from '@stratosui/core';
-import { APIResource, entityCatalog } from '@stratosui/store';
+import { type AppChip, AppChipsComponent, arrayHelper, ConfirmationDialogService, CurrentUserPermissionsService } from '@stratosui/core';
+import { type APIResource, entityCatalog } from '@stratosui/store';
 import { RemoveCfUserRole } from '../../../../../../actions/users.actions';
-import { CFAppState } from '../../../../../../cf-app-state';
+import type { CFAppState } from '../../../../../../cf-app-state';
 import { organizationEntityType } from '../../../../../../cf-entity-types';
-import { IOrganization } from '../../../../../../cf-api.types';
+import type { IOrganization } from '../../../../../../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { getOrgRoles } from '../../../../../../features/cf/cf.helpers';
-import { CfUser, IUserPermissionInOrg, OrgUserRoleNames } from '../../../../../../store/types/cf-user.types';
+import type { CfUser, IUserPermissionInOrg, OrgUserRoleNames } from '../../../../../../store/types/cf-user.types';
 import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
-import { CfPermissionCellDirective, ICellPermissionList } from '../cf-permission-cell';
+import { CfPermissionCellDirective, type ICellPermissionList } from '../cf-permission-cell';
 
 @Component({
   selector: 'app-org-user-permission-cell',
@@ -31,7 +31,7 @@ import { CfPermissionCellDirective, ICellPermissionList } from '../cf-permission
 export class CfOrgPermissionCellComponent extends CfPermissionCellDirective<OrgUserRoleNames> {
 
   constructor(
-    public store: Store<CFAppState>,
+    public store: Store,
     cfUserService: CfUserService,
     private userPerms: CurrentUserPermissionsService,
     confirmDialog: ConfirmationDialogService,
@@ -95,7 +95,7 @@ export class CfOrgPermissionCellComponent extends CfPermissionCellDirective<OrgU
     ));
   }
 
-  public canRemovePermission = (cfGuid: string, orgGuid: string, spaceGuid: string) =>
+  public canRemovePermission = (cfGuid: string, orgGuid: string, _spaceGuid: string) =>
     this.userPerms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid);
 
 }

@@ -1,23 +1,24 @@
-import { DatePipe } from '@angular/common';
+import type { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import type { GeneralEntityAppState } from '@stratosui/store';
 
 import {
   defaultPaginationPageSizeOptionsTable,
-  IGlobalListAction,
-  IListAction,
-  IListConfig,
-  IListDataSource,
-  IListMultiFilterConfig,
-  IMultiListAction,
-  ITableColumn,
+  type IGlobalListAction,
+  type IListAction,
+  type IListConfig,
+  type IListDataSource,
+  type IListMultiFilterConfig,
+  type IMultiListAction,
+  type ITableColumn,
   ListViewTypes,
 } from '@stratosui/core';
-import { APIResource, ListView } from '@stratosui/store';
-import { CFAppState } from '../../../../../cf-app-state';
+import type { APIResource, ListView } from '@stratosui/store';
+import type { CFAppState } from '../../../../../cf-app-state';
 import { getServicePlanName } from '../../../../../features/service-catalog/services-helper';
-import { ServicesService } from '../../../../../features/service-catalog/services.service';
-import { IServicePlan } from '../../../../../cf-api-svc.types';
+import type { ServicesService } from '../../../../../features/service-catalog/services.service';
+import type { IServicePlan } from '../../../../../cf-api-svc.types';
 import { ServicePlansDataSource } from './service-plans-data-source';
 import {
   TableCellAServicePlanExtrasComponent,
@@ -105,7 +106,7 @@ export class ServicePlansListConfigService implements IListConfig<APIResource<IS
 
 
   constructor(
-    store: Store<CFAppState>,
+    store: Store<GeneralEntityAppState>,
     protected datePipe: DatePipe,
     servicesService: ServicesService
   ) {

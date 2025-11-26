@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Action, Store } from '@ngrx/store';
+import { type Observable, EMPTY } from 'rxjs';
 import { catchError, first, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import { EntityDeleteCompleteAction } from '../actions/entity.delete.actions';
@@ -19,13 +19,13 @@ import {
   UpdateUserFavoriteMetadataAction,
   UpdateUserFavoriteMetadataSuccessAction,
 } from '../actions/user-favourites.actions';
-import { InternalAppState } from '../app-state';
+import type { InternalAppState } from '../app-state';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { proxyAPIVersion } from '../jetstream';
-import { NormalizedResponse } from '../types/api.types';
+import type { NormalizedResponse } from '../types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
-import { IFavoriteMetadata, UserFavorite, userFavoritesPaginationKey } from '../types/user-favorites.types';
-import { UserFavoriteManager } from '../user-favorite-manager';
+import { type IFavoriteMetadata, type UserFavorite, userFavoritesPaginationKey } from '../types/user-favorites.types';
+import type { UserFavoriteManager } from '../user-favorite-manager';
 import { STRATOS_ENDPOINT_TYPE, userFavouritesEntityType } from './../helpers/stratos-entity-factory';
 
 const favoriteUrlPath = `/pp/${proxyAPIVersion}/favorites`;
@@ -43,32 +43,32 @@ export class UserFavoritesEffect {
 
    saveFavorite = createEffect(() => this.actions$.pipe(
     ofType<SaveUserFavoriteAction>(SaveUserFavoriteAction.ACTION_TYPE),
-    mergeMap((action): Observable<any> | any[] => {
+    mergeMap((action) => {
       // Defensive: Validate action payload before processing
       if (!action?.favorite) {
         console.error('Save favorite error: action.favorite is null or undefined', { action });
-        return [];
+        return EMPTY;
       }
 
       if (!action.favorite.getPayload) {
         console.error('Save favorite error: action.favorite.getPayload is not a function', { favorite: action.favorite });
-        return [];
+        return EMPTY;
       }
 
       const actionType = 'update';
       this.store.dispatch(new StartRequestAction(action, actionType));
       return this.http.post<UserFavorite<IFavoriteMetadata>>(favoriteUrlPath, action.favorite.getPayload()).pipe(
-        switchMap((newFavorite): any[] => {
+        switchMap((newFavorite) => {
           this.store.dispatch(new WrapperRequestActionSuccess(null, action, actionType));
           this.store.dispatch(new SaveUserFavoriteSuccessAction(newFavorite));
-          return [];
+          return EMPTY;
         }),
-        catchError((error): any[] => {
+        catchError((error: unknown) => {
           let errorMessage = 'Failed to save user favorite';
 
           // Defensive: Check error object exists and has expected properties
-          const errorStatus = error?.status;
-          const errorMsg = error?.message;
+          const errorStatus = (error as { status?: number })?.status;
+          const errorMsg = (error as { message?: string })?.message;
 
           // Provide more specific error messages based on HTTP status
           if (errorStatus === 400) {
@@ -86,11 +86,11 @@ export class UserFavoritesEffect {
           });
 
           this.store.dispatch(new WrapperRequestActionFailed(errorMessage, action, actionType));
-          return [];
+          return EMPTY;
         })
       );
     })
-  ));
+  ), { dispatch: false });
 
    getFavorite$ = createEffect(() => this.actions$.pipe(
     ofType<GetUserFavoritesAction>(GetUserFavoritesAction.ACTION_TYPE),
@@ -99,7 +99,7 @@ export class UserFavoritesEffect {
       const actionType = 'fetch';
       this.store.dispatch(new StartRequestAction(action, actionType));
       return this.http.get<UserFavorite<IFavoriteMetadata>[]>(favoriteUrlPath).pipe(
-        switchMap((favorites): any[] => {
+        switchMap((favorites) => {
           const mappedData = favorites.reduce<NormalizedResponse<UserFavorite<IFavoriteMetadata>>>((data, favorite) => {
             const { guid } = favorite;
             if (guid) {
@@ -110,12 +110,12 @@ export class UserFavoritesEffect {
           }, { entities: { [favEntityKey]: {} }, result: [] });
           this.store.dispatch(new WrapperRequestActionSuccess(mappedData, action, actionType, mappedData.result.length, 1));
           this.store.dispatch(new GetUserFavoritesSuccessAction(favorites));
-          return [];
+          return EMPTY;
         }),
-        catchError((): any[] => {
+        catchError(() => {
           this.store.dispatch(new GetUserFavoritesFailedAction());
           this.store.dispatch(new WrapperRequestActionFailed('Failed to fetch user favorites', action, actionType));
-          return [];
+          return EMPTY;
         })
       );
     })
@@ -123,11 +123,11 @@ export class UserFavoritesEffect {
 
    toggleFavorite = createEffect(() => this.actions$.pipe(
     ofType<ToggleUserFavoriteAction>(ToggleUserFavoriteAction.ACTION_TYPE),
-    mergeMap((action): Observable<any> | any[] => {
+    mergeMap((action) => {
       // Defensive: Validate action payload before processing
       if (!action?.favorite) {
         console.error('Toggle favorite error: action.favorite is null or undefined', { action });
-        return [];
+        return EMPTY;
       }
 
       return this.userFavoriteManager.getIsFavoriteObservable(action.favorite).pipe(
@@ -139,13 +139,13 @@ export class UserFavoritesEffect {
             return [new SaveUserFavoriteAction(action.favorite)];
           }
         }),
-        catchError((error): any[] => {
+        catchError((error: unknown) => {
           // Defensive: Handle errors in toggle operation
           console.error('Toggle favorite error:', {
             favorite: action?.favorite,
             error
           });
-          return [];
+          return EMPTY;
         })
       );
     })
@@ -153,40 +153,40 @@ export class UserFavoritesEffect {
 
    removeFavorite$ = createEffect(() => this.actions$.pipe(
     ofType<RemoveUserFavoriteAction>(RemoveUserFavoriteAction.ACTION_TYPE),
-    mergeMap((action: RemoveUserFavoriteAction): Observable<any> | any[] => {
+    mergeMap((action: RemoveUserFavoriteAction) => {
       // Defensive: Validate action payload before processing
       if (!action?.guid) {
         console.error('Remove favorite error: action.guid is null or undefined', { action });
-        return [];
+        return EMPTY;
       }
 
       if (!action?.favorite) {
         console.error('Remove favorite error: action.favorite is null or undefined', { action });
-        return [];
+        return EMPTY;
       }
 
       if (!action?.entity || !Array.isArray(action.entity) || action.entity.length === 0) {
         console.error('Remove favorite error: action.entity is invalid', { action });
-        return [];
+        return EMPTY;
       }
 
       const actionType = 'update';
       this.store.dispatch(new StartRequestAction(action, actionType));
       return this.http.delete<UserFavorite<IFavoriteMetadata>>(`${favoriteUrlPath}/${action.guid}`).pipe(
-        switchMap((): any[] => {
+        switchMap(() => {
           this.store.dispatch(new WrapperRequestActionSuccess(null, action));
           this.store.dispatch(new RemoveUserFavoriteSuccessAction(action.favorite));
           this.store.dispatch(new ClearPaginationOfEntity(action.entity[0], action.guid, userFavoritesPaginationKey));
-          return [];
+          return EMPTY;
         }),
-        catchError((error): any[] => {
+        catchError((error: unknown) => {
           // Defensive: Log error details for debugging
           console.error('Remove favorite error:', {
             guid: action?.guid,
             error
           });
           this.store.dispatch(new WrapperRequestActionFailed('Failed to remove user favorite', action, actionType));
-          return [];
+          return EMPTY;
         })
       );
     })
@@ -194,16 +194,16 @@ export class UserFavoritesEffect {
 
    updateMetadata$ = createEffect(() => this.actions$.pipe(
     ofType<UpdateUserFavoriteMetadataAction>(UpdateUserFavoriteMetadataAction.ACTION_TYPE),
-    mergeMap((action: UpdateUserFavoriteMetadataAction): Observable<any> | any[] => {
+    mergeMap((action: UpdateUserFavoriteMetadataAction) => {
       // Defensive: Validate action payload before processing
       if (!action?.favorite) {
         console.error('Update favorite metadata error: action.favorite is null or undefined', { action });
-        return [];
+        return EMPTY;
       }
 
       if (!action.favorite.guid) {
         console.error('Update favorite metadata error: action.favorite.guid is null or undefined', { favorite: action.favorite });
-        return [];
+        return EMPTY;
       }
 
       const actionType = 'update';
@@ -212,17 +212,17 @@ export class UserFavoritesEffect {
         `${favoriteUrlPath}/${action.favorite.guid}/metadata`,
         action.favorite.metadata
       ).pipe(
-        switchMap((): any[] => {
+        switchMap(() => {
           this.store.dispatch(new WrapperRequestActionSuccess(null, action));
           this.store.dispatch(new UpdateUserFavoriteMetadataSuccessAction(action.favorite));
-          return [];
+          return EMPTY;
         }),
-        catchError((error): any[] => {
+        catchError((error: unknown) => {
           let errorMessage = 'Failed to update user favorite metadata';
 
           // Defensive: Check error object exists and has expected properties
-          const errorStatus = error?.status;
-          const errorMsg = error?.message;
+          const errorStatus = (error as { status?: number })?.status;
+          const errorMsg = (error as { message?: string })?.message;
 
           // Provide more specific error messages based on HTTP status
           if (errorStatus === 404) {
@@ -242,27 +242,27 @@ export class UserFavoritesEffect {
           });
 
           this.store.dispatch(new WrapperRequestActionFailed(errorMessage, action, actionType));
-          return [];
+          return EMPTY;
         })
       );
     })
-  ));
+  ), { dispatch: false });
 
 
   entityDeleteRequest$ = createEffect(() => this.actions$.pipe(
     ofType<EntityDeleteCompleteAction>(EntityDeleteCompleteAction.ACTION_TYPE),
     withLatestFrom(this.store),
-    mergeMap(([action, appState]): any[] => {
+    mergeMap(([action, appState]) => {
       // Defensive: Validate action exists
       if (!action) {
         console.error('Entity delete request error: action is null or undefined');
-        return [];
+        return EMPTY;
       }
 
       // Defensive: Verify asFavorite method exists
       if (!action.asFavorite || typeof action.asFavorite !== 'function') {
         console.error('Entity delete request error: action.asFavorite is not a function', { action });
-        return [];
+        return EMPTY;
       }
 
       // If there is a favorite, delete it
@@ -271,7 +271,7 @@ export class UserFavoritesEffect {
       // Defensive: Validate favorite has guid
       if (!fav?.guid) {
         console.error('Entity delete request error: favorite guid is null or undefined', { favorite: fav });
-        return [];
+        return EMPTY;
       }
 
       const entityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, userFavouritesEntityType);
@@ -280,8 +280,8 @@ export class UserFavoritesEffect {
       if (appState?.requestData?.[entityKey]?.[fav.guid]) {
         this.store.dispatch(new RemoveUserFavoriteAction(fav));
       }
-      return [];
+      return EMPTY;
     })
-  ));
+  ), { dispatch: false });
 
 }

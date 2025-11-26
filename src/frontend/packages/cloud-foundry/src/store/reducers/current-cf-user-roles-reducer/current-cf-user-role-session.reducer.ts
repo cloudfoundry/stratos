@@ -1,8 +1,8 @@
-import { EndpointActionComplete, EndpointUser, INewlyConnectedEndpointInfo, SessionUser, VerifySession, VerifiedSession } from '@stratosui/store';
+import type { EndpointActionComplete, EndpointUser, INewlyConnectedEndpointInfo, SessionUser, VerifiedSession } from '@stratosui/store';
 
 import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import { CfScopeStrings } from '../../../user-permissions/cf-user-permissions.types';
-import { IAllCfRolesState, ICfRolesState, IGlobalRolesState } from '../../types/cf-current-user-roles.types';
+import type { IAllCfRolesState, ICfRolesState, IGlobalRolesState } from '../../types/cf-current-user-roles.types';
 import { getDefaultCfEndpointRoles } from './current-cf-user-base-cf-role.reducer';
 
 interface PartialEndpoint {

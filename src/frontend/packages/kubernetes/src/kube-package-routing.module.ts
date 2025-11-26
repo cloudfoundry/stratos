@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { RouterModule, type Routes } from '@angular/router';
 
 import { HELM_ENDPOINT_TYPE } from './helm/helm-entity-factory';
 import { KUBERNETES_ENDPOINT_TYPE } from './kubernetes/kubernetes-entity-factory';

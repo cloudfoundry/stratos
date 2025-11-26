@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
+import type { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import type { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
+import type { GeneralEntityAppState } from '@stratosui/store';
 import { CreateServiceInstanceHelper } from './create-service-instance-helper.service';
 
 @Injectable({
@@ -14,11 +15,11 @@ export class CreateServiceInstanceHelperServiceFactory {
     [key: string]: CreateServiceInstanceHelper
   } = {};
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) { }
 
-  create<T>(
+  create<_T>(
     cfGuid: string,
     serviceGuid: string,
   ) {

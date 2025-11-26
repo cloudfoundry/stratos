@@ -2,27 +2,27 @@ import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { ITableColumn } from '@stratosui/core';
+import type { ITableColumn } from '@stratosui/core';
 import {
   TableCellEndpointNameComponent,
 } from '@stratosui/core';
 import {
-  IListConfig,
-  IListMultiFilterConfig,
+  type IListConfig,
+  type IListMultiFilterConfig,
   ListViewTypes,
-  IGlobalListAction,
-  IMultiListAction,
-  IListAction,
+  type IGlobalListAction,
+  type IMultiListAction,
+  type IListAction,
 } from '@stratosui/core';
-import { AppState } from '@stratosui/store';
-import { filter, map } from 'rxjs/operators';
+import type { AppState } from '@stratosui/store';
+import { map } from 'rxjs/operators';
 
-import { ListView } from '../../../../../store/src/actions/list.actions';
+import type { ListView } from '../../../../../store/src/actions/list.actions';
 import { defaultHelmKubeListPageSize } from '../../list-types/kube-helm-list-types';
-import { HelmRelease } from '../workload.types';
+import type { HelmRelease } from '../workload.types';
 import { HelmReleaseCardComponent } from './helm-release-card/helm-release-card.component';
 import { HelmReleasesDataSource } from './helm-releases-list-source';
-import { KubernetesNamespacesFilterItem, KubernetesNamespacesFilterService } from './kube-namespaces-filter-config.service';
+import { type KubernetesNamespacesFilterItem, KubernetesNamespacesFilterService } from './kube-namespaces-filter-config.service';
 
 @Injectable({
   providedIn: 'root'
@@ -154,6 +154,6 @@ function createKubeNamespaceFilterConfig(key: string, label: string, cfOrgSpaceI
         item: entity,
         value: entity.guid || entity.metadata?.name || '' // Endpoint search via guid, namespace by name (easier filtering)
       }));
-    })),
+    }) as any),
   };
 }

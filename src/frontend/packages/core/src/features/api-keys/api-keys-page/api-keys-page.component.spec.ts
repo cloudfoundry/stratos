@@ -1,15 +1,18 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import {
+  type AppState,
+  type BaseEntityValues,
   entityCatalog,
   EntityServiceFactory,
   generateStratosEntities,
   EntityCatalogHelper,
   EntityCatalogHelpers,
-  getDefaultPaginationEntityState
+  getDefaultPaginationEntityState,
+  type TestEntityCatalog
 } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { TailwindDialogService } from '../../../shared/services/tailwind-dialog.service';
@@ -25,28 +28,28 @@ describe('ApiKeysPageComponent', () => {
 
   beforeEach(async () => {
     // Clear and register entities BEFORE TestBed configuration for Angular 20
-    (entityCatalog as any).clear();
+    (entityCatalog as TestEntityCatalog).clear();
     const entities = generateStratosEntities();
     entities.forEach(entity => entityCatalog.register(entity));
 
     // Create initial state with stratosApiKey sections to prevent store errors
-    const initialState = {
+    const initialState: Partial<AppState<BaseEntityValues & Record<string, unknown>>> = {
       pagination: {
         stratosApiKey: {}
-      },
+      } as any,
       request: {
         stratosApiKey: {}
-      },
+      } as any,
       requestData: {
         stratosApiKey: {}
-      }
+      } as any
     };
 
     await TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
         NoopAnimationsModule,
-        createBasicStoreModule(initialState as any),
+        createBasicStoreModule(initialState),
         ApiKeysPageComponent,
       ],
       providers: [

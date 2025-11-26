@@ -1,20 +1,20 @@
-import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, type OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { Observable, of } from 'rxjs';
+import { type Observable, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { cfEntityCatalog } from '../../../../../../../../cloud-foundry/src/cf-entity-catalog';
 import { userProvidedServiceInstanceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/src/cf-types';
 import { getServiceName } from '../../../../../../../../cloud-foundry/src/features/service-catalog/services-helper';
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom } from '@stratosui/core';
 import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { IService, IServiceInstance } from '../../../../../../cf-api-svc.types';
+import type { APIResource } from '../../../../../../../../store/src/types/api.types';
+import type { IService, IServiceInstance } from '../../../../../../cf-api-svc.types';
 import {
   TableCellServiceBrokerComponent,
-  TableCellServiceBrokerComponentConfig,
+  type TableCellServiceBrokerComponentConfig,
   TableCellServiceBrokerComponentMode,
 } from '../../cf-services/table-cell-service-broker/table-cell-service-broker.component';
 
@@ -36,7 +36,7 @@ export class TableCellServiceComponent extends TableCellCustom<APIResource<IServ
   serviceUrl$!: Observable<string>;
   service$!: Observable<APIResource<IService>>;
   // tslint:disable-next-line:ban-types
-  isUserProvidedServiceInstance!: Boolean;
+  isUserProvidedServiceInstance!: boolean;
 
   brokerNameConfig: TableCellServiceBrokerComponentConfig = {
     mode: TableCellServiceBrokerComponentMode.NAME

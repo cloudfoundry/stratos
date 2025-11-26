@@ -1,4 +1,4 @@
-import { AutoscalerQuery } from './app-autoscaler.actions';
+import type { AutoscalerQuery } from './app-autoscaler.actions';
 
 export interface AutoscalerInfo {
   name: string;

@@ -1,11 +1,12 @@
 import { Directive, forwardRef, Input, inject } from '@angular/core';
-import { AbstractControl, NG_ASYNC_VALIDATORS, Validator } from '@angular/forms';
+import { type AbstractControl, NG_ASYNC_VALIDATORS, type Validator } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { GitSCMService, GitSCMType } from '@stratosui/git';
-import { Observable, of as observableOf } from 'rxjs';
+import { GitSCMService, type GitSCMType } from '@stratosui/git';
+import { type Observable, of as observableOf } from 'rxjs';
 import { debounceTime, filter, first, map, tap } from 'rxjs/operators';
+import type { GeneralEntityAppState } from '@stratosui/store';
 
-import { CFAppState, CheckProjectExists, selectDeployAppState } from '@stratosui/cloud-foundry';
+import { type CFAppState, CheckProjectExists, selectDeployAppState } from '@stratosui/cloud-foundry';
 
 interface GithubProjectExistsResponse {
   githubProjectDoesNotExist: boolean;
@@ -27,7 +28,7 @@ export class GithubProjectExistsDirective implements Validator {
 
   private lastValue = '';
 
-  private store = inject(Store<CFAppState>);
+  private store = inject(Store<GeneralEntityAppState>);
   private scmService = inject(GitSCMService);
 
   // Reduce API calls trying to validate until we have a valid name
@@ -74,7 +75,7 @@ export class GithubProjectExistsDirective implements Validator {
         map((createAppState): GithubProjectExistsResponse =>
           createAppState.projectExists.exists ? null : {
             githubProjectDoesNotExist: !createAppState.projectExists.exists,
-            githubProjectError: createAppState.projectExists.error ? createAppState.projectExists.data || '' : ''
+            githubProjectError: createAppState.projectExists.error ? (createAppState.projectExists.data as string) || '' : ''
           }),
         first()
       );

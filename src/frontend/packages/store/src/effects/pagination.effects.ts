@@ -5,14 +5,14 @@ import { map } from 'rxjs/operators';
 
 import {
   ADD_PARAMS,
-  AddParams,
+  type AddParams,
   REMOVE_PARAMS,
-  RemoveParams,
+  type RemoveParams,
   ResetPagination,
   SET_PARAMS,
-  SetParams,
+  type SetParams,
 } from '../actions/pagination.actions';
-import { AppState } from '../app-state';
+import type { AppState } from '../app-state';
 
 @Injectable({
   providedIn: 'root'

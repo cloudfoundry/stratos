@@ -2,13 +2,11 @@ import { CommonModule } from '@angular/common';
 import { NgModule, Optional, SkipSelf } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { EndpointsService } from '../../../core/src/core/endpoints.service';
-import { CoreModule } from '../../../core/src/public-api';
-import { SharedModule } from '@stratosui/core';
+import { CoreModule, EndpointsService, SharedModule } from '@stratosui/core';
 import { GetSystemInfo } from '../../../store/src/actions/system.actions';
 import { EntityCatalogModule } from '../../../store/src/entity-catalog.module';
 import { EndpointHealthCheck } from '../../../store/src/entity-catalog/entity-catalog.types';
-import { AppState } from '../../../store/src/public-api';
+import type { AppState } from '../../../store/src/public-api';
 import { HELM_ENDPOINT_TYPE } from './helm-entity-factory';
 import { generateHelmEntities } from './helm-entity-generator';
 import { HelmHubRegistrationComponent } from './helm-hub-registration/helm-hub-registration.component';

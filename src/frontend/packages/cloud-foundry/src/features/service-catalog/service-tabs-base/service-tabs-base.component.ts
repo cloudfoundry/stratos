@@ -1,15 +1,14 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
-import { PageHeaderComponent, IHeaderBreadcrumb, LoadingPageComponent, IPageSideNavTab } from '@stratosui/core';
-import { CFAppState, CfUserPermissionDirective, CfCurrentUserPermissions } from '@stratosui/cloud-foundry';
+import { PageHeaderComponent, type IHeaderBreadcrumb, LoadingPageComponent, type IPageSideNavTab } from '@stratosui/core';
+import { CfUserPermissionDirective, CfCurrentUserPermissions } from '@stratosui/cloud-foundry';
 import { CSI_CANCEL_URL } from '../../../shared/components/add-service-instance/csi-mode.service';
 import { getServiceName } from '../services-helper';
-import { ServicesService } from '../services.service';
+import { ServicesService, type SpaceScopedService } from '../services.service';
 
 @Component({
   selector: 'app-service-tabs-base',
@@ -30,7 +29,7 @@ export class ServiceTabsBaseComponent {
   toolTipText$!: Observable<string>;
   hasVisiblePlans$!: Observable<boolean>;
   servicesSubscription!: Subscription;
-  isServiceSpaceScoped$!: Observable<any>;
+  isServiceSpaceScoped$!: Observable<SpaceScopedService>;
   addServiceInstanceLink!: string[];
   serviceLabel$!: Observable<string>;
 
@@ -61,7 +60,6 @@ export class ServiceTabsBaseComponent {
   ];
 
   private servicesService = inject(ServicesService);
-  private store = inject(Store<CFAppState>);
 
   constructor() {
     this.hasVisiblePlans$ = this.servicesService.servicePlans$.pipe(

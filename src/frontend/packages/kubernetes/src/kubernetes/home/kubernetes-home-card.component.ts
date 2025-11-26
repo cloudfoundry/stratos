@@ -1,14 +1,14 @@
-import { Component, Input, OnInit, computed, inject, ChangeDetectionStrategy, Injector, runInInjectionContext } from '@angular/core';
+import { Component, Input, type OnInit, computed, inject, ChangeDetectionStrategy, Injector, runInInjectionContext } from '@angular/core';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { Store } from '@ngrx/store';
-import { AppState } from '@stratosui/store';
-import { combineLatest, Observable } from 'rxjs';
+import type { AppState } from '@stratosui/store';
+import type { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
-import { HomePageCardLayout } from '../../../../core/src/features/home/home.types';
-import { HomeCardShortcut } from '../../../../store/src/entity-catalog/entity-catalog.types';
-import { EndpointModel } from '../../../../store/src/types/endpoint.types';
+import type { HomePageCardLayout } from '../../../../core/src/features/home/home.types';
+import type { HomeCardShortcut } from '../../../../store/src/entity-catalog/entity-catalog.types';
+import type { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { kubeEntityCatalog } from '../kubernetes-entity-generator';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { TileGridComponent } from '../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';

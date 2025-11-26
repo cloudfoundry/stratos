@@ -1,10 +1,11 @@
 import { ApplicationRef, Injectable } from '@angular/core';
+import { Action } from '@ngrx/store';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { mergeMap } from 'rxjs/operators';
 
 import { WrapperRequestActionSuccess } from '../../../../store/src/types/request.types';
 import { AppMetadataTypes } from '../../actions/app-metadata.actions';
-import { CF_APP_UPDATE_SUCCESS, UpdateExistingApplication } from '../../actions/application.actions';
+import { CF_APP_UPDATE_SUCCESS, type UpdateExistingApplication } from '../../actions/application.actions';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 
 @Injectable()
@@ -18,17 +19,17 @@ export class UpdateAppEffects {
 
    UpdateAppInStore$ = createEffect(() => this.actions$.pipe(
     ofType<WrapperRequestActionSuccess>(CF_APP_UPDATE_SUCCESS),
-    mergeMap((action: WrapperRequestActionSuccess): any[] => {
+    mergeMap((action: WrapperRequestActionSuccess): Action[] => {
       const updateAction = action.apiAction as UpdateExistingApplication;
       const updateEntities = updateAction.updateEntities || [AppMetadataTypes.ENV_VARS, AppMetadataTypes.STATS, AppMetadataTypes.SUMMARY];
-      const actions: any[] = [];
-      updateEntities.forEach((updateEntity: any) => {
+      const actions: Action[] = [];
+      updateEntities.forEach((updateEntity: AppMetadataTypes) => {
         switch (updateEntity) {
           case AppMetadataTypes.ENV_VARS:
             // This is done so the app metadata env vars environment_json matches that of the app
             actions.push(cfEntityCatalog.appEnvVar.actions.getMultiple(action.apiAction.guid, action.apiAction.endpointGuid));
             break;
-          case AppMetadataTypes.STATS:
+          case AppMetadataTypes.STATS: {
             const statsAction = cfEntityCatalog.appStats.actions.getMultiple(
               action.apiAction.guid,
               action.apiAction.endpointGuid as string
@@ -42,6 +43,7 @@ export class UpdateAppEffects {
               actions.push(statsAction);
             }
             break;
+          }
           case AppMetadataTypes.SUMMARY:
             actions.push(cfEntityCatalog.appSummary.actions.get(action.apiAction.guid, action.apiAction.endpointGuid));
             break;

@@ -1,4 +1,4 @@
-import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
+import type { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { FetchAllBuildpacks } from '../actions/buildpack.action';
 
 export interface BuildpackActionBuilders extends OrchestratedActionBuilders {

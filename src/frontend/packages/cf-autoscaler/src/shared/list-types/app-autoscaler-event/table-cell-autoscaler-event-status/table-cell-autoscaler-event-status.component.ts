@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
-import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
-import { EntityInfo } from '../../../../../../store/src/types/api.types';
+import { TableCellCustom } from '@stratosui/core';
+import type { APIResource } from '../../../../../../store/src/types/api.types';
+import type { AppAutoscalerEvent } from '../../../../store/app-autoscaler.types';
 import { TableCellAutoscalerEventStatusIconPipe } from './table-cell-autoscaler-event-status-icon.pipe';
 
 @Component({
@@ -16,4 +17,4 @@ import { TableCellAutoscalerEventStatusIconPipe } from './table-cell-autoscaler-
     TableCellAutoscalerEventStatusIconPipe
   ]
 })
-export class TableCellAutoscalerEventStatusComponent extends TableCellCustom<EntityInfo> { }
+export class TableCellAutoscalerEventStatusComponent extends TableCellCustom<APIResource<AppAutoscalerEvent>> { }

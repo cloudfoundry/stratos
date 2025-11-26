@@ -3,7 +3,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { map } from 'rxjs/operators';
 
 import { AppMetadataTypes } from '../../actions/app-metadata.actions';
-import { AppVariables, AppVariablesUpdate } from '../../actions/app-variables.actions';
+import { AppVariables, type AppVariablesUpdate } from '../../actions/app-variables.actions';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 
 

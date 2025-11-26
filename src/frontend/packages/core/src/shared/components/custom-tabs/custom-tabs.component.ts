@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, ContentChildren, QueryList, AfterContentInit, ViewChild, TemplateRef  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, ContentChildren, type QueryList, type AfterContentInit, ViewChild, TemplateRef  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 
@@ -18,7 +18,7 @@ export class CustomTabComponent {
   @Input() disabled = false;
   @Input() textLabel = '';
 
-  @ViewChild(TemplateRef, { static: true }) content!: TemplateRef<any>;
+  @ViewChild(TemplateRef, { static: true }) content!: TemplateRef<unknown>;
 
   isActive = false;
 }

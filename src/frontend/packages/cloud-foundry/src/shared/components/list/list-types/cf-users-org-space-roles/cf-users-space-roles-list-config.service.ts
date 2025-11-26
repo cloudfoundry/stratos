@@ -1,17 +1,18 @@
 import { inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, type Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import {
+import type { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import type {
   CurrentUserPermissionsService,
-} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import { IGlobalListAction, IListAction, IListConfig, IListMultiFilterConfig, IMultiListAction, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { ISpace } from '../../../../../cf-api.types';
+} from '@stratosui/core';
+import type { ITableColumn } from '@stratosui/core';
+import { type IGlobalListAction, type IListAction, type IListConfig, type IListMultiFilterConfig, type IMultiListAction, ListViewTypes } from '@stratosui/core';
+import type { ListView } from '../../../../../../../store/src/actions/list.actions';
+import type { APIResource } from '../../../../../../../store/src/types/api.types';
+import type { GeneralEntityAppState } from '@stratosui/store';
+import type { ISpace } from '../../../../../cf-api.types';
 import { selectCfUsersRolesRoles } from '../../../../../store/selectors/cf-users-roles.selector';
 import { SpaceUserRoleNames } from '../../../../../store/types/cf-user.types';
 import { CfUsersSpaceRolesDataSourceService } from './cf-users-space-roles-data-source.service';
@@ -77,7 +78,7 @@ export class CfUsersSpaceRolesListConfigService implements IListConfig<APIResour
   }];
   // Use BehaviorSubject instead of signal + toObservable to avoid NG0203
   private initialised$ = new BehaviorSubject<boolean>(false);
-  private store = inject(Store<CFAppState>);
+  private store = inject(Store<GeneralEntityAppState>);
 
   constructor(cfGuid: string, spaceGuid: string, userPerms: CurrentUserPermissionsService) {
     this.store.select(selectCfUsersRolesRoles).pipe(

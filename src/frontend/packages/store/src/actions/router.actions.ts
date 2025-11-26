@@ -1,14 +1,14 @@
-import { NavigationExtras } from '@angular/router';
-import { Action } from '@ngrx/store';
+import type { NavigationExtras } from '@angular/router';
+import type { Action } from '@ngrx/store';
 
-import { RouterRedirect } from '../reducers/routing.reducer';
+import type { RouterRedirect } from '../reducers/routing.reducer';
 
 export const RouterActions = {
   GO: '[Router] Go To',
 };
 
 export interface RouterQueryParams {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 export interface IRouterNavPayload {
   path: string[] | string;

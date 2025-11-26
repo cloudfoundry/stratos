@@ -21,9 +21,9 @@ export interface UserProfileInfo {
       value: string;
     }
   ];
-  approvals?: any;
+  approvals?: unknown;
   passwordLastModified: string;
-  schemas: any;
+  schemas: unknown;
   zoneId: string;
   origin: string;
 }

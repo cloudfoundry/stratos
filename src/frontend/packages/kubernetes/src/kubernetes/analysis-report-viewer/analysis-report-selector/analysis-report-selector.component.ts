@@ -1,12 +1,12 @@
 import { AsyncPipe } from '@angular/common';
-import {Component, EventEmitter, Input, OnDestroy, OnInit, Output, inject, ChangeDetectionStrategy } from '@angular/core';
+import {Component, EventEmitter, Input, type OnDestroy, type OnInit, Output, inject, ChangeDetectionStrategy } from '@angular/core';
 import { formatDistance } from 'date-fns';
-import { Observable, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
 import { KubernetesAnalysisService } from '../../services/kubernetes.analysis.service';
-import { AnalysisReport } from '../../store/kube.types';
+import type { AnalysisReport } from '../../store/kube.types';
 
 @Component({
 selector: 'app-analysis-report-selector',

@@ -1,10 +1,45 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, type OnChanges, Output, type SimpleChanges } from '@angular/core';
 
-import { AppAutoscalerMetricDataLine, AppAutoscalerMetricDataPoint } from '../../../../../store/app-autoscaler.types';
+import type { AppAutoscalerMetricDataLine, AppAutoscalerMetricDataPoint } from '../../../../../store/app-autoscaler.types';
 
-function formatLabel(label: any): string {
+interface ScaleBand {
+  bandwidth(): number;
+  (value: string | number): number | undefined;
+}
+
+type ScaleLinear = (value: number) => number
+
+interface ColorHelper {
+  scaleType: string;
+  getColor(value: string | number): string;
+  getLinearGradientStops(value: number, value2?: number): string[];
+}
+
+interface SeriesItem {
+  name: string | number;
+  value: number;
+}
+
+interface BarItem {
+  value: number;
+  label: string | number;
+  roundEdges: boolean;
+  data: SeriesItem;
+  width: number;
+  formattedLabel: string;
+  height: number;
+  x: number;
+  y: number;
+  color?: string;
+  gradientStops?: string[];
+  offset0?: number;
+  offset1?: number;
+  tooltipText?: string;
+}
+
+function formatLabel(label: string | number | Date): string {
   if (label instanceof Date) {
     label = label.toLocaleDateString();
   } else {
@@ -61,13 +96,13 @@ function formatLabel(label: any): string {
 })
 export class AppAutoscalerComboSeriesVerticalComponent implements OnChanges {
 
-  @Input() dims: any;
+  @Input() dims!: { width: number; height: number };
   @Input() type = 'standard';
-  @Input() series!: any[];
-  @Input() seriesLine!: any[];
-  @Input() xScale: any;
-  @Input() yScale: any;
-  @Input() colors: any;
+  @Input() series!: SeriesItem[];
+  @Input() seriesLine!: AppAutoscalerMetricDataLine[];
+  @Input() xScale!: ScaleBand;
+  @Input() yScale!: ScaleLinear;
+  @Input() colors!: ColorHelper;
   @Input() tooltipDisabled = false;
   @Input() gradient!: boolean;
   @Input() activeEntries!: AppAutoscalerMetricDataLine[];
@@ -79,11 +114,11 @@ export class AppAutoscalerComboSeriesVerticalComponent implements OnChanges {
   @Output() deactivate = new EventEmitter();
   @Output() bandwidth = new EventEmitter<number>();
 
-  bars!: any[];
-  x: any;
-  y: any;
+  bars!: BarItem[];
+  x!: number;
+  y!: number;
 
-  ngOnChanges(changes: SimpleChanges): void {
+  ngOnChanges(_changes: SimpleChanges): void {
     this.update();
   }
 
@@ -95,19 +130,19 @@ export class AppAutoscalerComboSeriesVerticalComponent implements OnChanges {
     }
 
     let d0 = 0;
-    let total: number;
+    let total = 0;
     if (this.type === 'normalized') {
-      total = this.series.map((d: any) => d.value).reduce((sum: number, d: any) => sum + d, 0);
+      total = this.series.map((d) => d.value).reduce((sum: number, d: number) => sum + d, 0);
     }
 
-    this.bars = this.series.map((d: any, index: number) => {
+    this.bars = this.series.map((d, index: number) => {
 
       let value = d.value;
       const label = d.name;
       const formattedLabel = formatLabel(label);
       const roundEdges = this.type === 'standard';
 
-      const bar: any = {
+      const bar: BarItem = {
         value,
         label,
         roundEdges,
@@ -156,7 +191,7 @@ export class AppAutoscalerComboSeriesVerticalComponent implements OnChanges {
         bar.y = this.yScale(offset1);
         bar.offset0 = offset0;
         bar.offset1 = offset1;
-        value = (offset1 - offset0).toFixed(2);
+        value = parseFloat((offset1 - offset0).toFixed(2));
       }
 
       if (this.colors.scaleType === 'ordinal') {
@@ -178,7 +213,7 @@ export class AppAutoscalerComboSeriesVerticalComponent implements OnChanges {
 
       this.getSeriesTooltips(this.seriesLine, index);
       const lineValue = this.seriesLine[0].series[index].value;
-      const lineName = this.seriesLine[0].series[index].name;
+      const _lineName = this.seriesLine[0].series[index].name;
       bar.tooltipText = `
         <span class="tooltip-label">${tooltipLabel}</span>
         <span class="tooltip-val"> Y1 - ${value.toLocaleString()} • Y2 - ${lineValue.toLocaleString()}%</span>
@@ -204,12 +239,12 @@ export class AppAutoscalerComboSeriesVerticalComponent implements OnChanges {
     return item !== undefined;
   }
 
-  onClick(data: any): void {
+  onClick(data: SeriesItem): void {
     this.select.emit(data);
   }
 
-  trackBy(index: number, bar: any): string {
-    return bar.label;
+  trackBy(_index: number, bar: BarItem): string {
+    return String(bar.label);
   }
 
 }

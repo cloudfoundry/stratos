@@ -2,18 +2,19 @@ import { inject, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { Store } from '@ngrx/store';
-import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '@stratosui/store/testing';
+import { createBasicStoreModule, createEntityStoreState, type TestStoreEntity } from '@stratosui/store/testing';
 import {
   SetInitialParams,
-  APIResponse,
-  InternalAppState,
-  IRequestTypeState,
+  type APIResponse,
+  type APIResource,
+  type InternalAppState,
+  type IRequestTypeState,
   EntityCatalogTestModuleManualStore,
   TEST_CATALOGUE_ENTITIES,
   entityCatalog,
-  TestEntityCatalog,
-  EntityCatalogEntityConfig,
-  EntityRequestAction,
+  type TestEntityCatalog,
+  type EntityCatalogEntityConfig,
+  type EntityRequestAction,
   WrapperRequestActionSuccess,
   EntityServiceFactory,
 } from '@stratosui/store';
@@ -25,11 +26,12 @@ import {
 } from './entity-relations-spec-helper';
 import { GetOrganization } from '../actions/organization.actions';
 import { FetchRelationPaginatedAction, FetchRelationSingleAction } from '../actions/relation.actions';
-import { CFAppState } from '../cf-app-state';
+import type { IOrganization } from '../cf-api.types';
+import type { CFAppState } from '../cf-app-state';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { generateCFEntities } from '../cf-entity-generator';
 import {
-  CFRequestDataState,
+  type CFRequestDataState,
   organizationEntityType,
   quotaDefinitionEntityType,
   routeEntityType,
@@ -62,7 +64,7 @@ describe('Entity Relations - validate -', () => {
   // the catalog after entity keys are computed, causing temporary lookup failures
   beforeAll(() => {
     const originalWarn = console.warn;
-    vi.spyOn(console, 'warn').mockImplementation((...args: any[]) => {
+    vi.spyOn(console, 'warn').mockImplementation((...args: unknown[]) => {
       // Suppress only the entity catalog warnings
       const firstArg = args[0];
       if (typeof firstArg === 'string' && firstArg.includes('Missing catalog entity:')) {
@@ -91,7 +93,7 @@ describe('Entity Relations - validate -', () => {
     quotaEntityKey = entityCatalog.getEntityKey(CF_ENDPOINT_TYPE, quotaDefinitionEntityType);
   }
 
-  function setup(store) {
+  function setup(store: Partial<CFAppState>) {
     TestBed.configureTestingModule({
       imports: [
         {
@@ -105,9 +107,9 @@ describe('Entity Relations - validate -', () => {
       ],
     });
   }
-  function noOp(iStore: Store<CFAppState>, includeRelations: string[]): Promise<void> {
+  function noOp(iStore: Store, includeRelations: string[]): Promise<void> {
     return new Promise<void>((done) => {
-      const dispatchSpy = vi.spyOn(iStore, 'dispatch').mockImplementation();
+      const dispatchSpy = vi.spyOn(iStore, 'dispatch').mockImplementation(vi.fn() as any);
       const res = validateEntityRelations({
         cfGuid,
         action: new GetOrganization(orgGuid, cfGuid, includeRelations, true),
@@ -141,7 +143,7 @@ describe('Entity Relations - validate -', () => {
 
   function testEverythingMissingNothingRequired(): Promise<void> {
     return new Promise<void>((done) => {
-      inject([Store], (iStore: Store<CFAppState>) => {
+      inject([Store], (iStore: Store) => {
         noOp(iStore, []).then(done);
       })();
     });
@@ -171,8 +173,8 @@ describe('Entity Relations - validate -', () => {
         true,
       );
 
-      inject([Store], (iStore: Store<CFAppState>) => {
-        const dispatchSpy = vi.spyOn(iStore, 'dispatch').mockImplementation();
+      inject([Store], (iStore: Store) => {
+        const dispatchSpy = vi.spyOn(iStore, 'dispatch').mockImplementation(vi.fn() as any);
 
         const res = validateEntityRelations({
           cfGuid,
@@ -198,7 +200,7 @@ describe('Entity Relations - validate -', () => {
 
   function testListExistsListRequired(): Promise<void> {
     return new Promise<void>((done) => {
-      inject([Store], (iStore: Store<CFAppState>) => {
+      inject([Store], (iStore: Store) => {
         noOp(iStore, [createEntityRelationKey(organizationEntityType, spaceEntityType)]).then(done);
       })();
     });
@@ -206,7 +208,7 @@ describe('Entity Relations - validate -', () => {
 
   function testListExistsListNotRequired(): Promise<void> {
     return new Promise<void>((done) => {
-      inject([Store], (iStore: Store<CFAppState>) => {
+      inject([Store], (iStore: Store) => {
         noOp(iStore, []).then(done);
       })();
     });
@@ -239,8 +241,8 @@ describe('Entity Relations - validate -', () => {
         entityRelationMissingQuotaUrl,
       );
 
-      inject([Store], (iStore: Store<InternalAppState>) => {
-        const dispatchSpy = vi.spyOn(iStore, 'dispatch').mockImplementation();
+      inject([Store], (iStore: Store) => {
+        const dispatchSpy = vi.spyOn(iStore, 'dispatch').mockImplementation(vi.fn() as any);
 
         const res = validateEntityRelations({
           cfGuid,
@@ -289,7 +291,7 @@ describe('Entity Relations - validate -', () => {
       return createEntityStoreState(entityMap) as Partial<CFAppState>;
     }
 
-    function advancedSetup(mapStore: (store) => Partial<CFAppState> = mStore => mStore) {
+    function advancedSetup(mapStore: (store: Partial<CFAppState>) => Partial<CFAppState> = mStore => mStore) {
       const store = mapStore(createBasicStore());
       setup(store);
 
@@ -315,7 +317,8 @@ describe('Entity Relations - validate -', () => {
 
     it('List exists, list required', () => {
       advancedSetup(store => {
-        store.requestData[orgEntityKey][orgGuid].entity.spaces = [
+        const requestData = store.requestData as Record<string, Record<string, APIResource<IOrganization>>>;
+        requestData[orgEntityKey][orgGuid].entity.spaces = [
           helper.createEmptySpace(spaceGuid, 'Some params, none required', orgGuid),
         ];
         return store;
@@ -325,7 +328,8 @@ describe('Entity Relations - validate -', () => {
 
     it('List exists, list not required', () => {
       advancedSetup(store => {
-        store.requestData[orgEntityKey][orgGuid].entity.spaces = [
+        const requestData = store.requestData as Record<string, Record<string, APIResource<IOrganization>>>;
+        requestData[orgEntityKey][orgGuid].entity.spaces = [
           helper.createEmptySpace(spaceGuid, 'Some params, none required', orgGuid),
         ];
         return store;
@@ -343,7 +347,8 @@ describe('Entity Relations - validate -', () => {
       space.entity.routes_url = 'routes_url';
 
       advancedSetup(store => {
-        store.requestData[orgEntityKey][orgGuid].entity.spaces = [space];
+        const requestData = store.requestData as Record<string, Record<string, APIResource<IOrganization>>>;
+        requestData[orgEntityKey][orgGuid].entity.spaces = [space];
         return store;
       });
 
@@ -385,8 +390,8 @@ describe('Entity Relations - validate -', () => {
       );
 
       return new Promise<void>((done) => {
-        inject([Store], (iStore: Store<InternalAppState>) => {
-          const dispatchSpy = vi.spyOn(iStore, 'dispatch').mockImplementation();
+        inject([Store], (iStore: Store) => {
+          const dispatchSpy = vi.spyOn(iStore, 'dispatch').mockImplementation(vi.fn() as any);
 
           const res = validateEntityRelations({
             cfGuid,
@@ -420,8 +425,8 @@ describe('Entity Relations - validate -', () => {
         populateMissing);
       advancedSetup();
       return new Promise<void>((done) => {
-        inject([Store], (iStore: Store<CFAppState>) => {
-          const dispatchSpy = vi.spyOn(iStore, 'dispatch').mockImplementation();
+        inject([Store], (iStore: Store) => {
+          const dispatchSpy = vi.spyOn(iStore, 'dispatch').mockImplementation(vi.fn() as any);
 
           const res = validateEntityRelations({
             cfGuid,
@@ -455,8 +460,8 @@ describe('Entity Relations - validate -', () => {
         true);
       advancedSetup();
       return new Promise<void>((done) => {
-        inject([Store], (iStore: Store<CFAppState>) => {
-          const dispatchSpy = vi.spyOn(iStore, 'dispatch').mockImplementation();
+        inject([Store], (iStore: Store) => {
+          const dispatchSpy = vi.spyOn(iStore, 'dispatch').mockImplementation(vi.fn() as any);
 
           const res = validateEntityRelations({
             cfGuid,
@@ -485,10 +490,11 @@ describe('Entity Relations - validate -', () => {
     it('Have missing relation in store, associate it with parent', () => {
       const quotaDefinition = helper.createEmptyQuotaDefinition('quota_guid', 'missing but in store');
       advancedSetup(store => {
-        store.requestData[quotaEntityKey] = {
+        const requestData = store.requestData as Record<string, Record<string, APIResource<IOrganization>>>;
+        requestData[quotaEntityKey] = {
           [quotaDefinition.metadata.guid]: quotaDefinition,
         };
-        const org = store.requestData[orgEntityKey][orgGuid];
+        const org = requestData[orgEntityKey][orgGuid];
         org.entity.quota_definition_guid = quotaDefinition.metadata.guid;
         return store;
       });
@@ -508,8 +514,8 @@ describe('Entity Relations - validate -', () => {
         endpointType: CF_ENDPOINT_TYPE,
       };
       // Add for easier debugging in tests
-      /* tslint:disable-next-line:no-string-literal  */
-      associateAPIAction['childEntityKey'] = quotaEntityKey;
+      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+      (associateAPIAction as any)['childEntityKey'] = quotaEntityKey;
 
       const associateAction = new WrapperRequestActionSuccess({
         entities: {
@@ -518,8 +524,8 @@ describe('Entity Relations - validate -', () => {
         result: [orgGuid]
       }, associateAPIAction, 'fetch', 1, 1);
       return new Promise<void>((done) => {
-        inject([Store], (iStore: Store<InternalAppState>) => {
-          const dispatchSpy = vi.spyOn(iStore, 'dispatch').mockImplementation();
+        inject([Store], (iStore: Store) => {
+          const dispatchSpy = vi.spyOn(iStore, 'dispatch').mockImplementation(vi.fn() as any);
 
           const res = validateEntityRelations({
             cfGuid,
@@ -592,14 +598,14 @@ describe('Entity Relations - validate -', () => {
 
     it('List exists, list required', () => {
       const newSpace = helper.createEmptySpace(spaceGuid, 'Some params, none required', orgGuid);
-      apiResponse.response.entities[orgEntityKey][orgGuid].entity.spaces = [newSpace];
+      (apiResponse.response.entities[orgEntityKey][orgGuid] as APIResource<IOrganization>).entity.spaces = [newSpace];
       apiResponse.response.entities[spaceEntityKey] = { [spaceGuid]: newSpace };
       return testListExistsListRequired();
     });
 
     it('List exists, list not required', () => {
       const newSpace = helper.createEmptySpace(spaceGuid, 'Some params, none required', orgGuid);
-      apiResponse.response.entities[orgEntityKey][orgGuid].entity.spaces = [newSpace];
+      (apiResponse.response.entities[orgEntityKey][orgGuid] as APIResource<IOrganization>).entity.spaces = [newSpace];
       apiResponse.response.entities[spaceEntityKey] = { [spaceGuid]: newSpace };
       return testListExistsListNotRequired();
     });

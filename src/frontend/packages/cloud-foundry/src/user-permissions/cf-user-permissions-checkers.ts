@@ -1,22 +1,22 @@
 import { Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of } from 'rxjs';
+import type { Store } from '@ngrx/store';
+import { combineLatest, type Observable, of } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 import {
   BaseCurrentUserPermissionsChecker,
   CUSTOM_USER_PERMISSION_CHECKERS,
   CurrentUserPermissionsService,
-  IConfigGroup,
-  IConfigGroups,
-  ICurrentUserPermissionsChecker,
-  IPermissionCheckCombiner,
-  IPermissionConfigs,
+  type IConfigGroup,
+  type IConfigGroups,
+  type ICurrentUserPermissionsChecker,
+  type IPermissionCheckCombiner,
+  type IPermissionConfigs,
   PermissionConfig,
   PermissionConfigLink,
-  PermissionTypes,
+  type PermissionTypes,
 } from '@stratosui/core';
-import { GeneralEntityAppState, PermissionValues, connectedEndpointsSelector } from '@stratosui/store';
-import { CFFeatureFlagTypes, IFeatureFlag } from '../cf-api.types';
+import { type GeneralEntityAppState, type PermissionValues, connectedEndpointsSelector } from '@stratosui/store';
+import { CFFeatureFlagTypes, type IFeatureFlag } from '../cf-api.types';
 import { cfEntityCatalog } from '../cf-entity-catalog';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
 import {
@@ -24,7 +24,7 @@ import {
   getCurrentUserCFEndpointRolesState,
   getCurrentUserCFGlobalState,
 } from '../store/selectors/cf-current-user-role.selectors';
-import { IOrgRoleState, ISpaceRoleState, ISpacesRoleState } from '../store/types/cf-current-user-roles.types';
+import type { IOrgRoleState, ISpaceRoleState, ISpacesRoleState } from '../store/types/cf-current-user-roles.types';
 import {
   CfCurrentUserPermissions,
   CfPermissionStrings,
@@ -117,7 +117,7 @@ export const cfPermissionConfigs: IPermissionConfigs = {
 export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker implements ICurrentUserPermissionsChecker {
   static readonly ALL_SPACES = 'PERMISSIONS__ALL_SPACES_PLEASE';
 
-  constructor(private store: Store<GeneralEntityAppState>) {
+  constructor(private store: Store) {
     super();
   }
 
@@ -185,7 +185,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
   private getEndpointScopesCheck(permission: CfScopeStrings, endpointGuid?: string): Observable<boolean> {
     const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
     return endpointGuids$.pipe(
-      switchMap(guids => combineLatest(guids.map(guid => this.check(CfPermissionTypes.ENDPOINT_SCOPE, permission, endpointGuid)))),
+      switchMap(guids => combineLatest(guids.map(_guid => this.check(CfPermissionTypes.ENDPOINT_SCOPE, permission, endpointGuid)))),
       map(checks => checks.some(check => check)),
       distinctUntilChanged()
     );
@@ -325,7 +325,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
     );
   }
 
-  private checkAllOfType(endpointGuid: string, type: CfPermissionTypes, permission: CfPermissionStrings, orgGuid?: string): Observable<boolean> {
+  private checkAllOfType(endpointGuid: string, type: CfPermissionTypes, permission: CfPermissionStrings, _orgGuid?: string): Observable<boolean> {
     return this.getCfEndpointState(endpointGuid).pipe(
       map(state => {
         if (!state || !(state as any)[type]) {

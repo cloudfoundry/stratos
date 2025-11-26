@@ -2,18 +2,18 @@ import {
   Component,
   ComponentFactoryResolver,
   Input,
-  OnInit,
-  Type,
+  type OnInit,
+  type Type,
   ViewChild,
   ViewContainerRef,
   ViewEncapsulation,
   inject, ChangeDetectionStrategy } from '@angular/core';
 import { MultiActionListEntity } from '@stratosui/store';
 
-import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
-import { TableCellCustom } from '../../list.types';
+import type { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
+import type { TableCellCustom } from '../../list.types';
 import { TableCellDefaultComponent } from '../app-table-cell-default/app-table-cell-default.component';
-import { ICellDefinition } from '../table.types';
+import type { ICellDefinition } from '../table.types';
 
 @Component({
   selector: 'app-table-cell',
@@ -37,10 +37,10 @@ export class TableCellComponent<T> implements OnInit {
   @Input() set row(row: T | MultiActionListEntity) {
     if (this.cellComponent) {
       const { rowValue, entityKey } = this.getRowData(row);
-      this.cellComponent.row = rowValue;
+      this.cellComponent.row = rowValue as T;
       this.cellComponent.entityKey = entityKey;
       if (this.dataSource.getRowState) {
-        this.cellComponent.rowState = this.dataSource.getRowState(rowValue, entityKey);
+        this.cellComponent.rowState = this.dataSource.getRowState(rowValue as T, entityKey);
       }
     }
     this.rcRow = row;
@@ -49,7 +49,7 @@ export class TableCellComponent<T> implements OnInit {
     return this.rcRow;
   }
 
-  @Input() config: object | undefined;
+  @Input() config: unknown;
 
   private cellComponent!: TableCellCustom<T>;
   private componentFactoryResolver = inject(ComponentFactoryResolver);
@@ -69,7 +69,7 @@ export class TableCellComponent<T> implements OnInit {
 
   private createComponent() {
     const component = this.getComponent();
-    return !!component ? this.target.createComponent(component) : null;
+    return component ? this.target.createComponent(component) : null;
   }
 
   private getRowData(rowData: T | MultiActionListEntity) {
@@ -88,12 +88,12 @@ export class TableCellComponent<T> implements OnInit {
       // Add to target to ensure ngcontent is correct in new component
       this.cellComponent = component.instance as TableCellCustom<T>;
       const { rowValue, entityKey } = this.getRowData(this.row);
-      this.cellComponent.row = rowValue;
+      this.cellComponent.row = rowValue as T;
       this.cellComponent.entityKey = entityKey;
       this.cellComponent.dataSource = this.dataSource;
       this.cellComponent.config = this.config;
       if (this.dataSource.getRowState) {
-        this.cellComponent.rowState = this.dataSource.getRowState(rowValue, entityKey);
+        this.cellComponent.rowState = this.dataSource.getRowState(rowValue as T, entityKey);
       }
       if (this.cellDefinition) {
         const defaultTableCell = this.cellComponent as TableCellDefaultComponent<T>;

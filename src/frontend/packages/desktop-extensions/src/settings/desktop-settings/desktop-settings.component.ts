@@ -1,11 +1,16 @@
 import { Component } from '@angular/core';
-import { ProfileSettingsTypes } from '@stratosui/core';
+import { CardComponent, PageHeaderComponent, ProfileSettingsComponent, ProfileSettingsTypes } from '@stratosui/core';
 
 @Component({
-selector: 'app-desktop-settings',
+  selector: 'app-desktop-settings',
   templateUrl: './desktop-settings.component.html',
   styleUrls: ['./desktop-settings.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    PageHeaderComponent,
+    CardComponent,
+    ProfileSettingsComponent
+  ]
 })
 export class DesktopSettingsComponent {
 

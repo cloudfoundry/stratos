@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit, OnChanges, SimpleChanges  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, type OnInit, type OnChanges, type SimpleChanges  } from '@angular/core';
 
 
 /**
@@ -134,7 +134,7 @@ export class ProgressSpinnerComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['value'] || changes['mode']) {
+    if (changes.value || changes.mode) {
       this.updateDashOffset();
     }
   }

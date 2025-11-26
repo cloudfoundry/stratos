@@ -1,7 +1,7 @@
-import { Component, Input, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, type OnInit , ChangeDetectionStrategy } from '@angular/core';
 
-import { MetricsChartComponent, MetricsConfig, MetricsLineChartConfig, MetricsChartHelpers, MetricsRangeSelectorComponent } from '@stratosui/core';
-import { MetricQueryConfig, IMetricMatrixResult, IMetricApplication, MetricQueryType } from '@stratosui/store';
+import { MetricsChartComponent, type MetricsConfig, type MetricsLineChartConfig, MetricsChartHelpers, MetricsRangeSelectorComponent } from '@stratosui/core';
+import { MetricQueryConfig, type IMetricMatrixResult, type IMetricApplication, MetricQueryType } from '@stratosui/store';
 import { FetchApplicationMetricsAction } from '../../../actions/cf-metrics.actions';
 
 @Component({
@@ -43,8 +43,6 @@ export class ApplicationInstanceChartComponent implements OnInit {
 
   public instanceMetricConfig!: MetricsConfig<IMetricMatrixResult<IMetricApplication>>;
 
-  constructor() { }
-
   ngOnInit() {
     this.instanceChartConfig = MetricsChartHelpers.buildChartConfig(this.yAxisLabel);
     this.instanceMetricConfig = {
@@ -64,7 +62,7 @@ export class ApplicationInstanceChartComponent implements OnInit {
   private mapSeriesItemValue() {
     switch (this.seriesTranslation) {
       case 'mb':
-        return (bytes) => (bytes / 1000000).toFixed(2);
+        return (bytes: number) => (bytes / 1000000).toFixed(2);
       default:
         return undefined;
     }

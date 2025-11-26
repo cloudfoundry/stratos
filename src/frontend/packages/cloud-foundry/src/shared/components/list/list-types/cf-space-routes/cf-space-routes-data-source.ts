@@ -1,8 +1,8 @@
 import { Store } from '@ngrx/store';
-import { IListDataSource, IListConfig } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
+import type { IListDataSource, IListConfig } from '@stratosui/core';
+import type { APIResource, GeneralEntityAppState } from '@stratosui/store';
 
-import { CFAppState } from '../../../../../cf-app-state';
+import type { CFAppState } from '../../../../../cf-app-state';
 import {
   applicationEntityType,
   domainEntityType,
@@ -13,16 +13,16 @@ import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
 } from '../../../../../entity-relations/entity-relations.types';
-import { IRoute } from '../../../../../cf-api.types';
+import type { IRoute } from '../../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
-import { CfRoutesDataSourceBase } from '../cf-routes/cf-routes-data-source-base';
+import { CfRoutesDataSourceBase, type ListCfRoute } from '../cf-routes/cf-routes-data-source-base';
 
 
 export class CfSpaceRoutesDataSource extends CfRoutesDataSourceBase implements IListDataSource<APIResource<IRoute>> {
 
   constructor(
-    store: Store<CFAppState>,
-    listConfig: IListConfig<APIResource>,
+    store: Store<GeneralEntityAppState>,
+    listConfig: IListConfig<APIResource<ListCfRoute>>,
     spaceGuid: string,
     cfGuid: string
   ) {

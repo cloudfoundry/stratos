@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
@@ -71,7 +71,12 @@ describe('CompactAppCardComponent', () => {
     component = fixture.componentInstance;
     component.app = {
       entity: {},
-      metadata: {}
+      metadata: {
+        guid: 'test-guid',
+        created_at: '2025-01-01T00:00:00Z',
+        updated_at: '2025-01-01T00:00:00Z',
+        url: '/v2/apps/test-guid'
+      }
     };
     fixture.detectChanges();
   });

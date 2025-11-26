@@ -1,12 +1,12 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { TableCellComponent } from './table-cell.component';
 
 describe('TableCellComponent', () => {
-  let component: TableCellComponent<any>;
-  let fixture: ComponentFixture<TableCellComponent<any>>;
+  let component: TableCellComponent<unknown>;
+  let fixture: ComponentFixture<TableCellComponent<unknown>>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({

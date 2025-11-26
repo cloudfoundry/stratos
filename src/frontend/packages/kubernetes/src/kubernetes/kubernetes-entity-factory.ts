@@ -1,4 +1,4 @@
-import { Schema, schema } from 'normalizr';
+import type { Schema, schema } from 'normalizr';
 
 import { getAPIResourceGuid } from '../../../cloud-foundry/src/store/selectors/api.selectors';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
@@ -12,7 +12,7 @@ import {
   getGuidFromKubeStatefulSetObj,
   getGuidFromResource,
 } from './store/kube.getIds';
-import { KubernetesApp } from './store/kube.types';
+import type { KubernetesApp } from './store/kube.types';
 
 export const kubernetesEntityType = 'info';
 export const kubernetesNodesEntityType = 'node';

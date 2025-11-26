@@ -1,6 +1,6 @@
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
-import { ClearPaginationOfEntity } from '../../actions/pagination.actions';
-import { PaginationEntityState, PaginationState } from '../../types/pagination.types';
+import type { ClearPaginationOfEntity } from '../../actions/pagination.actions';
+import type { PaginationEntityState, PaginationState } from '../../types/pagination.types';
 import { spreadClientPagination } from './pagination-reducer.helper';
 
 export function paginationClearOfEntity(state: PaginationState, action: ClearPaginationOfEntity) {
@@ -34,12 +34,13 @@ function clearPaginationOfEntity(entityPaginationState: PaginationEntityState, g
   // For each page in a pagination section
   const pageWithEntity = (entityPaginationState.ids && Object.keys(entityPaginationState.ids).find(pageKey => {
     // Does the entity exist in this page?
-    const page = (entityPaginationState.ids as Record<string, any>)[pageKey];
+    const page = entityPaginationState.ids[Number(pageKey)];
     return page?.indexOf(guid) >= 0;
   }));
 
   if (pageWithEntity) {
-    const page = (entityPaginationState.ids as Record<string, any>)[pageWithEntity];
+    const pageNumber = Number(pageWithEntity);
+    const page = entityPaginationState.ids[pageNumber];
     const index = page.indexOf(guid);
     // Recreate the pagination section with new values
     const newEntityPagState = {
@@ -47,8 +48,8 @@ function clearPaginationOfEntity(entityPaginationState: PaginationEntityState, g
       ids: { ...entityPaginationState.ids },
       clientPagination: spreadClientPagination(entityPaginationState.clientPagination)
     };
-    (newEntityPagState.ids as Record<string, any>)[pageWithEntity] = [...(newEntityPagState.ids as Record<string, any>)[pageWithEntity]];
-    (newEntityPagState.ids as Record<string, any>)[pageWithEntity].splice(index, 1);
+    newEntityPagState.ids[pageNumber] = [...newEntityPagState.ids[pageNumber]];
+    newEntityPagState.ids[pageNumber].splice(index, 1);
     newEntityPagState.totalResults--;
     const clientPag = newEntityPagState.clientPagination;
     clientPag.totalResults--;

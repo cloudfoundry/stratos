@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, type HttpErrorResponse } from '@angular/common/http';
 import { ApplicationRef, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
@@ -7,13 +7,13 @@ import { catchError, map, mergeMap } from 'rxjs/operators';
 import {
   METRIC_API_FAILED,
   METRIC_API_START,
-  MetricsAPIAction,
+  type MetricsAPIAction,
   MetricsAPIActionSuccess,
 } from '../actions/metrics-api.actions';
-import { getFullMetricQueryQuery, METRICS_START, MetricsAction } from '../actions/metrics.actions';
-import { DispatchOnlyAppState } from '../app-state';
+import { getFullMetricQueryQuery, METRICS_START, type MetricsAction } from '../actions/metrics.actions';
+import type { DispatchOnlyAppState } from '../app-state';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
-import { IMetricsResponse } from '../types/base-metric.types';
+import type { IMetricsResponse } from '../types/base-metric.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
 
 @Injectable({
@@ -58,16 +58,17 @@ export class MetricsEffect {
             action
           );
         })
-      ).pipe(catchError((errObservable: any) => {
+      ).pipe(catchError((errObservable: unknown) => {
+        const httpError = errObservable as HttpErrorResponse;
         this.appRef.tick();
         return [
           new WrapperRequestActionFailed(
-            errObservable.message,
+            httpError.message || 'Unknown error',
             action,
             'fetch', {
             endpointIds: [action.endpointGuid],
-            url: errObservable.url || fullUrl,
-            eventCode: errObservable.status ? errObservable.status + '' : '500',
+            url: httpError.url || fullUrl,
+            eventCode: httpError.status ? `${httpError.status}` : '500',
             message: 'Metric request error',
           }
           )
@@ -86,12 +87,13 @@ export class MetricsEffect {
           this.appRef.tick();
           return new MetricsAPIActionSuccess(action.endpointGuid, metric, action.queryType);
         })
-      ).pipe(catchError((errObservable: any) => {
+      ).pipe(catchError((errObservable: unknown) => {
+        const httpError = errObservable as HttpErrorResponse;
         this.appRef.tick();
         return [
           {
             type: METRIC_API_FAILED,
-            error: errObservable.message
+            error: httpError.message || 'Unknown error'
           }
         ];
       }));

@@ -5,6 +5,20 @@
 // Reference: https://github.com/stephenhandley/type-of-is/blob/master/index.js
 // Modified for Typescript
 
+// Type definitions for JSON Schema structures
+interface JsonSchemaProperty {
+  type?: string | string[];
+  format?: string;
+  items?: JsonSchemaProperty;
+  properties?: Record<string, JsonSchemaProperty>;
+  oneOf?: JsonSchemaProperty[];
+  required?: boolean | string[];
+  title?: string;
+}
+
+// Type for constructor functions
+type Constructor = new (...args: unknown[]) => unknown;
+
 const BUILT_IN_TYPES = [
   Object,
   Function,
@@ -17,28 +31,28 @@ const BUILT_IN_TYPES = [
   Error
 ];
 
-const toString = ({}).toString;
+const objectToString = ({}).toString;
 
-function isBuiltIn(constructor: Function): boolean {
+function isBuiltIn(ctor: Function): boolean {
   for (const bit of BUILT_IN_TYPES) {
-    if (bit === constructor) {
+    if (bit === ctor) {
       return true;
     }
   }
   return false;
 }
 
-function of(obj: unknown): (new (...args: any[]) => any) | null | undefined {
+function of(obj: unknown): Constructor | null | undefined {
   if ((obj === null) || (obj === undefined)) {
     return obj as null | undefined;
   } else {
-    return (obj as any).constructor as (new (...args: any[]) => any);
+    return (obj as Record<string, unknown>).constructor as Constructor;
   }
 }
 
 function stringType(obj: unknown): string {
   // [object Blah] -> Blah
-  const stype = toString.call(obj).slice(8, -1);
+  const stype = objectToString.call(obj).slice(8, -1);
   if ((obj === null) || (obj === undefined)) {
     return stype.toLowerCase();
   }
@@ -73,7 +87,7 @@ function getPropertyType(value: unknown): string {
   return type;
 }
 
-function getUniqueKeys(a: Record<string, unknown>, b: Record<string, unknown>, c?: string[]): string[] {
+function _getUniqueKeys(a: Record<string, unknown>, b: Record<string, unknown>, c?: string[]): string[] {
   const aKeys = Object.keys(a);
   const bKeys = Object.keys(b);
   const result = c || [];
@@ -112,7 +126,8 @@ function processArray(array: unknown[], output?: Record<string, unknown>, nested
     output = output || {};
     output.type = getPropertyType(array);
     output.items = output.items || {};
-    type = (output.items as any).type || null;
+    const items = output.items as JsonSchemaProperty;
+    type = items.type as string || null;
   }
 
   // Determine whether each item is different
@@ -121,7 +136,8 @@ function processArray(array: unknown[], output?: Record<string, unknown>, nested
     const elementFormat = getPropertyFormat(array[arrIndex]);
 
     if (type && elementType !== type) {
-      (output.items as any).oneOf = [];
+      const items = output.items as JsonSchemaProperty;
+      items.oneOf = [];
       oneOf = true;
       break;
     } else {
@@ -132,9 +148,10 @@ function processArray(array: unknown[], output?: Record<string, unknown>, nested
 
   // Setup type otherwise
   if (!oneOf && type) {
-    (output.items as any).type = type;
+    const items = output.items as JsonSchemaProperty;
+    items.type = type;
     if (format) {
-      (output.items as any).format = format;
+      items.format = format;
     }
   } else if (oneOf && type !== 'object') {
     output.items = {
@@ -144,19 +161,20 @@ function processArray(array: unknown[], output?: Record<string, unknown>, nested
   }
 
   // Process each item depending
-  if (typeof (output.items as any).oneOf !== 'undefined' || type === 'object') {
+  const items = output.items as JsonSchemaProperty;
+  if (typeof items.oneOf !== 'undefined' || type === 'object') {
     for (let itemIndex = 0, itemLength = array.length; itemIndex < itemLength; itemIndex++) {
       const value = array[itemIndex];
       const itemType = getPropertyType(value);
       const itemFormat = getPropertyFormat(value);
       let arrayItem: Record<string, unknown>;
       if (itemType === 'object') {
-        if ((output.items as any).properties) {
-          (output.items as any).required = false;
+        if (items.properties) {
+          items.required = false;
         }
-        arrayItem = processObject(value as Record<string, unknown>, oneOf ? {} : (output.items as any).properties, true);
+        arrayItem = processObject(value as Record<string, unknown>, oneOf ? {} : items.properties, true);
       } else if (itemType === 'array') {
-        arrayItem = processArray(value as unknown[], oneOf ? {} : (output.items as any).properties, true);
+        arrayItem = processArray(value as unknown[], oneOf ? {} : items.properties, true);
       } else {
         arrayItem = {};
         arrayItem.type = itemType;
@@ -166,18 +184,20 @@ function processArray(array: unknown[], output?: Record<string, unknown>, nested
       }
       if (oneOf) {
         const childType = stringType(value).toLowerCase();
-        const tempObj: any = {};
+        const tempObj: Record<string, unknown> = {};
         if (!arrayItem.type && childType === 'object') {
           tempObj.properties = arrayItem;
           tempObj.type = 'object';
           arrayItem = tempObj;
         }
-        (output.items as any).oneOf.push(arrayItem);
+        if (items.oneOf) {
+          items.oneOf.push(arrayItem as JsonSchemaProperty);
+        }
       } else {
-        if ((output.items as any).type !== 'object') {
+        if (items.type !== 'object') {
           continue;
         }
-        (output.items as any).properties = arrayItem;
+        items.properties = arrayItem as Record<string, JsonSchemaProperty>;
       }
     }
   }
@@ -194,6 +214,8 @@ function processObject(object: Record<string, unknown>, output?: Record<string, 
     output.required = [];
   }
 
+  const properties = output.properties as Record<string, JsonSchemaProperty>;
+
   for (const key of Object.keys(object)) {
     const value = object[key];
     let typ = getPropertyType(value);
@@ -202,41 +224,40 @@ function processObject(object: Record<string, unknown>, output?: Record<string, 
     typ = typ === 'undefined' ? 'null' : typ;
 
     if (typ === 'object') {
-      (output.properties as any)[key] = processObject(value as Record<string, unknown>, (output.properties as any)[key]);
+      properties[key] = processObject(value as Record<string, unknown>, properties[key] as Record<string, unknown>) as JsonSchemaProperty;
       continue;
     }
 
     if (typ === 'array') {
-      (output.properties as any)[key] = processArray(value as unknown[], (output.properties as any)[key]);
+      properties[key] = processArray(value as unknown[], properties[key] as Record<string, unknown>) as JsonSchemaProperty;
       continue;
     }
 
-    if ((output.properties as any)[key]) {
-      const entry = (output.properties as any)[key];
+    if (properties[key]) {
+      const entry = properties[key];
       const hasTypeArray = Array.isArray(entry.type);
 
       // When an array already exists, we check the existing
       // type array to see if it contains our current property
       // type, if not, we add it to the array and continue
-      if (hasTypeArray && entry.type.indexOf(typ) < 0) {
-        entry.type.push(typ);
+      if (hasTypeArray && (entry.type as string[]).indexOf(typ) < 0) {
+        (entry.type as string[]).push(typ);
       }
 
       // When multiple fields of differing types occur,
       // json schema states that the field must specify the
       // primitive types the field allows in array format.
       if (!hasTypeArray && entry.type !== typ) {
-        entry.type = [entry.type, typ];
+        entry.type = [entry.type as string, typ];
       }
 
       continue;
     }
 
-    (output.properties as any)[key] = {};
-    (output.properties as any)[key].type = typ;
+    properties[key] = { type: typ };
 
     if (format) {
-      (output.properties as any)[key].format = format;
+      properties[key].format = format;
     }
   }
 
@@ -278,7 +299,8 @@ export function generateJsonSchemaFromObject(title: string | undefined, object: 
     output.items = processOutput.items;
 
     if (output.title) {
-      (output.items as any).title = output.title;
+      const items = output.items as JsonSchemaProperty;
+      items.title = output.title as string;
       output.title += ' Set';
     }
   }

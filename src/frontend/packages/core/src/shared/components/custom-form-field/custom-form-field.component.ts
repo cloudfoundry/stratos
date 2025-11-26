@@ -1,5 +1,5 @@
-import { Component, Input, ContentChild, ElementRef, AfterContentInit, Directive, ChangeDetectorRef, OnDestroy, AfterViewInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { FormControl, NgControl } from '@angular/forms';
+import { Component, Input, ContentChild, ElementRef, type AfterContentInit, Directive, ChangeDetectorRef, type OnDestroy, type AfterViewInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { type FormControl, NgControl } from '@angular/forms';
 
 import { Subject, takeUntil } from 'rxjs';
 import { CustomSelectComponent } from '../custom-select/custom-select.component';
@@ -100,7 +100,7 @@ export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit
     }
 
     // Listen to form control status changes if available
-    if (this.ngControl && this.ngControl.statusChanges) {
+    if (this.ngControl?.statusChanges) {
       this.ngControl.statusChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
         this.updateErrorMessage();
         this.updateAriaAttributes();
@@ -159,19 +159,19 @@ export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit
 
     const errors = this.ngControl.errors;
 
-    if (errors['required']) {
+    if (errors.required) {
       this.errorMessage = 'This field is required';
-    } else if (errors['email']) {
+    } else if (errors.email) {
       this.errorMessage = 'Please enter a valid email address';
-    } else if (errors['minlength']) {
-      this.errorMessage = `Minimum length is ${errors['minlength'].requiredLength} characters`;
-    } else if (errors['maxlength']) {
-      this.errorMessage = `Maximum length is ${errors['maxlength'].requiredLength} characters`;
-    } else if (errors['min']) {
-      this.errorMessage = `Minimum value is ${errors['min'].min}`;
-    } else if (errors['max']) {
-      this.errorMessage = `Maximum value is ${errors['max'].max}`;
-    } else if (errors['pattern']) {
+    } else if (errors.minlength) {
+      this.errorMessage = `Minimum length is ${errors.minlength.requiredLength} characters`;
+    } else if (errors.maxlength) {
+      this.errorMessage = `Maximum length is ${errors.maxlength.requiredLength} characters`;
+    } else if (errors.min) {
+      this.errorMessage = `Minimum value is ${errors.min.min}`;
+    } else if (errors.max) {
+      this.errorMessage = `Maximum value is ${errors.max.max}`;
+    } else if (errors.pattern) {
       this.errorMessage = 'Please enter a valid format';
     } else {
       // Generic error message for custom validators
@@ -249,7 +249,7 @@ export class CustomButtonDirective {
   }
 })
 export class MatInputDirective {
-  @Input() formControl!: FormControl<any>;
+  @Input() formControl!: FormControl<unknown>;
   @Input() formControlName!: string;
 }
 
@@ -261,7 +261,7 @@ export class MatInputDirective {
   }
 })
 export class AppInputDirective {
-  @Input() formControl!: FormControl<any>;
+  @Input() formControl!: FormControl<unknown>;
   @Input() formControlName!: string;
 }
 

@@ -1,12 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { Action, Store } from '@ngrx/store';
+import { type Action, Store } from '@ngrx/store';
 import { map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { ClearPaginationOfType } from '../actions/pagination.actions';
-import { GeneralEntityAppState, GeneralRequestDataState } from '../app-state';
-import { EntitySchema } from '../helpers/entity-schema';
-import { EntitySchemaTreeBuilder, IFlatTree } from '../helpers/schema-tree-traverse';
+import type { GeneralEntityAppState, GeneralRequestDataState } from '../app-state';
+import type { EntitySchema } from '../helpers/entity-schema';
+import { EntitySchemaTreeBuilder, type IFlatTree } from '../helpers/schema-tree-traverse';
 import { getAPIRequestDataState } from '../selectors/api.selectors';
 
 
@@ -98,7 +98,8 @@ export class RecursiveDeleteEffect {
     const tree = this.entityTreeCache[action.guid] ?
       this.entityTreeCache[action.guid] :
       new EntitySchemaTreeBuilder().getFlatTree(action, state);
-    return this.entityTreeCache[action.guid] = tree;
+    this.entityTreeCache[action.guid] = tree;
+    return tree;
   }
 
 }

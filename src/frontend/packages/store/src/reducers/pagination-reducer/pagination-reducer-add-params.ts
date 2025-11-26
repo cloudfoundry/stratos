@@ -1,5 +1,5 @@
-import { AddParams } from '../../actions/pagination.actions';
-import { PaginationEntityState } from '../../types/pagination.types';
+import type { AddParams } from '../../actions/pagination.actions';
+import type { PaginationEntityState } from '../../types/pagination.types';
 import { removeEmptyParams } from './pagination-reducer.helper';
 
 export function paginationAddParams(state: PaginationEntityState, action: AddParams) {

@@ -1,17 +1,19 @@
 import { HttpRequest } from '@angular/common/http';
-import { of, throwError } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { throwError } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
-import { StratosCatalogEndpointEntity } from '../../entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { MakeEntityRequestPipe } from '../entity-request-pipeline.types';
+import type { StratosCatalogEndpointEntity } from '../../entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import type { JetstreamResponse } from '../entity-request-pipeline.types';
+import type { PipelineHttpClient } from '../pipline-http-client.service';
 
-export const makeRequestEntityPipe: MakeEntityRequestPipe = (
-  httpClient,
-  requestOrObservable,
+export const makeRequestEntityPipe = <T = unknown>(
+  httpClient: PipelineHttpClient,
+  requestOrObservable: HttpRequest<unknown> | Observable<HttpRequest<unknown>>,
   endpointConfig: StratosCatalogEndpointEntity,
   endpointGuids: string | string[],
   externalRequest: boolean = false
-) => {
+): Observable<JetstreamResponse<T>> => {
   // Defensive null checks for Angular 20 DI compatibility
   if (!httpClient) {
     console.error('makeRequestEntityPipe: httpClient is null or undefined');
@@ -23,7 +25,7 @@ export const makeRequestEntityPipe: MakeEntityRequestPipe = (
   }
 
   if (requestOrObservable instanceof HttpRequest) {
-    return httpClient.pipelineRequest(
+    return httpClient.pipelineRequest<JetstreamResponse<T>>(
       requestOrObservable,
       endpointConfig,
       endpointGuids,
@@ -42,7 +44,7 @@ export const makeRequestEntityPipe: MakeEntityRequestPipe = (
         console.error('makeRequestEntityPipe: request from observable is null');
         return throwError(() => new Error('request from observable is null'));
       }
-      return httpClient.pipelineRequest(
+      return httpClient.pipelineRequest<JetstreamResponse<T>>(
         request,
         endpointConfig,
         endpointGuids,

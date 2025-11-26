@@ -1,6 +1,8 @@
-import { ActionOrchestrator } from './action-orchestrator';
-import { EntityRequestAction } from '../../types/request.types';
-import { PaginatedAction } from '../../types/pagination.types';
+import { expect } from 'vitest';
+
+import type { ActionOrchestrator, OrchestratedActionBuilders } from './action-orchestrator';
+import type { EntityRequestAction } from '../../types/request.types';
+import type { PaginatedAction } from '../../types/pagination.types';
 
 const BASE_ACTIONS = [
   'get',
@@ -14,10 +16,14 @@ const fakeActions = [
   'myMadeUpAction2'
 ];
 
-function assertActions(actionOrchestrator: ActionOrchestrator<any>, actionsNotToHave: string[], actionsToHave?: string[]) {
-  actionsNotToHave.forEach(action => expect(actionOrchestrator.hasActionBuilder(action)).toBe(false));
+function assertActions(actionOrchestrator: ActionOrchestrator<OrchestratedActionBuilders>, actionsNotToHave: string[], actionsToHave?: string[]) {
+  actionsNotToHave.forEach(action => {
+    expect(actionOrchestrator.hasActionBuilder(action)).toBe(false);
+  });
   if (actionsToHave) {
-    actionsToHave.forEach(action => expect(actionOrchestrator.hasActionBuilder(action)).toBe(true));
+    actionsToHave.forEach(action => {
+      expect(actionOrchestrator.hasActionBuilder(action)).toBe(true);
+    });
   }
 }
 
@@ -25,7 +31,7 @@ export function getBaseActionKeys() {
   return [...BASE_ACTIONS];
 }
 
-export function hasActions<T extends ActionOrchestrator<any>>(actionOrchestrator: T, expectToHave?: string[]) {
+export function hasActions<T extends ActionOrchestrator<OrchestratedActionBuilders>>(actionOrchestrator: T, expectToHave?: string[]) {
   const baseActions = getBaseActionKeys();
   const baseActionsToNotHave = expectToHave ? getBaseActionKeys().reduce((actions, action) => {
     if (!expectToHave.find((expectAction) => expectAction === action)) {

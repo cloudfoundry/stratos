@@ -1,10 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-
-
-import {
-  EndpointListDetailsComponent,
-} from '../../../../../core/src/shared/components/list/list-types/endpoint/endpoint-list.helpers';
-import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
+import { EndpointListDetailsComponent } from '@stratosui/core';
+import type { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { GIT_ENDPOINT_SUB_TYPES } from '../../../store/git-entity-factory';
 
 
@@ -22,7 +18,7 @@ export class GitEndpointDetailsComponent extends EndpointListDetailsComponent {
   avatar: string;
 
   set row(row: EndpointModel) {
-    if (row && row.user) {
+    if (row?.user) {
       this.name = row.user.name === '**token**' ? 'Unknown' : row.user.name;
       if (row.sub_type === GIT_ENDPOINT_SUB_TYPES.GITHUB) {
         this.avatar = `https://avatars.githubusercontent.com/${row.user.name}`;

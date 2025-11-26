@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, type HttpHeaders, HttpParams } from '@angular/common/http';
 import { ApplicationRef, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
@@ -7,11 +7,11 @@ import { catchError, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 import {
   InvalidSession,
   LOGIN,
-  Login,
+  type Login,
   LoginFailed,
   LoginSuccess,
   LOGOUT,
-  Logout,
+  type Logout,
   LogoutFailed,
   LogoutSuccess,
   RESET_AUTH,
@@ -24,12 +24,12 @@ import {
   VERIFY_SESSION,
   VerifySession,
 } from '../actions/auth.actions';
-import { GET_ENDPOINTS_SUCCESS, GetAllEndpointsSuccess } from '../actions/endpoint.actions';
-import { DispatchOnlyAppState } from '../app-state';
+import { GET_ENDPOINTS_SUCCESS, type GetAllEndpointsSuccess } from '../actions/endpoint.actions';
+import type { DispatchOnlyAppState } from '../app-state';
 import { BrowserStandardEncoder } from '../browser-encoder';
 import { LocalStorageService } from '../helpers/local-storage-service';
 import { stratosEntityCatalog } from '../stratos-entity-catalog';
-import { SessionDataEnvelope } from '../types/auth.types';
+import type { SessionDataEnvelope } from '../types/auth.types';
 
 const SETUP_HEADER = 'stratos-setup-required';
 const UPGRADE_HEADER = 'retry-after';
@@ -66,11 +66,11 @@ export class AuthEffect {
         headers,
         withCredentials: true
       }).pipe(
-        map(data => {
+        map(_data => {
           this.appRef.tick();
           return new VerifySession();
         }),
-        catchError((err, caught) => {
+        catchError((err, _caught) => {
           this.appRef.tick();
           return [new LoginFailed(err)];
         }));
@@ -107,7 +107,7 @@ export class AuthEffect {
             ];
           }
         }),
-        catchError((err, caught) => {
+        catchError((err, _caught) => {
           let setupMode = false;
           let isUpgrading = false;
           const ssoOptions = err.headers.get(SSO_HEADER) as string;
@@ -156,7 +156,7 @@ export class AuthEffect {
       return this.http.post('/pp/v1/auth/logout', {}, {
         withCredentials: true
       }).pipe(
-        mergeMap((data: any) => {
+        mergeMap((data: { isSSO?: boolean }) => {
           this.appRef.tick();
           if (data.isSSO) {
             return [new LogoutSuccess(), new ResetSSOAuth()];
@@ -164,7 +164,7 @@ export class AuthEffect {
             return [new LogoutSuccess(), new ResetAuth()];
           }
         }),
-        catchError((err, caught) => {
+        catchError((err, _caught) => {
           this.appRef.tick();
           return [new LogoutFailed(err)];
         }));
@@ -183,11 +183,11 @@ export class AuthEffect {
     tap(() => {
       // Ensure that we clear any path from the location (otherwise would be stored via auth gate as redirectPath for log in)
       const returnUrl = encodeURI(window.location.origin);
-      window.open('/pp/v1/auth/sso_logout?state=' + returnUrl, '_self');
+      window.open(`/pp/v1/auth/sso_logout?state=${returnUrl}`, '_self');
       this.appRef.tick();
     })), { dispatch: false });
 
-  private isDomainMismatch(headers: any): boolean {
+  private isDomainMismatch(headers: HttpHeaders): boolean {
     if (headers.has(DOMAIN_HEADER)) {
       const expectedDomain = headers.get(DOMAIN_HEADER);
       const okay = window.location.hostname.endsWith(expectedDomain);

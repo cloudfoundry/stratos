@@ -1,12 +1,12 @@
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, type OnInit } from '@angular/core';
+import { type AbstractControl, FormBuilder, type FormControl, type FormGroup, ReactiveFormsModule, type ValidationErrors, type ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ApplicationService } from '@stratosui/cloud-foundry';
-import { StepOnNextFunction } from '@stratosui/core';
+import type { StepOnNextFunction } from '@stratosui/core';
 import { autoscalerTransformArrayToMap } from '../../../core/autoscaler-helpers/autoscaler-transform-policy';
 import { PolicyAlert } from '../../../core/autoscaler-helpers/autoscaler-util';
 import { numberWithFractionOrExceedRange } from '../../../core/autoscaler-helpers/autoscaler-validation';
@@ -86,7 +86,7 @@ export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDire
   };
 
   validateGlobalLimitMin(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any, } => {
+    return (control: AbstractControl): ValidationErrors | null => {
       const invalid = this.editLimitForm ?
         numberWithFractionOrExceedRange(control.value, 1, this.editLimitForm.get('instance_max_count').value - 1, true) : false;
       const lastValid = this.editLimitValid;
@@ -99,7 +99,7 @@ export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDire
   }
 
   validateGlobalLimitMax(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any, } => {
+    return (control: AbstractControl): ValidationErrors | null => {
       const invalid = this.editLimitForm ? numberWithFractionOrExceedRange(control.value,
         this.editLimitForm.get('instance_min_count').value + 1, Number.MAX_VALUE, true) : false;
       const lastValid = this.editLimitValid;

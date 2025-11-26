@@ -1,10 +1,10 @@
-import { Injectable, Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Injectable, Component, Input, Output, EventEmitter, type OnInit } from '@angular/core';
 
 export interface JsonSchemaFormData {
-  schema?: any;
-  data?: any;
-  layout?: any[];
-  options?: any;
+  schema?: unknown;
+  data?: unknown;
+  layout?: unknown[];
+  options?: unknown;
 }
 
 export interface JsonSchemaFormConfig {
@@ -27,14 +27,14 @@ export interface JsonSchemaFormConfig {
   `
 })
 export class TailwindJsonSchemaFormComponent implements OnInit {
-  @Input() schema: any;
-  @Input() data: any;
-  @Input() layout!: any[];
-  @Input() options: any;
+  @Input() schema: unknown;
+  @Input() data: unknown;
+  @Input() layout!: unknown[];
+  @Input() options: unknown;
   @Input() framework: string = 'tailwind';
 
-  @Output() onChanges = new EventEmitter<any>();
-  @Output() onSubmit = new EventEmitter<any>();
+  @Output() onChanges = new EventEmitter<unknown>();
+  @Output() onSubmit = new EventEmitter<unknown>();
   @Output() isValid = new EventEmitter<boolean>();
 
   ngOnInit(): void {
@@ -46,7 +46,7 @@ export class TailwindJsonSchemaFormComponent implements OnInit {
   }
 
   // Placeholder methods for compatibility
-  buildLayout(): any[] {
+  buildLayout(): unknown[] {
     return this.layout || [];
   }
 
@@ -65,7 +65,7 @@ export class TailwindJsonSchemaFormComponent implements OnInit {
 })
 export class TailwindJsonSchemaFormService {
 
-  buildFormData(schema: any, data?: any, layout?: any[]): JsonSchemaFormData {
+  buildFormData(schema: unknown, data?: unknown, layout?: unknown[]): JsonSchemaFormData {
     return {
       schema,
       data: data || {},
@@ -74,11 +74,11 @@ export class TailwindJsonSchemaFormService {
     };
   }
 
-  validateSchema(schema: any): boolean {
+  validateSchema(schema: unknown): boolean {
     return schema && typeof schema === 'object';
   }
 
-  validateData(data: any, schema: any): boolean {
+  validateData(_data: unknown, _schema: unknown): boolean {
     return true; // Basic validation - should be enhanced
   }
 }

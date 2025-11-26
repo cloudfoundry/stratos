@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule, Optional, SkipSelf } from '@angular/core';
 
-import { CoreModule, SharedModule } from '@stratosui/core';
-import { EndpointsService } from '../../../core/src/core/endpoints.service';
+import { CoreModule, EndpointsService, SharedModule } from '@stratosui/core';
 import { EntityCatalogModule } from '../../../store/src/entity-catalog.module';
 import { EndpointHealthCheck } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { KubernetesAWSAuthFormComponent } from './auth-forms/kubernetes-aws-auth-form/kubernetes-aws-auth-form.component';
@@ -41,7 +40,6 @@ import {
 } from './kube-config-registration/kube-config-selection/kube-config-table-user-select/kube-config-table-user-select.component';
 import { KUBERNETES_ENDPOINT_TYPE, kubernetesNamespacesEntityType } from './kubernetes-entity-factory';
 import { kubeEntityCatalog } from './kubernetes-entity-generator';
-import { KubernetesListConfigService } from './kubernetes-list-service';
 import {
   KubernetesNamespacePreviewComponent,
 } from './kubernetes-namespace/kubernetes-namespace-preview/kubernetes-namespace-preview.component';

@@ -12,8 +12,8 @@ import {
   MetaCardValueComponent,
   MultilineTitleComponent
 } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { IBuildpack } from '../../../../../../cf-api.types';
+import type { APIResource } from '@stratosui/store';
+import type { IBuildpack } from '../../../../../../cf-api.types';
 
 @Component({
   selector: 'app-cf-buildpack-card',

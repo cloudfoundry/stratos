@@ -1,9 +1,9 @@
-import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
+import type { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { GetAllOrganizationSpaces } from '../actions/organization.actions';
 import { CreateSpace, DeleteSpace, GetAllSpaces, GetSpace, UpdateSpace } from '../actions/space.actions';
-import { IUpdateSpace } from '../cf-api.types';
+import type { IUpdateSpace } from '../cf-api.types';
 import { cfEntityFactory } from '../cf-entity-factory';
-import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
+import type { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 import { organizationEntityType, spaceEntityType, spaceWithOrgEntityType } from '../cf-entity-types';
 import { createEntityRelationKey } from '../entity-relations/entity-relations.types';
 
@@ -21,28 +21,28 @@ export interface SpaceActionBuilders extends OrchestratedActionBuilders {
   remove: (
     guid: string,
     endpointGuid: string,
-    { orgGuid }: { orgGuid: string, }
+    { orgGuid }?: { orgGuid: string, }
   ) => DeleteSpace;
   create: (
     id: string,
     endpointGuid: string,
-    { orgGuid, createSpace }: { orgGuid: string, createSpace: IUpdateSpace, }
+    { orgGuid, createSpace }?: { orgGuid: string, createSpace: IUpdateSpace, }
   ) => CreateSpace;
   update: (
     guid: string,
     endpointGuid: string,
-    updatedSpace: IUpdateSpace
+    updatedSpace?: IUpdateSpace
   ) => UpdateSpace;
   getMultiple: (
     endpointGuid: string,
     paginationKey: string,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
   ) => GetAllSpaces;
   getAllInOrganization: (
     orgGuid: string,
     endpointGuid: string,
     paginationKey: string,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
   ) => GetAllOrganizationSpaces;
 }
 

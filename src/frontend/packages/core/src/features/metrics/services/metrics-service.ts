@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import {
-  APIResource,
-  EntityInfo,
-  EndpointModel,
+  type APIResource,
+  type EntityInfo,
+  type EndpointModel,
   getFullEndpointApiUrl,
-  PaginationMonitor,
+  type PaginationMonitor,
   stratosEntityCatalog,
 } from '@stratosui/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
 export interface MetricsEndpointProvider {
@@ -40,9 +40,10 @@ export class MetricsService {
             endpoints: [],
           };
           endpoints.forEach(e => {
-            if (e.metadata && e.metadata.metrics && e.metadata.metrics === ep.guid) {
+            if (e.metadata?.metrics && e.metadata.metrics === ep.guid) {
               provider.endpoints.push(e);
-              (e as any).url = getFullEndpointApiUrl(e);
+              // Dynamically add url property for display purposes
+              (e as EndpointModel & { url: string }).url = getFullEndpointApiUrl(e);
             }
           });
           result.push(provider);

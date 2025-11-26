@@ -1,14 +1,14 @@
 import { describe, it, expect, vi } from 'vitest';
-import { Action, Store } from '@ngrx/store';
+import type { Action, Store } from '@ngrx/store';
 import { of } from 'rxjs';
 
-import { AppState } from '../../app-state';
-import { EntityServiceFactory } from '../../entity-service-factory.service';
-import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
-import { ActionOrchestrator, OrchestratedActionBuilders } from '../action-orchestrator/action-orchestrator';
+import type { AppState } from '../../app-state';
+import type { EntityServiceFactory } from '../../entity-service-factory.service';
+import type { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
+import { ActionOrchestrator, type OrchestratedActionBuilders } from '../action-orchestrator/action-orchestrator';
 import { ActionBuilderConfigMapper } from '../entity-catalog-entity/action-builder-config.mapper';
 import { EntityCatalogEntityStoreHelpers } from '../entity-catalog-entity/entity-catalog-entity-store-helpers';
-import { EntityCatalogHelper } from '../entity-catalog-entity/entity-catalog.service';
+import type { EntityCatalogHelper } from '../entity-catalog-entity/entity-catalog.service';
 import { EntityCatalogHelpers } from '../entity-catalog.helper';
 
 describe('ActionDispatcher', () => {
@@ -55,7 +55,7 @@ describe('ActionDispatcher', () => {
     const customGetMultipleAction = { type: 'custom MultipleAction', entityType, endpointType, paginationKey: testPaginationKey };
 
     const builders: OrchestratedActionBuilders = {
-      get: (guid: string, endpointGuid: string, extraArgs?: any) => ({
+      get: (guid: string, endpointGuid: string, extraArgs?: unknown) => ({
         ...getAction,
         guid,
         endpointGuid,
@@ -96,8 +96,8 @@ describe('ActionDispatcher', () => {
 
     const store = {
       dispatch: (action: Action) => { },
-      select: (...args: any[]) => of(null),
-    } as Store<AppState<any>>;
+      select: (...args: unknown[]) => of(null),
+    } as Store<AppState<unknown>>;
 
     EntityCatalogHelpers.SetEntityCatalogHelper({
       store,

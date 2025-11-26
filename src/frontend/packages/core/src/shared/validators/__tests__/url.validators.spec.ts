@@ -199,8 +199,9 @@ describe('URL Validators', () => {
     });
 
     it('should handle null/undefined', () => {
-      expect(normalizeUrl(null as any)).toBe(null);
-      expect(normalizeUrl(undefined as any)).toBe(undefined);
+      // Test edge cases where function may receive falsy values
+      expect(normalizeUrl(null as unknown as string)).toBe(null);
+      expect(normalizeUrl(undefined as unknown as string)).toBe(undefined);
     });
 
     it('should trim whitespace', () => {

@@ -1,14 +1,14 @@
 // Removed Angular CDK overlay dependency - using custom theme system
 import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
 import { SetThemeAction } from './actions/dashboard-actions';
-import { DashboardOnlyAppState } from './app-state';
+import type { DashboardOnlyAppState } from './app-state';
 import { selectDashboardState } from './selectors/dashboard.selectors';
 import { StyleService } from './style.service';
-import { StratosTheme } from './types/theme.types';
+import type { StratosTheme } from './types/theme.types';
 
 const lightTheme: StratosTheme = {
   key: 'default',
@@ -126,7 +126,9 @@ export class ThemeService {
     // Remove pre-existing styles from document body
     this.getThemes()
       .filter(theme => theme.styleName)
-      .forEach(theme => document.body.classList.remove(theme.styleName));
+      .forEach(theme => {
+        document.body.classList.remove(theme.styleName);
+      });
     // Add new style to document body
     if (newTheme.styleName) {
       document.body.classList.add(newTheme.styleName);

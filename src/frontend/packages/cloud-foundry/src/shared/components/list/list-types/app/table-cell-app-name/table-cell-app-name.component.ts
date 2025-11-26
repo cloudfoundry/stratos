@@ -1,13 +1,13 @@
-import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { BREADCRUMB_URL_PARAM, TableCellCustom } from '@stratosui/core';
-import { getCurrentRoutingState, RoutingEvent } from '@stratosui/store';
-import { CFAppState } from '../../../../../../cf-app-state';
+import { getCurrentRoutingState, type RoutingEvent, type GeneralEntityAppState } from '@stratosui/store';
+import type { CFAppState } from '../../../../../../cf-app-state';
 
 @Component({
   selector: 'app-table-cell-app-name',
@@ -21,13 +21,9 @@ import { CFAppState } from '../../../../../../cf-app-state';
   ]
 })
 export class TableCellAppNameComponent<T> extends TableCellCustom<T> implements OnInit {
-  public appLinkUrlParam$!: Observable<any>;
+  public appLinkUrlParam$!: Observable<Record<string, string>>;
 
-  private store = inject(Store<CFAppState>);
-
-  constructor() {
-    super();
-  }
+  private store = inject(Store<GeneralEntityAppState>);
 
   ngOnInit(): void {
 

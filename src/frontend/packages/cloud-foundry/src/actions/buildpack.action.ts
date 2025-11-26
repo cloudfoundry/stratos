@@ -1,7 +1,7 @@
 import { HttpRequest } from '@angular/common/http';
 
 import { getActions } from '../../../store/src/actions/action.helper';
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
+import type { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { buildpackEntityType } from '../cf-entity-types';
 import { CFStartAction } from './cf-action.types';
@@ -17,7 +17,7 @@ export class FetchAllBuildpacks extends CFStartAction implements PaginatedAction
   actions = getActions('Buildpacks', 'List all');
   entity = [cfEntityFactory(buildpackEntityType)];
   entityType = buildpackEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   initialParams = {
     page: 1,
     'results-per-page': 100,

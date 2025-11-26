@@ -1,25 +1,26 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable } from 'rxjs';
+import type { GeneralEntityAppState } from '@stratosui/store';
+import { combineLatest, type Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
-import { MetricsConfig } from '../../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
+import type { MetricsConfig } from '../../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
 import { MetricsLineChartConfig } from '../../../../../../../core/src/shared/components/metrics-chart/metrics-chart.types';
 import {
   MetricsChartHelpers,
 } from '../../../../../../../core/src/shared/components/metrics-chart/metrics.component.helpers';
 import { MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
+import type { AppState } from '../../../../../../../store/src/app-state';
 import { EntityServiceFactory } from '../../../../../../../store/src/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
-import { IMetricMatrixResult, IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
-import { IMetricCell, MetricQueryType } from '../../../../../../../store/src/types/metric.types';
+import type { IMetricMatrixResult, IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
+import { type IMetricCell, MetricQueryType } from '../../../../../../../store/src/types/metric.types';
 import { FetchCFCellMetricsAction } from '../../../../../actions/cf-metrics.actions';
 import { CfCellHelper } from '../../../cf-cell.helpers';
-import { ActiveRouteCfCell } from '../../../cf-page.types';
+import type { ActiveRouteCfCell } from '../../../cf-page.types';
 
 
-export const enum CellMetrics {
+export enum CellMetrics {
   /**
    * Deprecated since Diego v2.31.0. See https://github.com/bosh-prometheus/prometheus-boshrelease/issues/333
    */
@@ -69,19 +70,19 @@ export class CloudFoundryCellService {
   constructor(
     activeRouteCfCell: ActiveRouteCfCell,
     private entityServiceFactory: EntityServiceFactory,
-    store: Store<AppState>,
+    store: Store<GeneralEntityAppState>,
     paginationMonitorFactory: PaginationMonitorFactory) {
 
     this.cellId = activeRouteCfCell.cellId;
     this.cfGuid = activeRouteCfCell.cfGuid;
 
-    this.remainingContainers$ = this.generate(CellMetrics.REMAINING_CONTAINERS);
-    this.totalContainers$ = this.generate(CellMetrics.TOTAL_CONTAINERS);
-    this.remainingDisk$ = this.generate(CellMetrics.REMAINING_DISK);
-    this.totalDisk$ = this.generate(CellMetrics.TOTAL_DISK);
-    this.remainingMemory$ = this.generate(CellMetrics.REMAINING_MEMORY);
-    this.totalMemory$ = this.generate(CellMetrics.TOTAL_MEMORY);
-    this.cpus$ = this.generate(CellMetrics.CPUS);
+    this.remainingContainers$ = this.generate(CellMetrics.REMAINING_CONTAINERS, false);
+    this.totalContainers$ = this.generate(CellMetrics.TOTAL_CONTAINERS, false);
+    this.remainingDisk$ = this.generate(CellMetrics.REMAINING_DISK, false);
+    this.totalDisk$ = this.generate(CellMetrics.TOTAL_DISK, false);
+    this.remainingMemory$ = this.generate(CellMetrics.REMAINING_MEMORY, false);
+    this.totalMemory$ = this.generate(CellMetrics.TOTAL_MEMORY, false);
+    this.cpus$ = this.generate(CellMetrics.CPUS, false);
 
     this.usageContainers$ = this.generateUsage(this.remainingContainers$, this.totalContainers$);
     this.usageDisk$ = this.generateUsage(this.remainingDisk$, this.totalDisk$);
@@ -113,7 +114,7 @@ export class CloudFoundryCellService {
       metricsAction: new FetchCFCellMetricsAction(
         this.cfGuid,
         this.cellId,
-        new MetricQueryConfig(queryString + `{bosh_job_id="${this.cellId}"}`, {}),
+        new MetricQueryConfig(`${queryString}{bosh_job_id="${this.cellId}"}`, {}),
         queryRange
       ),
     };
@@ -127,11 +128,13 @@ export class CloudFoundryCellService {
     return lineChartConfig;
   }
 
-  private generate(metric: CellMetrics, isMetric = false, customAction?: FetchCFCellMetricsAction): Observable<any> {
+  private generate(metric: CellMetrics, isMetric: false, customAction?: FetchCFCellMetricsAction): Observable<string>;
+  private generate(metric: CellMetrics, isMetric: true, customAction?: FetchCFCellMetricsAction): Observable<IMetricCell>;
+  private generate(metric: CellMetrics, isMetric = false, customAction?: FetchCFCellMetricsAction): Observable<string | IMetricCell> {
     const action = customAction || new FetchCFCellMetricsAction(
       this.cfGuid,
       this.cellId,
-      new MetricQueryConfig(metric + `{bosh_job_id="${this.cellId}"}`, {}),
+      new MetricQueryConfig(`${metric}{bosh_job_id="${this.cellId}"}`, {}),
       MetricQueryType.QUERY,
       false
     );
@@ -141,21 +144,20 @@ export class CloudFoundryCellService {
     ).waitForEntity$.pipe(
       map(entityInfo => entityInfo.entity),
       map(entity => {
-        if (!entity.data || !entity.data.result) {
-          return null;
+        if (!entity.data || !entity.data.result || !entity.data.result.length) {
+          return isMetric ? {} as IMetricCell : '';
         }
         if (isMetric) {
           return entity.data.result[0].metric;
         }
-        const res = entity.data.result;
-        return res && res.length ? entity.data.result[0].value[1] : null;
+        return entity.data.result[0].value[1];
       })
     );
   }
 
-  private generateUsage(remaining$: Observable<string>, total$: Observable<string>): Observable<any> {
+  private generateUsage(remaining$: Observable<string>, total$: Observable<string>): Observable<string> {
     return combineLatest([remaining$, total$]).pipe(
-      map(([remaining, total]) => Number(total) - Number(remaining))
+      map(([remaining, total]) => (Number(total) - Number(remaining)).toString())
     );
   }
 }

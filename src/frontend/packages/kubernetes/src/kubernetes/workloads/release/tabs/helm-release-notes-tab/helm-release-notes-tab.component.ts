@@ -1,11 +1,12 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import {Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { AnsiColors } from '@stratosui/core';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { NoContentMessageComponent } from '../../../../../../../core/src/shared/components/no-content-message/no-content-message.component';
 
+import type { HelmRelease } from '../../../workload.types';
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
 
 @Component({
@@ -31,7 +32,7 @@ export class HelmReleaseNotesTabComponent {
 
 
     this.notes$ = this.helmReleaseHelper.release$.pipe(
-      map((release: any) => {
+      map((release: HelmRelease) => {
         if (release?.info?.notes) {
           return this.colorizer.ansiColorsToHtml(release.info.notes);
         } else {

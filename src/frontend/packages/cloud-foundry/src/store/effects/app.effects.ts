@@ -4,10 +4,10 @@ import { Store } from '@ngrx/store';
 import { first, map } from 'rxjs/operators';
 
 import { endpointHasMetrics } from '../../../../core/src/features/endpoints/endpoint-helpers';
-import { EndpointOnlyAppState } from '../../../../store/src/app-state';
-import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
+import type { EndpointOnlyAppState } from '../../../../store/src/app-state';
+import type { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
 import { ASSIGN_ROUTE_SUCCESS } from '../../actions/application-service-routes.actions';
-import { CF_APP_UPDATE_SUCCESS, UpdateExistingApplication } from '../../actions/application.actions';
+import { CF_APP_UPDATE_SUCCESS, type UpdateExistingApplication } from '../../actions/application.actions';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import {
   createAppInstancesMetricAction,

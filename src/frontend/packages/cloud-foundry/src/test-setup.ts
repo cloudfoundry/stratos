@@ -5,15 +5,15 @@ import { expect, describe, it, afterEach } from 'vitest';
 // IMMEDIATE: Expose vitest globals to window for entity-catalog test detection
 // This MUST happen before any Angular/Store imports that check window.describe
 if (typeof window !== 'undefined') {
-  (window as any).describe = describe;
-  (window as any).it = it;
-  (window as any).expect = expect;
+  (window as unknown as Record<string, unknown>).describe = describe;
+  (window as unknown as Record<string, unknown>).it = it;
+  (window as unknown as Record<string, unknown>).expect = expect;
 
   // IMMEDIATE: Suppress console.error for WebSocket connection failures in tests
   // This must be set up BEFORE any component initialization
   if (typeof console !== 'undefined' && console.error) {
     const originalConsoleError = console.error.bind(console);
-    console.error = function (...args: any[]) {
+    console.error = (...args: unknown[]) => {
       const firstArg = args[0];
       const message = typeof firstArg === 'string' ? firstArg : '';
 
@@ -23,7 +23,7 @@ if (typeof window !== 'undefined') {
       }
 
       // Filter WebSocket connection errors when second arg is the error object
-      if (args.length >= 2 && typeof args[1] === 'object' && args[1]?.code === 'WEBSOCKET_FAILED') {
+      if (args.length >= 2 && typeof args[1] === 'object' && args[1] !== null && 'code' in args[1] && args[1].code === 'WEBSOCKET_FAILED') {
         return; // Silently skip WebSocket connection errors in test environment
       }
 
@@ -40,23 +40,23 @@ import {
   platformBrowserTesting,
 } from '@angular/platform-browser/testing';
 import { getTestBed } from '@angular/core/testing';
-import { entityCatalog, TestEntityCatalog } from '@stratosui/store';
+import { entityCatalog, type TestEntityCatalog } from '@stratosui/store';
 
 // Polyfill: window.matchMedia for tests
 // Components that use media queries need matchMedia to be available
 if (typeof window.matchMedia === 'undefined') {
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
-    value: (query: string) => ({
+    value: (query: string): MediaQueryList => ({
       matches: false,
       media: query,
-      onchange: null,
+      onchange: null as ((this: MediaQueryList, ev: MediaQueryListEvent) => unknown) | null,
       addListener: () => { }, // deprecated but still used by some code
       removeListener: () => { }, // deprecated but still used by some code
       addEventListener: () => { },
       removeEventListener: () => { },
       dispatchEvent: () => true,
-    }),
+    } as MediaQueryList),
   });
 }
 
@@ -95,6 +95,9 @@ afterEach(() => {
 
 // Setup snapshots AFTER TestBed initialization
 // expect must be available globally before setup-snapshots tries to use it
-import('@analogjs/vitest-angular/setup-snapshots').catch(() => {
+// Note: Using dynamic require since setup-snapshots.d.ts is not a module
+try {
+  require('@analogjs/vitest-angular/setup-snapshots');
+} catch {
   // Silently ignore if setup-snapshots not available (older AnalogJS versions)
-});
+}

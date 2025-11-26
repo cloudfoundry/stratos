@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { ApplicationStateIconPipe } from './application-state-icon.pipe';
 
 describe('ApplicationStateIconPipe', () => {
-  let pipe;
+  let pipe: ApplicationStateIconPipe;
 
   beforeEach(() => {
     pipe = new ApplicationStateIconPipe();

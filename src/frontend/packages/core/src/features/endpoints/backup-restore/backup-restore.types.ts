@@ -1,4 +1,4 @@
-import { EndpointModel } from '@stratosui/store';
+import type { EndpointModel } from '@stratosui/store';
 
 export enum BackupEndpointTypes {
   ENDPOINT = 'endpoint',

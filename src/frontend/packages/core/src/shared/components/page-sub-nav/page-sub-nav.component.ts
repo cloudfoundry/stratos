@@ -1,9 +1,9 @@
 import { TemplatePortal } from '@angular/cdk/portal';
 
-import { AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
+import { type AfterViewInit, Component, Input, type OnDestroy, type TemplateRef, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { TabNavService } from '../../../tab-nav.service';
-import { IHeaderBreadcrumbLink } from '../page-header/page-header.types';
+import type { IHeaderBreadcrumbLink } from '../page-header/page-header.types';
 
 @Component({
   selector: 'app-page-sub-nav',
@@ -21,7 +21,7 @@ export class PageSubNavComponent implements AfterViewInit, OnDestroy {
     this.tabNavService.setSubNavBreadcrumbs(crumbs);
   }
 
-  @ViewChild('subNavTmpl', { static: true }) subNavTmpl!: TemplateRef<any>;
+  @ViewChild('subNavTmpl', { static: true }) subNavTmpl!: TemplateRef<unknown>;
 
   ngAfterViewInit() {
     const portal = new TemplatePortal(this.subNavTmpl, undefined, {});

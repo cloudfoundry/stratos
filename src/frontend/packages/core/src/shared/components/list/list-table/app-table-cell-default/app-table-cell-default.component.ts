@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, type OnDestroy } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { Observable, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 
 import { objectHelper } from '../../../../../core/helper-classes/object.helpers';
 import { pathGet } from '../../../../../core/utils.service';
 import { TableCellCustom } from '../../list.types';
-import { ICellDefinition } from '../table.types';
+import type { ICellDefinition } from '../table.types';
 import { CustomIconComponent } from '../../../../../shared/components/custom-material/custom-material.component';
 
 @Component({
@@ -52,12 +52,12 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
 
   private asyncSub!: Subscription;
 
-  public valueContext: { value: any } = { value: null as any };
+  public valueContext: { value: unknown } = { value: null };
   public isLink = false;
   public isExternalLink = false;
   public linkValue!: string;
   public linkTarget = '_self';
-  public valueGenerator!: (row: T, schemaKey?: string) => string | Observable<string>;
+  public valueGenerator!: (row: T, schemaKey?: string) => string | Observable<string> | null;
   public showShortLink = false;
 
   public init() {
@@ -90,7 +90,7 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
     this.setupLinkDeps();
   }
 
-  private setupAsyncLink(value: any) {
+  private setupAsyncLink(value: unknown) {
     if (!this.cellDefinition.getAsyncLink) {
       return;
     }
@@ -104,16 +104,16 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
       return;
     }
     const asyncConfig = this.cellDefinition.asyncValue;
-    const rowWithObs = row as Record<string, any>;
-    this.asyncSub = (rowWithObs[asyncConfig.pathToObs] as Observable<any>).subscribe((value: any) => {
-      this.valueContext.value = pathGet(asyncConfig.pathToValue, value as any);
+    const rowWithObs = row as Record<string, unknown>;
+    this.asyncSub = (rowWithObs[asyncConfig.pathToObs] as Observable<unknown>).subscribe((value: unknown) => {
+      this.valueContext.value = pathGet(asyncConfig.pathToValue, value);
       this.setupAsyncLink(value);
       this.cdr.markForCheck();
     });
   }
 
   private setValue(row: T, schemaKey?: string) {
-    if (this.cellDefinition && this.cellDefinition.asyncValue) {
+    if (this.cellDefinition?.asyncValue) {
       this.setupAsync(row);
     } else if (this.valueGenerator) {
       this.valueContext.value = this.valueGenerator(row, schemaKey);
@@ -128,11 +128,11 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
     return this.getValueGetter(cellDefinition);
   }
 
-  private getValueGetter(cellDefinition: ICellDefinition<T>) {
+  private getValueGetter(cellDefinition: ICellDefinition<T>): ((row: T, schemaKey?: string) => string | Observable<string>) | null {
     if (cellDefinition.getValue) {
       return cellDefinition.getValue;
     } else if (cellDefinition.valuePath) {
-      return (row: T) => objectHelper.getPathFromString(row, cellDefinition.valuePath);
+      return (row: T) => objectHelper.getPathFromString(row, cellDefinition.valuePath) as string;
     }
     return null;
   }

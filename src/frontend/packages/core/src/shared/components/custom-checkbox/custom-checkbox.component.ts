@@ -1,6 +1,6 @@
 
 import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, forwardRef  } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { type ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 export interface MatCheckboxChange {
   source: CustomCheckboxComponent;
@@ -26,7 +26,7 @@ export class CustomCheckboxComponent implements ControlValueAccessor {
   @Input() disabled = false;
   @Input() indeterminate = false;
   @Input() checked = false;
-  @Input() value: any;
+  @Input() value: unknown;
   @Input() name!: string;
   @Input() id!: string;
   @Input() required = false;
@@ -38,8 +38,12 @@ export class CustomCheckboxComponent implements ControlValueAccessor {
   @Output() change = new EventEmitter<MatCheckboxChange>();
   @Output() indeterminateChange = new EventEmitter<boolean>();
 
-  private _onChange = (value: any) => {};
-  private _onTouched = () => {};
+  private _onChange = (_value: boolean) => {
+    // ControlValueAccessor callback
+  };
+  private _onTouched = () => {
+    // ControlValueAccessor callback
+  };
 
   toggle() {
     if (this.disabled) return;
@@ -63,11 +67,11 @@ export class CustomCheckboxComponent implements ControlValueAccessor {
     this.checked = value;
   }
 
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: (value: boolean) => void): void {
     this._onChange = fn;
   }
 
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn: () => void): void {
     this._onTouched = fn;
   }
 

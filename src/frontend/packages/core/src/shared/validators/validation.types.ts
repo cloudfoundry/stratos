@@ -1,5 +1,5 @@
-import { AbstractControl, ValidationErrors, AsyncValidatorFn, ValidatorFn } from '@angular/forms';
-import { Observable } from 'rxjs';
+import type { AsyncValidatorFn, ValidatorFn } from '@angular/forms';
+import type { Observable } from 'rxjs';
 
 /**
  * Standard validation error keys used across the application
@@ -23,7 +23,7 @@ export enum ValidationErrorKey {
 export interface ValidationError {
   key: ValidationErrorKey;
   message: string;
-  params?: Record<string, any>;
+  params?: Record<string, unknown>;
 }
 
 /**
@@ -47,7 +47,7 @@ export interface UrlValidatorConfig {
 /**
  * Configuration for async uniqueness validator
  */
-export interface UniquenessValidatorConfig<T = any> {
+export interface UniquenessValidatorConfig<_T = unknown> {
   /** Function to check if value exists */
   checkFn: (value: string) => Promise<boolean> | Observable<boolean>;
   /** Debounce time in ms (default: 300) */
@@ -61,7 +61,7 @@ export interface UniquenessValidatorConfig<T = any> {
 /**
  * Validator factory return type with metadata
  */
-export interface ValidatorFactory<TConfig = any> {
+export interface ValidatorFactory<TConfig = unknown> {
   validator: ValidatorFn | AsyncValidatorFn;
   config: TConfig;
   description: string;

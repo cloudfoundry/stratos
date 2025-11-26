@@ -1,13 +1,13 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, type OnDestroy, Output  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomFormFieldComponent } from '../custom-form-field/custom-form-field.component';
 import { CustomSelectComponent, CustomOptionComponent } from '../custom-select/custom-select.component';
-import { EntityMonitorFactory, MetricQueryType, IMetrics, MetricsAction, EntityMonitor } from '@stratosui/store';
-import { Subscription } from 'rxjs';
+import { EntityMonitorFactory, MetricQueryType, type IMetrics, type MetricsAction, type EntityMonitor } from '@stratosui/store';
+import type { Subscription } from 'rxjs';
 
 import { MetricsRangeSelectorManagerService } from '../../services/metrics-range-selector-manager.service';
-import { ITimeRange } from '../../services/metrics-range-selector.types';
+import type { ITimeRange } from '../../services/metrics-range-selector.types';
 import { StartEndDateComponent } from '../start-end-date/start-end-date.component';
 
 @Component({

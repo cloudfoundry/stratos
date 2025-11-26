@@ -3,54 +3,54 @@ import { ApplicationRef, Injectable } from '@angular/core';
 import { TailwindSnackBarService } from '../../../../core/src/shared/services/tailwind-snackbar.service';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
-import { combineLatest, Observable, of } from 'rxjs';
+import { combineLatest, type Observable, of } from 'rxjs';
 import { catchError, first, flatMap, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { environment } from '../../../../core/src/environments/environment';
 import {
-  EndpointActionComplete,
+  type EndpointActionComplete,
   GET_ENDPOINTS_SUCCESS,
-  GetAllEndpointsSuccess,
+  type GetAllEndpointsSuccess,
   REGISTER_ENDPOINTS_SUCCESS,
   UNREGISTER_ENDPOINTS_SUCCESS,
-  UnregisterEndpoint,
+  type UnregisterEndpoint,
 } from '../../../../store/src/actions/endpoint.actions';
 import { ClearPaginationOfType, ResetPaginationOfType } from '../../../../store/src/actions/pagination.actions';
-import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
+import type { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { isJetstreamError } from '../../../../store/src/jetstream';
 import {
-  AppState,
-  EndpointModel,
+  type AppState,
+  type EndpointModel,
   entityCatalog,
-  NormalizedResponse,
+  type NormalizedResponse,
   WrapperRequestActionSuccess,
 } from '../../../../store/src/public-api';
-import { ApiRequestTypes } from '../../../../store/src/reducers/api-request-reducer/request-helpers';
+import type { ApiRequestTypes } from '../../../../store/src/reducers/api-request-reducer/request-helpers';
 import { endpointOfTypeSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { stratosEntityCatalog } from '../../../../store/src/stratos-entity-catalog';
 import {
-  EntityRequestAction,
+  type EntityRequestAction,
   StartRequestAction,
   WrapperRequestActionFailed,
 } from '../../../../store/src/types/request.types';
 import { helmEntityCatalog } from '../helm-entity-catalog';
 import { HELM_ENDPOINT_TYPE, HELM_HUB_ENDPOINT_TYPE, HELM_REPO_ENDPOINT_TYPE } from '../helm-entity-factory';
-import { Chart } from '../monocular/shared/models/chart';
-import { ChartVersion } from '../monocular/shared/models/chart-version';
+import type { Chart } from '../monocular/shared/models/chart';
+import type { ChartVersion } from '../monocular/shared/models/chart-version';
 import { stratosMonocularEndpointGuid } from '../monocular/stratos-monocular.helper';
 import {
   GET_HELM_VERSIONS,
   GET_MONOCULAR_CHART_VERSIONS,
   GET_MONOCULAR_CHARTS,
-  GetHelmChartVersions,
-  GetHelmVersions,
-  GetMonocularCharts,
+  type GetHelmChartVersions,
+  type GetHelmVersions,
+  type GetMonocularCharts,
   HELM_INSTALL,
   HELM_SYNCHRONISE,
-  HelmInstall,
-  HelmSynchronise,
+  type HelmInstall,
+  type HelmSynchronise,
 } from './helm.actions';
-import { HelmVersion } from './helm.types';
+import type { HelmVersion } from './helm.types';
 
 type MonocularChartsResponse = {
   data: Chart[];
@@ -157,7 +157,7 @@ export class HelmEffects {
       this.store.dispatch(new StartRequestAction(action));
 
       const helmEndpoints = Object.values(endpointOfTypeSelector(HELM_ENDPOINT_TYPE)(appState)) as EndpointModel[];
-      const helmHubEndpoint = helmEndpoints.find(endpoint => (endpoint as any).sub_type === HELM_HUB_ENDPOINT_TYPE);
+      const helmHubEndpoint = helmEndpoints.find(endpoint => endpoint.sub_type === HELM_HUB_ENDPOINT_TYPE);
 
       // See https://github.com/SUSE/stratos/issues/466. It would be better to use the standard proxy for this request and go out to all
       // valid helm sub types instead of making two requests here
@@ -296,9 +296,9 @@ export class HelmEffects {
       const proxyAPIVersion = environment.proxyAPIVersion;
       const url = `/pp/${proxyAPIVersion}/chartrepos/${action.endpoint.guid}`;
       const req = this.httpClient.post(url, requestArgs);
-      req.subscribe((ok: unknown) => {
+      req.subscribe((_ok: unknown) => {
         this.snackBar.open('Helm Repository synchronization started', 'Dismiss', { duration: 3000 });
-      }, (err: unknown) => {
+      }, (_err: unknown) => {
         this.snackBar.open(`Failed to Synchronize Helm Repository '${action.endpoint.name}'`, 'Dismiss', { duration: 5000 });
       });
       return [];
@@ -339,26 +339,28 @@ export class HelmEffects {
     })
   ));
 
-  private static createHelmErrorMessage(err: any): string {
+  private static createHelmErrorMessage(err: unknown): string {
     if (err) {
-      if (err.error && err.error.message) {
+      const error = err as { error?: { message?: string; status?: string }; message?: string };
+      if (error.error?.message) {
         // Kube error
-        return err.error.message;
-      } else if (err.message) {
+        return error.error.message;
+      } else if (error.message) {
         // Http error
-        return err.message;
-      } else if (err.error.status) {
+        return error.message;
+      } else if (error.error?.status) {
         // Jetstream error
-        return err.error.status;
+        return error.error.status;
       }
     }
     return 'Helm API request error';
   }
 
-  public static createHelmError(err: any): { status: string, message: string, } {
+  public static createHelmError(err: unknown): { status: string, message: string, } {
+    const error = err as { error?: unknown; status?: number };
     let unwrapped = err;
-    if (err.error) {
-      unwrapped = err.error;
+    if (error.error) {
+      unwrapped = error.error;
     }
     const jetstreamError = isJetstreamError(unwrapped);
     if (jetstreamError) {
@@ -369,8 +371,8 @@ export class HelmEffects {
       };
     }
     return {
-      status: err && err.status ? err.status + '' : '500',
-      message: this.createHelmErrorMessage(err)
+      status: error?.status ? `${error.status}` : '500',
+      message: HelmEffects.createHelmErrorMessage(err)
     };
   }
 

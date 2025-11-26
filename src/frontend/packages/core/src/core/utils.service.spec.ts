@@ -1,6 +1,7 @@
 import { inject, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import type { Subscription } from 'rxjs';
 
 import { pathGet, pathSet, safeStringToObj, safeUnsubscribe, UtilsService } from './utils.service';
 
@@ -66,9 +67,9 @@ describe('UtilsService', () => {
 
   describe('#usageBytes', () => {
     it('should return empty value', () => {
-      expect(service.usageBytes(0 as any)).toBe('-');
-      expect(service.usageBytes(Number.POSITIVE_INFINITY as any)).toBe('-');
-      expect(service.usageBytes(NaN as any)).toBe('-');
+      expect(service.usageBytes(0 as unknown as [number, number])).toBe('-');
+      expect(service.usageBytes(Number.POSITIVE_INFINITY as unknown as [number, number])).toBe('-');
+      expect(service.usageBytes(NaN as unknown as [number, number])).toBe('-');
       expect(service.usageBytes([])).toBe('-');
     });
 
@@ -140,7 +141,7 @@ describe('UtilsService', () => {
 
   describe('#pathSet', () => {
     it('should set object value based on path ', () => {
-      const obj: any = { a: { b: {} } };
+      const obj: { a: { b: unknown } } = { a: { b: {} } };
       pathSet('a.b', obj, 1);
 
       expect(obj.a.b).toBe(1);
@@ -165,8 +166,8 @@ describe('UtilsService', () => {
 
   describe('#safeUnsubscribe', () => {
     it('should call unsubscribe method from objects', () => {
-      const spy = { unsubscribe: vi.fn() };
-      const spy2 = { unsubscribe: vi.fn() };
+      const spy = { unsubscribe: vi.fn() } as unknown as Subscription;
+      const spy2 = { unsubscribe: vi.fn() } as unknown as Subscription;
       safeUnsubscribe(spy, spy2);
 
       expect(spy.unsubscribe).toHaveBeenCalled();

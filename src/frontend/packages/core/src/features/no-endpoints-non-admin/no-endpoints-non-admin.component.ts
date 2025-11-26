@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component  } from '@angular/core';
 
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
-import { ProductNameComponent } from '../../shared/components/product-name.ccomponent';
+import { ProductNameComponent } from '../../shared/components/product-name.component';
 import { ShowPageHeaderComponent } from '../../shared/components/page-header/show-page-header/show-page-header.component';
 import { NoContentMessageComponent } from '../../shared/components/no-content-message/no-content-message.component';
 

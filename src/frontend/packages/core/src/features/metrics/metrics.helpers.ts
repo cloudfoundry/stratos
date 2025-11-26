@@ -1,8 +1,8 @@
 import { getFullEndpointApiUrl, StratosStatus, entityCatalog } from '@stratosui/store';
-import { Observable, of as observableOf } from 'rxjs';
+import { type Observable, of as observableOf } from 'rxjs';
 
-import { EndpointIcon } from '../endpoints/endpoint-helpers';
-import { MetricsEndpointProvider } from './services/metrics-service';
+import type { EndpointIcon } from '../endpoints/endpoint-helpers';
+import type { MetricsEndpointProvider } from './services/metrics-service';
 
 // Info for an endpoint that a metrics endpoint provides for
 export interface MetricsEndpointInfo {
@@ -45,7 +45,7 @@ export function mapMetricsData(ep: MetricsEndpointProvider): MetricsEndpointInfo
   });
 
   // Add all of the potentially unknown endpoints
-  if (ep.provider && ep.provider.metadata && ep.provider.metadata && ep.provider.metadata.metrics_stratos
+  if (ep.provider?.metadata?.metrics_stratos
     && Array.isArray(ep.provider.metadata.metrics_stratos)) {
     ep.provider.metadata.metrics_stratos.forEach(endp => {
       // See if we already know about this endpoint
@@ -77,11 +77,11 @@ export function mapMetricsData(ep: MetricsEndpointProvider): MetricsEndpointInfo
 
 // Simple URL compare that ignores tailing forward slashes
 function compareUrl(a: string, b: string): boolean {
-  if (a && a.endsWith('/')) {
+  if (a?.endsWith('/')) {
     a = a.substr(0, a.length - 1);
   }
 
-  if (b && b.endsWith('/')) {
+  if (b?.endsWith('/')) {
     b = b.substr(0, b.length - 1);
   }
 

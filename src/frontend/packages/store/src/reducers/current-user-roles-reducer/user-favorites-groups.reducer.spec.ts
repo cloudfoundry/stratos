@@ -6,8 +6,8 @@ import {
   RemoveUserFavoriteSuccessAction,
   SaveUserFavoriteSuccessAction,
 } from '../../actions/user-favourites.actions';
-import { getDefaultFavoriteGroupsState, IUserFavoritesGroupsState } from '../../types/favorite-groups.types';
-import { IEndpointFavMetadata, UserFavorite } from '../../types/user-favorites.types';
+import { getDefaultFavoriteGroupsState, type IUserFavoritesGroupsState } from '../../types/favorite-groups.types';
+import { type IEndpointFavMetadata, UserFavorite } from '../../types/user-favorites.types';
 import { getEndpointIDFromFavorite } from '../../user-favorite-helpers';
 import { userFavoriteGroupsReducer } from './user-favorites-groups.reducer';
 
@@ -15,7 +15,7 @@ import { userFavoriteGroupsReducer } from './user-favorites-groups.reducer';
 // The warnings occur because test data references Cloud Foundry entities that aren't registered
 // in the test catalog. This is expected behavior for unit tests that use mock data.
 beforeEach(() => {
-  vi.spyOn(console, 'warn').mockImplementation((msg: any) => {
+  vi.spyOn(console, 'warn').mockImplementation((msg: unknown) => {
     // Suppress only the entity catalog warnings
     if (typeof msg === 'string' && msg.includes('Missing catalog entity:')) {
       return;

@@ -1,9 +1,7 @@
 import { ChangeDetectionStrategy, Component} from '@angular/core';
 
-
-import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
+import { ListComponent, ListConfig } from '@stratosui/core';
 import { KubernetesNodesListConfigService } from '../../list-types/kubernetes-nodes/kubernetes-nodes-list-config.service';
-import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -20,7 +18,5 @@ import { ListComponent } from '../../../../../core/src/shared/components/list/li
   }]
 })
 export class KubernetesNodesTabComponent {
-
-  constructor() { }
 
 }

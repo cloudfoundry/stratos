@@ -1,22 +1,23 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, type Observable } from 'rxjs';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
 import {
   ClearPaginationOfType,
-  EntityCatalogEntityConfig,
+  type EntityCatalogEntityConfig,
   PaginationMonitorFactory,
-  ActionState,
-  RequestInfoState,
-  APIResource
+  type ActionState,
+  type RequestInfoState,
+  type APIResource,
+  type GeneralEntityAppState
 } from '@stratosui/store';
 import {
   getUserProvidedServiceInstanceRelations,
-  IUserProvidedServiceInstanceData,
+  type IUserProvidedServiceInstanceData,
 } from '../../actions/user-provided-service.actions';
-import { IUserProvidedServiceInstance } from '../../cf-api-svc.types';
-import { CFAppState } from '../../cf-app-state';
+import type { IUserProvidedServiceInstance } from '../../cf-api-svc.types';
+import type { CFAppState } from '../../cf-app-state';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { organizationEntityType, spaceEntityType } from '../../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../entity-relations/entity-relations.types';
@@ -30,7 +31,7 @@ import { QParam, QParamJoiners } from '../q-param';
 export class CloudFoundryUserProvidedServicesService {
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<GeneralEntityAppState>,
     private paginationMonitorFactory: PaginationMonitorFactory,
   ) {
 
@@ -85,7 +86,7 @@ export class CloudFoundryUserProvidedServicesService {
     return cfEntityCatalog.userProvidedService.api.create<RequestInfoState>(
       cfGuid,
       guid,
-      data,
+      { data },
     ).pipe(
       pairwise(),
       filter(([oldV, newV]) => oldV.creating && !newV.creating),

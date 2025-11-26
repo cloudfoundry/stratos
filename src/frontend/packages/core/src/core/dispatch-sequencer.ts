@@ -1,6 +1,6 @@
-import { Action, Store } from '@ngrx/store';
+import { Store, Action } from '@ngrx/store';
 import { GeneralEntityAppState } from '@stratosui/store';
-import { from, Observable, of as observableOf } from 'rxjs';
+import { from, type Observable, of as observableOf } from 'rxjs';
 import { bufferTime, concatMap, delay, filter, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 
 
@@ -36,7 +36,7 @@ export class DispatchSequencer {
    */
   private filter(actions: DispatchSequencerAction[]): DispatchSequencerAction[] {
     if (this.debounceInMs) {
-      const now = new Date().getTime();
+      const now = Date.now();
       return actions.filter(action => {
         const lastDispatch = this.dispatchRecord[action.id] || 0;
         return now - lastDispatch > this.debounceInMs;
@@ -47,7 +47,7 @@ export class DispatchSequencer {
 
   private dispatch = (actions: DispatchSequencerAction[]) => {
     actions.forEach(action => {
-      this.dispatchRecord[action.id] = new Date().getTime();
+      this.dispatchRecord[action.id] = Date.now();
       this.store.dispatch(action.action);
     });
   }
@@ -56,11 +56,11 @@ export class DispatchSequencer {
    * Dispatch actions in groups of `batchSize` such that there are no duplicate actions dispatched within `debounceInMs`. Each batch
    * dispatch will be separated by `batchDelayInMs`.
    */
-  public sequence(obs: Observable<DispatchSequencerAction[]>): Observable<any> {
+  public sequence(obs: Observable<DispatchSequencerAction[]>): Observable<DispatchSequencerAction[]> {
     return obs.pipe(switchMap(actions => this.innerSequence(actions)));
   }
 
-  private innerSequence(allActions: DispatchSequencerAction[]): Observable<any> {
+  private innerSequence(allActions: DispatchSequencerAction[]): Observable<DispatchSequencerAction[]> {
     return observableOf(allActions).pipe(
       filter(actions => !!actions.length),
       map(actions => this.filter(actions)),

@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, OnInit  } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, type OnInit, inject  } from '@angular/core';
+import { CommonModule, DatePipe, SlicePipe, AsyncPipe } from '@angular/common';
 import { Meta } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
-import { GeneralEntityAppState, AuthState, SessionData } from '@stratosui/store';
-import { Observable } from 'rxjs';
+import type {GeneralEntityAppState} from '@stratosui/store';
+import type {AuthState, SessionData} from '@stratosui/store';
+import type { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
@@ -17,6 +18,8 @@ import { BooleanIndicatorComponent } from '../../../shared/components/boolean-in
   standalone: true,
   imports: [
     CommonModule,
+    DatePipe,
+    SlicePipe,
     PageHeaderComponent,
     MetadataItemComponent,
     BooleanIndicatorComponent
@@ -45,23 +48,23 @@ export class DiagnosticsPageComponent implements OnInit {
   public gitBranchLink: string;
   public gitCommitLink: string;
 
-  constructor(
-    private meta: Meta,
-    private store: Store<GeneralEntityAppState>,
-  ) { }
+  private meta = inject(Meta);
+  private store = inject(Store<GeneralEntityAppState>);
+
+  constructor() { }
 
   ngOnInit() {
 
     const helmLastModifiedRegEx = /seconds:([0-9]*)/;
 
     this.sessionData$ = this.store.select(s => s.auth).pipe(
-      filter(auth => !!(auth && auth.sessionData)),
+      filter(auth => !!(auth?.sessionData)),
       filter(auth => !!(auth.sessionData.diagnostics)),
       map((auth: AuthState) => auth.sessionData)
     );
 
     this.userIsAdmin$ = this.sessionData$.pipe(
-      map(session => session.user && session.user.admin)
+      map(session => session.user?.admin)
     );
 
     this.versionNumber$ = this.sessionData$.pipe(
@@ -93,12 +96,12 @@ export class DiagnosticsPageComponent implements OnInit {
     }
 
     this.gitHubRepository = this.getGitHubProject(this.gitProject);
-    if (!!this.gitHubRepository) {
+    if (this.gitHubRepository) {
       this.gitHubRepositoryLink = `https://github.com/${this.gitHubRepository}`;
-      if (!!this.gitBranch) {
+      if (this.gitBranch) {
         this.gitBranchLink = `https://github.com/${this.gitHubRepository}/tree/${this.gitBranch}`;
       }
-      if (!!this.gitCommit) {
+      if (this.gitCommit) {
         this.gitCommitLink = `https://github.com/${this.gitHubRepository}/commit/${this.gitCommit}`;
       }
     }

@@ -1,14 +1,14 @@
 import intersect from 'intersect';
 import { isAfter, isEqual, parse } from 'date-fns';
 
-import { AppRecurringSchedule, AppScalingRule, AppSpecificDate } from '../../store/app-autoscaler.types';
+import type { AppRecurringSchedule, AppScalingRule, AppSpecificDate } from '../../store/app-autoscaler.types';
 import { AutoscalerConstants } from './autoscaler-util';
 
 export function numberWithFractionOrExceedRange(value: number | string | null | undefined, min: number, max: number, required: boolean) {
-  if ((!value || isNaN(Number(value))) && !required) {
+  if ((!value || Number.isNaN(Number(value))) && !required) {
     return false;
   }
-  if ((!value || isNaN(Number(value))) && required) {
+  if ((!value || Number.isNaN(Number(value))) && required) {
     return true;
   }
   const numValue = Number(value);
@@ -16,8 +16,8 @@ export function numberWithFractionOrExceedRange(value: number | string | null | 
 }
 
 export function timeIsSameOrAfter(startTime: string, endTime: string) {
-  const startTimeDate = parse('2000-01-01T' + startTime, AutoscalerConstants.MomentFormateDateTimeT, new Date());
-  const endTimeDate = parse('2000-01-01T' + endTime, AutoscalerConstants.MomentFormateDateTimeT, new Date());
+  const startTimeDate = parse(`2000-01-01T${startTime}`, AutoscalerConstants.MomentFormateDateTimeT, new Date());
+  const endTimeDate = parse(`2000-01-01T${endTime}`, AutoscalerConstants.MomentFormateDateTimeT, new Date());
   return isAfter(startTimeDate, endTimeDate) || isEqual(startTimeDate, endTimeDate);
 }
 
@@ -34,8 +34,8 @@ export function dateTimeIsSameOrAfter(startDateTime: string, endDateTime: string
 }
 
 export function recurringSchedulesInvalidRepeatOn(inputRecurringSchedules: AppRecurringSchedule) {
-  const weekdayCount = inputRecurringSchedules.hasOwnProperty('days_of_week') ? inputRecurringSchedules.days_of_week.length : 0;
-  const monthdayCount = inputRecurringSchedules.hasOwnProperty('days_of_month') ? inputRecurringSchedules.days_of_month.length : 0;
+  const weekdayCount = Object.hasOwn(inputRecurringSchedules, 'days_of_week') ? inputRecurringSchedules.days_of_week.length : 0;
+  const monthdayCount = Object.hasOwn(inputRecurringSchedules, 'days_of_month') ? inputRecurringSchedules.days_of_month.length : 0;
   return (weekdayCount > 0 && monthdayCount > 0) || (weekdayCount === 0 && monthdayCount === 0);
 }
 
@@ -45,8 +45,8 @@ export function recurringSchedulesOverlapping(
   if (!inputRecurringSchedules) {
     return false;
   }
-  const overlappingSchedule = inputRecurringSchedules.find((value, i) => {
-    if (index === i || !inputRecurringSchedules[i].hasOwnProperty(property) ||
+  const overlappingSchedule = inputRecurringSchedules.find((_value, i) => {
+    if (index === i || !Object.hasOwn(inputRecurringSchedules[i], property) ||
       inputRecurringSchedules[i].start_date && newSchedule.start_date && !dateOverlaps(inputRecurringSchedules[i], newSchedule)) {
       return false;
     }
@@ -91,18 +91,18 @@ export function specificDateRangeOverlapping(newSchedule: AppSpecificDate, index
 }
 
 function timeOverlaps(timeI: AppRecurringSchedule, tiemJ: AppRecurringSchedule): boolean {
-  const startDateTimeI = parse('1970-01-01T' + timeI.start_time, AutoscalerConstants.MomentFormateDateTimeT, new Date());
-  const endDateTimeI = parse('1970-01-01T' + timeI.end_time, AutoscalerConstants.MomentFormateDateTimeT, new Date());
-  const startDateTimeJ = parse('1970-01-01T' + tiemJ.start_time, AutoscalerConstants.MomentFormateDateTimeT, new Date());
-  const endDateTimeJ = parse('1970-01-01T' + tiemJ.end_time, AutoscalerConstants.MomentFormateDateTimeT, new Date());
+  const startDateTimeI = parse(`1970-01-01T${timeI.start_time}`, AutoscalerConstants.MomentFormateDateTimeT, new Date());
+  const endDateTimeI = parse(`1970-01-01T${timeI.end_time}`, AutoscalerConstants.MomentFormateDateTimeT, new Date());
+  const startDateTimeJ = parse(`1970-01-01T${tiemJ.start_time}`, AutoscalerConstants.MomentFormateDateTimeT, new Date());
+  const endDateTimeJ = parse(`1970-01-01T${tiemJ.end_time}`, AutoscalerConstants.MomentFormateDateTimeT, new Date());
   return dateTimeOverlaps(startDateTimeI, endDateTimeI, startDateTimeJ, endDateTimeJ);
 }
 
 function dateOverlaps(dateI: AppRecurringSchedule, dateJ: AppRecurringSchedule): boolean {
-  const startDateTimeI = parse(dateI.start_date + 'T00:00', AutoscalerConstants.MomentFormateDateTimeT, new Date());
-  const endDateTimeI = parse(dateI.end_date + 'T23:59', AutoscalerConstants.MomentFormateDateTimeT, new Date());
-  const startDateTimeJ = parse(dateJ.start_date + 'T00:00', AutoscalerConstants.MomentFormateDateTimeT, new Date());
-  const endDateTimeJ = parse(dateJ.end_date + 'T23:59', AutoscalerConstants.MomentFormateDateTimeT, new Date());
+  const startDateTimeI = parse(`${dateI.start_date}T00:00`, AutoscalerConstants.MomentFormateDateTimeT, new Date());
+  const endDateTimeI = parse(`${dateI.end_date}T23:59`, AutoscalerConstants.MomentFormateDateTimeT, new Date());
+  const startDateTimeJ = parse(`${dateJ.start_date}T00:00`, AutoscalerConstants.MomentFormateDateTimeT, new Date());
+  const endDateTimeJ = parse(`${dateJ.end_date}T23:59`, AutoscalerConstants.MomentFormateDateTimeT, new Date());
   return dateTimeOverlaps(startDateTimeI, endDateTimeI, startDateTimeJ, endDateTimeJ);
 }
 
@@ -120,7 +120,7 @@ export function getThresholdMin(policyTriggers: AppScalingRule[], metricType: st
   if (scaleType === 'upper') {
     return policyTriggers.reduce((thresholdMin, trigger, triggerIndex) => {
       if (triggerIndex !== index && trigger.metric_type === metricType &&
-        AutoscalerConstants.LowerOperators.indexOf(trigger.operator) >= 0) {
+        AutoscalerConstants.LowerOperators.indexOf(trigger.operator as typeof AutoscalerConstants.LowerOperators[number]) >= 0) {
         return Math.max(trigger.threshold + 1, thresholdMin);
       } else {
         return thresholdMin;
@@ -135,7 +135,7 @@ export function getThresholdMax(policyTriggers: AppScalingRule[], metricType: st
   if (scaleType === 'lower') {
     return policyTriggers.reduce((thresholdMax, trigger, triggerIndex) => {
       if (triggerIndex !== index && trigger.metric_type === metricType &&
-        AutoscalerConstants.UpperOperators.indexOf(trigger.operator) >= 0) {
+        AutoscalerConstants.UpperOperators.indexOf(trigger.operator as typeof AutoscalerConstants.UpperOperators[number]) >= 0) {
         return Math.min(trigger.threshold - 1, thresholdMax);
       } else {
         return thresholdMax;
@@ -147,6 +147,6 @@ export function getThresholdMax(policyTriggers: AppScalingRule[], metricType: st
 }
 
 export function inValidMetricType(metricType: string): boolean {
-  const metricTypePattern = new RegExp('^[a-zA-Z0-9_]+$');
+  const metricTypePattern = /^[a-zA-Z0-9_]+$/;
   return !metricTypePattern.test(metricType);
 }

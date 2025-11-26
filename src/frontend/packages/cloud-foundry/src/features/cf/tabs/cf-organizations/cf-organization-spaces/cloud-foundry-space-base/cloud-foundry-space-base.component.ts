@@ -1,30 +1,30 @@
-import { Component, OnDestroy , ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, type OnDestroy , ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of, Subscription } from 'rxjs';
+import { combineLatest, type Observable, of, type Subscription } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
 import {
   getActionsFromExtensions,
   getTabsFromExtensions,
-  StratosActionMetadata,
+  type StratosActionMetadata,
   StratosActionType,
   StratosTabType,
 } from '../../../../../../../../core/src/core/extension/extension-service';
 import { environment } from '../../../../../../../../core/src/environments/environment.prod';
-import { IPageSideNavTab } from '../../../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
+import type { IPageSideNavTab } from '../../../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { PageHeaderComponent } from '../../../../../../../../core/src/shared/components/page-header/page-header.component';
-import { IHeaderBreadcrumb } from '../../../../../../../../core/src/shared/components/page-header/page-header.types';
+import type { IHeaderBreadcrumb } from '../../../../../../../../core/src/shared/components/page-header/page-header.types';
 import { LoadingPageComponent } from '../../../../../../../../core/src/shared/components/loading-page/loading-page.component';
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
-import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
+import type { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
-import { CFAppState } from '../../../../../../cf-app-state';
+import type { CFAppState } from '../../../../../../cf-app-state';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { spaceEntityType } from '../../../../../../cf-entity-types';
-import { ISpaceFavMetadata } from '../../../../../../cf-metadata-types';
+import type { ISpaceFavMetadata } from '../../../../../../cf-metadata-types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { CfUserService } from '../../../../../../shared/data-services/cf-user.service';
 import {
@@ -121,8 +121,7 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
     public cfEndpointService: CloudFoundryEndpointService,
     public cfSpaceService: CloudFoundrySpaceService,
     public cfOrgService: CloudFoundryOrganizationService,
-    private store: Store<CFAppState>,
-    private confirmDialog: ConfirmationDialogService,
+    private store: Store,_confirmDialog: ConfirmationDialogService,
     userFavoriteManager: UserFavoriteManager
   ) {
     this.favorite$ = cfSpaceService.space$.pipe(

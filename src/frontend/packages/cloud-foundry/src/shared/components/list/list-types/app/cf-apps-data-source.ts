@@ -1,11 +1,12 @@
 import { Store } from '@ngrx/store';
-import { getRowMetadata } from '@stratosui/store';
-import { Subscription } from 'rxjs';
+import { getRowMetadata, type GeneralEntityAppState } from '@stratosui/store';
+import type { Subscription } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
 import { debounceTime, delay, distinctUntilChanged, map, withLatestFrom } from 'rxjs/operators';
 
-import { GetAllApplications } from '../../../../../../../cloud-foundry/src/actions/application.actions';
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import type { GetAllApplications } from '../../../../../../../cloud-foundry/src/actions/application.actions';
+import type { IApp } from '../../../../../../../cloud-foundry/src/cf-api.types';
+import type { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   applicationEntityType,
   organizationEntityType,
@@ -13,19 +14,19 @@ import {
   spaceEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationKey } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { DispatchSequencer, DispatchSequencerAction } from '../../../../../../../core/src/core/dispatch-sequencer';
 import {
+  DispatchSequencer,
+  type DispatchSequencerAction,
+  type DataFunction,
+  type DataFunctionDefinition,
   distinctPageUntilChanged,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import {
-  ListPaginationMultiFilterChange,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
-import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
+  type ListPaginationMultiFilterChange,
+} from '@stratosui/core';
+import type { IListConfig } from '@stratosui/core';
 import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
 import { MultiActionListEntity } from '../../../../../../../store/src/monitors/pagination-monitor';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { PaginationParam } from '../../../../../../../store/src/types/pagination.types';
+import type { APIResource } from '../../../../../../../store/src/types/api.types';
+import type { PaginationParam } from '../../../../../../../store/src/types/pagination.types';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { cfOrgSpaceFilter } from '../../../../../features/cf/cf.helpers';
@@ -44,9 +45,9 @@ export class CfAppsDataSource extends CFListDataSource<APIResource> {
   public declare action: GetAllApplications;
 
   constructor(
-    store: Store<AppState>,
+    store: Store<GeneralEntityAppState>,
     listConfig?: IListConfig<APIResource>,
-    transformEntities?: any[],
+    transformEntities?: (DataFunction<APIResource> | DataFunctionDefinition)[],
     paginationKey = CfAppsDataSource.paginationKey,
     seedPaginationKey = CfAppsDataSource.paginationKey,
     cfGuid?: string
@@ -80,7 +81,11 @@ export class CfAppsDataSource extends CFListDataSource<APIResource> {
       isLocal: true,
       transformEntities,
       listConfig,
-      destroy: () => this.subs.forEach(sub => sub.unsubscribe())
+      destroy: () => {
+        for (const sub of this.subs) {
+          sub.unsubscribe();
+        }
+      }
     });
 
     this.action = action;
@@ -97,15 +102,19 @@ export class CfAppsDataSource extends CFListDataSource<APIResource> {
         if (!page || maxedResults) {
           return [];
         }
-        const actions = new Array<DispatchSequencerAction>();
+        const actions: DispatchSequencerAction[] = [];
         page.forEach(app => {
+          let appResource: APIResource<IApp>;
           if (app instanceof MultiActionListEntity) {
-            app = app.entity;
+            appResource = app.entity as APIResource<IApp>;
+          } else {
+            appResource = app as APIResource<IApp>;
           }
-          if (app.entity.state === 'STARTED') {
+          const appEntity = appResource.entity as IApp;
+          if (appEntity.state === 'STARTED') {
             actions.push({
-              id: app.metadata.guid,
-              action: cfEntityCatalog.appStats.actions.getMultiple(app.metadata.guid, app.entity.cfGuid)
+              id: appResource.metadata.guid,
+              action: cfEntityCatalog.appStats.actions.getMultiple(appResource.metadata.guid, appEntity.cfGuid)
             });
           }
         });
@@ -119,7 +128,7 @@ export class CfAppsDataSource extends CFListDataSource<APIResource> {
   }
 
   public setMultiFilter(changes: ListPaginationMultiFilterChange[], params: PaginationParam) {
-    return createCfOrSpaceMultipleFilterFn(this.store as Store<CFAppState>, this.action, this.setQParam)
+    return createCfOrSpaceMultipleFilterFn(this.store, this.action, this.setQParam)
       (changes, params);
   }
 

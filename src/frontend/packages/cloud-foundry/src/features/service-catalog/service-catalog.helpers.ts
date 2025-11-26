@@ -1,4 +1,4 @@
-import { Provider } from '@angular/core';
+import type { Provider } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { ServicesService } from './services.service';

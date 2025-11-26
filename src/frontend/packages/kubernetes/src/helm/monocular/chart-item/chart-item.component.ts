@@ -1,9 +1,9 @@
 
-import { Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, type OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
-import { Chart } from '../shared/models/chart';
+import type { Chart } from '../shared/models/chart';
 import { ChartsService } from '../shared/services/charts.service';
 import { ListItemComponent } from '../list-item/list-item.component';
 

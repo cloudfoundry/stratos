@@ -46,12 +46,6 @@ import { MetaCardValueComponent } from './components/list/list-cards/meta-card/m
 import { EntityListViewComponent } from './components/list/list-generics/entity-list-view/entity-list-view.component';
 import { ListHostDirective } from './components/list/list-generics/helpers/list-host.directive';
 import { ListViewComponent } from './components/list/list-generics/list-view/list-view.component';
-import {
-  TableCellRequestMonitorIconComponent,
-} from './components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
-import {
-  TableCellSidePanelComponent,
-} from './components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
 import { TableCellStatusDirective } from './components/list/list-table/table-cell-status.directive';
 import { listTableComponents } from './components/list/list-table/table-components';
 import { TableComponent } from './components/list/list-table/table.component';
@@ -79,10 +73,11 @@ import { MetricsRangeSelectorComponent } from './components/metrics-range-select
 import { MultilineTitleComponent } from './components/multiline-title/multiline-title.component';
 import { NestedTabsComponent } from './components/nested-tabs/nested-tabs.component';
 import { PageHeaderModule } from './components/page-header/page-header.module';
+import { PageHeaderComponent } from './components/page-header/page-header.component';
 import { PageSubNavSectionComponent } from './components/page-sub-nav-section/page-sub-nav-section.component';
 import { PageSubNavComponent } from './components/page-sub-nav/page-sub-nav.component';
 import { PollingIndicatorComponent } from './components/polling-indicator/polling-indicator.component';
-import { ProductNameComponent } from './components/product-name.ccomponent';
+import { ProductNameComponent } from './components/product-name.component';
 import { ProfileSettingsComponent } from './components/profile-settings/profile-settings.component';
 import { RingChartComponent } from './components/ring-chart/ring-chart.component';
 import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
@@ -96,6 +91,8 @@ import {
 import { StackedInputActionsComponent } from './components/stacked-input-actions/stacked-input-actions.component';
 import { StartEndDateComponent } from './components/start-end-date/start-end-date.component';
 import { SteppersModule } from './components/stepper/steppers.module';
+import { SteppersComponent } from './components/stepper/steppers/steppers.component';
+import { StepComponent } from './components/stepper/step/step.component';
 import { StratosTitleComponent } from './components/stratos-title/stratos-title.component'; // Now standalone
 import { TileSelectorTileComponent } from './components/tile-selector-tile/tile-selector-tile.component';
 import { TileSelectorComponent } from './components/tile-selector/tile-selector.component';
@@ -147,6 +144,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
+    // Import the modules which re-export the standalone components
     PageHeaderModule,
     RouterModule,
     SteppersModule,
@@ -218,6 +216,9 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     StackedInputActionComponent, // Now standalone - moved to imports
     EndpointCardComponent, // Now standalone - moved to imports
     ProductNameComponent, // Now standalone - moved to imports
+    PageHeaderComponent, // Standalone component
+    SteppersComponent, // Standalone component
+    StepComponent, // Standalone component
     // Wave 11 dependency chain - now standalone
     MetaCardComponent, // Now standalone - moved to imports
     MetaCardTitleComponent, // Now standalone - moved to imports
@@ -227,8 +228,8 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     TableComponent, // Now standalone - moved to imports
     DisableRouterLinkDirective, // Now standalone - moved to imports
     TableCellEndpointStatusComponent, // Now standalone - moved to imports
-    TableCellEndpointNameComponent, // Now standalone - moved to imports
-    TableCellStatusDirective, // Now standalone - moved to imports
+    // TableCellEndpointNameComponent - already in listTableComponents
+    // TableCellStatusDirective - already in listTableComponents
     // Standalone pipes
     PercentagePipe,
     ApplicationStateIconPipe,
@@ -299,7 +300,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     CapitalizeFirstPipe,
 
     // === Standalone Directives (imported above) ===
-    TableCellStatusDirective,
+    // TableCellStatusDirective - already in listTableComponents
     FocusDirective,
     BlurDirective,
     UniqueDirective,
@@ -386,13 +387,20 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     JsonViewerComponent,
     CopyToClipboardComponent,
     SidepanelPreviewComponent,
-    TableCellEndpointNameComponent,
+    // TableCellEndpointNameComponent - already in listTableComponents
     EndpointCardComponent,
     CardProgressOverlayComponent,
     MaxListMessageComponent,
     ProfileSettingsComponent,
     ProductNameComponent,
     NoContentMessageComponent,
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+
+    // === Card/Table Component Arrays (all standalone) ===
+    ...listCardComponents,
+    ...listTableComponents,
 
     // === Custom Material Wrapper Components ===
     CustomExpansionPanelComponent,

@@ -1,8 +1,8 @@
-import { HttpRequest } from '@angular/common/http';
-import { Action } from '@ngrx/store';
+import type { HttpRequest } from '@angular/common/http';
+import type { Action } from '@ngrx/store';
 
 import { ApiActionTypes, RequestTypes } from '../actions/request.actions';
-import { BasePipelineRequestAction } from '../entity-catalog/action-orchestrator/action-orchestrator';
+import type { BasePipelineRequestAction } from '../entity-catalog/action-orchestrator/action-orchestrator';
 import type { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
 import type { EntitySchema } from '../helpers/entity-schema';
 import type { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
@@ -48,7 +48,7 @@ export interface EntityRequestAction extends EntityCatalogEntityConfig, RequestA
    * like local lists, we want to immediately remove that entry instead of clearing the table and refetching all data. This flag allows that
    */
   removeEntityOnDelete?: boolean;
-  options?: HttpRequest<any>;
+  options?: HttpRequest<unknown>;
 }
 
 export interface IUpdateRequestAction {
@@ -76,14 +76,14 @@ export interface IFailedRequestAction {
   message: string;
   apiAction: EntityRequestAction | PaginatedAction;
   requestType: ApiRequestTypes;
-  response?: any;
+  response?: unknown;
 }
 
 export abstract class StartAction implements Action {
   type = ApiActionTypes.API_REQUEST_START;
 }
 
-export abstract class RequestAction implements Action {
+export abstract class RequestStartAction implements Action {
   type = RequestTypes.START;
 }
 export abstract class RequestSuccessAction implements Action {
@@ -107,17 +107,17 @@ export class UpdateCfAction extends RequestUpdateAction implements IUpdateReques
 }
 
 export interface ICFAction extends EntityRequestAction {
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   actions: string[];
   skipValidation?: boolean;
   validate?: boolean;
 }
 
-export class APISuccessOrFailedAction<T = any> implements Action {
+export class APISuccessOrFailedAction<T = unknown> implements Action {
   constructor(public type: string, public apiAction: EntityRequestAction | PaginatedAction, public response?: T) { }
 }
 
-export class StartRequestAction extends RequestAction {
+export class StartRequestAction extends RequestStartAction {
   constructor(
     public apiAction: EntityRequestAction | PaginatedAction,
     public requestType: ApiRequestTypes = 'fetch'
@@ -126,7 +126,7 @@ export class StartRequestAction extends RequestAction {
   }
 }
 
-export class WrapperRequestActionSuccess<T = any> extends RequestSuccessAction implements ISuccessRequestAction {
+export class WrapperRequestActionSuccess<T = unknown> extends RequestSuccessAction implements ISuccessRequestAction {
   constructor(
     public response: NormalizedResponse<T>,
     public apiAction: EntityRequestAction | PaginatedAction,
@@ -152,7 +152,7 @@ export class WrapperRequestActionFailed extends RequestFailedAction implements I
     public apiAction: EntityRequestAction | PaginatedAction,
     public requestType: ApiRequestTypes = 'fetch',
     public internalEndpointError?: InternalEndpointError,
-    public response?: any
+    public response?: unknown
   ) {
     super();
   }

@@ -1,5 +1,5 @@
-import {  Component, DebugElement, ElementRef, Renderer2, provideZonelessChangeDetection } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {  Component, type DebugElement, ElementRef, Renderer2, provideZonelessChangeDetection } from '@angular/core';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { By } from '@angular/platform-browser';
 import { ButtonBlurOnClickDirective } from './button-blur-on-click.directive';

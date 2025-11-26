@@ -2,16 +2,18 @@ import { DatePipe, TitleCasePipe } from '@angular/common';
 import {Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
-import { CardCell } from '../../../../../../core/src/shared/components/list/list.types';
-import { MetaCardComponent } from '../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
-import { MetaCardItemComponent } from '../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
-import { MetaCardKeyComponent } from '../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
-import { MetaCardTitleComponent } from '../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
-import { MetaCardValueComponent } from '../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
-import { MultilineTitleComponent } from '../../../../../../core/src/shared/components/multiline-title/multiline-title.component';
-import { TableCellEndpointNameComponent } from '../../../../../../core/src/shared/components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
-import { CustomIconComponent } from '../../../../../../core/src/shared/components/custom-material/custom-material.component';
-import { HelmRelease } from '../../workload.types';
+import {
+  CardCell,
+  MetaCardComponent,
+  MetaCardItemComponent,
+  MetaCardKeyComponent,
+  MetaCardTitleComponent,
+  MetaCardValueComponent,
+  MultilineTitleComponent,
+  TableCellEndpointNameComponent,
+  CustomIconComponent
+} from '@stratosui/core';
+import type { HelmRelease } from '../../workload.types';
 
 @Component({
   selector: 'app-helm-release-card',

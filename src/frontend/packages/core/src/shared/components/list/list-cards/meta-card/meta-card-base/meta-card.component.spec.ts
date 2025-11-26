@@ -1,5 +1,5 @@
 import { Component, ViewChild, provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Observable, of } from 'rxjs';
@@ -8,12 +8,12 @@ import {
   EntityMonitorFactory,
   EntitySchema,
   EntityServiceFactory,
-  IFavoriteMetadata,
+  type IFavoriteMetadata,
   StratosStatus,
   UserFavorite,
   UserFavoriteManager,
   entityCatalog,
-  TestEntityCatalog,
+  type TestEntityCatalog,
 } from '@stratosui/store';
 import { createBasicStoreModule, CoreTestingModule } from '@test-framework';
 import { generateGenericMockEntities } from '@test-framework/mock-catalog-entities';
@@ -41,7 +41,7 @@ class UserFavoriteManagerMock {
     return of(true);
   }
 
-  getFavorite() {
+  getFavorite(): UserFavorite<IFavoriteMetadata> | null {
     return null;
   }
 }
@@ -109,7 +109,7 @@ describe('MetaCardComponent', () => {
 
   beforeEach(() => {
     fixture = TestBed.createComponent(WrapperComponent);
-    entityMonitorFactory = TestBed.inject(EntityMonitorFactory) as any as EntityMonitorFactoryMock;
+    entityMonitorFactory = TestBed.inject(EntityMonitorFactory) as unknown as EntityMonitorFactoryMock;
     component = fixture.componentInstance.metaCard;
     element = fixture.debugElement.nativeElement;
     // Don't call detectChanges here - let each test control when it happens

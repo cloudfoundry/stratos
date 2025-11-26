@@ -1,8 +1,8 @@
 import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
-import { CfOrgSpaceLabelService } from '../../services/cf-org-space-label.service';
+import type { CfOrgSpaceLabelService } from '../../services/cf-org-space-label.service';
 
 @Component({
   selector: 'app-cf-org-space-links',

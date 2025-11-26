@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -18,7 +18,7 @@ import { EditAutoscalerPolicyStep1Component } from './edit-autoscaler-policy-ste
 describe('EditAutoscalerPolicyStep1Component', () => {
   let component: EditAutoscalerPolicyStep1Component;
   let fixture: ComponentFixture<EditAutoscalerPolicyStep1Component>;
-  let mockEntityServiceFactory: any;
+  let mockEntityServiceFactory: Partial<EntityServiceFactory>;
 
   beforeEach(() => {
     // Create a mock entity service that emits proper values

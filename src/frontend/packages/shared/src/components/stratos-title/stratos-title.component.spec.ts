@@ -1,8 +1,9 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, Component } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { StratosTitleComponent } from './stratos-title.component';
+import { ProductNameComponent } from '@stratosui/core';
 
 // Mock ProductNameComponent for testing
 @Component({
@@ -19,10 +20,13 @@ describe('StratosTitleComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
-      declarations: [StratosTitleComponent],
-      imports: [MockProductNameComponent],
+      imports: [StratosTitleComponent],
       teardown: { destroyAfterEach: false }
     })
+      .overrideComponent(StratosTitleComponent, {
+        remove: { imports: [ProductNameComponent] },
+        add: { imports: [MockProductNameComponent] }
+      })
       .compileComponents();
   });
 

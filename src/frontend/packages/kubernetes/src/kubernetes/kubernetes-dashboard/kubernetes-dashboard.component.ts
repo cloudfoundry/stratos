@@ -1,17 +1,16 @@
-import { Component, ElementRef, OnInit, Renderer2, ViewChild, signal, inject, ChangeDetectionStrategy, Injector } from '@angular/core';
+import { Component, ElementRef, type OnInit, Renderer2, ViewChild, signal, inject, ChangeDetectionStrategy, Injector } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import {
+import type {
   EndpointMissingMessageParts,
 } from '../../../../core/src/shared/components/endpoints-missing/endpoints-missing.component';
-import { IHeaderBreadcrumb } from '../../../../core/src/shared/components/page-header/page-header.types';
-import { PageHeaderModule } from '../../../../core/src/shared/components/page-header/page-header.module';
-import { LoadingPageComponent } from '@stratosui/core';
+import type { IHeaderBreadcrumb } from '../../../../core/src/shared/components/page-header/page-header.types';
+import { PageHeaderComponent, LoadingPageComponent } from '@stratosui/core';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { KubernetesService } from '../services/kubernetes.service';
@@ -25,7 +24,7 @@ import { KubernetesService } from '../services/kubernetes.service';
   imports: [
     CommonModule,
     RouterModule,
-    PageHeaderModule,
+    PageHeaderComponent,
     LoadingPageComponent
   ],
   providers: [
@@ -120,7 +119,7 @@ export class KubernetesDashboardTabComponent implements OnInit {
   checkPageLoad() {
     let hasLoaded = false;
     const errMsg = this.getStratosError();
-    if (!!errMsg) {
+    if (errMsg) {
       hasLoaded = true;
       this.errorMsg.set({
         firstLine: errMsg,
@@ -130,7 +129,7 @@ export class KubernetesDashboardTabComponent implements OnInit {
     }
 
     const kdToolbar = this.getKubeDashToolbar();
-    if (!!kdToolbar) {
+    if (kdToolbar) {
       hasLoaded = true;
     }
     if (this.getKubeDashLogin()) {
@@ -167,7 +166,7 @@ export class KubernetesDashboardTabComponent implements OnInit {
 
         h2 = h2.replace('%3F', '?');
         h2 = h2.replace('%3D', '=');
-        h2 = '#!' + h2;
+        h2 = `#!${h2}`;
         iframeWindow.location.hash = h2;
         this.href = '';
       }
@@ -184,7 +183,7 @@ export class KubernetesDashboardTabComponent implements OnInit {
 
     const height = this.expanded ? '48px' : '0px';
     const kdToolbar = this.getKubeDashToolbar();
-    if (!!kdToolbar) {
+    if (kdToolbar) {
       this.renderer.setStyle(kdToolbar, 'height', height);
       this.renderer.setStyle(kdToolbar, 'minHeight', height);
     }
@@ -192,10 +191,7 @@ export class KubernetesDashboardTabComponent implements OnInit {
 
   // Can we detect the dashboard's toolbar (implies dashboard UI has loaded)
   private getKubeDashToolbar() {
-    if (this.pKubeDash &&
-      this.pKubeDash.nativeElement &&
-      this.pKubeDash.nativeElement.contentDocument &&
-      this.pKubeDash.nativeElement.contentDocument.getElementsByTagName) {
+    if (this.pKubeDash?.nativeElement?.contentDocument?.getElementsByTagName) {
       const kdChrome = this.pKubeDash.nativeElement.contentDocument.getElementsByTagName('kd-chrome')[0];
       if (kdChrome) {
         const kdToolbar = kdChrome.getElementsByTagName('mat-toolbar')[0];
@@ -211,10 +207,7 @@ export class KubernetesDashboardTabComponent implements OnInit {
 
   // Can we detect the dashboard login page?
   private getKubeDashLogin(): boolean {
-    if (this.pKubeDash &&
-      this.pKubeDash.nativeElement &&
-      this.pKubeDash.nativeElement.contentDocument &&
-      this.pKubeDash.nativeElement.contentDocument.getElementsByTagName) {
+    if (this.pKubeDash?.nativeElement?.contentDocument?.getElementsByTagName) {
       const kdLogin = this.pKubeDash.nativeElement.contentDocument.getElementsByTagName('kd-login');
       return kdLogin.length === 1;
     }
@@ -223,10 +216,7 @@ export class KubernetesDashboardTabComponent implements OnInit {
 
   // Can we detect a Stratos error message page?
   private getStratosError(): string {
-    if (this.pKubeDash &&
-      this.pKubeDash.nativeElement &&
-      this.pKubeDash.nativeElement.contentDocument &&
-      this.pKubeDash.nativeElement.contentDocument.getElementsByTagName) {
+    if (this.pKubeDash?.nativeElement?.contentDocument?.getElementsByTagName) {
       const stratosError = this.pKubeDash.nativeElement.contentDocument.getElementsByTagName('stratos-error');
       if (stratosError.length === 1) {
         return stratosError[0].innerText;

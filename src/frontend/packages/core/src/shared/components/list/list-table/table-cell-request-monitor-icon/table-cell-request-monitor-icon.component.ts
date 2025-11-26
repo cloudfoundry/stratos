@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, type OnInit, type OnChanges, type SimpleChanges } from '@angular/core';
 
-import { getRowMetadata, EntitySchema, APIResource } from '@stratosui/store';
+import { getRowMetadata, type EntitySchema, type APIResource } from '@stratosui/store';
 
-import { AppMonitorComponentTypes, AppActionMonitorIconComponent } from '../../../app-action-monitor-icon/app-action-monitor-icon.component';
+import { type AppMonitorComponentTypes, AppActionMonitorIconComponent } from '../../../app-action-monitor-icon/app-action-monitor-icon.component';
 import { TableCellCustom } from '../../list.types';
 
 export interface ITableCellRequestMonitorIconConfig {
@@ -10,7 +10,7 @@ export interface ITableCellRequestMonitorIconConfig {
   schema: EntitySchema;
   monitorState?: AppMonitorComponentTypes;
   updateKey?: string;
-  getId?: (element: any) => string;
+  getId?: (element: unknown) => string;
 }
 
 interface Config<T> {
@@ -27,7 +27,7 @@ selector: 'app-table-cell-request-monitor-icon',
     AppActionMonitorIconComponent
 ]
 })
-export class TableCellRequestMonitorIconComponent<T = any> extends TableCellCustom<T, Config<T>> implements OnInit, OnChanges {
+export class TableCellRequestMonitorIconComponent<T = unknown> extends TableCellCustom<T, Config<T>> implements OnInit, OnChanges {
   public configObj!: ITableCellRequestMonitorIconConfig;
 
   public id!: string;
@@ -43,7 +43,7 @@ export class TableCellRequestMonitorIconComponent<T = any> extends TableCellCust
   ngOnChanges(changes: SimpleChanges) {
     // When row or config changes, update the configuration
     // This is necessary in zoneless mode with OnPush change detection
-    if (changes['row'] || changes['config']) {
+    if (changes.row || changes.config) {
       this.updateConfig();
     }
   }
@@ -51,10 +51,10 @@ export class TableCellRequestMonitorIconComponent<T = any> extends TableCellCust
   private updateConfig() {
     this.configObj = this.config.getConfig(this.row);
 
-    if (this.configObj && this.configObj.getId) {
+    if (this.configObj?.getId) {
       this.id = this.configObj.getId(this.row);
       /* tslint:disable-next-line:no-string-literal  */
-    } else if (this.row && (this.row as any)['metadata']) {
+    } else if (this.row && (this.row as Record<string, unknown>).metadata) {
       const row = this.row as unknown as APIResource;
       this.id = getRowMetadata(row);
     } else {

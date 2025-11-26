@@ -1,6 +1,6 @@
 import { provideHttpClient } from '@angular/common/http';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
@@ -76,7 +76,7 @@ describe('BackupEndpointsComponent', () => {
       hasEntities$: of(true),
       totalEntities$: of(1),
       isMultiAction$: of(false)
-    } as any);
+    } as ReturnType<typeof stratosEntityCatalog.endpoint.store.getAll.getPaginationService>);
   });
 
   beforeEach(() => {

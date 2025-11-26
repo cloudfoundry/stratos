@@ -1,21 +1,21 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import { ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { IApp, ISpace } from '../../../../../cf-api.types';
+import type { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import type { ITableColumn } from '@stratosui/core';
+import { ListViewTypes } from '@stratosui/core';
+import type { ListView } from '../../../../../../../store/src/actions/list.actions';
+import type { APIResource, GeneralEntityAppState } from '@stratosui/store';
+import type { IApp, ISpace } from '../../../../../cf-api.types';
 import { ActiveRouteCfCell } from '../../../../../features/cf/cf-page.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
-import { CfCellApp, CfCellAppsDataSource } from './cf-cell-apps-source';
+import { type CfCellApp, CfCellAppsDataSource } from './cf-cell-apps-source';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CfCellAppsListConfigService extends BaseCfListConfig<CfCellApp> {
-  private store = inject(Store<CFAppState>);
+  private store = inject(Store<GeneralEntityAppState>);
   private activeRouteCfCell = inject(ActiveRouteCfCell);
 
   dataSource: CfCellAppsDataSource;

@@ -1,10 +1,10 @@
-import { Directive, OnInit } from '@angular/core';
+import { Directive, type OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, of } from 'rxjs';
+import { type Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { StepOnNextFunction } from '@stratosui/core';
-import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
-import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
+import type { StepOnNextFunction } from '@stratosui/core';
+import type { AppAutoscalerPolicy, AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
+import type { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
 
 @Directive()
 export abstract class EditAutoscalerPolicyDirective implements OnInit {

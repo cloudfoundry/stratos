@@ -1,15 +1,15 @@
-import { Store } from '@ngrx/store';
+import type { Store } from '@ngrx/store';
 
-import { GET_ORGANIZATION, GetOrganization } from '../actions/organization.actions';
-import { ApiActionTypes, APIResponse } from '../../../store/src/actions/request.actions';
-import { GET_SPACE, GetSpace } from '../actions/space.actions';
-import { GeneralEntityAppState, GeneralRequestDataState } from '../../../store/src/app-state';
-import { ICFAction, EntityRequestAction } from '../../../store/src/types/request.types';
-import { ValidateEntityResult } from './entity-relations.types';
+import { GET_ORGANIZATION, type GetOrganization } from '../actions/organization.actions';
+import { ApiActionTypes, type APIResponse } from '../../../store/src/actions/request.actions';
+import { GET_SPACE, type GetSpace } from '../actions/space.actions';
+import type { GeneralEntityAppState, GeneralRequestDataState } from '../../../store/src/app-state';
+import type { ICFAction, EntityRequestAction } from '../../../store/src/types/request.types';
+import type { ValidateEntityResult } from './entity-relations.types';
 import { orgSpacePostProcess } from './processors/org-space-post-processor';
 
 export function validationPostProcessor(
-  store: Store<GeneralEntityAppState>,
+  store: Store,
   action: EntityRequestAction,
   apiResponse: APIResponse,
   allEntities: GeneralRequestDataState): ValidateEntityResult {
@@ -19,7 +19,7 @@ export function validationPostProcessor(
 }
 
 function apiAction(
-  store: Store<GeneralEntityAppState>,
+  store: Store,
   action: EntityRequestAction,
   apiResponse: APIResponse,
   allEntities: GeneralRequestDataState): ValidateEntityResult {

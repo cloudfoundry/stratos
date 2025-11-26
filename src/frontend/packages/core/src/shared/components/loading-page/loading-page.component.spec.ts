@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach } from 'vitest';
@@ -49,7 +49,7 @@ describe('LoadingPageComponent', () => {
 
   beforeEach(async () => {
     fixture = TestBed.createComponent(LoadingPageComponent);
-    entityFactory = TestBed.inject(EntityMonitorFactory) as any as EntityMonitorFactoryMock;
+    entityFactory = TestBed.inject(EntityMonitorFactory) as unknown as EntityMonitorFactoryMock;
     component = fixture.componentInstance;
     element = fixture.nativeElement;
   });

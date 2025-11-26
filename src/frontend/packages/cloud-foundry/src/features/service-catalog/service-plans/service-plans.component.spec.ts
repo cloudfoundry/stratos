@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -8,7 +8,7 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { EffectsModule } from '@ngrx/effects';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { EntityServiceFactory, EntityCatalogFeatureModule, CATALOGUE_ENTITIES, generateStratosEntities, entityCatalog, TestEntityCatalog } from '@stratosui/store';
+import { EntityServiceFactory, EntityCatalogFeatureModule, CATALOGUE_ENTITIES, generateStratosEntities, entityCatalog, type TestEntityCatalog } from '@stratosui/store';
 import { createBasicStoreModule } from '@test-framework';
 import { generateCFEntities } from '../../../cf-entity-generator';
 import { ServicesService } from '../services.service';

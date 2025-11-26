@@ -1,18 +1,18 @@
-import { DatePipe } from '@angular/common';
+import type { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf } from 'rxjs';
+import { type Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { CurrentUserPermissionsService, RowState, ListViewTypes } from '@stratosui/core';
-import { endpointEntityType, PaginationMonitorFactory, APIResource } from '@stratosui/store';
-import { CFAppState } from '../../../../cf-app-state';
+import { type CurrentUserPermissionsService, type RowState, ListViewTypes } from '@stratosui/core';
+import { endpointEntityType, type PaginationMonitorFactory, type APIResource, type GeneralEntityAppState } from '@stratosui/store';
+import type { CFAppState } from '../../../../cf-app-state';
 import { serviceBindingEntityType } from '../../../../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../../entity-relations/entity-relations.types';
-import { IServiceBinding } from '../../../../cf-api-svc.types';
+import type { IServiceBinding } from '../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { AppServiceBindingListConfigService } from '../../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
-import { ServiceActionHelperService } from '../../../../shared/data-services/service-action-helper.service';
+import type { ServiceActionHelperService } from '../../../../shared/data-services/service-action-helper.service';
 import { fetchTotalResults } from '../../../cf/cf.helpers';
 import { ApplicationService } from '../../application.service';
 
@@ -25,7 +25,7 @@ export class AppDeleteServiceInstancesListConfigService extends AppServiceBindin
   obsCache: { [serviceGuid: string]: Observable<RowState>, } = {};
 
   constructor(
-    store: Store<CFAppState>,
+    store: Store<GeneralEntityAppState>,
     appService: ApplicationService,
     datePipe: DatePipe,
     currentUserPermissionService: CurrentUserPermissionsService,

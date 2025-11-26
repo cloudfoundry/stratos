@@ -2,11 +2,11 @@ import { HttpRequest } from '@angular/common/http';
 
 import { getActions } from '../../../store/src/actions/action.helper';
 import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
+import type { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { serviceEntityType, servicePlanEntityType } from '../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
-import { createEntityRelationKey, EntityInlineParentAction } from '../entity-relations/entity-relations.types';
+import { createEntityRelationKey, type EntityInlineParentAction } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
 
 export class GetAllServices extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
@@ -27,7 +27,7 @@ export class GetAllServices extends CFStartAction implements PaginatedAction, En
   actions = getActions('Service', 'Get all Services');
   entity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceEntityType).getSchema();
   entityType = serviceEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   initialParams = {
     page: 1,
     'results-per-page': 100,
@@ -55,7 +55,7 @@ export class GetService extends CFStartAction implements EntityInlineParentActio
   actions = getActions('Service', 'Get Service');
   entity = cfEntityFactory(serviceEntityType);
   entityType = serviceEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
 }
 
 export class GetServicePlansForService extends CFStartAction implements PaginatedAction {
@@ -77,7 +77,7 @@ export class GetServicePlansForService extends CFStartAction implements Paginate
   actions = getActions('Service', 'Get Service plans');
   entity = [cfEntityFactory(servicePlanEntityType)];
   entityType = servicePlanEntityType;
-  options: HttpRequest<any>;
+  options: HttpRequest<unknown>;
   initialParams = {
     page: 1,
     'results-per-page': 100,

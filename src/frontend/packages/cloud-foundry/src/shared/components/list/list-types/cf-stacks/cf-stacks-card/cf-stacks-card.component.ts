@@ -10,7 +10,8 @@ import {
   MetaCardValueComponent,
   MultilineTitleComponent
 } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
+import type { APIResource } from '@stratosui/store';
+import type { IStack } from '../../../../../../cf-api.types';
 
 @Component({
   selector: 'app-cf-stacks-card',
@@ -28,4 +29,4 @@ import { APIResource } from '@stratosui/store';
     MultilineTitleComponent
   ]
 })
-export class CfStacksCardComponent extends CardCell<APIResource> { }
+export class CfStacksCardComponent extends CardCell<APIResource<IStack>> { }

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { combineLatest, type Observable, of as observableOf } from 'rxjs';
 import {
   combineLatest as combineLatestOperators,
   distinctUntilChanged,
@@ -15,10 +15,10 @@ import {
 
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { endpointEntityType } from '../../../../../../store/src/helpers/stratos-entity-factory';
-import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
+import type { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
 import { UsersRolesSetChanges } from '../../../../actions/users-roles.actions';
-import { IOrganization, ISpace } from '../../../../cf-api.types';
-import { CFAppState } from '../../../../cf-app-state';
+import type { IOrganization, ISpace } from '../../../../cf-api.types';
+import type { CFAppState } from '../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { organizationEntityType, spaceEntityType } from '../../../../cf-entity-types';
 import {
@@ -32,8 +32,8 @@ import {
   selectCfUsersRolesPicked,
   selectCfUsersRolesRoles,
 } from '../../../../store/selectors/cf-users-roles.selector';
-import { CfUser, IUserPermissionInOrg, OrgUserRoleNames, SpaceUserRoleNames, UserRoleInOrg, UserRoleInSpace } from '../../../../store/types/cf-user.types';
-import { CfRoleChange, CfUserRolesSelected } from '../../../../store/types/users-roles.types';
+import type { CfUser, IUserPermissionInOrg, OrgUserRoleNames, SpaceUserRoleNames, UserRoleInOrg, UserRoleInSpace } from '../../../../store/types/cf-user.types';
+import type { CfRoleChange, CfUserRolesSelected } from '../../../../store/types/users-roles.types';
 import { CfUserPermissionsChecker } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { canUpdateOrgSpaceRoles } from '../../cf.helpers';
 
@@ -76,7 +76,7 @@ export class CfRolesService {
   /**
    * Create an observable with an org/space guids and whether it can be edited by the connected user
    */
-  static canEditOrgOrSpace<T>(
+  static canEditOrgOrSpace<_T>(
     userPerms: CurrentUserPermissionsService,
     guid: string,
     cfGuid: string,
@@ -89,13 +89,13 @@ export class CfRolesService {
   }
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store,
     private cfUserService: CfUserService,
     private userPerms: CurrentUserPermissionsService,
   ) {
     this.existingRoles$ = this.store.select(selectCfUsersRolesPicked).pipe(
       combineLatestOperators(this.store.select(selectCfUsersRolesCf)),
-      filter(([users, cfGuid]) => !!cfGuid),
+      filter(([_users, cfGuid]) => !!cfGuid),
       switchMap(([users, cfGuid]) => this.populateRoles(cfGuid, users)),
       distinctUntilChanged(),
       publishReplay(1),
@@ -190,7 +190,7 @@ export class CfRolesService {
   private createRolesUserDiff(
     existingRoles: CfUserRolesSelected,
     newRoles: IUserPermissionInOrg,
-    changes: CfRoleChange[],
+    _changes: CfRoleChange[],
     user: CfUser,
     orgGuid: string
   ): CfRoleChange[] {

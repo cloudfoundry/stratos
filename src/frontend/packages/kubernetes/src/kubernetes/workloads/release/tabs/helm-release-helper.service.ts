@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, type Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { helmEntityCatalog } from '../../../../helm/helm-entity-catalog';
-import { ChartAttributes } from '../../../../helm/monocular/shared/models/chart';
-import { ChartMetadata } from '../../../../helm/store/helm.types';
+import type { Chart, ChartAttributes } from '../../../../helm/monocular/shared/models/chart';
+import type { ChartMetadata } from '../../../../helm/store/helm.types';
 import { kubeEntityCatalog } from '../../../kubernetes-entity-generator';
-import { ContainerStateCollection, KubernetesPod } from '../../../store/kube.types';
+import type { ContainerStateCollection, KubernetesPod } from '../../../store/kube.types';
 import { getHelmReleaseDetailsFromGuid } from '../../store/workloads-entity-factory';
-import {
+import type {
   HelmRelease,
   HelmReleaseChartData,
   HelmReleaseGraph,
@@ -17,6 +17,18 @@ import {
   HelmReleaseRevision,
 } from '../../workload.types';
 import { workloadsEntityCatalog } from '../../workloads-entity-catalog';
+
+// Type for entity service response
+interface EntityResponse<T> {
+  entity: T;
+}
+
+// Type for history entity response
+interface HistoryEntityResponse {
+  entity: {
+    revisions: HelmReleaseRevision[];
+  };
+}
 
 // Simple class to represent MAJOR.MINOR.REVISION version
 export class Version {
@@ -83,7 +95,7 @@ export class Version {
   }
 }
 
-type InternalHelmUpgrade = {
+export type InternalHelmUpgrade = {
   release: HelmRelease,
   upgrade: ChartAttributes,
   version: string,
@@ -120,10 +132,10 @@ export class HelmReleaseHelperService {
     );
 
     this.release$ = entityService.waitForEntity$.pipe(
-      map((item: any) => item.entity),
+      map((item: EntityResponse<HelmRelease>) => item.entity),
       map((item: HelmRelease) => {
         if (!item.chart.metadata.icon) {
-          const copy = JSON.parse(JSON.stringify(item));
+          const copy = JSON.parse(JSON.stringify(item)) as HelmRelease;
           copy.chart.metadata.icon = '/core/assets/custom/app_placeholder.svg';
           return copy;
         }
@@ -142,7 +154,7 @@ export class HelmReleaseHelperService {
     // Get helm release
     const guid = workloadsEntityCatalog.graph.actions.get(this.releaseTitle, this.endpointGuid).guid;
     return workloadsEntityCatalog.graph.store.getEntityMonitor(guid).entity$.pipe(
-      filter((graph: any) => !!graph)
+      filter((graph: HelmReleaseGraph) => !!graph)
     );
   }
 
@@ -150,25 +162,25 @@ export class HelmReleaseHelperService {
     // Get helm release
     const guid = workloadsEntityCatalog.resource.actions.get(this.releaseTitle, this.endpointGuid).guid;
     return workloadsEntityCatalog.resource.store.getEntityMonitor(guid).entity$.pipe(
-      filter((resources: any) => !!resources)
+      filter((resources: HelmReleaseResources) => !!resources)
     );
   }
 
   public fetchReleaseChartStats(): Observable<HelmReleaseChartData> {
-    return (kubeEntityCatalog.pod.store as any).getInWorkload.getPaginationMonitor(
+    return (kubeEntityCatalog.pod.store as { getInWorkload: { getPaginationMonitor: (endpointGuid: string, namespace: string, releaseTitle: string) => { currentPage$: Observable<KubernetesPod[]> } } }).getInWorkload.getPaginationMonitor(
       this.endpointGuid,
       this.namespace,
       this.releaseTitle
     ).currentPage$.pipe(
-      filter((pods: any) => !!pods),
-      map((pods: any) => this.mapPods(pods))
+      filter((pods: KubernetesPod[]) => !!pods),
+      map((pods: KubernetesPod[]) => this.mapPods(pods))
     );
   }
 
   // Check to see if a workload has updates available
   public getCharts() {
     return helmEntityCatalog.chart.store.getPaginationService().entities$.pipe(
-      filter((charts: any) => !!charts)
+      filter((charts: Chart[]) => !!charts)
     );
   }
 
@@ -179,12 +191,12 @@ export class HelmReleaseHelperService {
       this.endpointGuid,
       { namespace: this.namespace }
     ).waitForEntity$.pipe(
-      map((historyEntity: any) => historyEntity.entity.revisions)
+      map((historyEntity: HistoryEntityResponse) => historyEntity.entity.revisions)
     );
   }
 
   private mapPods(pods: KubernetesPod[]): HelmReleaseChartData {
-    const podPhases: { [phase: string]: number, } = {};
+    const podPhases: { [phase: string]: number } = {};
     const containers = {
       ready: {
         name: 'Ready',
@@ -197,7 +209,7 @@ export class HelmReleaseHelperService {
     };
 
     pods.forEach(pod => {
-      const status = pod.expandedStatus.status;
+      const status: string = pod.expandedStatus.status;
 
       if (!podPhases[status]) {
         podPhases[status] = 1;
@@ -227,29 +239,29 @@ export class HelmReleaseHelperService {
   }
 
   // tslint:disable-next-line:ban-types
-  private isContainerReady(state: ContainerStateCollection = {}): Boolean {
+  private isContainerReady(state: ContainerStateCollection = {}): boolean {
     if (state.running) {
       return true;
-    } else if (!!state.waiting) {
+    } else if (state.waiting) {
       return false;
-    } else if (!!state.terminated) {
+    } else if (state.terminated) {
       // Assume a failed state is not ready (covers completed init states), discard success state
       return state.terminated.exitCode === 0 ? null : false;
     }
     return false;
   }
 
-  public hasUpgrade(returnLatest = false): Observable<InternalHelmUpgrade> {
-    const updates = combineLatest(this.getCharts(), this.release$);
+  public hasUpgrade(returnLatest = false): Observable<InternalHelmUpgrade | null> {
+    const updates = combineLatest([this.getCharts(), this.release$]);
     return updates.pipe(
-      map(([charts, release]: [any, any]) => {
+      map(([charts, release]: [Chart[], HelmRelease]) => {
         let score = -1;
-        let match;
+        let match: InternalHelmUpgrade | undefined;
         for (const c of charts) {
           const matchScore = this.compareCharts(c.attributes, release.chart.metadata);
           if (matchScore > score) {
             score = matchScore;
-            if (c.relationships && c.relationships.latestChartVersion && c.relationships.latestChartVersion.data) {
+            if (c.relationships?.latestChartVersion?.data) {
               const latest = new Version(c.relationships.latestChartVersion.data.version);
               const current = new Version(release.chart.metadata.version);
               if (latest.isNewer(current)) {
@@ -257,7 +269,7 @@ export class HelmReleaseHelperService {
                   release,
                   upgrade: c.attributes,
                   version: c.relationships.latestChartVersion.data.version,
-                  monocularEndpointId: c.monocularEndpointId
+                  monocularEndpointId: c.monocularEndpointId || ''
                 };
               }
             }
@@ -271,14 +283,14 @@ export class HelmReleaseHelperService {
         // NOTE: If the helm repository is removed that we installed from, we won't be able to find the chart
         if (returnLatest) {
           // Need to check that the chart is probably the same
-          const releaseChart = charts.find((c: any) => this.compareCharts(c.attributes, release.chart.metadata) !== -1 &&
+          const releaseChart = charts.find((c: Chart) => this.compareCharts(c.attributes, release.chart.metadata) !== -1 &&
             c.relationships.latestChartVersion.data.version === release.chart.metadata.version);
           if (releaseChart) {
             return {
               release,
               upgrade: releaseChart.attributes,
               version: releaseChart.relationships.latestChartVersion.data.version,
-              monocularEndpointId: releaseChart.monocularEndpointId
+              monocularEndpointId: releaseChart.monocularEndpointId || ''
             };
           }
         }
@@ -320,7 +332,7 @@ export class HelmReleaseHelperService {
     // Must have at least one source in common
     let count = 0;
     a.sources.forEach(source => {
-      count += b.sources.findIndex((s) => s === source) === -1 ? 0 : 1;
+      count += b.sources.indexOf(source) === -1 ? 0 : 1;
     });
 
     return common + count * 100;

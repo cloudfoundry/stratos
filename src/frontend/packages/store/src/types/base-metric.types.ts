@@ -1,4 +1,4 @@
-import { MetricQueryConfig } from '../actions/metrics.actions';
+import type { MetricQueryConfig } from '../actions/metrics.actions';
 
 export enum MetricResultTypes {
   MATRIX = 'matrix',
@@ -7,16 +7,16 @@ export enum MetricResultTypes {
   STRING = 'string'
 }
 
-export interface IMetricsResponse<T = any> {
+export interface IMetricsResponse<T = unknown> {
   status: string;
   data: IMetrics<T>;
 }
 
-export interface IMetricsData<T = any> {
+export interface IMetricsData<T = unknown> {
   resultType: string;
   result: [T];
 }
-export interface IMetrics<T = any> {
+export interface IMetrics<T = unknown> {
   query: MetricQueryConfig;
   windowValue: string;
   data: IMetricsData<T>;
@@ -28,11 +28,11 @@ interface IVectorResult<T> {
 // [unixTimeStamp, sampleValue]
 export type IMetricSample = [number, string];
 
-export interface IMetricMatrixResult<T = any> extends IVectorResult<T> {
+export interface IMetricMatrixResult<T = unknown> extends IVectorResult<T> {
   values: IMetricSample[];
 }
 
-export interface IMetricVectorResult<T = any> extends IVectorResult<T> {
+export interface IMetricVectorResult<T = unknown> extends IVectorResult<T> {
   value: IMetricSample;
 }
 
@@ -40,9 +40,9 @@ export interface IMetricVectorResult<T = any> extends IVectorResult<T> {
 export type IMetricScalarResult = IMetricSample[];
 export type IMetricStringsResult = IMetricSample[];
 
-export interface ChartSeries<T = any> {
+export interface ChartSeries<T = unknown> {
   name: string;
-  metadata: any;
+  metadata: Record<string, unknown>;
   series: {
     name: string | Date;
     value: T;
