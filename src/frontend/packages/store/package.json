@@ -16,8 +16,8 @@
     }
   },
   "peerDependencies": {
-    "@angular/common": "20.3.9",
-    "@angular/core": "20.3.9"
+    "@angular/common": "^21.0.0",
+    "@angular/core": "^21.0.0"
   },
   "description": "Stratos Store",
   "license": "Apache-2.0",

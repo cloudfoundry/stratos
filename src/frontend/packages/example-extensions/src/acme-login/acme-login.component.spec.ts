@@ -27,7 +27,7 @@ describe('AcmeLoginComponent', () => {
         NoopAnimationsModule,
         StoreModule.forRoot(appReducers),
       ]
-    }),
+    })
       .compileComponents();
   });
 

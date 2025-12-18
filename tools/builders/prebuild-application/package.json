@@ -4,14 +4,26 @@
   "description": "Custom Angular builders with prebuild script execution",
   "main": "dist/index.js",
   "builders": "builders.json",
+  "files": [
+    "dist",
+    "src",
+    "builders.json",
+    "tsconfig.json"
+  ],
   "dependencies": {
-    "@angular-devkit/architect": "^0.2003.9",
-    "@angular-devkit/core": "^20.3.9",
-    "@angular-devkit/build-angular": "^20.3.9",
-    "rxjs": "^7.8.2",
     "glob": "^11.0.0"
   },
+  "peerDependencies": {
+    "@angular-devkit/architect": "^0.2100.0",
+    "@angular-devkit/core": "^21.0.0",
+    "@angular-devkit/build-angular": "^21.0.0",
+    "rxjs": "^7.8.0"
+  },
   "devDependencies": {
+    "@angular-devkit/architect": "^0.2100.3",
+    "@angular-devkit/core": "^21.0.3",
+    "@angular-devkit/build-angular": "^21.0.3",
+    "rxjs": "^7.8.2",
     "@types/node": "^24.2.1"
   },
   "scripts": {

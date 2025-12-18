@@ -22,13 +22,13 @@ export class TileGroupComponent implements OnInit, AfterContentInit {
 
   constructor() { }
 
-  @HostBinding('class.tile-group-gutters') private hasGutters = true;
+  @HostBinding('class.tile-group-gutters') hasGutters = true;
 
-  @HostBinding('class.tile-group-6-cols') private isSixColumn = false;
-  @HostBinding('class.tile-group-4-cols') private isFourColumn = false;
-  @HostBinding('class.tile-group-3-cols') private isThreeColumn = false;
-  @HostBinding('class.tile-group-2-cols') private isTwoColumn = false;
-  @HostBinding('class.tile-group-1-cols') private isOneColumn = false;
+  @HostBinding('class.tile-group-6-cols') isSixColumn = false;
+  @HostBinding('class.tile-group-4-cols') isFourColumn = false;
+  @HostBinding('class.tile-group-3-cols') isThreeColumn = false;
+  @HostBinding('class.tile-group-2-cols') isTwoColumn = false;
+  @HostBinding('class.tile-group-1-cols') isOneColumn = false;
 
   @ContentChildren(TileComponent) tiles!: QueryList<TileComponent>;
 

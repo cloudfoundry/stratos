@@ -10,13 +10,13 @@
     "tsc": "tsc"
   },
   "dependencies": {
-    "@angular-devkit/build-angular": "20.3.8",
-    "@angular-devkit/core": "20.3.8",
-    "@angular-devkit/schematics": "20.3.8",
-    "typescript": "5.9.2"
+    "@angular-devkit/build-angular": "21.0.3",
+    "@angular-devkit/core": "21.0.3",
+    "@angular-devkit/schematics": "21.0.3",
+    "typescript": "5.8.3"
   },
   "devDependencies": {
-    "@angular-devkit/architect": "0.2003.8"
+    "@angular-devkit/architect": "0.2100.3"
   },
   "builders": "builders/builders.json",
   "schematics": "./schematics/collection.json"

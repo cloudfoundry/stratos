@@ -22,8 +22,7 @@ describe('AppActionExtensionComponent', () => {
         SharedModule,
         createBasicStoreModule(),
       ]
-    }),
-    .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

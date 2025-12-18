@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { ApplicationRef, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
@@ -23,7 +23,6 @@ export class UAASetupEffect {
   constructor(
     private http: HttpClient,
     private actions$: Actions,
-    private appRef: ApplicationRef
   ) { }
 
   getSetupScopesUrl = '/pp/v1/setup/check';
@@ -37,11 +36,9 @@ export class UAASetupEffect {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       }).pipe(
         map(data => {
-          this.appRef.tick();
           return new SetupSuccess(data);
         }),
         catchError((err, caught) => {
-          this.appRef.tick();
           return [new SetupFailed(`Failed to save configuration. ${this.fetchError(err)}`)];
         })
       );
@@ -55,11 +52,9 @@ export class UAASetupEffect {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       }).pipe(
         map(data => {
-          this.appRef.tick();
           return new SetupSuccess(data);
         }),
         catchError((err, caught) => {
-          this.appRef.tick();
           return [new SetupFailed(`Failed to setup Administrator scope. ${this.fetchError(err)}`)];
         })
       );

@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { ApplicationRef, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { environment } from '@stratosui/core';
@@ -41,8 +41,7 @@ export class WorkloadsEffects {
   constructor(
     private httpClient: HttpClient,
     private actions$: Actions,
-    private store: Store<AppState>,
-    private appRef: ApplicationRef
+    private store: Store<AppState>
   ) { }
 
   proxyAPIVersion = environment.proxyAPIVersion;
@@ -146,14 +145,12 @@ export class WorkloadsEffects {
         { namespace: action.namespace });
       return this.httpClient.post(url, action.values).pipe(
         mergeMap(() => {
-          this.appRef.tick();
           return [
             fetchAction,
             new WrapperRequestActionSuccess(null, action)
           ];
         }),
         catchError(error => {
-          this.appRef.tick();
           const { status, message } = HelmEffects.createHelmError(error);
           const errorMessage = `Failed to upgrade helm release: ${message}`;
           return [
@@ -197,11 +194,9 @@ export class WorkloadsEffects {
     };
     return this.httpClient.get(url, requestArgs).pipe(
       mergeMap((response: any) => {
-        this.appRef.tick();
         return [new WrapperRequestActionSuccess(mapResult(response), action)];
       }),
       catchError(error => {
-        this.appRef.tick();
         const { status, message } = HelmEffects.createHelmError(error);
         const errorMessage = `Failed to fetch helm data: ${message}`;
         return [

@@ -1,4 +1,4 @@
-import { ApplicationRef, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { EMPTY } from 'rxjs';
@@ -27,8 +27,7 @@ import { validateEntityRelations } from '../../entity-relations/entity-relations
 export class CfValidateEffects {
   constructor(
     private actions$: Actions,
-    private store: Store<CFAppState>,
-    private appRef: ApplicationRef
+    private store: Store<CFAppState>
   ) { }
 
   /**
@@ -81,7 +80,6 @@ export class CfValidateEffects {
           }));
         }),
         mergeMap(({ validatedApiResponse, independentUpdates, validation }) => {
-          this.appRef.tick();
           return [new CfValidateEntitiesComplete(
             apiAction,
             validatedApiResponse,
@@ -94,7 +92,6 @@ export class CfValidateEffects {
         .pipe(catchError((error: unknown): import('rxjs').Observable<never> => {
           console.warn(`Entity validation process failed`, error);
           this.update(apiAction, false, error instanceof Error ? error.message : String(error));
-          this.appRef.tick();
           return EMPTY;
         }));
     })
@@ -108,7 +105,6 @@ export class CfValidateEffects {
       if (completeAction.validationResult.started && completeAction.independentUpdates) {
         this.update(completeAction.apiAction, false, null);
       }
-      this.appRef.tick();
       return actions;
     })));
 

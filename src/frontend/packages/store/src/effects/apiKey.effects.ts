@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { ApplicationRef, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap, switchMap } from 'rxjs/operators';
@@ -31,7 +31,6 @@ export class ApiKeyEffect {
     private http: HttpClient,
     private actions$: Actions,
     private store: Store<InternalAppState>,
-    private appRef: ApplicationRef
   ) {
   }
 
@@ -59,12 +58,10 @@ export class ApiKeyEffect {
             result: [guid]
           };
           this.store.dispatch(new WrapperRequestActionSuccess(response, action, actionType));
-          this.appRef.tick();
           return [];
         }),
         catchError((err: any): any[] => {
           this.store.dispatch(new WrapperRequestActionFailed(this.convertErrorToString(err), action, actionType));
-          this.appRef.tick();
           return [];
         })
       );
@@ -87,12 +84,10 @@ export class ApiKeyEffect {
       }).pipe(
         switchMap((): any[] => {
           this.store.dispatch(new WrapperRequestActionSuccess(null, action, actionType));
-          this.appRef.tick();
           return [];
         }),
         catchError((err: any): any[] => {
           this.store.dispatch(new WrapperRequestActionFailed(this.convertErrorToString(err), action, actionType));
-          this.appRef.tick();
           return [];
         })
       );
@@ -122,12 +117,10 @@ export class ApiKeyEffect {
           });
 
           this.store.dispatch(new WrapperRequestActionSuccess(response, action, actionType));
-          this.appRef.tick();
           return [];
         }),
         catchError((err: any): any[] => {
           this.store.dispatch(new WrapperRequestActionFailed(this.convertErrorToString(err), action, actionType));
-          this.appRef.tick();
           return [];
         })
       );

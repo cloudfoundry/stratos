@@ -1,5 +1,5 @@
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
-import { ApplicationRef, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -52,7 +52,6 @@ export class EndpointsEffect {
     private http: HttpClient,
     private actions$: Actions,
     private store: Store<DispatchOnlyAppState>,
-    private appRef: ApplicationRef
   ) { }
 
    getEndpoint$ = createEffect(() => this.actions$.pipe(
@@ -98,7 +97,6 @@ export class EndpointsEffect {
 
       // Order is important. Need to ensure data is written (none cf action success) before we notify everything is loaded
       // (endpoint success)
-      this.appRef.tick();
       return [
         new WrapperRequestActionSuccess(mappedData, associatedAction, 'fetch'),
         new GetAllEndpointsSuccess(mappedData, isLogin),
@@ -318,7 +316,6 @@ export class EndpointsEffect {
         }
 
         actions.push(new WrapperRequestActionSuccess(response, apiAction, apiActionType, null, null, endpoint ? endpoint.guid : null));
-        this.appRef.tick();
         return actions;
       }
       ),
@@ -329,7 +326,6 @@ export class EndpointsEffect {
         }
         const errorMessage = errorMessageHandler ? errorMessageHandler(e) : 'Could not perform action';
         actions.push(new WrapperRequestActionFailed(errorMessage, apiAction, apiActionType));
-        this.appRef.tick();
         return actions;
       }));
   }

@@ -1,4 +1,4 @@
-import { ApplicationRef, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { mergeMap } from 'rxjs/operators';
 
@@ -11,8 +11,7 @@ import { cfEntityCatalog } from '../../cf-entity-catalog';
 export class UpdateAppEffects {
 
   constructor(
-    private actions$: Actions,
-    private appRef: ApplicationRef
+    private actions$: Actions
   ) {
   }
 
@@ -48,7 +47,6 @@ export class UpdateAppEffects {
         }
       });
 
-      this.appRef.tick();
       return actions;
     })));
 }

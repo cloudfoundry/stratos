@@ -1,4 +1,4 @@
-import { ApplicationRef, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { map } from 'rxjs/operators';
 
@@ -14,7 +14,6 @@ export class DashboardEffect {
   constructor(
     private actions$: Actions,
     private themeService: ThemeService,
-    private appRef: ApplicationRef,
   ) { }
 
    hydrate$ = createEffect(() => this.actions$.pipe(
@@ -22,7 +21,6 @@ export class DashboardEffect {
     map(() => {
       // Ensure the previous theme is applied after dashboard is hydrated
       this.themeService.initialize();
-      this.appRef.tick();
     })
   ), { dispatch: false });
 }

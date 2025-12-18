@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { ApplicationRef, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, flatMap, mergeMap } from 'rxjs/operators';
@@ -23,8 +23,7 @@ export class CloudFoundryEffects {
   constructor(
     private http: HttpClient,
     private actions$: Actions,
-    private store: Store<CFAppState>,
-    private appRef: ApplicationRef
+    private store: Store<CFAppState>
   ) { }
 
   
@@ -54,13 +53,11 @@ export class CloudFoundryEffects {
               metadata: {}
             };
             mappedData.result.push(id);
-            this.appRef.tick();
             return [
               new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
           }),
           catchError(error => {
-            this.appRef.tick();
             return [
               new WrapperRequestActionFailed(error.message, action, actionType, {
                 endpointIds: [action.guid],

@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { ApplicationRef, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
@@ -18,7 +18,6 @@ export class SystemEffects {
     private httpClient: HttpClient,
     private actions$: Actions,
     private store: Store<InternalAppState>,
-    private appRef: ApplicationRef,
   ) { }
 
    getInfo$ = createEffect(() => this.actions$.pipe(
@@ -32,13 +31,11 @@ export class SystemEffects {
       this.store.dispatch(new StartRequestAction(associatedAction, 'fetch'));
       return this.httpClient.get('/pp/v1/info').pipe(
         mergeMap((info: SystemInfo) => {
-          this.appRef.tick();
           return [
             new GetSystemSuccess(info, action.login, associatedAction),
             new WrapperRequestActionSuccess({ entities: {}, result: [] }, action)
           ];
         }), catchError((e) => {
-          this.appRef.tick();
           return [
             { type: action.actions[2] },
             new WrapperRequestActionFailed('Could not fetch system info', action)

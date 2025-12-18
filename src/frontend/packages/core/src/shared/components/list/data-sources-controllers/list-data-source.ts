@@ -480,8 +480,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       const isSelecting = multiMode && currentSelection.size > 0;
       this._isSelecting.set(isSelecting);
       this._isSelectingSubject.next(isSelecting);
-      // ZONELESS: Trigger change detection after async selection state update
-      this.appRef?.tick();
+      // ZONELESS: Signal update triggers automatic change detection
     });
   }
 
@@ -520,8 +519,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       const isSelecting = currentSelection.size > 0;
       this._isSelecting.set(isSelecting);
       this._isSelectingSubject.next(isSelecting);
-      // ZONELESS: Trigger change detection after async bulk selection update
-      this.appRef?.tick();
+      // ZONELESS: Signal update triggers automatic change detection
     });
 
   }

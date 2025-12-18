@@ -1,4 +1,4 @@
-import { Injectable, ComponentRef, ApplicationRef, Injector, EmbeddedViewRef, createComponent, EnvironmentInjector, Type, InjectionToken } from '@angular/core';
+import { Injectable, ComponentRef, Injector, EmbeddedViewRef, createComponent, EnvironmentInjector, Type, InjectionToken, ApplicationRef } from '@angular/core';
 import { Subject, Observable } from 'rxjs';
 
 // Define the MAT_DIALOG_DATA token for providing dialog data
@@ -157,8 +157,6 @@ export class TailwindDialogService {
       this.setupFocusTrap(dialogContainer);
       this.focusFirstElement(dialogContainer);
       dialogRef._emitOpened();
-      // ZONELESS: Trigger change detection after dialog is fully opened
-      this.appRef.tick();
     }, 0);
 
     return dialogRef;
@@ -463,8 +461,6 @@ export class TailwindDialogService {
       if (dialogContainer.parentNode) {
         dialogContainer.parentNode.removeChild(dialogContainer);
       }
-      // ZONELESS: Trigger change detection after dialog removal
-      this.appRef.tick();
     }, 300);
   }
 

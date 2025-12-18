@@ -1,4 +1,4 @@
-import { ApplicationRef, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
@@ -22,7 +22,6 @@ export class PaginationEffects {
   constructor(
     private actions$: Actions,
     private store: Store<AppState>,
-    private appRef: ApplicationRef,
   ) { }
 
    clearPaginationOnParamChange$ = createEffect(() => this.actions$.pipe(
@@ -31,7 +30,6 @@ export class PaginationEffects {
       const addAction = action as AddParams;
       if (!addAction.keepPages) {
         this.store.dispatch(new ResetPagination(action.entityConfig, action.paginationKey));
-        this.appRef.tick();
       }
     })), { dispatch: false });
 }

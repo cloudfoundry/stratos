@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { ApplicationRef, Injectable, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { ClearPaginationOfEntity, ClearPaginationOfType } from '@stratosui/store';
@@ -107,7 +107,6 @@ export class KubernetesEffects {
   private http = inject(HttpClient);
   private actions$ = inject(Actions);
   private store = inject(Store<AppState>);
-  private appRef = inject(ApplicationRef);
 
   
   fetchDashboardInfo$ = createEffect(() => this.actions$.pipe(
@@ -134,12 +133,10 @@ export class KubernetesEffects {
           };
           result.entities[dashboardEntityConfig.entityKey][action.guid] = status;
           result.result.push(action.guid);
-          this.appRef.tick();
           return [
             new WrapperRequestActionSuccess(result, action)
           ];
         }), catchError(error => {
-          this.appRef.tick();
           return [
             new WrapperRequestActionFailed(error.message, action, 'fetch', {
               endpointIds: [action.kubeGuid],
@@ -432,13 +429,11 @@ export class KubernetesEffects {
         //   }
         // });
 
-        this.appRef.tick();
         return [
           new WrapperRequestActionSuccess(processesData, action)
         ];
       }),
       catchError(error => {
-        this.appRef.tick();
         const { status, message } = this.createKubeError(error);
         return [
           new WrapperRequestActionFailed(message, action, 'fetch', {
@@ -487,11 +482,9 @@ export class KubernetesEffects {
           if (requestType === 'create') {
             actions.push(new ClearPaginationOfType(action));
           }
-          this.appRef.tick();
           return actions;
         }),
         catchError(error => {
-          this.appRef.tick();
           const { status, message } = this.createKubeError(error);
           return [
             new WrapperRequestActionFailed(message, action, requestType, {
@@ -533,11 +526,9 @@ export class KubernetesEffects {
           ];
           // actions.push(new ClearPaginationOfType(action));
           actions.push(new ClearPaginationOfEntity(action, action.guid));
-          this.appRef.tick();
           return actions;
         }),
         catchError(error => {
-          this.appRef.tick();
           const { status, message } = this.createKubeError(error);
           return [
             new WrapperRequestActionFailed(message, action, 'delete', {

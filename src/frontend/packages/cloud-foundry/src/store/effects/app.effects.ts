@@ -1,4 +1,4 @@
-import { ApplicationRef, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { first, map } from 'rxjs/operators';
@@ -20,15 +20,13 @@ export class AppEffects {
 
   constructor(
     private actions$: Actions,
-    private store: Store<EndpointOnlyAppState>,
-    private appRef: ApplicationRef
+    private store: Store<EndpointOnlyAppState>
   ) { }
 
    updateSummary$ = createEffect(() => this.actions$.pipe(
     ofType<APISuccessOrFailedAction>(ASSIGN_ROUTE_SUCCESS),
     map(action => {
       cfEntityCatalog.appSummary.api.get(action.apiAction.guid, action.apiAction.endpointGuid);
-      this.appRef.tick();
     }),
   ), { dispatch: false });
 
@@ -46,10 +44,7 @@ export class AppEffects {
           if (hasMetrics) {
             this.store.dispatch(createAppInstancesMetricAction(updateAction.guid, updateAction.endpointGuid));
           }
-          this.appRef.tick();
         });
-      } else {
-        this.appRef.tick();
       }
     }),
   ), { dispatch: false });

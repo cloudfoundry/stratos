@@ -22,8 +22,7 @@ describe('AppTabExtensionComponent', () => {
         SharedModule,
         createBasicStoreModule(),
       ]
-    }),
-    .compileComponents();
+    }).compileComponents();
   });
 
   beforeEach(() => {

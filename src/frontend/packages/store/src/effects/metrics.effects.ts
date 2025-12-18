@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { ApplicationRef, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, map, mergeMap } from 'rxjs/operators';
@@ -25,7 +25,6 @@ export class MetricsEffect {
     private actions$: Actions,
     private httpClient: HttpClient,
     private store: Store<DispatchOnlyAppState>,
-    private appRef: ApplicationRef
   ) { }
 
    metrics$ = createEffect(() => this.actions$.pipe(
@@ -47,7 +46,6 @@ export class MetricsEffect {
               data: metric.data
             }
           } : {};
-          this.appRef.tick();
           return new WrapperRequestActionSuccess(
             {
               entities: {
@@ -59,7 +57,6 @@ export class MetricsEffect {
           );
         })
       ).pipe(catchError((errObservable: any) => {
-        this.appRef.tick();
         return [
           new WrapperRequestActionFailed(
             errObservable.message,
@@ -83,11 +80,9 @@ export class MetricsEffect {
       }).pipe(
         map((metrics: { [cfguid: string]: IMetricsResponse }) => {
           const metric = metrics[action.endpointGuid];
-          this.appRef.tick();
           return new MetricsAPIActionSuccess(action.endpointGuid, metric, action.queryType);
         })
       ).pipe(catchError((errObservable: any) => {
-        this.appRef.tick();
         return [
           {
             type: METRIC_API_FAILED,

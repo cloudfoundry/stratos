@@ -1,4 +1,4 @@
-import { ApplicationRef, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { map } from 'rxjs/operators';
 
@@ -13,14 +13,12 @@ import { cfEntityCatalog } from '../../cf-entity-catalog';
 export class AppVariablesEffect {
 
   constructor(
-    private actions$: Actions,
-    private appRef: ApplicationRef
+    private actions$: Actions
   ) { }
 
    apiRequestStart$ = createEffect(() => this.actions$.pipe(
     ofType<AppVariablesUpdate>(AppVariables.UPDATE),
     map((apiAction: AppVariablesUpdate) => {
-      this.appRef.tick();
       return cfEntityCatalog.application.actions.update(
         apiAction.appGuid,
         apiAction.cfGuid,
