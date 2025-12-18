@@ -1,6 +1,6 @@
 import CopyPlugin from 'copy-webpack-plugin';
 
-import { StratosConfig } from '../lib/stratos.config';
+import { StratosConfig } from '../lib/stratos.config.js';
 
 // Handler ensures all assets from packages are copied as part of the build
 export class AssetsHandler {

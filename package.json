@@ -21,6 +21,7 @@
     "build-cf": "ng build stratos --configuration production",
     "prebuild-dev": "node build/build-orchestrator.js",
     "build-dev": "ng build stratos --configuration development",
+    "build-builders": "cd tools/builders/prebuild-application && bun install && bun run build && mkdir -p ../../node_modules/@stratos/builders && cp -r dist ../../node_modules/@stratos/builders/",
     "prebuild-ui": "bun run build && bun run prebuild-zip",
     "prebuild-zip": "node build/prebuild-zip.js",
     "pre-build-only": "node build/build-orchestrator.js",
@@ -91,7 +92,8 @@
     "xml2js": "0.5.0",
     "postcss": "8.4.31",
     "request": "npm:@cypress/request@^3.0.0",
-    "ajv": "8.17.1"
+    "ajv": "8.17.1",
+    "typescript": "^5.8.3"
   },
   "dependencies": {
     "@angular/animations": "20.3.9",

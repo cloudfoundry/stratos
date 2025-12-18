@@ -1,7 +1,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
-import { StratosConfig } from './lib/stratos.config';
+import { StratosConfig } from './lib/stratos.config.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Generate the go file to include the required backend plugins
 const sConfig = new StratosConfig(__dirname, {}, false);

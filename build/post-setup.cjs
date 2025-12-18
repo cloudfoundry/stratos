@@ -70,30 +70,91 @@ function checkDevkitBuild() {
 }
 
 function buildCustomBuilders() {
+  log('Building custom Angular builders...');
   const buildersDir = path.join(ROOT_DIR, 'tools/builders/prebuild-application');
-  const distDir = path.join(buildersDir, 'dist');
+  const buildersNodeModules = path.join(ROOT_DIR, 'node_modules/@stratos/builders');
+  const buildersDist = path.join(buildersNodeModules, 'dist');
 
   // Check if already built
-  if (fs.existsSync(distDir)) {
+  if (fs.existsSync(buildersDist) && fs.readdirSync(buildersDist).length > 0) {
     log('✓ Custom builders already built');
-    return;
+    return true;
   }
 
-  if (!fs.existsSync(buildersDir)) {
-    log('⚠️  Custom builders directory not found');
-    return;
-  }
-
-  log('Building custom Angular builders...');
   try {
-    execSync('npm run build', {
+    // Install dependencies
+    log('  Installing builder dependencies...');
+    execSync('bun install', {
       cwd: buildersDir,
       stdio: 'inherit'
     });
-    log('✓ Custom builders compiled successfully');
+
+    // Build TypeScript
+    log('  Compiling TypeScript...');
+    execSync('bun run build', {
+      cwd: buildersDir,
+      stdio: 'inherit'
+    });
+
+    // Copy dist to node_modules
+    const distSrc = path.join(buildersDir, 'dist');
+    if (fs.existsSync(distSrc)) {
+      fs.cpSync(distSrc, buildersDist, { recursive: true });
+      log('✓ Custom builders built successfully');
+      return true;
+    } else {
+      error('Build succeeded but dist directory not found');
+      return false;
+    }
   } catch (err) {
     error(`Failed to build custom builders: ${err.message}`);
-    log('   The build may fail. Try running: cd tools/builders/prebuild-application && npm run build');
+    return false;
+  }
+}
+
+function generateExtensionModule() {
+  log('Generating extension module...');
+  const extensionGenPath = path.join(ROOT_DIR, 'build/extension-generator.mjs');
+  const extensionModulePath = path.join(ROOT_DIR, 'src/frontend/packages/core/src/_custom-import.module.ts');
+
+  // Check if already exists
+  if (fs.existsSync(extensionModulePath)) {
+    log('✓ Extension module already exists');
+    return true;
+  }
+
+  if (!fs.existsSync(extensionGenPath)) {
+    log('⚠️  Extension generator not found, will be generated during build');
+    return false;
+  }
+
+  return runScript('extension-generator', extensionGenPath);
+}
+
+function applySkipWorktreeFlags() {
+  log('Applying skip-worktree flags to build-modified files...');
+  const filesToSkip = [
+    'src/frontend/packages/core/src/index.html'
+  ];
+
+  let appliedCount = 0;
+  for (const file of filesToSkip) {
+    const filePath = path.join(ROOT_DIR, file);
+    if (fs.existsSync(filePath)) {
+      try {
+        execSync(`git update-index --skip-worktree "${file}"`, {
+          cwd: ROOT_DIR,
+          stdio: 'pipe'
+        });
+        appliedCount++;
+      } catch (err) {
+        // Silently ignore errors (file may not be tracked or already has flag)
+      }
+    }
+  }
+
+  if (appliedCount > 0) {
+    log(`✓ Applied skip-worktree flags to ${appliedCount} file(s)`);
   }
 }
 
@@ -104,7 +165,7 @@ function main() {
   // Check devkit
   checkDevkitBuild();
 
-  // Build custom builders
+  // Build custom Angular builders
   buildCustomBuilders();
 
   // Run dev-setup
@@ -125,6 +186,9 @@ function main() {
     runScript('store-git-metadata', storeMetadataPath);
   }
 
+  // Generate extension module
+  generateExtensionModule();
+
   // Run prepare-backend
   const prepareBackendPath = path.join(ROOT_DIR, 'dist-devkit/backend.js');
   if (fs.existsSync(prepareBackendPath)) {
@@ -136,8 +200,8 @@ function main() {
   // Create proxy config if needed
   createProxyConfig();
 
-  // Check extension module
-  checkExtensionModule();
+  // Apply skip-worktree flags to build-modified files
+  applySkipWorktreeFlags();
 
   log('');
   log('✅ Post-install setup complete!');

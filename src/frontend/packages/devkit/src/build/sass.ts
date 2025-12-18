@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { StratosConfig } from '../lib/stratos.config';
+import { StratosConfig } from '../lib/stratos.config.js';
 
 /**
  * Sass Handler

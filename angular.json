@@ -33,7 +33,7 @@
               },
               {
                 "name": "Generate custom imports",
-                "script": "sh -c 'mv build/extension-generator.js build/extension-generator.cjs && node build/extension-generator.cjs && mv build/extension-generator.cjs build/extension-generator.js'",
+                "script": "node build/extension-generator.mjs",
                 "phase": 2,
                 "cache": true,
                 "cacheKey": ["custom-src/**/*", "src/frontend/packages/core/custom-extensions.json"],
@@ -42,10 +42,10 @@
               },
               {
                 "name": "Prepare backend",
-                "script": "sh -c 'mv dist-devkit/backend.js dist-devkit/backend.cjs 2>/dev/null || true && node dist-devkit/backend.cjs && mv dist-devkit/backend.cjs dist-devkit/backend.js 2>/dev/null || true'",
+                "script": "node dist-devkit/src/backend.js",
                 "phase": 2,
                 "cache": true,
-                "cacheKey": ["dist-devkit/backend.js", "src/jetstream/**/*.go"],
+                "cacheKey": ["dist-devkit/src/backend.js", "src/jetstream/**/*.go"],
                 "timeout": 60000,
                 "required": false
               }

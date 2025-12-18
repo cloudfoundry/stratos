@@ -1,7 +1,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
-import { StratosConfig } from '../lib/stratos.config';
+import { StratosConfig } from '../lib/stratos.config.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /**
  * Transforms the index.html file

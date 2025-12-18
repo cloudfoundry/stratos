@@ -2,9 +2,9 @@ import * as fs from 'fs';
 import * as yaml from 'js-yaml';
 import * as path from 'path';
 
-import { GitMetadata } from './git.metadata';
-import { Logger } from './log';
-import { AssetMetadata, DEFAULT_THEME, ExtensionMetadata, PackageInfo, Packages, ThemingMetadata } from './packages';
+import { GitMetadata } from './git.metadata.js';
+import { Logger } from './log.js';
+import { AssetMetadata, DEFAULT_THEME, ExtensionMetadata, PackageInfo, Packages, ThemingMetadata } from './packages.js';
 
 /**
  * Represents the stratos.yaml file or the defaults if not found

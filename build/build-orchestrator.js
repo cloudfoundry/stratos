@@ -32,7 +32,7 @@ const tools = [
   },
   {
     name: 'Extension Generator',
-    script: './extension-generator.js',
+    script: './extension-generator.mjs',
     required: true,
     description: 'Generates _custom-import.module.ts from stratos.yaml',
     watchPaths: ['stratos.yaml', 'src/frontend/packages/*/package.json']

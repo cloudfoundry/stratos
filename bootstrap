@@ -86,20 +86,12 @@ fi
 
 # Step 2: Generate extension module
 print_status "Step 2/4: Generating extension imports..."
-if [ ! -f "build/extension-generator.js" ]; then
-    print_error "extension-generator.js not found"
+if [ ! -f "build/extension-generator.mjs" ]; then
+    print_error "extension-generator.mjs not found"
     exit 1
 fi
 
-# Run build scripts as CommonJS (package.json has "type": "module" but build scripts use require)
-# Temporarily rename to .cjs to force CommonJS interpretation
-mv build/extension-generator.js build/extension-generator.cjs 2>/dev/null || true
-if [ -f "build/extension-generator.cjs" ]; then
-    node build/extension-generator.cjs
-    mv build/extension-generator.cjs build/extension-generator.js
-else
-    node build/extension-generator.js
-fi
+node build/extension-generator.mjs
 
 if [ -f "src/frontend/packages/core/src/_custom-import.module.ts" ]; then
     print_success "Extension module generated"
