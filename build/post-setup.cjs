@@ -21,7 +21,9 @@ function error(message) {
 function runScript(scriptName, scriptPath) {
   log(`Running ${scriptName}...`);
   try {
-    execSync(`sh -c 'mv ${scriptPath} ${scriptPath.replace('.js', '.cjs')} 2>/dev/null || true && node ${scriptPath.replace('.js', '.cjs')} && mv ${scriptPath.replace('.js', '.cjs')} ${scriptPath} 2>/dev/null || true'`, {
+    // Use the cross-platform wrapper script
+    const wrapperScript = path.join(ROOT_DIR, 'build', 'run-script-cjs.cjs');
+    execSync(`node "${wrapperScript}" "${scriptPath}"`, {
       cwd: ROOT_DIR,
       stdio: 'inherit'
     });

@@ -10,11 +10,12 @@ console.log('Copying devkit files');
 const STRATOS_DIR= path.resolve(__dirname, '..', '..', '..', '..');
 const DEVKIT_DIST_DIR= path.join(STRATOS_DIR, 'dist-devkit');
 
-let err = fs.copySync(path.join(__dirname, 'package.json'), path.join(DEVKIT_DIST_DIR, 'package.json'));
-if (err) {
-  console.log(err);
-}
-err =fs.copySync(path.join(__dirname, 'src'), path.join(DEVKIT_DIST_DIR), {
+// Copy package.json but change type to commonjs since we output CommonJS
+const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'));
+packageJson.type = 'commonjs';
+fs.writeFileSync(path.join(DEVKIT_DIST_DIR, 'package.json'), JSON.stringify(packageJson, null, 2));
+
+let err = fs.copySync(path.join(__dirname, 'src'), path.join(DEVKIT_DIST_DIR), {
   overwrite: true,
   dereference: true,
   preserveTimestamps: true,

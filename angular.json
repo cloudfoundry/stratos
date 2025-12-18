@@ -15,7 +15,7 @@
             "prebuildScripts": [
               {
                 "name": "Clean symlinks",
-                "script": "sh -c 'mv build/clean-symlinks.js build/clean-symlinks.cjs && node build/clean-symlinks.cjs && mv build/clean-symlinks.cjs build/clean-symlinks.js'",
+                "script": "node build/run-script-cjs.cjs build/clean-symlinks.js",
                 "phase": 1,
                 "cache": true,
                 "cacheKey": ["src/frontend/packages/**/package.json"],
@@ -24,7 +24,7 @@
               },
               {
                 "name": "Store git metadata",
-                "script": "sh -c 'mv build/store-git-metadata.js build/store-git-metadata.cjs && node build/store-git-metadata.cjs && mv build/store-git-metadata.cjs build/store-git-metadata.js'",
+                "script": "node build/run-script-cjs.cjs build/store-git-metadata.js",
                 "phase": 1,
                 "cache": true,
                 "cacheKey": [".git/HEAD", ".git/refs/heads/**"],
