@@ -113,7 +113,7 @@ git push origin master
 - User profile export feature
 
 ### Changed
-- Updated Angular to version 20
+- Updated Angular to version 21
 - Improved performance of dashboard
 - Enhanced accessibility
 
@@ -160,7 +160,7 @@ git commit -am "docs: changelog for v5.0.0"
 git tag -a v5.0.0 -m "Release v5.0.0
 
 Major release with the following highlights:
-- Angular 20 upgrade
+- Angular 21 upgrade
 - New authentication system
 - Performance improvements
 - Enhanced accessibility
@@ -430,7 +430,7 @@ Team,
 Stratos v5.0.0 has been released and is available on GitHub.
 
 🎯 Highlights:
-- Angular 20 upgrade with performance improvements
+- Angular 21 upgrade with performance improvements
 - New multi-factor authentication
 - Enhanced accessibility features
 - Bug fixes and stability improvements
@@ -456,7 +456,7 @@ Thanks to everyone who contributed!
 ```markdown
 # Stratos v5.0.0
 
-Major release with Angular 20 upgrade and new authentication features.
+Major release with Angular 21 upgrade and new authentication features.
 
 ## 🎉 Highlights
 
@@ -466,7 +466,7 @@ Major release with Angular 20 upgrade and new authentication features.
 - **Accessibility Improvements**: WCAG 2.1 AA compliance
 
 ### Performance
-- **40% faster initial load** through Angular 20 zoneless change detection
+- **40% faster initial load** through Angular 21 zoneless change detection
 - **Reduced bundle size** by 25% with improved tree-shaking
 - **Faster navigation** with route-level code splitting
 
@@ -521,7 +521,7 @@ Thanks to all contributors who made this release possible!
 ```markdown
 🎉 Stratos v5.0.0 is here!
 
-✨ Angular 20 upgrade
+✨ Angular 21 upgrade
 🔐 Multi-factor authentication
 ⚡ 40% faster performance
 ♿ Enhanced accessibility

@@ -118,7 +118,7 @@ If versions are incorrect, you'll see:
 - **Location**: `src/frontend/packages/*/src/**/*.spec.ts`
 - **Runner**: Vitest 3.1.1
 - **Environment**: happy-dom
-- **Framework**: Angular 20 TestBed
+- **Framework**: Angular 21 TestBed
 
 ### E2E Tests (Playwright)
 - **Location**: `e2e/**/*.spec.ts`
@@ -373,7 +373,7 @@ poolOptions: {
 **Why `singleFork: true`?**
 - Ensures TestBed state is properly reset between test files
 - Prevents cross-test contamination
-- Required for Angular 20 zoneless change detection
+- Required for Angular 21 zoneless change detection
 
 ### Test Setup Flow
 

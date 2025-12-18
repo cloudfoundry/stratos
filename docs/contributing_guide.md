@@ -207,7 +207,7 @@ packages/
 ```
 
 **Key Technologies:**
-- Angular 20 (zoneless change detection)
+- Angular 21 (zoneless change detection)
 - NgRx for state management
 - RxJS for reactive programming
 - Tailwind CSS for styling
