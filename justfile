@@ -124,12 +124,9 @@ build-frontend-dev:
 
 build-backend:
     @Write-Host "🔨 Building backend for {{CURRENT_PLATFORM}}..." -ForegroundColor Blue
-    @New-Item -ItemType Directory -Force -Path {{BIN_DIR}} | Out-Null
-    cd src/jetstream && \
-        go build \
-        -ldflags "-X main.appVersion={{VERSION}} -X main.buildDate={{BUILD_DATE}} -X main.gitCommit={{GIT_COMMIT}}" \
-        -o ../../{{BIN_DIR}}/jetstream
-    @Write-Host "✅ Backend built: {{BIN_DIR}}/jetstream" -ForegroundColor Green
+    node build-backend.cjs
+    @Write-Host "✅ Backend built: dist/bin/jetstream" -ForegroundColor Green
+# Cross-platform directory dependency for BIN_DIR
 
 build-backend-all:
     @Write-Host "🔨 Building backend for all 6 platforms..." -ForegroundColor Blue
