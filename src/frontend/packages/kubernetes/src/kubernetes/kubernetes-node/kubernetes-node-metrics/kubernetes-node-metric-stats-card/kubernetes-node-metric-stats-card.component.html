@@ -3,7 +3,7 @@
     <h3 class="card-title">Summary of {{title}} Usage for Last {{period}}</h3>
   </div>
   @if (metric==='container_memory_usage_bytes') {
-    <div class="card-content p-4">
+    <div class="card-content p-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <app-kubernetes-node-simple-metric key="Mean" value="{{ (mean$ | async) | bytesToHumanSize }}" [unit]=""></app-kubernetes-node-simple-metric>
         <app-kubernetes-node-simple-metric key="Maximum" value="{{ (max$ | async ) | bytesToHumanSize }}" [unit]=""></app-kubernetes-node-simple-metric>
@@ -11,7 +11,7 @@
     </div>
   }
   @if (metric==='container_cpu_usage_seconds_total') {
-    <div class="card-content p-4">
+    <div class="card-content p-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <app-kubernetes-node-simple-metric key="Mean" value="{{ (mean$ | async) | number:'1.0-2' }}" unit="secs"></app-kubernetes-node-simple-metric>
         <app-kubernetes-node-simple-metric key="Maximum" value="{{ (max$ | async ) | number:'1.0-2' }}" unit="secs"></app-kubernetes-node-simple-metric>

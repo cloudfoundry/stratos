@@ -128,18 +128,23 @@ export class SideNavComponent implements OnInit {
       'apps': 'apps',
       'marketplace': 'store',
       'market': 'store',
-      'service': 'cloud',
+      'service': 'cloud_queue',
       'cloud foundry': 'cloud',
       'cloud': 'cloud',
-      'endpoint': 'settings',
+      'endpoint': 'settings_ethernet',
       'kubernetes': 'settings',
+      'workload': 'view_module',
+      'helm': 'extension',
       'metric': 'analytics',
       'user': 'person',
       'organization': 'business',
       'space': 'folder',
       'domain': 'domain',
       'security': 'security',
-      'admin': 'admin_panel_settings'
+      'admin': 'admin_panel_settings',
+      'about': 'info',
+      'profile': 'account_circle',
+      'api': 'vpn_key'
     };
 
     // Look for matching icon in the map
@@ -149,8 +154,8 @@ export class SideNavComponent implements OnInit {
       }
     }
 
-    // Default fallback
-    return 'dashboard';
+    // Default fallback - use a generic icon that exists
+    return 'circle';
   }
 
   public signOut() {

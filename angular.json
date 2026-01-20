@@ -86,29 +86,29 @@
               {
                 "glob": "**/*",
                 "input": "src/frontend/packages/core/assets",
-                "output": "/core/assets"
+                "output": "core/assets"
               },
               "src/frontend/packages/core/favicon.ico",
               {
                 "glob": "**/*",
                 "input": "custom-src/frontend/assets/custom",
-                "output": "/core/assets/custom",
+                "output": "core/assets/custom",
                 "ignore": ["**/.gitkeep"]
               },
               {
                 "glob": "**/*",
                 "input": "src/frontend/packages/kubernetes/assets",
-                "output": "/kubernetes/assets"
+                "output": "kubernetes/assets"
               },
               {
                 "glob": "**/*",
                 "input": "node_modules/monaco-editor/min/vs",
-                "output": "/core/assets/monaco/vs"
+                "output": "core/assets/monaco/vs"
               },
               {
                 "glob": "**/*",
                 "input": "node_modules/@cfstratos/monaco-yaml/lib",
-                "output": "/core/assets/monaco/vs/language/yaml"
+                "output": "core/assets/monaco/vs/language/yaml"
               }
             ],
             "styles": [
@@ -165,7 +165,8 @@
             "ssl": true,
             "sslKey": "dev-ssl/server.key",
             "sslCert": "dev-ssl/server.crt",
-            "proxyConfig": "proxy.conf.cjs"
+            "proxyConfig": "proxy.conf.cjs",
+            "servePath": "/"
           },
           "configurations": {
             "development": {

@@ -37,7 +37,7 @@
         <app-card class="kubedash__card">
           <app-card-progress-overlay [busy]="dashboardUIBusy()" [label]="dashboardUIMsg"></app-card-progress-overlay>
           <div class="card-header">
-            <div class="card-title">Kubernetes Dashboard Installation</div>
+            <h3 class="card-title">Kubernetes Dashboard Installation</h3>
             <div class="kubedash__card-icon">
               @if (status.service) {
                 <app-boolean-indicator [showText]="false" [isTrue]="true" type="yes-no">
@@ -88,7 +88,7 @@
         <app-card class="kubedash__card">
           <app-card-progress-overlay [busy]="serviceAccountBusy()" [label]="serviceAccountMsg"></app-card-progress-overlay>
           <div class="card-header">
-            <div class="card-title">Service Account</div>
+            <h3 class="card-title">Service Account</h3>
             <div class="kubedash__card-icon">
               @if (status.serviceAccount) {
                 <app-boolean-indicator [showText]="false" [isTrue]="true" type="yes-no">

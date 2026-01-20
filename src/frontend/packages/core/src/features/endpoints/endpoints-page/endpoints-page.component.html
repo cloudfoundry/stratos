@@ -1,24 +1,22 @@
 <app-page-header>
   <h1>Endpoints</h1>
   <div class="page-header-right">
-    <div class="flex items-center space-x-2">
-      <button
-        id="stratos-add-endpoint"
-        *appUserPermission="canRegisterEndpoint | async"
-        class="btn btn-icon bg-primary text-white hover:bg-opacity-90 transition-all duration-200 hover:scale-105"
-        type="button"
-        (click)="openRegisterModal()"
-        matTooltip="Register Endpoint"
-        >
-        <app-custom-icon>add</app-custom-icon>
+    <button
+      id="stratos-add-endpoint"
+      *appUserPermission="canRegisterEndpoint | async"
+      class="btn btn-icon"
+      type="button"
+      (click)="openRegisterModal()"
+      matTooltip="Register Endpoint"
+      >
+      <app-custom-icon>add</app-custom-icon>
+    </button>
+    @if (canBackupRestore$ | async) {
+      <button id="stratos-restore-backup" class="btn btn-icon" type="button"
+        [routerLink]="'/endpoints/backup-restore'" matTooltip="Backup/Restore Endpoints">
+        <app-custom-icon>settings_backup_restore</app-custom-icon>
       </button>
-      @if (canBackupRestore$ | async) {
-        <button id="stratos-restore-backup" class="btn btn-icon" type="button"
-          [routerLink]="'/endpoints/backup-restore'" matTooltip="Backup/Restore Endpoints">
-          <app-custom-icon>settings_backup_restore</app-custom-icon>
-        </button>
-      }
-    </div>
+    }
   </div>
 </app-page-header>
 

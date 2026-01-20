@@ -3,7 +3,7 @@
   @if (haveConnectedCf$ | async) {
     <div class="page-header-right">
       <ng-container *appCfUserPermission="canCreateApplication">
-        <button id="appwall-create-application" class="btn btn-primary btn-icon" [routerLink]="'/applications/new/'">
+        <button id="appwall-create-application" class="btn btn-icon" [routerLink]="'/applications/new/'">
           <span class="material-icons">add</span>
         </button>
       </ng-container>

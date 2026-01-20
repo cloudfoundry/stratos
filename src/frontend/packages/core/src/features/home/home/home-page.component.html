@@ -4,7 +4,7 @@
     @if (layouts$ | async; as layouts) {
       <div class="relative inline-block">
         <div class="dropdown">
-          <button class="btn btn-secondary flex items-center space-x-1" [attr.aria-expanded]="false"
+          <button class="btn btn-secondary flex items-center gap-1" [attr.aria-expanded]="false"
             type="button" #dropdownButton (click)="toggleDropdown(dropdownButton)">
             <span class="material-icons">view_week</span>
             <span class="material-icons">arrow_drop_down</span>

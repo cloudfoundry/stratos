@@ -1,18 +1,16 @@
 <app-page-header [breadcrumbs]="breadcrumbs$ | async">
   <h1>Dashboard</h1>
   <div class="page-header-right" [ngClass]="{'hidden': (isLoading$ | async) }">
-    <span>
-      @if (expanded) {
-        <button (click)="toggle()" class="btn-icon" title="Collapse">
-          <span class="material-icons">expand_less</span>
-        </button>
-      }
-      @if (!expanded) {
-        <button (click)="toggle()" class="btn-icon" title="Expand">
-          <span class="material-icons">expand_more</span>
-        </button>
-      }
-    </span>
+    @if (expanded) {
+      <button (click)="toggle()" class="btn btn-icon" title="Collapse">
+        <span class="material-icons">expand_less</span>
+      </button>
+    }
+    @if (!expanded) {
+      <button (click)="toggle()" class="btn btn-icon" title="Expand">
+        <span class="material-icons">expand_more</span>
+      </button>
+    }
   </div>
 </app-page-header>
 
