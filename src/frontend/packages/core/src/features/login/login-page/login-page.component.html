@@ -1,113 +1,204 @@
 <app-intro-screen
   id="app-login-page"
-  class="login-page min-h-screen flex items-center justify-center relative"
   [ngClass]="{'opacity-50 pointer-events-none': busy$ | async }"
-  >
-  <!-- Full-screen background -->
-  <div
-    class="absolute inset-0 z-0"
-    [ngStyle]="{
-      'background-image': loginBackground(),
-      'background-color': loginBackgroundColor(),
-      'background-size': 'cover',
-      'background-position': 'center',
-      'background-repeat': 'no-repeat'
-    }"
-  ></div>
-  <!-- Login Form Card -->
-  <div
-    class="login-card card w-full max-w-md mx-4 p-8 rounded-lg shadow-lg relative z-10"
-    [ngStyle]="{
-      'background-color': loginCardBackground()
-    }"
-    >
-    <!-- Logo and Display Name Header -->
-    <div class="login-header flex items-center space-x-4 mb-6">
-      <img
-        class="login-logo h-12 w-12 flex-shrink-0"
-        [src]="themeLogo()"
-        [alt]="themeDisplayName() || 'Logo'"
-        />
-      <div class="login-title-section flex-1">
-        <h1 class="login-title text-xl font-bold text-gray-900 mb-1">
-          {{ themeDisplayName() || themeTitle() || 'Stratos' }}
-        </h1>
-        @if (themeSubtitle()) {
-          <p class="login-subtitle text-sm text-gray-600">
-            {{ themeSubtitle() }}
-          </p>
+>
+  <!-- Split-screen container -->
+  <div class="login-split-container">
+
+    <!-- LEFT PANEL: Branding & Imagery -->
+    <div class="login-left-panel flex-1 relative hidden md:flex flex-col items-center justify-center p-12">
+      <!-- Background with gradient overlay -->
+      <div
+        class="absolute inset-0 z-0"
+        [ngStyle]="{
+          'background-image': loginBackground(),
+          'background-color': loginBackgroundColor(),
+          'background-size': 'cover',
+          'background-position': 'center'
+        }"
+      ></div>
+
+      <!-- Gradient overlay for depth -->
+      <div class="login-gradient-overlay"></div>
+
+      <!-- Content container -->
+      <div class="relative z-10 text-center text-white space-y-8 max-w-lg">
+        <!-- Logo (large version) -->
+        <div class="flex justify-center mb-8">
+          <img
+            class="login-logo-large h-24 w-24 drop-shadow-lg"
+            [src]="themeLogo()"
+            [alt]="themeDisplayName() || 'Logo'"
+          />
+        </div>
+
+        <!-- Title & Subtitle -->
+        <div class="space-y-4">
+          <h1 class="text-4xl md:text-5xl font-bold drop-shadow-lg">
+            {{ themeDisplayName() || themeTitle() || 'Stratos' }}
+          </h1>
+
+          @if (themeSubtitle()) {
+            <p class="text-xl text-white/90 drop-shadow-md">
+              {{ themeSubtitle() }}
+            </p>
+          }
+        </div>
+
+        <!-- Feature highlights -->
+        @if (leftPanelContent().showFeaturesList && leftPanelContent().features.length > 0) {
+          <div class="space-y-3 mt-12">
+            @for (feature of leftPanelContent().features; track feature) {
+              <div class="flex items-center justify-center gap-3 text-white/90">
+                <span class="material-icons text-white/80">check_circle</span>
+                <span class="text-base">{{ feature }}</span>
+              </div>
+            }
+          </div>
         }
       </div>
     </div>
 
-    <div class="login-body">
-      <div class="login-form-outer" [ngClass]="{'login-sso': (ssoLogin$ | async)}">
-        <form class="login-form space-y-6" name="loginForm" (ngSubmit)="login()" #loginForm="ngForm">
+    <!-- RIGHT PANEL: Login Form -->
+    <div
+      class="login-right-panel flex-1 flex items-center justify-center p-6 md:p-12"
+      [ngStyle]="{
+        'background-image': loginBackground(),
+        'background-color': loginBackgroundColor()
+      }"
+    >
+
+      <!-- Glass card container -->
+      <div class="login-glass-card w-full max-w-md relative z-10 p-8 md:p-10 rounded-2xl">
+
+        <!-- Mobile logo (small version) -->
+        <div class="md:hidden flex justify-center mb-6">
+          <img
+            class="login-logo h-16 w-16"
+            [src]="themeLogo()"
+            [alt]="themeDisplayName() || 'Logo'"
+          />
+        </div>
+
+        <!-- Welcome header -->
+        <div class="text-center mb-8">
+          <h2 class="text-2xl font-bold login-form-title mb-2">
+            Welcome Back
+          </h2>
+          <p class="text-sm login-form-subtitle">
+            Sign in to continue to {{ themeDisplayName() || 'Stratos' }}
+          </p>
+        </div>
+
+        <!-- Login form -->
+        <form class="space-y-5" name="loginForm" (ngSubmit)="login()" #loginForm="ngForm">
+
+          <!-- Standard login fields -->
           @if (!(ssoLogin$ | async)) {
-            <div class="space-y-1">
-              <label for="username" class="sr-only">Username</label>
+            <!-- Username -->
+            <div class="form-group">
+              <label for="username" class="login-label">Username</label>
               <input
                 id="username"
-                class="input w-full"
+                class="login-input w-full"
                 required
                 [(ngModel)]="username"
                 name="username"
-                placeholder="Username"
+                placeholder="Enter your username"
                 type="text"
                 autocomplete="username"
-                >
+              />
             </div>
-          }
 
-          @if (!(ssoLogin$ | async)) {
-            <div class="space-y-1 relative">
-              <label for="password" class="sr-only">Password</label>
+            <!-- Password -->
+            <div class="form-group relative">
+              <label for="password" class="login-label">Password</label>
               <input
                 id="password"
-                class="input w-full pr-12"
+                class="login-input w-full pr-12"
                 required
                 [type]="!showPassword ? 'password' : 'text'"
                 [(ngModel)]="password"
                 name="password"
-                placeholder="Password"
+                placeholder="Enter your password"
                 autocomplete="current-password"
-                >
-              <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+              />
+              <div class="absolute inset-y-0 right-0 flex items-center pr-3 pt-6">
                 <app-show-hide-button (changed)="showPassword = $event"></app-show-hide-button>
               </div>
             </div>
-          }
 
-          @if (showLoginButton$ | async) {
-            <button
-              class="btn btn-primary w-full py-3"
-              type="submit"
-              [disabled]="!(ssoLogin$ | async) && !loginForm.valid"
+            <!-- Remember Me & Forgot Password Row -->
+            <div class="flex items-center justify-between">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  class="login-checkbox"
+                  [(ngModel)]="rememberMe"
+                  name="rememberMe"
+                />
+                <span class="text-sm login-checkbox-label">Remember me</span>
+              </label>
+            </div>
+
+            <!-- Login button -->
+            @if (showLoginButton$ | async) {
+              <button
+                class="btn btn-primary w-full py-3 text-base font-semibold"
+                type="submit"
+                [disabled]="!loginForm.valid"
               >
-              Sign In
-            </button>
+                Sign In
+              </button>
+            }
           }
-        </form>
-      </div>
 
-      <div id="login-loading" class="login-loading mt-4" [class.hidden]="!(busy$ | async)">
-        <div class="progress">
-          <div class="progress-bar w-full animate-pulse"></div>
+          <!-- SSO Section -->
+          @if (ssoLogin$ | async) {
+            <div class="sso-section">
+              @if (showLoginButton$ | async) {
+                <button
+                  class="btn btn-primary w-full py-3 text-base font-semibold flex items-center justify-center gap-2"
+                  type="submit"
+                >
+                  <span class="material-icons">login</span>
+                  <span>Sign In with SSO</span>
+                </button>
+              }
+            </div>
+          }
+
+        </form>
+
+        <!-- Loading indicator -->
+        <div id="login-loading" class="login-loading mt-6" [class.hidden]="!(busy$ | async)">
+          <div class="progress-glass">
+            <div class="progress-bar w-full animate-pulse"></div>
+          </div>
         </div>
+
       </div>
     </div>
+
   </div>
 
+  <!-- Error message banner (floating) -->
   @if (message$ | async; as displayMessage) {
     <div
       id="login-error-message"
-      class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 alert"
+      class="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-4 transition-all duration-300"
       [ngClass]="{
         'translate-y-0 opacity-100': !!displayMessage,
         '-translate-y-full opacity-0': !displayMessage
       }"
-      >
-      {{ displayMessage }}
+    >
+      <div class="login-alert-glass px-4 py-3 rounded-lg">
+        <div class="flex items-center gap-3">
+          <span class="material-icons text-xl">error_outline</span>
+          <span class="flex-1">{{ displayMessage }}</span>
+        </div>
+      </div>
     </div>
   }
+
 </app-intro-screen>

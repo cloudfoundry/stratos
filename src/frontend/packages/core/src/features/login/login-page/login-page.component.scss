@@ -1,45 +1,384 @@
-.login {
-  &__card {
-    padding: 0;
-    width: 300px;
-    mat-form-field {
-      width: 100%;
+// ============================================================================
+// Stratos Login Page - Glassmorphism Design
+// ============================================================================
+
+// Import mixins for glassmorphism
+@mixin glass-effect($bg-opacity: 0.1, $blur: 20px) {
+  backdrop-filter: blur($blur) saturate(180%);
+  -webkit-backdrop-filter: blur($blur) saturate(180%);
+  background: rgba(255, 255, 255, $bg-opacity);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+
+  .dark-theme & {
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  }
+}
+
+// Browser support fallback
+@supports not (backdrop-filter: blur(20px)) {
+  .login-glass-card {
+    background: rgba(255, 255, 255, 0.95) !important;
+
+    .dark-theme & {
+      background: rgba(30, 41, 59, 0.95) !important;
     }
   }
-  &__body {
-    padding: 24px;
+}
+
+// ============================================================================
+// Split-screen container
+// ============================================================================
+
+.login-split-container {
+  @apply w-full flex flex-col;
+  min-height: 100vh;
+  height: 100vh;
+  position: relative;
+
+  @media (min-width: 768px) {
+    @apply flex-row;
   }
-  &__submit {
-    width: 100%;
+}
+
+// ============================================================================
+// Left Panel - Branding
+// ============================================================================
+
+.login-left-panel {
+  @apply relative flex flex-col items-center justify-center p-12;
+  @apply hidden;
+  flex: 0 0 35%; // Take 35% of width on desktop
+
+  @media (min-width: 768px) {
+    @apply flex;
   }
-  &-message {
-    font-size: 18px;
-    height: 20px;
-    padding-top: 20px;
+
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+
+  // Ensure content is above background
+  > * {
+    position: relative;
+    z-index: 10;
   }
-  &__form-outer {
-    $cubic: cubic-bezier(.215, .61, .355, 1);
-    $time: 250ms;
-    height: 180px;
+}
+
+.login-gradient-overlay {
+  @apply absolute inset-0 z-10;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.3) 0%,
+    rgba(0, 0, 0, 0.1) 100%
+  );
+
+  .dark-theme & {
+    background: linear-gradient(
+      135deg,
+      rgba(0, 0, 0, 0.5) 0%,
+      rgba(0, 0, 0, 0.3) 100%
+    );
+  }
+}
+
+.login-logo-large {
+  @apply h-24 w-24;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
+  animation: fadeInScale 0.6s ease-out;
+}
+
+// ============================================================================
+// Right Panel - Form
+// ============================================================================
+
+.login-right-panel {
+  @apply relative flex items-center justify-center p-6;
+  flex: 1; // Take remaining 65% on desktop
+  background-size: cover;
+  background-position: center;
+
+  @media (min-width: 768px) {
+    @apply p-12;
+  }
+
+  // Overlay to darken background slightly for better contrast
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.2);
+    z-index: 0;
+
+    .dark-theme & {
+      background: rgba(0, 0, 0, 0.4);
+    }
+  }
+}
+
+// ============================================================================
+// Glass Card
+// ============================================================================
+
+.login-glass-card {
+  @include glass-effect(0.15, 20px);
+  @apply rounded-2xl shadow-2xl w-full max-w-md relative z-10;
+  @apply p-6;
+  animation: fadeInUp 0.5s ease-out;
+  transition: all 0.3s ease;
+
+  // More transparent glass effect
+  background: rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+
+  .dark-theme & {
+    background: rgba(15, 23, 42, 0.8) !important;
+    border: 1px solid rgba(148, 163, 184, 0.15);
+  }
+
+  @media (min-width: 768px) {
+    @apply p-10;
+  }
+
+  // Mobile adjustments - more opaque for better readability
+  @media (max-width: 767px) {
+    background: rgba(255, 255, 255, 0.95) !important;
+
+    .dark-theme & {
+      background: rgba(15, 23, 42, 0.95) !important;
+    }
+  }
+}
+
+// ============================================================================
+// Form Elements
+// ============================================================================
+
+.login-form-title {
+  color: var(--content-text);
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.login-form-subtitle {
+  color: var(--content-text);
+  opacity: 0.85;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.login-label {
+  @apply block text-sm font-medium mb-2;
+  color: var(--content-text);
+}
+
+.login-input {
+  @apply px-4 py-3 border rounded-lg w-full;
+  @apply focus:outline-none focus:ring-2 focus:border-transparent;
+  @apply transition-all duration-200;
+
+  background-color: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--input-text);
+  --tw-ring-color: var(--color-primary);
+
+  &::placeholder {
+    color: var(--input-placeholder);
+    opacity: 0.6;
+  }
+
+  &:focus {
+    border-color: var(--input-focus-border);
+    background-color: var(--input-bg);
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+  }
+
+  .dark-theme & {
+    background-color: rgba(15, 23, 42, 0.5);
+    border-color: var(--input-border);
+  }
+}
+
+// ============================================================================
+// Checkbox Styling
+// ============================================================================
+
+.login-checkbox {
+  @apply w-4 h-4 rounded border-2 cursor-pointer;
+  @apply transition-all duration-200;
+  border-color: var(--input-border);
+  appearance: none;
+  background-color: var(--input-bg);
+
+  &:checked {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+  }
+
+  &:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}
+
+.login-checkbox-label {
+  color: var(--content-text);
+  user-select: none;
+}
+
+// ============================================================================
+// Loading Indicator
+// ============================================================================
+
+.login-loading {
+  @apply mt-4;
+
+  &.hidden {
+    @apply opacity-0 h-0 overflow-hidden;
+  }
+}
+
+.progress-glass {
+  @apply w-full h-2 rounded-full overflow-hidden;
+  background: rgba(226, 232, 240, 0.3);
+  backdrop-filter: blur(10px);
+
+  .progress-bar {
+    @apply h-full;
+    background: linear-gradient(
+      90deg,
+      var(--color-primary),
+      var(--color-secondary)
+    );
+    animation: progressPulse 1.5s ease-in-out infinite;
+  }
+}
+
+// ============================================================================
+// Alert Banner (Glass)
+// ============================================================================
+
+.login-alert-glass {
+  @include glass-effect(0.15, 16px);
+  @apply text-sm font-medium;
+  background: rgba(239, 68, 68, 0.15) !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+  color: var(--danger-text);
+
+  .dark-theme & {
+    background: rgba(127, 29, 29, 0.8) !important;
+    border: 1px solid rgba(239, 68, 68, 0.4) !important;
+  }
+
+  .material-icons {
+    color: var(--color-danger);
+  }
+}
+
+// ============================================================================
+// Animations
+// ============================================================================
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
     opacity: 1;
-    transition: height $time $cubic 100ms, opacity $time * 2 $cubic $time + 50ms;
-    &.login-sso {
-      height: auto;
-    }
+    transform: translateY(0);
   }
-  &__loading {
-    display: none;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
   }
-  &__busy {
-    .login__form {
-      display: none;
-    }
-    .login__form-outer {
-      height: 0;
-      opacity: 0;
-    }
-    .login__loading {
-      display: block;
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes progressPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scaleX(0.98);
+  }
+}
+
+// ============================================================================
+// Responsive Adjustments
+// ============================================================================
+
+@media (max-width: 767px) {
+  .login-split-container {
+    @apply flex-col;
+  }
+
+  .login-right-panel {
+    @apply min-h-screen;
+  }
+
+  .login-glass-card {
+    @apply p-6;
+  }
+
+  .login-form-title {
+    @apply text-xl;
+  }
+}
+
+// ============================================================================
+// Accessibility
+// ============================================================================
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  .login-glass-card,
+  .login-logo-large,
+  .progress-bar {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+// High contrast mode
+@media (prefers-contrast: high) {
+  .login-glass-card {
+    border: 2px solid var(--content-border);
+    background: var(--card-bg) !important;
+    backdrop-filter: none;
+  }
+
+  .login-input {
+    border: 2px solid var(--input-border);
+  }
+}
+
+// ============================================================================
+// Dark Theme Specific Adjustments
+// ============================================================================
+
+.dark-theme {
+  .login-left-panel {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  }
+
+  .login-form-title {
+    color: var(--content-text);
+  }
+
+  .btn-primary {
+    @apply shadow-lg;
+
+    &:hover {
+      @apply shadow-xl;
     }
   }
 }

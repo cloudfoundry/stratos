@@ -56,6 +56,13 @@ export interface StratosTheme {
     backgroundColor?: string;
     cardBackground?: string;
     customMessage?: string;
+    // New properties for split-screen glassmorphism design
+    leftPanelGradientStart?: string;
+    leftPanelGradientEnd?: string;
+    showFeaturesList?: boolean;
+    features?: string[];
+    glassOpacity?: number;
+    glassBlur?: number;
   };
 }
 
@@ -106,6 +113,16 @@ export const defaultTheme: StratosTheme = {
     backgroundImage: '/core/assets/login-bg.jpg',
     backgroundColor: '#f5f5f5',
     cardBackground: '#ffffff',
+    leftPanelGradientStart: '#2196f3',
+    leftPanelGradientEnd: '#00bcd4',
+    showFeaturesList: true,
+    features: [
+      'Multi-Cloud Management',
+      'Unified Dashboard',
+      'Enterprise Security',
+    ],
+    glassOpacity: 0.1,
+    glassBlur: 20,
   },
 };
 
@@ -156,6 +173,16 @@ export const darkTheme: StratosTheme = {
     backgroundImage: '/core/assets/login-bg.jpg',
     backgroundColor: '#0f172a',
     cardBackground: '#1e293b',
+    leftPanelGradientStart: '#3b82f6',
+    leftPanelGradientEnd: '#06b6d4',
+    showFeaturesList: true,
+    features: [
+      'Multi-Cloud Management',
+      'Unified Dashboard',
+      'Enterprise Security',
+    ],
+    glassOpacity: 0.7,
+    glassBlur: 20,
   },
 };
 

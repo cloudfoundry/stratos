@@ -60,11 +60,20 @@ export class LoginPageComponent implements OnInit {
     this.themeService.theme()?.branding?.loginSubtitle || ''
   );
 
+  public leftPanelContent = computed(() => {
+    const theme = this.themeService.theme();
+    return {
+      showFeaturesList: theme?.login?.showFeaturesList || false,
+      features: theme?.login?.features || []
+    };
+  });
+
   // Form state
   loginForm!: NgForm;
   username = '';
   password = '';
   showPassword = false;
+  rememberMe = false;
   message = '';
 
   // Reactive state observables
@@ -254,7 +263,7 @@ export class LoginPageComponent implements OnInit {
       this.clearRedirectAttempts();
       this.message = '';
 
-      this.store.dispatch(new Login(this.username, this.password));
+      this.store.dispatch(new Login(this.username, this.password, this.rememberMe));
 
       // Wait for LOGIN_SUCCESS, then ensure app is ready before navigating
       this.actions$.pipe(

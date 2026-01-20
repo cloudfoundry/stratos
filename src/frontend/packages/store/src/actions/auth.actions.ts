@@ -18,7 +18,11 @@ export const RESET_AUTH = '[Auth] Reset auth data';
 export const RESET_SSO_AUTH = '[Auth] Reset auth data (SSO)';
 
 export class Login implements Action {
-  constructor(public username: string, public password: string) { }
+  constructor(
+    public username: string,
+    public password: string,
+    public rememberMe: boolean = false
+  ) { }
   type = LOGIN;
 }
 

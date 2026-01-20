@@ -70,6 +70,15 @@
   --login-bg-image: url('/core/assets/login-bg.jpg');
   --login-card-bg: #ffffff;
 
+  /* Glassmorphism */
+  --glass-bg-light: rgba(255, 255, 255, 0.1);
+  --glass-border-light: rgba(255, 255, 255, 0.2);
+  --glass-shadow-light: rgba(0, 0, 0, 0.1);
+
+  /* Login branding */
+  --login-left-gradient-start: var(--color-primary);
+  --login-left-gradient-end: var(--color-secondary);
+
   /* Logo */
   --logo-bg: #ffffff;
 
@@ -166,6 +175,11 @@
   --login-bg: #0f172a;
   --login-bg-image: url('/core/assets/login-bg.jpg');
   --login-card-bg: #1e293b;
+
+  /* Glassmorphism - dark */
+  --glass-bg-light: rgba(30, 41, 59, 0.7);
+  --glass-border-light: rgba(148, 163, 184, 0.1);
+  --glass-shadow-light: rgba(0, 0, 0, 0.37);
 
   /* Logo - dark theme */
   --logo-bg: #1e293b;
@@ -961,5 +975,35 @@ body.modal-open {
 
   .bg-nav-tooltip {
     background-color: var(--nav-tooltip);
+  }
+
+  /* Glassmorphism utilities */
+  .glass-light {
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .glass-dark {
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(148, 163, 184, 0.1);
+  }
+
+  .glass-blur-sm {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .glass-blur-md {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .glass-blur-lg {
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
   }
 }

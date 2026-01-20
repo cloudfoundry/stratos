@@ -50,12 +50,13 @@ export class AuthEffect {
 
    loginRequest$ = createEffect(() => this.actions$.pipe(
     ofType<Login>(LOGIN),
-    switchMap(({ username, password }: { username: string; password: string }) => {
+    switchMap(({ username, password, rememberMe }: { username: string; password: string; rememberMe: boolean }) => {
       const params = new HttpParams({
         encoder: new BrowserStandardEncoder(),
         fromObject: {
           username,
-          password
+          password,
+          remember_me: rememberMe.toString()
         }
       });
       const headers = {
