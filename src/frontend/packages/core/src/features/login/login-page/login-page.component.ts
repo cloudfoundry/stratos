@@ -13,6 +13,7 @@ import { StratosThemeService } from '../../../../../theme/theme.service';
 import { queryParamMap } from '../../../core/auth-guard.service';
 import { IntroScreenComponent } from '../../../shared/components/intro-screen/intro-screen.component';
 import { ShowHideButtonComponent } from '../../../core/show-hide-button/show-hide-button.component';
+import { loginTransition } from '../../../core/route-animations';
 
 @Component({
   selector: 'app-login-page',
@@ -25,7 +26,8 @@ import { ShowHideButtonComponent } from '../../../core/show-hide-button/show-hid
     IntroScreenComponent,
     ShowHideButtonComponent
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [loginTransition]
 })
 export class LoginPageComponent implements OnInit {
 
@@ -95,6 +97,7 @@ export class LoginPageComponent implements OnInit {
 
   // Track navigation state
   private readonly navigationInProgress$ = new BehaviorSubject<boolean>(false);
+  private hasNavigatedAway = false; // Prevent multiple navigations
 
   // App ready signal - wait for app to be stable before allowing navigation
   readonly appReady$ = this.appRef.isStable.pipe(
@@ -286,12 +289,21 @@ export class LoginPageComponent implements OnInit {
   }
 
   private async handleSuccessfulLogin(auth: AuthState): Promise<null> {
+    // Prevent multiple navigations
+    if (this.hasNavigatedAway) {
+      console.log('Navigation already in progress or completed, skipping...');
+      return null;
+    }
+
     this.redirectAttempts++;
 
     // Prevent infinite redirect loop
     if (this.redirectAttempts > this.MAX_REDIRECT_ATTEMPTS) {
       return null;
     }
+
+    // Mark that we're navigating away
+    this.hasNavigatedAway = true;
 
     const redirect: RouterRedirect = auth.redirect;
     const targetPath = redirect ? decodeURI(redirect.path) : '/home';
@@ -302,13 +314,26 @@ export class LoginPageComponent implements OnInit {
 
       // Check if navigation actually succeeded
       if (navResult === false) {
-        throw new Error('Navigation blocked');
+        console.warn('Navigation was blocked, retrying...');
+        // Try again with skipLocationChange to force navigation
+        const retryResult = await this.router.navigate([targetPath], {
+          queryParams,
+          skipLocationChange: false
+        });
+
+        if (retryResult === false) {
+          throw new Error('Navigation blocked after retry');
+        }
       }
 
       // Success! Clear attempts since we successfully redirected
       this.clearRedirectAttempts();
     } catch (error) {
-      // Hard redirect as fallback
+      console.error('Angular navigation failed, using hard redirect as last resort:', error);
+
+      // Wait for animation to complete before hard redirect (800ms total: 200ms delay + 600ms animation)
+      await new Promise(resolve => setTimeout(resolve, 800));
+
       const queryString = Object.keys(queryParams).length > 0
         ? '?' + Object.entries(queryParams).map(([k, v]) => `${k}=${encodeURIComponent(v as string)}`).join('&')
         : '';

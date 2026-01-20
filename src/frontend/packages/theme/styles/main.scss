@@ -284,6 +284,19 @@ html {
 
 body {
   @apply h-full m-0 p-0 font-sans;
+  background-color: var(--app-bg);
+
+  // Prevent white flash during route transitions
+  &::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--app-bg);
+    z-index: -1;
+  }
 }
 
 /* Router outlet needs to be a flex container to properly pass flex layout to children */

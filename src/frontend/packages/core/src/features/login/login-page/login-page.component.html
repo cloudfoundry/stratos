@@ -1,5 +1,6 @@
 <app-intro-screen
   id="app-login-page"
+  [@loginTransition]
   [ngClass]="{'opacity-50 pointer-events-none': busy$ | async }"
 >
   <!-- Split-screen container -->
