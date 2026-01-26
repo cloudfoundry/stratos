@@ -1,14 +1,14 @@
 <ng-template #pageHeaderTmpl>
-  <div class="page-header-outer bg-header-bg text-header-text">
+  <div class="page-header-outer bg-header-bg text-header-text shadow-sm">
     <div class="page-header-inner">
       <div class="page-header">
-        <div class="page-header-toolbar flex items-center justify-between px-6 py-4">
+        <div class="page-header-toolbar flex items-center justify-between px-6 py-3.5">
           <!-- Mobile menu toggle -->
           @if (isMobile$ | async) {
             <div class="page-header-nav-toggle-wrapper">
               @if (!hideSideNavButton) {
                 <button
-                  class="p-2 text-header-text hover:bg-white/10 rounded-md transition-colors"
+                  class="p-2.5 text-header-text hover:bg-white/10 rounded-lg transition-all duration-200 ease-in-out active:scale-95"
                   (click)="toggleSidenav()">
                   <span class="material-icons">menu</span>
                 </button>
@@ -23,11 +23,11 @@
               <div class="page-header-breadcrumbs flex items-center space-x-2">
                 @for (breadcrumbDef of breadcrumbDefinitions; track $index) {
                   @if (breadcrumbDef.routerLink) {
-                    <span class="page-header-breadcrumb text-white/90 hover:text-white cursor-pointer"
+                    <span class="page-header-breadcrumb text-white/90 hover:text-white cursor-pointer transition-colors duration-150"
                     [routerLink]="breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
                   }
                   @if (!breadcrumbDef.routerLink) {
-                    <span class="page-header-breadcrumb text-white/70"
+                    <span class="page-header-breadcrumb text-white/75"
                     >{{ breadcrumbDef.value }}</span>
                   }
                   <span class="material-icons text-white/50 text-sm">chevron_right</span>
@@ -47,7 +47,7 @@
           </div>
 
           <!-- Right content -->
-          <div class="page-header-right flex items-center gap-3">
+          <div class="page-header-right flex items-center gap-2">
             <!-- Extension buttons -->
             <div #extensionRef>
               @if (actionsKey) {
@@ -63,7 +63,7 @@
             <!-- Divider -->
             @if ((extensionRef.children[0] && extensionRef.children[0].children && extensionRef.children[0].children.length > 0) ||
               (ref.children[0] && ref.children[0] && ref.children[0].children && ref.children[0].children.length > 0)) {
-              <span class="page-header-divider text-white/30"
+              <span class="page-header-divider text-white/30 px-2"
                 >
                 |
               </span>
@@ -75,15 +75,15 @@
             <!-- History button -->
             @if (showHistory) {
               <div class="relative">
-                <button class="page-header-menu-button p-2 text-header-text hover:bg-white/10 rounded-md transition-colors"
+                <button class="page-header-menu-button p-2.5 text-header-text hover:bg-white/10 rounded-lg transition-all duration-200 ease-in-out active:scale-95"
                   (click)="toggleHistoryMenu()">
                   <span class="material-icons">schedule</span>
                 </button>
                 <!-- History dropdown menu -->
                 @if (isHistoryMenuOpen) {
                   <div
-                    class="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                    <div class="page-header-history p-4 w-80">
+                    class="absolute right-0 top-full mt-2.5 bg-white rounded-xl shadow-xl border border-gray-200 z-50 animate-slide-down">
+                    <div class="page-header-history p-5 w-80">
                       <h3 class="page-header-history-title text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
                       <app-recent-entities mode="menu" class="page-header-history-list" history="true">
                       </app-recent-entities>
@@ -97,11 +97,11 @@
             @if ((events$ | async).length > 0) {
               <button
                 routerLink="/events"
-                class="page-header-notification-button relative p-2 text-header-text hover:bg-white/10 rounded-md transition-colors">
+                class="page-header-notification-button relative p-2.5 text-header-text hover:bg-white/10 rounded-lg transition-all duration-200 ease-in-out active:scale-95">
                 <span class="material-icons">notifications</span>
                 @if ((unreadEventCount$ | async); as count) {
                   <span
-                    class="absolute -top-1 -right-1 bg-danger-500 text-white text-xs rounded-full min-w-[1.25rem] h-5 flex items-center justify-center px-1">
+                    class="absolute -top-1 -right-1 bg-danger-500 text-white text-xs font-semibold rounded-full min-w-[1.25rem] h-5 flex items-center justify-center px-1.5 shadow-md">
                     {{ count }}
                   </span>
                 }
@@ -112,7 +112,7 @@
             @if (!hideMenu && !environment.hideUserMenu) {
               <div class="relative">
                 <button id="userMenu"
-                  class="page-header-menu-button page-header-usermenu p-2 hover:bg-white/10 rounded-md transition-colors"
+                  class="page-header-menu-button page-header-usermenu p-2 hover:bg-white/10 rounded-lg transition-all duration-200 ease-in-out active:scale-95"
                   (click)="toggleUserMenu()">
                   <app-user-avatar color="header" [allowGravatar]="allowGravatar$ | async" [user]="user$ | async">
                   </app-user-avatar>
@@ -120,30 +120,30 @@
                 <!-- User dropdown menu -->
                 @if (isUserMenuOpen) {
                   <div
-                    class="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                    class="absolute right-0 top-full mt-2.5 bg-white rounded-xl shadow-xl border border-gray-200 z-50 animate-slide-down">
                     <div class="page-header-menu-inner p-4 w-64">
                       <!-- User info -->
-                      <div class="page-header-username flex items-center space-x-3 pb-4 border-b border-gray-200 mb-4">
+                      <div class="page-header-username flex items-center space-x-3 pb-4 border-b border-gray-200 mb-3">
                         <app-user-avatar [allowGravatar]="allowGravatar$ | async" [user]="user$ | async"></app-user-avatar>
                         <div class="page-header-username-text">
-                          <div class="font-medium text-gray-900">{{ username$ | async }}</div>
+                          <div class="font-semibold text-gray-900">{{ username$ | async }}</div>
                         </div>
                       </div>
                       <!-- Menu items -->
                       @if (!logoutOnly) {
                         <div class="space-y-1">
-                          <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                          <button class="w-full text-left px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors duration-150 font-medium"
                             routerLink="/about"
                             (click)="closeUserMenu()">
                             <span>About</span>
                           </button>
-                          <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                          <button class="w-full text-left px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors duration-150 font-medium"
                             routerLink="/user-profile"
                             (click)="closeUserMenu()">
                             <span>Profile</span>
                           </button>
                           @if (canAPIKeys$ | async) {
-                            <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                            <button class="w-full text-left px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors duration-150 font-medium"
                               routerLink="/api-keys"
                               (click)="closeUserMenu()"
                               >
@@ -156,7 +156,7 @@
                         </div>
                       }
                       @if (canLogout$ | async) {
-                        <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                        <button class="w-full text-left px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors duration-150 font-medium"
                           (click)="logout(); closeUserMenu()"
                           >
                           <span>Logout</span>

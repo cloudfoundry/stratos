@@ -7,7 +7,7 @@
 /* Modern responsive home grid */
 .home-grid {
   display: grid;
-  gap: 1.5rem;
+  gap: 1.75rem;
   grid-auto-rows: min-content;
   width: 100%;
 
@@ -17,6 +17,8 @@
   /* Responsive breakpoints */
   &.columns-1 {
     grid-template-columns: 1fr;
+    max-width: 1200px;
+    margin: 0 auto;
   }
 
   &.columns-2 {
@@ -46,7 +48,7 @@
 
   /* Compact gap on mobile */
   @media (max-width: 639px) {
-    gap: 1rem;
+    gap: 1.25rem;
   }
 }
 
@@ -54,6 +56,24 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  animation: fadeInUp 0.4s ease-out backwards;
+  
+  @for $i from 1 through 12 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{$i * 0.05}s;
+    }
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Legacy support */
@@ -72,14 +92,14 @@
     line-height: 40px;
     .home-page__header {
       flex: 1;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
     }
   }
 
   &__card {
     height: 100%;
     &:last-child {
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
   }
 
@@ -87,7 +107,7 @@
   &__list {
     display: grid;
     flex: 1;
-    gap: 1.5rem;
+    gap: 1.75rem;
     grid-auto-rows: min-content;
   }
 
@@ -121,22 +141,23 @@
     flex: 0 0 20px;
     display: flex;
     align-self: center;
-    margin: 0 0 0 10px;
+    margin: 0 0 0 12px;
     font-size: 20px;
     width: 20px;
     height: 20px;
     line-height: 20px;
     opacity: 0;
+    transition: opacity 0.2s ease-in-out;
   }
   mat-icon.layout-menu__icon.layout-menu__tick {
     opacity: 1;
   }
 
   &__tick {
-    font-weight: bold;
+    font-weight: 600;
   }
   &__sep {
-    margin: 10px 0;
+    margin: 12px 0;
   }
 }
 
@@ -145,32 +166,51 @@
   &__panel {
     background-color: var(--card-bg);
     border: 1px solid var(--card-border);
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
     color: var(--content-text);
     overflow: hidden;
+    animation: slideDown 0.2s ease-out;
   }
 
   &__option {
-    @apply flex items-center justify-between w-full px-4 py-2 text-sm transition-colors;
+    @apply flex items-center justify-between w-full px-4 py-2.5 text-sm transition-all duration-150;
     background: transparent;
     border: 0;
     color: var(--content-text);
     text-align: left;
     width: 100%;
+    cursor: pointer;
 
     &:hover,
     &:focus-visible {
       background-color: var(--nav-hover);
       color: var(--header-text);
+      padding-left: 1.125rem;
     }
 
     .material-icons {
       color: inherit;
+      transition: transform 0.2s ease-in-out;
+    }
+
+    &:hover .material-icons {
+      transform: scale(1.1);
     }
   }
 
   &__divider {
-    @apply my-1;
+    @apply my-1.5;
     border-bottom: 1px solid var(--card-border);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

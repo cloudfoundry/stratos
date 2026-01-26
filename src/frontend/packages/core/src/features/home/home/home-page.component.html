@@ -1,37 +1,37 @@
 <app-page-header [endpointIds$]="allEndpointIds$">
-  <h1>Home</h1>
+  <h1 class="text-2xl font-semibold tracking-tight">Home</h1>
   <div class="page-header-right">
     @if (layouts$ | async; as layouts) {
       <div class="relative inline-block">
         <div class="dropdown">
-          <button class="btn btn-secondary flex items-center gap-1" [attr.aria-expanded]="false"
+          <button class="btn btn-secondary flex items-center gap-2 shadow-sm hover:shadow" [attr.aria-expanded]="false"
             type="button" #dropdownButton (click)="toggleDropdown(dropdownButton)">
-            <span class="material-icons">view_week</span>
-            <span class="material-icons">arrow_drop_down</span>
+            <span class="material-icons text-lg">view_week</span>
+            <span class="material-icons text-lg">arrow_drop_down</span>
           </button>
-          <div class="dropdown-menu layout-dropdown__panel absolute right-0 mt-2 w-56 rounded-md z-50 hidden" #dropdownMenu>
-            <div class="py-1">
+          <div class="dropdown-menu layout-dropdown__panel absolute right-0 mt-3 w-56 rounded-xl shadow-xl border border-gray-200 z-50 hidden bg-white" #dropdownMenu>
+            <div class="py-1.5">
               @for (layout of layouts; track layout?.id ?? $index) {
                 <div>
                   @if (layout) {
                     <button (click)="onChangeLayout(layout); closeDropdown(dropdownButton)"
-                      class="layout-dropdown__option">
-                      <span>{{ layout.title }}</span>
-                      <span class="material-icons text-primary-600"
+                      class="layout-dropdown__option w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 flex items-center justify-between">
+                      <span class="font-medium">{{ layout.title }}</span>
+                      <span class="material-icons text-primary-600 text-lg transition-opacity duration-150"
                         [class.opacity-100]="layout.id === layoutID"
                       [class.opacity-0]="layout.id !== layoutID">done</span>
                     </button>
                   }
                   @if (!layout) {
-                    <div class="layout-dropdown__divider"></div>
+                    <div class="layout-dropdown__divider border-t border-gray-200 my-1.5"></div>
                   }
                 </div>
               }
-              <div class="layout-dropdown__divider"></div>
+              <div class="layout-dropdown__divider border-t border-gray-200 my-1.5"></div>
               <button (click)="toggleShowAllEndpoints(); closeDropdown(dropdownButton)"
-                class="layout-dropdown__option">
-                <span>Show all endpoints</span>
-                <span class="material-icons text-primary-600"
+                class="layout-dropdown__option w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 flex items-center justify-between">
+                <span class="font-medium">Show all endpoints</span>
+                <span class="material-icons text-primary-600 text-lg transition-opacity duration-150"
                   [class.opacity-100]="showAllEndpoints"
                 [class.opacity-0]="!showAllEndpoints">done</span>
               </button>
@@ -43,8 +43,8 @@
   </div>
 </app-page-header>
 @if (haveThingsToShow$ | async ) {
-  <div class="p-6">
-    <div class="home-grid"
+  <div class="p-8">
+    <div class="home-grid gap-6"
       [class.columns-1]="columns === 1"
       [class.columns-2]="columns === 2"
       [class.columns-3]="columns === 3"
@@ -59,11 +59,11 @@
   </div>
 } @else {
   @if (haveRegistered$ | async) {
-    <div class="p-6">
+    <div class="p-8">
       <app-no-content-message [icon]="noneAvailableMsg.icon" [firstLine]="noneAvailableMsg.firstLine"
       [secondLine]="noneAvailableMsg.secondLine"></app-no-content-message>
     </div>
   } @else {
-    <app-endpoints-missing class="p-6" [showToolbarHint]="false"></app-endpoints-missing>
+    <app-endpoints-missing class="p-8" [showToolbarHint]="false"></app-endpoints-missing>
   }
 }

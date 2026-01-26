@@ -59,12 +59,11 @@
   @apply relative flex flex-col items-center justify-center p-12;
   @apply hidden;
   flex: 0 0 35%; // Take 35% of width on desktop
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
 
   @media (min-width: 768px) {
     @apply flex;
   }
-
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
 
   // Ensure content is above background
   > * {
