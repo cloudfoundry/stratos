@@ -1,4 +1,4 @@
-$checkbox-margin: 30px;
+$checkbox-margin: 24px;
 
 :host {
   flex: 1;
@@ -12,7 +12,7 @@ form.stepper-form {
   max-width: unset;
   mat-form-field,
   mat-checkbox {
-    max-width: 450px;
+    max-width: 600px;
   }
   P {
     max-width: unset;
@@ -20,35 +20,157 @@ form.stepper-form {
 }
 
 .edit-endpoint {
-  &__section {
-    margin-top: $checkbox-margin;
+  &__section-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--content-text);
+    margin: 32px 0 20px 0;
+    letter-spacing: -0.01em;
+    
+    &:first-child {
+      margin-top: 0;
+    }
   }
-  &__sso {
-    margin-top: $checkbox-margin;
+  
+  &__label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--content-text);
+    margin-bottom: 6px;
   }
+  
+  &__input {
+    width: 100%;
+    max-width: 600px;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    background-color: var(--input-bg) !important;
+    border: 1px solid var(--input-border) !important;
+    color: var(--input-text) !important;
+    transition: border-color 0.2s ease;
+
+    &:hover {
+      border-color: var(--input-border-hover) !important;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--input-focus-border) !important;
+      box-shadow: 0 0 0 3px var(--input-focus-shadow);
+    }
+    
+    &::placeholder {
+      color: var(--input-placeholder);
+    }
+  }
+  
   &__advanced {
     display: flex;
     flex-direction: column;
     height: 0;
-    margin-left: 24px;
+    margin-top: 20px;
     overflow: hidden;
+    opacity: 0;
+    transition: all 0.3s ease;
   }
-  &__cacert-title {
-    margin: 10px 0;
-    display: block;
+  
+  &__shown {
+    height: auto;
+    opacity: 1;
   }
+  
   &__cacert {
-    line-break: anywhere;
-    max-width: 580px;
+    width: 100%;
+    max-width: 100%;
     resize: vertical;
+    min-height: 200px;
+    border-radius: 6px;
+    padding: 12px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    background-color: var(--input-bg) !important;
+    border: 1px solid var(--input-border) !important;
+    color: var(--input-text) !important;
+    transition: border-color 0.2s ease;
+
+    &:hover {
+      border-color: var(--input-border-hover) !important;
+    }
 
     &:focus {
       outline: none;
-      border-color: var(--input-focus-border);
-      box-shadow: 0 0 0 1px var(--input-focus-border);
+      border-color: var(--input-focus-border) !important;
+      box-shadow: 0 0 0 3px var(--input-focus-shadow);
+    }
+    
+    &::placeholder {
+      color: var(--input-placeholder);
     }
   }
-  &__shown {
-    height: auto;
+  
+  &__sso-info {
+    margin-top: 16px;
+    padding: 16px;
+    border-radius: 6px;
+    background-color: var(--info-bg);
+    border: 1px solid var(--info-border);
+  }
+  
+  &__info-text {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--content-text);
+    margin: 0 0 12px 0;
+  }
+  
+  &__code-block {
+    position: relative;
+    border-radius: 6px;
+    background-color: var(--code-block-bg);
+    border: 1px solid var(--code-block-border);
+    overflow: hidden;
+  }
+  
+  &__code {
+    padding: 12px;
+    margin: 0;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    color: var(--code-block-text);
+    background: transparent;
+    overflow-x: auto;
+    white-space: pre;
+    word-wrap: normal;
+  }
+  
+  &__copy-btn {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    padding: 6px;
+    border: none;
+    background-color: var(--button-secondary-bg);
+    color: var(--button-secondary-text);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    
+    &:hover {
+      opacity: 1;
+      background-color: var(--button-secondary-hover-bg);
+    }
+    
+    &:active {
+      transform: scale(0.95);
+    }
   }
 }

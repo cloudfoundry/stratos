@@ -31,9 +31,14 @@ $icon-nav-width: 50px;
   font: inherit;
   cursor: pointer;
 
+  &:hover {
+    opacity: 0.9;
+  }
+
   &:focus {
-    outline: 2px solid rgba(255, 255, 255, 0.2);
+    outline: 2px solid rgba(255, 255, 255, 0.3);
     outline-offset: 2px;
+    border-radius: 8px;
   }
 }
 
@@ -55,12 +60,24 @@ $icon-nav-width: 50px;
 
 .side-nav {
   height: 100%;
+  
+  // Firefox-specific fix
+  @supports (-moz-appearance: none) {
+    transform: translateZ(0);
+  }
+  
   &__nav-toggle {
     margin: 0 5px;
+    
+    &:hover {
+      opacity: 0.9;
+    }
+    
     &-icon {
       font-size: 20px;
     }
   }
+  
   &__inner {
     display: flex;
     flex-direction: column;
@@ -68,18 +85,21 @@ $icon-nav-width: 50px;
     overflow: hidden;
     width: $nav-width;
   }
+  
   &__top {
     display: flex;
     flex: 0 0 56px;
     flex-direction: column;
     height: 56px;
     width: $nav-width;
+    
     &-inner {
       display: flex;
       flex: 1;
       padding: 0 3px 0 10px;
     }
   }
+  
   &__items {
     flex: 1;
     list-style-type: none;
@@ -87,6 +107,7 @@ $icon-nav-width: 50px;
     overflow: auto;
     padding: 0;
   }
+  
   &__item {
     align-items: center;
     border-color: transparent;
@@ -99,6 +120,7 @@ $icon-nav-width: 50px;
     padding: 12px $side-nav-padding-h;
     text-decoration: none;
     white-space: nowrap;
+    
     &-icon {
       flex: none;
       font-size: $side-nav-mat-icon-height-large;
@@ -107,19 +129,36 @@ $icon-nav-width: 50px;
       text-align: center;
       width: $side-nav-mat-icon-height-large;
     }
+    
+    &-label {
+      opacity: 1;
+      
+      // Force animations ONLY on non-Firefox using !important
+      @supports not (-moz-appearance: none) {
+        transition: opacity 0.15s ease-out !important;
+      }
+    }
   }
+  
   &__logo {
     align-items: center;
     display: flex;
     justify-content: center;
     position: relative;
     width: 100%;
+    
     &-text {
       flex: 1;
       padding: 0;
       text-align: center;
       text-transform: uppercase;
+      
+      // Force animations ONLY on non-Firefox using !important
+      @supports not (-moz-appearance: none) {
+        transition: opacity 0.15s ease-out !important;
+      }
     }
+    
     &-img {
       background-image: url('/core/assets/nav-logo.png');
       background-position: center;
@@ -127,11 +166,18 @@ $icon-nav-width: 50px;
       background-size: contain;
       height: 100%;
       width: 100%;
+      
+      // Force animations ONLY on non-Firefox using !important
+      @supports not (-moz-appearance: none) {
+        transition: width 0.15s ease-out !important;
+      }
     }
   }
+  
   &__top-inner {
     overflow: hidden;
   }
+  
   &__bottom {
     display: flex;
     flex: 0 0 auto;
@@ -140,126 +186,97 @@ $icon-nav-width: 50px;
     padding: 12px;
     pointer-events: none;
   }
+  
   &__logo-img,
   &__item-label {
     opacity: 1;
   }
+  
   &__copyright-icon,
   &__logo-icon-img {
     opacity: 0;
+    
+    // Force animations ONLY on non-Firefox using !important
+    @supports not (-moz-appearance: none) {
+      transition: opacity 0.15s ease-out !important;
+    }
   }
+  
   &__copyright {
     opacity: 1;
     white-space: nowrap;
+    
+    // Force animations ONLY on non-Firefox using !important
+    @supports not (-moz-appearance: none) {
+      transition: opacity 0.15s ease-out !important;
+    }
   }
+  
   &__copyright-icon {
     width: 0;
+    
+    // Force animations ONLY on non-Firefox using !important
+    @supports not (-moz-appearance: none) {
+      transition: width 0.15s ease-out !important;
+    }
   }
 }
-$transition-time: 0.2s;
-$transition-delay: 0.5s;
+
 .side-nav__icon-mode {
   overflow: hidden;
   width: $icon-nav-width;
-  &__top,
-  &__item-icon,
-  &__item-label,
-  &__copyright,
-  &__logo-img,
-  &__copyright-icon,
-  &__logo-icon-img {
-    transition: 0s opacity, 0s width;
-  }
+  
   .side-nav {
     &__inner {
-      transition: $transition-time width;
       width: $icon-nav-width;
     }
+    
     &__items,
     &__top,
     &__bottom,
     &__top-inner {
       overflow-x: hidden;
     }
+    
     &__top-inner {
       padding: 0;
     }
+    
     &__top {
       width: $icon-nav-width;
     }
+    
     &__nav-toggle {
       margin: 0;
     }
+    
     &__item-icon {
       font-size: $side-nav-mat-icon-height-large;
       height: $side-nav-mat-icon-height-large;
       margin-right: 0;
       width: $side-nav-mat-icon-height-large;
     }
+    
     &__item-label,
     &__copyright  {
       opacity: 0;
     }
+    
     &__logo-img {
       width: 0;
     }
+    
     &__copyright-icon,
     &__logo-icon-img {
       opacity: 1;
     }
+    
     &__copyright-icon {
       width: auto;
     }
+    
     &__logo-text {
       display: none;
     }
   }
-  // This will allow hover nav
-  // &:hover {
-  //   overflow: visible;
-  //   .side-nav {
-  //     &__inner {
-  //       position: fixed;
-  //       transition-delay: $transition-delay;
-  //       width: $nav-width;
-  //     }
-  //     &,
-  //     &__top,
-  //     &__item-icon,
-  //     &__item-label,
-  //     &__copyright,
-  //     &__logo-img,
-  //     &__copyright-icon,
-  //     &__logo-icon-img {
-  //       transition-delay: $transition-delay;
-  //     }
-  //     &__copyright-icon {
-  //       width: 0;
-  //     }
-  //   }
-  // }
-  // &:not(:hover) {
-  //   .side-nav {
-  //     &__top {
-  //       width: $icon-nav-width;
-  //     }
-  //     &__item-icon {
-  //       font-size: $side-nav-mat-icon-height-large;
-  //       height: $side-nav-mat-icon-height-large;
-  //       margin-right: 0;
-  //       width: $side-nav-mat-icon-height-large;
-  //     }
-  //     &__item-label,
-  //     &__copyright  {
-  //       opacity: 0;
-  //     }
-  //     &__logo-img {
-  //       width: 0;
-  //     }
-  //     &__copyright-icon,
-  //     &__logo-icon-img {
-  //       opacity: 1;
-  //     }
-  //   }
-  // }
 }

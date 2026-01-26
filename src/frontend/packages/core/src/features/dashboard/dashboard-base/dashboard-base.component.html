@@ -5,8 +5,9 @@
     <!-- Side navigation drawer -->
     @if (mainNavState$ | async; as navState) {
       <div #sidenav
-        class="dashboard-side-nav bg-nav-bg text-nav-text h-full flex-shrink-0 transition-all duration-300 ease-in-out shadow-lg"
-         [ngClass]="{
+        class="dashboard-side-nav bg-nav-bg text-nav-text h-full flex-shrink-0 shadow-xl"
+        style="transition: width 0.2s ease-out !important; will-change: width !important;"
+        [ngClass]="{
            'fixed inset-y-0 left-0 z-50': navState.mode === 'over',
            'w-64': (navState.mode === 'side' && !navState.iconMode) || (navState.mode === 'over'),
            'w-16': navState.mode === 'side' && navState.iconMode,
@@ -44,7 +45,7 @@
             @if (subNavData$ | async; as data) {
               <div>
                 @if (data[0] || data[1] || data[3]) {
-                  <div class="page-header-sub-nav bg-content-secondary border-b border-content-border px-6 py-4">
+                  <div class="page-header-sub-nav bg-content-secondary border-b border-content-border px-6 py-4 shadow-sm">
                     <div class="page-header-sub-nav-container flex items-center justify-between">
                       @if (data[0] && !data[3]) {
                         <div class="page-header-sub-nav-title text-xl font-semibold text-content-text">
@@ -55,7 +56,7 @@
                         <div class="page-header-sub-nav-breadcrumbs flex items-center space-x-2">
                           @for (breadcrumbDef of breadcrumbs; track breadcrumbDef.value; let isLast = $last) {
                             @if (breadcrumbDef.routerLink) {
-                              <span class="page-header-sub-nav-breadcrumb text-accent hover:text-accent-dark cursor-pointer font-medium"
+                              <span class="page-header-sub-nav-breadcrumb text-accent hover:text-accent-dark cursor-pointer font-medium transition-all duration-200 px-2 py-1 rounded-md hover:bg-white/10"
                               [routerLink]="breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
                             }
                             @if (!breadcrumbDef.routerLink) {
@@ -92,7 +93,7 @@
 
   <!-- Side help panel -->
   <div #sideHelp
-    class="dashboard-side-help-outer fixed inset-y-0 right-0 z-50 bg-white shadow-xl transform transition-transform duration-300 ease-in-out"
+    class="dashboard-side-help-outer fixed inset-y-0 right-0 z-50 bg-white shadow-2xl transform transition-transform duration-200"
        [ngClass]="{
          'translate-x-0': sidePanelService.opened(),
          'translate-x-full': !sidePanelService.opened(),

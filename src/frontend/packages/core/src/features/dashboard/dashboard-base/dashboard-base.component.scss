@@ -22,6 +22,17 @@ $app-header-height: 56px;
   @media (max-width: 767px) {
     grid-template-columns: 1fr;
   }
+  
+  &__side-nav {
+    overflow: hidden;
+    
+    // Force animations ONLY on Chrome using !important
+    @supports not (-moz-appearance: none) {
+      transition: width 0.2s ease-out !important;
+      will-change: width !important;
+    }
+  }
+  
   &__side-help-outer {
     z-index: 9999;
 
@@ -55,9 +66,6 @@ $app-header-height: 56px;
     display: flex;
     flex-direction: column;
     width: 100%;
-  }
-  &__side-nav {
-    overflow: hidden;
   }
   &__inline-help {
     width: 600px;
