@@ -4,31 +4,59 @@
 }
 
 .confirm-dialog {
-  min-width: 250px;
+  min-width: 300px;
+  
   &__actions {
-    @apply flex justify-end gap-2 mt-6;
+    @apply flex justify-end gap-3 mt-6;
+    
+    button {
+      @apply transition-all duration-200 ease-in-out;
+      min-width: 100px;
+      
+      &:hover {
+        transform: translateY(-1px);
+      }
+      
+      &:active {
+        transform: translateY(0);
+      }
+    }
   }
 
   &__header {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--content-border);
   }
 
   &__warn-icon {
-    $size: 28px;
+    $size: 32px;
     font-size: $size;
     height: $size;
     margin-left: 12px;
     width: $size;
+    @apply transition-all duration-200 ease-in-out;
+    
+    &:hover {
+      transform: scale(1.1);
+    }
   }
 
   &__message {
     white-space: pre-wrap;
+    line-height: 1.6;
+    color: var(--content-text);
+    margin: 16px 0;
   }
 
   &__enter-text {
     display: flex;
     flex-direction: column;
     width: 100%;
+    gap: 12px;
+    margin-top: 16px;
   }
 }

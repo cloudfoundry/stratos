@@ -8,24 +8,58 @@
   width: 100%;
   position: relative;
   overflow: visible;
+  animation: fadeInUp 0.5s ease-out;
+  
   & > * {
-    margin-bottom: 20px;
+    margin-bottom: 24px;
   }
+  
   > mat-icon {
-    font-size: 96px;
-    height: 96px;
-    width: 96px;
+    font-size: 112px;
+    height: 112px;
+    width: 112px;
+    opacity: 0.7;
+    @apply transition-all duration-300 ease-in-out;
+    
+    &:hover {
+      opacity: 0.9;
+      transform: scale(1.05);
+    }
   }
+  
   .first-line {
-    font-size: 30px;
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--content-text);
   }
+  
   .second-line {
-    font-size: 24px;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--content-muted);
+    
+    a {
+      @apply transition-all duration-200 ease-in-out;
+      color: var(--color-primary);
+      text-decoration: none;
+      font-weight: 500;
+      padding: 2px 6px;
+      border-radius: 4px;
+      
+      &:hover {
+        background-color: rgba(33, 150, 243, 0.1);
+        transform: translateY(-1px);
+      }
+    }
   }
+  
   .first-line,
   .second-line {
     max-width: 700px;
   }
+  
   &__link {
     display: flex;
     opacity: 0;
@@ -33,38 +67,62 @@
     right: 113px;
     top: 54px;
     z-index: 10;
+    @apply transition-all duration-300 ease-in-out;
+    
     &-icon {
       font-size: 44px;
       height: 44px;
       transform: rotate(90deg);
       width: 44px;
+      @apply transition-transform duration-300;
     }
+    
     &-text {
       font-size: 16px;
       margin-top: 26px;
+      font-weight: 500;
     }
+    
     &--show {
       opacity: 1;
-      transition: opacity .6s;
+      transition: opacity 0.6s ease-out;
+      
+      &:hover {
+        .app-no-content-container__link-icon {
+          transform: rotate(90deg) scale(1.1);
+        }
+      }
     }
   }
+  
   &__menu {
     margin-top: 0;
-    // When in a menu, we don't want the menu to be too wide
-    max-width: 200px;
-    padding: 10px;
+    max-width: 240px;
+    padding: 16px;
 
     > mat-icon {
-      font-size: 72px;
-      height: 72px;
-      width: 72px;
+      font-size: 80px;
+      height: 80px;
+      width: 80px;
     }
 
     .first-line {
-      font-size: 22px;
+      font-size: 24px;
     }
+    
     .second-line {
       font-size: 16px;
     }
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

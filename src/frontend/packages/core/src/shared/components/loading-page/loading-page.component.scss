@@ -16,54 +16,56 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1050; /* Use z-index from theme system (modal level) */
-
-    /* Theme-aware backdrop with proper opacity */
+    z-index: 1050;
     background-color: var(--content-bg);
-    opacity: 0.95;
-
-    /* Backdrop blur for modern glass-morphism effect (optional) */
-    backdrop-filter: blur(2px);
+    opacity: 0.97;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.3s ease-out;
   }
 
   /* Content indicator container */
   &__indicator {
     flex: none;
     text-align: center;
-    max-width: 28rem; /* 448px */
-    padding: 0 1.5rem; /* 24px horizontal padding */
+    max-width: 32rem;
+    padding: 2rem;
+    background-color: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   /* Alert message styling with theme support */
   &__alert {
-    margin-bottom: 1rem; /* 16px */
-    padding: 0.75rem; /* 12px */
-    border-radius: 0.5rem; /* 8px */
-    font-size: 0.875rem; /* 14px */
+    margin-bottom: 1.25rem;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
     font-weight: 500;
     text-align: center;
-
-    /* Theme-aware warning colors */
     background-color: var(--warning-bg);
     color: var(--warning-text);
     border: 1px solid var(--warning-border);
+    animation: pulse 2s ease-in-out infinite;
   }
 
   /* Loading text styling */
   &__text {
-    font-size: 1.125rem; /* 18px */
-    font-weight: 500;
-    margin-bottom: 1.5rem; /* 24px */
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1.75rem;
     color: var(--content-text);
+    letter-spacing: -0.01em;
   }
 
   /* Progress bar container */
   &__progress {
     width: 100%;
-    height: 0.5rem; /* 8px */
-    background-color: var(--content-border);
-    border-radius: 9999px; /* fully rounded */
+    height: 0.625rem;
+    background-color: var(--content-secondary);
+    border-radius: 9999px;
     overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
   }
 
   /* Animated progress bar */
@@ -71,13 +73,14 @@
     width: 100%;
     height: 100%;
     border-radius: 9999px;
-    background-color: var(--color-primary);
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+    animation: shimmer 2s ease-in-out infinite;
+    box-shadow: 0 0 12px rgba(33, 150, 243, 0.4);
   }
 
   /* Spinner container */
   &__spinner-container {
-    margin-top: 1rem; /* 16px */
+    margin-top: 1.5rem;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -86,41 +89,85 @@
   /* Spinner with theme support */
   &__spinner {
     display: inline-block;
-    width: 2rem; /* 32px */
-    height: 2rem; /* 32px */
+    width: 2.5rem;
+    height: 2.5rem;
     border: 3px solid var(--content-border);
     border-radius: 50%;
     border-top-color: var(--color-primary);
-    animation: spin 0.8s linear infinite;
+    border-right-color: var(--color-secondary);
+    animation: spin 0.8s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+    box-shadow: 0 0 8px rgba(33, 150, 243, 0.2);
   }
 }
 
-/* Keyframes for spinner animation */
+/* Enhanced keyframes */
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
 }
 
-/* Keyframes for pulse animation (if not already defined globally) */
+@keyframes shimmer {
+  0%, 100% {
+    opacity: 1;
+    transform: translateX(-100%);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateX(100%);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.97;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 @keyframes pulse {
   0%, 100% {
     opacity: 1;
   }
   50% {
-    opacity: 0.5;
+    opacity: 0.7;
   }
 }
 
 /* Reduced motion support (accessibility) */
 @media (prefers-reduced-motion: reduce) {
   .loading-page {
+    &__overlay {
+      animation: none;
+    }
+    
+    &__indicator {
+      animation: none;
+    }
+    
     &__progress-bar {
       animation: none;
     }
 
     &__spinner {
-      animation: spin 2s linear infinite; /* Slower animation for reduced motion */
+      animation: spin 2s linear infinite;
+    }
+    
+    &__alert {
+      animation: none;
     }
   }
 }

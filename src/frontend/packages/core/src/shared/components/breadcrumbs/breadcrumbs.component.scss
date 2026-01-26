@@ -1,25 +1,39 @@
-$breadcrumb-opacity: 0.7;
+$breadcrumb-opacity: 0.75;
 $breadcrumb-hover-opacity: 1;
-$breadcrumb-padding: 3px;
+$breadcrumb-padding: 6px;
 .breadcrumb {
+  @apply transition-all duration-200 ease-in-out;
+  
   &,
   &__separator {
     opacity: $breadcrumb-opacity;
   }
   &__separator {
-    font-size: 26px;
+    font-size: 22px;
     margin: 0 $breadcrumb-padding;
     user-select: none;
+    @apply transition-opacity duration-200;
   }
   &__list {
     align-items: center;
     display: flex;
     justify-content: center;
+    gap: 4px;
   }
   &__link {
     cursor: pointer;
+    @apply font-medium;
+    padding: 4px 8px;
+    border-radius: 6px;
+    
     &:hover {
       opacity: $breadcrumb-hover-opacity;
+      background-color: rgba(255, 255, 255, 0.1);
+      transform: translateY(-1px);
+    }
+    
+    &:active {
+      transform: translateY(0);
     }
   }
 }
