@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { ShowHideButtonComponent } from './show-hide-button.component';
 
@@ -6,12 +8,16 @@ describe('ShowHideButtonComponent', () => {
   let component: ShowHideButtonComponent;
   let fixture: ComponentFixture<ShowHideButtonComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ ShowHideButtonComponent ]
-    })
-    .compileComponents();
-  }));
+      providers: [provideZonelessChangeDetection()],
+      imports: [
+        ShowHideButtonComponent,
+      ],
+      
+    });
+    TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ShowHideButtonComponent);

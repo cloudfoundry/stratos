@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { BaseTestModulesNoShared } from '../../../../../../../../core/test-framework/core-test.helper';
 import { GithubCommitAuthorComponent } from '../../../../github-commit-author/github-commit-author.component';
@@ -8,13 +10,17 @@ describe('TableCellCommitAuthorComponent', () => {
   let component: TableCellCommitAuthorComponent<any>;
   let fixture: ComponentFixture<TableCellCommitAuthorComponent<any>>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [TableCellCommitAuthorComponent, GithubCommitAuthorComponent],
-      imports: [...BaseTestModulesNoShared]
+      providers: [provideZonelessChangeDetection()],
+      imports: [
+        ...BaseTestModulesNoShared,
+        TableCellCommitAuthorComponent,
+        GithubCommitAuthorComponent,
+      ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellCommitAuthorComponent);

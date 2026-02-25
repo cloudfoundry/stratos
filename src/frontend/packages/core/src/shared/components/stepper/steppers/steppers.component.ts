@@ -1,5 +1,4 @@
-import {
-  AfterContentInit,
+import { ChangeDetectionStrategy, ChangeDetectorRef, AfterContentInit,
   Component,
   ContentChildren,
   Input,
@@ -7,8 +6,10 @@ import {
   OnInit,
   QueryList,
   ViewEncapsulation,
-} from '@angular/core';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
+ } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { TailwindSnackBarService, TailwindSnackBarRef } from '../../../services/tailwind-snackbar.service';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { getPreviousRoutingState, IRouterNavPayload, RouterNav, AppState } from '@stratosui/store';
@@ -18,22 +19,30 @@ import { catchError, first, map, switchMap } from 'rxjs/operators';
 import { BASE_REDIRECT_QUERY } from '../stepper.types';
 import { SteppersService } from '../steppers.service';
 import { StepComponent, StepOnNextResult } from './../step/step.component';
+import { DotContentComponent } from '../../../../core/dot-content/dot-content.component';
 
 @Component({
   selector: 'app-steppers',
   templateUrl: './steppers.component.html',
   styleUrls: ['./steppers.component.scss'],
   providers: [SteppersService],
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    DotContentComponent
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
-  private nextSub: Subscription;
+  private nextSub!: Subscription;
   cancel$: Observable<string>;
 
-  @ContentChildren(StepComponent) stepComponents: QueryList<StepComponent>;
+  @ContentChildren(StepComponent) stepComponents!: QueryList<StepComponent>;
 
-  @Input() cancel = null;
+  @Input() cancel: string = null;
   @Input() nextButtonProgress = true;
   @Input() basePreviousRedirect: IRouterNavPayload = this.route.snapshot.queryParams[BASE_REDIRECT_QUERY] ? {
     path: this.route.snapshot.queryParams[BASE_REDIRECT_QUERY]
@@ -47,8 +56,8 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   stepValidateSub: Subscription = null;
 
-  private enterData;
-  private snackBarRef: MatSnackBarRef<SimpleSnackBar>;
+  private enterData: any;
+  private snackBarRef!: TailwindSnackBarRef<any>;
 
   currentIndex = 0;
   cancelQueryParams$: Observable<{
@@ -57,8 +66,9 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   constructor(
     private steppersService: SteppersService,
     private store: Store<AppState>,
-    private snackBar: MatSnackBar,
-    private route: ActivatedRoute
+    private snackBar: TailwindSnackBarService,
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {
     const previousRoute$ = store.select(getPreviousRoutingState).pipe(first());
     this.cancel$ = previousRoute$.pipe(
@@ -94,6 +104,10 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       this.hiddenSubs.push(step.onHidden.subscribe((hidden) => {
         this.filterSteps();
       }));
+      // Listen for validation changes to trigger change detection
+      this.hiddenSubs.push(step.onValidChange.subscribe(() => {
+        this.cdr.markForCheck();
+      }));
     }));
     this.filterSteps();
   }
@@ -102,7 +116,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     this.steps = this.allSteps.filter((step => !step.hidden));
   }
 
-  goNext() {
+  goNext(): void {
     // Close previous error snackbar if there was one
     if (this.snackBarRef) {
       this.snackBar.dismiss();
@@ -144,30 +158,31 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
           } else if (!success && message) {
             this.snackBarRef = this.snackBar.open(message, 'Dismiss', { panelClass: 'stepper-snack-bar' });
           }
-          return [];
-        })).subscribe();
+          return observableOf(undefined);
+        })
+      ).subscribe();
     }
   }
 
-  redirect(redirectPayload?: IRouterNavPayload) {
+  redirect(redirectPayload?: IRouterNavPayload): Observable<void> {
     if (redirectPayload) {
       return observableOf(this.dispatchRedirect(redirectPayload));
     }
-    return combineLatest(
+    return combineLatest([
       this.cancel$,
       this.cancelQueryParams$
-    ).pipe(
+    ]).pipe(
       map(([path, params]) => {
         this.dispatchRedirect({ path, query: params });
       })
     );
   }
 
-  private dispatchRedirect(redirectPayload: IRouterNavPayload) {
+  private dispatchRedirect(redirectPayload: IRouterNavPayload): void {
     this.store.dispatch(new RouterNav(redirectPayload));
   }
 
-  setActive(index: number) {
+  setActive(index: number): void {
     if (this.basePreviousRedirect && index < 0) {
       this.dispatchRedirect(this.basePreviousRedirect);
     }
@@ -209,6 +224,9 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       this.steps[this.currentIndex].onEnter(this.enterData);
     }
     this.enterData = undefined;
+
+    // Trigger change detection for OnPush strategy
+    this.cdr.markForCheck();
   }
 
   private findValidStep(index: number, isNextDirection: boolean) {
@@ -282,7 +300,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     return true;
   }
 
-  getIconLigature(step: StepComponent, index: number): 'done' {
+  getIconLigature(step: StepComponent, index: number): string {
     return 'done';
   }
 

@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 
+import { ListComponent } from '../../../../../../../../../core/src/shared/components/list/list.component';
 import { ListConfig } from '../../../../../../../../../core/src/shared/components/list/list.component.types';
 import {
   CfSpacesServiceInstancesListConfigService,
@@ -9,6 +10,11 @@ import {
   selector: 'app-cloud-foundry-space-service-instances',
   templateUrl: './cloud-foundry-space-service-instances.component.html',
   styleUrls: ['./cloud-foundry-space-service-instances.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    ListComponent
+  ],
   providers: [
     {
       provide: ListConfig,

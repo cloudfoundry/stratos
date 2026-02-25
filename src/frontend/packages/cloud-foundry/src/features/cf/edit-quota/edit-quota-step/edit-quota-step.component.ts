@@ -1,14 +1,12 @@
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+
+import { Component, OnDestroy, ViewChild , ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
-import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { AppState } from '../../../../../../store/src/app-state';
-import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { APIResource } from '../../../../../../store/src/types/api.types';
+import { safeUnsubscribe, StepOnNextFunction } from '@stratosui/core';
+import { AppState, ActionState, APIResource } from '@stratosui/store';
 import { IOrgQuotaDefinition } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
@@ -22,18 +20,23 @@ import { QuotaDefinitionFormComponent } from '../../quota-definition-form/quota-
   styleUrls: ['./edit-quota-step.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
-  ]
+  ],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    QuotaDefinitionFormComponent
+]
 })
 export class EditQuotaStepComponent implements OnDestroy {
 
   cfGuid: string;
   quotaGuid: string;
-  quotaDefinition$: Observable<APIResource<IOrgQuotaDefinition>>;
-  quotaSubscription: Subscription;
-  quota: IOrgQuotaDefinition;
+  quotaDefinition$!: Observable<APIResource<IOrgQuotaDefinition>>;
+  quotaSubscription!: Subscription;
+  quota!: IOrgQuotaDefinition;
 
-  @ViewChild('form')
-  form: QuotaDefinitionFormComponent;
+  @ViewChild('form', { static: false })
+  form!: QuotaDefinitionFormComponent;
 
   constructor(
     private store: Store<AppState>,
@@ -59,7 +62,7 @@ export class EditQuotaStepComponent implements OnDestroy {
   validate = () => this.form && this.form.valid();
 
   submit: StepOnNextFunction = () =>
-    cfEntityCatalog.quotaDefinition.api.update<ActionState>(this.quotaGuid, this.cfGuid, this.form.formGroup.value).pipe(
+    cfEntityCatalog.quotaDefinition.api.update<ActionState>(this.quotaGuid, this.cfGuid, this.form.formGroup.getRawValue()).pipe(
       pairwise(),
       filter(([oldV, newV]) => oldV.busy && !newV.busy),
       map(([, newV]) => newV),

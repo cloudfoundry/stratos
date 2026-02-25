@@ -1,5 +1,5 @@
 import { HttpClient, HttpRequest, HttpResponse } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map, mergeMap } from 'rxjs/operators';
@@ -10,15 +10,14 @@ import { IStratosEndpointDefinition } from '../entity-catalog/entity-catalog.typ
 import { cfAPIVersion, proxyAPIVersion } from '../jetstream';
 import { connectedEndpointsOfTypesSelector, endpointOfTypeSelector } from '../selectors/endpoint.selectors';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class PipelineHttpClient {
 
   static readonly EndpointHeader = 'x-cap-cnsi-list';
-
-  constructor(
-    public httpClient: HttpClient,
-    private store: Store<InternalAppState>,
-  ) { }
+  public httpClient = inject(HttpClient);
+  private store = inject(Store<InternalAppState>);
 
   private makeRequest<R>(
     hr: HttpRequest<any>,

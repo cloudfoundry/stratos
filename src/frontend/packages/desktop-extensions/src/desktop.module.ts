@@ -10,9 +10,6 @@ import { ElectronService } from './electron/electron.service';
   declarations: [
     DesktopLoginComponent,
   ],
-  entryComponents: [
-    DesktopLoginComponent
-  ],
   providers: [
     ElectronService,
   ]

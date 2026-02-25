@@ -1,7 +1,7 @@
-import { Component, Input, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, Injector, Input, OnDestroy, signal , ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
-  BehaviorSubject,
   combineLatest as observableCombineLatest,
   Observable,
   of as observableOf,
@@ -9,12 +9,10 @@ import {
 } from 'rxjs';
 import { filter, first, map, startWith } from 'rxjs/operators';
 
-import { DeleteDeployAppSection } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { SnackBarService } from '../../../../../../core/src/shared/services/snackbar.service';
-import { RouterNav } from '../../../../../../store/src/actions/router.actions';
+import { safeUnsubscribe, LogViewerComponent, StepOnNextFunction, SnackBarService } from '@stratosui/core';
+import { RouterNav } from '@stratosui/store';
+import { CFAppState } from '@stratosui/cloud-foundry';
+import { DeleteDeployAppSection } from '../../../../actions/deploy-applications.actions';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { CfAppsDataSource } from '../../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
@@ -23,50 +21,57 @@ import { DeployApplicationDeployer } from '../deploy-application-deployer';
 @Component({
   selector: 'app-deploy-application-step3',
   templateUrl: './deploy-application-step3.component.html',
-  styleUrls: ['./deploy-application-step3.component.scss']
+  styleUrls: ['./deploy-application-step3.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    LogViewerComponent,
+  ]
 })
 export class DeployApplicationStep3Component implements OnDestroy {
 
-  @Input() appGuid: string;
+  @Input() appGuid!: string;
 
   // Validation observable
   valid$: Observable<boolean>;
 
-  showOverlay$: Observable<boolean>;
+  showOverlay$!: Observable<boolean>;
 
-  error$ = new BehaviorSubject<boolean>(false);
+  error = signal<boolean>(false);
   // Observable for when the deploy modal can be closed
   closeable$: Observable<boolean>;
 
-  public deployer: DeployApplicationDeployer;
+  public deployer!: DeployApplicationDeployer;
 
-  private deploySub: Subscription;
-  private errorSub: Subscription;
-  private validSub: Subscription;
-  private busySub: Subscription;
+  private deploySub!: Subscription;
+  private errorSub!: Subscription;
+  private validSub!: Subscription;
+  private busySub!: Subscription;
 
   public busy = false;
 
   constructor(
     private store: Store<CFAppState>,
     private snackBarService: SnackBarService,
-    public cfOrgSpaceService: CfOrgSpaceDataService
+    public cfOrgSpaceService: CfOrgSpaceDataService,
+    private injector: Injector
   ) {
     this.valid$ = observableOf(false);
     this.closeable$ = observableOf(false);
   }
 
   private initDeployer() {
-    this.deploySub = this.deployer.status$.pipe(
+    this.deploySub = this.deployer.status$.asObservable().pipe(
       filter(status => status.deploying),
     ).subscribe();
 
     // Observables
-    this.errorSub = this.deployer.status$.pipe(
+    this.errorSub = this.deployer.status$.asObservable().pipe(
       filter((status) => status.error)
     ).subscribe(status => this.snackBarService.show(status.errorMsg, 'Dismiss'));
 
-    const appGuid$ = this.deployer.applicationGuid$.pipe(
+    const appGuid$ = this.deployer.applicationGuid$.asObservable().pipe(
       filter((appGuid) => appGuid !== null),
       first(),
     );
@@ -89,15 +94,15 @@ export class DeployApplicationStep3Component implements OnDestroy {
 
     this.closeable$ = observableCombineLatest(
       this.valid$.pipe(startWith(false)),
-      this.deployer.status$).pipe(
+      this.deployer.status$.asObservable()).pipe(
         map(([validated, status]) => {
           return validated || status.error;
         })
       );
 
-    this.busySub = this.deployer.status$.subscribe(status => this.busy = status.deploying);
+    this.busySub = this.deployer.status$.asObservable().subscribe(status => this.busy = status.deploying);
 
-    this.showOverlay$ = this.deployer.status$.pipe(
+    this.showOverlay$ = this.deployer.status$.asObservable().pipe(
       map(status => {
         return !status.deploying || status.deploying && !this.deployer.streamTitle;
       })
@@ -121,7 +126,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
   }
 
   private setupCompletionNotification() {
-    this.deployer.status$.pipe(
+    this.deployer.status$.asObservable().pipe(
       filter(status => !status.deploying),
       first()
     ).subscribe(status => {
@@ -140,7 +145,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
     if (fsDeployer) {
       this.deployer = fsDeployer;
     } else {
-      this.deployer = new DeployApplicationDeployer(this.store, this.cfOrgSpaceService);
+      this.deployer = new DeployApplicationDeployer(this.store, this.cfOrgSpaceService, this.injector);
     }
 
     this.initDeployer();

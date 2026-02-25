@@ -1,4 +1,5 @@
-import { Component, Input, OnInit, Output } from '@angular/core';
+import { Component, Input, OnInit, Output, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import {
   EntityMonitor,
   EntityMonitorFactory,
@@ -9,6 +10,7 @@ import {
 } from '@stratosui/store';
 import { Observable, of } from 'rxjs';
 import { distinctUntilChanged, map, pairwise, startWith, withLatestFrom } from 'rxjs/operators';
+import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 
 export enum AppMonitorComponentTypes {
   UPDATE = 'MONITOR_UPDATE',
@@ -119,22 +121,28 @@ export class ActionMonitorComponentState {
 @Component({
   selector: 'app-action-monitor-icon',
   templateUrl: './app-action-monitor-icon.component.html',
-  styleUrls: ['./app-action-monitor-icon.component.scss']
+  styleUrls: ['./app-action-monitor-icon.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    CustomIconComponent
+  ]
 })
 export class AppActionMonitorIconComponent implements OnInit {
 
   // State observable - use this instead of creating one
   @Input()
-  public state: Observable<IActionMonitorComponentState>;
+  public state!: Observable<IActionMonitorComponentState>;
 
   @Input()
-  public entityKey: string;
+  public entityKey!: string;
 
   @Input()
-  public id: string;
+  public id!: string;
 
   @Input()
-  public schema: EntitySchema;
+  public schema!: EntitySchema;
 
   @Input()
   public monitorState: AppMonitorComponentTypes = AppMonitorComponentTypes.FETCHING;
@@ -143,9 +151,8 @@ export class AppActionMonitorIconComponent implements OnInit {
   public updateKey = rootUpdatingKey;
 
   @Output()
-  public currentState: Observable<IActionMonitorComponentState>;
-
-  constructor(private entityMonitorFactory: EntityMonitorFactory) { }
+  public currentState!: Observable<IActionMonitorComponentState>;
+  private entityMonitorFactory = inject(EntityMonitorFactory);
 
   ngOnInit() {
     if (this.state) {

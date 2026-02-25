@@ -1,28 +1,41 @@
-import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
+import { CommonModule } from '@angular/common';
+import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
-import { Component, Input, OnDestroy } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
-import { MatChipInputEvent } from '@angular/material/chips';
+import { Component, Input, OnDestroy, computed, signal , ChangeDetectionStrategy } from '@angular/core';
+import { ReactiveFormsModule, FormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest as obsCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
-import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
-import { IUserProvidedServiceInstanceData } from '../../../../../../cloud-foundry/src/actions/user-provided-service.actions';
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
+// Form interfaces
+interface CreateEditServiceInstanceForm {
+  name: FormControl<string>;
+  syslog_drain_url: FormControl<string>;
+  credentials: FormControl<string>;
+  route_service_url: FormControl<string>;
+  tags: FormControl<any[]>;
+}
+
+interface BindExistingInstanceForm {
+  serviceInstances: FormControl<string>;
+}
+
+import { StatefulIconComponent, safeUnsubscribe, urlValidationExpression, environment, StepOnNextResult, isValidJsonValidator } from '@stratosui/core';
+import { AppNameUniqueDirective } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
+import { Store } from '@ngrx/store';
+import { combineLatest as obsCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
+import { APIResource } from '@stratosui/store';
+
+import { IUserProvidedServiceInstanceData } from '../../../../actions/user-provided-service.actions';
+import { CFAppState } from '../../../../cf-app-state';
 import {
   serviceBindingEntityType,
   userProvidedServiceInstanceEntityType,
-} from '../../../../../../cloud-foundry/src/cf-entity-types';
-import { createEntityRelationKey } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+} from '../../../../cf-entity-types';
+import { createEntityRelationKey } from '../../../../entity-relations/entity-relations.types';
 import {
   selectCreateServiceInstance,
-} from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
-import { safeUnsubscribe, urlValidationExpression } from '../../../../../../core/src/core/utils.service';
-import { environment } from '../../../../../../core/src/environments/environment';
-import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { isValidJsonValidator } from '../../../../../../core/src/shared/form-validators';
-import { APIResource } from '../../../../../../store/src/types/api.types';
+} from '../../../../store/selectors/create-service-instance.selectors';
 import { IUserProvidedServiceInstance } from '../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { AppNameUniqueChecking } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
@@ -34,7 +47,20 @@ const { proxyAPIVersion, cfAPIVersion } = environment;
 @Component({
   selector: 'app-specify-user-provided-details',
   templateUrl: './specify-user-provided-details.component.html',
-  styleUrls: ['./specify-user-provided-details.component.scss']
+  styleUrls: ['./specify-user-provided-details.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    CustomFormFieldComponent,
+    MatLabelComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
+    AppNameUniqueDirective,
+    StatefulIconComponent
+  ]
 })
 export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
 
@@ -48,38 +74,36 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       route && route.snapshot ? route.snapshot.params : { endpointId: null, serviceInstanceId: null };
     this.isUpdate = endpointId && serviceInstanceId;
 
-    this.createEditServiceInstance = new UntypedFormGroup({
-      name: new UntypedFormControl('', [Validators.required, Validators.maxLength(50)]),
-      syslog_drain_url: new UntypedFormControl('', [Validators.pattern(urlValidationExpression)]),
-      credentials: new UntypedFormControl('', isValidJsonValidator()),
-      route_service_url: new UntypedFormControl('', [Validators.pattern(urlValidationExpression)]),
-      tags: new UntypedFormControl([]),
+    this.createEditServiceInstance = new FormGroup<CreateEditServiceInstanceForm>({
+      name: new FormControl('', { validators: [Validators.required, Validators.maxLength(50)], nonNullable: true }),
+      syslog_drain_url: new FormControl('', { validators: [Validators.pattern(urlValidationExpression)], nonNullable: true }),
+      credentials: new FormControl('', { validators: isValidJsonValidator(), nonNullable: true }),
+      route_service_url: new FormControl('', { validators: [Validators.pattern(urlValidationExpression)], nonNullable: true }),
+      tags: new FormControl<any[]>([], { nonNullable: true }),
     });
-    this.bindExistingInstance = new UntypedFormGroup({
-      serviceInstances: new UntypedFormControl('', [Validators.required]),
+    this.bindExistingInstance = new FormGroup<BindExistingInstanceForm>({
+      serviceInstances: new FormControl('', { validators: [Validators.required], nonNullable: true }),
     });
     this.initUpdate(serviceInstanceId, endpointId);
     this.setupValidate();
   }
-  public createEditServiceInstance: UntypedFormGroup;
-  public bindExistingInstance: UntypedFormGroup;
-  public separatorKeysCodes = [ENTER, COMMA, SPACE];
-  public allServiceInstanceNames: string[];
+  public createEditServiceInstance: FormGroup<CreateEditServiceInstanceForm>;
+  public bindExistingInstance: FormGroup<BindExistingInstanceForm>;
+  public allServiceInstanceNames!: string[];
   public subs: Subscription[] = [];
   public isUpdate: boolean;
   public tags: { label: string, }[] = [];
-  public valid = new BehaviorSubject(false);
+  public validate = signal(false);
   private subscriptions: Subscription[] = [];
-  private tagsChanged = new BehaviorSubject(true);
 
   @Input()
-  public cfGuid: string;
+  public cfGuid!: string;
   @Input()
-  public spaceGuid: string;
+  public spaceGuid!: string;
   @Input()
-  public appId: string;
+  public appId!: string;
   @Input()
-  public serviceInstanceId: string;
+  public serviceInstanceId!: string;
 
   @Input()
   public showModeSelection = false;
@@ -99,7 +123,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   ];
   formMode = CreateServiceFormMode.CreateServiceInstance;
 
-  private originalFormValue;
+  private originalFormValue: IUserProvidedServiceInstanceData | null = null;
 
   ngOnDestroy(): void {
     safeUnsubscribe(...this.subscriptions);
@@ -108,26 +132,19 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   private setupValidate() {
     const obs = obsCombineLatest([
       this.createEditServiceInstance.statusChanges.pipe(startWith('INVALID')),
-      this.bindExistingInstance.statusChanges.pipe(startWith('INVALID')),
-      this.tagsChanged
+      this.bindExistingInstance.statusChanges.pipe(startWith('INVALID'))
     ]).pipe(
       map(([createValid, bindValid]) =>
         this.formStatusToBool(this.formMode === CreateServiceFormMode.CreateServiceInstance ? createValid : bindValid)
       ),
       map(valid => this.validAndChanged(valid)),
     );
-    this.subscriptions.push(this.tagsChanged.subscribe(() => {
-      if (this.formMode === CreateServiceFormMode.CreateServiceInstance) {
-        this.createEditServiceInstance.markAsTouched();
-        this.createEditServiceInstance.markAsDirty();
-        this.createEditServiceInstance.updateValueAndValidity();
-      } else {
-        this.bindExistingInstance.markAsTouched();
-        this.bindExistingInstance.markAsDirty();
-        this.bindExistingInstance.updateValueAndValidity();
-      }
+
+    // Subscribe to form status changes and update validate signal
+    // Note: We don't call updateValueAndValidity here to avoid infinite loops
+    this.subscriptions.push(obs.subscribe(valid => {
+      this.validate.set(valid);
     }));
-    this.subscriptions.push(obs.subscribe(valid => this.valid.next(valid)));
   }
 
   private validAndChanged(isValid = false): boolean {
@@ -164,7 +181,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   }
 
   resetForms = (mode: CreateServiceFormMode) => {
-    this.valid.next(false);
+    this.validate.set(false);
     this.createEditServiceInstance.reset();
     this.bindExistingInstance.reset();
     if (mode === CreateServiceFormMode.CreateServiceInstance) {
@@ -319,15 +336,16 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
     );
   }
 
-  private getServiceData() {
-    const data = {
-      ...this.createEditServiceInstance.value,
-      spaceGuid: this.spaceGuid || null
+  private getServiceData(): IUserProvidedServiceInstanceData {
+    const formValue = this.createEditServiceInstance.value;
+    return {
+      spaceGuid: this.spaceGuid,
+      name: formValue.name!,
+      route_service_url: formValue.route_service_url || undefined,
+      syslog_drain_url: formValue.syslog_drain_url || undefined,
+      tags: this.getTagsArray(),
+      credentials: formValue.credentials ? JSON.parse(formValue.credentials) : undefined
     };
-    data.credentials = data.credentials ? JSON.parse(data.credentials) : {};
-
-    data.tags = this.getTagsArray();
-    return data;
   }
 
 
@@ -340,16 +358,14 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   }
 
 
-  public addTag(event: MatChipInputEvent): void {
-    const input = event.input;
+  public addTagFromInput(event: KeyboardEvent): void {
+    event.preventDefault();
+    const input = event.target as HTMLInputElement;
+    const label = (input.value || '').trim();
 
-    const label = (event.value || '').trim();
     if (label) {
       this.tags.push({ label });
-      this.tagsChanged.next(true);
-    }
-
-    if (input) {
+      this.updateTagsFormControl();
       input.value = '';
     }
   }
@@ -359,8 +375,16 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
 
     if (index >= 0) {
       this.tags.splice(index, 1);
-      this.tagsChanged.next(true);
+      this.updateTagsFormControl();
     }
+  }
+
+  private updateTagsFormControl(): void {
+    const tagsArray = this.tags.map(t => t.label);
+    this.createEditServiceInstance.controls.tags.setValue(tagsArray);
+    this.createEditServiceInstance.controls.tags.markAsTouched();
+    // Mark the form as dirty to trigger change detection
+    this.createEditServiceInstance.markAsDirty();
   }
 
 }

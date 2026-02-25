@@ -1,16 +1,19 @@
-import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { MatSort, Sort } from '@angular/material/sort';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { MatSort, Sort } from '../../../services/tailwind-material-replacements';
 import { ListSort } from '@stratosui/store';
-import { combineLatest as observableCombineLatest, Subscription } from 'rxjs';
+import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-import { ITableListDataSource } from '../data-sources-controllers/list-data-source-types';
+import { ITableListDataSource, RowState } from '../data-sources-controllers/list-data-source-types';
 import { IListPaginationController } from '../data-sources-controllers/list-pagination-controller';
 import { ListExpandedComponentType } from '../list.component.types';
 import { TableCellActionsComponent } from './table-cell-actions/table-cell-actions.component';
 import { TableCellExpanderComponent, TableCellExpanderConfig } from './table-cell-expander/table-cell-expander.component';
 import { TableCellSelectComponent } from './table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from './table-header-select/table-header-select.component';
+import { TableCellComponent } from './table-cell/table-cell.component';
+import { TableRowComponent } from './table-row/table-row.component';
 import { TableRowExpandedService } from './table-row/table-row-expanded-service';
 import { ITableColumn } from './table.types';
 
@@ -41,8 +44,15 @@ const tableColumnAction: ITableColumn<any> = {
   selector: 'app-table',
   templateUrl: './table.component.html',
   styleUrls: ['./table.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     TableRowExpandedService
+  ],
+  standalone: true,
+  imports: [
+    CommonModule,
+    TableCellComponent,
+    TableRowComponent
   ]
 })
 export class TableComponent<T> implements OnInit, OnDestroy {
@@ -50,6 +60,8 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   private uberSub: Subscription;
 
   @ViewChild(MatSort, { static: true }) sort: MatSort;
+
+  constructor(private cdr: ChangeDetectorRef) { }
 
   // See https://github.com/angular/angular-cli/issues/2034 for weird definition
   @Input() hideTable = false;
@@ -76,7 +88,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
           ...tableColumnExpander,
           cellConfig: (row: T) => {
             const res: TableCellExpanderConfig = {
-              rowId: this.dataSource.trackBy(null, row)
+              rowId: String(this.dataSource.trackBy(0, row))
             };
             return res;
           }
@@ -95,6 +107,11 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   }
 
   initWidgetStore() {
+    // If sort directive is not available (not in template), skip initialization
+    if (!this.sort) {
+      return;
+    }
+
     const sortStoreToWidget = this.paginationController.sort$.pipe(
       tap((sort: ListSort) => {
         if (this.sort.active !== sort.field || this.sort.direction !== sort.direction) {
@@ -103,6 +120,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
             start: sort.direction as 'asc' | 'desc',
             disableClear: true
           });
+          this.cdr.markForCheck();
         }
       })
     );
@@ -113,6 +131,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
           field: sort.active,
           direction: sort.direction,
         });
+        this.cdr.markForCheck();
       })
     );
 
@@ -122,11 +141,21 @@ export class TableComponent<T> implements OnInit, OnDestroy {
     ).subscribe();
   }
 
-  getRowState(row: T) {
+  getRowState(row: T): Observable<RowState> | null {
     if (this.dataSource.getRowState) {
       return this.dataSource.getRowState(row);
     }
     return null;
+  }
+
+  handleSort(column: ITableColumn<T>): void {
+    if (column.sort && this.sort) {
+      this.sort.sort({
+        id: column.columnId,
+        start: this.sort.direction === 'asc' ? 'desc' : 'asc',
+        disableClear: true
+      });
+    }
   }
 
   ngOnDestroy() {

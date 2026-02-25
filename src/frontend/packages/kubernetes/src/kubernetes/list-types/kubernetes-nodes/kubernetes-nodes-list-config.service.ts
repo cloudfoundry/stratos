@@ -7,6 +7,10 @@ import {
   IListConfig,
   IListFilter,
   ListViewTypes,
+  IGlobalListAction,
+  IMultiListAction,
+  IListAction,
+  IListMultiFilterConfig,
 } from '../../../../../core/src/shared/components/list/list.component.types';
 import { AppState } from '../../../../../store/src/public-api';
 import { PaginationEntityState } from '../../../../../store/src/types/pagination.types';
@@ -29,7 +33,9 @@ export enum KubernetesNodesListFilterKeys {
   LABELS = 'labels'
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class KubernetesNodesListConfigService implements IListConfig<KubernetesNode> {
   dataSource: KubernetesNodesDataSource;
 
@@ -114,12 +120,12 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
     noEntries: 'There are no nodes'
   };
 
-  getGlobalActions = () => null;
-  getMultiActions = () => [];
-  getSingleActions = () => [];
-  getColumns = () => this.columns;
-  getDataSource = () => this.dataSource;
-  getMultiFiltersConfigs = () => [];
+  getGlobalActions = (): IGlobalListAction<KubernetesNode>[] => [];
+  getMultiActions = (): IMultiListAction<KubernetesNode>[] => [];
+  getSingleActions = (): IListAction<KubernetesNode>[] => [];
+  getColumns = (): ITableColumn<KubernetesNode>[] => this.columns;
+  getDataSource = (): KubernetesNodesDataSource => this.dataSource;
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
   getFilters = (): IListFilter[] => this.filters;
 
   constructor(
@@ -147,10 +153,10 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
 
           case KubernetesNodesListFilterKeys.LABELS:
             return entities.filter(node => {
-              return Object.entries(node.metadata.labels).some(([label, value]) => {
-                label = label.toUpperCase();
-                value = value.toUpperCase();
-                return label.includes(filterString) || value.includes(filterString);
+              return Object.entries(node.metadata.labels).some(([label, value]: [string, string]) => {
+                const upperLabel = label.toUpperCase();
+                const upperValue = value.toUpperCase();
+                return upperLabel.includes(filterString) || upperValue.includes(filterString);
               });
             });
 

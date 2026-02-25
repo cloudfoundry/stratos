@@ -3,21 +3,20 @@ import { Action, Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { catchError, first, map, pairwise, share, skipWhile, switchMap, tap } from 'rxjs/operators';
 
-import { AppState } from '../../../store/src/app-state';
-import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
 import {
+  AppState,
+  entityCatalog,
   EntityUserRolesEndpoint,
   EntityUserRolesFetch,
-} from '../../../store/src/entity-request-pipeline/entity-request-pipeline.types';
-import {
   BaseHttpClientFetcher,
   flattenPagination,
   PaginationFlattener,
-} from '../../../store/src/helpers/paginated-request-helpers';
-import { ActionState } from '../../../store/src/reducers/api-request-reducer/types';
-import { connectedEndpointsOfTypesSelector } from '../../../store/src/selectors/endpoint.selectors';
-import { selectPaginationState } from '../../../store/src/selectors/pagination.selectors';
-import { BasePaginatedAction, PaginationEntityState } from '../../../store/src/types/pagination.types';
+  ActionState,
+  connectedEndpointsOfTypesSelector,
+  selectPaginationState,
+  PaginationEntityState,
+  BasePaginatedAction,
+} from '@stratosui/store';
 import {
   CfUserRelationTypes,
   GET_CURRENT_CF_USER_RELATIONS,
@@ -145,23 +144,23 @@ function fetchCfUserRoles(endpoint: IEndpointConnectionInfo, store: Store<AppSta
 
 class PermissionFlattener extends BaseHttpClientFetcher<CFResponse> implements PaginationFlattener<CFResponse, CFResponse> {
 
-  constructor(httpClient: HttpClient, public url, public requestOptions: { [key: string]: any, }) {
+  constructor(httpClient: HttpClient, public url: string, public requestOptions: { [key: string]: any }) {
     super(httpClient, url, requestOptions, 'page');
   }
-  public getTotalPages = (res: CFResponse) => res.total_pages;
+  public getTotalPages = (res: CFResponse): number => res.total_pages;
 
-  public mergePages = (res: CFResponse[]) => {
+  public mergePages = (res: CFResponse[]): CFResponse => {
     const firstRes = res.shift();
-    const final = res.reduce((finalRes, currentRes) => {
+    const final = res.reduce((finalRes: CFResponse, currentRes: CFResponse) => {
       finalRes.resources = [
         ...finalRes.resources,
       ];
       return finalRes;
-    }, firstRes);
+    }, firstRes as CFResponse);
     return final;
   };
   public getTotalResults = (res: CFResponse): number => res.total_results;
-  public clearResults = (res: CFResponse) => of(res);
+  public clearResults = (res: CFResponse): Observable<CFResponse> => of(res);
 }
 
 export function fetchCfUserRole(store: Store<AppState>, action: GetCurrentCfUserRelations, httpClient: HttpClient): Observable<boolean> {

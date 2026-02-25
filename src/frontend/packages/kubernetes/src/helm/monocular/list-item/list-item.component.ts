@@ -1,24 +1,33 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { AsyncPipe, NgClass } from '@angular/common';
+import { ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { CustomTooltipDirective } from '@stratosui/core';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { Chart } from '../shared/models/chart';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-list-item',
   templateUrl: './list-item.component.html',
   styleUrls: ['./list-item.component.scss'],
-  /* tslint:disable-next-line:no-inputs-metadata-property */
-  inputs: ['detailUrl'],
+  standalone: true,
+  imports: [
+    AsyncPipe,
+    NgClass,
+    RouterLink,
+    CustomTooltipDirective,
+  ]
 })
 export class ListItemComponent implements OnInit {
 
   @Input() height = 'default';
   @Input() public artifactHubAndHelmRepoTypes$: Observable<boolean>;
-  @Input() chart: Chart;
+  @Input() chart!: Chart;
 
-  public detailUrl: string;
-  public showArtifactHub$: Observable<boolean>;
+  @Input() public detailUrl: string;
+  public showArtifactHub$!: Observable<boolean>;
 
   ngOnInit() {
     this.showArtifactHub$ = this.artifactHubAndHelmRepoTypes$ ? this.artifactHubAndHelmRepoTypes$.pipe(

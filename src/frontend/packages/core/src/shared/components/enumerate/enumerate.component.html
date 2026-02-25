@@ -1,10 +1,19 @@
-<div *ngIf="(collection | async) as collection; else empty">
-  <div *ngIf="collection.length > 0; else empty">
-    <span *ngFor="let item of collection; let index = index">
-      {{labelPath ? item[labelPath] : item}}<span *ngIf="index !== collection.length - 1">, </span>
-    </span>
-  </div>
+@if ((collection | async); as collection) {
+  <div>
+    @if (collection.length > 0) {
+      <div>
+        @for (item of collection; track $index; let index = $index) {
+          <span>
+            {{labelPath ? item[labelPath] : item}}@if (index !== collection.length - 1) {
+            <span>, </span>
+          }
+        </span>
+      }
+    </div>
+  } @else {
+    <div>None</div>
+  }
 </div>
-<ng-template #empty>
+} @else {
   <div>None</div>
-</ng-template>
+}

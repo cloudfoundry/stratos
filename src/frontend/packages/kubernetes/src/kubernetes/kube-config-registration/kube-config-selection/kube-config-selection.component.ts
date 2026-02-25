@@ -1,8 +1,12 @@
-import { Component, Input } from '@angular/core';
+import {Component, Input, signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, Observable, of as observableOf, of } from 'rxjs';
+import { combineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
 
+import { FileInputComponent } from '../../../../../core/src/shared/components/file-input/file-input.component';
+import { CustomIconComponent } from '../../../../../core/src/shared/components/custom-material/custom-material.component';
 import {
   ITableListDataSource,
   RowState,
@@ -10,6 +14,7 @@ import {
 import {
   TableHeaderSelectComponent,
 } from '../../../../../core/src/shared/components/list/list-table/table-header-select/table-header-select.component';
+import { TableComponent } from '../../../../../core/src/shared/components/list/list-table/table.component';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
 import { SnackBarService } from '../../../../../core/src/shared/services/snackbar.service';
 import { AppState } from '../../../../../store/src/public-api';
@@ -18,9 +23,7 @@ import { KubeConfigFileCluster } from '../kube-config.types';
 import { KubeConfigTableCertComponent } from './kube-config-table-cert/kube-config-table-cert.component';
 import { KubeConfigTableNameComponent } from './kube-config-table-name/kube-config-table-name.component';
 import { KubeConfigTableSelectComponent } from './kube-config-table-select/kube-config-table-select.component';
-import {
-  KubeConfigTableSubTypeSelectComponent,
-} from './kube-config-table-sub-type-select/kube-config-table-sub-type-select.component';
+import { KubeConfigTableSubTypeSelectComponent } from './kube-config-table-sub-type-select/kube-config-table-sub-type-select.component';
 import { KubeConfigTableUserSelectComponent } from './kube-config-table-user-select/kube-config-table-user-select.component';
 
 export interface KubeConfigTableListDataSource extends ITableListDataSource<KubeConfigFileCluster> {
@@ -28,16 +31,24 @@ export interface KubeConfigTableListDataSource extends ITableListDataSource<Kube
 }
 
 @Component({
-  selector: 'app-kube-config-selection',
+selector: 'app-kube-config-selection',
   templateUrl: './kube-config-selection.component.html',
   styleUrls: ['./kube-config-selection.component.scss'],
   providers: [
     KubeConfigHelper
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    FileInputComponent,
+    TableComponent,
+    CustomIconComponent
+  ]
 })
 export class KubeConfigSelectionComponent {
 
-  @Input() applyStarted: boolean;
+  @Input() applyStarted!: boolean;
   public dataSource: KubeConfigTableListDataSource = {
     connect: () => this.helper.clusters$,
     disconnect: () => { },
@@ -125,17 +136,21 @@ export class KubeConfigSelectionComponent {
   ];
 
   // Is the import data valid?
-  valid = new BehaviorSubject<boolean>(false);
-  valid$ = this.valid.asObservable();
+  private _valid = signal<boolean>(false);
+  valid$ = toObservable(this._valid);
 
-  canSetIntermediate = false;
+  canSetIntermediate = false;  private store = inject(Store<AppState>);
+  public helper = inject(KubeConfigHelper);
+  private snackbarService = inject(SnackBarService);
 
-  constructor(
-    private store: Store<AppState>,
-    public helper: KubeConfigHelper,
-    private snackbarService: SnackBarService
-  ) {
+
+
+  constructor() {
+
+
     this.helper.clustersChanged = () => this.clustersChanged();
+
+
   }
 
   // Save data for the next step to know the list of clusters to import
@@ -205,7 +220,7 @@ export class KubeConfigSelectionComponent {
     });
 
     // Must be at least one selected and they all must be okay to import
-    this.valid.next(selected > 0 && selected === okay);
+    this._valid.set(selected > 0 && selected === okay);
   }
 
 }

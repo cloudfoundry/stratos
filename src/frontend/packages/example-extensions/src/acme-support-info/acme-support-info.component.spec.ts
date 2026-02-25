@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { AcmeSupportInfoComponent } from './acme-support-info.component';
 import { CoreModule } from '../../core/core.module';
@@ -8,16 +10,17 @@ describe('AcmeSupportInfoComponent', () => {
   let component: AcmeSupportInfoComponent;
   let fixture: ComponentFixture<AcmeSupportInfoComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       declarations: [ AcmeSupportInfoComponent ],
       imports: [
         CoreModule,
-        SharedModule
+        SharedModule,
       ]
-    })
+    }),
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AcmeSupportInfoComponent);

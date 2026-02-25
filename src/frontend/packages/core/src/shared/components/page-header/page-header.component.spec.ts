@@ -1,52 +1,50 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
+import { CommonModule } from '@angular/common';
 
-import { InternalEventMonitorFactory } from '../../../../../store/src/monitors/internal-event-monitor.factory';
-import { appReducers } from '../../../../../store/src/reducers.module';
-import { CoreModule } from '../../../core/core.module';
+import { InternalEventMonitorFactory, appReducers } from '@stratosui/store';
+import { CoreTestingModule } from '@test-framework';
 import { EndpointsService } from '../../../core/endpoints.service';
-import { MDAppModule } from '../../../core/md.module';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { TabNavService } from '../../../tab-nav.service';
-import { SharedModule } from '../../shared.module';
 import { PageHeaderComponent } from './page-header.component';
-import { PageHeaderModule } from './page-header.module';
 
 describe('PageHeaderComponent', () => {
   let component: PageHeaderComponent;
   let fixture: ComponentFixture<PageHeaderComponent>;
   const URL_KEY = 'key';
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
       providers: [
         InternalEventMonitorFactory,
         {
           provide: ActivatedRoute,
           useValue: {
             snapshot: {
-              queryParams: { breadcrumbs: URL_KEY }
+              queryParams: { breadcrumbs: URL_KEY },
+              data: {}
             }
           }
         },
         TabNavService,
         CurrentUserPermissionsService,
         EndpointsService,
+        provideZonelessChangeDetection(),
       ],
       imports: [
-        MDAppModule,
-        CoreModule,
-        SharedModule,
-        PageHeaderModule,
+        CoreTestingModule,
+        CommonModule,
         RouterTestingModule,
-        StoreModule.forRoot(
-          appReducers
-        )
+        StoreModule.forRoot(appReducers),
+        PageHeaderComponent,
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(PageHeaderComponent);

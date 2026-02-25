@@ -5,17 +5,17 @@ import { GetSpaceRoutes } from '../actions/space.actions';
 import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
 export interface RoutesActionBuilders extends OrchestratedActionBuilders {
-  create: (id, endpointGuid, route: NewRoute) => CreateRoute;
+  create: (id: string, endpointGuid: string, route: NewRoute) => CreateRoute;
   delete: (
-    guid,
-    endpointGuid,
+    guid: string,
+    endpointGuid: string,
     appGuid?: string,
     appGuids?: string[],
     async?: boolean,
     recursive?: boolean
   ) => DeleteRoute;
   getMultiple: (
-    endpointGuid,
+    endpointGuid: string,
     paginationKey: string,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
   ) => GetAllRoutes;
@@ -42,14 +42,14 @@ export interface RoutesActionBuilders extends OrchestratedActionBuilders {
 }
 
 export const routesActionBuilders: RoutesActionBuilders = {
-  create: (id, endpointGuid, route: NewRoute) => new CreateRoute(
+  create: (id: string, endpointGuid: string, route: NewRoute) => new CreateRoute(
     id,
     endpointGuid,
     route
   ),
   delete: (
-    guid,
-    endpointGuid,
+    guid: string,
+    endpointGuid: string,
     appGuid?: string,
     appGuids?: string[],
     async: boolean = false,
@@ -63,7 +63,7 @@ export const routesActionBuilders: RoutesActionBuilders = {
     recursive
   ),
   getMultiple: (
-    endpointGuid,
+    endpointGuid: string,
     paginationKey: string,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetAllRoutes(endpointGuid, paginationKey, includeRelations, populateMissing),

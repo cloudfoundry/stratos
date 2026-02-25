@@ -1,5 +1,5 @@
 import { NgZone } from '@angular/core';
-import moment from 'moment';
+import { getTime, subMinutes } from 'date-fns';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, map, share, startWith } from 'rxjs/operators';
 
@@ -12,7 +12,7 @@ import {
 
 export function newNonAngularInterval(ngZone: NgZone, intervalTime: number) {
   return new Observable<number>((observer) => {
-    let intervalTimer;
+    let intervalTimer: any;
     let counter = 0;
     observer.add(() => {
       clearInterval(intervalTimer);
@@ -68,7 +68,7 @@ export class InternalEventMonitor {
   }
 
   private getErrorsOverTimePeriod(state: InternalEventSubjectState, minutes: number) {
-    const time = moment().subtract(minutes, 'minutes').unix() * 1000;
+    const time = getTime(subMinutes(new Date(), minutes));
     return Object.keys(state).reduce<Record<string, InternalEventState[]>>((errorObject, key) => {
       const events = state[key];
       const hasErrorEvent = !!events.find(event => {

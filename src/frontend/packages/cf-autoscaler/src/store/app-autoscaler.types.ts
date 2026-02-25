@@ -139,6 +139,7 @@ export interface AppAutoscalerFetchPolicyFailedResponse {
 }
 
 export interface AppAutoscalerInvalidPolicyError {
+  [key: string]: AppAutoscalerInvalidPolicyErrorEntity | undefined;
   alertInvalidPolicyTriggerMetricName?: AppAutoscalerInvalidPolicyErrorEntity;
   alertInvalidPolicyTriggerThreshold100?: AppAutoscalerInvalidPolicyErrorEntity;
   alertInvalidPolicyTriggerThresholdRange?: AppAutoscalerInvalidPolicyErrorEntity;

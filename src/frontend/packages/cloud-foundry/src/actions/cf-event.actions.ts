@@ -16,7 +16,7 @@ export const CfGetAllEvents = {
 export class GetAllCfEvents extends CFStartAction implements PaginatedAction {
   private static sortField = 'timestamp'; // This is the field that 'order-direction' is applied to. Cannot be changed
 
-  constructor(public paginationKey: string, public endpointGuid) {
+  constructor(public paginationKey: string, public endpointGuid: string) {
     super();
     this.paginationKey = this.paginationKey || createEntityRelationPaginationKey(endpointEntityType, endpointGuid);
     this.options = new HttpRequest(
@@ -43,7 +43,7 @@ export class GetAllCfEvents extends CFStartAction implements PaginatedAction {
   initialParams = {
     'order-direction': 'desc',
     'order-direction-field': GetAllCfEvents.sortField,
-    q: []
+    q: [] as string[]
     // q: [
     //   new QParam('actee', this.appGuid, QParamJoiners.colon).toString(),
     // ]

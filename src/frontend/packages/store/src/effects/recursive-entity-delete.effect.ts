@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { map, mergeMap, withLatestFrom } from 'rxjs/operators';
@@ -56,10 +56,9 @@ export class ResetTreeDelete implements Action {
 @Injectable()
 export class RecursiveDeleteEffect {
   private entityTreeCache: { [guid: string]: IFlatTree } = {};
-  constructor(
-    private actions$: Actions,
-    private store: Store<GeneralEntityAppState>
-  ) { }
+
+  private actions$ = inject(Actions);
+  private store = inject(Store<GeneralEntityAppState>);
 
   
   delete$ = createEffect(() => this.actions$.pipe(

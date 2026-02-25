@@ -3,32 +3,32 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 
-import { DeleteQuotaDefinition } from '../../../../../../../cloud-foundry/src/actions/quota-definitions.actions';
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
-  BaseCfListConfig,
-} from '../../../../../../../cloud-foundry/src/shared/components/list/list-types/base-cf/base-cf-list-config';
-import {
+  ConfirmationDialogConfig,
+  ConfirmationDialogService,
   CurrentUserPermissionsService,
-} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import { IListAction, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+  IListAction,
+  ITableColumn,
+  ListViewTypes
+} from '@stratosui/core';
+import { APIResource, RouterNav } from '@stratosui/store';
+import { DeleteQuotaDefinition } from '../../../../../actions/quota-definitions.actions';
+import { CFAppState } from '../../../../../cf-app-state';
 import { IQuotaDefinition } from '../../../../../cf-api.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
+import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfQuotasDataSourceService } from './cf-quotas-data-source.service';
 import { TableCellQuotaComponent } from './table-cell-quota/table-cell-quota.component';
 
 export const QUOTA_FROM_LIST = 'list';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfQuotasListConfigService extends BaseCfListConfig<APIResource<IQuotaDefinition>> {
   dataSource: CfQuotasDataSourceService;
-  deleteSubscription: Subscription;
+  deleteSubscription!: Subscription;
   canEdit: Observable<boolean>;
   canDelete: Observable<boolean>;
 
@@ -48,7 +48,7 @@ export class CfQuotasListConfigService extends BaseCfListConfig<APIResource<IQuo
 
   enableTextFilter = true;
   text = {
-    title: null,
+    title: null as string | null,
     filter: 'Search by name',
     noEntries: 'There are no quotas'
   };
@@ -103,7 +103,7 @@ export class CfQuotasListConfigService extends BaseCfListConfig<APIResource<IQuo
   getDataSource = () => this.dataSource;
   getSingleActions = () => [this.listActionEdit, this.listActionDelete];
 
-  editSingleQuota = (item: APIResource<IQuotaDefinition>) => {
+  editSingleQuota = (item: APIResource<IQuotaDefinition>): void => {
     this.store.dispatch(
       new RouterNav({
         path: [
@@ -120,7 +120,7 @@ export class CfQuotasListConfigService extends BaseCfListConfig<APIResource<IQuo
     );
   }
 
-  deleteSingleQuota(item: APIResource<IQuotaDefinition>) {
+  deleteSingleQuota(item: APIResource<IQuotaDefinition>): void {
     const quotaGuid = item.metadata.guid;
     const confirmation = new ConfirmationDialogConfig(
       'Delete Quota',

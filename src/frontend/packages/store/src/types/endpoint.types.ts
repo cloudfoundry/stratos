@@ -1,5 +1,5 @@
-import { MetricsAPITargets, MetricsStratosInfo } from '../actions/metrics-api.actions';
-import { EndpointType } from '../extension-types';
+import type { MetricsAPITargets, MetricsStratosInfo } from '../actions/metrics-api.actions';
+import type { EndpointType } from '../extension-types';
 
 export const endpointListKey = 'endpoint-list';
 export interface INewlyConnectedEndpointInfo {

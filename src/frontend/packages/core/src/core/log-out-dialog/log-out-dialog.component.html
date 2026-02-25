@@ -1,15 +1,15 @@
 <div class="logout-dialog__outer">
-  <mat-progress-bar class="logout-dialog__progress" mode="determinate" [value]="percentage">
-  </mat-progress-bar>
-  <mat-dialog-content class="logout-dialog__content">
+  <app-progress-bar class="logout-dialog__progress" mode="determinate" [value]="percentage">
+  </app-progress-bar>
+  <div class="dialog-content logout-dialog__content">
     <div class="logout-dialog__message">
-      <mat-icon>pan_tool</mat-icon>
+      <i class="material-icons">pan_tool</i>
       <div>
         Are you still there?
       </div>
     </div>
-  </mat-dialog-content>
-  <mat-dialog-actions class="logout-dialog__actions">
-    <button mat-button color="primary" [mat-dialog-close]="true">Yes</button>
-  </mat-dialog-actions>
+  </div>
+  <div class="dialog-actions logout-dialog__actions">
+    <button class="btn btn-primary" (click)="dialogRef.close()">Yes</button>
+  </div>
 </div>

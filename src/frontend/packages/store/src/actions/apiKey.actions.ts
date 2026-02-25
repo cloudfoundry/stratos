@@ -40,5 +40,5 @@ export class GetAllApiKeys extends BaseApiKeyAction implements PaginationApiKeyA
   }
   flattenPagination = true;
   paginationKey: string;
-  initialParams: PaginationParam;
+  initialParams!: PaginationParam;
 }

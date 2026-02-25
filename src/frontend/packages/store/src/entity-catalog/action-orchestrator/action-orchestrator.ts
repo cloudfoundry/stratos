@@ -1,8 +1,8 @@
 import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 
-import { EntitySchema } from '../../helpers/entity-schema';
-import { PaginatedAction } from '../../types/pagination.types';
+import type { EntitySchema } from '../../helpers/entity-schema';
+import type { PaginatedAction } from '../../types/pagination.types';
 import { EntityRequestAction, StartAction } from '../../types/request.types';
 
 export interface ActionBuilderAction extends EntityRequestAction {
@@ -116,7 +116,7 @@ export class BasePipelineRequestAction<M extends Array<any> = any[]> extends Sta
 // This action will be created by the entity catalog from single request entity builder configs.
 export class BaseEntityRequestAction extends BasePipelineRequestAction implements EntityRequestAction {
   public options: HttpRequest<any>;
-  public updatingKey = null;
+  public updatingKey: string | null = null;
   constructor(
     entity: EntitySchema | EntitySchema[],
     public guid: string,

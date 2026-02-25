@@ -12,19 +12,17 @@ import { CreateEndpointComponent } from './create-endpoint.component';
 @NgModule({
   imports: [
     CommonModule,
-    CoreModule,
-    SharedModule
-  ],
-  declarations: [
     CreateEndpointComponent,
     CreateEndpointCfStep1Component,
     CreateEndpointBaseStepComponent,
     CreateEndpointConnectComponent,
     ConnectEndpointComponent,
   ],
+  declarations: [],
   exports: [
     CreateEndpointComponent,
     CreateEndpointCfStep1Component,
+    CreateEndpointBaseStepComponent,
     CreateEndpointConnectComponent,
     ConnectEndpointComponent,
   ]

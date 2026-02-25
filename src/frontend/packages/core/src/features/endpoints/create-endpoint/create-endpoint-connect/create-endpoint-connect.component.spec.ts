@@ -1,11 +1,15 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from '@stratosui/store/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
+import {
+  EntityCatalogTestModuleManualStore,
+  EntityServiceFactory,
+  generateStratosEntities,
+  TEST_CATALOGUE_ENTITIES
+} from '@stratosui/store';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { SidePanelService } from '@stratosui/core';
 
-import { CoreTestingModule } from '../../../../../test-framework/core-test.modules';
-import { CoreModule } from '../../../../core/core.module';
-import { SidePanelService } from '../../../../shared/services/side-panel.service';
-import { SharedModule } from '../../../../shared/shared.module';
 import { ConnectEndpointComponent } from '../../connect-endpoint/connect-endpoint.component';
 import { CreateEndpointConnectComponent } from './create-endpoint-connect.component';
 
@@ -13,23 +17,26 @@ describe('CreateEndpointConnectComponent', () => {
   let component: CreateEndpointConnectComponent;
   let fixture: ComponentFixture<CreateEndpointConnectComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        createBasicStoreModule(),
+        EntityCatalogTestModuleManualStore,
         CreateEndpointConnectComponent,
         ConnectEndpointComponent,
       ],
-      imports: [
-        CoreModule,
-        SharedModule,
-        CoreTestingModule,
-        RouterTestingModule,
-        createBasicStoreModule(),
-      ],
-      providers: [SidePanelService],
-    })
-      .compileComponents();
-  }));
+      providers: [
+        EntityServiceFactory,
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: generateStratosEntities()
+        },
+        SidePanelService,
+        ...STORE_TEST_PROVIDERS,
+        provideZonelessChangeDetection(),
+      ]
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CreateEndpointConnectComponent);

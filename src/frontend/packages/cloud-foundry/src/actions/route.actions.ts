@@ -38,14 +38,14 @@ export interface NewRoute {
 }
 
 export abstract class BaseRouteAction extends CFStartAction implements ICFAction {
+  endpointType = 'cf';
+  actions!: string[];
+  entity = [cfEntityFactory(routeEntityType)];
+  entityType = routeEntityType;
+  options!: HttpRequest<any>;
   constructor(public guid: string, public endpointGuid: string, public appGuid?: string) {
     super();
   }
-  endpointType = 'cf';
-  actions: string[];
-  entity = [cfEntityFactory(routeEntityType)];
-  entityType = routeEntityType;
-  options: HttpRequest<any>;
 }
 
 export class CreateRoute extends BaseRouteAction {

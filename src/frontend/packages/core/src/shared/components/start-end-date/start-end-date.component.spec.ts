@@ -1,8 +1,11 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import moment from 'moment';
+import { parseISO } from 'date-fns';
 
-import { SharedModule } from './../../shared.module';
 import { StartEndDateComponent } from './start-end-date.component';
 
 describe('StartEndDateComponent', () => {
@@ -10,15 +13,20 @@ describe('StartEndDateComponent', () => {
   let fixture: ComponentFixture<StartEndDateComponent>;
   let element: HTMLElement;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideZonelessChangeDetection()
+      ],
       imports: [
-        SharedModule,
-        NoopAnimationsModule
+        StartEndDateComponent,
+        NoopAnimationsModule,
       ]
-    })
-      .compileComponents();
-  }));
+    });
+      TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(StartEndDateComponent);
@@ -32,35 +40,35 @@ describe('StartEndDateComponent', () => {
   });
 
   it('should show message if invalid', () => {
-    component.end = moment('2019-01-01T03:00:00.000Z');
-    component.start = moment('2019-01-02T03:00:00.000Z');
+    component.end = parseISO('2019-01-01T03:00:00.000Z');
+    component.start = parseISO('2019-01-02T03:00:00.000Z');
 
     expect(component.validMessage).toEqual('Start date must be before end date.');
   });
 
   it('should emit changes if valid dates', () => {
-    spyOn(component.startChange, 'emit');
-    spyOn(component.endChange, 'emit');
-    component.start = moment('2019-01-01T03:00:00.000Z');
-    component.end = moment('2019-01-03T03:00:00.000Z');
-    component.start = moment('2019-01-02T03:00:00.000Z');
-    component.end = moment('2019-01-04T03:00:00.000Z');
+    vi.spyOn(component.startChange, 'emit');
+    vi.spyOn(component.endChange, 'emit');
+    component.start = parseISO('2019-01-01T03:00:00.000Z');
+    component.end = parseISO('2019-01-03T03:00:00.000Z');
+    component.start = parseISO('2019-01-02T03:00:00.000Z');
+    component.end = parseISO('2019-01-04T03:00:00.000Z');
 
     expect(component.startChange.emit).toHaveBeenCalled();
     expect(component.endChange.emit).toHaveBeenCalled();
   });
 
   it('should be able to use custom validate method', () => {
-    const customValidate = jasmine.createSpy().and.returnValue(null);
+    const customValidate = vi.fn().mockReturnValue(null);
     component.validate = customValidate;
-    component.start = moment('2019-01-02T03:00:00.000Z');
+    component.start = parseISO('2019-01-02T03:00:00.000Z');
 
     expect(customValidate).toHaveBeenCalledWith(component.start, undefined);
   });
 
   it('should validate dates by default', () => {
-    component.start = moment('2019-01-01T03:00:00.000Z');
-    component.end = moment('2019-01-02T03:00:00.000Z');
+    component.start = parseISO('2019-01-01T03:00:00.000Z');
+    component.end = parseISO('2019-01-02T03:00:00.000Z');
     expect(component.valid).toBeTruthy();
   });
 });

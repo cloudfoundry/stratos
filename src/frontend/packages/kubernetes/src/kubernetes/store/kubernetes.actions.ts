@@ -1,7 +1,8 @@
-import { SortDirection } from '@angular/material/sort';
+// Replaced Angular Material sort with custom type
+export type SortDirection = 'asc' | 'desc' | '';
 import { Action } from '@ngrx/store';
-import { getActions } from 'frontend/packages/store/src/actions/action.helper';
-import { ApiRequestTypes } from 'frontend/packages/store/src/reducers/api-request-reducer/request-helpers';
+import { getActions } from '@stratosui/store';
+import { ApiRequestTypes } from '@stratosui/store';
 
 import { MetricQueryConfig, MetricsAction, MetricsChartAction } from '../../../../store/src/actions/metrics.actions';
 import { getPaginationKey } from '../../../../store/src/actions/pagination.actions';
@@ -91,7 +92,7 @@ const defaultSortParams = {
 
 // Set the current namespace fo the given endpoint
 export class SetCurrentNamespaceAction implements Action {
-  constructor(public endpoint, public namespace: string) { }
+  constructor(public endpoint: string, public namespace: string) { }
   type = SET_CURRENT_NAMESPACE;
 }
 
@@ -123,7 +124,7 @@ export class GetKubernetesNode implements KubeSingleEntityAction {
 }
 
 export class GetKubernetesNodes implements KubePaginationAction {
-  constructor(public kubeGuid) {
+  constructor(public kubeGuid: string) {
     this.paginationKey = getPaginationKey(kubernetesNodesEntityType, kubeGuid);
   }
   type = GET_NODES_INFO;
@@ -143,7 +144,7 @@ export class GetKubernetesNodes implements KubePaginationAction {
 }
 
 export class KubeHealthCheck extends GetKubernetesNodes {
-  constructor(kubeGuid) {
+  constructor(kubeGuid: string) {
     super(kubeGuid);
     this.paginationKey = kubeGuid + '-health-check';
     this.initialParams.limit = 1;
@@ -202,7 +203,7 @@ export class GetKubernetesNamespaces implements KubePaginationAction {
 }
 
 export class GetKubernetesPod implements KubeSingleEntityAction {
-  constructor(public podName, public namespaceName, public kubeGuid) {
+  constructor(public podName: string, public namespaceName: string, public kubeGuid: string) {
     this.guid = getGuidFromKubePod(kubeGuid, namespaceName, podName);
   }
   type = GET_KUBE_POD;
@@ -218,7 +219,7 @@ export class GetKubernetesPod implements KubeSingleEntityAction {
 }
 
 export class GetKubernetesPods implements KubePaginationAction {
-  constructor(public kubeGuid) {
+  constructor(public kubeGuid: string) {
     this.paginationKey = getPaginationKey(kubernetesPodsEntityType, 'k8', kubeGuid);
   }
   type = GET_POD_INFO;
@@ -265,7 +266,7 @@ export class GetKubernetesPodsInNamespace extends GetKubernetesPods {
 }
 
 export class GetKubernetesServices implements KubePaginationAction {
-  constructor(public kubeGuid) {
+  constructor(public kubeGuid: string) {
     this.paginationKey = getPaginationKey(kubernetesServicesEntityType, kubeGuid);
   }
   type = GET_SERVICE_INFO;
@@ -299,7 +300,7 @@ export class GetKubernetesServicesInNamespace extends GetKubernetesServices {
 
 
 export class GetKubernetesStatefulSets implements KubePaginationAction {
-  constructor(public kubeGuid) {
+  constructor(public kubeGuid: string) {
     this.paginationKey = getPaginationKey(kubernetesStatefulSetsEntityType, kubeGuid);
   }
   type = GET_KUBE_STATEFULSETS;
@@ -316,7 +317,7 @@ export class GetKubernetesStatefulSets implements KubePaginationAction {
 }
 
 export class GeKubernetesDeployments implements KubePaginationAction {
-  constructor(public kubeGuid) {
+  constructor(public kubeGuid: string) {
     this.paginationKey = getPaginationKey(kubernetesDeploymentsEntityType, kubeGuid);
   }
   type = GET_KUBE_DEPLOYMENT;
@@ -349,7 +350,7 @@ export class GetKubernetesDashboard implements KubeSingleEntityAction {
   guid: string;
 }
 
-function getKubeMetricsAction(guid: string) {
+function getKubeMetricsAction(guid: string): string {
   return `${MetricsAction.getBaseMetricsURL()}/kubernetes/${guid}`;
 }
 

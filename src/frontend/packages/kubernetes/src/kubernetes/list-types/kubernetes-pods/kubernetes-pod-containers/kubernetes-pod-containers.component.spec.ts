@@ -1,27 +1,33 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
-import { KubernetesPod } from '../../../store/kube.types';
+import { KubernetesPod } from '@stratosui/store';
 import { KubernetesPodContainersComponent } from './kubernetes-pod-containers.component';
 
 describe('KubernetesPodContainersComponent', () => {
   let component: KubernetesPodContainersComponent;
   let fixture: ComponentFixture<KubernetesPodContainersComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [KubernetesPodContainersComponent],
-      imports: KubernetesBaseTestModules
-    })
-      .compileComponents();
-  }));
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
+      imports: [
+        KubernetesPodContainersComponent,
+        ...KubernetesBaseTestModules,
+      ]}).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesPodContainersComponent);
     component = fixture.componentInstance;
     component.row = {
       metadata: {
-        uid: ''
+        uid: '',
+        kubeId: 'test-kube-id',
+        name: 'test-pod',
+        namespace: 'default'
       },
       status: {
 

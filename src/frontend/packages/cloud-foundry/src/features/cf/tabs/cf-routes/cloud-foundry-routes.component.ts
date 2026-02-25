@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 
-import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
+import { ListComponent, ListConfig } from '@stratosui/core';
 import {
   CfRoutesListConfigService,
 } from '../../../../shared/components/list/list-types/cf-routes/cf-routes-list-config.service';
@@ -15,7 +16,13 @@ import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-s
       provide: ListConfig,
       useClass: CfRoutesListConfigService
     },
-    CfOrgSpaceDataService
+    CfOrgSpaceDataService,
+    DatePipe
+  ],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    ListComponent
   ]
 })
 export class CloudFoundryRoutesComponent { }

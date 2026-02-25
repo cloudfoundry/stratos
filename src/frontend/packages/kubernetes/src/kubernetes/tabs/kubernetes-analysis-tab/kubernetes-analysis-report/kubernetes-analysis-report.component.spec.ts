@@ -1,34 +1,43 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { of } from 'rxjs';
 
-import { TabNavService } from '../../../../../../core/src/tab-nav.service';
 import { KubeBaseGuidMock, KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
-import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
 import { KubernetesAnalysisService } from '../../../services/kubernetes.analysis.service';
-import { CoreModule } from './../../../../../../core/src/core/core.module';
-import { AnalysisReportViewerComponent } from './../../../analysis-report-viewer/analysis-report-viewer.component';
 import { KubernetesAnalysisReportComponent } from './kubernetes-analysis-report.component';
-
 
 describe('KubernetesAnalysisReportComponent', () => {
   let component: KubernetesAnalysisReportComponent;
   let fixture: ComponentFixture<KubernetesAnalysisReportComponent>;
+  let mockAnalysisService: any;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [KubernetesAnalysisReportComponent, AnalysisReportViewerComponent],
+  beforeEach(async () => {
+    // Create mock analysis service with getByID method that returns mock data
+    mockAnalysisService = {
+      getByID: vi.fn().mockReturnValue(of({
+        id: 'test-id',
+        name: 'Test Analysis Report',
+        type: 'popeye',
+        report: { sections: [] },
+        created: new Date().toISOString()
+      }))
+    };
+
+    await TestBed.configureTestingModule({
       imports: [
-        KubernetesBaseTestModules,
-        CoreModule,
+        KubernetesAnalysisReportComponent,
+        ...KubernetesBaseTestModules,
       ],
       providers: [
-        KubernetesAnalysisService,
-        KubernetesEndpointService,
+        provideRouter([]),
         KubeBaseGuidMock,
-        TabNavService,
+        { provide: KubernetesAnalysisService, useValue: mockAnalysisService },
+        provideZonelessChangeDetection(),
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesAnalysisReportComponent);

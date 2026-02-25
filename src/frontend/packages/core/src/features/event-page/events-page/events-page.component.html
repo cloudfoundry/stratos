@@ -1,46 +1,96 @@
 <app-page-header>
-  <h1 *ngIf="endpointOnly">Endpoint Notifications</h1>
-  <h1 *ngIf="!endpointOnly">Notifications</h1>
+  @if (endpointOnly) {
+    <h1>Endpoint Notifications</h1>
+  }
+  @if (!endpointOnly) {
+    <h1>Notifications</h1>
+  }
   <div class="page-header-right">
     <span>
-      <button mat-icon-button matTooltip="Close" [routerLink]="back$ | async">
-        <mat-icon>close</mat-icon>
+      <button class="btn btn-icon" type="button" matTooltip="Close" [routerLink]="back$ | async">
+        <app-custom-icon>close</app-custom-icon>
       </button>
     </span>
   </div>
 </app-page-header>
 <div class="event-page">
-  <mat-button-toggle-group *ngIf="hasReadEvents$ | async ; else defaultHeader" [value]="selectedFilterSubject | async"
-    class="event-page__filter" aria-label="filter" #group="matButtonToggleGroup"
-    (change)="selectedFilterSubject.next($event.value)">
-    <mat-button-toggle value="{{filterValues.UNREAD}}">Unread</mat-button-toggle>
-    <mat-button-toggle value="{{filterValues.READ}}">Read</mat-button-toggle>
-    <mat-button-toggle value="{{filterValues.ALL}}">All</mat-button-toggle>
-  </mat-button-toggle-group>
-  <ng-template #defaultHeader>
+  @if (hasReadEvents$ | async ) {
+    <div
+      class="event-page__filter inline-flex rounded-lg border border-gray-300 bg-white p-1 shadow-sm"
+      role="group"
+      aria-label="filter">
+      <button type="button"
+        class="px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200"
+        [class.bg-blue-600]="(selectedFilterSubject | async) === filterValues.UNREAD"
+        [class.text-white]="(selectedFilterSubject | async) === filterValues.UNREAD"
+        [class.text-gray-700]="(selectedFilterSubject | async) !== filterValues.UNREAD"
+        [class.hover:bg-gray-100]="(selectedFilterSubject | async) !== filterValues.UNREAD"
+        (click)="selectedFilterSubject.next(filterValues.UNREAD)"
+        [attr.aria-pressed]="(selectedFilterSubject | async) === filterValues.UNREAD">
+        Unread
+      </button>
+      <button type="button"
+        class="px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200"
+        [class.bg-blue-600]="(selectedFilterSubject | async) === filterValues.READ"
+        [class.text-white]="(selectedFilterSubject | async) === filterValues.READ"
+        [class.text-gray-700]="(selectedFilterSubject | async) !== filterValues.READ"
+        [class.hover:bg-gray-100]="(selectedFilterSubject | async) !== filterValues.READ"
+        (click)="selectedFilterSubject.next(filterValues.READ)"
+        [attr.aria-pressed]="(selectedFilterSubject | async) === filterValues.READ">
+        Read
+      </button>
+      <button type="button"
+        class="px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200"
+        [class.bg-blue-600]="(selectedFilterSubject | async) === filterValues.ALL"
+        [class.text-white]="(selectedFilterSubject | async) === filterValues.ALL"
+        [class.text-gray-700]="(selectedFilterSubject | async) !== filterValues.ALL"
+        [class.hover:bg-gray-100]="(selectedFilterSubject | async) !== filterValues.ALL"
+        (click)="selectedFilterSubject.next(filterValues.ALL)"
+        [attr.aria-pressed]="(selectedFilterSubject | async) === filterValues.ALL">
+        All
+      </button>
+    </div>
+  } @else {
     <h2 class="event-page__unread-header">Unread</h2>
-  </ng-template>
+  }
 
-  <mat-list class="event-page__list" [ngClass]="{'event-page__list-has-read': hasReadEvents$ | async}"
-    *ngIf="events$ | async as events">
-    <mat-card class="event-page__event-row-card" *ngFor="let event of events">
-      <mat-list-item class="event-page__event-row">
-        <app-stateful-icon class="event-page__event-row-icon" [state]="event.stratosStatus">
-        </app-stateful-icon>
-        <span class="event-page__event-message">{{event.message}}</span>
-        <button class="event-page__event-row-button" *ngIf="event.link" color="primary" mat-flat-button
-          [routerLink]="event.link" [queryParams]="createQueryParams(event.link) | async">View</button>
-        <button class="event-page__event-row-button" *ngIf="event.read" color="primary" mat-flat-button
-          (click)="updateReadState(event, false)">Mark as unread</button>
-        <button class="event-page__event-row-button" *ngIf="!event.read" color="primary" mat-flat-button
-          (click)="updateReadState(event, true)">Mark as read</button>
-      </mat-list-item>
-    </mat-card>
-    <mat-card class="event-page__no-event-message" *ngIf="events.length === 0">
-      <mat-list-item>
-        <div *ngIf="endpointOnly">You have no unread endpoint notifications.</div>
-        <div *ngIf="!endpointOnly">You have no unread notifications.</div>
-      </mat-list-item>
-    </mat-card>
-  </mat-list>
+  @if (events$ | async; as events) {
+    <div class="event-page__list space-y-2"
+      [ngClass]="{'event-page__list-has-read': hasReadEvents$ | async}"
+      role="list">
+      @for (event of events; track event.key) {
+        <app-card class="event-page__event-row-card">
+          <div class="event-page__event-row flex items-center gap-4 p-4" role="listitem">
+            <app-stateful-icon class="event-page__event-row-icon flex-shrink-0" [state]="event.stratosStatus">
+            </app-stateful-icon>
+            <span class="event-page__event-message flex-1 text-sm text-gray-900">{{event.message}}</span>
+            @if (event.link) {
+              <button class="event-page__event-row-button btn btn-primary" type="button"
+              [routerLink]="event.link" [queryParams]="createQueryParams(event.link) | async">View</button>
+            }
+            @if (event.read) {
+              <button class="event-page__event-row-button btn btn-primary" type="button"
+              (click)="updateReadState(event, false)">Mark as unread</button>
+            }
+            @if (!event.read) {
+              <button class="event-page__event-row-button btn btn-primary" type="button"
+              (click)="updateReadState(event, true)">Mark as read</button>
+            }
+          </div>
+        </app-card>
+      }
+      @if (events.length === 0) {
+        <app-card class="event-page__no-event-message">
+          <div class="p-4 text-center text-sm text-gray-600" role="listitem">
+            @if (endpointOnly) {
+              <div>You have no unread endpoint notifications.</div>
+            }
+            @if (!endpointOnly) {
+              <div>You have no unread notifications.</div>
+            }
+          </div>
+        </app-card>
+      }
+    </div>
+  }
 </div>

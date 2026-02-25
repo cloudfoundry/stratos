@@ -12,7 +12,7 @@ const selectCurrentUserStratosRolesState = (state: ICurrentUserRolesState) => st
 
 const selectCurrentUserStratosRoles = (role: PermissionValues) => (state: Omit<IStratosRolesState, 'scopes'>) => {
   // Note - should not cover `scopes`
-  return state[role] || false;
+  return (state as Record<string, any>)[role] || false;
 };
 
 export const selectCurrentUserGlobalHasScopes = (scope: UserScopeStrings) => (scopes: UserScopeStrings[]) => scopes.includes(scope);

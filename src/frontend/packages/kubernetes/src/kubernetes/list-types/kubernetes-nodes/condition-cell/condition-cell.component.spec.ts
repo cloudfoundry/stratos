@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { BaseTestModules } from '../../../../../../core/test-framework/core-test.helper';
 import { ConditionCellComponent } from './condition-cell.component';
@@ -7,13 +9,15 @@ describe('ConditionCellComponent', () => {
   let component: ConditionCellComponent;
   let fixture: ComponentFixture<ConditionCellComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [ConditionCellComponent],
-      imports: BaseTestModules
-    })
-      .compileComponents();
-  }));
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
+      imports: [
+        ConditionCellComponent,
+        ...BaseTestModules,
+      ]
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ConditionCellComponent);

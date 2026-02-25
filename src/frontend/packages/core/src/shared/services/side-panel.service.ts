@@ -6,10 +6,12 @@ import {
   Inject,
   Injectable,
   ViewContainerRef,
+  signal,
+  computed,
+  Signal,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { asapScheduler, BehaviorSubject, Observable, Subject } from 'rxjs';
-import { filter, observeOn, publishReplay, refCount, tap } from 'rxjs/operators';
+import { filter, tap } from 'rxjs/operators';
 
 // Side Panel Modes
 export enum SidePanelMode {
@@ -28,13 +30,15 @@ export enum SidePanelMode {
  *  - with show(...) - Brings in side panel below the top nav
  *  - with showModal(...) - Brings in side panel overlaying the top nav
  */
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class SidePanelService {
-  private openedSubject: BehaviorSubject<boolean>;
-  public opened$: Observable<boolean>;
+  private _opened = signal<boolean>(false);
+  public opened = this._opened.asReadonly();
 
-  private previewModeSubject: BehaviorSubject<SidePanelMode>;
-  public previewMode$: Observable<SidePanelMode>;
+  private _previewMode = signal<SidePanelMode>(SidePanelMode.Normal);
+  public previewMode = this._previewMode.asReadonly();
 
   private container: ViewContainerRef;
 
@@ -43,12 +47,6 @@ export class SidePanelService {
     private router: Router,
     @Inject(DOCUMENT) private document: Document,
   ) {
-    this.openedSubject = new BehaviorSubject(false);
-    this.opened$ = this.observeSubject(this.openedSubject);
-
-    this.previewModeSubject = new BehaviorSubject<SidePanelMode>(-1);
-    this.previewMode$ = this.observeSubject(this.previewModeSubject);
-
     this.setupRouterListener();
   }
 
@@ -74,7 +72,7 @@ export class SidePanelService {
     }
 
     this.render(component, props, componentFactoryResolver);
-    this.previewModeSubject.next(mode);
+    this._previewMode.set(mode);
     this.open();
   }
 
@@ -94,7 +92,7 @@ export class SidePanelService {
 
   // Re-open the panel with its current contents
   public open() {
-    this.openedSubject.next(true);
+    this._opened.set(true);
     this.document.addEventListener('keydown', this.onKeyDown);
   }
 
@@ -103,11 +101,11 @@ export class SidePanelService {
       throw new Error('SidePanelService: container must be set');
     }
 
-    this.openedSubject.next(false);
+    this._opened.set(false);
     this.document.removeEventListener('keydown', this.onKeyDown);
   }
 
-  onKeyDown = (event) => {
+  onKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Escape') {
       this.hide();
     }
@@ -132,7 +130,7 @@ export class SidePanelService {
 
   public clear() {
     this.container.clear();
-    this.openedSubject.next(false);
+    this._opened.set(false);
   }
 
   private setupRouterListener() {
@@ -140,13 +138,5 @@ export class SidePanelService {
       filter(() => !!this.container),
       tap((e) => this.hide()))
       .subscribe();
-  }
-
-  private observeSubject(subject: Subject<any>) {
-    return subject.asObservable().pipe(
-      publishReplay(1),
-      refCount(),
-      observeOn(asapScheduler)
-    );
   }
 }

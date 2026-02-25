@@ -1,6 +1,8 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from '@stratosui/store/testing';
+import { createBasicStoreModule } from "../../core/test-framework/core-test.helper";
 
 import { CoreModule } from '../../core/core.module';
 import { SharedModule } from '../../shared/shared.module';
@@ -10,18 +12,19 @@ describe('AppActionExtensionComponent', () => {
   let component: AppActionExtensionComponent;
   let fixture: ComponentFixture<AppActionExtensionComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       declarations: [ AppActionExtensionComponent ],
       imports: [
         CoreModule,
         RouterTestingModule,
         SharedModule,
-        createBasicStoreModule()
+        createBasicStoreModule(),
       ]
-    })
+    }),
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AppActionExtensionComponent);

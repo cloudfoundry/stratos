@@ -3,76 +3,109 @@
     <h1>{{title}} Setup with Cloud Foundry UAA</h1>
   </app-page-header>
   <app-show-page-header></app-show-page-header>
-  <div class="uaa-wizard">
+  <div class="p-6">
     <app-steppers>
       <app-step title="UAA Endpoint" [valid]="validateUAAForm | async" [onNext]="uaaFormNext">
-        <div class="uaa-wizard__form">
-          <p class="uaa-wizard__form-section">Please enter the following information to allow <app-product-name></app-product-name> to authenticate
-            with
-            your UAA:</p>
-          <form class="uaa-wizard__form" [formGroup]="uaaForm" class="stepper-form">
-            <div class="uaa-wizard__form-block">
-              <mat-form-field>
-                <input matInput formControlName="apiUrl" placeholder="UAA Endpoint Url">
-              </mat-form-field>
-              <mat-checkbox matInput formControlName="skipSSL">Skip SSL validation for the UAA</mat-checkbox>
-              <mat-form-field>
-                <input matInput formControlName="clientId" placeholder="Client ID">
-              </mat-form-field>
-              <mat-form-field>
-                <input matInput formControlName="clientSecret" placeholder="Client Secret"
+        <div class="space-y-6">
+          <p class="text-gray-700">Please enter the following information to allow <app-product-name></app-product-name> to authenticate
+          with
+        your UAA:</p>
+        <form [formGroup]="uaaForm" class="space-y-6">
+          <div class="space-y-4">
+            <div class="form-field">
+              <label class="form-label" for="apiUrl">UAA Endpoint URL</label>
+              <input id="apiUrl" class="input" formControlName="apiUrl" placeholder="UAA Endpoint URL">
+            </div>
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input type="checkbox" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500" formControlName="skipSSL">
+              <span class="text-sm text-gray-700">Skip SSL validation for the UAA</span>
+            </label>
+            <div class="form-field">
+              <label class="form-label" for="clientId">Client ID</label>
+              <input id="clientId" class="input" formControlName="clientId" placeholder="Client ID">
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="clientSecret">Client Secret</label>
+              <div class="relative">
+                <input
+                  id="clientSecret"
+                  class="input pr-10"
+                  formControlName="clientSecret"
+                  placeholder="Client Secret"
                   [type]="!show ? 'password' : 'text'">
-                <span matSuffix>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                   <app-show-hide-button (changed)="show = $event"></app-show-hide-button>
-                </span>
-              </mat-form-field>
+                </div>
+              </div>
             </div>
-            <p class="uaa-wizard__form-section">Enter the username and password of an admin user (this is used to
-              retrieve
-              scope metadata)</p>
-            <div class="uaa-wizard__form-block">
-              <mat-form-field>
-                <input matInput formControlName="adminUsername" placeholder="Admin Username">
-              </mat-form-field>
-              <mat-form-field>
-                <input matInput type="password" formControlName="adminPassword" placeholder="Admin Password"
-                  [type]="!showPassword ? 'password' : 'text'">
-                <span matSuffix>
-                  <app-show-hide-button (changed)="showPassword = $event"></app-show-hide-button>
-                </span>
-              </mat-form-field>
-            </div>
-            <!-- Single Sign-on -->
-            <p class="uaa-wizard__form-section">UAA Single Sign On (SSO)</p>
-            <div class="uaa-wizard__form-block">
-              <mat-checkbox matInput formControlName="useSSO">Use SSO (Use the UAA's UI to login rather than the <app-product-name></app-product-name>
-                login UI)</mat-checkbox>
-              <p *ngIf="uaaForm.value.useSSO" class="uaa-wizard__sso-block">You must ensure that the client specified
-                above has its 'redirect_uri' configured to include the <app-product-name></app-product-name> SSO Callback URL:
-                <code>{{ clientRedirectURI }}</code>
-              </p>
-            </div>
-
-          </form>
-        </div>
-      </app-step>
-      <app-step title="Admin Scope" [onNext]="uaaScopeNext">
-        <app-loading-page [isLoading]="applyingSetup$" alert="Saving configuration"
-          text="Please wait - this will take a few moments">
-          <div class="uaa-wizard__form">
-            <p>Please select the UAA scope to use to identify users as <app-product-name></app-product-name> Administrators:</p>
-            <form class="stepper-form">
-              <mat-form-field>
-                <mat-select selected="uaaScopes[0]" [(ngModel)]="selectedScope" name="UAAScope">
-                  <mat-option *ngFor="let scope of uaaScopes" [value]="scope">
-                    {{ scope }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
-            </form>
           </div>
-        </app-loading-page>
-      </app-step>
-    </app-steppers>
-  </div>
+          <div class="border-t pt-6">
+            <p class="text-gray-700 mb-4">Enter the username and password of an admin user (this is used to
+              retrieve
+            scope metadata)</p>
+            <div class="space-y-4">
+              <div class="form-field">
+                <label class="form-label" for="adminUsername">Admin Username</label>
+                <input id="adminUsername" class="input" formControlName="adminUsername" placeholder="Admin Username">
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="adminPassword">Admin Password</label>
+                <div class="relative">
+                  <input
+                    id="adminPassword"
+                    class="input pr-10"
+                    formControlName="adminPassword"
+                    placeholder="Admin Password"
+                    [type]="!showPassword ? 'password' : 'text'">
+                  <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <app-show-hide-button (changed)="showPassword = $event"></app-show-hide-button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Single Sign-on -->
+          <div class="border-t pt-6">
+            <p class="text-gray-700 mb-4">UAA Single Sign On (SSO)</p>
+            <div class="space-y-4">
+              <label class="flex items-start space-x-2 cursor-pointer">
+                <input type="checkbox" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 mt-0.5" formControlName="useSSO">
+                <span class="text-sm text-gray-700">Use SSO (Use the UAA's UI to login rather than the <app-product-name></app-product-name>
+              login UI)</span>
+            </label>
+            @if (uaaForm.value.useSSO) {
+              <div class="alert alert-info">
+                <p class="text-info-800">You must ensure that the client specified
+                  above has its 'redirect_uri' configured to include the <app-product-name></app-product-name> SSO Callback URL:
+                  <code class="bg-info-100 px-1 py-0.5 rounded text-xs">{{ clientRedirectURI }}</code>
+                </p>
+              </div>
+            }
+          </div>
+        </div>
+      </form>
+    </div>
+  </app-step>
+  <app-step title="Admin Scope" [onNext]="uaaScopeNext">
+    <app-loading-page [isLoading]="applyingSetup()" alert="Saving configuration"
+      text="Please wait - this will take a few moments">
+      <div class="space-y-4">
+        <p class="text-gray-700">Please select the UAA scope to use to identify users as <app-product-name></app-product-name> Administrators:</p>
+        <form class="space-y-4">
+          <div class="form-field">
+            <label class="form-label" for="uaaScope">UAA Scope</label>
+            <select id="uaaScope" class="input" [(ngModel)]="selectedScope" name="UAAScope">
+              @for (scope of uaaScopes; track scope) {
+                <option [value]="scope">
+                  {{ scope }}
+                </option>
+              }
+            </select>
+          </div>
+        </form>
+      </div>
+    </app-loading-page>
+  </app-step>
+</app-steppers>
+</div>
 </div>

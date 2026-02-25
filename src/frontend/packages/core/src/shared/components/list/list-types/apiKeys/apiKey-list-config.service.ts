@@ -1,17 +1,18 @@
 import { Injectable } from '@angular/core';
-import { SortDirection } from '@angular/material/sort';
+export type SortDirection = 'asc' | 'desc' | '';
 import { Store } from '@ngrx/store';
 import { ApiKey, stratosEntityCatalog, ListView, AppState } from '@stratosui/store';
-
-import moment from 'moment';
+import { format } from 'date-fns';
 
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { ITableColumn } from '../../list-table/table.types';
-import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
+import { IGlobalListAction, IListAction, IListConfig, IListMultiFilterConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
 import { ApiKeyDataSource } from './apiKey-data-source';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ApiKeyListConfigService implements IListConfig<ApiKey> {
 
   private static comment = 'comment';
@@ -39,7 +40,7 @@ export class ApiKeyListConfigService implements IListConfig<ApiKey> {
   public readonly columns: ITableColumn<ApiKey>[] = [
     {
       columnId: ApiKeyListConfigService.comment,
-      headerCell: () => 'Description',
+      headerCell: (): string => 'Description',
       cellDefinition: {
         valuePath: 'comment'
       },
@@ -52,9 +53,9 @@ export class ApiKeyListConfigService implements IListConfig<ApiKey> {
     },
     {
       columnId: ApiKeyListConfigService.lastUsedName,
-      headerCell: () => 'Last Used',
+      headerCell: (): string => 'Last Used',
       cellDefinition: {
-        getValue: row => row.last_used ? moment(row.last_used).format('LLL') : null
+        getValue: (row: ApiKey): string | null => row.last_used ? format(new Date(row.last_used), 'PPPp') : null
       },
       sort: {
         type: 'sort',
@@ -91,11 +92,13 @@ export class ApiKeyListConfigService implements IListConfig<ApiKey> {
     );
   }
 
-  public getGlobalActions = () => [];
-  public getMultiActions = () => [];
-  public getSingleActions = () => this.singleActions;
-  public getColumns = () => this.columns;
-  public getDataSource = () => this.dataSource;
-  public getMultiFiltersConfigs = () => [];
+  public getGlobalActions = (): IGlobalListAction<ApiKey>[] => [];
+  public getMultiActions = (): IMultiListAction<ApiKey>[] => [];
+  public getSingleActions = (): IListAction<ApiKey>[] => this.singleActions;
+  public getColumns = (): ITableColumn<ApiKey>[] => this.columns;
+  public getDataSource(): ApiKeyDataSource {
+    return this.dataSource;
+  }
+  public getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
 
 }

@@ -1,49 +1,58 @@
 import { DatePipe } from '@angular/common';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection, importProvidersFrom, APP_INITIALIZER } from '@angular/core';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { generateTestApplicationServiceProvider } from '../../../../../../../test-framework/application-service-helper';
-import { generateCfBaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { IServiceInstance } from '../../../../../../cf-api-svc.types';
 import {
-  ApplicationEnvVarsHelper,
-} from '../../../../../../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+  ConfirmationDialogService
+} from '@stratosui/core';
+import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
+import { EntityCatalogHelper, EntityCatalogHelpers, EntityMonitorFactory, PaginationMonitorFactory, EntityServiceFactory, APIResource } from '@stratosui/store';
+import { STORE_TEST_PROVIDERS, createBasicStoreModule } from '@stratosui/store/testing';
+import { ApplicationServiceMock, CloudFoundryTestingModule, CF_BASE_TEST_PROVIDERS } from "@test-framework/cf";
+import { IServiceInstance } from '../../../../../../cf-api-svc.types';
+import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 import { ApplicationStateService } from '../../../../../services/application-state.service';
-import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
-import { ServiceIconComponent } from '../../../../service-icon/service-icon.component';
 import { AppServiceBindingCardComponent } from './app-service-binding-card.component';
-
 describe('AppServiceBindingCardComponent', () => {
   let component: AppServiceBindingCardComponent;
   let fixture: ComponentFixture<AppServiceBindingCardComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
         AppServiceBindingCardComponent,
-        ServiceIconComponent,
-        CfOrgSpaceLinksComponent
       ],
-      imports: generateCfBaseTestModules(),
       providers: [
-        EntityMonitorFactory,
-        generateTestApplicationServiceProvider('1', '1'),
-        ApplicationEnvVarsHelper,
+        ...CF_BASE_TEST_PROVIDERS,
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          NoopAnimationsModule,
+          CloudFoundryTestingModule,
+          createBasicStoreModule(),
+        ),
+        EntityCatalogHelper,
+        {
+          provide: APP_INITIALIZER,
+          useFactory: (ech: EntityCatalogHelper) => () => EntityCatalogHelpers.SetEntityCatalogHelper(ech),
+          deps: [EntityCatalogHelper],
+          multi: true
+        },
+        { provide: ApplicationService, useClass: ApplicationServiceMock },
         ApplicationStateService,
-        PaginationMonitorFactory,
         ConfirmationDialogService,
+        
+        PaginationMonitorFactory,
+        ...cfCurrentUserPermissionsService,
         DatePipe,
         ServiceActionHelperService,
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(AppServiceBindingCardComponent);
     component = fixture.componentInstance;
     component.row = {

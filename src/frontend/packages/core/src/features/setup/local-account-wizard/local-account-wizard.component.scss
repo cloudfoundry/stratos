@@ -47,25 +47,22 @@
     }
   }
   app-steppers {
-    display: flex;
-    flex: 1;
-    margin: 24px 0;
+    @apply flex flex-1 my-6; // 24px = spacing[6]
     > .steppers__wrapper {
-      flex: 1;
+      @apply flex-1;
     }
     .stepper-form {
-      margin-top: 0;
-      max-width: none;
+      @apply mt-0 max-w-none;
     }
+    .form-field,
     .mat-form-field {
-      max-width: 450px;
+      @apply max-w-[450px];
     }
     .steppers__contents {
-      margin: 0 48px;
-      overflow-y: auto;
+      @apply mx-12 overflow-y-auto; // 48px = spacing[12]
     }
     .steppers__navigation {
-      margin-top: 36px;
+      @apply mt-9; // 36px = spacing[9]
     }
  }
   app-stratos-title {

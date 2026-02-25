@@ -1,17 +1,39 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import {  signal, provideZonelessChangeDetection } from '@angular/core';
 
 import { StratosTitleComponent } from './stratos-title.component';
+import { StratosThemeService } from '@stratosui/theme';
 
 describe('StratosTitleComponent', () => {
   let component: StratosTitleComponent;
   let fixture: ComponentFixture<StratosTitleComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
+    const mockTheme = signal({
+      branding: {
+        companyName: 'Test Company',
+        loginTitle: 'Test Title',
+        loginSubtitle: 'Test Subtitle',
+        logo: '/test-logo.png'
+      }
+    } as any);
+
+    const mockThemeService = {
+      theme: mockTheme.asReadonly(),
+    };
+
     TestBed.configureTestingModule({
-      declarations: [ StratosTitleComponent ]
+      imports: [ StratosTitleComponent ],
+      providers: [
+
+        { provide: StratosThemeService, useValue: mockThemeService },
+
+        provideZonelessChangeDetection(),
+      ]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(StratosTitleComponent);

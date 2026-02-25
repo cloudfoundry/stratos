@@ -1,6 +1,6 @@
+import { CommonModule } from '@angular/common';
 import { ScrollDispatcher } from '@angular/cdk/scrolling';
-import {
-  AfterViewInit,
+import { ChangeDetectionStrategy, AfterViewInit,
   Component,
   ElementRef,
   HostListener,
@@ -9,7 +9,9 @@ import {
   QueryList,
   ViewChild,
   ViewChildren,
-} from '@angular/core';
+  signal,
+ } from '@angular/core';
+import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import {
   IUserFavoritesGroups,
@@ -22,11 +24,15 @@ import {
   selectDashboardState,
   SetHomeCardLayoutAction,
   SetDashboardStateValueAction,
+  stratosEntityCatalog,
 } from '@stratosui/store';
-import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
-import { debounceTime, filter, first, map, startWith } from 'rxjs/operators';
+import { combineLatest, Observable, of, Subscription } from 'rxjs';
+import { debounceTime, filter, first, map, startWith, switchMap, tap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../core/endpoints.service';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { NoContentMessageComponent } from '../../../shared/components/no-content-message/no-content-message.component';
+import { EndpointsMissingComponent } from '../../../shared/components/endpoints-missing/endpoints-missing.component';
 import { HomePageCardLayout } from './../home.types';
 import { HomePageEndpointCardComponent } from './home-page-endpoint-card/home-page-endpoint-card.component';
 
@@ -45,7 +51,16 @@ const noFavoritesMsg = {
 @Component({
   selector: 'app-home-page',
   templateUrl: './home-page.component.html',
-  styleUrls: ['./home-page.component.scss']
+  styleUrls: ['./home-page.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    PageHeaderComponent,
+    NoContentMessageComponent,
+    EndpointsMissingComponent,
+    HomePageEndpointCardComponent
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   public allEndpointIds$: Observable<string[]>;
@@ -55,10 +70,11 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
   public layouts$: Observable<HomePageCardLayout[]>;
 
-  private layout = new BehaviorSubject<HomePageCardLayout>(null);
+  private _layout = signal<HomePageCardLayout>(null);
+  public layout = this._layout.asReadonly();
   public layout$: Observable<HomePageCardLayout>;
 
-  private showMode = new BehaviorSubject<boolean>(null);
+  private _showMode = signal<boolean>(null);
   public showAllEndpoints = false;
 
   public haveThingsToShow$: Observable<boolean>;
@@ -78,17 +94,21 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
   noneAvailableMsg = noFavoritesMsg;
 
-  @ViewChild('endpointsPanel') endpointsPanel;
+  @ViewChild('endpointsPanel', { static: false }) endpointsPanel: ElementRef;
   @ViewChildren(HomePageEndpointCardComponent) endpointCards: QueryList<HomePageEndpointCardComponent>;
-  @ViewChildren('endpointCard') endpointElements: QueryList<ElementRef>;
+  @ViewChildren('endpointElements') endpointElements!: QueryList<ElementRef>;
 
   notLoadedCardIndices: number[] = [];
   cardsToLoad: HomePageEndpointCardComponent[] = [];
   isLoadingACard = false;
 
-  private viewMonitorSub: Subscription;
-  private cardChangesSub: Subscription;
-  private checkLayout = new BehaviorSubject<boolean>(true);
+  private viewMonitorSub!: Subscription;
+  private cardChangesSub!: Subscription;
+  private _checkLayout = signal<boolean>(true);
+  private check$ = toObservable(this._checkLayout).pipe(
+    filter(v => v),
+    debounceTime(100) // Debounce the check signal itself
+  );
 
   constructor(
     public endpointsService: EndpointsService,
@@ -96,6 +116,11 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     public userFavoriteManager: UserFavoriteManager,
     private scrollDispatcher: ScrollDispatcher,
   ) {
+    // Ensure endpoints are loaded from the backend
+    // This is necessary because the home page relies on endpoint data being present in the store
+    // Without this, the CF home cards will timeout trying to fetch data
+    this.store.dispatch(stratosEntityCatalog.endpoint.actions.getAll(false));
+
     // Redirect to /applications if not enabled
     endpointsService.disablePersistenceFeatures$.pipe(
       map(off => {
@@ -112,13 +137,28 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     ).subscribe();
 
     this.layouts$ = of(this.layouts);
-    this.layout$ = this.layout.asObservable();
-    this.allEndpointIds$ = this.endpointsService.connectedEndpoints$.pipe(
+    this.layout$ = toObservable(this._layout);
+
+    // Wait for endpoints to be loaded before creating the endpoint IDs list
+    // This ensures CF data fetches have the endpoint context they need
+    this.allEndpointIds$ = this.endpointsService.haveRegistered$.pipe(
+      filter(haveRegistered => haveRegistered),
+      first(),
+      switchMap(() => this.endpointsService.connectedEndpoints$),
       map(endpoints => Object.values(endpoints).map(endpoint => endpoint.guid))
     );
     this.haveRegistered$ = this.endpointsService.haveRegistered$;
-    const connected$ = this.endpointsService.connectedEndpoints$;
-    const showMode$ = this.showMode.asObservable();
+
+    // ZONELESS FIX: Don't block the observable chain when no endpoints are registered
+    // The filter was preventing any emissions, which blocked combineLatest from ever firing
+    // Now we emit an empty array when no endpoints are registered, allowing the template to render
+    const connected$ = this.endpointsService.haveRegistered$.pipe(
+      switchMap((haveRegistered) =>
+        haveRegistered ? this.endpointsService.connectedEndpoints$ : of([])
+      )
+    );
+
+    const showMode$ = toObservable(this._showMode);
 
     // Default value from backend
     const sessionData$ = this.store.select(s => s.auth).pipe(
@@ -158,7 +198,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     this.haveThingsToShow$ = this.endpoints$.pipe(map(eps => eps.length > 0), startWith(true));
 
     // Set an initial layout
-    this.layout.next(this.getLayout(1, 1));
+    this._layout.set(this.getLayout(1, 1));
 
     this.store.select(selectDashboardState).pipe(
       map(dashboardState => dashboardState.homeLayout || 0),
@@ -170,40 +210,78 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    const check$ = this.checkLayout.asObservable().pipe(filter(v => v));
-    const scroll$ = this.scrollDispatcher.scrolled().pipe(map((e: any) => {
-      const el = e.elementRef.nativeElement;
-      return el.scrollTop;
-    }), startWith(0));
+    const scroll$ = this.scrollDispatcher.scrolled().pipe(
+      map((e: any) => {
+        const el = e.elementRef.nativeElement;
+        return el.scrollTop;
+      }),
+      debounceTime(100), // Debounce scroll events
+      startWith(0)
+    );
 
     // Load cards as they come into view
-    this.viewMonitorSub = combineLatest([scroll$, check$]).pipe(debounceTime(200)).subscribe(([scrollTop, check]) => {
-      // User has scrolled - check the remaining cards that have not been loaded to see if any are now visible and shoule be loaded
-      // Only load the first one - after that one has loaded, we'll call this method again and check for the next one
-      const remaining = [];
-      const processedCard = false;
+    this.viewMonitorSub = combineLatest([scroll$, this.check$]).pipe(
+      debounceTime(150) // Reduce debounce time for better responsiveness
+    ).subscribe(([scrollTop]) => {
+      // Skip if already processing or no cards to check
+      if (this.isLoadingACard || this.notLoadedCardIndices.length === 0) {
+        return;
+      }
+
+      // Reset check signal
+      this._checkLayout.set(false);
+
+      // User has scrolled - check the remaining cards that have not been loaded to see if any are now visible
+      const remaining: number[] = [];
+      const cardsArray = this.endpointElements.toArray();
+      const cardsComponentArray = this.endpointCards.toArray();
+
+      // Early exit if arrays are empty or mismatched
+      if (cardsArray.length === 0 || cardsComponentArray.length === 0) {
+        return;
+      }
+
+      const panelParent = this.endpointsPanel?.nativeElement?.offsetParent;
+      if (!panelParent) {
+        return;
+      }
+
+      const height = panelParent.offsetHeight;
+      const scrollBottom = scrollTop + height;
+
       for (const index of this.notLoadedCardIndices) {
-        const cardElement = this.endpointElements.toArray()[index] as ElementRef;
+        const cardElement = cardsArray[index];
+        if (!cardElement) {
+          continue;
+        }
+
         const cardTop = cardElement.nativeElement.offsetTop;
         const cardBottom = cardTop + cardElement.nativeElement.offsetHeight;
-        const height = this.endpointsPanel.nativeElement.offsetParent.offsetHeight;
-        const scrollBottom = scrollTop + height;
-        // Check if the card is in view - either its top or bottom must be withtin he visible scroll area
+
+        // Check if the card is in view - either its top or bottom must be within the visible scroll area
         if ((cardTop >= scrollTop && cardTop <= scrollBottom) || (cardBottom >= scrollTop && cardBottom <= scrollBottom)) {
-          const card = this.endpointCards.toArray()[index];
-          this.cardsToLoad.push(card);
+          const card = cardsComponentArray[index];
+          if (card) {
+            this.cardsToLoad.push(card);
+          }
         } else {
           remaining.push(index);
         }
       }
-      this.processCardsToLoad();
+
       this.notLoadedCardIndices = remaining;
+      this.processCardsToLoad();
     });
   }
 
   processCardsToLoad() {
-    if (!this.isLoadingACard && this.cardsToLoad.length > 0) {
-      const nextCardToLoad = this.cardsToLoad.shift();
+    // Guard against redundant calls
+    if (this.isLoadingACard || this.cardsToLoad.length === 0) {
+      return;
+    }
+
+    const nextCardToLoad = this.cardsToLoad.shift();
+    if (nextCardToLoad) {
       this.isLoadingACard = true;
       nextCardToLoad.load();
     }
@@ -225,7 +303,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     }
   }
 
-  setCardsToLoad(cards: any[]) {
+  setCardsToLoad(cards: ElementRef[]) {
     this.notLoadedCardIndices = [];
     for (let i = 0; i < cards.length; i++) {
       this.notLoadedCardIndices.push(i);
@@ -237,8 +315,14 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   // to check if there are more cards that are visible and thus can be loaded
   cardLoaded() {
     this.isLoadingACard = false;
+
+    // First try to process any cards already in the queue
     this.processCardsToLoad();
-    this.checkCardsInView();
+
+    // Only trigger a new check if we have remaining unloaded cards and no cards in the queue
+    if (this.notLoadedCardIndices.length > 0 && this.cardsToLoad.length === 0) {
+      this.checkCardsInView();
+    }
   }
 
   @HostListener('window:resize')
@@ -249,11 +333,11 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
   // Check the cards in view
   checkCardsInView() {
-    this.checkLayout.next(true);
+    this._checkLayout.set(true);
   }
 
   public toggleShowAllEndpoints() {
-    this.showMode.next(!this.showAllEndpoints);
+    this._showMode.set(!this.showAllEndpoints);
   }
 
   // The layout was changed
@@ -263,7 +347,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     // If the layout is automatic, then adjust based on number of things to show
     const lay$ = layout.id === 0 ? this.automaticLayout() : of(layout);
     lay$.pipe(first()).subscribe(lo => {
-      this.layout.next(lo);
+      this._layout.set(lo);
 
       // Update the grid columns based on the layout
       this.columns = lo.x;
@@ -282,9 +366,9 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   // 2. Endpoint that has child favourites
   // 3. Remaining endpoints
   private orderEndpoints(endpoints: EndpointModel[], favorites: IUserFavoritesGroups, showMode: boolean): EndpointModel[] {
-    const processed = {};
-    const result = [];
-    const epMap = {};
+    const processed: Record<string, boolean> = {};
+    const result: EndpointModel[] = [];
+    const epMap: Record<string, EndpointModel> = {};
     endpoints.forEach(ep => epMap[ep.guid] = ep);
 
     Object.keys(favorites).forEach(fav => {
@@ -345,5 +429,29 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
   private getLayout(x: number, y: number): HomePageCardLayout {
     return this.layouts.find(item => item && item.x === x && item.y === y);
+  }
+
+  // TrackBy functions for optimal change detection
+  trackByLayoutId(index: number, layout: HomePageCardLayout): number {
+    return layout?.id ?? index;
+  }
+
+  trackByEndpointGuid(index: number, endpoint: EndpointModel): string {
+    return endpoint?.guid ?? index.toString();
+  }
+
+  // Dropdown menu helpers
+  toggleDropdown(button: HTMLElement) {
+    const menu = button.nextElementSibling as HTMLElement;
+    if (menu) {
+      menu.classList.toggle('hidden');
+    }
+  }
+
+  closeDropdown(button: HTMLElement) {
+    const menu = button.nextElementSibling as HTMLElement;
+    if (menu) {
+      menu.classList.add('hidden');
+    }
   }
 }

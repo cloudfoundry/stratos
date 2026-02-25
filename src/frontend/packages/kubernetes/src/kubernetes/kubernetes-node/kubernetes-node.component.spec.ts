@@ -1,7 +1,11 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 
+import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { TabNavService } from '../../../../core/src/tab-nav.service';
+import { populateStoreWithTestEndpoint, testSCFEndpointGuid } from '@stratosui/store/testing';
 import { KubeBaseGuidMock, KubernetesBaseTestModules } from '../kubernetes.testing.module';
 import { KubernetesNodeComponent } from './kubernetes-node.component';
 
@@ -9,11 +13,11 @@ describe('KubernetesNodeComponent', () => {
   let component: KubernetesNodeComponent;
   let fixture: ComponentFixture<KubernetesNodeComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [KubernetesNodeComponent],
-      imports: KubernetesBaseTestModules,
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [KubernetesNodeComponent, ...KubernetesBaseTestModules],
       providers: [
+        EntityServiceFactory,
         TabNavService,
         KubeBaseGuidMock,
         {
@@ -21,16 +25,18 @@ describe('KubernetesNodeComponent', () => {
           useValue: {
             snapshot: {
               params: {
-                endpointId: 'anything'
+                endpointId: testSCFEndpointGuid
               },
               queryParams: {}
             }
           }
         }
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+
+    // Populate store with test endpoint data to prevent EmptyError in hasMetrics() observable
+    populateStoreWithTestEndpoint();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesNodeComponent);

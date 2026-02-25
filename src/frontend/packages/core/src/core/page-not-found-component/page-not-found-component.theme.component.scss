@@ -1,7 +1,0 @@
-@mixin page-404($theme, $app-theme) {
-  $primary: map-get($theme, primary);
-  .page-not-found {
-    background-color: mat-contrast($primary, 500);
-    color: mat-color($primary, 500);
-  }
-}

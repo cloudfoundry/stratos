@@ -1,11 +1,26 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { HttpClient, HttpHandler } from '@angular/common/http';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { SidePanelService } from '../../../../../../../core/src/shared/services/side-panel.service';
-import { TabNavService } from '../../../../../../../core/src/tab-nav.service';
-import { HelmReleaseProviders, KubeBaseGuidMock } from '../../../../kubernetes.testing.module';
-import { KubernetesEndpointService } from '../../../../services/kubernetes-endpoint.service';
+import { SidePanelService, TabNavService } from '@stratosui/core';
+import {
+  CATALOGUE_ENTITIES,
+  entityCatalog,
+  EntityCatalogFeatureModule,
+  TestEntityCatalog,
+} from '@stratosui/store';
+import { generateStratosEntities } from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+
+import { generateHelmEntities } from '../../../../../helm/helm-entity-generator';
+import { kubeEntityCatalog } from '../../../../kubernetes-entity-generator';
+import { KubernetesBaseTestModules, KubeBaseGuidMock } from '../../../../kubernetes.testing.module';
 import { KubernetesAnalysisService } from '../../../../services/kubernetes.analysis.service';
-import { WorkloadsBaseTestingModule } from '../../../workloads.testing.module';
+import { KubernetesEndpointService } from '../../../../services/kubernetes-endpoint.service';
+import { HelmReleaseHelperService } from '../helm-release-helper.service';
+import { HelmReleaseActivatedRouteMock, HelmReleaseGuidMock } from '../../../../../helm/helm-testing.module';
+import { HelmReleaseSocketService } from '../../helm-release-tab-base/helm-release-socket-service';
 import {
   AnalysisReportSelectorComponent,
 } from './../../../../analysis-report-viewer/analysis-report-selector/analysis-report-selector.component';
@@ -15,23 +30,38 @@ describe('HelmReleaseSummaryTabComponent', () => {
   let component: HelmReleaseSummaryTabComponent;
   let fixture: ComponentFixture<HelmReleaseSummaryTabComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
-        ...WorkloadsBaseTestingModule
+        ...KubernetesBaseTestModules,
+        HelmReleaseSummaryTabComponent,
+        AnalysisReportSelectorComponent,
       ],
-      declarations: [HelmReleaseSummaryTabComponent, AnalysisReportSelectorComponent],
       providers: [
-        ...HelmReleaseProviders,
+        HelmReleaseHelperService,
+        HelmReleaseSocketService,
+        HelmReleaseActivatedRouteMock,
+        HelmReleaseGuidMock,
+        TabNavService,
         KubernetesAnalysisService,
         KubernetesEndpointService,
         KubeBaseGuidMock,
-        TabNavService,
-        SidePanelService
+        HttpClient,
+        HttpHandler,
+        SidePanelService,
+        {
+          provide: CATALOGUE_ENTITIES,
+          useFactory: () => {
+            return [
+              ...generateHelmEntities(),
+            ];
+          },
+          multi: true
+        },
+        provideZonelessChangeDetection(),
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(HelmReleaseSummaryTabComponent);

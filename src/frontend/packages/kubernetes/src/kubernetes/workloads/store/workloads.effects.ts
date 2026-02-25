@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { ApplicationRef, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
-import { environment } from 'frontend/packages/core/src/environments/environment';
+import { environment } from '@stratosui/core';
 import { Observable } from 'rxjs';
 import { catchError, flatMap, mergeMap } from 'rxjs/operators';
 
@@ -33,13 +33,16 @@ import {
   UpgradeHelmRelease,
 } from './workloads.actions';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class WorkloadsEffects {
 
   constructor(
     private httpClient: HttpClient,
     private actions$: Actions,
-    private store: Store<AppState>
+    private store: Store<AppState>,
+    private appRef: ApplicationRef
   ) { }
 
   proxyAPIVersion = environment.proxyAPIVersion;
@@ -143,12 +146,14 @@ export class WorkloadsEffects {
         { namespace: action.namespace });
       return this.httpClient.post(url, action.values).pipe(
         mergeMap(() => {
+          this.appRef.tick();
           return [
             fetchAction,
             new WrapperRequestActionSuccess(null, action)
           ];
         }),
         catchError(error => {
+          this.appRef.tick();
           const { status, message } = HelmEffects.createHelmError(error);
           const errorMessage = `Failed to upgrade helm release: ${message}`;
           return [
@@ -191,8 +196,12 @@ export class WorkloadsEffects {
       params: null
     };
     return this.httpClient.get(url, requestArgs).pipe(
-      mergeMap((response: any) => [new WrapperRequestActionSuccess(mapResult(response), action)]),
+      mergeMap((response: any) => {
+        this.appRef.tick();
+        return [new WrapperRequestActionSuccess(mapResult(response), action)];
+      }),
       catchError(error => {
+        this.appRef.tick();
         const { status, message } = HelmEffects.createHelmError(error);
         const errorMessage = `Failed to fetch helm data: ${message}`;
         return [

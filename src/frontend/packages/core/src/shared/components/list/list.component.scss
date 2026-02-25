@@ -2,6 +2,9 @@
   display: flex;
   flex-direction: column;
   position: relative;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
 
   mat-progress-bar {
     position: absolute;
@@ -19,6 +22,13 @@
 
   .list-component__header-card {
     padding-left: 20px;
+  }
+
+  // Reduce card padding for list tables to prevent overflow
+  &__table {
+    .app-table__card {
+      padding: 5px !important;
+    }
   }
 
   &__cards {
@@ -41,6 +51,10 @@
 
   &__body-inner {
     position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
   $title-left-padding: 25px;
@@ -52,8 +66,15 @@
     }
 
     &-card {
+      display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
+      gap: 0.5rem;
+
+      @media (max-width: 767px) {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
     }
 
     &__left,
@@ -61,53 +82,117 @@
       align-items: center;
       display: flex;
       flex-direction: row;
+      flex-wrap: wrap;
+      gap: 0.5rem;
 
       > div {
-        &:not(:last-of-type) {
-          padding-right: $title-content-padding;
-        }
-
         &:not([hidden]) {
           align-items: center;
           display: flex;
         }
       }
+
+      @media (max-width: 767px) {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+      }
     }
 
     &__right {
       justify-content: flex-end;
+
+      @media (max-width: 767px) {
+        justify-content: stretch;
+      }
+
+      // Fix form-field layout in filters - should be horizontal
+      .filter .form-field,
+      .sort .form-field {
+        margin-bottom: 0;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.5rem;
+
+        .label {
+          margin-bottom: 0;
+          min-width: max-content;
+          white-space: nowrap;
+        }
+
+        .select {
+          min-width: 120px;
+        }
+
+        .input {
+          min-width: 180px;
+        }
+      }
     }
 
     &__left {
       flex: 1;
+      min-width: 0;
 
       &--text {
-        padding: 10px 10px 10px 0;
+        padding: 0;
+        font-weight: 500;
       }
 
       &--multi-actions {
-        button {
-          &:first-of-type {
-            margin-left: -10px;
-          }
-        }
+        display: flex;
+        gap: 0.5rem;
       }
 
       &--multi-filters {
-        mat-form-field {
-          padding-right: $title-content-padding;
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+
+        @media (max-width: 767px) {
+          width: 100%;
+        }
+
+        // Fix form-field layout in multi-filters - should be horizontal like filters
+        .form-field {
+          margin-bottom: 0;
+          flex-direction: row;
+          align-items: center;
+          gap: 0.5rem;
+
+          .label {
+            margin-bottom: 0;
+            min-width: max-content;
+            white-space: nowrap;
+          }
+
+          .select {
+            min-width: 120px;
+          }
         }
       }
     }
 
     > mat-card {
-      min-height: 74px;
-      padding: 0 24px;
+      min-height: 52px;
+      padding: 0.5rem 1rem;
       width: 100%;
+
+      @media (max-width: 767px) {
+        padding: 0.5rem 0.75rem;
+        min-height: auto;
+      }
     }
   }
 
   &__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+
     .no-rows {
       padding: 20px $title-left-padding;
     }
@@ -120,6 +205,7 @@
   }
 
   &__paginator {
+    flex: 0 0 auto;
     height: 67px;
     padding: 4px;
 

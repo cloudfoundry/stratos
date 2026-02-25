@@ -13,7 +13,7 @@ import { GitMeta, GitSCM } from '../../../../scm/scm';
 
 
 export class GithubCommitsDataSource extends ListDataSource<GitCommit> {
-  store: Store<AppState>;
+  declare store: Store<AppState>;
 
   /**
    * Creates an instance of GithubCommitsDataSource.

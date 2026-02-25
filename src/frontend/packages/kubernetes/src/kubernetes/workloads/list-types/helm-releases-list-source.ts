@@ -2,13 +2,13 @@ import { Store } from '@ngrx/store';
 import {
   DataFunctionDefinitionType,
   ListDataSource,
-} from 'frontend/packages/core/src/shared/components/list/data-sources-controllers/list-data-source';
+} from '@stratosui/core';
 import {
   extractActualListEntity,
-} from 'frontend/packages/core/src/shared/components/list/data-sources-controllers/local-filtering-sorting';
-import { IListConfig } from 'frontend/packages/core/src/shared/components/list/list.component.types';
-import { AppState } from 'frontend/packages/store/src/app-state';
-import { PaginationEntityState } from 'frontend/packages/store/src/types/pagination.types';
+} from '@stratosui/core';
+import { IListConfig } from '@stratosui/core';
+import { AppState } from '@stratosui/store';
+import { PaginationEntityState } from '@stratosui/store';
 
 import { HelmRelease } from '../workload.types';
 import { workloadsEntityCatalog } from '../workloads-entity-catalog';
@@ -38,7 +38,7 @@ export class HelmReleasesDataSource extends ListDataSource<HelmRelease> {
       store,
       action,
       schema: action.entity[0],
-      getRowUniqueId: row => action.entity[0].getId(row),
+      getRowUniqueId: (row: HelmRelease) => action.entity[0].getId(row),
       paginationKey: action.paginationKey,
       isLocal: true,
       transformEntities,

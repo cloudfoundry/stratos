@@ -1,46 +1,58 @@
-import { Component, OnInit } from '@angular/core';
-import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import moment from 'moment-timezone';
 import { of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
-
-import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
-import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
+import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
+import { ApplicationService } from '@stratosui/cloud-foundry';
+import { StepOnNextFunction } from '@stratosui/core';
 import { autoscalerTransformArrayToMap } from '../../../core/autoscaler-helpers/autoscaler-transform-policy';
 import { PolicyAlert } from '../../../core/autoscaler-helpers/autoscaler-util';
 import { numberWithFractionOrExceedRange } from '../../../core/autoscaler-helpers/autoscaler-validation';
 import { EditAutoscalerPolicyDirective } from '../edit-autoscaler-policy-base-step';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 
+interface EditLimitForm {
+  instance_min_count: FormControl<number>;
+  instance_max_count: FormControl<number>;
+  timezone: FormControl<string>;
+}
+
 @Component({
   selector: 'app-edit-autoscaler-policy-step1',
   templateUrl: './edit-autoscaler-policy-step1.component.html',
   styleUrls: ['./edit-autoscaler-policy-step1.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
-    { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
+    { provide: TailwindErrorStateMatcher, useClass: TailwindShowOnDirtyErrorStateMatcher }
+  ],
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule
   ]
 })
 export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDirective implements OnInit {
 
   policyAlert = PolicyAlert;
-  timezoneOptions = moment.tz.names();
-  editLimitForm: UntypedFormGroup;
+  timezoneOptions = Intl.supportedValuesOf('timeZone');
+  editLimitForm: FormGroup<EditLimitForm>;
 
   private editLimitValid = true;
 
   constructor(
     public applicationService: ApplicationService,
-    private fb: UntypedFormBuilder,
+    private fb: FormBuilder,
     service: EditAutoscalerPolicyService,
-    route: ActivatedRoute
+    route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {
     super(service, route);
-    this.editLimitForm = this.fb.group({
-      instance_min_count: [0, [Validators.required, this.validateGlobalLimitMin()]],
-      instance_max_count: [0, [Validators.required, this.validateGlobalLimitMax()]],
-      timezone: [0, [Validators.required]]
+    this.editLimitForm = this.fb.group<EditLimitForm>({
+      instance_min_count: this.fb.nonNullable.control(0, [Validators.required, this.validateGlobalLimitMin()]),
+      instance_max_count: this.fb.nonNullable.control(0, [Validators.required, this.validateGlobalLimitMax()]),
+      timezone: this.fb.nonNullable.control('', [Validators.required])
     });
   }
 
@@ -52,20 +64,23 @@ export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDire
         if (!this.currentPolicy.scaling_rules_form) {
           this.currentPolicy = autoscalerTransformArrayToMap(this.currentPolicy);
         }
-        this.editLimitForm.controls.timezone.setValue(this.currentPolicy.schedules.timezone);
+        this.editLimitForm.controls.timezone.setValue(this.currentPolicy.schedules?.timezone ?? '');
         this.editLimitForm.controls.instance_min_count.setValue(this.currentPolicy.instance_min_count);
         this.editLimitForm.controls.instance_max_count.setValue(this.currentPolicy.instance_max_count);
         this.editLimitForm.controls.instance_min_count.setValidators([Validators.required, this.validateGlobalLimitMin()]);
         this.editLimitForm.controls.instance_max_count.setValidators([Validators.required, this.validateGlobalLimitMax()]);
+        this.cdr.markForCheck();
         return this.currentPolicy;
       })
     );
   }
 
   onNext: StepOnNextFunction = () => {
-    this.currentPolicy.instance_min_count = Math.floor(this.editLimitForm.get('instance_min_count').value);
-    this.currentPolicy.instance_max_count = Math.floor(this.editLimitForm.get('instance_max_count').value);
-    this.currentPolicy.schedules.timezone = this.editLimitForm.get('timezone').value;
+    this.currentPolicy.instance_min_count = Math.floor(this.editLimitForm.get('instance_min_count')?.value ?? 0);
+    this.currentPolicy.instance_max_count = Math.floor(this.editLimitForm.get('instance_max_count')?.value ?? 0);
+    if (this.currentPolicy.schedules) {
+      this.currentPolicy.schedules.timezone = this.editLimitForm.get('timezone')?.value ?? '';
+    }
     this.service.setState(this.currentPolicy);
     return observableOf({ success: true });
   };

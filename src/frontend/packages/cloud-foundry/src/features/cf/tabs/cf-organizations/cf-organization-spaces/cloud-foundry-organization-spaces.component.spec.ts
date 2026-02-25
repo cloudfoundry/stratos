@@ -1,36 +1,75 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { StoreModule } from '@ngrx/store';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { TabNavService } from '../../../../../../../core/src/tab-nav.service';
+import { TabNavService } from '@stratosui/core';
 import {
-  generateCfBaseTestModules,
+  EntityCatalogTestModule,
+  generateStratosEntities,
+  TEST_CATALOGUE_ENTITIES,
+  appReducers,
+  EntityCatalogHelper,
+  EntityCatalogHelpers,
+  EntityServiceFactory,
+  EntityMonitorFactory,
+  PaginationMonitorFactory
+} from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import {
+  CloudFoundryTestingModule,
+  generateCFEntities,
   generateTestCfEndpointServiceProvider,
-} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import {
-  CloudFoundryOrganizationServiceMock,
-} from '../../../../../../test-framework/cloud-foundry-organization.service.mock';
-import { CfUserPermissionDirective } from '../../../../../shared/directives/cf-user-permission/cf-user-permission.directive';
+  CloudFoundryOrganizationServiceMock
+} from "@test-framework/cf";
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
-import { CloudFoundryOrganizationSpacesComponent } from './cloud-foundry-organization-spaces.component';
-
+import { CloudFoundryOrganizationSpacesComponent } from "./cloud-foundry-organization-spaces.component";
 describe('CloudFoundryOrganizationSpacesComponent', () => {
   let component: CloudFoundryOrganizationSpacesComponent;
   let fixture: ComponentFixture<CloudFoundryOrganizationSpacesComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
+      imports: [
         CloudFoundryOrganizationSpacesComponent,
-        CfUserPermissionDirective
       ],
-      imports: generateCfBaseTestModules(),
       providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideNoopAnimations(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          CloudFoundryTestingModule,
+          StoreModule.forRoot(appReducers, {
+            runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
+          }),
+          EntityCatalogTestModule
+        ),
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities(),
+          ]
+        },
+        EntityServiceFactory,
+        EntityMonitorFactory,
+        PaginationMonitorFactory,
         ...generateTestCfEndpointServiceProvider(),
         { provide: CloudFoundryOrganizationService, useClass: CloudFoundryOrganizationServiceMock },
-        TabNavService
+        TabNavService,
       ]
     })
       .compileComponents();
-  }));
+
+    // Initialize EntityCatalogHelper for Angular 20 compatibility
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryOrganizationSpacesComponent);

@@ -1,0 +1,117 @@
+<form [formGroup]="form" class="space-y-4">
+  @for (field of formFields; track field) {
+    <div class="form-field">
+      <!-- Text Input -->
+      @if (!isTextarea(field.property) && !isSelect(field.property) && getFieldType(field.property) !== 'checkbox') {
+        <div class="form-group">
+          <label [for]="field.key" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            {{ field.property.title || field.key }}
+            @if (field.required) {
+              <span class="text-red-500">*</span>
+            }
+          </label>
+          <input
+            [id]="field.key"
+            [type]="getFieldType(field.property)"
+            [formControlName]="field.key"
+            [placeholder]="field.property.description || ''"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+            [class.border-red-500]="field.control.invalid && field.control.touched"
+            />
+          @if (field.control.invalid && field.control.touched) {
+            <div class="mt-1 text-sm text-red-600">
+              @if (field.control.errors?.['required']) {
+                <div>{{ field.property.title || field.key }} is required</div>
+              }
+            </div>
+          }
+        </div>
+      }
+      <!-- Textarea -->
+      @if (isTextarea(field.property)) {
+        <div class="form-group">
+          <label [for]="field.key" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            {{ field.property.title || field.key }}
+            @if (field.required) {
+              <span class="text-red-500">*</span>
+            }
+          </label>
+          <textarea
+            [id]="field.key"
+            [formControlName]="field.key"
+            [placeholder]="field.property.description || ''"
+            rows="3"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+            [class.border-red-500]="field.control.invalid && field.control.touched"
+          ></textarea>
+          @if (field.control.invalid && field.control.touched) {
+            <div class="mt-1 text-sm text-red-600">
+              @if (field.control.errors?.['required']) {
+                <div>{{ field.property.title || field.key }} is required</div>
+              }
+            </div>
+          }
+        </div>
+      }
+      <!-- Select -->
+      @if (isSelect(field.property)) {
+        <div class="form-group">
+          <label [for]="field.key" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            {{ field.property.title || field.key }}
+            @if (field.required) {
+              <span class="text-red-500">*</span>
+            }
+          </label>
+          <select
+            [id]="field.key"
+            [formControlName]="field.key"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+            [class.border-red-500]="field.control.invalid && field.control.touched"
+            >
+            <option value="">Select an option</option>
+            @for (option of field.property.enum; track option) {
+              <option [value]="option">{{ option }}</option>
+            }
+          </select>
+          @if (field.control.invalid && field.control.touched) {
+            <div class="mt-1 text-sm text-red-600">
+              @if (field.control.errors?.['required']) {
+                <div>{{ field.property.title || field.key }} is required</div>
+              }
+            </div>
+          }
+        </div>
+      }
+      <!-- Checkbox -->
+      @if (getFieldType(field.property) === 'checkbox') {
+        <div class="form-group">
+          <div class="flex items-center">
+            <input
+              [id]="field.key"
+              type="checkbox"
+              [formControlName]="field.key"
+              class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700"
+              />
+            <label [for]="field.key" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+              {{ field.property.title || field.key }}
+              @if (field.required) {
+                <span class="text-red-500">*</span>
+              }
+            </label>
+          </div>
+          @if (field.property.description) {
+            <div class="mt-1 text-sm text-gray-500">
+              {{ field.property.description }}
+            </div>
+          }
+        </div>
+      }
+      <!-- Description -->
+      @if (field.property.description && !isTextarea(field.property) && getFieldType(field.property) !== 'checkbox') {
+        <div class="mt-1 text-sm text-gray-500">
+          {{ field.property.description }}
+        </div>
+      }
+    </div>
+  }
+</form>

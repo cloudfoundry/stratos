@@ -23,7 +23,7 @@ export interface IQuotaDefinition {
   total_private_domains?: number;
 }
 
-export interface IRoute {
+export interface IRoute<T = unknown> {
   host: string;
   path: string;
   domain_guid: string;
@@ -35,7 +35,7 @@ export interface IRoute {
   space_url: string;
   space?: APIResource<ISpace>;
   apps_url: string;
-  apps?: APIResource<IApp>[];
+  apps?: T extends string ? string[] : APIResource<IApp>[];
   route_mappings_url: string;
   guid?: string;
   cfGuid?: string;
@@ -79,6 +79,7 @@ export interface ISpace {
   security_groups?: APIResource<ISecurityGroup>[];
   staging_security_groups_url: string;
   staging_security_groups?: APIResource<ISecurityGroup>[];
+  space_quota_definition_url?: string;
   space_quota_definition?: APIResource<ISpaceQuotaDefinition>;
   routes?: APIResource<IRoute>[];
   cfGuid?: string;

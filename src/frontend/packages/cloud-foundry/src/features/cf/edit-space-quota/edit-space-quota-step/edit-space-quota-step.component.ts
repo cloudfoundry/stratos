@@ -1,14 +1,11 @@
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnDestroy, ViewChild , ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, pairwise, tap } from 'rxjs/operators';
 
-import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { AppState } from '../../../../../../store/src/app-state';
-import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { APIResource } from '../../../../../../store/src/types/api.types';
+import { safeUnsubscribe, StepOnNextFunction } from '@stratosui/core';
+import { ActionState, APIResource, AppState } from '@stratosui/store';
 import { ISpaceQuotaDefinition } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
@@ -22,19 +19,24 @@ import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-
   styleUrls: ['./edit-space-quota-step.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
-  ]
+  ],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    SpaceQuotaDefinitionFormComponent
+]
 })
 export class EditSpaceQuotaStepComponent implements OnDestroy {
 
-  spaceQuotaSubscription: Subscription;
+  spaceQuotaSubscription!: Subscription;
   cfGuid: string;
   spaceQuotaGuid: string;
-  allQuotas: string[];
-  spaceQuotaDefinition$: Observable<APIResource<ISpaceQuotaDefinition>>;
-  quota: ISpaceQuotaDefinition;
+  allQuotas!: string[];
+  spaceQuotaDefinition$!: Observable<APIResource<ISpaceQuotaDefinition>>;
+  quota!: ISpaceQuotaDefinition;
 
-  @ViewChild('form')
-  form: SpaceQuotaDefinitionFormComponent;
+  @ViewChild('form', { static: false })
+  form!: SpaceQuotaDefinitionFormComponent;
 
   constructor(
     private store: Store<AppState>,
@@ -64,7 +66,7 @@ export class EditSpaceQuotaStepComponent implements OnDestroy {
   validate = () => !!this.form && this.form.valid();
 
   submit: StepOnNextFunction = () =>
-    cfEntityCatalog.spaceQuota.api.update<ActionState>(this.spaceQuotaGuid, this.cfGuid, this.form.formGroup.value).pipe(
+    cfEntityCatalog.spaceQuota.api.update<ActionState>(this.spaceQuotaGuid, this.cfGuid, this.form.formGroup.getRawValue()).pipe(
       pairwise(),
       filter(([oldV, newV]) => oldV.busy && !newV.busy),
       map(([, newV]) => newV),

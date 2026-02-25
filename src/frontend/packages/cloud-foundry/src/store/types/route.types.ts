@@ -23,9 +23,9 @@ export interface RouteMode {
 
 export class CfRoute {
   /* tslint:disable-next-line:variable-name  */
-  domain_guid: string;
+  domain_guid!: string;
   /* tslint:disable-next-line:variable-name  */
-  space_guid: string;
+  space_guid!: string;
   path?: string;
   host?: string;
   port?: number;

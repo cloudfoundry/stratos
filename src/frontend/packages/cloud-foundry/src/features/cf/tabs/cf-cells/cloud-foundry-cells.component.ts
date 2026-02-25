@@ -1,13 +1,12 @@
-import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
-import { AppState } from '../../../../../../store/src/app-state';
-import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
-import {
-  CfCellsListConfigService,
-} from '../../../../shared/components/list/list-types/cf-cells/cf-cells-list-config.service';
+import { ListComponent, ListConfig } from '@stratosui/core';
+import { AppState, PaginationMonitorFactory } from '@stratosui/store';
+
+import { CfCellsListConfigService } from '../../../../shared/components/list/list-types/cf-cells/cf-cells-list-config.service';
 import { CfCellHelper } from '../../cf-cell.helpers';
 import { getActiveRouteCfCellProvider } from '../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
@@ -17,13 +16,19 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
   selector: 'app-cloud-foundry-cells',
   templateUrl: './cloud-foundry-cells.component.html',
   styleUrls: ['./cloud-foundry-cells.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    ListComponent,
+  ],
   providers: [
     {
       provide: ListConfig,
       useClass: CfCellsListConfigService
     },
     getActiveRouteCfCellProvider,
-  ]
+  ],
 })
 export class CloudFoundryCellsComponent {
   hasCellMetrics$: Observable<boolean>;

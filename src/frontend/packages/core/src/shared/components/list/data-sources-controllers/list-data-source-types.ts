@@ -1,4 +1,5 @@
 import { DataSource } from '@angular/cdk/table';
+import { Signal } from '@angular/core';
 import { Action } from '@ngrx/store';
 import {
   IRequestEntityTypeState,
@@ -11,7 +12,7 @@ import {
   ListSort,
   EntityCatalogEntityConfig,
 } from '@stratosui/store';
-import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
+import { Observable } from 'rxjs';
 
 export interface IEntitySelectItem {
   page: number;
@@ -51,21 +52,21 @@ export interface AppEvent {
 }
 
 export class ListActionConfig<T> {
-  createAction: (
+  createAction!: (
     dataSource: IListDataSource<T>,
     items: IRequestEntityTypeState<T>
   ) => Action;
-  icon: string;
-  label: string;
-  description: string;
-  visible: (row: T) => boolean;
-  enabled: (row: T) => boolean;
+  icon!: string;
+  label!: string;
+  description!: string;
+  visible!: (row: T) => boolean;
+  enabled!: (row: T) => boolean;
 }
 
 interface ICoreListDataSource<T> extends DataSource<T> {
   rowsState?: Observable<RowsState>;
   getRowState?(row: T, schemaKey?: string): Observable<RowState>;
-  trackBy(index: number, item: T);
+  trackBy(index: number, item: T): string | number;
 }
 
 interface ICoreTableListDataSource<T> extends ICoreListDataSource<T> {
@@ -73,8 +74,8 @@ interface ICoreTableListDataSource<T> extends ICoreListDataSource<T> {
 
   selectAllChecked?: boolean; // Select items - remove once ng-content can exist in md-table
   selectAllIndeterminate?: boolean; // Select all checkbox as indeterminate
-  selectedRows?: Map<string, T>; // Select items - remove once ng-content can exist in md-table
-  selectedRows$?: ReplaySubject<Map<string, T>>; // Select items - remove once ng-content can exist in md-table
+  selectedRows?: Signal<Map<string, T>>; // Select items - remove once ng-content can exist in md-table
+  selectedRows$?: Observable<Map<string, T>>; // Select items - remove once ng-content can exist in md-table
   selectAllFilteredRows?: () => void; // Select items - remove once ng-content can exist in md-table
   selectedRowToggle?: (row: T, multiMode?: boolean) => void; // Select items - remove once ng-content can exist in md-table
   selectClear?: () => void;
@@ -107,8 +108,10 @@ export interface IListDataSource<T> extends ICoreListDataSource<T>, ICoreTableLi
   isMultiAction$?: Observable<boolean>;
 
   addItem: T;
-  isAdding$: BehaviorSubject<boolean>;
-  isSelecting$: BehaviorSubject<boolean>;
+  isAdding: Signal<boolean>;
+  isAdding$: Observable<boolean>;
+  isSelecting: Signal<boolean>;
+  isSelecting$: Observable<boolean>;
   isLoadingPage$: Observable<boolean>;
 
   maxedResults$: Observable<boolean>;
@@ -119,11 +122,11 @@ export interface IListDataSource<T> extends ICoreListDataSource<T>, ICoreTableLi
   getRowUniqueId: getRowUniqueId<T>;
   entitySelectConfig?: EntitySelectConfig; // For multi action lists, this is used to configure the entity select.
 
-  destroy();
+  destroy(): void;
   /**
    * Set's data source specific text filter param
    */
-  setFilterParam(filterParam: string, pag: PaginationEntityState);
+  setFilterParam(filterParam: string, pag: PaginationEntityState): void;
   /**
    * Gets data source specific text filter param
    */
@@ -131,17 +134,17 @@ export interface IListDataSource<T> extends ICoreListDataSource<T>, ICoreTableLi
   /**
    * Set's data source specific multi filter properties. Only applicable in maxedResult world
    */
-  setMultiFilter(changes: ListPaginationMultiFilterChange[], params: PaginationParam);
-  refresh();
+  setMultiFilter(changes: ListPaginationMultiFilterChange[], params: PaginationParam): void;
+  refresh(): void;
 
-  updateMetricsAction(newAction: MetricsAction);
+  updateMetricsAction(newAction: MetricsAction): void;
   /**
    * Ensure that list maxed status is ignored. This will result in all results being shown when previously ignored
    */
-  showAllAfterMax();
+  showAllAfterMax(): void;
 }
 
-export type getRowUniqueId<T> = (T) => string;
+export type getRowUniqueId<T> = (row: T) => string;
 export interface RowsState {
   [rowUID: string]: RowState;
 }

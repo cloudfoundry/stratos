@@ -1,20 +1,46 @@
-import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { RouterModule } from '@angular/router';
 
-import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import {
+  BooleanIndicatorComponent,
+  AppChip,
+  AppChipsComponent,
+  CardCell,
+  MetaCardComponent,
+  MetaCardItemComponent,
+  MetaCardKeyComponent,
+  MetaCardTitleComponent,
+  MetaCardValueComponent,
+  MultilineTitleComponent
+} from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
 import { IRule, IRuleType, ISpace } from '../../../../../../cf-api.types';
 import { CloudFoundryEndpointService } from '../../../../../../features/cf/services/cloud-foundry-endpoint.service';
 
 @Component({
   selector: 'app-cf-security-groups-card',
   templateUrl: './cf-security-groups-card.component.html',
-  styleUrls: ['./cf-security-groups-card.component.scss']
+  styleUrls: ['./cf-security-groups-card.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MetaCardComponent,
+    MetaCardTitleComponent,
+    MetaCardItemComponent,
+    MetaCardKeyComponent,
+    MetaCardValueComponent,
+    MultilineTitleComponent,
+    BooleanIndicatorComponent,
+    AppChipsComponent,
+  ]
 })
-export class CfSecurityGroupsCardComponent extends CardCell<APIResource> implements OnInit {
+export class CfSecurityGroupsCardComponent extends CardCell<APIResource<any>> implements OnInit {
 
   tags: AppChip<IRule>[] = [];
-  private typeColors = {
+  private typeColors: Record<string, string> = {
     tcp: 'tcp-class',
     all: 'all-class',
     udp: 'udp-class'
@@ -25,15 +51,15 @@ export class CfSecurityGroupsCardComponent extends CardCell<APIResource> impleme
     super();
   }
 
-  ngOnInit() {
-    this.tags = this.row.entity.rules.map(t => ({
+  ngOnInit(): void {
+    this.tags = this.row.entity.rules.map((t: IRule) => ({
       value: `${t.protocol} ${this.getRuleString(t)}`,
       key: t,
       color: this.typeColors[t.protocol]
     }));
   }
 
-  getSpaceUrl = (space: APIResource<ISpace>) => {
+  getSpaceUrl = (space: APIResource<ISpace>): string[] => {
     return [
       '/cloud-foundry',
       `${this.cfEndpointService.cfGuid}`,
@@ -45,7 +71,7 @@ export class CfSecurityGroupsCardComponent extends CardCell<APIResource> impleme
 
   }
 
-  getRuleString = (rule: IRule) => {
+  getRuleString = (rule: IRule): string => {
 
     let destination = rule.destination;
 

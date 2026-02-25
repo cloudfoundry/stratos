@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { DotContentComponent } from './dot-content.component';
 
@@ -6,12 +8,16 @@ describe('DotContentComponent', () => {
   let component: DotContentComponent;
   let fixture: ComponentFixture<DotContentComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [DotContentComponent]
-    })
-      .compileComponents();
-  }));
+      providers: [provideZonelessChangeDetection()],
+      imports: [
+        DotContentComponent,
+      ],
+      
+    });
+      TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(DotContentComponent);

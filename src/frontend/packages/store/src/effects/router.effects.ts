@@ -7,23 +7,26 @@ import { RouterActions, RouterNav } from '../actions/router.actions';
 
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class RouterEffect {
 
   constructor(
     private actions$: Actions,
-    private router: Router
+    private router: Router,
   ) { }
 
   
   routerGoUrl$ = createEffect(() => this.actions$.pipe(
     ofType<RouterNav>(RouterActions.GO),
     map((action: RouterNav) => action.payload),
-    tap(({ path, query: queryParams, extras = {} }) => {
+    tap(({ path, query: queryParams, extras = {} }: { path: any; query: any; extras?: any }) => {
       const extraParams = { ...extras, queryParams };
       if (typeof path === 'string') {
         path = path.split('/');
       }
       this.router.navigate(path, extraParams);
+      // Removed manual tick() call - zoneless change detection handles this automatically
     })), { dispatch: false });
 }

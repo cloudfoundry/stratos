@@ -1,54 +1,73 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { StoreModule } from '@ngrx/store';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import {
-  BooleanIndicatorComponent,
-} from '../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import {
-  CopyToClipboardComponent,
-} from '../../../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
-import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
-import { CapitalizeFirstPipe } from '../../../../../../core/src/shared/pipes/capitalizeFirstLetter.pipe';
-import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
-import { EntityMonitorFactory } from '../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
-import {
-  generateCfBaseTestModulesNoShared,
-  generateTestCfEndpointServiceProvider,
-} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundryOrganizationServiceMock } from '../../../../../test-framework/cloud-foundry-organization.service.mock';
+  EntityCatalogTestModule,
+  generateStratosEntities,
+  TEST_CATALOGUE_ENTITIES,
+  appReducers,
+  EntityCatalogHelper,
+  EntityCatalogHelpers,
+  EntityServiceFactory,
+  EntityMonitorFactory,
+  PaginationMonitorFactory
+} from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { MetadataItemComponent, BooleanIndicatorComponent, CapitalizeFirstPipe } from '@stratosui/core';
+import { CloudFoundryTestingModule, generateCFEntities, CloudFoundryOrganizationServiceMock } from '@test-framework/cf';
 import { CloudFoundryOrganizationService } from '../../../../features/cf/services/cloud-foundry-organization.service';
-import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
-import { CfUserService } from '../../../data-services/cf-user.service';
 import { CardCfOrgUserDetailsComponent } from './card-cf-org-user-details.component';
 
 describe('CardCfOrgUserDetailsComponent', () => {
   let component: CardCfOrgUserDetailsComponent;
   let fixture: ComponentFixture<CardCfOrgUserDetailsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
+      imports: [
         CardCfOrgUserDetailsComponent,
         MetadataItemComponent,
-        CopyToClipboardComponent,
-        CardCfOrgUserDetailsComponent,
+        BooleanIndicatorComponent,
         CapitalizeFirstPipe,
-        BooleanIndicatorComponent
       ],
-      imports: generateCfBaseTestModulesNoShared(),
       providers: [
-        CfUserService,
-        generateTestCfEndpointServiceProvider(),
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideNoopAnimations(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          CloudFoundryTestingModule,
+          StoreModule.forRoot(appReducers, {
+            runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
+          }),
+          EntityCatalogTestModule
+        ),
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities(),
+          ]
+        },
         EntityServiceFactory,
-        CfOrgSpaceDataService,
-        CfUserService,
-        PaginationMonitorFactory,
         EntityMonitorFactory,
-        { provide: CloudFoundryOrganizationService, useClass: CloudFoundryOrganizationServiceMock }
+        PaginationMonitorFactory,
+        EntityCatalogHelper,
+        { provide: CloudFoundryOrganizationService, useClass: CloudFoundryOrganizationServiceMock },
       ]
     })
       .compileComponents();
-  }));
+
+    // Initialize EntityCatalogHelper for Angular 20 compatibility
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CardCfOrgUserDetailsComponent);

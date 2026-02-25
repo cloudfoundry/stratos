@@ -1,17 +1,17 @@
 import { compose } from '@ngrx/store';
 
-import { GeneralEntityAppState, IRequestEntityTypeState as IRequestEntityKeyState, IRequestTypeState } from '../app-state';
+import type { GeneralEntityAppState, IRequestEntityTypeState as IRequestEntityKeyState, IRequestTypeState } from '../app-state';
 import { EntityCatalogHelpers } from '../entity-catalog/entity-catalog.helper';
-import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
-import { ActionState, RequestInfoState, UpdatingSection } from '../reducers/api-request-reducer/types';
-import { APIResource } from '../types/api.types';
+import type { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
+import type { ActionState, RequestInfoState, UpdatingSection } from '../reducers/api-request-reducer/types';
+import type { APIResource } from '../types/api.types';
 
-export const getEntityById = <T>(guid: string) => (entities): T => {
+export const getEntityById = <T>(guid: string) => (entities: any): T => {
   return entities[guid];
 };
 
 export const getNestedEntityWithKeys = <T>(entityKeys: string[]) => (
-  entities
+  entities: any
 ): T => {
   let entity = entities;
   entityKeys.forEach(k => entity = entity[k]);
@@ -29,7 +29,7 @@ export const getEntityUpdateSections = (
 };
 
 export const getUpdateSectionById = (guid: string) => (
-  updating
+  updating: any
 ): ActionState => {
   return updating ? updating[guid] : null;
 };
@@ -100,7 +100,7 @@ export function selectNestedEntity<T = APIResource[]>(
 // T => APIResource || base entity (e.g. EndpointModel)
 export function getRequestEntityKey<T>(entityKey: string) {
   return (state: IRequestTypeState): IRequestEntityKeyState<T> => {
-    return state[entityKey] || {} as IRequestEntityKeyState<T>;
+    return state?.[entityKey] || {} as IRequestEntityKeyState<T>;
   };
 }
 

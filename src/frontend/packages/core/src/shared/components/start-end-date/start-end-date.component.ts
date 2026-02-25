@@ -1,11 +1,17 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output  } from '@angular/core';
+import { isValid, isBefore, isEqual } from 'date-fns';
 
-import moment from 'moment';
+import { DateTimeComponent } from '../date-time/date-time.component';
 
 @Component({
   selector: 'app-start-end-date',
   templateUrl: './start-end-date.component.html',
-  styleUrls: ['./start-end-date.component.scss']
+  styleUrls: ['./start-end-date.component.scss'],
+  standalone: true,
+  imports: [
+    DateTimeComponent
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StartEndDateComponent {
 
@@ -19,10 +25,10 @@ export class StartEndDateComponent {
   }
 
   @Input()
-  set start(start: moment.Moment) {
+  set start(start: Date) {
     this.valid = true;
-    if (start && start.isValid()) {
-      const clone = moment(start);
+    if (start && isValid(start)) {
+      const clone = new Date(start);
       this.startValue = clone;
       if (!this.pValidate(start, this.end)) {
         this.valid = false;
@@ -37,10 +43,10 @@ export class StartEndDateComponent {
   }
 
   @Input()
-  set end(end: moment.Moment) {
+  set end(end: Date) {
     this.valid = true;
-    if (end && end.isValid()) {
-      const clone = moment(end);
+    if (end && isValid(end)) {
+      const clone = new Date(end);
       this.endValue = clone;
       if (!this.pValidate(this.start, end)) {
         this.valid = false;
@@ -54,21 +60,21 @@ export class StartEndDateComponent {
     return this.endValue;
   }
   @Output()
-  public endChange = new EventEmitter<moment.Moment>();
+  public endChange = new EventEmitter<Date>();
   @Output()
-  public startChange = new EventEmitter<moment.Moment>();
+  public startChange = new EventEmitter<Date>();
 
   @Output()
   public isValid = new EventEmitter<boolean>();
 
   public validValue = true;
-  public validMessage: string;
+  public validMessage!: string;
 
-  private startValue: moment.Moment;
-  private endValue: moment.Moment;
+  private startValue!: Date;
+  private endValue!: Date;
 
-  private lastValidStartValue: moment.Moment;
-  private lastValidEndValue: moment.Moment;
+  private lastValidStartValue!: Date;
+  private lastValidEndValue!: Date;
 
   private emitChanges() {
     if (this.isDifferentDate(this.lastValidStartValue, this.startValue)) {
@@ -82,19 +88,19 @@ export class StartEndDateComponent {
   }
 
   @Input()
-  public validate: (start: moment.Moment, end: moment.Moment) => string = (start: moment.Moment, end: moment.Moment): string => {
+  public validate: (start: Date, end: Date) => string = (start: Date, end: Date): string => {
     if (!end || !start) {
       return null;
     }
-    return end.isBefore(start) ? 'Start date must be before end date.' : null;
+    return isBefore(end, start) ? 'Start date must be before end date.' : null;
   }
 
-  private pValidate(start: moment.Moment, end: moment.Moment): boolean {
+  private pValidate(start: Date, end: Date): boolean {
     this.validMessage = this.validate(start, end);
     return !this.validMessage;
   }
 
-  private isDifferentDate(oldDate: moment.Moment, newDate: moment.Moment) {
-    return !oldDate || !newDate || !oldDate.isSame(newDate);
+  private isDifferentDate(oldDate: Date, newDate: Date) {
+    return !oldDate || !newDate || !isEqual(oldDate, newDate);
   }
 }

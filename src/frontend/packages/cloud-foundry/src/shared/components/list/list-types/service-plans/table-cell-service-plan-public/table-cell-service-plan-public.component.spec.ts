@@ -1,38 +1,37 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { StoreModule } from '@ngrx/store';
 
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
-import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { EntityMonitorFactory, EntityServiceFactory } from '@stratosui/store';
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ServicesService } from '../../../../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../../../../features/service-catalog/services.service.mock';
 import { ServicePlanPublicComponent } from '../../../../service-plan-public/service-plan-public.component';
 import { TableCellAServicePlanPublicComponent } from './table-cell-service-plan-public.component';
-
 describe('TableCellAServicePlanPublicComponent', () => {
   let component: TableCellAServicePlanPublicComponent;
   let fixture: ComponentFixture<TableCellAServicePlanPublicComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
-        TableCellAServicePlanPublicComponent,
-        ServicePlanPublicComponent
-      ],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
+        TableCellAServicePlanPublicComponent,
+        ServicePlanPublicComponent,
         StoreModule,
-        CoreModule,
-        generateCfStoreModules()
+        generateCfStoreModules(),
       ],
       providers: [
+        EntityServiceFactory,
+        
         EntityMonitorFactory,
         { provide: ServicesService, useClass: ServicesServiceMock },
+
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellAServicePlanPublicComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

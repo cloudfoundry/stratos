@@ -28,11 +28,17 @@ export class CfCellsDataSource
       store,
       action,
       schema: cfEntityFactory(action.entityType),
-      getRowUniqueId: (row) => row.metric.bosh_job_id,
+      getRowUniqueId: (row: IMetrics<IMetricVectorResult<IMetricCell>>): string => {
+        // For metrics objects, we need to extract the first result's bosh_job_id
+        if (row && Array.isArray(row) && row.length > 0 && row[0].metric) {
+          return row[0].metric.bosh_job_id;
+        }
+        return '';
+      },
       paginationKey: action.paginationKey,
       isLocal: true,
       transformEntities: [{ type: 'filter', field: CfCellsDataSource.cellIdPath }],
-      transformEntity: map((response) => {
+      transformEntity: map((response): IMetricVectorResult<IMetricCell>[] => {
         if (!response || response.length === 0) {
           return [];
         }

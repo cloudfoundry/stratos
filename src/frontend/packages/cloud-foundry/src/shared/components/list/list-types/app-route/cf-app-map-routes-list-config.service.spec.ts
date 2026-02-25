@@ -1,41 +1,61 @@
 import { DatePipe } from '@angular/common';
-import { inject, TestBed } from '@angular/core/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { ActivatedRoute } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CoreModule } from '../../../../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
-import { ApplicationServiceMock } from '../../../../../../test-framework/application-service-helper';
-import { generateCfStoreModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import {
+  ConfirmationDialogService,
+  CurrentUserPermissionsService
+} from '@stratosui/core';
+import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
+import { ApplicationServiceMock, generateCfStoreModules } from '@test-framework/cf';
+import { CFAppState } from '../../../../../cf-app-state';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { CfAppMapRoutesListConfigService } from './cf-app-map-routes-list-config.service';
 
 describe('CfAppMapRoutesListConfigService', () => {
-
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        CfAppMapRoutesListConfigService,
-        { provide: ApplicationService, useClass: ApplicationServiceMock },
-        DatePipe
-      ],
       imports: [
         ...generateCfStoreModules(),
-        SharedModule,
-        CoreModule,
-        RouterTestingModule,
-        NoopAnimationsModule
+      ],
+      providers: [
+        { provide: ApplicationService, useClass: ApplicationServiceMock },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              queryParamMap: {
+                get: () => 'test-space-guid'
+              }
+            }
+          }
+        },
+        {
+          provide: CfAppMapRoutesListConfigService,
+          useFactory: (
+            store: Store<CFAppState>,
+            appService: ApplicationService,
+            confirmDialog: ConfirmationDialogService,
+            datePipe: DatePipe,
+            activatedRoute: ActivatedRoute,
+            cups: CurrentUserPermissionsService) => {
+            return new CfAppMapRoutesListConfigService(store, appService, confirmDialog, datePipe, activatedRoute, cups);
+          },
+          deps: [Store, ApplicationService, ConfirmationDialogService, DatePipe, ActivatedRoute, CurrentUserPermissionsService]
+        },
+        DatePipe,
+        ConfirmationDialogService,
+        ...cfCurrentUserPermissionsService,
+        provideZonelessChangeDetection(),
       ]
     });
   });
 
-  it(
-    'should be created',
-    inject(
-      [CfAppMapRoutesListConfigService],
-      (service: CfAppMapRoutesListConfigService) => {
-        expect(service).toBeTruthy();
-      }
-    )
-  );
+  it('should be created', () => {
+    const service = TestBed.inject(CfAppMapRoutesListConfigService);
+    expect(service).toBeTruthy();
+  });
 });

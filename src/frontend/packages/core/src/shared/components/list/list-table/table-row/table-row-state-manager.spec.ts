@@ -1,7 +1,7 @@
 import { tap, skip } from 'rxjs/operators';
 import { RowsState, RowState } from '../../data-sources-controllers/list-data-source-types';
 import { Observable, Subscription } from 'rxjs';
-import { waitForAsync } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { TableRowStateManager } from './table-row-state-manager';
 
 
@@ -12,7 +12,7 @@ describe('TableRowStateManager', () => {
   const checkState = (manager: TableRowStateManager, actualState: RowState, expectedState: RowState) => {
     const fake = {
       FAKE: {
-        error: false
+        error: false,
       }
     };
     expect(actualState).toEqual(expectedState);
@@ -20,23 +20,23 @@ describe('TableRowStateManager', () => {
     expect(actualState).not.toEqual(fake);
     expect(stateManager.rowState).not.toEqual(fake);
   };
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     stateManager = new TableRowStateManager();
     obs = stateManager.observable;
     if (sub) {
       sub.unsubscribe();
     }
-  }));
+  });
 
 
-  it('should init the state', waitForAsync(() => {
+  it('should init the state', () => {
     const initState = {
       1: {
-        error: true
+        error: true,
       },
       2: {
         error: false,
-        blocked: true
+        blocked: true,
       }
     };
 
@@ -46,10 +46,10 @@ describe('TableRowStateManager', () => {
     sub = obs.pipe(
       tap(state => {
         checkState(stateManager, state, initState);
-      })
+      }),
     ).subscribe();
-  }));
-  it('should update the row state', waitForAsync(() => {
+  });
+  it('should update the row state', () => {
     const initState = {
       1: {
         error: true,
@@ -86,11 +86,11 @@ describe('TableRowStateManager', () => {
       skip(1),
       tap(state => {
         checkState(stateManager, state, expectedState);
-      })
+      }),
     ).subscribe();
     stateManager.updateRowState('1', updateState);
-  }));
-  it('should update the state', waitForAsync(() => {
+  });
+  it('should update the state', () => {
     const initState = {
       1: {
         error: true,
@@ -98,16 +98,16 @@ describe('TableRowStateManager', () => {
       },
       2: {
         error: false,
-        blocked: true
+        blocked: true,
       }
     };
     const updateState = {
       1: {
         error: false,
-        blocked: true
+        blocked: true,
       },
       2: {
-        blocked: false
+        blocked: false,
       }
     };
     const expectedState = {
@@ -118,7 +118,7 @@ describe('TableRowStateManager', () => {
       },
       2: {
         blocked: false,
-        error: false
+        error: false,
       }
     };
 
@@ -131,9 +131,9 @@ describe('TableRowStateManager', () => {
       }),
     ).subscribe();
     stateManager.updateState(updateState);
-  }));
+  });
 
-  it('should set the state', waitForAsync(() => {
+  it('should set the state', () => {
     const initState = {
       1: {
         error: true,
@@ -141,16 +141,16 @@ describe('TableRowStateManager', () => {
       },
       2: {
         error: false,
-        blocked: true
+        blocked: true,
       }
     };
     const setState = {
       1: {
         error: false,
-        blocked: true
+        blocked: true,
       },
       2: {
-        blocked: false
+        blocked: false,
       }
     };
 
@@ -163,9 +163,9 @@ describe('TableRowStateManager', () => {
       }),
     ).subscribe();
     stateManager.setState(setState);
-  }));
+  });
 
-  it('should set the row state', waitForAsync((done) => {
+  it('should set the row state', () => {
     const initState = {
       1: {
         error: true,
@@ -173,7 +173,7 @@ describe('TableRowStateManager', () => {
       },
       2: {
         error: false,
-        blocked: true
+        blocked: true,
       }
     };
     const setState = {
@@ -189,7 +189,7 @@ describe('TableRowStateManager', () => {
       },
       2: {
         error: false,
-        blocked: true
+        blocked: true,
       }
     };
 
@@ -202,5 +202,5 @@ describe('TableRowStateManager', () => {
       }),
     ).subscribe();
     stateManager.setRowState('1', setState);
-  }));
+  });
 });

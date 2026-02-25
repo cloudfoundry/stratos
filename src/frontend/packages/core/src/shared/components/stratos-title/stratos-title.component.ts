@@ -1,12 +1,35 @@
-import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, Input, computed, inject, ChangeDetectionStrategy } from '@angular/core';
+import { StratosThemeService } from '../../../../../theme/theme.service';
 
 @Component({
   selector: 'app-stratos-title',
   templateUrl: './stratos-title.component.html',
-  styleUrls: ['./stratos-title.component.scss']
+  styleUrls: ['./stratos-title.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule
+  ]
 })
 export class StratosTitleComponent {
+  private themeService = inject(StratosThemeService);
 
   // Optional title
-  @Input() title: string;
+  @Input() title?: string;
+
+  // Theme-related signals (computed from theme service)
+  public themeTitle = computed(() =>
+    this.themeService.theme()?.branding?.companyName ||
+    this.themeService.theme()?.branding?.loginTitle ||
+    'Stratos'
+  );
+
+  public themeSubtitle = computed(() =>
+    this.themeService.theme()?.branding?.loginSubtitle || ''
+  );
+
+  public themeLogo = computed(() =>
+    this.themeService.theme()?.branding?.logo || '/core/assets/logo.png'
+  );
 }

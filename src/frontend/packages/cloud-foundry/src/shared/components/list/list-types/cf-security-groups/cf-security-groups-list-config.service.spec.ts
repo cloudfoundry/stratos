@@ -1,19 +1,30 @@
-import { inject, TestBed } from '@angular/core/testing';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { generateCfBaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { generateCfBaseTestModulesNoShared, generateActiveRouteCfOrgSpaceMock } from '@test-framework/cf';
 import { CfSecurityGroupsListConfigService } from './cf-security-groups-list-config.service';
 
 describe('CfSecurityGroupsListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [CfSecurityGroupsListConfigService, ActiveRouteCfOrgSpace],
-      imports: generateCfBaseTestModules()
-
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(generateCfBaseTestModulesNoShared()),
+        generateActiveRouteCfOrgSpaceMock(),
+        CfSecurityGroupsListConfigService,
+      ],
     });
   });
 
-  it('should be created', inject([CfSecurityGroupsListConfigService], (service: CfSecurityGroupsListConfigService) => {
+  it('should be created', () => {
+    const service = TestBed.inject(CfSecurityGroupsListConfigService);
     expect(service).toBeTruthy();
-  }));
+  });
 });

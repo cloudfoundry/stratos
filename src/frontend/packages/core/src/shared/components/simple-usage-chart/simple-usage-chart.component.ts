@@ -1,11 +1,24 @@
-import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, ElementRef, Input, ViewChild  } from '@angular/core';
+import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
+import { ChartConfiguration } from 'chart.js';
+import { BaseChartDirective } from 'ng2-charts';
 
 import { IChartData, IChartThresholds, ISimpleUsageChartData, IUsageColor } from './simple-usage-chart.types';
+import { CustomIconComponent } from '../custom-material/custom-material.component';
 
 @Component({
   selector: 'app-simple-usage-chart',
   templateUrl: './simple-usage-chart.component.html',
-  styleUrls: ['./simple-usage-chart.component.scss']
+  styleUrls: ['./simple-usage-chart.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    CustomIconComponent,
+    CustomTooltipDirective,
+    BaseChartDirective
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SimpleUsageChartComponent {
   static BASE_COLOR_SELECTOR = 'simple-usage-graph-color';
@@ -29,10 +42,28 @@ export class SimpleUsageChartComponent {
     {
       name: 'Remaining',
       value: 100
-    }]
+    }],
+    chartJsData: {
+      labels: ['Used', 'Unknown', 'Remaining'],
+      datasets: [{
+        data: [0, 0, 100],
+        backgroundColor: ['#94949440', '#94949440', '#94949440']
+      }]
+    }
   };
 
-  @ViewChild('colors', { static: true }) colorsElement: ElementRef;
+  public chartOptions: any = {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '70%',
+    plugins: {
+      legend: {
+        display: false
+      }
+    }
+  };
+
+  @ViewChild('colors', { static: true }) colorsElement!: ElementRef;
 
   @Input() chartTitle = 'Usage';
 
@@ -55,8 +86,9 @@ export class SimpleUsageChartComponent {
         warningText = 'Unknown data found'
       } = usageData;
       const remaining = total - (used + unknown);
+      const colors = this.getColors(total, used);
       this.chartData = {
-        colors: this.getColors(total, used),
+        colors,
         total,
         used,
         unknown,
@@ -72,7 +104,14 @@ export class SimpleUsageChartComponent {
         {
           name: remainingLabel,
           value: remaining
-        }]
+        }],
+        chartJsData: {
+          labels: [usedLabel, unknownLabel, remainingLabel],
+          datasets: [{
+            data: [used, unknown, remaining],
+            backgroundColor: colors?.domain || ['#94949440', '#94949440', '#94949440']
+          }]
+        }
       };
     }
   }

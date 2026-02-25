@@ -1,4 +1,7 @@
-import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { RouterModule } from '@angular/router';
+
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
@@ -6,7 +9,10 @@ import { map, switchMap } from 'rxjs/operators';
 import {
   CurrentUserPermissionsService,
 } from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
+import { ListComponent } from '../../../../../../../core/src/shared/components/list/list.component';
 import { ListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { NoContentMessageComponent } from '../../../../../../../core/src/shared/components/no-content-message/no-content-message.component';
+import { PageSubNavComponent } from '../../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
 import { CFFeatureFlagTypes } from '../../../../../cf-api.types';
 import { CFAppState } from '../../../../../cf-app-state';
 import {
@@ -15,6 +21,8 @@ import {
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { createCfOrgSpaceSteppersUrl, someFeatureFlags, waitForCFPermissions } from '../../../cf.helpers';
+import { CfAdminAddUserWarningComponent } from '../../cf-admin-add-user-warning/cf-admin-add-user-warning.component';
+import { CloudFoundryInviteUserLinkComponent } from '../cf-invite-user-link/cloud-foundry-invite-user-link.component';
 
 @Component({
   selector: 'app-cloud-foundry-organization-users',
@@ -23,7 +31,18 @@ import { createCfOrgSpaceSteppersUrl, someFeatureFlags, waitForCFPermissions } f
   providers: [{
     provide: ListConfig,
     useClass: CfOrgUsersListConfigService
-  }]
+  }],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    RouterModule,
+    PageSubNavComponent,
+    ListComponent,
+    NoContentMessageComponent,
+    CfAdminAddUserWarningComponent,
+    CloudFoundryInviteUserLinkComponent
+  ]
 })
 export class CloudFoundryOrganizationUsersComponent {
 

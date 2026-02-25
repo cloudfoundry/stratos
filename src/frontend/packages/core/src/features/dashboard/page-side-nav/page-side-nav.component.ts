@@ -1,5 +1,6 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, Input, OnInit  } from '@angular/core';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -11,6 +12,7 @@ import { StratosTabMetadata } from '../../../core/extension/extension-service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { IBreadcrumb } from '../../../shared/components/breadcrumbs/breadcrumbs.types';
 import { TabNavService } from '../../../tab-nav.service';
+import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 
 
 
@@ -21,13 +23,24 @@ export interface IPageSideNavTab extends StratosTabMetadata {
 @Component({
   selector: 'app-page-side-nav',
   templateUrl: './page-side-nav.component.html',
-  styleUrls: ['./page-side-nav.component.scss']
+  styleUrls: ['./page-side-nav.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    CustomIconComponent
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PageSideNavComponent implements OnInit {
 
-  pTabs: IPageSideNavTab[];
+  pTabs: IPageSideNavTab[] = [];
   @Input() set tabs(tabs: IPageSideNavTab[]) {
-    if (!tabs || (this.pTabs && tabs.length === this.pTabs.length)) {
+    if (!tabs) {
+      this.pTabs = [];
+      return;
+    }
+    if (this.pTabs && tabs.length === this.pTabs.length) {
       return;
     }
     this.pTabs = tabs.map(tab => ({
@@ -40,9 +53,9 @@ export class PageSideNavComponent implements OnInit {
   }
 
   @Input()
-  public header: string;
-  public activeTab$: Observable<string>;
-  public breadcrumbs$: Observable<IBreadcrumb[]>;
+  public header!: string;
+  public activeTab$!: Observable<string>;
+  public breadcrumbs$!: Observable<IBreadcrumb[]>;
   public isMobile$: Observable<boolean>;
   constructor(
     public tabNavService: TabNavService,
@@ -55,7 +68,7 @@ export class PageSideNavComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.activeTab$ = this.tabNavService.getCurrentTabHeaderObservable().pipe(map(item => item ? item.label : null));
+    this.activeTab$ = this.tabNavService.getCurrentTabHeaderObservable().pipe(map((item: any) => item ? item.label : null));
   }
 
 }

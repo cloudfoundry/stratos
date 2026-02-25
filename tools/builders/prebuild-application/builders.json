@@ -1,0 +1,10 @@
+{
+  "$schema": "@angular-devkit/architect/src/builders-schema.json",
+  "builders": {
+    "prebuild-application": {
+      "implementation": "./dist/index",
+      "schema": "./src/schema.json",
+      "description": "Build Angular application with prebuild script execution"
+    }
+  }
+}

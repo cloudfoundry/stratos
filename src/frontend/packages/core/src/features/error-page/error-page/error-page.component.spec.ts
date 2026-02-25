@@ -1,31 +1,46 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from '@stratosui/store/testing';
-
-import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
-import { CoreModule } from '../../../core/core.module';
-import { SharedModule } from '../../../shared/shared.module';
-import { TabNavService } from '../../../tab-nav.service';
+import {
+  entityCatalog,
+  generateStratosEntities,
+  EntityCatalogHelper,
+  EntityCatalogHelpers,
+  InternalEventMonitorFactory
+} from '@stratosui/store';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@test-framework';
 import { ErrorPageComponent } from './error-page.component';
 
 describe('ErrorPageComponent', () => {
   let component: ErrorPageComponent;
   let fixture: ComponentFixture<ErrorPageComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [ErrorPageComponent],
+  beforeEach(async () => {
+    // Clear and register entities BEFORE TestBed configuration for Angular 20
+    (entityCatalog as any).clear();
+    const entities = generateStratosEntities();
+    entities.forEach(entity => entityCatalog.register(entity));
+
+    await TestBed.configureTestingModule({
       imports: [
-        CoreModule,
-        SharedModule,
-        CoreTestingModule,
+        RouterTestingModule,
+        NoopAnimationsModule,
         createBasicStoreModule(),
-        RouterTestingModule
+        ErrorPageComponent,
       ],
-      providers: [TabNavService]
-    })
-      .compileComponents();
-  }));
+      providers: [
+        InternalEventMonitorFactory,
+        ...STORE_TEST_PROVIDERS,
+        provideZonelessChangeDetection(),
+      ]
+    }).compileComponents();
+
+    // Initialize EntityCatalogHelper for Angular 20 compatibility
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ErrorPageComponent);

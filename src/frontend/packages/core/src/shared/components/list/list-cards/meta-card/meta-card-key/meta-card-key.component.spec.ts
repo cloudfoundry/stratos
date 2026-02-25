@@ -1,20 +1,21 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { SharedModule } from '../../../../../shared.module';
 import { MetaCardKeyComponent } from './meta-card-key.component';
 
 describe('MetaCardKeyComponent', () => {
   let component: MetaCardKeyComponent;
   let fixture: ComponentFixture<MetaCardKeyComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       imports: [
-        SharedModule
+        MetaCardKeyComponent,
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(MetaCardKeyComponent);

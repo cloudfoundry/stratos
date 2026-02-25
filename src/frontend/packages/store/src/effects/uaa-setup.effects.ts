@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { ApplicationRef, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
@@ -15,12 +15,15 @@ import {
 import { LocalAdminSetupData, UaaSetupData } from './../types/uaa-setup.types';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class UAASetupEffect {
 
   constructor(
     private http: HttpClient,
-    private actions$: Actions
+    private actions$: Actions,
+    private appRef: ApplicationRef
   ) { }
 
   getSetupScopesUrl = '/pp/v1/setup/check';
@@ -33,8 +36,14 @@ export class UAASetupEffect {
       return this.http.post(this.getSetupScopesUrl, params, {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       }).pipe(
-        map(data => new SetupSuccess(data)),
-        catchError((err, caught) => [new SetupFailed(`Failed to save configuration. ${this.fetchError(err)}`)])
+        map(data => {
+          this.appRef.tick();
+          return new SetupSuccess(data);
+        }),
+        catchError((err, caught) => {
+          this.appRef.tick();
+          return [new SetupFailed(`Failed to save configuration. ${this.fetchError(err)}`)];
+        })
       );
     })));
 
@@ -45,12 +54,18 @@ export class UAASetupEffect {
       return this.http.post(this.saveSetupUrl, params, {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       }).pipe(
-        map(data => new SetupSuccess(data)),
-        catchError((err, caught) => [new SetupFailed(`Failed to setup Administrator scope. ${this.fetchError(err)}`)])
+        map(data => {
+          this.appRef.tick();
+          return new SetupSuccess(data);
+        }),
+        catchError((err, caught) => {
+          this.appRef.tick();
+          return [new SetupFailed(`Failed to setup Administrator scope. ${this.fetchError(err)}`)];
+        })
       );
     })));
 
-  private fetchError(err): string {
+  private fetchError(err: any): string {
     const httpResponse = isHttpErrorResponse(err);
     if (httpResponse) {
       if (httpResponse.error.error) {

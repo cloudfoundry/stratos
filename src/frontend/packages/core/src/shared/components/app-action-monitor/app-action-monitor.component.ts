@@ -1,4 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, Input, OnInit  } from '@angular/core';
 import { rootUpdatingKey, EntitySchema, EntityMonitorFactory } from '@stratosui/store';
 import { schema } from 'normalizr';
 import { never as observableNever, Observable, of as observableOf } from 'rxjs';
@@ -14,11 +15,18 @@ import {
   TableCellRequestMonitorIconComponent,
 } from '../list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
 import { ITableColumn } from '../list/list-table/table.types';
+import { TableComponent } from '../list/list-table/table.component';
 
 @Component({
   selector: 'app-action-monitor',
   templateUrl: './app-action-monitor.component.html',
-  styleUrls: ['./app-action-monitor.component.scss']
+  styleUrls: ['./app-action-monitor.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    TableComponent
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppActionMonitorComponent<T> implements OnInit {
 
@@ -43,7 +51,7 @@ export class AppActionMonitorComponent<T> implements OnInit {
    * Get the ID of the ENTITY (not table row)
    */
   @Input()
-  public getId: (element) => string;
+  public getId: (element: T) => string;
 
   /**
    * Get the ID of the ROW
@@ -52,7 +60,7 @@ export class AppActionMonitorComponent<T> implements OnInit {
   public trackBy = ((index: number, item: T) => index.toString());
 
   @Input()
-  public getCellConfig: (element) => ITableCellRequestMonitorIconConfig;
+  public getCellConfig: (element: T) => ITableCellRequestMonitorIconConfig;
 
   @Input()
   public columns: ITableColumn<T>[] = [];

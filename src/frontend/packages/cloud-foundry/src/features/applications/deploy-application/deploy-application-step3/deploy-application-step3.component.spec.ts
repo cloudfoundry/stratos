@@ -1,41 +1,33 @@
-import { CommonModule } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 
-import { CoreModule } from '../../../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../../../core/src/shared/shared.module';
-import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfBaseTestModulesNoShared } from "@test-framework/cf";
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
-import { DeployApplicationStep3Component } from './deploy-application-step3.component';
+import { DeployApplicationStep3Component } from "./deploy-application-step3.component";
 
 describe('DeployApplicationStep3Component', () => {
   let component: DeployApplicationStep3Component;
   let fixture: ComponentFixture<DeployApplicationStep3Component>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [DeployApplicationStep3Component],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
-        ...generateCfStoreModules(),
-        CommonModule,
-        CoreModule,
-        SharedModule,
-        RouterTestingModule,
-        NoopAnimationsModule,
-        HttpClientModule,
-        HttpClientTestingModule,
+        DeployApplicationStep3Component,
       ],
       providers: [
-        CfOrgSpaceDataService
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(generateCfBaseTestModulesNoShared()),
+        CfOrgSpaceDataService,
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(DeployApplicationStep3Component);
     component = fixture.componentInstance;
     fixture.detectChanges();

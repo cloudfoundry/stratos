@@ -1,16 +1,30 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { Component, Input, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
-import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
-import { endpointEntityType } from '../../../../../store/src/helpers/stratos-entity-factory';
+import { CustomFormFieldComponent, CustomCheckboxComponent, FocusDirective, UnlimitedInputComponent, safeUnsubscribe } from '@stratosui/core';
+import { endpointEntityType } from '@stratosui/store';
 import { IQuotaDefinition } from '../../../cf-api.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { createEntityRelationPaginationKey } from '../../../entity-relations/entity-relations.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
+
+export interface SpaceQuotaFormValues {
+  name: string;
+  totalServices: number;
+  totalRoutes: number;
+  memoryLimit: number;
+  instanceMemoryLimit: number;
+  nonBasicServicesAllowed: boolean;
+  totalReservedRoutePorts: number;
+  appInstanceLimit: number;
+  totalServiceKeys: number;
+  totalPrivateDomains: number;
+  appTasksLimit: number;
+}
 
 
 @Component({
@@ -19,15 +33,36 @@ import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
   styleUrls: ['./space-quota-definition-form.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
-  ]
+  ],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    ReactiveFormsModule,
+    CustomCheckboxComponent,
+    CustomFormFieldComponent,
+    FocusDirective,
+    UnlimitedInputComponent
+]
 })
 export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
-  quotasSubscription: Subscription;
+  quotasSubscription!: Subscription;
   cfGuid: string;
   orgGuid: string;
-  allQuotas: string[];
-  spaceQuotaDefinitions$: Observable<string[]>;
-  formGroup: UntypedFormGroup;
+  allQuotas!: string[];
+  spaceQuotaDefinitions$!: Observable<string[]>;
+  formGroup!: FormGroup<{
+    name: FormControl<string>;
+    totalServices: FormControl<number>;
+    totalRoutes: FormControl<number>;
+    memoryLimit: FormControl<number>;
+    instanceMemoryLimit: FormControl<number>;
+    nonBasicServicesAllowed: FormControl<boolean>;
+    totalReservedRoutePorts: FormControl<number>;
+    appInstanceLimit: FormControl<number>;
+    totalServiceKeys: FormControl<number>;
+    totalPrivateDomains: FormControl<number>;
+    appTasksLimit: FormControl<number>;
+  }>;
 
   @Input() quota: IQuotaDefinition;
 
@@ -47,17 +82,21 @@ export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
   setupForm() {
     const quota: any = this.quota || {};
 
-    this.formGroup = new UntypedFormGroup({
-      name: new UntypedFormControl(quota.name || '', [Validators.required, this.nameTakenValidator()]),
-      totalServices: new UntypedFormControl(quota.total_services),
-      totalRoutes: new UntypedFormControl(quota.total_routes),
-      memoryLimit: new UntypedFormControl(quota.memory_limit),
-      instanceMemoryLimit: new UntypedFormControl(quota.instance_memory_limit),
-      nonBasicServicesAllowed: new UntypedFormControl(quota.non_basic_services_allowed || false),
-      totalReservedRoutePorts: new UntypedFormControl(quota.total_reserved_route_ports),
-      appInstanceLimit: new UntypedFormControl(quota.app_instance_limit),
-      totalServiceKeys: new UntypedFormControl(quota.total_service_keys),
-      appTasksLimit: new UntypedFormControl(quota.app_task_limit),
+    this.formGroup = new FormGroup({
+      name: new FormControl(quota.name || '', {
+        validators: [Validators.required, this.nameTakenValidator()],
+        nonNullable: true
+      }),
+      totalServices: new FormControl(quota.total_services, { nonNullable: true }),
+      totalRoutes: new FormControl(quota.total_routes, { nonNullable: true }),
+      memoryLimit: new FormControl(quota.memory_limit, { nonNullable: true }),
+      instanceMemoryLimit: new FormControl(quota.instance_memory_limit, { nonNullable: true }),
+      nonBasicServicesAllowed: new FormControl(quota.non_basic_services_allowed || false, { nonNullable: true }),
+      totalReservedRoutePorts: new FormControl(quota.total_reserved_route_ports, { nonNullable: true }),
+      appInstanceLimit: new FormControl(quota.app_instance_limit, { nonNullable: true }),
+      totalServiceKeys: new FormControl(quota.total_service_keys, { nonNullable: true }),
+      totalPrivateDomains: new FormControl(quota.total_private_domains, { nonNullable: true }),
+      appTasksLimit: new FormControl(quota.app_task_limit, { nonNullable: true }),
     });
   }
 
@@ -92,7 +131,7 @@ export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
     }
 
     if (this.allQuotas) {
-      return this.allQuotas.indexOf(value || this.formGroup.value.name) === -1;
+      return this.allQuotas.indexOf(value ?? this.formGroup.value.name ?? '') === -1;
     }
 
     return true;

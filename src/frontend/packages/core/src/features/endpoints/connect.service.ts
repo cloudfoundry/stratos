@@ -36,22 +36,22 @@ export const isEndpointConnected = (endpoint: EndpointModel): boolean => {
 
 export class ConnectEndpointService {
 
-  public connectingError$: Observable<string>;
+  public connectingError$!: Observable<string | null>;
   private hasConnected = new Subject<boolean>();
 
   // This Observable is used to observe when conenction has completed
   public hasConnected$: Observable<boolean> = this.hasConnected.asObservable();
-  public isBusy$: Observable<boolean>;
+  public isBusy$!: Observable<boolean>;
 
-  private connecting$: Observable<boolean>;
-  private connected$: Observable<[boolean, EndpointModel]>;
-  private fetchingInfo$: Observable<boolean>;
-  private update$: Observable<ActionState>;
+  private connecting$!: Observable<boolean>;
+  private connected$!: Observable<[boolean, EndpointModel]>;
+  private fetchingInfo$!: Observable<boolean>;
+  private update$!: Observable<ActionState>;
 
   private subs: Subscription[] = [];
 
-  private hasAttemptedConnect: boolean;
-  private pData: ConnectEndpointData;
+  private hasAttemptedConnect!: boolean;
+  private pData!: ConnectEndpointData;
 
   // We need a delay to ensure the BE has finished registering the endpoint.
   // If we don't do this and if we're quick enough, we can navigate to the application page

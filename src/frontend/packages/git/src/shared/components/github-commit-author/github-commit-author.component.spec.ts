@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {  ChangeDetectorRef, provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { GithubCommitAuthorComponent } from './github-commit-author.component';
 
@@ -7,12 +9,13 @@ describe('GithubCommitAuthorComponent', () => {
   let fixture: ComponentFixture<GithubCommitAuthorComponent>;
   let element: HTMLElement;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [GithubCommitAuthorComponent]
+      providers: [provideZonelessChangeDetection()],
+      imports: [GithubCommitAuthorComponent]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(GithubCommitAuthorComponent);
@@ -61,11 +64,20 @@ describe('GithubCommitAuthorComponent', () => {
   });
 
   it('should not render github link / avatar', () => {
-    component.commit.author = null;
+    // OnPush change detection requires new object reference and manual check
+    component.commit = {
+      ...component.commit,
+      author: null,
+    };
+    // Manually trigger change detection for OnPush strategy
+    const cdr = fixture.debugElement.injector.get(ChangeDetectorRef);
+    cdr.markForCheck();
     fixture.detectChanges();
 
-    const anchor = element.querySelector('a');
-    const img = element.querySelector('img');
+    // Re-query the element after change detection
+    const updatedElement = fixture.nativeElement;
+    const anchor = updatedElement.querySelector('a');
+    const img = updatedElement.querySelector('img');
     expect(anchor).toBeNull();
     expect(img).toBeNull();
   });

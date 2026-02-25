@@ -1,15 +1,21 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IApp, ISpace } from '../../../../../../cf-api.types';
+import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
 import { TableCellAppCfOrgSpaceBase } from '../TableCellAppCfOrgSpaceBase';
 
 @Component({
   selector: 'app-table-cell-app-cforgspace',
   templateUrl: './table-cell-app-cforgspace.component.html',
   styleUrls: ['./table-cell-app-cforgspace.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CfOrgSpaceLinksComponent
+  ]
 })
 export class TableCellAppCfOrgSpaceComponent extends TableCellAppCfOrgSpaceBase {
 
@@ -21,8 +27,8 @@ export class TableCellAppCfOrgSpaceComponent extends TableCellAppCfOrgSpaceBase 
     }
   }
 
-  constructor(store: Store<CFAppState>) {
-    super(store);
+  constructor() {
+    super(inject(Store<CFAppState>));
   }
 
 }

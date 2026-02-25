@@ -1,6 +1,7 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { ValuesPipe } from '../../../../../../../../core/src/shared/pipes/values.pipe';
 import { EventMetadataComponent } from './event-metadata.component';
 
@@ -8,15 +9,13 @@ describe('EventMetadataComponent', () => {
   let component: EventMetadataComponent;
   let fixture: ComponentFixture<EventMetadataComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [EventMetadataComponent, ValuesPipe],
-      imports: [CoreModule]
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [EventMetadataComponent, ValuesPipe],
+      providers: [provideZonelessChangeDetection()],
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(EventMetadataComponent);
     component = fixture.componentInstance;
     component.metadata = {};

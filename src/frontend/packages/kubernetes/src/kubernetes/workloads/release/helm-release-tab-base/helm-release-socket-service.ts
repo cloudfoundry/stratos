@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Subject, Subscription } from 'rxjs';
+import { of, Subject, Subscription } from 'rxjs';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
 import { catchError, map, share, switchMap } from 'rxjs/operators';
 
@@ -52,11 +52,11 @@ export class HelmReleaseSocketService implements OnDestroy {
       `${protocol}://${host}/pp/v1/helm/releases/${releaseRef}/status`
     );
 
-    const socket$ = makeWebSocketObservable(streamUrl).pipe(catchError(e => {
+    const socket$ = makeWebSocketObservable(streamUrl).pipe(catchError((e: any): import('rxjs').Observable<never> => {
       console.error(
         'Error while connecting to socket: ' + JSON.stringify(e)
       );
-      return [];
+      return of([]) as unknown as import('rxjs').Observable<never>;
     }),
       share(),
     );
@@ -66,15 +66,25 @@ export class HelmReleaseSocketService implements OnDestroy {
         return getResponses(this.sendToSocket);
       }),
       map((message: string) => message),
-      catchError(e => {
+      catchError((e: any): import('rxjs').Observable<never> => {
         console.error('Workload WS error: ', e);
-        return [];
+        return of([]) as unknown as import('rxjs').Observable<never>;
       })
     );
 
     let prefix = '';
-    this.sub = messages.subscribe(jsonString => {
-      const messageObj = JSON.parse(jsonString);
+    this.sub = messages.subscribe((jsonString: string) => {
+      // Guard against empty, invalid, or non-string data
+      if (!jsonString || typeof jsonString !== 'string' || jsonString.trim() === '') {
+        return;
+      }
+      let messageObj;
+      try {
+        messageObj = JSON.parse(jsonString);
+      } catch (e) {
+        console.error('Failed to parse WebSocket message:', e);
+        return;
+      }
       if (messageObj) {
         if (messageObj.kind === 'ReleasePrefix') {
           prefix = messageObj.data;
@@ -91,7 +101,7 @@ export class HelmReleaseSocketService implements OnDestroy {
 
           // Store ALL resources for the release
           if (prefix) {
-            manifest.forEach(resource => {
+            manifest.forEach((resource: any) => {
               const entityType = this.getEntityTypeForResource(resource.kind);
               if (entityType) {
                 if (!resources[entityType]) {
@@ -105,11 +115,11 @@ export class HelmReleaseSocketService implements OnDestroy {
               let action: KubePaginationAction;
               if (entityType === 'pod') {
                 resourcesOfType = resourcesOfType || [];
-                resourcesOfType = resourcesOfType.map((pod: KubernetesPod) =>
+                resourcesOfType = (resourcesOfType as any[]).map((pod: KubernetesPod) =>
                   KubernetesPodExpandedStatusHelper.updatePodWithExpandedStatus(pod)
-                );
+                ) as BasicKubeAPIResource[];
               }
-              action = kubeEntityCatalog[entityType].actions.getInWorkload(
+              action = (kubeEntityCatalog as any)[entityType].actions.getInWorkload(
                 this.helmReleaseHelper.endpointGuid,
                 this.helmReleaseHelper.namespace,
                 this.helmReleaseHelper.releaseTitle
@@ -140,7 +150,7 @@ export class HelmReleaseSocketService implements OnDestroy {
   /**
    * Convert type in kube api kind string to kube entity catalog property name
    */
-  private getEntityTypeForResource(type: string): string {
+  private getEntityTypeForResource(type: string): string | undefined {
     // TODO: Ideally this should come from some kubeEntityCatalog.allKubeEntities `def.apiName === resource.kind && def.apiWorkspaced`
     // lookup, however we don't currently have anything in the entity that matches the catalog property name
     // (apiName casing doesn't match). We should improve the whole kubeEntityCatalog[entityType] process
@@ -162,6 +172,7 @@ export class HelmReleaseSocketService implements OnDestroy {
       case 'ServiceAccount':
         return 'serviceAccount';
     }
+    return undefined;
   }
 
   public stop() {
@@ -194,16 +205,18 @@ export class HelmReleaseSocketService implements OnDestroy {
   }
 
   ngOnDestroy() {
-    this.sub.unsubscribe();
+    if (this.sub) {
+      this.sub.unsubscribe();
+    }
     this.snackbarService.hide();
   }
 
   private addResource(action: EntityRequestAction, data: any) {
     const catalogEntity = entityCatalog.getEntity(action);
-    const response = {
+    const response: any = {
       entities: {
         [catalogEntity.entityKey]: {
-          [action.guid]: data
+          [action.guid as string]: data
         }
       },
       result: [
@@ -214,10 +227,10 @@ export class HelmReleaseSocketService implements OnDestroy {
     this.store.dispatch(successWrapper);
   }
 
-  private populateList(action: KubePaginationAction, resources: any) {
+  private populateList(action: KubePaginationAction, resources: any[]) {
     const entity = entityCatalog.getEntity(action);
-    const newResources = {};
-    resources.forEach(resource => {
+    const newResources: any = {};
+    resources.forEach((resource: any) => {
       const newResource: HelmReleasePod | HelmReleaseService = {
         endpointId: action.kubeGuid,
         releaseTitle: this.helmReleaseHelper.releaseTitle,
@@ -226,7 +239,7 @@ export class HelmReleaseSocketService implements OnDestroy {
       newResource.metadata.kubeId = action.kubeGuid;
       // The service entity from manifest is missing this, but apply here to ensure any others are caught
       newResource.metadata.namespace = this.helmReleaseHelper.namespace;
-      const entityId = action.entity[0].getId(resource);
+      const entityId = (action.entity as any)[0].getId(resource);
       newResources[entityId] = newResource;
     });
 

@@ -1,37 +1,67 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { Store } from '@ngrx/store';
-import { testSessionData } from '@stratosui/store/testing';
 
-import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { MetadataCardTestComponents } from '../../../../../../../../core/test-framework/core-test.helper';
-import { VerifiedSession } from '../../../../../../../../store/src/actions/auth.actions';
-import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
-import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
 import {
+  ConfirmationDialogService,
+  MetaCardComponent,
+  MetaCardItemComponent,
+  MetaCardKeyComponent,
+  MetaCardTitleComponent,
+  MetaCardValueComponent,
+  MultilineTitleComponent,
+  ApplicationStateIconComponent,
+  ApplicationStateIconPipe,
+  CardStatusComponent
+} from '@stratosui/core';
+import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
+import {
+  VerifiedSession,
+  EntityServiceFactory,
+  EntityMonitorFactory,
+  PaginationMonitorFactory,
+  UserFavoriteManager
+} from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import {
+  testSessionData,
   generateCfBaseTestModulesNoShared,
   generateTestCfEndpointServiceProvider,
   generateTestCfUserServiceProvider,
-} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from "@test-framework/cf";
 import { CloudFoundryOrganizationService } from '../../../../../../features/cf/services/cloud-foundry-organization.service';
 import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../../../services/cloud-foundry-user-provided-services.service';
-import { CfSpaceCardComponent } from './cf-space-card.component';
-
+import { CfSpaceCardComponent } from "./cf-space-card.component";
 describe('CfSpaceCardComponent', () => {
   let component: CfSpaceCardComponent;
   let fixture: ComponentFixture<CfSpaceCardComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
         CfSpaceCardComponent,
-        ...MetadataCardTestComponents
+        MetaCardComponent,
+        MetaCardItemComponent,
+        MetaCardKeyComponent,
+        MetaCardTitleComponent,
+        MetaCardValueComponent,
+        MultilineTitleComponent,
+        ApplicationStateIconComponent,
+        ApplicationStateIconPipe,
+        CardStatusComponent,
       ],
-      imports: generateCfBaseTestModulesNoShared(),
       providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(generateCfBaseTestModulesNoShared()),
         PaginationMonitorFactory,
         EntityMonitorFactory,
         generateTestCfUserServiceProvider(),
@@ -40,14 +70,16 @@ describe('CfSpaceCardComponent', () => {
         generateTestCfEndpointServiceProvider(),
         EntityServiceFactory,
         ConfirmationDialogService,
-        CloudFoundryUserProvidedServicesService
+        CloudFoundryUserProvidedServicesService,
+        UserFavoriteManager,
+        ...cfCurrentUserPermissionsService,
       ]
     })
       .compileComponents();
 
-    const store = TestBed.get(Store);
+    const store = TestBed.inject(Store);
     store.dispatch(new VerifiedSession(testSessionData));
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CfSpaceCardComponent);

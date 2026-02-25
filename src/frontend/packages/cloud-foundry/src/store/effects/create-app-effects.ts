@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { ApplicationRef, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { of as observableOf, throwError as observableThrowError } from 'rxjs';
@@ -19,7 +19,8 @@ export class CreateAppPageEffects {
   constructor(
     private http: HttpClient,
     private actions$: Actions,
-    private store: Store<CFAppState>
+    private store: Store<CFAppState>,
+    private appRef: ApplicationRef
   ) {
     this.proxyAPIVersion = environment.proxyAPIVersion;
     this.cfAPIVersion = environment.cfAPIVersion;
@@ -31,22 +32,24 @@ export class CreateAppPageEffects {
    CheckAppNameIsFree$ = createEffect(() => this.actions$.pipe(
     ofType<IsNewAppNameFree>(CHECK_NAME),
     withLatestFrom(this.store.select(selectNewAppCFDetails)),
-    switchMap(([action, cfDetails]: [any, NewAppCFDetails]) => {
+    switchMap(([action, cfDetails]: [IsNewAppNameFree, NewAppCFDetails]) => {
       const { cloudFoundry, org, space } = cfDetails;
-      return this.http.get(`/pp/${this.proxyAPIVersion}/proxy/${this.cfAPIVersion}/apps`, {
+      return this.http.get<{ [guid: string]: { total_results: number } }>(`/pp/${this.proxyAPIVersion}/proxy/${this.cfAPIVersion}/apps`, {
         params: {
           q: `name:${action.name};space_guid:${space}`
         },
         headers: { 'x-cap-cnsi-list': cloudFoundry }
       }).pipe(
-        map(apps => {
+        map((apps: { [guid: string]: { total_results: number } }) => {
           const ourCfApps = apps[cloudFoundry];
           if (ourCfApps.total_results) {
             throw observableThrowError('Taken');
           }
+          this.appRef.tick();
           return new AppNameFree(action.name);
         }),
-        catchError(err => {
+        catchError((_err: unknown) => {
+          this.appRef.tick();
           return observableOf(new AppNameTaken(action.name));
         }));
     })));

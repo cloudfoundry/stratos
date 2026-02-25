@@ -2,20 +2,21 @@ import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { getServicePlanName } from '../../../../../../../cloud-foundry/src/features/service-catalog/services-helper';
-import { ServicesService } from '../../../../../../../cloud-foundry/src/features/service-catalog/services.service';
-import {
-  IListDataSource,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import {
   defaultPaginationPageSizeOptionsTable,
+  IGlobalListAction,
+  IListAction,
   IListConfig,
+  IListDataSource,
+  IListMultiFilterConfig,
+  IMultiListAction,
+  ITableColumn,
   ListViewTypes,
-} from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+} from '@stratosui/core';
+import { APIResource, ListView } from '@stratosui/store';
+import { CFAppState } from '../../../../../cf-app-state';
+import { getServicePlanName } from '../../../../../features/service-catalog/services-helper';
+import { ServicesService } from '../../../../../features/service-catalog/services.service';
 import { IServicePlan } from '../../../../../cf-api-svc.types';
 import { ServicePlansDataSource } from './service-plans-data-source';
 import {
@@ -32,14 +33,16 @@ import {
 /**
  * @export
  */
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ServicePlansListConfigService implements IListConfig<APIResource<IServicePlan>> {
 
   viewType = ListViewTypes.TABLE_ONLY;
   pageSizeOptions = defaultPaginationPageSizeOptionsTable;
   dataSource: IListDataSource<APIResource<IServicePlan>>;
   defaultView = 'table' as ListView;
-  text = {
+  text: { title: string | null; filter: string; noEntries: string } = {
     title: null,
     filter: 'Search by name',
     noEntries: 'There are no service plans'
@@ -51,7 +54,7 @@ export class ServicePlansListConfigService implements IListConfig<APIResource<IS
       columnId: 'name',
       headerCell: () => 'Name',
       cellDefinition: {
-        getValue: (row) => getServicePlanName(row.entity)
+        getValue: (row: APIResource<IServicePlan>) => getServicePlanName(row.entity)
       },
       sort: {
         type: 'sort',
@@ -89,7 +92,7 @@ export class ServicePlansListConfigService implements IListConfig<APIResource<IS
     {
       columnId: 'creation', headerCell: () => 'Creation Date',
       cellDefinition: {
-        getValue: (row: APIResource) => `${this.datePipe.transform(row.metadata.created_at, 'medium')}`
+        getValue: (row: APIResource<IServicePlan>) => `${this.datePipe.transform(row.metadata.created_at, 'medium')}`
       },
       sort: {
         type: 'sort',
@@ -109,10 +112,10 @@ export class ServicePlansListConfigService implements IListConfig<APIResource<IS
     this.dataSource = new ServicePlansDataSource(servicesService.cfGuid, servicesService.serviceGuid, store, this);
   }
 
-  getGlobalActions = () => [];
-  getMultiActions = () => [];
-  getSingleActions = () => [];
-  getMultiFiltersConfigs = () => [];
-  getColumns = () => this.columns;
-  getDataSource = () => this.dataSource;
+  getGlobalActions = (): IGlobalListAction<APIResource<IServicePlan>>[] => [];
+  getMultiActions = (): IMultiListAction<APIResource<IServicePlan>>[] => [];
+  getSingleActions = (): IListAction<APIResource<IServicePlan>>[] => [];
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
+  getColumns = (): ITableColumn<APIResource<IServicePlan>>[] => this.columns;
+  getDataSource = (): import('../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types').IListDataSource<APIResource<IServicePlan>> => this.dataSource;
 }

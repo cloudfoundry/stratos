@@ -59,7 +59,7 @@ function reduceIdsToState(entityKey: string) {
   };
 }
 
-function deleteEntity(state, entityKey, guid) {
+function deleteEntity(state: any, entityKey: any, guid: any) {
   const newState = {} as Record<string, any>;
   for (const entityTypeKey in state) {
     if (entityTypeKey === entityKey) {

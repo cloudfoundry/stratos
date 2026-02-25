@@ -49,14 +49,14 @@ export function cleanRecentsList(state: IRecentlyVisitedState, endpointGuids: st
 
   // Turn the guids into a map, for easier lookup of testing if an endpoint shold be kept or not
   const endpointMap = endpointGuids.reduce((m, obj) => {
-    m[obj] = true;
+    (m as Record<string, boolean>)[obj] = true;
     return m;
   }, {});
 
   // Filter all of the recent entities
   const filtered = Object.values(state).filter(entity => {
     // Was this endpoint in the list?
-    const exists = endpointMap[entity.endpointId];
+    const exists = (endpointMap as Record<string, boolean>)[entity.endpointId];
     return exists ? inclusive : !inclusive;
   });
 

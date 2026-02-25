@@ -1,17 +1,14 @@
 import { Store } from '@ngrx/store';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { featureFlagEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
-import {
-  ListDataSource,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
+import { ListDataSource, IListConfig } from '@stratosui/core';
+import { PaginationEntityState } from '@stratosui/store';
+import { CFAppState } from '../../../../../cf-app-state';
+import { featureFlagEntityType } from '../../../../../cf-entity-types';
 import { IFeatureFlag } from '../../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 
-export const FeatureFlagDescriptions = {
+export const FeatureFlagDescriptions: Record<string, string> = {
   user_org_creation: 'Any user can create an organization',
   private_domain_creation: ' An Org Manager can create private domains for that organization',
   app_bits_upload: 'Space Developers can upload app bits',
@@ -40,7 +37,7 @@ export class CfFeatureFlagsDataSource extends ListDataSource<IFeatureFlag> {
       store,
       action,
       schema: cfEntityFactory(featureFlagEntityType),
-      getRowUniqueId: (ff) => ff.guid,
+      getRowUniqueId: (ff: IFeatureFlag) => ff.guid,
       paginationKey: action.paginationKey,
       isLocal: true,
       transformEntities: [

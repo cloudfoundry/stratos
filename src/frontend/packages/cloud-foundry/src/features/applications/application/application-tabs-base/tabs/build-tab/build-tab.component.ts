@@ -1,28 +1,40 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { GitCommit, gitEntityCatalog, GitRepo, GitSCMService, GitSCMType, SCMIcon } from '@stratosui/git';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { combineLatest, delay, distinct, filter, first, map, mergeMap, startWith, switchMap, tap } from 'rxjs/operators';
 
-import { AppMetadataTypes } from '../../../../../../../../cloud-foundry/src/actions/app-metadata.actions';
-import { UpdateExistingApplication } from '../../../../../../../../cloud-foundry/src/actions/application.actions';
-import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
+import { CFAppState } from '@stratosui/cloud-foundry';
 import {
   CurrentUserPermissionsService,
-} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { ResetPagination } from '../../../../../../../../store/src/actions/pagination.actions';
-import { getFullEndpointApiUrl } from '../../../../../../../../store/src/endpoint-utils';
-import { ActionState } from '../../../../../../../../store/src/reducers/api-request-reducer/types';
-import { EntityInfo } from '../../../../../../../../store/src/types/api.types';
+  ConfirmationDialogConfig,
+  ConfirmationDialogService,
+  MetadataItemComponent,
+  PageSubNavComponent,
+  PageSubNavSectionComponent,
+  TileComponent,
+  TileGridComponent,
+  TileGroupComponent,
+  MbToHumanSizePipe,
+  UptimePipe,
+} from '@stratosui/core';
+import { ResetPagination, getFullEndpointApiUrl, ActionState, EntityInfo } from '@stratosui/store';
+import { AppMetadataTypes } from '../../../../../../actions/app-metadata.actions';
+import { UpdateExistingApplication } from '../../../../../../actions/application.actions';
 import { IAppSummary } from '../../../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
 import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
+import { CfUserPermissionDirective } from '../../../../../../shared/directives/cf-user-permission/cf-user-permission.directive';
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
 import { ApplicationData, ApplicationService } from '../../../../application.service';
 import { DEPLOY_TYPES_IDS } from '../../../../deploy-application/deploy-application-steps.types';
+import { ApplicationPollComponent } from '../../application-poll/application-poll.component';
+import { CardAppStatusComponent } from '../../../../../../shared/components/cards/card-app-status/card-app-status.component';
+import { CardAppInstancesComponent } from '../../../../../../shared/components/cards/card-app-instances/card-app-instances.component';
+import { CardAppUptimeComponent } from '../../../../../../shared/components/cards/card-app-uptime/card-app-uptime.component';
+import { ViewBuildpackComponent } from './view-buildpack/view-buildpack.component';
 import { EnvVarStratosProjectSource } from './application-env-vars.service';
 
 const isDockerHubRegEx = /^([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+):([a-zA-Z0-9_.-]+)/g;
@@ -59,12 +71,32 @@ interface CustomEnvVarStratosProjectSource extends EnvVarStratosProjectSource {
   selector: 'app-build-tab',
   templateUrl: './build-tab.component.html',
   styleUrls: ['./build-tab.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    RouterModule,
+    PageSubNavComponent,
+    PageSubNavSectionComponent,
+    CfUserPermissionDirective,
+    ApplicationPollComponent,
+    TileGridComponent,
+    TileGroupComponent,
+    TileComponent,
+    CardAppStatusComponent,
+    CardAppInstancesComponent,
+    CardAppUptimeComponent,
+    MetadataItemComponent,
+    ViewBuildpackComponent,
+    MbToHumanSizePipe,
+    UptimePipe,
+  ],
   providers: [
     ApplicationMonitorService,
   ]
 })
 export class BuildTabComponent implements OnInit {
-  public isBusyUpdating$: Observable<{ updating: boolean, }>;
+  public isBusyUpdating$!: Observable<{ updating: boolean, }>;
   public manageAppPermission = CfCurrentUserPermissions.APPLICATION_MANAGE;
 
   constructor(
@@ -77,17 +109,18 @@ export class BuildTabComponent implements OnInit {
     private cups: CurrentUserPermissionsService
   ) { }
 
-  cardTwoFetching$: Observable<boolean>;
+  cardTwoFetching$!: Observable<boolean>;
 
   public async: any;
 
   getFullApiUrl = getFullEndpointApiUrl;
 
-  sshStatus$: Observable<string>;
+  sshStatus$!: Observable<string>;
 
-  deploySource$: Observable<CustomEnvVarStratosProjectSource>;
+  deploySource$!: Observable<CustomEnvVarStratosProjectSource>;
 
-  public gitRepo$: Observable<GitRepo>;
+  public gitRepo$!: Observable<GitRepo>;
+  public gitRepo: GitRepo | null = null;
 
   ngOnInit() {
     this.cardTwoFetching$ = this.applicationService.application$.pipe(
@@ -195,11 +228,11 @@ export class BuildTabComponent implements OnInit {
         }
         return deploySource;
       }),
-      startWith({ type: 'loading' })
+      startWith({ type: 'loading', timestamp: null, endpointGuid: null })
     );
 
     this.deploySource$ = canSeeEnvVars$.pipe(
-      switchMap(canSeeEnvVars => canSeeEnvVars ? deploySource$ : of(null)),
+      switchMap(canSeeEnvVars => canSeeEnvVars ? deploySource$ : of({ type: 'not-available', timestamp: null, endpointGuid: null })),
     );
   }
 
@@ -299,7 +332,7 @@ export class BuildTabComponent implements OnInit {
     );
   }
 
-  pollEntityService(state, stateString): Observable<any> {
+  pollEntityService(state: any, stateString: string): Observable<any> {
     return this.applicationService.entityService
       .poll(1000, state).pipe(
         delay(1),

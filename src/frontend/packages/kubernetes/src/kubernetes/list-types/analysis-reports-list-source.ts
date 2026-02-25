@@ -1,8 +1,8 @@
 import { NgZone } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { safeUnsubscribe } from 'frontend/packages/core/src/core/utils.service';
-import { ListDataSource } from 'frontend/packages/core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { IListConfig } from 'frontend/packages/core/src/shared/components/list/list.component.types';
+import { safeUnsubscribe } from '@stratosui/core';
+import { ListDataSource } from '@stratosui/core';
+import { IListConfig } from '@stratosui/core';
 import { interval, Subscription } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 

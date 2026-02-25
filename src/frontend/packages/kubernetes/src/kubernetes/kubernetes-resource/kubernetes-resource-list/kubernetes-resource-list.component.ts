@@ -1,8 +1,12 @@
-import { Component, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {Component, OnDestroy, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
+
+import { PageSubNavComponent, ListViewComponent } from '@stratosui/core';
+import { GeneralAppState } from '../../../../../store/src/app-state';
 
 import { ListConfigUpdate } from '../../../../../core/src/shared/components/list/list-generics/list-config-provider.types';
 import {
@@ -41,6 +45,13 @@ const namespaceColumnId = 'namespace';
   selector: 'app-kubernetes-resource-list',
   templateUrl: './kubernetes-resource-list.component.html',
   styleUrls: ['./kubernetes-resource-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    PageSubNavComponent,
+    ListViewComponent
+  ]
 })
 export class KubernetesResourceListComponent implements OnDestroy {
 
@@ -56,24 +67,28 @@ export class KubernetesResourceListComponent implements OnDestroy {
 
   public isNamespacedView = true;
   public isWorkloadView = false;
+  public menuOpen = false;
 
   private sub: Subscription;
   private kubeId: string;
   private workloadTitle: string;
   private workloadNamespace: string;
+  private store = inject(Store<GeneralAppState>);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private baseKubeGuid = inject(BaseKubeGuid);
+  private uiConfigService = inject(KubernetesUIConfigService);
 
-  constructor(
-    private store: Store<any>,
-    private route: ActivatedRoute,
-    router: Router,
-    kubeId: BaseKubeGuid,
-    private uiConfigService: KubernetesUIConfigService
-  ) {
+
+
+  constructor() {
+
+
     // Entity Catalog Key can be specified in the route config
-    this.entityCatalogKey = route.snapshot.data.entityCatalogKey;
+    this.entityCatalogKey = this.route.snapshot.data.entityCatalogKey;
     if (!this.entityCatalogKey) {
       // Default is to use the last part of the route
-      const routeParts = router.url.split('/');
+      const routeParts = this.router.url.split('/');
       this.entityCatalogKey = routeParts[routeParts.length - 1];
     }
 
@@ -84,7 +99,7 @@ export class KubernetesResourceListComponent implements OnDestroy {
     }
 
     // Workload
-    if (route.snapshot.data?.isWorkload) {
+    if (this.route.snapshot.data?.isWorkload) {
       this.isWorkloadView = true;
       const { endpointId, namespace, releaseTitle } = getHelmReleaseDetailsFromGuid(this.route.snapshot.parent.parent.params.guid);
       this.kubeId = endpointId;
@@ -92,23 +107,26 @@ export class KubernetesResourceListComponent implements OnDestroy {
       this.workloadTitle = releaseTitle;
     } else {
       // Namespaced
-      this.kubeId = kubeId.guid;
-      const namespacesObs = kubeEntityCatalog.namespace.store.getPaginationService(kubeId.guid);
+      this.kubeId = this.baseKubeGuid.guid;
+      const namespacesObs = kubeEntityCatalog.namespace.store.getPaginationService(this.baseKubeGuid.guid);
       this.namespaces$ = namespacesObs.entities$.pipe(map(ns => ns.map(n => n.metadata.name)));
 
       // Watch for namespace changes
-      this.sub = this.store.select<KubernetesCurrentNamespace>(state => state.k8sCurrentNamespace).pipe(
-        map(data => data[this.kubeId]),
-        filter(data => !!data)
-      ).subscribe(ns => {
+      this.sub = this.store.select<KubernetesCurrentNamespace>((state: any) => state.k8sCurrentNamespace).pipe(
+        filter((data: Record<string, string>) => !!data), // Filter out undefined/null before accessing properties
+        map((data: Record<string, string>) => data[this.kubeId]),
+        filter((data: string) => !!data)
+      ).subscribe((ns: string) => {
         this.selectedNamespace = ns === '*' ? undefined : ns;
         if (this.isNamespacedView) {
-          this.createProvider(catalogEntity);
+          this.createProvider(catalogEntity as any);
         }
       });
     }
 
-    this.createProvider(catalogEntity);
+    this.createProvider(catalogEntity as any);
+
+
   }
 
   ngOnDestroy() {
@@ -117,7 +135,7 @@ export class KubernetesResourceListComponent implements OnDestroy {
     }
   }
 
-  private createProvider(catalogEntity: any) {
+  private createProvider(catalogEntity: { definition: KubeResourceEntityDefinition; actions: any }) {
     this.isNamespacedView = !this.isWorkloadView && !!catalogEntity.definition.apiNamespaced;
     let action;
     if (this.isWorkloadView) {

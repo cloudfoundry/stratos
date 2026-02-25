@@ -1,13 +1,24 @@
-<button *ngIf="(show$ | async)" [disabled]="busy$ | async" mat-icon-button [matMenuTriggerFor]="menu">
-  <mat-icon>more_vert</mat-icon>
-</button>
-<mat-menu #menu="matMenu" [xPosition]="'before'" [yPosition]="'below'">
-  <ng-container *ngFor="let action of actions">
-    <button class="table-cell-actions__button" mat-menu-item *ngIf="obs.visible[action.label] | async"
-      (click)="action.action(row)" [disabled]="!(obs.enabled[action.label] | async)" matTooltip="{{action.description}}"
-      matTooltipShowDelay="2000" [ngClass]="{'hasIcon': !!action.icon}">
-      <mat-icon *ngIf="!!action.icon">{{action.icon}}</mat-icon>
-      <span>{{action.label}}</span>
+@if ((show$ | async)) {
+  <div class="table-cell-actions-container">
+    <button [disabled]="busy()" class="btn btn-icon" (click)="toggleMenu()">
+      <span class="material-icons">more_vert</span>
     </button>
-  </ng-container>
-</mat-menu>
+    <div class="table-cell-actions-menu"
+      [class.table-cell-actions-menu--open]="menuOpen">
+      @for (action of actions; track action) {
+        @if (obs.visible[action.label] | async) {
+          <button class="table-cell-actions__button"
+            (click)="action.action(row); toggleMenu()"
+            [disabled]="!(obs.enabled[action.label] | async)"
+            [title]="action.description"
+            [ngClass]="{'hasIcon': !!action.icon}">
+            @if (!!action.icon) {
+              <span class="material-icons text-sm">{{action.icon}}</span>
+            }
+            <span>{{action.label}}</span>
+          </button>
+        }
+      }
+    </div>
+  </div>
+}

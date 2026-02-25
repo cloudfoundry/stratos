@@ -11,14 +11,16 @@ import {
 import {
   EndpointsListConfigService,
 } from '../../../../../core/src/shared/components/list/list-types/endpoint/endpoints-list-config.service';
-import { IListConfig, ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
+import { IListConfig, ListViewTypes, IGlobalListAction, IMultiListAction, IListAction, IListMultiFilterConfig } from '../../../../../core/src/shared/components/list/list.component.types';
 import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../../store/src/monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { AppState, EndpointModel } from '../../../../../store/src/public-api';
 import { KubernetesEndpointsDataSource } from './kubernetes-endpoints-data-source';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class KubernetesEndpointsListConfigService implements IListConfig<EndpointModel> {
   columns: ITableColumn<EndpointModel>[];
   isLocal = true;
@@ -51,10 +53,10 @@ export class KubernetesEndpointsListConfigService implements IListConfig<Endpoin
       internalEventMonitorFactory,
     );
   }
-  public getColumns = () => this.columns;
-  public getGlobalActions = () => [];
-  public getMultiActions = () => [];
-  public getSingleActions = () => [];
-  public getMultiFiltersConfigs = () => [];
-  public getDataSource = () => this.dataSource;
+  public getColumns = (): ITableColumn<EndpointModel>[] => this.columns;
+  public getGlobalActions = (): IGlobalListAction<EndpointModel>[] => [];
+  public getMultiActions = (): IMultiListAction<EndpointModel>[] => [];
+  public getSingleActions = (): IListAction<EndpointModel>[] => [];
+  public getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
+  public getDataSource = (): KubernetesEndpointsDataSource => this.dataSource;
 }

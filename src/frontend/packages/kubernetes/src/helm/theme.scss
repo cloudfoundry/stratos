@@ -1,78 +1,35 @@
-@import '@angular/material/_theming';
-// Plus imports for other components in your app.
+// Angular Material theme disabled - using Tailwind CSS utilities
+// Converted to Tailwind CSS custom properties and utilities
 
-// Include the base styles for Angular Material core. We include this here so that you only
-// have to load a single css file for Angular Material in your app.
-@include mat-core();
+// Primary color palette - now using Tailwind custom colors
+:root {
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-200: #bfdbfe;
+  --color-primary-300: #93c5fd;
+  --color-primary-400: #60a5fa;
+  --color-primary-500: #3371e3;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-800: #1e40af;
+  --color-primary-900: #1e3a8a;
 
-// Custom palette for monocular.
-$color-base: #3371e3;
+  --color-accent-500: #00bcd4;
+  --color-warning-500: #f44336;
 
-$mat-monocular: (
-  50:  #bdd1f6, // #e3f2fd,
-  100: #adc6f4, // #bbdefb,
-  200: #8fb1f0, // #90caf9,
-  300: #709ceb, // #64b5f6,
-  400: #5286e7, // #42a5f5,
-  500: #3371e3, // #2196f3,
-  600: #2b60c1, // #1e88e5,
-  700: #244f9f, // #1976d2,
-  800: #1c3e7d, // #1565c0,
-  900: #142d5b, // #0d47a1,
-  A100: #adc6f4, // #82b1ff,
-  A200: #8fb1f0, // #448aff,
-  A400: #5286e7, // #2979ff,
-  A700: #244f9f, // #2962ff,
-  contrast: (
-    50: $black-87-opacity,
-    100: $black-87-opacity,
-    200: $black-87-opacity,
-    300: $black-87-opacity,
-    400: white,
-    500: white,
-    600: white,
-    700: white,
-    800: white,
-    900: white,
-    A100: $black-87-opacity,
-    A200: $black-87-opacity,
-    A400: white,
-    A700: white,
-  )
-);
+  // Layout colors converted to CSS custom properties
+  --color-layout-dark: #333239;
+  --color-layout-base: #303030;
+  --color-layout-light: #f8f8f8;
+  --color-layout-text: #38383F;
+  --color-background-light: #EAEDEF;
+  --color-border: #D7D9DD;
 
-// Define the palettes for your theme using the Material Design palettes available in palette.scss
-// (imported above). For each palette, you can optionally specify a default, lighter, and darker
-// hue.
-$monocular-app-primary: mat-palette($mat-monocular);
-$monocular-app-accent:  mat-palette($mat-light-blue);
-
-// The warn palette is optional (defaults to red).
-$monocular-app-warn: mat-palette($mat-red);
-
-// Create the theme object (a Sass map containing all of the palettes).
-$monocular-app-theme: mat-light-theme($monocular-app-primary, $monocular-app-accent, $monocular-app-warn);
-
-// Include theme styles for core and each component used in your app.
-// Alternatively, you can import and @include the theme mixins for each component
-// that you are using.
-// @include angular-material-theme($monocular-app-theme);
-
-// Base palette for the project
-$layout-dark: #333239;
-$layout-base: #303030;
-$layout-light: #f8f8f8;
-$layout-text: #38383F;
-$text-white: white;
-$background-light: #EAEDEF;
-$background-white: white;
-$header-backgound-gradient: linear-gradient(to left, $layout-base, mat-color($monocular-app-primary, 900));
-$border-color: #D7D9DD;
-
-// Other common sizes
-$border-radius: 8px;
-$layout-max-width: 1280px;
-$header-bar-height: 70px;
+  // Common sizes as CSS custom properties
+  --border-radius: 8px;
+  --layout-max-width: 1280px;
+  --header-bar-height: 70px;
+}
 
 // Responsive. They represents the min width of every display.
 $breakpoints: (
@@ -89,34 +46,36 @@ $mappy-queries: (
   wide: mappy-bp(xlarge)
 );
 
-// Import the library. I need to import it after the breakpoints definition
-@import '~mappy-breakpoints/mappy-breakpoints';
+// Temporarily disabled due to import issues - fallback mixin provided below
+// @import '~mappy-breakpoints/mappy-breakpoints';
 
-// Add more classes to Material2 components
-mat-form-field {
-  &.mat-input--full {
-    width: 100%;
-  }
-
-  .mat-input-infix {
-    border-top: 0;
-  }
-
-  &.mat-input--reverse {
-    .mat-input-underline {
-      background-color: $layout-light;
-    }
-    .mat-input-element {
-      color: $layout-light;
+// Fallback mixin for mappy-bp to prevent build errors
+@mixin mappy-bp($breakpoints...) {
+  @if length($breakpoints) > 0 {
+    @if nth($breakpoints, 1) == "max-width" and nth($breakpoints, 2) == "small" {
+      @media (max-width: 479px) {
+        @content;
+      }
+    } @else if length($breakpoints) == 2 and nth($breakpoints, 1) == "medium" and nth($breakpoints, 2) == "large" {
+      @media (min-width: 840px) and (max-width: 1023px) {
+        @content;
+      }
+    } @else {
+      @content;
     }
   }
+}
 
-  &:not(.mat-focused) .mat-input-placeholder {
-     color: darken($layout_light, 25);
-  }
+// Material components have been fully migrated to Tailwind utility classes
+// Form field classes: .w-full, .input-reverse, .text-2xl
+// Input styling: handled by input base styles and placeholder utilities
 
-  &.mat-input--big {
-    font-size: 1.5em;
+// Custom input classes for Kubernetes/Helm specific use cases
+.input-reverse {
+  @apply bg-gray-100 text-gray-100;
+
+  &::placeholder {
+    @apply text-gray-400;
   }
 }
 

@@ -1,9 +1,11 @@
 {
-  "extends": "../../../tsconfig.app.json",
+  "extends": "../../../tsconfig.json",
   "compilerOptions": {
-    "declaration": true,
-    "declarationMap": true,
-    "outDir": "../../../../out-tsc"
+    "declaration": false,
+    "outDir": "../../../../out-tsc/app",
+    "types": [],
+    "target": "ES2022",
+    "useDefineForClassFields": false
   },
   "files": [
     "src/main.ts",
@@ -11,6 +13,6 @@
     "src/_custom-import.module.ts"
   ],
   "include": [
-    "src/frontend/packages/**/*.d.ts"
+    "src/**/*.d.ts"
   ]
 }

@@ -1,10 +1,12 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { AsyncPipe, CommonModule, DatePipe } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { BREADCRUMB_URL_PARAM } from '../../../../../../core/src/shared/components/breadcrumbs/breadcrumbs.types';
-import { StratosStatus } from '../../../../../../store/src/types/shared.types';
+import { BREADCRUMB_URL_PARAM, ApplicationStateIconComponent } from '@stratosui/core';
+import { StratosStatus } from '@stratosui/store';
 import { CFAppState } from '../../../../cf-app-state';
 import { ApplicationStateData, ApplicationStateService } from '../../../../shared/services/application-state.service';
 import { ApplicationService } from '../../../applications/application.service';
@@ -14,22 +16,31 @@ import { ActiveRouteCfOrgSpace } from '../../../cf/cf-page.types';
 @Component({
   selector: 'app-compact-app-card',
   templateUrl: './compact-app-card.component.html',
-  styleUrls: ['./compact-app-card.component.scss']
+  styleUrls: ['./compact-app-card.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    AsyncPipe,
+    DatePipe,
+    RouterModule,
+    ApplicationStateIconComponent
+  ]
 })
 export class CompactAppCardComponent implements OnInit {
 
-  @Input() app;
+  @Input() app!: any;
 
-  @Input() endpoint: string;
+  @Input() endpoint!: string;
 
   @Input() showDate = true;
-  @Input() dateMode: string;
+  @Input() dateMode!: string;
 
-  applicationState$: Observable<ApplicationStateData>;
+  applicationState$!: Observable<ApplicationStateData>;
 
-  appStatus$: Observable<StratosStatus>;
+  appStatus$!: Observable<StratosStatus>;
 
-  bcType: any;
+  bcType!: any;
 
 
   constructor(

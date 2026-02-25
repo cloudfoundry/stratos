@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
@@ -11,6 +13,7 @@ import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IService, IServiceInstance } from '../../../../../../cf-api-svc.types';
 import {
+  TableCellServiceBrokerComponent,
   TableCellServiceBrokerComponentConfig,
   TableCellServiceBrokerComponentMode,
 } from '../../cf-services/table-cell-service-broker/table-cell-service-broker.component';
@@ -18,15 +21,22 @@ import {
 @Component({
   selector: 'app-table-cell-service',
   templateUrl: './table-cell-service.component.html',
-  styleUrls: ['./table-cell-service.component.scss']
+  styleUrls: ['./table-cell-service.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    RouterModule,
+    TableCellServiceBrokerComponent
+  ]
 })
 export class TableCellServiceComponent extends TableCellCustom<APIResource<IServiceInstance>> implements OnInit {
 
-  serviceName$: Observable<string>;
-  serviceUrl$: Observable<string>;
-  service$: Observable<APIResource<IService>>;
+  serviceName$!: Observable<string>;
+  serviceUrl$!: Observable<string>;
+  service$!: Observable<APIResource<IService>>;
   // tslint:disable-next-line:ban-types
-  isUserProvidedServiceInstance: Boolean;
+  isUserProvidedServiceInstance!: Boolean;
 
   brokerNameConfig: TableCellServiceBrokerComponentConfig = {
     mode: TableCellServiceBrokerComponentMode.NAME

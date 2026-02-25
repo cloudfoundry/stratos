@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { TailwindSnackBarService } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { catchError, filter, map, switchMap } from 'rxjs/operators';
@@ -49,16 +49,18 @@ export enum UserInviteSendSpaceRoles {
 interface UserInviteSend {
   org: string;
   space: string;
-  spaceRoles: { [spaceRole: string]: boolean, };
+  spaceRoles: { [spaceRole: string]: boolean; };
   emails: string[];
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class UserInviteConfigureService {
 
   constructor(
     private http: HttpClient,
-    private snackBar: MatSnackBar,
+    private snackBar: TailwindSnackBarService,
     private confirmDialog: ConfirmationDialogService,
   ) { }
 
@@ -123,12 +125,14 @@ export class UserInviteConfigureService {
   }
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class UserInviteService {
 
-  configured$: Observable<boolean>;
-  enabled$: Observable<boolean>;
-  canConfigure$: Observable<boolean>;
+  configured$!: Observable<boolean>;
+  enabled$!: Observable<boolean>;
+  canConfigure$!: Observable<boolean>;
 
   constructor(
     private store: Store<CFAppState>,

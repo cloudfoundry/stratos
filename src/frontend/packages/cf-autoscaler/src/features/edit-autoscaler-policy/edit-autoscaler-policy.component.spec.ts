@@ -1,54 +1,72 @@
 import { DatePipe } from '@angular/common';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createEmptyStoreModule } from '@stratosui/store/testing';
-
-import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
-import { ApplicationServiceMock } from '../../../../cloud-foundry/test-framework/application-service-helper';
-import { CoreModule } from '../../../../core/src/core/core.module';
-import { CurrentUserPermissionsService } from '../../../../core/src/core/permissions/current-user-permissions.service';
-import { SharedModule } from '../../../../core/src/shared/shared.module';
-import { TabNavService } from '../../../../core/src/tab-nav.service';
+import { BehaviorSubject } from 'rxjs';
+import { createEmptyStoreModule } from "@stratosui/store/testing";
+import { ApplicationService } from '@stratosui/cloud-foundry';
+import { ApplicationServiceMock } from '@test-framework/cf';
+import { TabNavService, CurrentUserPermissionsService } from '@stratosui/core';
+import { EntityServiceFactory, EntityMonitorFactory, PaginationMonitorFactory } from '@stratosui/store';
 import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
 import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
-import { EditAutoscalerPolicyStep1Component } from './edit-autoscaler-policy-step1/edit-autoscaler-policy-step1.component';
-import { EditAutoscalerPolicyStep2Component } from './edit-autoscaler-policy-step2/edit-autoscaler-policy-step2.component';
-import { EditAutoscalerPolicyStep3Component } from './edit-autoscaler-policy-step3/edit-autoscaler-policy-step3.component';
-import { EditAutoscalerPolicyStep4Component } from './edit-autoscaler-policy-step4/edit-autoscaler-policy-step4.component';
 import { EditAutoscalerPolicyComponent } from './edit-autoscaler-policy.component';
 
 describe('EditAutoscalerPolicyComponent', () => {
   let component: EditAutoscalerPolicyComponent;
   let fixture: ComponentFixture<EditAutoscalerPolicyComponent>;
+  let mockEntityServiceFactory: any;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
+    // Create a mock entity service that emits proper values
+    const entityObsSubject = new BehaviorSubject({
+      entity: null,
+      entityRequestInfo: {
+        fetching: false,
+        error: true // Simulate error to satisfy the filter and complete the observable
+      }
+    });
+
+    mockEntityServiceFactory = {
+      create: vi.fn().mockReturnValue({
+        entityObs$: entityObsSubject.asObservable(),
+        waitForEntity$: entityObsSubject.asObservable()
+      })
+    };
+
     TestBed.configureTestingModule({
-      declarations: [
-        EditAutoscalerPolicyComponent,
-        EditAutoscalerPolicyStep1Component,
-        EditAutoscalerPolicyStep2Component,
-        EditAutoscalerPolicyStep3Component,
-        EditAutoscalerPolicyStep4Component,
-      ],
       imports: [
+        EditAutoscalerPolicyComponent,
         CfAutoscalerTestingModule,
         NoopAnimationsModule,
         createEmptyStoreModule(),
-        CoreModule,
-        SharedModule,
         RouterTestingModule,
       ],
       providers: [
+        provideZonelessChangeDetection(),
         DatePipe,
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         TabNavService,
+        { provide: EntityServiceFactory, useValue: mockEntityServiceFactory },
+        EntityMonitorFactory,
+        PaginationMonitorFactory,
         EditAutoscalerPolicyService,
-        CurrentUserPermissionsService
+        CurrentUserPermissionsService,
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              queryParams: {}
+            }
+          }
+        }
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EditAutoscalerPolicyComponent);

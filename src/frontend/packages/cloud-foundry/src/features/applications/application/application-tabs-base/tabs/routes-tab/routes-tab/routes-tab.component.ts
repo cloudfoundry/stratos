@@ -1,17 +1,17 @@
 import { DatePipe } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   CurrentUserPermissionsService,
-} from '../../../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import {
   ConfirmationDialogService,
-} from '../../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { ListConfig } from '../../../../../../../../../core/src/shared/components/list/list.component.types';
+  ListComponent,
+  ListConfig,
+  NoContentMessageComponent,
+} from '@stratosui/core';
+import { CFAppState } from '../../../../../../../cf-app-state';
 import {
   CfAppRoutesListConfigService,
 } from '../../../../../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
@@ -22,7 +22,14 @@ import { ApplicationService } from '../../../../../application.service';
   selector: 'app-routes-tab',
   templateUrl: './routes-tab.component.html',
   styleUrls: ['./routes-tab.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    ListComponent,
+    NoContentMessageComponent
+],
   providers: [
+    DatePipe,
     {
       provide: ListConfig,
       useFactory: (
@@ -40,9 +47,9 @@ import { ApplicationService } from '../../../../../application.service';
   ]
 })
 export class RoutesTabComponent implements OnInit {
+  private appService = inject(ApplicationService);
 
-  paginationSubscription: Subscription;
-  constructor(private appService: ApplicationService) { }
+  paginationSubscription!: Subscription;
 
   ngOnInit() {
     this.appService.orgDomains$.pipe(

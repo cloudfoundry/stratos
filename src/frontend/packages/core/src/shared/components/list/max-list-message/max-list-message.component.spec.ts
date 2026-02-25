@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { MatIconModule } from '@angular/material/icon';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
-
-import { createBasicStoreModule } from '../../../../../../store/testing/public-api';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 import { NoContentMessageComponent } from '../../no-content-message/no-content-message.component';
 import { MaxListMessageComponent } from './max-list-message.component';
 
@@ -10,20 +10,18 @@ describe('MaxListMessageComponent', () => {
   let component: MaxListMessageComponent;
   let fixture: ComponentFixture<MaxListMessageComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        MaxListMessageComponent,
-        NoContentMessageComponent
-      ],
+      providers: [provideZonelessChangeDetection()],
       imports: [
-        MatIconModule,
         RouterTestingModule,
-        createBasicStoreModule()
+        createBasicStoreModule(),
+        MaxListMessageComponent,
+        NoContentMessageComponent,
       ],
-    })
-      .compileComponents();
-  }));
+    });
+      TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(MaxListMessageComponent);

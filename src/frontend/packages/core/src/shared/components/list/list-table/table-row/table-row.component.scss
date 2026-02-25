@@ -7,7 +7,7 @@
       }
       &__inner {
         * {
-          opacity: .65;
+          opacity: 0.65;
         }
       }
     }
@@ -36,6 +36,7 @@
   align-items: center;
   border-style: solid;
   border-width: 0 0 1px;
+  border-color: var(--table-border);
   display: flex;
   transition: opacity .25s;
   &-wrapper {
@@ -43,7 +44,7 @@
   }
   &__deletion-bar {
     &-inner {
-      flex: .5;
+      flex: 0.5;
       max-width: 200px;
     }
     &-text {
@@ -97,6 +98,7 @@
     display: flex;
     flex: 1;
     width: 100%;
+    padding: 0 24px;
 
     .mat-expansion-panel-body {
       padding: 0;
@@ -124,4 +126,24 @@
     // Remove the bottom border if there's an error underneath it
     border-bottom-width: 0;
   }
+}
+
+.table-row-cell {
+  flex: 1 1 200px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  color: var(--content-text);
+
+  app-table-cell {
+    width: 100%;
+  }
+}
+
+.table-cell-expander {
+  flex: 0 0 48px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

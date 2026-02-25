@@ -1,6 +1,6 @@
 import { Compiler, Injector } from '@angular/core';
 import { Validators } from '@angular/forms';
-import moment from 'moment';
+import { formatDuration, intervalToDuration } from 'date-fns';
 
 import { BaseEndpointAuth } from '../../../core/src/core/endpoint-auth';
 import {
@@ -19,7 +19,7 @@ import {
 import { EndpointAuthTypeConfig, EndpointType } from '../../../store/src/extension-types';
 import { metricEntityType } from '../../../store/src/helpers/stratos-entity-factory';
 import { entityFetchedWithoutError } from '../../../store/src/operators';
-import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
+import { IFavoriteMetadata, UserFavorite } from '../../../store/src/types/user-favorites.types';
 import { KubernetesAWSAuthFormComponent } from './auth-forms/kubernetes-aws-auth-form/kubernetes-aws-auth-form.component';
 import {
   KubernetesCertsAuthFormComponent,
@@ -83,6 +83,7 @@ import {
   KubernetesStatefulSet,
   KubeService,
   KubeServiceAccount,
+  SimpleKubeListColumn,
 } from './store/kube.types';
 import { KubeDashboardStatus } from './store/kubernetes.effects';
 import { generateWorkloadsEntities } from './workloads/store/workloads-entity-generator';
@@ -151,7 +152,7 @@ const kubeAuthTypeMap: { [type: string]: EndpointAuthTypeConfig, } = {
     },
     types: new Array<EndpointType>(),
     component: KubernetesGKEAuthFormComponent,
-    help: '/core/assets/custom/help/en/connecting_gke.md'
+    help: '/kubernetes/assets/custom/help/en/connecting_gke.md'
   },
   [KubeEndpointAuthTypes.TOKEN]: {
     value: KubeEndpointAuthTypes.TOKEN,
@@ -167,7 +168,7 @@ const kubeAuthTypeMap: { [type: string]: EndpointAuthTypeConfig, } = {
 class KubeResourceEntityHelper {
 
   public static generate<
-    B = any,
+    B extends BasicKubeAPIResource = BasicKubeAPIResource,
     C extends OrchestratedActionBuilderConfig = OrchestratedActionBuilders
   >(
     endpointDefinition: StratosEndpointExtensionDefinition,
@@ -198,16 +199,16 @@ class KubeResourceEntityHelper {
     if (defn.canFavorite && defn.getIsValid) {
       entity.builders.entityBuilder = {
         getIsValid: defn.getIsValid,
-        getMetadata: (resource: any) => {
+        getMetadata: (resource: B) => {
           return {
             endpointId: resource.kubeGuid,
             guid: resource.metadata.uid,
             kubeGuid: resource.kubeGuid,
             name: resource.metadata.name,
-          };
+          } as IFavoriteMetadata;
         },
-        getLink: metadata => `/kubernetes/${metadata.endpointId}/resource/${defn.type}`,
-        getGuid: resource => schema.getId(resource),
+        getLink: (favorite: UserFavorite<IFavoriteMetadata>) => `/kubernetes/${favorite.endpointId}/resource/${defn.type}`,
+        getGuid: (resource: B) => schema.getId(resource),
       };
     }
 
@@ -251,21 +252,21 @@ export class KubeEntityCatalog {
       labelPlural: 'Kubernetes',
       icon: 'kubernetes',
       iconFont: 'stratos-icons',
-      logoUrl: '/core/assets/custom/kubernetes.svg',
+      logoUrl: '/kubernetes/assets/custom/kubernetes.svg',
       authTypes: [
         kubeAuthTypeMap[KubeEndpointAuthTypes.CERT_AUTH],
         kubeAuthTypeMap[KubeEndpointAuthTypes.CONFIG],
         BaseEndpointAuth.UsernamePassword,
         kubeAuthTypeMap[KubeEndpointAuthTypes.TOKEN],
       ],
-      getEndpointIdFromEntity: (entity) => entity.kubeGuid || entity.metadata?.kubeId,
+      getEndpointIdFromEntity: (entity: any) => entity.kubeGuid || entity.metadata?.kubeId,
       renderPriority: 4,
       subTypes: [
         {
           type: 'config',
           label: 'Import Kubeconfig',
           authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.CONFIG]],
-          logoUrl: '/core/assets/custom/kube_import.png',
+          logoUrl: '/kubernetes/assets/custom/kube_import.png',
           renderPriority: 3,
           registrationComponent: KubeConfigRegistrationComponent,
         },
@@ -274,35 +275,35 @@ export class KubeEntityCatalog {
           label: 'SUSE CaaS Platform',
           labelShort: 'CaaSP',
           authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.CONFIG], kubeAuthTypeMap[KubeEndpointAuthTypes.TOKEN]],
-          logoUrl: '/core/assets/custom/caasp.png',
+          logoUrl: '/kubernetes/assets/custom/caasp.png',
           renderPriority: 5,
         }, {
           type: 'aks',
           label: 'Azure AKS',
           labelShort: 'AKS',
           authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.CONFIG_AZ], kubeAuthTypeMap[KubeEndpointAuthTypes.TOKEN]],
-          logoUrl: '/core/assets/custom/aks.svg',
+          logoUrl: '/kubernetes/assets/custom/aks.svg',
           renderPriority: 6
         }, {
           type: 'eks',
           label: 'Amazon EKS',
           labelShort: 'EKS',
           authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.AWS_IAM], kubeAuthTypeMap[KubeEndpointAuthTypes.TOKEN]],
-          logoUrl: '/core/assets/custom/eks.svg',
+          logoUrl: '/kubernetes/assets/custom/eks.svg',
           renderPriority: 6
         }, {
           type: 'gke',
           label: 'Google Kubernetes Engine',
           labelShort: 'GKE',
           authTypes: [kubeAuthTypeMap[KubeEndpointAuthTypes.GKE], kubeAuthTypeMap[KubeEndpointAuthTypes.TOKEN]],
-          logoUrl: '/core/assets/custom/gke.svg',
+          logoUrl: '/kubernetes/assets/custom/gke.svg',
           renderPriority: 6
         }, {
           type: 'k3s',
           label: 'K3S',
           labelShort: 'K3S',
           authTypes: [BaseEndpointAuth.UsernamePassword, kubeAuthTypeMap[KubeEndpointAuthTypes.TOKEN]],
-          logoUrl: '/core/assets/custom/k3s.svg',
+          logoUrl: '/kubernetes/assets/custom/k3s.svg',
           renderPriority: 6
         }],
       homeCard: {
@@ -318,7 +319,7 @@ export class KubeEntityCatalog {
 
     this.endpoint = new StratosCatalogEndpointEntity(
       endpointDef,
-      favorite => `/kubernetes/${favorite.endpointId}`
+      (favorite) => `/kubernetes/${favorite.endpointId}`
     );
     this.statefulSet = this.generateStatefulSetsEntity(endpointDef);
     this.pod = KubeResourceEntityHelper.generate<KubernetesPod, KubePodActionBuilders>(endpointDef, {
@@ -348,7 +349,7 @@ export class KubeEntityCatalog {
         definition, { actionBuilders: kubeNamespaceActionBuilders }
       ),
       getIsValid: (favorite) =>
-        kubeEntityCatalog.namespace.api.get(favorite.metadata.name, favorite.endpointId).pipe(entityFetchedWithoutError()),
+        kubeEntityCatalog.namespace.api.get((favorite.metadata as { name: string }).name, favorite.endpointId).pipe(entityFetchedWithoutError()),
       listColumns: [
         {
           header: 'Status',
@@ -508,8 +509,8 @@ export class KubeEntityCatalog {
       apiWorkspaced: true,
       listColumns: [{
         header: 'Secrets',
-        field: (row: KubeServiceAccount) => row.secrets?.length.toString()
-      }]
+        field: (row: KubeServiceAccount) => row.secrets?.length.toString() as string
+      } as SimpleKubeListColumn<KubeServiceAccount>]
     });
     this.role = KubeResourceEntityHelper.generate<KubeAPIResource, KubeResourceActionBuilders>(endpointDef, {
       type: 'role',
@@ -539,7 +540,7 @@ export class KubeEntityCatalog {
 
   public allKubeEntities(): StratosBaseCatalogEntity[] {
     return [
-      ...Object.getOwnPropertyNames(this).map(s => this[s]),
+      ...Object.getOwnPropertyNames(this).map(s => (this as any)[s]).filter(v => v instanceof StratosBaseCatalogEntity),
       ...generateWorkloadsEntities(this.endpoint.definition)
     ];
   }
@@ -577,7 +578,7 @@ export class KubeEntityCatalog {
   }
 
   private generateDashboardEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-    return new StratosCatalogEntity<IFavoriteMetadata, any, KubeDashboardActionBuilders>({
+    return new StratosCatalogEntity<IFavoriteMetadata, KubeDashboardStatus, KubeDashboardActionBuilders>({
       type: kubernetesDashboardEntityType,
       schema: kubernetesEntityFactory(kubernetesDashboardEntityType),
       endpoint: endpointDefinition
@@ -587,7 +588,7 @@ export class KubeEntityCatalog {
   }
 
   private generateAnalysisReportsEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-    return new StratosCatalogEntity<undefined, any, AnalysisReportsActionBuilders>({
+    return new StratosCatalogEntity<undefined, AnalysisReport, AnalysisReportsActionBuilders>({
       type: analysisReportEntityType,
       schema: kubernetesEntityFactory(analysisReportEntityType),
       endpoint: endpointDefinition
@@ -606,7 +607,7 @@ export class KubeEntityCatalog {
     });
   }
 
-  private jobToCompletion(spec: any, status: any): string {
+  private jobToCompletion(spec: { completions?: number; parallelism?: number }, status: { succeeded?: number; Succeeded?: number }): string {
     if (!!spec.completions) {
       return status.succeeded + '/' + spec.completions;
     }
@@ -622,16 +623,20 @@ export class KubeEntityCatalog {
     return status.succeeded + '/1';
   }
 
-  private jobToDuration(status: any): string {
+  private jobToDuration(status: { startTime?: string; CompletionTime?: string; completionTime?: string }): string {
     if (!status.startTime) {
       return '';
     }
 
-    if (!!status.CompletionTime) {
-      return moment.duration(moment(status.startTime).diff(moment())).humanize();
-    }
+    const startDate = new Date(status.startTime);
+    const endDate = status.CompletionTime ? new Date() : new Date(status.completionTime || '');
 
-    return moment.duration(moment(status.startTime).diff(moment(status.completionTime))).humanize();
+    const duration = intervalToDuration({
+      start: startDate,
+      end: endDate
+    });
+
+    return formatDuration(duration, { format: ['years', 'months', 'days', 'hours', 'minutes'] });
   }
 }
 

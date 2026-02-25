@@ -1,11 +1,11 @@
-import { Compiler, ComponentFactory, Injector } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { Compiler, ComponentFactory, Injector } from '@angular/core';
+import type { Store } from '@ngrx/store';
+import type { Observable } from 'rxjs';
 
-import { HomePageEndpointCard } from '../../../core/src/features/home/home.types';
-import { IListAction } from '../../../core/src/shared/components/list/list.component.types';
-import { AppState, GeneralEntityAppState } from '../app-state';
-import {
+import type { HomePageEndpointCard } from '../../../core/src/features/home/home.types';
+import type { IListAction } from '../../../core/src/shared/components/list/list.component.types';
+import type { AppState, GeneralEntityAppState } from '../app-state';
+import type {
   ApiErrorMessageHandler,
   EntitiesFetchHandler,
   EntitiesInfoHandler,
@@ -17,15 +17,15 @@ import {
   PrePaginationApiRequest,
   SuccessfulApiResponseDataMapper,
 } from '../entity-request-pipeline/entity-request-pipeline.types';
-import {
+import type {
   PaginationPageIteratorConfig,
 } from '../entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
-import { EndpointAuthTypeConfig } from '../extension-types';
-import { EntitySchema } from '../helpers/entity-schema';
-import { EndpointModel } from '../types/endpoint.types';
-import { StratosStatus } from '../types/shared.types';
-import { UserFavorite } from '../types/user-favorites.types';
-import { UserFavoriteManager } from '../user-favorite-manager';
+import type { EndpointAuthTypeConfig } from '../extension-types';
+import type { EntitySchema } from '../helpers/entity-schema';
+import type { EndpointModel } from '../types/endpoint.types';
+import type { StratosStatus } from '../types/shared.types';
+import type { UserFavorite } from '../types/user-favorites.types';
+import type { UserFavoriteManager } from '../user-favorite-manager';
 
 export interface EntityCatalogEntityConfig {
   entityType: string;
@@ -217,7 +217,7 @@ export interface IStratosEntityDefinition<
 }
 
 export class NonJetstreamRequestHandler<T = any> {
-  isSuccess: (request: T) => boolean;
+  isSuccess!: (request: T) => boolean;
   getErrorCode?: (request: T) => string;
 }
 

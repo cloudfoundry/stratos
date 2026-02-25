@@ -1,9 +1,11 @@
 import { DOCUMENT } from '@angular/common';
-import { AfterContentInit, Component, HostBinding, Inject, OnDestroy, OnInit } from '@angular/core';
+import { AfterContentInit, ChangeDetectionStrategy, Component, HostBinding, Inject, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AuthOnlyAppState, ThemeService } from '@stratosui/store';
+import { AuthOnlyAppState, ThemeService, VerifySession } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { create } from 'rxjs-spy';
+
+import { StratosThemeService } from '../../theme/theme.service';
 
 import { environment } from './environments/environment';
 import { LoggedInService } from './logged-in.service';
@@ -11,7 +13,9 @@ import { LoggedInService } from './logged-in.service';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
+  standalone: false,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
 
@@ -21,12 +25,17 @@ export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
 
   constructor(
     private loggedInService: LoggedInService,
-    store: Store<AuthOnlyAppState>,
+    private store: Store<AuthOnlyAppState>,
     public themeService: ThemeService,
+    private stratosThemeService: StratosThemeService,
     @Inject(DOCUMENT) private document: Document,
   ) {
+    // Dispatch initial session verification BEFORE routing starts
+    // This prevents the authGuard from blocking indefinitely waiting for verifying=false
+    this.store.dispatch(new VerifySession());
+
     // We use the username to key the session storage. We could replace this with the users id?
-    this.userId$ = store.select(state => state.auth.sessionData && state.auth.sessionData.user ? state.auth.sessionData.user.name : null);
+    this.userId$ = this.store.select(state => state.auth.sessionData && state.auth.sessionData.user ? state.auth.sessionData.user.name : null);
     if (!environment.production) {
       if (environment.showObsDebug || environment.disablePolling) {
         const spy = create();
@@ -57,16 +66,6 @@ export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
 
   ngOnInit() {
     this.loggedInService.init();
-
-    // Material design defines smaller sizes when on desktop but angular-material uses larger mobile sizes
-    // Add a style to the body if we detect a desktop browser, so we can adjust styling to match the MD Specification
-
-    // Approximation for detecting desktop browser - see: Stack Overflow: https://goo.gl/e1KuJR
-    const isTouchDevice = () => 'ontouchstart' in window || 'onmsgesturechange' in window;
-    const isDesktop = window.screenX !== 0 && !isTouchDevice() ? true : false;
-    if (isDesktop) {
-      this.document.body.classList.add('mat-desktop');
-    }
 
     // Desktop (Electron ?)
     if (environment.desktopMode) {

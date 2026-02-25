@@ -124,7 +124,7 @@ function createHost(tree: Tree): workspaces.WorkspaceHost {
         throw new Error('File not found.');
       }
 
-      return virtualFs.fileBufferToString(data);
+      return virtualFs.fileBufferToString(new Uint8Array(data).buffer as ArrayBuffer);
     },
     async writeFile(path: string, data: string): Promise<void> {
       return tree.overwrite(path, data);

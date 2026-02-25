@@ -1,13 +1,16 @@
-import { TitleCasePipe } from '@angular/common';
+import { AsyncPipe, CommonModule, TitleCasePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
   ComponentFactoryResolver,
   OnDestroy,
+  signal,
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
+import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
+import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
@@ -38,14 +41,23 @@ import {
   selectCreateServiceInstance,
 } from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
+import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
+import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
+import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
 import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { StratosStatus } from '../../../../../../store/src/types/shared.types';
 import { IServicePlan } from '../../../../cf-api-svc.types';
+import { ServicePlanPriceComponent } from '../../service-plan-price/service-plan-price.component';
+import { ServicePlanPublicComponent } from '../../service-plan-public/service-plan-public.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiModeService } from '../csi-mode.service';
 import { NoServicePlansComponent } from '../no-service-plans/no-service-plans.component';
+
+interface SelectPlanForm {
+  servicePlans: FormControl<string>;
+}
 
 @Component({
   selector: 'app-select-plan-step',
@@ -54,18 +66,34 @@ import { NoServicePlansComponent } from '../no-service-plans/no-service-plans.co
   providers: [
     TitleCasePipe
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    CustomFormFieldComponent,
+    MatLabelComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
+    AsyncPipe,
+    FocusDirective,
+    MetadataItemComponent,
+    CardStatusComponent,
+    ServicePlanPublicComponent,
+    ServicePlanPriceComponent
+]
 })
 export class SelectPlanStepComponent implements OnDestroy {
-  selectedPlan$: Observable<APIResource<IServicePlan>>;
-  selectedPlanAccessibility$ = new BehaviorSubject<StratosStatus>(null);
-  cSIHelperService: CreateServiceInstanceHelper;
+  selectedPlan$!: Observable<APIResource<IServicePlan>>;
+  private selectedPlanAccessibilitySignal = signal<StratosStatus | null>(null);
+  selectedPlanAccessibility = this.selectedPlanAccessibilitySignal.asReadonly();
+  cSIHelperService!: CreateServiceInstanceHelper;
   @ViewChild('noplans', { read: ViewContainerRef, static: true })
-  noPlansDiv: ViewContainerRef;
+  noPlansDiv!: ViewContainerRef;
 
-  validate = new BehaviorSubject<boolean>(false);
-  subscription: Subscription;
-  stepperForm: UntypedFormGroup;
+  validate = signal<boolean>(false);
+  subscription!: Subscription;
+  stepperForm: FormGroup<SelectPlanForm>;
   servicePlans$: Observable<APIResource<IServicePlan>[]>;
   displayNames: { [guid: string]: string } = {};
 
@@ -77,8 +105,8 @@ export class SelectPlanStepComponent implements OnDestroy {
     private modeService: CsiModeService
 
   ) {
-    this.stepperForm = new UntypedFormGroup({
-      servicePlans: new UntypedFormControl('', Validators.required),
+    this.stepperForm = new FormGroup<SelectPlanForm>({
+      servicePlans: new FormControl<string>('', { validators: Validators.required, nonNullable: true }),
     });
 
     this.servicePlans$ = this.store.select(selectCreateServiceInstance).pipe(
@@ -95,7 +123,7 @@ export class SelectPlanStepComponent implements OnDestroy {
           this.stepperForm.controls.servicePlans.disable();
           this.clearNoPlans();
           this.createNoPlansComponent();
-          setTimeout(() => this.validate.next(false));
+          setTimeout(() => this.validate.set(false));
         }
         if (o.length > 0) {
           this.stepperForm.controls.servicePlans.enable();
@@ -122,7 +150,7 @@ export class SelectPlanStepComponent implements OnDestroy {
             this.cSIHelperService.servicePlanVisibilities$,
             this.cSIHelperService.serviceBroker$).pipe(
               first()
-            ).subscribe(cardStatus => this.selectedPlanAccessibility$.next(cardStatus));
+            ).subscribe(cardStatus => this.selectedPlanAccessibilitySignal.set(cardStatus));
         })
       );
 
@@ -141,12 +169,12 @@ export class SelectPlanStepComponent implements OnDestroy {
       withLatestFrom(this.store.select(selectCreateServiceInstance)),
       tap(([servicePlans, createServiceInstanceState]) => {
         if (this.modeService.isEditServiceInstanceMode()) {
-          this.stepperForm.controls.servicePlans.setValue(createServiceInstanceState.servicePlanGuid);
+          this.stepperForm.controls.servicePlans.setValue(createServiceInstanceState.servicePlanGuid ?? '');
         } else {
-          this.stepperForm.controls.servicePlans.setValue(servicePlans[0].metadata.guid);
+          this.stepperForm.controls.servicePlans.setValue(servicePlans[0]?.metadata.guid ?? '');
         }
         this.stepperForm.updateValueAndValidity();
-        this.validate.next(this.stepperForm.valid);
+        this.validate.set(this.stepperForm.valid);
       }),
     ).subscribe();
   }

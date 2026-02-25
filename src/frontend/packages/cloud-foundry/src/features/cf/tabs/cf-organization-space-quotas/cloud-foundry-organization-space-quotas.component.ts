@@ -1,8 +1,12 @@
-import { Component } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
+import { ListComponent } from '../../../../../../core/src/shared/components/list/list.component';
 import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
+import { PageSubNavComponent } from '../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
 import {
   CfSpaceQuotasListConfigService,
 } from '../../../../shared/components/list/list-types/cf-space-quotas/cf-space-quotas-list-config.service';
@@ -14,7 +18,16 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
   selector: 'app-cloud-foundry-organization-space-quotas',
   templateUrl: './cloud-foundry-organization-space-quotas.component.html',
   styleUrls: ['./cloud-foundry-organization-space-quotas.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    RouterModule,
+    PageSubNavComponent,
+    ListComponent
+  ],
   providers: [
+    DatePipe,
     {
       provide: ListConfig,
       useClass: CfSpaceQuotasListConfigService

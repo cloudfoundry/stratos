@@ -1,19 +1,24 @@
-import { BaseTestModules } from '../../core/test-framework/core-test.helper';
-import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES } from '../../store/src/entity-catalog-test.module';
-import { generateStratosEntities } from '../../store/src/stratos-entity-generator';
+import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities } from '@stratosui/store';
+import { BaseTestModules, BASE_TEST_PROVIDERS } from '@test-framework';
 import { generateCFEntities } from '../src/cf-entity-generator';
 
+// Re-export CF entity generator for test files
+export { generateCFEntities };
+
+// Modules for imports array
 export const CFBaseTestModules = [
   ...BaseTestModules,
+  EntityCatalogTestModule
+];
+
+// Providers for providers array
+export const CFBaseTestProviders = [
+  ...BASE_TEST_PROVIDERS,
   {
-    ngModule: EntityCatalogTestModule,
-    providers: [
-      {
-        provide: TEST_CATALOGUE_ENTITIES, useValue: [
-          ...generateStratosEntities(),
-          ...generateCFEntities()
-        ]
-      }
+    provide: TEST_CATALOGUE_ENTITIES,
+    useFactory: () => [
+      ...generateStratosEntities(),
+      ...generateCFEntities()
     ]
   }
 ];

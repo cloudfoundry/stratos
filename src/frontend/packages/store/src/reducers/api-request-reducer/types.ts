@@ -1,4 +1,4 @@
-import { EntityCatalogEntityConfig } from '../../entity-catalog/entity-catalog.types';
+import type { EntityCatalogEntityConfig } from '../../entity-catalog/entity-catalog.types';
 
 export const enum RequestSectionKeys {
   CF = 'cf',
@@ -62,7 +62,7 @@ export interface RequestInfoState {
   creating: boolean;
   deleting: DeleteActionState;
   error: boolean;
-  response: any;
+  response?: any;
   message: string;
 }
 
@@ -74,7 +74,7 @@ const defaultRequestState = {
   creating: false,
   error: false,
   deleting: { ...defaultDeletingActionState },
-  response: null,
+  response: null as any,
   message: ''
 };
 

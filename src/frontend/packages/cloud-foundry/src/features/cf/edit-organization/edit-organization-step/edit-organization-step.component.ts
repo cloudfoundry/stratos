@@ -1,16 +1,12 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { Component, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, pairwise, take, tap } from 'rxjs/operators';
 
-import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { endpointEntityType } from '../../../../../../store/src/helpers/stratos-entity-factory';
-import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
-import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { APIResource } from '../../../../../../store/src/types/api.types';
+import { CustomFormFieldComponent, safeUnsubscribe, FocusDirective, StepOnNextFunction, CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
+import { endpointEntityType, PaginationMonitorFactory, ActionState, getPaginationObservables, APIResource } from '@stratosui/store';
 import { IOrganization, IOrgQuotaDefinition } from '../../../../cf-api.types';
 import { CFAppState } from '../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
@@ -29,6 +25,12 @@ const enum OrgStatus {
   ACTIVE = 'active',
   SUSPENDED = 'suspended'
 }
+
+interface EditOrganizationForm {
+  orgName: FormControl<string>;
+  quotaDefinition: FormControl<string | null>;
+}
+
 @Component({
   selector: 'app-edit-organization-step',
   templateUrl: './edit-organization-step.component.html',
@@ -37,35 +39,50 @@ const enum OrgStatus {
     getActiveRouteCfOrgSpaceProvider,
     CloudFoundryOrganizationService,
     CloudFoundryUserProvidedServicesService
+  ],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    CustomFormFieldComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
+    FocusDirective
   ]
 })
 export class EditOrganizationStepComponent implements OnInit, OnDestroy {
 
-  fetchOrgsSub: Subscription;
-  allOrgsInEndpoint: any;
-  allOrgsInEndpoint$: Observable<any>;
-  orgSubscription: Subscription;
-  currentStatus: string;
-  originalName: string;
+  fetchOrgsSub!: Subscription;
+  allOrgsInEndpoint: string[];
+  allOrgsInEndpoint$!: Observable<string[]>;
+  orgSubscription!: Subscription;
+  currentStatus!: string;
+  originalName!: string;
   org$: Observable<IOrganization>;
-  editOrgName: UntypedFormGroup;
+  editOrgName: FormGroup<EditOrganizationForm>;
   status: boolean;
   cfGuid: string;
   orgGuid: string;
-  quotaDefinitions$: Observable<APIResource<IOrgQuotaDefinition>[]>;
+  quotaDefinitions$!: Observable<APIResource<IOrgQuotaDefinition>[]>;
+
+  get orgName(): FormControl<string> { return this.editOrgName ? this.editOrgName.get('orgName') as FormControl<string> : new FormControl('', { nonNullable: true }); }
+
+  get quotaDefinition(): FormControl<string | null> { return this.editOrgName ? this.editOrgName.get('quotaDefinition') as FormControl<string | null> : new FormControl(null); }
 
   constructor(
     private store: Store<CFAppState>,
     private paginationMonitorFactory: PaginationMonitorFactory,
-    private cfOrgService: CloudFoundryOrganizationService
+    private cfOrgService: CloudFoundryOrganizationService,
+    private fb: FormBuilder
   ) {
     this.orgGuid = cfOrgService.orgGuid;
     this.cfGuid = cfOrgService.cfGuid;
     this.status = false;
-    this.editOrgName = new UntypedFormGroup({
-      orgName: new UntypedFormControl('', [Validators.required as any, this.nameTakenValidator()]),
-      quotaDefinition: new UntypedFormControl(),
-      // toggleStatus: new FormControl(false),
+    this.allOrgsInEndpoint = [];
+    this.editOrgName = this.fb.group<EditOrganizationForm>({
+      orgName: new FormControl('', { nonNullable: true, validators: [Validators.required, this.nameTakenValidator()] }),
+      quotaDefinition: new FormControl<string | null>(null),
     });
     this.org$ = this.cfOrgService.org$.pipe(
       map(o => o.entity.entity),
@@ -120,19 +137,19 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
     );
   }
 
-  validate = (value: string = null) => {
+  validate = (value: string = null): boolean => {
     if (this.allOrgsInEndpoint) {
       return this.allOrgsInEndpoint
-        .filter(o => o !== this.originalName)
-        .indexOf(value ? value : this.editOrgName.value.orgName) === -1;
+        .filter((o: string) => o !== this.originalName)
+        .indexOf(value ? value : this.orgName.value) === -1;
     }
     return true;
   }
 
   submit: StepOnNextFunction = () => {
     return cfEntityCatalog.org.api.update<ActionState>(this.orgGuid, this.cfGuid, {
-      name: this.editOrgName.value.orgName,
-      quota_definition_guid: this.editOrgName.value.quotaDefinition,
+      name: this.orgName.value,
+      quota_definition_guid: this.quotaDefinition.value,
       status: this.status ? OrgStatus.ACTIVE : OrgStatus.SUSPENDED
     }).pipe(
       pairwise(),

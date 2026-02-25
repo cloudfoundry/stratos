@@ -1,13 +1,9 @@
 import { Store } from '@ngrx/store';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import {
-  IListDataSource,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
-import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
+import { IListConfig, IListDataSource } from '@stratosui/core';
+import { APIResource, PaginatedAction } from '@stratosui/store';
 import { IRoute } from '../../../../../cf-api.types';
+import { CFAppState } from '../../../../../cf-app-state';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { CfRoutesDataSourceBase } from '../cf-routes/cf-routes-data-source-base';
 

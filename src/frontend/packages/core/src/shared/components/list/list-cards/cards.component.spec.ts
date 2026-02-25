@@ -1,26 +1,32 @@
-import { Type } from '@angular/core';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Type, provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { EntityInfo } from '../../../../../../store/src/types/api.types';
-import { CoreModule } from '../../../../core/core.module';
-import { SharedModule } from '../../../shared.module';
-import { IListDataSource } from '../data-sources-controllers/list-data-source-types';
-import { CardCell } from '../list.types';
+import { EntityInfo } from '@stratosui/store';
+import { IListDataSource, CardCell } from '@stratosui/core';
 import { CardsComponent } from './cards.component';
 
 describe('CardsComponent', () => {
   let component: CardsComponent<EntityInfo>;
   let fixture: ComponentFixture<CardsComponent<EntityInfo>>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
       imports: [
-        CoreModule,
-        SharedModule
+        CardsComponent, // Standalone component
+        NoopAnimationsModule,
       ]
-    })
-      .compileComponents();
-  }));
+    });
+    TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent<CardsComponent<EntityInfo>>(CardsComponent);

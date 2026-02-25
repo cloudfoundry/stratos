@@ -4,16 +4,16 @@ import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
 export interface ServicePlanVisibilityActionBuilders extends OrchestratedActionBuilders {
   getMultiple: (
-    endpointGuid,
-    paginationKey,
+    endpointGuid: string,
+    paginationKey: string,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
   ) => GetServicePlanVisibilities;
 }
 
 export const servicePlanVisibilityActionBuilders: ServicePlanVisibilityActionBuilders = {
   getMultiple: (
-    endpointGuid,
-    paginationKey,
+    endpointGuid: string,
+    paginationKey: string,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetServicePlanVisibilities(endpointGuid, paginationKey, includeRelations, populateMissing)
 };

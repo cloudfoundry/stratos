@@ -1,6 +1,7 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import {
   BooleanIndicatorComponent,
 } from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
@@ -10,15 +11,13 @@ describe('TableCellServiceActiveComponent', () => {
   let component: TableCellServiceActiveComponent;
   let fixture: ComponentFixture<TableCellServiceActiveComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [TableCellServiceActiveComponent, BooleanIndicatorComponent],
-      imports: [CoreModule]
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
+      imports: [TableCellServiceActiveComponent, BooleanIndicatorComponent]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellServiceActiveComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

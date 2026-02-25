@@ -1,5 +1,6 @@
-import { Component, Inject, OnInit, ViewEncapsulation } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, Inject, OnInit, ViewEncapsulation, signal  } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import {
   VerifySession,
@@ -9,18 +10,49 @@ import {
   UAASetupState,
   InternalAppState,
 } from '@stratosui/store';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { delay, filter, map, skipWhile, take } from 'rxjs/operators';
+
+interface UAAWizardForm {
+  apiUrl: FormControl<string>;
+  clientId: FormControl<string>;
+  adminPassword: FormControl<string>;
+  adminUsername: FormControl<string>;
+  clientSecret: FormControl<string>;
+  useSSO: FormControl<boolean>;
+  skipSSL: FormControl<boolean>;
+}
 
 import { APP_TITLE } from '../../../core/core.types';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { getSSOClientRedirectURI } from '../../endpoints/endpoint-helpers';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { ShowPageHeaderComponent } from '../../../shared/components/page-header/show-page-header/show-page-header.component';
+import { SteppersComponent } from '../../../shared/components/stepper/steppers/steppers.component';
+import { StepComponent } from '../../../shared/components/stepper/step/step.component';
+import { ProductNameComponent } from '../../../shared/components/product-name.ccomponent';
+import { ShowHideButtonComponent } from '../../../core/show-hide-button/show-hide-button.component';
+import { LoadingPageComponent } from '../../../shared/components/loading-page/loading-page.component';
 
 @Component({
   selector: 'app-console-uaa-wizard',
   templateUrl: './console-uaa-wizard.component.html',
   styleUrls: ['./console-uaa-wizard.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    PageHeaderComponent,
+    ShowPageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    ProductNameComponent,
+    ShowHideButtonComponent,
+    LoadingPageComponent
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConsoleUaaWizardComponent implements OnInit {
 
@@ -32,11 +64,11 @@ export class ConsoleUaaWizardComponent implements OnInit {
     this.clientRedirectURI = getSSOClientRedirectURI();
   }
 
-  uaaForm: UntypedFormGroup;
-  validateUAAForm: Observable<boolean>;
-  uaaScopes = [];
+  uaaForm!: FormGroup<UAAWizardForm>;
+  validateUAAForm!: Observable<boolean>;
+  uaaScopes: string[] = [];
   selectedScope = '';
-  applyingSetup$ = new BehaviorSubject<boolean>(false);
+  applyingSetup = signal<boolean>(false);
 
   public show = false;
   public showPassword = false;
@@ -70,7 +102,8 @@ export class ConsoleUaaWizardComponent implements OnInit {
           success,
           message: state.message
         };
-      }));
+      })
+    );
   }
 
   uaaScopeNext: StepOnNextFunction = () => {
@@ -85,7 +118,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
       console_admin_scope: this.selectedScope
     }));
 
-    this.applyingSetup$.next(true);
+    this.applyingSetup.set(true);
     return this.store.select(s => [s.uaaSetup, s.auth]).pipe(
       filter(([uaa, auth]: [UAASetupState, AuthState]) => {
         return !(uaa.settingUp || auth.verifying);
@@ -106,26 +139,27 @@ export class ConsoleUaaWizardComponent implements OnInit {
           const reload = loc.protocol + '//' + loc.host;
           window.location.assign(reload);
         } else {
-          this.applyingSetup$.next(false);
+          this.applyingSetup.set(false);
         }
         return {
           success: !state[0].error,
           message: state[0].message
         };
-      }));
+      })
+    );
   }
   ngOnInit() {
-    this.uaaForm = new UntypedFormGroup({
-      apiUrl: new UntypedFormControl('', [Validators.required as any]),
-      skipSSL: new UntypedFormControl(false),
-      clientId: new UntypedFormControl('', [Validators.required as any]),
-      clientSecret: new UntypedFormControl(''),
-      adminUsername: new UntypedFormControl('', [Validators.required as any]),
-      adminPassword: new UntypedFormControl('', [Validators.required as any]),
-      useSSO: new UntypedFormControl(false),
+    this.uaaForm = new FormGroup<UAAWizardForm>({
+      apiUrl: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+      skipSSL: new FormControl(false, { nonNullable: true }),
+      clientId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+      clientSecret: new FormControl('', { nonNullable: true }),
+      adminUsername: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+      adminPassword: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+      useSSO: new FormControl(false, { nonNullable: true }),
     });
 
-    let observer;
+    let observer: any;
     this.validateUAAForm = new Observable(o => {
       observer = o;
       observer.next(false);

@@ -1,14 +1,19 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { AsyncPipe, NgStyle } from '@angular/common';
+import {Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
+import { BooleanIndicatorComponent } from '@stratosui/core';
 import { KubernetesNodeService } from '../../../../../services/kubernetes-node.service';
 import { ConditionType, ConditionTypeLabels, KubernetesCondition } from '../../../../../store/kube.types';
 
 @Component({
   selector: 'app-kubernetes-node-condition',
   templateUrl: './kubernetes-node-condition.component.html',
-  styleUrls: ['./kubernetes-node-condition.component.scss']
+  styleUrls: ['./kubernetes-node-condition.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [AsyncPipe, NgStyle, BooleanIndicatorComponent]
 })
 export class KubernetesNodeConditionComponent implements OnInit {
 
@@ -46,10 +51,7 @@ export class KubernetesNodeConditionComponent implements OnInit {
     CaaspDisruptive: ['warning', 'material-icons'],
     CaaspSecurity: ['security', 'material-icons']
   };
-
-  constructor(
-    public kubeNodeService: KubernetesNodeService
-  ) { }
+  public kubeNodeService = inject(KubernetesNodeService);
 
   ngOnInit() {
     this.condition$ = this.overrideCondition$ ? this.overrideCondition$ : this.kubeNodeService.node$.pipe(

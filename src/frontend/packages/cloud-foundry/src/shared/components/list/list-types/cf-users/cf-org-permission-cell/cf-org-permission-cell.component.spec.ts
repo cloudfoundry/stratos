@@ -1,35 +1,45 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { StoreModule } from '@ngrx/store';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
-import {
-  generateCfStoreModules,
-  generateTestCfEndpointServiceProvider,
-} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CoreModule } from '@stratosui/core';
+import { appReducers } from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { CloudFoundryTestingModule, generateTestCfEndpointServiceProvider } from '@test-framework/cf';
 import { CfOrgPermissionCellComponent } from './cf-org-permission-cell.component';
-import { HttpClientModule } from '@angular/common/http';
 
-describe('CfUserPermissionCellComponent', () => {
+describe('CfOrgPermissionCellComponent', () => {
   let component: CfOrgPermissionCellComponent;
   let fixture: ComponentFixture<CfOrgPermissionCellComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
-        CfOrgPermissionCellComponent
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        CfOrgPermissionCellComponent,
       ],
       providers: [
-        ...generateTestCfEndpointServiceProvider()
-      ],
-      imports: [
-        ...generateCfStoreModules(),
-        SharedModule,
-        HttpClientModule
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          NoopAnimationsModule,
+          StoreModule.forRoot(
+            appReducers,
+            { runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false } }
+          ),
+          CloudFoundryTestingModule,
+          CoreModule,
+        ),
+        ...generateTestCfEndpointServiceProvider(),
       ]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(CfOrgPermissionCellComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

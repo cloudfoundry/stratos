@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
@@ -12,7 +13,12 @@ import { waitForCFPermissions } from '../../cf.helpers';
 @Component({
   selector: 'app-cf-admin-add-user-warning',
   templateUrl: './cf-admin-add-user-warning.component.html',
-  styleUrls: ['./cf-admin-add-user-warning.component.scss']
+  styleUrls: ['./cf-admin-add-user-warning.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule
+  ]
 })
 export class CfAdminAddUserWarningComponent {
 

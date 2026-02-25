@@ -1,3 +1,7 @@
-<div *ngIf="value$ | async as value">
-  <mat-progress-bar *ngIf="value < HIDE_VALUE" class="routing-indicator" mode="determinate" [value]="value"></mat-progress-bar>
-</div>
+@if (value$ | async; as value) {
+  <div>
+    @if (value < HIDE_VALUE) {
+      <app-progress-bar class="routing-indicator" mode="determinate" [value]="value"></app-progress-bar>
+    }
+  </div>
+}

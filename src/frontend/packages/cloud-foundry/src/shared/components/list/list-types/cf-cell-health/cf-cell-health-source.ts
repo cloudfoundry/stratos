@@ -36,7 +36,13 @@ export class CfCellHealthDataSource extends ListDataSource<CfCellHealthEntry, IM
       store,
       action,
       schema: cfEntityFactory(action.entityType),
-      getRowUniqueId: (row: CfCellHealthEntry) => row.timestamp.toString(),
+      getRowUniqueId: (metrics: IMetrics<IMetricMatrixResult<IMetricCell>>) => {
+        // For metrics objects, create a unique ID from the metric data
+        if (metrics && Array.isArray(metrics) && metrics.length > 0 && metrics[0].data?.result?.[0]?.metric) {
+          return metrics[0].data.result[0].metric.bosh_job_id || 'unknown';
+        }
+        return 'unknown';
+      },
       paginationKey: action.paginationKey,
       isLocal: true,
       transformEntity: map((response) => {
@@ -52,8 +58,8 @@ export class CfCellHealthDataSource extends ListDataSource<CfCellHealthEntry, IM
   private mapMetricsToStates(values: [number, string][]): CfCellHealthEntry[] {
     // Create a new collection containing only the change of state
     const newValues = values.reduce((res, value, index) => {
-      const timestamp = value['0'];
-      const state = value['1'];
+      const timestamp = value[0];
+      const state = value[1];
       if (index === 0) {
         // Record the first entry
         res.current = state;
@@ -70,7 +76,7 @@ export class CfCellHealthDataSource extends ListDataSource<CfCellHealthEntry, IM
         });
       }
       return res;
-    }, { current: null, collection: [] });
+    }, { current: null as string | null, collection: [] as CfCellHealthEntry[] });
 
     return newValues.collection;
   }

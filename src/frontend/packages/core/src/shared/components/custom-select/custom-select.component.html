@@ -1,0 +1,32 @@
+<div class="custom-select"
+  [class.disabled]="disabled"
+  [class.open]="isOpen"
+  [class.invalid]="invalid"
+  [attr.aria-invalid]="invalid || null"
+  [attr.aria-describedby]="invalid && errorMessage ? 'error-' + (id || name) : null">
+
+  <div class="select-trigger" #selectTrigger (click)="toggle()">
+    <span class="select-value" [class.placeholder]="!displayValue || displayValue === ''">
+      {{ displayValue && displayValue !== '' ? displayValue : (placeholder || 'Select...') }}
+    </span>
+    <div class="select-suffix">
+      <div class="select-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  @if (isOpen) {
+    <div class="select-options"
+      #selectOptions
+      [style.top]="dropdownTop"
+      [style.left]="dropdownLeft"
+      [style.min-width]="dropdownWidth">
+      <div class="options-container">
+        <ng-content></ng-content>
+      </div>
+    </div>
+  }
+</div>

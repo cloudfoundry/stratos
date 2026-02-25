@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { StratosConfig } from '../lib/stratos.config';
+import { StratosConfig } from '../lib/stratos.config.js';
 
 /**
  * Sass Handler
@@ -23,9 +23,18 @@ export class SassHandler {
           if (innerRule.use !== undefined) {
             innerRule.use.forEach(p => {
               if (p.loader && p.loader.indexOf('sass-loader') > 0) {
-                p.options.sassOptions = {
-                  importer: this.customSassImport(config)
-                };
+                // Ensure options exists
+                if (!p.options) p.options = {};
+                if (!p.options.sassOptions) p.options.sassOptions = {};
+                
+                // Configure SASS with custom importer for modern Angular Material v20
+                try {
+                  // Don't override implementation, let Angular CLI handle it
+                  // Just set up our custom importer for theme resolution
+                  p.options.sassOptions.importer = this.customSassImport(config);
+                } catch (e) {
+                  console.warn('Could not configure SASS importer:', e);
+                }
               }
             });
           }

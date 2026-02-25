@@ -1,11 +1,11 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { fetchAutoscalerInfo } from '@stratosui/cf-autoscaler';
+import { Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
-import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
-import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
+import { TailwindDialogService, MetadataItemComponent } from '@stratosui/core';
+import { fetchAutoscalerInfo } from '@stratosui/cf-autoscaler';
+import { EntityServiceFactory, APIResource, EntityInfo } from '@stratosui/store';
 import { ICfV2Info } from '../../../../cf-api.types';
 import { CloudFoundryEndpointService } from '../../../../features/cf/services/cloud-foundry-endpoint.service';
 import {
@@ -16,22 +16,26 @@ import { UserInviteConfigureService, UserInviteService } from '../../../../featu
 @Component({
   selector: 'app-card-cf-info',
   templateUrl: './card-cf-info.component.html',
-  styleUrls: ['./card-cf-info.component.scss']
+  styleUrls: ['./card-cf-info.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    MetadataItemComponent
+  ]
 })
 export class CardCfInfoComponent implements OnInit, OnDestroy {
-  public apiUrl: string;
+  public cfEndpointService = inject(CloudFoundryEndpointService);
+  public userInviteService = inject(UserInviteService);
+  public userInviteConfigureService = inject(UserInviteConfigureService);
+  private dialog = inject(TailwindDialogService);
+  private esf = inject(EntityServiceFactory);
+
+  public apiUrl!: string;
   private subs: Subscription[] = [];
-  public autoscalerVersion$: Observable<string>;
+  public autoscalerVersion$!: Observable<string | null>;
 
-  constructor(
-    public cfEndpointService: CloudFoundryEndpointService,
-    public userInviteService: UserInviteService,
-    public userInviteConfigureService: UserInviteConfigureService,
-    private dialog: MatDialog,
-    private esf: EntityServiceFactory
-  ) { }
-
-  description$: Observable<string>;
+  description$!: Observable<string>;
 
   ngOnInit() {
     const obs$ = this.cfEndpointService.endpoint$.pipe(
@@ -54,7 +58,7 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
     );
   }
 
-  getApiEndpointUrl(apiEndpoint) {
+  getApiEndpointUrl(apiEndpoint: any) {
     const path = apiEndpoint.Path ? `/${apiEndpoint.Path}` : '';
     return `${apiEndpoint.Scheme}://${apiEndpoint.Host}${path}`;
   }

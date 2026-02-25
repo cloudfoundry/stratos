@@ -135,7 +135,7 @@ export class GetAllAppsInSpace extends CFStartAction implements PaginatedAction,
     public endpointGuid: string,
     public spaceGuid: string,
     public paginationKey: string,
-    public includeRelations = [],
+    public includeRelations: string[] = [],
     public populateMissing = true,
     public flattenPagination = true
   ) {
@@ -162,14 +162,14 @@ export class GetAllAppsInSpace extends CFStartAction implements PaginatedAction,
 
 
 export abstract class BaseSpaceAction extends CFStartAction implements ICFAction {
+  actions!: string[];
+  entity = [cfEntityFactory(spaceEntityType)];
+  entityType = spaceEntityType;
+  options!: HttpRequest<any>;
+  removeEntityOnDelete?: boolean;
   constructor(public guid: string, public orgGuid: string, public endpointGuid: string) {
     super();
   }
-  actions: string[];
-  entity = [cfEntityFactory(spaceEntityType)];
-  entityType = spaceEntityType;
-  options: HttpRequest<any>;
-  removeEntityOnDelete?: boolean;
 }
 
 export class DeleteSpace extends BaseSpaceAction {
@@ -299,7 +299,7 @@ export class GetServiceInstancesForSpace
     'results-per-page': 100,
     'order-direction': 'desc',
     'order-direction-field': 'creation',
-    q: []
+    q: [] as string[]
   };
   parentGuid: string;
   parentEntityConfig = new CFEntityConfig(spaceEntityType);

@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { CommonModule } from '@angular/common';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { CustomTooltipDirective, TailwindSnackBarService } from '@stratosui/core';
+import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, pairwise, startWith, tap } from 'rxjs/operators';
@@ -16,12 +18,36 @@ import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-use
 import { goToAppWall } from '../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
+import { PageSubNavComponent } from '../../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
+import { TileGridComponent } from '../../../../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
+import { TileGroupComponent } from '../../../../../../../core/src/shared/components/tile/tile-group/tile-group.component';
+import { TileComponent } from '../../../../../../../core/src/shared/components/tile/tile/tile.component';
+import { CardCfOrgUserDetailsComponent } from '../../../../../shared/components/cards/card-cf-org-user-details/card-cf-org-user-details.component';
+import { LoadingPageComponent } from '../../../../../../../core/src/shared/components/loading-page/loading-page.component';
+import { CardNumberMetricComponent } from '../../../../../../../core/src/shared/components/cards/card-number-metric/card-number-metric.component';
+import { CardCfRecentAppsComponent } from '../../../../home/card-cf-recent-apps/card-cf-recent-apps.component';
+import { CfUserPermissionDirective } from '../../../../../shared/directives/cf-user-permission/cf-user-permission.directive';
 
 @Component({
   selector: 'app-cloud-foundry-organization-summary',
   templateUrl: './cloud-foundry-organization-summary.component.html',
   styleUrls: ['./cloud-foundry-organization-summary.component.scss'],
-
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    CustomTooltipDirective,
+    RouterModule,
+    PageSubNavComponent,
+    TileGridComponent,
+    TileGroupComponent,
+    TileComponent,
+    CardCfOrgUserDetailsComponent,
+    LoadingPageComponent,
+    CardNumberMetricComponent,
+    CardCfRecentAppsComponent,
+    CfUserPermissionDirective
+  ]
 })
 export class CloudFoundryOrganizationSummaryComponent {
   appLink: () => void;
@@ -34,7 +60,7 @@ export class CloudFoundryOrganizationSummaryComponent {
     public cfEndpointService: CloudFoundryEndpointService,
     public cfOrgService: CloudFoundryOrganizationService,
     private confirmDialog: ConfirmationDialogService,
-    private snackBar: MatSnackBar
+    private snackBar: TailwindSnackBarService
   ) {
     this.appLink = () => {
       goToAppWall(store, cfOrgService.cfGuid, cfOrgService.orgGuid);

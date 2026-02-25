@@ -106,6 +106,7 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+	log.Trace("loginToCNSI:params = ", params)
 
 	if len(params.CNSIGUID) == 0 {
 		return api.NewHTTPShadowError(

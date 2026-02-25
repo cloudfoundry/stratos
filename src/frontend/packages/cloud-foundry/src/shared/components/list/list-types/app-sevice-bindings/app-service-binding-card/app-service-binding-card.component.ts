@@ -1,13 +1,21 @@
-import { Component, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { TailwindDialogService } from '@stratosui/core';
 import { combineLatest as observableCombineLatest, Observable, of } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import {
   CurrentUserPermissionsService,
 } from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
+import { AppChip, AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { CardCell, IListRowCell } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { MetaCardComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
+import { MetaCardItemComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
+import { MetaCardKeyComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
+import { MetaCardValueComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
+import { MetaCardTitleComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
+import { ActionState } from '../../../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
 import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
 import { ComponentEntityMonitorConfig } from '../../../../../../../../store/src/types/shared.types';
@@ -30,9 +38,11 @@ import {
 import { AppEnvVarsState } from '../../../../../../store/types/app-metadata.types';
 import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
+import { ServiceIconComponent } from '../../../../service-icon/service-icon.component';
 import { CSI_CANCEL_URL } from '../../../../add-service-instance/csi-mode.service';
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
 import {
+  TableCellServiceBrokerComponent,
   TableCellServiceBrokerComponentConfig,
   TableCellServiceBrokerComponentMode,
 } from '../../cf-services/table-cell-service-broker/table-cell-service-broker.component';
@@ -45,26 +55,40 @@ interface EnvVarData {
 @Component({
   selector: 'app-app-service-binding-card',
   templateUrl: './app-service-binding-card.component.html',
-  styleUrls: ['./app-service-binding-card.component.scss']
+  styleUrls: ['./app-service-binding-card.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MetaCardComponent,
+    MetaCardTitleComponent,
+    MetaCardItemComponent,
+    MetaCardKeyComponent,
+    MetaCardValueComponent,
+    ServiceIconComponent,
+    AppChipsComponent,
+    TableCellServiceBrokerComponent
+  ]
 })
 export class AppServiceBindingCardComponent extends CardCell<APIResource<IServiceBinding>> implements OnInit, IListRowCell {
 
-  envVarsAvailable$: Observable<EnvVarData>;
-  listData: {
+  envVarsAvailable$!: Observable<EnvVarData | null>;
+  listData!: {
     label: string;
     data$: Observable<string>;
     customStyle?: string;
   }[];
   cardMenu: MenuItem[];
-  service$: Observable<APIResource<IService> | null>;
-  serviceInstance$: Observable<EntityInfo<APIResource<IServiceInstance | IUserProvidedServiceInstance>>>;
-  tags$: Observable<AppChip<IServiceInstance | IUserProvidedServiceInstance>[]>;
-  entityConfig: ComponentEntityMonitorConfig;
-  private envVarServicesSection$: Observable<string>;
-  isUserProvidedServiceInstance: boolean;
-  serviceDescription$: Observable<string>;
-  serviceUrl$: Observable<string>;
-  serviceName$: Observable<string>;
+  service$!: Observable<APIResource<IService> | null>;
+  serviceInstance$!: Observable<EntityInfo<APIResource<IServiceInstance | IUserProvidedServiceInstance>>>;
+  tags$!: Observable<AppChip<IServiceInstance | IUserProvidedServiceInstance>[]>;
+  entityConfig!: ComponentEntityMonitorConfig;
+  private envVarServicesSection$!: Observable<string>;
+  isUserProvidedServiceInstance!: boolean;
+  serviceDescription$!: Observable<string | undefined>;
+  serviceUrl$!: Observable<string | undefined>;
+  serviceName$!: Observable<string | undefined>;
 
   brokerNameConfig: TableCellServiceBrokerComponentConfig = {
     mode: TableCellServiceBrokerComponentMode.NAME
@@ -74,7 +98,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
   };
 
   constructor(
-    private dialog: MatDialog,
+    private dialog: TailwindDialogService,
     private appService: ApplicationService,
     private serviceActionHelperService: ServiceActionHelperService,
     private currentUserPermissionsService: CurrentUserPermissionsService,
@@ -104,6 +128,11 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
   }
 
   ngOnInit() {
+    if (!this.row || !this.row.entity || !this.row.entity.service_instance || !this.row.entity.service_instance.entity || !this.row.metadata) {
+      console.warn('Invalid service binding data');
+      return;
+    }
+
     this.entityConfig = new ComponentEntityMonitorConfig(this.row.metadata.guid, cfEntityFactory(serviceBindingEntityType));
 
     this.isUserProvidedServiceInstance = !!isUserProvidedServiceInstance(this.row.entity.service_instance.entity);
@@ -114,43 +143,52 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     }
 
     this.tags$ = this.serviceInstance$.pipe(
-      filter(o => !!o.entity.entity.tags),
-      map(o => o.entity.entity.tags.map(t => ({ value: t })))
+      filter(o => !!o && !!o.entity && !!o.entity.entity && !!o.entity.entity.tags),
+      map(o => o.entity.entity.tags.filter(t => t != null).map(t => ({ value: t })))
     );
 
     this.setupEnvVars();
   }
 
-  private setupAsServiceInstance() {
+  private setupAsServiceInstance(): void {
     const serviceInstance$ = cfEntityCatalog.serviceInstance.store.getEntityService(
       this.row.entity.service_instance_guid, this.appService.cfGuid
     ).waitForEntity$;
     this.serviceInstance$ = serviceInstance$;
     this.service$ = serviceInstance$.pipe(
+      filter(o => !!o && !!o.entity && !!o.entity.entity && !!o.entity.entity.service_guid),
       switchMap(o => cfEntityCatalog.service.store.getEntityService(o.entity.entity.service_guid, this.appService.cfGuid, {})
         .waitForEntity$),
-      filter(service => !!service),
+      filter(service => !!service && !!service.entity),
       map(e => e.entity)
     );
     this.listData = [{
       label: 'Service Plan',
       data$: this.serviceInstance$.pipe(
+        filter(si => !!si && !!si.entity && !!si.entity.entity),
         map(si => {
           if (this.isUserProvidedServiceInstance) {
             return null;
           }
           const serviceInstance: IServiceInstance = si.entity.entity as IServiceInstance;
-          return getServicePlanName(serviceInstance.service_plan.entity);
+          return serviceInstance && serviceInstance.service_plan && serviceInstance.service_plan.entity
+            ? getServicePlanName(serviceInstance.service_plan.entity)
+            : null;
         })
       )
     }];
-    this.envVarServicesSection$ = this.service$.pipe(map(s => s.entity.label));
+    this.envVarServicesSection$ = this.service$.pipe(
+      filter(s => !!s && !!s.entity),
+      map(s => s.entity.label)
+    );
 
     this.serviceDescription$ = this.service$.pipe(
+      filter(service => !!service && !!service.entity),
       map(service => service.entity.description)
     );
 
     this.serviceUrl$ = this.service$.pipe(
+      filter(service => !!service && !!service.entity && !!service.metadata),
       map(service => getServiceSummaryUrl(service.entity.cfGuid, service.metadata.guid))
     );
 
@@ -160,7 +198,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
 
   }
 
-  private setupAsUserProvidedServiceInstance() {
+  private setupAsUserProvidedServiceInstance(): void {
     const userProvidedServiceInstance$ = cfEntityCatalog.userProvidedService.store.getEntityService(
       this.row.entity.service_instance_guid, this.appService.cfGuid
     ).waitForEntity$;
@@ -180,7 +218,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     this.envVarServicesSection$ = of('user-provided');
   }
 
-  private setupEnvVars() {
+  private setupEnvVars(): void {
     this.envVarsAvailable$ = observableCombineLatest(
       this.envVarServicesSection$,
       this.serviceInstance$,
@@ -188,26 +226,26 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
       .pipe(
         first(),
         map(([serviceLabel, serviceInstance, allEnvVars]) => {
-          const systemEnvJson = (allEnvVars as APIResource<AppEnvVarsState>[])[0].entity.system_env_json;
-          const serviceInstanceName = serviceInstance.entity.entity.name;
+          const systemEnvJson = (allEnvVars as APIResource<AppEnvVarsState>[])?.[0]?.entity?.system_env_json;
+          const serviceInstanceName = serviceInstance?.entity?.entity?.name;
 
-          return systemEnvJson.VCAP_SERVICES[serviceLabel] ? {
+          return (systemEnvJson?.VCAP_SERVICES?.[serviceLabel] && serviceInstanceName) ? {
             key: serviceInstanceName,
-            value: systemEnvJson.VCAP_SERVICES[serviceLabel].find(s => s.name === serviceInstanceName)
+            value: systemEnvJson.VCAP_SERVICES[serviceLabel].find((s: any) => s.name === serviceInstanceName)
           } : null;
         }),
         filter(p => !!p),
       );
   }
 
-  showEnvVars = (envVarData: EnvVarData) => {
+  showEnvVars = (envVarData: EnvVarData): void => {
     this.dialog.open(EnvVarViewComponent, {
       data: envVarData,
       disableClose: false
     });
   };
 
-  private detach = () => {
+  private detach = (): void => {
     this.serviceActionHelperService.detachServiceBinding(
       [this.row],
       this.row.entity.service_instance_guid,
@@ -217,13 +255,15 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     );
   };
 
-  private edit = () => this.serviceActionHelperService.startEditServiceBindingStepper(
-    this.row.entity.service_instance_guid,
-    this.appService.cfGuid,
-    {
-      appId: this.appService.appGuid,
-      [CSI_CANCEL_URL]: `/applications/${this.appService.cfGuid}/${this.appService.appGuid}/services`
-    },
-    this.isUserProvidedServiceInstance
-  );
+  private edit = (): void => {
+    this.serviceActionHelperService.startEditServiceBindingStepper(
+      this.row.entity.service_instance_guid,
+      this.appService.cfGuid,
+      {
+        appId: this.appService.appGuid,
+        [CSI_CANCEL_URL]: `/applications/${this.appService.cfGuid}/${this.appService.appGuid}/services`
+      },
+      this.isUserProvidedServiceInstance
+    );
+  };
 }

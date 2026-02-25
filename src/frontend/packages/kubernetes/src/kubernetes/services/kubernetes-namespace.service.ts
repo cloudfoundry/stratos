@@ -8,7 +8,9 @@ import { kubeEntityCatalog } from '../kubernetes-entity-generator';
 import { KubernetesNamespace } from '../store/kube.types';
 import { KubernetesEndpointService } from './kubernetes-endpoint.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class KubernetesNamespaceService {
   namespaceName: string;
   kubeGuid: string;

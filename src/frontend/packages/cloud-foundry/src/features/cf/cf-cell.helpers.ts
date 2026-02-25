@@ -3,12 +3,14 @@ import { Observable, of } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { endpointHasMetricsByAvailable } from '../../../../core/src/features/endpoints/endpoint-helpers';
-import { MetricQueryConfig } from '../../../../store/src/actions/metrics.actions';
-import { AppState } from '../../../../store/src/app-state';
-import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
-import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { IMetrics } from '../../../../store/src/types/base-metric.types';
-import { MetricQueryType } from '../../../../store/src/types/metric.types';
+import {
+  AppState,
+  getPaginationObservables,
+  IMetrics,
+  MetricQueryConfig,
+  MetricQueryType,
+  PaginationMonitorFactory
+} from '@stratosui/store';
 import { FetchCFCellMetricsPaginatedAction } from '../../actions/cf-metrics.actions';
 import { CFEntityConfig } from '../../cf-types';
 import { CellMetrics } from './tabs/cf-cells/cloud-foundry-cell/cloud-foundry-cell.service';

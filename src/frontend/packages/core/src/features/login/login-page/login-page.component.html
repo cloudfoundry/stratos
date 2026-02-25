@@ -1,30 +1,113 @@
-<app-intro-screen id="app-login-page" class="login login__busy" [ngClass]="{'login__busy': busy$ | async }">
-  <mat-card class="login__card">
-    <app-stratos-title></app-stratos-title>
-    <div class="login__body">
-      <div class="login__form-outer" [ngClass]="{'login-sso': ssoLogin}">
-        <form class="login__form" name="loginForm" (ngSubmit)="login()" #loginForm="ngForm">
-          <mat-form-field *ngIf="!ssoLogin" [hideRequiredMarker]="true">
-            <input matInput required [(ngModel)]="username" name="username" placeholder="Username">
-          </mat-form-field>
-          <mat-form-field *ngIf="!ssoLogin" [hideRequiredMarker]="true">
-            <input matInput required [type]="!showPassword ? 'password' : 'text'" [(ngModel)]="password" name="password"
-              placeholder="Password">
-            <span matSuffix>
-              <app-show-hide-button (changed)="showPassword = $event"></app-show-hide-button>
-            </span>
-          </mat-form-field>
-          <button class="login__submit" color="primary" *ngIf="!loggedIn" type="submit" mat-button mat-raised-button
-            [disabled]="!ssoLogin && !loginForm.valid">Login</button>
-        </form>
-      </div>
-      <div id="login__loading" class="login__loading">
-        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+<app-intro-screen
+  id="app-login-page"
+  class="login-page min-h-screen flex items-center justify-center relative"
+  [ngClass]="{'opacity-50 pointer-events-none': busy$ | async }"
+  >
+  <!-- Full-screen background -->
+  <div
+    class="absolute inset-0 z-0"
+    [ngStyle]="{
+      'background-image': loginBackground(),
+      'background-color': loginBackgroundColor(),
+      'background-size': 'cover',
+      'background-position': 'center',
+      'background-repeat': 'no-repeat'
+    }"
+  ></div>
+  <!-- Login Form Card -->
+  <div
+    class="login-card card w-full max-w-md mx-4 p-8 rounded-lg shadow-lg relative z-10"
+    [ngStyle]="{
+      'background-color': loginCardBackground()
+    }"
+    >
+    <!-- Logo and Display Name Header -->
+    <div class="login-header flex items-center space-x-4 mb-6">
+      <img
+        class="login-logo h-12 w-12 flex-shrink-0"
+        [src]="themeLogo()"
+        [alt]="themeDisplayName() || 'Logo'"
+        />
+      <div class="login-title-section flex-1">
+        <h1 class="login-title text-xl font-bold text-gray-900 mb-1">
+          {{ themeDisplayName() || themeTitle() || 'Stratos' }}
+        </h1>
+        @if (themeSubtitle()) {
+          <p class="login-subtitle text-sm text-gray-600">
+            {{ themeSubtitle() }}
+          </p>
+        }
       </div>
     </div>
-  </mat-card>
-  <div id="login-error-message" class="login-message"
-    [ngClass]="{'login-message--show': !!message, 'login-message-error': this.error}">
-    {{ message }}
+
+    <div class="login-body">
+      <div class="login-form-outer" [ngClass]="{'login-sso': (ssoLogin$ | async)}">
+        <form class="login-form space-y-6" name="loginForm" (ngSubmit)="login()" #loginForm="ngForm">
+          @if (!(ssoLogin$ | async)) {
+            <div class="space-y-1">
+              <label for="username" class="sr-only">Username</label>
+              <input
+                id="username"
+                class="input w-full"
+                required
+                [(ngModel)]="username"
+                name="username"
+                placeholder="Username"
+                type="text"
+                autocomplete="username"
+                >
+            </div>
+          }
+
+          @if (!(ssoLogin$ | async)) {
+            <div class="space-y-1 relative">
+              <label for="password" class="sr-only">Password</label>
+              <input
+                id="password"
+                class="input w-full pr-12"
+                required
+                [type]="!showPassword ? 'password' : 'text'"
+                [(ngModel)]="password"
+                name="password"
+                placeholder="Password"
+                autocomplete="current-password"
+                >
+              <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                <app-show-hide-button (changed)="showPassword = $event"></app-show-hide-button>
+              </div>
+            </div>
+          }
+
+          @if (showLoginButton$ | async) {
+            <button
+              class="btn btn-primary w-full py-3"
+              type="submit"
+              [disabled]="!(ssoLogin$ | async) && !loginForm.valid"
+              >
+              Sign In
+            </button>
+          }
+        </form>
+      </div>
+
+      <div id="login-loading" class="login-loading mt-4" [class.hidden]="!(busy$ | async)">
+        <div class="progress">
+          <div class="progress-bar w-full animate-pulse"></div>
+        </div>
+      </div>
+    </div>
   </div>
+
+  @if (message$ | async; as displayMessage) {
+    <div
+      id="login-error-message"
+      class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 alert"
+      [ngClass]="{
+        'translate-y-0 opacity-100': !!displayMessage,
+        '-translate-y-full opacity-0': !displayMessage
+      }"
+      >
+      {{ displayMessage }}
+    </div>
+  }
 </app-intro-screen>

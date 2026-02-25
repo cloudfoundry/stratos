@@ -3,10 +3,11 @@
     <div class="release-title">
       <app-multiline-title>{{ row.name }}</app-multiline-title>
       <div class="release-title--icon">
-        <img *ngIf="icon; else noIcon" [src]="icon" (error)="loadImageError()">
-        <ng-template #noIcon>
-          <mat-icon fontSet="stratos-icons">workloads</mat-icon>
-        </ng-template>
+        @if (icon) {
+          <img [src]="icon" (error)="loadImageError()">
+        } @else {
+          <app-custom-icon fontSet="stratos-icons">workloads</app-custom-icon>
+        }
       </div>
     </div>
   </app-meta-card-title>

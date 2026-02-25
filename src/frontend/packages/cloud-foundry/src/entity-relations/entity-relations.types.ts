@@ -1,28 +1,32 @@
 import { Action, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
-import { getPaginationKey } from '../../../store/src/actions/pagination.actions';
-import { APIResponse } from '../../../store/src/actions/request.actions';
-import { GeneralEntityAppState, GeneralRequestDataState, IRequestTypeState } from '../../../store/src/app-state';
-import { EntityRequestAction } from '../../../store/src/types/request.types';
+import {
+  EntityCatalogEntityConfig,
+  getPaginationKey,
+  APIResponse,
+  GeneralEntityAppState,
+  GeneralRequestDataState,
+  IRequestTypeState,
+  EntityRequestAction,
+} from '@stratosui/store';
 import { EntityTreeRelation } from './entity-relation-tree';
 
 export class ValidateEntityRelationsConfig<T extends GeneralEntityAppState = GeneralEntityAppState> {
   /**
    * The guid of the cf. If this is null or not known we'll try to extract it from the list of parentEntities
    */
-  cfGuid: string;
-  store: Store<T>;
+  cfGuid!: string;
+  store!: Store<T>;
   /**
    * Entities store. Used to determine if we already have the entity/entities and to watch when fetching entities
    */
-  allEntities: GeneralRequestDataState;
+  allEntities!: GeneralRequestDataState;
   /**
    * Pagination store. Used to determine if we already have the entity/entites. This and allEntities make the inner loop code much easier
    * and quicker
    */
-  allPagination: IRequestTypeState;
+  allPagination!: IRequestTypeState;
   /**
    * New entities that have not yet made it into the store (as a result of being called mid-api handling). Used to determine if we already
    * have an entity/entities
@@ -31,11 +35,11 @@ export class ValidateEntityRelationsConfig<T extends GeneralEntityAppState = Gen
   /**
    * The action that has fetched the entity/entities
    */
-  action: EntityRequestAction;
+  action!: EntityRequestAction;
   /**
    * Collection of entity (guids) whose children may be missing. For example a list of organizations that have missing spaces
    */
-  parentEntities: string[];
+  parentEntities!: string[];
   /**
    * If a child is missing, should we raise an action to fetch it?
    *
@@ -45,12 +49,12 @@ export class ValidateEntityRelationsConfig<T extends GeneralEntityAppState = Gen
    * If we're validating an api request we'll have the apiResponse, otherwise it's null and we're ad hoc validating an entity/list
    *
    */
-  apiResponse: APIResponse;
+  apiResponse!: APIResponse;
 }
 
 export class EntityTree {
-  rootRelation: EntityTreeRelation;
-  requiredParamNames: string[];
+  rootRelation!: EntityTreeRelation;
+  requiredParamNames!: string[];
   maxDepth?: number;
 }
 
@@ -116,12 +120,12 @@ export class ValidationResult {
   /**
    * True if data was missing an api requests have been kicked off to fetch
    */
-  started: boolean;
+  started!: boolean;
   /**
    * Promise that fires when the api requests kicked off to fetch missing data have all completed. Contains the new apiResponse (for the
    * case of validating api calls this might be updated to ensure parent entities are associated with missing children).
    */
-  completed: Promise<APIResponse>;
+  completed!: Promise<APIResponse>;
 }
 
 export interface ValidateResultFetchingState {

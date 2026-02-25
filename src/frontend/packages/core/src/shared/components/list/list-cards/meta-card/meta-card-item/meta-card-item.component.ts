@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, ContentChild, Input, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 import { MetaCardKeyComponent } from '../meta-card-key/meta-card-key.component';
 import { MetaCardValueComponent } from '../meta-card-value/meta-card-value.component';
@@ -7,12 +8,16 @@ import { MetaCardValueComponent } from '../meta-card-value/meta-card-value.compo
   selector: 'app-meta-card-item',
   templateUrl: './meta-card-item.component.html',
   styleUrls: ['./meta-card-item.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule
+  ]
 })
 export class MetaCardItemComponent implements OnInit {
 
   defaultStyle = 'row';
-  styles = {
+  styles: { [key: string]: string } = {
     row: 'meta-card-item-row',
     'row-top': 'meta-card-item-row-top',
     column: 'meta-card-item-column',
@@ -22,12 +27,12 @@ export class MetaCardItemComponent implements OnInit {
   };
   itemStyle = 'meta-card-item-row';
   @ContentChild(MetaCardKeyComponent, { static: true })
-  key: MetaCardKeyComponent;
+  key!: MetaCardKeyComponent;
 
   @ContentChild(MetaCardValueComponent, { static: true })
-  value: MetaCardValueComponent;
+  value!: MetaCardValueComponent;
 
-  @ViewChild('content', { static: true }) content: TemplateRef<any>;
+  @ViewChild('content', { static: true }) content!: TemplateRef<any>;
 
   @Input() customStyle = this.defaultStyle;
 

@@ -1,14 +1,12 @@
-import { Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { ActivatedRoute, RouterModule } from '@angular/router';
+
+import { CustomTooltipDirective, CurrentUserPermissionsService, PageHeaderComponent, IHeaderBreadcrumb, PageSubNavComponent, BooleanIndicatorComponent, LoadingPageComponent, CardNumberMetricComponent, TileGridComponent, TileGroupComponent, TileComponent } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
-
-import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
-import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
-import { AppState } from '../../../../../store/src/app-state';
-import { APIResource } from '../../../../../store/src/types/api.types';
-import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
+import { AppState, APIResource, EndpointModel } from '@stratosui/store';
 import { IOrganization, IOrgQuotaDefinition, ISpace } from '../../../cf-api.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
@@ -24,22 +22,37 @@ export const QUOTA_ORG_GUID = 'org';
   styleUrls: ['../quota-definition-base/quota-definition-base.component.scss', './quota-definition.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
+  ],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    RouterModule,
+    CustomTooltipDirective,
+    PageHeaderComponent,
+    PageSubNavComponent,
+    BooleanIndicatorComponent,
+    LoadingPageComponent,
+    CardNumberMetricComponent,
+    TileGridComponent,
+    TileGroupComponent,
+    TileComponent
   ]
 })
 export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
-  breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
-  quotaDefinition$: Observable<APIResource<IOrgQuotaDefinition>>;
-  org$: Observable<APIResource<IOrganization>>;
-  space$: Observable<APIResource<ISpace>>;
-  cfGuid: string;
-  orgGuid: string;
-  spaceGuid: string;
-  quotaGuid: string;
-  editLink$: Observable<string[]>;
+  declare breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+  declare quotaDefinition$: Observable<APIResource<IOrgQuotaDefinition>>;
+  declare org$: Observable<APIResource<IOrganization>>;
+  declare space$: Observable<APIResource<ISpace>>;
+  declare cfGuid: string;
+  declare orgGuid: string;
+  declare spaceGuid: string;
+  declare quotaGuid: string;
+  editLink$!: Observable<string[]>;
   editParams: object;
-  detailsLoading$: Observable<boolean>;
-  orgSubscriber: Subscription;
-  public canEditQuota$: Observable<boolean>;
+  declare detailsLoading$: Observable<boolean>;
+  declare orgSubscriber: Subscription;
+  public canEditQuota$!: Observable<boolean>;
   public isCf = false;
 
   constructor(

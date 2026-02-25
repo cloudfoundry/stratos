@@ -1,10 +1,13 @@
-import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
-import { AfterContentInit, Component, Input, OnDestroy } from '@angular/core';
-import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { MatChipInputEvent } from '@angular/material/chips';
+import { CommonModule } from '@angular/common';
+import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
+import { AfterContentInit, Component, Input, OnDestroy, signal,
+  ChangeDetectionStrategy} from '@angular/core';
+import { AbstractControl, ValidatorFn, Validators, ReactiveFormsModule, FormsModule, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+
 import { Store } from '@ngrx/store';
 import {
-  BehaviorSubject,
   combineLatest as observableCombineLatest,
   Observable,
   of as observableOf,
@@ -45,24 +48,47 @@ import {
 } from '../../../../store/selectors/create-service-instance.selectors';
 import { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
 import { LongRunningCfOperationsService } from '../../../data-services/long-running-cf-op.service';
-import { SchemaFormConfig } from '../../schema-form/schema-form.component';
+import { SchemaFormComponent, SchemaFormConfig } from '../../schema-form/schema-form.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
 
+interface SelectExistingInstanceForm {
+  serviceInstance: string;
+}
+
+interface CreateNewInstanceForm {
+  name: string;
+  servicePlan: string;
+  spaceGuid: string;
+  params: object;
+  tags: string;
+}
 
 @Component({
   selector: 'app-specify-details-step',
   templateUrl: './specify-details-step.component.html',
   styleUrls: ['./specify-details-step.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    CustomFormFieldComponent,
+    MatLabelComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
+    SchemaFormComponent
+  ]
 })
 export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit {
 
   serviceInstancesInit$: Observable<boolean>;
   hasInstances$: Observable<boolean>;
-  serviceInstanceName: string;
-  serviceInstanceGuid: string;
+  serviceInstanceName!: string;
+  serviceInstanceGuid!: string;
   selectCreateInstance$: Observable<CreateServiceInstanceState>;
   formModes = [
     {
@@ -77,30 +103,39 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   @Input()
   showModeSelection = false;
 
-  @Input() appId: string;
+  @Input() appId!: string;
 
-  formMode: CreateServiceFormMode;
+  formMode!: CreateServiceFormMode;
 
-  selectExistingInstanceForm: UntypedFormGroup;
-  createNewInstanceForm: UntypedFormGroup;
+  selectExistingInstanceForm!: FormGroup<{
+    serviceInstance: FormControl<string>;
+  }>;
+  createNewInstanceForm!: FormGroup<{
+    name: FormControl<string>;
+    servicePlan: FormControl<string>;
+    spaceGuid: FormControl<string>;
+    params: FormControl<object>;
+    tags: FormControl<string[]>;
+  }>;
   serviceInstances$: Observable<APIResource<IServiceInstance>[]>;
   bindableServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
-  cSIHelperService: CreateServiceInstanceHelper;
-  allServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
-  validate: BehaviorSubject<boolean> = new BehaviorSubject(false);
-  allServiceInstanceNames: string[];
+  cSIHelperService!: CreateServiceInstanceHelper;
+  allServiceInstances$!: Observable<APIResource<IServiceInstance>[]>;
+  private _validate = signal<boolean>(false);
+  validate = toObservable(this._validate);
+  allServiceInstanceNames!: string[];
   tagsVisible = true;
   tagsSelectable = true;
   tagsRemovable = true;
   tagsAddOnBlur = true;
-  separatorKeysCodes = [ENTER, COMMA, SPACE];
-  tags = [];
-  spaceScopeSub: Subscription;
+  tags: string[] = [];
+  spaceScopeSub!: Subscription;
   bindExistingInstance = false;
   subscriptions: Subscription[] = [];
-  serviceParamsValid = new BehaviorSubject(false);
-  serviceParams: object = null;
-  schemaFormConfig: SchemaFormConfig;
+  private _serviceParamsValid = signal<boolean>(false);
+  serviceParamsValid = toObservable(this._serviceParamsValid);
+  serviceParams: object = {};
+  schemaFormConfig!: SchemaFormConfig;
 
 
   nameTakenValidator = (): ValidatorFn => {
@@ -152,7 +187,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
         if (!this.appId) {
           return svcs;
         } else {
-          const updated = [];
+          const updated: APIResource<IServiceInstance>[] = [];
           svcs.forEach(svc => {
             const alreadyBound = !!svc.entity.service_bindings.find(binding => binding.entity.app_guid === this.appId);
             if (alreadyBound) {
@@ -206,7 +241,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
           this.serviceInstanceName = state.name;
           this.createNewInstanceForm.updateValueAndValidity();
           if (state.tags) {
-            this.tags = [].concat(state.tags.map(t => ({ label: t })));
+            this.tags = [].concat(state.tags);
           }
         })
       ).subscribe();
@@ -214,16 +249,16 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.subscriptions.push(this.setupFormValidatorData());
   };
 
-  setServiceParams(data) {
+  setServiceParams(data: any) {
     this.serviceParams = data;
   }
 
   setParamsValid(valid: boolean) {
-    this.serviceParamsValid.next(valid);
+    this._serviceParamsValid.set(valid);
   }
 
   resetForms = (mode: CreateServiceFormMode) => {
-    this.validate.next(false);
+    this._validate.set(false);
     this.createNewInstanceForm.reset();
     this.selectExistingInstanceForm.reset();
     if (mode === CreateServiceFormMode.CreateServiceInstance) {
@@ -256,16 +291,19 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   }
 
   private setupForms() {
-    this.createNewInstanceForm = new UntypedFormGroup({
-      name: new UntypedFormControl('', [Validators.required, this.nameTakenValidator(), Validators.maxLength(50)]),
-      tags: new UntypedFormControl(''),
+    this.createNewInstanceForm = new FormGroup({
+      name: new FormControl('', { nonNullable: true, validators: [Validators.required, this.nameTakenValidator(), Validators.maxLength(50)] }),
+      servicePlan: new FormControl('', { nonNullable: true }),
+      spaceGuid: new FormControl('', { nonNullable: true }),
+      params: new FormControl({}, { nonNullable: true }),
+      tags: new FormControl<string[]>([], { nonNullable: true }),
     });
-    this.selectExistingInstanceForm = new UntypedFormGroup({
-      serviceInstances: new UntypedFormControl('', [Validators.required]),
+    this.selectExistingInstanceForm = new FormGroup({
+      serviceInstance: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     });
   }
 
-  setOrg = (guid) => this.store.dispatch(new SetCreateServiceInstanceOrg(guid));
+  setOrg = (guid: string) => this.store.dispatch(new SetCreateServiceInstanceOrg(guid));
 
   ngOnDestroy() {
     this.subscriptions.forEach(s => s.unsubscribe());
@@ -363,22 +401,22 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     };
   };
 
-  private setServiceInstanceGuid = (request: { creating: boolean; error: boolean; response: { result: any[], }, }) =>
-    this.bindExistingInstance ? this.selectExistingInstanceForm.controls.serviceInstances.value : request.response.result[0];
+  private setServiceInstanceGuid = (request: RequestInfoState): string | undefined =>
+    this.bindExistingInstance ? this.selectExistingInstanceForm.controls.serviceInstance.value : request.response?.result?.[0];
 
   private setupValidate() {
     // For a new service instance the step is valid if the form and service params are both valid
     this.subscriptions.push(
       observableCombineLatest([
-        this.serviceParamsValid.asObservable(),
+        this.serviceParamsValid,
         this.createNewInstanceForm.statusChanges
       ]).pipe(
-        map(([serviceParamsValid, b]) => this.validate.next(serviceParamsValid && this.createNewInstanceForm.valid))
+        map(([serviceParamsValid, b]) => this._validate.set(serviceParamsValid && this.createNewInstanceForm.valid))
       ).subscribe()
     );
     // For existing service instance the step is valid if the form is (there's no service params)
     this.subscriptions.push(this.selectExistingInstanceForm.statusChanges.pipe(
-      map(() => this.validate.next(this.selectExistingInstanceForm.valid))
+      map(() => this._validate.set(this.selectExistingInstanceForm.valid))
     ).subscribe());
   }
 
@@ -445,7 +483,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     const { spaceGuid, cfGuid } = createServiceInstance;
     const servicePlanGuid = createServiceInstance.servicePlanGuid;
     const params = this.serviceParams;
-    const tagsStr = this.tags.length > 0 ? this.tags.map(t => t.label) : [];
+    const tagsStr: string[] = this.tags.length > 0 ? this.tags : [];
 
     const newServiceInstanceGuid = this.getNewServiceGuid(name, spaceGuid, servicePlanGuid);
 
@@ -480,24 +518,30 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     );
   }
 
-  addTag(event: MatChipInputEvent): void {
-    const input = event.input;
-    const value = event.value;
-    if ((value || '').trim()) {
-      this.tags.push({ label: value.trim() });
-    }
+  addTagFromInput(event: KeyboardEvent): void {
+    event.preventDefault();
+    const input = event.target as HTMLInputElement;
+    const value = input.value;
 
-    if (input) {
+    if ((value || '').trim()) {
+      this.tags.push(value.trim());
+      this.updateTagsFormControl();
       input.value = '';
     }
   }
 
-  removeTag(tag: any): void {
+  removeTag(tag: string): void {
     const index = this.tags.indexOf(tag);
 
     if (index >= 0) {
       this.tags.splice(index, 1);
+      this.updateTagsFormControl();
     }
+  }
+
+  private updateTagsFormControl(): void {
+    this.createNewInstanceForm.controls.tags.setValue(this.tags);
+    this.createNewInstanceForm.controls.tags.markAsTouched();
   }
 
   checkName = (value: string = null) => {

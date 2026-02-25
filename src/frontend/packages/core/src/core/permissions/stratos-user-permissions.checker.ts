@@ -1,3 +1,4 @@
+import { inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
   selectSessionData,
@@ -77,7 +78,9 @@ export const stratosPermissionConfigs: IPermissionConfigs = {
 };
 
 export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChecker implements ICurrentUserPermissionsChecker {
-  constructor(private store: Store<GeneralEntityAppState>) {
+  private store = inject(Store<GeneralEntityAppState>);
+
+  constructor() {
     super();
   }
 
@@ -165,7 +168,7 @@ export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChe
   }
 
   private groupConfigs(configs: PermissionConfig[]): IConfigGroups {
-    return configs.reduce((grouped, config) => {
+    return configs.reduce((grouped: IConfigGroups, config) => {
       const type = config.type;
       return {
         ...grouped,
@@ -174,7 +177,7 @@ export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChe
           config
         ]
       };
-    }, {});
+    }, {} as IConfigGroups);
   }
 
 }

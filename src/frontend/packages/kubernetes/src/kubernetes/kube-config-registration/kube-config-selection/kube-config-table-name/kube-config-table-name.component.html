@@ -1,9 +1,12 @@
 <div class="name">
-  <mat-form-field class="cell-edit-variable"
-    *ngIf="dataSource.getRowUniqueId(row) === dataSource.getRowUniqueId(dataSource.editRow) else value">
-    <input matInput name="envVarValue" [value]="dataSource.editRow?.name"
-      (input)="dataSource.editRowName = $event.target.value" />
-  </mat-form-field>
-  <ng-template #value><span class="cell-value-variable">{{row.name}}</span></ng-template>
+  @if (dataSource.getRowUniqueId(row) === dataSource.getRowUniqueId(dataSource.editRow)) {
+    <app-form-field class="cell-edit-variable"
+      >
+      <input appInput name="envVarValue" [value]="dataSource.editRow?.name"
+        (input)="dataSource.editRowName = $event.target.value" />
+    </app-form-field>
+  } @else {
+    <span class="cell-value-variable">{{row.name}}</span>
+  }
   <app-table-cell-edit [row]="row" [dataSource]="dataSource" subtle="true"></app-table-cell-edit>
 </div>

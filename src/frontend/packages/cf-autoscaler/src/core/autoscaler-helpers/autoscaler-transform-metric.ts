@@ -1,4 +1,5 @@
-import moment from 'moment-timezone';
+import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 
 import { PaginationResponse } from '../../../../cloud-foundry/src/store/types/cf-api.types';
 import {
@@ -92,9 +93,9 @@ export function insertEmptyMetrics(
 function buildSingleMetricData(timestamp: number, value: number | string, timezone: string): AppAutoscalerMetricDataPoint {
   const name = (() => {
     if (timezone) {
-      return moment(timestamp * 1000).tz(timezone).format(AutoscalerConstants.MomentFormateTimeS);
+      return formatInTimeZone(new Date(timestamp * 1000), timezone, AutoscalerConstants.MomentFormateTimeS);
     } else {
-      return moment(timestamp * 1000).format(AutoscalerConstants.MomentFormateTimeS);
+      return format(new Date(timestamp * 1000), AutoscalerConstants.MomentFormateTimeS);
     }
   })();
   return {
@@ -224,7 +225,7 @@ function getMetricBasicInfo(
   source: AppAutoscalerMetricData[],
   trigger: AppScalingTrigger
 ): AppAutoscalerMetricBasicInfo {
-  const intervalMap = {};
+  const intervalMap: Record<number, number> = {};
   let maxCount = 1;
   let preTimestamp = 0;
   let maxValue = -1;

@@ -70,6 +70,7 @@ export class GetAppServiceBindings extends CFStartAction implements PaginatedAct
     public endpointGuid: string,
     public paginationKey: string = null,
     public includeRelations: string[] = [
+      createEntityRelationKey(serviceBindingEntityType, applicationEntityType),
       createEntityRelationKey(serviceBindingEntityType, serviceInstancesEntityType),
     ],
     public populateMissing = true

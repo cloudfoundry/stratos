@@ -2,25 +2,23 @@ import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { publishReplay, refCount } from 'rxjs/operators';
+import { CurrentUserPermissionsService, ConfirmationDialogService, IListConfig } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import {
-  CurrentUserPermissionsService,
-} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { CFAppState } from '../../../../../cf-app-state';
 import { CloudFoundrySpaceService } from '../../../../../features/cf/services/cloud-foundry-space.service';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfRoutesListConfigBase } from '../cf-routes/cf-routes-list-config-base';
 import { CfSpaceRoutesDataSource } from './cf-space-routes-data-source';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfSpaceRoutesListConfigService extends CfRoutesListConfigBase implements IListConfig<APIResource> {
-  private dataSource: CfSpaceRoutesDataSource;
+  private dataSource!: CfSpaceRoutesDataSource;
 
-  getDataSource: () => CfSpaceRoutesDataSource;
+  getDataSource!: () => CfSpaceRoutesDataSource;
 
   constructor(
     store: Store<CFAppState>,

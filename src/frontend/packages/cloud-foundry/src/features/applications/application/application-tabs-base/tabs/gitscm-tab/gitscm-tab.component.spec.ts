@@ -1,48 +1,86 @@
 import { DatePipe } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection, NO_ERRORS_SCHEMA, importProvidersFrom } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
+import { getGitHubAPIURL, GITHUB_API_URL, GitSCMService } from '@stratosui/git';
 import {
-  GithubCommitAuthorComponent,
-} from '../../../../../../../../git/src/shared/components/github-commit-author/github-commit-author.component';
-import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../../../../git/src/shared/github.helpers';
-import { GitSCMService } from '../../../../../../../../git/src/shared/scm/scm.service';
-import { ApplicationServiceMock } from '../../../../../../../test-framework/application-service-helper';
-import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { ApplicationService } from '../../../../application.service';
+  EntityServiceFactory,
+  EntityMonitorFactory,
+  PaginationMonitorFactory,
+  entityCatalog,
+  TestEntityCatalog,
+  generateStratosEntities,
+  EntityCatalogTestModule,
+  TEST_CATALOGUE_ENTITIES,
+  EntityCatalogHelper,
+  EntityCatalogHelpers
+} from '@stratosui/store';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { generateTestApplicationServiceProvider } from '@test-framework/cf';
+import { TailwindSnackBarService } from '@stratosui/core';
+import { generateCFEntities } from '@stratosui/cloud-foundry';
+import { generateASEntities } from '@stratosui/cf-autoscaler';
+
+import { ApplicationStateService } from '../../../../../../shared/services/application-state.service';
+import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { GitSCMTabComponent } from './gitscm-tab.component';
 
 describe('GitSCMTabComponent', () => {
   let component: GitSCMTabComponent;
   let fixture: ComponentFixture<GitSCMTabComponent>;
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [GitSCMTabComponent, GithubCommitAuthorComponent],
+  const appId = '1';
+  const cfId = '2';
+
+  beforeEach(async () => {
+    // Initialize entity catalog before test
+    const testEntityCatalog = entityCatalog as TestEntityCatalog;
+    testEntityCatalog.clear();
+
+    await TestBed.configureTestingModule({
       imports: [
-        ...generateCfStoreModules(),
-        CoreModule,
-        SharedModule,
-        RouterTestingModule,
-        NoopAnimationsModule,
-        HttpClientModule,
-        HttpClientTestingModule
+        GitSCMTabComponent,
+        {
+          ngModule: EntityCatalogTestModule,
+          providers: [
+            {
+              provide: TEST_CATALOGUE_ENTITIES,
+              useValue: [
+                ...generateCFEntities(),
+                ...generateStratosEntities(),
+                ...generateASEntities(),
+              ]
+            }
+          ]
+        },
       ],
       providers: [
-        { provide: ApplicationService, useClass: ApplicationServiceMock },
+        importProvidersFrom(createBasicStoreModule()),
+        ...STORE_TEST_PROVIDERS,
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideNoopAnimations(),
+        EntityCatalogHelper,
+        EntityServiceFactory,
+        EntityMonitorFactory,
+        PaginationMonitorFactory,
+        generateTestApplicationServiceProvider(cfId, appId),
+        ApplicationEnvVarsHelper,
+        ApplicationStateService,
+        TailwindSnackBarService,
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
         DatePipe,
         GitSCMService,
-      ]
-    })
-      .compileComponents();
-  }));
+      ],
+      schemas: [NO_ERRORS_SCHEMA]
+    }).compileComponents();
 
-  beforeEach(() => {
+    // Initialize EntityCatalogHelper
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+
     fixture = TestBed.createComponent(GitSCMTabComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { APIResource } from '../../types/api.types';
 import { EntityRequestAction, ISuccessRequestAction } from '../../types/request.types';
 import { requestDataReducerFactory } from './request-data-reducer.factory';
@@ -12,17 +13,17 @@ describe('RequestDataReducerFactory', () => {
     const guid = 'id123';
     const successType = 'SUCCESS_YO';
     const domain = {
-      name: guid
+      name: guid,
     };
     const apiResource: APIResource<{ name: string }> = { entity: domain, metadata: { created_at: '', guid, updated_at: '', url: '' } };
     const resEntity = {
-      [guid]: apiResource
+      [guid]: apiResource,
     };
     const action = {
       type: successType,
       response: {
         entities: {
-          [entityKey]: resEntity
+          [entityKey]: resEntity,
         },
         result: [resEntity[guid].entity.name]
       },

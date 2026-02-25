@@ -1,6 +1,4 @@
-import { EntitySchema } from '../../store/src/helpers/entity-schema';
-import { metricEntityType } from '../../store/src/helpers/stratos-entity-factory';
-import { APIResource } from '../../store/src/types/api.types';
+import { EntitySchema, metricEntityType, APIResource } from '@stratosui/store';
 import {
   CFApplicationEntitySchema,
   CFEntitySchema,
@@ -319,7 +317,7 @@ entityCache[featureFlagEntityType] = FeatureFlagSchema;
 const ServiceBrokerSchema = new CFEntitySchema(serviceBrokerEntityType, {}, { idAttribute: getAPIResourceGuid });
 entityCache[serviceBrokerEntityType] = ServiceBrokerSchema;
 
-function createUserOrgSpaceSchema(schemaKey, entity, relationKey): EntitySchema {
+function createUserOrgSpaceSchema(schemaKey: string, entity: any, relationKey: string): EntitySchema {
   return new CFEntitySchema(schemaKey, entity, { idAttribute: getAPIResourceGuid }, relationKey);
 }
 

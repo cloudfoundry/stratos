@@ -1,11 +1,14 @@
-import { CdkRow } from '@angular/cdk/table';
+import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ComponentFactoryResolver,
   ComponentRef,
   Input,
+  OnChanges,
   OnInit,
+  SimpleChanges,
   ViewChild,
   ViewContainerRef,
   ViewEncapsulation,
@@ -16,28 +19,40 @@ import { map } from 'rxjs/operators';
 import { RowState } from '../../data-sources-controllers/list-data-source-types';
 import { ListExpandedComponentType } from '../../list.component.types';
 import { CardCell } from '../../list.types';
+import { ITableColumn } from '../table.types';
+import { TableCellComponent } from '../table-cell/table-cell.component';
 import { TableRowExpandedService } from './table-row-expanded-service';
+import { CustomIconComponent } from '../../../../../shared/components/custom-material/custom-material.component';
 
 @Component({
-  selector: 'app-table-row',
+selector: 'app-table-row',
   templateUrl: './table-row.component.html',
   styleUrls: ['./table-row.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  preserveWhitespaces: false
+  preserveWhitespaces: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    CustomIconComponent,
+    TableCellComponent
+  ]
 })
-export class TableRowComponent<T = any> extends CdkRow implements OnInit {
+export class TableRowComponent<T = any> implements OnInit, OnChanges {
 
   @ViewChild('expandedComponent', { read: ViewContainerRef, static: true })
-  expandedComponent: ViewContainerRef;
+  expandedComponent!: ViewContainerRef;
 
-  @Input() rowState: Observable<RowState>;
-  @Input() expandComponent: ListExpandedComponentType<T>;
-  @Input() row: T;
-  @Input() minRowHeight: string;
-  @Input() inExpandedRow: boolean;
-  @Input() rowId: string;
-  @Input() prominentErrorBar: boolean;
+  @Input() columns!: ITableColumn<T>[];
+  @Input() dataSource: any;
+  @Input() rowState!: Observable<RowState>;
+  @Input() expandComponent!: ListExpandedComponentType<T>;
+  @Input() row!: T;
+  @Input() minRowHeight!: string;
+  @Input() inExpandedRow!: boolean;
+  @Input() rowId!: string;
+  @Input() prominentErrorBar!: boolean;
+  @Input() togglePosition: 'before' | 'after' = 'before';
 
   public inErrorState$: Observable<boolean>;
   public inWarningState$: Observable<boolean>;
@@ -48,15 +63,15 @@ export class TableRowComponent<T = any> extends CdkRow implements OnInit {
   public isDeleting$: Observable<boolean>;
   public isWarningIcon$: Observable<boolean>;
   public defaultMinRowHeight = '50px';
+  public isExpanded = false;
 
   private expandedComponentRef: ComponentRef<any>;
 
   constructor(
     private componentFactoryResolver: ComponentFactoryResolver,
-    public expandedService: TableRowExpandedService
-  ) {
-    super();
-  }
+    public expandedService: TableRowExpandedService,
+    private cdr: ChangeDetectorRef
+  ) { }
 
   ngOnInit() {
     if (this.rowState) {
@@ -90,6 +105,20 @@ export class TableRowComponent<T = any> extends CdkRow implements OnInit {
     this.expandedService.collapse(this.rowId);
   }
 
+  ngOnChanges(changes: SimpleChanges) {
+    // When row, columns, or other relevant inputs change, mark for check
+    // This is necessary in zoneless mode with OnPush change detection
+    if (changes['row'] || changes['columns'] || changes['dataSource']) {
+      // Update expanded component if it exists with new row data
+      if (this.expandedComponentRef && changes['row']) {
+        const instance: CardCell<any> = this.expandedComponentRef.instance;
+        instance.row = this.row;
+      }
+      // Mark for check to ensure template expressions re-evaluate in zoneless mode
+      this.cdr.markForCheck();
+    }
+  }
+
   private getComponent() {
     if (!this.expandComponent) {
       return;
@@ -119,6 +148,18 @@ export class TableRowComponent<T = any> extends CdkRow implements OnInit {
     }
     const instance: CardCell<any> = this.expandedComponentRef.instance;
     instance.row = this.row; // This could be set again when `row` changes above
+  }
+
+  public toggleExpand() {
+    if (!this.expandComponent) {
+      return;
+    }
+    this.isExpanded = !this.isExpanded;
+    if (this.isExpanded) {
+      this.panelOpened();
+    } else {
+      this.expandedService.collapse(this.rowId);
+    }
   }
 
 }

@@ -3,15 +3,13 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { SourceType } from '../../../../../cloud-foundry/src/store/types/deploy-application.types';
-import { PermissionConfig } from '../../../../../core/src/core/permissions/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
-import { GitSCM, GitSCMService } from '../../../../../git/src/public_api';
-import { GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE } from '../../../../../git/src/store/git-entity-factory';
-import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
-import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
+import { PermissionConfig, CurrentUserPermissionsService } from '@stratosui/core';
+import { GitSCM, GitSCMService, GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE } from '@stratosui/git';
+import { getFullEndpointApiUrl, stratosEntityCatalog } from '@stratosui/store';
+
 import { CFFeatureFlagTypes } from '../../../cf-api.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
+import { SourceType } from '../../../store/types/deploy-application.types';
 import { CfPermissionTypes } from '../../../user-permissions/cf-user-permissions-checkers';
 
 export enum DEPLOY_TYPES_IDS {

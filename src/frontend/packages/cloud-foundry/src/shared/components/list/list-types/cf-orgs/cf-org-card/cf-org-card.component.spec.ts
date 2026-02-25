@@ -1,18 +1,36 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { Store } from '@ngrx/store';
-import { testSessionData } from '@stratosui/store/testing';
 
-import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { MetadataCardTestComponents } from '../../../../../../../../core/test-framework/core-test.helper';
-import { VerifiedSession } from '../../../../../../../../store/src/actions/auth.actions';
-import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
-import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
 import {
-  generateCfBaseTestModulesNoShared,
+  ConfirmationDialogService,
+  MetaCardComponent,
+  MetaCardItemComponent,
+  MetaCardKeyComponent,
+  MetaCardTitleComponent,
+  MetaCardValueComponent,
+  MultilineTitleComponent,
+  InfinityPipe,
+  MbToHumanSizePipe
+} from '@stratosui/core';
+import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
+import {
+  VerifiedSession,
+  EntityServiceFactory,
+  EntityMonitorFactory,
+  PaginationMonitorFactory,
+  UserFavoriteManager
+} from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import {
+  testSessionData,
   generateTestCfEndpointServiceProvider,
   generateTestCfUserServiceProvider,
-} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+  generateCfBaseTestModulesNoShared
+} from '@test-framework/cf';
 import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
 import { CfOrgCardComponent } from './cf-org-card.component';
 
@@ -20,28 +38,41 @@ describe('CfOrgCardComponent', () => {
   let component: CfOrgCardComponent;
   let fixture: ComponentFixture<CfOrgCardComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
         CfOrgCardComponent,
-        MetadataCardTestComponents
+        MetaCardComponent,
+        MetaCardItemComponent,
+        MetaCardKeyComponent,
+        MetaCardTitleComponent,
+        MetaCardValueComponent,
+        MultilineTitleComponent,
+        InfinityPipe,
+        MbToHumanSizePipe,
       ],
-      imports: generateCfBaseTestModulesNoShared(),
       providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(generateCfBaseTestModulesNoShared()),
         PaginationMonitorFactory,
         EntityMonitorFactory,
         generateTestCfUserServiceProvider(),
         CfOrgSpaceDataService,
-        generateTestCfEndpointServiceProvider(),
+        ...generateTestCfEndpointServiceProvider(),
         EntityServiceFactory,
-        ConfirmationDialogService
+        ConfirmationDialogService,
+        ...cfCurrentUserPermissionsService,
+        UserFavoriteManager,
       ]
     })
       .compileComponents();
 
-    const store = TestBed.get(Store);
+    const store = TestBed.inject(Store);
     store.dispatch(new VerifiedSession(testSessionData));
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CfOrgCardComponent);
@@ -172,7 +203,7 @@ describe('CfOrgCardComponent', () => {
                 entity: {
                   name: 'cf-dev.io',
                   router_group_guid: null,
-                  router_group_type: null
+                  router_group_type: null,
                 }
               }
             ],
@@ -368,7 +399,7 @@ describe('CfOrgCardComponent', () => {
             guid: 'test',
             cfGuid: 'test'
           },
-          metadata: null
+          metadata: null,
         }],
         quota_definition: {
           entity: {
@@ -381,9 +412,9 @@ describe('CfOrgCardComponent', () => {
             total_service_keys: 1,
             total_reserved_route_ports: 1,
             total_services: -1,
-            total_routes: -1
+            total_routes: -1,
           },
-          metadata: null
+          metadata: null,
         }
       },
       metadata: {

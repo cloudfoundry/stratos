@@ -1,9 +1,9 @@
-@import '~@stratosui/theme/helper';
+@use '~@stratosui/theme/helper';
 
-@import './sass/styles';
+@use './sass/styles';
 
 // Custom Theme
-@import './sass/colors';
+@use './sass/colors';
 
 @function stratos-theme() {
   @return (

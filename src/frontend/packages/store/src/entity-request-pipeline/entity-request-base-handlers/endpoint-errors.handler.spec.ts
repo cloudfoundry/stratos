@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { Action } from '@ngrx/store';
 
 import { SendEventAction } from '../../actions/internal-events.actions';
@@ -10,7 +11,7 @@ import { JetstreamError } from './handle-multi-endpoints.pipe';
 
 
 describe('endpoint-error-handler', () => {
-  it('correct actions are fired', (done) => {
+  it('correct actions are fired', () => {
     const entityType = 'key';
 
     const entity = new StratosBaseCatalogEntity({
@@ -31,42 +32,43 @@ describe('endpoint-error-handler', () => {
       {
         error: {
           status: 'test',
-          statusCode: 200
+          statusCode: 200,
         },
         errorResponse: 'response'
       }
     );
-    const actionDispatcher = () => {
-      let timesCalled = 0;
-      return (action: Action) => {
-        ++timesCalled;
-        if (timesCalled === 1) {
-          const successOrFailure = action as APISuccessOrFailedAction;
-          expect(successOrFailure instanceof APISuccessOrFailedAction).toBe(true);
-          expect(successOrFailure.response).toBe(error.jetstreamErrorResponse.error.status);
-          expect(successOrFailure.apiAction.endpointGuid).toBe(endpointGuid);
-          expect(successOrFailure.apiAction.type).toBe('test');
-          expect(successOrFailure.type).toBe(entity.getRequestAction('failure', requestType).type);
-        }
-        if (timesCalled === 2) {
-          const eventAction = action as SendEventAction;
-          expect(eventAction instanceof SendEventAction).toBe(true);
-          expect(eventAction.eventState.eventCode).toBe(error.errorCode);
-          expect(eventAction.eventState.severity).toBe(InternalEventSeverity.ERROR);
-          expect(eventAction.eventState.message).toBe('test');
-          expect(eventAction.eventState.metadata.url).toBe(error.url);
-          expect(eventAction.eventState.metadata.errorResponse.errorResponse).toEqual(error.jetstreamErrorResponse);
-          done();
-        }
-      };
+    const actions: Action[] = [];
+    const actionDispatcher = (action: Action) => {
+      actions.push(action);
     };
+
     const errors = [error];
-    const errorHandler = endpointErrorsHandlerFactory(actionDispatcher());
+    const errorHandler = endpointErrorsHandlerFactory(actionDispatcher);
     errorHandler(
       { type: 'test', guid: endpointGuid } as EntityRequestAction,
       entity,
       requestType,
-      errors
+      errors,
     );
+
+    // Verify both actions were dispatched
+    expect(actions.length).toBe(2);
+
+    // Check first action
+    const successOrFailure = actions[0] as APISuccessOrFailedAction;
+    expect(successOrFailure instanceof APISuccessOrFailedAction).toBe(true);
+    expect(successOrFailure.response).toBe(error.jetstreamErrorResponse.error.status);
+    expect(successOrFailure.apiAction.endpointGuid).toBe(endpointGuid);
+    expect(successOrFailure.apiAction.type).toBe('test');
+    expect(successOrFailure.type).toBe(entity.getRequestAction('failure', requestType).type);
+
+    // Check second action
+    const eventAction = actions[1] as SendEventAction;
+    expect(eventAction instanceof SendEventAction).toBe(true);
+    expect(eventAction.eventState.eventCode).toBe(error.errorCode);
+    expect(eventAction.eventState.severity).toBe(InternalEventSeverity.ERROR);
+    expect(eventAction.eventState.message).toBe('test');
+    expect(eventAction.eventState.metadata.url).toBe(error.url);
+    expect(eventAction.eventState.metadata.errorResponse.errorResponse).toEqual(error.jetstreamErrorResponse);
   });
 });

@@ -1,23 +1,24 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { UserProfileBannerComponent } from './user-profile-banner.component';
-import { MDAppModule } from '../../../core/md.module';
 import { CoreModule } from '../../../core/core.module';
 
 describe('UserProfileBannerComponent', () => {
   let component: UserProfileBannerComponent;
   let fixture: ComponentFixture<UserProfileBannerComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ UserProfileBannerComponent ],
+      providers: [provideZonelessChangeDetection()],
       imports: [
+        UserProfileBannerComponent,
         CoreModule,
-        MDAppModule
       ]
-    })
-    .compileComponents();
-  }));
+    });
+    TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(UserProfileBannerComponent);

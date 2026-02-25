@@ -1,1 +1,3 @@
-<app-chips [chips]="chipsConfig$ | async"></app-chips>
+@if (chipsConfig$ | async; as chips) {
+  <app-chips [chips]="chips"></app-chips>
+}

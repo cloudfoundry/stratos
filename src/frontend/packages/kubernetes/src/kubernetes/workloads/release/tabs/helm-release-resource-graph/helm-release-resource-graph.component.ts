@@ -1,8 +1,18 @@
-import { Component, ComponentFactoryResolver, OnDestroy, OnInit } from '@angular/core';
-import { Edge } from '@swimlane/ngx-graph';
-import { SidePanelService } from 'frontend/packages/core/src/shared/services/side-panel.service';
-import { BehaviorSubject, combineLatest, Observable, Subject, Subscription } from 'rxjs';
+import { CommonModule } from '@angular/common';
+import {Component, ComponentFactoryResolver, OnDestroy, OnInit, signal, WritableSignal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AppProgressBarComponent } from '../../../../../../../core/src/shared/components/progress-bar/app-progress-bar.component';
+import { CustomIconComponent } from '../../../../../../../core/src/shared/components/custom-material/custom-material.component';
+import { CustomTooltipDirective } from '../../../../../../../core/src/shared/components/custom-tooltip/custom-tooltip.directive';
+import { Edge, NgxGraphModule } from '@swimlane/ngx-graph';
+import { SidePanelService } from '@stratosui/core';
+import { combineLatest, Observable, Subject, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, publishReplay, refCount, startWith } from 'rxjs/operators';
+
+import { PageSubNavComponent } from '../../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
+import { AnalysisReportRunnerComponent } from '../../../../analysis-report-viewer/analysis-report-runner/analysis-report-runner.component';
+import { AnalysisReportSelectorComponent } from '../../../../analysis-report-viewer/analysis-report-selector/analysis-report-selector.component';
+import { WorkloadLiveReloadComponent } from '../../workload-live-reload/workload-live-reload.component';
 
 import {
   KubernetesResourceViewerComponent,
@@ -54,7 +64,20 @@ interface CustomHelmReleaseGraphNodeData extends HelmReleaseGraphNodeData {
 @Component({
   selector: 'app-helm-release-resource-graph',
   templateUrl: './helm-release-resource-graph.component.html',
-  styleUrls: ['./helm-release-resource-graph.component.scss']
+  styleUrls: ['./helm-release-resource-graph.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    AppProgressBarComponent,
+    CustomIconComponent,
+    CustomTooltipDirective,
+    NgxGraphModule,
+    PageSubNavComponent,
+    AnalysisReportRunnerComponent,
+    AnalysisReportSelectorComponent,
+    WorkloadLiveReloadComponent
+  ]
 })
 export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
 
@@ -63,9 +86,11 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
   public nodes: CustomHelmReleaseGraphNode[] = [];
   public links: Edge[] = [];
 
-  update$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  private updateSignal: WritableSignal<boolean> = signal<boolean>(false);
+  update$ = toObservable(this.updateSignal);
 
-  fit$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  private fitSignal: WritableSignal<boolean> = signal<boolean>(false);
+  fit$ = toObservable(this.fitSignal);
 
   public layout = 'dagre';
 
@@ -83,14 +108,19 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
     distinctUntilChanged(),
     publishReplay(1),
     refCount()
-  );
+  );  private componentFactoryResolver = inject(ComponentFactoryResolver);
+  private helper = inject(HelmReleaseHelperService);
+  public analyzerService = inject(KubernetesAnalysisService);
+  private previewPanel = inject(SidePanelService);
 
-  constructor(
-    private componentFactoryResolver: ComponentFactoryResolver,
-    private helper: HelmReleaseHelperService,
-    public analyzerService: KubernetesAnalysisService,
-    private previewPanel: SidePanelService) {
+
+
+  constructor() {
+
+
     this.path = `${this.helper.namespace}/${this.helper.releaseTitle}`;
+
+
   }
 
   ngOnInit() {
@@ -99,7 +129,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
     this.graph = combineLatest(
       this.helper.fetchReleaseGraph(),
       this.analysisReportUpdated$
-    ).subscribe(([g, report]) => {
+    ).subscribe(([g, report]: [any, any]) => {
       const newNodes: CustomHelmReleaseGraphNode[] = [];
       Object.values(g.nodes).forEach((node: HelmReleaseGraphNode) => {
         const colors = this.getColor(node.data.status);
@@ -138,7 +168,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
         });
       });
       this.links = newLinks;
-      this.update$.next(true);
+      this.updateSignal.set(true);
 
       if (!this.didInitialFit) {
         this.didInitialFit = true;
@@ -147,7 +177,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
     });
   }
 
-  private applyAlertToNode(newNode, report) {
+  private applyAlertToNode(newNode: CustomHelmReleaseGraphNode, report: any) {
     if (report && report.alerts) {
       Object.values(report.alerts).forEach((group: ResourceAlert[]) => {
         group.forEach(alert => {
@@ -157,11 +187,11 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
             // namespace is undefined, however the only resources we have should be from the correct context
           ) {
             newNode.data.alerts = newNode.data.alerts || [];
-            newNode.data.alerts.push(alert);
+            (newNode.data.alerts as any).push(alert);
             newNode.data.alertSummary = newNode.data.alertSummary || {};
-            if (alert.level > newNode.data.alertSummary.level || !newNode.data.alertSummary.level) {
-              newNode.data.alertSummary.color = this.alertLevelToColor(alert.level);
-              newNode.data.alertSummary.level = alert.level;
+            if (alert.level > (newNode.data.alertSummary as any).level || !(newNode.data.alertSummary as any).level) {
+              (newNode.data.alertSummary as any).color = this.alertLevelToColor(alert.level);
+              (newNode.data.alertSummary as any).level = alert.level;
             }
           }
         });
@@ -189,7 +219,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
 
   // Open side panel when node is clicked
   public onNodeClick(node: CustomHelmReleaseGraphNode) {
-    this.analysisReportUpdated$.pipe(first()).subscribe(analysis => {
+    this.analysisReportUpdated$.pipe(first()).subscribe((analysis: any) => {
       this.previewPanel.show(
         KubernetesResourceViewerComponent,
         {
@@ -205,7 +235,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
   }
 
   public fitGraph() {
-    this.fit$.next(true);
+    this.fitSignal.set(true);
   }
 
   public toggleLayout() {
@@ -244,19 +274,19 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
 
   private getResource(node: CustomHelmReleaseGraphNode): Observable<HelmReleaseResource> {
     return this.helper.fetchReleaseResources().pipe(
-      filter(r => !!r),
-      map((r: HelmReleaseResources) => Object.values(r.data).find((res) =>
+      filter((r: any) => !!r),
+      map((r: HelmReleaseResources) => Object.values(r.data).find((res: any) =>
         res.metadata.name === node.label && res.kind === node.data.kind
       )),
       first(),
     );
   }
 
-  public analysisChanged(report) {
+  public analysisChanged(report: any) {
     if (report === null) {
       this.analysisReportUpdated.next(null);
     } else {
-      this.analyzerService.getByID(this.helper.endpointGuid, report.id).subscribe(results => {
+      this.analyzerService.getByID(this.helper.endpointGuid, report.id).subscribe((results: any) => {
         this.analysisReportUpdated.next(results);
       });
     }

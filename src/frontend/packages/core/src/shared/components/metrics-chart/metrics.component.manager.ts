@@ -12,7 +12,7 @@ export class MetricsChartManager {
       result => ({
         name: metricsConfig.getSeriesName(result),
         metadata: result.metric,
-        series: result.values.map(val => ({
+        series: result.values.map((val: any) => ({
           name: metricsConfig.mapSeriesItemName ? metricsConfig.mapSeriesItemName(val[0]) : val[0],
           value: metricsConfig.mapSeriesItemValue ? metricsConfig.mapSeriesItemValue(val[1]) : val[1]
         }))

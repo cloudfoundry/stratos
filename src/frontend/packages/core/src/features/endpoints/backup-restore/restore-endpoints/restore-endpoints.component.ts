@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
-import { MatCheckboxChange } from '@angular/material/checkbox';
+import { ChangeDetectionStrategy, Component  } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { MatCheckboxChange } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { Store } from '@ngrx/store';
 import { stratosEntityCatalog, GeneralEntityAppState, httpErrorResponseToSafeString } from '@stratosui/store';
 import { Observable, of, Subject } from 'rxjs';
@@ -11,6 +12,11 @@ import { ConfirmationDialogConfig } from '../../../../shared/components/confirma
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import { StepOnNextFunction, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
 import { RestoreEndpointsService } from '../restore-endpoints.service';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
+import { SteppersComponent } from '../../../../shared/components/stepper/steppers/steppers.component';
+import { StepComponent } from '../../../../shared/components/stepper/step/step.component';
+import { ShowHideButtonComponent } from '../../../../core/show-hide-button/show-hide-button.component';
+import { ProductNameComponent } from '../../../../shared/components/product-name.ccomponent';
 
 @Component({
   selector: 'app-restore-endpoints',
@@ -18,13 +24,24 @@ import { RestoreEndpointsService } from '../restore-endpoints.service';
   styleUrls: ['./restore-endpoints.component.scss'],
   providers: [
     RestoreEndpointsService
-  ]
+  ],
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    ShowHideButtonComponent,
+    ProductNameComponent
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RestoreEndpointsComponent {
 
   // Step 2
-  passwordValid$: Observable<boolean>;
-  passwordForm: UntypedFormGroup;
+  passwordValid$!: Observable<boolean>;
+  passwordForm!: FormGroup;
   show = false;
 
   constructor(
@@ -36,8 +53,8 @@ export class RestoreEndpointsComponent {
   }
 
   setupPasswordStep() {
-    this.passwordForm = new UntypedFormGroup({
-      password: new UntypedFormControl('', [Validators.required, Validators.minLength(6)]),
+    this.passwordForm = new FormGroup({
+      password: new FormControl('', [Validators.required, Validators.minLength(6)]),
     });
     this.passwordValid$ = this.passwordForm.statusChanges.pipe(
       map(() => {
@@ -47,7 +64,7 @@ export class RestoreEndpointsComponent {
     );
   }
 
-  onFileChange(event) {
+  onFileChange(event: Event) {
     const files = getEventFiles(event);
     if (!files.length) {
       return;
@@ -83,7 +100,7 @@ export class RestoreEndpointsComponent {
       });
     };
 
-    const backupFailure = err => {
+    const backupFailure = (err: any) => {
       const errorMessage = httpErrorResponseToSafeString(err);
       result.next({
         success: false,

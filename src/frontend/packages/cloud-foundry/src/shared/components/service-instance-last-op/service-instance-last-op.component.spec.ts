@@ -1,25 +1,22 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import {
-  BooleanIndicatorComponent,
-} from '../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import { BaseTestModulesNoShared } from '../../../../../core/test-framework/core-test.helper';
 import { ServiceInstanceLastOpComponent } from './service-instance-last-op.component';
 
 describe('ServiceInstanceLastOpComponent', () => {
   let component: ServiceInstanceLastOpComponent;
   let fixture: ComponentFixture<ServiceInstanceLastOpComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
+      providers: [provideZonelessChangeDetection()],
+      imports: [
         ServiceInstanceLastOpComponent,
-        BooleanIndicatorComponent,
       ],
-      imports: [...BaseTestModulesNoShared]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServiceInstanceLastOpComponent);

@@ -1,12 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
 
 import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
 import { ConditionType, ConditionTypeLabels, KubernetesNode } from '../../../store/kube.types';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-node-pressure',
   templateUrl: './kubernetes-node-pressure.component.html',
-  styleUrls: ['./kubernetes-node-pressure.component.scss']
+  styleUrls: ['./kubernetes-node-pressure.component.scss'],
+  standalone: true
 })
 export class KubernetesNodePressureComponent extends TableCellCustom<KubernetesNode> implements OnInit {
 

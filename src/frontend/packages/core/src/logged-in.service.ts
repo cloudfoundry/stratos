@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable, NgZone } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { TailwindDialogService } from './shared/services/tailwind-dialog.service';
 import { Store } from '@ngrx/store';
 import { VerifySession, selectDashboardState, DashboardState, AppState, AuthState } from '@stratosui/store';
 import { combineLatest, fromEvent, interval, merge, Subscription } from 'rxjs';
@@ -11,44 +11,51 @@ import { PageVisible } from './core/page-visible';
 import { CurrentUserPermissionsService } from './core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from './core/permissions/stratos-user-permissions.checker';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class LoggedInService {
+  private userInteractionChecker!: Subscription;
+  private lastUserInteraction = Date.now();
+  private sessionChecker!: Subscription;
+
+  // Check the session every 5 seconds (Note: this is vey cheap to do unless the session is about to expire)
+  private readonly checkSessionInterval: number = 5 * 1000;
+
+  // Warn inactive users 2 minutes before logging them out
+  private readonly warnBeforeLogout: number = 2 * 60 * 1000;
+
+  // User considered idle if no interaction for 5 minutes
+  private readonly userIdlePeriod: number = 5 * 60 * 1000;
+
+  // Avoid a race condition where the cookie is deleted if the user presses ok just before expiration
+  private readonly autoLogoutDelta: number = 5 * 1000;
+
+  // When we see the following events, we consider the user as active
+  private readonly userActiveEvents = ['keydown', 'DOMMouseScroll', 'mousewheel', 'mousedown', 'touchstart', 'touchmove', 'scroll', 'wheel'];
+
+  private activityPromptShown = false;
+  private sub!: Subscription;
+  private destroying = false;
+  private initialized = false;
+
   constructor(
     @Inject(DOCUMENT) private document: Document,
     private store: Store<AppState>,
-    private dialog: MatDialog,
+    private dialog: TailwindDialogService,
     private ngZone: NgZone,
     private currentUserPermissionsService: CurrentUserPermissionsService,
   ) { }
 
-  private userInteractionChecker: Subscription;
-
-  private lastUserInteraction = Date.now();
-  private sessionChecker: Subscription;
-
-  // Check the session every 5 seconds (Note: this is vey cheap to do unless the session is about to expire)
-  private checkSessionInterval = 5 * 1000;
-
-  // Warn inactive users 2 minutes before logging them out
-  private warnBeforeLogout = 2 * 60 * 1000;
-
-  // User considered idle if no interaction for 5 minutes
-  private userIdlePeriod = 5 * 60 * 1000;
-
-  // Avoid a race condition where the cookie is deleted if the user presses ok just before expiration
-  private autoLogoutDelta = 5 * 1000;
-  // When we see the following events, we consider the user as active
-  private userActiveEvents = ['keydown', 'DOMMouseScroll', 'mousewheel', 'mousedown', 'touchstart', 'touchmove', 'scroll', 'wheel'];
-
-  private activityPromptShown = false;
-
-  private sub: Subscription;
-
-  private destroying = false;
-
   init() {
+    // Prevent multiple initializations
+    if (this.initialized) {
+      return;
+    }
+    this.initialized = true;
+
     const eventStreams = this.userActiveEvents.map((eventName) => {
-      return fromEvent(document, eventName);
+      return fromEvent(this.document, eventName);
     });
 
     const auth$ = this.store.select(s => s.auth);
@@ -83,12 +90,14 @@ export class LoggedInService {
     }
   }
 
-  // Run outside Angular zone for protractor tests to work
-  // See: https://github.com/angular/protractor/blob/master/docs/timeouts.md#waiting-for-angular
+  // Run outside Angular zone to prevent E2E test timeouts
+  // Polling intervals should not block Angular change detection
   private openSessionCheckerPoll() {
     this.closeSessionCheckerPoll();
+    // Ensure interval configuration is valid
+    const intervalTime = this.checkSessionInterval || 5000;
     this.ngZone.runOutsideAngular(() => {
-      this.sessionChecker = interval(this.checkSessionInterval)
+      this.sessionChecker = interval(intervalTime)
         .pipe(
           withLatestFrom(
             this.store.select(selectDashboardState),
@@ -110,7 +119,7 @@ export class LoggedInService {
   }
 
 
-  private _promptInactiveUser(expiryDate) {
+  private _promptInactiveUser(expiryDate: number) {
     this.activityPromptShown = true;
 
     const dialogRef = this.dialog.open(LogOutDialogComponent, {
@@ -118,7 +127,7 @@ export class LoggedInService {
       disableClose: true
     });
 
-    dialogRef.afterClosed().subscribe((verify = false) => {
+    dialogRef.afterClosed().subscribe((verify: boolean = false) => {
       if (verify) {
         this.store.dispatch(new VerifySession(false, false));
         this.openSessionCheckerPoll();
@@ -129,6 +138,11 @@ export class LoggedInService {
 
   private _checkSession(dashboardState: DashboardState, authState: AuthState) {
     if (this.activityPromptShown || this.destroying) {
+      return;
+    }
+
+    // Guard against undefined authState or sessionData
+    if (!authState || !authState.sessionData || typeof authState.sessionData.sessionExpiresOn !== 'number') {
       return;
     }
 

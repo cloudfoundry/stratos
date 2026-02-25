@@ -1,4 +1,6 @@
 <div class="node-link">
   <a [routerLink]="nodeLink">{{row.metadata.name}}</a>
-  <mat-icon *ngIf="icon" class="{{icon.class}} node-link__help" [matTooltip]="icon.message">{{icon.icon}}</mat-icon>
+  @if (icon) {
+    <span class="material-symbols-outlined {{icon.class}} node-link__help" [matTooltip]="icon.message">{{icon.icon}}</span>
+  }
 </div>

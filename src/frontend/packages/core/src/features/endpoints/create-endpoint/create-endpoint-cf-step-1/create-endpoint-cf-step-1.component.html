@@ -1,57 +1,87 @@
 <form [formGroup]="registerForm" class="stepper-form">
-  <h1 class="create-endpoint__section-title">{{endpoint.definition.label}} Information</h1>
-  <mat-form-field>
-    <input matInput id="name" name="name" formControlName="nameField" placeholder="Name"
-      [appUnique]="registerForm.value.createSystemEndpointField ? (customEndpoints | async)?.names : (existingPersonalEndpoints | async)?.names">
-    <mat-error *ngIf="registerForm.controls.nameField.errors?.required">Name is required</mat-error>
-    <mat-error *ngIf="registerForm.controls.nameField.errors?.appUnique">Name is not unique</mat-error>
-  </mat-form-field>
-  <mat-form-field novalidate>
-    <input matInput id="url" name="url" formControlName="urlField" type="url" required placeholder="Endpoint Address"
-      pattern="{{urlValidation}}" 
-      [appUnique]="registerForm.value.createSystemEndpointField ? (customEndpoints | async)?.urls : (existingPersonalEndpoints | async)?.urls">
-    <mat-error *ngIf="registerForm.controls.urlField.errors?.required">URL is required</mat-error>
-    <mat-error *ngIf="registerForm.controls.urlField.errors?.pattern">Invalid API URL</mat-error>
-    <mat-error *ngIf="registerForm.controls.urlField.errors?.appUnique">URL is not unique</mat-error>
-  </mat-form-field>
-  <mat-checkbox matInput *ngIf="userEndpointsAndIsAdmin | async" name="createSystemEndpoint" 
-    formControlName="createSystemEndpointField" (change)="toggleCreateSystemEndpoint()"
-    [ngClass]="{'hide': fixedUrl, 'show': !fixedUrl}">Create a system endpoint (visible to all users)
-  </mat-checkbox>
-  <mat-checkbox [disabled]="showCACertField" matInput name="skipSSL" formControlName="skipSSLField">Skip SSL validation for the endpoint</mat-checkbox>
-  <mat-checkbox matInput (change)="toggleCACertField()">Use a CA Certificate for the endpoint</mat-checkbox>
+  <div class="create-endpoint__grid">
+    <!-- Left column: Cloud Foundry Information -->
+    <div class="create-endpoint__info-column">
+      <h1 class="create-endpoint__section-title" style="color: var(--content-text);">{{endpoint.definition.label}} Information</h1>
+      <app-form-field>
+        <input appInput id="name" name="name" formControlName="nameField" placeholder="Name"
+          [appUnique]="registerForm.value.createSystemEndpointField ? (customEndpoints | async)?.names : (existingPersonalEndpoints | async)?.names">
+        @if (registerForm.controls.nameField.errors?.required) {
+          <app-error>Name is required</app-error>
+        }
+        @if (registerForm.controls.nameField.errors?.appUnique) {
+          <app-error>Name is not unique</app-error>
+        }
+      </app-form-field>
+      <app-form-field>
+        <input appInput id="url" name="url" formControlName="urlField" type="text" required placeholder="Endpoint Address"
+          [appUnique]="registerForm.value.createSystemEndpointField ? (customEndpoints | async)?.urls : (existingPersonalEndpoints | async)?.urls">
+        @if (registerForm.controls.urlField.errors?.required) {
+          <app-error>URL is required</app-error>
+        }
+        @if (registerForm.controls.urlField.errors?.invalidUrl) {
+          <app-error>Invalid API URL. Enter a valid hostname or URL (e.g., api.example.com or https://api.example.com)</app-error>
+        }
+        @if (registerForm.controls.urlField.errors?.appUnique) {
+          <app-error>URL is not unique</app-error>
+        }
+      </app-form-field>
+      @if (userEndpointsAndIsAdmin | async) {
+        <app-checkbox appInput name="createSystemEndpoint"
+          formControlName="createSystemEndpointField" (change)="toggleCreateSystemEndpoint()"
+          [ngClass]="{'hide': fixedUrl, 'show': !fixedUrl}">Create a system endpoint (visible to all users)
+        </app-checkbox>
+      }
+    </div>
+
+    <!-- Right column: Checkbox options -->
+    <div class="create-endpoint__options-column">
+      <h1 class="create-endpoint__section-title" style="color: var(--content-text);">Options</h1>
+      <app-checkbox appInput id="skipSSL" name="skipSSL" formControlName="skipSSLField">Skip SSL validation for the endpoint</app-checkbox>
+      <app-checkbox appInput id="useCACert" (change)="toggleCACertField()">Use a CA Certificate for the endpoint</app-checkbox>
+      @if (showAdvancedFields) {
+        <app-checkbox appInput id="showAdvanced" (change)="toggleAdvancedOptions()">Show Advanced Options</app-checkbox>
+      }
+      @if (endpointTypeSupportsSSO) {
+        <app-checkbox appInput id="ssoAllowed" name="ssoAllowed" formControlName="ssoAllowedField">Allow SSO login to this endpoint</app-checkbox>
+      }
+    </div>
+  </div>
+
+  <!-- Full-width sections below grid -->
   <div [ngClass]="{'create-endpoint__shown': showCACertField}" class="create-endpoint__advanced" spellcheck=false>
-    <span class="create-endpoint__cacert-title">Specify CA Certificate:</span>
-    <textarea rows="10" class="create-endpoint__cacert" matInput formControlName="caCertField" name="caCert"></textarea>
+    <span class="create-endpoint__cacert-title" style="color: var(--content-text);">Specify CA Certificate:</span>
+    <textarea rows="10" class="create-endpoint__cacert input" appInput formControlName="caCertField" name="caCertField"></textarea>
   </div>
+
   <div [ngClass]="{'hide': !showAdvancedFields, 'show': showAdvancedFields}" class="create-endpoint__section">
-    <mat-checkbox matInput (change)="toggleAdvancedOptions()">Show Advanced Options</mat-checkbox>
     <div [ngClass]="{'create-endpoint__shown': showAdvancedOptions}" class="create-endpoint__advanced">
-      <h1>Advanced Options</h1>
-      <p>Client ID and Client Secret do not normally need to be specified.</p>
-      <p>Note that these are not administrator credentials and only need to be specified if your endpoint uses
-        non-standard configuration.</p>
-      <mat-form-field>
-        <input matInput id="client_id" name="client_id" formControlName="clientIDField" placeholder="Client ID">
-      </mat-form-field>
-      <mat-form-field>
-        <input matInput id="client_secret" name="client_secret" formControlName="clientSecretField"
+      <h1 style="color: var(--content-text);">Advanced Options</h1>
+      <p style="color: var(--content-text);">Client ID and Client Secret do not normally need to be specified.</p>
+      <p style="color: var(--content-text);">Note that these are not administrator credentials and only need to be specified if your endpoint uses
+      non-standard configuration.</p>
+      <app-form-field>
+        <input appInput id="client_id" name="client_id" formControlName="clientIDField" placeholder="Client ID">
+      </app-form-field>
+      <app-form-field>
+        <input appInput id="client_secret" name="client_secret" formControlName="clientSecretField"
           placeholder="Client Secret" [type]="!show ? 'password' : 'text'">
-        <button mat-icon-button matSuffix (click)="show = !show" [attr.aria-label]="'Hide Secret'"
+        <button class="btn btn-icon" type="button" matSuffix (click)="show = !show" [attr.aria-label]="'Hide Secret'"
           [attr.aria-pressed]="!show">
-          <mat-icon>{{!show ? 'visibility_off' : 'visibility'}}</mat-icon>
+          <app-custom-icon>{{!show ? 'visibility_off' : 'visibility'}}</app-custom-icon>
         </button>
-      </mat-form-field>
+      </app-form-field>
     </div>
   </div>
+
   <div [ngClass]="{'hide': !endpointTypeSupportsSSO, 'show': endpointTypeSupportsSSO}" class="create-endpoint__sso">
-    <mat-checkbox matInput name="ssoAllowed" formControlName="ssoAllowedField">Allow SSO login to this endpoint
-    </mat-checkbox>
-    <div *ngIf="!!registerForm.controls.ssoAllowedField.value">
-      <p>
-        Please ensure that you have added the <app-product-name></app-product-name> SSO Callback URL shown below to the client's 'redirect_uri'.
-      </p>
-      <pre>{{clientRedirectURI}}</pre>
-    </div>
+    @if (!!registerForm.controls.ssoAllowedField.value) {
+      <div>
+        <p style="color: var(--content-text);">
+          Please ensure that you have added the <app-product-name></app-product-name> SSO Callback URL shown below to the client's 'redirect_uri'.
+        </p>
+        <pre class="border" style="background-color: var(--code-block-bg); color: var(--code-block-text); border-color: var(--code-block-border);">{{clientRedirectURI}}</pre>
+      </div>
+    }
   </div>
 </form>

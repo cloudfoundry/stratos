@@ -4,10 +4,12 @@
 
 <app-steppers cancel="/applications">
   <!-- Select the cf/org/space -->
-  <app-step *ngIf="!appGuid" [title]="'Cloud Foundry'" [valid]="step1.validate | async" [onNext]="onNext"
-    [blocked]="cfOrgSpaceService.isLoading$ | async">
-    <app-create-application-step1 [isRedeploy]="isRedeploy" #step1></app-create-application-step1>
-  </app-step>
+  @if (!appGuid) {
+    <app-step [title]="'Cloud Foundry'" [valid]="step1.validate | async" [onNext]="onNext"
+      [blocked]="cfOrgSpaceService.isLoading$ | async">
+      <app-create-application-step1 [isRedeploy]="isRedeploy" #step1></app-create-application-step1>
+    </app-step>
+  }
   <!-- Select the configuration for the source previously selected -->
   <app-step [title]="'Source'" [valid]="step2.validate | async" [onNext]="step2.onNext">
     <app-deploy-application-step2 [isRedeploy]="isRedeploy" #step2></app-deploy-application-step2>

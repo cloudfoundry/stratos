@@ -1,5 +1,8 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
+import { EntityServiceFactory } from '@stratosui/store';
 import { BaseTestModules } from '../../../../../../core/test-framework/core-test.helper';
 import { KubernetesNodeCapacityComponent } from './kubernetes-node-capacity.component';
 
@@ -7,13 +10,15 @@ describe('KubernetesNodeCapacityComponent', () => {
   let component: KubernetesNodeCapacityComponent<any>;
   let fixture: ComponentFixture<KubernetesNodeCapacityComponent<any>>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [KubernetesNodeCapacityComponent],
-      imports: BaseTestModules
-    })
-      .compileComponents();
-  }));
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      providers: [EntityServiceFactory, provideZonelessChangeDetection()],
+      imports: [
+        KubernetesNodeCapacityComponent,
+        ...BaseTestModules,
+      ]
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesNodeCapacityComponent);
@@ -31,7 +36,7 @@ describe('KubernetesNodeCapacityComponent', () => {
         capacity: {
           pods: 100,
           memory: '100Ki',
-          cpu: 100
+          cpu: 100,
         }
       },
       spec: {

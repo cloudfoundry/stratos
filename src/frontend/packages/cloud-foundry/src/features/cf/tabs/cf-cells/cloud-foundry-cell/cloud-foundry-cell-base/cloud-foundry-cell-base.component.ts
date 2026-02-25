@@ -1,7 +1,11 @@
-import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
+import { PageHeaderComponent } from '../../../../../../../../core/src/shared/components/page-header/page-header.component';
+import { LoadingPageComponent } from '../../../../../../../../core/src/shared/components/loading-page/loading-page.component';
 import { IPageSideNavTab } from '../../../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
 import { IHeaderBreadcrumb } from '../../../../../../../../core/src/shared/components/page-header/page-header.types';
 import { metricEntityType } from '../../../../../../../../store/src/helpers/stratos-entity-factory';
@@ -17,6 +21,14 @@ import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
   providers: [
     getActiveRouteCfCellProvider,
     CloudFoundryCellService
+  ],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    RouterModule,
+    PageHeaderComponent,
+    LoadingPageComponent
   ]
 })
 export class CloudFoundryCellBaseComponent {
@@ -46,7 +58,7 @@ export class CloudFoundryCellBaseComponent {
   public name$: Observable<string>;
   public waitForEntityId: string;
   public waitForEntitySchema = cfEntityFactory(metricEntityType);
-  public cfCellService: CloudFoundryCellService;
+  public cfCellService!: CloudFoundryCellService;
 
 
   constructor(

@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import { MDAppModule } from '../../../../../../../../core/src/core/md.module';
 import {
@@ -11,20 +13,18 @@ describe('TableCellConfirmRoleAddRemComponent', () => {
   let component: TableCellConfirmRoleAddRemComponent;
   let fixture: ComponentFixture<TableCellConfirmRoleAddRemComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       imports: [
+        BooleanIndicatorComponent,
         MDAppModule,
-      ],
-      declarations: [
         TableCellConfirmRoleAddRemComponent,
-        BooleanIndicatorComponent
-      ]
+      ],
+      
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellConfirmRoleAddRemComponent);
     component = fixture.componentInstance;
     component.row = {

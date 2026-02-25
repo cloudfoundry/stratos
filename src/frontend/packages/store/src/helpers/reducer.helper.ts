@@ -1,9 +1,9 @@
 import { stratosEndpointGuidKey } from '../entity-request-pipeline/pipeline.types';
 
-export const mergeState = (state, newState) => {
+export const mergeState = (state: any, newState: any) => {
   const baseState = { ...state };
 
-  Object.keys(newState).forEach(entityKey => {
+  Object.keys(newState).forEach((entityKey: string) => {
     if (shouldMerge(newState, baseState, entityKey)) {
       baseState[entityKey] = {
         ...baseState[entityKey],
@@ -16,13 +16,13 @@ export const mergeState = (state, newState) => {
   return baseState;
 };
 
-export const deepMergeState = (state, newState) => {
+export const deepMergeState = (state: any, newState: any) => {
   const baseState = { ...state };
-  Object.keys(newState).forEach(entityKey => {
+  Object.keys(newState).forEach((entityKey: string) => {
     if (shouldMerge(newState, baseState, entityKey)) {
       const baseStateEnt = { ...baseState[entityKey] };
       const newStateEnt = newState[entityKey];
-      Object.keys(newStateEnt).forEach(id => {
+      Object.keys(newStateEnt).forEach((id: string) => {
         baseStateEnt[id] = mergeEntity(
           baseStateEnt[id],
           newStateEnt[id]
@@ -39,7 +39,7 @@ export const deepMergeState = (state, newState) => {
   return baseState;
 };
 
-export function mergeEntity(baseEntity, newEntity) {
+export function mergeEntity(baseEntity: any, newEntity: any) {
   if (baseEntity && baseEntity.entity) {
     const merged = {
       entity: merge(baseEntity.entity, newEntity.entity),
@@ -49,8 +49,8 @@ export function mergeEntity(baseEntity, newEntity) {
       // main org and mark it as fetched)
       metadata: baseEntity.metadata ? merge(baseEntity.metadata, newEntity.metadata) : newEntity.metadata
     };
-    if (baseEntity[stratosEndpointGuidKey]) {
-      merged[stratosEndpointGuidKey] = baseEntity[stratosEndpointGuidKey];
+    if ((baseEntity as any)[stratosEndpointGuidKey]) {
+      (merged as any)[stratosEndpointGuidKey] = (baseEntity as any)[stratosEndpointGuidKey];
     }
     return merged;
   } else {
@@ -58,14 +58,14 @@ export function mergeEntity(baseEntity, newEntity) {
   }
 }
 
-function merge(baseObject, newObject) {
+function merge(baseObject: any, newObject: any) {
   return {
     ...baseObject,
     ...newObject
   };
 }
 
-function shouldMerge(newState, baseState, entityKey) {
+function shouldMerge(newState: any, baseState: any, entityKey: string) {
   return typeof newState[entityKey] !== 'string' && baseState[entityKey] && Object.keys(baseState[entityKey]);
 }
 
@@ -74,14 +74,14 @@ export const pick = <O, K extends keyof O>(o: O, keys: string[]): Pick<O, K> => 
   if (!o) {
     return null;
   }
-  keys.forEach(k => {
-    copy[k] = o[k];
+  keys.forEach((k: string) => {
+    copy[k] = (o as any)[k];
   });
   return copy;
 };
 
-export const composeFn = (...fns) =>
-  fns.reverse().reduce((prevFn, nextFn) =>
-    value => nextFn(prevFn(value)),
-    value => value
+export const composeFn = (...fns: any[]) =>
+  fns.reverse().reduce((prevFn: any, nextFn: any) =>
+    (value: any) => nextFn(prevFn(value)),
+    (value: any) => value
   );

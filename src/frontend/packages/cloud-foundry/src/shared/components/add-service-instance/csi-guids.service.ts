@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
 // import { StringifyOptions } from 'querystring';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CsiGuidsService {
 
-  public cfGuid: string;
-  public serviceGuid: string;
+  public cfGuid!: string;
+  public serviceGuid!: string;
   constructor() { }
 
 }

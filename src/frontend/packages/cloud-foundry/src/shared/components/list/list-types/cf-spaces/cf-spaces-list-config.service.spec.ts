@@ -1,29 +1,27 @@
-import { inject, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import {
-  generateCfBaseTestModules,
-  generateTestCfEndpointServiceProvider,
-} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import {
-  CloudFoundryOrganizationServiceMock,
-} from '../../../../../../test-framework/cloud-foundry-organization.service.mock';
+import { generateCfStoreModules, CloudFoundryOrganizationServiceMock } from '@test-framework/cf';
 import { CloudFoundryOrganizationService } from '../../../../../features/cf/services/cloud-foundry-organization.service';
 import { CfSpacesListConfigService } from './cf-spaces-list-config.service';
 
 describe('CfOrgsSpaceListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        ...generateTestCfEndpointServiceProvider(),
-        CfSpacesListConfigService,
-        { provide: CloudFoundryOrganizationService, useClass: CloudFoundryOrganizationServiceMock },
+      imports: [
+        ...generateCfStoreModules(),
       ],
-      imports: generateCfBaseTestModules()
-
+      providers: [
+        { provide: CloudFoundryOrganizationService, useClass: CloudFoundryOrganizationServiceMock },
+        CfSpacesListConfigService,
+        provideZonelessChangeDetection(),
+      ]
     });
   });
 
-  it('should be created', inject([CfSpacesListConfigService], (service: CfSpacesListConfigService) => {
+  it('should be created', () => {
+    const service = TestBed.inject(CfSpacesListConfigService);
     expect(service).toBeTruthy();
-  }));
+  });
 });

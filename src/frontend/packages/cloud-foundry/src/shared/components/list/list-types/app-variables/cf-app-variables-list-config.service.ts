@@ -3,19 +3,19 @@ import { Store } from '@ngrx/store';
 import { of as observableOf, Subject } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import {
-  TableCellEditComponent,
-} from '../../../../../../../core/src/shared/components/list/list-table/table-cell-edit/table-cell-edit.component';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import {
+  ConfirmationDialogConfig,
+  ConfirmationDialogService,
+  IListMultiFilterConfig,
+  IGlobalListAction,
   IListAction,
   IListConfig,
   IMultiListAction,
+  ITableColumn,
   ListViewTypes,
-} from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
+} from '@stratosui/core';
+import { entityCatalog } from '@stratosui/store';
+import { TableCellEditComponent } from '../../../../../../../core/src/shared/components/list/list-table/table-cell-edit/table-cell-edit.component';
 import { UpdateExistingApplication } from '../../../../../actions/application.actions';
 import { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
@@ -26,13 +26,15 @@ import { CfAppVariablesDataSource, ListAppEnvVar } from './cf-app-variables-data
 import { TableCellEditVariableComponent } from './table-cell-edit-variable/table-cell-edit-variable.component';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVar> {
   envVarsDataSource: CfAppVariablesDataSource;
 
   private multiListActionDelete: IMultiListAction<ListAppEnvVar> = {
     action: (items: ListAppEnvVar[]) => {
-      return this.dispatchDeleteAction(Array.from(this.envVarsDataSource.selectedRows.values()));
+      return this.dispatchDeleteAction(Array.from(this.envVarsDataSource.selectedRows().values()));
     },
     icon: 'delete',
     label: 'Delete',
@@ -101,7 +103,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
           this.envVarsDataSource.transformedEntities,
           newValues
         );
-        trigger$.next();
+        trigger$.next(void 0);
       }
     );
     return trigger$.pipe(
@@ -138,12 +140,12 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
     );
   }
 
-  getGlobalActions = () => null;
-  getMultiActions = () => [this.multiListActionDelete];
-  getSingleActions = () => [this.listActionDelete];
-  getColumns = () => this.columns;
-  getDataSource = () => this.envVarsDataSource;
-  getMultiFiltersConfigs = () => [];
+  getGlobalActions = (): IGlobalListAction<ListAppEnvVar>[] => null;
+  getMultiActions = (): IMultiListAction<ListAppEnvVar>[] => [this.multiListActionDelete];
+  getSingleActions = (): IListAction<ListAppEnvVar>[] => [this.listActionDelete];
+  getColumns = (): ITableColumn<ListAppEnvVar>[] => this.columns;
+  getDataSource = (): CfAppVariablesDataSource => this.envVarsDataSource;
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
 
   constructor(
     private store: Store<CFAppState>,

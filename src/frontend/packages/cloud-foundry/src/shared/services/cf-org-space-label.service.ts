@@ -2,11 +2,14 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
-import { endpointEntityType, STRATOS_ENDPOINT_TYPE } from '../../../../store/src/helpers/stratos-entity-factory';
-import { selectEntity } from '../../../../store/src/selectors/api.selectors';
-import { APIResource } from '../../../../store/src/types/api.types';
-import { EndpointModel } from '../../../../store/src/types/endpoint.types';
+import {
+  APIResource,
+  endpointEntityType,
+  EndpointModel,
+  entityCatalog,
+  selectEntity,
+  STRATOS_ENDPOINT_TYPE
+} from '@stratosui/store';
 import { IOrganization, ISpace } from '../../cf-api.types';
 import { CFAppState } from '../../cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../cf-entity-types';
@@ -21,6 +24,7 @@ export class CfOrgSpaceLabelService {
   private space$: Observable<APIResource<ISpace>>;
 
   /**
+   * @param store NgRx Store instance
    * @param cfGuid Only important if using getValue
    * @param orgGuid Only important if using getValue
    * @param spaceGuid Only important if using getValue

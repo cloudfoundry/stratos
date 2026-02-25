@@ -1,10 +1,10 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
-import { ClearPaginationOfEntity, ClearPaginationOfType } from 'frontend/packages/store/src/actions/pagination.actions';
-import { ApiRequestTypes } from 'frontend/packages/store/src/reducers/api-request-reducer/request-helpers';
-import { connectedEndpointsOfTypesSelector } from 'frontend/packages/store/src/selectors/endpoint.selectors';
+import { ClearPaginationOfEntity, ClearPaginationOfType } from '@stratosui/store';
+import { ApiRequestTypes } from '@stratosui/store';
+import { connectedEndpointsOfTypesSelector } from '@stratosui/store';
 import { of } from 'rxjs';
 import { catchError, first, flatMap, map, mergeMap, switchMap } from 'rxjs/operators';
 
@@ -98,11 +98,16 @@ export interface KubeDashboardStatus {
   serviceAccount: any;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class KubernetesEffects {
   proxyAPIVersion = environment.proxyAPIVersion;
 
-  constructor(private http: HttpClient, private actions$: Actions, private store: Store<AppState>) { }
+  private http = inject(HttpClient);
+  private actions$ = inject(Actions);
+  private store = inject(Store<AppState>);
+  private appRef = inject(ApplicationRef);
 
   
   fetchDashboardInfo$ = createEffect(() => this.actions$.pipe(
@@ -129,18 +134,22 @@ export class KubernetesEffects {
           };
           result.entities[dashboardEntityConfig.entityKey][action.guid] = status;
           result.result.push(action.guid);
+          this.appRef.tick();
           return [
             new WrapperRequestActionSuccess(result, action)
           ];
-        }), catchError(error => [
-          new WrapperRequestActionFailed(error.message, action, 'fetch', {
-            endpointIds: [action.kubeGuid],
-            url: error.url || url,
-            eventCode: error.status ? error.status + '' : '500',
-            message: 'Kubernetes Dashboard request error',
-            error
-          })
-        ]));
+        }), catchError(error => {
+          this.appRef.tick();
+          return [
+            new WrapperRequestActionFailed(error.message, action, 'fetch', {
+              endpointIds: [action.kubeGuid],
+              url: error.url || url,
+              eventCode: error.status ? error.status + '' : '500',
+              message: 'Kubernetes Dashboard request error',
+              error
+            })
+          ];
+        }));
     })
   ));
 
@@ -357,9 +366,9 @@ export class KubernetesEffects {
       of([action.kubeGuid]) :
       this.store.select(connectedEndpointsOfTypesSelector(KUBERNETES_ENDPOINT_TYPE)).pipe(
         first(),
-        map(endpoints => Object.values(endpoints).map(endpoint => endpoint.guid))
+        map(endpoints => Object.values(endpoints).map((endpoint: any) => endpoint.guid))
       );
-    let pKubeIds: string[];
+    let pKubeIds: string[] = [];
 
     const entityKey = entityCatalog.getEntityKey(action);
     return getKubeIds.pipe(
@@ -368,7 +377,7 @@ export class KubernetesEffects {
         const headers = new HttpHeaders({ 'x-cap-cnsi-list': pKubeIds });
         const requestArgs = {
           headers,
-          params: null
+          params: null as any
         };
         const paginationAction = action as KubePaginationAction;
         if (paginationAction.initialParams) {
@@ -385,20 +394,22 @@ export class KubernetesEffects {
         } as NormalizedResponse;
 
         const items: Array<T> = Object.entries(allRes).reduce((combinedRes, [kubeId, res]) => {
-          if (!res.items) {
+          const resObj = res as any;
+          if (!resObj.items) {
             // The request to this endpoint has failed. Note - throwing this hides any other failures,
             // however we follow the same approach elsewhere
             throw res;
           }
-          res.items.forEach(item => {
+          resObj.items.forEach((item: any) => {
             item.metadata.kubeId = kubeId;
             combinedRes.push(item);
           });
           return combinedRes;
-        }, []);
+        }, [] as Array<T>);
         const processesData = items
           .reduce((res, data) => {
-            const id = action.entity[0].getId(data);
+            const entityArray = Array.isArray(action.entity) ? action.entity : [action.entity];
+            const id = entityArray[0].getId(data);
             const updatedData = action.entityType === kubernetesPodsEntityType ?
               KubernetesPodExpandedStatusHelper.updatePodWithExpandedStatus(data as unknown as KubernetesPod) :
               data;
@@ -421,11 +432,13 @@ export class KubernetesEffects {
         //   }
         // });
 
+        this.appRef.tick();
         return [
           new WrapperRequestActionSuccess(processesData, action)
         ];
       }),
       catchError(error => {
+        this.appRef.tick();
         const { status, message } = this.createKubeError(error);
         return [
           new WrapperRequestActionFailed(message, action, 'fetch', {
@@ -474,9 +487,11 @@ export class KubernetesEffects {
           if (requestType === 'create') {
             actions.push(new ClearPaginationOfType(action));
           }
+          this.appRef.tick();
           return actions;
         }),
         catchError(error => {
+          this.appRef.tick();
           const { status, message } = this.createKubeError(error);
           return [
             new WrapperRequestActionFailed(message, action, requestType, {
@@ -518,9 +533,11 @@ export class KubernetesEffects {
           ];
           // actions.push(new ClearPaginationOfType(action));
           actions.push(new ClearPaginationOfEntity(action, action.guid));
+          this.appRef.tick();
           return actions;
         }),
         catchError(error => {
+          this.appRef.tick();
           const { status, message } = this.createKubeError(error);
           return [
             new WrapperRequestActionFailed(message, action, 'delete', {

@@ -1,12 +1,13 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
+import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
+import { CommonModule } from '@angular/common';
 
-import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
-import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
+import { ApplicationService } from '@stratosui/cloud-foundry';
+import { safeUnsubscribe, TileGridComponent, TileGroupComponent, TileComponent } from '@stratosui/core';
 import {
   AutoscalerConstants,
   getAdjustmentType,
@@ -23,12 +24,32 @@ import { AppAutoscalerInvalidPolicyError, AppAutoscalerPolicyLocal } from '../..
 import { EditAutoscalerPolicyDirective } from '../edit-autoscaler-policy-base-step';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 
+interface EditTriggerForm {
+  metric_type: FormControl<string>;
+  operator: FormControl<string>;
+  threshold: FormControl<number>;
+  unit: FormControl<string>;
+  adjustment: FormControl<number>;
+  breach_duration_secs: FormControl<number>;
+  cool_down_secs: FormControl<number>;
+  adjustment_type: FormControl<string>;
+}
+
 @Component({
   selector: 'app-edit-autoscaler-policy-step2',
   templateUrl: './edit-autoscaler-policy-step2.component.html',
   styleUrls: ['./edit-autoscaler-policy-step2.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
-    { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
+    { provide: TailwindErrorStateMatcher, useClass: TailwindShowOnDirtyErrorStateMatcher }
+  ],
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    TileGridComponent,
+    TileGroupComponent,
+    TileComponent
   ]
 })
 export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDirective implements OnInit, OnDestroy {
@@ -39,10 +60,10 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   private metricUnitSubject = new BehaviorSubject(this.metricTypes[0]);
   metricUnit$: Observable<string>;
   operatorTypes = AutoscalerConstants.UpperOperators.concat(AutoscalerConstants.LowerOperators);
-  editTriggerForm: UntypedFormGroup;
+  editTriggerForm: FormGroup<EditTriggerForm>;
   // appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
 
-  public currentPolicy: AppAutoscalerPolicyLocal;
+  public declare currentPolicy: AppAutoscalerPolicyLocal;
   public testing = false;
   private editIndex = -1;
   private editMetricType = '';
@@ -52,33 +73,37 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
 
   constructor(
     public applicationService: ApplicationService,
-    private fb: UntypedFormBuilder,
+    private fb: FormBuilder,
     service: EditAutoscalerPolicyService,
-    route: ActivatedRoute
+    route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {
     super(service, route);
-    this.editTriggerForm = this.fb.group({
-      metric_type: [0, [Validators.required, this.validateTriggerMetricType()]],
-      operator: [0, this.validateTriggerOperator()],
-      threshold: [0, [Validators.required, Validators.min(1), this.validateTriggerThreshold()]],
-      unit: [0],
-      adjustment: [0, [Validators.required, Validators.min(1), this.validateTriggerAdjustment()]],
-      breach_duration_secs: [0, [
+    this.editTriggerForm = this.fb.group<EditTriggerForm>({
+      metric_type: this.fb.control('', { validators: [Validators.required, this.validateTriggerMetricType()], nonNullable: true }),
+      operator: this.fb.control('', { validators: [this.validateTriggerOperator()], nonNullable: true }),
+      threshold: this.fb.control(0, { validators: [Validators.required, Validators.min(1), this.validateTriggerThreshold()], nonNullable: true }),
+      unit: this.fb.control('', { nonNullable: true }),
+      adjustment: this.fb.control(0, { validators: [Validators.required, Validators.min(1), this.validateTriggerAdjustment()], nonNullable: true }),
+      breach_duration_secs: this.fb.control(0, { validators: [
         Validators.min(AutoscalerConstants.PolicyDefaultSetting.breach_duration_secs_min),
         Validators.max(AutoscalerConstants.PolicyDefaultSetting.breach_duration_secs_max)
-      ]],
-      cool_down_secs: [0, [
+      ], nonNullable: true }),
+      cool_down_secs: this.fb.control(0, { validators: [
         Validators.min(AutoscalerConstants.PolicyDefaultSetting.cool_down_secs_min),
         Validators.max(AutoscalerConstants.PolicyDefaultSetting.cool_down_secs_max)
-      ]],
-      adjustment_type: [0, this.validateTriggerAdjustmentType()]
+      ], nonNullable: true }),
+      adjustment_type: this.fb.control('', { validators: [this.validateTriggerAdjustmentType()], nonNullable: true })
     });
 
     this.metricUnit$ = this.metricUnitSubject.asObservable();
 
     this.subs.push(this.editTriggerForm.get('metric_type').valueChanges.pipe(
-      map(value => this.getMetricUnit(value)),
-    ).subscribe(unit => this.metricUnitSubject.next(unit)));
+      map((value: string) => this.getMetricUnit(value)),
+    ).subscribe((unit: string) => {
+      this.metricUnitSubject.next(unit);
+      this.cdr.markForCheck();
+    }));
 
     this.filteredMetricTypes$ = this.editTriggerForm.controls.metric_type.valueChanges.pipe(
       startWith(''),
@@ -110,31 +135,32 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
       threshold: this.currentPolicy.scaling_rules_form[index].threshold,
       unit: this.currentPolicy.scaling_rules_form[index].unit || '',
       adjustment: Math.abs(Number(this.currentPolicy.scaling_rules_form[index].adjustment)),
-      breach_duration_secs: this.currentPolicy.scaling_rules_form[index].breach_duration_secs,
-      cool_down_secs: this.currentPolicy.scaling_rules_form[index].cool_down_secs,
+      breach_duration_secs: this.currentPolicy.scaling_rules_form[index].breach_duration_secs ?? 0,
+      cool_down_secs: this.currentPolicy.scaling_rules_form[index].cool_down_secs ?? 0,
       adjustment_type: this.editAdjustmentType
     });
     this.metricUnitSubject.next(this.getMetricUnit(this.editMetricType));
   }
 
   finishTrigger() {
-    const adjustmentP = this.editTriggerForm.get('adjustment_type').value === 'value' ? '' : '%';
-    const adjustmentI = this.editTriggerForm.get('adjustment').value;
+    const adjustmentP = this.editTriggerForm.get('adjustment_type')?.value === 'value' ? '' : '%';
+    const adjustmentI = this.editTriggerForm.get('adjustment')?.value ?? 0;
     const adjustmentM = this.editScaleType === 'upper' ? `+${adjustmentI}${adjustmentP}` : `-${adjustmentI}${adjustmentP}`;
-    this.currentPolicy.scaling_rules_form[this.editIndex].metric_type = this.editTriggerForm.get('metric_type').value;
-    this.currentPolicy.scaling_rules_form[this.editIndex].operator = this.editTriggerForm.get('operator').value;
-    this.currentPolicy.scaling_rules_form[this.editIndex].threshold = this.editTriggerForm.get('threshold').value;
-    this.currentPolicy.scaling_rules_form[this.editIndex].unit = this.editTriggerForm.get('unit').value;
+    this.currentPolicy.scaling_rules_form[this.editIndex].metric_type = this.editTriggerForm.get('metric_type')?.value ?? '';
+    this.currentPolicy.scaling_rules_form[this.editIndex].operator = this.editTriggerForm.get('operator')?.value ?? '';
+    this.currentPolicy.scaling_rules_form[this.editIndex].threshold = this.editTriggerForm.get('threshold')?.value ?? 0;
+    this.currentPolicy.scaling_rules_form[this.editIndex].unit = this.editTriggerForm.get('unit')?.value ?? '';
     this.currentPolicy.scaling_rules_form[this.editIndex].adjustment = adjustmentM;
-    if (this.editTriggerForm.get('breach_duration_secs').value) {
-      this.currentPolicy.scaling_rules_form[this.editIndex].breach_duration_secs =
-        this.editTriggerForm.get('breach_duration_secs').value;
+    const breachDuration = this.editTriggerForm.get('breach_duration_secs')?.value ?? 0;
+    if (breachDuration) {
+      this.currentPolicy.scaling_rules_form[this.editIndex].breach_duration_secs = breachDuration;
     } else {
       this.currentPolicy.scaling_rules_form[this.editIndex].breach_duration_secs =
         AutoscalerConstants.PolicyDefaultSetting.breach_duration_secs_default;
     }
-    if (this.editTriggerForm.get('cool_down_secs').value) {
-      this.currentPolicy.scaling_rules_form[this.editIndex].cool_down_secs = this.editTriggerForm.get('cool_down_secs').value;
+    const coolDown = this.editTriggerForm.get('cool_down_secs')?.value ?? 0;
+    if (coolDown) {
+      this.currentPolicy.scaling_rules_form[this.editIndex].cool_down_secs = coolDown;
     } else {
       this.currentPolicy.scaling_rules_form[this.editIndex].cool_down_secs =
         AutoscalerConstants.PolicyDefaultSetting.cool_down_secs_default;

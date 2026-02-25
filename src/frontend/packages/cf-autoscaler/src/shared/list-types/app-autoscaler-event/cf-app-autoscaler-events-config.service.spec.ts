@@ -1,20 +1,17 @@
-import { CommonModule } from '@angular/common';
-import { HttpBackend, HttpClient, HttpClientModule } from '@angular/common/http';
+import { DatePipe } from '@angular/common';
+import { HttpBackend, HttpClient, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController } from '@angular/common/http/testing';
 import { inject, TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
-import { createEmptyStoreModule } from '@stratosui/store/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { provideRouter } from '@angular/router';
+import { createEmptyStoreModule, STORE_TEST_PROVIDERS } from "@stratosui/store/testing";
 
-import { ApplicationsModule } from '../../../../../cloud-foundry/src/features/applications/applications.module';
 import {
   generateTestApplicationServiceProvider,
-} from '../../../../../cloud-foundry/test-framework/application-service-helper';
-import { CoreModule } from '../../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../../core/src/shared/shared.module';
-import { AppTestModule } from '../../../../../core/test-framework/core-test.helper';
-import { EntityCatalogHelper } from '../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
+} from '@test-framework/cf';
+import { AppTestModule } from '@test-framework';
+import { EntityCatalogHelper } from '@stratosui/store';
 import { CfAutoscalerTestingModule } from '../../../cf-autoscaler-testing.module';
 import { CfAppAutoscalerEventsConfigService } from './cf-app-autoscaler-events-config.service';
 
@@ -26,24 +23,22 @@ describe('CfAppAutoscalerEventsConfigService', () => {
 
     TestBed.configureTestingModule({
       providers: [
+        ...STORE_TEST_PROVIDERS,
         { provide: HttpBackend, useClass: HttpTestingController },
         CfAppAutoscalerEventsConfigService,
-        EntityServiceFactory,
-        EntityMonitorFactory,
         EntityCatalogHelper,
         generateTestApplicationServiceProvider(appGuid, cfGuid),
         HttpClient,
+        DatePipe,
+
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
       ],
       imports: [
-        HttpClientModule,
         CfAutoscalerTestingModule,
-        CommonModule,
-        CoreModule,
-        SharedModule,
-        ApplicationsModule,
         createEmptyStoreModule(),
-        RouterTestingModule,
-        AppTestModule
+        AppTestModule,
       ]
     });
   });

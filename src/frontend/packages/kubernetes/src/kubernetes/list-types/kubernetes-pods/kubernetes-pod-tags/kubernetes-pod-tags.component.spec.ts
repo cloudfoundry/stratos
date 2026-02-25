@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
 import { KubernetesStatus } from '../../../store/kube.types';
@@ -8,13 +10,14 @@ describe('KubernetesPodTagsComponent', () => {
   let component: KubernetesPodTagsComponent<any>;
   let fixture: ComponentFixture<KubernetesPodTagsComponent<any>>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [KubernetesPodTagsComponent],
-      imports: KubernetesBaseTestModules
-    })
-      .compileComponents();
-  }));
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
+      imports: [
+        KubernetesPodTagsComponent,
+        ...KubernetesBaseTestModules,
+      ]}).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesPodTagsComponent);
@@ -22,7 +25,7 @@ describe('KubernetesPodTagsComponent', () => {
     component.row = {
       spec: {},
       status: {
-        phase: KubernetesStatus.RUNNING
+        phase: KubernetesStatus.RUNNING,
       },
       metadata: {
         namespace: 'test',

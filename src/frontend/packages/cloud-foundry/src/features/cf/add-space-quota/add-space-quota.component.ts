@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 
+import { PageHeaderComponent, StepComponent, SteppersComponent } from '@stratosui/core';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
+import { CreateSpaceQuotaStepComponent } from './create-space-quota-step/create-space-quota-step.component';
 
 @Component({
   selector: 'app-add-space-quota',
@@ -9,6 +11,14 @@ import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
   styleUrls: ['./add-space-quota.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
+  ],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    CreateSpaceQuotaStepComponent
   ]
 })
 export class AddSpaceQuotaComponent {

@@ -1,32 +1,41 @@
-import { HttpClient, HttpHandler } from '@angular/common/http';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { generateCfBaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
+
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { UserInviteService } from '../../user-invites/user-invite.service';
-import { CloudFoundryUsersComponent } from './cloud-foundry-users.component';
+import { CloudFoundryUsersComponent } from "./cloud-foundry-users.component";
 
 describe('CloudFoundryUsersComponent', () => {
   let component: CloudFoundryUsersComponent;
   let fixture: ComponentFixture<CloudFoundryUsersComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [CloudFoundryUsersComponent],
-      imports: generateCfBaseTestModules(),
+      imports: [
+        CloudFoundryUsersComponent,
+      ],
       providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(generateCfBaseTestModulesNoShared()),
         ActiveRouteCfOrgSpace,
         UserInviteService,
-        HttpClient,
-        HttpHandler,
         CloudFoundryEndpointService,
-        CfUserService
+        CfUserService,
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryUsersComponent);

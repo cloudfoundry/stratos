@@ -1,23 +1,29 @@
 <div>
-  <app-panel *ngIf="!chart && !initing" class="app-panel--container">
-    <h2>Sorry, we couldn't find the chart</h2>
-  </app-panel>
-  <app-panel *ngIf="chart && !currentVersion && !initing" class="app-panel--container">
-    <h2>Sorry, we couldn't find the version information for this chart</h2>
-  </app-panel>
+  @if (!chart && !initing) {
+    <app-panel class="app-panel--container">
+      <h2>Sorry, we couldn't find the chart</h2>
+    </app-panel>
+  }
+  @if (chart && !currentVersion && !initing) {
+    <app-panel class="app-panel--container">
+      <h2>Sorry, we couldn't find the version information for this chart</h2>
+    </app-panel>
+  }
   <app-loader [loading]="loading">
-    <div class="chart-details__wrapper" *ngIf="chart && currentVersion">
-      <app-entity-summary-title class="summary-title" [title]="chart.attributes.name" [subTitle]="chartSubTitle"
-        [subText]="chart.attributes.description" [imagePath]="iconUrl">
-        <div class="chart-details__content">
-          <article class="chart-details__content__docs">
-            <app-chart-details-readme [currentVersion]="currentVersion"></app-chart-details-readme>
-          </article>
-        </div>
-      </app-entity-summary-title>
-      <aside class="chart-details__content__info">
-        <app-chart-details-info [chart]="chart" [currentVersion]="currentVersion"></app-chart-details-info>
-      </aside>
-    </div>
+    @if (chart && currentVersion) {
+      <div class="chart-details__wrapper">
+        <app-entity-summary-title class="summary-title" [title]="chart.attributes.name" [subTitle]="chartSubTitle"
+          [subText]="chart.attributes.description" [imagePath]="iconUrl">
+          <div class="chart-details__content">
+            <article class="chart-details__content__docs">
+              <app-chart-details-readme [currentVersion]="currentVersion"></app-chart-details-readme>
+            </article>
+          </div>
+        </app-entity-summary-title>
+        <aside class="chart-details__content__info">
+          <app-chart-details-info [chart]="chart" [currentVersion]="currentVersion"></app-chart-details-info>
+        </aside>
+      </div>
+    }
   </app-loader>
 </div>

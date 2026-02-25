@@ -1,7 +1,9 @@
-import { Component, ComponentFactoryResolver, Injector, OnDestroy } from '@angular/core';
+import {Component, ComponentFactoryResolver, Injector, OnDestroy, signal, WritableSignal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+
 import { UntypedFormBuilder } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
+import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, pairwise, startWith, withLatestFrom } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
@@ -18,6 +20,7 @@ import {
   ITableListDataSource,
   RowState,
 } from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
+import { TableComponent } from '../../../../../core/src/shared/components/list/list-table/table.component';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
 import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { AppState } from '../../../../../store/src/public-api';
@@ -33,18 +36,52 @@ import {
 const REGISTER_ACTION = 'Register endpoint';
 const CONNECT_ACTION = 'Connect endpoint';
 
+/**
+ * Signal wrapper utility for BehaviorSubject compatibility
+ * Provides dual API: Signal methods + BehaviorSubject compatibility (.next(), .asObservable())
+ * Enables zero-breaking-change migration from BehaviorSubject to Signal
+ */
+function createSignalWrapper<T>(initialValue: T) {
+  const _signal = signal<T>(initialValue);
+  const wrapper = Object.assign(
+    // Make it callable like a signal
+    () => _signal(),
+    {
+      // WritableSignal methods
+      set: (value: T) => _signal.set(value),
+      update: (fn: (value: T) => T) => _signal.update(fn),
+      asReadonly: () => _signal.asReadonly(),
+      // BehaviorSubject compatibility methods
+      next: (value: T) => _signal.set(value),
+      getValue: () => _signal(),
+      asObservable: () => toObservable(_signal),
+    }
+  );
+  return wrapper as WritableSignal<T> & {
+    next: (value: T) => void;
+    getValue: () => T;
+    asObservable: () => Observable<T>;
+  };
+}
+
 @Component({
-  selector: 'app-kube-config-import',
+selector: 'app-kube-config-import',
   templateUrl: './kube-config-import.component.html',
-  styleUrls: ['./kube-config-import.component.scss']
+  styleUrls: ['./kube-config-import.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    TableComponent
+]
 })
 export class KubeConfigImportComponent implements OnDestroy {
 
-  done = new BehaviorSubject<boolean>(false);
+  // Top-level signals - use wrapper for BehaviorSubject compatibility
+  done = createSignalWrapper<boolean>(false);
   done$ = this.done.asObservable();
-  busy = new BehaviorSubject<boolean>(false);
+  busy = createSignalWrapper<boolean>(false);
   busy$ = this.busy.asObservable();
-  data = new BehaviorSubject<KubeConfigImportAction[]>([]);
+  data = createSignalWrapper<KubeConfigImportAction[]>([]);
   data$ = this.data.asObservable();
 
   public dataSource: ITableListDataSource<KubeConfigImportAction> = {
@@ -82,19 +119,15 @@ export class KubeConfigImportComponent implements OnDestroy {
   ];
 
   subs: Subscription[] = [];
-  applyStarted: boolean;
+  applyStarted!: boolean;
   private iteration = 0;
 
   private connectService: ConnectEndpointService;
-
-  constructor(
-    public store: Store<AppState>,
-    public resolver: ComponentFactoryResolver,
-    private injector: Injector,
-    private fb: UntypedFormBuilder,
-    private endpointsService: EndpointsService,
-  ) {
-  }
+  public store = inject(Store<AppState>);
+  public resolver = inject(ComponentFactoryResolver);
+  private injector = inject(Injector);
+  private fb = inject(UntypedFormBuilder);
+  private endpointsService = inject(EndpointsService);
 
   // Process the next action in the list
   private processAction(actions: KubeConfigImportAction[]) {
@@ -125,12 +158,12 @@ export class KubeConfigImportComponent implements OnDestroy {
       reg.cluster._subType
     );
     const mainObs$ = this.getUpdatingState(obs$).pipe(
-      startWith({ busy: true, error: false, completed: false })
+      startWith({ busy: true, error: false, completed: false, message: '' })
     );
 
-    this.subs.push(mainObs$.subscribe(reg.actionState));
+    this.subs.push(mainObs$.subscribe(value => reg.actionState.next(value)));
 
-    const sub = reg.actionState.subscribe(progress => {
+    const sub = reg.actionState.asObservable().subscribe((progress: IActionMonitorComponentState) => {
       // Not sure what the status is used for?
       reg.status = progress;
       if (progress.error && progress.message) {
@@ -170,7 +203,10 @@ export class KubeConfigImportComponent implements OnDestroy {
       // Echo obs$ to the behaviour subject
       this.subs.push(obs$.subscribe(connect.actionState));
 
-      this.subs.push(connect.actionState.pipe(filter(status => status.completed), first()).subscribe(status => {
+      this.subs.push(connect.actionState.asObservable().pipe(
+        filter((status: IActionMonitorComponentState) => status.completed),
+        first()
+      ).subscribe((status: IActionMonitorComponentState) => {
         if (status.error) {
           connect.state.next({ message: status.message, error: true });
         }
@@ -247,8 +283,9 @@ export class KubeConfigImportComponent implements OnDestroy {
           action: REGISTER_ACTION,
           description: `Register "${item.name}" with the URL "${item.cluster.server}"`,
           cluster: item,
-          state: new BehaviorSubject<RowState>({}),
-          actionState: new BehaviorSubject<any>({}),
+          // Use signal wrapper for nested dynamic state - maintains .next() and .asObservable() API
+          state: createSignalWrapper<RowState>({}),
+          actionState: createSignalWrapper<any>({}),
         };
         // Only include if the endpoint does not already exist
         if (!item._guid) {
@@ -264,9 +301,10 @@ export class KubeConfigImportComponent implements OnDestroy {
             description: `Connect "${item.name}" with the user "${user.name}"`,
             cluster: item,
             user,
-            state: new BehaviorSubject<RowState>({}),
+            // Use signal wrapper for nested dynamic state - maintains .next() and .asObservable() API
+            state: createSignalWrapper<RowState>({}),
             depends: register,
-            actionState: new BehaviorSubject<any>({}),
+            actionState: createSignalWrapper<any>({}),
           });
         }
       }

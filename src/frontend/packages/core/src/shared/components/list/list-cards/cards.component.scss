@@ -1,11 +1,74 @@
 .cards {
-  display: flex;
-  flex-flow: wrap;
-  justify-content: space-between;
-  .mat-card {
+  display: grid;
+  gap: 1.5rem;
+  padding: 1rem;
+  overflow: visible;
+  max-height: inherit;
+  width: 100%;
+
+  // Modern responsive grid - mobile-first approach
+  grid-template-columns: 1fr;
+
+  &__columns-1 {
+    grid-template-columns: 1fr;
+  }
+
+  &__columns-2 {
+    // Mobile: 1 column, Tablet+: auto-fit with min 350px
+    @media (min-width: 640px) {
+      grid-template-columns: repeat(auto-fit, minmax(min(350px, 100%), 1fr));
+    }
+  }
+
+  &__columns-3 {
+    // Mobile: 1 column, Small: 2 columns, Large: 3 columns
+    @media (min-width: 640px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    @media (min-width: 1024px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  &__columns-4 {
+    // Mobile: 1 column, Small: 2 columns, Large: 4+ columns
+    @media (min-width: 640px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    @media (min-width: 1024px) {
+      grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+    }
+  }
+
+  &__columns-5 {
+    // Mobile: 1 column, Small: 2 columns, Medium: 3 columns, Large: 5+ columns
+    @media (min-width: 640px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    @media (min-width: 1280px) {
+      grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+    }
+  }
+
+  // Compact mobile layout
+  @media (max-width: 639px) {
+    gap: 1rem;
+    padding: 0.5rem;
+  }
+
+  // Card hover effects for both mat-card and .card
+  .mat-card,
+  .card,
+  mat-card {
+    position: relative;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+
     &::after {
       bottom: 0;
-      box-shadow: 0 2px 15px 2px rgba(0, 0, 0, .3);
+      box-shadow: 0 4px 20px 4px rgba(0, 0, 0, .15);
       content: '';
       left: 0;
       opacity: 0;
@@ -13,16 +76,30 @@
       right: 0;
       top: 0;
       transition: opacity .3s ease-in-out;
+      pointer-events: none;
+      border-radius: inherit;
     }
+
     &:hover {
       cursor: pointer;
+      transform: translateY(-2px);
+
       &::after {
         opacity: 1;
       }
     }
+
+    // Accessibility: Focus visible
+    &:focus-visible {
+      outline: 2px solid currentColor;
+      outline-offset: 2px;
+    }
   }
+
+  // Grid filler for alignment (not needed with modern grid but kept for compatibility)
   .row-filler {
-    height: 1px;
+    height: 0;
     opacity: 0;
+    pointer-events: none;
   }
 }

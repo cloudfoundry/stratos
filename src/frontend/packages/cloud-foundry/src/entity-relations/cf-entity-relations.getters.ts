@@ -1,15 +1,17 @@
 import { HttpParams, HttpRequest } from '@angular/common/http';
 
-import { InternalAppState } from '../../../store/src/app-state';
-import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
-import { StratosBaseCatalogEntity } from '../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
 import {
-  getPaginationParams,
-} from '../../../store/src/entity-request-pipeline/pagination-request-base-handlers/get-params.pipe';
-import { selectPaginationState } from '../../../store/src/selectors/pagination.selectors';
-import { isPaginatedAction, PaginatedAction, PaginationParam } from '../../../store/src/types/pagination.types';
-import { EntityRequestAction } from '../../../store/src/types/request.types';
+  InternalAppState,
+  entityCatalog,
+  StratosBaseCatalogEntity,
+  EntityCatalogEntityConfig,
+  selectPaginationState,
+  isPaginatedAction,
+  PaginatedAction,
+  PaginationParam,
+  EntityRequestAction
+} from '@stratosui/store';
+import { getPaginationParams } from '../../../store/src/entity-request-pipeline/pagination-request-base-handlers/get-params.pipe';
 import { QParam } from '../shared/q-param';
 import { listEntityRelations } from './entity-relations';
 import { EntityInlineParentAction, isEntityInlineParentAction } from './entity-relations.types';
@@ -48,7 +50,7 @@ export function addCfRelationParams(request: HttpRequest<any>, action: EntityReq
   const relationInfo = paginationAction ?
     getEntityRelationsForPaginationRequest(paginationAction as EntityInlineParentAction & PaginatedAction) :
     getEntityRelationsForEntityRequest(entityInlineParent as EntityInlineParentAction & EntityRequestAction);
-  const update = {};
+  const update: Record<string, string> = {};
   if (relationInfo.maxDepth > 0) {
     update['inline-relations-depth'] = (relationInfo.maxDepth > 2 ? 2 : relationInfo.maxDepth) + '';
   }

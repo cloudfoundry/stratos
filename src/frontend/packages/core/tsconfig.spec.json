@@ -1,8 +1,12 @@
 {
-  "extends": "../../../tsconfig.spec.json",
+  "extends": "../../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../../../out-tsc"
+    "outDir": "../../../../out-tsc/spec",
+    "types": [
+      "vitest/globals",
+      "node"
+    ]
   },
-  "files": ["src/test.ts", "src/polyfills.ts"],
+  "files": ["src/test-setup.ts", "src/polyfills.ts"],
   "include": ["**/*.spec.ts", "**/*.d.ts"]
 }

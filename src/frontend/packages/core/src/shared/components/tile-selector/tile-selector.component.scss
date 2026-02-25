@@ -1,4 +1,4 @@
-@import '../../../../sass/mixins';
+@use '../../../../sass/mixins';
 
 .tile-selectors {
   $bottom-space: 30px;
@@ -10,29 +10,29 @@
   min-width: 0;
 
 
-  @include breakpoint(mobileonly) {
+  @include mixins.breakpoint(mobileonly) {
     // < 600
     grid-template-columns: repeat(1, 1fr);
   }
 
-  @include breakpoint(phablet) {
+  @include mixins.breakpoint(phablet) {
     // > 600
     grid-column-gap: $bottom-space;
     grid-row-gap: $bottom-space;
     grid-template-columns: repeat(2, 1fr);
   }
 
-  @include breakpoint(tablet) {
+  @include mixins.breakpoint(tablet) {
     // > 900
     grid-template-columns: repeat(3, 1fr);
   }
 
-  @include breakpoint(laptop) {
+  @include mixins.breakpoint(laptop) {
     // > 1200
     grid-template-columns: repeat(4, 1fr);
   }
 
-  @include breakpoint(desktop) {
+  @include mixins.breakpoint(desktop) {
     // > 1800
     grid-template-columns: repeat(5, 1fr);
   }

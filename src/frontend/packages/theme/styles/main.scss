@@ -1,0 +1,965 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Icon font styles - supports both material-icons and custom icon fonts */
+.material-icons,
+.custom-icon,
+.icon {
+  font-family: 'Material Icons' !important;
+  font-feature-settings: 'liga';
+  -webkit-font-feature-settings: 'liga';
+  -moz-font-feature-settings: 'liga';
+  @apply font-normal not-italic text-2xl leading-none tracking-normal normal-case inline-block whitespace-nowrap antialiased;
+  word-wrap: normal;
+  direction: ltr;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.stratos-icons {
+  font-family: 'stratos-icons' !important;
+  font-feature-settings: 'liga';
+  -webkit-font-feature-settings: 'liga';
+  -moz-font-feature-settings: 'liga';
+  @apply font-normal not-italic text-2xl leading-none tracking-normal normal-case inline-block whitespace-nowrap antialiased;
+  word-wrap: normal;
+  direction: ltr;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* CSS Custom Properties for theme customization */
+:root {
+  /* Brand colors - these will be overridden by StratosThemeService */
+  --color-primary: #1e293b;
+  --color-secondary: #60a5fa;
+  --color-accent: #60a5fa;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #3b82f6;
+
+  /* Navigation colors - these will be overridden by StratosThemeService */
+  --nav-bg: #1e293b;
+  --nav-text: #ffffff;
+  --nav-text-muted: rgba(255, 255, 255, 0.7);
+  --nav-hover: rgba(255, 255, 255, 0.1);
+  --nav-active: rgba(255, 255, 255, 0.15);
+  --nav-border: rgba(255, 255, 255, 0.1);
+  --nav-tooltip: #374151;
+
+  /* Layout colors - these will be overridden by StratosThemeService */
+  --app-bg: #f8fafc;
+  --body-bg: #f1f5f9;
+  --app-text: #1e293b;
+  --text-muted: #64748b;
+  --header-bg: #ffffff;
+  --header-text: #1e293b;
+  --header-border: #e2e8f0;
+  --content-bg: #ffffff;
+  --content-secondary: #f8fafc;
+  --content-border: #e2e8f0;
+  --content-text: #1e293b;
+  --content-muted: #64748b;
+
+  /* Login page */
+  --login-bg: #f5f5f5;
+  --login-bg-image: url('/core/assets/login-bg.jpg');
+  --login-card-bg: #ffffff;
+
+  /* Logo */
+  --logo-bg: #ffffff;
+
+  /* Interactive elements - light theme */
+  --input-bg: #ffffff;
+  --input-border: #d1d5db;
+  --input-text: #1e293b;
+  --input-placeholder: #9ca3af;
+  --input-focus-border: var(--color-primary);
+  --input-disabled-bg: #f3f4f6;
+
+  /* Code block - light theme */
+  --code-block-bg: #f3f4f6;
+  --code-block-border: #d1d5db;
+  --code-block-text: #1e293b;
+
+  /* Card and panel colors */
+  --card-bg: #ffffff;
+  --card-border: #e5e7eb;
+  --card-header-bg: #f9fafb;
+  --card-shadow: rgba(0, 0, 0, 0.1);
+
+  /* Table colors */
+  --table-header-bg: #f9fafb;
+  --table-header-text: #374151;
+  --table-row-hover: #f9fafb;
+  --table-border: #e5e7eb;
+
+  /* Stepper colors - light theme */
+  --step-inactive-bg: #e5e7eb;
+  --step-inactive-text: #4b5563;
+  --step-skip-bg: #f3f4f6;
+  --step-skip-text: #9ca3af;
+
+  /* Status and state colors */
+  --success-bg: #dcfce7;
+  --success-text: #166534;
+  --success-border: #86efac;
+
+  --warning-bg: #fef3c7;
+  --warning-text: #92400e;
+  --warning-border: #fcd34d;
+
+  --danger-bg: #fee2e2;
+  --danger-text: #991b1b;
+  --danger-border: #fca5a5;
+
+  --info-bg: #dbeafe;
+  --info-text: #1e40af;
+  --info-border: #93c5fd;
+
+  /* Shadow system */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark Theme - WCAG AA Compliant */
+.dark-theme {
+  /* Brand colors - adjusted for dark theme with higher contrast */
+  --color-primary: #60a5fa;
+  --color-secondary: #38bdf8;
+  --color-accent: #38bdf8;
+  --color-success: #4ade80;
+  --color-warning: #fbbf24;
+  --color-danger: #f87171;
+  --color-info: #60a5fa;
+
+  /* Navigation colors - dark theme */
+  --nav-bg: #0f172a;
+  --nav-text: #f1f5f9;
+  --nav-text-muted: rgba(241, 245, 249, 0.7);
+  --nav-hover: rgba(241, 245, 249, 0.1);
+  --nav-active: rgba(241, 245, 249, 0.15);
+  --nav-border: rgba(241, 245, 249, 0.1);
+  --nav-tooltip: #1e293b;
+
+  /* Layout colors - dark theme with proper contrast */
+  --app-bg: #0f172a;
+  --body-bg: #020617;
+  --app-text: #f1f5f9;
+  --text-muted: #94a3b8;
+  --header-bg: #1e293b;
+  --header-text: #f1f5f9;
+  --header-border: #334155;
+  --content-bg: #1e293b;
+  --content-secondary: #0f172a;
+  --content-border: #334155;
+  --content-text: #f1f5f9;
+  --content-muted: #94a3b8;
+
+  /* Login page - dark theme */
+  --login-bg: #0f172a;
+  --login-bg-image: url('/core/assets/login-bg.jpg');
+  --login-card-bg: #1e293b;
+
+  /* Logo - dark theme */
+  --logo-bg: #1e293b;
+
+  /* Interactive elements - dark theme */
+  --input-bg: #1e293b;
+  --input-border: #475569;
+  --input-text: #f1f5f9;
+  --input-placeholder: #64748b;
+  --input-focus-border: var(--color-primary);
+  --input-disabled-bg: #0f172a;
+
+  /* Code block - dark theme */
+  --code-block-bg: #0f172a;
+  --code-block-border: #334155;
+  --code-block-text: #e2e8f0;
+
+  /* Card and panel colors - dark theme */
+  --card-bg: #1e293b;
+  --card-border: #334155;
+  --card-header-bg: #0f172a;
+  --card-shadow: rgba(0, 0, 0, 0.3);
+
+  /* Table colors - dark theme */
+  --table-header-bg: #0f172a;
+  --table-header-text: #cbd5e1;
+  --table-row-hover: #334155;
+  --table-border: #334155;
+
+  /* Stepper colors - dark theme */
+  --step-inactive-bg: #334155;
+  --step-inactive-text: #cbd5e1;
+  --step-skip-bg: #1e293b;
+  --step-skip-text: #64748b;
+
+  /* Status and state colors - dark theme with WCAG AA compliance */
+  --success-bg: #14532d;
+  --success-text: #86efac;
+  --success-border: #22c55e;
+
+  --warning-bg: #78350f;
+  --warning-text: #fcd34d;
+  --warning-border: #f59e0b;
+
+  --danger-bg: #7f1d1d;
+  --danger-text: #fca5a5;
+  --danger-border: #ef4444;
+
+  --info-bg: #1e3a8a;
+  --info-text: #93c5fd;
+  --info-border: #3b82f6;
+
+  /* Shadow system - enhanced for dark theme */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+}
+
+/* Smooth theme transitions */
+html,
+body,
+.card,
+.input,
+.btn,
+.nav-item,
+.table th,
+.table td {
+  @apply transition-colors duration-300 ease-in-out;
+}
+
+/* Reduced Motion Support (WCAG AAA) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .theme-icon,
+  .spinner,
+  [class*='animate-'],
+  [class*='transition-'] {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Base layout styles */
+* {
+  @apply box-border;
+}
+
+html {
+  @apply h-full;
+  background-color: var(--app-bg);
+  color: var(--app-text);
+}
+
+body {
+  @apply h-full m-0 p-0 font-sans;
+}
+
+/* Router outlet needs to be a flex container to properly pass flex layout to children */
+router-outlet {
+  display: contents;
+}
+
+/* Ensure all routed components can participate in flex layout */
+router-outlet + * {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0%;
+  min-height: 0;
+  width: 100%;
+}
+
+/* Component base styles */
+@layer components {
+  /* Modern Button System */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-3.5 py-2;
+    @apply border border-transparent text-sm font-medium rounded-md;
+    @apply transition-all duration-200 cursor-pointer;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none;
+  }
+
+  /* Primary Button */
+  .btn-primary {
+    @apply text-white shadow-sm;
+    background-color: var(--color-primary);
+
+    &:hover:not(:disabled) {
+      @apply shadow-md;
+      background-color: color-mix(in srgb, var(--color-primary) 90%, black);
+      transform: translateY(-1px);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    &:focus {
+      --tw-ring-color: var(--color-primary);
+    }
+  }
+
+  /* Secondary Button */
+  .btn-secondary {
+    @apply shadow-sm;
+    color: var(--content-text);
+    background-color: var(--card-bg);
+    border-color: var(--content-border);
+
+    &:hover:not(:disabled) {
+      @apply shadow;
+      background-color: color-mix(in srgb, var(--card-bg) 95%, black);
+      border-color: var(--content-border);
+    }
+
+    &:focus {
+      --tw-ring-color: var(--color-primary);
+    }
+  }
+
+  /* Success Button */
+  .btn-success {
+    @apply text-white shadow-sm;
+    background-color: var(--color-success);
+
+    &:hover:not(:disabled) {
+      @apply shadow-md;
+      background-color: color-mix(in srgb, var(--color-success) 90%, black);
+      transform: translateY(-1px);
+    }
+
+    &:focus {
+      --tw-ring-color: var(--color-success);
+    }
+  }
+
+  /* Warning Button */
+  .btn-warning {
+    @apply text-white shadow-sm;
+    background-color: var(--color-warning);
+
+    &:hover:not(:disabled) {
+      @apply shadow-md;
+      background-color: color-mix(in srgb, var(--color-warning) 90%, black);
+      transform: translateY(-1px);
+    }
+
+    &:focus {
+      --tw-ring-color: var(--color-warning);
+    }
+  }
+
+  /* Danger Button */
+  .btn-danger {
+    @apply text-white shadow-sm;
+    background-color: var(--color-danger);
+
+    &:hover:not(:disabled) {
+      @apply shadow-md;
+      background-color: color-mix(in srgb, var(--color-danger) 90%, black);
+      transform: translateY(-1px);
+    }
+
+    &:focus {
+      --tw-ring-color: var(--color-danger);
+    }
+  }
+
+  /* Info Button */
+  .btn-info {
+    @apply text-white shadow-sm;
+    background-color: var(--color-info);
+
+    &:hover:not(:disabled) {
+      @apply shadow-md;
+      background-color: color-mix(in srgb, var(--color-info) 90%, black);
+      transform: translateY(-1px);
+    }
+
+    &:focus {
+      --tw-ring-color: var(--color-info);
+    }
+  }
+
+  /* Ghost Button */
+  .btn-ghost {
+    @apply bg-transparent border-gray-300 text-gray-700;
+    @apply hover:bg-gray-100 hover:border-gray-400;
+  }
+
+  /* Outline Variants */
+  .btn-outline-primary {
+    @apply bg-transparent border-2 text-gray-700;
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+
+    &:hover:not(:disabled) {
+      background-color: var(--color-primary);
+      @apply text-white shadow-sm;
+    }
+  }
+
+  .btn-outline-secondary {
+    @apply bg-transparent border-2 border-gray-300 text-gray-700;
+    @apply hover:bg-gray-100 hover:border-gray-400;
+  }
+
+  /* Icon Buttons - DRY approach with shared base */
+  %btn-icon-base {
+    @apply rounded-md p-2;
+    @apply inline-flex items-center justify-center;
+  }
+
+  .btn-icon {
+    @extend %btn-icon-base;
+    @apply w-9 h-9 min-w-[36px] min-h-[36px];
+  }
+
+  .btn-icon-sm {
+    @extend %btn-icon-base;
+    @apply w-8 h-8 min-w-[32px] min-h-[32px];
+  }
+
+  .btn-icon-lg {
+    @extend %btn-icon-base;
+    @apply w-11 h-11 min-w-[44px] min-h-[44px];
+  }
+
+  /* Button Sizes */
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+
+  .btn-lg {
+    @apply px-6 py-3 text-base;
+  }
+
+  /* Icon sizing within buttons */
+  .btn .material-icons,
+  .btn .icon,
+  .btn-icon .material-icons,
+  .btn-icon .icon {
+    @apply text-[20px] w-5 h-5 leading-5;
+  }
+
+  .btn-sm .material-icons,
+  .btn-sm .icon {
+    @apply text-[18px] w-[18px] h-[18px];
+  }
+
+  .btn-lg .material-icons,
+  .btn-lg .icon {
+    @apply text-2xl w-6 h-6;
+  }
+
+  /* Input styles */
+  .input {
+    @apply block w-full px-3 py-2 border rounded-md shadow-sm;
+    @apply focus:outline-none focus:ring-2 focus:border-transparent;
+    --tw-ring-color: var(--color-primary);
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+    color: var(--input-text);
+
+    &::placeholder {
+      color: var(--content-muted);
+      opacity: 0.7;
+    }
+
+    &:focus {
+      border-color: var(--input-focus-border);
+      background-color: var(--input-bg);
+    }
+
+    &:disabled {
+      background-color: var(--input-disabled-bg);
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .dark-theme & {
+      background-color: var(--input-bg);
+      border-color: var(--input-border);
+      color: var(--input-text);
+    }
+  }
+
+  /* Form field wrapper */
+  .form-field {
+    @apply mb-4 flex flex-col;
+  }
+
+  /* Label styles */
+  .label {
+    @apply block text-sm font-medium mb-1.5;
+    color: var(--content-text);
+
+    .dark-theme & {
+      color: var(--content-text);
+    }
+  }
+
+  /* Select dropdown styles */
+  .select {
+    @apply block w-full px-3 py-2 border rounded-md shadow-sm;
+    @apply focus:outline-none focus:ring-2 focus:border-transparent;
+    @apply disabled:opacity-60 disabled:cursor-not-allowed;
+    --tw-ring-color: var(--color-primary);
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+    color: var(--input-text);
+
+    &:focus {
+      border-color: var(--input-focus-border);
+    }
+
+    &:disabled {
+      background-color: var(--input-disabled-bg);
+    }
+
+    .dark-theme & {
+      background-color: var(--input-bg);
+      border-color: var(--input-border);
+      color: var(--input-text);
+    }
+  }
+
+  /* Filter-specific adjustments for inline layout */
+  .filter .form-field {
+    @apply mb-0 flex-row items-center gap-2;
+
+    .label {
+      @apply mb-0 min-w-max;
+    }
+
+    .select {
+      @apply min-w-[120px];
+    }
+  }
+
+  /* Global input theming - ensures all inputs respect theme */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  textarea,
+  select {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border-color: var(--input-border);
+
+    &::placeholder {
+      color: var(--input-placeholder);
+    }
+
+    &:focus {
+      background-color: var(--input-bg);
+      border-color: var(--input-focus-border);
+    }
+
+    &:disabled {
+      background-color: var(--input-disabled-bg);
+      opacity: 0.6;
+    }
+  }
+
+  /* Card styles */
+  .card {
+    @apply bg-white rounded-lg border border-gray-200 p-4;
+    background-color: var(--card-bg);
+    border-color: var(--card-border);
+    box-shadow: var(--shadow-sm);
+    color: var(--content-text);
+  }
+
+  .card-header {
+    @apply px-6 py-4 border-b border-gray-200;
+    background-color: var(--card-header-bg);
+  }
+
+  .card-body {
+    @apply px-6 py-4;
+  }
+
+  .card-footer {
+    @apply px-6 py-4 border-t border-gray-200;
+  }
+
+  /* Status indicators */
+  %status-base {
+    @apply text-white px-2 py-1 rounded-full text-xs font-medium;
+  }
+
+  .status-success {
+    @extend %status-base;
+    background-color: var(--color-success);
+  }
+
+  .status-warning {
+    @extend %status-base;
+    background-color: var(--color-warning);
+  }
+
+  .status-danger {
+    @extend %status-base;
+    background-color: var(--color-danger);
+  }
+
+  .status-info {
+    @extend %status-base;
+    background-color: var(--color-info);
+  }
+
+  /* Navigation styles */
+  .nav {
+    background-color: var(--nav-bg);
+    color: var(--nav-text);
+  }
+
+  .nav-item {
+    @apply transition-colors duration-200;
+
+    &:hover {
+      background-color: var(--nav-hover);
+    }
+
+    &.active {
+      background-color: var(--nav-active);
+    }
+  }
+}
+
+/* Legacy Material component support - temporary compatibility layer */
+.mat-mdc-button,
+.mat-mdc-raised-button,
+.mat-mdc-flat-button,
+.mat-mdc-stroked-button,
+.mat-mdc-icon-button {
+  @apply btn;
+}
+
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-flat-button.mat-primary {
+  @apply btn-primary;
+}
+
+.mat-mdc-raised-button.mat-accent,
+.mat-mdc-flat-button.mat-accent,
+.mat-mdc-stroked-button {
+  @apply btn-secondary;
+}
+
+.mat-mdc-raised-button.mat-warn,
+.mat-mdc-flat-button.mat-warn {
+  @apply btn-danger;
+}
+
+.mat-mdc-icon-button {
+  @apply btn-icon;
+
+  .material-icons,
+  .icon {
+    @apply text-[20px] w-5 h-5;
+  }
+}
+
+/* Material Card compatibility */
+.mat-card,
+.mat-mdc-card {
+  @apply card;
+}
+
+mat-card,
+mat-mdc-card {
+  @apply card;
+  display: block;
+}
+
+.mat-card-content,
+.mat-mdc-card-content,
+mat-card-content,
+mat-mdc-card-content {
+  display: block;
+}
+
+.mat-card-title,
+.mat-mdc-card-title,
+mat-card-title,
+mat-mdc-card-title {
+  @apply text-lg font-semibold mb-2;
+  display: block;
+}
+
+.mat-card-subtitle,
+.mat-mdc-card-subtitle,
+mat-card-subtitle,
+mat-mdc-card-subtitle {
+  @apply text-sm text-gray-600 mb-3;
+  display: block;
+}
+
+/* Material overlay surfaces (menus, autocomplete, selects) */
+.mat-mdc-menu-panel,
+.mat-mdc-select-panel,
+.mat-mdc-autocomplete-panel,
+.mat-menu-panel,
+.mat-select-panel,
+.mat-autocomplete-panel,
+.cdk-overlay-pane .mat-mdc-menu-panel {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--shadow-lg);
+  color: var(--content-text);
+}
+
+.mat-mdc-menu-item,
+.mat-mdc-option,
+.mat-mdc-autocomplete-panel mat-option,
+.mat-menu-item,
+.mat-option,
+.mat-autocomplete-panel mat-option {
+  color: var(--content-text);
+
+  &.mat-mdc-menu-item-highlighted,
+  &.mat-mdc-option-active,
+  &:hover {
+    background-color: var(--nav-hover);
+    color: var(--header-text);
+  }
+}
+
+.mat-mdc-menu-item-text,
+.mat-mdc-option .mdc-list-item__primary-text,
+.mat-mdc-chip .mdc-evolution-chip__text-label,
+.mat-menu-item .mat-mdc-menu-item-text,
+.mat-option .mat-option-text {
+  color: inherit;
+}
+
+/* Chip pills */
+.mat-mdc-chip,
+.mat-mdc-standard-chip,
+.mat-mdc-chip.mat-mdc-chip-appearance-standard,
+mat-chip {
+  background-color: var(--content-secondary);
+  border: 1px solid var(--card-border);
+  color: var(--content-text);
+}
+
+.mat-mdc-chip .mat-mdc-chip-remove,
+.mat-mdc-chip .mat-mdc-chip-trailing-icon {
+  color: inherit;
+}
+
+.mat-mdc-chip:hover,
+.mat-mdc-chip.mat-mdc-chip-highlighted,
+.mat-mdc-chip:focus-visible {
+  background-color: var(--table-row-hover);
+}
+
+/* Header styles */
+.header {
+  background-color: var(--header-bg);
+  color: var(--header-text);
+}
+
+/* Login page styles */
+.login-page {
+  @apply bg-cover bg-center min-h-screen;
+  background-color: var(--login-bg);
+  background-image: var(--login-bg-image);
+}
+
+.login-card {
+  background-color: var(--login-card-bg);
+}
+
+/* Loading spinner */
+.spinner {
+  @apply inline-block w-4 h-4 border-2 border-solid border-gray-200 dark:border-gray-700 border-r-transparent rounded-full animate-spin;
+}
+
+.spinner-primary {
+  border-color: var(--color-primary);
+  border-right-color: transparent;
+}
+
+/* Dark mode support for spinner-primary border */
+.dark .spinner-primary {
+  border-color: var(--color-primary);
+  border-right-color: transparent;
+}
+
+/* Table styles */
+.table {
+  @apply min-w-full divide-y divide-gray-200;
+
+  th {
+    @apply px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+  }
+
+  td {
+    @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900;
+  }
+
+  tbody tr {
+    @apply even:bg-gray-50;
+  }
+}
+
+/* List styles */
+.list-item {
+  @apply border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition-colors duration-150;
+}
+
+/* Progress bar */
+.progress {
+  @apply w-full bg-gray-200 rounded-full h-2;
+}
+
+.progress-bar {
+  @apply h-2 rounded-full transition-all duration-300;
+  background-color: var(--color-primary);
+}
+
+/* Alert styles */
+.alert {
+  @apply p-4 rounded-md border-l-4;
+}
+
+.alert-success {
+  @apply bg-green-50 border-green-400 text-green-800;
+}
+
+.alert-warning {
+  @apply bg-yellow-50 border-yellow-400 text-yellow-800;
+}
+
+.alert-danger {
+  @apply bg-red-50 border-red-400 text-red-800;
+}
+
+.alert-info {
+  @apply bg-blue-50 border-blue-400 text-blue-800;
+}
+
+/* Modal styles */
+.modal-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 z-50;
+}
+
+.modal {
+  @apply fixed inset-0 z-50 overflow-y-auto;
+}
+
+.modal-container {
+  @apply flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0;
+}
+
+.modal-panel {
+  @apply transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg;
+}
+
+/* Tooltip */
+.tooltip {
+  @apply absolute z-10 invisible px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 transition-opacity duration-300;
+
+  &:hover .tooltip-text {
+    @apply visible opacity-100;
+  }
+}
+
+/* Modal body scroll lock */
+body.modal-open {
+  @apply overflow-hidden;
+}
+
+/* Utility classes with CSS variables */
+@layer utilities {
+  /* Color utilities using CSS variables for theme support */
+  .text-primary {
+    color: var(--color-primary);
+  }
+
+  .text-secondary {
+    color: var(--color-secondary);
+  }
+
+  .bg-primary {
+    background-color: var(--color-primary);
+  }
+
+  .bg-secondary {
+    background-color: var(--color-secondary);
+  }
+
+  .bg-accent {
+    background-color: var(--color-accent);
+  }
+
+  .border-primary {
+    border-color: var(--color-primary);
+  }
+
+  .border-secondary {
+    border-color: var(--color-secondary);
+  }
+
+  .hover\:bg-primary:hover {
+    background-color: var(--color-primary);
+  }
+
+  .focus\:ring-primary:focus {
+    --tw-ring-color: var(--color-primary);
+  }
+
+  /* Navigation utilities */
+  .bg-nav-bg {
+    background-color: var(--nav-bg);
+  }
+
+  .text-nav-text {
+    color: var(--nav-text);
+  }
+
+  .text-nav-muted {
+    color: var(--nav-text-muted);
+  }
+
+  .bg-nav-hover {
+    background-color: var(--nav-hover);
+  }
+
+  .bg-nav-active {
+    background-color: var(--nav-active);
+  }
+
+  .border-nav-border {
+    border-color: var(--nav-border);
+  }
+
+  .bg-nav-tooltip {
+    background-color: var(--nav-tooltip);
+  }
+}

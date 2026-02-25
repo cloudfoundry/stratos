@@ -1,10 +1,9 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { MaterialDesignFrameworkModule } from '@ajsf/material';
-
-import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
-import {
-  generateCfBaseTestModulesNoShared,
-} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { of } from 'rxjs';
+import { provideStore } from '@ngrx/store';
+import { appReducers } from '@stratosui/store';
 import { ServicesService } from '../../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
 import { SchemaFormComponent } from '../../schema-form/schema-form.component';
@@ -15,30 +14,28 @@ describe('BindAppsStepComponent', () => {
   let component: BindAppsStepComponent;
   let fixture: ComponentFixture<BindAppsStepComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        BindAppsStepComponent,
-        SchemaFormComponent
-      ],
       imports: [
-        generateCfBaseTestModulesNoShared(),
-        MaterialDesignFrameworkModule
+        BindAppsStepComponent,
+        SchemaFormComponent,
       ],
       providers: [
+        provideZonelessChangeDetection(),
+        provideStore(appReducers, {
+          runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
+        }),
         { provide: ServicesService, useClass: ServicesServiceMock },
         CsiGuidsService,
-        PaginationMonitorFactory
       ]
-
-
-    })
-      .compileComponents();
-  }));
+    });
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(BindAppsStepComponent);
     component = fixture.componentInstance;
+    component.boundAppId = '';
+    component.apps$ = of([]);
     fixture.detectChanges();
   });
 

@@ -51,7 +51,13 @@ export class CfCellAppsDataSource
       store,
       action,
       schema: cfEntityFactory(action.entityType),
-      getRowUniqueId: (row: CfCellApp) => row.appGuid,
+      getRowUniqueId: (row: IMetrics<IMetricVectorResult<IMetricApplication>>) => {
+        // For the pre-transform type, extract ID from metrics response
+        if (row && Array.isArray(row) && row.length > 0 && row[0]?.data?.result?.[0]?.metric?.application_id) {
+          return row[0].data.result[0].metric.application_id;
+        }
+        return 'unknown';
+      },
       paginationKey: action.paginationKey,
       isLocal: true,
       transformEntity: map((response) => {
@@ -66,6 +72,8 @@ export class CfCellAppsDataSource
       }),
       listConfig
     });
+    // Override with correct type for post-transform usage
+    this.getRowUniqueId = (row: CfCellApp) => row.appGuid;
     this.appEntityServices = {};
   }
 

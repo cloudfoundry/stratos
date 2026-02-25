@@ -1,40 +1,109 @@
-import { CommonModule } from '@angular/common';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-
-import { createBasicStoreModule } from '../../../../../../store/testing/public-api';
-import { CoreTestingModule } from '../../../../../test-framework/core-test.modules';
-import { CoreModule } from '../../../../core/core.module';
-import { SharedModule } from './../../../../shared/shared.module';
+import { Store } from '@ngrx/store';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import {
+  AppState,
+  BaseEntityValues,
+  entityCatalog,
+  EntityServiceFactory,
+  generateStratosEntities,
+  EntityCatalogHelper,
+  EntityCatalogHelpers,
+  PaginationMonitorFactory,
+  EntityMonitorFactory,
+  stratosEntityFactory,
+  endpointEntityType,
+  NormalizedResponse,
+  WrapperRequestActionSuccess,
+  EntityCatalogTestModuleManualStore,
+  TEST_CATALOGUE_ENTITIES
+} from '@stratosui/store';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS, testSCFEndpoint, testSCFEndpointGuid } from '@stratosui/store/testing';
 import { EditEndpointStepComponent } from './edit-endpoint-step.component';
 
 describe('EditEndpointStepComponent', () => {
   let component: EditEndpointStepComponent;
   let fixture: ComponentFixture<EditEndpointStepComponent>;
+  let activatedRoute: any;
+  let store: Store<AppState<BaseEntityValues>>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [EditEndpointStepComponent],
+  beforeEach(async () => {
+    // Create mutable route object with test endpoint GUID
+    activatedRoute = {
+      snapshot: {
+        params: { id: testSCFEndpointGuid },
+        queryParams: {}
+      }
+    };
+
+    await TestBed.configureTestingModule({
       imports: [
-        CoreTestingModule,
-        createBasicStoreModule(),
-        CommonModule,
-        CoreModule,
-        SharedModule,
+        createBasicStoreModule(), // This includes the test endpoint in initial state
+        EditEndpointStepComponent,
+        EntityCatalogTestModuleManualStore,
       ],
       providers: [
+        EntityServiceFactory,
+        EntityCatalogHelper,
+        PaginationMonitorFactory,
+        EntityMonitorFactory,
         {
           provide: ActivatedRoute,
-          useValue: {
-            snapshot: {
-              params: { id: 'guid' }
-            }
-          }
+          useValue: activatedRoute
         },
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useFactory: generateStratosEntities
+        },
+        ...STORE_TEST_PROVIDERS,
+        provideZonelessChangeDetection(),
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+
+    // Initialize EntityCatalogHelper AFTER TestBed is configured
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+
+    // Get store and dispatch endpoint data to populate pagination
+    store = TestBed.inject(Store);
+    const stratosEndpointEntityConfig = stratosEntityFactory(endpointEntityType);
+    const stratosEndpointEntityKey = entityCatalog.getEntityKey(stratosEndpointEntityConfig);
+
+    // Create test endpoint with all required properties for the form
+    const testEndpointWithClientId = {
+      ...testSCFEndpoint,
+      client_id: '',  // Form expects a string value, not undefined
+      skip_ssl_validation: false,
+      api_endpoint: {
+        Scheme: 'https',
+        Opaque: '',
+        User: null,
+        Host: 'api.test.com',
+        Path: '',
+        RawPath: '',
+        ForceQuery: false,
+        RawQuery: '',
+        Fragment: ''
+      }
+    };
+
+    const mappedData = {
+      entities: {
+        [stratosEndpointEntityKey]: {
+          [testSCFEndpointGuid]: testEndpointWithClientId
+        }
+      },
+      result: [testSCFEndpointGuid]
+    } as NormalizedResponse;
+
+    store.dispatch(new WrapperRequestActionSuccess(mappedData, {
+      type: 'GET_ALL',
+      paginationKey: 'endpoint-list',
+      ...stratosEndpointEntityConfig
+    }, 'fetch', 1, 1));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EditEndpointStepComponent);
@@ -42,11 +111,16 @@ describe('EditEndpointStepComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  afterEach(() => {
+    if (component) {
+      component.ngOnDestroy();
+    }
+    if (fixture) {
+      fixture.destroy();
+    }
   });
 
-  afterAll(() => {
-    component.ngOnDestroy();
+  it('should create', () => {
+    expect(component).toBeTruthy();
   });
 });

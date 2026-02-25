@@ -6,23 +6,24 @@ import { Observable } from 'rxjs';
 import { catchError, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { PaginationResponse } from '../../../cloud-foundry/src/store/types/cf-api.types';
-import { environment } from '../../../core/src/environments/environment';
-import { AppState } from '../../../store/src/app-state';
-import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
-import { isHttpErrorResponse } from '../../../store/src/jetstream';
-import { ApiRequestTypes } from '../../../store/src/reducers/api-request-reducer/request-helpers';
+import { environment } from '@stratosui/core';
 import {
-  resultPerPageParam,
-  resultPerPageParamDefault,
-} from '../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
-import { selectPaginationState } from '../../../store/src/selectors/pagination.selectors';
-import { APIResource, NormalizedResponse } from '../../../store/src/types/api.types';
-import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../store/src/types/pagination.types';
-import {
+  AppState,
+  entityCatalog,
+  isHttpErrorResponse,
+  ApiRequestTypes,
+  selectPaginationState,
+  APIResource,
+  NormalizedResponse,
+  PaginatedAction,
+  PaginationEntityState,
+  PaginationParam,
   StartRequestAction,
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
-} from '../../../store/src/types/request.types';
+  resultPerPageParam,
+  resultPerPageParamDefault
+} from '@stratosui/store';
 import { buildMetricData } from '../core/autoscaler-helpers/autoscaler-transform-metric';
 import {
   autoscalerTransformArrayToMap,
@@ -69,7 +70,7 @@ import {
 const { proxyAPIVersion } = environment;
 const commonPrefix = `/pp/${proxyAPIVersion}/autoscaler`;
 
-function extractAutoscalerError(error): string {
+function extractAutoscalerError(error: any): string {
   const httpResponse: HttpErrorResponse = isHttpErrorResponse(error);
   if (httpResponse) {
     return httpResponse.error ? httpResponse.error.error : JSON.stringify(httpResponse.error);
@@ -77,11 +78,13 @@ function extractAutoscalerError(error): string {
   return error._body;
 }
 
-function createAutoscalerErrorMessage(requestType: string, error) {
+function createAutoscalerErrorMessage(requestType: string, error: any): string {
   return `Unable to ${requestType}: ${error.status} ${extractAutoscalerError(error) || ''}`;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class AutoscalerEffects {
   constructor(
     private http: HttpClient,
@@ -89,7 +92,7 @@ export class AutoscalerEffects {
     private store: Store<AppState>,
   ) { }
 
-  
+
   fetchAutoscalerInfo$ = createEffect(() => this.actions$.pipe(
     ofType<GetAppAutoscalerInfoAction>(AUTOSCALER_INFO),
     mergeMap(action => {
@@ -110,9 +113,17 @@ export class AutoscalerEffects {
               new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
           }),
-          catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerErrorMessage('fetch autoscaler info', err), action, actionType)
-          ]));
+          catchError(err => {
+            // 404/503 are expected when autoscaler is not configured or unavailable
+            // Don't show error message to user, just mark as unavailable
+            const isExpectedError = err.status === 404 || err.status === 503;
+            const errorMessage = isExpectedError
+              ? 'Autoscaler not available for this endpoint'
+              : createAutoscalerErrorMessage('fetch autoscaler info', err);
+            return [
+              new WrapperRequestActionFailed(errorMessage, action, actionType)
+            ];
+          }));
     })));
 
   
@@ -136,9 +147,16 @@ export class AutoscalerEffects {
               new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
           }),
-          catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerErrorMessage('fetch health info', err), action, actionType)
-          ]));
+          catchError(err => {
+            // Gracefully handle autoscaler unavailability
+            const isUnavailable = err.status === 404 || err.status === 503;
+            const errorMessage = isUnavailable
+              ? 'Autoscaler health check unavailable'
+              : createAutoscalerErrorMessage('fetch health info', err);
+            return [
+              new WrapperRequestActionFailed(errorMessage, action, actionType)
+            ];
+          }));
     })));
 
   
@@ -170,9 +188,11 @@ export class AutoscalerEffects {
               new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
           }),
-          catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerErrorMessage('update policy', err), action, actionType)
-          ]));
+          catchError(err => {
+            return [
+              new WrapperRequestActionFailed(createAutoscalerErrorMessage('update policy', err), action, actionType)
+            ];
+          }));
     })));
 
   
@@ -202,9 +222,11 @@ export class AutoscalerEffects {
               new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
           }),
-          catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerErrorMessage('detach policy', err), action, actionType)
-          ]));
+          catchError(err => {
+            return [
+              new WrapperRequestActionFailed(createAutoscalerErrorMessage('detach policy', err), action, actionType)
+            ];
+          }));
     })));
 
   
@@ -237,9 +259,11 @@ export class AutoscalerEffects {
               new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
           }),
-          catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerErrorMessage('update credential', err), action, actionType)
-          ]));
+          catchError(err => {
+            return [
+              new WrapperRequestActionFailed(createAutoscalerErrorMessage('update credential', err), action, actionType)
+            ];
+          }));
     })));
 
   
@@ -263,9 +287,11 @@ export class AutoscalerEffects {
               new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
           }),
-          catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerErrorMessage('delete credential', err), action, actionType)
-          ]));
+          catchError(err => {
+            return [
+              new WrapperRequestActionFailed(createAutoscalerErrorMessage('delete credential', err), action, actionType)
+            ];
+          }));
     })));
 
   
@@ -315,9 +341,11 @@ export class AutoscalerEffects {
               new WrapperRequestActionSuccess(mappedData, action, actionType, histories.total_results, histories.total_pages)
             ];
           }),
-          catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerErrorMessage('fetch scaling history', err), action, actionType)
-          ]));
+          catchError(err => {
+            return [
+              new WrapperRequestActionFailed(createAutoscalerErrorMessage('fetch scaling history', err), action, actionType)
+            ];
+          }));
     })));
 
   
@@ -346,9 +374,11 @@ export class AutoscalerEffects {
               new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
           }),
-          catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerErrorMessage('fetch metrics', err), action, actionType)
-          ]));
+          catchError(err => {
+            return [
+              new WrapperRequestActionFailed(createAutoscalerErrorMessage('fetch metrics', err), action, actionType)
+            ];
+          }));
     })));
 
   private createUpdatePolicy(
@@ -375,9 +405,11 @@ export class AutoscalerEffects {
               new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
           }),
-          catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerErrorMessage('create policy', err), action, actionType)
-          ]));
+          catchError(err => {
+            return [
+              new WrapperRequestActionFailed(createAutoscalerErrorMessage('create policy', err), action, actionType)
+            ];
+          }));
   }
 
   private fetchPolicy(
@@ -492,7 +524,7 @@ export class AutoscalerEffects {
 
   transformTriggerData(
     key: string, mappedData: NormalizedResponse, data: AppAutoscalerPolicyLocal, query: AutoscalerQuery, appGuid: string) {
-    mappedData.entities[key] = Object.keys(data.scaling_rules_map).reduce((entity, metricType) => {
+    mappedData.entities[key] = Object.keys(data.scaling_rules_map).reduce((entity: Record<string, any>, metricType: string) => {
       const id = AutoscalerConstants.createMetricId(appGuid, metricType);
       data.scaling_rules_map[metricType].query = query;
       entity[id] = {

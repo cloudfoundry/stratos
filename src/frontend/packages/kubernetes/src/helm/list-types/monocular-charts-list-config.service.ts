@@ -7,6 +7,9 @@ import {
   IListConfig,
   IListMultiFilterConfig,
   ListViewTypes,
+  IGlobalListAction,
+  IMultiListAction,
+  IListAction,
 } from '../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../store/src/actions/list.actions';
 import { AppState } from '../../../../store/src/public-api';
@@ -16,11 +19,13 @@ import { MonocularChart } from '../store/helm.types';
 import { MonocularChartCardComponent } from './monocular-chart-card/monocular-chart-card.component';
 import { MonocularChartsDataSource } from './monocular-charts-data-source';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class MonocularChartsListConfig implements IListConfig<MonocularChart> {
-  dataSource: MonocularChartsDataSource;
+  dataSource!: MonocularChartsDataSource;
   isLocal = true;
-  multiFilterConfigs: IListMultiFilterConfig[];
+  multiFilterConfigs!: IListMultiFilterConfig[];
 
   columns: Array<ITableColumn<MonocularChart>> = [
     {
@@ -87,11 +92,11 @@ export class MonocularChartsListConfig implements IListConfig<MonocularChart> {
     this.dataSource = new MonocularChartsDataSource(store, this);
   }
 
-  getGlobalActions = () => [];
-  getMultiActions = () => [];
-  getSingleActions = () => [];
-  getColumns = () => this.columns;
-  getDataSource = () => this.dataSource;
-  getMultiFiltersConfigs = () => [];
+  getGlobalActions = (): IGlobalListAction<MonocularChart>[] => [];
+  getMultiActions = (): IMultiListAction<MonocularChart>[] => [];
+  getSingleActions = (): IListAction<MonocularChart>[] => [];
+  getColumns = (): ITableColumn<MonocularChart>[] => this.columns;
+  getDataSource = (): MonocularChartsDataSource => this.dataSource;
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
 
 }

@@ -1,12 +1,12 @@
-import { HttpClientModule } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from '@stratosui/store/testing';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS, CoreTestingModule } from '@test-framework';
 
-import { CoreModule } from '../../../core/core.module';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
-import { SharedModule } from '../../../shared/shared.module';
 import { TabNavService } from '../../../tab-nav.service';
 import { EulaPageComponent } from './eula-page.component';
 
@@ -14,24 +14,24 @@ describe('EulaPageComponent', () => {
   let component: EulaPageComponent;
   let fixture: ComponentFixture<EulaPageComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [EulaPageComponent],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
-        CoreModule,
+        CoreTestingModule,
         RouterTestingModule,
-        SharedModule,
-        HttpClientModule,
+        NoopAnimationsModule,
         HttpClientTestingModule,
         createBasicStoreModule(),
+        EulaPageComponent,
       ],
       providers: [
         TabNavService,
-        CurrentUserPermissionsService
+        CurrentUserPermissionsService,
+        ...STORE_TEST_PROVIDERS,
+        provideZonelessChangeDetection(),
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EulaPageComponent);

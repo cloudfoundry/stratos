@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
@@ -36,7 +36,7 @@ interface IGroupedFavorites {
   providedIn: 'root'
 })
 export class UserFavoriteManager {
-  constructor(private store: Store<GeneralEntityAppState>) { }
+  private store = inject(Store<GeneralEntityAppState>);
 
   public getAllFavorites() {
     const waitForFavorites$ = this.getWaitForFavoritesObservable();
@@ -56,7 +56,9 @@ export class UserFavoriteManager {
       this.store.select(errorFetchingFavoritesSelector)
     ).pipe(
       tap(([fetching, error]) => {
+        // Defensive: Log error details before throwing
         if (error) {
+          console.error('User favorites: Error fetching favorites from store', { fetching, error });
           throw new Error('Could not fetch favorites');
         }
       }),
@@ -113,16 +115,44 @@ export class UserFavoriteManager {
   }
 
   public getUserFavoriteFromObject = <T extends IFavoriteMetadata = IFavoriteMetadata>(f: IFavoriteTypeInfo<T>): UserFavorite<T> => {
+    // Defensive: Validate favorite object before creating UserFavorite
+    if (!f) {
+      console.error('User favorites: getUserFavoriteFromObject - favorite object is null or undefined');
+      return null;
+    }
+
+    if (!f.endpointId || !f.endpointType || !f.entityType) {
+      console.error('User favorites: getUserFavoriteFromObject - missing required fields', {
+        hasEndpointId: !!f.endpointId,
+        hasEndpointType: !!f.endpointType,
+        hasEntityType: !!f.entityType,
+        favorite: f
+      });
+      return null;
+    }
+
     return new UserFavorite<T>(f.endpointId, f.endpointType, f.entityType, f.entityId, f.metadata);
   }
 
   public getIsFavoriteObservable(favorite: UserFavorite<IFavoriteMetadata>) {
+    // Defensive: Validate favorite before selecting from store
+    if (!favorite) {
+      console.error('User favorites: getIsFavoriteObservable - favorite is null or undefined');
+      return of(false);
+    }
+
     return this.store.select(
       isFavorite(favorite)
     );
   }
 
   public toggleFavorite(favorite: UserFavorite<IFavoriteMetadata>) {
+    // Defensive: Validate favorite before toggling
+    if (!favorite) {
+      console.error('User favorites: toggleFavorite - favorite is null or undefined');
+      return;
+    }
+
     stratosEntityCatalog.userFavorite.api.toggle(favorite);
   }
 
@@ -132,7 +162,7 @@ export class UserFavoriteManager {
     const favoriteEntities$ = this.store.select(favoriteEntitiesSelector);
     return waitForFavorites$.pipe(switchMap(() => favoriteEntities$)).pipe(
       map(favs => {
-        const result = [];
+        const result: Array<UserFavorite<IFavoriteMetadata>> = [];
         Object.values(favs).forEach(f => {
           if (f.endpointId === endpointID && f.entityId) {
             // Ensure we actually have a UserFavorite object and not a struct
@@ -149,7 +179,18 @@ export class UserFavoriteManager {
    */
   public getEntityMetadata(favorite: IFavoriteTypeInfo, entity: any) {
     const catalogEntity = entityCatalog.getEntity(favorite.endpointType, favorite.entityType);
-    return catalogEntity ? catalogEntity.builders.entityBuilder.getMetadata(entity) : null;
+    if (!catalogEntity) {
+      // Only warn for non-endpoint entities. Endpoint lookups may use fallback logic in the catalog
+      // which searches both the endpoints and entities maps. The warning from entityCatalog.getEntity
+      // is sufficient for debugging, no need to duplicate here for endpoint types.
+      if (favorite.entityType !== EntityCatalogHelpers.endpointType) {
+        console.warn(
+          `User favourite - getEntityMetadata - catalogEntity not found for endpointType=${favorite.endpointType}, entityType=${favorite.entityType}`
+        );
+      }
+      return null;
+    }
+    return catalogEntity.builders?.entityBuilder?.getMetadata(entity) || null;
   }
 
    private buildFavoriteFromCatalogEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
@@ -157,12 +198,20 @@ export class UserFavoriteManager {
     entity: any,
     endpointId: string
   ) {
+    if (!catalogEntity) {
+      console.warn('User favourite - buildFavoriteFromCatalogEntity - catalogEntity is undefined');
+      return null;
+    }
+    if (!catalogEntity.definition) {
+      console.warn('User favourite - buildFavoriteFromCatalogEntity - catalogEntity.definition is undefined');
+      return null;
+    }
     const isEndpoint = catalogEntity.isEndpoint;
     const entityDefinition = catalogEntity.definition as IStratosEntityDefinition;
-    const endpointType = isEndpoint ? catalogEntity.getTypeAndSubtype().type : entityDefinition.endpoint.type;
+    const endpointType = isEndpoint ? catalogEntity.getTypeAndSubtype().type : entityDefinition.endpoint?.type;
     const entityType = isEndpoint ? EntityCatalogHelpers.endpointType : entityDefinition.type;
-    const metadata = catalogEntity.builders.entityBuilder.getMetadata(entity);
-    const guid = isEndpoint ? null : catalogEntity.builders.entityBuilder.getGuid(entity);
+    const metadata = catalogEntity.builders?.entityBuilder?.getMetadata(entity);
+    const guid = isEndpoint ? null : catalogEntity.builders?.entityBuilder?.getGuid(entity);
     if (!endpointId) {
       console.error('User favourite - buildFavoriteFromCatalogEntity - endpointId is undefined');
     }
@@ -182,8 +231,18 @@ export class UserFavoriteManager {
     endpointType: string
   ) {
     // We need to get the endpoint ID for the entity
+    // Defensive: Entity catalog lookup may return null if endpoint type not registered yet
     const endpointCatalogEntity = entityCatalog.getEndpoint(endpointType);
-    if (entity && endpointCatalogEntity && endpointCatalogEntity.definition.getEndpointIdFromEntity) {
+    if (!endpointCatalogEntity) {
+      console.warn(
+        `User favourite - getFavorite - endpoint catalog entity not found for endpointType=${endpointType}. ` +
+        `Cannot create favorite for entity type ${entityType}.`
+      );
+      return null;
+    }
+
+    // Defensive: Verify definition and required methods exist
+    if (entity && endpointCatalogEntity.definition?.getEndpointIdFromEntity) {
       const id = endpointCatalogEntity.definition.getEndpointIdFromEntity(entity);
       return this.getFavoriteFromEntity<Y>(entityType, endpointType, id, entity);
     }
@@ -197,6 +256,17 @@ export class UserFavoriteManager {
     entity: Y
   ) {
     const catalogEntity = entityCatalog.getEntity<T, Y>(endpointType, entityType) as StratosBaseCatalogEntity<T, Y>;
+    if (!catalogEntity) {
+      // Only warn for non-endpoint entities. Endpoint lookups (entityType === 'endpoint') may use
+      // fallback logic in entityCatalog that searches both the endpoints and entities maps.
+      // The entityCatalog.getEntity warning is sufficient for debugging these cases.
+      if (entityType !== EntityCatalogHelpers.endpointType) {
+        console.warn(
+          `User favourite - getFavoriteFromEntity - catalogEntity not found for endpointType=${endpointType}, entityType=${entityType}`
+        );
+      }
+      return null;
+    }
     return this.buildFavoriteFromCatalogEntity<T, Y>(catalogEntity, entity, endpointId);
   }
 

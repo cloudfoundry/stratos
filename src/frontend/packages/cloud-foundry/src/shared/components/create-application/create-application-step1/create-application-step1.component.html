@@ -1,41 +1,59 @@
 <b>{{ stepperText }}</b>
 <form #cfForm="ngForm" class="create-app-step-1 stepper-form">
-  <mat-form-field *ngIf="!isMarketplaceMode">
-    <mat-select #cfSelect="ngModel" [disabled]="(cfOrgSpaceService.cf.loading$ | async)"
-      [ngModel]="cfOrgSpaceService.cf.select.getValue()"
-      (selectionChange)="cfOrgSpaceService.cf.select.next($event.value)" required name="cf" [disabled]="isRedeploy"
-      placeholder="Cloud Foundry" [appFocus]="!(cfOrgSpaceService.cf.loading$ | async)">
-      <mat-option *ngFor="let cf of cfOrgSpaceService.cf.list$ | async" [value]="cf.guid">
-        <span>{{ cf.name }}</span>
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
-  <mat-form-field>
-    <mat-select #orgSelect="ngModel"
+  @if (!isMarketplaceMode) {
+    <div class="mb-4">
+      <label class="block text-sm font-medium mb-1">Cloud Foundry *</label>
+      <app-select #cfSelect="ngModel" [disabled]="(cfOrgSpaceService.cf.loading$ | async)"
+        [ngModel]="cfOrgSpaceService.cf.select.getValue()"
+        (selectionChange)="cfOrgSpaceService.cf.select.next($event.value)" required name="cf" [disabled]="isRedeploy"
+        [appFocus]="!(cfOrgSpaceService.cf.loading$ | async)"
+        class="block w-full border-b border-gray-300 dark:border-gray-600 pb-2">
+        @for (cf of cfOrgSpaceService.cf.list$ | async; track cf) {
+          <app-option [value]="cf.guid" [label]="cf.name">
+            <span>{{ cf.name }}</span>
+          </app-option>
+        }
+      </app-select>
+    </div>
+  }
+  <div class="mb-4">
+    <label class="block text-sm font-medium mb-1">Organization *</label>
+    <app-select #orgSelect="ngModel"
       [disabled]="!cfOrgSpaceService.cf.select.getValue() || (cfOrgSpaceService.org.loading$ | async) || isRedeploy"
       [ngModel]="cfOrgSpaceService.org.select.getValue()"
-      (selectionChange)="cfOrgSpaceService.org.select.next($event.value)" required placeholder="Organization" name="org"
-      [appFocus]="isMarketplaceMode && !(!cfOrgSpaceService.cf.select.getValue() || (cfOrgSpaceService.org.loading$ | async) || isRedeploy)">
-      <mat-option *ngFor="let org of cfOrgSpaceService.org.list$ | async" [value]="org.guid">
-        <span>{{ org.name }}</span>
-      </mat-option>
-    </mat-select>
-    <mat-error *ngIf="!(hasOrgs$ | async)">
-      There are no organizations in this Cloud Foundry
-    </mat-error>
-  </mat-form-field>
-  <mat-form-field>
-    <mat-select #spaceSelect="ngModel"
+      (selectionChange)="cfOrgSpaceService.org.select.next($event.value)" required name="org"
+      [appFocus]="isMarketplaceMode && !(!cfOrgSpaceService.cf.select.getValue() || (cfOrgSpaceService.org.loading$ | async) || isRedeploy)"
+      class="block w-full border-b border-gray-300 dark:border-gray-600 pb-2">
+      @for (org of cfOrgSpaceService.org.list$ | async; track org) {
+        <app-option [value]="org.guid" [label]="org.name">
+          <span>{{ org.name }}</span>
+        </app-option>
+      }
+    </app-select>
+    @if (!(hasOrgs$ | async)) {
+      <p class="text-sm text-red-600 dark:text-red-400 mt-1">
+        There are no organizations in this Cloud Foundry
+      </p>
+    }
+  </div>
+  <div class="mb-4">
+    <label class="block text-sm font-medium mb-1">Space *</label>
+    <app-select #spaceSelect="ngModel"
       [disabled]="!cfOrgSpaceService.org.select.getValue() || (cfOrgSpaceService.space.loading$ | async) || isRedeploy"
       [ngModel]="cfOrgSpaceService.space.select.getValue()"
-      (selectionChange)="cfOrgSpaceService.space.select.next($event.value)" required placeholder="Space" name="space">
-      <mat-option *ngFor="let space of spaces$ | async" [value]="space.guid">
-        <span>{{ space.name }}</span>
-      </mat-option>
-    </mat-select>
-    <mat-error *ngIf="!(hasSpaces$ | async)">
-      There are no spaces in this organization
-    </mat-error>
-  </mat-form-field>
-  <p>Don't see your organization or space? Please make sure you have the relevant permissions.</p>
+      (selectionChange)="cfOrgSpaceService.space.select.next($event.value)" required name="space"
+      class="block w-full border-b border-gray-300 dark:border-gray-600 pb-2">
+      @for (space of spaces$ | async; track space) {
+        <app-option [value]="space.guid" [label]="space.name">
+          <span>{{ space.name }}</span>
+        </app-option>
+      }
+    </app-select>
+    @if (!(hasSpaces$ | async)) {
+      <p class="text-sm text-red-600 dark:text-red-400 mt-1">
+        There are no spaces in this organization
+      </p>
+    }
+  </div>
+  <p class="text-sm text-gray-600 dark:text-gray-400">Don't see your organization or space? Please make sure you have the relevant permissions.</p>
 </form>

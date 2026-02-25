@@ -1,9 +1,11 @@
-@import '../../theme.scss';
+@use '../../theme.scss';
+// Import missing mixins
+@use '../mixins' as mixins;
 
 $filters-width: 175px;
 
 .charts {
-  max-width: $layout-max-width;
+  max-width: var(--layout-max-width);
   margin: auto;
 
   &__header {
@@ -39,7 +41,7 @@ $filters-width: 175px;
       flex: 1;
       display: flex;
       flex-direction: column;
-      border-left: 1px solid $border-color;
+      border-left: 1px solid var(--color-border);
 
       app-chart-list {
         flex: 1;
@@ -50,12 +52,12 @@ $filters-width: 175px;
       &__topbar {
         display: flex;
         height: 40px;
-        border-bottom: 1px solid $border-color;
+        border-bottom: 1px solid var(--color-border);
         align-items: center;
         padding-left: 10px;
 
         * {
-          fill: lighten($layout-base, 50%);
+          fill: #9ca3af; // equivalent to light gray
         }
 
         input {
@@ -66,16 +68,16 @@ $filters-width: 175px;
           background: none;
           outline: none;
           margin-left: 5px;
-          color: $layout-base;
-          @include placeholder {
-            color: lighten($layout-base, 50%);
+          color: var(--color-layout-base);
+          @include mixins.placeholder {
+            color: #9ca3af; // equivalent to light gray
           }
         }
       }
     }
   }
 
-  @include mappy-bp(max-width small) {
+  @include mixins.mappy-bp(max-width small) {
 
     &__header__filters {
       display: inline-block;

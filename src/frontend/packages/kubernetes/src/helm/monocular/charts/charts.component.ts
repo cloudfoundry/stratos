@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { MatIconRegistry } from '@angular/material/icon';
+import {Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+
+import { MatIconRegistry } from '@stratosui/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 
@@ -7,19 +8,33 @@ import { Chart } from '../shared/models/chart';
 import { ChartsService } from '../shared/services/charts.service';
 import { ConfigService } from '../shared/services/config.service';
 import { ReposService } from '../shared/services/repos.service';
+import { LoaderComponent } from '../loader/loader.component';
+import { PanelComponent } from '../panel/panel.component';
+import { ListFiltersComponent } from '../list-filters/list-filters.component';
+import { ChartListComponent } from '../chart-list/chart-list.component';
+import { CustomIconComponent } from '../../../../../core/src/shared/components/custom-material/custom-material.component';
 
 @Component({
   selector: 'app-charts',
   templateUrl: './charts.component.html',
   styleUrls: ['./charts.component.scss'],
-  viewProviders: [MatIconRegistry]
+  viewProviders: [MatIconRegistry],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    LoaderComponent,
+    PanelComponent,
+    ListFiltersComponent,
+    ChartListComponent,
+    CustomIconComponent
+]
 })
 export class ChartsComponent implements OnInit {
   charts: Chart[] = [];
   orderedCharts: Chart[] = [];
   loading = true;
-  searchTerm: string;
-  searchTimeout: any;
+  searchTerm!: string;
+  searchTimeout!: ReturnType<typeof setTimeout>;
   filtersOpen = false;
 
   // Default filters
@@ -43,17 +58,14 @@ export class ChartsComponent implements OnInit {
   orderBy = 'name';
 
   // Repos
-  repoName: string;
-
-  constructor(
-    private chartsService: ChartsService,
-    private reposService: ReposService,
-    private route: ActivatedRoute,
-    private router: Router,
-    private config: ConfigService,
-    private mdIconRegistry: MatIconRegistry,
-    private sanitizer: DomSanitizer
-  ) { }
+  repoName!: string;
+  private chartsService = inject(ChartsService);
+  private reposService = inject(ReposService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private config = inject(ConfigService);
+  private mdIconRegistry = inject(MatIconRegistry);
+  private sanitizer = inject(DomSanitizer);
 
   ngOnInit() {
     this.mdIconRegistry.addSvgIcon(
@@ -104,7 +116,7 @@ export class ChartsComponent implements OnInit {
     });
   }
 
-  onSelectRepo(index) {
+  onSelectRepo(index: number): void {
     this.repoName = this.filters[0].items[index].value;
     this.filters[0].items = this.filters[0].items.map(r => {
       r.selected = r.value === this.repoName;
@@ -116,7 +128,7 @@ export class ChartsComponent implements OnInit {
     );
   }
 
-  onSelectOrderBy(index) {
+  onSelectOrderBy(index: number): void {
     this.orderBy = this.filters[1].items[index].value;
     this.filters[1].items = this.filters[1].items.map(o => {
       o.selected = o.value === this.orderBy;
@@ -125,11 +137,12 @@ export class ChartsComponent implements OnInit {
     this.orderedCharts = this.orderCharts(this.orderedCharts);
   }
 
-  searchChange(e) {
-    this.searchTerm = e.target.value;
+  searchChange(e: Event): void {
+    this.searchTerm = (e.target as HTMLInputElement).value;
     clearTimeout(this.searchTimeout);
     if (!this.searchTerm) {
-      return (this.orderedCharts = this.orderCharts(this.charts));
+      this.orderedCharts = this.orderCharts(this.charts);
+      return;
     }
     this.searchTimeout = setTimeout(() => this.searchCharts(), 1000);
   }
@@ -148,7 +161,7 @@ export class ChartsComponent implements OnInit {
   }
 
   // Sort charts
-  orderCharts(charts): Chart[] {
+  orderCharts(charts: Chart[]): Chart[] {
     switch (this.orderBy) {
       case 'created': {
         return charts.sort(this.sortByCreated).reverse();

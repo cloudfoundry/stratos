@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { getCurrentPageStartIndex, splitCurrentPage } from './local-list-controller.helpers';
 
 describe('LocalListController', () => {
@@ -10,7 +11,7 @@ describe('LocalListController', () => {
     8,
     9,
     10,
-    11
+    11,
   ];
 
   it('should get correct start index 1', () => {
@@ -31,7 +32,7 @@ describe('LocalListController', () => {
       5,
       6,
       7,
-      8
+      8,
     ], 3, 4);
     expect(start).toBe(9);
   });
@@ -117,7 +118,7 @@ describe('LocalListController', () => {
         5],
       6,
       7,
-      8
+      8,
     ], 3, 4);
     expect(data.entities).toEqual([
       0,
@@ -149,7 +150,7 @@ describe('LocalListController', () => {
       5,
       6,
       7,
-      8
+      8,
     ], 5, 2);
     expect(data.entities).toEqual([
       0,
@@ -163,7 +164,7 @@ describe('LocalListController', () => {
         5,
         6],
       7,
-      8
+      8,
     ]);
     expect(data.index).toEqual(5);
   });
@@ -181,7 +182,7 @@ describe('LocalListController', () => {
         4,
         5],
       5,
-      6
+      6,
     ], 5, 3);
     expect(data.entities).toEqual([
       0,
@@ -212,7 +213,7 @@ describe('LocalListController', () => {
       4,
       5,
       5,
-      6
+      6,
     ], 5, 3);
     expect(data.entities).toEqual([
       0,
@@ -243,7 +244,7 @@ describe('LocalListController', () => {
       4,
       5,
       5,
-      6
+      6,
     ], 5, 4);
     expect(data.entities).toEqual([
       0,
@@ -257,7 +258,7 @@ describe('LocalListController', () => {
       4,
       5,
       5,
-      6
+      6,
     ]);
     expect(data.index).toEqual(null);
   });

@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import {
   IListDataSource,
@@ -11,15 +13,15 @@ describe('KubeConfigTableName', () => {
   let component: KubeConfigTableNameComponent;
   let fixture: ComponentFixture<KubeConfigTableNameComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       imports: [
-        ...KubernetesBaseTestModules
-      ],
-      declarations: [KubeConfigTableNameComponent]
-    })
-      .compileComponents();
-  }));
+        ...KubernetesBaseTestModules,
+
+        KubeConfigTableNameComponent,
+      ]}).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubeConfigTableNameComponent);

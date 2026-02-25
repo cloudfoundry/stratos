@@ -1,0 +1,143 @@
+#!/usr/bin/env bash
+# Stratos Development Environment Bootstrap Script
+# This script initializes a fresh Stratos checkout by building required dependencies
+# in the correct order before running bun install.
+
+set -e  # Exit on any error
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Print colored output
+print_status() { echo -e "${BLUE}==>${NC} $1"; }
+print_success() { echo -e "${GREEN}✓${NC} $1"; }
+print_error() { echo -e "${RED}✗${NC} $1"; }
+print_warning() { echo -e "${YELLOW}⚠${NC} $1"; }
+
+print_status "Stratos Development Environment Bootstrap"
+echo ""
+
+# Check prerequisites
+print_status "Checking prerequisites..."
+
+# Check Node.js
+if ! command -v node &> /dev/null; then
+    print_error "Node.js is not installed. Please install Node.js 24 or later."
+    exit 1
+fi
+
+NODE_VERSION=$(node --version | cut -d'v' -f2 | cut -d'.' -f1)
+if [ "$NODE_VERSION" -lt 24 ]; then
+    print_warning "Node.js version is $NODE_VERSION. Version 24 or later is recommended."
+else
+    print_success "Node.js $(node --version) found"
+fi
+
+# Check Bun
+if ! command -v bun &> /dev/null; then
+    print_error "Bun is not installed. Please install Bun: https://bun.sh"
+    exit 1
+fi
+print_success "Bun $(bun --version) found"
+
+# Check Go
+if ! command -v go &> /dev/null; then
+    print_error "Go is not installed. Please install Go 1.21 or later."
+    exit 1
+fi
+print_success "Go $(go version | awk '{print $3}') found"
+
+echo ""
+
+# Step 1: Build devkit package
+print_status "Step 1/4: Building devkit package..."
+if [ ! -d "src/frontend/packages/devkit" ]; then
+    print_error "Devkit package directory not found. Are you in the Stratos root directory?"
+    exit 1
+fi
+
+cd src/frontend/packages/devkit
+
+# Remove old lockfile if it exists (it's incompatible with modern npm/bun)
+if [ -f "package-lock.json" ]; then
+    print_warning "Removing old package-lock.json from devkit"
+    rm package-lock.json
+fi
+
+# Use npm for devkit build to avoid circular dependency with bun
+print_status "Installing devkit dependencies..."
+npm install --legacy-peer-deps > /dev/null 2>&1
+
+print_status "Building devkit..."
+npm run build > /dev/null 2>&1
+
+cd ../../../..
+
+if [ -d "dist-devkit" ]; then
+    print_success "Devkit built successfully"
+else
+    print_error "Devkit build failed - dist-devkit directory not created"
+    exit 1
+fi
+
+# Step 2: Generate extension module
+print_status "Step 2/4: Generating extension imports..."
+if [ ! -f "build/extension-generator.mjs" ]; then
+    print_error "extension-generator.mjs not found"
+    exit 1
+fi
+
+node build/extension-generator.mjs
+
+if [ -f "src/frontend/packages/core/src/_custom-import.module.ts" ]; then
+    print_success "Extension module generated"
+else
+    print_error "Extension module generation failed"
+    exit 1
+fi
+
+# Step 3: Setup development configuration
+print_status "Step 3/4: Setting up development configuration..."
+if [ ! -f "build/dev-setup.js" ]; then
+    print_error "dev-setup.js not found"
+    exit 1
+fi
+
+# Run dev-setup as CommonJS (temporarily rename to .cjs)
+mv build/dev-setup.js build/dev-setup.cjs 2>/dev/null || true
+if [ -f "build/dev-setup.cjs" ]; then
+    node build/dev-setup.cjs
+    mv build/dev-setup.cjs build/dev-setup.js
+else
+    node build/dev-setup.js
+fi
+
+if [ -f "proxy.conf.js" ]; then
+    print_success "Development configuration created"
+else
+    print_warning "proxy.conf.js not created (may already exist)"
+fi
+
+# Step 4: Clean up any stray node_modules in workspace packages
+print_status "Step 4/4: Cleaning workspace..."
+find src/frontend/packages -type d -name "node_modules" -maxdepth 2 2>/dev/null | while read dir; do
+    print_warning "Removing unexpected node_modules: $dir"
+    rm -rf "$dir"
+done
+print_success "Workspace cleaned"
+
+echo ""
+print_success "Bootstrap complete!"
+echo ""
+print_status "Next steps:"
+echo "  1. Run: bun install"
+echo "  2. Run: make dev-frontend (for development)"
+echo "     OR:  make build (for production build)"
+echo ""
+print_status "For backend development, also run:"
+echo "  make build-backend"
+echo ""

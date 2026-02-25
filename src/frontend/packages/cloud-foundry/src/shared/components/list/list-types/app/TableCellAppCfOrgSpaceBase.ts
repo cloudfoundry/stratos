@@ -9,7 +9,7 @@ import { CfOrgSpaceLabelService } from '../../../../services/cf-org-space-label.
 
 export class TableCellAppCfOrgSpaceBase extends TableCellCustom<APIResource<IApp>> {
 
-  public cfOrgSpace: CfOrgSpaceLabelService;
+  public cfOrgSpace!: CfOrgSpaceLabelService;
 
   constructor(private store: Store<CFAppState>) {
     super();

@@ -1,45 +1,47 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit , ChangeDetectionStrategy } from '@angular/core';
 
-import { MetricsConfig } from '../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
-import { MetricsLineChartConfig } from '../../../../../core/src/shared/components/metrics-chart/metrics-chart.types';
-import { MetricsChartHelpers } from '../../../../../core/src/shared/components/metrics-chart/metrics.component.helpers';
-import { MetricQueryConfig } from '../../../../../store/src/actions/metrics.actions';
-import { IMetricMatrixResult } from '../../../../../store/src/types/base-metric.types';
-import { IMetricApplication, MetricQueryType } from '../../../../../store/src/types/metric.types';
+import { MetricsChartComponent, MetricsConfig, MetricsLineChartConfig, MetricsChartHelpers, MetricsRangeSelectorComponent } from '@stratosui/core';
+import { MetricQueryConfig, IMetricMatrixResult, IMetricApplication, MetricQueryType } from '@stratosui/store';
 import { FetchApplicationMetricsAction } from '../../../actions/cf-metrics.actions';
 
 @Component({
   selector: 'app-application-instance-chart',
   templateUrl: './application-instance-chart.component.html',
-  styleUrls: ['./application-instance-chart.component.scss']
+  styleUrls: ['./application-instance-chart.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    MetricsChartComponent,
+    MetricsRangeSelectorComponent
+  ]
 })
 export class ApplicationInstanceChartComponent implements OnInit {
 
   @Input()
-  private appGuid: string;
+  private appGuid!: string;
 
   @Input()
-  private endpointGuid: string;
+  private endpointGuid!: string;
 
   @Input()
-  private yAxisLabel: string;
+  private yAxisLabel!: string;
 
   // Prometheus query string
   @Input()
-  private queryString: string;
+  private queryString!: string;
 
   @Input()
-  private seriesTranslation: string;
+  private seriesTranslation!: string;
 
   @Input()
   private queryRange = false;
 
   @Input()
-  public title: string;
+  public title!: string;
 
-  public instanceChartConfig: MetricsLineChartConfig;
+  public instanceChartConfig!: MetricsLineChartConfig;
 
-  public instanceMetricConfig: MetricsConfig<IMetricMatrixResult<IMetricApplication>>;
+  public instanceMetricConfig!: MetricsConfig<IMetricMatrixResult<IMetricApplication>>;
 
   constructor() { }
 

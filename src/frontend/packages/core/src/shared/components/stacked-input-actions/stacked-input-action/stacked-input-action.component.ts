@@ -1,5 +1,5 @@
-import {
-  AfterContentInit,
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, AfterContentInit,
   Component,
   ElementRef,
   EventEmitter,
@@ -8,12 +8,16 @@ import {
   OnInit,
   Output,
   ViewChild,
-} from '@angular/core';
-import { UntypedFormControl, Validators } from '@angular/forms';
+ } from '@angular/core';
+import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { CustomFormFieldComponent, AppErrorComponent, AppInputDirective } from '../../../components/custom-form-field/custom-form-field.component';
+import { CustomTooltipDirective } from '../../custom-tooltip/custom-tooltip.directive';
 import { Observable, Subscription } from 'rxjs';
 
 import { safeUnsubscribe } from '../../../../core/utils.service';
+import { BooleanIndicatorComponent } from '../../boolean-indicator/boolean-indicator.component';
 import { StackedInputActionsState } from '../stacked-input-actions.component';
+import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 
 export enum StackedInputActionResult {
   PROCESSING = 'PROCESSING',
@@ -43,7 +47,19 @@ export interface StackedInputActionUpdate {
 @Component({
   selector: 'app-stacked-input-action',
   templateUrl: './stacked-input-action.component.html',
-  styleUrls: ['./stacked-input-action.component.scss']
+  styleUrls: ['./stacked-input-action.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    CustomFormFieldComponent,
+    AppErrorComponent,
+    AppInputDirective,
+    CustomIconComponent,
+    CustomTooltipDirective,
+    BooleanIndicatorComponent
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StackedInputActionComponent implements OnInit, OnDestroy, AfterContentInit {
 
@@ -55,11 +71,11 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
       uniqueError: 'Email is not unique'
     }
   };
-  @Input() stateIn$: Observable<StackedInputActionsState>;
-  @Input() position: number;
-  @Input() showRemove: boolean;
-  @Input() key: number;
-  private pConfig: StackedInputActionConfig;
+  @Input() stateIn$!: Observable<StackedInputActionsState>;
+  @Input() position!: number;
+  @Input() showRemove!: boolean;
+  @Input() key!: number;
+  private pConfig!: StackedInputActionConfig;
   @Input()
   set config(config: StackedInputActionConfig) {
     this.pConfig = config;
@@ -71,26 +87,26 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
   @Output() stateOut = new EventEmitter<StackedInputActionUpdate>();
   @Output() remove = new EventEmitter<any>();
 
-  @ViewChild('inputElement', { static: true }) inputElement: ElementRef;
+  @ViewChild('inputElement', { static: true }) inputElement!: ElementRef;
 
   public result = StackedInputActionResult;
-  public textFormControl = new UntypedFormControl('', [Validators.required, this.uniqueValidator.bind(this)]);
-  public state: StackedInputActionsState;
+  public textFormControl = new FormControl<string>('', [Validators.required, this.uniqueValidator.bind(this)]);
+  public state!: StackedInputActionsState;
   private subs: Subscription[] = [];
-  private otherValues: string[];
+  private otherValues!: string[];
 
   ngOnInit() {
     const validators = [Validators.required, this.uniqueValidator.bind(this)];
     if (this.config.isEmailInput) {
       validators.push(Validators.email);
     }
-    this.textFormControl = new UntypedFormControl('', validators);
+    this.textFormControl = new FormControl<string>('', validators);
 
     // Emit any changes of form state outwards.
     this.subs.push(this.textFormControl.valueChanges.subscribe((value) => {
       this.stateOut.emit({
         key: this.key,
-        value,
+        value: value ?? '',
         // Component is valid if form is ok OR it's already succeeded
         valid: this.state && this.state.result === StackedInputActionResult.SUCCEEDED || this.textFormControl.valid
       });
@@ -108,7 +124,7 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
     this.inputElement.nativeElement.focus();
   }
 
-  uniqueValidator(control: UntypedFormControl) {
+  uniqueValidator(control: FormControl<string>) {
     // custom unique validator that has quick access to the recently changed otherValues array
     if (!this.otherValues ||
       !this.otherValues.find(otherValue => otherValue === control.value)) {

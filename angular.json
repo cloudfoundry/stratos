@@ -9,42 +9,101 @@
       "projectType": "application",
       "architect": {
         "build": {
-          "builder": "@angular-builders/custom-webpack:browser",
+          "builder": "@stratos/builders:prebuild-application",
           "options": {
-            "allowedCommonJsDependencies": [
-              "moment-timezone",
-              "js-yaml",
-              "webcola",
-              "dagre",
-              "lodash/isEqual",
-              "ajv",
-              "lodash/filter",
-              "lodash/map",
-              "lodash/uniqueId",
-              "lodash/cloneDeep"
-            ],
-            "customWebpackConfig": {
-              "path": "./dist-devkit/build/main.js"
+            "browserTarget": "stratos:build-internal",
+            "prebuildScripts": [
+              {
+                "name": "Clean symlinks",
+                "script": "sh -c 'mv build/clean-symlinks.js build/clean-symlinks.cjs && node build/clean-symlinks.cjs && mv build/clean-symlinks.cjs build/clean-symlinks.js'",
+                "phase": 1,
+                "cache": true,
+                "cacheKey": ["src/frontend/packages/**/package.json"],
+                "timeout": 30000,
+                "required": true
+              },
+              {
+                "name": "Store git metadata",
+                "script": "sh -c 'mv build/store-git-metadata.js build/store-git-metadata.cjs && node build/store-git-metadata.cjs && mv build/store-git-metadata.cjs build/store-git-metadata.js'",
+                "phase": 1,
+                "cache": true,
+                "cacheKey": [".git/HEAD", ".git/refs/heads/**"],
+                "timeout": 30000,
+                "required": true
+              },
+              {
+                "name": "Generate custom imports",
+                "script": "node build/extension-generator.mjs",
+                "phase": 2,
+                "cache": true,
+                "cacheKey": ["custom-src/**/*", "src/frontend/packages/core/custom-extensions.json"],
+                "timeout": 60000,
+                "required": true
+              },
+              {
+                "name": "Prepare backend",
+                "script": "node dist-devkit/src/backend.js",
+                "phase": 2,
+                "cache": true,
+                "cacheKey": ["dist-devkit/src/backend.js", "src/jetstream/**/*.go"],
+                "timeout": 60000,
+                "required": false
+              }
+            ]
+          },
+          "configurations": {
+            "development": {
+              "browserTarget": "stratos:build-internal:development"
             },
-            "indexTransform": "./dist-devkit/build/index.transform.js",
-            "preserveSymlinks": true,
+            "production": {
+              "browserTarget": "stratos:build-internal:production"
+            },
+            "desktop": {
+              "browserTarget": "stratos:build-internal:desktop"
+            }
+          }
+        },
+        "build-internal": {
+          "builder": "@angular-devkit/build-angular:application",
+          "options": {
             "outputPath": "dist",
             "index": "src/frontend/packages/core/src/index.html",
-            "main": "src/frontend/packages/core/src/main.ts",
+            "browser": "src/frontend/packages/core/src/main.ts",
+            "polyfills": [
+              "src/frontend/packages/core/src/polyfills.ts"
+            ],
+            "allowedCommonJsDependencies": [
+              "deepmerge",
+              "xterm",
+              "xterm-addon-fit",
+              "dagre",
+              "webcola",
+              "intersect",
+              "expect-type"
+            ],
             "tsConfig": "src/frontend/packages/core/tsconfig.app.json",
-            "polyfills": "src/frontend/packages/core/src/polyfills.ts",
             "assets": [
-              "src/frontend/packages/core/assets",
               {
                 "glob": "**/*",
-                "input": "custom-src/frontend/assets/custom",
-                "output": "/core/assets/custom"
+                "input": "src/frontend/packages/core/assets",
+                "output": "/core/assets"
               },
               "src/frontend/packages/core/favicon.ico",
               {
                 "glob": "**/*",
-                "input": "node_modules/ngx-monaco-editor/assets/monaco",
-                "output": "/core/assets/monaco"
+                "input": "custom-src/frontend/assets/custom",
+                "output": "/core/assets/custom",
+                "ignore": ["**/.gitkeep"]
+              },
+              {
+                "glob": "**/*",
+                "input": "src/frontend/packages/kubernetes/assets",
+                "output": "/kubernetes/assets"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/monaco-editor/min/vs",
+                "output": "/core/assets/monaco/vs"
               },
               {
                 "glob": "**/*",
@@ -53,77 +112,77 @@
               }
             ],
             "styles": [
+              "src/frontend/packages/theme/styles/main.scss",
+              "src/frontend/packages/theme/theme-transitions.scss",
               "src/frontend/packages/core/src/styles.scss",
               "node_modules/xterm/css/xterm.css"
             ],
-            "scripts": []
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "src/frontend/packages/core/sass",
+                "src/frontend/packages/core/src/sass"
+              ]
+            }
           },
           "configurations": {
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
+            },
             "production": {
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
-              "namedChunks": false,
               "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": true,
-              "fileReplacements": [{
-                "replace": "src/frontend/packages/core/src/environments/environment.ts",
-                "with": "src/frontend/packages/core/src/environments/environment.prod.ts"
-              }]
+              "fileReplacements": [
+                {
+                  "replace": "src/frontend/packages/core/src/environments/environment.ts",
+                  "with": "src/frontend/packages/core/src/environments/environment.prod.ts"
+                }
+              ]
             },
             "desktop": {
               "optimization": false,
               "outputHashing": "all",
               "sourceMap": false,
-              "namedChunks": false,
               "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": false,
-              "fileReplacements": [{
-                "replace": "src/frontend/packages/core/src/environments/environment.ts",
-                "with": "src/frontend/packages/core/src/environments/environment.desktop.ts"
-              }]
+              "fileReplacements": [
+                {
+                  "replace": "src/frontend/packages/core/src/environments/environment.ts",
+                  "with": "src/frontend/packages/core/src/environments/environment.desktop.ts"
+                }
+              ]
             }
-
           }
         },
         "serve": {
-          "builder": "@angular-builders/custom-webpack:dev-server",
+          "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "sslCert": "dev-ssl/server.crt",
-            "proxyConfig": "proxy.conf.js",
+            "buildTarget": "stratos:build-internal:development",
+            "port": 5440,
             "ssl": true,
             "sslKey": "dev-ssl/server.key",
-            "browserTarget": "stratos:build"
+            "sslCert": "dev-ssl/server.crt",
+            "proxyConfig": "proxy.conf.cjs"
           },
           "configurations": {
+            "development": {
+              "buildTarget": "stratos:build-internal:development"
+            },
             "production": {
-              "browserTarget": "stratos:build:production"
+              "buildTarget": "stratos:build-internal:production"
             },
             "desktop": {
-              "browserTarget": "stratos:build:desktop"
+              "buildTarget": "stratos:build-internal:desktop"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "stratos:build"
-          }
-        }
-      }
-    },
-    "stratos-e2e": {
-      "root": "e2e",
-      "sourceRoot": "",
-      "projectType": "application",
-      "architect": {
-        "e2e": {
-          "builder": "@angular-devkit/build-angular:protractor",
-          "options": {
-            "protractorConfig": "./protractor.conf.js",
-            "devServerTarget": "stratos:serve"
+            "buildTarget": "stratos:build"
           }
         }
       }
@@ -184,33 +243,6 @@
               "buildOptimizer": true
             }
           }
-        },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "preserveSymlinks": true,
-            "main": "src/frontend/packages/core/src/test.ts",
-            "polyfills": "src/frontend/packages/core/src/polyfills.ts",
-            "tsConfig": "src/frontend/packages/core/tsconfig.spec.json",
-            "karmaConfig": "src/frontend/packages/core/karma.conf.js",
-            "styles": [
-              "src/frontend/packages/core/src/styles.css"
-            ],
-            "scripts": [],
-            "assets": [
-              "src/frontend/packages/core/src/favicon.ico",
-              {
-                "glob": "**/*",
-                "input": "src/frontend/packages/core/assets",
-                "output": "/core/assets/custom"
-              },
-              {
-                "glob": "**/*",
-                "input": "custom-src/frontend/assets/custom",
-                "output": "/core/assets/custom"
-              }
-            ]
-          }
         }
       }
     },
@@ -230,14 +262,6 @@
             "production": {
               "tsConfig": "src/frontend/packages/store/tsconfig.lib.prod.json"
             }
-          }
-        },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "src/frontend/packages/store/src/test.ts",
-            "tsConfig": "src/frontend/packages/store/tsconfig.spec.json",
-            "karmaConfig": "src/frontend/packages/store/karma.conf.js"
           }
         }
       }
@@ -260,14 +284,6 @@
             }
           }
         },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "src/frontend/packages/extension/src/test.ts",
-            "tsConfig": "src/frontend/packages/extension/tsconfig.spec.json",
-            "karmaConfig": "src/frontend/packages/extension/karma.conf.js"
-          }
-        },
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
@@ -281,7 +297,7 @@
           }
         }
       }
-    },    
+    },
     "shared": {
       "root": "src/frontend/packages/shared",
       "sourceRoot": "src/frontend/packages/shared/src",
@@ -293,14 +309,6 @@
           "options": {
             "tsConfig": "src/frontend/packages/shared/tsconfig.lib.json",
             "project": "src/frontend/packages/shared/ng-package.json"
-          }
-        },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "src/frontend/packages/shared/src/test.ts",
-            "tsConfig": "src/frontend/packages/shared/tsconfig.spec.json",
-            "karmaConfig": "src/frontend/packages/shared/karma.conf.js"
           }
         }
       }
@@ -322,14 +330,6 @@
               "tsConfig": "src/frontend/packages/cloud-foundry/tsconfig.lib.prod.json"
             }
           }
-        },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "src/frontend/packages/cloud-foundry/src/test.ts",
-            "tsConfig": "src/frontend/packages/cloud-foundry/tsconfig.spec.json",
-            "karmaConfig": "src/frontend/packages/cloud-foundry/karma.conf.js"
-          }
         }
       }
     },
@@ -350,14 +350,6 @@
               "tsConfig": "src/frontend/packages/cf-autoscaler/tsconfig.lib.prod.json"
             }
           }
-        },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "src/frontend/packages/cf-autoscaler/src/test.ts",
-            "tsConfig": "src/frontend/packages/cf-autoscaler/tsconfig.spec.json",
-            "karmaConfig": "src/frontend/packages/cf-autoscaler/karma.conf.js"
-          }
         }
       }
     },
@@ -366,34 +358,15 @@
       "sourceRoot": "src/frontend/packages/kubernetes/src",
       "projectType": "library",
       "prefix": "lib",
-      "architect": {
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "src/frontend/packages/kubernetes/src/test.ts",
-            "tsConfig": "src/frontend/packages/kubernetes/tsconfig.spec.json",
-            "karmaConfig": "src/frontend/packages/kubernetes/karma.conf.js"
-          }
-        }
-      }
+      "architect": {}
     },
     "git": {
       "root": "src/frontend/packages/git",
       "sourceRoot": "src/frontend/packages/git/src",
       "projectType": "library",
       "prefix": "lib",
-      "architect": {
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "src/frontend/packages/git/src/test.ts",
-            "tsConfig": "src/frontend/packages/git/tsconfig.spec.json",
-            "karmaConfig": "src/frontend/packages/git/karma.conf.js"
-          }
-        }
-      }
+      "architect": {}
     }
-
   },
   "schematics": {
     "@schematics/angular:component": {
@@ -405,6 +378,9 @@
     }
   },
   "cli": {
-    "analytics": false
+    "analytics": false,
+    "cache": {
+      "enabled": true
+    }
   }
 }

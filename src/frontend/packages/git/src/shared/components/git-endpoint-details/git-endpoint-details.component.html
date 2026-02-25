@@ -1,9 +1,14 @@
-<div class="git-details" *ngIf="name else noUser">
-  <div class="git-details__line">
-    <span class="git-details__icon" *ngIf="avatar">
-      <img src="{{ avatar }}" alt="@{{ name }}">
-    </span>
-    {{ name }}
+@if (name) {
+  <div class="flex items-center space-x-2">
+    <div class="flex items-center space-x-2">
+      @if (avatar) {
+        <span class="flex-shrink-0">
+          <img src="{{ avatar }}" alt="@{{ name }}" class="w-6 h-6 rounded-full">
+        </span>
+      }
+      <span class="text-gray-900">{{ name }}</span>
+    </div>
   </div>
-</div>
-<ng-template #noUser>-</ng-template>
+} @else {
+  <span class="text-gray-500">-</span>
+}

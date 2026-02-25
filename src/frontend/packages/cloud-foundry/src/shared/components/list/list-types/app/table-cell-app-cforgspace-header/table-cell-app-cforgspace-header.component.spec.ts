@@ -1,7 +1,8 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { StoreModule } from '@ngrx/store';
 
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import {
   ApplicationStateIconComponent,
 } from '../../../../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.component';
@@ -11,40 +12,36 @@ import {
 import {
   ApplicationStateComponent,
 } from '../../../../../../../../core/src/shared/components/application-state/application-state.component';
-import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { PaginationMonitorFactory, APIResource } from '@stratosui/store';
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { IApp } from '../../../../../../cf-api.types';
 import { ApplicationStateService } from '../../../../../services/application-state.service';
 import { TableCellAppStatusComponent } from '../table-cell-app-status/table-cell-app-status.component';
-import { TableCellAppCfOrgSpaceHeaderComponent } from './table-cell-app-cforgspace-header.component';
-
+import { TableCellAppCfOrgSpaceHeaderComponent } from "./table-cell-app-cforgspace-header.component";
 describe('TableCellAppCfOrgSpaceHeaderComponent', () => {
   let component: TableCellAppCfOrgSpaceHeaderComponent;
   let fixture: ComponentFixture<TableCellAppCfOrgSpaceHeaderComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
         TableCellAppStatusComponent,
         ApplicationStateComponent,
         ApplicationStateIconComponent,
-        ApplicationStateIconPipe
-      ],
-      imports: [
+        ApplicationStateIconPipe,
         StoreModule,
-        CoreModule,
-        generateCfStoreModules()
+        generateCfStoreModules(),
       ],
       providers: [
+        
         ApplicationStateService,
-        PaginationMonitorFactory
+        PaginationMonitorFactory,
+
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellAppCfOrgSpaceHeaderComponent);
     component = fixture.componentInstance;
     component.row = { entity: {}, metadata: {} } as APIResource<IApp>;

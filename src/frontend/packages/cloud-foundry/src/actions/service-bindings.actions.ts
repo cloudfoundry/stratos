@@ -73,7 +73,7 @@ export class DeleteServiceBinding extends CFStartAction implements ICFAction {
 }
 
 export class FetchAllServiceBindings extends CFStartAction implements PaginatedAction {
-  constructor(public endpointGuid: string, public paginationKey: string, public includeRelations = [], public populateMissing = false) {
+  constructor(public endpointGuid: string, public paginationKey: string, public includeRelations: string[] = [], public populateMissing = false) {
     super();
     this.options = new HttpRequest(
       'GET',

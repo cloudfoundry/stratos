@@ -1,8 +1,10 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { Portal } from '@angular/cdk/portal';
-import { AfterViewInit, Component, NgZone, OnDestroy, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
-import { MatDrawer } from '@angular/material/sidenav';
-import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router } from '@angular/router';
+import { Portal, PortalModule } from '@angular/cdk/portal';
+import { ChangeDetectionStrategy, AfterViewInit, Component, NgZone, OnDestroy, OnInit, ViewChild, ViewContainerRef  } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatDrawer } from '../../../shared/services/tailwind-material-replacements';
+import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router, RouterModule } from '@angular/router';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import { Store } from '@ngrx/store';
 import {
   GetCurrentUsersRelations,
@@ -23,27 +25,41 @@ import { EndpointsService } from '../../../core/endpoints.service';
 import { IHeaderBreadcrumbLink } from '../../../shared/components/page-header/page-header.types';
 import { SidePanelMode, SidePanelService } from '../../../shared/services/side-panel.service';
 import { TabNavService } from '../../../tab-nav.service';
-import { IPageSideNavTab } from '../page-side-nav/page-side-nav.component';
+import { PageSideNavComponent, IPageSideNavTab } from '../page-side-nav/page-side-nav.component';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
-import { SideNavItem } from './../side-nav/side-nav.component';
+import { SideNavComponent, SideNavItem } from './../side-nav/side-nav.component';
+import { RoutingIndicatorComponent } from '../../../shared/components/routing-indicator/routing-indicator.component';
+import { ShowPageHeaderComponent } from '../../../shared/components/page-header/show-page-header/show-page-header.component';
 
 @Component({
   selector: 'app-dashboard-base',
   templateUrl: './dashboard-base.component.html',
-  styleUrls: ['./dashboard-base.component.scss']
+  styleUrls: ['./dashboard-base.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    PortalModule,
+    ScrollingModule,
+    SideNavComponent,
+    PageSideNavComponent,
+    ShowPageHeaderComponent,
+    RoutingIndicatorComponent
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 
 export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit {
-  public activeTabLabel$: Observable<string>;
-  public subNavData$: Observable<[string, Portal<any>, IPageSideNavTab, IHeaderBreadcrumbLink[]]>;
-  public isMobile$: Observable<boolean>;
-  public sideNavMode$: Observable<string>;
-  public sideNavMode: string;
-  public mainNavState$: Observable<{ mode: string; opened: boolean; iconMode: boolean, }>;
-  public rightNavState$: Observable<{ opened: boolean, component?: object, props?: object, }>;
-  private dashboardState$: Observable<DashboardState>;
-  public noMargin$: Observable<boolean>;
-  private closeSub: Subscription;
+  public activeTabLabel$!: Observable<string>;
+  public subNavData$!: Observable<[string, Portal<any>, IPageSideNavTab, IHeaderBreadcrumbLink[]]>;
+  public isMobile$: Observable<boolean> = of(false);
+  public sideNavMode$!: Observable<string>;
+  public sideNavMode!: string;
+  public mainNavState$: Observable<{ mode: string; opened: boolean; iconMode: boolean, }> = of({ mode: 'side', opened: true, iconMode: false });
+  public rightNavState$!: Observable<{ opened: boolean, component?: object, props?: object, }>;
+  private dashboardState$: Observable<DashboardState> = of({} as DashboardState);
+  public noMargin$: Observable<boolean> = of(false);
+  private closeSub!: Subscription;
   private mobileSub: Subscription;
   private drawer: MatDrawer;
   public iconModeOpen = false;
@@ -52,9 +68,9 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   sideNavTabs: SideNavItem[] = this.getNavigationRoutes();
   sideNaveMode = 'side';
 
-  @ViewChild('previewPanelContainer', { read: ViewContainerRef }) previewPanelContainer: ViewContainerRef;
+  @ViewChild('previewPanelContainer', { read: ViewContainerRef, static: false }) previewPanelContainer!: ViewContainerRef;
 
-  @ViewChild('content') public content;
+  @ViewChild('content', { static: false }) public content: any;
 
   // Slide-in side panel mode
   sidePanelMode: SidePanelMode = SidePanelMode.Modal;
@@ -106,9 +122,9 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
 
   @ViewChild('sidenav') set sidenav(drawer: MatDrawer) {
     this.drawer = drawer;
-    if (!this.closeSub) {
+    if (!this.closeSub && drawer && drawer.closedStart) {
       // We need this for mobile to ensure the state is synced when the dashboard is closed by clicking on the backdrop.
-      this.closeSub = drawer.closedStart.pipe(withLatestFrom(this.dashboardState$)).subscribe(([change, state]) => {
+      this.closeSub = drawer.closedStart.pipe(withLatestFrom(this.dashboardState$)).subscribe(([change, state]: [any, DashboardState]) => {
         if (state.isMobile) {
           this.store.dispatch(new CloseSideNav());
         }
@@ -119,9 +135,11 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   public redrawSideNav() {
     // We need to do this to ensure there isn't a space left behind
     // when going from mobile to desktop
-    this.ngZone.runOutsideAngular(() => {
-      setTimeout(() => this.drawer._modeChanged.next(), 250);
-    });
+    if (this.drawer && this.drawer._modeChanged) {
+      this.ngZone.runOutsideAngular(() => {
+        setTimeout(() => this.drawer._modeChanged.next(), 250);
+      });
+    }
   }
 
   dispatchRelations() {
@@ -137,13 +155,13 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   ngOnInit() {
-    this.subNavData$ = combineLatest(
+    this.subNavData$ = combineLatest([
       this.tabNavService.getCurrentTabHeaderObservable().pipe(
         startWith(null)
       ),
       this.tabNavService.tabSubNav$,
       this.tabNavService.tabSubNavBreadcrumbs$
-    ).pipe(map(([tabNav, tabSubNav, tabSubNavBreadcrumb]) => [tabNav ? tabNav.label : null, tabSubNav, tabNav, tabSubNavBreadcrumb]));
+    ]).pipe(map(([tabNav, tabSubNav, tabSubNavBreadcrumb]: [any, any, any]) => [tabNav ? tabNav.label : null, tabSubNav, tabNav, tabSubNavBreadcrumb]));
 
     // Register all health checks for endpoint types that support this
     entityCatalog.getAllEndpointTypes().forEach(epType => {
@@ -153,12 +171,17 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     });
 
     this.dispatchRelations();
+    // Initialize user favorites - fire and forget action, no subscription needed
     stratosEntityCatalog.userFavorite.api.getAll();
   }
 
   ngOnDestroy() {
-    this.mobileSub.unsubscribe();
-    this.closeSub.unsubscribe();
+    if (this.mobileSub) {
+      this.mobileSub.unsubscribe();
+    }
+    if (this.closeSub) {
+      this.closeSub.unsubscribe();
+    }
     this.sidePanelService.unsetContainer();
   }
 
@@ -192,7 +215,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     if (!routes) {
       return [];
     }
-    return routes.reduce((nav, route) => {
+    return routes.reduce((nav: SideNavItem[], route: Route) => {
       if (route.data && route.data.stratosNavigation) {
         const item: SideNavItem = {
           ...route.data.stratosNavigation,

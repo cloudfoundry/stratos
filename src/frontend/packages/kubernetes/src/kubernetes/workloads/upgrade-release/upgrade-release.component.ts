@@ -1,14 +1,18 @@
-import { Component, ViewChild } from '@angular/core';
+import { AsyncPipe } from '@angular/common';
+import {Component, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
+import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
+import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import {
   StepComponent,
   StepOnNextFunction,
   StepOnNextResult,
 } from '../../../../../core/src/shared/components/stepper/step/step.component';
+import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
 import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { ChartsService } from '../../../helm/monocular/shared/services/charts.service';
 import { createMonocularProviders } from '../../../helm/monocular/stratos-monocular-providers.helpers';
@@ -24,6 +28,16 @@ import { ReleaseUpgradeVersionsListConfig } from './release-version-list-config'
   selector: 'app-upgrade-release',
   templateUrl: './upgrade-release.component.html',
   styleUrls: ['./upgrade-release.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    AsyncPipe,
+    ChartValuesEditorComponent,
+    ListComponent,
+    PageHeaderComponent,
+    StepComponent,
+    SteppersComponent
+  ],
   providers: [
     HelmReleaseHelperService,
     {
@@ -55,23 +69,28 @@ export class UpgradeReleaseComponent {
   public showAdvancedOptions = false;
 
   private chartUrl: string;
+  private store = inject(Store<any>);
+  public helper = inject(HelmReleaseHelperService);
+  private chartsService = inject(ChartsService);
 
-  constructor(
-    store: Store<any>,
-    public helper: HelmReleaseHelperService,
-    private chartsService: ChartsService,
-  ) {
+
+
+  constructor() {
+
 
     this.cancelUrl = `/workloads/${this.helper.guid}`;
 
     this.helper.hasUpgrade(true).pipe(
       filter(c => !!c),
-      first()
+      first(undefined, null)
     ).subscribe(chart => {
+      if (!chart) {
+        return;
+      }
       const name = chart.upgrade.name;
       const repoName = chart.upgrade.repo.name;
       const version = chart.release.chart.metadata.version;
-      this.listConfig = new ReleaseUpgradeVersionsListConfig(store, repoName, name, version, chart.monocularEndpointId);
+      this.listConfig = new ReleaseUpgradeVersionsListConfig(this.store, repoName, name, version, chart.monocularEndpointId);
       this.monocularEndpointId = chart.monocularEndpointId;
 
       // First step is valid when a version has been selected
@@ -85,6 +104,8 @@ export class UpgradeReleaseComponent {
         })
       );
     });
+
+
   }
 
   // Ensure the editor is resized when the overrides step becomes visible
@@ -103,8 +124,11 @@ export class UpgradeReleaseComponent {
     return combineLatest(
       [this.helper.release$, this.chartsService.getVersionFromEndpoint(endpointID, chart.repo.name, chart.name, version)]
     ).pipe(
-      first(),
+      first(undefined, [null, null]),
       tap(([release, chartVersionDetail]) => {
+        if (!release || !chartVersionDetail) {
+          return;
+        }
         this.chartUrl = this.chartsService.getChartURL(chartVersionDetail);
         const schemaUrl = this.chartsService.getChartSchemaURL(chartVersionDetail, chart.name, chart.repo);
         this.config = {
@@ -151,7 +175,7 @@ export class UpgradeReleaseComponent {
         pairwise(),
         filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
         map(([, newVal]) => newVal),
-        map(result => ({
+        map((result: ActionState) => ({
           success: !result.error,
           redirect: !result.error,
           redirectPayload: {

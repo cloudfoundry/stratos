@@ -1,24 +1,26 @@
+import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { RemoveCfUserRole } from '../../../../../../../../cloud-foundry/src/actions/users.actions';
-import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { organizationEntityType, spaceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
-import { selectCfEntity } from '../../../../../../../../cloud-foundry/src/store/selectors/api.selectors';
-import { arrayHelper } from '../../../../../../../../core/src/core/helper-classes/array.helper';
+import { AppChipsComponent, arrayHelper, ConfirmationDialogService, CurrentUserPermissionsService } from '@stratosui/core';
+import { APIResource, entityCatalog } from '@stratosui/store';
 import {
-  CurrentUserPermissionsService,
-} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { IOrganization, ISpace } from '../../../../../../cf-api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
-import { getSpaceRoles } from '../../../../../../features/cf/cf.helpers';
-import { CfUser, IUserPermissionInSpace, SpaceUserRoleNames } from '../../../../../../store/types/cf-user.types';
-import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
+  CFAppState,
+  CF_ENDPOINT_TYPE,
+  CfCurrentUserPermissions,
+  CfUser,
+  getSpaceRoles,
+  IOrganization,
+  ISpace,
+  IUserPermissionInSpace,
+  organizationEntityType,
+  RemoveCfUserRole,
+  selectCfEntity,
+  spaceEntityType,
+  SpaceUserRoleNames
+} from '@stratosui/cloud-foundry';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { CfPermissionCellDirective, ICellPermissionList } from '../cf-permission-cell';
 
@@ -26,11 +28,16 @@ import { CfPermissionCellDirective, ICellPermissionList } from '../cf-permission
   selector: 'app-cf-space-permission-cell',
   templateUrl: './cf-space-permission-cell.component.html',
   styleUrls: ['./cf-space-permission-cell.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    AppChipsComponent
+  ]
 })
 export class CfSpacePermissionCellComponent extends CfPermissionCellDirective<SpaceUserRoleNames> {
 
-  missingRoles$: Observable<boolean>;
+  missingRoles$: Observable<boolean | null>;
 
   constructor(
     public store: Store<CFAppState>,
@@ -41,16 +48,16 @@ export class CfSpacePermissionCellComponent extends CfPermissionCellDirective<Sp
     super(store, confirmDialog, cfUserService);
 
     const spaces$: Observable<APIResource<ISpace>[]> = this.config$.pipe(
-      switchMap(config => config.spaces$ as Observable<APIResource<ISpace>[]>)
+      switchMap(config => (config.spaces$ || observableOf([])) as Observable<APIResource<ISpace>[]>)
     );
     const isOrgLevel$: Observable<boolean> = this.config$.pipe(map(config => config.isOrgLevel));
-    this.chipsConfig$ = combineLatest(
+    this.chipsConfig$ = combineLatest([
       this.rowSubject.asObservable(),
-      this.config$.pipe(switchMap(config => config.org$)),
+      this.config$.pipe(switchMap(config => config.org$ || observableOf<APIResource<IOrganization> | null>(null))),
       spaces$,
       isOrgLevel$,
-    ).pipe(
-      switchMap(([user, org, spaces, isOrgLevel]: [APIResource<CfUser>, APIResource<IOrganization>, APIResource<ISpace>[], boolean]) => {
+    ]).pipe(
+      switchMap(([user, org, spaces, isOrgLevel]: [APIResource<CfUser>, APIResource<IOrganization> | null, APIResource<ISpace>[], boolean]) => {
         const permissionList = this.createPermissions(user, isOrgLevel, spaces);
         // If we're showing spaces from multiple orgs prefix the org name to the space name
         return org ? observableOf(this.getChipConfig(permissionList)) : this.prefixOrgName(permissionList);
@@ -67,13 +74,13 @@ export class CfSpacePermissionCellComponent extends CfPermissionCellDirective<Sp
     return spaces$.pipe(
       // Switch to using the user entity
       switchMap(() => this.userEntity),
-      map(user => user.missingRoles || { space: [] }),
+      map(user => user.missingRoles || { space: [] as any[] }),
       map(missingRoles => missingRoles.space ? !!missingRoles.space.length : false),
       filter(areMissingRoles => !!areMissingRoles),
     );
   }
 
-  private prefixOrgName(permissionList: ICellPermissionList<SpaceUserRoleNames>[]) {
+  private prefixOrgName(permissionList: ICellPermissionList<SpaceUserRoleNames>[]): Observable<any> {
     // Find all unique org guids
     const orgGuids = permissionList.map(permission => permission.orgGuid).filter((value, index, self) => self.indexOf(value) === index);
     // Find names of all orgs
@@ -83,18 +90,18 @@ export class CfSpacePermissionCellComponent extends CfPermissionCellDirective<Sp
       filter(org => !!org),
       first(),
       map((orgs: APIResource<IOrganization>[]) => {
-        const orgNames: { [orgGuid: string]: string, } = {};
+        const orgNames: { [orgGuid: string]: string } = {};
         orgs.forEach(org => {
           orgNames[org.metadata.guid] = org.entity.name;
         });
         return orgNames;
       })
-    ) : observableOf([]);
+    ) : observableOf({});
     return combineLatest(
       observableOf(permissionList),
       orgNames$
     ).pipe(
-      map(([permissions, orgNames]) => {
+      map(([permissions, orgNames]: [ICellPermissionList<SpaceUserRoleNames>[], { [key: string]: string }]) => {
         // Prefix permission name with org name
         permissions.forEach(permission => {
           permission.name = `${orgNames[permission.orgGuid]}: ${permission.name}`;

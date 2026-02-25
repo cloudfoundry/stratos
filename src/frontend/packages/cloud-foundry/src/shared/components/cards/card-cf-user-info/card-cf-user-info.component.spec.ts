@@ -1,25 +1,50 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-
-import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { of } from 'rxjs';
 import {
-  generateCfBaseTestModulesNoShared,
-  generateTestCfEndpointService,
-} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+  MetadataItemComponent,
+  CardWrapperComponent,
+  CardHeaderComponent,
+  CardTitleComponent,
+  CardContentComponent
+} from '@stratosui/core';
 import { CardCfUserInfoComponent } from './card-cf-user-info.component';
-import { CopyToClipboardComponent } from '../../../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
+import { CloudFoundryEndpointService } from '../../../../features/cf/services/cloud-foundry-endpoint.service';
 
 describe('CardCfUserInfoComponent', () => {
   let component: CardCfUserInfoComponent;
   let fixture: ComponentFixture<CardCfUserInfoComponent>;
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        declarations: [CardCfUserInfoComponent, MetadataItemComponent, CopyToClipboardComponent, CardCfUserInfoComponent],
-        imports: generateCfBaseTestModulesNoShared(),
-        providers: [generateTestCfEndpointService()]
-      }).compileComponents();
+
+  // Mock CloudFoundryEndpointService
+  const mockCfEndpointService = {
+    endpoint$: of({
+      entity: {
+        user: {
+          name: 'test-user',
+          admin: false
+        }
+      }
     })
-  );
+  };
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        CardCfUserInfoComponent,
+        MetadataItemComponent,
+        CardWrapperComponent,
+        CardHeaderComponent,
+        CardTitleComponent,
+        CardContentComponent
+      ],
+      providers: [
+        provideZonelessChangeDetection(),
+        { provide: CloudFoundryEndpointService, useValue: mockCfEndpointService }
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CardCfUserInfoComponent);

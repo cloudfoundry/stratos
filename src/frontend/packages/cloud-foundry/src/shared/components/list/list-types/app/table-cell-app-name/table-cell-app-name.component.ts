@@ -1,22 +1,31 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { BREADCRUMB_URL_PARAM } from '../../../../../../../../core/src/shared/components/breadcrumbs/breadcrumbs.types';
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { getCurrentRoutingState, RoutingEvent } from '../../../../../../../../store/src/types/routing.type';
+import { BREADCRUMB_URL_PARAM, TableCellCustom } from '@stratosui/core';
+import { getCurrentRoutingState, RoutingEvent } from '@stratosui/store';
+import { CFAppState } from '../../../../../../cf-app-state';
 
 @Component({
   selector: 'app-table-cell-app-name',
   templateUrl: './table-cell-app-name.component.html',
-  styleUrls: ['./table-cell-app-name.component.scss']
+  styleUrls: ['./table-cell-app-name.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule
+  ]
 })
 export class TableCellAppNameComponent<T> extends TableCellCustom<T> implements OnInit {
-  public appLinkUrlParam$: Observable<any>;
+  public appLinkUrlParam$!: Observable<any>;
 
-  constructor(private store: Store<CFAppState>) {
+  private store = inject(Store<CFAppState>);
+
+  constructor() {
     super();
   }
 

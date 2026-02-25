@@ -5,7 +5,7 @@ import {
   TableCellSidePanelConfig,
 } from '../../../../../core/src/shared/components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
-import { ISimpleListConfig, ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
+import { ISimpleListConfig, ListViewTypes, IGlobalListAction, IMultiListAction, IListAction, IListMultiFilterConfig } from '../../../../../core/src/shared/components/list/list.component.types';
 import {
   KubernetesResourceViewerComponent,
   KubernetesResourceViewerConfig,
@@ -70,11 +70,11 @@ export abstract class BaseKubernetesServicesListConfig implements ISimpleListCon
     filter: 'Filter by Name',
     noEntries: 'There are no services'
   };
-  getGlobalActions = () => null;
-  getMultiActions = () => [];
-  getSingleActions = () => [];
-  getColumns = () => this.columns;
-  getMultiFiltersConfigs = () => [];
+  getGlobalActions = (): IGlobalListAction<KubeService>[] | null => null;
+  getMultiActions = (): IMultiListAction<KubeService>[] => [];
+  getSingleActions = (): IListAction<KubeService>[] => [];
+  getColumns = (): ITableColumn<KubeService>[] => this.columns;
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
 }
 
 export class KubernetesServicesListConfig extends BaseKubernetesServicesListConfig {

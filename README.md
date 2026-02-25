@@ -9,11 +9,10 @@
 
 # Roadmap
 
-1. Upgrade Stratos Frontend to Angular >= v17 LTS (currently in progress)
-1. Convert GoLang backend (Jetstream) to use Cloud Foundry V3 API and remove Vi2 API calls
-1. Convert Frontend to call either Jetstream API or V3 API directly.  V3 API calls can require more roundtrips than the V2 APIs they replace.
-1. Upgrade Stratos Frontend to Angular v18-v20 Active/LTS (v17 EOL is 2025-05-15)
+Angualr 20 upgrade of frontend code is completed, working on supporting elements.
 
+1. Convert GoLang backend (Jetstream) to use Cloud Foundry V3 API and remove V2 API calls
+1. Convert Frontend to call either Jetstream API or V3 API directly. V3 API calls can require more roundtrips than the V2 APIs they replace.
 
 (Please note:  The official repository is at cloudfoundry/stratos and the cloudfoundry-community/stratos will track this but may be used for some testing purposes)
 
@@ -34,6 +33,87 @@ Please visit our new [documentation site](https://stratos.app/). There you can d
 1. Guides for [developers](https://stratos.app/docs/developer/introduction).
 1. How to [extend](https://stratos.app/docs/extensions/introduction) Stratos [functionality](https://stratos.app/docs/extensions/frontend) and apply a custom [theme](https://stratos.app/docs/extensions/theming).
 
+## Developer Workflow
+
+### Prerequisites
+
+- **Node.js 24+** - Required for build system
+- **Bun** - Package manager ([installation guide](https://bun.sh))
+- **Go 1.21+** - For backend development
+
+### First-Time Setup
+
+On a fresh checkout, run the bootstrap script **once** to initialize the development environment:
+
+```bash
+git clone https://github.com/cloudfoundry/stratos.git
+cd stratos
+
+# One-time bootstrap (builds required infrastructure)
+./bootstrap
+# OR
+make bootstrap
+# OR
+bun run bootstrap
+
+# Install dependencies
+bun install
+
+# Start development server
+make dev-frontend
+```
+
+**What bootstrap does:**
+1. Verifies prerequisites (Node.js, Bun, Go)
+2. Builds the devkit package (required by Angular CLI)
+3. Generates extension module imports
+4. Creates development proxy configuration
+5. Cleans up workspace
+
+**Troubleshooting:**
+- If `bun install` fails with missing files: Run `make bootstrap` first
+- If builds fail with "File not found" errors: Run `make bootstrap`
+- Bootstrap only needs to run once per checkout
+
+### Development Commands
+
+```bash
+# Frontend development server (https://127.0.0.1:5440)
+make dev-frontend
+# OR
+bun run start
+
+# Build for production
+make build              # Both frontend and backend
+make build-frontend     # Frontend only
+make build-backend      # Backend only
+
+# Testing
+bun test                # All frontend tests
+bun run test-frontend:core
+bun run test-frontend:cloud-foundry
+bun run test-backend    # Backend tests
+bun run e2e             # End-to-end tests
+
+# Linting
+bun run lint
+```
+
+### Full Stack Development
+
+Run these in separate terminals:
+
+```bash
+# Terminal 1: Frontend (port 5440)
+make dev-frontend
+
+# Terminal 2: Backend API (port 5443)
+make dev-backend
+
+# Access at: https://127.0.0.1:5440
+```
+
+For more detailed information, see [CLAUDE.md](CLAUDE.md).
 
 ## Acknowledgements
 

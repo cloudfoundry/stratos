@@ -1,57 +1,99 @@
 <ng-template #content>
   <div class="number-metric-card">
-    <mat-card *ngIf="!textOnly; else textOnlyTemplate" class="number-metric-card__container" [ngClass]="{'number-metric-card__plain': mode === 'plain'}">
-      <app-card-status [status$]="status$"></app-card-status>
-      <mat-icon *ngIf="icon" [fontSet]="iconFont" class="number-metric-card__icon">{{ icon }}</mat-icon>
-      <div class="number-metric-card__container-inner"
-        [ngClass]="{'number-metric-card__container-inner-reverse': labelAtTop}">
-        <div [ngClass]="{'number-metric-card__value--unlimited': isUnlimited}" class="number-metric-card__value"
-          *ngIf="(status$ | async) as status">
-          <span class="number-metric-card__usage-count"
-            [ngClass]="{'text-danger': status === 'error', 'text-warning': status === 'warning'}">{{ formattedValue }}</span>
-          <span *ngIf="limit" class="number-metric-card__limit"> / {{ formattedLimit }}</span>
-          <div *ngIf="usage" class="number-metric-card__usage">{{ usage }} %</div>
+    @if (!textOnly) {
+      <div
+        class="card p-4 relative"
+        [ngClass]="{'border-0 shadow-none bg-transparent': mode === 'plain'}">
+        <app-card-status [status$]="status$"></app-card-status>
+        <div class="flex items-start space-x-4">
+          @if (icon) {
+            <span class="text-3xl text-gray-400 dark:text-slate-500 flex-shrink-0"
+            [ngClass]="iconFont === 'stratos-icons' ? 'stratos-icons' : 'material-icons'">{{ icon }}</span>
+          }
+          <div class="flex-1" [ngClass]="{'flex flex-col-reverse': labelAtTop, 'flex flex-col': !labelAtTop}">
+            @if ((status$ | async); as status) {
+              <div class="number-metric-card-value"
+                [ngClass]="{'text-gray-400': isUnlimited}"
+                >
+                <div class="flex items-baseline space-x-1">
+                  <span class="text-2xl font-bold"
+                    [ngClass]="{
+                      'text-danger-500': status === 'error',
+                      'text-warning-500': status === 'warning',
+                      'text-gray-900 dark:text-slate-100': status !== 'error' && status !== 'warning'
+                    }">{{ formattedValue }}</span>
+                  @if (limit) {
+                    <span class="text-lg text-gray-500 dark:text-slate-400"> / {{ formattedLimit }}</span>
+                  }
+                </div>
+                @if (usage) {
+                  <div class="text-sm text-primary font-medium mt-1">{{ usage }}%</div>
+                }
+              </div>
+            }
+            <div class="number-metric-card-label text-sm text-gray-500 dark:text-slate-400"
+              [ngClass]="{'mb-2': labelAtTop, 'mt-1': !labelAtTop}">
+              {{ labelSingular && value === '1' ? labelSingular : label }}
+            </div>
+          </div>
         </div>
-        <div class="number-metric-card__label">{{ labelSingular && value === '1' ? labelSingular : label }}</div>
+        <!-- Alert badges -->
+        @if (alertInfo) {
+          <div class="number-metric-card-alerts mt-3 space-y-2" (click)="alertsClicked()">
+            @if (alertInfo.info) {
+              <div
+                class="alert alert-info flex items-center space-x-2 p-2 text-xs cursor-pointer">
+                <span class="material-icons text-sm">info</span>
+                <span>{{ alertInfo.info }}</span>
+              </div>
+            }
+            @if (alertInfo.warning) {
+              <div
+                class="alert alert-warning flex items-center space-x-2 p-2 text-xs cursor-pointer">
+                <span class="material-icons text-sm">warning</span>
+                <span>{{ alertInfo.warning }}</span>
+              </div>
+            }
+            @if (alertInfo.error) {
+              <div
+                class="alert alert-danger flex items-center space-x-2 p-2 text-xs cursor-pointer">
+                <span class="material-icons text-sm">error</span>
+                <span>{{ alertInfo.error }}</span>
+              </div>
+            }
+          </div>
+        }
       </div>
-      <div class="number-metric-card__alerts" *ngIf="alertInfo" (click)="alertsClicked()">
-        <div *ngIf="alertInfo.info" class="number-metric-card__alert-badge number-metric-card__alert-badge-info">
-          <mat-icon>info</mat-icon>
-          {{ alertInfo.info }}
-        </div>
-        <div *ngIf="alertInfo.warning" class="number-metric-card__alert-badge number-metric-card__alert-badge-warning">
-          <mat-icon>warning</mat-icon>
-          <div>{{ alertInfo.warning }}</div>
-        </div>
-        <div *ngIf="alertInfo.error" class="number-metric-card__alert-badge number-metric-card__alert-badge-error">
-          <mat-icon>error</mat-icon>
-          {{ alertInfo.error }}
+    } @else {
+      <div class="number-metric-card__container">
+        <div class="number-metric-card__container-inner"
+          [ngClass]="{'number-metric-card__container-inner-reverse': labelAtTop}">
+          @if ((status$ | async); as status) {
+            <div class="number-metric-card__value text-gray-900 dark:text-slate-100">
+              <span class="number-metric-card__usage-count"
+              [ngClass]="{'text-danger-500': status === 'error', 'text-warning-500': status === 'warning', 'dark:text-slate-100': status !== 'error' && status !== 'warning'}">{{ formattedValue }}</span>
+              @if (limit) {
+                <span class="number-metric-card__limit text-gray-500 dark:text-slate-400"> / {{ formattedLimit }}</span>
+              }
+              @if (usage) {
+                <div class="number-metric-card__usage text-primary-600 dark:text-primary-400">{{ usage }} %</div>
+              }
+            </div>
+          }
+          <div class="number-metric-card__label text-gray-500 dark:text-slate-400">{{ labelSingular && value === '1' ? labelSingular : label }}</div>
         </div>
       </div>
-    </mat-card>
+    }
   </div>
 </ng-template>
 
-<ng-template #textOnlyTemplate>
-  <div class="number-metric-card__container">
-    <div class="number-metric-card__container-inner"
-      [ngClass]="{'number-metric-card__container-inner-reverse': labelAtTop}">
-      <div class="number-metric-card__value" *ngIf="(status$ | async) as status">
-        <span class="number-metric-card__usage-count"
-          [ngClass]="{'text-danger': status === 'error', 'text-warning': status === 'warning'}">{{ formattedValue }}</span>
-        <span *ngIf="limit" class="number-metric-card__limit"> / {{ formattedLimit }}</span>
-        <div *ngIf="usage" class="number-metric-card__usage">{{ usage }} %</div>
-      </div>
-      <div class="number-metric-card__label">{{ labelSingular && value === '1' ? labelSingular : label }}</div>
-    </div>
-  </div>
-</ng-template>
 
-<ng-container #text *ngIf="link; else noLink">
-  <a (click)="goToLink()" class="number-metric-card__anchor">
-    <ng-container *ngTemplateOutlet="content"></ng-container>
-  </a>
-</ng-container>
-<ng-template #noLink>
+@if (link) {
+  <ng-container #text>
+    <a (click)="goToLink()" class="number-metric-card__anchor">
+      <ng-container *ngTemplateOutlet="content"></ng-container>
+    </a>
+  </ng-container>
+} @else {
   <ng-container *ngTemplateOutlet="content"></ng-container>
-</ng-template>
+}

@@ -1,13 +1,13 @@
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DatePipe } from '@angular/common';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CoreModule } from '../../../../../../core/src/core/core.module';
-import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
-import { SharedModule } from '../../../../../../core/src/shared/shared.module';
-import { ApplicationServiceMock } from '../../../../../test-framework/application-service-helper';
-import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { ApplicationServiceMock, generateCfBaseTestModulesNoShared } from '@test-framework/cf';
 import { ApplicationService } from '../../application.service';
 import { MapRoutesComponent } from './map-routes.component';
 
@@ -15,27 +15,23 @@ describe('MapRoutesComponent', () => {
   let component: MapRoutesComponent;
   let fixture: ComponentFixture<MapRoutesComponent>;
 
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        declarations: [MapRoutesComponent],
-        providers: [
-          ListConfig,
-          { provide: ApplicationService, useClass: ApplicationServiceMock },
-          DatePipe
-        ],
-        imports: [
-          ...generateCfStoreModules(),
-          CoreModule,
-          SharedModule,
-          NoopAnimationsModule,
-          RouterTestingModule
-        ]
-      }).compileComponents();
-    })
-  );
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        MapRoutesComponent,
+        NoopAnimationsModule,
+      ],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(generateCfBaseTestModulesNoShared()),
+        { provide: ApplicationService, useClass: ApplicationServiceMock },
+        DatePipe,
+      ]
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(MapRoutesComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

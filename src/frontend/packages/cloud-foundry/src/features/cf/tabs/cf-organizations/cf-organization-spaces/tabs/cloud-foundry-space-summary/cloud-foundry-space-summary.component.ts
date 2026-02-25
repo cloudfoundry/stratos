@@ -1,28 +1,52 @@
-import { Component } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+
+import { CustomTooltipDirective, TailwindSnackBarService } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, pairwise, startWith, tap } from 'rxjs/operators';
 
-import { ConfirmationDialogConfig } from '../../../../../../../../../core/src/shared/components/confirmation-dialog.config';
-import {
-  ConfirmationDialogService,
-} from '../../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { RouterNav } from '../../../../../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../../../../../store/src/entity-catalog/entity-catalog';
-import { selectDeletionInfo } from '../../../../../../../../../store/src/selectors/api.selectors';
+import { ConfirmationDialogConfig, ConfirmationDialogService } from '@stratosui/core';
+import { RouterNav, AppState, entityCatalog, selectDeletionInfo } from '@stratosui/store';
 import { spaceEntityType } from '../../../../../../../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../../cf-types';
 import { CfCurrentUserPermissions } from '../../../../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
+import {
+  PageSubNavComponent,
+  TileGridComponent,
+  TileGroupComponent,
+  TileComponent,
+  LoadingPageComponent,
+  CardNumberMetricComponent
+} from '@stratosui/core';
+import { CardCfRecentAppsComponent } from '../../../../../../../features/home/card-cf-recent-apps/card-cf-recent-apps.component';
+import { CfUserPermissionDirective } from '../../../../../../../shared/directives/cf-user-permission/cf-user-permission.directive';
+import { CardCfSpaceDetailsComponent } from '../../../../../../../shared/components/cards/card-cf-space-details/card-cf-space-details.component';
 
 @Component({
   selector: 'app-cloud-foundry-space-summary',
   templateUrl: './cloud-foundry-space-summary.component.html',
-  styleUrls: ['./cloud-foundry-space-summary.component.scss']
+  styleUrls: ['./cloud-foundry-space-summary.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    RouterModule,
+    CustomTooltipDirective,
+    PageSubNavComponent,
+    TileGridComponent,
+    TileGroupComponent,
+    TileComponent,
+    LoadingPageComponent,
+    CardNumberMetricComponent,
+    CardCfRecentAppsComponent,
+    CfUserPermissionDirective,
+    CardCfSpaceDetailsComponent
+  ]
 })
 export class CloudFoundrySpaceSummaryComponent {
   detailsLoading$: Observable<boolean>;
@@ -36,7 +60,7 @@ export class CloudFoundrySpaceSummaryComponent {
     public cfSpaceService: CloudFoundrySpaceService,
     private confirmDialog: ConfirmationDialogService,
     private store: Store<AppState>,
-    private snackBar: MatSnackBar,
+    private snackBar: TailwindSnackBarService,
   ) {
     this.detailsLoading$ = combineLatest([
       // Wait for the apps to have been fetched, this will determine if multiple small cards are shown or now

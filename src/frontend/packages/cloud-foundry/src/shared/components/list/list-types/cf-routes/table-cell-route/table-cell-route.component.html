@@ -1,7 +1,11 @@
-<div *ngIf="!isRouteTCP">
-  <a href="{{routeUrl}}" target="_blank">{{routeUrl}}</a>
-</div>
+@if (!isRouteTCP) {
+  <div>
+    <a href="{{routeUrl}}" target="_blank">{{routeUrl}}</a>
+  </div>
+}
 
-<div *ngIf="isRouteTCP">
-  {{routeUrl}}
-</div>
+@if (isRouteTCP) {
+  <div>
+    {{routeUrl}}
+  </div>
+}

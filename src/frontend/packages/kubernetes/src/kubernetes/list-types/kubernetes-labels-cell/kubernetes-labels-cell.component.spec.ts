@@ -1,5 +1,8 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
+import { EntityServiceFactory } from '@stratosui/store';
 import { BaseTestModules } from '../../../../../core/test-framework/core-test.helper';
 import { KubernetesStatus } from '../../store/kube.types';
 import { KubernetesLabelsCellComponent } from './kubernetes-labels-cell.component';
@@ -8,13 +11,14 @@ describe('KubernetesLabelsCellComponent', () => {
   let component: KubernetesLabelsCellComponent;
   let fixture: ComponentFixture<KubernetesLabelsCellComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [KubernetesLabelsCellComponent],
-      imports: BaseTestModules
-    })
-      .compileComponents();
-  }));
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      providers: [EntityServiceFactory, provideZonelessChangeDetection()],
+      imports: [
+        KubernetesLabelsCellComponent,
+        ...BaseTestModules,
+      ]}).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesLabelsCellComponent);
@@ -27,7 +31,7 @@ describe('KubernetesLabelsCellComponent', () => {
         uid: 'test'
       },
       status: {
-        phase: KubernetesStatus.ACTIVE
+        phase: KubernetesStatus.ACTIVE,
       },
       spec: {
         containers: [],

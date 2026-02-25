@@ -1,23 +1,40 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, computed, inject, ChangeDetectionStrategy, Injector, runInInjectionContext } from '@angular/core';
+import { toSignal, toObservable } from '@angular/core/rxjs-interop';
+import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
-import { AppState } from 'frontend/packages/store/src/app-state';
+import { AppState } from '@stratosui/store';
 import { combineLatest, Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
 import { HomePageCardLayout } from '../../../../core/src/features/home/home.types';
 import { HomeCardShortcut } from '../../../../store/src/entity-catalog/entity-catalog.types';
-import { EndpointModel } from '../../../../store/src/public-api';
+import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { kubeEntityCatalog } from '../kubernetes-entity-generator';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
+import { TileGridComponent } from '../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
+import { TileGroupComponent } from '../../../../core/src/shared/components/tile/tile-group/tile-group.component';
+import { TileComponent } from '../../../../core/src/shared/components/tile/tile/tile.component';
+import { CardNumberMetricComponent } from '../../../../core/src/shared/components/cards/card-number-metric/card-number-metric.component';
+import { HomeShortcutsComponent } from '../../../../core/src/features/home/home/home-shortcuts/home-shortcuts.component';
 
 @Component({
   selector: 'app-k8s-home-card',
   templateUrl: './kubernetes-home-card.component.html',
-  styleUrls: ['./kubernetes-home-card.component.scss']
+  styleUrls: ['./kubernetes-home-card.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    TileGridComponent,
+    TileGroupComponent,
+    TileComponent,
+    CardNumberMetricComponent,
+    HomeShortcutsComponent
+  ]
 })
 export class KubernetesHomeCardComponent implements OnInit {
 
-  @Input() endpoint: EndpointModel;
+  @Input() endpoint!: EndpointModel;
 
   pLayout: HomePageCardLayout;
 
@@ -31,13 +48,14 @@ export class KubernetesHomeCardComponent implements OnInit {
     }
   }
 
-  public shortcuts: HomeCardShortcut[];
+  public shortcuts!: HomeCardShortcut[];
 
-  public podCount$: Observable<number>;
-  public nodeCount$: Observable<number>;
-  public namespaceCount$: Observable<number>;
+  public podCount$!: Observable<number>;
+  public nodeCount$!: Observable<number>;
+  public namespaceCount$!: Observable<number>;
 
-  constructor(private store: Store<AppState>) { }
+  private store = inject(Store<AppState>);
+  private injector = inject(Injector);
 
   ngOnInit() {
     const guid = this.endpoint.guid;
@@ -96,8 +114,22 @@ export class KubernetesHomeCardComponent implements OnInit {
       }
     });
 
-    return combineLatest([this.podCount$, this.nodeCount$, this.namespaceCount$]).pipe(
-      map(() => true)
-    );
+    // Convert counts to signals within injection context
+    return runInInjectionContext(this.injector, () => {
+      const podCountSignal = toSignal(this.podCount$, { initialValue: 0 });
+      const nodeCountSignal = toSignal(this.nodeCount$, { initialValue: 0 });
+      const namespaceCountSignal = toSignal(this.namespaceCount$, { initialValue: 0 });
+
+      // Compute loaded state - true when all counts are available
+      const loadedComputed = computed(() => {
+        // Access all signals to create dependency
+        podCountSignal();
+        nodeCountSignal();
+        namespaceCountSignal();
+        return true;
+      });
+
+      return toObservable(loadedComputed);
+    });
   }
 }

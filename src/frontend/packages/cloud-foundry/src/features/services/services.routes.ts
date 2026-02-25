@@ -1,0 +1,33 @@
+import { Routes } from '@angular/router';
+
+import {
+  AddServiceInstanceBaseStepComponent,
+} from '../../shared/components/add-service-instance/add-service-instance-base-step/add-service-instance-base-step.component';
+import {
+  AddServiceInstanceComponent,
+} from '../../shared/components/add-service-instance/add-service-instance/add-service-instance.component';
+import { DetachServiceInstanceComponent } from './detach-service-instance/detach-service-instance.component';
+import { ServicesWallComponent } from './services-wall/services-wall.component';
+
+export const SERVICES_ROUTES: Routes = [
+  {
+    path: '',
+    component: ServicesWallComponent,
+  },
+  {
+    path: 'new',
+    component: AddServiceInstanceBaseStepComponent
+  },
+  {
+    path: 'new/:type',
+    component: AddServiceInstanceComponent
+  },
+  {
+    path: ':type/:endpointId/:serviceInstanceId/edit',
+    component: AddServiceInstanceComponent
+  },
+  {
+    path: ':type/:endpointId/:serviceInstanceId/detach',
+    component: DetachServiceInstanceComponent
+  }
+];

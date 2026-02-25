@@ -6,52 +6,61 @@
   path: '/endpoints/backup-restore'
   }">
   <app-step title="Select" [valid]="selectValid$ | async">
-    <div *ngIf="service.canBackup(); else noEndpoints" class="select-step">
-      <p>Select the endpoints and connection details that you would like to backup</p>
-      <div class="select-step__buttons">
-        <button mat-raised-button color="primary" [disabled]="disableSelectAll$ | async"
+    @if (service.canBackup()) {
+      <div class="select-step">
+        <p>Select the endpoints and connection details that you would like to backup</p>
+        <div class="select-step__buttons">
+          <button class="btn btn-primary" type="button" [disabled]="disableSelectAll$ | async"
           (click)="service.selectAll()">Select All</button>
-        <button mat-raised-button color="primary" [disabled]="disableSelectNone$ | async"
+          <button class="btn btn-primary" type="button" [disabled]="disableSelectNone$ | async"
           (click)="service.selectNone()">Select None</button>
+        </div>
+        <!-- 77px is the min height given Connection details drop down. In some cases it's missing, those rows would be
+        shorter without the min height here -->
+        <app-table [dataSource]="endpointDataSource" [columns]="columns" [minRowHeight]="'77px'"></app-table>
       </div>
-      <!-- 77px is the min height given Connection details drop down. In some cases it's missing, those rows would be
-      shorter without the min height here -->
-      <app-table [dataSource]="endpointDataSource" [columns]="columns" [minRowHeight]="'77px'"></app-table>
-    </div>
-    <ng-template #noEndpoints>
+    } @else {
       <p>There are no endpoints to backup</p>
-    </ng-template>
+    }
   </app-step>
   <app-step title="Password" finishButtonText="Download" [onNext]="onNext" [valid]="passwordValid$ | async">
     <div class="password-step">
       <p>Protect the backup by providing a password. You will need this password when restoring from this backup</p>
       <form [formGroup]="passwordForm" class="stepper-form">
-        <mat-form-field>
-          <mat-label>Password</mat-label>
-          <input matInput formControlName="password" name="password" required
+        <div class="form-field">
+          <label class="form-label">Password</label>
+          <input class="form-input" formControlName="password" name="password" required
             [type]="!showPassword[1] ? 'password' : 'text'">
-          <span matSuffix>
+          <span class="form-suffix">
             <app-show-hide-button (changed)="showPassword[1] = $event"></app-show-hide-button>
           </span>
-          <mat-error *ngIf="passwordForm.controls.password.errors && passwordForm.controls.password.errors.required">
-            Password is required</mat-error>
-          <mat-error *ngIf="passwordForm.controls.password.errors && passwordForm.controls.password.errors.minlength">
-            Password must be at least {{passwordForm.controls.password.errors.minlength.requiredLength}} characters
-          </mat-error>
-        </mat-form-field>
-        <mat-form-field>
-          <mat-label>Confirm Password</mat-label>
-          <input matInput formControlName="password2" name="password2" required
-            [type]="!showPassword[2] ? 'password' : 'text'" [pattern]="passwordForm.controls.password2.value">
-          <span matSuffix>
+          @if (passwordForm.controls.password.errors && passwordForm.controls.password.errors.required) {
+            <div class="form-error">
+            Password is required</div>
+          }
+          @if (passwordForm.controls.password.errors && passwordForm.controls.password.errors.minlength) {
+            <div class="form-error">
+              Password must be at least {{passwordForm.controls.password.errors.minlength.requiredLength}} characters
+            </div>
+          }
+        </div>
+        <div class="form-field">
+          <label class="form-label">Confirm Password</label>
+          <input class="form-input" formControlName="password2" name="password2" required
+            [type]="!showPassword[2] ? 'password' : 'text'">
+          <span class="form-suffix">
             <app-show-hide-button (changed)="showPassword[2] = $event"></app-show-hide-button>
           </span>
-          <mat-error *ngIf="passwordForm.controls.password2.errors && passwordForm.controls.password2.errors.required">
-            Password is required</mat-error>
-          <mat-error *ngIf="passwordForm.controls.password2.errors && passwordForm.controls.password2.errors.pattern">
-            Passwords must match
-          </mat-error>
-        </mat-form-field>
+          @if (passwordForm.controls.password2.errors && passwordForm.controls.password2.errors.required) {
+            <div class="form-error">
+            Password is required</div>
+          }
+          @if (passwordForm.errors && passwordForm.errors.passwordMismatch) {
+            <div class="form-error">
+              Passwords must match
+            </div>
+          }
+        </div>
       </form>
     </div>
   </app-step>

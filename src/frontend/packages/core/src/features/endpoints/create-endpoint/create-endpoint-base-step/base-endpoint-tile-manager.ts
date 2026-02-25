@@ -1,13 +1,13 @@
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
-
-import { GeneralEntityAppState } from '../../../../../../store/src/app-state';
 import {
+  GeneralEntityAppState,
+  IStratosEndpointDefinition,
   StratosCatalogEndpointEntity,
-} from '../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { IStratosEndpointDefinition } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
-import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity-catalog';
+  stratosEntityCatalog,
+} from '@stratosui/store';
+
 import { TileConfigManager } from '../../../../shared/components/tile/tile-selector.helpers';
 import { ITileConfig, ITileData } from '../../../../shared/components/tile/tile-selector.types';
 
@@ -127,7 +127,7 @@ export abstract class BaseEndpointTileManager {
       filter(endpoints => !!endpoints),
       map(endpoints => {
         const endpointsByType: ExpandedEndpoints<Observable<number>> = [];
-        return endpointEntities.reduce((res, endpointEntity) => {
+        return endpointEntities.reduce((res: ExpandedEndpoints<Observable<number>>, endpointEntity: StratosCatalogEndpointEntity) => {
           const { type: endpointType, subType: endpointSubType } = endpointEntity.getTypeAndSubtype();
           res.push({
             current: endpoints.filter(em => em.cnsi_type === endpointType && em.sub_type === endpointSubType).length,
@@ -137,8 +137,8 @@ export abstract class BaseEndpointTileManager {
           return res;
         }, endpointsByType);
       }),
-      switchMap(endpointsByType => combineLatest(Object.values(endpointsByType).map(type => type.limit.pipe(
-        map(limit => ({
+      switchMap(endpointsByType => combineLatest(Object.values(endpointsByType).map((type: ExpandedEndpoint<Observable<number>>) => type.limit.pipe(
+        map((limit: number) => ({
           ...type,
           limit
         }))

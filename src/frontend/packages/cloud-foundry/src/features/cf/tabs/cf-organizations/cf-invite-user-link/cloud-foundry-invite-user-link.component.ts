@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
+import { CardWrapperComponent, CardContentComponent } from '../../../../../../../core/src/shared/components/cards';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { createCfOrgSpaceSteppersUrl } from '../../../cf.helpers';
 import { UserInviteService } from '../../../user-invites/user-invite.service';
@@ -15,11 +17,18 @@ interface UserInviteStepperLink {
 @Component({
   selector: 'app-cloud-foundry-invite-user-link',
   templateUrl: './cloud-foundry-invite-user-link.component.html',
-  styleUrls: ['./cloud-foundry-invite-user-link.component.scss']
+  styleUrls: ['./cloud-foundry-invite-user-link.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    CardWrapperComponent,
+    CardContentComponent
+  ]
 })
 export class CloudFoundryInviteUserLinkComponent implements OnInit {
 
-  inviteUserDetails$: Observable<UserInviteStepperLink>;
+  inviteUserDetails$!: Observable<UserInviteStepperLink | null>;
 
   constructor(
     private userInviteService: UserInviteService,

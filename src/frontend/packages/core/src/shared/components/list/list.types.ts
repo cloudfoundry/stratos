@@ -31,6 +31,7 @@ export abstract class TableCellCustom<T, C = any> {
   }
 
   protected pConfig: C;
+  @Input()
   set config(config: C) {
     this.pConfig = config;
   }

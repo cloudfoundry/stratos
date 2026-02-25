@@ -1,15 +1,11 @@
 import { Store } from '@ngrx/store';
-import { getRowMetadata } from '@stratosui/store';
 
+import { ListDataSource, IListConfig } from '@stratosui/core';
+import { getRowMetadata, APIResource } from '@stratosui/store';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
-} from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import {
-  ListDataSource,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+} from '../../../../../entity-relations/entity-relations.types';
 import { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';

@@ -18,16 +18,20 @@ import { SystemEffects } from './effects/system.effects';
 import { UAASetupEffect } from './effects/uaa-setup.effects';
 import { UserFavoritesEffect } from './effects/user-favorites-effect';
 import { UserProfileEffect } from './effects/user-profile.effects';
+import { EntityCatalogProvidersModule } from './entity-catalog-providers.module';
 import { PipelineHttpClient } from './entity-request-pipeline/pipline-http-client.service';
 import { AppReducersModule } from './reducers.module';
 
 
 @NgModule({
   providers: [
+    // Explicitly provide PipelineHttpClient for Angular 20 DI compatibility
+    // Even though it has providedIn: 'root', re-declaring helps ensure proper initialization
     PipelineHttpClient
   ],
   imports: [
     AppReducersModule,
+    EntityCatalogProvidersModule,
     HttpClientModule,
     EffectsModule.forRoot([
       DashboardEffect,

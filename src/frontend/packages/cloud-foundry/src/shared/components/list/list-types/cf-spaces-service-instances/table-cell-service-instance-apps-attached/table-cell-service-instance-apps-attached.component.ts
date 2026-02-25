@@ -1,8 +1,9 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
+import { AppChipsComponent, AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServiceInstance } from '../../../../../../cf-api-svc.types';
@@ -17,15 +18,21 @@ import { getCfServiceInstance } from '../../../../../../features/service-catalog
 @Component({
   selector: 'app-table-cell-service-instance-apps-attached',
   templateUrl: './table-cell-service-instance-apps-attached.component.html',
-  styleUrls: ['./table-cell-service-instance-apps-attached.component.scss']
+  styleUrls: ['./table-cell-service-instance-apps-attached.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    AppChipsComponent
+  ]
 })
 export class TableCellServiceInstanceAppsAttachedComponent
   extends TableCellCustom<APIResource<IServiceInstance>>
   implements OnInit {
 
-  boundApps$: Observable<AppChip[]>;
-  config$ = new BehaviorSubject(null);
-  row$ = new BehaviorSubject<APIResource<IServiceInstance>>(null);
+  boundApps$!: Observable<AppChip[]>;
+  config$ = new BehaviorSubject<any>(null);
+  row$ = new BehaviorSubject<APIResource<IServiceInstance> | null>(null);
 
   @Input('config')
   set config(config: any) {

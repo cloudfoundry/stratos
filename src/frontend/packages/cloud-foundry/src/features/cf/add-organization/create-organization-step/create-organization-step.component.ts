@@ -1,16 +1,19 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { Component, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
-import { endpointEntityType } from '../../../../../../store/src/helpers/stratos-entity-factory';
-import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
-import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { APIResource } from '../../../../../../store/src/types/api.types';
+import { CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, FocusDirective, StepOnNextFunction } from '@stratosui/core';
+import {
+  APIResource,
+  endpointEntityType,
+  entityCatalog,
+  getPaginationObservables,
+  PaginationMonitorFactory
+} from '@stratosui/store';
 import { CreateOrganization } from '../../../../actions/organization.actions';
 import { IOrganization, IOrgQuotaDefinition } from '../../../../cf-api.types';
 import { CFAppState } from '../../../../cf-app-state';
@@ -21,39 +24,54 @@ import { createEntityRelationPaginationKey } from '../../../../entity-relations/
 import { selectCfRequestInfo } from '../../../../store/selectors/api.selectors';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 
+interface CreateOrganizationForm {
+  orgName: FormControl<string>;
+  quotaDefinition: FormControl<string | null>;
+}
 
 @Component({
   selector: 'app-create-organization-step',
   templateUrl: './create-organization-step.component.html',
-  styleUrls: ['./create-organization-step.component.scss']
+  styleUrls: ['./create-organization-step.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    CustomFormFieldComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
+    FocusDirective
+  ]
 })
 export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
 
-  orgSubscription: Subscription;
-  submitSubscription: Subscription;
+  orgSubscription!: Subscription;
+  submitSubscription!: Subscription;
   cfGuid: string;
-  allOrgs: string[];
-  orgs$: Observable<APIResource<IOrganization>[]>;
-  quotaDefinitions$: Observable<APIResource<IOrgQuotaDefinition>[]>;
-  cfUrl: string;
-  addOrg: UntypedFormGroup;
+  allOrgs!: string[];
+  orgs$!: Observable<string[]>;
+  quotaDefinitions$!: Observable<APIResource<IOrgQuotaDefinition>[]>;
+  cfUrl!: string;
+  addOrg!: FormGroup<CreateOrganizationForm>;
 
-  get orgName(): any { return this.addOrg ? this.addOrg.get('orgName') : { value: '' }; }
+  get orgName(): FormControl<string> { return this.addOrg ? this.addOrg.get('orgName') as FormControl<string> : new FormControl('', { nonNullable: true }); }
 
-  get quotaDefinition(): any { return this.addOrg ? this.addOrg.get('quotaDefinition') : { value: '' }; }
+  get quotaDefinition(): FormControl<string | null> { return this.addOrg ? this.addOrg.get('quotaDefinition') as FormControl<string | null> : new FormControl(null); }
 
   constructor(
     private store: Store<CFAppState>,
     activatedRoute: ActivatedRoute,
     private paginationMonitorFactory: PaginationMonitorFactory,
+    private fb: FormBuilder,
   ) {
     this.cfGuid = activatedRoute.snapshot.params.endpointId;
   }
 
   ngOnInit() {
-    this.addOrg = new UntypedFormGroup({
-      orgName: new UntypedFormControl('', [Validators.required as any, this.nameTakenValidator()]),
-      quotaDefinition: new UntypedFormControl(),
+    this.addOrg = this.fb.group<CreateOrganizationForm>({
+      orgName: new FormControl('', { nonNullable: true, validators: [Validators.required, this.nameTakenValidator()] }),
+      quotaDefinition: new FormControl<string | null>(null),
     });
     const action = CloudFoundryEndpointService.createGetAllOrganizations(this.cfGuid);
     this.orgs$ = getPaginationObservables<APIResource>(
@@ -102,7 +120,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
   submit: StepOnNextFunction = () => {
     this.store.dispatch(new CreateOrganization(this.cfGuid, {
       name: this.orgName.value,
-      quota_definition_guid: this.quotaDefinition.value
+      quota_definition_guid: this.quotaDefinition.value ?? undefined
     }));
 
     return this.store.select(selectCfRequestInfo(organizationEntityType, this.orgName.value)).pipe(

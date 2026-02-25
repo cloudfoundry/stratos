@@ -1,4 +1,5 @@
-import { SortDirection } from '@angular/material/sort';
+// Replaced Angular Material sort with custom type
+export type SortDirection = 'asc' | 'desc' | '';
 
 import { getPaginationKey } from '../../../../store/src/actions/pagination.actions';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';

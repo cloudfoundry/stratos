@@ -1,20 +1,27 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { PageNotFoundComponentComponent } from './page-not-found-component.component';
 import { CoreModule } from '../core.module';
 import { SharedModule } from '../../shared/shared.module';
-import { MatIcon } from '@angular/material/icon';
 
 describe('PageNotFoundComponentComponent', () => {
   let component: PageNotFoundComponentComponent;
   let fixture: ComponentFixture<PageNotFoundComponentComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ PageNotFoundComponentComponent, MatIcon ]
-    })
-    .compileComponents();
-  }));
+
+      providers: [provideZonelessChangeDetection()],
+
+      imports: [
+        PageNotFoundComponentComponent,
+      ]
+
+    });
+    TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(PageNotFoundComponentComponent);

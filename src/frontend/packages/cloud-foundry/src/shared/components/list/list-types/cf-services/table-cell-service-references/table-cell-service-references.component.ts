@@ -1,17 +1,22 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { ClickStopPropagationDirective, TableCellCustom } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
 import { IService, IServiceExtra } from '../../../../../../cf-api-svc.types';
 
 @Component({
   selector: 'app-table-cell-service-references',
   templateUrl: './table-cell-service-references.component.html',
-  styleUrls: ['./table-cell-service-references.component.scss']
+  styleUrls: ['./table-cell-service-references.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    ClickStopPropagationDirective
+]
 })
 export class TableCellServiceReferencesComponent extends TableCellCustom<APIResource<IService>> {
 
-  extraInfo: IServiceExtra;
+  extraInfo!: IServiceExtra;
 
   @Input()
   set row(pService: APIResource<IService>) {

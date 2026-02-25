@@ -1,19 +1,14 @@
+import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest } from 'rxjs';
+import { combineLatest, of as observableOf } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
-import { RemoveCfUserRole } from '../../../../../../../../cloud-foundry/src/actions/users.actions';
-import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { organizationEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
-import { arrayHelper } from '../../../../../../../../core/src/core/helper-classes/array.helper';
-import {
-  CurrentUserPermissionsService,
-} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { AppChip, AppChipsComponent, arrayHelper, ConfirmationDialogService, CurrentUserPermissionsService } from '@stratosui/core';
+import { APIResource, entityCatalog } from '@stratosui/store';
+import { RemoveCfUserRole } from '../../../../../../actions/users.actions';
+import { CFAppState } from '../../../../../../cf-app-state';
+import { organizationEntityType } from '../../../../../../cf-entity-types';
 import { IOrganization } from '../../../../../../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { getOrgRoles } from '../../../../../../features/cf/cf.helpers';
@@ -26,7 +21,12 @@ import { CfPermissionCellDirective, ICellPermissionList } from '../cf-permission
   selector: 'app-org-user-permission-cell',
   templateUrl: './cf-org-permission-cell.component.html',
   styleUrls: ['./cf-org-permission-cell.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    AppChipsComponent
+  ]
 })
 export class CfOrgPermissionCellComponent extends CfPermissionCellDirective<OrgUserRoleNames> {
 
@@ -37,10 +37,10 @@ export class CfOrgPermissionCellComponent extends CfPermissionCellDirective<OrgU
     confirmDialog: ConfirmationDialogService,
   ) {
     super(store, confirmDialog, cfUserService);
-    this.chipsConfig$ = combineLatest(
+    this.chipsConfig$ = combineLatest([
       this.rowSubject.asObservable(),
-      this.config$.pipe(switchMap(config => config.org$))
-    ).pipe(
+      this.config$.pipe(switchMap(config => config.org$ || observableOf(null)))
+    ]).pipe(
       map(([user, org]: [APIResource<CfUser>, APIResource<IOrganization>]) => this.setChipConfig(user, org))
     );
   }

@@ -1,12 +1,13 @@
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import moment from 'moment';
+import { differenceInMilliseconds, isBefore } from 'date-fns';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
-import { IListConfig, ListConfig, ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
+import { IGlobalListAction, IListAction, IListConfig, IListMultiFilterConfig, IMultiListAction, ListConfig, ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
+import { ListDataSource } from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { MetricsRangeSelectorService } from '../../../../../core/src/shared/services/metrics-range-selector.service';
 import { ITimeRange } from '../../../../../core/src/shared/services/metrics-range-selector.types';
 import { APIResource } from '../../../../../store/src/types/api.types';
@@ -20,7 +21,9 @@ import {
   TableCellAutoscalerEventStatusComponent,
 } from './table-cell-autoscaler-event-status/table-cell-autoscaler-event-status.component';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfAppAutoscalerEventsConfigService
   extends ListConfig<APIResource<AppAutoscalerEvent>>
   implements IListConfig<APIResource<AppAutoscalerEvent>> {
@@ -30,7 +33,7 @@ export class CfAppAutoscalerEventsConfigService
       columnId: 'timestamp',
       headerCell: () => 'Timestamp',
       cellDefinition: {
-        getValue: row => this.datePipe.transform(row.entity.timestamp / 1000000, 'medium')
+        getValue: (row: APIResource<AppAutoscalerEvent>) => this.datePipe.transform(row.entity.timestamp / 1000000, 'medium')
       },
       sort: true,
       cellFlex: '3'
@@ -42,7 +45,7 @@ export class CfAppAutoscalerEventsConfigService
       columnId: 'type',
       headerCell: () => 'Type',
       cellDefinition: {
-        getValue: row => row.entity.scaling_type === 0 ? 'dynamic' : 'schedule'
+        getValue: (row: APIResource<AppAutoscalerEvent>) => row.entity.scaling_type === 0 ? 'dynamic' : 'schedule'
       },
       cellFlex: '2'
     },
@@ -53,7 +56,7 @@ export class CfAppAutoscalerEventsConfigService
       columnId: 'action',
       headerCell: () => 'Action',
       cellDefinition: {
-        getValue: row => {
+        getValue: (row: APIResource<AppAutoscalerEvent>) => {
           if (row.entity.message) {
             const change = row.entity.new_instances - row.entity.old_instances;
             if (change >= 0) {
@@ -79,7 +82,7 @@ export class CfAppAutoscalerEventsConfigService
   ];
   viewType = ListViewTypes.TABLE_ONLY;
   text = {
-    title: null,
+    title: null as string | null,
     noEntries: 'There are no scaling events'
   };
   isLocal = false;
@@ -110,16 +113,17 @@ export class CfAppAutoscalerEventsConfigService
   ];
 
   private thirtyDays = 1000 * 60 * 60 * 24 * 30;
-  customTimeValidation = (start: moment.Moment, end: moment.Moment) => {
+  customTimeValidation = (start: Date | null, end: Date | null): string | null => {
     if (!end || !start) {
       return null;
     }
-    if (!start.isBefore(end)) {
+    if (!isBefore(start, end)) {
       return 'Start date must be before end date.';
     }
-    if (moment().diff(start) > this.thirtyDays) {
+    if (differenceInMilliseconds(new Date(), start) > this.thirtyDays) {
       return 'Only recent 30 days data are support to be query.';
     }
+    return null;
   }
 
   constructor(
@@ -137,10 +141,10 @@ export class CfAppAutoscalerEventsConfigService
     );
   }
 
-  getGlobalActions = () => null;
-  getMultiActions = () => null;
-  getSingleActions = () => null;
-  getColumns = () => this.columns;
+  getGlobalActions = (): IGlobalListAction<APIResource<AppAutoscalerEvent>>[] => [];
+  getMultiActions = (): IMultiListAction<APIResource<AppAutoscalerEvent>>[] => [];
+  getSingleActions = (): IListAction<APIResource<AppAutoscalerEvent>>[] => [];
+  getColumns = (): ITableColumn<APIResource<AppAutoscalerEvent>>[] => this.columns;
   getDataSource = () => this.autoscalerEventSource;
-  getMultiFiltersConfigs = () => [];
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
 }

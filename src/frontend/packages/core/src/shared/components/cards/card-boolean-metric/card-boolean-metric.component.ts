@@ -1,24 +1,30 @@
-import { Component, Input, OnChanges, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { RouterNav, AppState } from '@stratosui/store';
 
 @Component({
   selector: 'app-card-boolean-metric',
   templateUrl: './card-boolean-metric.component.html',
-  styleUrls: ['./card-boolean-metric.component.scss']
+  styleUrls: ['./card-boolean-metric.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule
+  ]
 })
 export class CardBooleanMetricComponent implements OnInit, OnChanges {
 
-  @Input() icon: string;
-  @Input() iconFont: string;
-  @Input() label: string;
-  @Input() value: string;
+  @Input() icon!: string;
+  @Input() iconFont!: string;
+  @Input() label!: string;
+  @Input() value!: string;
   @Input() textOnly = false;
-  @Input() link: () => void | string;
+  @Input() link!: () => void | string;
 
-  formattedValue: string;
+  formattedValue!: string;
 
-  constructor(private store: Store<AppState>) { }
+  private store = inject(Store<AppState>);
 
   ngOnInit() {
     this.format();

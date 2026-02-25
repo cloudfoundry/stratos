@@ -1,25 +1,24 @@
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, of as observableOf } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   CurrentUserPermissionsService,
-} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import {
-  ListDataSource,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { ITableColumn, ITableText } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import {
   defaultPaginationPageSizeOptionsTable,
+  IGlobalListAction,
   IListAction,
   IListConfig,
-  ListViewTypes,
-} from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+  IListMultiFilterConfig,
+  IMultiListAction,
+  ITableColumn,
+  ITableText,
+  ListDataSource,
+  ListViewTypes
+} from '@stratosui/core';
+import { APIResource, ListView } from '@stratosui/store';
+import { CFAppState } from '../../../../../cf-app-state';
 import { IServiceInstance } from '../../../../../cf-api-svc.types';
 import { isUserProvidedServiceInstance } from '../../../../../features/cf/cf.helpers';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
@@ -48,7 +47,7 @@ interface CanCache {
 export class CfServiceInstancesListConfigBase implements IListConfig<APIResource<IServiceInstance>> {
   viewType = ListViewTypes.TABLE_ONLY;
   pageSizeOptions = defaultPaginationPageSizeOptionsTable;
-  dataSource: ListDataSource<APIResource>;
+  dataSource!: ListDataSource<APIResource>;
   defaultView = 'table' as ListView;
   text: ITableText = {
     title: null,
@@ -123,27 +122,33 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
     },
   ];
 
-  private listActionDelete: IListAction<APIResource> = {
-    action: (item: APIResource) => this.deleteServiceInstance(item),
+  private listActionDelete: IListAction<APIResource<IServiceInstance>> = {
+    action: (item: APIResource<IServiceInstance>) => this.deleteServiceInstance(item),
     label: 'Delete',
     description: 'Delete Service Instance',
     createVisible: (row$: Observable<APIResource<IServiceInstance>>) =>
       row$.pipe(
         switchMap(
-          row => this.can(this.canDeleteCache, CfCurrentUserPermissions.SERVICE_INSTANCE_DELETE, row.entity.cfGuid, row.entity.space_guid)
+          row => row && row.entity && row.entity.cfGuid && row.entity.space_guid ?
+            this.can(this.canDeleteCache, CfCurrentUserPermissions.SERVICE_INSTANCE_DELETE, row.entity.cfGuid, row.entity.space_guid) :
+            observableOf(false)
         )
       )
   };
 
-  private listActionDetach: IListAction<APIResource> = {
-    action: (item: APIResource) => this.deleteServiceBinding(item),
+  private listActionDetach: IListAction<APIResource<IServiceInstance>> = {
+    action: (item: APIResource<IServiceInstance>) => this.deleteServiceBinding(item),
     label: 'Unbind',
     description: 'Unbind Service Instance',
-    createEnabled: (row$: Observable<APIResource<IServiceInstance>>) => row$.pipe(map(row => row.entity.service_bindings.length !== 0)),
+    createEnabled: (row$: Observable<APIResource<IServiceInstance>>) => row$.pipe(
+      map(row => !!(row && row.entity && row.entity.service_bindings && row.entity.service_bindings.length !== 0))
+    ),
     createVisible: (row$: Observable<APIResource<IServiceInstance>>) =>
       row$.pipe(
         switchMap(
-          row => this.can(this.canDetachCache, CfCurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid)
+          row => row && row.entity && row.entity.cfGuid && row.entity.space_guid ?
+            this.can(this.canDetachCache, CfCurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid) :
+            observableOf(false)
         )
       )
   };
@@ -164,7 +169,9 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
     createVisible: (row$: Observable<APIResource<IServiceInstance>>) =>
       row$.pipe(
         switchMap(
-          row => this.can(this.canDetachCache, CfCurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid)
+          row => row && row.entity && row.entity.cfGuid && row.entity.space_guid ?
+            this.can(this.canDetachCache, CfCurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid) :
+            observableOf(false)
         )
       )
   };
@@ -203,11 +210,11 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
     );
   }
 
-  getGlobalActions = () => [];
-  getMultiActions = () => [];
-  getSingleActions = () => [this.listActionEdit, this.listActionDetach, this.listActionDelete];
-  getMultiFiltersConfigs = () => [];
-  getColumns = () => this.serviceInstanceColumns;
-  getDataSource = () => null;
+  getGlobalActions = (): IGlobalListAction<APIResource<IServiceInstance>>[] => [];
+  getMultiActions = (): IMultiListAction<APIResource<IServiceInstance>>[] => [];
+  getSingleActions = (): IListAction<APIResource<IServiceInstance>>[] => [this.listActionEdit, this.listActionDetach, this.listActionDelete];
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
+  getColumns = (): ITableColumn<APIResource<IServiceInstance>>[] => this.serviceInstanceColumns;
+  getDataSource = (): ListDataSource<APIResource> | null => null;
 
 }

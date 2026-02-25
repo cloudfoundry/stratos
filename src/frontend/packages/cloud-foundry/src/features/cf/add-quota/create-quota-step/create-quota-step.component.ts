@@ -1,10 +1,10 @@
-import { Component, ViewChild } from '@angular/core';
-import { UntypedFormGroup } from '@angular/forms';
+import { Component, ViewChild , ChangeDetectionStrategy } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
 
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
+import { StepOnNextFunction } from '@stratosui/core';
+import { RequestInfoState } from '@stratosui/store';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
@@ -17,16 +17,21 @@ import { QuotaDefinitionFormComponent } from '../../quota-definition-form/quota-
   styleUrls: ['./create-quota-step.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
+  ],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    QuotaDefinitionFormComponent
   ]
 })
 export class CreateQuotaStepComponent {
 
-  quotasSubscription: Subscription;
+  quotasSubscription!: Subscription;
   cfGuid: string;
-  quotaForm: UntypedFormGroup;
+  quotaForm!: FormGroup;
 
   @ViewChild('form', { static: true })
-  form: QuotaDefinitionFormComponent;
+  form!: QuotaDefinitionFormComponent;
 
   constructor(
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
@@ -37,7 +42,7 @@ export class CreateQuotaStepComponent {
   validate = () => !!this.form && this.form.valid();
 
   submit: StepOnNextFunction = () => {
-    const formValues = this.form.formGroup.value;
+    const formValues = this.form.formGroup.getRawValue();
     return cfEntityCatalog.quotaDefinition.api.create<RequestInfoState>(formValues.name, this.cfGuid, formValues).pipe(
       pairwise(),
       filter(([oldV, newV]) => oldV.creating && !newV.creating),

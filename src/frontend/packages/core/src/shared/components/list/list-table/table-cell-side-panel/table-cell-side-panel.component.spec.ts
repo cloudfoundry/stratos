@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { SidePanelService } from '../../../../services/side-panel.service';
@@ -8,18 +10,23 @@ describe('TableCellSidePanelComponent', () => {
   let component: TableCellSidePanelComponent;
   let fixture: ComponentFixture<TableCellSidePanelComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [TableCellSidePanelComponent],
+      
       providers: [
+        
         SidePanelService,
+
+        provideZonelessChangeDetection(),
       ],
       imports: [
-        RouterTestingModule
+        RouterTestingModule,
+        TableCellSidePanelComponent,
       ]
-    })
-      .compileComponents();
-  }));
+    
+    });
+      TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellSidePanelComponent);

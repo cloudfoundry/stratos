@@ -12,7 +12,7 @@ import { autoscalerEntityFactory } from '../../../store/autoscaler-entity-factor
 
 
 export class AppAutoscalerMetricChartDataSource extends ListDataSource<APIResource<AppScalingTrigger>> {
-  action: any;
+  declare action: any;
   constructor(
     store: Store<CFAppState>,
     cfGuid: string,

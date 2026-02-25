@@ -1,47 +1,37 @@
-.mat-radio-outer-circle {
-  height: 15px;
-  top: 2.5px;
-  width: 15px;
+.radio-outer-circle {
+  @apply h-[15px] w-[15px] top-[2.5px];
 }
 
 .app-autoscaler-tile-grid-100 {
-  width: 100%;
+  @apply w-full;
 }
 
 .autoscaler-policy-edit {
-  display: flex;
-  position: relative;
-  width: 100%;
+  @apply flex relative w-full;
   &__actions {
-    bottom: 10px;
-    padding-top: 0;
-    position: absolute;
-    right: 24px;
-    text-align: right;
+    @apply absolute bottom-2.5 right-6 pt-0 text-right;
   }
 }
 
 .app-metadata {
-  display: flex;
-  flex-direction: row;
+  @apply flex flex-row;
   &__two-cols {
-    flex: 1;
-    margin-right: 3em;
+    @apply flex-1 mr-12;
     app-metadata-item:first-child {
-      margin-top: 0;
+      @apply mt-0;
     }
   }
 }
 
 .autoscaler-policy-edit-recurring {
-  max-width: 100%;
+  @apply max-w-full;
   .form-field-left {
-    margin-right: .5em;
+    @apply mr-2;
   }
   .form-field-30 {
-    width: 30%;
+    @apply w-[30%];
   }
   .form-field-50 {
-    width: 50%;
+    @apply w-1/2;
   }
 }

@@ -1,5 +1,5 @@
 import { ComponentFactoryResolver, Injector } from '@angular/core';
-import { UntypedFormBuilder } from '@angular/forms';
+import { FormBuilder } from '@angular/forms';
 
 import { ConnectEndpointData } from '../../../../core/src/features/endpoints/connect.service';
 import { RowState } from '../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
@@ -16,7 +16,7 @@ export class KubeConfigAuthHelper {
 
   authTypes: { [name: string]: EndpointAuthTypeConfig, } = {};
 
-  public subTypes = [];
+  public subTypes: Array<{ id: string; name: string }> = [];
 
   constructor() {
     const epTypeInfo = entityCatalog.getAllEndpointTypes(false);
@@ -25,21 +25,27 @@ export class KubeConfigAuthHelper {
       const defn = k8s.definition;
 
       // Collect all of the auth types
-      defn.authTypes.forEach(at => {
-        this.authTypes[at.value] = at;
-      });
+      if (defn.authTypes) {
+        defn.authTypes.forEach(at => {
+          this.authTypes[at.value] = at;
+        });
+      }
 
       this.subTypes.push({ id: '', name: 'Generic' });
 
       // Collect all of the auth types for the sub-types
-      defn.subTypes.forEach(st => {
-        if (st.type !== 'config') {
-          this.subTypes.push({ id: st.type, name: st.labelShort });
-        }
-        st.authTypes.forEach(at => {
-          this.authTypes[at.value] = at;
+      if (defn.subTypes) {
+        defn.subTypes.forEach(st => {
+          if (st.type !== 'config') {
+            this.subTypes.push({ id: st.type, name: st.labelShort });
+          }
+          if (st.authTypes) {
+            st.authTypes.forEach(at => {
+              this.authTypes[at.value] = at;
+            });
+          }
         });
-      });
+      }
 
       // Sort the subtypes
       this.subTypes = this.subTypes.sort((a, b) => a.name.localeCompare(b.name));
@@ -87,7 +93,7 @@ export class KubeConfigAuthHelper {
       };
     }
 
-    const authProvider = user.user['auth-provider'];
+    const authProvider = (user.user as Record<string, { config?: Record<string, string> }>)['auth-provider'];
     if (authProvider && authProvider.config) {
       if (authProvider.config['cmd-path'] && authProvider.config['cmd-path'].indexOf('gcloud') !== -1) {
         // GKE
@@ -132,7 +138,7 @@ export class KubeConfigAuthHelper {
   }
 
   // Use the auto component to get the data in the correct format for connecting to the endpoint
-  public getAuthDataForConnect(resolver: ComponentFactoryResolver, injector: Injector, fb: UntypedFormBuilder, user: KubeConfigFileUser)
+  public getAuthDataForConnect(resolver: ComponentFactoryResolver, injector: Injector, fb: FormBuilder, user: KubeConfigFileUser)
     : ConnectEndpointData | null {
 
     let data = null;

@@ -1,27 +1,35 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import { AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { EntityMonitorFactory, EntityServiceFactory } from '@stratosui/store';
 import {
   generateCfBaseTestModulesNoShared,
-} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { TableCellServiceInstanceTagsComponent } from './table-cell-service-instance-tags.component';
-
 describe('TableCellServiceInstanceTagsComponent', () => {
   let component: TableCellServiceInstanceTagsComponent;
   let fixture: ComponentFixture<TableCellServiceInstanceTagsComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [TableCellServiceInstanceTagsComponent, AppChipsComponent],
-      imports: generateCfBaseTestModulesNoShared(),
-      providers: [EntityMonitorFactory]
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        ...generateCfBaseTestModulesNoShared(),
+        TableCellServiceInstanceTagsComponent,
+        AppChipsComponent,
+    ],
+      providers: [
+        EntityServiceFactory,
+        EntityMonitorFactory,
+        provideZonelessChangeDetection(),
+      ]
 
     })
       .compileComponents();
-  }));
+  });
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(TableCellServiceInstanceTagsComponent);
     component = fixture.componentInstance;
     component.row = {
@@ -51,9 +59,9 @@ describe('TableCellServiceInstanceTagsComponent', () => {
       }
     };
     fixture.detectChanges();
-  }));
+  });
 
-  it('should create', waitForAsync(() => {
+  it('should create', () => {
     expect(component).toBeTruthy();
-  }));
+  });
 });

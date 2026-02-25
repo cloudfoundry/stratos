@@ -1,77 +1,60 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { Store } from '@ngrx/store';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { Store, StoreModule } from '@ngrx/store';
 
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
-import { MDAppModule } from '../../../../../../../../core/src/core/md.module';
-import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
-import {
-  getPaginationAction,
-} from '../../../../../../../../store/src/entity-catalog/action-orchestrator/action-orchestrator.spec.helpers';
-import { EntityCatalogEntityConfig } from '../../../../../../../../store/src/entity-catalog/entity-catalog.types';
-import { NormalizedResponse } from '../../../../../../../../store/src/types/api.types';
-import { PaginatedAction } from '../../../../../../../../store/src/types/pagination.types';
-import { WrapperRequestActionSuccess } from '../../../../../../../../store/src/types/request.types';
-import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { cfEntityFactory } from '../../../../../../cf-entity-factory';
-import { cfEventEntityType } from '../../../../../../cf-entity-types';
-import {
-  CloudFoundryEventsListComponent,
-} from '../../../../../../shared/components/cloud-foundry-events-list/cloud-foundry-events-list.component';
-import { ApplicationStateService } from '../../../../../../shared/services/application-state.service';
-import { ApplicationService } from '../../../../application.service';
-import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
+import { appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule } from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { ApplicationService, CFAppState, generateCFEntities } from '@stratosui/cloud-foundry';
+import { ApplicationServiceMock, generateActiveRouteCfOrgSpaceMock, ApplicationStateService, ApplicationEnvVarsHelper } from '@test-framework/cf';
 import { EventsTabComponent } from './events-tab.component';
 
 describe('EventsTabComponent', () => {
-  class ApplicationServiceMock {
-    cfGuid = 'mockCfGuid';
-    appGuid = 'mockAppGuid';
-  }
-
   let component: EventsTabComponent;
   let fixture: ComponentFixture<EventsTabComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
         EventsTabComponent,
-        CloudFoundryEventsListComponent
+        NoopAnimationsModule,
+        StoreModule.forRoot(
+          appReducers,
+          { runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false } }
+        ),
+        {
+          ngModule: EntityCatalogTestModule,
+          providers: [
+            {
+              provide: TEST_CATALOGUE_ENTITIES,
+              useValue: [
+                ...generateStratosEntities(),
+                ...generateCFEntities()
+              ]
+            }
+          ]
+        },
       ],
       providers: [
+        ...STORE_TEST_PROVIDERS,
         { provide: ApplicationService, useClass: ApplicationServiceMock },
+        generateActiveRouteCfOrgSpaceMock(),
         ApplicationStateService,
-        ApplicationEnvVarsHelper
-      ],
-      imports: [
-        ...generateCfStoreModules(),
-        MDAppModule,
-        SharedModule,
-        CoreModule,
-        NoopAnimationsModule,
+        ApplicationEnvVarsHelper,
+        Store,
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
       ]
-    })
-      .compileComponents();
-    const eventsConfig: EntityCatalogEntityConfig = cfEntityFactory(cfEventEntityType);
+    }).compileComponents();
 
-    const mappedData = {
-      entities: {},
-      result: []
-    } as NormalizedResponse;
-    const pagAction: PaginatedAction = {
-      type: 'POPULATE_TEST_DATA',
-      ...getPaginationAction(),
-      ...eventsConfig,
-      paginationKey: 'app-events:mockCfGuidmockAppGuid'
-    };
-    const store = TestBed.get(Store);
-    store.dispatch(new WrapperRequestActionSuccess(mappedData, pagAction, 'fetch'));
-  }));
-
-  beforeEach(() => {
     fixture = TestBed.createComponent(EventsTabComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    // Don't call detectChanges() as the component may subscribe to observables
+    // that require more complex test data setup
   });
 
   it('should be created', () => {

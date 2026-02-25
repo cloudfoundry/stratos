@@ -1,15 +1,28 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
+
+import { CopyToClipboardComponent } from '../copy-to-clipboard/copy-to-clipboard.component';
+import { CustomIconComponent } from '../custom-material/custom-material.component';
 
 @Component({
   selector: 'app-metadata-item',
   templateUrl: './metadata-item.component.html',
-  styleUrls: ['./metadata-item.component.scss']
+  styleUrls: ['./metadata-item.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    CustomIconComponent,
+    CustomTooltipDirective,
+    CopyToClipboardComponent
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetadataItemComponent {
 
   constructor() { }
 
-  @Input() public icon: string;
+  @Input() icon!: string;
 
   @Input() public iconFont: string;
 

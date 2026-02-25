@@ -1,15 +1,12 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
-import { CoreModule } from '../../../../../core/src/core/core.module';
-import { MDAppModule } from '../../../../../core/src/core/md.module';
-import { SharedModule } from '../../../../../core/src/shared/shared.module';
-import { TabNavService } from '../../../../../core/src/tab-nav.service';
-import { generateTestApplicationServiceProvider } from '../../../../test-framework/application-service-helper';
-import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundrySharedModule } from '../../../shared/cf-shared.module';
-import { ApplicationStateService } from '../../../shared/services/application-state.service';
-import { ApplicationEnvVarsHelper } from '../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { TabNavService } from '@stratosui/core';
+import { generateTestApplicationServiceProvider, generateCfStoreModules, ApplicationStateService, ApplicationEnvVarsHelper } from '@test-framework/cf';
 import { CliInfoApplicationComponent } from './cli-info-application.component';
 
 describe('CliInfoApplicationComponent', () => {
@@ -18,29 +15,24 @@ describe('CliInfoApplicationComponent', () => {
 
   const appId = '1';
   const cfId = '2';
-
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [CliInfoApplicationComponent],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
-        ...generateCfStoreModules(),
-        CoreModule,
-        SharedModule,
-        MDAppModule,
-        RouterTestingModule,
-        CloudFoundrySharedModule
+        CliInfoApplicationComponent,
+        NoopAnimationsModule,
       ],
       providers: [
+        importProvidersFrom(generateCfStoreModules()),
+        provideRouter([]),
+        provideHttpClient(),
         generateTestApplicationServiceProvider(cfId, appId),
         ApplicationStateService,
         ApplicationEnvVarsHelper,
-        TabNavService
+        TabNavService,
+        provideZonelessChangeDetection(),
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(CliInfoApplicationComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

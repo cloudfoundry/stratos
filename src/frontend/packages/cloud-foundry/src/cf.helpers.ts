@@ -1,4 +1,4 @@
-import { APIResource } from '../../store/src/types/api.types';
+import { APIResource } from '@stratosui/store';
 import { IApp } from './cf-api.types';
 import { CfApplicationState } from './store/types/application.types';
 
@@ -16,5 +16,5 @@ export function getEntityFlattenedList<T>(property: string, entities: APIResourc
   const all = entities
     .map(s => s.entity[property])
     .filter(s => !!s);
-  return [].concat.apply([], all);
+  return ([] as T[]).concat(...all);
 }

@@ -1,5 +1,9 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit, inject } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
+
+import { ClickStopPropagationDirective } from '../../../core/click-stop-propagation.directive';
 
 export interface IAppChip<T = string> {
   key?: T;
@@ -11,7 +15,7 @@ export interface IAppChip<T = string> {
 }
 export class AppChip<T = string> implements IAppChip<T> {
   key?: T;
-  value: string;
+  value!: string;
   clearAction?: (chip: IAppChip<T>) => void;
   hideClearButton$?: Observable<boolean>;
   busy?: Observable<boolean>;
@@ -24,17 +28,30 @@ export class AppChip<T = string> implements IAppChip<T> {
 
 @Component({
   selector: 'app-chips',
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    ClickStopPropagationDirective
+  ],
   templateUrl: './chips.component.html',
-  styleUrls: ['./chips.component.scss']
+  styleUrls: ['./chips.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppChipsComponent implements OnInit {
-
-  constructor() { }
+  private cdr = inject(ChangeDetectorRef);
 
   public atLowerLimit = true;
 
+  private pChips: AppChip[] = [];
   @Input()
-  public chips: AppChip[] = [];
+  get chips(): AppChip[] {
+    return this.pChips;
+  }
+  set chips(chips: AppChip[]) {
+    this.pChips = chips;
+    this.cdr.markForCheck();
+  }
 
   @Input()
   stacked = false;
@@ -45,10 +62,17 @@ export class AppChipsComponent implements OnInit {
   @Input()
   lowerLimit = 3;
 
+  private pDisplayProperty = 'value';
   @Input()
-  displayProperty = 'value';
+  get displayProperty(): string {
+    return this.pDisplayProperty;
+  }
+  set displayProperty(displayProperty: string) {
+    this.pDisplayProperty = displayProperty;
+    this.cdr.markForCheck();
+  }
 
-  public limit;
+  public limit!: number;
 
   ngOnInit() {
     this.limit = this.lowerLimit;
@@ -62,6 +86,21 @@ export class AppChipsComponent implements OnInit {
       this.limit = this.lowerLimit;
       this.atLowerLimit = true;
     }
+    this.cdr.markForCheck();
+  }
+
+  public getChipClasses(color?: string): string {
+    if (!color) {
+      return 'bg-gray-100 border-gray-300 text-gray-800';
+    }
+    const colorMap: { [key: string]: string } = {
+      'primary': 'bg-blue-100 border-blue-300 text-blue-800',
+      'success': 'bg-green-100 border-green-300 text-green-800',
+      'warning': 'bg-yellow-100 border-yellow-300 text-yellow-800',
+      'danger': 'bg-red-100 border-red-300 text-red-800',
+      'info': 'bg-cyan-100 border-cyan-300 text-cyan-800'
+    };
+    return colorMap[color] || 'bg-gray-100 border-gray-300 text-gray-800';
   }
 
 }

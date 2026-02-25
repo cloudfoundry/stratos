@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { BehaviorSubject, combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
+import { combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { getIdFromRoute } from '../../../../core/src/core/utils.service';
@@ -34,7 +34,9 @@ export interface SpaceScopedService {
   orgGuid?: string;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ServicesService {
   isSpaceScoped$: Observable<SpaceScopedService>;
   allServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
@@ -48,7 +50,8 @@ export class ServicesService {
   serviceExtraInfo$: Observable<IServiceExtra>;
   service$: Observable<APIResource<IService>>;
   serviceEntityService: EntityService<APIResource<IService>>;
-  initialised$ = new BehaviorSubject(false);
+  private _initialised = signal<boolean>(false);
+  public initialised = this._initialised.asReadonly();
 
   constructor(
     public activatedRoute: ActivatedRoute,
@@ -59,7 +62,7 @@ export class ServicesService {
 
     this.initServicesObservables();
 
-    if (this.serviceGuid) {
+    if (this.serviceGuid && this.cfGuid) {
       this.initServiceObservables();
     }
   }

@@ -1,9 +1,15 @@
-import { AfterContentInit, Component, ContentChildren, OnDestroy, QueryList } from '@angular/core';
+
+import { ChangeDetectionStrategy, AfterContentInit, Component, ContentChildren, OnDestroy, QueryList  } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { CardWrapperComponent } from '../cards/card/card.component';
+import { CustomFormFieldComponent } from '../custom-form-field/custom-form-field.component';
+import { CustomSelectComponent, CustomOptionComponent } from '../custom-select/custom-select.component';
 import { EntityMonitorFactory, IMetrics, MetricQueryType } from '@stratosui/store';
 import { Subscription } from 'rxjs';
 
 import { MetricsRangeSelectorManagerService } from '../../services/metrics-range-selector-manager.service';
 import { MetricsChartComponent } from '../metrics-chart/metrics-chart.component';
+import { StartEndDateComponent } from '../start-end-date/start-end-date.component';
 
 @Component({
   selector: 'app-metrics-parent-range-selector',
@@ -11,13 +17,23 @@ import { MetricsChartComponent } from '../metrics-chart/metrics-chart.component'
   styleUrls: ['./metrics-parent-range-selector.component.scss'],
   providers: [
     MetricsRangeSelectorManagerService
-  ]
+  ],
+  standalone: true,
+  imports: [
+    CommonModule,
+    CardWrapperComponent,
+    CustomFormFieldComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
+    StartEndDateComponent
+],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetricsParentRangeSelectorComponent implements AfterContentInit, OnDestroy {
-  private actionSub: Subscription;
+  private actionSub!: Subscription;
 
   @ContentChildren(MetricsChartComponent)
-  private metricsCharts: QueryList<MetricsChartComponent>;
+  private metricsCharts!: QueryList<MetricsChartComponent>;
 
   public rangeTypes = MetricQueryType;
 

@@ -2,19 +2,8 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, first, map } from 'rxjs/operators';
 
-import { arraysEqual } from '../../../../../../../core/src/core/utils.service';
-import {
-  valueOrCommonFalsy,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-pagination-controller';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import {
-  IListConfig,
-  ListConfig,
-  ListViewTypes,
-} from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { AddParams } from '../../../../../../../store/src/actions/pagination.actions';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
+import { arraysEqual, valueOrCommonFalsy, ITableColumn, IListConfig, ListConfig, ListViewTypes } from '@stratosui/core';
+import { AddParams, APIResource, PaginatedAction } from '@stratosui/store';
 import { CfEvent } from '../../../../../cf-api.types';
 import { CFAppState } from '../../../../../cf-app-state';
 import { QParam, QParamJoiners } from '../../../../q-param';
@@ -55,7 +44,7 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
   ];
   viewType = ListViewTypes.TABLE_ONLY;
   text = {
-    title: null,
+    title: null as string,
     noEntries: 'There are no events'
   };
 
@@ -81,14 +70,14 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
     );
   }
 
-  getGlobalActions = () => null;
-  getMultiActions = () => null;
-  getSingleActions = () => null;
-  getColumns = () => this.columns;
-  getDataSource = () => this.eventSource;
-  getMultiFiltersConfigs = () => [];
+  getGlobalActions = (): import('../../../../../../../core/src/shared/components/list/list.component.types').IGlobalListAction<APIResource>[] => null;
+  getMultiActions = (): import('../../../../../../../core/src/shared/components/list/list.component.types').IMultiListAction<APIResource>[] => null;
+  getSingleActions = (): import('../../../../../../../core/src/shared/components/list/list.component.types').IListAction<APIResource>[] => null;
+  getColumns = (): ITableColumn<APIResource>[] => this.columns;
+  getDataSource = (): CfEventsDataSource => this.eventSource;
+  getMultiFiltersConfigs = (): import('../../../../../../../core/src/shared/components/list/list.component.types').IListMultiFilterConfig[] => [];
 
-  setActeeFilter(actee: string) {
+  setActeeFilter(actee: string): void {
     this.getEventFilters().pipe(
       first()
     ).subscribe(currentFilters => {
@@ -99,7 +88,7 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
     });
   }
 
-  setEventFilters(values: { actee: string, type: string[], }) {
+  setEventFilters(values: { actee: string, type: string[] }): void {
     this.getEventFilters().pipe(
       first()
     ).subscribe(currentFilters => {

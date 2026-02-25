@@ -1,62 +1,86 @@
 import { DatePipe } from '@angular/common';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { CUSTOM_ELEMENTS_SCHEMA, importProvidersFrom } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
-import { createEmptyStoreModule } from '@stratosui/store/testing';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { provideRouter } from '@angular/router';
+import { describe, it, expect, beforeEach, afterAll, vi } from 'vitest';
+import { BehaviorSubject } from 'rxjs';
 
-import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
-import {
-  CardAppInstancesComponent,
-} from '../../../../cloud-foundry/src/shared/components/cards/card-app-instances/card-app-instances.component';
-import {
-  CardAppUsageComponent,
-} from '../../../../cloud-foundry/src/shared/components/cards/card-app-usage/card-app-usage.component';
-import {
-  RunningInstancesComponent,
-} from '../../../../cloud-foundry/src/shared/components/running-instances/running-instances.component';
-import {
-  cfCurrentUserPermissionsService,
-} from '../../../../cloud-foundry/src/user-permissions/cf-user-permissions-checkers';
-import { ApplicationServiceMock } from '../../../../cloud-foundry/test-framework/application-service-helper';
-import { CoreModule } from '../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../core/src/shared/shared.module';
-import { TabNavService } from '../../../../core/src/tab-nav.service';
+import { ApplicationService } from '@stratosui/cloud-foundry';
+import { ApplicationServiceMock } from '@test-framework/cf';
+import { CoreModule, TabNavService } from '@stratosui/core';
+import { generateBaseTestStoreModules } from '@test-framework/core-test.helper';
+import { EntityServiceFactory } from '@stratosui/store';
 import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
-import { CardAutoscalerDefaultComponent } from '../../shared/card-autoscaler-default/card-autoscaler-default.component';
 import { AutoscalerTabExtensionComponent } from './autoscaler-tab-extension.component';
 
 describe('AutoscalerTabExtensionComponent', () => {
   let component: AutoscalerTabExtensionComponent;
   let fixture: ComponentFixture<AutoscalerTabExtensionComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
+    // Create mock observables that emit proper values before completing
+    const entityObsSubject = new BehaviorSubject({
+      entityRequestInfo: {
+        fetching: false,
+        error: false
+      },
+      entity: {
+        entity: {
+          instance_min_count: 1,
+          instance_max_count: 10,
+          scaling_rules_map: {}
+        }
+      }
+    });
+
+    const waitForEntitySubject = new BehaviorSubject({
+      entity: {
+        entity: {
+          instance_min_count: 1,
+          instance_max_count: 10,
+          scaling_rules_map: {}
+        }
+      }
+    });
+
+    // Create a mock EntityServiceFactory that returns services with proper observables
+    const mockEntityServiceFactory = {
+      create: vi.fn().mockReturnValue({
+        entityObs$: entityObsSubject.asObservable(),
+        waitForEntity$: waitForEntitySubject.asObservable(),
+        entityMonitor: {
+          entityRequest$: new BehaviorSubject({
+            error: false,
+            message: ''
+          }).asObservable()
+        }
+      })
+    };
+
     TestBed.configureTestingModule({
-      declarations: [
-        AutoscalerTabExtensionComponent,
-        CardAutoscalerDefaultComponent,
-        CardAppInstancesComponent,
-        CardAppUsageComponent,
-        RunningInstancesComponent
-      ],
       imports: [
-        CfAutoscalerTestingModule,
-        NoopAnimationsModule,
-        createEmptyStoreModule(),
-        CoreModule,
-        SharedModule,
-        NgxChartsModule,
-        RouterTestingModule,
+        AutoscalerTabExtensionComponent,
       ],
       providers: [
+        importProvidersFrom(
+          CfAutoscalerTestingModule,
+          ...generateBaseTestStoreModules(),
+          CoreModule,
+          NoopAnimationsModule
+        ),
+        provideRouter([]),
         DatePipe,
         { provide: ApplicationService, useClass: ApplicationServiceMock },
+        { provide: EntityServiceFactory, useValue: mockEntityServiceFactory },
         TabNavService,
-        ...cfCurrentUserPermissionsService
-      ]
+        provideZonelessChangeDetection(),
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AutoscalerTabExtensionComponent);

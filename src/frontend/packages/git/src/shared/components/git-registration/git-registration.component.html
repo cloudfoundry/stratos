@@ -1,46 +1,91 @@
 <app-steppers [cancel]="'/endpoints'">
   <app-step title="Register" [onNext]="onNext" nextButtonText="Register" [valid]="validate | async">
-    <div class="select-step">
-      <h3>Select the type of {{gitTypes[epSubType].label}} to register</h3>
-      <form class="stepper-form" *ngIf="registerForm" [formGroup]="registerForm">
-        <mat-radio-group class="select-step__radio-group" formControlName="selectedType" name="gitTypes">
-          <div *ngFor="let gitTypeEntry of gitTypes[epSubType].types | keyvalue">
-            <mat-radio-button class="select-step__radio-button" [value]="gitTypeEntry.key"
-              [disabled]="gitTypeEntry.value.exists">
-              {{ gitTypeEntry.value.label }}
-            </mat-radio-button>
-            <div *ngIf="gitTypeEntry.value.description" class="select-step__description"
-              [ngClass]="{'select-step__off': gitTypeEntry.value.exists}">
-              <p *ngFor="let p of gitTypeEntry.value.description">{{p}}</p>
-            </div>
+    <div class="p-6">
+      <h3 class="text-xl font-semibold mb-4">Select the type of {{gitTypes[epSubType].label}} to register</h3>
+      @if (registerForm) {
+        <form class="space-y-4" [formGroup]="registerForm">
+          <div class="space-y-3">
+            @for (gitTypeEntry of gitTypes[epSubType].types | keyvalue; track gitTypeEntry) {
+              <div class="block">
+                <label class="flex items-start space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+                  [class.opacity-50]="gitTypeEntry.value.exists"
+                  [class.cursor-not-allowed]="gitTypeEntry.value.exists"
+                  [class.pointer-events-none]="gitTypeEntry.value.exists">
+                  <input type="radio" formControlName="selectedType" [value]="gitTypeEntry.key"
+                    class="mt-1 text-primary-600 focus:ring-primary-500 border-gray-300"
+                    [attr.aria-disabled]="gitTypeEntry.value.exists ? 'true' : null">
+                  <div class="flex-1">
+                    <div class="font-medium text-gray-900">{{ gitTypeEntry.value.label }}</div>
+                    @if (gitTypeEntry.value.description) {
+                      <div class="mt-1 text-sm text-gray-600"
+                        [class.text-gray-400]="gitTypeEntry.value.exists">
+                        @for (p of gitTypeEntry.value.description; track p) {
+                          <p class="mb-1">{{p}}</p>
+                        }
+                      </div>
+                    }
+                  </div>
+                </label>
+              </div>
+            }
           </div>
-        </mat-radio-group>
-
-        <div *ngIf="showEndpointFields" class="select-step__endpoint-form">
-          <mat-form-field>
-            <input matInput id="name" name="name" formControlName="nameField" placeholder="Name"
-              [appUnique]="registerForm.value.createSystemEndpointField ? (customEndpoints | async)?.names : (existingPersonalEndpoints | async)?.names">
-            <mat-error *ngIf="registerForm.controls.nameField.errors?.required">Name is required</mat-error>
-            <mat-error *ngIf="registerForm.controls.nameField.errors?.appUnique">Name is not unique</mat-error>
-          </mat-form-field>
-          <mat-form-field novalidate>
-            <input matInput id="url" name="url" formControlName="urlField" type="url" required
-              placeholder="Endpoint Address" pattern="{{urlValidation}}"
-              [appUnique]="registerForm.value.createSystemEndpointField ? (customEndpoints | async)?.urls : (existingPersonalEndpoints | async)?.urls">
-            <mat-error *ngIf="registerForm.controls.urlField.errors?.required">URL is required</mat-error>
-            <mat-error *ngIf="registerForm.controls.urlField.errors?.pattern">Invalid API URL</mat-error>
-            <mat-error *ngIf="registerForm.controls.urlField.errors?.appUnique">URL is not unique</mat-error>
-          </mat-form-field>
-          <mat-checkbox matInput *ngIf="userEndpointsAndIsAdmin | async" name="createSystemEndpoint" 
-            formControlName="createSystemEndpointField" (change)="toggleCreateSystemEndpoint()"
-            [ngClass]="{'hide': fixedUrl, 'show': !fixedUrl}">Create a system endpoint (visible to all users)
-          </mat-checkbox>
-          <mat-checkbox matInput name="skipSSL" formControlName="skipSSLField"
-            [ngClass]="{'hide': fixedUrl, 'show': !fixedUrl}">Skip SSL validation for the
-            endpoint
-          </mat-checkbox>
-        </div>
-      </form>
+          @if (showEndpointFields) {
+            <div class="space-y-4 mt-6">
+              <div class="form-group">
+                <label for="name" class="label">Name</label>
+                <input id="name" name="name" formControlName="nameField" placeholder="Name"
+                  class="input" [appUnique]="registerForm.value.createSystemEndpointField ? (customEndpoints | async)?.names : (existingPersonalEndpoints | async)?.names">
+                @if (registerForm.controls.nameField.errors?.required) {
+                  <div class="text-red-600 text-sm mt-1">
+                    Name is required
+                  </div>
+                }
+                @if (registerForm.controls.nameField.errors?.appUnique) {
+                  <div class="text-red-600 text-sm mt-1">
+                    Name is not unique
+                  </div>
+                }
+              </div>
+              <div class="form-group">
+                <label for="url" class="label">Endpoint Address</label>
+                <input id="url" name="url" formControlName="urlField" type="text" required
+                  placeholder="Endpoint Address" class="input"
+                  [appUnique]="registerForm.value.createSystemEndpointField ? (customEndpoints | async)?.urls : (existingPersonalEndpoints | async)?.urls">
+                @if (registerForm.controls.urlField.errors?.required) {
+                  <div class="text-red-600 text-sm mt-1">
+                    URL is required
+                  </div>
+                }
+                @if (registerForm.controls.urlField.errors?.invalidUrl) {
+                  <div class="text-red-600 text-sm mt-1">
+                    Invalid API URL. Enter a valid hostname or URL (e.g., github.com or https://github.enterprise.com)
+                  </div>
+                }
+                @if (registerForm.controls.urlField.errors?.appUnique) {
+                  <div class="text-red-600 text-sm mt-1">
+                    URL is not unique
+                  </div>
+                }
+              </div>
+              <div class="space-y-3">
+                @if (userEndpointsAndIsAdmin | async) {
+                  <label class="checkbox-label"
+                    [class.hidden]="fixedUrl">
+                    <input type="checkbox" name="createSystemEndpoint"
+                      formControlName="createSystemEndpointField" (change)="toggleCreateSystemEndpoint()"
+                      class="checkbox">
+                    <span class="checkbox-text">Create a system endpoint (visible to all users)</span>
+                  </label>
+                }
+                <label class="checkbox-label" [class.hidden]="fixedUrl">
+                  <input type="checkbox" name="skipSSL" formControlName="skipSSLField" class="checkbox">
+                  <span class="checkbox-text">Skip SSL validation for the endpoint</span>
+                </label>
+              </div>
+            </div>
+          }
+        </form>
+      }
     </div>
   </app-step>
   <app-step title="Connect (Optional)" [valid]="connect.doConnect ? connect.valid : true" [onNext]="connect.onNext"

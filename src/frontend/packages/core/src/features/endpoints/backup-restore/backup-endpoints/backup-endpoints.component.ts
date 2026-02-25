@@ -1,20 +1,33 @@
-import { Component, OnDestroy } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
-import moment from 'moment';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, OnDestroy, Injector  } from '@angular/core';
+import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
+import { format } from 'date-fns';
 import { httpErrorResponseToSafeString, entityCatalog, stratosEntityCatalog, EndpointModel } from '@stratosui/store';
 import { Observable, of, Subject, Subscription } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import { ITableListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source-types';
 import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
+import { TableComponent } from '../../../../shared/components/list/list-table/table.component';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
+import { StepComponent } from '../../../../shared/components/stepper/step/step.component';
 import { StepOnNextFunction, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
+import { SteppersComponent } from '../../../../shared/components/stepper/steppers/steppers.component';
+import { ShowHideButtonComponent } from '../../../../core/show-hide-button/show-hide-button.component';
 import { BackupCheckboxCellComponent } from '../backup-checkbox-cell/backup-checkbox-cell.component';
 import { BackupConnectionCellComponent } from '../backup-connection-cell/backup-connection-cell.component';
 import { BackupEndpointsService } from '../backup-endpoints.service';
 import { BackupEndpointTypes } from '../backup-restore.types';
+
+// Typed form interface for password form
+interface BackupPasswordForm {
+  password: FormControl<string>;
+  password2: FormControl<string>;
+}
 
 @Component({
   selector: 'app-backup-endpoints',
@@ -22,11 +35,22 @@ import { BackupEndpointTypes } from '../backup-restore.types';
   styleUrls: ['./backup-endpoints.component.scss'],
   providers: [
     BackupEndpointsService
-  ]
+  ],
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    TableComponent,
+    ShowHideButtonComponent
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BackupEndpointsComponent implements OnDestroy {
 
-  sub: Subscription;
+  sub!: Subscription;
 
   // Step 1
   columns: ITableColumn<EndpointModel>[] = [
@@ -58,19 +82,28 @@ export class BackupEndpointsComponent implements OnDestroy {
       cellComponent: BackupConnectionCellComponent,
     },
   ];
-  endpointDataSource: ITableListDataSource<EndpointModel>;
-  disableSelectAll$: Observable<boolean>;
-  disableSelectNone$: Observable<boolean>;
-  selectValid$: Observable<boolean>;
+  endpointDataSource!: ITableListDataSource<EndpointModel>;
+  disableSelectAll$!: Observable<boolean>;
+  disableSelectNone$!: Observable<boolean>;
+  selectValid$!: Observable<boolean>;
 
   // Step 2
-  passwordValid$: Observable<boolean>;
-  passwordForm: UntypedFormGroup;
+  passwordValid$!: Observable<boolean>;
+  passwordForm!: FormGroup<BackupPasswordForm>;
   showPassword: boolean[] = [];
+
+  // Custom validator for password matching
+  private readonly passwordMatchValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+    const group = control as FormGroup<BackupPasswordForm>;
+    const password = group.controls.password.value;
+    const password2 = group.controls.password2.value;
+    return password === password2 ? null : { passwordMismatch: true };
+  };
 
   constructor(
     public service: BackupEndpointsService,
     private confirmDialog: ConfirmationDialogService,
+    private injector: Injector,
   ) {
     this.setupSelectStep();
     this.setupPasswordStep();
@@ -94,25 +127,32 @@ export class BackupEndpointsComponent implements OnDestroy {
       isTableLoading$: endpointObs.fetchingEntities$,
       connect: () => endpoints$,
       disconnect: () => { },
-      trackBy: (index, row) => row.guid
+      trackBy: (index: number, row: EndpointModel) => row.guid
     };
 
-    this.disableSelectAll$ = this.service.allChanged$;
-    this.disableSelectNone$ = this.service.hasChanges$.pipe(
+    this.disableSelectAll$ = toObservable(this.service.allChanged, { injector: this.injector });
+    this.disableSelectNone$ = toObservable(this.service.hasChanges, { injector: this.injector }).pipe(
       map(hasChanges => !hasChanges)
     );
 
-    this.selectValid$ = this.service.hasChanges$;
+    this.selectValid$ = toObservable(this.service.hasChanges, { injector: this.injector });
   }
 
   setupPasswordStep() {
-    this.passwordForm = new UntypedFormGroup({
-      password: new UntypedFormControl('', [Validators.required, Validators.minLength(6)]),
-      password2: new UntypedFormControl(''),
-    });
-    this.sub = this.passwordForm.controls.password.valueChanges.subscribe(value => this.passwordForm.controls.password2.setValidators(
-      [Validators.required, Validators.pattern(value)]
-    ));
+    this.passwordForm = new FormGroup<BackupPasswordForm>(
+      {
+        password: new FormControl('', {
+          validators: [Validators.required, Validators.minLength(6)],
+          nonNullable: true
+        }),
+        password2: new FormControl('', {
+          validators: [Validators.required],
+          nonNullable: true
+        }),
+      },
+      { validators: this.passwordMatchValidator }
+    );
+
     this.passwordValid$ = this.passwordForm.statusChanges.pipe(
       map(() => {
         this.service.password = this.passwordForm.controls.password.value;
@@ -136,12 +176,12 @@ export class BackupEndpointsComponent implements OnDestroy {
       });
     };
 
-    const backupSuccess = data => {
+    const backupSuccess = (data: Blob) => {
       const downloadURL = window.URL.createObjectURL(data);
       const link = document.createElement('a');
       link.href = downloadURL;
       // Time of client, not server
-      const dateTime = moment().format('YYYYMMDD-HHmmss');
+      const dateTime = format(new Date(), 'yyyyMMdd-HHmmss');
       link.download = `stratos_backup_${dateTime}.bk`;
       link.click();
 
@@ -151,7 +191,7 @@ export class BackupEndpointsComponent implements OnDestroy {
       });
     };
 
-    const backupFailure = err => {
+    const backupFailure = (err: any) => {
       const errorMessage = httpErrorResponseToSafeString(err);
       result.next({
         success: false,

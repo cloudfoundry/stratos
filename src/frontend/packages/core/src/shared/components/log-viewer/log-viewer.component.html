@@ -4,13 +4,18 @@
   </div>
 
   <div class="log-viewer__scrollToBotttom">
-    <button *ngIf="!( isLocked$ | async )" (click)="scrollToBottom()" class="log-viewer__scrollButton" mat-raised-button color="primary">Scroll to Bottom</button>
+    @if (!( isLocked$ | async )) {
+      <button (click)="scrollToBottom()" class="log-viewer__scrollButton btn btn-primary">Scroll to Bottom</button>
+    }
   </div>
 
-  <div *ngIf="statusMessage$ | async as message">
-
-  <div class="log-viewer__message" *ngIf="message.message" [ngClass]="{'log-viewer__message-error': message.isError}">
-    <div class="log-viewer__messageText">{{ message.message }}</div>
-  </div>
-</div>  
+  @if (statusMessage$ | async; as message) {
+    <div>
+      @if (message.message) {
+        <div class="log-viewer__message" [ngClass]="{'log-viewer__message-error': message.isError}">
+          <div class="log-viewer__messageText">{{ message.message }}</div>
+        </div>
+      }
+    </div>
+  }
 </div>

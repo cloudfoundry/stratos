@@ -1,5 +1,10 @@
-import { AfterContentInit, Component, Input } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, AfterContentInit, Component, Input } from '@angular/core';
+import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { cfEndpointUrlValidator, normalizeUrl } from '../../../../shared/validators';
+import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
+import { CustomFormFieldComponent, AppErrorComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
+import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 import { ActivatedRoute } from '@angular/router';
 import {
   ActionState,
@@ -8,7 +13,7 @@ import {
   StratosCatalogEndpointEntity
 } from '@stratosui/store';
 import { Observable } from 'rxjs';
-import { filter, map, pairwise } from 'rxjs/operators';
+import { filter, map, pairwise, startWith } from 'rxjs/operators';
 
 import { getIdFromRoute } from '../../../../core/utils.service';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
@@ -19,18 +24,43 @@ import { SnackBarService } from '../../../../shared/services/snackbar.service';
 import { ConnectEndpointConfig } from '../../connect.service';
 import { getSSOClientRedirectURI } from '../../endpoint-helpers';
 import { CreateEndpointHelperComponent } from '../create-endpoint-helper';
+import { UniqueDirective } from '../../../../shared/components/unique.directive';
+import { ProductNameComponent } from '../../../../shared/components/product-name.ccomponent';
+
+interface CreateEndpointForm {
+  nameField: FormControl<string>;
+  urlField: FormControl<string>;
+  skipSSLField: FormControl<boolean>;
+  ssoAllowedField: FormControl<boolean>;
+  clientIDField: FormControl<string>;
+  clientSecretField: FormControl<string>;
+  createSystemEndpointField: FormControl<boolean>;
+  caCertField: FormControl<string>;
+}
 
 @Component({
   selector: 'app-create-endpoint-cf-step-1',
   templateUrl: './create-endpoint-cf-step-1.component.html',
-  styleUrls: ['./create-endpoint-cf-step-1.component.scss']
+  styleUrls: ['./create-endpoint-cf-step-1.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    CustomFormFieldComponent,
+    AppErrorComponent,
+    CustomCheckboxComponent,
+    CustomIconComponent,
+    UniqueDirective,
+    ProductNameComponent
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponent implements IStepperStep, AfterContentInit {
 
-  registerForm: UntypedFormGroup;
+  registerForm: FormGroup<CreateEndpointForm>;
 
   @Input() finalStep: boolean;
-  private pFixedUrl: string;
+  private pFixedUrl!: string;
   @Input()
   get fixedUrl(): string {
     return this.pFixedUrl;
@@ -50,7 +80,7 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   urlValidation: string;
 
   showAdvancedFields = false;
-  clientRedirectURI: string;
+  clientRedirectURI!: string;
 
   endpointTypeSupportsSSO = false;
   endpoint: StratosCatalogEndpointEntity;
@@ -61,7 +91,7 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   lastSkipSSLValue = false;
 
   constructor(
-    private fb: UntypedFormBuilder,
+    private fb: FormBuilder,
     activatedRoute: ActivatedRoute,
     private snackBarService: SnackBarService,
     sessionService: SessionService,
@@ -70,16 +100,16 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   ) {
     super(sessionService, currentUserPermissionsService, userProfileService);
 
-    this.registerForm = this.fb.group({
-      nameField: ['', [Validators.required]],
-      urlField: ['', [Validators.required]],
-      skipSSLField: [false, []],
-      ssoAllowedField: [false, []],
+    this.registerForm = this.fb.group<CreateEndpointForm>({
+      nameField: this.fb.nonNullable.control('', [Validators.required]),
+      urlField: this.fb.nonNullable.control('', [Validators.required, cfEndpointUrlValidator]),
+      skipSSLField: this.fb.nonNullable.control(false, []),
+      ssoAllowedField: this.fb.nonNullable.control(false, []),
       // Optional Client ID and Client Secret
-      clientIDField: ['', []],
-      clientSecretField: ['', []],
-      createSystemEndpointField: [true, []],
-      caCertField: ['', []],
+      clientIDField: this.fb.nonNullable.control('', []),
+      clientSecretField: this.fb.nonNullable.control('', []),
+      createSystemEndpointField: this.fb.nonNullable.control(true, []),
+      caCertField: this.fb.nonNullable.control('', []),
     });
 
     const epType = getIdFromRoute(activatedRoute, 'type');
@@ -100,11 +130,14 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
       sslAllow = false;
     }
 
+    // Normalize URL using shared utility
+    const url = normalizeUrl(this.registerForm.value.urlField || '');
+
     return stratosEntityCatalog.endpoint.api.register<ActionState>(
       type,
       subType,
       this.registerForm.value.nameField,
-      this.registerForm.value.urlField,
+      url,
       sslAllow,
       this.registerForm.value.clientIDField,
       this.registerForm.value.clientSecretField,
@@ -118,13 +151,13 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
       map(result => {
         const data: ConnectEndpointConfig = {
           guid: result.message,
-          name: this.registerForm.value.nameField,
-          type,
-          subType,
+          name: this.registerForm.value.nameField ?? '',
+          type: type || '',
+          subType: subType || '',
           ssoAllowed: this.registerForm.value.ssoAllowedField ? !!this.registerForm.value.ssoAllowedField : false
         };
         if (!result.error) {
-          this.snackBarService.show(`Successfully registered '${this.registerForm.value.nameField}'`);
+          this.snackBarService.show(`Successfully registered '${this.registerForm.value.nameField ?? ''}'`);
         }
         const success = !result.error;
         return {
@@ -139,9 +172,9 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
 
   ngAfterContentInit() {
     this.validate = this.registerForm.statusChanges.pipe(
-      map(() => {
-        return this.registerForm.valid;
-      }));
+      startWith(this.registerForm.status),
+      map(() => this.registerForm.valid)
+    );
   }
 
   setUrlValidation(endpoint: StratosCatalogEndpointEntity) {
@@ -164,10 +197,12 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   toggleCACertField() {
     this.showCACertField = !this.showCACertField;
     if (this.showCACertField) {
-      this.lastSkipSSLValue = this.registerForm.value.skipSSLField;
+      this.lastSkipSSLValue = this.registerForm.value.skipSSLField ?? false;
       this.registerForm.controls.skipSSLField.setValue(false);
+      this.registerForm.controls.skipSSLField.disable();
     } else {
-      this.registerForm.controls.skipSSLField.setValue(this.lastSkipSSLValue);
+      this.registerForm.controls.skipSSLField.setValue(this.lastSkipSSLValue ?? false);
+      this.registerForm.controls.skipSSLField.enable();
     }
   }
 

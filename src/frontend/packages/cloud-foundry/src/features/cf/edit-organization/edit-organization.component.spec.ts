@@ -1,34 +1,57 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { of } from 'rxjs';
 
-import { TabNavService } from '../../../../../core/src/tab-nav.service';
-import {
-  generateCfBaseTestModules,
-  generateTestCfEndpointServiceProvider,
-} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import {
-  CloudFoundryUserProvidedServicesService,
-} from '../../../shared/services/cloud-foundry-user-provided-services.service';
+import { TabNavService } from '@stratosui/core';
+import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
+import { STORE_TEST_PROVIDERS, createBasicStoreModule } from '@stratosui/store/testing';
+import { generateCFEntities } from '../../../cf-entity-generator';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
-import { EditOrganizationStepComponent } from './edit-organization-step/edit-organization-step.component';
-import { EditOrganizationComponent } from './edit-organization.component';
+import { CloudFoundryOrganizationService } from '../services/cloud-foundry-organization.service';
+import { EditOrganizationComponent } from "./edit-organization.component";
 
 describe('EditOrganizationComponent', () => {
   let component: EditOrganizationComponent;
   let fixture: ComponentFixture<EditOrganizationComponent>;
 
-  beforeEach(waitForAsync(() => {
+  const mockActiveRoute = {
+    cfGuid: 'test-cf-guid',
+    orgGuid: 'test-org-guid',
+    spaceGuid: 'test-space-guid'
+  };
+
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [EditOrganizationComponent, EditOrganizationStepComponent],
-      imports: generateCfBaseTestModules(),
+      imports: [
+        EditOrganizationComponent,
+        createBasicStoreModule(),
+        EntityCatalogTestModule,
+      ],
       providers: [
-        ActiveRouteCfOrgSpace,
-        generateTestCfEndpointServiceProvider(),
+        ...STORE_TEST_PROVIDERS,
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateCFEntities(),
+            ...generateStratosEntities(),
+          ]
+        },
+        { provide: ActiveRouteCfOrgSpace, useValue: mockActiveRoute },
         TabNavService,
-        CloudFoundryUserProvidedServicesService,
+        provideRouter([]),
+        provideHttpClient(),
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();
-  }));
+
+    // Initialize EntityCatalogHelper for Angular 20 compatibility
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EditOrganizationComponent);

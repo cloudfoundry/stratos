@@ -1,6 +1,23 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
+import { EffectsModule } from '@ngrx/effects';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { generateCfBaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import {
+  EntityServiceFactory,
+  EntityMonitorFactory,
+  EntityCatalogFeatureModule,
+  CATALOGUE_ENTITIES,
+  generateStratosEntities,
+  entityCatalog,
+  TestEntityCatalog,
+  ENTITY_CATALOG_TOKEN
+} from '@stratosui/store';
+import { createBasicStoreModule } from '@test-framework';
+import { generateCFEntities } from '../../../cf-entity-generator';
 import {
   CompactServiceInstanceCardComponent,
 } from '../../../shared/components/cards/compact-service-instance-card/compact-service-instance-card.component';
@@ -16,36 +33,60 @@ import {
 import { ServiceIconComponent } from '../../../shared/components/service-icon/service-icon.component';
 import { ServicesService } from '../services.service';
 import { ServicesServiceMock } from '../services.service.mock';
-import { ServiceSummaryComponent } from './service-summary.component';
+import { ServiceSummaryComponent } from "./service-summary.component";
 
 describe('ServiceSummaryComponent', () => {
   let component: ServiceSummaryComponent;
   let fixture: ComponentFixture<ServiceSummaryComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
+  beforeEach(async () => {
+    // Initialize entity catalog before test
+    const testEntityCatalog = entityCatalog as TestEntityCatalog;
+    testEntityCatalog.clear();
+
+    await TestBed.configureTestingModule({
+      imports: [
         ServiceSummaryComponent,
         ServiceSummaryCardComponent,
         ServiceBrokerCardComponent,
         ServiceRecentInstancesCardComponent,
-        ServiceRecentInstancesCardComponent,
         ServiceIconComponent,
-        CompactServiceInstanceCardComponent
+        CompactServiceInstanceCardComponent,
+        EntityCatalogFeatureModule,
+        EffectsModule.forRoot([]),
+        createBasicStoreModule(),
       ],
-      imports: generateCfBaseTestModules(),
       providers: [
+        EntityServiceFactory,
+        EntityMonitorFactory,
         { provide: ServicesService, useClass: ServicesServiceMock },
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+        {
+          provide: ENTITY_CATALOG_TOKEN,
+          useValue: entityCatalog
+        },
+        {
+          provide: CATALOGUE_ENTITIES,
+          useFactory: () => {
+            return [
+              ...generateCFEntities(),
+              ...generateStratosEntities(),
+            ];
+          },
+          multi: true
+        },
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     fixture = TestBed.createComponent(ServiceSummaryComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-  }));
+  });
 
   it('should create', () => {
     expect(component).toBeTruthy();

@@ -1,40 +1,63 @@
-import { HttpClientModule } from '@angular/common/http';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection, importProvidersFrom, NO_ERRORS_SCHEMA } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { provideRouter } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
+import { StoreModule } from '@ngrx/store';
 
-import { CoreModule } from '../../../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../../../core/src/shared/shared.module';
-import { TabNavService } from '../../../../../../core/src/tab-nav.service';
-import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CfUserServiceTestProvider } from '../../../../../test-framework/user-service-helper';
+import { EntityMonitorFactory, PaginationMonitorFactory, EntityServiceFactory, appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { AppTestModule } from '@test-framework';
+import { CloudFoundryTestingModule, generateCFEntities } from '@test-framework/cf';
+import { CfUserServiceTestProvider } from "@test-framework/user-service-helper";
+import { TabNavService } from '@stratosui/core';
+
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CfRolesService } from './cf-roles.service';
-import { UsersRolesConfirmComponent } from './manage-users-confirm/manage-users-confirm.component';
-import { UsersRolesModifyComponent } from './manage-users-modify/manage-users-modify.component';
-import {
-  SpaceRolesListWrapperComponent,
-} from './manage-users-modify/space-roles-list-wrapper/space-roles-list-wrapper.component';
-import { UsersRolesSelectComponent } from './manage-users-select/manage-users-select.component';
-import { ManageUsersSetUsernamesComponent } from './manage-users-set-usernames/manage-users-set-usernames.component';
 import { UsersRolesComponent } from './manage-users.component';
 
 describe('UsersRolesComponent', () => {
   let component: UsersRolesComponent;
   let fixture: ComponentFixture<UsersRolesComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
-        ...generateCfStoreModules(),
-        CoreModule,
-        SharedModule,
-        NoopAnimationsModule,
-        RouterTestingModule,
-        HttpClientModule
+        UsersRolesComponent,
       ],
+      schemas: [NO_ERRORS_SCHEMA],
       providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideNoopAnimations(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          HttpClientTestingModule,
+          CloudFoundryTestingModule,
+          StoreModule.forRoot(appReducers, {
+            runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
+          }),
+          EntityCatalogTestModule,
+          AppTestModule
+        ),
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities()
+          ]
+        },
+        EntityServiceFactory,
+        EntityMonitorFactory,
+        PaginationMonitorFactory,
+        EntityCatalogHelper,
+        CfUserServiceTestProvider,
+        CfRolesService,
+        TabNavService,
         {
           provide: ActivatedRoute,
           useValue: {
@@ -44,22 +67,22 @@ describe('UsersRolesComponent', () => {
             }
           }
         },
-        ActiveRouteCfOrgSpace,
-        CfUserServiceTestProvider,
-        CfRolesService,
-        TabNavService
+        {
+          provide: ActiveRouteCfOrgSpace,
+          useValue: {
+            cfGuid: 'cfGuid',
+            orgGuid: 'orgGuid',
+            spaceGuid: 'spaceGuid'
+          }
+        },
       ],
-      declarations: [
-        UsersRolesComponent,
-        UsersRolesSelectComponent,
-        UsersRolesModifyComponent,
-        UsersRolesConfirmComponent,
-        SpaceRolesListWrapperComponent,
-        ManageUsersSetUsernamesComponent
-      ]
     })
       .compileComponents();
-  }));
+
+    // Initialize EntityCatalogHelper for Angular 20 compatibility
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(UsersRolesComponent);

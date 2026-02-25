@@ -1,32 +1,33 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { createBasicStoreModule } from '@stratosui/store/testing';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@test-framework';
+import { EntityMonitorFactory, EntityServiceFactory } from '@stratosui/store';
 
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
-import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
-import { CoreModule } from '../../../core/core.module';
 import { MetricsRangeSelectorService } from '../../services/metrics-range-selector.service';
-import { DateTimeComponent } from '../date-time/date-time.component';
-import { StartEndDateComponent } from '../start-end-date/start-end-date.component';
 import { MetricsParentRangeSelectorComponent } from './metrics-parent-range-selector.component';
 
 describe('MetricsParentRangeSelectorComponent', () => {
   let component: MetricsParentRangeSelectorComponent;
   let fixture: ComponentFixture<MetricsParentRangeSelectorComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [MetricsParentRangeSelectorComponent, StartEndDateComponent, DateTimeComponent],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
-        CoreModule,
-        CoreTestingModule,
+        NoopAnimationsModule,
+        MetricsParentRangeSelectorComponent,
         createBasicStoreModule(),
-        NoopAnimationsModule
       ],
-      providers: [MetricsRangeSelectorService, EntityMonitorFactory]
-    })
-      .compileComponents();
-  }));
+      providers: [
+        ...STORE_TEST_PROVIDERS,
+        EntityServiceFactory,
+        EntityMonitorFactory,
+        MetricsRangeSelectorService,
+        provideZonelessChangeDetection(),
+      ]
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(MetricsParentRangeSelectorComponent);

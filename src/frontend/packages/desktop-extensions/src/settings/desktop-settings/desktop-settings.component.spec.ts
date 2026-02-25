@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { DesktopSettingsComponent } from './desktop-settings.component';
 
@@ -6,12 +8,13 @@ describe('DesktopSettingsComponent', () => {
   let component: DesktopSettingsComponent;
   let fixture: ComponentFixture<DesktopSettingsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       declarations: [ DesktopSettingsComponent ]
-    })
+    }),
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(DesktopSettingsComponent);

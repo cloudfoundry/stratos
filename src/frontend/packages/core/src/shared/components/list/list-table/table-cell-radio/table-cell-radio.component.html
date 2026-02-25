@@ -1,1 +1,10 @@
-<mat-radio-button [disabled]="(dataSource.isAdding$ | async) || disable" (change)="dataSource.selectedRowToggle(row, false)" [checked]="dataSource.selectedRows?.has(dataSource.getRowUniqueId(row))"></mat-radio-button>
+<div class="radio-container">
+  <input type="radio"
+         class="radio"
+         [disabled]="(dataSource.isAdding$ | async) || disable"
+         (change)="dataSource.selectedRowToggle(row, false)"
+         [checked]="dataSource.selectedRows()?.has(dataSource.getRowUniqueId(row))"
+         [name]="'table-row-radio-' + dataSource.entityType"
+         [id]="'radio-' + dataSource.getRowUniqueId(row)">
+  <label class="radio-label" [for]="'radio-' + dataSource.getRowUniqueId(row)"></label>
+</div>

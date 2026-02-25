@@ -1,17 +1,13 @@
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf, of } from 'rxjs';
-import { map } from 'rxjs/internal/operators/map';
+import { Observable, of as observableOf, of, BehaviorSubject } from 'rxjs';
+import { map } from 'rxjs/operators';
 
-import { EntityService } from '../../store/src/entity-service';
-import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
-import { APIResource, EntityInfo } from '../../store/src/types/api.types';
-import { IApp, IAppSummary, IDomain, ISpace } from '../src/cf-api.types';
+import { EntityService, RequestInfoState, APIResource, EntityInfo } from '@stratosui/store';
+import { ApplicationService } from '@stratosui/cloud-foundry';
+import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../src/cf-api.types';
 import { CFAppState } from '../src/cf-app-state';
-import { ApplicationData, ApplicationService } from '../src/features/applications/application.service';
-import {
-  ApplicationEnvVarsHelper,
-  EnvVarStratosProject,
-} from '../src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { ApplicationData } from '../src/features/applications/application.service';
+import { ApplicationEnvVarsHelper, EnvVarStratosProject } from '../src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { ApplicationStateData, ApplicationStateService } from '../src/shared/services/application-state.service';
 import { AppStat } from '../src/store/types/app-metadata.types';
 
@@ -32,7 +28,12 @@ export class ApplicationServiceMock {
   static appGuid = 'mockAppGuid';
   cfGuid = ApplicationServiceMock.cfGuid;
   appGuid = ApplicationServiceMock.appGuid;
-  application$: Observable<ApplicationData> = observableOf(({
+
+  private entityObsSubject = new BehaviorSubject({} as any);
+
+  // Use BehaviorSubjects instead of observableOf() to prevent immediate completion
+  // This fixes issues with withLatestFrom() and first() operators in components
+  private appSubject = new BehaviorSubject<ApplicationData>({
     cf: {
       guid: this.cfGuid
     },
@@ -50,7 +51,19 @@ export class ApplicationServiceMock {
       },
     },
     fetching: false
-  } as ApplicationData));
+  } as ApplicationData);
+
+  private appOrgSubject = new BehaviorSubject<APIResource<IOrganization>>(createEntity<IOrganization>({
+    name: 'mockOrg',
+    guid: 'mockOrgGuid'
+  } as IOrganization));
+
+  private appSpaceSubject = new BehaviorSubject<APIResource<ISpace>>(createEntity<ISpace>({
+    name: 'mockSpace',
+    guid: 'mockSpaceGuid'
+  } as ISpace));
+
+  application$: Observable<ApplicationData> = this.appSubject.asObservable();
   app$: Observable<EntityInfo<APIResource<IApp>>> = this.application$.pipe(
     map(appData => {
       return {
@@ -79,12 +92,15 @@ export class ApplicationServiceMock {
     indicator: null,
     actions: {}
   });
-  appSpace$: Observable<APIResource<ISpace>> = observableOf(createEntity<ISpace>({} as ISpace));
+  appOrg$: Observable<APIResource<IOrganization>> = this.appOrgSubject.asObservable();
+  appSpace$: Observable<APIResource<ISpace>> = this.appSpaceSubject.asObservable();
   applicationRunning$: Observable<boolean> = observableOf(false);
   orgDomains$: Observable<APIResource<IDomain>[]> = observableOf([]);
   entityService: EntityService<APIResource<IApp<unknown>>> = {
     waitForEntity$: of({}),
-    updatingSection$: of({})
+    updatingSection$: of({}),
+    entityObs$: this.entityObsSubject.asObservable(),
+    poll: () => of({})
   } as EntityService<APIResource<IApp<unknown>>>
 }
 

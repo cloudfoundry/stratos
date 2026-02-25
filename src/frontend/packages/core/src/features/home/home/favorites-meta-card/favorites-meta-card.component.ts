@@ -1,23 +1,28 @@
-import { Component, Input } from '@angular/core';
+
+import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { first } from 'rxjs/operators';
+import { entityCatalog, FavoriteIconData, IFavoriteMetadata, UserFavorite, UserFavoriteManager } from '@stratosui/store';
 
-import { entityCatalog } from '../../../../../../store/src/public-api';
-import { FavoriteIconData, IFavoriteMetadata, UserFavorite } from '../../../../../../store/src/types/user-favorites.types';
-import { UserFavoriteManager } from '../../../../../../store/src/user-favorite-manager';
+import { EntityFavoriteStarComponent } from '../../../../core/entity-favorite-star/entity-favorite-star.component';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 
 @Component({
   selector: 'app-favorites-meta-card',
   templateUrl: './favorites-meta-card.component.html',
-  styleUrls: ['./favorites-meta-card.component.scss']
+  styleUrls: ['./favorites-meta-card.component.scss'],
+  standalone: true,
+  imports: [
+    EntityFavoriteStarComponent
+],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FavoritesMetaCardComponent {
 
   @Input()
-  public endpoint;
+  public endpoint: any;
 
   public favorite: UserFavorite<IFavoriteMetadata>;
 
@@ -25,9 +30,9 @@ export class FavoritesMetaCardComponent {
   public favoriteType: string;
 
   // Favorite name
-  public name: string;
+  public name!: string;
 
-  public routerLink: string;
+  public routerLink!: string;
 
   public icon: FavoriteIconData;
 

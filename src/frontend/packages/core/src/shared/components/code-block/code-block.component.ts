@@ -1,18 +1,27 @@
-import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild  } from '@angular/core';
+
+import { CopyToClipboardComponent } from '../copy-to-clipboard/copy-to-clipboard.component';
 
 @Component({
   selector: 'app-code-block',
+  standalone: true,
+  imports: [
+    CommonModule,
+    CopyToClipboardComponent
+  ],
   templateUrl: './code-block.component.html',
-  styleUrls: ['./code-block.component.scss']
+  styleUrls: ['./code-block.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CodeBlockComponent implements OnInit, OnDestroy {
 
-  @Input() hideCopy: boolean;
-  @Input() codeBlockStyle: string;
+  @Input() hideCopy!: boolean;
+  @Input() codeBlockStyle!: string;
   text = '';
-  private observer: MutationObserver;
+  private observer!: MutationObserver;
 
-  @ViewChild('preBlock', { static: true }) code: ElementRef;
+  @ViewChild('preBlock', { static: true }) code!: ElementRef;
 
   ngOnInit(): void {
     this.observer = new MutationObserver(() => {
@@ -31,6 +40,6 @@ export class CodeBlockComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.observer.disconnect();
+    this.observer?.disconnect();
   }
 }

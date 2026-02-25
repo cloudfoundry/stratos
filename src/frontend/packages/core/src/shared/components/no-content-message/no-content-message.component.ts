@@ -1,4 +1,7 @@
-import { AfterViewInit, Component, ElementRef, Input, Renderer2, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, Renderer2, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { CustomIconComponent } from '../custom-material/custom-material.component';
 
 export interface NoContentMessageLine {
   link?: string;
@@ -8,32 +11,38 @@ export interface NoContentMessageLine {
 @Component({
   selector: 'app-no-content-message',
   templateUrl: './no-content-message.component.html',
-  styleUrls: ['./no-content-message.component.scss']
+  styleUrls: ['./no-content-message.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    CustomIconComponent,
+    RouterModule
+  ]
 })
 export class NoContentMessageComponent implements AfterViewInit {
 
-  @Input() icon: string;
-  @Input() iconFont: string;
-  @Input() firstLine: string;
-  @Input() secondLine: NoContentMessageLine;
-  @Input() otherLines: NoContentMessageLine[];
-  @Input() toolbarLink: {
+  @Input() icon?: string;
+  @Input() iconFont?: string;
+  @Input() firstLine?: string;
+  @Input() secondLine?: NoContentMessageLine;
+  @Input() otherLines?: NoContentMessageLine[];
+  @Input() toolbarLink?: {
     text: string;
   };
-  @Input() toolbarAlign: string;
+  @Input() toolbarAlign?: string;
 
-  @Input() mode: string;
+  @Input() mode?: string;
 
-  @ViewChild('toolBarLinkElement') toolBarLinkElement: ElementRef;
-
-  constructor(private renderer: Renderer2) { }
+  @ViewChild('toolBarLinkElement', { static: false }) toolBarLinkElement?: ElementRef;
+  private renderer = inject(Renderer2);
 
   ngAfterViewInit() {
     // Align the prompt with the toolbar item ...
     // Note - Only execute after a delay. The final place of the target element may change given visibility of other menu items
     // (polling disabled, notification bell). We should come back to this and replace the timeout with a better way of determining readyness
     setTimeout(() => {
-      if (this.toolBarLinkElement) {
+      if (this.toolBarLinkElement && this.toolbarAlign) {
         const elem = document.getElementById(this.toolbarAlign);
         if (elem) {
           const right = document.body.clientWidth - elem.getBoundingClientRect().right - 3;

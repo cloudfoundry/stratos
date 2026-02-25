@@ -1,14 +1,31 @@
-import { Component, OnInit } from '@angular/core';
-
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {
+  MetadataItemComponent,
+  CardWrapperComponent,
+  CardHeaderComponent,
+  CardTitleComponent,
+  CardContentComponent
+} from '@stratosui/core';
 import { CloudFoundryEndpointService } from '../../../../features/cf/services/cloud-foundry-endpoint.service';
 
 @Component({
   selector: 'app-card-cf-user-info',
   templateUrl: './card-cf-user-info.component.html',
-  styleUrls: ['./card-cf-user-info.component.scss']
+  styleUrls: ['./card-cf-user-info.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    MetadataItemComponent,
+    CardWrapperComponent,
+    CardHeaderComponent,
+    CardTitleComponent,
+    CardContentComponent
+  ]
 })
 export class CardCfUserInfoComponent implements OnInit {
-  constructor(public cfEndpointService: CloudFoundryEndpointService) { }
+  public cfEndpointService = inject(CloudFoundryEndpointService);
 
   ngOnInit() { }
 

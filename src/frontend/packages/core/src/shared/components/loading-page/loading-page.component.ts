@@ -1,13 +1,19 @@
 import { animate, style, transition, trigger } from '@angular/animations';
-import { Component, Input, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { EntitySchema, EntityMonitor, EntityMonitorFactory } from '@stratosui/store';
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { filter, first, map, startWith } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
+import { filter, first, map } from 'rxjs/operators';
 
 @Component({
-  selector: 'app-loading-page',
+selector: 'app-loading-page',
   templateUrl: './loading-page.component.html',
   styleUrls: ['./loading-page.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+  ],
   animations: [
     trigger(
       'leaveLoaderAnimation', [
@@ -20,11 +26,10 @@ import { filter, first, map, startWith } from 'rxjs/operators';
   ]
 })
 export class LoadingPageComponent implements OnInit {
-
-  constructor(private entityMonitorFactory: EntityMonitorFactory) { }
+  private entityMonitorFactory = inject(EntityMonitorFactory);
 
   @Input()
-  isLoading: Observable<boolean>;
+  isLoading!: Observable<boolean>;
 
   @Input()
   text = 'Retrieving your data';
@@ -36,33 +41,30 @@ export class LoadingPageComponent implements OnInit {
   alert = '';
 
   @Input()
-  entityId: string;
+  entityId!: string;
 
   @Input()
-  entitySchema: EntitySchema;
+  entitySchema!: EntitySchema;
 
-  public isDeleting: Observable<boolean>;
+  public isDeleting!: Observable<boolean>;
 
-  public text$: Observable<string>;
+  public text$!: Observable<string>;
 
   ngOnInit() {
     if (this.isLoading) {
-      this.isLoading
-        .pipe(
-          filter(loading => !loading),
-          first()
-        );
-      this.isDeleting = observableOf(false);
+      // isLoading is already provided as an input
+      this.isDeleting = new BehaviorSubject(false);
     } else if (this.entityId && this.entitySchema) {
       this.buildFromMonitor(this.entityMonitorFactory.create(this.entityId, this.entitySchema));
     } else {
-      this.isLoading = this.isDeleting = observableOf(false);
+      this.isLoading = new BehaviorSubject(false);
+      this.isDeleting = new BehaviorSubject(false);
     }
 
-    this.text$ = combineLatest(
-      this.isLoading.pipe(startWith(false)),
-      this.isDeleting.pipe(startWith(false))
-    ).pipe(
+    this.text$ = combineLatest([
+      this.isLoading,
+      this.isDeleting
+    ]).pipe(
       map(([isLoading, isDeleting]) => {
         if (isDeleting) {
           return this.deleteText;

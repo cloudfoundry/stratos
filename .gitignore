@@ -8,6 +8,7 @@
 
 # dependencies
 /node_modules
+src/frontend/packages/devkit/package-lock.json
 
 # IDEs and editors
 .idea
@@ -83,6 +84,7 @@ deploy/kubernetes/console/imagelist.txt
 
 .dist/
 dist-devkit/
+tools/builders/*/dist/
 deploy/uaa/tmp/
 src/backend/*/vendor/
 .v8flags*
@@ -110,17 +112,12 @@ src/jetstream/docs/
 src/frontend/packages/core/favicon.ico
 src/frontend/packages/core/sass/custom.scss
 src/frontend/packages/core/assets/eula.html
-src/frontend/packages/core/assets/logo.png
-src/frontend/packages/core/assets/nav-logo.png
-src/frontend/packages/core/assets/login-bg.jpg
 src/frontend/packages/core/src/custom-import.module.ts
+src/frontend/packages/core/src/_custom-import.module.ts
 src/frontend/packages/core/src/custom
 src/frontend/packages/core/assets/custom
 src/frontend/packages/core/sass/custom
 src/frontend/packages/core/src/index.html
-
-# Customisation - generated import module
-src/frontend/packages/core/src/_custom-import.module.ts
 
 # Backend file generated to include extra plugins
 src/jetstream/extra_plugins.go
@@ -159,3 +156,11 @@ website/versions-repo
 /stratos-ui/
 /stratos-ui-packaged.zip
 
+src/jetstream/jetstream.exe
+.claude
+build/src/
+src/frontend/packages/store/node_modules/
+test-results/
+secrets.yaml
+node_modules
+*.darwin

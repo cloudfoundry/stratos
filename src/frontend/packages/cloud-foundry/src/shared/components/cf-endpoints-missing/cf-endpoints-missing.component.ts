@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { AsyncPipe } from '@angular/common';
 
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import {
@@ -6,11 +7,15 @@ import {
   EndpointsMissingComponent,
 } from '../../../../../core/src/shared/components/endpoints-missing/endpoints-missing.component';
 import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
+import { NoContentMessageComponent } from '../../../../../core/src/shared/components/no-content-message/no-content-message.component';
 
 @Component({
-  selector: 'app-cf-endpoints-missing',
+selector: 'app-cf-endpoints-missing',
   templateUrl: './cf-endpoints-missing.component.html',
-  styleUrls: ['./cf-endpoints-missing.component.scss']
+  styleUrls: ['./cf-endpoints-missing.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [AsyncPipe, NoContentMessageComponent]
 })
 export class CfEndpointsMissingComponent extends EndpointsMissingComponent {
 
@@ -31,8 +36,8 @@ export class CfEndpointsMissingComponent extends EndpointsMissingComponent {
   showToolbarHint = false;
   showNoConnected = true;
 
-  constructor(cloudFoundryService: CloudFoundryService, endpointsService: EndpointsService) {
-    super(endpointsService);
+  constructor(cloudFoundryService: CloudFoundryService) {
+    super();
     this.haveConnected$ = cloudFoundryService.hasConnectedCFEndpoints$;
     this.haveRegistered$ = cloudFoundryService.hasRegisteredCFEndpoints$;
   }

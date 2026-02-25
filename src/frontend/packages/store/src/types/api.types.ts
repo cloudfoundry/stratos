@@ -1,6 +1,6 @@
-import { IRequestEntityTypeState } from '../app-state';
-import { RequestInfoState } from '../reducers/api-request-reducer/types';
-import { BaseEntityValues } from './entity.types';
+import type { IRequestEntityTypeState } from '../app-state';
+import type { RequestInfoState } from '../reducers/api-request-reducer/types';
+import type { BaseEntityValues } from './entity.types';
 
 export interface EntityInfo<T = any> {
   entityRequestInfo: RequestInfoState;

@@ -1,5 +1,8 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
+import { EntityServiceFactory } from '@stratosui/store';
 import { BaseTestModules } from '../../../../../../core/test-framework/core-test.helper';
 import { KubernetesNodePressureComponent } from './kubernetes-node-pressure.component';
 
@@ -7,13 +10,15 @@ describe('KubernetesNodePressureComponent', () => {
   let component: KubernetesNodePressureComponent;
   let fixture: ComponentFixture<KubernetesNodePressureComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [KubernetesNodePressureComponent],
-      imports: BaseTestModules
-    })
-      .compileComponents();
-  }));
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      providers: [EntityServiceFactory, provideZonelessChangeDetection()],
+      imports: [
+        KubernetesNodePressureComponent,
+        ...BaseTestModules,
+      ]
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesNodePressureComponent);

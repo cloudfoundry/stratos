@@ -26,15 +26,17 @@ import { CfCellsDataSource } from './cf-cells-data-source';
 
 // tslint:enable:max-line-length
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResult<IMetricCell>> {
 
-  dataSource: CfCellsDataSource;
+  dataSource!: CfCellsDataSource;
   defaultView = 'table' as ListView;
   viewType = ListViewTypes.TABLE_ONLY;
   enableTextFilter = true;
   text = {
-    title: null,
+    title: null as string,
     filter: 'Search by id',
     noEntries: 'There are no cells'
   };

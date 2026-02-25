@@ -4,6 +4,55 @@ $side-nav-mat-icon-height-large: 24px;
 $side-nav-mat-icon-padding-right: 10px;
 $nav-width: 200px;
 $icon-nav-width: 50px;
+
+// Material Icons override for sidebar
+.material-icons {
+  font-family: 'Material Icons' !important;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: 'liga';
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+// Minimal adjustments for logo button
+.nav-logo {
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+
+  &:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.2);
+    outline-offset: 2px;
+  }
+}
+
+// Logout button styling
+.nav-logout {
+  .logout-button {
+    border: none;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+
+    &:focus {
+      outline: 2px solid rgba(255, 255, 255, 0.2);
+      outline-offset: 2px;
+    }
+  }
+}
+
 .side-nav {
   height: 100%;
   &__nav-toggle {
@@ -44,7 +93,7 @@ $icon-nav-width: 50px;
     cursor: pointer;
     display: flex;
     font-size: 14px;
-    letter-spacing: .01em;
+    letter-spacing: 0.01em;
     line-height: $side-nav-mat-icon-height;
     outline: 0;
     padding: 12px $side-nav-padding-h;
@@ -107,8 +156,8 @@ $icon-nav-width: 50px;
     width: 0;
   }
 }
-$transition-time: .2s;
-$transition-delay: .5s;
+$transition-time: 0.2s;
+$transition-delay: 0.5s;
 .side-nav__icon-mode {
   overflow: hidden;
   width: $icon-nav-width;

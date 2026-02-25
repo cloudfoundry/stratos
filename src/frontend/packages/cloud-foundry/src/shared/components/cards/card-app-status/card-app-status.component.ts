@@ -1,18 +1,26 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { ApplicationService } from '../../../../../../cloud-foundry/src/features/applications/application.service';
-import { StratosStatus } from '../../../../../../store/src/types/shared.types';
+import { ApplicationStateComponent, CardStatusComponent } from '@stratosui/core';
+import { StratosStatus } from '@stratosui/store';
+import { ApplicationService } from '../../../../features/applications/application.service';
 
 @Component({
   selector: 'app-card-app-status',
   templateUrl: './card-app-status.component.html',
-  styleUrls: ['./card-app-status.component.scss']
+  styleUrls: ['./card-app-status.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CardStatusComponent,
+    ApplicationStateComponent
+  ]
 })
 export class CardAppStatusComponent implements OnInit {
-  status$: Observable<StratosStatus>;
-  constructor(public applicationService: ApplicationService) { }
+  public applicationService = inject(ApplicationService);
+
+  status$!: Observable<StratosStatus>;
 
   ngOnInit() {
     this.status$ = this.applicationService.applicationState$.pipe(

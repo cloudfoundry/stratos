@@ -1,34 +1,33 @@
 import { Compiler, Injector } from '@angular/core';
 import { Action, Store } from '@ngrx/store';
-import { entityFetchedWithoutError } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
-import { BaseEndpointAuth } from '../../core/src/core/endpoint-auth';
-import { urlValidationExpression } from '../../core/src/core/utils.service';
-import { AppState, GeneralEntityAppState } from '../../store/src/app-state';
+import { BaseEndpointAuth, urlValidationExpression } from '@stratosui/core';
 import {
+  ActionDispatcher,
+  APIResource,
+  AppState,
+  EndpointHealthCheck,
+  EntityInfo,
+  EntitySchema,
+  entityFetchedWithoutError,
+  GeneralEntityAppState,
+  ICFAction,
+  IFavoriteMetadata,
+  IStratosEntityDefinition,
+  JetstreamError,
+  JetstreamResponse,
+  metricEntityType,
+  PaginatedAction,
+  PaginationEntityState,
+  RequestInfoState,
+  selectSessionData,
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
-} from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import {
-  EndpointHealthCheck,
-  IStratosEntityDefinition,
-  StratosEndpointExtensionDefinition,
-} from '../../store/src/entity-catalog/entity-catalog.types';
-import {
-  JetstreamError,
-} from '../../store/src/entity-request-pipeline/entity-request-base-handlers/handle-multi-endpoints.pipe';
-import { ActionDispatcher, JetstreamResponse } from '../../store/src/entity-request-pipeline/entity-request-pipeline.types';
-import { EntitySchema } from '../../store/src/helpers/entity-schema';
-import { metricEntityType } from '../../store/src/helpers/stratos-entity-factory';
-import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
-import { selectSessionData } from '../../store/src/reducers/auth.reducer';
-import { APIResource, EntityInfo } from '../../store/src/types/api.types';
-import { PaginatedAction, PaginationEntityState } from '../../store/src/types/pagination.types';
-import { ICFAction } from '../../store/src/types/request.types';
-import { IFavoriteMetadata } from '../../store/src/types/user-favorites.types';
+  StratosEndpointExtensionDefinition
+} from '@stratosui/store';
 import { CfValidateEntitiesStart } from './actions/relations-actions';
 import {
   IService,
@@ -168,7 +167,12 @@ import { CfUser } from './store/types/cf-user.types';
 import { cfUserRolesFetch } from './user-permissions/cf-user-roles-fetch';
 
 function safePopulatePaginationFromParent(store: Store<GeneralEntityAppState>, action: PaginatedAction): Observable<Action> {
-  return populatePaginationFromParent(store, action).pipe(
+  const result$ = populatePaginationFromParent(store, action);
+  // Guard against null/undefined Observable from populatePaginationFromParent
+  if (!result$) {
+    return of(action);
+  }
+  return result$.pipe(
     map(newAction => newAction || action)
   );
 }
@@ -202,10 +206,10 @@ function shouldValidate(action: ICFAction, isValidated: boolean, entityInfo: Req
   // 6) The entity isn't in the process of being updated
   return !entityInfo.fetching &&
     !entityInfo.error &&
-    !entityInfo.deleting.busy &&
-    !entityInfo.deleting.deleted &&
+    !entityInfo.deleting?.busy &&
+    !entityInfo.deleting?.deleted &&
     // This is required to ensure that we don't continue trying to fetch missing relations when we're already fetching missing relations
-    !Object.keys(entityInfo.updating).find(key => entityInfo.updating[key].busy);
+    !(entityInfo.updating && Object.keys(entityInfo.updating).find(key => entityInfo.updating[key]?.busy));
 }
 
 export interface CFBasePipelineRequestActionMeta {
@@ -330,7 +334,7 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
           lastValidationFootprint = newValidationFootprint;
           actionsArray.forEach(actionFromArray => dispatcher(new CfValidateEntitiesStart(
             actionFromArray,
-            state.ids[actionFromArray.__forcedPageNumber__ || state.currentPage]
+            (state.ids as Record<number, string[]>)[actionFromArray.__forcedPageNumber__ || state.currentPage]
           )));
         }
       };
@@ -338,19 +342,24 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
     entitiesFetchHandler: (store: Store<GeneralEntityAppState>, actions: PaginatedAction[]) => () => {
       combineLatest(actions.map(action => safePopulatePaginationFromParent(store, action))).pipe(
         first(),
-      ).subscribe(newActions => newActions.forEach(newAction => store.dispatch(newAction)));
+      ).subscribe(newActions => newActions?.forEach(newAction => {
+        if (newAction) {
+          store.dispatch(newAction);
+        }
+      }));
     },
     paginationConfig: {
       getEntitiesFromResponse: (response: CFResponse) => response.resources,
       getTotalPages: (responseWithPages: JetstreamResponse<CFResponse | CFResponse[]>) =>
         // Input is keyed per endpoint. Value per endpoint can either be a response or a number of responses (one per page)
         Object.values(responseWithPages).reduce((max, response: CFResponse | CFResponse[]) => {
-          const resp = (response[0] || response);
+          const resp = Array.isArray(response) ? response[0] : response;
           return max > resp.total_pages ? max : resp.total_pages;
         }, 0),
       getTotalEntities: (responseWithPages: JetstreamResponse<CFResponse | CFResponse[]>) =>
         Object.values(responseWithPages).reduce((all, response: CFResponse | CFResponse[]) => {
-          return all + (response[0] || response).total_results;
+          const resp = Array.isArray(response) ? response[0] : response;
+          return all + resp.total_results;
         }, 0),
       getPaginationParameters: (page: number) => ({ page: page + '' }),
       canIgnoreMaxedState: (store: Store<AppState>) => {
@@ -959,6 +968,7 @@ function generateRouteEntity(endpointDefinition: StratosEndpointExtensionDefinit
   cfEntityCatalog.route = new StratosCatalogEntity<
     IFavoriteMetadata,
     APIResource<IRoute>,
+    RoutesActionBuilders,
     RoutesActionBuilders
   >(
     definition,

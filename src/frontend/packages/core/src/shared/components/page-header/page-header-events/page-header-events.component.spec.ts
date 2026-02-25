@@ -1,26 +1,36 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { ActivatedRoute } from '@angular/router';
+import { provideMockStore } from '@ngrx/store/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import { PageHeaderEventsComponent } from './page-header-events.component';
-import { SharedModule } from '../../../shared.module';
-import { StoreModule } from '@ngrx/store';
-import { RouterTestingModule } from '@angular/router/testing';
-import { InternalEventMonitorFactory } from '../../../../../../store/src/monitors/internal-event-monitor.factory';
 
 describe('PageHeaderEventsComponent', () => {
   let component: PageHeaderEventsComponent;
   let fixture: ComponentFixture<PageHeaderEventsComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      providers: [InternalEventMonitorFactory],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
-        SharedModule,
-        StoreModule.forRoot({}),
-        RouterTestingModule
+        NoopAnimationsModule,
+        PageHeaderEventsComponent,
+      ],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideMockStore({ initialState: {} }),
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              params: {}
+            }
+          }
+        }
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(PageHeaderEventsComponent);

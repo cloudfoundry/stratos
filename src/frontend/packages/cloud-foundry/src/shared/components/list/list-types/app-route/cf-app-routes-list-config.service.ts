@@ -4,20 +4,17 @@ import { Store } from '@ngrx/store';
 import { combineLatest } from 'rxjs';
 import { switchMap, take } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import {
-  CurrentUserPermissionsService,
-} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { IGlobalListAction, IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { ConfirmationDialogService, CurrentUserPermissionsService, IGlobalListAction, IListConfig } from '@stratosui/core';
+import { APIResource, RouterNav } from '@stratosui/store';
+import { CFAppState } from '../../../../../cf-app-state';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfAppRoutesListConfigServiceBase } from './cf-app-routes-list-config-base';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfAppRoutesListConfigService extends CfAppRoutesListConfigServiceBase implements IListConfig<APIResource> {
 
   constructor(

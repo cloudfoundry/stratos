@@ -1,21 +1,30 @@
+
 import { HttpClient } from '@angular/common/http';
-import { Component, ElementRef, Input, SecurityContext, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Input, SecurityContext, ViewChild  } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 
 import { PreviewableComponent } from '../../previewable-component';
 
 import { marked } from 'marked';
+import { SidepanelPreviewComponent } from '../sidepanel-preview/sidepanel-preview.component';
+import { MarkdownContentObserverDirective } from './markdown-content-observer.directive';
 
 @Component({
   selector: 'app-markdown-preview',
   templateUrl: './markdown-preview.component.html',
-  styleUrls: ['./markdown-preview.component.scss']
+  styleUrls: ['./markdown-preview.component.scss'],
+  standalone: true,
+  imports: [
+    SidepanelPreviewComponent,
+    MarkdownContentObserverDirective
+],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MarkdownPreviewComponent implements PreviewableComponent {
 
-  markdownHtml: string;
-  documentUrl: string;
-  title = null;
+  markdownHtml!: string;
+  documentUrl!: string;
+  title: string = '';
 
   @Input('documentUrl')
   set setDocumentUrl(value: string) {
@@ -33,29 +42,35 @@ export class MarkdownPreviewComponent implements PreviewableComponent {
     private domSanitizer: DomSanitizer
   ) { }
 
+  private parseInline(tokens: any[]): string {
+    return tokens.map((token: any) => {
+      if (token.type === 'text') {
+        return token.raw;
+      }
+      return token.raw || '';
+    }).join('');
+  }
+
   setProps(props: { [key: string]: any, }) {
     this.setDocumentUrl = props.documentUrl;
   }
 
   private loadDocument() {
     this.httpClient.get(this.documentUrl, { responseType: 'text' }).subscribe(
-      (markText) => {
+      (markText: string) => {
         if (markText && markText.length > 0) {
-          // Basic sanitization
-          marked.setOptions({
-            sanitize: true,
-            sanitizer: dirty => this.domSanitizer.sanitize(SecurityContext.HTML, dirty),
-          });
+          // Basic sanitization - Note: marked no longer supports sanitize option
           const renderer = new marked.Renderer();
           // Ensure links in the readme open in a new tab
-          renderer.link = (href, title, text) => {
-            const link = marked.Renderer.prototype.link.call(renderer, href, title, text);
-            return link.replace('<a', '<a target="_blank" ');
+          renderer.link = ({ href, title, tokens }: any) => {
+            const text = this.parseInline(tokens);
+            return `<a target="_blank" href="${href}" ${title ? `title="${title}"` : ''}>${text}</a>`;
           };
-          this.markdownHtml = marked(markText, { renderer });
+          const result = marked(markText, { renderer });
+          this.markdownHtml = typeof result === 'string' ? result : '';
         }
       },
-      (error) => console.warn(`Failed to fetch markdown with url ${this.documentUrl}: `, error));
+      (error: any) => console.warn(`Failed to fetch markdown with url ${this.documentUrl}: `, error));
   }
 
   public markdownRendered() {

@@ -1,6 +1,8 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { BaseChartDirective } from 'ng2-charts';
 
 import { CoreModule } from '../../../core/core.module';
 import { SimpleUsageChartComponent } from './simple-usage-chart.component';
@@ -9,13 +11,17 @@ describe('SimpleUsageChartComponent', () => {
   let component: SimpleUsageChartComponent;
   let fixture: ComponentFixture<SimpleUsageChartComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [CoreModule, NgxChartsModule, NoopAnimationsModule],
-      declarations: [SimpleUsageChartComponent]
-    })
-      .compileComponents();
-  }));
+      providers: [provideZonelessChangeDetection()],
+      imports: [
+        CoreModule,
+        NoopAnimationsModule,
+        SimpleUsageChartComponent,
+      ]
+    });
+      TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SimpleUsageChartComponent);

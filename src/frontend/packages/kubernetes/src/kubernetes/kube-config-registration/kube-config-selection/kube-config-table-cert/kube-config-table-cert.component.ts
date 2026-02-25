@@ -1,6 +1,9 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Component, Input } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import {Component, Input, signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { CustomCheckboxComponent } from '../../../../../../core/src/shared/components/custom-checkbox/custom-checkbox.component';
+import { ProgressSpinnerComponent } from '../../../../../../core/src/shared/components/progress-spinner/progress-spinner.component';
 import { timeout } from 'rxjs/operators';
 
 import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
@@ -15,16 +18,23 @@ type CertResponse = {
 };
 
 @Component({
-  selector: 'app-kube-config-table-cert',
+selector: 'app-kube-config-table-cert',
   templateUrl: './kube-config-table-cert.component.html',
-  styleUrls: ['./kube-config-table-cert.component.scss']
+  styleUrls: ['./kube-config-table-cert.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    CustomCheckboxComponent,
+    ProgressSpinnerComponent
+  ]
 })
 export class KubeConfigTableCertComponent extends TableCellCustom<KubeConfigFileCluster> {
 
-  initialValue = new BehaviorSubject<{
+  private _initialValue = signal<{
     checked: boolean;
-  }>(null);
-  initialValue$ = this.initialValue.asObservable();
+  } | null>(null);
+  initialValue$ = toObservable(this._initialValue);
   initialized = false;
 
   @Input()
@@ -34,7 +44,7 @@ export class KubeConfigTableCertComponent extends TableCellCustom<KubeConfigFile
       this.initialized = true;
       if (row.cluster['insecure-skip-tls-verify']) {
         // User has manually specified default skip option
-        this.initialValue.next({
+        this._initialValue.set({
           checked: true
         });
       } else {
@@ -52,21 +62,15 @@ export class KubeConfigTableCertComponent extends TableCellCustom<KubeConfigFile
   }
   get row(): KubeConfigFileCluster {
     return super.row;
-  }
-
-  constructor(
-    private helper: KubeConfigHelper,
-    private http: HttpClient
-  ) {
-    super();
-  }
+  }  private helper = inject(KubeConfigHelper);
+  private http = inject(HttpClient);
 
   private update(checked: boolean) {
-    this.initialValue.next({ checked });
+    this._initialValue.set({ checked });
     this.valueChanged(checked);
   }
 
-  valueChanged(value) {
+  valueChanged(value: boolean): void {
     this.row.cluster['insecure-skip-tls-verify'] = value;
     this.helper.update(this.row);
   }

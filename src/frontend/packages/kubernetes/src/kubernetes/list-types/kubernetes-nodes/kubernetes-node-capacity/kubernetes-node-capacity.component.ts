@@ -1,13 +1,17 @@
-import { Component, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewEncapsulation} from '@angular/core';
 
+import { BytesToHumanSize } from '@stratosui/core';
 import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
 
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-node-capacity',
   templateUrl: './kubernetes-node-capacity.component.html',
   styleUrls: ['./kubernetes-node-capacity.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  standalone: true,
+  imports: [BytesToHumanSize]
 })
 export class KubernetesNodeCapacityComponent<T> extends TableCellCustom<T> {
 

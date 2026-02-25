@@ -1,16 +1,23 @@
-<div *ngIf="(broker$ | async) else noBroker" class="service-broker">
-  <ng-container *ngIf="config?.mode === 'NAME'">
-    {{(broker$ | async).entity.name}}
-  </ng-container>
-  <div *ngIf="config?.mode === 'SCOPE'">
-    <ng-container *ngIf="spaceLink$ | async as spaceLink; else notSpaceScoped">
-      <ng-container *ngIf="config?.altScope; else normScope">Space</ng-container>
-      <ng-template #normScope><a [routerLink]="spaceLink.link">{{ spaceLink.name }}</a></ng-template>
-    </ng-container>
-    <ng-template #notSpaceScoped>
-      All Spaces
-    </ng-template>
+@if ((broker$ | async)) {
+  <div class="service-broker">
+    @if (config?.mode === 'NAME') {
+      {{(broker$ | async).entity.name}}
+    }
+    @if (config?.mode === 'SCOPE') {
+      <div>
+        @if (spaceLink$ | async; as spaceLink) {
+          @if (config?.altScope) {
+            Space
+          } @else {
+            <a [routerLink]="spaceLink.link">{{ spaceLink.name }}</a>
+          }
+        } @else {
+          All Spaces
+        }
+      </div>
+    }
   </div>
-</div>
+} @else {
+  -
+}
 <!-- Some CFs will return 403 when requesting a service's broker -->
-<ng-template #noBroker>-</ng-template>

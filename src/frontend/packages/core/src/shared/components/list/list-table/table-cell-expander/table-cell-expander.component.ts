@@ -1,5 +1,6 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
-import { Component, Input, OnInit } from '@angular/core';
+
+import { Component, Input, OnInit, inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 
 import { TableCellCustom } from '../../list.types';
 import { TableRowExpandedService } from '../table-row/table-row-expanded-service';
@@ -13,6 +14,9 @@ export interface TableCellExpanderConfig {
   selector: 'app-table-cell-expander',
   templateUrl: './table-cell-expander.component.html',
   styleUrls: ['./table-cell-expander.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [],
   animations: [
     trigger('indicatorRotate', [
       state('collapsed, void', style({ transform: 'rotate(0deg)' })),
@@ -25,10 +29,10 @@ export interface TableCellExpanderConfig {
 })
 export class TableCellExpanderComponent<T = any> extends TableCellCustom<T, CellConfigFunction<T>> implements OnInit {
 
+  public expandedService = inject(TableRowExpandedService);
+  private cdr = inject(ChangeDetectorRef);
+
   expanded = false;
-  constructor(public expandedService: TableRowExpandedService) {
-    super();
-  }
 
   @Input() set config(config: CellConfigFunction<T>) {
     super.config = config;
@@ -52,6 +56,8 @@ export class TableCellExpanderComponent<T = any> extends TableCellCustom<T, Cell
       const config: TableCellExpanderConfig = this.config(this.row);
       this.rowId = config.rowId;
       this.expanded = this.expandedService.expanded[this.rowId];
+      // Mark for check to ensure template expressions re-evaluate in zoneless mode
+      this.cdr.markForCheck();
     }
   }
 

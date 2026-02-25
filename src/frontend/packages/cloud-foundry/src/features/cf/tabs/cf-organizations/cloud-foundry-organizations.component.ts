@@ -1,14 +1,18 @@
-import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { RouterModule } from '@angular/router';
+
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import {
+  CurrentUserPermissionsService,
   ActionListConfigProvider,
-} from '../../../../../../core/src/shared/components/list/list-generics/list-providers/action-list-config-provider';
-import { ListViewTypes } from '../../../../../../core/src/shared/components/list/list.component.types';
-import { ListView } from '../../../../../../store/src/actions/list.actions';
-import { APIResource } from '../../../../../../store/src/types/api.types';
+  ListViewTypes,
+  ListViewComponent,
+  PageSubNavComponent
+} from '@stratosui/core';
+import { ListView, APIResource } from '@stratosui/store';
 import { IOrganization } from '../../../../cf-api.types';
 import { CfOrgCardComponent } from '../../../../shared/components/list/list-types/cf-orgs/cf-org-card/cf-org-card.component';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
@@ -18,6 +22,14 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
   selector: 'app-cloud-foundry-organizations',
   templateUrl: './cloud-foundry-organizations.component.html',
   styleUrls: ['./cloud-foundry-organizations.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    RouterModule,
+    PageSubNavComponent,
+    ListViewComponent
+  ]
 })
 export class CloudFoundryOrganizationsComponent {
   public canAddOrg$: Observable<boolean>;

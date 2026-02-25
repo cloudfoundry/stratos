@@ -1,12 +1,20 @@
-import { Component, Input } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+
+import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 
 import { BREADCRUMB_URL_PARAM, IBreadcrumb, IBreadcrumbLink } from './breadcrumbs.types';
+import { CustomIconComponent } from '../custom-material/custom-material.component';
 
 @Component({
   selector: 'app-breadcrumbs',
   templateUrl: './breadcrumbs.component.html',
-  styleUrls: ['./breadcrumbs.component.scss']
+  styleUrls: ['./breadcrumbs.component.scss'],
+  standalone: true,
+  imports: [
+    RouterModule,
+    CustomIconComponent
+],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BreadcrumbsComponent {
   public breadcrumbDefinitions: IBreadcrumbLink[] = null;

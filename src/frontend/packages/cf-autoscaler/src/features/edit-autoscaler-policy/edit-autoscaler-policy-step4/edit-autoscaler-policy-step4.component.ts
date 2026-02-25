@@ -1,18 +1,17 @@
-import { Component, OnInit } from '@angular/core';
-import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
+import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import moment from 'moment-timezone';
+import { format } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 import { of as observableOf } from 'rxjs';
 import { filter, first, map, pairwise } from 'rxjs/operators';
+import { CommonModule } from '@angular/common';
 
-import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
-import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
-import { AppState } from '../../../../../store/src/app-state';
-import { EntityService } from '../../../../../store/src/entity-service';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
-import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
+import { ApplicationService } from '@stratosui/cloud-foundry';
+import { StepOnNextFunction } from '@stratosui/core';
+import { AppState, EntityService, EntityServiceFactory, RequestInfoState } from '@stratosui/store';
 import { AutoscalerConstants, PolicyAlert } from '../../../core/autoscaler-helpers/autoscaler-util';
 import {
   dateTimeIsSameOrAfter,
@@ -27,45 +26,70 @@ import {
 } from '../../../store/app-autoscaler.types';
 import { EditAutoscalerPolicyDirective } from '../edit-autoscaler-policy-base-step';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
+import {
+  TileGridComponent,
+  TileGroupComponent,
+  TileComponent,
+  MetadataItemComponent
+} from '@stratosui/core';
+
+interface EditSpecificDateForm {
+  instance_min_count: FormControl<number>;
+  instance_max_count: FormControl<number>;
+  initial_min_instance_count: FormControl<number>;
+  start_date_time: FormControl<string>;
+  end_date_time: FormControl<string>;
+}
 
 @Component({
   selector: 'app-edit-autoscaler-policy-step4',
   templateUrl: './edit-autoscaler-policy-step4.component.html',
   styleUrls: ['./edit-autoscaler-policy-step4.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    TileGridComponent,
+    TileGroupComponent,
+    TileComponent,
+    MetadataItemComponent
+  ],
   providers: [
-    { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
+    { provide: TailwindErrorStateMatcher, useClass: TailwindShowOnDirtyErrorStateMatcher }
   ]
 })
 export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDirective implements OnInit {
 
   policyAlert = PolicyAlert;
-  editSpecificDateForm: UntypedFormGroup;
+  editSpecificDateForm: FormGroup<EditSpecificDateForm>;
 
-  private updateAppAutoscalerPolicyService: EntityService;
-  public currentPolicy: AppAutoscalerPolicyLocal;
+  private updateAppAutoscalerPolicyService!: EntityService;
+  public declare currentPolicy: AppAutoscalerPolicyLocal;
   private editIndex = -1;
   private editMutualValidation = {
     limit: true,
     datetime: true
   };
-  private action: CreateAppAutoscalerPolicyAction | UpdateAppAutoscalerPolicyAction;
-  private createUpdateTest: string;
+  private action!: CreateAppAutoscalerPolicyAction | UpdateAppAutoscalerPolicyAction;
+  private createUpdateTest!: string;
 
   constructor(
     public applicationService: ApplicationService,
     private store: Store<AppState>,
-    private fb: UntypedFormBuilder,
+    private fb: FormBuilder,
     private entityServiceFactory: EntityServiceFactory,
     service: EditAutoscalerPolicyService,
-    route: ActivatedRoute
+    route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {
     super(service, route);
-    this.editSpecificDateForm = this.fb.group({
-      instance_min_count: [0],
-      instance_max_count: [0],
-      initial_min_instance_count: [0, [this.validateSpecificDateInitialMin()]],
-      start_date_time: [0, [Validators.required, this.validateSpecificDateStartDateTime()]],
-      end_date_time: [0, [Validators.required, this.validateSpecificDateEndDateTime()]]
+    this.editSpecificDateForm = this.fb.group<EditSpecificDateForm>({
+      instance_min_count: new FormControl<number>(0, { nonNullable: true }),
+      instance_max_count: new FormControl<number>(0, { nonNullable: true }),
+      initial_min_instance_count: new FormControl<number>(0, { validators: [this.validateSpecificDateInitialMin()], nonNullable: true }),
+      start_date_time: new FormControl<string>('', { validators: [Validators.required, this.validateSpecificDateStartDateTime()], nonNullable: true }),
+      end_date_time: new FormControl<string>('', { validators: [Validators.required, this.validateSpecificDateEndDateTime()], nonNullable: true })
     });
   }
 
@@ -140,12 +164,13 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
 
   editSpecificDate(index: number) {
     this.editIndex = index;
+    const specificDate = this.currentPolicy.schedules.specific_date[index];
     this.editSpecificDateForm.setValue({
-      instance_min_count: this.currentPolicy.schedules.specific_date[index].instance_min_count,
-      instance_max_count: Math.abs(Number(this.currentPolicy.schedules.specific_date[index].instance_max_count)),
-      initial_min_instance_count: this.currentPolicy.schedules.specific_date[index].initial_min_instance_count,
-      start_date_time: this.currentPolicy.schedules.specific_date[index].start_date_time,
-      end_date_time: this.currentPolicy.schedules.specific_date[index].end_date_time,
+      instance_min_count: specificDate.instance_min_count,
+      instance_max_count: Math.abs(Number(specificDate.instance_max_count)),
+      initial_min_instance_count: specificDate.initial_min_instance_count ?? 0,
+      start_date_time: specificDate.start_date_time,
+      end_date_time: specificDate.end_date_time,
     });
     this.editSpecificDateForm.controls.instance_min_count.setValidators([Validators.required,
     validateRecurringSpecificMin(this.editSpecificDateForm, this.editMutualValidation)]);
@@ -154,18 +179,22 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
   }
 
   finishSpecificDate() {
-    if (this.editSpecificDateForm.get('initial_min_instance_count').value) {
-      this.currentPolicy.schedules.specific_date[this.editIndex].initial_min_instance_count =
-        this.editSpecificDateForm.get('initial_min_instance_count').value;
-    } else {
-      delete this.currentPolicy.schedules.specific_date[this.editIndex].initial_min_instance_count;
+    const specificDate = this.currentPolicy.schedules?.specific_date?.[this.editIndex];
+    if (!specificDate) {
+      return;
     }
-    this.currentPolicy.schedules.specific_date[this.editIndex].instance_min_count =
-      this.editSpecificDateForm.get('instance_min_count').value;
-    this.currentPolicy.schedules.specific_date[this.editIndex].instance_max_count =
-      this.editSpecificDateForm.get('instance_max_count').value;
-    this.currentPolicy.schedules.specific_date[this.editIndex].start_date_time = this.editSpecificDateForm.get('start_date_time').value;
-    this.currentPolicy.schedules.specific_date[this.editIndex].end_date_time = this.editSpecificDateForm.get('end_date_time').value;
+    const initialMinCount = this.editSpecificDateForm.get('initial_min_instance_count')?.value ?? 0;
+    if (initialMinCount) {
+      specificDate.initial_min_instance_count = initialMinCount;
+    } else {
+      delete specificDate.initial_min_instance_count;
+    }
+    specificDate.instance_min_count =
+      this.editSpecificDateForm.get('instance_min_count')?.value ?? 0;
+    specificDate.instance_max_count =
+      this.editSpecificDateForm.get('instance_max_count')?.value ?? 0;
+    specificDate.start_date_time = this.editSpecificDateForm.get('start_date_time')?.value ?? '';
+    specificDate.end_date_time = this.editSpecificDateForm.get('end_date_time')?.value ?? '';
     this.editIndex = -1;
   }
 
@@ -187,15 +216,15 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
         instance_min_count: 0,
         instance_max_count: 0,
         start_date_time: control.value,
-        end_date_time: this.editSpecificDateForm.get('end_date_time').value
+        end_date_time: this.editSpecificDateForm.get('end_date_time')?.value ?? ''
       };
       const lastValid = this.editMutualValidation.datetime;
       this.editMutualValidation.datetime = true;
-      if (dateTimeIsSameOrAfter(moment().tz(this.currentPolicy.schedules.timezone)
-        .format(AutoscalerConstants.MomentFormateDateTimeT), control.value)) {
+      if (dateTimeIsSameOrAfter(format(toZonedTime(new Date(), this.currentPolicy.schedules.timezone),
+        AutoscalerConstants.MomentFormateDateTimeT), control.value)) {
         errors.alertInvalidPolicyScheduleStartDateTimeBeforeNow = { value: control.value };
       }
-      if (dateTimeIsSameOrAfter(control.value, this.editSpecificDateForm.get('end_date_time').value)) {
+      if (dateTimeIsSameOrAfter(control.value, this.editSpecificDateForm.get('end_date_time')?.value ?? '')) {
         this.editMutualValidation.datetime = false;
         errors.alertInvalidPolicyScheduleEndDateTimeBeforeStartDateTime = { value: control.value };
       }
@@ -219,16 +248,16 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
       const newSchedule = {
         instance_min_count: 0,
         instance_max_count: 0,
-        start_date_time: this.editSpecificDateForm.get('start_date_time').value,
+        start_date_time: this.editSpecificDateForm.get('start_date_time')?.value ?? '',
         end_date_time: control.value
       };
       const lastValid = this.editMutualValidation.datetime;
       this.editMutualValidation.datetime = true;
-      if (dateTimeIsSameOrAfter(moment().tz(this.currentPolicy.schedules.timezone).
-        format(AutoscalerConstants.MomentFormateDateTimeT), control.value)) {
+      if (dateTimeIsSameOrAfter(format(toZonedTime(new Date(), this.currentPolicy.schedules.timezone),
+        AutoscalerConstants.MomentFormateDateTimeT), control.value)) {
         errors.alertInvalidPolicyScheduleEndDateTimeBeforeNow = { value: control.value };
       }
-      if (dateTimeIsSameOrAfter(this.editSpecificDateForm.get('start_date_time').value, control.value)) {
+      if (dateTimeIsSameOrAfter(this.editSpecificDateForm.get('start_date_time')?.value ?? '', control.value)) {
         this.editMutualValidation.datetime = false;
         errors.alertInvalidPolicyScheduleEndDateTimeBeforeStartDateTime = { value: control.value };
       }
@@ -250,7 +279,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
   }
 }
 
-export function validateRecurringSpecificMin(editForm, editMutualValidation): ValidatorFn {
+export function validateRecurringSpecificMin(editForm: FormGroup<any>, editMutualValidation: { limit: boolean }): ValidatorFn {
   return (control: AbstractControl): { [key: string]: any, } => {
     const invalid = editForm &&
       numberWithFractionOrExceedRange(control.value, 1, editForm.get('instance_max_count').value - 1, true);
@@ -266,7 +295,7 @@ export function validateRecurringSpecificMin(editForm, editMutualValidation): Va
   };
 }
 
-export function validateRecurringSpecificMax(editForm, editMutualValidation): ValidatorFn {
+export function validateRecurringSpecificMax(editForm: FormGroup<any>, editMutualValidation: { limit: boolean }): ValidatorFn {
   return (control: AbstractControl): { [key: string]: any, } => {
     const invalid = editForm && numberWithFractionOrExceedRange(control.value,
       editForm.get('instance_min_count').value + 1, Number.MAX_VALUE, true);

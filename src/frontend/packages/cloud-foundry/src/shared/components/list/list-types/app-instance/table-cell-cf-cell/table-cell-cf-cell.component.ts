@@ -1,7 +1,10 @@
-import { Component, Input, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, Input, OnDestroy , ChangeDetectionStrategy } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
+import { ProgressSpinnerComponent } from '../../../../../../../../core/src/shared/components/progress-spinner/progress-spinner.component';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { EntityService } from '../../../../../../../../store/src/entity-service';
 import { IMetricMatrixResult, IMetrics } from '../../../../../../../../store/src/types/base-metric.types';
@@ -11,13 +14,20 @@ import { ListAppInstance } from '../app-instance-types';
 @Component({
   selector: 'app-table-cell-cf-cell-usage',
   templateUrl: './table-cell-cf-cell.component.html',
-  styleUrls: ['./table-cell-cf-cell.component.scss']
+  styleUrls: ['./table-cell-cf-cell.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    RouterModule,
+    ProgressSpinnerComponent
+  ]
 })
 export class TableCellCfCellComponent extends TableCellCustom<ListAppInstance> implements OnDestroy {
 
-  cellMetric$: Observable<IMetricCell>;
-  cellLink: string;
-  fetchMetricsSub: Subscription;
+  cellMetric$!: Observable<IMetricCell>;
+  cellLink!: string;
+  fetchMetricsSub!: Subscription;
 
   @Input('config')
   set config(config: {

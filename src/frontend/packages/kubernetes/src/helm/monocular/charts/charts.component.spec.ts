@@ -1,12 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import {  NO_ERRORS_SCHEMA, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of } from 'rxjs';
 
-import { createBasicStoreModule } from '../../../../../store/testing/public-api';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 import { ChartItemComponent } from '../chart-item/chart-item.component';
 import { ChartListComponent } from '../chart-list/chart-list.component';
 import { LoaderComponent } from '../loader/loader.component';
@@ -24,9 +25,7 @@ describe('ChartsComponent', () => {
       imports: [
         HttpClientTestingModule,
         createBasicStoreModule(),
-        RouterTestingModule
-      ],
-      declarations: [
+        RouterTestingModule,
         ChartsComponent,
         ChartListComponent,
         ChartItemComponent,
@@ -46,7 +45,7 @@ describe('ChartsComponent', () => {
               queryParams: {}
             },
             queryParams: of({}),
-            params: of({})
+            params: of({}),
           }
         },
         ReposService,

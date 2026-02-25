@@ -1,6 +1,6 @@
-<div class="kubernetes-node-metrics">
+<div class="p-6 space-y-6">
   <app-tile>
-    <app-tile-group>
+    <app-tile-group class="tile-group-2-cols">
       <app-tile>
         <app-kubernetes-node-metric-stats-card title="Memory" [metric]="memoryMetric" [unit]="memoryUnit"></app-kubernetes-node-metric-stats-card>
       </app-tile>
@@ -8,9 +8,11 @@
         <app-kubernetes-node-metric-stats-card title="CPU" [metric]="cpuMetric" [unit]="cpuUnit"></app-kubernetes-node-metric-stats-card>
       </app-tile>
     </app-tile-group>
-    <app-metrics-parent-range-selector class="kubernetes-node-metrics__charts">
-      <app-metrics-chart *ngFor="let config of instanceMetricConfigs" [metricsConfig]="config[0]" [chartConfig]="config[1]">
-      </app-metrics-chart>
+    <app-metrics-parent-range-selector class="mt-6">
+      @for (config of instanceMetricConfigs; track config) {
+        <app-metrics-chart [metricsConfig]="config[0]" [chartConfig]="config[1]">
+        </app-metrics-chart>
+      }
     </app-metrics-parent-range-selector>
   </app-tile>
 </div>

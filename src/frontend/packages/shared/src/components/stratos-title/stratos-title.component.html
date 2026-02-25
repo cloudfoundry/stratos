@@ -1,7 +1,11 @@
-<div class="stratos-title">
-  <img class="stratos-title__logo" src="/core/assets/logo.png" />
-  <h1 class="mat-h1 stratos-title__header">
-    <span *ngIf="title">{{ title }}</span>
-    <app-product-name *ngIf="!title"></app-product-name>
+<div class="flex flex-col items-center justify-center pt-6">
+  <img class="w-60 py-3 px-0 pb-4" src="/core/assets/logo.png" alt="Stratos Logo" />
+  <h1 class="hidden text-3xl font-medium tracking-widest m-0 text-center uppercase text-theme-text">
+    @if (title) {
+      <span>{{ title }}</span>
+    }
+    @if (!title) {
+      <app-product-name></app-product-name>
+    }
   </h1>
 </div>

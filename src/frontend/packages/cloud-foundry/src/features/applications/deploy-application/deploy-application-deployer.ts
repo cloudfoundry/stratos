@@ -1,5 +1,7 @@
+import { Injector, signal, WritableSignal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, of as observableOf, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, of as observableOf, Subject, Subscription } from 'rxjs';
 import websocketConnect from 'rxjs-websockets';
 import { catchError, combineLatest, filter, first, map, mergeMap, share, switchMap, tap } from 'rxjs/operators';
 
@@ -19,6 +21,35 @@ import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-spac
 import { FileScannerInfo } from './deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
 import { DEPLOY_TYPES_IDS } from './deploy-application-steps.types';
 
+// Helper function to create a signal wrapper compatible with BehaviorSubject API
+// The wrapper provides BehaviorSubject-like API (.next, .getValue, .asObservable)
+// while being backed by a Signal for fine-grained reactivity
+function createSignalWrapper<T>(initialValue: T, injector: Injector) {
+  const _signal = signal<T>(initialValue);
+  // Create the observable once during initialization, outside of any reactive context
+  // This prevents NG0602 errors when asObservable() is called from reactive contexts
+  const _observable = toObservable(_signal, { injector });
+
+  const wrapper = Object.assign(
+    // Make it callable like a signal
+    () => _signal(),
+    {
+      // WritableSignal methods
+      set: (value: T) => _signal.set(value),
+      update: (fn: (value: T) => T) => _signal.update(fn),
+      asReadonly: () => _signal.asReadonly(),
+      // BehaviorSubject compatibility methods
+      next: (value: T) => _signal.set(value),
+      getValue: () => _signal(),
+      asObservable: () => _observable,
+    }
+  );
+  return wrapper as WritableSignal<T> & {
+    next: (value: T) => void;
+    getValue: () => T;
+    asObservable: () => Observable<T>;
+  };
+}
 
 export interface DeployApplicationDeployerStatus {
   error: boolean;
@@ -68,49 +99,60 @@ interface FolderSourceInfo extends DeploySource {
 
 export class DeployApplicationDeployer {
 
-  isRedeploy: string;
-  connectSub: Subscription;
-  updateSub: Subscription;
-  msgSub: Subscription;
+  isRedeploy!: string;
+  connectSub!: Subscription;
+  updateSub!: Subscription;
+  msgSub!: Subscription;
   streamTitle = 'Preparing...';
   appData: AppData;
   proxyAPIVersion = environment.proxyAPIVersion;
-  cfGuid: string;
-  orgGuid: string;
-  spaceGuid: string;
+  cfGuid!: string;
+  orgGuid!: string;
+  spaceGuid!: string;
   applicationSource: any;
-  applicationOverrides: OverrideAppDetails;
+  applicationOverrides!: OverrideAppDetails;
 
-  status$ = new BehaviorSubject<DeployApplicationDeployerStatus>({
-    error: false,
-    deploying: false
-  });
+  // Signal wrappers with BehaviorSubject-compatible API for backward compatibility
+  // These provide both Signal reactivity and Observable API via .asObservable()
+  status$: ReturnType<typeof createSignalWrapper<DeployApplicationDeployerStatus>>;
 
   // Observable on the application GUID of the application being deployed
-  applicationGuid$ = new BehaviorSubject<string>(null);
+  applicationGuid$: ReturnType<typeof createSignalWrapper<string | null>>;
 
   // Status of file transfers
-  fileTransferStatus$ = new BehaviorSubject<FileTransferStatus>(undefined);
+  fileTransferStatus$: ReturnType<typeof createSignalWrapper<FileTransferStatus | undefined>>;
 
-  public messages = new BehaviorSubject<string>('');
+  public messages: ReturnType<typeof createSignalWrapper<string>>;
 
   // Are we deploying?
   deploying = false;
 
-  private inputStream;
+  private inputStream: any;
 
   private isOpen = false;
 
-  public fsFileInfo: FileScannerInfo;
+  public fsFileInfo!: FileScannerInfo;
 
-  private fileTransfers;
-  private fileTransferStatus: FileTransferStatus;
-  private currentFileTransfer;
+  private fileTransfers: any;
+  private fileTransferStatus!: FileTransferStatus;
+  private currentFileTransfer: any;
 
   constructor(
     private store: Store<CFAppState>,
     public cfOrgSpaceService: CfOrgSpaceDataService,
-  ) { }
+    private injector: Injector,
+  ) {
+    this.status$ = createSignalWrapper<DeployApplicationDeployerStatus>({
+      error: false,
+      deploying: false
+    }, this.injector);
+
+    this.applicationGuid$ = createSignalWrapper<string | null>(null, this.injector);
+
+    this.fileTransferStatus$ = createSignalWrapper<FileTransferStatus | undefined>(undefined, this.injector);
+
+    this.messages = createSignalWrapper<string>('', this.injector);
+  }
 
   updateStatus(error = false, errorMsg?: string) {
     this.status$.next({
@@ -166,9 +208,10 @@ export class DeployApplicationDeployer {
         this.applicationSource = appDetail.applicationSource;
         this.applicationOverrides = appDetail.applicationOverrides;
         const host = window.location.host;
+        const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
         const appId = this.isRedeploy ? `&app=${this.isRedeploy}` : '';
         const streamUrl = (
-          `wss://${host}/pp/${this.proxyAPIVersion}/${this.cfGuid}/${this.orgGuid}/${this.spaceGuid}/deploy` +
+          `${protocol}://${host}/pp/${this.proxyAPIVersion}/${this.cfGuid}/${this.orgGuid}/${this.spaceGuid}/deploy` +
           `?org=${org.entity.name}&space=${space.entity.name}${appId}`
         );
 
@@ -176,7 +219,7 @@ export class DeployApplicationDeployer {
         const buffer = websocketConnect(streamUrl)
           .pipe(
             switchMap((get) => get(this.inputStream)),
-            catchError(e => {
+            catchError((e: any): any[] => {
               return [];
             }),
             filter(l => !!l),
@@ -304,7 +347,7 @@ export class DeployApplicationDeployer {
     return JSON.stringify(msg);
   };
 
-  processWebSocketMessage = (log) => {
+  processWebSocketMessage = (log: any) => {
     switch (log.type) {
       case SocketEventTypes.MANIFEST:
         this.streamTitle = 'Starting deployment...';
@@ -415,7 +458,7 @@ export class DeployApplicationDeployer {
     }
   }
 
-  private onClose(log, title, error) {
+  private onClose(log: any, title: string, error: any) {
     if (title) {
       this.streamTitle = title;
     }
@@ -428,7 +471,7 @@ export class DeployApplicationDeployer {
 
   // File Upload
   sendLocalSourceMetadata() {
-    const metadata = {
+    const metadata: { files: any[]; folders: any[] } = {
       files: [],
       folders: []
     };
@@ -462,9 +505,9 @@ export class DeployApplicationDeployer {
   }
 
   // Flatten files and folders
-  collectFoldersAndFiles(metadata, base, folder) {
+  collectFoldersAndFiles(metadata: any, base: string, folder: any) {
     if (folder.files) {
-      folder.files.forEach(file => {
+      folder.files.forEach((file: any) => {
         file.fullPath = base ? base + '/' + file.name : file.name;
         metadata.files.push(file);
       });

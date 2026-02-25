@@ -13,10 +13,12 @@ import { ConfigService } from './config.service';
 
 
 /* Most of this code should be in an effect and we should store the data in the app store */
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ChartsService {
   hostname: string;
-  cacheCharts: any;
+  cacheCharts: { [repo: string]: Chart[] };
 
   constructor(
     private http: HttpClient,
@@ -62,12 +64,12 @@ export class ChartsService {
     }
 
     if (this.cacheCharts[repo] && this.cacheCharts[repo].length > 0) {
-      return Observable.create((observer) => {
+      return Observable.create((observer: { next: (value: Chart[]) => void }) => {
         observer.next(this.cacheCharts[repo]);
       });
     } else {
-      return this.http.get<{ data: any, }>(url).pipe(
-        map(r => this.extractData(r)),
+      return this.http.get<{ data: Chart[], }>(url).pipe(
+        map(r => this.extractData<Chart[]>(r)),
         tap((data) => this.storeCache(data, repo)),
         catchError(this.handleError)
       );
@@ -83,14 +85,14 @@ export class ChartsService {
    */
   getChart(repo: string, chartName: string): Observable<Chart> {
     // Transform Observable<Chart[]> into Observable<Chart>[]
-    return this.http.get(`${this.hostname}/v1/charts/${repo}/${chartName}`).pipe(
-      map(this.extractData),
+    return this.http.get<{ data: Chart }>(`${this.hostname}/v1/charts/${repo}/${chartName}`).pipe(
+      map(r => this.extractData<Chart>(r)),
       catchError(this.handleError)
     );
   }
 
   // TODO: use backend search API endpoint
-  searchCharts(query, repo?: string): Observable<Chart[]> {
+  searchCharts(query: string, repo?: string): Observable<Chart[]> {
     const re = new RegExp(query, 'i');
     return this.getCharts(repo).pipe(
       map(charts => {
@@ -106,7 +108,7 @@ export class ChartsService {
     );
   }
 
-  arrayMatch(keywords: string[], re): boolean {
+  arrayMatch(keywords: string[], re: RegExp): boolean {
     if (!keywords) { return false; }
 
     return keywords.some((keyword) => {
@@ -136,13 +138,13 @@ export class ChartsService {
    * @param version Chart version
    * @return An observable that will be the json schema
    */
-  getChartSchema(chartVersion: ChartVersion, chart: Chart): Observable<any> {
+  getChartSchema(chartVersion: ChartVersion, chart: Chart): Observable<unknown> {
     const url = this.getChartSchemaURL(chartVersion, chart.attributes.name, chart.attributes.repo);
     return url ? this.http.get(url) : of(null);
   }
 
   // Get the URL for obtaining a Chart's schema
-  getChartSchemaURL(chartVersion: ChartVersion, name: string, repo: RepoAttributes): string {
+  getChartSchemaURL(chartVersion: ChartVersion, name: string, repo: RepoAttributes): string | null {
     // We have the schema URL, so we can fetch that directly
     return chartVersion.attributes.schema ? `${this.hostname}${chartVersion.attributes.schema}` : null;
   }
@@ -186,8 +188,8 @@ export class ChartsService {
    * @return An observable containing an array of ChartVersions
    */
   getVersions(repo: string, chartName: string): Observable<ChartVersion[]> {
-    return this.http.get<{ data: any, }>(`${this.hostname}/v1/charts/${repo}/${chartName}/versions`).pipe(
-      map(m => this.extractData(m)),
+    return this.http.get<{ data: ChartVersion[], }>(`${this.hostname}/v1/charts/${repo}/${chartName}/versions`).pipe(
+      map(m => this.extractData<ChartVersion[]>(m)),
       catchError(this.handleError)
     );
   }
@@ -200,17 +202,17 @@ export class ChartsService {
    * @return An observable containing an array of ChartVersions
    */
   getVersion(repo: string, chartName: string, version: string): Observable<ChartVersion> {
-    return this.http.get(`${this.hostname}/v1/charts/${repo}/${chartName}/versions/${version}`).pipe(
-      map(this.extractData),
+    return this.http.get<{ data: ChartVersion }>(`${this.hostname}/v1/charts/${repo}/${chartName}/versions/${version}`).pipe(
+      map(r => this.extractData<ChartVersion>(r)),
       catchError(this.handleError)
     );
   }
 
   getVersionFromEndpoint(endpoint: string, repo: string, chartName: string, version: string): Observable<ChartVersion> {
     const requestArgs = { headers: { 'x-cap-cnsi-list': endpoint !== stratosMonocularEndpointGuid ? endpoint : '' } };
-    return this.http.get(
+    return this.http.get<{ data: ChartVersion }>(
       `${this.hostname}/v1/charts/${repo}/${chartName}/versions/${version}`, requestArgs).pipe(
-        map(this.extractData),
+        map(r => this.extractData<ChartVersion>(r)),
         catchError(this.handleError)
       );
   }
@@ -240,17 +242,18 @@ export class ChartsService {
    * @param data Elements in the response
    * @return Return the same response
    */
-  private storeCache(data: Chart[], repo: string): Chart[] {
-    this.cacheCharts[repo] = data;
-    return data;
+  private storeCache(data: unknown, repo: string): Chart[] {
+    const charts = data as Chart[];
+    this.cacheCharts[repo] = charts;
+    return charts;
   }
 
 
-  private extractData(res: { data: any, }) {
-    return res.data || {};
+  private extractData<T>(res: { data: T, }): T {
+    return res.data || {} as T;
   }
 
-  private handleError(error: any) {
+  private handleError(error: { message?: string; status?: number; statusText?: string }): Observable<never> {
     const errMsg = (error.message) ? error.message :
       error.status ? `${error.status} - ${error.statusText}` : 'Server error';
     console.error(errMsg);

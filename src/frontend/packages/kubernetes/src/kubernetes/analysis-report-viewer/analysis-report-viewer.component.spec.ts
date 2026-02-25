@@ -1,4 +1,7 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { ActivatedRoute } from '@angular/router';
 
 import { KubernetesBaseTestModules } from '../kubernetes.testing.module';
 import { KubernetesAnalysisService } from '../services/kubernetes.analysis.service';
@@ -8,18 +11,30 @@ describe('AnalysisReportViewerComponent', () => {
   let component: AnalysisReportViewerComponent;
   let fixture: ComponentFixture<AnalysisReportViewerComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [ AnalysisReportViewerComponent ],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         KubernetesBaseTestModules,
+
+        AnalysisReportViewerComponent,
       ],
       providers: [
-        KubernetesAnalysisService
+
+        KubernetesAnalysisService,
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              params: { endpointId: 'test' },
+              queryParams: {}
+            }
+          }
+        },
+
+        provideZonelessChangeDetection(),
       ]
-    })
-    .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AnalysisReportViewerComponent);

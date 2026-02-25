@@ -46,13 +46,13 @@ function deleteEndpointEntities(
   state: IRequestEntityTypeState<GitEntity>,
   endpointGuid: string
 ) {
-  return Object.keys(state).reduce((newEntities, guid) => {
+  return Object.keys(state).reduce((newEntities: IRequestEntityTypeState<GitEntity>, guid: string) => {
     const entity = state[guid];
     if (entity.endpointGuid !== endpointGuid) {
       newEntities[guid] = entity;
     }
     return newEntities;
-  }, {});
+  }, {} as IRequestEntityTypeState<GitEntity>);
 }
 
 /**
@@ -103,7 +103,8 @@ class GitEntityCatalog {
             ...BaseEndpointAuth.Token,
             help: '/core/assets/connect/github.md',
             config: {
-              title: 'Personal Access Token'
+              title: 'Personal Access Token',
+              helpText: 'Enter a GitHub Personal Access Token with "repo" scope to access your repositories. You can create one at https://github.com/settings/tokens'
             }
           }],
           logoUrl: '/core/assets/endpoint-icons/github-logo.png',
@@ -118,7 +119,8 @@ class GitEntityCatalog {
             ...BaseEndpointAuth.Bearer,
             help: '/core/assets/connect/gitlab.md',
             config: {
-              title: 'Personal Access Token'
+              title: 'Personal Access Token',
+              helpText: 'Enter a GitLab Personal Access Token with "api" and "read_repository" scopes to access your repositories. You can create one at https://gitlab.com/-/profile/personal_access_tokens'
             }
           }],
           logoUrl: '/core/assets/endpoint-icons/gitlab-icon-rgb.svg',

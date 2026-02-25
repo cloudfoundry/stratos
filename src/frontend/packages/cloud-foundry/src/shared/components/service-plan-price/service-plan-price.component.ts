@@ -1,19 +1,25 @@
-import { registerLocaleData } from '@angular/common';
+import { CommonModule, registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
-import { Component, Input } from '@angular/core';
+import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 
-import { APIResource } from '../../../../../store/src/types/api.types';
+import { APIResource } from '@stratosui/store';
 import { IServicePlan, IServicePlanCost } from '../../../cf-api-svc.types';
 
 
 @Component({
   selector: 'app-service-plan-price',
   templateUrl: './service-plan-price.component.html',
-  styleUrls: ['./service-plan-price.component.scss']
+  styleUrls: ['./service-plan-price.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    // Note: CurrencyPipe is provided by CommonModule
+  ]
 })
 export class ServicePlanPriceComponent {
 
-  @Input() servicePlan: APIResource<IServicePlan>;
+  @Input() servicePlan!: APIResource<IServicePlan>;
 
   constructor() {
     registerLocaleData(localeFr);

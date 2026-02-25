@@ -1,39 +1,44 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { NgxGraphModule } from '@swimlane/ngx-graph';
-import { SidePanelService } from 'frontend/packages/core/src/shared/services/side-panel.service';
+import { SidePanelService } from '@stratosui/core';
 
 import { TabNavService } from '../../../../../../../core/src/tab-nav.service';
-import { HelmReleaseProviders, KubernetesBaseTestModules } from '../../../../kubernetes.testing.module';
+import { HelmReleaseProviders, KubernetesBaseTestModules, KubeBaseGuidMock } from '../../../../kubernetes.testing.module';
 import { KubernetesEndpointService } from '../../../../services/kubernetes-endpoint.service';
 import { KubernetesAnalysisService } from '../../../../services/kubernetes.analysis.service';
-import {
-  AnalysisReportSelectorComponent,
-} from './../../../../analysis-report-viewer/analysis-report-selector/analysis-report-selector.component';
-import { KubeBaseGuidMock } from './../../../../kubernetes.testing.module';
+import { AnalysisReportSelectorComponent } from '../../../../analysis-report-viewer/analysis-report-selector/analysis-report-selector.component';
+import { AnalysisReportViewerComponent } from '../../../../analysis-report-viewer/analysis-report-viewer.component';
+import { HelmReleaseSocketService } from '../../helm-release-tab-base/helm-release-socket-service';
 import { HelmReleaseResourceGraphComponent } from './helm-release-resource-graph.component';
 
 describe('HelmReleaseResourceGraphComponent', () => {
   let component: HelmReleaseResourceGraphComponent;
   let fixture: ComponentFixture<HelmReleaseResourceGraphComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
-        ...KubernetesBaseTestModules,
-        NgxGraphModule
+        KubernetesBaseTestModules,
+        NgxGraphModule,
+
+        HelmReleaseResourceGraphComponent,
+        AnalysisReportSelectorComponent,
+        AnalysisReportViewerComponent,
       ],
-      declarations: [HelmReleaseResourceGraphComponent, AnalysisReportSelectorComponent],
       providers: [
         ...HelmReleaseProviders,
         SidePanelService,
-        TabNavService,
         KubernetesAnalysisService,
         KubernetesEndpointService,
+        HelmReleaseSocketService,
         KubeBaseGuidMock,
+
+        provideZonelessChangeDetection(),
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(HelmReleaseResourceGraphComponent);

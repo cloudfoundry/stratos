@@ -48,7 +48,7 @@ export interface FavoriteIconData {
 const favoriteGuidSeparator = '-';
 
 export class UserFavorite<T extends IEntityMetadata = IEntityMetadata> implements IFavoriteTypeInfo<T> {
-  public guid: string;
+  public guid!: string;
 
   private catalogEntity: StratosBaseCatalogEntity;
   private entityBuilder: IStratosEntityBuilder<IEntityMetadata>;

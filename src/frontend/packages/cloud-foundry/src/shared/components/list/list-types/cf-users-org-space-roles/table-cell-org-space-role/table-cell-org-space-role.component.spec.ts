@@ -1,47 +1,50 @@
 import { HttpClientModule } from '@angular/common/http';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
-import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CfUserServiceTestProvider } from '../../../../../../../test-framework/user-service-helper';
+import {
+  APIResource,
+  EntityMonitorFactory,
+  EntityServiceFactory,
+  PaginationMonitorFactory,
+} from '@stratosui/store';
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { CfUserServiceTestProvider } from "@test-framework/user-service-helper";
 import { ISpace } from '../../../../../../cf-api.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../../features/cf/cf-page.types';
 import { CfRolesService } from '../../../../../../features/cf/users/manage-users/cf-roles.service';
 import { CfRoleCheckboxComponent } from '../../../../cf-role-checkbox/cf-role-checkbox.component';
 import { TableCellRoleOrgSpaceComponent } from './table-cell-org-space-role.component';
-
 describe('TableCellSpaceRoleComponent', () => {
   let component: TableCellRoleOrgSpaceComponent;
   let fixture: ComponentFixture<TableCellRoleOrgSpaceComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
+        TableCellRoleOrgSpaceComponent,
+        CfRoleCheckboxComponent,
         ...generateCfStoreModules(),
-        CoreModule,
         NoopAnimationsModule,
-        HttpClientModule
+        HttpClientModule,
       ],
       providers: [
+        EntityServiceFactory,
+        
         CfUserServiceTestProvider,
         CfRolesService,
         PaginationMonitorFactory,
         ActiveRouteCfOrgSpace,
-        EntityMonitorFactory
+        EntityMonitorFactory,
+
+        provideZonelessChangeDetection(),
       ],
-      declarations: [
-        TableCellRoleOrgSpaceComponent,
-        CfRoleCheckboxComponent
-      ]
+      
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellRoleOrgSpaceComponent);
     component = fixture.componentInstance;
     component.row = {

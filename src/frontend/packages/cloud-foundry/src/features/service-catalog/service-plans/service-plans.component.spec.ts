@@ -1,28 +1,56 @@
 import { DatePipe } from '@angular/common';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { EffectsModule } from '@ngrx/effects';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { generateCfBaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { EntityServiceFactory, EntityCatalogFeatureModule, CATALOGUE_ENTITIES, generateStratosEntities, entityCatalog, TestEntityCatalog } from '@stratosui/store';
+import { createBasicStoreModule } from '@test-framework';
+import { generateCFEntities } from '../../../cf-entity-generator';
 import { ServicesService } from '../services.service';
 import { ServicesServiceMock } from '../services.service.mock';
-import { ServicePlansComponent } from './service-plans.component';
+import { ServicePlansComponent } from "./service-plans.component";
 
 describe('ServicePlansComponent', () => {
   let component: ServicePlansComponent;
   let fixture: ComponentFixture<ServicePlansComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      imports: generateCfBaseTestModules(),
-      declarations: [
-        ServicePlansComponent
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        ServicePlansComponent,
+        createBasicStoreModule(),
+        EntityCatalogFeatureModule,
+        EffectsModule.forRoot([]),
       ],
       providers: [
+        EntityServiceFactory,
         DatePipe,
         { provide: ServicesService, useClass: ServicesServiceMock },
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+        provideNoopAnimations(),
+        {
+          provide: CATALOGUE_ENTITIES,
+          useFactory: () => {
+            const testEntityCatalog = entityCatalog as TestEntityCatalog;
+            testEntityCatalog.clear();
+            return [
+              ...generateCFEntities(),
+              ...generateStratosEntities(),
+            ];
+          },
+          multi: true
+        },
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServicePlansComponent);

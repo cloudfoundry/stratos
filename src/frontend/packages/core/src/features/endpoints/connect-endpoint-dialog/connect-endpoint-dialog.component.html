@@ -1,27 +1,28 @@
 <div class="connection-dialog__loading-wrapper">
-  <mat-progress-bar class="connection-dialog__loading"
+  <app-progress-bar class="connection-dialog__loading"
     [color]="(connectService.connectingError$ | async) && !(connectService.isBusy$ | async) ? 'warn' : 'primary'"
     [mode]="(connectService.isBusy$ | async) ? 'indeterminate' : 'solid'">
-  </mat-progress-bar>
+  </app-progress-bar>
 </div>
 <div class="connection-dialog">
   <div class="connection-dialog__title">
-    <h2 mat-dialog-title>
+    <h2 class="dialog-title">
       Connect to {{ data.name }}
     </h2>
-    <button *ngIf="helpDocument$ | async as link" [appBlur]="true" class="connection-dialog__help" mat-icon-button (click)="showHelp(link)">
-      <mat-icon>help</mat-icon>
-    </button>
+    @if (helpDocument$ | async; as link) {
+      <button [appBlur]="true" class="connection-dialog__help btn-icon" (click)="showHelp(link)">
+        <i class="material-icons">help</i>
+      </button>
+    }
   </div>
   <app-connect-endpoint (valid)="valid = $event" (authType)="setHelpLink($event.help)" [connectService]="connectService" [formSubmit]="true">
   </app-connect-endpoint>
   <app-dialog-error message="{{connectService.connectingError$ | async}}"
     [show]="(connectService.connectingError$ | async) && !(connectService.isBusy$ | async)">
   </app-dialog-error>
-  <mat-dialog-actions class="connection-dialog__actions">
-    <button [mat-dialog-close]="true" mat-button color="warn"
-      [disabled]="(connectService.isBusy$ | async)">Cancel</button>
-    <button (click)="connect()" [disabled]="(connectService.isBusy$ | async) || !valid" mat-button
-      color="primary">Connect</button>
-  </mat-dialog-actions>
+  <div class="dialog-actions connection-dialog__actions">
+    <button (click)="dialogRef.close()" class="btn btn-warn"
+    [disabled]="(connectService.isBusy$ | async)">Cancel</button>
+    <button (click)="connect()" [disabled]="(connectService.isBusy$ | async) || !valid" class="btn btn-primary">Connect</button>
+  </div>
 </div>

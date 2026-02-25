@@ -1,4 +1,5 @@
-import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, inject } from '@angular/core';
 
 export enum BooleanIndicatorType {
   enabledDisabled = 'enabled-disabled',
@@ -31,10 +32,17 @@ export type booleanStringType = 'True' | 'False' | 'Unknown';
 @Component({
   selector: 'app-boolean-indicator',
   templateUrl: './boolean-indicator.component.html',
-  styleUrls: ['./boolean-indicator.component.scss']
+  styleUrls: ['./boolean-indicator.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BooleanIndicatorComponent {
-  public booleanOutput: IBooleanOutput;
+  private cdr = inject(ChangeDetectorRef);
+
+  public booleanOutput!: IBooleanOutput;
   // Invert the text labels with the icons (No text for yes value and vice-versa)
   @Input() inverse = false;
   // Should we use a subtle display - this won't show the No option as danger (typically red)
@@ -46,9 +54,18 @@ export class BooleanIndicatorComponent {
   set subtle(subtle: boolean) {
     this.pSubtle = subtle;
     this.updateBooleanOutput();
+    this.cdr.markForCheck();
   }
 
-  @Input() showText = true;
+  private pShowText = true;
+  @Input()
+  get showText(): boolean {
+    return this.pShowText;
+  }
+  set showText(showText: boolean) {
+    this.pShowText = showText;
+    this.cdr.markForCheck();
+  }
 
   private icons = {
     Yes: 'check_circle',
@@ -69,7 +86,7 @@ export class BooleanIndicatorComponent {
     Progress: 'cached'
   };
 
-  private pType: BooleanIndicatorType;
+  private pType!: BooleanIndicatorType;
   @Input()
   get type(): BooleanIndicatorType {
     return this.pType;
@@ -77,9 +94,10 @@ export class BooleanIndicatorComponent {
   set type(type: BooleanIndicatorType) {
     this.pType = type;
     this.updateBooleanOutput();
+    this.cdr.markForCheck();
   }
 
-  private pIsTrue: boolean;
+  private pIsTrue!: boolean;
   @Input()
   get isTrue(): boolean {
     return this.pIsTrue;
@@ -87,6 +105,7 @@ export class BooleanIndicatorComponent {
   set isTrue(isTrue: boolean) {
     this.pIsTrue = isTrue;
     this.updateBooleanOutput();
+    this.cdr.markForCheck();
   }
 
   private updateBooleanOutput() {
@@ -112,7 +131,7 @@ export class BooleanIndicatorComponent {
     }
     const text = this.getText({ isTrue, inverse });
     return {
-      icon: this.icons[text],
+      icon: (this.icons as any)[text],
       text,
       isTrue: inverse ? !isTrue : isTrue,
       subtle

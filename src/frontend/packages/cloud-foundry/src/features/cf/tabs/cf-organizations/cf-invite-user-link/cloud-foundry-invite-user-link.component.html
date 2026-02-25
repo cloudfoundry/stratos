@@ -1,10 +1,12 @@
-<mat-card class="invite-user-details" *ngIf="(inviteUserDetails$ | async) as inviteUserDetails">
-  <mat-card-content>
-    <div class="invite-user-details__content">
-      <div class="invite-user-details__text">{{inviteUserDetails.text}}</div>
-      <button mat-button class="invite-user-details__button" [disableRipple]="true" color="primary"
-        (click)="inviteUser(inviteUserDetails.url)">Invite
+@if ((inviteUserDetails$ | async); as inviteUserDetails) {
+  <app-card class="invite-user-details">
+    <app-card-content>
+      <div class="invite-user-details__content">
+        <div class="invite-user-details__text">{{inviteUserDetails.text}}</div>
+        <button class="btn btn-ghost invite-user-details__button"
+          (click)="inviteUser(inviteUserDetails.url)">Invite
         Users</button>
-    </div>
-  </mat-card-content>
-</mat-card>
+      </div>
+    </app-card-content>
+  </app-card>
+}

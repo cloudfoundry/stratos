@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { FavoritesSidePanelComponent } from './favorites-side-panel.component';
 
@@ -6,12 +8,16 @@ describe('FavoritesSidePanelComponent', () => {
   let component: FavoritesSidePanelComponent;
   let fixture: ComponentFixture<FavoritesSidePanelComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ FavoritesSidePanelComponent ]
-    })
-    .compileComponents();
-  }));
+      providers: [provideZonelessChangeDetection()],
+      imports: [
+        FavoritesSidePanelComponent,
+      ],
+      
+    });
+    TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(FavoritesSidePanelComponent);

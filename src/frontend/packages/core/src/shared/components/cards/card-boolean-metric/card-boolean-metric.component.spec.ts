@@ -1,19 +1,26 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-
-import { BaseTestModulesNoShared } from '../../../../../test-framework/core-test.helper';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { BaseTestModulesNoShared, STORE_TEST_PROVIDERS } from '@test-framework/core-test.helper';
 import { CardBooleanMetricComponent } from './card-boolean-metric.component';
 
 describe('CardBooleanMetricComponent', () => {
   let component: CardBooleanMetricComponent;
   let fixture: ComponentFixture<CardBooleanMetricComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [CardBooleanMetricComponent],
-      imports: [...BaseTestModulesNoShared],
-    })
-      .compileComponents();
-  }));
+      imports: [
+        CardBooleanMetricComponent,
+        ...BaseTestModulesNoShared,
+      ],
+      providers: [
+        ...(STORE_TEST_PROVIDERS || []),
+        provideZonelessChangeDetection(),
+      ]
+    });
+      TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CardBooleanMetricComponent);

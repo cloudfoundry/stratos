@@ -5,13 +5,13 @@ import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
 export interface ServiceActionBuilders extends OrchestratedActionBuilders {
   get: (
-    guid,
-    endpointGuid,
+    guid: string,
+    endpointGuid: string,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
   ) => GetService;
   getMultiple: (
-    endpointGuid,
-    paginationKey,
+    endpointGuid: string,
+    paginationKey: string,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
   ) => GetAllServices;
   getAllInSpace: (
@@ -25,8 +25,8 @@ export interface ServiceActionBuilders extends OrchestratedActionBuilders {
 
 export const serviceActionBuilders: ServiceActionBuilders = {
   get: (
-    guid,
-    endpointGuid,
+    guid: string,
+    endpointGuid: string,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetService(
     guid,
@@ -35,8 +35,8 @@ export const serviceActionBuilders: ServiceActionBuilders = {
     populateMissing
   ),
   getMultiple: (
-    endpointGuid,
-    paginationKey,
+    endpointGuid: string,
+    paginationKey: string,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetAllServices(paginationKey, endpointGuid, includeRelations, populateMissing),
   getAllInSpace: (

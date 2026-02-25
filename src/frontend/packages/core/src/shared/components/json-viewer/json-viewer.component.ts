@@ -1,4 +1,5 @@
-import { Component, Input, OnChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnChanges  } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 export interface Segment {
   key: string;
@@ -11,13 +12,19 @@ export interface Segment {
 @Component({
   selector: 'app-json-viewer',
   templateUrl: './json-viewer.component.html',
-  styleUrls: ['./json-viewer.component.scss']
+  styleUrls: ['./json-viewer.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    JsonViewerComponent // Self-import for recursive rendering
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class JsonViewerComponent implements OnChanges {
 
   @Input() json: any;
 
-  @Input() root: string;
+  @Input() root!: string;
 
   // Whether to expand all initially
   @Input() expanded = true;

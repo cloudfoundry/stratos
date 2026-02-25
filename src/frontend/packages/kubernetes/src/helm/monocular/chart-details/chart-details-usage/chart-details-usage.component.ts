@@ -1,6 +1,7 @@
-import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
-import { MatIconRegistry } from '@angular/material/icon';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { AsyncPipe } from '@angular/common';
+import {Component, Input, OnInit, ViewEncapsulation, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CustomTooltipDirective, MatIconRegistry } from '@stratosui/core';
+import { TailwindSnackBarService } from '@stratosui/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 
@@ -13,20 +14,20 @@ import { getMonocularEndpoint } from '../../stratos-monocular.helper';
   templateUrl: './chart-details-usage.component.html',
   styleUrls: ['./chart-details-usage.component.scss'],
   viewProviders: [MatIconRegistry],
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [AsyncPipe, CustomTooltipDirective]
 })
 export class ChartDetailsUsageComponent implements OnInit {
-  @Input() chart: Chart;
+  @Input() chart!: Chart;
   @Input() currentVersion: string;
-  installing: boolean;
-
-  constructor(
-    private mdIconRegistry: MatIconRegistry,
-    private sanitizer: DomSanitizer,
-    public snackBar: MatSnackBar,
-    public endpointsService: EndpointsService,
-    private route: ActivatedRoute,
-  ) { }
+  installing!: boolean;
+  private mdIconRegistry = inject(MatIconRegistry);
+  private sanitizer = inject(DomSanitizer);
+  public snackBar = inject(TailwindSnackBarService);
+  public endpointsService = inject(EndpointsService);
+  private route = inject(ActivatedRoute);
 
   ngOnInit() {
     this.mdIconRegistry.addSvgIcon(

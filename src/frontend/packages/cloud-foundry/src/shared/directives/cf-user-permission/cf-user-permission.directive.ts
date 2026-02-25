@@ -3,28 +3,28 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
-import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
-import { AppState } from '../../../../../store/src/app-state';
-import { waitForCFPermissions } from '../../../features/cf/cf.helpers';
-import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
+import { CurrentUserPermissionsService } from '@stratosui/core';
+import { AppState } from '@stratosui/store';
+import { CfCurrentUserPermissions, waitForCFPermissions } from '@stratosui/cloud-foundry';
 
 @Directive({
-  selector: '[appCfUserPermission]'
+  selector: '[appCfUserPermission]',
+  standalone: true
 })
 export class CfUserPermissionDirective implements OnDestroy, OnInit {
   @Input()
-  public appCfUserPermission: CfCurrentUserPermissions;
+  public appCfUserPermission!: CfCurrentUserPermissions;
 
   @Input()
-  public appCfUserPermissionEndpointGuid: string;
+  public appCfUserPermissionEndpointGuid!: string;
 
   @Input()
-  private appCfUserPermissionOrganizationGuid: string;
+  private appCfUserPermissionOrganizationGuid!: string;
 
   @Input()
-  private appCfUserPermissionSpaceGuid: string;
+  private appCfUserPermissionSpaceGuid!: string;
 
-  private canSub: Subscription;
+  private canSub!: Subscription;
 
   constructor(
     private store: Store<AppState>,

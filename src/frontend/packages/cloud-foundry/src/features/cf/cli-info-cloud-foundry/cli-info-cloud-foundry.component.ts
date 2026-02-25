@@ -1,8 +1,12 @@
-import { Component, OnInit, Optional } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, OnInit, Optional , ChangeDetectionStrategy } from '@angular/core';
+
+import { CustomTooltipDirective } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
+import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
@@ -11,7 +15,9 @@ import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { getPreviousRoutingState } from '../../../../../store/src/types/routing.type';
 import { IOrganization, ISpace } from '../../../cf-api.types';
 import { CFAppState } from '../../../cf-app-state';
-import { CFAppCLIInfoContext } from '../../../shared/components/cli-info/cli-info.component';
+import { CliCommandComponent } from '../../../shared/components/cli-info/cli-command/cli-command.component';
+import { CFAppCLIInfoContext, CliInfoComponent } from '../../../shared/components/cli-info/cli-info.component';
+import { CfUserPermissionDirective } from '../../../shared/directives/cf-user-permission/cf-user-permission.directive';
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../shared/services/cloud-foundry-user-provided-services.service';
@@ -27,6 +33,16 @@ import { CloudFoundrySpaceService } from '../services/cloud-foundry-space.servic
   selector: 'app-cli-info-cloud-foundry',
   templateUrl: './cli-info-cloud-foundry.component.html',
   styleUrls: ['./cli-info-cloud-foundry.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    CustomTooltipDirective,
+    PageHeaderComponent,
+    CliInfoComponent,
+    CliCommandComponent,
+    CfUserPermissionDirective
+  ],
   providers: [
     getActiveRouteCfOrgSpaceProvider,
     CloudFoundryEndpointService,
@@ -40,20 +56,20 @@ export class CliInfoCloudFoundryComponent implements OnInit {
   permsOrgEdit = CfCurrentUserPermissions.ORGANIZATION_EDIT;
   permsSpaceEdit = CfCurrentUserPermissions.SPACE_EDIT;
 
-  orgGuid: string;
-  spaceGuid: string;
+  orgGuid!: string;
+  spaceGuid!: string;
 
   cfEndpointEntityService: any;
-  public previousUrl: string;
-  public previousQueryParams: {
+  public previousUrl!: string;
+  public previousQueryParams!: {
     [key: string]: string;
   };
 
-  public context$: Observable<CFAppCLIInfoContext>;
+  public context$!: Observable<CFAppCLIInfoContext>;
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
-  public route$: Observable<{ url: string, queryParams: any }>;
+  public route$!: Observable<{ url: string, queryParams: any }>;
 
-  public endpointOrgSpace$: Observable<[
+  public endpointOrgSpace$!: Observable<[
     EntityInfo<EndpointModel>,
     EntityInfo<APIResource<IOrganization>>,
     EntityInfo<APIResource<ISpace>>

@@ -1,4 +1,8 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { CustomFormFieldComponent, MatInputDirective } from '@stratosui/core';
+import { Component, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { first, map } from 'rxjs/operators';
@@ -15,7 +19,16 @@ import { selectCfUsersRolesOrgGuid } from '../../../../../../store/selectors/cf-
 @Component({
   selector: 'app-table-cell-select-org',
   templateUrl: './table-cell-select-org.component.html',
-  styleUrls: ['./table-cell-select-org.component.scss']
+  styleUrls: ['./table-cell-select-org.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    FormsModule,
+    CustomFormFieldComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
+  ]
 })
 export class TableCellSelectOrgComponent extends TableCellCustom<APIResource<IOrganization>> implements OnInit, OnDestroy {
 

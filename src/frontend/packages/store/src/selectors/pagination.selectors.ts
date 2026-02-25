@@ -25,12 +25,12 @@ export function checkPagesForId(entityId: string) {
     if (!paginationState) {
       return false;
     }
-    return !!Object.keys(paginationState.ids).reduce((flatPages, pageId) => {
-      const page = paginationState.ids[pageId];
+    return !!Object.keys(paginationState.ids).reduce((flatPages: string[], pageId) => {
+      const page = (paginationState.ids as Record<string, any>)[pageId];
       if (page && Array.isArray(page)) {
         return [
           ...flatPages,
-          ...paginationState.ids[pageId]
+          ...(paginationState.ids as Record<string, any>)[pageId]
         ];
       }
       return flatPages;

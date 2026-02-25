@@ -1,10 +1,12 @@
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
+import { PageHeaderComponent, StepComponent, SteppersComponent } from '@stratosui/core';
 import { QUOTA_FROM_LIST } from '../../../shared/components/list/list-types/cf-quotas/cf-quotas-list-config.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { QUOTA_SPACE_GUID } from '../space-quota-definition/space-quota-definition.component';
+import { EditSpaceQuotaStepComponent } from './edit-space-quota-step/edit-space-quota-step.component';
 
 @Component({
   selector: 'app-edit-space-quota',
@@ -12,6 +14,14 @@ import { QUOTA_SPACE_GUID } from '../space-quota-definition/space-quota-definiti
   styleUrls: ['./edit-space-quota.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
+  ],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    EditSpaceQuotaStepComponent
   ]
 })
 export class EditSpaceQuotaComponent {

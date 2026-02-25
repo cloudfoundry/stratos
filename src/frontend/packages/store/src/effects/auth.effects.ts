@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { ApplicationRef, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, map, mergeMap, switchMap, tap } from 'rxjs/operators';
@@ -19,6 +19,7 @@ import {
   ResetAuth,
   ResetSSOAuth,
   SESSION_INVALID,
+  SESSION_VERIFIED,
   VerifiedSession,
   VERIFY_SESSION,
   VerifySession,
@@ -35,18 +36,21 @@ const UPGRADE_HEADER = 'retry-after';
 const DOMAIN_HEADER = 'x-stratos-domain';
 const SSO_HEADER = 'x-stratos-sso-login';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class AuthEffect {
 
   constructor(
     private http: HttpClient,
     private actions$: Actions,
     private store: Store<DispatchOnlyAppState>,
+    private appRef: ApplicationRef,
   ) { }
 
    loginRequest$ = createEffect(() => this.actions$.pipe(
     ofType<Login>(LOGIN),
-    switchMap(({ username, password }) => {
+    switchMap(({ username, password }: { username: string; password: string }) => {
       const params = new HttpParams({
         encoder: new BrowserStandardEncoder(),
         fromObject: {
@@ -60,9 +64,16 @@ export class AuthEffect {
 
       return this.http.post('/pp/v1/auth/login/uaa', params, {
         headers,
+        withCredentials: true
       }).pipe(
-        map(data => new VerifySession()),
-        catchError((err, caught) => [new LoginFailed(err)]));
+        map(data => {
+          this.appRef.tick();
+          return new VerifySession();
+        }),
+        catchError((err, caught) => {
+          this.appRef.tick();
+          return [new LoginFailed(err)];
+        }));
     })));
 
    verifyAuth$ = createEffect(() => this.actions$.pipe(
@@ -83,11 +94,13 @@ export class AuthEffect {
             const ssoOptions = response.headers.get(SSO_HEADER) as string;
             // Check for cookie domain mismatch with the requesting URL
             const isDomainMismatch = this.isDomainMismatch(response.headers);
+            this.appRef.tick();
             return action.login ? [new InvalidSession(false, false, isDomainMismatch, ssoOptions)] : [new ResetAuth()];
           } else {
             const sessionData = envelope.data;
             sessionData.sessionExpiresOn = parseInt(response.headers.get('x-cap-session-expires-on'), 10) * 1000;
             LocalStorageService.localStorageToStore(this.store, sessionData);
+            this.appRef.tick();
             return [
               stratosEntityCatalog.systemInfo.actions.getSystemInfo(true),
               new VerifiedSession(sessionData, action.updateEndpoints)
@@ -105,6 +118,7 @@ export class AuthEffect {
 
           // Check for cookie domain mismatch with the requesting URL
           const isDomainMismatch = this.isDomainMismatch(err.headers);
+          this.appRef.tick();
           return action.login ? [new InvalidSession(setupMode, isUpgrading, isDomainMismatch, ssoOptions)] : [new ResetAuth()];
         }));
     })));
@@ -113,6 +127,7 @@ export class AuthEffect {
     ofType<GetAllEndpointsSuccess>(GET_ENDPOINTS_SUCCESS),
     mergeMap(action => {
       if (action.login) {
+        this.appRef.tick();
         return [new LoginSuccess()];
       }
       return [];
@@ -121,21 +136,38 @@ export class AuthEffect {
    invalidSessionAuth$ = createEffect(() => this.actions$.pipe(
     ofType<VerifySession>(SESSION_INVALID),
     map(() => {
+      this.appRef.tick();
       return new LoginFailed('Invalid session');
     })));
+
+  // Trigger change detection after session is verified and endpoints are loaded into store
+  // This ensures zoneless change detection updates components that depend on endpoint data
+   sessionVerified$ = createEffect(() => this.actions$.pipe(
+    ofType<VerifiedSession>(SESSION_VERIFIED),
+    tap(() => {
+      // The SESSION_VERIFIED reducer has already updated the store with endpoint data
+      // Trigger change detection so components can react to the state changes
+      this.appRef.tick();
+    })), { dispatch: false });
 
    logoutRequest$ = createEffect(() => this.actions$.pipe(
     ofType<Logout>(LOGOUT),
     switchMap(() => {
-      return this.http.post('/pp/v1/auth/logout', {}).pipe(
+      return this.http.post('/pp/v1/auth/logout', {}, {
+        withCredentials: true
+      }).pipe(
         mergeMap((data: any) => {
+          this.appRef.tick();
           if (data.isSSO) {
             return [new LogoutSuccess(), new ResetSSOAuth()];
           } else {
             return [new LogoutSuccess(), new ResetAuth()];
           }
         }),
-        catchError((err, caught) => [new LogoutFailed(err)]));
+        catchError((err, caught) => {
+          this.appRef.tick();
+          return [new LogoutFailed(err)];
+        }));
     })));
 
    resetAuth$ = createEffect(() => this.actions$.pipe(
@@ -143,6 +175,7 @@ export class AuthEffect {
     tap(() => {
       // Ensure that we clear any path from the location (otherwise would be stored via auth gate as redirectPath for log in)
       window.location.assign(window.location.origin);
+      this.appRef.tick();
     })), { dispatch: false });
 
    resetSSOAuth$ = createEffect(() => this.actions$.pipe(
@@ -151,9 +184,10 @@ export class AuthEffect {
       // Ensure that we clear any path from the location (otherwise would be stored via auth gate as redirectPath for log in)
       const returnUrl = encodeURI(window.location.origin);
       window.open('/pp/v1/auth/sso_logout?state=' + returnUrl, '_self');
+      this.appRef.tick();
     })), { dispatch: false });
 
-  private isDomainMismatch(headers): boolean {
+  private isDomainMismatch(headers: any): boolean {
     if (headers.has(DOMAIN_HEADER)) {
       const expectedDomain = headers.get(DOMAIN_HEADER);
       const okay = window.location.hostname.endsWith(expectedDomain);

@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { UsageGaugeComponent } from './usage-gauge.component';
 import { PercentagePipe } from '../../pipes/percentage.pipe';
@@ -9,21 +11,21 @@ describe('UsageGaugeComponent', () => {
   let component: UsageGaugeComponent;
   let fixture: ComponentFixture<UsageGaugeComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        UsageGaugeComponent,
-        PercentagePipe,
-      ],
       imports: [
+        UsageGaugeComponent, // Now standalone (includes PercentagePipe),
         CoreModule,
       ],
       providers: [
+        
         UtilsService,
+
+        provideZonelessChangeDetection(),
       ]
-    })
-    .compileComponents();
-  }));
+    });
+    TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(UsageGaugeComponent);

@@ -1,5 +1,5 @@
-import {
-  AfterViewInit,
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, AfterViewInit,
   Compiler,
   Component,
   ComponentFactoryResolver,
@@ -12,8 +12,11 @@ import {
   Output,
   ViewChild,
   ViewContainerRef,
-} from '@angular/core';
-import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
+  signal,
+ } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { RouterModule } from '@angular/router';
+import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { filter, first, map, timeout } from 'rxjs/operators';
 
 import {
@@ -22,8 +25,12 @@ import {
 } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { EndpointModel, entityCatalog } from '../../../../../../store/src/public-api';
 import { UserFavoriteManager } from '../../../../../../store/src/user-favorite-manager';
+import { EntityFavoriteStarComponent } from '../../../../core/entity-favorite-star/entity-favorite-star.component';
+import { MultilineTitleComponent } from '../../../../shared/components/multiline-title/multiline-title.component';
 import { SidePanelMode, SidePanelService } from '../../../../shared/services/side-panel.service';
 import { FavoritesSidePanelComponent } from '../favorites-side-panel/favorites-side-panel.component';
+import { FavoritesMetaCardComponent } from '../favorites-meta-card/favorites-meta-card.component';
+import { HomeShortcutsComponent } from '../home-shortcuts/home-shortcuts.component';
 import { UserFavoriteEndpoint } from './../../../../../../store/src/types/user-favorites.types';
 import { HomePageCardLayout, HomePageEndpointCard, LinkMetadata } from './../../home.types';
 import {
@@ -46,13 +53,23 @@ enum Status {
 @Component({
   selector: 'app-home-page-endpoint-card',
   templateUrl: './home-page-endpoint-card.component.html',
-  styleUrls: ['./home-page-endpoint-card.component.scss']
+  styleUrls: ['./home-page-endpoint-card.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MultilineTitleComponent,
+    EntityFavoriteStarComponent,
+    HomeShortcutsComponent,
+    FavoritesMetaCardComponent,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterViewInit {
 
-  @ViewChild('customCard', {read: ViewContainerRef}) customCard: ViewContainerRef;
+  @ViewChild('customCard', { read: ViewContainerRef, static: true }) customCard!: ViewContainerRef;
 
-  @Input() endpoint: EndpointModel;
+  @Input() endpoint!: EndpointModel;
 
   pLayout: HomePageCardLayout;
 
@@ -71,24 +88,27 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
 
   favorites$: Observable<any>;
 
-  layout$ = new BehaviorSubject<HomePageCardLayout>(null);
+  private _layout = signal<HomePageCardLayout>(null);
+  public layoutSignal = this._layout.asReadonly();
+  public layout$: Observable<HomePageCardLayout>;
 
   links$: Observable<LinkMetadata>;
 
-  entity; StratosCatalogEndpointEntity;
+  entity: any;
 
   definition: IStratosEndpointDefinition<EntityCatalogSchemas>;
 
   favorite: UserFavoriteEndpoint;
 
-  public link: string;
+  public link!: string;
 
   // Status = 0 OK, 1 Loading, 2 Error
-  status$: Observable<Status>;
-  status = new BehaviorSubject<Status>(Status.OK);
+  private _status = signal<Status>(Status.OK);
+  public statusSignal = this._status.asReadonly();
+  public status$: Observable<Status>;
 
   private ref: ComponentRef<HomePageEndpointCard>;
-  private sub: Subscription;
+  private sub!: Subscription;
 
   private canLoad = false;
 
@@ -110,7 +130,8 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
     private injector: Injector,
     private componentFactoryResolver: ComponentFactoryResolver,
   ) {
-    this.status$ = this.status.asObservable();
+    this.layout$ = toObservable(this._layout);
+    this.status$ = toObservable(this._status);
   }
 
   ngAfterViewInit() {
@@ -135,7 +156,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
       this.link = this.favorite.getLink();
     }
 
-    this.links$ = combineLatest([this.favorites$, this.layout$.asObservable()]).pipe(
+    this.links$ = combineLatest([this.favorites$, this.layout$]).pipe(
       filter(([favs, layout]) => !!layout),
       map(([favs, layout]) => {
         // Get the list of shortcuts for the endpoint for the given endpoint ID
@@ -195,7 +216,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
 
   // Layout has changed
   public updateLayout() {
-    this.layout$.next(this.layout);
+    this._layout.set(this.layout);
     if (this.ref && this.ref.instance) {
       this.ref.instance.layout = this.pLayout;
     }
@@ -204,7 +225,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
   async createCard(endpointEntity: any) {
     this.customCard.clear();
 
-    let component;
+    let component: any;
     if (!endpointEntity) {
       component = this.componentFactoryResolver.resolveComponentFactory(DefaultEndpointHomeComponent);
     } else {
@@ -226,17 +247,25 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
   // Ask the card to load itself
   loadCardIfReady() {
     if (this.canLoad && this.ref && this.ref.instance && this.ref.instance.load) {
-      this.status.next(Status.Loading);
+      this._status.set(Status.Loading);
       const loadObs = this.ref.instance.load() || of(true);
 
-      // Timeout after 15 seconds
-      this.sub = loadObs.pipe(timeout(15000), filter(v => v === true), first()).subscribe(() => {
-        this.loaded.next();
-        setTimeout(() => this.status.next(Status.OK), 0);
-      }, () => {
-        this.loaded.next();
-        this.status.next(Status.Error);
-        this.sub.unsubscribe();
+      // Timeout after 60 seconds (increased from 15 to allow for slow API responses)
+      // CF home cards need to fetch apps, orgs, routes which can take time on large deployments
+      this.sub = loadObs.pipe(
+        timeout(60000),
+        filter((v: boolean) => v === true),
+        first()
+      ).subscribe({
+        next: () => {
+          this._status.set(Status.OK);
+          this.loaded.next(void 0);
+        },
+        error: () => {
+          this.loaded.next(void 0);
+          this._status.set(Status.Error);
+          this.sub.unsubscribe();
+        }
       });
     }
   }

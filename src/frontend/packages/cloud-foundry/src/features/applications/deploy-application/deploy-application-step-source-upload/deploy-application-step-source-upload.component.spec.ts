@@ -1,39 +1,51 @@
-import { HttpClientModule } from '@angular/common/http';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { provideRouter } from '@angular/router';
+import { provideMockStore } from '@ngrx/store/testing';
 
-import { CoreModule } from '../../../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../../../core/src/shared/shared.module';
-import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CATALOGUE_ENTITIES, entityCatalog, generateStratosEntities, TestEntityCatalog } from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { generateCFEntities } from '../../../../cf-entity-generator';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
-import { DeployApplicationStepSourceUploadComponent } from './deploy-application-step-source-upload.component';
+import { DeployApplicationStepSourceUploadComponent } from "./deploy-application-step-source-upload.component";
 
 describe('DeployApplicationStepSourceUploadComponent', () => {
   let component: DeployApplicationStepSourceUploadComponent;
   let fixture: ComponentFixture<DeployApplicationStepSourceUploadComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [DeployApplicationStepSourceUploadComponent],
+  beforeEach(async () => {
+    // Initialize entity catalog with CF entities
+    const testEntityCatalog = entityCatalog as TestEntityCatalog;
+    testEntityCatalog.clear();
+    const entities = [
+      ...generateCFEntities(),
+      ...generateStratosEntities()
+    ];
+    entities.forEach(entity => testEntityCatalog.register(entity));
+
+    await TestBed.configureTestingModule({
       imports: [
-        ...generateCfStoreModules(),
-        CoreModule,
-        SharedModule,
-        RouterTestingModule,
-        NoopAnimationsModule,
-        HttpClientModule,
-        HttpClientTestingModule,
+        DeployApplicationStepSourceUploadComponent,
       ],
       providers: [
-        CfOrgSpaceDataService
+        provideZonelessChangeDetection(),
+        provideNoopAnimations(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideMockStore(),
+        ...STORE_TEST_PROVIDERS,
+        {
+          provide: CATALOGUE_ENTITIES,
+          useValue: entities,
+          multi: true
+        },
+        CfOrgSpaceDataService,
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(DeployApplicationStepSourceUploadComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

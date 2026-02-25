@@ -1,4 +1,5 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
@@ -14,7 +15,12 @@ import { cfEntityCatalog } from '../../../cf-entity-catalog';
 @Component({
   selector: 'app-service-plan-public',
   templateUrl: './service-plan-public.component.html',
-  styleUrls: ['./service-plan-public.component.scss']
+  styleUrls: ['./service-plan-public.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule
+  ]
 })
 export class ServicePlanPublicComponent {
   planAccessibility$: Observable<StratosStatus>;
@@ -28,7 +34,7 @@ export class ServicePlanPublicComponent {
 
   set servicePlan(servicePlan: APIResource<IServicePlan>) {
     this.pServicePlan = servicePlan;
-    if (!servicePlan) {
+    if (!servicePlan || !servicePlan.entity) {
       return;
     }
     this.planAccessibility$ = getServicePlanAccessibilityCardStatus(
@@ -53,10 +59,18 @@ export class ServicePlanPublicComponent {
   }
 
   private getServiceBroker(serviceGuid: string, cfGuid: string): Observable<APIResource<IServiceBroker>> {
+    if (!serviceGuid || !cfGuid) {
+      return null;
+    }
     return cfEntityCatalog.service.store.getEntityService(serviceGuid, cfGuid, {}).waitForEntity$.pipe(
-      map(service => cfEntityCatalog.serviceBroker.store.getEntityService(service.entity.entity.service_broker_guid, cfGuid, {})),
-      switchMap(serviceService => serviceService.waitForEntity$),
-      map(entity => entity.entity)
+      map(service => {
+        if (!service || !service.entity || !service.entity.entity || !service.entity.entity.service_broker_guid) {
+          return null;
+        }
+        return cfEntityCatalog.serviceBroker.store.getEntityService(service.entity.entity.service_broker_guid, cfGuid, {});
+      }),
+      switchMap(serviceService => serviceService ? serviceService.waitForEntity$ : null),
+      map(entity => entity ? entity.entity : null)
     );
   }
 }

@@ -1,7 +1,14 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { BaseTestModulesNoShared } from '../../../../../test-framework/core-test.helper';
-import { SharedModule } from '../../../../shared/shared.module';
+import { EntityCatalogTestModule, EntityServiceFactory, generateStratosEntities, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { AppTestModule, BaseTestModulesNoShared } from "@test-framework/core-test.helper";
+import { SharedModule } from '@stratosui/core';
 import { TabNavService } from '../../../../tab-nav.service';
 import { BackupRestoreEndpointsComponent } from './backup-restore-endpoints.component';
 
@@ -9,19 +16,38 @@ describe('BackupRestoreEndpointsComponent', () => {
   let component: BackupRestoreEndpointsComponent;
   let fixture: ComponentFixture<BackupRestoreEndpointsComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [BackupRestoreEndpointsComponent],
       imports: [
         ...BaseTestModulesNoShared,
-        SharedModule
+        SharedModule,
+        BackupRestoreEndpointsComponent,
+        {
+          ngModule: EntityCatalogTestModule,
+          providers: [
+            {
+              provide: TEST_CATALOGUE_ENTITIES,
+              useValue: [
+                ...generateStratosEntities(),
+              ]
+            }
+          ]
+        },
+        createBasicStoreModule(),
+        AppTestModule,
       ],
       providers: [
-        TabNavService
-      ],
-    })
-      .compileComponents();
-  }));
+        TabNavService,
+        EntityServiceFactory,
+        ...(STORE_TEST_PROVIDERS || []),
+        provideRouter([]),
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ]
+    });
+    TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(BackupRestoreEndpointsComponent);

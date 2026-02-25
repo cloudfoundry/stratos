@@ -1,7 +1,9 @@
-import { Component, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import {Component, OnDestroy, inject, ChangeDetectionStrategy } from '@angular/core';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+
+import { PageHeaderComponent } from '../../../../../../core/src/shared/components/page-header/page-header.component';
 
 import { IPageSideNavTab } from '../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
 import { SessionService } from '../../../../../../core/src/shared/services/session.service';
@@ -18,13 +20,19 @@ import { HelmReleaseSocketService } from './helm-release-socket-service';
   selector: 'app-helm-release-tab-base',
   templateUrl: './helm-release-tab-base.component.html',
   styleUrls: ['./helm-release-tab-base.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    RouterModule,
+    PageHeaderComponent
+  ],
   providers: [
     HelmReleaseHelperService,
     KubernetesAnalysisService,
     {
       provide: HelmReleaseGuid,
       useFactory: (activatedRoute: ActivatedRoute) => ({
-        guid: activatedRoute.snapshot.params.guid
+        guid: activatedRoute.snapshot.params.guid,
       }),
       deps: [
         ActivatedRoute
@@ -35,7 +43,7 @@ import { HelmReleaseSocketService } from './helm-release-socket-service';
 })
 export class HelmReleaseTabBaseComponent implements OnDestroy {
 
-  isFetching$: Observable<boolean>;
+  isFetching$!: Observable<boolean>;
 
   public breadcrumbs = [{
     breadcrumbs: [
@@ -46,14 +54,17 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
   public title = '';
 
   tabLinks: IPageSideNavTab[];
+  public helmReleaseHelper = inject(HelmReleaseHelperService);
+  private analysisService = inject(KubernetesAnalysisService);
+  private snackbarService = inject(SnackBarService);
+  private sessionService = inject(SessionService);
+  private socketService = inject(HelmReleaseSocketService);
 
-  constructor(
-    public helmReleaseHelper: HelmReleaseHelperService,
-    private analysisService: KubernetesAnalysisService,
-    private snackbarService: SnackBarService,
-    sessionService: SessionService,
-    private socketService: HelmReleaseSocketService
-  ) {
+
+
+  constructor() {
+
+
     this.title = this.helmReleaseHelper.releaseTitle;
 
     this.tabLinks = [
@@ -63,11 +74,13 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
       { link: 'history', label: 'History', icon: 'schedule' },
       { link: 'analysis', label: 'Analysis', icon: 'assignment', hidden$: this.analysisService.hideAnalysis$ },
       { link: '-', label: 'Resources' },
-      { link: 'graph', label: 'Overview', icon: 'share', hidden$: sessionService.isTechPreview().pipe(map(tp => !tp)) },
+      { link: 'graph', label: 'Overview', icon: 'share', hidden$: this.sessionService.isTechPreview().pipe(map((tp: boolean) => !tp)) },
       ...this.getTabsFromEntityConfig()
     ];
 
     this.socketService.start();
+
+
   }
 
   ngOnDestroy() {
@@ -76,7 +89,7 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
   }
 
   private getTabsFromEntityConfig(): IPageSideNavTab[] {
-    const tabsFromRouterConfig = [];
+    const tabsFromRouterConfig: IPageSideNavTab[] = [];
 
     // Get the tabs from the router configuration
     kubeEntityCatalog.allKubeEntities().forEach(catalogEntity => {

@@ -1,6 +1,13 @@
-<div class="app-code-block" [ngClass]="{ 'app-code-block__pre': codeBlockStyle === 'pre'}">
-  <div class="app-code-block__content" #preBlock>
+<div class="app-code-block relative rounded-md"
+  [ngClass]="{ 'app-code-block__pre': codeBlockStyle === 'pre'}">
+  <div class="app-code-block__content p-4 font-mono text-sm overflow-x-auto" #preBlock>
     <ng-content></ng-content>
   </div>
-  <app-copy-to-clipboard *ngIf="!hideCopy" class="app-code-block__copy" [text]="text"></app-copy-to-clipboard>
+  @if (!hideCopy) {
+    <app-copy-to-clipboard
+      class="app-code-block__copy absolute top-2 right-2"
+      [text]="text"
+      [compact]="true">
+    </app-copy-to-clipboard>
+  }
 </div>

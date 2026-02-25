@@ -1,11 +1,13 @@
-import { AfterContentInit, Component, Input, OnInit, ViewChild } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { AfterContentInit, Component, Input, OnInit, ViewChild,
+  ChangeDetectionStrategy} from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { asapScheduler, Observable, of } from 'rxjs';
 import { map, observeOn, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import { CustomSelectComponent, CustomOptionComponent, FocusDirective, StepOnNextFunction } from '@stratosui/core';
 import { SetCFDetails } from '../../../../actions/create-applications-page.actions';
 import { ISpace } from '../../../../cf-api.types';
 import { CFAppState } from '../../../../cf-app-state';
@@ -17,27 +19,36 @@ import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-servi
   selector: 'app-create-application-step1',
   templateUrl: './create-application-step1.component.html',
   styleUrls: ['./create-application-step1.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    FormsModule,
+    CustomSelectComponent,
+    CustomOptionComponent,
+    FocusDirective
+  ]
 })
 export class CreateApplicationStep1Component implements OnInit, AfterContentInit {
 
   @Input()
-  isMarketplaceMode: boolean;
+  isMarketplaceMode!: boolean;
   constructor(
     private store: Store<CFAppState>,
     public cfOrgSpaceService: CfOrgSpaceDataService,
     public route: ActivatedRoute
   ) { }
 
-  public spaces$: Observable<ISpace[]>;
-  public hasSpaces$: Observable<boolean>;
-  public hasOrgs$: Observable<boolean>;
+  public spaces$!: Observable<ISpace[]>;
+  public hasSpaces$!: Observable<boolean>;
+  public hasOrgs$!: Observable<boolean>;
 
   @ViewChild('cfForm', { static: true })
-  cfForm: NgForm;
+  cfForm!: NgForm;
 
   @Input() isRedeploy = false;
 
-  validate: Observable<boolean>;
+  validate!: Observable<boolean>;
 
   @Input()
   stepperText = 'Select a Cloud Foundry instance, organization and space for the app.';

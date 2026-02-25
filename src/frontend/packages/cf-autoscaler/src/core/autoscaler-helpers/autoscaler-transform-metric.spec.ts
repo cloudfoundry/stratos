@@ -1,8 +1,9 @@
+import { describe, it, expect } from 'vitest';
 import {
-  isEqual
+  isEqual,
 } from './autoscaler-util';
 import {
-  insertEmptyMetrics, buildMetricData
+  insertEmptyMetrics, buildMetricData,
 } from './autoscaler-transform-metric';
 
 describe('Autoscaler Transform Metric Helper', () => {
@@ -32,92 +33,92 @@ describe('Autoscaler Transform Metric Helper', () => {
       total_results: 12,
       total_pages: 1,
       page: 1,
-      prev_url: null,
-      next_url: null,
+      prev_url: null as string | null,
+      next_url: null as string | null,
       resources: [
         {
           app_id: '2bd98ff4-99f4-422a-a037-172298277c8b',
           name: 'throughput',
           value: '6',
           unit: 'rps',
-          timestamp: 1557026418641445600
+          timestamp: 1557026418641445600,
         },
         {
           app_id: '2bd98ff4-99f4-422a-a037-172298277c8b',
           name: 'throughput',
           value: '5',
           unit: 'rps',
-          timestamp: 1557026457387453200
+          timestamp: 1557026457387453200,
         },
         {
           app_id: '2bd98ff4-99f4-422a-a037-172298277c8b',
           name: 'throughput',
           value: '5',
           unit: 'rps',
-          timestamp: 1557026497600111000
+          timestamp: 1557026497600111000,
         },
         {
           app_id: '2bd98ff4-99f4-422a-a037-172298277c8b',
           name: 'throughput',
           value: '5',
           unit: 'rps',
-          timestamp: 1557026538904853200
+          timestamp: 1557026538904853200,
         },
         {
           app_id: '2bd98ff4-99f4-422a-a037-172298277c8b',
           name: 'throughput',
           value: '6',
           unit: 'rps',
-          timestamp: 1557026577882890500
+          timestamp: 1557026577882890500,
         },
         {
           app_id: '2bd98ff4-99f4-422a-a037-172298277c8b',
           name: 'throughput',
           value: '8',
           unit: 'rps',
-          timestamp: 1557026616931637000
+          timestamp: 1557026616931637000,
         },
         {
           app_id: '2bd98ff4-99f4-422a-a037-172298277c8b',
           name: 'throughput',
           value: '12',
           unit: 'rps',
-          timestamp: 1557026657849241600
+          timestamp: 1557026657849241600,
         },
         {
           app_id: '2bd98ff4-99f4-422a-a037-172298277c8b',
           name: 'throughput',
           value: '18',
           unit: 'rps',
-          timestamp: 1557026697503883000
+          timestamp: 1557026697503883000,
         },
         {
           app_id: '2bd98ff4-99f4-422a-a037-172298277c8b',
           name: 'throughput',
           value: '21',
           unit: 'rps',
-          timestamp: 1557026737224771000
+          timestamp: 1557026737224771000,
         },
         {
           app_id: '2bd98ff4-99f4-422a-a037-172298277c8b',
           name: 'throughput',
           value: '18',
           unit: 'rps',
-          timestamp: 1557026778997745700
+          timestamp: 1557026778997745700,
         },
         {
           app_id: '2bd98ff4-99f4-422a-a037-172298277c8b',
           name: 'throughput',
           value: '16',
           unit: 'rps',
-          timestamp: 1557026817953504800
+          timestamp: 1557026817953504800,
         },
         {
           app_id: '2bd98ff4-99f4-422a-a037-172298277c8b',
           name: 'throughput',
           value: '14',
           unit: 'rps',
-          timestamp: 1557026857236819500
+          timestamp: 1557026857236819500,
         }
       ]
     };
@@ -161,7 +162,7 @@ describe('Autoscaler Transform Metric Helper', () => {
         params: {
           start: 1557026400,
           end: 1557026880,
-          step: 9.6
+          step: 9.6,
         }
       }
     };
@@ -170,7 +171,7 @@ describe('Autoscaler Transform Metric Helper', () => {
         target: [
           {
             name: 'throughput',
-            value: 14
+            value: 14,
           }
         ],
         colorTarget: [
@@ -197,62 +198,62 @@ describe('Autoscaler Transform Metric Helper', () => {
           {
             time: 1557026419,
             name: '03:20:19',
-            value: 6
+            value: 6,
           },
           {
             time: 1557026458,
             name: '03:20:58',
-            value: 5
+            value: 5,
           },
           {
             time: 1557026497,
             name: '03:21:37',
-            value: 5
+            value: 5,
           },
           {
             time: 1557026536,
             name: '03:22:16',
-            value: 5
+            value: 5,
           },
           {
             time: 1557026575,
             name: '03:22:55',
-            value: 6
+            value: 6,
           },
           {
             time: 1557026614,
             name: '03:23:34',
-            value: 8
+            value: 8,
           },
           {
             time: 1557026653,
             name: '03:24:13',
-            value: 12
+            value: 12,
           },
           {
             time: 1557026692,
             name: '03:24:52',
-            value: 18
+            value: 18,
           },
           {
             time: 1557026731,
             name: '03:25:31',
-            value: 21
+            value: 21,
           },
           {
             time: 1557026770,
             name: '03:26:10',
-            value: 18
+            value: 18,
           },
           {
             time: 1557026809,
             name: '03:26:49',
-            value: 16
+            value: 16,
           },
           {
             time: 1557026848,
             name: '03:27:28',
-            value: 14
+            value: 14,
           }
         ],
         colorTarget: [
@@ -324,51 +325,51 @@ describe('Autoscaler Transform Metric Helper', () => {
           series: [
             {
               name: '03:20:19',
-              value: 20
+              value: 20,
             },
             {
               name: '03:20:58',
-              value: 20
+              value: 20,
             },
             {
               name: '03:21:37',
-              value: 20
+              value: 20,
             },
             {
               name: '03:22:16',
-              value: 20
+              value: 20,
             },
             {
               name: '03:22:55',
-              value: 20
+              value: 20,
             },
             {
               name: '03:23:34',
-              value: 20
+              value: 20,
             },
             {
               name: '03:24:13',
-              value: 20
+              value: 20,
             },
             {
               name: '03:24:52',
-              value: 20
+              value: 20,
             },
             {
               name: '03:25:31',
-              value: 20
+              value: 20,
             },
             {
               name: '03:26:10',
-              value: 20
+              value: 20,
             },
             {
               name: '03:26:49',
-              value: 20
+              value: 20,
             },
             {
               name: '03:27:28',
-              value: 20
+              value: 20,
             }
           ]
         },
@@ -377,51 +378,51 @@ describe('Autoscaler Transform Metric Helper', () => {
           series: [
             {
               name: '03:20:19',
-              value: 10
+              value: 10,
             },
             {
               name: '03:20:58',
-              value: 10
+              value: 10,
             },
             {
               name: '03:21:37',
-              value: 10
+              value: 10,
             },
             {
               name: '03:22:16',
-              value: 10
+              value: 10,
             },
             {
               name: '03:22:55',
-              value: 10
+              value: 10,
             },
             {
               name: '03:23:34',
-              value: 10
+              value: 10,
             },
             {
               name: '03:24:13',
-              value: 10
+              value: 10,
             },
             {
               name: '03:24:52',
-              value: 10
+              value: 10,
             },
             {
               name: '03:25:31',
-              value: 10
+              value: 10,
             },
             {
               name: '03:26:10',
-              value: 10
+              value: 10,
             },
             {
               name: '03:26:49',
-              value: 10
+              value: 10,
             },
             {
               name: '03:27:28',
-              value: 10
+              value: 10,
             }
           ]
         },
@@ -430,57 +431,57 @@ describe('Autoscaler Transform Metric Helper', () => {
           series: [
             {
               name: '03:20:19',
-              value: 5
+              value: 5,
             },
             {
               name: '03:20:58',
-              value: 5
+              value: 5,
             },
             {
               name: '03:21:37',
-              value: 5
+              value: 5,
             },
             {
               name: '03:22:16',
-              value: 5
+              value: 5,
             },
             {
               name: '03:22:55',
-              value: 5
+              value: 5,
             },
             {
               name: '03:23:34',
-              value: 5
+              value: 5,
             },
             {
               name: '03:24:13',
-              value: 5
+              value: 5,
             },
             {
               name: '03:24:52',
-              value: 5
+              value: 5,
             },
             {
               name: '03:25:31',
-              value: 5
+              value: 5,
             },
             {
               name: '03:26:10',
-              value: 5
+              value: 5,
             },
             {
               name: '03:26:49',
-              value: 5
+              value: 5,
             },
             {
               name: '03:27:28',
-              value: 5
+              value: 5,
             }
           ]
         }
       ],
       unit: 'rps',
-      chartMaxValue: 30
+      chartMaxValue: 30,
     };
     const result = buildMetricData(metricName, data, startTime, endTime, skipFormat, trigger, 'UTC');
     expect(isEqual(expectedResult, result)).toBe(true);

@@ -1,52 +1,53 @@
-import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { TailwindDialogRef, MAT_DIALOG_DATA } from '@stratosui/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from '@stratosui/store/testing';
-
-import { CoreTestingModule } from '../../../test-framework/core-test.modules';
-import { SharedModule } from '../../shared/shared.module';
-import { CoreModule } from '../core.module';
-import { RouteModule } from './../../app.routing';
 import { LogOutDialogComponent } from './log-out-dialog.component';
 
 describe('LogOutDialogComponent', () => {
   let component: LogOutDialogComponent;
   let fixture: ComponentFixture<LogOutDialogComponent>;
   let element: HTMLElement;
-  let router: any;
+  let router: Router;
 
-  class MatDialogRefMock {
+  class TailwindDialogRefMock extends TailwindDialogRef {
+    close = vi.fn();
+    afterClosed = vi.fn();
+    afterOpened = vi.fn();
+    componentInstance = null;
   }
 
-  class MatDialogDataMock {
-    data: '';
-  }
+  const dialogDataMock = {
+    expiryDate: Date.now() + 5000
+  };
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
       providers: [
-        { provide: MatDialogRef, useClass: MatDialogRefMock },
-        { provide: MAT_DIALOG_DATA, useClass: MatDialogDataMock },
+        { provide: TailwindDialogRef, useClass: TailwindDialogRefMock },
+        { provide: 'TailwindDialogRef', useClass: TailwindDialogRefMock },
+        { provide: MAT_DIALOG_DATA, useValue: dialogDataMock },
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting()
       ],
       imports: [
-        CoreModule,
+        CommonModule,
+        LogOutDialogComponent,
         RouterTestingModule,
-        RouteModule,
-        SharedModule,
-        MatDialogModule,
-        NoopAnimationsModule,
-        CoreTestingModule,
-        createBasicStoreModule(),
+        NoopAnimationsModule
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(LogOutDialogComponent);
-    router = TestBed.get(Router);
+    router = TestBed.inject(Router);
     component = fixture.componentInstance;
     fixture.detectChanges();
     element = fixture.nativeElement;
@@ -56,21 +57,23 @@ describe('LogOutDialogComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should navigate after countdown', fakeAsync(() => {
-    const spy = spyOn(router, 'navigate');
+  it('should navigate after countdown', async () => {
+    vi.useFakeTimers();
+    const spy = vi.spyOn(router, 'navigate');
 
     component.data = {
-      expiryDate: Date.now() + 1000,
+      expiryDate: Date.now() + 1000
     };
     fixture.detectChanges();
     component.ngOnDestroy();
     component.ngOnInit();
 
     expect(spy).not.toHaveBeenCalled();
-    tick(1500);
+    await vi.advanceTimersByTimeAsync(1500);
     expect(spy).toHaveBeenCalled();
     expect(spy).toHaveBeenCalledWith(['/login/logout']);
-  }));
+    vi.useRealTimers();
+  });
 
   afterEach(() => {
     fixture.destroy();

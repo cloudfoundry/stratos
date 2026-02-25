@@ -16,20 +16,20 @@ export class GitIgnoreFilter {
     this.negatives = parsed[1];
   }
 
-  accepts(input) {
+  accepts(input: string) {
     if (input[0] === '/') {
       input = input.slice(1);
     }
     return this.negatives[0].test(input) || !this.positives[0].test(input);
   }
 
-  denies(input) {
+  denies(input: string) {
     if (input[0] === '/') {
       input = input.slice(1);
     }
     return !(this.negatives[0].test(input) || !this.positives[0].test(input));
   }
-  maybe(input) {
+  maybe(input: string) {
     if (input[0] === '/') {
       input = input.slice(1);
     }
@@ -45,17 +45,17 @@ export class GitIgnoreFilter {
    * @param  content  The content to parse,
    * @returns          The parsed positive and negatives definitions.
    */
-  parse(content) {
+  parse(content: string) {
     const prepareRegexes = this.prepareRegexes.bind(this);
     return content.split('\n')
-      .map(line => {
+      .map((line: string) => {
         line = line.trim();
         return line;
       })
-      .filter(line => {
+      .filter((line: string) => {
         return line && line[0] !== '#';
       })
-      .reduce((lists, line) => {
+      .reduce((lists: any, line: string) => {
         const isNegative = line[0] === '!';
         if (isNegative) {
           line = line.slice(1);
@@ -70,17 +70,17 @@ export class GitIgnoreFilter {
         }
         return lists;
       }, [[], []])
-      .map((list) => {
+      .map((list: any) => {
         return list
           .sort()
-          .map(pattern => prepareRegexes(pattern))
-          .reduce((ls, prepared) => {
+          .map((pattern: string) => prepareRegexes(pattern))
+          .reduce((ls: any, prepared: any) => {
             ls[0].push(prepared[0]);
             ls[1].push(prepared[1]);
             return ls;
           }, [[], [], []]);
       })
-      .map(item => {
+      .map((item: any) => {
         return [
           item[0].length > 0 ? new RegExp('^((' + item[0].join(')|(') + '))') : new RegExp('$^'),
           item[1].length > 0 ? new RegExp('^((' + item[1].join(')|(') + '))') : new RegExp('$^')
@@ -88,7 +88,7 @@ export class GitIgnoreFilter {
       });
   }
 
-  prepareRegexes(pattern) {
+  prepareRegexes(pattern: string) {
     return [
       // exact regex
       this.prepareRegexPattern(pattern),
@@ -97,15 +97,15 @@ export class GitIgnoreFilter {
     ];
   }
 
-  prepareRegexPattern(pattern) {
+  prepareRegexPattern(pattern: string) {
     return this.escapeRegex(pattern).replace('**', '(.+)').replace('*', '([^\\/]+)');
   }
 
-  preparePartialRegex(pattern) {
+  preparePartialRegex(pattern: string) {
     const prepareRegexPattern = this.prepareRegexPattern.bind(this);
     return pattern
       .split('/')
-      .map((item, index) => {
+      .map((item: string, index: number) => {
         if (index) {
           return '([\\/]?(' + prepareRegexPattern(item) + '\\b|$))';
         } else {
@@ -115,7 +115,7 @@ export class GitIgnoreFilter {
       .join('');
   }
 
-  private escapeRegex(pattern) {
+  private escapeRegex(pattern: string) {
     return pattern.replace(/[\-\[\]\/\{\}\(\)\+\?\.\\\^\$\|]/g, '\\$&');
   }
 

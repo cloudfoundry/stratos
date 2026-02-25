@@ -1,7 +1,9 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { BaseTestModulesNoShared } from '../../../../../../test-framework/core-test.helper';
-import { BooleanIndicatorComponent } from '../../../boolean-indicator/boolean-indicator.component';
+import { BaseTestModulesNoShared, STORE_TEST_PROVIDERS } from '@test-framework/core-test.helper';
+import { BooleanIndicatorComponent } from '@stratosui/core';
 import { TableCellBooleanIndicatorComponent } from './table-cell-boolean-indicator.component';
 
 
@@ -9,13 +11,20 @@ describe('TableCellBooleanIndicatorComponent', () => {
   let component: TableCellBooleanIndicatorComponent;
   let fixture: ComponentFixture<TableCellBooleanIndicatorComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [TableCellBooleanIndicatorComponent, BooleanIndicatorComponent],
-      imports: [...BaseTestModulesNoShared]
-    })
-      .compileComponents();
-  }));
+      providers: [
+        ...(STORE_TEST_PROVIDERS || []),
+        provideZonelessChangeDetection()
+      ],
+      imports: [
+        ...BaseTestModulesNoShared,
+        TableCellBooleanIndicatorComponent,
+        BooleanIndicatorComponent,
+      ]
+    });
+      TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellBooleanIndicatorComponent);

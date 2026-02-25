@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import moment from 'moment';
+import { differenceInMilliseconds, isBefore } from 'date-fns';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
@@ -8,7 +8,8 @@ import {
   BaseCfListConfig,
 } from '../../../../../cloud-foundry/src/shared/components/list/list-types/base-cf/base-cf-list-config';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
-import { ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
+import { IGlobalListAction, IListAction, IListMultiFilterConfig, IMultiListAction, ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
+import { ListDataSource } from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { MetricsRangeSelectorService } from '../../../../../core/src/shared/services/metrics-range-selector.service';
 import { ITimeRange } from '../../../../../core/src/shared/services/metrics-range-selector.types';
 import { ListView } from '../../../../../store/src/actions/list.actions';
@@ -22,7 +23,9 @@ import {
 import { AppAutoscalerMetricChartDataSource } from './app-autoscaler-metric-chart-data-source';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class AppAutoscalerMetricChartListConfigService extends BaseCfListConfig<APIResource<AppScalingTrigger>> {
   autoscalerMetricSource: AppAutoscalerMetricChartDataSource;
   cardComponent = AppAutoscalerMetricChartCardComponent;
@@ -39,7 +42,7 @@ export class AppAutoscalerMetricChartListConfigService extends BaseCfListConfig<
     }
   ];
   text = {
-    title: null,
+    title: null as string | null,
     noEntries: 'There are no metrics defined in the policy'
   };
 
@@ -69,16 +72,17 @@ export class AppAutoscalerMetricChartListConfigService extends BaseCfListConfig<
   ];
 
   private twoHours = 1000 * 60 * 60 * 2;
-  customTimeValidation = (start: moment.Moment, end: moment.Moment) => {
+  customTimeValidation = (start: Date | null, end: Date | null): string | null => {
     if (!end || !start) {
       return ' ';
     }
-    if (!start.isBefore(end)) {
+    if (!isBefore(start, end)) {
       return 'Start date must be before end date.';
     }
-    if (end.diff(start) > this.twoHours) {
+    if (differenceInMilliseconds(end, start) > this.twoHours) {
       return 'Time window must be two hours or less';
     }
+    return null;
   }
 
   constructor(
@@ -95,10 +99,10 @@ export class AppAutoscalerMetricChartListConfigService extends BaseCfListConfig<
     );
   }
 
-  getGlobalActions = () => null;
-  getMultiActions = () => null;
-  getSingleActions = () => null;
+  getGlobalActions = (): IGlobalListAction<APIResource<AppScalingTrigger>>[] => [];
+  getMultiActions = (): IMultiListAction<APIResource<AppScalingTrigger>>[] => [];
+  getSingleActions = (): IListAction<APIResource<AppScalingTrigger>>[] => [];
   getDataSource = () => this.autoscalerMetricSource;
-  getMultiFiltersConfigs = () => [];
-  getColumns = () => this.columns;
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
+  getColumns = (): ITableColumn<APIResource<AppScalingTrigger>>[] => this.columns;
 }

@@ -1,20 +1,27 @@
-import { Component, ViewChild } from '@angular/core';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { StoreModule } from '@ngrx/store';
-import { createBasicStoreModule } from '@stratosui/store/testing';
+import { Component, ViewChild, provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Observable, of } from 'rxjs';
-
-import { EntitySchema } from '../../../../../../../../store/src/helpers/entity-schema';
-import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../store/src/types/shared.types';
-import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
-import { UserFavoriteManager } from '@stratosui/store';
-import { CoreTestingModule } from '../../../../../../../test-framework/core-test.modules';
-import { SharedModule } from '../../../../../shared.module';
+import {
+  ComponentEntityMonitorConfig,
+  EntityMonitorFactory,
+  EntitySchema,
+  EntityServiceFactory,
+  IFavoriteMetadata,
+  StratosStatus,
+  UserFavorite,
+  UserFavoriteManager,
+  entityCatalog,
+  TestEntityCatalog,
+} from '@stratosui/store';
+import { createBasicStoreModule, CoreTestingModule } from '@test-framework';
+import { generateGenericMockEntities } from '@test-framework/mock-catalog-entities';
 import { MetaCardComponent } from './meta-card.component';
+import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
 
 @Component({
+  standalone: false,
   template: `
     <app-meta-card>
       <app-meta-card-title>Title</app-meta-card-title>
@@ -22,7 +29,7 @@ import { MetaCardComponent } from './meta-card.component';
 })
 class WrapperComponent {
   @ViewChild(MetaCardComponent, { static: true })
-  metaCard: MetaCardComponent;
+  metaCard!: MetaCardComponent;
 }
 
 class UserFavoriteManagerMock {
@@ -43,10 +50,10 @@ class EntityMonitorFactoryMock {
   entity = {
     entity: {
       entity: {
-        cfGuid: 1
+        cfGuid: 1,
       },
       metadata: {
-        guid: 2
+        guid: 2,
       }
     }
   };
@@ -56,7 +63,7 @@ class EntityMonitorFactoryMock {
     entity$: new Observable(subscriber => {
       subscriber.next(this.entity);
       subscriber.complete();
-    })
+    }),
   };
 
   create() {
@@ -65,6 +72,12 @@ class EntityMonitorFactoryMock {
 }
 
 describe('MetaCardComponent', () => {
+  // Register generic mock entities BEFORE any test data is created
+  // This must run at module load time because const declarations below use the catalog
+  const testEntityCatalog = entityCatalog as TestEntityCatalog;
+  testEntityCatalog.clear();
+  generateGenericMockEntities().forEach(entity => entityCatalog.register(entity));
+
   const favorite = new UserFavorite<IFavoriteMetadata>('endpoint', 'endpointType', 'entityType');
   const entityConfig = new ComponentEntityMonitorConfig('guid', new EntitySchema('schema', 'endpointType'));
 
@@ -73,31 +86,33 @@ describe('MetaCardComponent', () => {
   let element: HTMLElement;
   let entityMonitorFactory: EntityMonitorFactoryMock;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+
+    await TestBed.configureTestingModule({
       imports: [
-        SharedModule,
-        StoreModule,
+        MetaCardComponent,
+        MetaCardTitleComponent,
         CoreTestingModule,
         NoopAnimationsModule,
-        BrowserAnimationsModule,
-        createBasicStoreModule()
+        createBasicStoreModule(),
       ],
       declarations: [WrapperComponent],
       providers: [
+        EntityServiceFactory,
         { provide: EntityMonitorFactory, useClass: EntityMonitorFactoryMock },
         { provide: UserFavoriteManager, useClass: UserFavoriteManagerMock },
-      ]
-    })
-      .compileComponents();
-  }));
+        provideZonelessChangeDetection(),
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(WrapperComponent);
-    entityMonitorFactory = TestBed.get(EntityMonitorFactory);
+    entityMonitorFactory = TestBed.inject(EntityMonitorFactory) as any as EntityMonitorFactoryMock;
     component = fixture.componentInstance.metaCard;
-    fixture.detectChanges();
     element = fixture.debugElement.nativeElement;
+    // Don't call detectChanges here - let each test control when it happens
   });
 
   it('should create', () => {
@@ -109,37 +124,41 @@ describe('MetaCardComponent', () => {
     component.entityConfig = entityConfig;
     fixture.detectChanges();
 
-    expect(element.querySelector('mat-progress-bar')).toBeTruthy();
+    expect(element.querySelector('app-progress-bar')).toBeTruthy();
   });
 
   it('should show action menu', () => {
     component.actionMenu = [
       {
         label: 'Action1',
-        action: null,
+        action: () => {},
         can: of(true),
       },
       {
         label: 'Action2',
-        action: null,
+        action: () => {},
       },
     ];
     fixture.detectChanges();
 
-    expect(element.querySelector('mat-menu')).toBeTruthy();
+    // The menu button should be visible when actionMenu is set and showMenu$ is true
+    const menuButton = element.querySelector('button.meta-card__header__button');
+    expect(menuButton).toBeTruthy();
   });
 
   it('should hide actions without permission', () => {
     component.actionMenu = [
       {
         label: 'Action1',
-        action: null,
+        action: () => {},
         can: of(false),
       },
     ];
     fixture.detectChanges();
 
-    expect(element.querySelector('mat-menu')).toBeFalsy();
+    // The menu button should not be visible when all actions have can: false
+    const menuButton = element.querySelector('button.meta-card__header__button');
+    expect(menuButton).toBeFalsy();
   });
 
   it('should show star if favoritable', () => {

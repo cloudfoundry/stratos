@@ -17,7 +17,7 @@
 
 .autoscaler-policy-edit-trigger-item {
   .autoscaler-policy-edit-trigger-item-desc {
-    margin-bottom: .5em;
+    margin-bottom: 0.5em;
   }
   .autoscaler-policy-edit-trigger-item__unit {
     display: inline-block;
@@ -32,7 +32,7 @@
   input {
     left: 0;
     position: absolute;
-    top: .5em;
+    top: 0.5em;
     width: 90%;
     z-index: 200;
   }

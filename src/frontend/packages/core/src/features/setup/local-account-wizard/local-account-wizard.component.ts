@@ -1,5 +1,6 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { Component, OnInit, signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import {
   InternalAppState,
@@ -9,39 +10,80 @@ import {
   VerifySession,
   SetupSaveConfig,
 } from '@stratosui/store';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { delay, filter, map, take, tap } from 'rxjs/operators';
 
 import { APP_TITLE } from '../../../core/core.types';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { ShowPageHeaderComponent } from '../../../shared/components/page-header/show-page-header/show-page-header.component';
+import { SteppersComponent } from '../../../shared/components/stepper/steppers/steppers.component';
+import { StepComponent } from '../../../shared/components/stepper/step/step.component';
+import { LoadingPageComponent } from '../../../shared/components/loading-page/loading-page.component';
+import { ProductNameComponent } from '../../../shared/components/product-name.ccomponent';
+import { ShowHideButtonComponent } from '../../../core/show-hide-button/show-hide-button.component';
+
+// Typed form interface for local account password form
+interface LocalAccountForm {
+  adminPassword: FormControl<string>;
+  adminPasswordConfirm: FormControl<string>;
+}
 
 @Component({
-  selector: 'app-local-account-wizard',
+selector: 'app-local-account-wizard',
   templateUrl: './local-account-wizard.component.html',
-  styleUrls: ['./local-account-wizard.component.scss']
+  styleUrls: ['./local-account-wizard.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    PageHeaderComponent,
+    ShowPageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    LoadingPageComponent,
+    ProductNameComponent,
+    ShowHideButtonComponent
+  ]
 })
 export class LocalAccountWizardComponent implements OnInit {
 
-  passwordForm: UntypedFormGroup;
-  validateLocalAuthForm: Observable<boolean>;
-  applyingSetup$ = new BehaviorSubject<boolean>(false);
+  private store = inject(Store<Pick<InternalAppState, 'uaaSetup' | 'auth'>>);
+  public title = inject(APP_TITLE);
+
+  passwordForm!: FormGroup;
+  validateLocalAuthForm!: Observable<boolean>;
+  applyingSetup = signal<boolean>(false);
 
   showPassword: boolean[] = [];
 
-  constructor(private store: Store<Pick<InternalAppState, 'uaaSetup' | 'auth'>>, @Inject(APP_TITLE) public title: string) { }
-
   ngOnInit() {
-    this.passwordForm = new UntypedFormGroup({
-      adminPassword: new UntypedFormControl('', [Validators.required as any]),
-      adminPasswordConfirm: new UntypedFormControl('', [Validators.required as any])
-    });
+    this.passwordForm = new FormGroup<LocalAccountForm>({
+      adminPassword: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+      adminPasswordConfirm: new FormControl('', { nonNullable: true, validators: [Validators.required] })
+    }, { validators: this.passwordMatchValidator() });
 
-    this.validateLocalAuthForm = this.passwordForm.valueChanges.pipe(
-      tap(() => {
-        this.passwordForm.controls.adminPasswordConfirm.setValidators([Validators.required, this.confirmPasswordValidator()]);
-      }),
+    this.validateLocalAuthForm = this.passwordForm.statusChanges.pipe(
       map(() => this.passwordForm.valid)
     );
+  }
+
+  passwordMatchValidator(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: boolean } | null => {
+      const password = control.get('adminPassword');
+      const confirmPassword = control.get('adminPasswordConfirm');
+
+      if (!password || !confirmPassword) {
+        return null;
+      }
+
+      if (password.value !== confirmPassword.value) {
+        return { passwordMismatch: true };
+      }
+
+      return null;
+    };
   }
 
   next: StepOnNextFunction = () => {
@@ -49,7 +91,7 @@ export class LocalAccountWizardComponent implements OnInit {
       local_admin_password: this.passwordForm.get('adminPassword').value,
     };
 
-    this.applyingSetup$.next(true);
+    this.applyingSetup.set(true);
     this.store.dispatch(new SetupSaveConfig(data));
     return this.store.select(s => [s.uaaSetup, s.auth]).pipe(
       filter(([uaa, auth]: [UAASetupState, AuthState]) => {
@@ -71,7 +113,7 @@ export class LocalAccountWizardComponent implements OnInit {
           const reload = loc.protocol + '//' + loc.host;
           window.location.assign(reload);
         } else {
-          this.applyingSetup$.next(false);
+          this.applyingSetup.set(false);
         }
         return {
           success: !state[0].error,
@@ -80,10 +122,4 @@ export class LocalAccountWizardComponent implements OnInit {
       }));
   };
 
-  confirmPasswordValidator(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any, } => {
-      const same = control.value === this.passwordForm.value.adminPassword;
-      return same ? null : { passwordMatch: { value: control.value } };
-    };
-  }
 }

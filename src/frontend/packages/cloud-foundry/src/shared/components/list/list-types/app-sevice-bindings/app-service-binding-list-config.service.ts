@@ -3,36 +3,18 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { switchMap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import {
-  CurrentUserPermissionsService,
-} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import {
-  DataFunctionDefinition,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import {
-  IGlobalListAction,
-  IListAction,
-  ListViewTypes,
-} from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { IServiceBinding } from '../../../../../cf-api-svc.types';
-import { ApplicationService } from '../../../../../features/applications/application.service';
-import { isServiceInstance, isUserProvidedServiceInstance } from '../../../../../features/cf/cf.helpers';
-import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
-import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
+import { CurrentUserPermissionsService, DataFunctionDefinition, ITableColumn, IGlobalListAction, IListAction, IListMultiFilterConfig, IMultiListAction, ListViewTypes } from '@stratosui/core';
+import { ListView, RouterNav, APIResource } from '@stratosui/store';
+import { CFAppState, IServiceBinding, ApplicationService, isServiceInstance, isUserProvidedServiceInstance, CfCurrentUserPermissions, ServiceActionHelperService } from '@stratosui/cloud-foundry';
 import { CSI_CANCEL_URL } from '../../../add-service-instance/csi-mode.service';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
-import {
-  TableCellServiceInstanceTagsComponent,
-} from '../cf-spaces-service-instances/table-cell-service-instance-tags/table-cell-service-instance-tags.component';
+import { TableCellServiceInstanceTagsComponent } from '../cf-spaces-service-instances/table-cell-service-instance-tags/table-cell-service-instance-tags.component';
 import { AppServiceBindingCardComponent } from './app-service-binding-card/app-service-binding-card.component';
 import { AppServiceBindingDataSource } from './app-service-binding-data-source';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class AppServiceBindingListConfigService extends BaseCfListConfig<APIResource<IServiceBinding>> {
   dataSource: AppServiceBindingDataSource;
   cardComponent = AppServiceBindingCardComponent;
@@ -104,7 +86,11 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
         columnId: 'name',
         headerCell: () => 'Name',
         cellDefinition: {
-          getValue: (row) => row.entity.service_instance.entity.name
+          getValue: (row) => {
+            return row && row.entity && row.entity.service_instance && row.entity.service_instance.entity
+              ? row.entity.service_instance.entity.name
+              : '';
+          }
         },
         cellFlex: '2'
       },
@@ -113,8 +99,13 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
         headerCell: () => 'Service',
         cellDefinition: {
           getValue: (row) => {
+            if (!row || !row.entity || !row.entity.service_instance || !row.entity.service_instance.entity) {
+              return '';
+            }
             const si = isServiceInstance(row.entity.service_instance.entity);
-            return si ? si.service_plan.entity.service.entity.label : 'User Service';
+            return si && si.service_plan && si.service_plan.entity && si.service_plan.entity.service && si.service_plan.entity.service.entity
+              ? si.service_plan.entity.service.entity.label
+              : 'User Service';
           },
         },
         cellFlex: '1'
@@ -124,8 +115,11 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
         headerCell: () => 'Plan',
         cellDefinition: {
           getValue: (row: APIResource<IServiceBinding>) => {
+            if (!row || !row.entity || !row.entity.service_instance || !row.entity.service_instance.entity) {
+              return null;
+            }
             const si = isServiceInstance(row.entity.service_instance.entity);
-            return si ? si.service_plan.entity.name : null;
+            return si && si.service_plan && si.service_plan.entity ? si.service_plan.entity.name : null;
           }
         },
         cellFlex: '1'
@@ -163,12 +157,12 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
     this.dataSource = new AppServiceBindingDataSource(this.store, appService, this);
   }
 
-  getGlobalActions = () => [this.listActionAdd];
-  getMultiActions = () => [];
-  getSingleActions = () => [
+  getGlobalActions = (): IGlobalListAction<APIResource<IServiceBinding>>[] => [this.listActionAdd];
+  getMultiActions = (): IMultiListAction<APIResource<IServiceBinding>>[] => [];
+  getSingleActions = (): IListAction<APIResource<IServiceBinding>>[] => [
     this.listActionEdit,
     this.listActionUnbind,
-  ]
-  getMultiFiltersConfigs = () => [];
-  getDataSource = () => this.dataSource;
+  ];
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
+  getDataSource = (): AppServiceBindingDataSource => this.dataSource;
 }

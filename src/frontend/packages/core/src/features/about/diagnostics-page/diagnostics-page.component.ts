@@ -1,21 +1,34 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit  } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Meta } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
 import { GeneralEntityAppState, AuthState, SessionData } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { MetadataItemComponent } from '../../../shared/components/metadata-item/metadata-item.component';
+import { BooleanIndicatorComponent } from '../../../shared/components/boolean-indicator/boolean-indicator.component';
+
 @Component({
   selector: 'app-diagnostics-page',
   templateUrl: './diagnostics-page.component.html',
-  styleUrls: ['./diagnostics-page.component.scss']
+  styleUrls: ['./diagnostics-page.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    PageHeaderComponent,
+    MetadataItemComponent,
+    BooleanIndicatorComponent
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DiagnosticsPageComponent implements OnInit {
 
-  sessionData$: Observable<SessionData>;
-  versionNumber$: Observable<string>;
-  userIsAdmin$: Observable<boolean>;
-  helmLastModified$: Observable<Date>;
+  sessionData$!: Observable<SessionData>;
+  versionNumber$!: Observable<string>;
+  userIsAdmin$!: Observable<boolean>;
+  helmLastModified$!: Observable<Date>;
 
   public breadcrumbs = [
     {
@@ -62,7 +75,7 @@ export class DiagnosticsPageComponent implements OnInit {
       map((sessionData: SessionData) => {
         const lastModified = sessionData.diagnostics.helmLastModified;
         const match = helmLastModifiedRegEx.exec(lastModified);
-        if (match.length === 2) {
+        if (match && match.length === 2) {
           return new Date(parseInt(match[1], 10) * 1000);
         }
         return new Date(0);

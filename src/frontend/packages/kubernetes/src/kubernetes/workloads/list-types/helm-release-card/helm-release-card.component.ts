@@ -1,13 +1,38 @@
-import { DatePipe } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { DatePipe, TitleCasePipe } from '@angular/common';
+import {Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
+import { RouterModule } from '@angular/router';
 
 import { CardCell } from '../../../../../../core/src/shared/components/list/list.types';
+import { MetaCardComponent } from '../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
+import { MetaCardItemComponent } from '../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
+import { MetaCardKeyComponent } from '../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
+import { MetaCardTitleComponent } from '../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
+import { MetaCardValueComponent } from '../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
+import { MultilineTitleComponent } from '../../../../../../core/src/shared/components/multiline-title/multiline-title.component';
+import { TableCellEndpointNameComponent } from '../../../../../../core/src/shared/components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
+import { CustomIconComponent } from '../../../../../../core/src/shared/components/custom-material/custom-material.component';
 import { HelmRelease } from '../../workload.types';
 
 @Component({
   selector: 'app-helm-release-card',
   templateUrl: './helm-release-card.component.html',
-  styleUrls: ['./helm-release-card.component.scss']
+  styleUrls: ['./helm-release-card.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    RouterModule,
+    MetaCardComponent,
+    MetaCardItemComponent,
+    MetaCardKeyComponent,
+    MetaCardTitleComponent,
+    MetaCardValueComponent,
+    MultilineTitleComponent,
+    TableCellEndpointNameComponent,
+    CustomIconComponent,
+    DatePipe,
+    TitleCasePipe
+  ],
+  providers: [DatePipe]
 })
 export class HelmReleaseCardComponent extends CardCell<HelmRelease> {
 
@@ -32,12 +57,7 @@ export class HelmReleaseCardComponent extends CardCell<HelmRelease> {
   }
   get row(): HelmRelease {
     return super.row;
-  }
-
-
-  constructor(private datePipe: DatePipe) {
-    super();
-  }
+  }  private datePipe = inject(DatePipe);
 
   loadImageError() {
     this.icon = null;

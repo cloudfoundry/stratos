@@ -1,4 +1,4 @@
-import moment from 'moment';
+import { formatDistance } from 'date-fns';
 
 import { DataFunction } from '../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { ITableColumn } from '../../../../core/src/shared/components/list/list-table/table.types';
@@ -21,12 +21,12 @@ export function getConditionSort(condition: ConditionType): DataFunction<Kuberne
     });
   };
 }
-export function getContainerLengthSort(entities, paginationState) {
+export function getContainerLengthSort(entities: BasicKubeAPIResource[], paginationState: { params: { 'order-direction'?: string } }): BasicKubeAPIResource[] {
   const orderDirection = paginationState.params['order-direction'] || 'asc';
   return entities.sort((a, b) => {
 
-    const aConditionValue = a.spec.containers.length;
-    const bConditionValue = b.spec.containers.length;
+    const aConditionValue = (a.spec as { containers?: unknown[] }).containers?.length || 0;
+    const bConditionValue = (b.spec as { containers?: unknown[] }).containers?.length || 0;
     if (orderDirection === 'desc') {
       return aConditionValue - bConditionValue;
     } else {
@@ -41,7 +41,7 @@ export function createKubeAgeColumn<T extends BasicKubeAPIResource>(): ITableCol
     headerCell: () => 'Age',
     cellDefinition: {
       getValue: (row: T) => {
-        return moment(row.metadata.creationTimestamp).fromNow(true);
+        return formatDistance(new Date(row.metadata.creationTimestamp), new Date());
       }
     },
     sort: {

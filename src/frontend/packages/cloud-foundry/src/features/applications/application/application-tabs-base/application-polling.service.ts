@@ -1,7 +1,7 @@
 import { Injectable, NgZone } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
-import { first, map, tap } from 'rxjs/operators';
+import { filter, first, map, startWith, take, tap } from 'rxjs/operators';
 
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { AppState } from '../../../../../../store/src/app-state';
@@ -9,10 +9,12 @@ import { selectDashboardState } from '../../../../../../store/src/selectors/dash
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ApplicationService } from '../../application.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ApplicationPollingService {
 
-  private pollingSub: Subscription;
+  private pollingSub!: Subscription;
   private autoRefreshString = 'auto-refresh';
 
   public isPolling$ = this.applicationService.entityService.updatingSection$.pipe(map(
@@ -27,11 +29,19 @@ export class ApplicationPollingService {
     private ngZone: NgZone,
   ) {
     this.isEnabled$ = this.store.select(selectDashboardState).pipe(
-      map(dashboardState => dashboardState.pollingEnabled)
+      filter(dashboardState => !!dashboardState),
+      map(dashboardState => dashboardState.pollingEnabled),
+      startWith(true) // Default to enabled if dashboard state is not available
     );
 
     // Update initial started/stopped state
-    this.isEnabled$.pipe(first()).subscribe(enabled => this.updateEnabled(enabled));
+    // Use setTimeout to defer subscription until after constructor completes
+    // This allows the store to be fully initialized in test environments
+    setTimeout(() => {
+      this.isEnabled$.pipe(
+        take(1)
+      ).subscribe(enabled => this.updateEnabled(enabled));
+    }, 0);
   }
 
   public updateEnabled(enable: boolean) {
@@ -70,7 +80,7 @@ export class ApplicationPollingService {
       this.store.dispatch(updatingApp);
     }
     this.applicationService.entityService.entityObs$.pipe(
-      first(),
+      take(1),
     ).subscribe(resource => {
       cfEntityCatalog.appSummary.api.get(appGuid, cfGuid);
       if (resource && resource.entity && resource.entity.entity && resource.entity.entity.state === 'STARTED') {

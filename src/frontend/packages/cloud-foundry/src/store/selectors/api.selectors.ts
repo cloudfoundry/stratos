@@ -45,7 +45,7 @@ export function selectCfEntity<T = APIResource>(
   );
 }
 
-const getValueOrNull = (object, key) =>
+const getValueOrNull = (object: any, key: string): any =>
   object ? (object[key] ? object[key] : null) : null;
 export const getAPIResourceMetadata = (
   resource: APIResource

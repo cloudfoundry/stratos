@@ -17,23 +17,32 @@ export interface CfUserRolesSelected {
 }
 
 export class CfRoleChange {
-  userGuid: string;
-  orgGuid: string;
+  userGuid!: string;
+  orgGuid!: string;
   spaceGuid?: string;
-  add: boolean;
-  role: OrgUserRoleNames | SpaceUserRoleNames;
-  orgName: string;
+  add!: boolean;
+  role!: OrgUserRoleNames | SpaceUserRoleNames;
+  orgName!: string;
   spaceName?: string;
 }
 
 export class CfRoleChangeWithNames extends CfRoleChange {
-  username: string; // Why are all these names set out flat? So we can easily sort in future
-  orgName: string;
-  spaceName?: string;
-  roleName: string;
+  username!: string; // Why are all these names set out flat? So we can easily sort in future
+  declare orgName: string;
+  declare spaceName?: string;
+  roleName!: string;
 }
 
-export const UserRoleLabels = {
+export const UserRoleLabels: {
+  org: {
+    short: Record<OrgUserRoleNames | CfUserRoleParams, string>;
+    long: Record<OrgUserRoleNames | CfUserRoleParams, string>;
+  };
+  space: {
+    short: Record<SpaceUserRoleNames | CfUserRoleParams, string>;
+    long: Record<SpaceUserRoleNames | CfUserRoleParams, string>;
+  };
+} = {
   org: {
     short: {
       [OrgUserRoleNames.MANAGER]: 'Manager',
@@ -44,7 +53,7 @@ export const UserRoleLabels = {
       [CfUserRoleParams.AUDITED_ORGS]: 'Auditor',
       [OrgUserRoleNames.USER]: 'User',
       [CfUserRoleParams.ORGANIZATIONS]: 'User'
-    },
+    } as Record<OrgUserRoleNames | CfUserRoleParams, string>,
     long: {
       [OrgUserRoleNames.MANAGER]: 'Org Manager',
       [CfUserRoleParams.MANAGED_ORGS]: 'Org Manager',
@@ -54,7 +63,7 @@ export const UserRoleLabels = {
       [CfUserRoleParams.AUDITED_ORGS]: 'Org Auditor',
       [OrgUserRoleNames.USER]: 'Org User',
       [CfUserRoleParams.ORGANIZATIONS]: 'Org User'
-    }
+    } as Record<OrgUserRoleNames | CfUserRoleParams, string>
   },
   space: {
     short: {
@@ -64,7 +73,7 @@ export const UserRoleLabels = {
       [CfUserRoleParams.SPACES]: 'Developer',
       [SpaceUserRoleNames.AUDITOR]: 'Auditor',
       [CfUserRoleParams.AUDITED_SPACES]: 'Auditor',
-    },
+    } as Record<SpaceUserRoleNames | CfUserRoleParams, string>,
     long: {
       [SpaceUserRoleNames.MANAGER]: 'Space Manager',
       [CfUserRoleParams.MANAGED_SPACES]: 'Space Manager',
@@ -72,6 +81,6 @@ export const UserRoleLabels = {
       [CfUserRoleParams.SPACES]: 'Space Developer',
       [SpaceUserRoleNames.AUDITOR]: 'Space Auditor',
       [CfUserRoleParams.AUDITED_SPACES]: 'Space Auditor',
-    }
+    } as Record<SpaceUserRoleNames | CfUserRoleParams, string>
   }
 };

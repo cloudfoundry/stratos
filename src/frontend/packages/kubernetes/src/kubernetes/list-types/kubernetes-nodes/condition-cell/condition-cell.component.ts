@@ -1,12 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 
+import { BooleanIndicatorComponent } from '../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
 import { KubernetesNode } from '../../../store/kube.types';
 
 @Component({
   selector: 'app-condition-cell',
   templateUrl: './condition-cell.component.html',
-  styleUrls: ['./condition-cell.component.scss']
+  styleUrls: ['./condition-cell.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [BooleanIndicatorComponent]
 })
 export class ConditionCellComponent extends TableCellCustom<KubernetesNode> implements OnInit {
   public isTrue: boolean = null;

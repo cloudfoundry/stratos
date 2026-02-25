@@ -1,12 +1,17 @@
 <div [formGroup]="formGroup" class="token">
+  @if (config.helpText) {
+    <div class="token__help-text">
+      <p>{{ config.helpText }}</p>
+    </div>
+  }
   <div formGroupName="authValues" class="token__form">
-    <mat-form-field>
-      <input matInput placeholder="{{config.title || 'Token'}}" type="password" formControlName="token"
-        [type]="!showToken ? 'password' : 'text'">
-      <button mat-icon-button matSuffix (click)="showToken = !showToken" [attr.aria-label]="'Hide Token'"
-        [attr.aria-pressed]="!showToken" type='button'>
-        <mat-icon>{{!showToken ? 'visibility_off' : 'visibility'}}</mat-icon>
+    <app-form-field>
+      <input appInput placeholder="{{config.title || 'Token'}}" type="password" formControlName="token"
+        [type]="!showToken ? 'password' : 'text'" autocomplete="off">
+      <button class="btn btn-icon" matSuffix (click)="showToken = !showToken" [attr.aria-label]="'Hide Token'"
+        [attr.aria-pressed]="!showToken" type="button">
+        <app-custom-icon>{{!showToken ? 'visibility_off' : 'visibility'}}</app-custom-icon>
       </button>
-    </mat-form-field>
+    </app-form-field>
   </div>
 </div>

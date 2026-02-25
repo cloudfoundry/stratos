@@ -1,29 +1,51 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, of as observableOf } from 'rxjs';
 
-import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { userProvidedServiceInstanceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
+import {
+  CFAppState,
+  userProvidedServiceInstanceEntityType,
+  IUserProvidedServiceInstance,
+  cfEntityFactory,
+  CfCurrentUserPermissions,
+  ServiceActionHelperService,
+  CfOrgSpaceLabelService,
+  CfOrgSpaceLinksComponent,
+  CSI_CANCEL_URL,
+} from '@stratosui/cloud-foundry';
 import {
   CurrentUserPermissionsService,
-} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
-import { ComponentEntityMonitorConfig } from '../../../../../../../../store/src/types/shared.types';
-import { IUserProvidedServiceInstance } from '../../../../../../cf-api-svc.types';
-import { cfEntityFactory } from '../../../../../../cf-entity-factory';
-import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
-import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
-import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
-import { CSI_CANCEL_URL } from '../../../../add-service-instance/csi-mode.service';
+  AppChip,
+  AppChipsComponent,
+  CardCell,
+  MetaCardComponent,
+  MetaCardItemComponent,
+  MetaCardKeyComponent,
+  MetaCardTitleComponent,
+  MetaCardValueComponent,
+  MultilineTitleComponent,
+} from '@stratosui/core';
+import { APIResource, MenuItem, ComponentEntityMonitorConfig } from '@stratosui/store';
 
 
 @Component({
-  selector: 'app-user-provided-service-instance-card',
+selector: 'app-user-provided-service-instance-card',
   templateUrl: './user-provided-service-instance-card.component.html',
   styleUrls: ['./user-provided-service-instance-card.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    MetaCardComponent,
+    MetaCardTitleComponent,
+    MetaCardItemComponent,
+    MetaCardKeyComponent,
+    MetaCardValueComponent,
+    MultilineTitleComponent,
+    CfOrgSpaceLinksComponent,
+    AppChipsComponent,
+  ]
 })
 export class UserProvidedServiceInstanceCardComponent extends CardCell<APIResource<IUserProvidedServiceInstance>> {
   serviceInstanceEntity: APIResource<IUserProvidedServiceInstance>;

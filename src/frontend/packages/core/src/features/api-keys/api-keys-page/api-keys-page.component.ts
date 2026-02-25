@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { ChangeDetectionStrategy, Component  } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
+import { TailwindDialogService } from '../../../shared/services/tailwind-dialog.service';
 import { stratosEntityCatalog } from '@stratosui/store';
 import { Observable, Subject } from 'rxjs';
 import { first, map, startWith } from 'rxjs/operators';
@@ -7,6 +9,11 @@ import { first, map, startWith } from 'rxjs/operators';
 import { ApiKeyListConfigService } from '../../../shared/components/list/list-types/apiKeys/apiKey-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
 import { AddApiKeyDialogComponent } from '../add-api-key-dialog/add-api-key-dialog.component';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { ListComponent } from '../../../shared/components/list/list.component';
+import { NoContentMessageComponent } from '../../../shared/components/no-content-message/no-content-message.component';
+import { ProductNameComponent } from '../../../shared/components/product-name.ccomponent';
+import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 
 @Component({
   selector: 'app-api-keys-page',
@@ -14,8 +21,17 @@ import { AddApiKeyDialogComponent } from '../add-api-key-dialog/add-api-key-dial
   styleUrls: ['./api-keys-page.component.scss'],
   providers: [{
     provide: ListConfig,
-    useClass: ApiKeyListConfigService,
-  }]
+    useClass: ApiKeyListConfigService}], changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    CustomIconComponent,
+    CustomTooltipDirective,
+    PageHeaderComponent,
+    ListComponent,
+    NoContentMessageComponent,
+    ProductNameComponent
+  ]
 })
 export class ApiKeysPageComponent {
 
@@ -28,7 +44,7 @@ export class ApiKeysPageComponent {
   /* tslint:enable */
 
   constructor(
-    private dialog: MatDialog,
+    private dialog: TailwindDialogService,
   ) {
     this.hasKeys$ = stratosEntityCatalog.apiKey.store.getPaginationService().entities$.pipe(
       map(entities => entities && !!entities.length),
@@ -43,7 +59,7 @@ export class ApiKeysPageComponent {
   }
 
   clearKeyDetails() {
-    this.keyDetails.next();
+    this.keyDetails.next(null);
   }
 
   private showDialog(): Observable<string> {

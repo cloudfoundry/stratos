@@ -1,52 +1,61 @@
-import { Component, OnInit } from '@angular/core';
-import { AbstractControl, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { AbstractControl, ReactiveFormsModule, FormControl, FormGroup, Validators, FormBuilder } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { catchError, filter, first, map, mergeMap, pairwise, switchMap, tap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { domainEntityType, organizationEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
-import { selectNewAppState } from '../../../../../../cloud-foundry/src/store/effects/create-app-effects';
-import { CreateNewApplicationState } from '../../../../../../cloud-foundry/src/store/types/create-application.types';
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import {
-  ActionState,
-  getDefaultRequestState,
-  RequestInfoState,
-} from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { APIResource } from '../../../../../../store/src/types/api.types';
+import { CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, ErrorStateMatcher, ShowOnDirtyErrorStateMatcher, StepOnNextFunction } from '@stratosui/core';
+import { RouterNav, ActionState, getDefaultRequestState, RequestInfoState, APIResource } from '@stratosui/store';
+import { CFAppState, domainEntityType, organizationEntityType } from '@stratosui/cloud-foundry';
 import { IDomain } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { createEntityRelationKey } from '../../../../entity-relations/entity-relations.types';
 import { createGetApplicationAction } from '../../application.service';
+import { selectNewAppState } from '../../../../store/effects/create-app-effects';
+import { CreateNewApplicationState } from '../../../../store/types/create-application.types';
 
+interface DomainHostForm {
+  domain: FormControl<string>;
+  host: FormControl<string>;
+}
 
 @Component({
   selector: 'app-create-application-step3',
   templateUrl: './create-application-step3.component.html',
   styleUrls: ['./create-application-step3.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    CustomFormFieldComponent,
+    CustomSelectComponent,
+    CustomOptionComponent
+  ],
   providers: [
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
   ]
 })
 export class CreateApplicationStep3Component implements OnInit {
+  private store = inject(Store<CFAppState>);
 
-  setDomainHost: UntypedFormGroup;
+  setDomainHost: FormGroup<DomainHostForm>;
 
-  constructor(private store: Store<CFAppState>) {
-    this.setDomainHost = new UntypedFormGroup({
-      domain: new UntypedFormControl('', [Validators.required]),
-      host: new UntypedFormControl({ disabled: true }, [Validators.required, Validators.maxLength(63)]),
+  constructor() {
+    this.setDomainHost = new FormGroup({
+      domain: new FormControl('', {validators: [Validators.required], nonNullable: true}),
+      host: new FormControl('', {validators: [Validators.required, Validators.maxLength(63)], nonNullable: true}),
     });
+    // Disable host control initially - will be enabled when domain is selected
+    this.setDomainHost.controls.host.disable();
   }
 
-  domains$: Observable<APIResource<IDomain>[]>;
+  domains$!: Observable<APIResource<IDomain>[] | undefined>;
 
-  message = null;
+  message: any = null;
 
-  newAppData: CreateNewApplicationState;
+  newAppData!: CreateNewApplicationState;
   onNext: StepOnNextFunction = () => {
     const { cloudFoundryDetails, name } = this.newAppData;
 

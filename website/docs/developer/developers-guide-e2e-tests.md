@@ -1,10 +1,10 @@
 ---
 id: developers-guide-e2e-tests
 title: E2E Tests
-sidebar_label: E2E Tests 
+sidebar_label: E2E Tests
 ---
 
-The Stratos E2E test suite exercises the Stratos UI using protractor/web-driver.
+The Stratos E2E test suite exercises the Stratos UI using [Playwright](https://playwright.dev/).
 
 The tests require a Stratos instance to be running (front-end and back-end) and for a Cloud Foundry to be available to use for testing.
 
@@ -30,7 +30,7 @@ The tests require an instance of Cloud Foundry with the following:
 To meet the above requirements we recommend running the Stratos CF E2E set up script which is kept up to date with the latest test requirements.
 More information can be found [below](#running-the-e2e-set-up-script).
 
-Before running the E2E tests, you need to create a file named `secrets.yaml` in the root of the Stratos folder. An example template is included in [src/test-e2e/secrets.yaml.example](https://github.com/cloudfoundry/stratos/blob/master/src/test-e2e/secrets.yaml.example) - copy this to `secrets.yaml` and edit accordingly.
+Before running the E2E tests, you need to create a file named `secrets.yaml` in the root of the Stratos folder. An example template is included in [e2e/secrets.yaml.example](https://github.com/cloudfoundry/stratos/blob/master/e2e/secrets.yaml.example) - copy this to `secrets.yaml` and edit accordingly.
 
 If you want to run the tests in headless Chrome, add the following to the secrets file:
 
@@ -116,13 +116,20 @@ at [deploy/ci/automation/e2e-clean-remnants.sh](https://github.com/cloudfoundry/
 ## Running the tests
 
 To run the tests against an instance of Stratos execute
+```bash
+npm run e2e
 ```
-STRATOS_E2E_BASE_URL=<URL of stratos> ng e2e --dev-server-target= --base-url=<URL of stratos>
-```
+
 If running Stratos on `https://127.0.0.1:4200` then instead execute
-```
+```bash
 npm run e2e-dev
 ```
+
+Additional test commands:
+- `npm run e2e:ui` - Run tests with Playwright UI mode
+- `npm run e2e:debug` - Run tests in debug mode
+- `npm run e2e:headed` - Run tests in headed mode (see browser)
+- `npm run e2e:report` - View test report
 
 
 ## Running tests on Browserstack
@@ -147,7 +154,7 @@ The `BROWSERSTACK_TARGET` environment variable can be just a Browser name, e.g. 
 
 You can also specify which OS to use by separating the OS and browser with a `/`, e.g. `Windows/Chrome`. You can also specify the OS version by separating with a space, e.g. `Windows 10/Chrome`. You can fully described the OS and Browser with `Windows 10/Chrome 69`.
 
-For more information on supported Operating Systems/devices and browsers, see https://www.browserstack.com/list-of-browsers-and-platforms?product=js_testing and https://www.browserstack.com/automate/protractor.
+For more information on supported Operating Systems/devices and browsers, see https://www.browserstack.com/list-of-browsers-and-platforms?product=js_testing and https://playwright.dev/docs/test-runners.
 
 As an example, to run the E2E tests against a locally run Stratos dev system, use:
 

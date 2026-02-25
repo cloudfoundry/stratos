@@ -1,24 +1,25 @@
 import { Store } from '@ngrx/store';
-import { getRowMetadata } from '@stratosui/store';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
-
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { routeEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
-import { safeUnsubscribe } from '../../../../../../../core/src/core/utils.service';
 import {
+  safeUnsubscribe,
   ListPaginationMultiFilterChange,
   RowsState,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
+  IListConfig,
+  TableRowStateManager
+} from '@stratosui/core';
 import {
-  TableRowStateManager,
-} from '../../../../../../../core/src/shared/components/list/list-table/table-row/table-row-state-manager';
-import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { AppState } from '../../../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
-import { PaginationMonitor } from '../../../../../../../store/src/monitors/pagination-monitor';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { PaginatedAction, PaginationParam } from '../../../../../../../store/src/types/pagination.types';
+  getRowMetadata,
+  AppState,
+  entityCatalog,
+  PaginationMonitor,
+  APIResource,
+  PaginatedAction,
+  PaginationParam
+} from '@stratosui/store';
+
+import { CFAppState } from '../../../../../cf-app-state';
+import { routeEntityType } from '../../../../../cf-entity-types';
 import { IRoute } from '../../../../../cf-api.types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
@@ -34,8 +35,8 @@ export interface ListCfRoute extends IRoute {
   mappedAppsCountLabel?: string;
 }
 
-function isListCfRoute(anything: any): boolean {
-  return !!anything.url && !!anything.isTCPRoute;
+function isListCfRoute(anything: IRoute | ListCfRoute): boolean {
+  return !!(anything as ListCfRoute).url && !!(anything as ListCfRoute).isTCPRoute;
 }
 
 export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResource<ListCfRoute>, APIResource<IRoute>> {
@@ -120,7 +121,7 @@ export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResourc
    */
   private static createRowState(
     store: Store<AppState>,
-    paginationKey,
+    paginationKey: string,
     genericRouteState: boolean,
     isLocal: boolean): { rowsState: Observable<RowsState>, sub: Subscription } {
     if (genericRouteState) {

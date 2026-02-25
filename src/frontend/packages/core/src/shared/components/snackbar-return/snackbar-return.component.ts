@@ -1,12 +1,17 @@
-import { Component, Inject } from '@angular/core';
-import { MAT_SNACK_BAR_DATA, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
+import { ChangeDetectionStrategy, Component, Inject  } from '@angular/core';
+
+import { TailwindSnackBarRef } from '../../services/tailwind-snackbar.service';
+import { MAT_SNACK_BAR_DATA, SimpleSnackBar } from '../../../shared/services/tailwind-material-replacements';
 import { Store } from '@ngrx/store';
 import { RouterNav, AppState } from '@stratosui/store';
 
 @Component({
   selector: 'app-snackbar-return',
   templateUrl: './snackbar-return.component.html',
-  styleUrls: ['./snackbar-return.component.scss']
+  styleUrls: ['./snackbar-return.component.scss'],
+  standalone: true,
+  imports: [],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SnackBarReturnComponent extends SimpleSnackBar {
   returnLabel: string;
@@ -16,7 +21,7 @@ export class SnackBarReturnComponent extends SimpleSnackBar {
   constructor(
     @Inject(MAT_SNACK_BAR_DATA) public data: any,
     private store: Store<AppState>,
-    private snackRef: MatSnackBarRef<SimpleSnackBar>,
+    @Inject('TailwindSnackBarRef') private snackRef: TailwindSnackBarRef<any>,
   ) {
     super(snackRef, data);
     this.returnLabel = data.returnLabel || 'Return';

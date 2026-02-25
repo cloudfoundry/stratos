@@ -1,14 +1,24 @@
-<mat-card class="recent-instances">
-  <mat-card-header class="recent-instances__header">
-    <mat-card-title>Recently updated service instances</mat-card-title>
-    <app-stateful-icon *ngIf="!(serviceInstances$ | async)" [state]="'busy'"></app-stateful-icon>
-  </mat-card-header>
-  <mat-card-content class="recent-instances__content" *ngIf="serviceInstances$ | async as serviceInstances">
-    <div *ngIf="serviceInstances.length === 0">
-      There are no service instances.
-    </div>
-    <div *ngIf="serviceInstances.length > 0" class="recent-instances__scroller">
-      <app-compact-service-instance-card *ngFor="let serviceInstance of serviceInstances" [serviceInstance]="serviceInstance"></app-compact-service-instance-card>
-    </div>
-  </mat-card-content>
-</mat-card>
+<app-card class="recent-instances">
+  <app-card-header class="recent-instances__header">
+    <app-card-title>Recently updated service instances</app-card-title>
+    @if (!(serviceInstances$ | async)) {
+      <app-stateful-icon [state]="'busy'"></app-stateful-icon>
+    }
+  </app-card-header>
+  @if (serviceInstances$ | async; as serviceInstances) {
+    <app-card-content class="recent-instances__content">
+      @if (serviceInstances.length === 0) {
+        <div>
+          There are no service instances.
+        </div>
+      }
+      @if (serviceInstances.length > 0) {
+        <div class="recent-instances__scroller">
+          @for (serviceInstance of serviceInstances; track serviceInstance) {
+            <app-compact-service-instance-card [serviceInstance]="serviceInstance"></app-compact-service-instance-card>
+          }
+        </div>
+      }
+    </app-card-content>
+  }
+</app-card>

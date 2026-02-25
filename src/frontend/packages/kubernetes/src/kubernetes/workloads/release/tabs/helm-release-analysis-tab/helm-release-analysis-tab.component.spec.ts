@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { TabNavService } from '../../../../../../../core/src/tab-nav.service';
 import { AnalysisReportViewerComponent } from '../../../../analysis-report-viewer/analysis-report-viewer.component';
@@ -14,22 +16,27 @@ describe('HelmReleaseAnalysisTabComponent', () => {
   let component: HelmReleaseAnalysisTabComponent;
   let fixture: ComponentFixture<HelmReleaseAnalysisTabComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [HelmReleaseAnalysisTabComponent, AnalysisReportSelectorComponent, AnalysisReportViewerComponent],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         KubernetesBaseTestModules,
+
+        HelmReleaseAnalysisTabComponent,
+        AnalysisReportSelectorComponent,
+        AnalysisReportViewerComponent,
       ],
       providers: [
+
         KubernetesAnalysisService,
         KubernetesEndpointService,
         KubeBaseGuidMock,
         HelmReleaseProviders,
-        TabNavService
+        TabNavService,
+
+        provideZonelessChangeDetection(),
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(HelmReleaseAnalysisTabComponent);

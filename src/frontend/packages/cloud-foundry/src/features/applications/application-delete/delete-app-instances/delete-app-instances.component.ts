@@ -1,8 +1,8 @@
-import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, Output, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Subscription } from 'rxjs';
 
-import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
-import { APIResource } from '../../../../../../store/src/types/api.types';
+import { ListComponent, ListConfig } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
 import { IServiceInstance } from '../../../../cf-api-svc.types';
 import { AppDeleteServiceInstancesListConfigService } from './app-delete-instances-routes-list-config.service';
 
@@ -15,6 +15,10 @@ import { AppDeleteServiceInstancesListConfigService } from './app-delete-instanc
       provide: ListConfig,
       useClass: AppDeleteServiceInstancesListConfigService
     }
+  ],
+  standalone: true,
+  imports: [
+    ListComponent
   ]
 })
 export class DeleteAppServiceInstancesComponent implements OnDestroy {
@@ -24,7 +28,9 @@ export class DeleteAppServiceInstancesComponent implements OnDestroy {
 
   private selectedSub: Subscription;
 
-  constructor(private config: ListConfig<APIResource>) {
+  private config = inject(ListConfig<APIResource>);
+
+  constructor() {
     this.selectedSub = this.config.getDataSource().selectedRows$.subscribe(
       (selected) => {
         this.selected.emit(Array.from(selected.values()));

@@ -1,17 +1,24 @@
-import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, Output, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { entityCatalog, EntityCatalogEntityConfig, PaginationPageIteratorConfig, AppState } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { safeUnsubscribe } from '../../../../core/utils.service';
-import { NoContentMessageLine } from '../../no-content-message/no-content-message.component';
+import { NoContentMessageComponent, NoContentMessageLine } from '../../no-content-message/no-content-message.component';
 import { ITableTextMaxed } from '../list-table/table.types';
 
 @Component({
   selector: 'app-max-list-message',
   templateUrl: './max-list-message.component.html',
-  styleUrls: ['./max-list-message.component.scss']
+  styleUrls: ['./max-list-message.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    NoContentMessageComponent
+  ]
 })
 export class MaxListMessageComponent implements OnDestroy {
 
@@ -22,13 +29,15 @@ export class MaxListMessageComponent implements OnDestroy {
       canIgnoreMaxFirstLine: '',
       cannotIgnoreMaxFirstLine: '',
     };
-    this.configSubject.next({
+    const newConfig = {
       icon: safeConfig.icon || MaxListMessageComponent.defaultConfig.icon,
       iconFont: safeConfig.iconFont || MaxListMessageComponent.defaultConfig.iconFont,
       canIgnoreMaxFirstLine: safeConfig.canIgnoreMaxFirstLine || MaxListMessageComponent.defaultConfig.canIgnoreMaxFirstLine,
       cannotIgnoreMaxFirstLine: safeConfig.cannotIgnoreMaxFirstLine || MaxListMessageComponent.defaultConfig.cannotIgnoreMaxFirstLine,
       filterLine: safeConfig.filterLine || MaxListMessageComponent.defaultConfig.filterLine
-    });
+    };
+    this.configSignal.set(newConfig);
+    this.configSubject.next(newConfig);
   }
 
   @Input()
@@ -45,14 +54,16 @@ export class MaxListMessageComponent implements OnDestroy {
     const paginationConfig: PaginationPageIteratorConfig = catalogueEntity.getPaginationConfig();
     if (paginationConfig) {
       this.canIgnoreMaxedStatePipeSub = paginationConfig.canIgnoreMaxedState(this.store).subscribe(
-        canIgnoreMaxedState => this.canIgnoreMaxedState.next(canIgnoreMaxedState)
+        canIgnoreMaxedState => {
+          this.canIgnoreMaxedStateSignal.set(canIgnoreMaxedState);
+          this.canIgnoreMaxedStateSubject.next(canIgnoreMaxedState);
+        }
       );
     } else {
-      this.canIgnoreMaxedState.next(false);
+      this.canIgnoreMaxedStateSignal.set(false);
+      this.canIgnoreMaxedStateSubject.next(false);
     }
   }
-
-  constructor(private store: Store<AppState>) { }
 
   static defaultConfig: ITableTextMaxed = {
     icon: 'apps',
@@ -61,11 +72,15 @@ export class MaxListMessageComponent implements OnDestroy {
   };
 
   private canIgnoreMaxedStatePipeSub: Subscription;
-  private canIgnoreMaxedState = new BehaviorSubject<boolean>(null);
-  private canIgnoreMaxedState$ = this.canIgnoreMaxedState.asObservable();
+  private canIgnoreMaxedStateSignal = signal<boolean | null>(null);
+  private canIgnoreMaxedStateSubject = new BehaviorSubject<boolean | null>(null);
+  private canIgnoreMaxedState$ = this.canIgnoreMaxedStateSubject.asObservable();
 
-  private configSubject = new BehaviorSubject<ITableTextMaxed>(null);
+  private configSignal = signal<ITableTextMaxed | null>(null);
+  private configSubject = new BehaviorSubject<ITableTextMaxed | null>(null);
   private config$ = this.configSubject.asObservable();
+
+  private store = inject(Store<AppState>);
 
   public state$: Observable<{
     icon: string;

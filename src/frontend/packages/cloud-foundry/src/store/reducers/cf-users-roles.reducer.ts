@@ -131,8 +131,8 @@ export function cfUsersRolesReducer(state: UsersRolesState = defaultState, actio
   return state;
 }
 
-function setPermission(roles: IUserPermissionInOrg | IUserPermissionInSpace, role: string, applyRole: boolean) {
-  if (roles.permissions[role] === applyRole) {
+function setPermission(roles: IUserPermissionInOrg | IUserPermissionInSpace, role: string, applyRole: boolean): boolean {
+  if ((roles.permissions as any)[role] === applyRole) {
     return false;
   }
   roles.permissions = {
@@ -192,7 +192,7 @@ function setSpaceRole(
   spaceName: string,
   role: string,
   applyRole: boolean,
-  isSetByUsername: boolean) {
+  isSetByUsername: boolean): void {
   if (!orgRoles.spaces[spaceGuid]) {
     orgRoles.spaces[spaceGuid] = createDefaultSpaceRoles(orgGuid, orgName, spaceGuid, spaceName);
   }

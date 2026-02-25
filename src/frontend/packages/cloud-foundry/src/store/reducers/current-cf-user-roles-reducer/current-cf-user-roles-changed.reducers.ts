@@ -19,7 +19,7 @@ export function updateAfterCfRoleChange(
   const entityType = changePerm.isSpace ? 'spaces' : 'organizations';
 
   const cf = state[changePerm.endpointGuid];
-  const entity = cf[entityType][changePerm.entityGuid] || createEmptyState(changePerm.isSpace, changePerm.orgGuid);
+  const entity: any = (cf as any)[entityType][changePerm.entityGuid] || createEmptyState(changePerm.isSpace, changePerm.orgGuid);
   const permissionType = userRoleNameToPermissionName(changePerm.permissionTypeKey);
 
   if (entity && entity[permissionType] === isAdd) {

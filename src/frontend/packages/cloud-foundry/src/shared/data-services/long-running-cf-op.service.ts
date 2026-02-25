@@ -6,14 +6,15 @@ import { SnackBarService } from '../../../../core/src/shared/services/snackbar.s
 import { AppState } from '../../../../store/src/app-state';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class LongRunningCfOperationsService extends LongRunningOperationsService {
 
   constructor(
-    store: Store<AppState>,
     private snackBarService: SnackBarService
   ) {
-    super(store);
+    super();
   }
 
   handleLongRunningCreateService(bindApp: boolean) {

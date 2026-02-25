@@ -29,13 +29,13 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
   public total = 0;
   public files = 0;
   public folders = 0;
-  public excludes = [];
-  public root = {
+  public excludes: any[] = [];
+  public root: { files: any[]; folders: any } = {
     files: [],
     folders: {}
   };
   public summaryType: FileScannerInfoType = 'file';
-  public summaryItem;
+  public summaryItem: any;
 
   public manifestFile: any;
   public cfIgnoreFile: any;
@@ -50,7 +50,7 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
     return archiveRegex.test(fileName);
   }
 
-  file(context: FileScannerFolderContext, file, path) {
+  file(context: FileScannerFolderContext, file: any, path: string) {
     let fullName = path + '/' + file.name;
     if (fullName.indexOf('/') === 0) {
       fullName = fullName.substr(1);
@@ -83,7 +83,7 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
       return undefined;
     }
     this.folders++;
-    const newContext = {
+    const newContext: { folders: any; files: any[] } = {
       folders: {},
       files: []
     };
@@ -94,7 +94,7 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
   /**
    * Add a file to the list - will add necessary folders and check to see if the file should be excluded
    */
-  addFile(file) {
+  addFile(file: any) {
     // Make the folder for the file
     const fileParts = file.webkitRelativePath.split('/');
     let context = this.root;
@@ -129,10 +129,10 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
     }
   }
 
-  readItemContents(item): Promise<string> {
+  readItemContents(item: any): Promise<string> {
     const scanner = this;
     return new Promise((resolve, reject) => {
-      item.file(file => {
+      item.file((file: any) => {
         scanner.readFileContents(file).then((data: string) => {
           resolve(data);
         }).catch(() => {
@@ -142,7 +142,7 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
     });
   }
 
-  readFileContents(file): Promise<string> {
+  readFileContents(file: any): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result as string);

@@ -1,26 +1,33 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Observable, Subject } from 'rxjs';
-import websocketConnect from 'rxjs-websockets';
 import { catchError, filter, map, share, switchMap } from 'rxjs/operators';
+import websocketConnect from 'rxjs-websockets';
 
-import { UtilsService } from '../../../../../../core/src/core/utils.service';
-import { environment } from '../../../../../../core/src/environments/environment.prod';
+import { CustomCheckboxComponent, LogViewerComponent, UtilsService, environment } from '@stratosui/core';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryFirehoseFormatter } from './cloud-foundry-firehose-formatter';
 
 @Component({
   selector: 'app-cloud-foundry-firehose',
   templateUrl: './cloud-foundry-firehose.component.html',
-  styleUrls: ['./cloud-foundry-firehose.component.scss']
+  styleUrls: ['./cloud-foundry-firehose.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    FormsModule,
+    CustomCheckboxComponent,
+    LogViewerComponent
+]
 })
 export class CloudFoundryFirehoseComponent implements OnInit {
-  messages: Observable<string>;
-  connectionStatus: Observable<number>;
+  messages!: Observable<string>;
+  connectionStatus!: Observable<number>;
 
   filter: (jsonString: string) => string;
 
   // Formatter for fire hose log messages
-  formatter: CloudFoundryFirehoseFormatter;
+  formatter!: CloudFoundryFirehoseFormatter;
 
   constructor(
     private cfEndpointService: CloudFoundryEndpointService,
@@ -29,7 +36,8 @@ export class CloudFoundryFirehoseComponent implements OnInit {
 
   ngOnInit() {
     const host = window.location.host;
-    const streamUrl = `wss://${host}/pp/${environment.proxyAPIVersion}/${
+    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const streamUrl = `${protocol}://${host}/pp/${environment.proxyAPIVersion}/${
       this.cfEndpointService.cfGuid
       }/firehose`;
 
@@ -46,8 +54,8 @@ export class CloudFoundryFirehoseComponent implements OnInit {
       map((message: string) => message)
     );
     this.messages.pipe(
-      catchError(e => {
-        return [];
+      catchError((e) => {
+        return [] as any;
       }),
       share(),
       filter(l => !!l)

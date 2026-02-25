@@ -1,13 +1,11 @@
-import { Directive, forwardRef, Input } from '@angular/core';
+import { Directive, forwardRef, Input, inject } from '@angular/core';
 import { AbstractControl, NG_ASYNC_VALIDATORS, Validator } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { GitSCMService, GitSCMType } from '@stratosui/git';
 import { Observable, of as observableOf } from 'rxjs';
 import { debounceTime, filter, first, map, tap } from 'rxjs/operators';
 
-import { CheckProjectExists } from '../../../../../cloud-foundry/src/actions/deploy-applications.actions';
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { selectDeployAppState } from '../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
+import { CFAppState, CheckProjectExists, selectDeployAppState } from '@stratosui/cloud-foundry';
 
 interface GithubProjectExistsResponse {
   githubProjectDoesNotExist: boolean;
@@ -20,15 +18,17 @@ const GITHUB_PROJECT_EXISTS = {
 
 @Directive({
   selector: '[appGithubProjectExists][ngModel]',
-  providers: [GITHUB_PROJECT_EXISTS]
+  providers: [GITHUB_PROJECT_EXISTS],
+  standalone: true
 })
 export class GithubProjectExistsDirective implements Validator {
 
-  @Input() appGithubProjectExists: string;
+  @Input() appGithubProjectExists!: string;
 
   private lastValue = '';
 
-  constructor(private store: Store<CFAppState>, private scmService: GitSCMService) { }
+  private store = inject(Store<CFAppState>);
+  private scmService = inject(GitSCMService);
 
   // Reduce API calls trying to validate until we have a valid name
   // Must be of the form USER/NAME - where NAME must be at least 2 charts in length

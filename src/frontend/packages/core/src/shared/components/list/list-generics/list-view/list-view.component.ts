@@ -1,4 +1,4 @@
-import { Component, ComponentFactoryResolver, ComponentRef, Injector, Input, OnDestroy, Type, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentFactoryResolver, ComponentRef, Injector, Input, OnDestroy, Type, ViewChild } from '@angular/core';
 
 import { ListComponent } from '../../list.component';
 import { IListConfig, ListConfig } from '../../list.component.types';
@@ -6,9 +6,14 @@ import { ListHostDirective } from '../helpers/list-host.directive';
 import { ListConfigProvider } from '../list-config-provider.types';
 
 @Component({
-    selector: 'app-list-view',
-    templateUrl: './list-view.component.html',
-    styleUrls: ['./list-view.component.scss']
+  selector: 'app-list-view',
+  templateUrl: './list-view.component.html',
+  styleUrls: ['./list-view.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    ListHostDirective
+  ]
 })
 export class ListViewComponent<T> implements OnDestroy {
 
@@ -19,13 +24,14 @@ export class ListViewComponent<T> implements OnDestroy {
   }
 
   @ViewChild(ListHostDirective, { static: true })
-  public listHost: ListHostDirective;
+  public listHost!: ListHostDirective;
 
-  private componentRef: ComponentRef<ListComponent<unknown>>;
+  private componentRef!: ComponentRef<ListComponent<unknown>>;
 
   constructor(
     private componentFactoryResolver: ComponentFactoryResolver,
-    private injector: Injector
+    private injector: Injector,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnDestroy() {
@@ -43,6 +49,7 @@ export class ListViewComponent<T> implements OnDestroy {
     this.componentRef = viewContainerRef.createComponent(ListComponent,{
       injector: this.makeCustomConfigInjector(listConfig.getListConfig())
     });
+    this.cdr.markForCheck();
   }
 
   private makeCustomConfigInjector(listConfig: IListConfig<T>) {

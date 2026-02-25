@@ -1,13 +1,19 @@
-import { Directive, ElementRef, Input, OnChanges, SimpleChanges, Renderer2 } from '@angular/core';
+import { Directive, ElementRef, Input, OnChanges, SimpleChanges, Renderer2, inject } from '@angular/core';
 
 @Directive({
-  selector: '[appTableCellStatus]'
+selector: '[appTableCellStatus]',
+standalone: true
 })
 export class TableCellStatusDirective implements OnChanges {
 
-  @Input() appTableCellStatus: string;
+  @Input() appTableCellStatus!: string;
 
-  constructor(private el: ElementRef, private renderer: Renderer2) {
+  private readonly el: ElementRef;
+  private readonly renderer: Renderer2;
+
+  constructor(el: ElementRef, renderer: Renderer2) {
+    this.el = el;
+    this.renderer = renderer;
   }
 
   ngOnChanges(changes: SimpleChanges) {

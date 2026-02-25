@@ -1,10 +1,11 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from '@stratosui/store/testing';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 
-import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
-import { CustomizationService } from '../../../core/customizations.types';
-import { MDAppModule } from '../../../core/md.module';
+import { CoreTestingModule } from "@test-framework/core-test.modules";
+import { CustomizationService, MDAppModule } from '@stratosui/core';
 import { SideNavComponent } from './side-nav.component';
 
 
@@ -12,21 +13,25 @@ describe('SideNavComponent', () => {
   let component: SideNavComponent;
   let fixture: ComponentFixture<SideNavComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [SideNavComponent],
+      
       imports: [
         RouterTestingModule,
         MDAppModule,
         CoreTestingModule,
-        createBasicStoreModule()
+        createBasicStoreModule(),
+        SideNavComponent,
       ],
       providers: [
-        CustomizationService
+        
+        CustomizationService,
+        provideZonelessChangeDetection(),
       ]
-    })
-      .compileComponents();
-  }));
+    
+    });
+      TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SideNavComponent);

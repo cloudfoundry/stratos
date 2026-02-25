@@ -3,33 +3,34 @@ import { Maintainer } from './maintainer';
 import { RepoAttributes } from './repo';
 
 export class Chart {
-  id: string;
-  type: string;
-  links: string[];
-  attributes: ChartAttributes;
-  relationships: ChartRelationships;
+  id!: string;
+  type!: string;
+  links!: string[];
+  attributes!: ChartAttributes;
+  relationships!: ChartRelationships;
   monocularEndpointId?: string;
+  name?: string; // Promoted from attributes for convenience
 }
 
 
 export class ChartAttributes {
-  description: string;
-  name: string;
-  icon: string;
-  repo: RepoAttributes;
-  home: string;
-  sources: string[];
-  keywords: string[];
-  maintainers: Maintainer[];
+  description!: string;
+  name!: string;
+  icon!: string;
+  repo!: RepoAttributes;
+  home!: string;
+  sources!: string[];
+  keywords!: string[];
+  maintainers!: Maintainer[];
 }
 
 class ChartRelationships {
-  latestChartVersion: ChartVersionRelationship;
+  latestChartVersion!: ChartVersionRelationship;
 }
 
 class ChartVersionRelationship {
-  data: ChartVersionAttributes;
-  links: {
+  data!: ChartVersionAttributes;
+  links!: {
     self: string,
   };
 }

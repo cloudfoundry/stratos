@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { CoreModule } from '../../../../../core/core.module';
 import { TableCellIconComponent } from './table-cell-icon.component';
@@ -7,17 +9,19 @@ describe('TableCellIconComponent', () => {
   let component: TableCellIconComponent;
   let fixture: ComponentFixture<TableCellIconComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        TableCellIconComponent,
-      ],
+      
+      providers: [provideZonelessChangeDetection()],
+      
       imports: [
-        CoreModule
+        CoreModule,
+        TableCellIconComponent,
       ]
-    })
-      .compileComponents();
-  }));
+    
+    });
+      TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellIconComponent);
@@ -26,7 +30,7 @@ describe('TableCellIconComponent', () => {
     component.config = {
       getIcon: (row) => ({
         icon: ''
-      })
+      }),
     };
     fixture.detectChanges();
   });

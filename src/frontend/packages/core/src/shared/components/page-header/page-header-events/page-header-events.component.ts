@@ -1,17 +1,25 @@
 import { animate, style, transition, trigger } from '@angular/animations';
-import { Component, Input, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, Input, OnInit  } from '@angular/core';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AppState } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { first, map, publishReplay, refCount, share } from 'rxjs/operators';
 
 import { endpointEventKey, GlobalEventService, IGlobalEvent } from '../../../global-events.service';
+import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 
 @Component({
   selector: 'app-page-header-events',
   templateUrl: './page-header-events.component.html',
   styleUrls: ['./page-header-events.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    CustomIconComponent
+  ],
   animations: [
     trigger(
       'eventEnter', [
@@ -25,17 +33,18 @@ import { endpointEventKey, GlobalEventService, IGlobalEvent } from '../../../glo
       ])
     ]
     )
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PageHeaderEventsComponent implements OnInit {
   @Input()
-  public endpointIds$: Observable<string[]>;
+  public endpointIds$!: Observable<string[]>;
   @Input()
   public simpleErrorMessage = false;
 
-  public errorMessage$: Observable<string>;
+  public errorMessage$!: Observable<string>;
   endpointId: any;
-  private events$: Observable<any>;
+  private events$!: Observable<any>;
   constructor(
     private activatedRoute: ActivatedRoute,
     private store: Store<AppState>,

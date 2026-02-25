@@ -2,14 +2,18 @@
   <h1>Kubernetes Terminal</h1>
   <div class="page-header-right">
     <span>
-      <button mat-icon-button matTooltip="Disconnect" name="stop" *ngIf="sshViewer.isConnected" (click)="sshViewer.disconnect()" [disabled]="sshViewer.attemptingConnection">
-        <mat-icon>stop</mat-icon>
-      </button>
-      <button mat-icon-button matTooltip="Connect" name="start" *ngIf="!sshViewer.isConnected" (click)="sshViewer.reconnect()" [disabled]="sshViewer.attemptingConnection">
-        <mat-icon>play_arrow</mat-icon>
-      </button>
-      <button mat-icon-button matTooltip="Back" [routerLink]="kubeSummaryLink">
-        <mat-icon>close</mat-icon>
+      @if (sshViewer.isConnected) {
+        <button class="btn btn-icon" matTooltip="Disconnect" name="stop" (click)="sshViewer.disconnect()" [disabled]="sshViewer.attemptingConnection">
+          <span class="material-symbols-outlined">stop</span>
+        </button>
+      }
+      @if (!sshViewer.isConnected) {
+        <button class="btn btn-icon" matTooltip="Connect" name="start" (click)="sshViewer.reconnect()" [disabled]="sshViewer.attemptingConnection">
+          <span class="material-symbols-outlined">play_arrow</span>
+        </button>
+      }
+      <button class="btn btn-icon" matTooltip="Back" [routerLink]="kubeSummaryLink">
+        <span class="material-symbols-outlined">close</span>
       </button>
     </span>
   </div>

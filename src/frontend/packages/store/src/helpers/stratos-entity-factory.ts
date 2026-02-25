@@ -35,6 +35,9 @@ entityCache[userProfileEntityType] = UserProfileInfoSchema;
 const ApiKeySchema = new StratosEntitySchema(apiKeyEntityType, 'guid');
 entityCache[apiKeyEntityType] = ApiKeySchema;
 
+const MetricSchema = new StratosEntitySchema(metricEntityType, 'guid');
+entityCache[metricEntityType] = MetricSchema;
+
 export function stratosEntityFactory(key: string): EntitySchema {
   const entity = entityCache[key];
   if (!entity) {

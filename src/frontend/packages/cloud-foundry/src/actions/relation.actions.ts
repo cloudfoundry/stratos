@@ -10,6 +10,8 @@ import { CFStartAction } from './cf-action.types';
 const relationActionId = 'FetchRelationAction';
 
 export abstract class FetchRelationAction extends CFStartAction implements EntityInlineParentAction, EntityInlineChildAction {
+  entity!: RequestActionEntity;
+  entityType: string;
   constructor(
     public endpointGuid: string, // Always go out to a single cf
     public parentGuid: string,
@@ -30,8 +32,6 @@ export abstract class FetchRelationAction extends CFStartAction implements Entit
     );
     this.parentEntityConfig = parent.entity;
   }
-  entity: RequestActionEntity;
-  entityType: string;
   isId = relationActionId;
   actions = [
     '[Fetch Relations] Start',

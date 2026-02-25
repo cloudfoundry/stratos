@@ -1,3 +1,4 @@
+
 import {
   Component,
   ComponentFactory,
@@ -6,31 +7,35 @@ import {
   Injector,
   ViewChild,
   ViewContainerRef,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { GitCommit } from '@stratosui/git';
 import { Observable } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
-import { SetDeployCommit } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import { StepOnNextFunction } from '@stratosui/core';
+import { GitCommit } from '@stratosui/git';
+import { SetDeployCommit } from '../../../../actions/deploy-applications.actions';
+import { CFAppState } from '../../../../cf-app-state';
 import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wrapper.component';
 
 @Component({
-    selector: 'app-deploy-application-step2-1',
-    templateUrl: './deploy-application-step2-1.component.html',
-    styleUrls: ['./deploy-application-step2-1.component.scss']
+  selector: 'app-deploy-application-step2-1',
+  templateUrl: './deploy-application-step2-1.component.html',
+  styleUrls: ['./deploy-application-step2-1.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: []
 })
 export class DeployApplicationStep21Component {
 
-  validate: Observable<boolean>;
-  selectedCommit$: Observable<GitCommit>;
+  validate!: Observable<boolean>;
+  selectedCommit$!: Observable<GitCommit>;
 
   @ViewChild('target', { read: ViewContainerRef, static: true })
-  target: ViewContainerRef;
+  target!: ViewContainerRef;
   wrapperFactory: ComponentFactory<CommitListWrapperComponent>;
-  wrapperRef: ComponentRef<CommitListWrapperComponent>;
+  wrapperRef!: ComponentRef<CommitListWrapperComponent>;
 
   constructor(
     private store: Store<CFAppState>,

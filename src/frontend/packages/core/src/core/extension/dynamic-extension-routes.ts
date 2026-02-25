@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot } from '@angular/router';
+import { inject, Injectable } from '@angular/core';
+import { ActivatedRouteSnapshot, CanActivateFn, Router, RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs';
 
 import { getRoutesFromExtensions, StratosRouteType } from './extension-service';
@@ -18,51 +18,77 @@ import { getRoutesFromExtensions, StratosRouteType } from './extension-service';
  * as it would have before.
  */
 
+// Helper functions for route manipulation
+function getChildRoutes(r: any) {
+  if (!r) {
+    return [];
+  }
+  const loadedRoutes = r._loadedConfig ? r._loadedConfig.routes : [];
+  return r.children ? r.children : loadedRoutes;
+}
+
+function setChildRoutes(r: any, newRoutes: any): void {
+  if (!r) {
+    return;
+  }
+  const loadedRoutes = r._loadedConfig ? r._loadedConfig : {};
+  if (r.children) {
+    r.children = newRoutes;
+  } else {
+    loadedRoutes.routes = newRoutes;
+  }
+}
+
+export const dynamicExtensionRoutesGuard: CanActivateFn = (
+  route: ActivatedRouteSnapshot,
+  state: RouterStateSnapshot
+): Observable<boolean> | Promise<boolean> | boolean => {
+  const router = inject(Router);
+
+  const childRoutes = getChildRoutes(route.parent.routeConfig);
+  // Remove the last route (which is us, the '**' route)
+  let newChildRoutes = childRoutes.splice(0, childRoutes.length - 1);
+
+  // Does the parent root have metadata to tell us what route group this is?
+  // i.e. are there extension routes we need to try and add?
+  if (route.routeConfig.data && route.routeConfig.data.stratosRouteGroup) {
+    const tabGroup = route.routeConfig.data.stratosRouteGroup;
+
+    // Add the missing routes
+    const newRoutes = getRoutesFromExtensions(tabGroup as StratosRouteType);
+    newChildRoutes = newChildRoutes.concat(newRoutes);
+  }
+  // Update the route config and navigate again to the same route that was intercepted
+  setChildRoutes(route.parent.routeConfig, newChildRoutes);
+  router.navigateByUrl(state.url);
+
+  return false;
+};
+
+// Legacy class-based guard for backward compatibility during migration
+// @deprecated Use dynamicExtensionRoutesGuard functional guard instead
 @Injectable()
-export class DynamicExtensionRoutes implements CanActivate {
-  constructor(private router: Router) { }
+export class DynamicExtensionRoutes {
+  private router = inject(Router);
 
   canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
-  ): Observable<boolean> | Promise<boolean> | boolean {
-    const childRoutes = this.getChildRoutes(route.parent.routeConfig);
-    // Remove the last route (which is us, the '**' route)
+  ): boolean {
+    const router = this.router;
+
+    const childRoutes = getChildRoutes(route.parent.routeConfig);
     let newChildRoutes = childRoutes.splice(0, childRoutes.length - 1);
 
-    // Does the parent root have metadata to tell us what route group this is?
-    // i.e. are there extension routes we need to try and add?
     if (route.routeConfig.data && route.routeConfig.data.stratosRouteGroup) {
       const tabGroup = route.routeConfig.data.stratosRouteGroup;
-
-      // Add the missing routes
       const newRoutes = getRoutesFromExtensions(tabGroup as StratosRouteType);
       newChildRoutes = newChildRoutes.concat(newRoutes);
     }
-    // Update the route config and navigate again to the same route that was intercepted
-    this.setChildRoutes(route.parent.routeConfig, newChildRoutes);
-    this.router.navigateByUrl(state.url);
+
+    setChildRoutes(route.parent.routeConfig, newChildRoutes);
+    router.navigateByUrl(state.url);
 
     return false;
-  }
-
-  private getChildRoutes(r: any) {
-    if (!r) {
-      return [];
-    }
-    const loadedRoutes = r._loadedConfig ? r._loadedConfig.routes : [];
-    return r.children ? r.children : loadedRoutes;
-  }
-
-  private setChildRoutes(r: any, newRoutes: any) {
-    if (!r) {
-      return [];
-    }
-    const loadedRoutes = r._loadedConfig ? r._loadedConfig : {};
-    if (r.children) {
-      r.children = newRoutes;
-    } else {
-      loadedRoutes.routes = newRoutes;
-    }
   }
 }

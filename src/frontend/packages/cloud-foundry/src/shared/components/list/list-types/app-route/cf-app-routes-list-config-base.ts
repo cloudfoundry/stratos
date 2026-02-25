@@ -3,27 +3,27 @@ import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 import { publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { GetAppRoutes } from '../../../../../../../cloud-foundry/src/actions/application-service-routes.actions';
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import {
-  CurrentUserPermissionsService,
-} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
+import { ConfirmationDialogService, CurrentUserPermissionsService, IListConfig } from '@stratosui/core';
+import { APIResource, PaginatedAction } from '@stratosui/store';
+// eslint-disable-next-line @stratosui/no-relative-imports
+import { GetAppRoutes } from '../../../../../actions/application-service-routes.actions';
+// eslint-disable-next-line @stratosui/no-relative-imports
+import { CFAppState } from '../../../../../cf-app-state';
+// eslint-disable-next-line @stratosui/no-relative-imports
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
+// eslint-disable-next-line @stratosui/no-relative-imports
 import { ApplicationService } from '../../../../../features/applications/application.service';
+// eslint-disable-next-line @stratosui/no-relative-imports
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfRoutesListConfigBase } from '../cf-routes/cf-routes-list-config-base';
 import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
 
 export abstract class CfAppRoutesListConfigServiceBase extends CfRoutesListConfigBase implements IListConfig<APIResource> {
 
-  allowSelection: boolean;
-  getDataSource: () => CfAppRoutesDataSource;
+  allowSelection!: boolean;
+  getDataSource!: () => CfAppRoutesDataSource;
 
-  protected dataSource: CfAppRoutesDataSource;
+  protected dataSource!: CfAppRoutesDataSource;
 
   /**
    * Creates an instance of CfAppRoutesListConfigServiceBase.

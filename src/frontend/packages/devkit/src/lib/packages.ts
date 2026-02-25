@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { Logger } from './log';
-import { StratosConfig } from './stratos.config';
+import { Logger } from './log.js';
+import { StratosConfig } from './stratos.config.js';
 
 // Helper for packages
 

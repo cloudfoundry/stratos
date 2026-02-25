@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { ApplicationRef, Injectable } from '@angular/core';
+import { TailwindSnackBarService } from '../../../../core/src/shared/services/tailwind-snackbar.service';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
@@ -36,6 +36,7 @@ import {
 import { helmEntityCatalog } from '../helm-entity-catalog';
 import { HELM_ENDPOINT_TYPE, HELM_HUB_ENDPOINT_TYPE, HELM_REPO_ENDPOINT_TYPE } from '../helm-entity-factory';
 import { Chart } from '../monocular/shared/models/chart';
+import { ChartVersion } from '../monocular/shared/models/chart-version';
 import { stratosMonocularEndpointGuid } from '../monocular/stratos-monocular.helper';
 import {
   GET_HELM_VERSIONS,
@@ -65,7 +66,7 @@ const mapMonocularChartResponse = (
     result: []
   };
 
-  const items = response.data as Array<any>;
+  const items = response.data as Array<Chart>;
   const processedData: NormalizedResponse = items.reduce((res, data) => {
     const id = schema.getId(data);
     res.entities[entityKey][id] = data;
@@ -99,35 +100,39 @@ const addMonocularId = (endpointId: string, response: MonocularChartsResponse): 
   };
 };
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class HelmEffects {
 
   constructor(
     private httpClient: HttpClient,
     private actions$: Actions,
     private store: Store<AppState>,
-    public snackBar: MatSnackBar,
+    public snackBar: TailwindSnackBarService,
+    private appRef: ApplicationRef
   ) { }
 
   // Endpoints that we know are synchronizing
-  private syncing = {};
-  private syncTimer = null;
+  private syncing: Record<string, boolean> = {};
+  private syncTimer: ReturnType<typeof setTimeout> | null = null;
 
   proxyAPIVersion = environment.proxyAPIVersion;
 
   // Ensure that we refresh the charts when a repository finishes synchronizing
-  
+
   updateOnSyncFinished$ = createEffect(() => this.actions$.pipe(
     ofType<GetAllEndpointsSuccess>(GET_ENDPOINTS_SUCCESS),
-    flatMap(action => {
+    flatMap((action): Action[] => {
       // Look to see if we have any endpoints that are synchronizing
       let updated = false;
-      Object.values(action.payload.entities.stratosEndpoint).forEach(endpoint => {
-        if (endpoint.cnsi_type === HELM_ENDPOINT_TYPE && endpoint.endpoint_metadata) {
-          if (endpoint.endpoint_metadata.status === 'Synchronizing') {
+      Object.values(action.payload.entities.stratosEndpoint).forEach((endpoint: unknown) => {
+        const ep = endpoint as EndpointModel;
+        if (ep.cnsi_type === HELM_ENDPOINT_TYPE && ep.endpoint_metadata) {
+          if (ep.endpoint_metadata.status === 'Synchronizing') {
             // An endpoint is busy, so add it to the list to be monitored
-            if (!this.syncing[endpoint.guid]) {
-              this.syncing[endpoint.guid] = true;
+            if (!this.syncing[ep.guid]) {
+              this.syncing[ep.guid] = true;
               updated = true;
             }
           }
@@ -151,22 +156,26 @@ export class HelmEffects {
 
       this.store.dispatch(new StartRequestAction(action));
 
-      const helmEndpoints = Object.values(endpointOfTypeSelector(HELM_ENDPOINT_TYPE)(appState));
-      const helmHubEndpoint = helmEndpoints.find(endpoint => endpoint.sub_type === HELM_HUB_ENDPOINT_TYPE);
+      const helmEndpoints = Object.values(endpointOfTypeSelector(HELM_ENDPOINT_TYPE)(appState)) as EndpointModel[];
+      const helmHubEndpoint = helmEndpoints.find(endpoint => (endpoint as any).sub_type === HELM_HUB_ENDPOINT_TYPE);
 
       // See https://github.com/SUSE/stratos/issues/466. It would be better to use the standard proxy for this request and go out to all
       // valid helm sub types instead of making two requests here
       return combineLatest([
-        this.createHelmRepoRequest(helmEndpoints),
-        this.createHelmHubRequest(helmHubEndpoint)
+        this.createHelmRepoRequest(helmEndpoints as EndpointModel[]),
+        this.createHelmHubRequest(helmHubEndpoint as EndpointModel)
       ]).pipe(
         map(res => mergeMonocularChartResponses(entityKey, res, action.entity[0])),
-        mergeMap((response: NormalizedResponse) => [new WrapperRequestActionSuccess(response, action)]),
+        mergeMap((response: NormalizedResponse) => {
+          this.appRef.tick();
+          return [new WrapperRequestActionSuccess(response, action)];
+        }),
         catchError(error => {
+          this.appRef.tick();
           const { status, message } = HelmEffects.createHelmError(error);
-          const endpointIds = helmEndpoints.map(e => e.guid);
+          const endpointIds = helmEndpoints.map(e => (e as EndpointModel).guid);
           if (helmHubEndpoint) {
-            endpointIds.push(helmHubEndpoint.guid);
+            endpointIds.push((helmHubEndpoint as EndpointModel).guid);
           }
           return [
             new WrapperRequestActionFailed(message, action, 'fetch', {
@@ -195,14 +204,15 @@ export class HelmEffects {
 
         // Go through each endpoint ID
         Object.keys(response).forEach(endpoint => {
-          const endpointData = response[endpoint] || {};
+          const responseObj = response as Record<string, unknown>;
+          const endpointData = responseObj[endpoint] || {};
           if (isJetstreamError(endpointData)) {
             throw endpointData;
           }
           // Maintain typing
           const version: HelmVersion = {
             endpointId: endpoint,
-            ...endpointData
+            ...endpointData as Omit<HelmVersion, 'endpointId'>
           };
           processedData.entities[entityKey][action.entity[0].getId(version)] = version;
           processedData.result.push(endpoint);
@@ -224,12 +234,12 @@ export class HelmEffects {
             result: []
           };
 
-          const items = response.data as Array<any>;
+          const items = (response as { data: ChartVersion[] }).data;
           const processedData = items.reduce((res, data) => {
             const id = action.entity[0].getId(data);
             res.entities[entityKey][id] = data;
             // Promote the name to the top-level object for simplicity
-            data.name = data.attributes.name;
+            (data as unknown as { name: string }).name = data.attributes.name;
             res.result.push(id);
             return res;
           }, base);
@@ -251,12 +261,14 @@ export class HelmEffects {
       this.store.dispatch(new StartRequestAction(action, requestType));
       return this.httpClient.post(url, action.values).pipe(
         mergeMap(() => {
+          this.appRef.tick();
           return [
             new ClearPaginationOfType(action),
             new WrapperRequestActionSuccess(null, action)
           ];
         }),
         catchError(error => {
+          this.appRef.tick();
           const { status, message } = HelmEffects.createHelmError(error);
           const errorMessage = `Failed to install helm chart: ${message}`;
           return [
@@ -273,20 +285,20 @@ export class HelmEffects {
     })
   ));
 
-  
+
   helmSynchronise$ = createEffect(() => this.actions$.pipe(
     ofType<HelmSynchronise>(HELM_SYNCHRONISE),
-    flatMap(action => {
-      const requestArgs = {
+    flatMap((action): Action[] => {
+      const requestArgs: { headers: null; params: null } = {
         headers: null,
         params: null
       };
       const proxyAPIVersion = environment.proxyAPIVersion;
       const url = `/pp/${proxyAPIVersion}/chartrepos/${action.endpoint.guid}`;
       const req = this.httpClient.post(url, requestArgs);
-      req.subscribe(ok => {
+      req.subscribe((ok: unknown) => {
         this.snackBar.open('Helm Repository synchronization started', 'Dismiss', { duration: 3000 });
-      }, err => {
+      }, (err: unknown) => {
         this.snackBar.open(`Failed to Synchronize Helm Repository '${action.endpoint.name}'`, 'Dismiss', { duration: 5000 });
       });
       return [];
@@ -302,6 +314,7 @@ export class HelmEffects {
         if (endpoint.cnsi_type !== HELM_ENDPOINT_TYPE) {
           return [];
         }
+        this.appRef.tick();
         return [
           new ResetPaginationOfType(helmEntityCatalog.chart.getSchema()),
           new ResetPaginationOfType(helmEntityCatalog.chartVersions.getSchema()),
@@ -317,6 +330,7 @@ export class HelmEffects {
     flatMap(action => {
       const endpoint: EndpointModel = action.endpoint as EndpointModel;
       if (endpoint && endpoint.cnsi_type === HELM_ENDPOINT_TYPE && endpoint.sub_type === HELM_HUB_ENDPOINT_TYPE) {
+        this.appRef.tick();
         return [
           new ResetPaginationOfType(helmEntityCatalog.chart.getSchema()),
         ];
@@ -380,18 +394,22 @@ export class HelmEffects {
   private makeRequest(
     action: EntityRequestAction,
     url: string,
-    mapResult: (response: any) => NormalizedResponse,
+    mapResult: (response: unknown) => NormalizedResponse,
     endpointIds: string[],
-    headers = {}
+    headers: Record<string, string> = {}
   ): Observable<Action> {
     this.store.dispatch(new StartRequestAction(action));
-    const requestArgs = {
+    const requestArgs: { headers: Record<string, string>; params: null } = {
       headers,
       params: null
     };
     return this.httpClient.get(url, requestArgs).pipe(
-      mergeMap((response: any) => [new WrapperRequestActionSuccess(mapResult(response), action)]),
+      mergeMap((response: unknown) => {
+        this.appRef.tick();
+        return [new WrapperRequestActionSuccess(mapResult(response), action)];
+      }),
       catchError(error => {
+        this.appRef.tick();
         const { status, message } = HelmEffects.createHelmError(error);
         return [
           new WrapperRequestActionFailed(message, action, 'fetch', {
@@ -406,19 +424,19 @@ export class HelmEffects {
     );
   }
 
-  private checkSyncStatus() {
+  private checkSyncStatus(): void {
     // Dispatch request
     const url = `/pp/${this.proxyAPIVersion}/chartrepos/status`;
-    const requestArgs = {
+    const requestArgs: { headers: null; params: null } = {
       headers: null,
       params: null
     };
-    const req = this.httpClient.post(url, this.syncing, requestArgs);
-    req.subscribe(data => {
+    const req = this.httpClient.post<Record<string, boolean>>(url, this.syncing, requestArgs);
+    req.subscribe((data: Record<string, boolean> | null) => {
       if (data) {
         const existing = Object.keys(data).length;
-        const syncing = {};
-        Object.keys(data).forEach(guid => {
+        const syncing: Record<string, boolean> = {};
+        Object.keys(data).forEach((guid: string) => {
           if (data[guid]) {
             syncing[guid] = true;
           }
@@ -436,7 +454,7 @@ export class HelmEffects {
     });
   }
 
-  private scheduleSyncStatusCheck() {
+  private scheduleSyncStatusCheck(): void {
     if (this.syncTimer !== null) {
       clearTimeout(this.syncTimer);
       this.syncTimer = null;

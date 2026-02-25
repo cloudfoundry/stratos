@@ -1,9 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
-import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
-import {
-  CfCellAppsListConfigService,
-} from '../../../../../../shared/components/list/list-types/cf-cell-apps/cf-cell-apps-list-config.service';
+import { ListComponent, ListConfig } from '@stratosui/core';
+import { CfCellAppsListConfigService } from '../../../../../../shared/components/list/list-types/cf-cell-apps/cf-cell-apps-list-config.service';
 
 @Component({
   selector: 'app-cloud-foundry-cell-apps',
@@ -14,6 +12,11 @@ import {
       provide: ListConfig,
       useClass: CfCellAppsListConfigService
     }
+  ],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    ListComponent
   ]
 })
 export class CloudFoundryCellAppsComponent { }

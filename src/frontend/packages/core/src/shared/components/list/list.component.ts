@@ -1,9 +1,12 @@
 import { animate, style, transition, trigger } from '@angular/animations';
-import {
-  AfterViewInit,
+import { AsyncPipe, CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, AfterViewInit,
   ChangeDetectorRef,
   Component,
   EventEmitter,
+  forwardRef,
+  inject,
+  Injector,
   Input,
   NgZone,
   OnChanges,
@@ -14,10 +17,12 @@ import {
   SimpleChanges,
   TemplateRef,
   ViewChild,
-} from '@angular/core';
-import { NgForm, NgModel } from '@angular/forms';
-import { MatPaginator, PageEvent } from '@angular/material/paginator';
-import { SortDirection } from '@angular/material/sort';
+  signal,
+ } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { FormsModule, NgForm, NgModel } from '@angular/forms';
+import { MatPaginator, PageEvent } from '../../../shared/services/tailwind-material-replacements';
+export type SortDirection = 'asc' | 'desc' | '';
 import { Store } from '@ngrx/store';
 import {
   SetClientFilterKey,
@@ -35,6 +40,7 @@ import {
   ResetPagination,
   ResetPaginationSortFilter,
   PaginatedAction,
+  defaultClientPaginationPageSize,
 } from '@stratosui/store';
 import {
   asapScheduler,
@@ -76,17 +82,36 @@ import {
   IGlobalListAction,
   IListConfig,
   IListFilter,
+  IListMultiFilterConfigItem,
   IMultiListAction,
   IOptionalAction,
   ListConfig,
   ListViewTypes,
   MultiFilterManager,
 } from './list.component.types';
+import { CardsComponent } from './list-cards/cards.component';
+import { TableComponent } from './list-table/table.component';
+import { PollingIndicatorComponent } from '../polling-indicator/polling-indicator.component';
+import { MetricsRangeSelectorComponent } from '../metrics-range-selector/metrics-range-selector.component';
+import { MaxListMessageComponent } from './max-list-message/max-list-message.component';
+import { AppPaginatorComponent } from '../app-paginator/app-paginator.component';
 
 @Component({
   selector: 'app-list',
   templateUrl: './list.component.html',
   styleUrls: ['./list.component.scss'],
+  standalone: true,
+  imports: [
+    AsyncPipe,
+    CommonModule,
+    FormsModule,
+    CardsComponent,
+    forwardRef(() => TableComponent),
+    PollingIndicatorComponent,
+    MetricsRangeSelectorComponent,
+    MaxListMessageComponent,
+    AppPaginatorComponent,
+  ],
   animations: [
     trigger('list', [
       transition('* => in', [
@@ -95,18 +120,19 @@ import {
       ]),
       transition('* => left, * => repeatLeft', [
         style({ opacity: '0', transform: 'translateX(-2%)' }),
-        animate('350ms ease-out', style({ opacity: '1', transform: 'translateX(0)' })),
+        animate('350ms ease-out', style({ opacity: '1', transform: 'translateX(0)' }))
       ]),
       transition('* => right, * => repeatRight', [
         style({ opacity: '0', transform: 'translateX(2%)' }),
-        animate('350ms ease-out', style({ opacity: '1', transform: 'translateX(0)' })),
+        animate('350ms ease-out', style({ opacity: '1', transform: 'translateX(0)' }))
       ])
     ])
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterViewInit {
-  private uberSub: Subscription;
-  public entitySelectConfig: EntitySelectConfig;
+  private uberSub!: Subscription;
+  public entitySelectConfig!: EntitySelectConfig;
 
   @Input() addForm: NgForm;
 
@@ -119,11 +145,12 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   // List config when supplied as an attribute rather than a dependency
   @Input() listConfig: ListConfig<T>;
 
-  entitySelectValue = new BehaviorSubject(undefined);
-  entitySelectValue$: Observable<number> = this.entitySelectValue.asObservable();
+  private entitySelectValue = signal<number | undefined>(undefined);
+  private entitySelectValueSubject = new BehaviorSubject<number | undefined>(undefined);
+  entitySelectValue$ = this.entitySelectValueSubject.asObservable();
 
   pPaginator: MatPaginator;
-  private filterString: string;
+  private filterString!: string;
 
   @ViewChild(MatPaginator) set setPaginator(paginator: MatPaginator) {
     if (!paginator || this.paginationWidgetToStore) {
@@ -162,7 +189,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       map(value => value as string),
       tap(filterString => {
         return this.paginationController.filterByString(filterString);
-      })).subscribe();
+      })
+    ).subscribe();
   }
 
   @Output() initialised = new EventEmitter<boolean>();
@@ -175,10 +203,10 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     pageIndex: number,
     length: number;
   } = {
-      pageSizeOptions: null,
-      pageSize: null,
-      pageIndex: null,
-      length: null
+      pageSizeOptions: [],
+      pageSize: defaultClientPaginationPageSize,
+      pageIndex: 0,
+      length: 0
     };
   private headerSort: {
     direction: SortDirection,
@@ -187,23 +215,25 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       direction: null,
       value: null
     };
-  private sortColumns: ITableColumn<T>[];
-  private filterColumns: IListFilter[];
+  sortColumns: ITableColumn<T>[] = [];
+  filterColumns: IListFilter[] = [];
   private filterSelected: IListFilter;
 
-  private paginationWidgetToStore: Subscription;
-  private filterWidgetToStore: Subscription;
-  private multiFilterChangesSub: Subscription;
+  private paginationWidgetToStore!: Subscription;
+  private filterWidgetToStore!: Subscription;
+  private multiFilterChangesSub!: Subscription;
 
-  globalActions: IGlobalListAction<T>[];
-  multiActions: IMultiListAction<T>[];
-  haveMultiActions = new BehaviorSubject(false);
-  hasSingleActions: boolean;
-  columns: ITableColumn<T>[];
-  dataSource: IListDataSource<T>;
+  globalActions!: IGlobalListAction<T>[];
+  multiActions!: IMultiListAction<T>[];
+  private haveMultiActionsSignal = signal<boolean>(false);
+  private haveMultiActionsSubject = new BehaviorSubject<boolean>(false);
+  haveMultiActions = this.haveMultiActionsSubject.asObservable();
+  hasSingleActions!: boolean;
+  columns!: ITableColumn<T>[];
+  dataSource!: IListDataSource<T>;
   multiFilterManagers: MultiFilterManager<T>[];
 
-  paginationController: IListPaginationController<T>;
+  paginationController!: IListPaginationController<T>;
   private multiFilterWidgetObservables = new Array<Subscription>();
 
   view$: Observable<ListView>;
@@ -238,12 +268,11 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     return this.addForm || {};
   }
 
-  constructor(
-    private store: Store<GeneralAppState>,
-    private cd: ChangeDetectorRef,
-    @Optional() public config: ListConfig<T>,
-    private ngZone: NgZone,
-  ) { }
+  private store = inject(Store<GeneralAppState>);
+  private cd = inject(ChangeDetectorRef);
+  public config = inject(ListConfig<T>, { optional: true });
+  private ngZone = inject(NgZone);
+  private injector = inject(Injector);
 
   ngOnInit() {
     // null list means we have list bound but no value available yet
@@ -282,7 +311,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   }
 
   private getMultiFilterManagers() {
-    const configs = this.config.getMultiFiltersConfigs();
+    const configs = this.config?.getMultiFiltersConfigs();
     if (!configs) {
       return null;
     }
@@ -292,20 +321,21 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   // TODO: This needs tidying up - NJ
   private initialise() {
     this.globalActions = this.setupActionsDefaultObservables(
-      this.config.getGlobalActions()
+      this.config?.getGlobalActions() ?? []
     );
     this.multiActions = this.setupActionsDefaultObservables(
-      this.config.getMultiActions()
+      this.config?.getMultiActions() ?? []
     );
-    this.hasSingleActions = (this.config.getSingleActions() || []).length > 0;
-    this.columns = this.config.getColumns();
-    this.dataSource = this.config.getDataSource();
+    this.hasSingleActions = (this.config?.getSingleActions() || []).length > 0;
+    this.columns = this.config?.getColumns()!;
+    this.dataSource = this.config?.getDataSource()!;
     this.entitySelectConfig = this.dataSource.entitySelectConfig;
 
     this.dataSource.pagination$.pipe(
       first(),
     ).subscribe(pag => {
-      this.entitySelectValue.next(pag.forcedLocalPage);
+      this.entitySelectValue.set(pag.forcedLocalPage);
+      this.entitySelectValueSubject.next(pag.forcedLocalPage);
     });
 
 
@@ -328,10 +358,10 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     const { view, } = getListStateObservables(this.store, this.listViewKey);
     this.view$ = view.pipe(
       map(listView => {
-        if (this.config.viewType === ListViewTypes.CARD_ONLY) {
+        if (this.config?.viewType === ListViewTypes.CARD_ONLY) {
           return 'cards';
         }
-        if (this.config.viewType === ListViewTypes.TABLE_ONLY) {
+        if (this.config?.viewType === ListViewTypes.TABLE_ONLY) {
           return 'table';
         }
         return listView;
@@ -348,14 +378,14 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     // Determine if this list view needs the control header bar at the top
     this.hasControls$ = this.view$.pipe(map((viewType) => {
       return !!(
-        this.config.viewType === 'both' ||
-        this.config.text && this.config.text.title ||
+        this.config?.viewType === 'both' ||
+        this.config?.text && this.config?.text.title ||
         this.addForm ||
         this.globalActions && this.globalActions.length ||
         this.multiActions && this.multiActions.length ||
         viewType === 'cards' && this.sortColumns && this.sortColumns.length ||
         this.multiFilterManagers && this.multiFilterManagers.length ||
-        this.config.enableTextFilter
+        this.config?.enableTextFilter
       );
     }));
 
@@ -373,7 +403,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     );
 
     // Determine if we should hide the paginator
-    this.hidePaginator$ = observableCombineLatest(this.hasRows$, this.dataSource.pagination$).pipe(
+    this.hidePaginator$ = observableCombineLatest(this.hasRows$, this.paginationController.pagination$).pipe(
       map(([hasRows, pagination]) => {
         const minPageSize = (
           this.paginatorSettings.pageSizeOptions && this.paginatorSettings.pageSizeOptions.length ?
@@ -384,8 +414,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       }));
 
 
-    this.paginatorSettings.pageSizeOptions = this.config.pageSizeOptions ||
-      (this.config.viewType === ListViewTypes.TABLE_ONLY ? defaultPaginationPageSizeOptionsTable : defaultPaginationPageSizeOptionsCards);
+    this.paginatorSettings.pageSizeOptions = this.config?.pageSizeOptions ||
+      (this.config?.viewType === ListViewTypes.TABLE_ONLY ? defaultPaginationPageSizeOptionsTable : defaultPaginationPageSizeOptionsCards);
 
     // Ensure we set a pageSize that's relevant to the configured set of page sizes. The default is 9 and in some cases is not a valid
     // pageSize
@@ -405,8 +435,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       this.paginatorSettings.pageSize = pagination.pageSize;
     }));
 
-    this.sortColumns = this.columns.filter((column: ITableColumn<T>) => {
-      return column.sort;
+    this.sortColumns = (this.columns || []).filter((column: ITableColumn<T>) => {
+      return column && column.sort;
     });
 
     const sortStoreToWidget = this.paginationController.sort$.pipe(tap((sort: ListSort) => {
@@ -414,7 +444,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       this.headerSort.direction = sort.direction;
     }));
 
-    this.filterColumns = this.config.getFilters ? this.config.getFilters() : [];
+    this.filterColumns = this.config?.getFilters ? this.config?.getFilters() : [];
 
     const filterStoreToWidget = this.paginationController.filter$.pipe(
       distinctUntilChanged(),
@@ -471,7 +501,11 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       tap(() => {
         Object.values(this.multiFilterManagers).forEach((filterManager: MultiFilterManager<T>, index: number) => {
           // Pipe changes in the widgets to the store
-          const sub = filterManager.multiFilterConfig.select.asObservable().pipe(tap((filterItem: string) => {
+          // Handle both BehaviorSubject and Signal wrappers
+          const select$ = 'asObservable' in filterManager.multiFilterConfig.select
+            ? filterManager.multiFilterConfig.select.asObservable()
+            : toObservable(filterManager.multiFilterConfig.select, { injector: this.injector });
+          const sub = select$.pipe(tap((filterItem: string) => {
             this.paginationController.multiFilter(filterManager.multiFilterConfig, filterItem);
           }));
           this.multiFilterWidgetObservables.push(sub.subscribe());
@@ -508,7 +542,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     const haveMultiActions = observableCombineLatest(visibles$).pipe(
       map(visibles => visibles.some(visible => visible)),
       tap(allowSelection => {
-        this.haveMultiActions.next(allowSelection);
+        this.haveMultiActionsSignal.set(allowSelection);
+        this.haveMultiActionsSubject.next(allowSelection);
       })
     );
 
@@ -630,13 +665,13 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       case ListViewTypes.CARD_ONLY:
         return 'cards';
       default:
-        return this.config.defaultView || 'table';
+        return this.config?.defaultView || 'table';
     }
   }
 
   public resetFilteringAndSort() {
     /* tslint:disable-next-line:no-string-literal  */
-    const pAction: PaginatedAction = this.dataSource.action['length'] ? this.dataSource.action[0] : this.dataSource.action;
+    const pAction: PaginatedAction = (this.dataSource.action as any)['length'] ? (this.dataSource.action as any)[0] : this.dataSource.action;
     this.store.dispatch(new ResetPaginationSortFilter(pAction));
 
     if (!this.dataSource.isLocal) {
@@ -644,7 +679,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     }
 
     // Reset the multi-entity filter
-    this.entitySelectValue.next(undefined);
+    this.entitySelectValue.set(undefined);
+    this.entitySelectValueSubject.next(undefined);
     this.setEntityPage(undefined);
   }
 
@@ -669,8 +705,22 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     ));
   }
 
+  onPaginateChange(pageEvent: PageEvent) {
+    const pageSizeChanged = this.paginatorSettings.pageSize !== pageEvent.pageSize;
+    const pageChanged = this.paginatorSettings.pageIndex !== pageEvent.pageIndex;
+
+    if (pageSizeChanged) {
+      this.paginationController.pageSize(pageEvent.pageSize);
+      if (this.dataSource.isLocal) {
+        this.paginationController.page(0);
+      }
+    } else if (pageChanged) {
+      this.paginationController.page(pageEvent.pageIndex);
+    }
+  }
+
   executeActionMultiple(listActionConfig: IMultiListAction<T>) {
-    const result = listActionConfig.action(Array.from(this.dataSource.selectedRows.values()));
+    const result = listActionConfig.action(Array.from(this.dataSource.selectedRows().values()));
     if (isObservable(result)) {
       const sub = this.getActionSub(result);
       this.pendingActions.set(result, sub);
@@ -712,6 +762,28 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     }
   }
 
+  /**
+   * Helper method to calculate the last item index on the current page
+   */
+  public getPageEndIndex(): number {
+    if (!this.paginatorSettings) {
+      return 0;
+    }
+    const { pageIndex, pageSize, length } = this.paginatorSettings;
+    return Math.min((pageIndex + 1) * pageSize, length);
+  }
+
+  /**
+   * Helper method to calculate the last page index
+   */
+  public getLastPageIndex(): number {
+    if (!this.paginatorSettings || !this.paginatorSettings.pageSize) {
+      return 0;
+    }
+    const { length, pageSize } = this.paginatorSettings;
+    return Math.floor(length / pageSize);
+  }
+
   // Used by multi-entity lists
   public setEntityPage(page: number) {
     this.pPaginator.firstPage();
@@ -740,7 +812,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   }
 
   private getRowStateGeneratorFromEntityMonitor(entityConfig: EntityCatalogEntityConfig, dataSource: IListDataSource<T>) {
-    return (row) => {
+    return (row: any) => {
       if (!entityConfig || !row) {
         return observableOf(getDefaultRowState());
       }
@@ -767,5 +839,30 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
   public showAllAfterMax() {
     this.dataSource.showAllAfterMax();
+  }
+
+  // TrackBy functions for @for loops to optimize change detection
+  trackByAction(index: number, action: IOptionalAction<T>): string {
+    return action.label || index.toString();
+  }
+
+  trackByMultiFilterManager(index: number, manager: MultiFilterManager<T>): string {
+    return manager.filterKey;
+  }
+
+  trackByFilterItem(index: number, item: IListMultiFilterConfigItem): string {
+    return item.value;
+  }
+
+  trackByEntitySelectItem(index: number, item: any): number {
+    return item.page;
+  }
+
+  trackByFilter(index: number, filter: IListFilter): string {
+    return filter.key;
+  }
+
+  trackByColumn(index: number, column: ITableColumn<T>): string {
+    return column.columnId || index.toString();
   }
 }

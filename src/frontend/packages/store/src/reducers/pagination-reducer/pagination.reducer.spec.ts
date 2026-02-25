@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { HttpRequest } from '@angular/common/http';
 
 import { RequestTypes } from '../../actions/request.actions';
@@ -13,7 +14,7 @@ function getReducer() {
   return createPaginationReducer([
     RequestTypes.START,
     RequestTypes.SUCCESS,
-    RequestTypes.FAILED
+    RequestTypes.FAILED,
   ]);
 }
 
@@ -56,7 +57,7 @@ describe('PaginationReducer', () => {
     const paginationReducer = createPaginationReducer([
       RequestTypes.START,
       RequestTypes.SUCCESS,
-      RequestTypes.FAILED
+      RequestTypes.FAILED,
     ]);
     const apiAction = new MockPagAction();
     apiAction.paginationKey = 'PaginationKey';
@@ -73,7 +74,7 @@ describe('PaginationReducer', () => {
             ids: {},
             pageRequests: {},
             clientPagination: {
-              ...defaultClientPagination
+              ...defaultClientPagination,
             }
           }
         }
@@ -91,11 +92,11 @@ describe('PaginationReducer', () => {
               message: '',
               maxed: false,
               baseEntityConfig: { entityType: apiAction.entityType, endpointType: apiAction.endpointType, schemaKey: undefined },
-              entityConfig: null
+              entityConfig: null,
             }
           },
           clientPagination: {
-            ...defaultClientPagination
+            ...defaultClientPagination,
           }
         }
       }
@@ -104,7 +105,7 @@ describe('PaginationReducer', () => {
       newState,
       expectedNewState,
       entityKey,
-      paginationKey: apiAction.paginationKey
+      paginationKey: apiAction.paginationKey,
     });
   });
 
@@ -147,7 +148,7 @@ describe('PaginationReducer', () => {
           ids: {},
           pageRequests: {},
           clientPagination: {
-            ...defaultClientPagination
+            ...defaultClientPagination,
           }
         }
       }
@@ -164,7 +165,7 @@ describe('PaginationReducer', () => {
           pageRequests: { 1: { busy: false, error: false, message: '' } },
           clientPagination: {
             ...defaultClientPagination,
-            totalResults: 2
+            totalResults: 2,
           }
         }
       }
@@ -173,7 +174,7 @@ describe('PaginationReducer', () => {
       newState,
       expectedNewState,
       entityKey,
-      paginationKey
+      paginationKey,
     });
   });
 
@@ -209,7 +210,7 @@ describe('PaginationReducer', () => {
           ids: {},
           pageRequests: {},
           clientPagination: {
-            ...defaultClientPagination
+            ...defaultClientPagination,
           }
         }
       }
@@ -223,7 +224,7 @@ describe('PaginationReducer', () => {
           ids: {},
           pageRequests: { 1: { busy: false, error: true, message } },
           clientPagination: {
-            ...defaultClientPagination
+            ...defaultClientPagination,
           }
         }
       }
@@ -232,7 +233,7 @@ describe('PaginationReducer', () => {
       newState,
       expectedNewState,
       entityKey,
-      paginationKey
+      paginationKey,
     });
   });
 });

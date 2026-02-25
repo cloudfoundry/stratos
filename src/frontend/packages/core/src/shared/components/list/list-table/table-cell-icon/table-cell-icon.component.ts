@@ -1,4 +1,5 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 import { TableCellCustom } from '../../list.types';
 
@@ -10,9 +11,18 @@ export interface TableCellIconComponentConfig<T> {
 @Component({
   selector: 'app-table-cell-icon',
   templateUrl: './table-cell-icon.component.html',
-  styleUrls: ['./table-cell-icon.component.scss']
+  styleUrls: ['./table-cell-icon.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule
+  ]
 })
 export class TableCellIconComponent<T = any> extends TableCellCustom<T, TableCellIconComponentConfig<T>> {
+
+  constructor(private cdr: ChangeDetectorRef) {
+    super();
+  }
 
   @Input('row')
   get row() { return super.row; }
@@ -20,6 +30,7 @@ export class TableCellIconComponent<T = any> extends TableCellCustom<T, TableCel
     super.row = row;
     if (this.config) {
       this.icon = this.config.getIcon(row);
+      this.cdr.markForCheck();
     }
   }
 
@@ -34,7 +45,7 @@ export class TableCellIconComponent<T = any> extends TableCellCustom<T, TableCel
     this.size = config.size;
   }
 
-  icon: { icon: string, font?: string, tooltip?: string; };
+  icon!: { icon: string, font?: string, tooltip?: string; };
   size = '24px';
   tooltip = '';
 

@@ -61,16 +61,18 @@ export function cfUserReducer(state: IRequestEntityTypeState<APIResource<CfUser>
   return state;
 }
 
-export function endpointDisconnectUserReducer(state: IRequestEntityTypeState<APIResource<CfUser>>, action: DisconnectEndpoint) {
+export function endpointDisconnectUserReducer(state: IRequestEntityTypeState<APIResource<CfUser>>, action: DisconnectEndpoint): IRequestEntityTypeState<APIResource<CfUser>> {
   if (action.endpointType === CF_ENDPOINT_TYPE) {
     switch (action.type) {
       case DISCONNECT_ENDPOINTS_SUCCESS:
         const cfGuid = action.guid;
         // remove users that belong to this CF
-        const newUsers = {};
+        const newUsers: IRequestEntityTypeState<APIResource<CfUser>> = {};
         Object.values(state)
-          .filter(u => u.entity.cfGuid !== cfGuid)
-          .forEach(u => newUsers[u.metadata.guid] = u);
+          .filter((u: APIResource<CfUser>) => u.entity.cfGuid !== cfGuid)
+          .forEach((u: APIResource<CfUser>) => {
+            newUsers[u.metadata.guid] = u;
+          });
         return newUsers;
     }
   }
@@ -84,10 +86,10 @@ function updatePermission(
   permissionType: OrgUserRoleNames | SpaceUserRoleNames,
   add = false) {
   const type = isSpace ? 'space' : 'org';
-  const paramName = properties[type][permissionType];
+  const paramName: any = (properties as any)[type][permissionType];
   const newCollection = add ?
-    [...user[paramName], entityGuid] :
-    user[paramName].filter(guid => guid !== entityGuid);
+    [...(user as any)[paramName], entityGuid] :
+    (user as any)[paramName].filter((guid: string) => guid !== entityGuid);
   return {
     ...user,
     [paramName]: newCollection
@@ -112,11 +114,11 @@ export function userSpaceOrgReducer<T = StateEntity>(isSpace: boolean) {
 }
 
 function newEntityState<T = StateEntity>(state: StateEntities<T>, action: ChangeCfUserRole, add: boolean): StateEntities<T> {
-  const apiResource: APIResource<T> = state[action.guid];
+  const apiResource: APIResource<T> | undefined = state[action.guid];
   if (!apiResource) {
     return state;
   }
-  let roles: string[] = apiResource.entity[action.permissionTypeKey];
+  let roles: string[] | undefined = (apiResource.entity as any)[action.permissionTypeKey];
   if (!roles) {
     // No roles in entity, we can't modify them if they don't exist
     return state;
@@ -140,13 +142,15 @@ function newEntityState<T = StateEntity>(state: StateEntities<T>, action: Change
     return state;
   }
 
+  const updatedEntity: any = Object.assign({}, apiResource.entity, {
+    [action.permissionTypeKey]: roles
+  });
+
   return {
     ...state,
     [action.guid]: {
       ...apiResource,
-      entity: Object.assign({}, apiResource.entity, {
-        [action.permissionTypeKey]: roles
-      })
+      entity: updatedEntity
     }
   };
 }
@@ -178,12 +182,12 @@ function updateUserMissingRoles(users: IRequestEntityTypeState<APIResource<CfUse
   }
 
   // Create a delta of the changes, this will ensure we only return an updated state if there are updates
-  const haveUpdatedUsers: boolean = Object.values(usersInResponse).reduce((changes, user) => {
+  const haveUpdatedUsers: boolean = Object.values(usersInResponse).reduce((changes: boolean, user: APIResource<CfUser>) => {
     const oldMissingRoles = (users[user.metadata.guid] ? users[user.metadata.guid].entity.missingRoles : null)
       || getDefaultCfUserMissingRoles();
     const newMissingRoles = getDefaultCfUserMissingRoles();
-    Object.values(CfUserRoleParams).forEach((roleParam) => {
-      if (user.entity[roleParam]) {
+    Object.values(CfUserRoleParams).forEach((roleParam: string) => {
+      if ((user.entity as any)[roleParam]) {
         return;
       }
       // What's with all the `as`? Typing fun...

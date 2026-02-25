@@ -1,4 +1,4 @@
-@import '../../theme.scss';
+@use '../../theme.scss';
 
 .panel {
   padding: 2em;
@@ -10,12 +10,12 @@
   }
 
   &--background {
-    background-color: $layout-light;
+    background-color: var(--color-layout-light);
   }
 
   &--border {
-    border-radius: $border-radius;
-    border: 1px solid darken($layout-light, 5);
+    border-radius: var(--border-radius);
+    border: 1px solid #e1e5e9; // slightly darker than layout-light
   }
 
   &__title {

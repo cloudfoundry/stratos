@@ -1,4 +1,4 @@
-import { EntityRequestAction } from 'frontend/packages/store/src/types/request.types';
+import { EntityRequestAction } from '@stratosui/store';
 
 import { MonocularPaginationAction } from '../../../helm/store/helm.actions';
 import { HelmUpgradeValues } from '../../../helm/store/helm.types';

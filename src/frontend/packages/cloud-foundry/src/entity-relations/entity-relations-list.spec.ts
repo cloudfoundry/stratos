@@ -1,4 +1,5 @@
-import { EntitySchema } from '../../../store/src/helpers/entity-schema';
+import { describe, it, expect } from 'vitest';
+import { EntitySchema } from '@stratosui/store';
 import { listEntityRelations } from './entity-relations';
 import { createEntityRelationKey, EntityInlineParentAction } from './entity-relations.types';
 
@@ -28,14 +29,14 @@ describe('Entity Relations - List relations', () => {
     const child2Schema = new EntitySchema('child2', endpointType);
     const child1Schema = new EntitySchema('child1', endpointType, {
       entity: {
-        [child2Schema.entityType]: child2Schema
+        [child2Schema.entityType]: child2Schema,
       }
     });
 
     const action = createBaseAction();
     action.includeRelations = [
       createEntityRelationKey(action.entityType, child1Schema.entityType),
-      createEntityRelationKey(child1Schema.entityType, child2Schema.entityType)
+      createEntityRelationKey(child1Schema.entityType, child2Schema.entityType),
     ];
     action.entity = new EntitySchema(action.entityType, endpointType, { entity: { [child1Schema.entityType]: child1Schema } });
 
@@ -46,5 +47,3 @@ describe('Entity Relations - List relations', () => {
   });
 
 });
-
-

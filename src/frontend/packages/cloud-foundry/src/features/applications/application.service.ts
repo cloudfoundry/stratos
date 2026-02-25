@@ -3,13 +3,22 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map, pairwise, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
-import { AppMetadataTypes } from '../../../../cloud-foundry/src/actions/app-metadata.actions';
+import { APP_GUID, CF_GUID } from '@stratosui/core';
 import {
-  GetApplication,
-  UpdateApplication,
-  UpdateExistingApplication,
-} from '../../../../cloud-foundry/src/actions/application.actions';
-import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
+  ActionState,
+  APIResource,
+  endpointEntitiesSelector,
+  EntityInfo,
+  EntityService,
+  getCurrentPageRequestInfo,
+  PaginatedAction,
+  PaginationEntityState,
+  PaginationObservables,
+  rootUpdatingKey
+} from '@stratosui/store';
+import { AppMetadataTypes } from '../../actions/app-metadata.actions';
+import { GetApplication, UpdateApplication, UpdateExistingApplication } from '../../actions/application.actions';
+import { CFAppState } from '../../cf-app-state';
 import {
   applicationEntityType,
   domainEntityType,
@@ -17,18 +26,8 @@ import {
   routeEntityType,
   serviceBindingEntityType,
   spaceEntityType,
-  stackEntityType,
-} from '../../../../cloud-foundry/src/cf-entity-types';
-import { APP_GUID, CF_GUID } from '../../../../core/src/shared/entity.tokens';
-import { EntityService } from '../../../../store/src/entity-service';
-import { ActionState, rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
-import {
-  getCurrentPageRequestInfo,
-  PaginationObservables,
-} from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
-import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
-import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
-import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
+  stackEntityType
+} from '../../cf-entity-types';
 import { IApp, IAppSummary, IDomain, IOrganization, ISpace, IStack } from '../../cf-api.types';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { createEntityRelationKey } from '../../entity-relations/entity-relations.types';
@@ -61,7 +60,9 @@ export interface ApplicationData {
   cf: any;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ApplicationService {
 
   public entityService: EntityService<APIResource<IApp>>;
@@ -96,30 +97,30 @@ export class ApplicationService {
   /**
    * An observable based on the core application entity
    */
-  isFetchingApp$: Observable<boolean>;
-  isUpdatingApp$: Observable<boolean>;
+  isFetchingApp$!: Observable<boolean>;
+  isUpdatingApp$!: Observable<boolean>;
 
-  isDeletingApp$: Observable<boolean>;
+  isDeletingApp$!: Observable<boolean>;
 
-  isFetchingEnvVars$: Observable<boolean>;
-  isUpdatingEnvVars$: Observable<boolean>;
-  isFetchingStats$: Observable<boolean>;
+  isFetchingEnvVars$!: Observable<boolean>;
+  isUpdatingEnvVars$!: Observable<boolean>;
+  isFetchingStats$!: Observable<boolean>;
 
-  app$: Observable<EntityInfo<APIResource<IApp>>>;
-  waitForAppEntity$: Observable<EntityInfo<APIResource<IApp>>>;
-  appSummary$: Observable<EntityInfo<IAppSummary>>;
-  appStats$: Observable<AppStat[]>;
-  private appStatsFetching$: Observable<PaginationEntityState>; // Use isFetchingStats$ which is properly gated
+  app$!: Observable<EntityInfo<APIResource<IApp>>>;
+  waitForAppEntity$!: Observable<EntityInfo<APIResource<IApp>>>;
+  appSummary$!: Observable<EntityInfo<IAppSummary>>;
+  appStats$!: Observable<AppStat[]>;
+  private appStatsFetching$!: Observable<PaginationEntityState>; // Use isFetchingStats$ which is properly gated
   appEnvVars: PaginationObservables<APIResource>;
-  appOrg$: Observable<APIResource<IOrganization>>;
-  appSpace$: Observable<APIResource<ISpace>>;
+  appOrg$!: Observable<APIResource<IOrganization>>;
+  appSpace$!: Observable<APIResource<ISpace>>;
 
-  application$: Observable<ApplicationData>;
-  applicationStratProject$: Observable<EnvVarStratosProject>;
-  applicationState$: Observable<ApplicationStateData>;
-  applicationUrl$: Observable<string>;
-  applicationRunning$: Observable<boolean>;
-  orgDomains$: Observable<APIResource<IDomain>[]>;
+  application$!: Observable<ApplicationData>;
+  applicationStratProject$!: Observable<EnvVarStratosProject>;
+  applicationState$!: Observable<ApplicationStateData>;
+  applicationUrl$!: Observable<string>;
+  applicationRunning$!: Observable<boolean>;
+  orgDomains$!: Observable<APIResource<IDomain>[]>;
 
   /**
    * Fetch the current state of the app (given it's instances) as an object ready
@@ -246,7 +247,7 @@ export class ApplicationService {
       refCount());
 
     this.isUpdatingEnvVars$ = this.appEnvVars.pagination$.pipe(map(
-      ev => !!(getCurrentPageRequestInfo(ev).busy && ev.ids[ev.currentPage])
+      ev => !!(getCurrentPageRequestInfo(ev).busy && ev.ids[ev.currentPage]?.length > 0)
     ), startWith(false), publishReplay(1), refCount());
 
     this.isFetchingStats$ = this.appStatsFetching$.pipe(map(
@@ -268,7 +269,7 @@ export class ApplicationService {
     );
   }
 
-  isEntityComplete(value, requestInfo: { fetching: boolean, }): boolean {
+  isEntityComplete(value: any, requestInfo: { fetching: boolean, }): boolean {
     if (requestInfo) {
       return !requestInfo.fetching;
     } else {

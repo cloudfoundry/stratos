@@ -5,13 +5,13 @@ import { Observable, Subscription } from 'rxjs';
 
 import {
   CurrentUserPermissionsService,
-} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import { IListAction, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+  ConfirmationDialogConfig,
+  ConfirmationDialogService,
+  ITableColumn,
+  IListAction,
+  ListViewTypes,
+} from '@stratosui/core';
+import { RouterNav, APIResource } from '@stratosui/store';
 import { DeleteSpaceQuotaDefinition } from '../../../../../actions/quota-definitions.actions';
 import { IQuotaDefinition } from '../../../../../cf-api.types';
 import { CFAppState } from '../../../../../cf-app-state';
@@ -22,10 +22,12 @@ import { QUOTA_FROM_LIST } from '../cf-quotas/cf-quotas-list-config.service';
 import { TableCellQuotaComponent } from '../cf-quotas/table-cell-quota/table-cell-quota.component';
 import { CfOrgSpaceQuotasDataSourceService } from './cf-space-quotas-data-source.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfSpaceQuotasListConfigService extends BaseCfListConfig<APIResource<IQuotaDefinition>> {
-  dataSource: CfOrgSpaceQuotasDataSourceService;
-  deleteSubscription: Subscription;
+  dataSource!: CfOrgSpaceQuotasDataSourceService;
+  deleteSubscription!: Subscription;
   canEdit: Observable<boolean>;
   canDelete: Observable<boolean>;
 
@@ -45,7 +47,7 @@ export class CfSpaceQuotasListConfigService extends BaseCfListConfig<APIResource
 
   enableTextFilter = true;
   text = {
-    title: null,
+    title: null as string | null,
     filter: 'Search by name',
     noEntries: 'There are no quotas'
   };
@@ -73,7 +75,7 @@ export class CfSpaceQuotasListConfigService extends BaseCfListConfig<APIResource
       columnId: 'createdAt',
       headerCell: () => 'Creation',
       cellDefinition: {
-        getValue: (row: APIResource) => `${this.datePipe.transform(row.metadata.created_at, 'medium')}`
+        getValue: (row: APIResource<IQuotaDefinition>) => `${this.datePipe.transform(row.metadata.created_at, 'medium')}`
       },
       sort: {
         type: 'sort',
@@ -84,14 +86,14 @@ export class CfSpaceQuotasListConfigService extends BaseCfListConfig<APIResource
   ];
 
   private listActionDelete: IListAction<APIResource<IQuotaDefinition>> = {
-    action: (item: APIResource) => this.deleteSingleQuota(item),
+    action: (item: APIResource<IQuotaDefinition>) => this.deleteSingleQuota(item),
     label: 'Delete',
     description: 'Delete space quota',
     createVisible: () => this.canDelete
   };
 
   private listActionEdit: IListAction<APIResource<IQuotaDefinition>> = {
-    action: (item: APIResource) => this.editSingleQuota(item),
+    action: (item: APIResource<IQuotaDefinition>) => this.editSingleQuota(item),
     label: 'Edit',
     description: 'Edit space quota',
     createVisible: () => this.canEdit

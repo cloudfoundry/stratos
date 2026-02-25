@@ -1,5 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
@@ -13,8 +15,9 @@ describe('AcmeLoginComponent', () => {
   let component: AcmeLoginComponent;
   let fixture: ComponentFixture<AcmeLoginComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       declarations: [AcmeLoginComponent],
       imports: [
         CommonModule,
@@ -22,11 +25,11 @@ describe('AcmeLoginComponent', () => {
         SharedModule,
         RouterTestingModule,
         NoopAnimationsModule,
-        StoreModule.forRoot(appReducers)
+        StoreModule.forRoot(appReducers),
       ]
-    })
+    }),
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AcmeLoginComponent);

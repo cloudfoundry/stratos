@@ -1,16 +1,19 @@
-import { Injectable } from '@angular/core';
+import { Injectable, computed, Injector, inject, runInInjectionContext } from '@angular/core';
+import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { filter, first, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
 
-import { GetAllEndpoints } from '../../../../store/src/actions/endpoint.actions';
-import { AppState } from '../../../../store/src/app-state';
-import { EntityService } from '../../../../store/src/entity-service';
-import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
-import { EndpointModel } from '../../../../store/src/public-api';
-import { PaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
-import { EntityInfo } from '../../../../store/src/types/api.types';
-import { EndpointUser } from '../../../../store/src/types/endpoint.types';
+import {
+  GetAllEndpoints,
+  AppState,
+  EntityService,
+  EntityServiceFactory,
+  EndpointModel,
+  PaginationObservables,
+  EntityInfo,
+  EndpointUser
+} from '@stratosui/store';
 import { kubeEntityCatalog } from '../kubernetes-entity-generator';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import {
@@ -44,7 +47,9 @@ export interface CaaspNodeData {
 }
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class KubernetesEndpointService {
   info$: Observable<EntityInfo<any>>;
   cfInfoEntityService: EntityService<any>;
@@ -52,7 +57,7 @@ export class KubernetesEndpointService {
   kubeEndpointEntityService: EntityService<EndpointModel>;
   connected$: Observable<boolean>;
   currentUser$: Observable<EndpointUser>;
-  kubeGuid: string;
+  kubeGuid!: string;
   deployments$: Observable<KubernetesDeployment[]>;
   statefulSets$: Observable<KubernetesStatefulSet[]>;
   services$: Observable<KubeService[]>;
@@ -65,22 +70,33 @@ export class KubernetesEndpointService {
   kubeDashboardConfigured$: Observable<boolean>;
   kubeTerminalEnabled$: Observable<boolean>;
 
+  private injector = inject(Injector);
+
   public static hasKubeTerminalEnabled(store: Store<AppState>): Observable<boolean> {
+    // ZONELESS FIX: Don't block when plugin-config is missing
+    // Use switchMap to emit false when config is unavailable
     return store.select('auth').pipe(
-      filter(auth => !!auth.sessionData['plugin-config']),
-      map(auth => auth.sessionData['plugin-config'].kubeTerminalEnabled === 'true')
+      switchMap(auth =>
+        auth?.sessionData?.['plugin-config']
+          ? of(auth.sessionData['plugin-config'].kubeTerminalEnabled === 'true')
+          : of(false)
+      )
     );
   }
 
   public static getKubeDashboardStatus(store: Store<AppState>, kubeGuid: string): Observable<KubeDashboardStatus> {
+    // ZONELESS FIX: Don't block when plugin-config is missing
     const kubeDashboardEnabled$ = store.select('auth').pipe(
-      filter(auth => !!auth.sessionData['plugin-config']),
-      map(auth => auth.sessionData['plugin-config'].kubeDashboardEnabled === 'true')
+      switchMap(auth =>
+        auth?.sessionData?.['plugin-config']
+          ? of(auth.sessionData['plugin-config'].kubeDashboardEnabled === 'true')
+          : of(false)
+      )
     );
 
+    // ZONELESS FIX: Don't block when status entity is null
     const kubeDashboardStatus$ = kubeEntityCatalog.dashboard.store.getEntityService(kubeGuid).waitForEntity$.pipe(
-      map(status => status.entity),
-      filter(status => !!status)
+      map(status => status?.entity || null)
     );
 
     return kubeDashboardEnabled$.pipe(switchMap(enabled => enabled ? kubeDashboardStatus$ : of(null)));
@@ -104,7 +120,7 @@ export class KubernetesEndpointService {
     }
   }
 
-  initialize(kubeGuid) {
+  initialize(kubeGuid: string): void {
     this.kubeGuid = kubeGuid;
 
     this.kubeEndpointEntityService = this.entityServiceFactory.create(
@@ -125,7 +141,7 @@ export class KubernetesEndpointService {
           disruptiveUpdates: 0,
           securityUpdates: 0
         };
-        const versions = {};
+        const versions: Record<string, number> = {};
 
         nodes.forEach(n => {
           const nodeData = this.getCaaspNodeData(n);
@@ -157,7 +173,7 @@ export class KubernetesEndpointService {
     );
   }
 
-  getCaaspNodeData(n: KubernetesNode): CaaspNodeData {
+  getCaaspNodeData(n: KubernetesNode): CaaspNodeData | undefined {
     if (n && n.metadata && n.metadata.annotations) {
       return {
         version: n.metadata.annotations[CAASP_VERSION_ANNOTATION],
@@ -166,6 +182,7 @@ export class KubernetesEndpointService {
         securityUpdates: this.hasBooleanAnnotation(n.metadata.annotations, CAASP_SECURITY_UPDATES_ANNOTATION)
       };
     }
+    return undefined;
   }
 
   // Check for the specified annotation with a value of 'yes'
@@ -173,10 +190,10 @@ export class KubernetesEndpointService {
     return annotations[annotation] && annotations[annotation] === 'yes' ? true : false;
   }
 
-  getNodeKubeVersions(nodes$: Observable<KubernetesNode[]> = this.nodes$) {
+  getNodeKubeVersions(nodes$: Observable<KubernetesNode[]> = this.nodes$): Observable<string> {
     return nodes$.pipe(
       map(nodes => {
-        const versions = {};
+        const versions: Record<string, string> = {};
         nodes.forEach(node => {
           const v = node.status.nodeInfo.kubeletVersion;
           if (!versions[v]) {
@@ -188,7 +205,7 @@ export class KubernetesEndpointService {
     );
   }
 
-  getCountObservable(entities$: Observable<any[]>) {
+  getCountObservable(entities$: Observable<any[]>): Observable<number | null> {
     return entities$.pipe(
       map(entities => entities.length),
       startWith(null)
@@ -196,22 +213,33 @@ export class KubernetesEndpointService {
   }
 
   getPodCapacity(nodes$: Observable<KubernetesNode[]> = this.nodes$, pods$: Observable<KubernetesPod[]> = this.pods$) {
-    return combineLatest(nodes$, pods$).pipe(
-      map(([nodes, pods]) => ({
-        total: nodes.reduce((cap, node) => {
-          return cap + parseInt(node.status.capacity.pods, 10);
-        }, 0),
-        used: pods.length
-      }))
-    );
+    // Convert to signals within injection context
+    return runInInjectionContext(this.injector, () => {
+      const nodesSignal = toSignal(nodes$, { initialValue: [] as KubernetesNode[] });
+      const podsSignal = toSignal(pods$, { initialValue: [] as KubernetesPod[] });
+
+      // Compute capacity
+      const capacityComputed = computed(() => {
+        const nodes = nodesSignal();
+        const pods = podsSignal();
+        return {
+          total: nodes.reduce((cap, node) => {
+            return cap + parseInt(node.status.capacity.pods, 10);
+          }, 0),
+          used: pods.length
+        };
+      });
+
+      return toObservable(capacityComputed);
+    });
   }
 
   getNodeStatusCount(
     nodes$: Observable<KubernetesNode[]>,
     conditionType: string,
-    valueLabels: object = {},
+    valueLabels: Record<string, any> = {},
     countStatus = 'True'
-  ) {
+  ): Observable<any> {
     return nodes$.pipe(
       map(nodes => {
         const total = nodes.length;
@@ -264,9 +292,13 @@ export class KubernetesEndpointService {
 
     this.kubeDashboardEnabled$ = KubernetesEndpointService.hasKubeTerminalEnabled(this.store);
 
+    // ZONELESS FIX: Don't block when plugin-config is missing
     this.kubeTerminalEnabled$ = this.store.select('auth').pipe(
-      filter(auth => !!auth.sessionData['plugin-config']),
-      map(auth => auth.sessionData['plugin-config'].kubeTerminalEnabled === 'true')
+      switchMap(auth =>
+        auth?.sessionData?.['plugin-config']
+          ? of(auth.sessionData['plugin-config'].kubeTerminalEnabled === 'true')
+          : of(false)
+      )
     );
 
     this.kubeDashboardStatus$ = KubernetesEndpointService.getKubeDashboardStatus(this.store, this.kubeGuid);
@@ -293,6 +325,12 @@ export class KubernetesEndpointService {
   }
 
   private getObservable<T>(obs: PaginationObservables<T>): Observable<T[]> {
-    return obs.entities$.pipe(filter(p => !!p), first());
+    // ZONELESS FIX: Don't block the observable chain when entities are null
+    // The filter was preventing any emissions, which blocked combineLatest from ever firing
+    // Now we emit an empty array when entities are null, allowing the template to render
+    return obs.entities$.pipe(
+      map(p => p || []),
+      first()
+    );
   }
 }

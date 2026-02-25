@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { MDAppModule } from '../../../../../../core/src/public-api';
 import { KubeBaseGuidMock, KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
@@ -10,21 +12,21 @@ describe('ResourceAlertViewComponent', () => {
   let component: ResourceAlertViewComponent;
   let fixture: ComponentFixture<ResourceAlertViewComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [ResourceAlertViewComponent],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         KubernetesBaseTestModules,
-        MDAppModule
+        MDAppModule,
+        ResourceAlertViewComponent,
       ],
       providers: [
         KubernetesAnalysisService,
         KubernetesEndpointService,
         KubeBaseGuidMock,
+        provideZonelessChangeDetection(),
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ResourceAlertViewComponent);

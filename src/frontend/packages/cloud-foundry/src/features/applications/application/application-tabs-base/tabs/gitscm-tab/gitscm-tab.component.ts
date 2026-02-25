@@ -1,8 +1,8 @@
-import { DatePipe } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
+import { CommonModule, DatePipe } from '@angular/common';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { TailwindSnackBarService, TailwindSnackBarRef } from '@stratosui/core';
 import { Store } from '@ngrx/store';
-import { GitCommit, gitEntityCatalog, GitMeta, GitRepo, GitSCMService, GitSCMType, SCMIcon } from '@stratosui/git';
+import { GitCommit, gitEntityCatalog, GitMeta, GitRepo, GitSCMService, GitSCMType, SCMIcon, GithubCommitAuthorComponent } from '@stratosui/git';
 import { Observable, Subscription } from 'rxjs';
 import {
   distinctUntilChanged,
@@ -26,12 +26,35 @@ import {
 } from '../../../../../../shared/components/list/list-types/github-commits/github-commits-list-config-app-tab.service';
 import { ApplicationService } from '../../../../application.service';
 import { EnvVarStratosProject } from '../build-tab/application-env-vars.service';
+import { LoadingPageComponent } from '../../../../../../../../core/src/shared/components/loading-page/loading-page.component';
+import { TileGridComponent } from '../../../../../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
+import { TileGroupComponent } from '../../../../../../../../core/src/shared/components/tile/tile-group/tile-group.component';
+import { TileComponent } from '../../../../../../../../core/src/shared/components/tile/tile/tile.component';
+import { MetadataItemComponent } from '../../../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
+import { ListComponent } from '../../../../../../../../core/src/shared/components/list/list.component';
+import { NoContentMessageComponent } from '../../../../../../../../core/src/shared/components/no-content-message/no-content-message.component';
+import { TruncatePipe } from '../../../../../../../../core/src/core/truncate.pipe';
 
 @Component({
   selector: 'app-gitscm-tab',
   templateUrl: './gitscm-tab.component.html',
   styleUrls: ['./gitscm-tab.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    LoadingPageComponent,
+    TileGridComponent,
+    TileGroupComponent,
+    TileComponent,
+    MetadataItemComponent,
+    ListComponent,
+    NoContentMessageComponent,
+    GithubCommitAuthorComponent,
+    TruncatePipe
+  ],
   providers: [
+    DatePipe,
     {
       provide: ListConfig,
       useFactory: (
@@ -47,15 +70,15 @@ import { EnvVarStratosProject } from '../build-tab/application-env-vars.service'
 })
 export class GitSCMTabComponent implements OnInit, OnDestroy {
 
-  public hasRepo$: Observable<boolean>;
-  public isLoading$: Observable<boolean>;
+  public hasRepo$!: Observable<boolean>;
+  public isLoading$!: Observable<boolean>;
 
-  public gitSCMRepo$: Observable<GitRepo>;
-  public commit$: Observable<GitCommit>;
-  public isHead$: Observable<boolean>;
+  public gitSCMRepo$!: Observable<GitRepo>;
+  public commit$!: Observable<GitCommit>;
+  public isHead$!: Observable<boolean>;
 
-  private gitSCMRepoErrorSub: Subscription;
-  private snackBarRef: MatSnackBarRef<SimpleSnackBar>;
+  private gitSCMRepoErrorSub!: Subscription;
+  private snackBarRef: TailwindSnackBarRef<any>;
 
   public noContentFirstLine = 'Unable to fetch details';
   public noContentSecondLine: NoContentMessageLine = {
@@ -64,7 +87,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
   public noContentOtherLines: NoContentMessageLine[] = [{
     text: 'Alternatively this may be due to a communication issue.'
   }];
-  public icon$: Observable<SCMIcon>;
+  public icon$!: Observable<SCMIcon>;
 
   ngOnDestroy(): void {
     if (this.snackBarRef) {
@@ -77,7 +100,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
 
   constructor(
     public appService: ApplicationService,
-    private snackBar: MatSnackBar,
+    private snackBar: TailwindSnackBarService,
     private scmService: GitSCMService
   ) { }
 

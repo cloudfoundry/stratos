@@ -74,6 +74,21 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
   httpClient: PipelineHttpClient,
   { action, requestType, catalogEntity, appState }: PaginatedRequestPipelineConfig
 ): Observable<PipelineResult> => {
+  // Defensive null checks for Angular 20 DI compatibility
+  if (!store || !httpClient || !action || !catalogEntity || !appState) {
+    console.error('basePaginatedRequestPipeline: Missing required dependencies', {
+      hasStore: !!store,
+      hasHttpClient: !!httpClient,
+      hasAction: !!action,
+      hasCatalogEntity: !!catalogEntity,
+      hasAppState: !!appState
+    });
+    return of({
+      success: false,
+      errorMessage: 'Missing required dependencies in basePaginatedRequestPipeline'
+    } as PipelineResult);
+  }
+
   const prePaginatedRequestFunction = getPrePaginatedRequestFunction(catalogEntity);
   const actionDispatcher = (actionToDispatch: Action) => store.dispatch(actionToDispatch);
   const entity = catalogEntity as StratosCatalogEntity;

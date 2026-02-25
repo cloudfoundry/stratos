@@ -19,9 +19,9 @@ import {
   relativePathToWorkspaceRoot,
   updateWorkspace,
   validateProjectName,
-} from '../../lib/schematics';
-import { Versions } from './../../lib/schematics';
-import { ThemeOptionsSchema } from './schema';
+} from '../../lib/schematics.js';
+import { Versions } from './../../lib/schematics.js';
+import { ThemeOptionsSchema } from './schema.js';
 
 // Reference: https://github.com/angular/angular-cli/tree/master/packages/schematics/angular
 

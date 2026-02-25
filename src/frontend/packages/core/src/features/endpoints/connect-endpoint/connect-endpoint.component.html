@@ -1,13 +1,21 @@
 <form class="connect" [formGroup]="endpointForm" (ngSubmit)="formSubmit && connectService.submit()">
-  <mat-form-field class="connect__auth-type" *ngIf="authTypesForEndpoint.length > 1">
-    <mat-select (selectionChange)="authChanged($event)" id="authType" name="authType" formControlName="authType"
-      placeholder="Auth Type">
-      <mat-option *ngFor="let auth of authTypesForEndpoint" [value]="auth.value">{{ auth.name }}</mat-option>
-    </mat-select>
-  </mat-form-field>
-  <input type="hidden" *ngIf="authTypesForEndpoint.length === 1" name="authType" formControlName="authType">
+  @if (authTypesForEndpoint.length > 1) {
+    <app-form-field class="connect__auth-type">
+      <app-select (selectionChange)="authChanged($event)" id="authType" name="authType" formControlName="authType"
+        placeholder="Auth Type">
+        @for (auth of authTypesForEndpoint; track auth) {
+          <app-option [value]="auth.value">{{ auth.name }}</app-option>
+        }
+      </app-select>
+    </app-form-field>
+  }
+  @if (authTypesForEndpoint.length === 1) {
+    <input type="hidden" name="authType" formControlName="authType">
+  }
   <template #authForm></template>
-  <mat-checkbox *ngIf="canShareEndpointToken" class="connection-dialog__shared" matInput name="systemShared"
-    formControlName="systemShared">Share this endpoint connection</mat-checkbox>
+  @if (canShareEndpointToken) {
+    <app-checkbox class="connection-dialog__shared" appInput name="systemShared"
+    formControlName="systemShared">Share this endpoint connection</app-checkbox>
+  }
   <button type="submit" style="display:none"></button>
 </form>

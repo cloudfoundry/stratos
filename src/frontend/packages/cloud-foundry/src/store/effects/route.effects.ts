@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { ApplicationRef, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
@@ -8,15 +8,18 @@ import { CFAppState } from '../../cf-app-state';
 import { ClearPaginationOfEntity } from '../../../../store/src/actions/pagination.actions';
 import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class RouteEffect {
 
   constructor(
     private actions$: Actions,
-    private store: Store<CFAppState>
+    private store: Store<CFAppState>,
+    private appRef: ApplicationRef
   ) { }
 
-  
+
   unmapEffect$ = createEffect(() => this.actions$.pipe(
     ofType<APISuccessOrFailedAction>(RouteEvents.UNMAP_ROUTE_SUCCESS),
     map((action: APISuccessOrFailedAction) => {
@@ -25,6 +28,7 @@ export class RouteEffect {
         // Remove the route from the specified pagination list
         this.store.dispatch(new ClearPaginationOfEntity(action.apiAction, action.apiAction.guid, unmapAction.clearPaginationKey));
       }
+      this.appRef.tick();
     })
   ), { dispatch: false });
 }

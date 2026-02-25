@@ -1,10 +1,14 @@
-import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
+import { CustomTooltipDirective } from '@stratosui/core';
+import { RouterModule } from '@angular/router';
 import { entityCatalog, EndpointModel, stratosEntityCatalog } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../../../core/endpoints.service';
 import { TableCellCustom } from '../../../list.types';
+import { CustomIconComponent } from '../../../../../../shared/components/custom-material/custom-material.component';
 
 export interface RowWithEndpointId {
   endpointId: string;
@@ -13,17 +17,25 @@ export interface RowWithEndpointId {
 @Component({
   selector: 'app-table-cell-endpoint-name',
   templateUrl: './table-cell-endpoint-name.component.html',
-  styleUrls: ['./table-cell-endpoint-name.component.scss']
+  styleUrls: ['./table-cell-endpoint-name.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    CustomIconComponent,
+    CustomTooltipDirective
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TableCellEndpointNameComponent extends TableCellCustom<EndpointModel | RowWithEndpointId>  {
 
-  public endpoint$: Observable<any>;
+  public endpoint$!: Observable<any>;
 
   @Input('row')
   set row(row: EndpointModel | RowWithEndpointId) {
     super.row = row;
     /* tslint:disable-next-line:no-string-literal */
-    const id = row['endpointId'] || row['guid'];
+    const id = (row as any)['endpointId'] || (row as any)['guid'];
     this.endpoint$ = stratosEntityCatalog.endpoint.store.getEntityMonitor(id).entity$.pipe(
       filter(data => !!data),
       map(data => {

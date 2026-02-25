@@ -37,7 +37,7 @@ export interface ServiceBindingActionBuilders extends OrchestratedActionBuilders
 export const serviceBindingActionBuilders: ServiceBindingActionBuilders = {
   create: (
     id,
-    endpointGuid,
+    endpointGuid: string,
     { applicationGuid, serviceInstanceGuid, params }: { applicationGuid: string, serviceInstanceGuid: string, params: object }
   ) => new CreateServiceBinding(
     endpointGuid,
@@ -48,11 +48,11 @@ export const serviceBindingActionBuilders: ServiceBindingActionBuilders = {
   ),
   remove: (
     guid,
-    endpointGuid,
+    endpointGuid: string,
     { serviceInstanceGuid }: { serviceInstanceGuid: string }
   ) => new DeleteServiceBinding(endpointGuid, guid, serviceInstanceGuid),
   getMultiple: (
-    endpointGuid,
+    endpointGuid: string,
     paginationKey,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {},
   ) => new FetchAllServiceBindings(

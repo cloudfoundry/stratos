@@ -1,20 +1,28 @@
-import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { RouterModule } from '@angular/router';
+
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
 import {
   CurrentUserPermissionsService,
-} from '../../../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ListConfig } from '../../../../../../../../../core/src/shared/components/list/list.component.types';
+  ListComponent,
+  ListConfig,
+  NoContentMessageComponent,
+  PageSubNavComponent
+} from '@stratosui/core';
 import { CFFeatureFlagTypes } from '../../../../../../../cf-api.types';
 import { CFAppState } from '../../../../../../../cf-app-state';
 import {
   CfSpaceUsersListConfigService,
 } from '../../../../../../../shared/components/list/list-types/cf-space-users/cf-space-users-list-config.service';
 import { CfCurrentUserPermissions } from '../../../../../../../user-permissions/cf-user-permissions-checkers';
+import { CfAdminAddUserWarningComponent } from '../../../../cf-admin-add-user-warning/cf-admin-add-user-warning.component';
 import { ActiveRouteCfOrgSpace } from '../../../../../cf-page.types';
 import { createCfOrgSpaceSteppersUrl, someFeatureFlags, waitForCFPermissions } from '../../../../../cf.helpers';
+import { CloudFoundryInviteUserLinkComponent } from '../../../../cf-organizations/cf-invite-user-link/cloud-foundry-invite-user-link.component';
 
 @Component({
   selector: 'app-cloud-foundry-space-users',
@@ -23,7 +31,18 @@ import { createCfOrgSpaceSteppersUrl, someFeatureFlags, waitForCFPermissions } f
   providers: [{
     provide: ListConfig,
     useClass: CfSpaceUsersListConfigService
-  }]
+  }],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    RouterModule,
+    PageSubNavComponent,
+    NoContentMessageComponent,
+    ListComponent,
+    CfAdminAddUserWarningComponent,
+    CloudFoundryInviteUserLinkComponent
+  ]
 })
 export class CloudFoundrySpaceUsersComponent {
   public addRolesByUsernameLink$: Observable<{

@@ -1,27 +1,39 @@
-<ng-container *ngIf="isPopup; else notPopup">
-  <mat-dialog-content class="details__popup">
+@if (isPopup) {
+  <div class="details__popup p-6">
     <ng-container *ngTemplateOutlet="showValues">
     </ng-container>
-  </mat-dialog-content>
-  <mat-dialog-actions class="dialog__actions">
-    <button [mat-dialog-close]="true" mat-button>Close</button>
-  </mat-dialog-actions>
-</ng-container>
-
-
-<ng-template #notPopup>
-  <div *ngIf="showPopup; else showValues">
-    <button mat-stroked-button color="primary" (click)="doShowPopup()">
-      Show Details
-    </button>
   </div>
-</ng-template>
+  <div class="dialog__actions flex justify-end gap-2 p-4 border-t border-gray-200 dark:border-gray-700">
+    <button class="btn btn-ghost">Close</button>
+  </div>
+} @else {
+  @if (showPopup) {
+    <div>
+      <button class="btn btn-outline" (click)="doShowPopup()">
+        Show Details
+      </button>
+    </div>
+  } @else {
+    <div class="details">
+      @for (metadata of (metadata) | keyvalue; track metadata) {
+        <div class="details__section">
+          <div class="details__section__key">{{metadata.key}}: </div>
+          <div>{{metadata.value | json}}</div>
+        </div>
+      }
+    </div>
+  }
+}
+
+
 
 <ng-template #showValues>
   <div class="details">
-    <div class="details__section" *ngFor="let metadata of (metadata) | keyvalue">
-      <div class="details__section__key">{{metadata.key}}: </div>
-      <div>{{metadata.value | json}}</div>
-    </div>
+    @for (metadata of (metadata) | keyvalue; track metadata) {
+      <div class="details__section">
+        <div class="details__section__key">{{metadata.key}}: </div>
+        <div>{{metadata.value | json}}</div>
+      </div>
+    }
   </div>
 </ng-template>

@@ -1,43 +1,61 @@
 <div>
-  <ng-container *ngIf="connectable; else notConnectable">
-    <ng-container *ngIf="row.connectionStatus === 'connected' ">
-      <span *ngIf="config?.showLabel">Connected <span *ngIf="row.local">(local)</span></span>
-      <mat-icon fontSet="stratos-icons">endpoints_connected</mat-icon>
-    </ng-container>
-    <ng-container *ngIf="row.connectionStatus === 'disconnected'">
-      <span *ngIf="config?.showLabel">Disconnected <span *ngIf="row.local">(local)</span></span>
-      <mat-icon fontSet="stratos-icons">endpoints_disconnected</mat-icon>
-    </ng-container>
-    <ng-container *ngIf="row.connectionStatus === 'checking'">
-      <span *ngIf="config?.showLabel">Updating </span>
-      <mat-spinner diameter="20"></mat-spinner>
-    </ng-container>
-    <ng-container *ngIf="!row.connectionStatus || row.connectionStatus === 'unknown'">
-      <span *ngIf="config?.showLabel">Unknown </span>
-      <mat-icon>help_outline</mat-icon>
-    </ng-container>
-  </ng-container>
-  <ng-template #notConnectable>
-    <ng-container *ngIf="row?.endpoint_metadata?.status as status; else noStatus">
-      <ng-container *ngIf="status === 'Synchronized'">
-        <span *ngIf="config?.showLabel">Synchronized </span>
-        <mat-icon>cloud_done</mat-icon>
-      </ng-container>
-      <ng-container *ngIf="status === 'Synchronizing'">
-        <span *ngIf="config?.showLabel">Synchronizing </span>
-        <mat-spinner diameter="20"></mat-spinner>
-      </ng-container>
-      <ng-container *ngIf="status === 'Pending'">
-        <span *ngIf="config?.showLabel">Sync Pending</span>
-        <mat-icon>hourglass_empty</mat-icon>
-      </ng-container>
-      <ng-container *ngIf="status === 'Failed'">
-        <span *ngIf="config?.showLabel">Synchronization failed</span>
-        <mat-icon>sync_problem</mat-icon>
-      </ng-container>
-    </ng-container>
-    <ng-template #noStatus>
+  @if (connectable) {
+    @if (row.connectionStatus === 'connected' ) {
+      @if (config?.showLabel) {
+        <span>Connected @if (row.local) {
+          <span>(local)</span>
+        }</span>
+      }
+      <app-custom-icon fontSet="stratos-icons">endpoints_connected</app-custom-icon>
+    }
+    @if (row.connectionStatus === 'disconnected') {
+      @if (config?.showLabel) {
+        <span>Disconnected @if (row.local) {
+          <span>(local)</span>
+        }</span>
+      }
+      <app-custom-icon fontSet="stratos-icons">endpoints_disconnected</app-custom-icon>
+    }
+    @if (row.connectionStatus === 'checking') {
+      @if (config?.showLabel) {
+        <span>Updating </span>
+      }
+      <app-spinner [diameter]="20"></app-spinner>
+    }
+    @if (!row.connectionStatus || row.connectionStatus === 'unknown') {
+      @if (config?.showLabel) {
+        <span>Unknown </span>
+      }
+      <app-custom-icon>help_outline</app-custom-icon>
+    }
+  } @else {
+    @if (row?.endpoint_metadata?.status; as status) {
+      @if (status === 'Synchronized') {
+        @if (config?.showLabel) {
+          <span>Synchronized </span>
+        }
+        <app-custom-icon>cloud_done</app-custom-icon>
+      }
+      @if (status === 'Synchronizing') {
+        @if (config?.showLabel) {
+          <span>Synchronizing </span>
+        }
+        <app-spinner [diameter]="20"></app-spinner>
+      }
+      @if (status === 'Pending') {
+        @if (config?.showLabel) {
+          <span>Sync Pending</span>
+        }
+        <app-custom-icon>hourglass_empty</app-custom-icon>
+      }
+      @if (status === 'Failed') {
+        @if (config?.showLabel) {
+          <span>Synchronization failed</span>
+        }
+        <app-custom-icon>sync_problem</app-custom-icon>
+      }
+    } @else {
       -
-    </ng-template>
-  </ng-template>
+    }
+  }
 </div>

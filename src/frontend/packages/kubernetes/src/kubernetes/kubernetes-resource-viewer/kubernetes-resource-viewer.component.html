@@ -1,47 +1,56 @@
 <app-sidepanel-preview [header]="headerContent" class="resource-preview" title="{{title}}" [favorite]="favorite">
 
-  <div *ngIf="resource$ | async as resource">
-    <div class="resource-preview__side-by-side">
-      <app-metadata-item label="API Version">{{ resource.apiVersion }}</app-metadata-item>
-      <app-metadata-item label="Kind">{{ resource.kind | titlecase }}</app-metadata-item>
-      <div class="resource-preview__metrics">
-        <a *ngIf="hasPodMetrics$ | async" [routerLink]="podRouterLink$ | async">View Metrics</a>
+  @if (resource$ | async; as resource) {
+    <div>
+      <div class="resource-preview__side-by-side">
+        <app-metadata-item label="API Version">{{ resource.apiVersion }}</app-metadata-item>
+        <app-metadata-item label="Kind">{{ resource.kind | titlecase }}</app-metadata-item>
+        <div class="resource-preview__metrics">
+          @if (hasPodMetrics$ | async) {
+            <a [routerLink]="podRouterLink$ | async">View Metrics</a>
+          }
+        </div>
       </div>
+      <div class="resource-preview__side-by-side">
+        <app-metadata-item label="Created">{{ resource.creationTimestamp | date:'medium' }}</app-metadata-item>
+        <app-metadata-item label="Age">{{ resource.age }}</app-metadata-item>
+      </div>
+      @if (resource.labels) {
+        <app-metadata-item class="resource-preview__labels" label="Labels">
+          @for (label of resource.labels; track label) {
+            <div class="resource-preview__label">
+              <div class="resource-preview__label-name">{{ label.name }}</div>
+              <div class="resource-preview__label-value">{{ label.value }}</div>
+            </div>
+          }
+        </app-metadata-item>
+      }
+      @if (resource.annotations) {
+        <app-metadata-item class="resource-preview__labels" label="Annotations">
+          @for (label of resource.annotations; track label) {
+            <div class="resource-preview__label">
+              <div class="resource-preview__label-name">{{ label.name }}</div>
+              <div class="resource-preview__label-value">{{ label.value }}</div>
+            </div>
+          }
+        </app-metadata-item>
+      }
+      @if (alerts) {
+        <app-metadata-item class="resource-preview__labels" label="Alerts">
+          <app-resource-alert-view [showHeader]="false" [alerts]="alerts"></app-resource-alert-view>
+        </app-metadata-item>
+      }
+      <!-- Custom component if there is one -->
+      <ng-template #customComponent></ng-template>
+      <app-json-viewer #viewer [small]="true" [json]="resource.jsonView" [expanded]="false"></app-json-viewer>
     </div>
-    <div class="resource-preview__side-by-side">
-      <app-metadata-item label="Created">{{ resource.creationTimestamp | date:'medium' }}</app-metadata-item>
-      <app-metadata-item label="Age">{{ resource.age }}</app-metadata-item>
-    </div>
-
-    <app-metadata-item class="resource-preview__labels" label="Labels" *ngIf="resource.labels">
-      <div *ngFor="let label of resource.labels" class="resource-preview__label">
-        <div class="resource-preview__label-name">{{ label.name }}</div>
-        <div class="resource-preview__label-value">{{ label.value }}</div>
-      </div>
-    </app-metadata-item>
-
-    <app-metadata-item class="resource-preview__labels" label="Annotations" *ngIf="resource.annotations">
-      <div *ngFor="let label of resource.annotations" class="resource-preview__label">
-        <div class="resource-preview__label-name">{{ label.name }}</div>
-        <div class="resource-preview__label-value">{{ label.value }}</div>
-      </div>
-    </app-metadata-item>
-
-    <app-metadata-item class="resource-preview__labels" label="Alerts" *ngIf="alerts">
-      <app-resource-alert-view [showHeader]="false" [alerts]="alerts"></app-resource-alert-view>
-    </app-metadata-item>
-
-    <!-- Custom component if there is one -->
-    <ng-template #customComponent></ng-template>
-
-    <app-json-viewer #viewer [small]="true" [json]="resource.jsonView" [expanded]="false"></app-json-viewer>
-  </div>
+  }
 </app-sidepanel-preview>
 
 <ng-template #header>
   <div class="resource-preview__header">
-    <button mat-icon-button name="delete" (click)="deleteWarn()" matTooltip="Delete">
-      <mat-icon>delete</mat-icon>
+    <button class="btn-icon" name="delete" (click)="deleteWarn()" title="Delete">
+      <span class="material-icons">delete</span>
     </button>
   </div>
 </ng-template>

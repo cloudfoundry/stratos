@@ -1,49 +1,95 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { Component, OnDestroy, OnInit, signal , ChangeDetectionStrategy } from '@angular/core';
+import { Validators, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
+import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, mergeMap, pairwise, switchMap, tap } from 'rxjs/operators';
+import { toObservable } from '@angular/core/rxjs-interop';
 
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { domainEntityType, spaceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
-import { createEntityRelationKey } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { Route, RouteMode } from '../../../../../../cloud-foundry/src/store/types/route.types';
-import {
-  StepOnNextFunction,
-  StepOnNextResult,
-} from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { ActionState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { APIResource } from '../../../../../../store/src/types/api.types';
+import { CFAppState } from '../../../../cf-app-state';
+import { domainEntityType, spaceEntityType } from '../../../../cf-entity-types';
+import { createEntityRelationKey } from '../../../../entity-relations/entity-relations.types';
+import { Route, RouteMode } from '../../../../store/types/route.types';
+import { StepOnNextFunction, StepOnNextResult } from '@stratosui/core';
+import { RouterNav, ActionState, RequestInfoState, APIResource } from '@stratosui/store';
 import { IDomain } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ApplicationService } from '../../application.service';
 
+import {
+  CustomFormFieldComponent,
+  CustomSelectComponent,
+  CustomOptionComponent,
+  CustomCheckboxComponent,
+  FocusDirective
+} from '@stratosui/core';
+import { MapRoutesComponent } from '../map-routes/map-routes.component';
+
 const hostPattern = '^([\\w\\-\\.]*)$';
 const pathPattern = `^([\\w\\-\\/\\!\\#\\[\\]\\@\\&\\$\\'\\(\\)\\*\\+\\;\\=\\,]*)$`;
+
+interface DomainFormModel {
+  domain: APIResource<IDomain> | '';
+}
+
+interface HTTPRouteFormModel {
+  host: string;
+  path: string;
+}
+
+interface TCPRouteFormModel {
+  port: string;
+  useRandomPort: boolean;
+}
 @Component({
   selector: 'app-add-routes',
   templateUrl: './add-routes.component.html',
-  styleUrls: ['./add-routes.component.scss']
+  styleUrls: ['./add-routes.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    CustomFormFieldComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
+    CustomCheckboxComponent,
+    FocusDirective,
+    MapRoutesComponent
+]
 })
 export class AddRoutesComponent implements OnInit, OnDestroy {
   subscriptions: Subscription[] = [];
-  model: Route;
+  model!: Route;
   domains: APIResource<IDomain>[] = [];
-  addTCPRoute: UntypedFormGroup;
-  addHTTPRoute: UntypedFormGroup;
-  domainFormGroup: UntypedFormGroup;
+  addTCPRoute: FormGroup<{
+    port: FormControl<string>;
+    useRandomPort: FormControl<boolean>;
+  }>;
+  addHTTPRoute: FormGroup<{
+    host: FormControl<string>;
+    path: FormControl<string>;
+  }>;
+  domainFormGroup: FormGroup<{
+    domain: FormControl<APIResource<IDomain> | ''>;
+  }>;
   appGuid: string;
   cfGuid: string;
-  spaceGuid: string;
+  spaceGuid!: string;
   createTCPRoute = false;
-  selectedDomain: APIResource<any>;
-  selectedRoute$ = new BehaviorSubject<any>({
+  selectedDomain!: APIResource<any>;
+  private _selectedRoute = signal<any>({
     entity: {},
     metadata: {}
   });
+  // Convert signal to observable in field initializer (injection context)
+  private _selectedRoute$ = toObservable(this._selectedRoute);
+  // Expose as writable object for child component compatibility
+  selectedRoute$ = {
+    next: (value: any) => this._selectedRoute.set(value),
+    subscribe: (fn: any) => this._selectedRoute$.subscribe(fn)
+  } as any;
   appUrl: string;
-  isRouteSelected$ = new BehaviorSubject<boolean>(false);
+  isRouteSelected = signal<boolean>(false);
   addRouteModes: RouteMode[] = [
     { id: 'create', label: 'Create and map new route', submitLabel: 'Create' },
     { id: 'map', label: 'Map existing route', submitLabel: 'Map' }
@@ -58,21 +104,33 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     this.cfGuid = applicationService.cfGuid;
     this.appUrl = `/applications/${this.cfGuid}/${this.appGuid}/routes`;
     this.addRouteMode = this.addRouteModes[0];
-    this.domainFormGroup = new UntypedFormGroup({
-      domain: new UntypedFormControl('', [Validators.required as any])
+    this.domainFormGroup = new FormGroup({
+      domain: new FormControl<APIResource<IDomain> | ''>('', {
+        nonNullable: true,
+        validators: [Validators.required]
+      })
     });
 
-    this.addHTTPRoute = new UntypedFormGroup({
-      host: new UntypedFormControl('', [Validators.required as any, Validators.pattern(hostPattern), Validators.maxLength(63)]),
-      path: new UntypedFormControl('', [Validators.pattern(pathPattern), Validators.maxLength(128)])
+    this.addHTTPRoute = new FormGroup({
+      host: new FormControl('', {
+        nonNullable: true,
+        validators: [Validators.required, Validators.pattern(hostPattern), Validators.maxLength(63)]
+      }),
+      path: new FormControl('', {
+        nonNullable: true,
+        validators: [Validators.pattern(pathPattern), Validators.maxLength(128)]
+      })
     });
 
-    this.addTCPRoute = new UntypedFormGroup({
-      port: new UntypedFormControl('', [
-        Validators.required,
-        Validators.pattern('[0-9]*')
-      ]),
-      useRandomPort: new UntypedFormControl(false)
+    this.addTCPRoute = new FormGroup({
+      port: new FormControl('', {
+        nonNullable: true,
+        validators: [
+          Validators.required,
+          Validators.pattern('[0-9]*')
+        ]
+      }),
+      useRandomPort: new FormControl(false, { nonNullable: true })
     });
   }
 
@@ -80,7 +138,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscriptions.push(this.addTCPRoute.valueChanges.subscribe(val => {
-      const useRandomPort = val.useRandomPort;
+      const useRandomPort = val.useRandomPort ?? false;
       if (useRandomPort !== this.useRandomPort) {
         this.useRandomPort = useRandomPort;
         const validators = [
@@ -116,25 +174,38 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
               this.domains.push(domain);
             });
             this.selectedDomain = Object.values(this.domains)[0];
+            // Set initial domain value in the form
+            if (this.selectedDomain) {
+              this.domainFormGroup.patchValue({ domain: this.selectedDomain });
+            }
           })
         )
       ));
 
     this.subscriptions.push(space$.subscribe());
 
-    const selRoute$ = this.selectedRoute$.subscribe(x => {
+    // Subscribe to domain form changes to update selectedDomain
+    this.subscriptions.push(
+      this.domainFormGroup.controls.domain.valueChanges.subscribe(domain => {
+        if (domain && typeof domain !== 'string') {
+          this.selectedDomain = domain;
+        }
+      })
+    );
+
+    const selRoute$ = this._selectedRoute$.subscribe(x => {
       if (x.metadata.guid) {
-        this.isRouteSelected$.next(true);
+        this.isRouteSelected.set(true);
       }
     });
     this.subscriptions.push(selRoute$);
   }
 
-  _getValueForKey(key, form) {
+  _getValueForKey(key: string, form: any) {
     return form.value[key] ? form.value[key] : '';
   }
 
-  _getValue(key, form) {
+  _getValue(key: string, form: any) {
     return form.value[key] !== '' ? form.value[key] : null;
   }
 
@@ -145,7 +216,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
         : this.addHTTPRoute.valid;
     } else {
       try {
-        return this.isRouteSelected$.getValue();
+        return this.isRouteSelected();
       } catch (e) { }
 
       return false;
@@ -153,7 +224,8 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   }
 
   isTCPRouteCreation(): boolean {
-    return this.domainFormGroup.value.domain && this.domainFormGroup.value.domain.entity.router_group_type === 'tcp';
+    const domain = this.domainFormGroup.value.domain;
+    return !!domain && typeof domain !== 'string' && domain.entity.router_group_type === 'tcp';
   }
 
   submit: StepOnNextFunction = () => {
@@ -166,13 +238,14 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   };
 
   onSubmit(): Observable<StepOnNextResult> {
-    const domainGuid = this.domainFormGroup.value.domain.metadata.guid;
+    const domain = this.domainFormGroup.value.domain;
+    const domainGuid = typeof domain !== 'string' ? domain?.metadata.guid : '';
     const isTcpRoute = this.isTCPRouteCreation();
     const formGroup = isTcpRoute ? this.addTCPRoute : this.addHTTPRoute;
 
     // Set port to -1 to indicate that we should generate a random port number
     let port = this._getValue('port', formGroup);
-    if (isTcpRoute && formGroup.value.useRandomPort) {
+    if (isTcpRoute && (this.addTCPRoute.value.useRandomPort ?? false)) {
       port = -1;
     }
 
@@ -185,7 +258,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
 
     return this.createAndMapRoute(
       newRouteGuid,
-      domainGuid,
+      domainGuid ?? '',
       this._getValue('host', formGroup),
       this._getValue('path', formGroup),
       port,
@@ -239,7 +312,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   }
 
   private mapRouteSubmit(): Observable<StepOnNextResult> {
-    return this.selectedRoute$.pipe(
+    return this._selectedRoute$.pipe(
       switchMap(route => this.mapRoute(route.metadata.guid))
     );
   }

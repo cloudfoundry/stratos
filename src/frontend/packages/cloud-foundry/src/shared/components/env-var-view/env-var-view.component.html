@@ -1,17 +1,21 @@
 <div class="env-var-view">
-  <h2 mat-dialog-title>
+  <h2 class="dialog-title">
     Environment Variables
   </h2>
-  <mat-dialog-content class="env-var-view__content">
+  <div class="dialog-content env-var-view__content">
     <app-code-block>
       <ng-container>
-        <pre class="env-var-view__content__key">{{data.key}}=<span *ngIf="!isObject(data.value)">{{data.value}}</span></pre>
-        <pre class="env-var-view__content__value" *ngIf="isObject(data.value)">{{ data.value | json }}</pre>
+        <pre class="env-var-view__content__key">{{data.key}}=@if (!isObject(data.value)) {
+          <span>{{data.value}}</span>
+        }</pre>
+        @if (isObject(data.value)) {
+          <pre class="env-var-view__content__value">{{ data.value | json }}</pre>
+        }
       </ng-container>
     </app-code-block>
-  </mat-dialog-content>
+  </div>
 
-  <mat-dialog-actions class="env-var-view__actions">
-    <button mat-button color="primary" [mat-dialog-close]="true">Close</button>
-  </mat-dialog-actions>
+  <div class="dialog-actions env-var-view__actions">
+    <button class="btn btn-primary" (click)="dialogRef.close()">Close</button>
+  </div>
 </div>

@@ -7,14 +7,16 @@ import { stratosEntityCatalog } from '../../../../store/src/stratos-entity-catal
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CloudFoundryService {
   hasRegisteredCFEndpoints$: Observable<boolean>;
   hasConnectedCFEndpoints$: Observable<boolean>;
   connectedCFEndpoints$: Observable<EndpointModel[]>;
   cFEndpoints$: Observable<EndpointModel[]>;
   cfEndpointsMonitor: PaginationMonitor<EndpointModel>;
-  waitForAppEntity$: Observable<EntityInfo<APIResource>>;
+  waitForAppEntity$!: Observable<EntityInfo<APIResource>>;
 
   constructor() {
 

@@ -23,13 +23,13 @@ const defaultState: CreateServiceInstanceState = {
   spaceScoped: false
 };
 
-const setCreateServiceInstanceCfDetails = (state: CreateServiceInstanceState, action) => ({
+const setCreateServiceInstanceCfDetails = (state: CreateServiceInstanceState, action: any) => ({
   ...state,
   spaceGuid: action.spaceGuid,
   cfGuid: action.cfGuid,
   orgGuid: action.orgGuid,
 });
-const setCreateServiceInstance = (state: CreateServiceInstanceState, action) => ({
+const setCreateServiceInstance = (state: CreateServiceInstanceState, action: any) => ({
   ...state,
   spaceScoped: action.spaceScoped,
   spaceGuid: action.spaceGuid,
@@ -38,13 +38,13 @@ const setCreateServiceInstance = (state: CreateServiceInstanceState, action) => 
   tags: action.tags
 });
 
-const setSpaceScopedFlag = (state: CreateServiceInstanceState, action) => ({
+const setSpaceScopedFlag = (state: CreateServiceInstanceState, action: any) => ({
   ...state,
   spaceScoped: action.spaceScoped,
   spaceGuid: action.spaceGuid
 });
 
-export function createServiceInstanceReducer(state: CreateServiceInstanceState = defaultState, action): CreateServiceInstanceState {
+export function createServiceInstanceReducer(state: CreateServiceInstanceState = defaultState, action: any): CreateServiceInstanceState {
   switch (action.type) {
     case SET_SERVICE_PLAN:
       return { ...state, servicePlanGuid: action.servicePlanGuid };

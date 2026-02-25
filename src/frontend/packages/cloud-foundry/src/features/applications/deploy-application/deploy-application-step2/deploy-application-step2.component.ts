@@ -1,6 +1,8 @@
+import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild,
+  ChangeDetectionStrategy} from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { GitBranch, GitCommit, gitEntityCatalog, GitRepo, GitSCM, GitSCMService, GitSCMType } from '@stratosui/git';
@@ -45,18 +47,30 @@ import {
   selectProjectExists,
   selectSourceType,
 } from '../../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
+import { TruncatePipe } from '../../../../../../core/src/core/truncate.pipe';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { getCommitGuid } from '../../../../../../git/src/store/git-entity-factory';
 import { DeployApplicationState, SourceType } from '../../../../store/types/deploy-application.types';
 import { ApplicationDeploySourceTypes, DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
 import { GitSuggestedRepo } from './../../../../../../git/src/store/git.public-types';
+import { GithubProjectExistsDirective } from '../github-project-exists.directive';
+import { DeployApplicationFsComponent } from './deploy-application-fs/deploy-application-fs.component';
 
 
 
 @Component({
-  selector: 'app-deploy-application-step2',
+selector: 'app-deploy-application-step2',
   templateUrl: './deploy-application-step2.component.html',
-  styleUrls: ['./deploy-application-step2.component.scss']
+  styleUrls: ['./deploy-application-step2.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    FormsModule,
+    TruncatePipe,
+    GithubProjectExistsDirective,
+    DeployApplicationFsComponent
+  ]
 })
 export class DeployApplicationStep2Component
   implements OnInit, OnDestroy, AfterContentInit {
@@ -65,27 +79,27 @@ export class DeployApplicationStep2Component
 
   commitInfo: GitCommit;
   public DEPLOY_TYPES_IDS = DEPLOY_TYPES_IDS;
-  sourceType$: Observable<SourceType>;
+  sourceType$!: Observable<SourceType>;
   INITIAL_SOURCE_TYPE = 0; // Fall back to GitHub, for cases where there's no type in store (refresh) or url (removed & nav)
-  validate: Observable<boolean>;
+  validate!: Observable<boolean>;
 
-  stepperText$: Observable<string>;
+  stepperText$!: Observable<string>;
 
   // Observables for source types
-  sourceTypeGithub$: Observable<boolean>;
-  sourceTypeNeedsUpload$: Observable<boolean>;
+  sourceTypeGithub$!: Observable<boolean>;
+  sourceTypeNeedsUpload$!: Observable<boolean>;
   // tslint:disable-next-line:ban-types
-  canDeployType$: Observable<Boolean>;
-  isLoading$: Observable<boolean>;
+  canDeployType$!: Observable<Boolean>;
+  isLoading$!: Observable<boolean>;
 
   // Local FS data when file or folder upload
   // @Input('fsSourceData') fsSourceData;
 
   // ---- GIT ----------
-  repositoryBranches$: Observable<GitBranch[]>;
+  repositoryBranches$!: Observable<GitBranch[]>;
 
-  projectInfo$: Observable<GitRepo>;
-  commitSubscription: Subscription;
+  projectInfo$!: Observable<GitRepo>;
+  commitSubscription!: Subscription;
 
   sourceType: SourceType;
   repositoryBranch: GitBranch = null;
@@ -96,11 +110,11 @@ export class DeployApplicationStep2Component
   cachedSuggestions = {};
 
   // We don't have any repositories to suggest initially - need user to start typing
-  suggestedRepos$: Observable<GitSuggestedRepo[]>;
+  suggestedRepos$!: Observable<GitSuggestedRepo[]>;
 
   // Git URL
-  gitUrl: string;
-  gitUrlBranchName: string;
+  gitUrl!: string;
+  gitUrlBranchName!: string;
   // --------------
 
   // ---- Docker ----------
@@ -112,7 +126,7 @@ export class DeployApplicationStep2Component
   @ViewChild('sourceSelectionForm', { static: true }) sourceSelectionForm: NgForm;
   subscriptions: Array<Subscription> = [];
 
-  @ViewChild('fsChooser') fsChooser;
+  @ViewChild('fsChooser') fsChooser: any;
 
   ngOnDestroy() {
     this.subscriptions.forEach(p => p.unsubscribe());
@@ -359,15 +373,15 @@ export class DeployApplicationStep2Component
     }
 
     const cacheName = this.scm.getType() + ':' + name;
-    if (this.cachedSuggestions[cacheName]) {
-      return observableOf(this.cachedSuggestions[cacheName]);
+    if ((this.cachedSuggestions as { [key: string]: any })[cacheName]) {
+      return observableOf((this.cachedSuggestions as { [key: string]: any })[cacheName]);
     }
 
     return observableTimer(500).pipe(
       take(1),
       switchMap(() => this.scm.getMatchingRepositories(this.httpClient, name)),
       catchError(e => observableOf(null)),
-      tap(suggestions => this.cachedSuggestions[cacheName] = suggestions),
+      tap(suggestions => (this.cachedSuggestions as { [key: string]: any })[cacheName] = suggestions),
     );
   }
 

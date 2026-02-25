@@ -1,16 +1,18 @@
 import { inject, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { Store } from '@ngrx/store';
 import { first } from 'rxjs/operators';
 
-import { RequestTypes } from '../../../store/src/actions/request.actions';
-import { AppState } from '../../../store/src/app-state';
-import { EntityCatalogTestModuleManualStore, TEST_CATALOGUE_ENTITIES } from '../../../store/src/entity-catalog-test.module';
-import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
-import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
-import { APIResource } from '../../../store/src/types/api.types';
-import { WrapperRequestActionSuccess } from '../../../store/src/types/request.types';
-import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '../../../store/testing/public-api';
-import { EntityRelationSpecHelper } from '../../test-framework/entity-relations-spec-helper';
+import { RequestTypes } from '@stratosui/store';
+import { AppState } from '@stratosui/store';
+import { EntityCatalogTestModuleManualStore, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
+import { entityCatalog } from '@stratosui/store';
+import { EntityCatalogEntityConfig } from '@stratosui/store';
+import { APIResource } from '@stratosui/store';
+import { WrapperRequestActionSuccess } from '@stratosui/store';
+import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '@stratosui/store/testing';
+import { EntityRelationSpecHelper } from './entity-relations-spec-helper';
 import { GetAllOrganizationSpaces } from '../actions/organization.actions';
 import { ISpace } from '../cf-api.types';
 import { CFAppState } from '../cf-app-state';
@@ -19,8 +21,7 @@ import { generateCFEntities } from '../cf-entity-generator';
 import { organizationEntityType, spaceEntityType } from '../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
 import { populatePaginationFromParent } from './entity-relations';
-
-
+import { EntityServiceFactory } from '@stratosui/store';
 describe('Entity Relations - populate from parent', () => {
   const spaceEntityKey = entityCatalog.getEntityKey(CF_ENDPOINT_TYPE, spaceEntityType);
 
@@ -36,6 +37,7 @@ describe('Entity Relations - populate from parent', () => {
         {
           ngModule: EntityCatalogTestModuleManualStore,
           providers: [
+        EntityServiceFactory,
             { provide: TEST_CATALOGUE_ENTITIES, useValue: generateCFEntities() }
           ]
         },
@@ -44,31 +46,37 @@ describe('Entity Relations - populate from parent', () => {
     });
   }
 
-  it('No list in parent - no op', (done) => {
+  it('No list in parent - no op', () => {
     const entityMap = new Map<EntityCatalogEntityConfig, Array<TestStoreEntity>>([
       [
         cfEntityFactory(organizationEntityType),
         [{
           guid: orgGuid,
-          data: helper.createEmptyOrg(orgGuid, 'org-name')
+          data: helper.createEmptyOrg(orgGuid, 'org-name'),
         }]
       ]
     ]);
     const store = createEntityStoreState(entityMap) as Partial<CFAppState>;
     setup(store);
 
-    inject([Store], (iStore: Store<any>) => {
-      const testAction = new GetAllOrganizationSpaces(pagKey, orgGuid, cfGuid, [], true);
-      populatePaginationFromParent(iStore, testAction).pipe(first())
-        .subscribe(
-          (action: GetAllOrganizationSpaces) => expect(action).toBeUndefined(),
-          error => fail(error),
-          done
-        );
-    })();
+    return new Promise<void>((done, fail) => {
+      inject([Store], (iStore: Store<any>) => {
+        const testAction = new GetAllOrganizationSpaces(pagKey, orgGuid, cfGuid, [], true);
+        populatePaginationFromParent(iStore, testAction).pipe(first())
+          .subscribe(
+            (action: GetAllOrganizationSpaces) => {
+              // When no list exists in parent, the original action is returned
+              expect(action).toBeDefined();
+              expect(action).toBe(testAction);
+            },
+            error => fail(error),
+            done
+          );
+      })();
+    });
   });
 
-  it('List in parent', done => {
+  it('List in parent', () => {
     const spaces: APIResource<ISpace>[] = [
       helper.createEmptySpace('1', 'space1`', orgGuid),
       helper.createEmptySpace('2', 'space2`', orgGuid),
@@ -84,37 +92,39 @@ describe('Entity Relations - populate from parent', () => {
         cfEntityFactory(organizationEntityType),
         [{
           guid: org.metadata.guid,
-          data: org
+          data: org,
         }]
       ],
       [
         cfEntityFactory(spaceEntityType),
         spaces.map(space => ({
           guid: space.metadata.guid,
-          data: space
-        }))
+          data: space,
+        })),
       ]
     ]);
     setup(createEntityStoreState(entityMap));
 
-    inject([Store], (iStore: Store<AppState>) => {
-      populatePaginationFromParent(iStore, new GetAllOrganizationSpaces(pagKey, orgGuid, cfGuid, [], true)).pipe(first())
-        .subscribe((action: WrapperRequestActionSuccess) => {
-          expect(action).toBeDefined();
-          expect(action).not.toBeNull();
-          expect(action.type).toBe(RequestTypes.SUCCESS);
-          expect(action.totalResults).toBe(spaces.length);
-          expect(action.totalPages).toBe(1);
-          expect(action.response.result).toEqual(spaceGuids);
-          expect(action.response.entities[spaceEntityKey]).toEqual(spaces.reduce((map, space) => {
-            map[space.metadata.guid] = space;
-            return map;
-          }, {}));
-        },
-          error => fail(error),
-          done
-        );
-    })();
+    return new Promise<void>((done, fail) => {
+      inject([Store], (iStore: Store<AppState>) => {
+        populatePaginationFromParent(iStore, new GetAllOrganizationSpaces(pagKey, orgGuid, cfGuid, [], true)).pipe(first())
+          .subscribe((action: WrapperRequestActionSuccess) => {
+            expect(action).toBeDefined();
+            expect(action).not.toBeNull();
+            expect(action.type).toBe(RequestTypes.SUCCESS);
+            expect(action.totalResults).toBe(spaces.length);
+            expect(action.totalPages).toBe(1);
+            expect(action.response.result).toEqual(spaceGuids);
+            expect(action.response.entities[spaceEntityKey]).toEqual(spaces.reduce((map, space) => {
+              map[space.metadata.guid] = space;
+              return map;
+            }, {}));
+          },
+            error => fail(error),
+            done
+          );
+      })();
+    });
   });
 
 });

@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { HelmReleaseGuidMock } from '../../../../../helm/helm-testing.module';
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
@@ -8,16 +10,19 @@ describe('HelmReleaseHistoryTabComponent', () => {
   let component: HelmReleaseHistoryTabComponent;
   let fixture: ComponentFixture<HelmReleaseHistoryTabComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [ HelmReleaseHistoryTabComponent ],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        HelmReleaseHistoryTabComponent,
+      ],
       providers: [
         HelmReleaseHelperService,
-        HelmReleaseGuidMock
+        HelmReleaseGuidMock,
+
+        provideZonelessChangeDetection(),
       ]
-    })
-    .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(HelmReleaseHistoryTabComponent);

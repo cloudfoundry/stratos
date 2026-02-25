@@ -1,15 +1,14 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import {
-  LongRunningCfOperationsService,
-} from '../../../../../../../../cloud-foundry/src/shared/data-services/long-running-cf-op.service';
+import { EntityMonitorFactory, EntityServiceFactory } from '@stratosui/store';
+import { BooleanIndicatorComponent } from '@stratosui/core';
 import {
   generateCfBaseTestModulesNoShared,
-} from '../../../../../../../../cloud-foundry/test-framework/cloud-foundry-endpoint-service.helper';
-import {
-  BooleanIndicatorComponent,
-} from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
+} from '@test-framework/cloud-foundry-endpoint-service.helper';
+import { LongRunningCfOperationsService } from '../../../../../data-services/long-running-cf-op.service';
 import { ServiceInstanceLastOpComponent } from '../../../../service-instance-last-op/service-instance-last-op.component';
 import { TableCellServiceComponent } from './table-cell-service.component';
 
@@ -17,20 +16,24 @@ describe('TableCellServiceComponent', () => {
   let component: TableCellServiceComponent;
   let fixture: ComponentFixture<TableCellServiceComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
         TableCellServiceComponent,
         ServiceInstanceLastOpComponent,
-        BooleanIndicatorComponent
+        BooleanIndicatorComponent,
+        ...generateCfBaseTestModulesNoShared(),
       ],
-      imports: [...generateCfBaseTestModulesNoShared()],
-      providers: [EntityMonitorFactory, LongRunningCfOperationsService]
+      providers: [
+        EntityServiceFactory,
+        EntityMonitorFactory,
+        LongRunningCfOperationsService,
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+      ],
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellServiceComponent);
     component = fixture.componentInstance;
     component.row = {

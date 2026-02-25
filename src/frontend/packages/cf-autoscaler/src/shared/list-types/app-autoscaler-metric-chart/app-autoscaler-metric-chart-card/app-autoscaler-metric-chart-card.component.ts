@@ -1,5 +1,7 @@
-import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { BaseChartDirective } from 'ng2-charts';
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
@@ -17,23 +19,31 @@ import {
   AppScalingTrigger,
 } from '../../../../store/app-autoscaler.types';
 import { appAutoscalerAppMetricEntityType, autoscalerEntityFactory } from '../../../../store/autoscaler-entity-factory';
+import { AppAutoscalerComboChartComponent } from './combo-chart/combo-chart.component';
 
 
 @Component({
   selector: 'app-app-autoscaler-metric-chart-card',
   templateUrl: './app-autoscaler-metric-chart-card.component.html',
-  styleUrls: ['./app-autoscaler-metric-chart-card.component.scss']
+  styleUrls: ['./app-autoscaler-metric-chart-card.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    BaseChartDirective,
+    AppAutoscalerComboChartComponent
+  ]
 })
 
 export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<AppScalingTrigger>> implements IListRowCell {
   static columns = 1;
-  listData: {
+  listData!: {
     label: string;
     data$: Observable<string>;
     customStyle?: string;
   }[];
 
-  envVarUrl: string;
+  envVarUrl!: string;
 
   comboBarScheme = {
     name: 'singleLightBlue',
@@ -58,7 +68,7 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
     'order-direction': 'asc'
   };
 
-  public metricType: string;
+  public metricType!: string;
 
   @Input('row')
   set row(row: APIResource<AppScalingTrigger>) {
@@ -81,12 +91,13 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
     private appService: ApplicationService,
     private store: Store<AppState>,
     private paginationMonitorFactory: PaginationMonitorFactory,
+    private cdr: ChangeDetectorRef
   ) {
     super();
   }
 
-  public metricData$: Observable<any>;
-  public appAutoscalerAppMetricLegend;
+  public metricData$!: Observable<AppAutoscalerMetricData[]>;
+  public appAutoscalerAppMetricLegend!: { legendValue: AppAutoscalerMetricDataPoint[], legendColor: unknown[] };
 
   getLegend2(trigger: AppScalingTrigger) {
     const legendColor = buildLegendData(trigger);
@@ -107,7 +118,7 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
     const action = new GetAppAutoscalerAppMetricAction(this.appService.appGuid,
       this.appService.cfGuid, metricName, false, trigger, params);
     this.store.dispatch(action);
-    return getPaginationObservables<AppAutoscalerMetricData>({
+    const obs = getPaginationObservables<AppAutoscalerMetricData>({
       store: this.store,
       action,
       paginationMonitor: this.paginationMonitorFactory.create(
@@ -118,6 +129,11 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
     }, true).entities$.pipe(
       filter(entities => !!entities)
     );
+
+    // Subscribe to trigger change detection for metric updates
+    obs.subscribe(() => this.cdr.markForCheck());
+
+    return obs;
   }
 
 }

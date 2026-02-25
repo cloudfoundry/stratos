@@ -2,15 +2,14 @@ import { Directive, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
-
-import { StepOnNextFunction } from '../../../../core/src/shared/components/stepper/step/step.component';
+import { StepOnNextFunction } from '@stratosui/core';
 import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
 import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
 
 @Directive()
 export abstract class EditAutoscalerPolicyDirective implements OnInit {
-  public currentPolicy: AppAutoscalerPolicyLocal;
-  public appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
+  public currentPolicy!: AppAutoscalerPolicyLocal;
+  public appAutoscalerPolicy$!: Observable<AppAutoscalerPolicy>;
   protected isCreate = false;
 
   constructor(

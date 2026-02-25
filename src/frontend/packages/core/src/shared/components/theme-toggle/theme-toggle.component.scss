@@ -1,0 +1,89 @@
+.theme-toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.theme-toggle-button {
+  @apply flex items-center gap-2 p-2 rounded-md transition-all duration-200;
+  @apply bg-transparent;
+  @apply border border-transparent;
+  @apply focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-opacity-50;
+
+  cursor: pointer;
+  min-width: 36px;
+  min-height: 36px;
+
+  // Header context - inherit text color from header
+  color: inherit;
+
+  // Hover effect matching page-header buttons
+  &:hover {
+    @apply bg-white/10;
+  }
+
+  &:active {
+    @apply scale-95;
+  }
+}
+
+.theme-icon {
+  @apply w-5 h-5;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+
+  .theme-toggle-button:hover & {
+    @apply transform rotate-12;
+  }
+}
+
+.theme-label {
+  @apply text-sm font-medium;
+  @apply hidden sm:inline;
+}
+
+.theme-options {
+  @apply flex gap-1 p-1 rounded-lg;
+  background-color: var(--card-header-bg);
+}
+
+.theme-option {
+  @apply px-3 py-1 rounded text-sm transition-all;
+  color: var(--content-muted);
+
+  &:hover {
+    color: var(--content-text);
+  }
+
+  &.active {
+    background-color: var(--card-bg);
+    color: var(--content-text);
+    @apply shadow-sm;
+  }
+}
+
+// Smooth theme transition for the toggle component itself
+:host {
+  transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+// Reduced motion support for accessibility
+@media (prefers-reduced-motion: reduce) {
+  .theme-icon,
+  .theme-toggle-button,
+  .theme-option,
+  :host {
+    transition: none !important;
+  }
+
+  // Keep minimal feedback for button state
+  .theme-toggle-button {
+    transition: background-color 0.1s ease !important;
+  }
+
+  // Disable hover rotation animation
+  .theme-icon {
+    .theme-toggle-button:hover & {
+      transform: none !important;
+    }
+  }
+}

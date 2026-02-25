@@ -1,8 +1,11 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
-import { CFBaseTestModules } from '../../../../../test-framework/cf-test-helper';
+import { PaginationMonitorFactory, EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities } from '@stratosui/store';
+import { BaseTestModulesNoShared } from '@test-framework';
+import { CFBaseTestProviders, generateCFEntities } from '@test-framework/cf-test-helper';
 import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-form/space-quota-definition-form.component';
 import { EditSpaceQuotaStepComponent } from './edit-space-quota-step.component';
 
@@ -10,20 +13,33 @@ describe('EditSpaceQuotaStepComponent', () => {
   let component: EditSpaceQuotaStepComponent;
   let fixture: ComponentFixture<EditSpaceQuotaStepComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [EditSpaceQuotaStepComponent, SpaceQuotaDefinitionFormComponent],
       imports: [
-        ...CFBaseTestModules
+        EditSpaceQuotaStepComponent,
+        SpaceQuotaDefinitionFormComponent,
+        ...BaseTestModulesNoShared,
+        EntityCatalogTestModule,
       ],
       providers: [
-        PaginationMonitorFactory, {
+        ...CFBaseTestProviders,
+        PaginationMonitorFactory,
+        provideZonelessChangeDetection(),
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities()
+          ]
+        },
+        {
           provide: ActivatedRoute,
           useValue: {
             snapshot: {
               params: {
-                quotaId: 'quotaId',
-                endpointId: 'endpointId'
+                quotaId: 'test-quota-id',
+                orgId: 'test-org-id',
+                endpointId: 'test-cf-guid'
               },
               queryParams: {}
             },
@@ -32,7 +48,7 @@ describe('EditSpaceQuotaStepComponent', () => {
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EditSpaceQuotaStepComponent);

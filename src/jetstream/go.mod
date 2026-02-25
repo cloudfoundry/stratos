@@ -6,7 +6,7 @@ replace (
 	github.com/cloudfoundry/stratos/src/jetstream/api => ./api
 	github.com/cloudfoundry/stratos/src/jetstream/api/config => ./api/config
 	github.com/cloudfoundry/stratos/src/jetstream/crypto => ./crypto
-	github.com/cloudfoundry/stratos/src/jetstream/docs => ./docs
+	//	github.com/cloudfoundry/stratos/src/jetstream/docs => ./docs
 	github.com/cloudfoundry/stratos/src/jetstream/plugins/cfapppush => ./plugins/cfapppush
 	github.com/cloudfoundry/stratos/src/jetstream/plugins/cloudfoundry => ./plugins/cloudfoundry
 	github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes => ./plugins/kubernetes
@@ -59,7 +59,6 @@ require (
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/client-go v0.33.0
-
 )
 
 require (

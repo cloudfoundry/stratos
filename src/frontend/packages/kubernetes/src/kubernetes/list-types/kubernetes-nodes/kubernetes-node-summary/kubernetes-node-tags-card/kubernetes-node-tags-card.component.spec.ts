@@ -1,4 +1,7 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { BaseKubeGuid } from '../../../../kubernetes-page.types';
 import { KubernetesBaseTestModules } from '../../../../kubernetes.testing.module';
@@ -10,15 +13,32 @@ describe('KubernetesNodeTagsCardComponent', () => {
   let component: KubernetesNodeTagsCardComponent;
   let fixture: ComponentFixture<KubernetesNodeTagsCardComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [KubernetesNodeTagsCardComponent],
-      imports: KubernetesBaseTestModules,
-      providers: [BaseKubeGuid, KubernetesEndpointService, KubernetesNodeService],
-
-    })
-      .compileComponents();
-  }));
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        KubernetesNodeTagsCardComponent,
+        ...KubernetesBaseTestModules,
+      ],
+      providers: [
+        BaseKubeGuid,
+        KubernetesEndpointService,
+        KubernetesNodeService,
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              params: {
+                endpointId: 'anything',
+                nodeName: 'test-node'
+              },
+              queryParams: {}
+            }
+          }
+        },
+        provideZonelessChangeDetection(),
+      ],
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesNodeTagsCardComponent);

@@ -13,7 +13,7 @@ import { appAutoscalerScalingHistoryEntityType, autoscalerEntityFactory } from '
 
 
 export class CfAppAutoscalerEventsDataSource extends ListDataSource<APIResource<AppAutoscalerEvent>> {
-  action: any;
+  declare action: any;
   constructor(
     store: Store<CFAppState>,
     cfGuid: string,

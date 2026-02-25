@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { CoreModule } from '../../../core/core.module';
@@ -9,13 +11,13 @@ describe('BooleanIndicatorComponent', () => {
   let fixture: ComponentFixture<BooleanIndicatorComponent>;
   let element: HTMLElement;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [BooleanIndicatorComponent],
-      imports: [CoreModule, NoopAnimationsModule]
-    })
-      .compileComponents();
-  }));
+      providers: [provideZonelessChangeDetection()],
+      imports: [BooleanIndicatorComponent, CoreModule, NoopAnimationsModule]
+    });
+      TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(BooleanIndicatorComponent);
@@ -36,12 +38,14 @@ describe('BooleanIndicatorComponent', () => {
 
   it('should hide text if set', () => {
     component.showText = false;
+    // Component setter calls markForCheck(), but we need detectChanges in zoneless mode
     fixture.detectChanges();
     expect(element.textContent).not.toContain('Enabled');
   });
 
   it('should show unknown if not boolean value', () => {
     component.isTrue = null;
+    // Component setter calls markForCheck(), but we need detectChanges in zoneless mode
     fixture.detectChanges();
     expect(element.textContent).toContain('Unknown');
   });

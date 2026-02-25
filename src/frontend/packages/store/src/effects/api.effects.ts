@@ -13,19 +13,22 @@ import { ICFAction, WrapperRequestActionSuccess } from '../types/request.types';
 import { ApiActionTypes, RequestTypes } from './../actions/request.actions';
 import { InternalAppState } from './../app-state';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class APIEffect {
   constructor(
     private actions$: Actions,
     private store: Store<InternalAppState>,
-    private httpClient: PipelineHttpClient
+    private httpClient: PipelineHttpClient,
   ) { }
 
   
   apiRequest$ = createEffect(() => this.actions$.pipe(
     ofType<ICFAction | PaginatedAction>(ApiActionTypes.API_REQUEST_START),
     withLatestFrom(this.store),
-    mergeMap(([action, appState]) => {
+    mergeMap(([action, appState]: [ICFAction | PaginatedAction, InternalAppState]) => {
+      // Removed manual tick() call - zoneless change detection handles this automatically
       if (!(action as PaginatedAction).paginationKey) {
         return apiRequestPipelineFactory(baseRequestPipelineFactory, {
           store: this.store,
@@ -49,7 +52,7 @@ export class APIEffect {
   apiDeleteRequest$ = createEffect(() => this.actions$.pipe(
     ofType<WrapperRequestActionSuccess>(RequestTypes.SUCCESS),
     withLatestFrom(this.store),
-    mergeMap(([action, appState]) => {
+    mergeMap(([action, appState]: [WrapperRequestActionSuccess, InternalAppState]): any[] => {
       if (action.requestType === 'delete') {
         const deleteAction = EntityDeleteCompleteAction.parse(action.apiAction);
         if (deleteAction) {

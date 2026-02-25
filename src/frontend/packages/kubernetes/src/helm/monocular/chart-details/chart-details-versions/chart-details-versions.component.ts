@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import {Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { ChartAttributes } from '../../shared/models/chart';
@@ -8,17 +8,15 @@ import { ChartsService } from '../../shared/services/charts.service';
 @Component({
   selector: 'app-chart-details-versions',
   templateUrl: './chart-details-versions.component.html',
-  styleUrls: ['./chart-details-versions.component.scss']
+  styleUrls: ['./chart-details-versions.component.scss'],
+  standalone: true
 })
 export class ChartDetailsVersionsComponent {
-  @Input() versions: ChartVersion[];
-  @Input() currentVersion: ChartVersion;
+  @Input() versions!: ChartVersion[];
+  @Input() currentVersion!: ChartVersion;
   showAllVersions: boolean;
-
-  constructor(
-    private route: ActivatedRoute,
-    private chartService: ChartsService
-  ) { }
+  private route = inject(ActivatedRoute);
+  private chartService = inject(ChartsService);
 
   goToVersionUrl(version: ChartVersion): string {
     const chart: ChartAttributes = version.relationships.chart.data;

@@ -12,7 +12,7 @@ import { IListConfig } from '../../list.component.types';
 import { BaseEndpointsDataSource } from './base-endpoints-data-source';
 
 export class EndpointsDataSource extends BaseEndpointsDataSource {
-  store: Store<AppState>;
+  declare store: Store<AppState>;
 
   constructor(
     store: Store<AppState>,

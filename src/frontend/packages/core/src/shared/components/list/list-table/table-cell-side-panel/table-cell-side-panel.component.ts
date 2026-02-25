@@ -1,4 +1,4 @@
-import { Component, ComponentFactoryResolver, Input } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentFactoryResolver, Input } from '@angular/core';
 
 import { SidePanelService } from '../../../../services/side-panel.service';
 import { TableCellCustom } from '../../list.types';
@@ -13,11 +13,13 @@ export interface TableCellSidePanelConfig<T> {
 @Component({
   selector: 'app-table-cell-side-panel',
   templateUrl: './table-cell-side-panel.component.html',
-  styleUrls: ['./table-cell-side-panel.component.scss']
+  styleUrls: ['./table-cell-side-panel.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true
 })
 export class TableCellSidePanelComponent<T = any, A = any> extends TableCellCustom<T, object | CellConfigFunction<T>> {
 
-  public actualConfig: TableCellSidePanelConfig<A>;
+  public actualConfig!: TableCellSidePanelConfig<A>;
 
   @Input('row')
   get row(): T { return super.row; }
@@ -35,7 +37,8 @@ export class TableCellSidePanelComponent<T = any, A = any> extends TableCellCust
 
   constructor(
     private componentFactoryResolver: ComponentFactoryResolver,
-    private previewPanel: SidePanelService
+    private previewPanel: SidePanelService,
+    private cdr: ChangeDetectorRef
   ) {
     super();
   }
@@ -57,6 +60,7 @@ export class TableCellSidePanelComponent<T = any, A = any> extends TableCellCust
     } else {
       this.actualConfig = this.config as TableCellSidePanelConfig<A>;
     }
+    this.cdr.markForCheck();
   }
 
 }

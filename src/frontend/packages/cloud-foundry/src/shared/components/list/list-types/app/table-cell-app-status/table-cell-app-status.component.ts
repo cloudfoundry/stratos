@@ -1,9 +1,9 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { startWith } from 'rxjs/operators';
 
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { ApplicationStateComponent, TableCellCustom } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
 import { IApp } from '../../../../../../cf-api.types';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { ApplicationStateData, ApplicationStateService } from '../../../../../services/application-state.service';
@@ -12,10 +12,16 @@ import { ApplicationStateData, ApplicationStateService } from '../../../../../se
   selector: 'app-table-cell-app-status',
   templateUrl: './table-cell-app-status.component.html',
   styleUrls: ['./table-cell-app-status.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    ApplicationStateComponent
+  ]
 })
 export class TableCellAppStatusComponent extends TableCellCustom<APIResource<IApp>> implements OnInit {
+  private appStateService = inject(ApplicationStateService);
 
-  applicationState: ApplicationStateData;
+  applicationState!: ApplicationStateData;
   @Input('config')
   set config(value: { hideIcon: boolean, initialStateOnly: boolean, }) {
     super.config = value;
@@ -26,13 +32,9 @@ export class TableCellAppStatusComponent extends TableCellCustom<APIResource<IAp
     this.hideIcon = value.hideIcon || false;
     this.initialStateOnly = value.initialStateOnly || false;
   }
-  public fetchAppState$: Observable<ApplicationStateData>;
+  public fetchAppState$!: Observable<ApplicationStateData>;
   public hideIcon = false;
   public initialStateOnly = false;
-
-  constructor(private appStateService: ApplicationStateService) {
-    super();
-  }
 
   ngOnInit() {
     const applicationState = this.appStateService.get(this.row.entity, null);

@@ -1,11 +1,10 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild , ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
 
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { APIResource } from '../../../../../../store/src/types/api.types';
+import { StepOnNextFunction } from '@stratosui/core';
+import { RequestInfoState, APIResource } from '@stratosui/store';
 import { IQuotaDefinition } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
@@ -19,17 +18,22 @@ import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-
   styleUrls: ['./create-space-quota-step.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
-  ]
+  ],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    SpaceQuotaDefinitionFormComponent
+]
 })
 export class CreateSpaceQuotaStepComponent {
 
-  quotasSubscription: Subscription;
+  quotasSubscription!: Subscription;
   cfGuid: string;
   orgGuid: string;
-  spaceQuotaDefinitions$: Observable<APIResource<IQuotaDefinition>[]>;
+  spaceQuotaDefinitions$!: Observable<APIResource<IQuotaDefinition>[]>;
 
   @ViewChild('form', { static: true })
-  form: SpaceQuotaDefinitionFormComponent;
+  form!: SpaceQuotaDefinitionFormComponent;
 
   constructor(
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
@@ -42,7 +46,7 @@ export class CreateSpaceQuotaStepComponent {
   validate = () => !!this.form && this.form.valid();
 
   submit: StepOnNextFunction = () => {
-    const formValues = this.form.formGroup.value;
+    const formValues = this.form.formGroup.getRawValue();
 
     return cfEntityCatalog.spaceQuota.api.create<RequestInfoState>(formValues.name, this.cfGuid, {
       orgGuid: this.orgGuid,

@@ -1,9 +1,19 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { DatePipe } from '@angular/common';
+import { provideHttpClient } from '@angular/common/http';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { TabNavService } from '../../../../../core/src/tab-nav.service';
-import { generateTestApplicationServiceProvider } from '../../../../test-framework/application-service-helper';
-import { generateCfBaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { ApplicationsModule } from '../applications.module';
+import { TabNavService } from '@stratosui/core';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import {
+  generateTestApplicationServiceProvider,
+  ApplicationStateService,
+  ApplicationEnvVarsHelper,
+  generateCfBaseTestModulesNoShared,
+} from '@test-framework/cf';
+
 import { ApplicationDeleteComponent } from './application-delete.component';
 
 describe('ApplicationDeleteComponent', () => {
@@ -11,20 +21,26 @@ describe('ApplicationDeleteComponent', () => {
   let fixture: ComponentFixture<ApplicationDeleteComponent<any>>;
   const appId = '1';
   const cfId = '2';
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
-        ...generateCfBaseTestModules(),
-        ApplicationsModule
+        ApplicationDeleteComponent,
       ],
       providers: [
-        generateTestApplicationServiceProvider(cfId, appId),
-        TabNavService
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(generateCfBaseTestModulesNoShared()),
+        generateTestApplicationServiceProvider(appId, cfId),
+        ApplicationStateService,
+        ApplicationEnvVarsHelper,
+        TabNavService,
+        DatePipe,
       ]
     }).compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(ApplicationDeleteComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

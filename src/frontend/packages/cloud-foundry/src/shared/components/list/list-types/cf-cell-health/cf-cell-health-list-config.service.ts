@@ -27,10 +27,12 @@ import { CfCellHealthDataSource, CfCellHealthEntry, CfCellHealthState } from './
 
 // tslint:enable:max-line-length
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfCellHealthListConfigService extends BaseCfListConfig<CfCellHealthEntry> {
 
-  dataSource: CfCellHealthDataSource;
+  dataSource!: CfCellHealthDataSource;
   defaultView = 'table' as ListView;
   viewType = ListViewTypes.TABLE_ONLY;
   enableTextFilter = false;
@@ -58,7 +60,7 @@ export class CfCellHealthListConfigService extends BaseCfListConfig<CfCellHealth
     this.init$ = this.createMetricsAction(cloudFoundryCellService.cfGuid, cloudFoundryCellService.cellId).pipe(
       first(),
       tap(action => {
-        this.dataSource = new CfCellHealthDataSource(this.store, this, action);
+        this.dataSource = new CfCellHealthDataSource(this.store, this as BaseCfListConfig<CfCellHealthEntry>, action);
       })
     );
     this.showCustomTime = true;

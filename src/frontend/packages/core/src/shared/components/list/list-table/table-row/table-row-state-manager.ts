@@ -21,7 +21,7 @@ export class TableRowStateManager {
     this.syncObservableState();
   }
 
-  private mergeRowState(id: string, state) {
+  private mergeRowState(id: string, state: any) {
     const mergeIdState = {
       ...(this.rs[id] || {}),
       ...state

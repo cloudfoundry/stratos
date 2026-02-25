@@ -1,19 +1,21 @@
-import { Component } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom, TailwindDialogService } from '@stratosui/core';
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
 import { ListAppEnvVar } from '../cf-app-variables-data-source';
 
 @Component({
   selector: 'app-table-cell-edit-variable',
   templateUrl: './table-cell-edit-variable.component.html',
-  styleUrls: ['./table-cell-edit-variable.component.scss']
+  styleUrls: ['./table-cell-edit-variable.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: []
 })
 export class TableCellEditVariableComponent extends TableCellCustom<ListAppEnvVar> {
 
   constructor(
-    private dialog: MatDialog,
+    private dialog: TailwindDialogService,
   ) {
     super();
   }

@@ -2,16 +2,19 @@ import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { ITableColumn } from 'frontend/packages/core/src/shared/components/list/list-table/table.types';
+import { ITableColumn } from '@stratosui/core';
 import {
   TableCellEndpointNameComponent,
-} from 'frontend/packages/core/src/shared/components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
+} from '@stratosui/core';
 import {
   IListConfig,
   IListMultiFilterConfig,
   ListViewTypes,
-} from 'frontend/packages/core/src/shared/components/list/list.component.types';
-import { AppState } from 'frontend/packages/store/src/app-state';
+  IGlobalListAction,
+  IMultiListAction,
+  IListAction,
+} from '@stratosui/core';
+import { AppState } from '@stratosui/store';
 import { filter, map } from 'rxjs/operators';
 
 import { ListView } from '../../../../../store/src/actions/list.actions';
@@ -21,7 +24,9 @@ import { HelmReleaseCardComponent } from './helm-release-card/helm-release-card.
 import { HelmReleasesDataSource } from './helm-releases-list-source';
 import { KubernetesNamespacesFilterItem, KubernetesNamespacesFilterService } from './kube-namespaces-filter-config.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
 
   isLocal = true;
@@ -64,7 +69,7 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
       headerCell: () => 'Namespace',
       cellDefinition: {
         valuePath: 'namespace',
-        getLink: row => `/kubernetes/${row.endpointId}/namespaces/${row.namespace}`
+        getLink: (row: HelmRelease) => `/kubernetes/${row.endpointId}/namespaces/${row.namespace}`
       },
       sort: {
         type: 'sort',
@@ -77,7 +82,7 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
       columnId: 'status',
       headerCell: () => 'Status',
       cellDefinition: {
-        getValue: row => row.status.charAt(0).toUpperCase() + row.status.substring(1)
+        getValue: (row: HelmRelease) => row.status.charAt(0).toUpperCase() + row.status.substring(1)
       },
       sort: {
         type: 'sort',
@@ -103,7 +108,7 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
       columnId: 'last_Deployed',
       headerCell: () => 'Last Deployed',
       cellDefinition: {
-        getValue: (row) => `${this.datePipe.transform(row.info.last_deployed, 'medium')}`
+        getValue: (row: HelmRelease) => `${this.datePipe.transform(row.info.last_deployed, 'medium')}`
       },
       sort: {
         type: 'sort',
@@ -130,24 +135,24 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
     ];
   }
 
-  public getColumns = () => this.columns;
-  public getGlobalActions = () => [];
-  public getMultiActions = () => [];
-  public getSingleActions = () => [];
-  getMultiFiltersConfigs = () => this.multiFilterConfigs;
-  public getDataSource = () => this.dataSource;
+  public getColumns = (): ITableColumn<HelmRelease>[] => this.columns;
+  public getGlobalActions = (): IGlobalListAction<HelmRelease>[] => [];
+  public getMultiActions = (): IMultiListAction<HelmRelease>[] => [];
+  public getSingleActions = (): IListAction<HelmRelease>[] => [];
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => this.multiFilterConfigs;
+  public getDataSource = (): HelmReleasesDataSource => this.dataSource;
 }
 
-function createKubeNamespaceFilterConfig(key: string, label: string, cfOrgSpaceItem: KubernetesNamespacesFilterItem) {
+function createKubeNamespaceFilterConfig(key: string, label: string, cfOrgSpaceItem: KubernetesNamespacesFilterItem): IListMultiFilterConfig {
   return {
     key,
     label,
     ...cfOrgSpaceItem,
-    list$: cfOrgSpaceItem.list$.pipe(map((entities: any[]) => {
+    list$: cfOrgSpaceItem.list$.pipe(map((entities: Array<{ name?: string; metadata?: { name?: string }; guid?: string }>) => {
       return entities.map(entity => ({
-        label: entity.name || entity.metadata.name,
+        label: entity.name || entity.metadata?.name || '',
         item: entity,
-        value: entity.guid || entity.metadata.name // Endpoint search via guid, namespace by name (easier filtering)
+        value: entity.guid || entity.metadata?.name || '' // Endpoint search via guid, namespace by name (easier filtering)
       }));
     })),
   };

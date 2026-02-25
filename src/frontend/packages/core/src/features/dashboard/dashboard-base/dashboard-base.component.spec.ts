@@ -1,13 +1,12 @@
-import { CommonModule } from '@angular/common';
-import { HttpClient, HttpClientModule, HttpHandler } from '@angular/common/http';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
-import { StoreModule } from '@ngrx/store';
-
-import { appReducers } from '../../../../../store/src/reducers.module';
-import { CoreModule } from '../../../core/core.module';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import {
+  EntityServiceFactory,
+  EntityCatalogHelper,
+  EntityCatalogHelpers
+} from '@stratosui/store';
+import { BaseTestModulesNoShared, STORE_TEST_PROVIDERS, BASE_TEST_PROVIDERS } from '@test-framework/core-test.helper';
 import { PageHeaderService } from '../../../core/page-header-service/page-header.service';
 import { SidePanelService } from '../../../shared/services/side-panel.service';
 import { SharedModule } from '../../../shared/shared.module';
@@ -21,37 +20,39 @@ describe('DashboardBaseComponent', () => {
   let component: DashboardBaseComponent;
   let fixture: ComponentFixture<DashboardBaseComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [DashboardBaseComponent, SideNavComponent, PageSideNavComponent],
       imports: [
-        CommonModule,
-        CoreModule,
+        ...BaseTestModulesNoShared,
         SharedModule,
-        RouterTestingModule,
-        NoopAnimationsModule,
-        StoreModule.forRoot(
-          appReducers
-        ),
-        HttpClientModule,
-        HttpClientTestingModule
+        DashboardBaseComponent,
+        SideNavComponent,
+        PageSideNavComponent,
       ],
       providers: [
+        EntityServiceFactory,
         PageHeaderService,
         MetricsService,
         TabNavService,
-        HttpClient,
-        HttpHandler,
-        SidePanelService
+        SidePanelService,
+        ...STORE_TEST_PROVIDERS,
+        ...BASE_TEST_PROVIDERS,
+        provideZonelessChangeDetection(),
       ],
-    })
-      .compileComponents();
-  }));
+    });
+
+    // Set up entity catalog helper from DI
+    // Entities are registered automatically via BaseTestModulesNoShared's CATALOGUE_ENTITIES provider
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+
+    TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(DashboardBaseComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    // Don't call fixture.detectChanges() here - it triggers ngOnInit which requires full catalog setup
   });
 
   it('should be created', () => {

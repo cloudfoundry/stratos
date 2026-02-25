@@ -20,7 +20,9 @@ import { CfSpacesServiceInstancesDataSource } from './cf-spaces-service-instance
  * @export
  * @extends {CfServiceInstancesListConfigBase}
  */
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfSpacesServiceInstancesListConfigService extends CfServiceInstancesListConfigBase
   implements IListConfig<APIResource<IServiceInstance>>  {
 

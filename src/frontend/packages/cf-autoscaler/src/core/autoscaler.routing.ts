@@ -1,13 +1,12 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { DynamicExtensionRoutes } from '../../../core/src/core/extension/dynamic-extension-routes';
+import { dynamicExtensionRoutesGuard } from '../../../core/src/core/extension/dynamic-extension-routes';
 import { StratosActionType } from '../../../core/src/core/extension/extension-service';
 import {
   PageNotFoundComponentComponent,
 } from '../../../core/src/core/page-not-found-component/page-not-found-component.component';
 import { AutoscalerBaseComponent } from '../features/autoscaler-base.component';
-import { AutoscalerMetricPageComponent } from '../features/autoscaler-metric-page/autoscaler-metric-page.component';
 import {
   AutoscalerScaleHistoryPageComponent,
 } from '../features/autoscaler-scale-history-page/autoscaler-scale-history-page.component';
@@ -32,7 +31,7 @@ const autoscalerRoutes: Routes = [
           },
           {
             path: 'app-autoscaler-metric-page',
-            component: AutoscalerMetricPageComponent,
+            loadComponent: () => import('../features/autoscaler-metric-page/autoscaler-metric-page.component').then(m => m.AutoscalerMetricPageComponent),
           },
           {
             path: 'app-autoscaler-scale-history-page',
@@ -41,7 +40,7 @@ const autoscalerRoutes: Routes = [
           {
             path: '**',
             component: PageNotFoundComponentComponent,
-            canActivate: [DynamicExtensionRoutes],
+            canActivate: [dynamicExtensionRoutesGuard],
             data: {
               stratosRouteGroup: StratosActionType.Application
             }

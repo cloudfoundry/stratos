@@ -1,4 +1,8 @@
-import { Component, ContentChild, ContentChildren, Input, OnDestroy, QueryList } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, ContentChild, ContentChildren, Input, OnDestroy, QueryList, HostListener  } from '@angular/core';
+import { combineLatest, Observable, of as observableOf, of, Subscription } from 'rxjs';
+import { first, map, tap } from 'rxjs/operators';
+
 import {
   EntityMonitorFactory,
   MenuItem,
@@ -6,12 +10,15 @@ import {
   UserFavorite,
   ComponentEntityMonitorConfig,
   StratosStatus,
+  UserFavoriteManager,
 } from '@stratosui/store';
-import { combineLatest, Observable, of as observableOf, of, Subscription } from 'rxjs';
-import { first, map, tap } from 'rxjs/operators';
-
-import { UserFavoriteManager } from '@stratosui/store';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
+import { ApplicationStateIconComponent } from '../../../../application-state/application-state-icon/application-state-icon.component';
+import { CardStatusComponent } from '../../../../cards/card-status/card-status.component';
+import { ClickStopPropagationDirective } from '../../../../../../core/click-stop-propagation.directive';
+import { EntityFavoriteStarComponent } from '../../../../../../core/entity-favorite-star/entity-favorite-star.component';
+import { CustomIconComponent } from '../../../../custom-material/custom-material.component';
+import { AppProgressBarComponent } from '../../../../progress-bar/app-progress-bar.component';
 import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
 
@@ -27,18 +34,31 @@ export function createMetaCardMenuItemSeparator(): MenuItem {
 @Component({
   selector: 'app-meta-card',
   templateUrl: './meta-card.component.html',
-  styleUrls: ['./meta-card.component.scss']
+  styleUrls: ['./meta-card.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    CustomIconComponent,
+    ApplicationStateIconComponent,
+    CardStatusComponent,
+    ClickStopPropagationDirective,
+    EntityFavoriteStarComponent,
+    AppProgressBarComponent,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetaCardComponent implements OnDestroy {
 
+  public menuOpen = false;
+
   @ContentChildren(MetaCardItemComponent)
-  metaItems: QueryList<MetaCardItemComponent>;
+  metaItems!: QueryList<MetaCardItemComponent>;
 
   @ContentChild(MetaCardTitleComponent, { static: true })
-  title: MetaCardTitleComponent;
+  title!: MetaCardTitleComponent;
 
   @Input()
-  status$: Observable<StratosStatus>;
+  status$!: Observable<StratosStatus>;
 
   @Input()
   public favorite: UserFavorite<IFavoriteMetadata>;
@@ -53,13 +73,13 @@ export class MetaCardComponent implements OnDestroy {
   statusIconByTitle = false;
 
   @Input()
-  statusIconTooltip: string;
+  statusIconTooltip!: string;
 
   @Input()
   statusBackground = false;
 
   @Input()
-  mode: string;
+  mode!: string;
 
   @Input()
   clickAction: () => void = null;
@@ -111,11 +131,11 @@ export class MetaCardComponent implements OnDestroy {
     return this.pActionMenu;
   }
 
-  entityMonitorSub: Subscription;
+  entityMonitorSub!: Subscription;
 
-  public showMenu$: Observable<boolean>;
+  public showMenu$!: Observable<boolean>;
   public isDeleting$: Observable<boolean> = observableOf(false);
-  private pActionMenu: MenuItem[];
+  private pActionMenu!: MenuItem[];
 
   constructor(
     private entityMonitorFactory: EntityMonitorFactory,
@@ -124,5 +144,25 @@ export class MetaCardComponent implements OnDestroy {
 
   ngOnDestroy() {
     safeUnsubscribe(this.entityMonitorSub);
+  }
+
+  toggleMenu(): void {
+    this.menuOpen = !this.menuOpen;
+  }
+
+  menuItemClick(menuItem: MenuItem): void {
+    menuItem.action();
+    this.menuOpen = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    // Close menu when clicking outside
+    if (this.menuOpen) {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.meta-card__header-container__actions')) {
+        this.menuOpen = false;
+      }
+    }
   }
 }

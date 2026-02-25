@@ -1,15 +1,16 @@
-import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { PageHeaderComponent, StepComponent, SteppersComponent } from '@stratosui/core';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
-import {
-  CloudFoundryUserProvidedServicesService,
-} from '../../../shared/services/cloud-foundry-user-provided-services.service';
+import { CloudFoundryUserProvidedServicesService } from '../../../shared/services/cloud-foundry-user-provided-services.service';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../services/cloud-foundry-space.service';
+import { EditSpaceStepComponent } from './edit-space-step/edit-space-step.component';
 
 @Component({
   selector: 'app-edit-space',
@@ -22,6 +23,15 @@ import { CloudFoundrySpaceService } from '../services/cloud-foundry-space.servic
     CloudFoundrySpaceService,
     CloudFoundryOrganizationService,
     CloudFoundryUserProvidedServicesService
+  ],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    PageHeaderComponent,
+    StepComponent,
+    SteppersComponent,
+    EditSpaceStepComponent
   ]
 })
 export class EditSpaceComponent {

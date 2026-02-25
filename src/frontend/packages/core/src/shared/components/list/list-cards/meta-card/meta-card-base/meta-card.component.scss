@@ -3,6 +3,7 @@
   flex-direction: column;
   height: 100%;
   width: 100%;
+  overflow: visible;
 
   &__deleting-overlay {
     align-items: center;
@@ -30,6 +31,7 @@
     flex-direction: row;
     padding-bottom: 4px;
     word-break: break-all;
+    overflow: visible;
 
     &__button {
       margin-right: -10px;
@@ -43,7 +45,7 @@
   }
 
   &__favorite {
-    opacity: .6;
+    opacity: 0.6;
   }
 
   &__header-container {
@@ -72,6 +74,7 @@
 
     &__actions {
       flex: 0 0 15px;
+      overflow: visible;
     }
   }
 

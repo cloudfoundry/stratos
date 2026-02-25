@@ -1,0 +1,645 @@
+/* ============================================================================
+   Custom Form Field Component - Tailwind-based Material Replacement
+
+   Phase 4: Complex Form Components
+
+   Features:
+   - Full Tailwind CSS styling with theme CSS variable integration
+   - Dark/light mode support using CSS variables
+   - Floating label behavior with smooth animations
+   - Form validation error states with visual feedback
+   - Prefix/suffix support
+   - WCAG 2.1 AA accessibility compliance
+   - Keyboard navigation and screen reader support
+   - Smooth animations with reduced-motion support
+   - Four appearance variants: standard, fill, outline, legacy
+   ============================================================================ */
+
+// @tailwind components;
+// @tailwind utilities;
+
+/* ============================================================================
+   Base Form Field Structure
+   ============================================================================ */
+
+.custom-form-field {
+  /* Base layout - uses Tailwind classes in HTML, minimal overrides here */
+  background-color: transparent;
+
+  &.disabled {
+    @apply opacity-60 cursor-not-allowed pointer-events-none;
+
+    .form-field-infix input,
+    .form-field-infix textarea,
+    .form-field-infix select {
+      background-color: var(--input-disabled-bg);
+      color: var(--text-muted);
+    }
+  }
+}
+
+/* ============================================================================
+   Input Infix and Base Input Styling
+   ============================================================================ */
+
+.form-field-infix input,
+.form-field-infix textarea,
+.form-field-infix select {
+  @apply border-0 bg-transparent p-0 m-0 w-full max-w-full;
+  @apply align-bottom text-inherit box-content outline-none;
+  @apply transition-colors duration-200;
+  font: inherit;
+
+  /* Use theme CSS variables for colors */
+  background-color: var(--input-bg);
+  color: var(--input-text);
+
+  /* Hide placeholder by default (floating label shows instead) */
+  &::placeholder {
+    @apply text-transparent transition-colors duration-200;
+  }
+
+  /* Show placeholder when focused */
+  &:focus::placeholder {
+    color: var(--input-placeholder);
+  }
+
+  /* Disabled state */
+  &:disabled {
+    @apply cursor-not-allowed opacity-60;
+    background-color: var(--input-disabled-bg);
+  }
+}
+
+/* ============================================================================
+   Floating Label Styling
+   ============================================================================ */
+
+.form-field-label {
+  /* Position and transition handled by Tailwind classes in HTML */
+  color: var(--input-placeholder);
+
+  /* Floating state - smaller and positioned above */
+  &.floating {
+    transform: translateY(-1.34375em) scale(0.75);
+    @apply text-xs font-medium;
+    color: var(--color-primary);
+  }
+
+  /* Dark mode adjustments */
+  .dark-theme & {
+    color: var(--input-placeholder);
+
+    &.floating {
+      color: var(--color-primary);
+    }
+  }
+}
+
+/* Focus state label color */
+.custom-form-field.focused .form-field-label.floating {
+  color: var(--input-focus-border);
+}
+
+/* Error state label color */
+.custom-form-field.invalid .form-field-label {
+  color: var(--color-danger);
+
+  &.floating {
+    color: var(--color-danger);
+  }
+}
+
+/* Success state label color */
+.custom-form-field.valid .form-field-label.floating {
+  color: var(--color-success);
+}
+
+/* ============================================================================
+   Prefix and Suffix
+   ============================================================================ */
+
+.form-field-prefix {
+  color: var(--text-muted);
+
+  .custom-form-field.focused & {
+    color: var(--input-focus-border);
+  }
+
+  .custom-form-field.invalid & {
+    color: var(--color-danger);
+  }
+
+  .custom-form-field.valid & {
+    color: var(--color-success);
+  }
+
+  .dark-theme & {
+    color: var(--content-muted);
+  }
+}
+
+.form-field-suffix {
+  color: var(--text-muted);
+
+  .custom-form-field.focused & {
+    color: var(--input-focus-border);
+  }
+
+  .custom-form-field.invalid & {
+    color: var(--color-danger);
+  }
+
+  .custom-form-field.valid & {
+    color: var(--color-success);
+  }
+
+  .dark-theme & {
+    color: var(--content-muted);
+  }
+}
+
+/* ============================================================================
+   State Icons (Error and Success)
+   ============================================================================ */
+
+.error-icon {
+  color: var(--color-danger);
+
+  .dark-theme & {
+    color: var(--color-danger);
+  }
+}
+
+.success-icon {
+  color: var(--color-success);
+
+  .dark-theme & {
+    color: var(--color-success);
+  }
+}
+
+/* ============================================================================
+   Underline and Ripple (Standard & Legacy Appearance)
+   ============================================================================ */
+
+.form-field-underline {
+  background-color: var(--input-border);
+
+  .custom-form-field.focused & {
+    @apply bg-transparent;
+  }
+
+  .custom-form-field.invalid & {
+    background-color: var(--color-danger);
+  }
+
+  .custom-form-field.valid & {
+    background-color: var(--color-success);
+  }
+
+  .dark-theme & {
+    background-color: var(--input-border);
+  }
+}
+
+.form-field-ripple {
+  background-color: var(--input-focus-border);
+
+  .custom-form-field.focused & {
+    @apply scale-x-100;
+  }
+
+  .custom-form-field.color-accent & {
+    background-color: var(--color-accent);
+  }
+
+  .custom-form-field.color-warn &,
+  .custom-form-field.invalid & {
+    background-color: var(--color-danger);
+  }
+
+  .custom-form-field.valid & {
+    background-color: var(--color-success);
+  }
+}
+
+/* ============================================================================
+   Error and Hint Messages
+   ============================================================================ */
+
+.form-field-error {
+  color: var(--color-danger);
+
+  .dark-theme & {
+    color: var(--color-danger);
+  }
+}
+
+.form-field-hint {
+  color: var(--text-muted);
+
+  .dark-theme & {
+    color: var(--content-muted);
+  }
+}
+
+/* ============================================================================
+   Form Field Container Base Styles
+   ============================================================================ */
+
+.form-field-wrapper {
+  background-color: transparent;
+}
+
+.form-field-flex {
+  background-color: transparent;
+}
+
+.form-field-infix {
+  background-color: transparent;
+}
+
+/* ============================================================================
+   Appearance Variants
+   ============================================================================ */
+
+/* Fill Appearance */
+.appearance-fill {
+  .form-field-flex {
+    @apply rounded-t px-3 transition-colors duration-200;
+    background-color: color-mix(in srgb, var(--input-bg) 95%, var(--input-border));
+
+    .dark-theme & {
+      background-color: color-mix(in srgb, var(--input-bg) 90%, transparent);
+    }
+  }
+
+  .form-field-underline {
+    bottom: 0 !important;
+  }
+
+  &.focused .form-field-flex {
+    background-color: color-mix(in srgb, var(--input-bg) 95%, var(--input-focus-border) 10%);
+  }
+
+  &.invalid .form-field-flex {
+    background-color: color-mix(in srgb, var(--input-bg) 95%, var(--color-danger) 10%);
+  }
+
+  &.valid .form-field-flex {
+    background-color: color-mix(in srgb, var(--input-bg) 95%, var(--color-success) 5%);
+  }
+}
+
+/* Outline Appearance */
+.appearance-outline {
+  .form-field-flex {
+    @apply rounded border px-3 transition-all duration-200;
+    border-color: var(--input-border);
+  }
+
+  .form-field-underline {
+    @apply hidden;
+  }
+
+  &.focused .form-field-flex {
+    @apply border-2;
+    border-color: var(--input-focus-border);
+    padding-left: calc(0.75rem - 1px);
+    padding-right: calc(0.75rem - 1px);
+  }
+
+  &.invalid .form-field-flex {
+    @apply border-2;
+    border-color: var(--color-danger);
+    padding-left: calc(0.75rem - 1px);
+    padding-right: calc(0.75rem - 1px);
+  }
+
+  &.valid .form-field-flex {
+    border-color: var(--color-success);
+  }
+
+  &.color-accent.focused .form-field-flex {
+    border-color: var(--color-accent);
+  }
+
+  &.disabled .form-field-flex {
+    border-color: var(--input-border);
+    @apply opacity-60;
+  }
+
+  /* Dark mode outline adjustments */
+  .dark-theme & .form-field-flex {
+    border-color: var(--input-border);
+  }
+}
+
+/* Legacy Appearance */
+.appearance-legacy {
+  .form-field-infix {
+    padding: 0.4375em 0 !important;
+  }
+
+  .form-field-label {
+    top: 0.4375em !important;
+  }
+}
+
+/* Standard Appearance (default) */
+.appearance-standard {
+  /* Uses default styles with underline */
+}
+
+/* ============================================================================
+   Button Styles (Icon Buttons and Standard Buttons)
+   ============================================================================ */
+
+.mat-icon-button {
+  @apply border-0 bg-transparent rounded-full cursor-pointer;
+  @apply inline-flex items-center justify-center;
+  @apply min-w-[40px] h-10 p-2;
+  @apply transition-colors duration-200 ease-out;
+  @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+
+  &:hover:not(.mat-button-disabled) {
+    background-color: var(--nav-hover);
+  }
+
+  &:focus {
+    background-color: var(--nav-active);
+    --tw-ring-color: var(--color-primary);
+  }
+
+  &.mat-button-disabled {
+    @apply cursor-default opacity-60 pointer-events-none;
+  }
+
+  .dark-theme & {
+    &:hover:not(.mat-button-disabled) {
+      background-color: var(--nav-hover);
+    }
+
+    &:focus {
+      background-color: var(--nav-active);
+    }
+  }
+}
+
+.mat-button {
+  @apply border-0 bg-transparent cursor-pointer;
+  @apply inline-flex items-center justify-center gap-2;
+  @apply min-w-[64px] h-9 px-4 rounded;
+  @apply transition-colors duration-200 ease-out;
+  @apply uppercase font-medium text-sm;
+  @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+
+  &:hover:not(.mat-button-disabled) {
+    background-color: var(--nav-hover);
+  }
+
+  &:focus {
+    background-color: var(--nav-active);
+    --tw-ring-color: var(--color-primary);
+  }
+
+  &.mat-button-disabled {
+    @apply cursor-default opacity-60 pointer-events-none;
+  }
+
+  .dark-theme & {
+    &:hover:not(.mat-button-disabled) {
+      background-color: var(--nav-hover);
+    }
+
+    &:focus {
+      background-color: var(--nav-active);
+    }
+  }
+}
+
+/* ============================================================================
+   Material Icons Support
+   ============================================================================ */
+
+.material-icons {
+  @apply font-normal not-italic text-2xl leading-none tracking-normal normal-case;
+  @apply inline-block whitespace-nowrap antialiased;
+  font-family: 'Material Icons';
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  font-feature-settings: 'liga';
+}
+
+/* ============================================================================
+   Animation Utilities
+   ============================================================================ */
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slideDown {
+  animation: slideDown 0.2s ease-out;
+}
+
+/* ============================================================================
+   Accessibility Enhancements
+   ============================================================================ */
+
+/* Focus visible for keyboard navigation */
+.form-field-infix input:focus-visible,
+.form-field-infix textarea:focus-visible,
+.form-field-infix select:focus-visible {
+  @apply outline-none ring-2 ring-offset-2 rounded;
+  --tw-ring-color: var(--input-focus-border);
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .form-field-label,
+  .form-field-hint,
+  .form-field-error {
+    @apply font-semibold;
+  }
+
+  .form-field-underline {
+    @apply h-0.5;
+  }
+
+  .form-field-ripple {
+    @apply h-1;
+  }
+
+  .appearance-outline .form-field-flex {
+    @apply border-2;
+  }
+}
+
+/* Reduced motion support (WCAG AAA) */
+@media (prefers-reduced-motion: reduce) {
+  .form-field-label,
+  .form-field-ripple,
+  .form-field-flex,
+  .form-field-prefix,
+  .form-field-suffix,
+  .form-field-underline,
+  .error-icon,
+  .success-icon,
+  .form-field-infix input,
+  .form-field-infix textarea,
+  .form-field-infix select {
+    @apply transition-none;
+    animation: none !important;
+  }
+
+  .animate-slideDown {
+    animation: none;
+  }
+
+  @keyframes slideDown {
+    from, to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* ============================================================================
+   Dark Theme Specific Enhancements
+   ============================================================================ */
+
+.dark-theme {
+  /* Enhanced focus states for dark mode */
+  .custom-form-field.focused .form-field-infix input,
+  .custom-form-field.focused .form-field-infix textarea,
+  .custom-form-field.focused .form-field-infix select {
+    background-color: color-mix(in srgb, var(--input-bg) 90%, var(--input-focus-border) 10%);
+  }
+
+  /* Enhanced error states for dark mode */
+  .custom-form-field.invalid .form-field-infix input,
+  .custom-form-field.invalid .form-field-infix textarea,
+  .custom-form-field.invalid .form-field-infix select {
+    background-color: color-mix(in srgb, var(--input-bg) 95%, var(--color-danger) 5%);
+  }
+
+  /* Enhanced success states for dark mode */
+  .custom-form-field.valid .form-field-infix input,
+  .custom-form-field.valid .form-field-infix textarea,
+  .custom-form-field.valid .form-field-infix select {
+    background-color: color-mix(in srgb, var(--input-bg) 95%, var(--color-success) 5%);
+  }
+}
+
+/* ============================================================================
+   Compact Form Field for Filters
+   ============================================================================ */
+
+/* When floatLabel is 'never', reduce padding and margins */
+.custom-form-field[ng-reflect-float-label="never"],
+.custom-form-field.float-label-never {
+  @apply mb-0;
+  background-color: transparent !important;
+
+  .form-field-wrapper {
+    padding-bottom: 0 !important;
+    background-color: transparent !important;
+  }
+
+  .form-field-flex {
+    background-color: transparent !important;
+  }
+
+  .form-field-infix {
+    padding: 0 !important;
+    min-width: auto !important;
+    background-color: transparent !important;
+
+    /* Ensure inputs still respect theme variables in compact mode */
+    input,
+    textarea,
+    select {
+      background-color: var(--input-bg);
+      color: var(--input-text);
+      border-color: var(--input-border);
+    }
+
+    app-select {
+      display: block;
+      background-color: var(--input-bg) !important;
+      border: none !important;
+      border-radius: 0.375rem;
+    }
+  }
+
+  .form-field-label {
+    @apply hidden;
+  }
+
+  .form-field-subscript-wrapper {
+    @apply hidden;
+  }
+
+  .form-field-underline {
+    @apply hidden;
+  }
+}
+
+/* ============================================================================
+   Responsive Adjustments
+   ============================================================================ */
+
+@media (max-width: 640px) {
+  .form-field-infix {
+    min-width: 120px !important;
+  }
+
+  .form-field-label {
+    @apply text-sm;
+  }
+
+  .form-field-hint,
+  .form-field-error {
+    @apply text-[0.7rem];
+  }
+
+  .error-icon,
+  .success-icon {
+    @apply w-4 h-4;
+  }
+}
+
+/* ============================================================================
+   Print Styles
+   ============================================================================ */
+
+@media print {
+  .custom-form-field {
+    .form-field-ripple,
+    .error-icon,
+    .success-icon {
+      @apply hidden;
+    }
+
+    .form-field-label {
+      @apply text-xs;
+      transform: translateY(-1.34375em) scale(0.75);
+    }
+
+    .form-field-infix input,
+    .form-field-infix textarea,
+    .form-field-infix select {
+      border-bottom: 1px solid #000;
+    }
+  }
+}

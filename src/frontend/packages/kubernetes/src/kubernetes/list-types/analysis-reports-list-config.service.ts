@@ -1,14 +1,16 @@
 import { Injectable, NgZone } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { ITableColumn } from 'frontend/packages/core/src/shared/components/list/list-table/table.types';
+import { ITableColumn } from '@stratosui/core';
 import {
   IListAction,
   IListConfig,
   IListMultiFilterConfig,
   ListViewTypes,
-} from 'frontend/packages/core/src/shared/components/list/list.component.types';
-import moment from 'moment';
-import { of } from 'rxjs';
+  IGlobalListAction,
+  IMultiListAction,
+} from '@stratosui/core';
+import { formatDistance } from 'date-fns';
+import { Observable, of } from 'rxjs';
 
 import { ListView } from '../../../../store/src/actions/list.actions';
 import { AppState } from '../../../../store/src/public-api';
@@ -19,7 +21,9 @@ import { AnalysisReport } from '../store/kube.types';
 import { AnalysisReportsDataSource } from './analysis-reports-list-source';
 import { AnalysisStatusCellComponent } from './analysis-status-cell/analysis-status-cell.component';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class AnalysisReportsListConfig implements IListConfig<AnalysisReport> {
   AppsDataSource: AnalysisReportsDataSource;
   isLocal = true;
@@ -32,7 +36,7 @@ export class AnalysisReportsListConfig implements IListConfig<AnalysisReport> {
       columnId: 'name', headerCell: () => 'Name',
       cellDefinition: {
         getValue: (row: AnalysisReport) => row.name,
-        getLink: row => row.status === 'completed' ? `/kubernetes/${this.guid}/analysis/report/${row.id}` : null
+        getLink: (row: AnalysisReport) => row.status === 'completed' ? `/kubernetes/${this.guid}/analysis/report/${row.id}` : null
       },
       sort: {
         type: 'sort',
@@ -59,7 +63,7 @@ export class AnalysisReportsListConfig implements IListConfig<AnalysisReport> {
       headerCell: () => 'Age',
       cellDefinition: {
         getValue: (row: AnalysisReport) => {
-          return moment(row.created).fromNow(true);
+          return formatDistance(new Date(row.created), new Date());
         }
       },
       sort: {
@@ -103,21 +107,21 @@ export class AnalysisReportsListConfig implements IListConfig<AnalysisReport> {
   }
 
   private listActionDelete: IListAction<AnalysisReport> = {
-    action: (item) => this.analysisService.delete(item.endpoint, item),
+    action: (item: AnalysisReport) => this.analysisService.delete(item.endpoint, item),
     label: 'Delete',
     icon: 'delete',
     description: ``,
-    createEnabled: row$ => of(true)
+    createEnabled: (row$: Observable<AnalysisReport>) => of(true)
   };
 
   private singleActions = [
     this.listActionDelete,
   ];
 
-  getGlobalActions = () => [];
-  getMultiActions = () => [];
-  getSingleActions = () => this.singleActions;
-  getColumns = () => this.columns;
-  getDataSource = () => this.AppsDataSource;
-  getMultiFiltersConfigs = () => [];
+  getGlobalActions = (): IGlobalListAction<AnalysisReport>[] => [];
+  getMultiActions = (): IMultiListAction<AnalysisReport>[] => [];
+  getSingleActions = (): IListAction<AnalysisReport>[] => this.singleActions;
+  getColumns = (): ITableColumn<AnalysisReport>[] => this.columns;
+  getDataSource = (): AnalysisReportsDataSource => this.AppsDataSource;
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
 }

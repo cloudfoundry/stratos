@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, computed, Injector, inject, runInInjectionContext } from '@angular/core';
+import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { filter, first, map, pairwise, startWith, tap } from 'rxjs/operators';
 
 import { SnackBarService } from '../../../../core/src/shared/services/snackbar.service';
@@ -22,7 +23,9 @@ export interface KubernetesAnalysisType {
   descriptionUrl?: string;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class KubernetesAnalysisService {
   kubeGuid: string;
 
@@ -42,6 +45,8 @@ export class KubernetesAnalysisService {
     return enabled$.pipe(startWith(false));
   }
 
+  private injector = inject(Injector);
+
   constructor(
     public kubeEndpointService: KubernetesEndpointService,
     public activatedRoute: ActivatedRoute,
@@ -54,7 +59,7 @@ export class KubernetesAnalysisService {
     this.enabled$ = KubernetesAnalysisService.isAnalysisEnabled(this.store);
     this.hideAnalysis$ = this.enabled$.pipe(map(enabled => !enabled));
 
-    const allEngines = {
+    const allEngines: Record<string, { name: string; id: string; namespaceAware: boolean; descriptionUrl: string }> = {
       popeye:
       {
         name: 'PopEye',
@@ -90,26 +95,39 @@ export class KubernetesAnalysisService {
       map(engines => engines.split(',').map(e => allEngines[e.trim()]).filter(e => !!e))
     );
 
-    this.namespaceAnalyzers$ = combineLatest(
-      this.analyzers$,
-      this.enabled$
-    ).pipe(
-      map(([a, enabled]) => {
+    // Convert to signals for computed within injection context
+    runInInjectionContext(this.injector, () => {
+      const analyzersSignal = toSignal(
+        this.analyzers$,
+        { initialValue: [] as KubernetesAnalysisType[] }
+      );
+
+      const enabledSignal = toSignal(
+        this.enabled$,
+        { initialValue: false }
+      );
+
+      // Compute namespace analyzers
+      const namespaceAnalyzersComputed = computed(() => {
+        const analyzers = analyzersSignal();
+        const enabled = enabledSignal();
         if (!enabled) {
           return null;
         }
-        return a.filter(v => v.namespaceAware);
-      })
-    );
+        return analyzers.filter(v => v.namespaceAware);
+      });
+
+      this.namespaceAnalyzers$ = toObservable(namespaceAnalyzersComputed);
+    });
 
     this.action = kubeEntityCatalog.analysisReport.actions.getMultiple(this.kubeGuid);
   }
 
-  public delete(endpointID: string, item: { id: string, }) {
+  public delete(endpointID: string, item: { id: string }): Observable<any> {
     return kubeEntityCatalog.analysisReport.api.delete(endpointID, item.id);
   }
 
-  public refresh() {
+  public refresh(): void {
     this.store.dispatch(new ResetPaginationOfType(this.action));
   }
 

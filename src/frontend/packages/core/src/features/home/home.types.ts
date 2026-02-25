@@ -18,7 +18,7 @@ export class HomePageCardLayout {
 
 export abstract class HomePageEndpointCard {
   public layout: HomePageCardLayout;
-  public endpoint: EndpointModel;
+  public endpoint!: EndpointModel;
   public load: () => Observable<boolean>;
 }
 

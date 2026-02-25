@@ -47,6 +47,20 @@ export const apiRequestPipelineFactory = (
   pipeline: EntityRequestPipeline,
   { store, httpClient, action, appState }: PipelineFactoryConfig
 ) => {
+  // Defensive null checks for Angular 20 DI compatibility
+  if (!store) {
+    console.error('apiRequestPipelineFactory: Store is null or undefined');
+    return of({ type: 'Stratos error: Store not initialized', error: new Error('Store is null') });
+  }
+  if (!httpClient) {
+    console.error('apiRequestPipelineFactory: HttpClient is null or undefined');
+    return of({ type: 'Stratos error: HttpClient not initialized', error: new Error('HttpClient is null') });
+  }
+  if (!pipeline) {
+    console.error('apiRequestPipelineFactory: Pipeline is null or undefined');
+    return of({ type: 'Stratos error: Pipeline not initialized', error: new Error('Pipeline is null') });
+  }
+
   const patchedAction = patchActionWithForcedConfig(action as PaginatedAction);
 
   const actionDispatcher = (actionToDispatch: Action) => store.dispatch(actionToDispatch);
@@ -55,19 +69,34 @@ export const apiRequestPipelineFactory = (
   const catalogEntity = entityCatalog.getEntity(patchedAction);
   const recursivelyDelete = shouldRecursivelyDelete(requestType, patchedAction);
 
-  if (recursivelyDelete) {
+  if (recursivelyDelete && action?.guid) {
     store.dispatch(
       new RecursiveDelete(action.guid, catalogEntity.getSchema(patchedAction.schemaKey)),
     );
   }
 
   startEntityHandler(actionDispatcher, catalogEntity, requestType, action);
-  return pipeline(store, httpClient, {
+
+  // Execute pipeline and ensure it returns an Observable
+  const pipelineResult = pipeline(store, httpClient, {
     action,
     requestType,
     catalogEntity,
     appState
-  }).pipe(
+  });
+
+  // Guard against null/undefined Observable
+  if (!pipelineResult) {
+    console.error('apiRequestPipelineFactory: Pipeline returned null/undefined Observable');
+    const errorResponse: PipelineResult = {
+      success: false,
+      errorMessage: 'Pipeline returned null'
+    };
+    failedEntityHandler(actionDispatcher, catalogEntity, requestType, action, errorResponse, recursivelyDelete);
+    return of({ type: 'Stratos error: Pipeline returned null', error: new Error('Pipeline returned null') });
+  }
+
+  return pipelineResult.pipe(
     tap((response) => {
       if (response.success) {
         successEntityHandler(actionDispatcher, catalogEntity, requestType, action, response, recursivelyDelete);
@@ -91,7 +120,23 @@ export const apiRequestPipelineFactory = (
         actionDispatcher,
         recursivelyDelete
       );
-      console.warn(error);
+
+      // Filter out expected errors to reduce console noise
+      const isExpected404 = httpResponse?.status === 404 &&
+        (error.url?.includes('/autoscaler/') || action.options?.url?.includes('/autoscaler/'));
+
+      // Network errors (status 0) are transient connectivity issues
+      const isNetworkError = httpResponse?.status === 0;
+
+      // App stats failures for stopped apps are expected
+      const isExpectedStatsError = httpResponse?.status === 0 &&
+        (error.url?.includes('/apps/') && error.url?.includes('/stats'));
+
+      // Only log unexpected errors
+      if (!isExpected404 && !isNetworkError && !isExpectedStatsError) {
+        console.warn(error);
+      }
+
       return of({ type: 'Stratos error handled.', error });
     }),
   );

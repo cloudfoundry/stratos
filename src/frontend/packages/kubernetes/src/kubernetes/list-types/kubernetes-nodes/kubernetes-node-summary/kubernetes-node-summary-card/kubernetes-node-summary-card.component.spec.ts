@@ -1,5 +1,9 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
+import { EntityServiceFactory } from '@stratosui/store';
 import { BaseKubeGuid } from '../../../../kubernetes-page.types';
 import { KubernetesBaseTestModules } from '../../../../kubernetes.testing.module';
 import { KubernetesEndpointService } from '../../../../services/kubernetes-endpoint.service';
@@ -10,14 +14,32 @@ describe('KubernetesNodeSummaryCardComponent', () => {
   let component: KubernetesNodeSummaryCardComponent;
   let fixture: ComponentFixture<KubernetesNodeSummaryCardComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [KubernetesNodeSummaryCardComponent],
-      imports: KubernetesBaseTestModules,
-      providers: [BaseKubeGuid, KubernetesEndpointService, KubernetesNodeService]
-    })
-      .compileComponents();
-  }));
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        KubernetesNodeSummaryCardComponent,
+        ...KubernetesBaseTestModules,
+      ],
+      providers: [
+        EntityServiceFactory,
+        BaseKubeGuid,
+        KubernetesEndpointService,
+        KubernetesNodeService,
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              queryParams: {},
+              params: {
+                nodeName: 'test-node'
+              }
+            }
+          }
+        },
+        provideZonelessChangeDetection(),
+      ]
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesNodeSummaryCardComponent);

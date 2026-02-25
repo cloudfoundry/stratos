@@ -55,7 +55,7 @@
     font-size: 13px;
     line-height: $type-height;
     margin-top: -($type-height - 2px);
-    opacity: .6;
+    opacity: 0.6;
   }
   &__panel {
     display: flex;
@@ -120,4 +120,38 @@
     margin-top: -10px;
     padding: 0 16px;
   }
+}
+
+// Theme-aware styles
+.card-header-border {
+  border-color: var(--card-border);
+}
+
+.card-title {
+  color: var(--content-text);
+}
+
+.card-subtitle {
+  color: var(--content-muted);
+}
+
+.sidebar-panel {
+  background-color: var(--card-header-bg);
+  border-color: var(--card-border);
+}
+
+.sidebar-title {
+  color: var(--content-text);
+}
+
+.sidebar-link {
+  color: var(--color-primary);
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.sidebar-muted-text {
+  color: var(--content-muted);
 }

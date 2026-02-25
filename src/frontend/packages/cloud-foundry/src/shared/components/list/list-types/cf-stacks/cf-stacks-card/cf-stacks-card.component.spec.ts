@@ -1,28 +1,51 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { StoreModule } from '@ngrx/store';
 
-import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { MetadataCardTestComponents } from '../../../../../../../../core/test-framework/core-test.helper';
-import {
-  generateCfBaseTestModulesNoShared,
-} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule } from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { generateCFEntities } from '@stratosui/cloud-foundry';
+
 import { CfStacksCardComponent } from './cf-stacks-card.component';
 
 describe('CfStacksCardComponent', () => {
   let component: CfStacksCardComponent;
   let fixture: ComponentFixture<CfStacksCardComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [CfStacksCardComponent, MetadataCardTestComponents],
-      imports: generateCfBaseTestModulesNoShared(),
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        CfStacksCardComponent,
+        NoopAnimationsModule,
+        StoreModule.forRoot(
+          appReducers,
+          { runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false } }
+        ),
+        {
+          ngModule: EntityCatalogTestModule,
+          providers: [
+            {
+              provide: TEST_CATALOGUE_ENTITIES,
+              useValue: [
+                ...generateStratosEntities(),
+                ...generateCFEntities()
+              ]
+            }
+          ]
+        },
+      ],
       providers: [
-        EntityMonitorFactory
+        ...STORE_TEST_PROVIDERS,
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(CfStacksCardComponent);
     component = fixture.componentInstance;
     component.row = {

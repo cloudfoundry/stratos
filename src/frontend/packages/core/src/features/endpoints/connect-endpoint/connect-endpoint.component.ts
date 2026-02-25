@@ -1,5 +1,5 @@
-import {
-  Component,
+
+import { ChangeDetectionStrategy, Component,
   ComponentFactoryResolver,
   ComponentRef,
   EventEmitter,
@@ -9,8 +9,11 @@ import {
   Output,
   ViewChild,
   ViewContainerRef,
-} from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+ } from '@angular/core';
+import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup, AbstractControl } from '@angular/forms';
+import { CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
+import { CustomCheckboxComponent } from '../../../shared/components/custom-checkbox/custom-checkbox.component';
+import { CustomSelectComponent, CustomOptionComponent } from '../../../shared/components/custom-select/custom-select.component';
 import { entityCatalog, EndpointAuthTypeConfig, IAuthForm, IEndpointAuthComponent } from '@stratosui/store';
 import { Subscription } from 'rxjs';
 
@@ -18,14 +21,33 @@ import { BaseEndpointAuth } from '../../../core/endpoint-auth';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { ConnectEndpointConfig, ConnectEndpointData, ConnectEndpointService } from '../connect.service';
 
+/**
+ * Base interface for the endpoint form structure.
+ * The authValues field will be typed dynamically based on the selected auth type.
+ */
+interface EndpointForm {
+  authType: FormControl<string>;
+  systemShared: FormControl<boolean>;
+  [key: string]: AbstractControl<any>;
+}
+
 @Component({
   selector: 'app-connect-endpoint',
   templateUrl: './connect-endpoint.component.html',
-  styleUrls: ['./connect-endpoint.component.scss']
+  styleUrls: ['./connect-endpoint.component.scss'],
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    CustomFormFieldComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
+    CustomCheckboxComponent
+],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConnectEndpointComponent implements OnInit, OnDestroy {
   private pDisabled = false;
-  private pConnectService: ConnectEndpointService;
+  private pConnectService!: ConnectEndpointService;
   @Input() set connectService(service: ConnectEndpointService) {
     if (!service || this.pConnectService) {
       return;
@@ -54,9 +76,9 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
 
   // Component reference for the dynamically created auth form
   @ViewChild('authForm', { read: ViewContainerRef, static: true })
-  public container: ViewContainerRef;
+  public container!: ViewContainerRef;
 
-  public endpointForm: UntypedFormGroup;
+  public endpointForm!: FormGroup<EndpointForm>;
 
   private bodyContent = '';
 
@@ -65,13 +87,13 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   private cachedAuthTypeFormFields: string[] = [];
 
   // The auth type that was initially auto-selected
-  private autoSelected: EndpointAuthTypeConfig;
-  private authFormComponentRef: ComponentRef<IAuthForm>;
+  private autoSelected!: EndpointAuthTypeConfig;
+  private authFormComponentRef!: ComponentRef<IAuthForm>;
 
   private subs: Subscription[] = [];
 
   constructor(
-    private fb: UntypedFormBuilder,
+    private fb: FormBuilder,
     private resolver: ComponentFactoryResolver,
   ) { }
 
@@ -99,11 +121,12 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     }
 
     this.cachedAuthTypeFormFields = Object.keys(this.autoSelected.form || {});
-    this.endpointForm = this.fb.group({
-      authType: [this.autoSelected.value || '', Validators.required],
-      authValues: this.fb.group(this.autoSelected.form || {}),
-      systemShared: false
+    this.endpointForm = this.fb.group<EndpointForm>({
+      authType: new FormControl(this.autoSelected.value || '', { nonNullable: true, validators: Validators.required }),
+      systemShared: new FormControl(false, { nonNullable: true })
     });
+    // Add authValues as a separate group to handle dynamic auth type switching
+    this.endpointForm.addControl('authValues', this.fb.group(this.autoSelected.form || {}));
     this.authChanged();
 
     // Template container reference is not available at construction
@@ -111,24 +134,24 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
 
     this.subs.push(this.endpointForm.valueChanges.pipe().subscribe(res => {
       const authType = this.authTypesForEndpoint.find(ep => ep.value === res.authType);
-      let valid = false;
       if (authType.component === this.authFormComponentRef.componentType) {
         this.setData();
-        valid = this.endpointForm.valid;
       }
-      this.valid.next(valid);
+      // Always emit actual form validity, regardless of component state
+      this.valid.next(this.endpointForm.valid);
     }));
 
     // Set initial valid status
     this.endpointForm.updateValueAndValidity();
+    this.valid.next(this.endpointForm.valid);
   }
 
   ngOnInit() {
     if (!this.endpointForm) {
       // Ensure there's something for the html to bind to
-      this.endpointForm = this.fb.group({
-        authType: null,
-        systemShared: false
+      this.endpointForm = this.fb.group<EndpointForm>({
+        authType: new FormControl('', { nonNullable: true }),
+        systemShared: new FormControl(false, { nonNullable: true })
       });
     }
   }
@@ -139,8 +162,8 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     if (!this.sameAuthTypeFormFields(this.cachedAuthTypeFormFields, authTypeFormFields)) {
       // Don't remove and re-add the same control, this helps with form validation
       this.cachedAuthTypeFormFields = authTypeFormFields;
-      this.endpointForm.removeControl('authValues');
-      this.endpointForm.addControl('authValues', this.fb.group(authType.form));
+      (this.endpointForm as any).removeControl('authValues');
+      (this.endpointForm as any).addControl('authValues', this.fb.group(authType.form || {}));
 
       // Update the auth form component
       this.createComponent(authType);
@@ -182,9 +205,9 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     }
 
     return {
-      authType,
+      authType: authType ?? '',
       authVal,
-      systemShared,
+      systemShared: systemShared ?? false,
       bodyContent: this.bodyContent,
     };
   }

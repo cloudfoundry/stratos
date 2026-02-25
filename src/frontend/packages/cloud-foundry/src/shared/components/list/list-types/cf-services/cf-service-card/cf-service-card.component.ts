@@ -1,19 +1,34 @@
-import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
-import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import {
+  AppChip,
+  CardCell,
+  MetaCardComponent,
+  MetaCardItemComponent,
+  MetaCardKeyComponent,
+  MetaCardTitleComponent,
+  MetaCardValueComponent,
+  MultilineTitleComponent
+} from '@stratosui/core';
+import { APIResource, EntityServiceFactory, RouterNav } from '@stratosui/store';
+
+import { CFAppState } from '../../../../../../cf-app-state';
 import { IService, IServiceExtra } from '../../../../../../cf-api-svc.types';
 import { getServiceName } from '../../../../../../features/service-catalog/services-helper';
 import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
+import { ServiceIconComponent } from '../../../../service-icon/service-icon.component';
+import { TableCellServiceActiveComponent } from '../table-cell-service-active/table-cell-service-active.component';
+import { TableCellServiceBindableComponent } from '../table-cell-service-bindable/table-cell-service-bindable.component';
 import {
+  TableCellServiceBrokerComponent,
   TableCellServiceBrokerComponentConfig,
   TableCellServiceBrokerComponentMode,
 } from '../table-cell-service-broker/table-cell-service-broker.component';
+import { TableCellServiceCfBreadcrumbsComponent } from '../table-cell-service-cf-breadcrumbs/table-cell-service-cf-breadcrumbs.component';
+import { TableCellServiceReferencesComponent } from '../table-cell-service-references/table-cell-service-references.component';
+import { TableCellServiceTagsComponent } from '../table-cell-service-tags/table-cell-service-tags.component';
 
 export interface ServiceTag {
   value: string;
@@ -23,7 +38,25 @@ export interface ServiceTag {
   selector: 'app-cf-service-card',
   templateUrl: './cf-service-card.component.html',
   styleUrls: ['./cf-service-card.component.scss'],
-  providers: [EntityServiceFactory]
+  providers: [EntityServiceFactory],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    MetaCardComponent,
+    MetaCardItemComponent,
+    MetaCardKeyComponent,
+    MetaCardTitleComponent,
+    MetaCardValueComponent,
+    MultilineTitleComponent,
+    ServiceIconComponent,
+    TableCellServiceActiveComponent,
+    TableCellServiceBindableComponent,
+    TableCellServiceBrokerComponent,
+    TableCellServiceCfBreadcrumbsComponent,
+    TableCellServiceReferencesComponent,
+    TableCellServiceTagsComponent,
+  ]
 })
 export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
   serviceEntity: APIResource<IService>;

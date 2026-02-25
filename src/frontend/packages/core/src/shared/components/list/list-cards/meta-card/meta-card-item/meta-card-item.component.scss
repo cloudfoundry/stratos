@@ -12,15 +12,23 @@
 }
 
 .meta-card-item__value {
-  overflow: hidden;
   text-align: end;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+
+  // Only truncate very long values (not short numeric ones)
+  &.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .meta-card-item__key {
   flex: none;
-  font-weight: 300;
+  font-weight: 400;
   padding-right: 10px;
 }
 

@@ -1,9 +1,11 @@
-import { Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { AsyncPipe } from '@angular/common';
+import {Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { Observable } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../core/src/core/endpoints.service';
+import { PageHeaderComponent } from '../../../../core/src/shared/components/page-header/page-header.component';
 import { IHeaderBreadcrumb } from '../../../../core/src/shared/components/page-header/page-header.types';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
@@ -14,6 +16,13 @@ import { KubernetesService } from '../services/kubernetes.service';
   selector: 'app-kubernetes-node',
   templateUrl: './kubernetes-node.component.html',
   styleUrls: ['./kubernetes-node.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    AsyncPipe,
+    RouterOutlet,
+    PageHeaderComponent,
+  ],
   providers: [
     {
       provide: BaseKubeGuid,
@@ -39,13 +48,15 @@ export class KubernetesNodeComponent {
     { link: 'pods', label: 'Pods', icon: 'pod', iconFont: 'stratos-icons' },
   ];
 
-  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;  public kubeEndpointService = inject(KubernetesEndpointService);
+  public kubeNodeService = inject(KubernetesNodeService);
+  public endpointsService = inject(EndpointsService);
 
-  constructor(
-    public kubeEndpointService: KubernetesEndpointService,
-    public kubeNodeService: KubernetesNodeService,
-    public endpointsService: EndpointsService
-  ) {
+
+
+  constructor() {
+
+
     this.endpointsService.hasMetrics(this.kubeEndpointService.kubeGuid).pipe(
       first(),
       tap(haveMetrics => {
@@ -56,7 +67,7 @@ export class KubernetesNodeComponent {
       })
     ).subscribe();
 
-    this.breadcrumbs$ = kubeEndpointService.endpoint$.pipe(
+    this.breadcrumbs$ = this.kubeEndpointService.endpoint$.pipe(
       map(endpoint => ([{
         breadcrumbs: [
           { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}` },
@@ -64,5 +75,7 @@ export class KubernetesNodeComponent {
       }])
       )
     );
+
+
   }
 }

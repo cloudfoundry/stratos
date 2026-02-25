@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { ApplicationRef, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, flatMap, mergeMap } from 'rxjs/operators';
@@ -15,13 +15,16 @@ import {
 import { GET_CF_INFO, GetCFInfo } from '../../actions/cloud-foundry.actions';
 import { CFAppState } from '../../cf-app-state';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CloudFoundryEffects {
   proxyAPIVersion = environment.proxyAPIVersion;
   constructor(
     private http: HttpClient,
     private actions$: Actions,
-    private store: Store<CFAppState>
+    private store: Store<CFAppState>,
+    private appRef: ApplicationRef
   ) { }
 
   
@@ -37,9 +40,9 @@ export class CloudFoundryEffects {
       };
       const url = `/pp/${this.proxyAPIVersion}/proxy/v2/info`;
       return this.http
-        .get(url, requestArgs)
+        .get<{ [guid: string]: any }>(url, requestArgs)
         .pipe(
-          mergeMap(info => {
+          mergeMap((info: { [guid: string]: any }) => {
             const mappedData = {
               entities: { [cfInfoKey]: {} },
               result: []
@@ -51,19 +54,23 @@ export class CloudFoundryEffects {
               metadata: {}
             };
             mappedData.result.push(id);
+            this.appRef.tick();
             return [
               new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
           }),
-          catchError(error => [
-            new WrapperRequestActionFailed(error.message, action, actionType, {
-              endpointIds: [action.guid],
-              url: error.url || url,
-              eventCode: error.status ? error.status + '' : '500',
-              message: 'Cloud Foundry Info request error',
-              error
-            })
-          ])
+          catchError(error => {
+            this.appRef.tick();
+            return [
+              new WrapperRequestActionFailed(error.message, action, actionType, {
+                endpointIds: [action.guid],
+                url: error.url || url,
+                eventCode: error.status ? error.status + '' : '500',
+                message: 'Cloud Foundry Info request error',
+                error
+              })
+            ];
+          })
         );
     })
   ));

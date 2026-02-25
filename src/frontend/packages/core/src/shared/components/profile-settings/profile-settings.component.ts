@@ -1,22 +1,29 @@
-import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
+import { CustomSlideToggleComponent } from '../custom-slide-toggle/custom-slide-toggle.component';
+import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
 import {
+  AppState,
+  LocalStorageService,
+  selectDashboardState,
+  selectSessionData,
   SetGravatarEnabledAction,
   SetPollingEnabledAction,
   SetSessionTimeoutAction,
-} from '../../../../../store/src/actions/dashboard-actions';
-import { AppState } from '../../../../../store/src/app-state';
-import { LocalStorageService } from '../../../../../store/src/helpers/local-storage-service';
-import { selectSessionData } from '../../../../../store/src/reducers/auth.reducer';
-import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
-import { ThemeService } from '../../../../../store/src/theme.service';
+  ThemeService,
+} from '@stratosui/store';
+import { BytesToHumanSize } from '../../../core/byte-formatters.pipe';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { UserProfileService } from '../../../core/user-profile.service';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
+import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
+import { CustomButtonToggleComponent, CustomButtonToggleGroupComponent } from '../custom-button-toggle/custom-button-toggle.component';
+import { CardTitleComponent } from '../cards/card-title/card-title.component';
 
 export enum ProfileSettingsTypes {
   GRAVATAR,
@@ -28,7 +35,19 @@ export enum ProfileSettingsTypes {
 @Component({
   selector: 'app-profile-settings',
   templateUrl: './profile-settings.component.html',
-  styleUrls: ['./profile-settings.component.scss']
+  styleUrls: ['./profile-settings.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    CustomSlideToggleComponent,
+    CustomIconComponent,
+    CustomTooltipDirective,
+    CustomButtonToggleComponent,
+    CustomButtonToggleGroupComponent,
+    BytesToHumanSize,
+    CardTitleComponent
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProfileSettingsComponent {
 
@@ -68,7 +87,7 @@ export class ProfileSettingsComponent {
   );
 
   public localStorageSize$ = this.sessionData$.pipe(
-    map(sessionData => LocalStorageService.localStorageSize(sessionData)),
+    map(sessionData => sessionData && sessionData.user ? LocalStorageService.localStorageSize(sessionData) : -1),
     filter(bytes => bytes !== -1),
   );
 
@@ -86,6 +105,11 @@ export class ProfileSettingsComponent {
     const newVal = !(gravatarEnabled === 'true');
     this.setGravatarEnabled(newVal);
   }
+
+  public updateTheme(themeKey: string) {
+    this.themeService.setTheme(themeKey);
+  }
+
   private setSessionTimeout(timeoutSession: boolean) {
     this.store.dispatch(new SetSessionTimeoutAction(timeoutSession));
   }
@@ -113,7 +137,11 @@ export class ProfileSettingsComponent {
   }
 
   clearLocalStorage() {
-    this.sessionData$.pipe(first()).subscribe(sessionData => LocalStorageService.clearLocalStorage(sessionData, this.confirmationService));
+    this.sessionData$.pipe(first()).subscribe(sessionData => {
+      if (sessionData && sessionData.user) {
+        LocalStorageService.clearLocalStorage(sessionData, this.confirmationService);
+      }
+    });
   }
 
 }

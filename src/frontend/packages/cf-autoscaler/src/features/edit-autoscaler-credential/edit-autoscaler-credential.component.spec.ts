@@ -1,15 +1,14 @@
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
-import { ApplicationServiceMock } from '../../../../cloud-foundry/test-framework/application-service-helper';
-import { CoreModule } from '../../../../core/src/core/core.module';
-import { CurrentUserPermissionsService } from '../../../../core/src/core/permissions/current-user-permissions.service';
-import { SharedModule } from '../../../../core/src/shared/shared.module';
-import { TabNavService } from '../../../../core/src/tab-nav.service';
-import { createBasicStoreModule } from '../../../../store/testing/public-api';
+import { AppTestModule } from '@test-framework';
+import { ApplicationServiceMock, ApplicationStateService } from '@test-framework/cf';
+import { ApplicationService } from '@stratosui/cloud-foundry';
+import { CurrentUserPermissionsService, TabNavService } from '@stratosui/core';
+import { STORE_TEST_PROVIDERS, createBasicStoreModule } from '@stratosui/store/testing';
 import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
 import { EditAutoscalerCredentialComponent } from './edit-autoscaler-credential.component';
 
@@ -17,28 +16,26 @@ describe('EditAutoscalerCredentialComponent', () => {
   let component: EditAutoscalerCredentialComponent;
   let fixture: ComponentFixture<EditAutoscalerCredentialComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
-        EditAutoscalerCredentialComponent,
-      ],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
-        BrowserAnimationsModule,
-        createBasicStoreModule(),
-        CoreModule,
-        SharedModule,
+        EditAutoscalerCredentialComponent,
         RouterTestingModule,
-        CfAutoscalerTestingModule
+        createBasicStoreModule(),
+        CfAutoscalerTestingModule,
+        AppTestModule,
       ],
       providers: [
+        ...STORE_TEST_PROVIDERS,
         DatePipe,
         { provide: ApplicationService, useClass: ApplicationServiceMock },
+        ApplicationStateService,
         TabNavService,
-        CurrentUserPermissionsService
-      ]
-    })
-      .compileComponents();
-  }));
+        CurrentUserPermissionsService,
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EditAutoscalerCredentialComponent);

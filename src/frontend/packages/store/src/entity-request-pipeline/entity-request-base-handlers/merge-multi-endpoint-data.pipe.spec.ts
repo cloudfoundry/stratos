@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { NormalizedResponse } from '../../types/api.types';
 import { multiEndpointResponseMergePipe } from './merge-multi-endpoint-data.pipe';
 
@@ -32,15 +33,15 @@ describe('merge-multi-endpoint-data', () => {
     const expectedEntities = {
       entity1: new Set(['guid1', 'guid2', 'guid3', 'guid4']),
       entity2: new Set(['entity2Guid1', 'entity2Guid2']),
-      entity3: new Set(['guid1', 'guid2'])
+      entity3: new Set(['guid1', 'guid2']),
     };
     const expectedResult = new Set(['guid1', 'guid2', 'guid3', 'guid4']);
     const merged = multiEndpointResponseMergePipe([{
       response: data1,
-      success: true
+      success: true,
     }, {
       response: data2,
-      success: true
+      success: true,
     }]);
 
     Object.keys(merged.response.entities).forEach(entityKey => {

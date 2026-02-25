@@ -21,7 +21,7 @@ import (
 	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/custombinder"
-	_ "github.com/cloudfoundry/stratos/src/jetstream/docs"
+	//_ "github.com/cloudfoundry/stratos/src/jetstream/docs"
 
 	"github.com/antonlindstrom/pgstore"
 	"github.com/cf-stratos/mysqlstore"

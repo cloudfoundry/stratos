@@ -1,20 +1,21 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { EntityInfo } from '../../../../../../../../store/src/types/api.types';
+import { EntityInfo } from '@stratosui/store/types/api.types';
 import { TableCellEventTimestampComponent } from './table-cell-event-timestamp.component';
 
 describe('TableCellEventTimestampComponent', () => {
   let component: TableCellEventTimestampComponent<EntityInfo>;
   let fixture: ComponentFixture<TableCellEventTimestampComponent<EntityInfo>>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [TableCellEventTimestampComponent]
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
+      imports: [TableCellEventTimestampComponent]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent<TableCellEventTimestampComponent<EntityInfo>>(TableCellEventTimestampComponent);
     component = fixture.componentInstance;
     component.row = {

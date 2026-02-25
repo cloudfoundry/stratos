@@ -1,8 +1,12 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component  } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AppState, RouterNav } from '@stratosui/store';
 
 import { ITileConfig, ITileData } from '../../../../shared/components/tile/tile-selector.types';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
+import { SteppersComponent } from '../../../../shared/components/stepper/steppers/steppers.component';
+import { StepComponent } from '../../../../shared/components/stepper/step/step.component';
+import { TileSelectorComponent } from '../../../../shared/components/tile-selector/tile-selector.component';
 
 interface IAppTileData extends ITileData {
   type: string;
@@ -12,10 +16,18 @@ interface IAppTileData extends ITileData {
   selector: 'app-backup-restore-endpoints',
   templateUrl: './backup-restore-endpoints.component.html',
   styleUrls: ['./backup-restore-endpoints.component.scss'],
+  standalone: true,
+  imports: [
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    TileSelectorComponent
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BackupRestoreEndpointsComponent {
 
-  public serviceType: string;
+  public serviceType!: string;
   public tileSelectorConfig: ITileConfig<IAppTileData>[];
 
   set selectedTile(tile: ITileConfig<IAppTileData>) {

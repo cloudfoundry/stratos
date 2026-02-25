@@ -1,23 +1,29 @@
-import { Component, Inject, Input, OnInit, Optional } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
+import { CommonModule } from '@angular/common';
+import { Component, Inject, Input, OnInit, Optional , ChangeDetectionStrategy } from '@angular/core';
+import { TailwindDialogService, MAT_DIALOG_DATA } from '@stratosui/core';
 
 @Component({
   selector: 'app-event-metadata',
   templateUrl: './event-metadata.component.html',
-  styleUrls: ['./event-metadata.component.scss']
+  styleUrls: ['./event-metadata.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule
+  ]
 })
 export class EventMetadataComponent implements OnInit {
 
   static maxValuesLength = 500;
   static maxKeys = 5;
 
-  @Input() metadata: { [name: string]: any, };
+  @Input() metadata!: { [name: string]: any, };
   @Input() canShowPopup = true;
   showPopup = false;
   isPopup = false;
 
   constructor(
-    private dialog: MatDialog,
+    private dialog: TailwindDialogService,
     @Optional() @Inject(MAT_DIALOG_DATA) public data?: {
       metadata: { [name: string]: string, },
     },

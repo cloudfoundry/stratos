@@ -1,4 +1,6 @@
 import { inject, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { pathGet, pathSet, safeStringToObj, safeUnsubscribe, UtilsService } from './utils.service';
 
@@ -8,7 +10,10 @@ describe('UtilsService', () => {
   beforeEach(() => {
     service = new UtilsService();
     TestBed.configureTestingModule({
-      providers: [UtilsService]
+      providers: [
+        UtilsService,
+        provideZonelessChangeDetection(),
+      ]
     });
   });
 
@@ -61,9 +66,9 @@ describe('UtilsService', () => {
 
   describe('#usageBytes', () => {
     it('should return empty value', () => {
-      expect(service.usageBytes(0)).toBe('-');
-      expect(service.usageBytes(Number.POSITIVE_INFINITY)).toBe('-');
-      expect(service.usageBytes(NaN)).toBe('-');
+      expect(service.usageBytes(0 as any)).toBe('-');
+      expect(service.usageBytes(Number.POSITIVE_INFINITY as any)).toBe('-');
+      expect(service.usageBytes(NaN as any)).toBe('-');
       expect(service.usageBytes([])).toBe('-');
     });
 
@@ -160,8 +165,8 @@ describe('UtilsService', () => {
 
   describe('#safeUnsubscribe', () => {
     it('should call unsubscribe method from objects', () => {
-      const spy = jasmine.createSpyObj('subscriber', ['unsubscribe']);
-      const spy2 = jasmine.createSpyObj('subscriber', ['unsubscribe']);
+      const spy = { unsubscribe: vi.fn() };
+      const spy2 = { unsubscribe: vi.fn() };
       safeUnsubscribe(spy, spy2);
 
       expect(spy.unsubscribe).toHaveBeenCalled();

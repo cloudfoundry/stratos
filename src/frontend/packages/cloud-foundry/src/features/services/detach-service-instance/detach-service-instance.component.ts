@@ -1,8 +1,9 @@
-import { DatePipe } from '@angular/common';
-import { Component } from '@angular/core';
+import { AsyncPipe, DatePipe } from '@angular/common';
+import { Component, signal , ChangeDetectionStrategy } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf, ReplaySubject } from 'rxjs';
+import { Observable, of as observableOf } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
@@ -12,26 +13,39 @@ import {
 } from '../../../../../cloud-foundry/src/shared/data-services/service-action-helper.service';
 import {
   AppMonitorComponentTypes,
-} from '../../../../../core/src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
-import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
-import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
-import { APIResource } from '../../../../../store/src/types/api.types';
+  ITableColumn,
+  PageHeaderComponent,
+  StepComponent,
+  SteppersComponent,
+} from '@stratosui/core';
+import { AppActionMonitorComponent } from '../../../../../core/src/shared/components/app-action-monitor/app-action-monitor.component';
+import { RouterNav, entityCatalog, APIResource } from '@stratosui/store';
 import { IServiceBinding } from '../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { CF_ENDPOINT_TYPE } from '../../../cf-types';
+import { DetachAppsComponent } from './detach-apps/detach-apps.component';
 
 @Component({
   selector: 'app-detach-service-instance',
   templateUrl: './detach-service-instance.component.html',
-  styleUrls: ['./detach-service-instance.component.scss']
+  styleUrls: ['./detach-service-instance.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    AsyncPipe,
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    DetachAppsComponent,
+    AppActionMonitorComponent
+  ]
 })
 export class DetachServiceInstanceComponent {
 
-  title$: Observable<string>;
-  cfGuid: string;
-  selectedBindings: APIResource<IServiceBinding>[];
-  deleteStarted: boolean;
+  title$!: Observable<string>;
+  cfGuid!: string;
+  selectedBindings!: APIResource<IServiceBinding>[];
+  deleteStarted!: boolean;
   public siBindingCatalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceBindingEntityType);
 
   public confirmColumns: ITableColumn<APIResource<IServiceBinding>>[] = [
@@ -55,7 +69,9 @@ export class DetachServiceInstanceComponent {
 
   deletingState = AppMonitorComponentTypes.DELETE;
 
-  public selectedBindings$ = new ReplaySubject<APIResource<IServiceBinding>[]>(1);
+  private _selectedBindings = signal<APIResource<IServiceBinding>[]>([]);
+  // Convert signal to Observable for component expecting Observable input
+  public selectedBindings$ = toObservable(this._selectedBindings);
 
   constructor(
     private store: Store<CFAppState>,
@@ -74,7 +90,7 @@ export class DetachServiceInstanceComponent {
   getId = (el: APIResource) => el.metadata.guid;
   setSelectedBindings = (selectedBindings: APIResource<IServiceBinding>[]) => {
     this.selectedBindings = selectedBindings;
-    this.selectedBindings$.next(selectedBindings);
+    this._selectedBindings.set(selectedBindings);
   }
 
   public startDelete = () => {

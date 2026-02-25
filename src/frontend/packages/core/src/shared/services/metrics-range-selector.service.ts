@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { MetricQueryType, MetricQueryConfig, MetricsAction, IMetrics } from '@stratosui/store';
+import { sub, getUnixTime } from 'date-fns';
 
 import { ITimeRange, StoreMetricTimeRange } from './metrics-range-selector.types';
 
-import moment from 'moment';
-
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class MetricsRangeSelectorService {
 
   constructor() { }
@@ -51,21 +52,34 @@ export class MetricsRangeSelectorService {
     };
   }
 
-  private convertWindowToRange(value: string): [moment.Moment, moment.Moment] {
+  private convertWindowToRange(value: string): [Date, Date] {
     const windowSplit = value.split(':');
+    const amount = parseInt(windowSplit[0], 10);
+    const unit = windowSplit[1];
+    const now = new Date();
+
+    // Map unit string to date-fns duration object key
+    const duration: any = {};
+    if (unit === 'minute') duration.minutes = amount;
+    else if (unit === 'hour') duration.hours = amount;
+    else if (unit === 'day') duration.days = amount;
+    else if (unit === 'week') duration.weeks = amount;
+    else if (unit === 'month') duration.months = amount;
+    else if (unit === 'year') duration.years = amount;
+
     return [
-      moment().subtract(parseInt(windowSplit[0], 10), windowSplit[1] as moment.unitOfTime.DurationConstructor),
-      moment()
+      sub(now, duration),
+      now
     ];
   }
 
-  public getNewDateRangeAction(action: MetricsAction, start: moment.Moment, end: moment.Moment) {
-    const startUnix = start.unix();
-    const endUnix = end.unix();
+  public getNewDateRangeAction(action: MetricsAction, start: Date, end: Date) {
+    const startUnix = getUnixTime(start);
+    const endUnix = getUnixTime(end);
     return this.newMetricsAction(action, new MetricQueryConfig(action.query.metric, {
       ...action.query.params,
       start: startUnix,
-      end: end.unix(),
+      end: endUnix,
       step: Math.max((endUnix - startUnix) / 50, 0)
     }));
   }

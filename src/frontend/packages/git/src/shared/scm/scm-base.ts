@@ -65,17 +65,23 @@ export abstract class BaseSCM {
     );
   }
 
-  protected parseErrorAsString(res: any): string {
+  protected parseErrorAsString(res: unknown): string {
     const response = this.parseHttpPipeError(res);
     return response.message || '';
   }
 
-  private parseHttpPipeError(res: any): { message?: string; } {
-    if (!res.status) {
-      return res;
+  private parseHttpPipeError(res: unknown): { message?: string; } {
+    if (typeof res !== 'object' || res === null) {
+      return {};
+    }
+
+    const response = res as { status?: number; json?: () => unknown; message?: string };
+
+    if (!response.status) {
+      return response;
     }
     try {
-      return res.json ? res.json() : res;
+      return response.json ? response.json() as { message?: string } : response;
     } catch (e) {
       console.warn('Failed to parse response body', e);
     }

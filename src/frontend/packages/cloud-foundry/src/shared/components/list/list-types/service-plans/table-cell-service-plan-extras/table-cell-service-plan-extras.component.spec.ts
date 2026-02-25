@@ -1,35 +1,31 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { StoreModule } from '@ngrx/store';
 
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
-import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
-import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { PaginationMonitorFactory } from '@stratosui/store';
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ApplicationStateService } from '../../../../../services/application-state.service';
-import { TableCellAServicePlanExtrasComponent } from './table-cell-service-plan-extras.component';
-
+import { TableCellAServicePlanExtrasComponent } from "./table-cell-service-plan-extras.component";
 describe('TableCellAServicePlanExtrasComponent', () => {
   let component: TableCellAServicePlanExtrasComponent;
   let fixture: ComponentFixture<TableCellAServicePlanExtrasComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
-        TableCellAServicePlanExtrasComponent,
-      ],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
+        TableCellAServicePlanExtrasComponent,
         StoreModule,
-        CoreModule,
-        generateCfStoreModules()
+        ...generateCfStoreModules(),
       ],
       providers: [
         ApplicationStateService,
-        PaginationMonitorFactory
-      ]
+        PaginationMonitorFactory,
+        provideZonelessChangeDetection(),
+      ],
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellAServicePlanExtrasComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

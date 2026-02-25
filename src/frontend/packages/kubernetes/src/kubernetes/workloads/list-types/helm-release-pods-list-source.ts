@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
-import { ListDataSource } from 'frontend/packages/core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { IListConfig } from 'frontend/packages/core/src/shared/components/list/list.component.types';
-import { AppState } from 'frontend/packages/store/src/app-state';
+import { ListDataSource } from '@stratosui/core';
+import { IListConfig } from '@stratosui/core';
+import { AppState } from '@stratosui/store';
 
 import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
 import { KubernetesPod } from '../../store/kube.types';
@@ -13,9 +13,10 @@ export class HelmReleasePodsDataSource extends ListDataSource<KubernetesPod> {
     store: Store<AppState>,
     listConfig: IListConfig<KubernetesPod>,
     endpointGuid: string,
-    releaseTitle: string
+    releaseTitle: string,
+    namespace?: string
   ) {
-    const action = kubeEntityCatalog.pod.actions.getInWorkload(endpointGuid, releaseTitle);
+    const action = kubeEntityCatalog.pod.actions.getInWorkload(endpointGuid, namespace || '*', releaseTitle);
     super({
       store,
       action,

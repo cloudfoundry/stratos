@@ -1,16 +1,14 @@
 import { CdkTableModule } from '@angular/cdk/table';
-import { Component, ViewChild } from '@angular/core';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import {  Component, ViewChild, provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { createBasicStoreModule } from '@stratosui/store/testing';
 import { EMPTY, of as observableOf } from 'rxjs';
 
-import { ListSort } from '../../../../../../store/src/actions/list.actions';
-import { CoreTestingModule } from '../../../../../test-framework/core-test.modules';
-import { CoreModule } from '../../../../core/core.module';
-import { UtilsService } from '../../../../core/utils.service';
-import { SharedModule } from '../../../shared.module';
-import { IListPaginationController } from '../data-sources-controllers/list-pagination-controller';
+import { IListPaginationController } from '@stratosui/core';
+import { ListSort } from '@stratosui/store';
+import { createBasicStoreModule } from '@stratosui/store/testing';
+
 import { TableComponent } from './table.component';
 
 describe('TableComponent', () => {
@@ -33,6 +31,7 @@ describe('TableComponent', () => {
     }
   ];
   @Component({
+    standalone: false,
     selector: `app-host-component`,
     template: `
     <app-table
@@ -77,45 +76,44 @@ describe('TableComponent', () => {
     public columns = columns;
     // new Array<ITableColumn<any>>();
     public paginationController = {
-      sort$: observableOf({} as ListSort)
+      sort$: observableOf({} as ListSort),
     } as IListPaginationController<any>;
     public dataSource = {
       trackBy: () => '1',
       connect: () => EMPTY,
       disconnect: () => null,
-      isTableLoading$: observableOf(false)
+      isTableLoading$: observableOf(false),
     };
     @ViewChild('basicColumnsTable', { static: true })
-    public basicColumnsTable: TableComponent<any>;
+    public basicColumnsTable!: TableComponent<any>;
     @ViewChild('selectionColumnsTable', { static: true })
-    public selectionColumnsTable: TableComponent<any>;
+    public selectionColumnsTable!: TableComponent<any>;
     @ViewChild('actionColumnsTable', { static: true })
-    public actionColumnsTable: TableComponent<any>;
+    public actionColumnsTable!: TableComponent<any>;
     @ViewChild('actionAndSelectionColumnsTable', { static: true })
-    public actionAndSelectionColumnsTable: TableComponent<any>;
+    public actionAndSelectionColumnsTable!: TableComponent<any>;
   }
   let component: TableHostComponent;
   let fixture: ComponentFixture<TableHostComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
-        CoreModule,
         CdkTableModule,
         NoopAnimationsModule,
-        CoreTestingModule,
         createBasicStoreModule(),
-        SharedModule
+        TableComponent,
       ],
       declarations: [
-        TableHostComponent
+        TableHostComponent,
       ],
       providers: [
-        UtilsService,
-      ]
-    })
-      .compileComponents();
-  }));
+        provideZonelessChangeDetection(),
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
+    });
+      TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent<TableHostComponent>(TableHostComponent);

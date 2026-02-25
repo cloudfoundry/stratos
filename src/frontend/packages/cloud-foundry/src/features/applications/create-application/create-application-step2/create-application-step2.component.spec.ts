@@ -1,47 +1,37 @@
-import { CommonModule } from '@angular/common';
-import { HttpBackend, HttpClient, HttpClientModule } from '@angular/common/http';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { provideRouter } from '@angular/router';
+import { StoreModule } from '@ngrx/store';
 
-import { CoreModule } from '../../../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../../../core/src/shared/shared.module';
-import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundrySharedModule } from '../../../../shared/cf-shared.module';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { appReducers } from '@stratosui/store';
 import { CreateApplicationStep2Component } from './create-application-step2.component';
-
 describe('CreateApplicationStep2Component', () => {
   let component: CreateApplicationStep2Component;
   let fixture: ComponentFixture<CreateApplicationStep2Component>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
-        CreateApplicationStep2Component
-      ],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
-        ...generateCfStoreModules(),
-        CommonModule,
-        CoreModule,
-        SharedModule,
-        CloudFoundrySharedModule,
-        NoopAnimationsModule,
-        HttpClientModule,
-        HttpClientTestingModule,
+        CreateApplicationStep2Component,
+        StoreModule.forRoot(appReducers, {
+          runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
+        }),
       ],
       providers: [
-        {
-          provide: HttpBackend,
-          useClass: HttpTestingController
-          ,
-        },
-        HttpClient
+        provideZonelessChangeDetection(),
+        provideNoopAnimations(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+        ...STORE_TEST_PROVIDERS,
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(CreateApplicationStep2Component);
     component = fixture.componentInstance;
     fixture.detectChanges();

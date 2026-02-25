@@ -1,8 +1,10 @@
-import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
+import { ListComponent, ListConfig, PageHeaderComponent } from '@stratosui/core';
+import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
 import {
   CfServicesListConfigService,
 } from '../../../shared/components/list/list-types/cf-services/cf-services-list-config.service';
@@ -19,14 +21,23 @@ import { getActiveRouteCfOrgSpaceProvider } from '../../cf/cf.helpers';
       provide: ListConfig,
       useClass: CfServicesListConfigService
     }
+  ],
+  standalone: true,
+  imports: [
+    CommonModule,
+    PageHeaderComponent,
+    CfEndpointsMissingComponent,
+    ListComponent
   ]
 })
 export class ServiceCatalogPageComponent {
 
   public cfIds$: Observable<string[]>;
 
-  constructor(public cloudFoundryService: CloudFoundryService) {
-    this.cfIds$ = cloudFoundryService.cFEndpoints$.pipe(
+  public cloudFoundryService = inject(CloudFoundryService);
+
+  constructor() {
+    this.cfIds$ = this.cloudFoundryService.cFEndpoints$.pipe(
       map(endpoints => endpoints
         .filter(endpoint => endpoint.connectionStatus === 'connected')
         .map(endpoint => endpoint.guid)

@@ -1,16 +1,12 @@
-import { HttpClientModule } from '@angular/common/http';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from '@stratosui/store/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { entityCatalog, EntityServiceFactory, generateStratosEntities } from '@stratosui/store';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { TabNavService, CurrentUserPermissionsService, SidePanelService } from '@stratosui/core';
+import { AppTestModule } from '@test-framework/core-test.helper';
 
-import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
-import { CoreModule } from '../../../core/core.module';
-import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
-import { SidePanelService } from '../../../shared/services/side-panel.service';
-import { SharedModule } from '../../../shared/shared.module';
-import { TabNavService } from '../../../tab-nav.service';
 import { ConnectEndpointComponent } from '../connect-endpoint/connect-endpoint.component';
 import { CreateEndpointCfStep1Component } from './create-endpoint-cf-step-1/create-endpoint-cf-step-1.component';
 import { CreateEndpointConnectComponent } from './create-endpoint-connect/create-endpoint-connect.component';
@@ -20,43 +16,42 @@ describe('CreateEndpointComponent', () => {
   let component: CreateEndpointComponent;
   let fixture: ComponentFixture<CreateEndpointComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        createBasicStoreModule(),
+        AppTestModule,
         CreateEndpointComponent,
         CreateEndpointCfStep1Component,
         CreateEndpointConnectComponent,
-        ConnectEndpointComponent
+        ConnectEndpointComponent,
       ],
-      imports: [
-        CoreModule,
-        SharedModule,
-        CoreTestingModule,
-        createBasicStoreModule(),
-        RouterTestingModule,
-        NoopAnimationsModule,
-        HttpClientModule
-      ],
-      providers: [{
-        provide: ActivatedRoute,
-        useValue: {
-          snapshot: {
-            queryParams: {},
-            params: {
-              type: 'metrics',
-              subtype: null
+      providers: [
+        EntityServiceFactory,
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              queryParams: {},
+              params: {
+                type: 'metrics',
+                subtype: null,
+              }
             }
-          }
+          },
         },
-      },
         CurrentUserPermissionsService,
         TabNavService,
         SidePanelService,
-        CurrentUserPermissionsService
+        ...STORE_TEST_PROVIDERS,
+        provideZonelessChangeDetection(),
       ],
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+
+    // Register entities AFTER modules are loaded
+    const entities = generateStratosEntities();
+    entities.forEach(entity => entityCatalog.register(entity));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CreateEndpointComponent);

@@ -1,3 +1,4 @@
+import { describe, it, expect, vi } from 'vitest';
 import { Action, Store } from '@ngrx/store';
 import { of } from 'rxjs';
 
@@ -19,17 +20,17 @@ describe('ActionDispatcher', () => {
       ...EntityCatalogEntityStoreHelpers.createCoreStore(
         actionOrchestrator,
         entityType,
-        null
+        null,
       ),
       ...EntityCatalogEntityStoreHelpers.getPaginationStore(
         actionBuilders,
         entityType,
-        null
-      )
+        null,
+      ),
     };
     const entityActionDispatcher = EntityCatalogEntityStoreHelpers.getActionDispatchers(
       store,
-      actionBuilders
+      actionBuilders,
     );
     expect(entityActionDispatcher.get).toBeUndefined();
   });
@@ -48,7 +49,7 @@ describe('ActionDispatcher', () => {
       entityType,
       endpointType,
       endpointGuid: testEndpointGuid,
-      paginationKey: testPaginationKey
+      paginationKey: testPaginationKey,
     };
     const customGetAction = { type: 'custom Action', entityType, endpointType, guid: testGuid };
     const customGetMultipleAction = { type: 'custom MultipleAction', entityType, endpointType, paginationKey: testPaginationKey };
@@ -57,20 +58,20 @@ describe('ActionDispatcher', () => {
       get: (guid: string, endpointGuid: string, extraArgs?: any) => ({
         ...getAction,
         guid,
-        endpointGuid
+        endpointGuid,
       }),
       getMultiple: (endpointGuid: string, paginationKey: string) => ({
         ...getMultipleAction,
         endpointGuid,
-        paginationKey
+        paginationKey,
       }),
       custom: (guid: string) => ({
         ...customGetAction,
-        guid
+        guid,
       }),
       customMultipleAction: (paginationKey: string) => ({
         ...customGetMultipleAction,
-        paginationKey
+        paginationKey,
       }),
     };
     const actionBuilders = ActionBuilderConfigMapper.getActionBuilders(builders, null, null, null);
@@ -80,56 +81,56 @@ describe('ActionDispatcher', () => {
       ...EntityCatalogEntityStoreHelpers.createCoreStore(
         actionOrchestrator,
         entityType,
-        (schema: string) => null
+        (schema: string) => null,
       ),
       ...EntityCatalogEntityStoreHelpers.getPaginationStore(
         actionBuilders,
         entityType,
-        (schema: string) => null
-      )
+        (schema: string) => null,
+      ),
     };
     const entityActionDispatcher = EntityCatalogEntityStoreHelpers.getActionDispatchers(
       entityStore,
-      actionBuilders
+      actionBuilders,
     );
 
     const store = {
-      dispatch: (action: Action) => { console.log(action); },
-      select: (...args: any[]) => of(null)
+      dispatch: (action: Action) => { },
+      select: (...args: any[]) => of(null),
     } as Store<AppState<any>>;
 
     EntityCatalogHelpers.SetEntityCatalogHelper({
       store,
       esf: {
-        create: (guid, action) => of(null)
+        create: (guid, action) => of(null),
       } as unknown as EntityServiceFactory,
       pmf: {
         create: (pk, ec, isLocal) => ({
           currentPageState$: {}
-        })
-      } as unknown as PaginationMonitorFactory
+        }),
+      } as unknown as PaginationMonitorFactory,
     } as EntityCatalogHelper);
-    const storeDispatchSpy = spyOn(store, 'dispatch');
+    const storeDispatchSpy = vi.spyOn(store, 'dispatch');
 
     expect(entityActionDispatcher.get).toBeDefined();
     expect(entityActionDispatcher.get(testGuid, testEndpointGuid)).toBeDefined();
     expect(storeDispatchSpy).toHaveBeenCalledWith(getAction);
-    storeDispatchSpy.calls.reset();
+    storeDispatchSpy.mockClear();
 
     expect(entityActionDispatcher.custom).toBeDefined();
     expect(entityActionDispatcher.custom(testGuid)).toBeDefined();
     expect(storeDispatchSpy).toHaveBeenCalledWith(customGetAction);
-    storeDispatchSpy.calls.reset();
+    storeDispatchSpy.mockClear();
 
     expect(entityActionDispatcher.getMultiple).toBeDefined();
     expect(entityActionDispatcher.getMultiple(testEndpointGuid, testPaginationKey)).toBeDefined();
     expect(storeDispatchSpy).toHaveBeenCalledWith(getMultipleAction);
-    storeDispatchSpy.calls.reset();
+    storeDispatchSpy.mockClear();
 
     expect(entityActionDispatcher.customMultipleAction).toBeDefined();
     expect(entityActionDispatcher.customMultipleAction(testPaginationKey)).toBeDefined();
     expect(storeDispatchSpy).toHaveBeenCalledWith(customGetMultipleAction);
-    storeDispatchSpy.calls.reset();
+    storeDispatchSpy.mockClear();
 
   });
 

@@ -71,6 +71,7 @@ export class GetAppEnvVarsAction extends CFStartAction implements PaginatedActio
 
 export class GetAppSummaryAction extends CFStartAction implements ICFAction {
   options: HttpRequest<any>;
+  paginationKey!: string;
   constructor(
     public guid: string,
     public endpointGuid: string,
@@ -83,7 +84,6 @@ export class GetAppSummaryAction extends CFStartAction implements ICFAction {
   }
   entity = [cfEntityFactory(appSummaryEntityType)];
   entityType = appSummaryEntityType;
-  paginationKey: string;
   actions = [
     '[App Metadata] Summary start',
     '[App Metadata] Summary success',

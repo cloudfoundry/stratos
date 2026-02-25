@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, signal , ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 
 import { ListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
@@ -16,11 +16,19 @@ import { CfUserService } from '../../../../../shared/data-services/cf-user.servi
 import { CfUser } from '../../../../../store/types/cf-user.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfRolesService } from '../cf-roles.service';
+import { EnumerateComponent } from '../../../../../../../core/src/shared/components/enumerate/enumerate.component';
+import { ListComponent } from '../../../../../../../core/src/shared/components/list/list.component';
 
 @Component({
   selector: 'app-manage-users-select',
   templateUrl: './manage-users-select.component.html',
   styleUrls: ['./manage-users-select.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    EnumerateComponent,
+    ListComponent,
+  ],
   providers: [
     {
       provide: ListConfig,
@@ -45,7 +53,7 @@ import { CfRolesService } from '../cf-roles.service';
 export class UsersRolesSelectComponent {
 
   selectedUsers$: Observable<CfUser[]>;
-  valid$ = new BehaviorSubject<boolean>(false);
+  valid$ = signal<boolean>(false);
 
   constructor(
     private store: Store<CFAppState>,
@@ -59,7 +67,7 @@ export class UsersRolesSelectComponent {
       switchMap(() => listConfig.getDataSource().selectedRows$),
       map(users => {
         const arrayUsers = Array.from<APIResource<CfUser>>(users.values()).map(row => row.entity);
-        this.valid$.next(!!arrayUsers.length);
+        this.valid$.set(!!arrayUsers.length);
         return arrayUsers;
       }),
       publishReplay(1),

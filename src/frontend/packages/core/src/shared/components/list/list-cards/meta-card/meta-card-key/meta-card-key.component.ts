@@ -4,11 +4,13 @@ import { ChangeDetectionStrategy, Component, TemplateRef, ViewChild } from '@ang
   selector: 'app-meta-card-key',
   templateUrl: './meta-card-key.component.html',
   styleUrls: ['./meta-card-key.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: []
 })
 export class MetaCardKeyComponent {
 
   @ViewChild(TemplateRef, { static: true })
-  content: TemplateRef<any>;
+  content!: TemplateRef<any>;
 
 }

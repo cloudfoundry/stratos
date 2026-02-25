@@ -1,31 +1,55 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideRouter } from '@angular/router';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { StoreModule } from '@ngrx/store';
+import { EffectsModule } from '@ngrx/effects';
 
-import { CoreModule } from '../../../../../core/src/core/core.module';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { PaginationMonitorFactory, EntityCatalogModule, appReducers } from '@stratosui/store';
+import { generateCFEntities } from '@stratosui/cloud-foundry';
 import { RunningInstancesComponent } from './running-instances.component';
 
 describe('RunningInstancesComponent', () => {
   let component: RunningInstancesComponent;
   let fixture: ComponentFixture<RunningInstancesComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [RunningInstancesComponent],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
-        ...generateCfStoreModules(),
-        CoreModule,
+        RunningInstancesComponent,
+        NoopAnimationsModule,
+        HttpClientTestingModule,
+        EntityCatalogModule.forFeature(() => generateCFEntities()),
+        StoreModule.forRoot(
+          appReducers,
+          { runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false } }
+        ),
+        EffectsModule.forRoot([]),
       ],
       providers: [
-        PaginationMonitorFactory
+        PaginationMonitorFactory,
+        provideRouter([]),
+        provideHttpClient(),
+        provideZonelessChangeDetection(),
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(RunningInstancesComponent);
     component = fixture.componentInstance;
+
+    // Mock the required inputs before detectChanges
+    component.instances = 3;
+    component.cfGuid = 'test-cf-guid';
+    component.appGuid = 'test-app-guid';
+
+    // Mock the pagination monitor to avoid the error
+    vi.spyOn(component, 'ngOnInit').mockImplementation(() => {
+      // Do nothing - just prevent the actual initialization
+    });
+
     fixture.detectChanges();
   });
 

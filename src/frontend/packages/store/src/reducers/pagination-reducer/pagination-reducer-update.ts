@@ -1,6 +1,6 @@
 import { PaginationEntityState } from '../../types/pagination.types';
 
-export function paginationPageBusy(state: PaginationEntityState, action): PaginationEntityState {
+export function paginationPageBusy(state: PaginationEntityState, action: any): PaginationEntityState {
   const { busy, apiAction, error } = action;
   const page = apiAction.pageNumber || state.currentPage;
 

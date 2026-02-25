@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { CustomTooltipDirective } from '@stratosui/core';
 
 import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
 import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
@@ -7,7 +9,10 @@ import { KubernetesNode } from '../../../store/kube.types';
 @Component({
   selector: 'app-kubernetes-node-link',
   templateUrl: './kubernetes-node-link.component.html',
-  styleUrls: ['./kubernetes-node-link.component.scss']
+  styleUrls: ['./kubernetes-node-link.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [RouterLink, CustomTooltipDirective]
 })
 export class KubernetesNodeLinkComponent extends TableCellCustom<KubernetesNode> implements OnInit {
 
@@ -18,12 +23,7 @@ export class KubernetesNodeLinkComponent extends TableCellCustom<KubernetesNode>
     class: string,
     message: string,
   };
-
-  constructor(
-    private kubeEndpointService: KubernetesEndpointService
-  ) {
-    super();
-  }
+  private kubeEndpointService = inject(KubernetesEndpointService);
 
   ngOnInit() {
     this.nodeLink = `/kubernetes/${this.kubeEndpointService.kubeGuid}/nodes/${this.row.metadata.name}`;

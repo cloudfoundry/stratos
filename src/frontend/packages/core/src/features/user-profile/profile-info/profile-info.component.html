@@ -1,67 +1,83 @@
 <app-page-header>
   <h1>User Profile</h1>
   <div class="page-header-right">
-    <button *ngIf="canEdit$ | async" mat-icon-button name="edit" routerLink="/user-profile/edit" matTooltip="Edit">
-      <mat-icon>edit</mat-icon>
-    </button>
+    @if (canEdit$ | async) {
+      <button class="btn-icon" name="edit" routerLink="/user-profile/edit" title="Edit">
+        <span class="material-icons">edit</span>
+      </button>
+    }
   </div>
 </app-page-header>
-<div class="user-profile">
-  <app-no-content-message *ngIf="isError$ | async" icon="error"
+<div class="p-6">
+  @if (isError$ | async) {
+    <app-no-content-message icon="error"
     firstLine="An error occurred retrieving the User Profile" [secondLine]="{
     text: ''
   }"></app-no-content-message>
-  <app-user-profile-banner *ngIf="userProfile$ | async as profile" [user]="profile"
-    [allowGravatar]="allowGravatar$ | async">
-  </app-user-profile-banner>
-  <div class="user-profile__info" *ngIf="userProfile$ | async as profile">
-    <div class="user-profile__content">
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>Summary</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="app-metadata">
-            <div class="app-metadata__two-cols">
-              <app-metadata-item icon="person" label="User id">{{ profile.userName }}</app-metadata-item>
-              <app-metadata-item *ngIf="(profile.name.givenName || profile.name.familyName); else noName" icon="title"
-                label="Name">{{ profile.name.givenName }} {{ profile.name.familyName }}</app-metadata-item>
-              <ng-template #noName>
-                <app-metadata-item icon="title" label="Name">No Name</app-metadata-item>
-              </ng-template>
-              <app-metadata-item *ngIf="primaryEmailAddress$ | async; else noEmail" icon="email" label="Email">
-                {{ primaryEmailAddress$ | async }}</app-metadata-item>
-              <ng-template #noEmail>
-                <app-metadata-item icon="email" label="Email">No Email Address</app-metadata-item>
-              </ng-template>
-              <app-metadata-item *ngIf="(userService.isAdmin$ | async)" icon="security" label="User Type">
-                Administrator</app-metadata-item>
-            </div>
-            <div class="app-metadata__two-cols" *ngIf="profile.origin === 'uaa'">
-              <app-metadata-item icon="date_range" label="Account Created">{{ profile.meta.created | date:'medium' }}
-              </app-metadata-item>
-              <app-metadata-item icon="date_range" label="Account Last Modified">
-                {{ profile.meta.lastModified | date:'medium' }}</app-metadata-item>
-              <app-metadata-item icon="lock_outline" label="Password Last Modified">
-                {{ profile.passwordLastModified | date:'medium' }}</app-metadata-item>
+  }
+  @if (userProfile$ | async; as profile) {
+    <app-user-profile-banner [user]="profile"
+      [allowGravatar]="allowGravatar$ | async">
+    </app-user-profile-banner>
+  }
+  @if (userProfile$ | async; as profile) {
+    <div class="mt-6">
+      <div class="space-y-6">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Summary</h3>
+          </div>
+          <div class="card-body">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div class="space-y-4">
+                <app-metadata-item icon="person" label="User id">{{ profile.userName }}</app-metadata-item>
+                @if ((profile.name.givenName || profile.name.familyName)) {
+                  <app-metadata-item icon="title"
+                  label="Name">{{ profile.name.givenName }} {{ profile.name.familyName }}</app-metadata-item>
+                } @else {
+                  <app-metadata-item icon="title" label="Name">No Name</app-metadata-item>
+                }
+                @if (primaryEmailAddress$ | async) {
+                  <app-metadata-item icon="email" label="Email">
+                  {{ primaryEmailAddress$ | async }}</app-metadata-item>
+                } @else {
+                  <app-metadata-item icon="email" label="Email">No Email Address</app-metadata-item>
+                }
+                @if ((userService.isAdmin$ | async)) {
+                  <app-metadata-item icon="security" label="User Type">
+                  Administrator</app-metadata-item>
+                }
+              </div>
+              @if (profile.origin === 'uaa') {
+                <div class="space-y-4">
+                  <app-metadata-item icon="date_range" label="Account Created">{{ profile.meta.created | date:'medium' }}
+                  </app-metadata-item>
+                  <app-metadata-item icon="date_range" label="Account Last Modified">
+                  {{ profile.meta.lastModified | date:'medium' }}</app-metadata-item>
+                  <app-metadata-item icon="lock_outline" label="Password Last Modified">
+                  {{ profile.passwordLastModified | date:'medium' }}</app-metadata-item>
+                </div>
+              }
             </div>
           </div>
-        </mat-card-content>
-      </mat-card>
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>Local Settings</mat-card-title>
-        </mat-card-header>
-        <app-profile-settings></app-profile-settings>
-      </mat-card>
-      <mat-card *ngIf="profile.origin === 'uaa'">
-        <mat-card-header>
-          <mat-card-title>Groups</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <app-chips [chips]="profile.groups" [stacked]="false" lowerLimit="20" displayProperty="display"></app-chips>
-        </mat-card-content>
-      </mat-card>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Local Settings</h3>
+          </div>
+          <app-profile-settings></app-profile-settings>
+        </div>
+        @if (profile.origin === 'uaa') {
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Groups</h3>
+            </div>
+            <div class="card-body">
+              <app-chips [chips]="profile.groups" [stacked]="false" lowerLimit="20" displayProperty="display"></app-chips>
+            </div>
+          </div>
+        }
+      </div>
     </div>
-  </div>
+  }
 </div>

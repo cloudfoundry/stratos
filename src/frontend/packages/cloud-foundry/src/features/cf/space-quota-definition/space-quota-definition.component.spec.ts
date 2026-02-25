@@ -1,19 +1,34 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { testSCFEndpoint, testSCFEndpointGuid } from '@stratosui/store/testing';
+import { Store, StoreModule } from '@ngrx/store';
 
-import { TabNavService } from '../../../../../core/src/tab-nav.service';
-import { EntityCatalogHelpers } from '../../../../../store/src/entity-catalog/entity-catalog.helper';
-import { EntityCatalogEntityConfig } from '../../../../../store/src/entity-catalog/entity-catalog.types';
-import { endpointEntityType, stratosEntityFactory } from '../../../../../store/src/helpers/stratos-entity-factory';
-import { NormalizedResponse } from '../../../../../store/src/types/api.types';
-import { WrapperRequestActionSuccess } from '../../../../../store/src/types/request.types';
 import {
-  generateCfBaseTestModules,
-  generateTestCfEndpointServiceProvider,
-} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { EntityRelationSpecHelper } from '../../../../test-framework/entity-relations-spec-helper';
+  TabNavService
+} from '@stratosui/core';
+import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
+import {
+  EntityCatalogHelpers,
+  EntityCatalogHelper,
+  EntityCatalogEntityConfig,
+  endpointEntityType,
+  stratosEntityFactory,
+  NormalizedResponse,
+  WrapperRequestActionSuccess,
+  EntityServiceFactory,
+  appReducers,
+  TEST_CATALOGUE_ENTITIES,
+  generateStratosEntities,
+  EntityCatalogTestModule
+} from '@stratosui/store';
+import { STORE_TEST_PROVIDERS, testSCFEndpoint, testSCFEndpointGuid } from '@stratosui/store/testing';
+import { generateTestCfEndpointServiceProvider } from '@test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCFEntities } from '@test-framework/cf';
+import { EntityRelationSpecHelper } from '../../../entity-relations/entity-relations-spec-helper';
 import { cfEntityFactory } from '../../../cf-entity-factory';
 import { organizationEntityType, spaceEntityType } from '../../../cf-entity-types';
 import { SpaceQuotaDefinitionComponent } from './space-quota-definition.component';
@@ -24,16 +39,34 @@ describe('SpaceQuotaDefinitionComponent', () => {
   const cfGuid = testSCFEndpointGuid;
   const orgGuid = '123';
   const spaceGuid = '123';
-
   const helper = new EntityRelationSpecHelper();
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        SpaceQuotaDefinitionComponent
+      imports: [
+        SpaceQuotaDefinitionComponent,
       ],
-      imports: generateCfBaseTestModules(),
       providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideNoopAnimations(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          StoreModule.forRoot(appReducers, {
+            runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
+          }),
+          EntityCatalogTestModule
+        ),
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities()
+          ]
+        },
+        EntityServiceFactory,
+        ...cfCurrentUserPermissionsService,
         {
           provide: ActivatedRoute,
           useValue: {
@@ -50,12 +83,15 @@ describe('SpaceQuotaDefinitionComponent', () => {
     })
       .compileComponents();
 
+    // Initialize Entity Catalog Helper AFTER compileComponents
+    const ech = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(ech);
 
     const stratosEndpointEntityConfig: EntityCatalogEntityConfig = stratosEntityFactory(endpointEntityType);
     const stratosEndpointEntityKey = EntityCatalogHelpers.buildEntityKey(
       stratosEndpointEntityConfig.entityType,
-      stratosEndpointEntityConfig.endpointType
-    );
+      stratosEndpointEntityConfig.endpointType,
+      );
 
     const orgEndpointEntityConfig: EntityCatalogEntityConfig = cfEntityFactory(organizationEntityType);
     const orgEntityKey = EntityCatalogHelpers.buildEntityKey(orgEndpointEntityConfig.entityType, orgEndpointEntityConfig.endpointType);
@@ -64,30 +100,30 @@ describe('SpaceQuotaDefinitionComponent', () => {
     const spaceEndpointEntityConfig: EntityCatalogEntityConfig = cfEntityFactory(spaceEntityType);
     const spaceEntityKey = EntityCatalogHelpers.buildEntityKey(
       spaceEndpointEntityConfig.entityType,
-      spaceEndpointEntityConfig.endpointType
-    );
+      spaceEndpointEntityConfig.endpointType,
+      );
     const space = helper.createEmptyOrg(spaceGuid, 'space');
 
     const mappedData = {
       entities: {
         [stratosEndpointEntityKey]: {
-          [testSCFEndpoint.guid]: testSCFEndpoint
+          [testSCFEndpoint.guid]: testSCFEndpoint,
         },
         [orgEntityKey]: {
-          [org.entity.guid]: org
+          [org.entity.guid]: org,
         },
         [spaceEntityKey]: {
-          [space.entity.guid]: space
+          [space.entity.guid]: space,
         }
       },
       result: [testSCFEndpoint.guid]
     } as NormalizedResponse;
-    const store = TestBed.get(Store);
+    const store = TestBed.inject(Store);
     store.dispatch(new WrapperRequestActionSuccess(mappedData, {
       type: 'POPULATE_TEST_DATA',
-      ...stratosEndpointEntityConfig
+      ...stratosEndpointEntityConfig,
     }, 'fetch'));
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SpaceQuotaDefinitionComponent);

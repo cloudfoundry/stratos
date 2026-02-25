@@ -1,31 +1,49 @@
 <app-page-header [showUnderFlow]="true">About</app-page-header>
-<mat-card class="about-page__card" *ngIf="!customizations.aboutInfoComponent; else aboutInfoContainer">
-  <app-stratos-title></app-stratos-title>
-  <div class="about-page">
-    <div class="about-page__version">{{ (versionNumber$ | async) }}</div>
-    <div class="about-page__title"><app-product-name></app-product-name> provides an easy-to-use web-based UI that allows developers and administrators to manage their applications and Cloud Foundry deployments</div>
+@if (!customizations.aboutInfoComponent) {
+  <div class="card mb-6">
+    <div class="card-body">
+      <app-stratos-title></app-stratos-title>
+      <div class="space-y-4">
+        <div class="text-lg font-semibold text-gray-600">{{ (versionNumber$ | async) }}</div>
+        <div class="text-base text-gray-700 leading-relaxed">
+          <app-product-name></app-product-name> provides an easy-to-use web-based UI that allows developers and administrators to manage their applications and Cloud Foundry deployments
+        </div>
+      </div>
+    </div>
   </div>
-</mat-card>
-<ng-template #aboutInfoContainer></ng-template>
+}
+<template #aboutInfoContainer></template>
 
-<mat-card *ngIf="customizations.hasEula" class="about-page__card about-page__eula">
-  <div>Use of this software is subject to the End-User License Agreement</div>
-  <button [routerLink]="['eula']" mat-button mat-raised-button color="primary">View EULA</button>
-</mat-card>
+@if (customizations.hasEula) {
+  <div class="card mb-6">
+    <div class="card-body">
+      <div class="mb-4 text-gray-700">Use of this software is subject to the End-User License Agreement</div>
+      <button [routerLink]="['eula']" class="btn btn-primary">View EULA</button>
+    </div>
+  </div>
+}
 
 <template #supportInfoContainer></template>
 
-<mat-card *ngIf="(sessionData$ | async) as session" class="about-page__card">
-  <app-metadata-item icon="web_asset" label="Version">{{ session.version.proxy_version }}</app-metadata-item>
-  <app-metadata-item icon="person" label="User">{{ session.user.name }}</app-metadata-item>
-</mat-card>
-
-<mat-card *ngIf="(this.userIsAdmin$ | async)" class="about-page__card about-page__admin-card">
-  <div class="about-page__admin">
-    <mat-icon class="about-page__warning-icon">security</mat-icon>
-    <div class="about-page__admin-text">You have administrative privileges</div>
-    <div>
-      <button [routerLink]="['diagnostics']" mat-button mat-raised-button color="primary">View Diagnostics</button>
+@if ((sessionData$ | async); as session) {
+  <div class="card mb-6">
+    <div class="card-body space-y-4">
+      <app-metadata-item icon="web_asset" label="Version">{{ session.version.proxy_version }}</app-metadata-item>
+      <app-metadata-item icon="person" label="User">{{ session.user.name }}</app-metadata-item>
     </div>
   </div>
-</mat-card>
+}
+
+@if ((this.userIsAdmin$ | async)) {
+  <div class="card mb-6 border-orange-200 bg-orange-50">
+    <div class="card-body">
+      <div class="flex items-center space-x-4">
+        <span class="material-icons text-orange-600 text-2xl">security</span>
+        <div class="flex-1">
+          <div class="text-gray-800 font-medium mb-2">You have administrative privileges</div>
+          <button [routerLink]="['diagnostics']" class="btn btn-primary">View Diagnostics</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

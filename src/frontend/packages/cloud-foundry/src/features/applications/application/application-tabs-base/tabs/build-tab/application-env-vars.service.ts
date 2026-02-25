@@ -1,10 +1,7 @@
 import { Injectable } from '@angular/core';
 
-import { OverrideAppDetails } from '../../../../../../../../cloud-foundry/src/store/types/deploy-application.types';
-import {
-  PaginationObservables,
-} from '../../../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { PaginationObservables, APIResource } from '@stratosui/store';
+import { OverrideAppDetails } from '../../../../../../store/types/deploy-application.types';
 import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
 
 
@@ -26,14 +23,16 @@ export interface EnvVarStratosProjectSource {
   dockerUsername?: string;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ApplicationEnvVarsHelper {
 
   createEnvVarsObs(appGuid: string, cfGuid: string): PaginationObservables<APIResource> {
     return cfEntityCatalog.appEnvVar.store.getPaginationService(appGuid, cfGuid);
   }
 
-  FetchStratosProject(appEnvVars): EnvVarStratosProject {
+  FetchStratosProject(appEnvVars: any): EnvVarStratosProject {
     if (!appEnvVars) {
       return null;
     }

@@ -1,26 +1,9 @@
 import { Store } from '@ngrx/store';
-import { getRowMetadata } from '@stratosui/store';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import {
-  applicationEntityType,
-  serviceBindingEntityType,
-  serviceEntityType,
-  serviceInstancesEntityType,
-  servicePlanEntityType,
-} from '../../../../../../../cloud-foundry/src/cf-entity-types';
-import {
-  createEntityRelationKey,
-  createEntityRelationPaginationKey,
-} from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
-import {
-  ListDataSource,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { IServiceBinding } from '../../../../../cf-api-svc.types';
-import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
+import { getRowMetadata, APIResource } from '@stratosui/store';
+import { ListDataSource, IListConfig } from '@stratosui/core';
+import { CFAppState, applicationEntityType, serviceBindingEntityType, serviceEntityType, serviceInstancesEntityType, servicePlanEntityType, ApplicationService, IServiceBinding, cfEntityCatalog } from '@stratosui/cloud-foundry';
+import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../../../entity-relations/entity-relations.types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 
 export class AppServiceBindingDataSource extends ListDataSource<APIResource<IServiceBinding>> {

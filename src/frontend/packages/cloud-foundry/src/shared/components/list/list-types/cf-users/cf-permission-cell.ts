@@ -3,16 +3,9 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { UserRoleLabels } from '../../../../../../../cloud-foundry/src/store/types/users-roles.types';
-import { AppChip } from '../../../../../../../core/src/shared/components/chips/chips.component';
-import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { TableCellCustom } from '../../../../../../../core/src/shared/components/list/list.types';
-import { selectSessionData } from '../../../../../../../store/src/reducers/auth.reducer';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { IUserRole } from '../../../../../features/cf/cf.helpers';
-import { CfUser } from '../../../../../store/types/cf-user.types';
+import { AppChip, ConfirmationDialogConfig, ConfirmationDialogService, TableCellCustom } from '@stratosui/core';
+import { APIResource, selectSessionData } from '@stratosui/store';
+import { CFAppState, CfUser, IUserRole, UserRoleLabels } from '@stratosui/cloud-foundry';
 import { CfUserService } from '../../../../data-services/cf-user.service';
 
 

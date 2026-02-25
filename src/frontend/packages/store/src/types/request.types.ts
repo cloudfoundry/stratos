@@ -3,11 +3,11 @@ import { Action } from '@ngrx/store';
 
 import { ApiActionTypes, RequestTypes } from '../actions/request.actions';
 import { BasePipelineRequestAction } from '../entity-catalog/action-orchestrator/action-orchestrator';
-import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
-import { EntitySchema } from '../helpers/entity-schema';
-import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
-import { NormalizedResponse } from './api.types';
-import { PaginatedAction } from './pagination.types';
+import type { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
+import type { EntitySchema } from '../helpers/entity-schema';
+import type { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
+import type { NormalizedResponse } from './api.types';
+import type { PaginatedAction } from './pagination.types';
 
 export interface SingleEntityAction {
   // For single entity requests
@@ -144,7 +144,7 @@ export interface InternalEndpointError {
   eventCode?: string;
   message?: string;
   url: string;
-  error?;
+  error?: string;
 }
 export class WrapperRequestActionFailed extends RequestFailedAction implements IFailedRequestAction {
   constructor(

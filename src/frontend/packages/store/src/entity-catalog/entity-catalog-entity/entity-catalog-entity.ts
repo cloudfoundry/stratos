@@ -1,22 +1,24 @@
-import { ActionReducer } from '@ngrx/store';
+import type { ActionReducer } from '@ngrx/store';
 
-import { IRequestEntityTypeState } from '../../app-state';
-import {
+import type { IRequestEntityTypeState } from '../../app-state';
+import type {
   EntitiesFetchHandler,
   EntitiesInfoHandler,
   EntityFetchHandler,
   EntityInfoHandler,
 } from '../../entity-request-pipeline/entity-request-pipeline.types';
-import {
+import type {
   PaginationPageIteratorConfig,
 } from '../../entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
-import { EntityPipelineEntity, stratosEndpointGuidKey } from '../../entity-request-pipeline/pipeline.types';
-import { EndpointAuthTypeConfig } from '../../extension-types';
+import type { EntityPipelineEntity } from '../../entity-request-pipeline/pipeline.types';
+import { stratosEndpointGuidKey } from '../../entity-request-pipeline/pipeline.types';
+import type { EndpointAuthTypeConfig } from '../../extension-types';
 import { EntitySchema } from '../../helpers/entity-schema';
 import { endpointEntityType, STRATOS_ENDPOINT_TYPE, stratosEntityFactory } from '../../helpers/stratos-entity-factory';
-import { EndpointModel } from '../../types/endpoint.types';
-import { APISuccessOrFailedAction, EntityRequestAction } from '../../types/request.types';
-import { IEndpointFavMetadata, UserFavorite } from '../../types/user-favorites.types';
+import type { EndpointModel } from '../../types/endpoint.types';
+import { APISuccessOrFailedAction } from '../../types/request.types';
+import type { EntityRequestAction } from '../../types/request.types';
+import type { IEndpointFavMetadata, UserFavorite } from '../../types/user-favorites.types';
 import {
   ActionBuilderAction,
   ActionOrchestrator,
@@ -24,7 +26,7 @@ import {
   OrchestratedActionBuilders,
 } from '../action-orchestrator/action-orchestrator';
 import { EntityCatalogHelpers } from '../entity-catalog.helper';
-import {
+import type {
   EntityCatalogSchemas,
   IEntityMetadata,
   IStratosBaseEntityDefinition,
@@ -35,8 +37,8 @@ import {
 } from '../entity-catalog.types';
 import { ActionBuilderConfigMapper } from './action-builder-config.mapper';
 import { ActionDispatchers, EntityCatalogEntityStoreHelpers } from './entity-catalog-entity-store-helpers';
-import { EntityCatalogEntityStore } from './entity-catalog-entity.types';
-import { NonOptionalKeys, RemoveIndex } from './type.helpers';
+import type { EntityCatalogEntityStore } from './entity-catalog-entity.types';
+import type { NonOptionalKeys, RemoveIndex } from './type.helpers';
 
 export type KnownActionBuilders<ABC extends OrchestratedActionBuilders> = Pick<
   ABC,
@@ -138,7 +140,7 @@ export class StratosBaseCatalogEntity<
       return newSchema;
     }, {
       default: entitySchemas.default
-    });
+    } as EntityCatalogSchemas);
   }
 
   private getEndpointType(definition: IStratosBaseEntityDefinition) {
@@ -282,7 +284,7 @@ export class StratosCatalogEntity<
   AB extends OrchestratedActionBuilderConfig = OrchestratedActionBuilders,
   ABC extends OrchestratedActionBuilders = AB extends OrchestratedActionBuilders ? AB : OrchestratedActionBuilders,
   > extends StratosBaseCatalogEntity<T, Y, AB, ABC> {
-  public definition: IStratosEntityDefinition<EntityCatalogSchemas, Y, ABC>;
+  public declare definition: IStratosEntityDefinition<EntityCatalogSchemas, Y, ABC>;
   constructor(
     entity: IStratosEntityDefinition,
     config?: EntityCatalogBuilders<T, Y, AB>
@@ -327,13 +329,22 @@ export class StratosCatalogEndpointEntity extends StratosBaseCatalogEntity<IEndp
     getGuid: metadata => metadata.guid,
   };
   // This is needed here for typing
-  public definition: IStratosEndpointDefinition<EntityCatalogSchemas>;
+  public declare definition: IStratosEndpointDefinition<EntityCatalogSchemas>;
   constructor(
     entity: StratosEndpointExtensionDefinition | IStratosEndpointDefinition,
     getLink?: (favorite: UserFavorite<IEndpointFavMetadata>) => string
   ) {
+    // For endpoint entities, preserve the endpoint type in the 'type' property
+    // This is used by the entity catalog to identify the endpoint type (e.g., 'cf', 'metrics')
+    // The schema's entityType will be 'endpoint' for all endpoint entities
+    //
+    // CRITICAL: Must exclude 'endpoint' property when spreading to ensure isEndpoint=true
+    // In StratosBaseCatalogEntity constructor, isEndpoint = !baseEntity.endpoint (line 76)
+    // If 'endpoint' property exists, the entity will be registered in the entities map
+    // instead of the endpoints map, breaking endpoint entity lookups
+    const { endpoint: _, ...entityWithoutEndpoint } = entity as any;
     const fullEntity: IStratosEndpointDefinition = {
-      ...entity,
+      ...entityWithoutEndpoint,
       schema: {
         default: stratosEntityFactory(endpointEntityType)
       }

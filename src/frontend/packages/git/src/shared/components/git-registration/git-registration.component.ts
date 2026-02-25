@@ -1,16 +1,21 @@
-import { Component, OnDestroy } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
+import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { gitRepositoryUrlValidator, normalizeUrl } from '../../../../../core/src/shared/validators';
 import {
   CreateEndpointHelperComponent,
-} from 'frontend/packages/core/src/features/endpoints/create-endpoint/create-endpoint-helper';
+} from '@stratosui/core';
 import { Observable, Subscription } from 'rxjs';
 import { filter, first, map, pairwise } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
 import { ConnectEndpointConfig } from '../../../../../core/src/features/endpoints/connect.service';
-import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
+import { CreateEndpointConnectComponent } from '../../../../../core/src/features/endpoints/create-endpoint/create-endpoint-connect/create-endpoint-connect.component';
+import { StepComponent, StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
+import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
+import { UniqueDirective } from '../../../../../core/src/shared/components/unique.directive';
 import { SessionService } from '../../../../../core/src/shared/services/session.service';
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
 import { UserProfileService } from '../../../../../core/src/core/user-profile.service';
@@ -50,10 +55,28 @@ enum GitTypeKeys {
   GITLAB_ENTERPRISE = 'githubenterprize',
 }
 
+interface GitRegistrationForm {
+  selectedType: FormControl<string>;
+  nameField: FormControl<string>;
+  urlField: FormControl<string>;
+  skipSSLField: FormControl<boolean>;
+  createSystemEndpointField: FormControl<boolean>;
+}
+
 @Component({
   selector: 'app-git-registration',
   templateUrl: './git-registration.component.html',
   styleUrls: ['./git-registration.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    SteppersComponent,
+    StepComponent,
+    CreateEndpointConnectComponent,
+    UniqueDirective
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GitRegistrationComponent extends CreateEndpointHelperComponent implements OnDestroy {
 
@@ -61,7 +84,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
 
   public epSubType: GIT_ENDPOINT_SUB_TYPES;
 
-  registerForm: UntypedFormGroup;
+  registerForm: FormGroup<GitRegistrationForm>;
 
   private sub: Subscription;
 
@@ -74,7 +97,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
   constructor(
     gitSCMService: GitSCMService,
     activatedRoute: ActivatedRoute,
-    private fb: UntypedFormBuilder,
+    private fb: FormBuilder,
     private snackBarService: SnackBarService,
     private endpointsService: EndpointsService,
     public sessionService: SessionService,
@@ -156,20 +179,34 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
       return !item.exists;
     });
 
-    this.registerForm = this.fb.group({
-      selectedType: [defaultSelection, []],
-      nameField: ['', [Validators.required]],
-      urlField: ['', [Validators.required]],
-      skipSSLField: [false, []],
-      createSystemEndpointField: [true, []],
+    this.registerForm = this.fb.group<GitRegistrationForm>({
+      selectedType: new FormControl(defaultSelection || '', { nonNullable: true, validators: [] }),
+      nameField: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+      urlField: new FormControl('', { nonNullable: true, validators: [Validators.required, gitRepositoryUrlValidator] }),
+      skipSSLField: new FormControl(false, { nonNullable: true, validators: [] }),
+      createSystemEndpointField: new FormControl(true, { nonNullable: true, validators: [] }),
     });
     this.updateType();
 
-    // Check for changes to the from selected type
-    this.sub = this.registerForm.controls.selectedType.valueChanges.subscribe(changes => this.updateType(changes));
+    // Check for changes to the selected type
+    this.sub = this.registerForm.controls.selectedType.valueChanges.subscribe(changes => {
+      // Prevent selection of already-registered endpoints
+      const typ = changes ?? '';
+      const defn = this.gitTypes[this.epSubType].types[typ];
+      if (defn?.exists) {
+        // If user tries to select an existing endpoint, revert to the previous valid selection
+        const validSelection = Object.keys(this.gitTypes[this.epSubType].types).find(key => {
+          const item = this.gitTypes[this.epSubType].types[key];
+          return !item.exists;
+        });
+        this.registerForm.controls.selectedType.setValue(validSelection || '', { emitEvent: false });
+      } else {
+        this.updateType(changes);
+      }
+    });
 
     this.validate = this.registerForm.statusChanges.pipe(map(() => {
-      const typ = this.registerForm.value.selectedType;
+      const typ = this.registerForm.value.selectedType ?? '';
       const defn = this.gitTypes[this.epSubType].types[typ];
       return !!defn.url || this.registerForm.valid;
     }));
@@ -179,7 +216,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
   }
 
   private updateType(value?: string) {
-    const typ = value || this.registerForm.value.selectedType;
+    const typ = value ?? this.registerForm.value.selectedType ?? '';
     const defn = this.gitTypes[this.epSubType].types[typ];
     this.showEndpointFields = !defn.url;
 
@@ -195,10 +232,10 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
 
   // Perform the endpoint registration
   onNext: StepOnNextFunction = () => {
-    const typ = this.registerForm.value.selectedType;
+    const typ = this.registerForm.value.selectedType ?? '';
     const defn = this.gitTypes[this.epSubType].types[typ];
-    const name = defn.name || this.registerForm.controls.nameField.value;
-    const url: string = this.updateUrlWithSuffix(defn.url || this.registerForm.controls.urlField.value, defn);
+    const name = defn.name ?? this.registerForm.controls.nameField.value ?? '';
+    const url: string = this.updateUrlWithSuffix(defn.url ?? this.registerForm.controls.urlField.value ?? '', defn);
     // If we're in enterprise mode also assign the skipSSL field, otherwise assume false
     const skipSSL = this.registerForm.controls.nameField.value && this.registerForm.controls.urlField.value ?
       this.registerForm.controls.skipSSLField.value :
@@ -248,5 +285,13 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
       this.registerForm.controls.nameField.updateValueAndValidity();
       this.registerForm.controls.urlField.updateValueAndValidity();
     });
+  }
+
+  /**
+   * Check if a git type option is selectable (not already registered)
+   * Used for visual styling and preventing selection in the template
+   */
+  isTypeSelectable(gitType: GithubType): boolean {
+    return !gitType.exists;
   }
 }

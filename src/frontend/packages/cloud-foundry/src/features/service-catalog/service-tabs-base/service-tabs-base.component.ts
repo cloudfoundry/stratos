@@ -1,13 +1,13 @@
-import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { IPageSideNavTab } from '../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
-import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
+import { PageHeaderComponent, IHeaderBreadcrumb, LoadingPageComponent, IPageSideNavTab } from '@stratosui/core';
+import { CFAppState, CfUserPermissionDirective, CfCurrentUserPermissions } from '@stratosui/cloud-foundry';
 import { CSI_CANCEL_URL } from '../../../shared/components/add-service-instance/csi-mode.service';
-import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { getServiceName } from '../services-helper';
 import { ServicesService } from '../services.service';
 
@@ -15,15 +15,24 @@ import { ServicesService } from '../services.service';
   selector: 'app-service-tabs-base',
   templateUrl: './service-tabs-base.component.html',
   styleUrls: ['./service-tabs-base.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    PageHeaderComponent,
+    LoadingPageComponent,
+    CfUserPermissionDirective
+  ]
 })
 export class ServiceTabsBaseComponent {
-  canCreateServiceInstance: CfCurrentUserPermissions;
-  toolTipText$: Observable<string>;
-  hasVisiblePlans$: Observable<boolean>;
-  servicesSubscription: Subscription;
-  isServiceSpaceScoped$: Observable<any>;
-  addServiceInstanceLink: string[];
-  serviceLabel$: Observable<string>;
+  canCreateServiceInstance!: CfCurrentUserPermissions;
+  toolTipText$!: Observable<string>;
+  hasVisiblePlans$!: Observable<boolean>;
+  servicesSubscription!: Subscription;
+  isServiceSpaceScoped$!: Observable<any>;
+  addServiceInstanceLink!: string[];
+  serviceLabel$!: Observable<string>;
 
   tabLinks: IPageSideNavTab[] = [
     {
@@ -51,7 +60,10 @@ export class ServiceTabsBaseComponent {
     }
   ];
 
-  constructor(private servicesService: ServicesService, private store: Store<CFAppState>) {
+  private servicesService = inject(ServicesService);
+  private store = inject(Store<CFAppState>);
+
+  constructor() {
     this.hasVisiblePlans$ = this.servicesService.servicePlans$.pipe(
       map(p => p.length > 0));
     this.canCreateServiceInstance = CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE;

@@ -1,7 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
-import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
-import { CF_GUID } from '../../../../../../../../core/src/shared/entity.tokens';
+import { ListComponent, ListConfig } from '@stratosui/core';
+import { TileComponent, TileGridComponent, TileGroupComponent } from '@stratosui/core';
+import { CF_GUID } from '@stratosui/core';
+import { CardAppInstancesComponent } from '../../../../../../shared/components/cards/card-app-instances/card-app-instances.component';
+import { CardAppStatusComponent } from '../../../../../../shared/components/cards/card-app-status/card-app-status.component';
+import { CardAppUsageComponent } from '../../../../../../shared/components/cards/card-app-usage/card-app-usage.component';
 import {
   CfAppInstancesConfigService,
 } from '../../../../../../shared/components/list/list-types/app-instance/cf-app-instances-config.service';
@@ -13,10 +17,21 @@ import { ApplicationMonitorService } from '../../../../application-monitor.servi
   selector: 'app-instances-tab',
   templateUrl: './instances-tab.component.html',
   styleUrls: ['./instances-tab.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    TileGridComponent,
+    TileGroupComponent,
+    TileComponent,
+    CardAppStatusComponent,
+    CardAppInstancesComponent,
+    CardAppUsageComponent,
+    ListComponent
+  ],
   providers: [
     {
       provide: ActiveRouteCfOrgSpace,
-      useFactory: (cfGuid) => ({ cfGuid }),
+      useFactory: (cfGuid: string) => ({ cfGuid }),
       deps: [CF_GUID]
     },
     CloudFoundryEndpointService,

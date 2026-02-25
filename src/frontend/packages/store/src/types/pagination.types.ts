@@ -1,10 +1,10 @@
 import { HttpRequest } from '@angular/common/http';
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 
 import { BasePipelineRequestAction } from '../entity-catalog/action-orchestrator/action-orchestrator';
-import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
-import { ListActionState } from '../reducers/api-request-reducer/types';
-import { EntityRequestAction } from './request.types';
+import type { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
+import type { ListActionState } from '../reducers/api-request-reducer/types';
+import type { EntityRequestAction } from './request.types';
 
 
 export interface PaginationParam {
@@ -52,17 +52,17 @@ export class PaginationEntityState {
   currentPage = 0;
   totalResults = 0;
   pageCount = 0;
-  ids = {};
-  params: PaginationParam;
+  ids: Record<number, string[]> = {};
+  params!: PaginationParam;
   pageRequests: {
     [pageNumber: string]: ListActionState,
-  };
+  } = {};
   clientPagination?: PaginationClientPagination;
   /**
    * The pagination key from where we share our values.
    */
   seed?: string;
-  maxedState: PaginationMaxedState;
+  maxedState: PaginationMaxedState = { isMaxedMode: false };
   isListPagination = false;
 }
 

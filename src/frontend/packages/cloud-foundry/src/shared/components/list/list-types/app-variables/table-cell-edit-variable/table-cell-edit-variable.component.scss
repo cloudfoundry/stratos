@@ -1,13 +1,13 @@
-mat-form-field {
-  .mat-form-field-infix {
-    width: inherit;
+.form-field {
+  .form-field-infix {
+    @apply w-auto;
   }
 }
 
 .cell-edit-variable {
-  width: 100%;
+  @apply w-full;
 }
 
 .cell-value-variable {
-  cursor: pointer;
+  @apply cursor-pointer;
 }

@@ -1,11 +1,29 @@
-<mat-card [ngClass]="{'fav-meta-card__clickable': !!routerLink}" (click)="openFavorite()" class="fav-meta-card" *ngIf="favorite">
-  <div class="fav-meta-card__icon-panel">
-    <mat-icon class="fav-meta-card__icon" *ngIf="icon.icon" [fontSet]="icon.iconFont">{{ icon.icon }}</mat-icon>
+@if (favorite) {
+  <div class="card hover:shadow-md transition-shadow duration-200 fav-card"
+    [class.cursor-pointer]="!!routerLink"
+    [class.fav-card--clickable]="!!routerLink"
+    (click)="openFavorite()"
+    >
+    <div class="card-body">
+      <div class="flex items-start justify-between space-x-4">
+        <div class="flex items-start space-x-3">
+          <div class="flex-shrink-0 p-2 fav-card__icon-bg rounded-lg">
+            @if (icon.icon) {
+              <span class="material-icons fav-card__icon text-xl" [attr.data-font]="icon.iconFont">{{ icon.icon }}</span>
+            }
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="text-sm font-medium fav-card__name truncate">{{ name }}</div>
+            <div class="text-xs fav-card__type mt-1">{{ favoriteType }}</div>
+          </div>
+        </div>
+        <div class="flex items-center space-x-2 flex-shrink-0">
+          @if (!valid) {
+            <span class="material-icons text-warning-500 text-sm" title="The entity for this favorite may have been deleted">warning</span>
+          }
+          <app-entity-favorite-star [favorite]="favorite" [confirmRemoval]="true"></app-entity-favorite-star>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="fav-meta-card__info">
-    <div class="fav-meta-card__name">{{ name }}</div>
-    <div class="fav-meta-card__type">{{ favoriteType }}</div>
-  </div>
-  <mat-icon class="fav-meta-card__error text-warning" matTooltip="The entity for this favorite may have been deleted" *ngIf="!valid">warning</mat-icon>
-  <app-entity-favorite-star class="fav-meta-card__star" [favorite]="favorite" [confirmRemoval]="true"></app-entity-favorite-star>
-</mat-card>
+}

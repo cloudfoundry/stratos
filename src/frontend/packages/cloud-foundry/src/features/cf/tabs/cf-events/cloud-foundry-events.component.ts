@@ -1,9 +1,9 @@
-import { Component } from '@angular/core';
-
-import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { ListConfig } from '@stratosui/core';
 import {
   CfAllEventsConfigService,
 } from '../../../../shared/components/list/list-types/cf-events/types/cf-all-events-config.service';
+import { CloudFoundryEventsListComponent } from '../../../../shared/components/cloud-foundry-events-list/cloud-foundry-events-list.component';
 
 @Component({
   selector: 'app-cloud-foundry-events',
@@ -12,6 +12,11 @@ import {
   providers: [{
     provide: ListConfig,
     useClass: CfAllEventsConfigService,
-  }]
+  }],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CloudFoundryEventsListComponent
+  ]
 })
 export class CloudFoundryEventsComponent { }

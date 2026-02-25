@@ -1,24 +1,38 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-import {
-  generateCfBaseTestModules,
-  generateTestCfEndpointServiceProvider,
-} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { UtilsService } from '@stratosui/core';
 import { CloudFoundryFirehoseComponent } from './cloud-foundry-firehose.component';
+import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 
 describe('CloudFoundryFirehoseComponent', () => {
   let component: CloudFoundryFirehoseComponent;
   let fixture: ComponentFixture<CloudFoundryFirehoseComponent>;
 
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        declarations: [CloudFoundryFirehoseComponent],
-        imports: generateCfBaseTestModules(),
-        providers: [...generateTestCfEndpointServiceProvider()]
-      }).compileComponents();
-    })
-  );
+  beforeEach(async () => {
+    const mockCfEndpointService = {
+      cfGuid: 'mock-guid'
+    };
+
+    const mockUtilsService = {
+      bytesToHumanSize: vi.fn((bytes) => bytes + 'B'),
+      formatUptime: vi.fn((seconds) => seconds + 's')
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [
+        CloudFoundryFirehoseComponent,
+      ],
+      providers: [
+        provideZonelessChangeDetection(),
+        { provide: CloudFoundryEndpointService, useValue: mockCfEndpointService },
+        { provide: UtilsService, useValue: mockUtilsService },
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryFirehoseComponent);

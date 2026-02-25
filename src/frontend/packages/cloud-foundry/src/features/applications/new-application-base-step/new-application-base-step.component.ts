@@ -1,13 +1,13 @@
-import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { BASE_REDIRECT_QUERY } from '../../../../../core/src/shared/components/stepper/stepper.types';
-import { ITileConfig, ITileData } from '../../../../../core/src/shared/components/tile/tile-selector.types';
-import { RouterNav } from '../../../../../store/src/actions/router.actions';
+import { CFAppState } from '@stratosui/cloud-foundry';
+import { PageHeaderComponent, StepComponent, SteppersComponent, BASE_REDIRECT_QUERY, ITileConfig, ITileData, TileSelectorComponent } from '@stratosui/core';
+import { RouterNav } from '@stratosui/store';
 import {
   ApplicationDeploySourceTypes,
   AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM,
@@ -26,18 +26,30 @@ export interface IAppTileData extends ITileData {
 @Component({
   selector: 'app-new-application-base-step',
   templateUrl: './new-application-base-step.component.html',
-  styleUrls: ['./new-application-base-step.component.scss']
+  styleUrls: ['./new-application-base-step.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    TileSelectorComponent
+  ],
+  providers: [
+    ApplicationDeploySourceTypes
+  ]
 })
 export class NewApplicationBaseStepComponent {
 
-  public serviceType: string;
+  public serviceType!: string;
   public tileSelectorConfig$: Observable<ITileConfig<IAppTileData>[]>;
 
   set selectedTile(tile: ITileConfig<IAppTileData>) {
     if (tile) {
       const baseUrl = 'applications';
       const type = tile.data.type;
-      const query = {
+      const query: { [key: string]: string } = {
         [BASE_REDIRECT_QUERY]: `${baseUrl}/new`
       };
       if (tile.data.subType) {

@@ -19,7 +19,9 @@ import { StratosUserPermissionsChecker } from './stratos-user-permissions.checke
 
 export const CUSTOM_USER_PERMISSION_CHECKERS = 'custom_user_perm_checkers';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CurrentUserPermissionsService {
   private allCheckers: ICurrentUserPermissionsChecker[];
   constructor(
@@ -29,7 +31,7 @@ export class CurrentUserPermissionsService {
     // Cannot set default value for parameter as the Optional decorator sets it to null
     const nullSafeCustomCheckers = customCheckers || [];
     this.allCheckers = [
-      new StratosUserPermissionsChecker(store),
+      new StratosUserPermissionsChecker(),
       ...nullSafeCustomCheckers
     ];
   }

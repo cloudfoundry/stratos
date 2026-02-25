@@ -1,15 +1,24 @@
-import { Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
+import { Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild , ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
 
-import { AppMetadataTypes } from '../../../../../../cloud-foundry/src/actions/app-metadata.actions';
-import { ApplicationService } from '../../../../../../cloud-foundry/src/features/applications/application.service';
-import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ConfirmationDialogConfig } from '../../../../../../core/src/shared/components/confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { StratosStatus } from '../../../../../../store/src/types/shared.types';
+import {
+  AppInputDirective,
+  CardStatusComponent,
+  ConfirmationDialogConfig,
+  ConfirmationDialogService,
+  CurrentUserPermissionsService,
+  CustomFormFieldComponent,
+  TailwindSnackBarRef,
+  TailwindSnackBarService
+} from '@stratosui/core';
+import { StratosStatus } from '@stratosui/store';
+import { AppMetadataTypes } from '../../../../actions/app-metadata.actions';
+import { ApplicationService } from '../../../../features/applications/application.service';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
+import { RunningInstancesComponent } from '../../running-instances/running-instances.component';
 
 const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig('Set Instance count to 0',
   'Are you sure you want to set the instance count to 0?', 'Confirm', true);
@@ -17,7 +26,17 @@ const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig('Set Ins
 @Component({
   selector: 'app-card-app-instances',
   templateUrl: './card-app-instances.component.html',
-  styleUrls: ['./card-app-instances.component.scss']
+  styleUrls: ['./card-app-instances.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    FormsModule,
+    AppInputDirective,
+    CustomFormFieldComponent,
+    CardStatusComponent,
+    RunningInstancesComponent
+  ]
 })
 export class CardAppInstancesComponent implements OnInit, OnDestroy {
 
@@ -26,7 +45,7 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
 
   @Input() busy: any;
 
-  @ViewChild('instanceField', { static: true }) instanceField: ElementRef;
+  @ViewChild('instanceField', { static: true }) instanceField!: ElementRef;
 
   status$: Observable<StratosStatus>;
 
@@ -36,7 +55,7 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
     public appService: ApplicationService,
     private renderer: Renderer2,
     private confirmDialog: ConfirmationDialogService,
-    private snackBar: MatSnackBar,
+    private snackBar: TailwindSnackBarService,
     cups: CurrentUserPermissionsService
   ) {
     this.status$ = this.appService.applicationState$.pipe(
@@ -55,17 +74,17 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
   private currentCount = 0;
   public editCount = 0;
 
-  private sub: Subscription;
+  private sub!: Subscription;
 
   public isEditing = false;
 
   public editValue: any;
 
   // Observable on the running instances count for the application
-  public runningInstances$: Observable<number>;
+  public runningInstances$!: Observable<number>;
 
   private app: any;
-  private snackBarRef: MatSnackBarRef<SimpleSnackBar>;
+  private snackBarRef!: TailwindSnackBarRef<any>;
 
   ngOnInit() {
     this.sub = this.appService.application$.subscribe(app => {

@@ -1,17 +1,32 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit, signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { IHeaderBreadcrumbLink } from 'frontend/packages/core/src/shared/components/page-header/page-header.types';
-import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
+import { IHeaderBreadcrumbLink } from '@stratosui/core';
+import { Observable, of, Subject } from 'rxjs';
 import { catchError, first, map, startWith } from 'rxjs/operators';
 
 import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
 import { KubernetesAnalysisService } from '../../../services/kubernetes.analysis.service';
 import { getParentURL } from '../../../services/route.helper';
+import { PageHeaderModule } from '@stratosui/core';
+import { PageSubNavComponent } from '@stratosui/core';
+import { LoadingPageComponent } from '@stratosui/core';
+import { AnalysisReportViewerComponent } from '../../../analysis-report-viewer/analysis-report-viewer.component';
 
 @Component({
   selector: 'app-kubernetes-analysis-report',
   templateUrl: './kubernetes-analysis-report.component.html',
-  styleUrls: ['./kubernetes-analysis-report.component.scss']
+  styleUrls: ['./kubernetes-analysis-report.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    PageHeaderModule,
+    PageSubNavComponent,
+    LoadingPageComponent,
+    AnalysisReportViewerComponent
+  ]
 })
 export class KubernetesAnalysisReportComponent implements OnInit {
 
@@ -23,22 +38,29 @@ export class KubernetesAnalysisReportComponent implements OnInit {
   endpointID: string;
   id: string;
 
-  private breadcrumbsSubject: BehaviorSubject<IHeaderBreadcrumbLink[]>;
-  public breadcrumbs$: Observable<IHeaderBreadcrumbLink[]>;
+  // Signal for tracking breadcrumbs
+  private breadcrumbsSignal = signal<IHeaderBreadcrumbLink[]>([
+    { value: 'Analysis', routerLink: '' },
+    { value: 'Report' },
+  ]);
+  public breadcrumbs$ = toObservable(this.breadcrumbsSignal);  private analysisService = inject(KubernetesAnalysisService);
+  private route = inject(ActivatedRoute);
+  private kubeEndpointService = inject(KubernetesEndpointService);
 
-  constructor(
-    private analysisService: KubernetesAnalysisService,
-    private route: ActivatedRoute,
-    private kubeEndpointService: KubernetesEndpointService,
-  ) {
-    this.id = route.snapshot.params.id;
 
-    this.breadcrumbsSubject = new BehaviorSubject<IHeaderBreadcrumbLink[]>(undefined);
-    this.breadcrumbs$ = this.breadcrumbsSubject.asObservable();
-    this.breadcrumbsSubject.next([
-      { value: 'Analysis', routerLink: getParentURL(route, 2) },
+
+  constructor() {
+
+
+    this.id = this.route.snapshot.params.id;
+
+    // Initialize breadcrumbs with actual route
+    this.breadcrumbsSignal.set([
+      { value: 'Analysis', routerLink: getParentURL(this.route, 2) },
       { value: 'Report' },
     ]);
+
+
   }
 
   ngOnInit() {
@@ -68,7 +90,7 @@ export class KubernetesAnalysisReportComponent implements OnInit {
 
     // When the report has loaded, update the name in the breadcrumbs
     this.report$.pipe(first()).subscribe(report => {
-      this.breadcrumbsSubject.next([
+      this.breadcrumbsSignal.set([
         { value: 'Analysis', routerLink: getParentURL(this.route, 2) },
         { value: report.name },
       ]);

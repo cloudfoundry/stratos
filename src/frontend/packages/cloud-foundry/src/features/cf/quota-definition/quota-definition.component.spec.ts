@@ -1,23 +1,60 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
-import { populateStoreWithTestEndpoint, testSCFEndpointGuid } from '@stratosui/store/testing';
+import { StoreModule } from '@ngrx/store';
 
-import { TabNavService } from '../../../../../core/src/tab-nav.service';
 import {
-  generateCfBaseTestModules,
-  generateTestCfEndpointServiceProvider,
-} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { QuotaDefinitionComponent } from './quota-definition.component';
+  TabNavService
+} from '@stratosui/core';
+import {
+  appReducers,
+  TEST_CATALOGUE_ENTITIES,
+  generateStratosEntities,
+  EntityCatalogTestModule,
+  EntityServiceFactory,
+  EntityCatalogHelper,
+  EntityCatalogHelpers
+} from '@stratosui/store';
+import { STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
+import { generateTestCfEndpointServiceProvider } from '@test-framework/cloud-foundry-endpoint-service.helper';
+import {generateCFEntities,
+  cfCurrentUserPermissionsService} from '@stratosui/cloud-foundry';
+import { QuotaDefinitionComponent } from "./quota-definition.component";
 
 describe('QuotaDefinitionComponent', () => {
   let component: QuotaDefinitionComponent;
   let fixture: ComponentFixture<QuotaDefinitionComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      declarations: [QuotaDefinitionComponent],
-      imports: generateCfBaseTestModules(),
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        QuotaDefinitionComponent,
+      ],
       providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideNoopAnimations(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          StoreModule.forRoot(appReducers, {
+            runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
+          }),
+          EntityCatalogTestModule
+        ),
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities()
+          ]
+        },
+        EntityServiceFactory,
+        ...cfCurrentUserPermissionsService,
         {
           provide: ActivatedRoute,
           useValue: {
@@ -27,11 +64,14 @@ describe('QuotaDefinitionComponent', () => {
             }
           }
         },
-        generateTestCfEndpointServiceProvider(),
+        ...generateTestCfEndpointServiceProvider(),
         TabNavService,
       ]
-    })
-      .compileComponents();
+    }).compileComponents();
+
+    // Initialize Entity Catalog Helper AFTER compileComponents
+    const ech = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(ech);
 
     populateStoreWithTestEndpoint();
   });

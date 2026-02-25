@@ -1,17 +1,20 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { ApplicationRef, Injectable } from '@angular/core';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { combineLatest as observableCombineLatest, combineLatest, Observable, of as observableOf, of } from 'rxjs';
+import { combineLatest as observableCombineLatest, combineLatest, EMPTY, Observable, of as observableOf, of } from 'rxjs';
 import { catchError, filter, first, map, mergeMap, pairwise, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
-import { ResetPagination } from '../../../../store/src/actions/pagination.actions';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
-import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
-import { selectSessionData } from '../../../../store/src/reducers/auth.reducer';
-import { SessionDataEndpoint } from '../../../../store/src/types/auth.types';
-import { PaginatedAction } from '../../../../store/src/types/pagination.types';
-import { ICFAction, UpdateCfAction } from '../../../../store/src/types/request.types';
+import {
+  ResetPagination,
+  entityCatalog,
+  ActionState,
+  selectSessionData,
+  SessionDataEndpoint,
+  PaginatedAction,
+  ICFAction
+} from '@stratosui/store';
+import { UpdateCfAction } from '../../../../store/src/types/request.types';
 import { GET_CURRENT_CF_USER_RELATION, GetCurrentCfUserRelations } from '../../actions/permissions.actions';
 import { UsersRolesActions, UsersRolesClearUpdateState, UsersRolesExecuteChanges } from '../../actions/users-roles.actions';
 import { AddCfUserRole, ChangeCfUserRole, RemoveCfUserRole } from '../../actions/users.actions';
@@ -27,7 +30,9 @@ import { selectCfUsersRoles } from '../selectors/cf-users-roles.selector';
 import { OrgUserRoleNames } from '../types/cf-user.types';
 import { CfRoleChange, UsersRolesState } from '../types/users-roles.types';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class UsersRolesEffects {
 
   constructor(
@@ -35,22 +40,29 @@ export class UsersRolesEffects {
     private actions$: Actions,
     private store: Store<CFAppState>,
     private cfUserService: CfUserService,
+    private appRef: ApplicationRef
   ) { }
 
-  @Effect() getCurrentUsersPermissions$ = this.actions$.pipe(
+  getCurrentUsersPermissions$ = createEffect(() => this.actions$.pipe(
     ofType<GetCurrentCfUserRelations>(GET_CURRENT_CF_USER_RELATION),
-    map(action => {
+    switchMap(action => {
       return fetchCfUserRole(this.store, action, this.httpClient).pipe(
-        map(() => ({ type: action.actions[1] })),
-        catchError(() => [{ type: action.actions[2] }])
+        map(() => {
+          this.appRef.tick();
+          return { type: action.actions[1] };
+        }),
+        catchError(() => {
+          this.appRef.tick();
+          return [{ type: action.actions[2] }];
+        })
       );
     })
-  );
+  ));
 
-  @Effect() clearEntityUpdates$ = this.actions$.pipe(
+  clearEntityUpdates$ = createEffect(() => this.actions$.pipe(
     ofType<UsersRolesClearUpdateState>(UsersRolesActions.ClearUpdateState),
-    mergeMap(action => {
-      const actions = [];
+    mergeMap((action): any[] => {
+      const actions: any[] = [];
       action.changedRoles.forEach(change => {
         const apiAction: ICFAction = {
           guid: change.spaceGuid ? change.spaceGuid : change.orgGuid,
@@ -63,11 +75,12 @@ export class UsersRolesEffects {
         };
         actions.push(new UpdateCfAction(apiAction, false, ''));
       });
+      this.appRef.tick();
       return actions;
     })
-  );
+  ));
 
-  @Effect() executeUsersRolesChange$ = this.actions$.pipe(
+  executeUsersRolesChange$ = createEffect(() => this.actions$.pipe(
     ofType<UsersRolesExecuteChanges>(UsersRolesActions.ExecuteChanges),
     withLatestFrom(
       this.store.select(selectCfUsersRoles),
@@ -134,18 +147,21 @@ export class UsersRolesEffects {
         }),
         mergeMap((listActions: PaginatedAction[]) => {
           if (listActions && listActions.length) {
+            this.appRef.tick();
             return listActions.map(listAction => new ResetPagination(listAction, listAction.paginationKey));
           }
-          return [];
+          this.appRef.tick();
+          return EMPTY;
         }),
-        catchError(() => {
+        catchError((_error: unknown) => {
           // Swallow the error so it doesn't print in the console
-          return [];
+          this.appRef.tick();
+          return EMPTY;
         })
       );
 
     }),
-  );
+  ));
 
   private createAllChanges(
     orgUserChanges: CfRoleChange[],
@@ -237,20 +253,21 @@ export class UsersRolesEffects {
       );
   }
 
-  private createActionObs(action: ChangeCfUserRole): Observable<any> {
+  private createActionObs(action: ChangeCfUserRole): Observable<boolean> {
     return entityCatalog.getEntity(action)
       .store
       .getEntityMonitor(action.guid)
       .getUpdatingSection(action.updatingKey).pipe(
         pairwise(),
-        filter(([oldUpdate, newUpdate]) => !!oldUpdate.busy && !newUpdate.busy),
-        map(([, newUpdate]) => newUpdate),
+        filter(([oldUpdate, newUpdate]: [ActionState, ActionState]) => !!oldUpdate.busy && !newUpdate.busy),
+        map(([, newUpdate]: [ActionState, ActionState]) => newUpdate),
         tap((update: ActionState) => {
           if (update.error) {
             // Ensure we throw an error such that any subsequent requests fail
             throw new Error(`Failed: ${update.message}`);
           }
-        })
+        }),
+        map((): boolean => true)
       );
   }
 }

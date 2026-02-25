@@ -1,12 +1,31 @@
-import { AfterContentInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
-import { JsonPointer } from '@ajsf/core';
+
+import { AfterContentInit, ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { FormsModule, ReactiveFormsModule, FormControl, FormGroup } from '@angular/forms';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { delay } from 'rxjs/operators';
+import {
+  CustomFormFieldComponent,
+  ErrorStateMatcher,
+  ShowOnDirtyErrorStateMatcher,
+  TailwindJsonSchemaFormModule,
+  safeStringToObj,
+  isValidJsonValidator
+} from '@stratosui/core';
 
-import { safeStringToObj } from '../../../../../core/src/core/utils.service';
-import { isValidJsonValidator } from '../../../../../core/src/shared/form-validators';
+interface SchemaJsonForm {
+  json: FormControl<string>;
+}
+
+// Simple JsonPointer replacement
+class JsonPointer {
+  static parse(path: any): string[] {
+    if (!path) return [];
+    const pathStr = path.toString();
+    if (pathStr === '') return [];
+    if (pathStr === '/') return [''];
+    return pathStr.split('/').slice(1);
+  }
+}
 
 export interface SchemaFormValidationError {
   dataPath: {};
@@ -22,15 +41,23 @@ export class SchemaFormConfig {
   selector: 'app-schema-form',
   templateUrl: './schema-form.component.html',
   styleUrls: ['./schema-form.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    CustomFormFieldComponent,
+    TailwindJsonSchemaFormModule
+],
   providers: [
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
   ]
 })
 export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit {
 
-  mode: 'JSON' | 'schema';
+  mode!: 'JSON' | 'schema';
   schemaView: 'schemaForm' | 'schemaJson' = 'schemaForm';
-  private schema;
+  private schema: object | undefined;
 
   @Input()
   set config(config: SchemaFormConfig) {
@@ -64,8 +91,8 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
 
   cleanSchema: object;
 
-  jsonData: object;
-  jsonForm: UntypedFormGroup;
+  jsonData: object | null = null;
+  jsonForm!: FormGroup<SchemaJsonForm>;
 
   formData: object = {};
   formInitialData: object;
@@ -75,8 +102,8 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
   subs: Subscription[] = [];
 
   ngOnInit() {
-    this.jsonForm = new UntypedFormGroup({
-      json: new UntypedFormControl('', isValidJsonValidator()),
+    this.jsonForm = new FormGroup<SchemaJsonForm>({
+      json: new FormControl('', { nonNullable: true, validators: [isValidJsonValidator()] }),
     });
   }
 
@@ -116,18 +143,18 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
     return !this.jsonForm.controls.json.value || this.jsonForm.controls.json.valid;
   }
 
-  private filterSchema = (schema?: object): any => {
+  private filterSchema = (schema?: { [key: string]: any }): { [key: string]: any } | null | undefined => {
     if (!schema) {
       return;
     }
-    const filterSchema = Object.keys(schema).reduce((obj, key) => {
+    const filterSchema = Object.keys(schema).reduce((obj: { [key: string]: any }, key) => {
       if (key !== '$schema') { obj[key] = schema[key]; }
       return obj;
     }, {});
     return Object.keys(filterSchema).length > 0 ? filterSchema : null;
   };
 
-  onFormChange(formData) {
+  onFormChange(formData: object) {
     this.formData = formData;
     this.pDataChange.next(formData);
   }
@@ -138,7 +165,7 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
     this.pValidChange.next(!this.formValidationErrors.length);
   }
 
-  private prettyValidationErrorsFn = (formValidationErrors: SchemaFormValidationError[]): string => {
+  private prettyValidationErrorsFn = (formValidationErrors: SchemaFormValidationError[]): string | null => {
     if (!formValidationErrors) {
       return null;
     }

@@ -3,25 +3,16 @@ import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { spaceEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
-import {
-  createEntityRelationPaginationKey,
-} from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import {
-  CurrentUserPermissionsService,
-} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import {
-  TableCellRadioComponent,
-} from '../../../../../../../core/src/shared/components/list/list-table/table-cell-radio/table-cell-radio.component';
-import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
+import { CFAppState, spaceEntityType, createEntityRelationPaginationKey, cfEntityCatalog } from '@stratosui/cloud-foundry';
+import { CurrentUserPermissionsService, ConfirmationDialogService, IListConfig } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
+import { TableCellRadioComponent } from '../../../../../../../core/src/shared/components/list/list-table/table-cell-radio/table-cell-radio.component';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { CfAppRoutesListConfigServiceBase } from './cf-app-routes-list-config-base';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfAppMapRoutesListConfigService extends CfAppRoutesListConfigServiceBase implements IListConfig<APIResource> {
 
   constructor(
@@ -57,8 +48,8 @@ export class CfAppMapRoutesListConfigService extends CfAppRoutesListConfigServic
       columnId: 'radio',
       cellComponent: TableCellRadioComponent,
       cellConfig: {
-        isDisabled: (row): boolean => row && row.entity && row.entity.apps && row.entity.apps.find(
-          a => a.metadata.guid === appService.appGuid
+        isDisabled: (row: APIResource): boolean => row && row.entity && row.entity.apps && row.entity.apps.find(
+          (a: APIResource) => a.metadata.guid === appService.appGuid
         )
       },
       class: 'table-column-select',

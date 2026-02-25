@@ -31,7 +31,7 @@ const selectSpaceWithRoleFromOrg = (role: CfPermissionStrings, orgId: string) =>
   const { spaceGuids } = org;
   return spaceGuids.reduce((array: string[], spaceGuid: string) => {
     const space = spaces[spaceGuid];
-    if (space && space[role]) {
+    if (space && (space as any)[role]) {
       array.push(spaceGuid);
     }
     return array;
@@ -43,7 +43,7 @@ export const selectCurrentUserCFEndpointRolesState = (endpointGuid: string) =>
   (state: IAllCfRolesState) => state ? state[endpointGuid] : null;
 
 export const selectCurrentUserCFGlobalRolesStates = (state: ICfRolesState) => state ? state.global : null;
-export const selectCurrentUserCFGlobalRolesState = (role: PermissionValues) => (state: IGlobalRolesState) => state[role] || false;
+export const selectCurrentUserCFGlobalRolesState = (role: PermissionValues) => (state: IGlobalRolesState) => (state as Record<string, any>)[role] || false;
 export const selectCurrentUserCFOrgsRolesState = (state: ICfRolesState) => state.organizations;
 export const selectCurrentUserCFSpacesRolesState = (state: ICfRolesState) => state.spaces;
 export const selectCurrentUserCFGlobalScopesState = (state: IGlobalRolesState) => state ? state.scopes : [];

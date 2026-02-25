@@ -1,10 +1,9 @@
-import { CommonModule } from '@angular/common';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { TailwindDialogRef, MAT_DIALOG_DATA } from '@stratosui/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
-import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
-import { CoreModule } from '../../../core/core.module';
 import { DialogConfirmComponent } from './dialog-confirm.component';
 
 describe('DialogConfirmComponent', () => {
@@ -12,12 +11,12 @@ describe('DialogConfirmComponent', () => {
   let fixture: ComponentFixture<DialogConfirmComponent>;
   let element: HTMLElement;
 
-  class MatDialogRefMock {
+  class TailwindDialogRefMock {
     close() {
     }
   }
 
-  class MatDialogDataMock {
+  class DialogDataMock {
     confirm = 'Confirm';
     message = { textToMatch: 'textToMatch' };
     title = 'Title';
@@ -25,25 +24,24 @@ describe('DialogConfirmComponent', () => {
       entity: {
         metadata: {}
       },
-      entityRequestInfo: {} as RequestInfoState
+      entityRequestInfo: {}
     };
   }
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [DialogConfirmComponent],
-      providers: [
-        { provide: MatDialogRef, useClass: MatDialogRefMock },
-        { provide: MAT_DIALOG_DATA, useClass: MatDialogDataMock },
-      ],
       imports: [
-        CommonModule,
-        CoreModule,
+        DialogConfirmComponent,
         NoopAnimationsModule,
+      ],
+      providers: [
+        { provide: TailwindDialogRef, useClass: TailwindDialogRefMock },
+        { provide: MAT_DIALOG_DATA, useClass: DialogDataMock },
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(DialogConfirmComponent);
@@ -57,15 +55,24 @@ describe('DialogConfirmComponent', () => {
   });
 
   it('should close when clicked on cancel', () => {
-    const spy = spyOn(component.dialogRef, 'close');
-    element.querySelector('button').click();
+    const spy = vi.spyOn(component.dialogRef, 'close');
+    const cancelButton = element.querySelector('button');
+    expect(cancelButton).toBeTruthy();
+    cancelButton?.click();
 
     expect(spy).toHaveBeenCalled();
   });
 
   it('should enable confirm button if matches text', () => {
-    const confirm: HTMLButtonElement = element.querySelector('.confirm-dialog__confirm');
-    const input: HTMLInputElement = element.querySelector('input');
+    const confirm: HTMLButtonElement | null = element.querySelector('.confirm-dialog__confirm');
+    const input: HTMLInputElement | null = element.querySelector('input');
+    expect(confirm).toBeTruthy();
+    expect(input).toBeTruthy();
+
+    if (!confirm || !input) {
+      return;
+    }
+
     expect(confirm.disabled).toBeTruthy();
 
     input.value = 'textToMatch';
@@ -85,7 +92,9 @@ describe('DialogConfirmComponent', () => {
     };
     fixture.detectChanges();
 
-    expect(element.querySelector('mat-icon').textContent).toEqual('warning');
+    const warningIcon = element.querySelector('.material-icons');
+    expect(warningIcon).toBeTruthy();
+    expect(warningIcon?.textContent).toEqual('warning');
   });
 
   it('should show warning icon if text to match', () => {
@@ -98,7 +107,9 @@ describe('DialogConfirmComponent', () => {
     };
     fixture.detectChanges();
 
-    expect(element.querySelector('mat-icon').textContent).toEqual('warning');
+    const warningIcon = element.querySelector('.material-icons');
+    expect(warningIcon).toBeTruthy();
+    expect(warningIcon?.textContent).toEqual('warning');
   });
 
   it('should show warning icon if is critical', () => {
@@ -111,12 +122,14 @@ describe('DialogConfirmComponent', () => {
     };
     fixture.detectChanges();
 
-    expect(element.querySelector('mat-icon').textContent).toEqual('warning');
-
+    const warningIcon = element.querySelector('.material-icons');
+    expect(warningIcon).toBeTruthy();
+    expect(warningIcon?.textContent).toEqual('warning');
   });
 
   it('should disable confirm button if not matching text', () => {
-    const confirm: HTMLButtonElement = element.querySelector('.confirm-dialog__confirm');
-    expect(confirm.disabled).toBeTruthy();
+    const confirm: HTMLButtonElement | null = element.querySelector('.confirm-dialog__confirm');
+    expect(confirm).toBeTruthy();
+    expect(confirm?.disabled).toBeTruthy();
   });
 });

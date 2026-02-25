@@ -1,4 +1,4 @@
-import { Injectable, ModuleWithProviders, NgModule } from '@angular/core';
+import { inject, Injectable, ModuleWithProviders, NgModule } from '@angular/core';
 import { ActivatedRoute, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AppState, GeneralEntityAppState, EntityServiceFactory } from '@stratosui/store';
@@ -62,29 +62,34 @@ export interface StratosExtensionRoutes {
 }
 
 // Stores the extension metadata as defined by the decorators
-const extensionMetadata = {
+const extensionMetadata: {
+  loginComponent: any | null;
+  extensionRoutes: { [key: string]: StratosExtensionRoutes[] };
+  tabs: { [key: string]: IPageSideNavTab[] };
+  actions: { [key: string]: StratosActionMetadata[] };
+} = {
   loginComponent: null,
-  extensionRoutes: {} as { [key: string]: StratosExtensionRoutes[], },
-  tabs: {} as { [key: string]: IPageSideNavTab[], },
-  actions: {} as { [key: string]: StratosActionMetadata[], },
+  extensionRoutes: {},
+  tabs: {},
+  actions: {},
 };
 
 /**
  * Decorator for a Tab extension
  */
 export function StratosTab(props: StratosTabMetadataConfig) {
-  return target => addExtensionTab(props.type, target, props);
+  return (target: any) => addExtensionTab(props.type, target, props);
 }
 
 /**
  * Decorator for an Action extension
  */
 export function StratosAction(props: StratosActionMetadata) {
-  return target => addExtensionAction(props.type, target, props);
+  return (target: any) => addExtensionAction(props.type, target, props);
 }
 
 export function StratosLoginComponent() {
-  return target => extensionMetadata.loginComponent = target;
+  return (target: any) => extensionMetadata.loginComponent = target;
 }
 
 function addExtensionTab(tab: StratosTabType, target: any, props: StratosTabMetadataConfig) {
@@ -127,8 +132,7 @@ export class ExtEmptyModule { }
 export class ExtensionService {
 
   public metadata = extensionMetadata;
-
-  constructor(private router: Router) { }
+  private router = inject(Router);
 
   // Declare extensions - this is a trick to ensure the Angular Build Optimiser does not
   // optimize out any extension components

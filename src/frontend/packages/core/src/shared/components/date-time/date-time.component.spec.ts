@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { DateTimeComponent } from './date-time.component';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
@@ -9,18 +11,19 @@ describe('DateTimeComponent', () => {
   let component: DateTimeComponent;
   let fixture: ComponentFixture<DateTimeComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [DateTimeComponent],
+      providers: [provideZonelessChangeDetection()],
       imports: [
+        DateTimeComponent, // Now standalone
         FormsModule,
         ReactiveFormsModule,
         MDAppModule,
-        NoopAnimationsModule
+        NoopAnimationsModule,
       ]
-    })
-      .compileComponents();
-  }));
+    });
+      TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(DateTimeComponent);

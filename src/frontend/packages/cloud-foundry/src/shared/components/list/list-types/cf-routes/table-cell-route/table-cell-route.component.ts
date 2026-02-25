@@ -1,18 +1,20 @@
-import { Component, OnInit } from '@angular/core';
-
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { TableCellCustom } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
 import { getRoute, isTCPRoute } from '../../../../../../features/applications/routes/routes.helper';
 import { ListCfRoute } from '../cf-routes-data-source-base';
 
 @Component({
   selector: 'app-table-cell-route',
   templateUrl: './table-cell-route.component.html',
-  styleUrls: ['./table-cell-route.component.scss']
+  styleUrls: ['./table-cell-route.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: []
 })
 export class TableCellRouteComponent extends TableCellCustom<APIResource<ListCfRoute>> implements OnInit {
-  routeUrl: string;
-  isRouteTCP: boolean;
+  routeUrl!: string;
+  isRouteTCP!: boolean;
 
   ngOnInit() {
     const route = this.row.entity;

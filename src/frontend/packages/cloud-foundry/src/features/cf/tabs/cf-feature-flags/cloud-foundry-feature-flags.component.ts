@@ -1,9 +1,6 @@
-import { Component } from '@angular/core';
-
-import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
-import {
-  CfFeatureFlagsListConfigService,
-} from '../../../../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-list-config.service';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { ListComponent, ListConfig } from '@stratosui/core';
+import { CfFeatureFlagsListConfigService } from '../../../../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-list-config.service';
 
 @Component({
   selector: 'app-cloud-foundry-feature-flags',
@@ -14,6 +11,11 @@ import {
       provide: ListConfig,
       useClass: CfFeatureFlagsListConfigService
     }
+  ],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    ListComponent
   ]
 })
 export class CloudFoundryFeatureFlagsComponent { }

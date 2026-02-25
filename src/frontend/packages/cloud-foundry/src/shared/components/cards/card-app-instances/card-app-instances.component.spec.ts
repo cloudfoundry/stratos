@@ -1,56 +1,56 @@
-import { CommonModule } from '@angular/common';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection, importProvidersFrom, APP_INITIALIZER } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CoreModule } from '../../../../../../core/src/core/core.module';
 import {
-  ApplicationStateIconComponent,
-} from '../../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.component';
-import {
-  ApplicationStateIconPipe,
-} from '../../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.pipe';
-import {
-  ApplicationStateComponent,
-} from '../../../../../../core/src/shared/components/application-state/application-state.component';
-import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
-import { ConfirmationDialogService } from '../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
-import { ApplicationServiceMock } from '../../../../../test-framework/application-service-helper';
-import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+  ConfirmationDialogService,
+  
+  TailwindSnackBarService
+} from '@stratosui/core';
+import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
+import { EntityCatalogHelper, EntityCatalogHelpers, PaginationMonitorFactory } from '@stratosui/store';
+import { STORE_TEST_PROVIDERS, createBasicStoreModule } from '@stratosui/store/testing';
+import { ApplicationServiceMock } from '@test-framework/application-service-helper';
+import { CloudFoundryTestingModule, CF_BASE_TEST_PROVIDERS } from '@test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationService } from '../../../../features/applications/application.service';
 import { ApplicationStateService } from '../../../services/application-state.service';
-import { RunningInstancesComponent } from '../../running-instances/running-instances.component';
 import { CardAppInstancesComponent } from './card-app-instances.component';
-
 describe('CardAppInstancesComponent', () => {
   let component: CardAppInstancesComponent;
   let fixture: ComponentFixture<CardAppInstancesComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        CardAppInstancesComponent,
-        CardStatusComponent,
-        ApplicationStateComponent,
-        ApplicationStateIconComponent,
-        ApplicationStateIconPipe,
-        RunningInstancesComponent,
-      ],
       imports: [
-        CoreModule,
-        CommonModule,
-        NoopAnimationsModule,
-        generateCfStoreModules()
+        CardAppInstancesComponent,
       ],
       providers: [
+        ...CF_BASE_TEST_PROVIDERS,
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          NoopAnimationsModule,
+          CloudFoundryTestingModule,
+          createBasicStoreModule(),
+        ),
+        EntityCatalogHelper,
+        {
+          provide: APP_INITIALIZER,
+          useFactory: (ech: EntityCatalogHelper) => () => EntityCatalogHelpers.SetEntityCatalogHelper(ech),
+          deps: [EntityCatalogHelper],
+          multi: true
+        },
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         ApplicationStateService,
         ConfirmationDialogService,
-        PaginationMonitorFactory
+        ...cfCurrentUserPermissionsService,
+        PaginationMonitorFactory,
+        TailwindSnackBarService,
+        provideZonelessChangeDetection(),
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CardAppInstancesComponent);

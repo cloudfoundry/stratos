@@ -1,5 +1,5 @@
-import {
-  Component,
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component,
   ElementRef,
   EventEmitter,
   Host,
@@ -10,7 +10,7 @@ import {
   Output,
   SkipSelf,
   ViewChild,
-} from '@angular/core';
+ } from '@angular/core';
 import { ControlContainer, FormGroupName } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
@@ -20,25 +20,30 @@ import { safeUnsubscribe } from '../../../core/utils.service';
 @Component({
   selector: 'app-file-input',
   templateUrl: './file-input.component.html',
-  styleUrls: ['./file-input.component.scss']
+  styleUrls: ['./file-input.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FileInputComponent implements OnInit, OnDestroy {
 
-  @ViewChild('inputFile', { static: true }) nativeInputFile: ElementRef;
+  @ViewChild('inputFile', { static: true }) nativeInputFile!: ElementRef;
 
-  @Input() accept: string;
+  @Input() accept!: string;
   @Output() onFileSelect: EventEmitter<File> = new EventEmitter();
   @Output() onFileData: EventEmitter<string> = new EventEmitter();
 
-  @Input() fileFormControlName;
+  @Input() fileFormControlName!: string;
 
   @Input() buttonLabel = '';
 
-  private files: File[];
+  private files!: File[];
 
   public name = '';
 
-  private formGroupControl: FormGroupName;
+  private formGroupControl!: FormGroupName;
   public disabled = false;
   private sub: Subscription;
 
@@ -62,16 +67,16 @@ export class FileInputComponent implements OnInit, OnDestroy {
 
   get fileCount(): number { return this.files && this.files.length || 0; }
 
-  onNativeInputFileSelect($event) {
+  onNativeInputFileSelect($event: Event) {
     const fs = getEventFiles($event);
-    if (fs.length > 0) {
-      this.files = fs;
+    if (fs && fs.length > 0) {
+      this.files = Array.from(fs);
       this.onFileSelect.emit(this.files[0]);
 
       if (!!this.formGroupControl) {
-        this.handleFileData(this.files[0], (value) => this.updateFileState(value));
+        this.handleFileData(this.files[0], (value: string | ArrayBuffer | null) => this.updateFileState(value));
       } else {
-        this.handleFileData(this.files[0], (value) => this.onFileData.emit(value));
+        this.handleFileData(this.files[0], (value: string | ArrayBuffer | null) => this.onFileData.emit(value as string));
       }
       if (this.files.length > 0) {
         this.name = this.files[0].name;
@@ -79,13 +84,13 @@ export class FileInputComponent implements OnInit, OnDestroy {
     }
   }
 
-  selectFile($event) {
+  selectFile($event: Event) {
     this.nativeInputFile.nativeElement.click();
     $event.preventDefault();
     return false;
   }
 
-  handleFileData(file, done) {
+  handleFileData(file: File, done: (value: string | ArrayBuffer | null) => void) {
     const reader = new FileReader();
     reader.onload = () => {
       done(reader.result);

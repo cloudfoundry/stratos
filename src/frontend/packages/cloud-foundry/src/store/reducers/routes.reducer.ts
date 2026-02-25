@@ -5,7 +5,7 @@ import { ASSIGN_ROUTE_SUCCESS, AssignRouteToApplication } from '../../actions/ap
 import { DeleteRoute, RouteEvents, UnmapRoute } from '../../actions/route.actions';
 import { IAppSummary, IRoute } from '../../cf-api.types';
 
-export function routeReducer(state: IRequestEntityTypeState<APIResource<IRoute>>, action: APISuccessOrFailedAction) {
+export function routeReducer(state: IRequestEntityTypeState<APIResource<IRoute<string>>>, action: APISuccessOrFailedAction): IRequestEntityTypeState<APIResource<IRoute<string>>> {
   switch (action.type) {
     case ASSIGN_ROUTE_SUCCESS:
       const mapRouteAction = action.apiAction as AssignRouteToApplication;
@@ -14,7 +14,7 @@ export function routeReducer(state: IRequestEntityTypeState<APIResource<IRoute>>
         ...state,
         [mapRouteAction.routeGuid]: {
           ...addAppRoute,
-          entity: addAppFromRoute(addAppRoute.entity, mapRouteAction.guid),
+          entity: addAppFromRoute(addAppRoute.entity, mapRouteAction.guid) as IRoute<string>,
         }
       };
     case RouteEvents.UNMAP_ROUTE_SUCCESS:
@@ -31,9 +31,9 @@ export function routeReducer(state: IRequestEntityTypeState<APIResource<IRoute>>
       return state;
   }
 }
-export function updateAppSummaryRoutesReducer(state: IRequestEntityTypeState<IAppSummary>, action: APISuccessOrFailedAction) {
-  let currentState;
-  let routeGuid;
+export function updateAppSummaryRoutesReducer(state: IRequestEntityTypeState<IAppSummary>, action: APISuccessOrFailedAction): IRequestEntityTypeState<IAppSummary> {
+  let currentState: IAppSummary;
+  let routeGuid: string;
   switch (action.type) {
     case RouteEvents.UNMAP_ROUTE_SUCCESS:
       const unmapRouteAction = action.apiAction as UnmapRoute;
@@ -46,7 +46,7 @@ export function updateAppSummaryRoutesReducer(state: IRequestEntityTypeState<IAp
       if (deleteAction.appGuids) {
         // Mutate state for each App
         let mutatedState = state;
-        deleteAction.appGuids.forEach(appGuid => {
+        deleteAction.appGuids.forEach((appGuid: any) => {
           currentState = state[appGuid];
           mutatedState = newState(currentState, appGuid, routeGuid, mutatedState);
         });
@@ -80,7 +80,7 @@ function newState(
   };
 }
 
-function addAppFromRoute(entity: IRoute, appGuid: string) {
+function addAppFromRoute(entity: IRoute<string>, appGuid: string): IRoute<string> {
   const oldApps = entity.apps ? entity.apps : [];
   return {
     ...entity,
@@ -88,7 +88,7 @@ function addAppFromRoute(entity: IRoute, appGuid: string) {
   };
 }
 
-function removeAppFromRoute(entity: any, appGuid: string) {
+function removeAppFromRoute(entity: IRoute<string>, appGuid: string): IRoute<string> {
   return entity.apps ? {
     ...entity,
     apps: entity.apps.filter((app: string) => app !== appGuid)

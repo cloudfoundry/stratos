@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal, computed, Injector, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { StratosStatus, GeneralEntityAppState } from '@stratosui/store';
-import { BehaviorSubject, combineLatest, Observable, ReplaySubject } from 'rxjs';
+import { toSignal, toObservable } from '@angular/core/rxjs-interop';
+import { combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, publishReplay, refCount, startWith } from 'rxjs/operators';
 
 export type GlobalEventTypes = 'warning' | 'error' | 'process' | 'complete';
@@ -65,8 +66,8 @@ export class GlobalEventService {
 
   private dataCache = new Map<any, Map<any, IGlobalEvent[]>>();
 
-  private readEvents = new Map<string, IGlobalEvent>();
-  private readEventsSubject = new BehaviorSubject<Map<string, IGlobalEvent>>(this.readEvents);
+  private _readEvents = signal<Map<string, IGlobalEvent>>(new Map<string, IGlobalEvent>());
+  public readEvents = this._readEvents.asReadonly();
 
   public events$: Observable<IGlobalEvent[]>;
   public priorityType$: Observable<GlobalEventTypes>;
@@ -78,12 +79,15 @@ export class GlobalEventService {
   }
 
   public updateEventReadState(event: IGlobalEvent, read: boolean) {
-    if (read && !this.readEvents.has(event.key)) {
-      this.readEvents.set(event.key, event);
-    } else if (!read && this.readEvents.has(event.key)) {
-      this.readEvents.delete(event.key);
-    }
-    this.readEventsSubject.next(this.readEvents);
+    this._readEvents.update(events => {
+      const newEvents = new Map(events);
+      if (read && !newEvents.has(event.key)) {
+        newEvents.set(event.key, event);
+      } else if (!read && newEvents.has(event.key)) {
+        newEvents.delete(event.key);
+      }
+      return newEvents;
+    });
   }
 
   public filterEvents(eventType: GlobalEventTypes) {
@@ -220,10 +224,13 @@ export class GlobalEventService {
     );
   }
 
-  constructor(private store: Store<GeneralEntityAppState>) {
+  private store = inject(Store<GeneralEntityAppState>);
+  private injector = inject(Injector);
+
+  constructor() {
     const eventsAndPriority$ = combineLatest([
       this.getEventsAndPriorityType(),
-      this.readEventsSubject.asObservable()
+      toObservable(this._readEvents, { injector: this.injector })
     ]).pipe(
       map(([[events, types], readEvents]) => {
         // Apply read state. We can't do this in cache as list is recreated on state change
@@ -234,7 +241,11 @@ export class GlobalEventService {
         readEvents.forEach((a, key) => {
           const oEvent = events.find(event => event.key === key);
           if (!oEvent) {
-            this.readEvents.delete(key);
+            this._readEvents.update(events => {
+              const newEvents = new Map(events);
+              newEvents.delete(key);
+              return newEvents;
+            });
           }
         });
         return [events, types] as [IGlobalEvent[], GlobalEventTypes];

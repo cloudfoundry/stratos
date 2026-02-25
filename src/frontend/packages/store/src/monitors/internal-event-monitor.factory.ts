@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from '@angular/core';
+import { inject, Injectable, NgZone } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, publishReplay, refCount } from 'rxjs/operators';
@@ -11,16 +11,14 @@ import { InternalAppState } from '../app-state';
 @Injectable()
 export class InternalEventMonitorFactory {
 
-  private events$: Observable<InternalEventsState>;
+  private store = inject(Store<InternalAppState>);
+  private ngZone = inject(NgZone);
 
-  constructor(store: Store<InternalAppState>, private ngZone: NgZone) {
-
-    this.events$ = store.select(internalEventStateSelector).pipe(
-      distinctUntilChanged(),
-      publishReplay(1),
-      refCount(),
-    );
-  }
+  private events$: Observable<InternalEventsState> = this.store.select(internalEventStateSelector).pipe(
+    distinctUntilChanged(),
+    publishReplay(1),
+    refCount(),
+  );
 
   getMonitor(eventType: string, subjectIds?: string[] | Observable<string[]>) {
     return new InternalEventMonitor(this.events$, eventType, subjectIds, this.ngZone);

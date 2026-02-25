@@ -1,8 +1,9 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { ValuesPipe } from '../../../../../../../../core/src/shared/pipes/values.pipe';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { APIResource } from '@stratosui/store/types/api.types';
 import { CfEvent } from '../../../../../../cf-api.types';
 import { EventMetadataComponent } from '../event-metadata/event-metadata.component';
 import { TableCellEventDetailComponent } from './table-cell-event-detail.component';
@@ -11,15 +12,13 @@ describe('TableCellEventDetailComponent', () => {
   let component: TableCellEventDetailComponent;
   let fixture: ComponentFixture<TableCellEventDetailComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [TableCellEventDetailComponent, ValuesPipe, EventMetadataComponent],
-      imports: [CoreModule]
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [TableCellEventDetailComponent, ValuesPipe, EventMetadataComponent],
+      providers: [provideZonelessChangeDetection()],
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent<TableCellEventDetailComponent>(TableCellEventDetailComponent);
     component = fixture.componentInstance;
     component.row = {

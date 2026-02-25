@@ -1,30 +1,37 @@
-import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
-import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
-import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
-import { EntityService } from '../../../../../store/src/entity-service';
-import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
-import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
-import { CFAppCLIInfoContext } from '../../../shared/components/cli-info/cli-info.component';
-import { ApplicationService } from '../application.service';
+import { IHeaderBreadcrumb, PageHeaderComponent } from '@stratosui/core';
+import { EndpointModel, EntityService, getFullEndpointApiUrl, stratosEntityCatalog } from '@stratosui/store';
+import { ApplicationService } from '@stratosui/cloud-foundry';
+import { CliCommandComponent } from '../../../shared/components/cli-info/cli-command/cli-command.component';
+import { CFAppCLIInfoContext, CliInfoComponent } from '../../../shared/components/cli-info/cli-info.component';
 
 @Component({
   selector: 'app-cli-info-application',
   templateUrl: './cli-info-application.component.html',
   styleUrls: ['./cli-info-application.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    PageHeaderComponent,
+    CliInfoComponent,
+    CliCommandComponent
+  ]
 })
 export class CliInfoApplicationComponent implements OnInit {
 
-  cfEndpointEntityService: EntityService<EndpointModel>;
-  public previousUrl: string;
-  public previousQueryParams: {
+  cfEndpointEntityService!: EntityService<EndpointModel>;
+  public previousUrl!: string;
+  public previousQueryParams!: {
     [key: string]: string;
   };
 
-  public context$: Observable<CFAppCLIInfoContext>;
-  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+  public context$!: Observable<CFAppCLIInfoContext>;
+  public breadcrumbs$!: Observable<IHeaderBreadcrumb[]>;
 
   constructor(
     private applicationService: ApplicationService,

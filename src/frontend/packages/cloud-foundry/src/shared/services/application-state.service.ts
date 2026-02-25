@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { StratosStatus, StratosStatusMetadata } from '../../../../store/src/types/shared.types';
+import { StratosStatus, StratosStatusMetadata } from '@stratosui/store';
 import { AppStat } from '../../store/types/app-metadata.types';
 
 export interface ApplicationStateData extends StratosStatusMetadata {
@@ -8,7 +8,9 @@ export interface ApplicationStateData extends StratosStatusMetadata {
     [key: string]: boolean
   };
 }
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ApplicationStateService {
 
   /**
@@ -158,12 +160,12 @@ export class ApplicationStateService {
    * @description Translates string list of action names into a map for easier checking if an action is supported
    * @param obj - object to traverse to replace 'actions' keys with maps
    */
-  private mapActions(obj: any) {
+  private mapActions(obj: { [key: string]: any }): void {
     for (const k of Object.keys(obj)) {
       const v = obj[k];
       if (k === 'actions') {
-        const map = {};
-        v.split(',').forEach(a => {
+        const map: { [key: string]: boolean } = {};
+        v.split(',').forEach((a: string) => {
           map[a.trim()] = true;
         });
         obj.actions = map;
@@ -187,17 +189,17 @@ export class ApplicationStateService {
    * @param summary - the application summary metadata (either from summary or entity)
    * @param appInstances - the application instances metadata (from the app stats API call)
    */
-  get(summary: any, appInstances: AppStat[]): ApplicationStateData {
-    const appState: string = summary ? summary.state : 'UNKNOWN';
+  get(summary: { state?: string, instances?: number, package_state?: string, package_updated_at?: string } | null, appInstances: AppStat[] | null): ApplicationStateData {
+    const appState: string = summary ? (summary.state || 'UNKNOWN') : 'UNKNOWN';
     const pkgState = this.getPackageState(appState, summary);
-    const wildcard = this.stateMetadata['?'];
+    const wildcard: any = (this.stateMetadata as any)['?'];
 
     // App state wildcard match, just match on package state
     if (wildcard && wildcard[pkgState]) {
       return wildcard[pkgState];
     }
 
-    const appStateMatch = this.stateMetadata[appState];
+    const appStateMatch: any = (this.stateMetadata as any)[appState];
     if (appStateMatch) {
       if (appStateMatch[pkgState]) {
         return appStateMatch[pkgState];
@@ -243,7 +245,7 @@ export class ApplicationStateService {
     };
   }
 
-  private checkSpecialCases(pkgState: string, counts) {
+  private checkSpecialCases(pkgState: string, counts: { running: number, crashed: number, flapping: number, starting: number, okay: number, expected: number }) {
     // Special case: App instances only in running and starting state
     if (counts.starting > 0 && counts.running > 0 && counts.okay === counts.expected) {
       return pkgState + '(N,0,0,N)';
@@ -260,10 +262,10 @@ export class ApplicationStateService {
    * @param appState - the application state
    * @param summary - the application summary
    */
-  private getPackageState(appState: string, summary: any): string {
+  private getPackageState(appState: string, summary: { package_state?: string, package_updated_at?: string } | null): string {
     let pkgState = (summary ? summary.package_state : '') || '*NONE*';
     // Tweak package state based on extra info in package_updated_at if needed (for now, only if stopped)
-    if (appState === 'STOPPED' && pkgState === 'PENDING') {
+    if (appState === 'STOPPED' && pkgState === 'PENDING' && summary) {
       pkgState = summary.package_updated_at && summary.package_updated_at.length > 0 ? 'PENDING' : '*NONE*';
     }
     return pkgState;
@@ -275,8 +277,15 @@ export class ApplicationStateService {
    * @param appInstances - the application instances metadata (from the app stats API call)
    * @returns Object with instance count metadata
    */
-  private getCounts(summary, appInstances: AppStat[]) {
-    const counts: any = {};
+  private getCounts(summary: { instances?: number } | null, appInstances: AppStat[] | null): { running: number, starting: number, okay: number, expected: number, crashed: number, flapping: number } {
+    const counts: { running: number, starting: number, okay: number, expected: number, crashed: number, flapping: number } = {
+      running: 0,
+      starting: 0,
+      okay: 0,
+      expected: 0,
+      crashed: 0,
+      flapping: 0
+    };
     // Need to check based on additional state
     // Note that the app summary returned when we are getting all apps does not report running_instances
     // NOTE: running_instances does not mean that the instance states ar "RUNNING"
@@ -285,7 +294,7 @@ export class ApplicationStateService {
     counts.okay = counts.running + counts.starting;
     // Note: We may have less app instance metadata than indicated by the app's desired instance count
     // So base decisions on the app instance metadata and ignore the app's count
-    counts.expected = appInstances.length;
+    counts.expected = appInstances ? appInstances.length : 0;
 
     // If we know how many aer running and this is the same as the total # instances then
     // this implies that #crashed and #flapping are 0, so we can skip needing to use app instance metadata
@@ -310,13 +319,13 @@ export class ApplicationStateService {
    * @param appInstances - the application instances metadata (from the app stats API call)
    * @param instanceState - the instance state to use when filtering the app instance metadata
    */
-  private getCount(value: number, appInstances: AppStat[], instanceState: string): number {
+  private getCount(value: number | undefined, appInstances: AppStat[] | null, instanceState: string): number {
     // Use a value if one available
     if (value) {
       return value;
     } else if (appInstances) {
       // Calculate from app instance metadata if available
-      return (Object.keys(appInstances).filter(k => appInstances[k].state === instanceState)).length;
+      return (Object.keys(appInstances).filter((k: string) => (appInstances as any)[k].state === instanceState)).length;
     } else {
       // No value given and no instance data available, so return -1 to represent unknown
       return -1;
@@ -342,13 +351,13 @@ export class ApplicationStateService {
    * @param summary - the application summary metadata (either from summary or entity)
    * @param appInstances - the application instances metadata (from the app stats API call)
    */
-  getInstanceState(summary: any, appInstances: AppStat[]): ApplicationStateData {
-    const appState: string = summary ? summary.state : 'UNKNOWN';
+  getInstanceState(summary: { state?: string, instances?: number } | null, appInstances: AppStat[] | null): ApplicationStateData {
+    const appState: string = summary ? (summary.state || 'UNKNOWN') : 'UNKNOWN';
     if (appState !== 'STARTED') {
       return this.getStateForIndicator(StratosStatus.TENTATIVE);
     } else {
       const running = this.getCount(undefined, appInstances, 'RUNNING');
-      if (running === summary.instances) {
+      if (summary && running === summary.instances) {
         return this.getStateForIndicator(StratosStatus.OK);
       } else if (running > 0) {
         return this.getStateForIndicator(StratosStatus.WARNING);

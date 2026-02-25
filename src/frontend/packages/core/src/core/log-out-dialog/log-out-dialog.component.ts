@@ -1,24 +1,33 @@
-import { Component, Inject, OnDestroy, OnInit, Optional } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, Optional } from '@angular/core';
+
+import { MAT_DIALOG_DATA } from '../../shared/services/tailwind-material-replacements';
+import { TailwindDialogRef } from '../../shared/services/tailwind-dialog.service';
 import { Router } from '@angular/router';
 import { interval, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { AppProgressBarComponent } from '../../shared/components/progress-bar/app-progress-bar.component';
 
 @Component({
   selector: 'app-log-out-dialog',
   templateUrl: './log-out-dialog.component.html',
-  styleUrls: ['./log-out-dialog.component.scss']
+  styleUrls: ['./log-out-dialog.component.scss'],
+  standalone: true,
+  imports: [
+    AppProgressBarComponent
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LogOutDialogComponent implements OnInit, OnDestroy {
   constructor(
-    public dialogRef: MatDialogRef<LogOutDialogComponent>,
+    @Inject('TailwindDialogRef') public dialogRef: TailwindDialogRef<LogOutDialogComponent>,
     @Optional() @Inject(MAT_DIALOG_DATA) public data: any,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) { }
 
-  private autoLogout: Subscription;
-  private countDown: number;
-  private countdownTotal: number;
+  private autoLogout!: Subscription;
+  private countDown!: number;
+  private countdownTotal!: number;
   public percentage = 0;
 
   ngOnInit() {
@@ -35,6 +44,7 @@ export class LogOutDialogComponent implements OnInit, OnDestroy {
             this.dialogRef.close(false);
           } else {
             this.percentage = ((this.countdownTotal - this.countDown) / this.countdownTotal) * 100;
+            this.cdr.markForCheck();
           }
         })
       ).subscribe();

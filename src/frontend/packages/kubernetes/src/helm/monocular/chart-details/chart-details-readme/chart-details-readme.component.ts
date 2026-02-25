@@ -1,15 +1,23 @@
-import { Component, Input } from '@angular/core';
+import { AsyncPipe } from '@angular/common';
+import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { marked } from 'marked';
 import { Observable, of as observableOf } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
 import { ChartVersion } from '../../shared/models/chart-version';
 import { ChartsService } from '../../shared/services/charts.service';
+import { LoaderComponent } from '../../loader/loader.component';
 
 @Component({
   selector: 'app-chart-details-readme',
   templateUrl: './chart-details-readme.component.html',
-  styleUrls: ['./chart-details-readme.component.scss']
+  styleUrls: ['./chart-details-readme.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    AsyncPipe,
+    LoaderComponent
+  ]
 })
 export class ChartDetailsReadmeComponent {
 
@@ -20,13 +28,14 @@ export class ChartDetailsReadmeComponent {
   }
 
   public loading = false;
-  public readmeContent$: Observable<string>;
+  public readmeContent$!: Observable<string>;
   private renderer = new marked.Renderer();
-  private loadingDelay: any;
+  private loadingDelay: ReturnType<typeof setTimeout>;
+  private chartsService = inject(ChartsService);
 
-  constructor(private chartsService: ChartsService) {
-    this.renderer.link = (href, title, text) => `<a target="_blank" title="${title}" href="${href}">${text}</a>`;
-    this.renderer.code = (text: string) => `<code>${text}</code>`;
+  constructor() {
+    this.renderer.link = ({ href, title, text }) => `<a target="_blank" title="${title}" href="${href}">${text}</a>`;
+    this.renderer.code = ({ text, lang, escaped }: { text: string; lang?: string; escaped?: boolean }) => `<code>${text}</code>`;
     this.loadingDelay = setTimeout(() => this.loading = true, 100);
   }
 
@@ -36,9 +45,10 @@ export class ChartDetailsReadmeComponent {
       map(resp => {
         clearTimeout(this.loadingDelay);
         this.loading = false;
-        return marked(resp, {
+        const result = marked(resp, {
           renderer: this.renderer
         });
+        return typeof result === 'string' ? result : '';
       }),
       catchError((error) => {
         this.loading = false;

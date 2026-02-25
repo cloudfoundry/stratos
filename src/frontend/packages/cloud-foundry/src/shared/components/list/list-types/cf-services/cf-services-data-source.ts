@@ -1,20 +1,10 @@
 import { Store } from '@ngrx/store';
-import { getRowMetadata } from '@stratosui/store';
-import { getDataFunctionList } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/local-filtering-sorting';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { serviceEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
-import {
-  createEntityRelationPaginationKey,
-} from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import {
-  ListDataSource,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
-import { endpointEntityType } from '../../../../../../../store/src/helpers/stratos-entity-factory';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
+import { getDataFunctionList, IListConfig, ListDataSource } from '@stratosui/core';
+import { APIResource, endpointEntityType, entityCatalog, getRowMetadata, PaginationEntityState } from '@stratosui/store';
+import { CFAppState } from '../../../../../cf-app-state';
+import { serviceEntityType } from '../../../../../cf-entity-types';
+import { createEntityRelationPaginationKey } from '../../../../../entity-relations/entity-relations.types';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 
@@ -45,7 +35,23 @@ export class CfServicesDataSource extends ListDataSource<APIResource> {
           const labels = filterByLabel(entities, paginationState)
           const tags = filterByTags(entities, paginationState)
 
-          return [...labels, ...tags]
+          // Create a Set to eliminate duplicates based on metadata.guid
+          const uniqueEntitiesMap = new Map<string, APIResource>();
+
+          // Add label matches
+          labels.forEach(entity => {
+            const guid = entity.metadata.guid;
+            uniqueEntitiesMap.set(guid, entity);
+          });
+
+          // Add tag matches (will not duplicate if already in map)
+          tags.forEach(entity => {
+            const guid = entity.metadata.guid;
+            uniqueEntitiesMap.set(guid, entity);
+          });
+
+          // Return deduplicated array maintaining original entity references
+          return Array.from(uniqueEntitiesMap.values())
         },
         (entities: APIResource[], paginationState: PaginationEntityState) => {
           const cfGuid = paginationState.clientPagination.filter.items.cf;

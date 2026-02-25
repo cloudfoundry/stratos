@@ -1,4 +1,4 @@
-@import '../../../../sass/mixins';
+@use '../../../../sass/mixins';
 .page-side-nav {
   $item-header-padding: 20px;
   $border-color: rgba(0, 0, 0, .1);
@@ -17,6 +17,8 @@
     font-size: 18px;
     height: 18px;
     width: 18px;
+    margin-right: 10px;
+    flex-shrink: 0;
   }
   &__item {
     align-items: center;
@@ -24,7 +26,7 @@
     cursor: pointer;
     display: flex;
     font-size: 14px;
-    letter-spacing: .01em;
+    letter-spacing: 0.01em;
     line-height: 18px;
     outline: 0;
     padding: 10px;
@@ -41,7 +43,7 @@
     cursor: default;
     display: flex;
     font-size: 12px;
-    letter-spacing: .01em;
+    letter-spacing: 0.01em;
     line-height: 18px;
     outline: 0;
     padding: 10px;
@@ -62,7 +64,7 @@
     border-bottom: 1px solid $border-color;
     font-weight: bold;
     height: 48px;
-    opacity: .6;
+    opacity: 0.6;
     overflow: hidden;
     padding: 0 $item-header-padding;
     position: relative;

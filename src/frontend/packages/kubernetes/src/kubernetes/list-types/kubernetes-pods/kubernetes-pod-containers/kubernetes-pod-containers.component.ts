@@ -1,6 +1,7 @@
-import { TitleCasePipe } from '@angular/common';
-import { Component, Input } from '@angular/core';
-import moment from 'moment';
+import { AsyncPipe, TitleCasePipe } from '@angular/common';
+import {Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CustomTooltipDirective } from '@stratosui/core';
+import { isBefore, isAfter } from 'date-fns';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
@@ -21,7 +22,10 @@ export interface ContainerForTable {
   styleUrls: ['./kubernetes-pod-containers.component.scss'],
   providers: [
     TitleCasePipe
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [AsyncPipe, CustomTooltipDirective]
 })
 export class KubernetesPodContainersComponent extends CardCell<KubernetesPod> {
 
@@ -53,13 +57,7 @@ export class KubernetesPodContainersComponent extends CardCell<KubernetesPod> {
   }
   get row(): KubernetesPod {
     return super.row;
-  }
-
-  constructor(
-    private titleCase: TitleCasePipe,
-  ) {
-    super();
-  }
+  }  private titleCase = inject(TitleCasePipe);
 
   private getState(containerStatus: ContainerStatus) {
     if (!containerStatus.state) {
@@ -70,11 +68,11 @@ export class KubernetesPodContainersComponent extends CardCell<KubernetesPod> {
       return 'Unknown';
     }
     const sorted = entries.sort((a, b) => {
-      const aStarted = moment(a[1].startedAt);
-      const bStarted = moment(b[1].startedAt);
+      const aStarted = new Date(a[1].startedAt);
+      const bStarted = new Date(b[1].startedAt);
 
-      return aStarted.isBefore(bStarted) ? -1 :
-        aStarted.isAfter(bStarted) ? 1 : 0;
+      return isBefore(aStarted, bStarted) ? -1 :
+        isAfter(aStarted, bStarted) ? 1 : 0;
 
     });
     return this.containerStatusToString(sorted[0][0], sorted[0][1]);

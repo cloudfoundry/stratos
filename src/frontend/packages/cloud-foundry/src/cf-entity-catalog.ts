@@ -1,9 +1,9 @@
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
-} from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { APIResource } from '../../store/src/types/api.types';
-import { IFavoriteMetadata } from '../../store/src/types/user-favorites.types';
+  APIResource,
+  IFavoriteMetadata
+} from '@stratosui/store';
 import {
   IService,
   IServiceBinding,
@@ -63,156 +63,156 @@ import { CfUser } from './store/types/cf-user.types';
  * This can be used to access functionality exposed by each specific type, such as get, update, delete, etc
  */
 export class CfEntityCatalog {
-  public cfEndpoint: StratosCatalogEndpointEntity;
+  public cfEndpoint!: StratosCatalogEndpointEntity;
 
-  public quotaDefinition: StratosBaseCatalogEntity<
+  public quotaDefinition!: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     APIResource<IOrgQuotaDefinition>,
     QuotaDefinitionActionBuilder
   >;
 
-  public appEnvVar: StratosBaseCatalogEntity<
+  public appEnvVar!: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     APIResource,
     AppEnvVarActionBuilders
   >;
 
-  public appSummary: StratosBaseCatalogEntity<
+  public appSummary!: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     IAppSummary,
     AppSummaryActionBuilders
   >;
 
-  public spaceQuota: StratosBaseCatalogEntity<
+  public spaceQuota!: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     APIResource<ISpaceQuotaDefinition>,
     SpaceQuotaDefinitionActionBuilders
   >;
 
-  public privateDomain: StratosBaseCatalogEntity<
+  public privateDomain!: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     APIResource<IPrivateDomain>
   >;
 
-  public cfInfo: StratosBaseCatalogEntity<
+  public cfInfo!: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     APIResource<ICfV2Info>,
     CfInfoDefinitionActionBuilders
   >;
 
-  public appStats: StratosBaseCatalogEntity<
+  public appStats!: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     AppStat,
     AppStatsActionBuilders
   >;
 
-  public buildPack: StratosBaseCatalogEntity<
+  public buildPack!: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     APIResource<IBuildpack>,
     BuildpackActionBuilders
   >;
 
-  public serviceBroker: StratosBaseCatalogEntity<
+  public serviceBroker!: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     APIResource<IServiceBroker>,
     ServiceBrokerActionBuilders
   >;
 
-  public servicePlanVisibility: StratosBaseCatalogEntity<
+  public servicePlanVisibility!: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     APIResource<IServicePlanVisibility>,
     ServicePlanVisibilityActionBuilders
   >;
 
-  public securityGroup: StratosBaseCatalogEntity<
+  public securityGroup!: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     APIResource<ISecurityGroup>,
     SecurityGroupBuilders
   >;
 
-  public serviceBinding: StratosBaseCatalogEntity<
+  public serviceBinding!: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     APIResource<IServiceBinding>,
     ServiceBindingActionBuilders
   >;
 
-  public service: StratosBaseCatalogEntity<
+  public service!: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     APIResource<IService>,
     ServiceActionBuilders
   >;
 
-  public servicePlan: StratosBaseCatalogEntity<
+  public servicePlan!: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     APIResource<IServicePlan>,
     ServicePlanActionBuilders
   >;
 
-  public serviceInstance: StratosBaseCatalogEntity<
+  public serviceInstance!: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     APIResource<IServiceInstance>,
     ServiceInstanceActionBuilders
   >;
 
-  public user: StratosBaseCatalogEntity<
+  public user!: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     APIResource<CfUser>,
     UserActionBuilders
   >;
 
-  public domain: StratosBaseCatalogEntity<
+  public domain!: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     APIResource<IDomain>,
     DomainActionBuilders
   >;
 
-  public event: StratosBaseCatalogEntity<
+  public event!: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     APIResource<CfEvent>,
     CfEventActionBuilders
   >;
 
-  public route: StratosBaseCatalogEntity<
+  public route!: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     APIResource<IRoute>,
     RoutesActionBuilders
   >;
 
-  public stack: StratosBaseCatalogEntity<
+  public stack!: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     APIResource<IStack>,
     StackActionBuilders
   >;
 
-  public featureFlag: StratosBaseCatalogEntity<
+  public featureFlag!: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     IFeatureFlag,
     FeatureFlagActionBuilders
   >;
 
-  public application: StratosBaseCatalogEntity<
+  public application!: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     APIResource<IApp>,
     ApplicationActionBuilders
   >;
 
-  public space: StratosBaseCatalogEntity<
+  public space!: StratosBaseCatalogEntity<
     ISpaceFavMetadata,
     APIResource<ISpace>,
     SpaceActionBuilders
   >;
 
-  public org: StratosBaseCatalogEntity<
+  public org!: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     APIResource<IOrganization>,
     OrganizationActionBuilders
   >;
 
-  public metric: StratosBaseCatalogEntity<
+  public metric!: StratosBaseCatalogEntity<
     IFavoriteMetadata
   >;
 
-  public userProvidedService: StratosBaseCatalogEntity<
+  public userProvidedService!: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     APIResource<IUserProvidedServiceInstance>,
     UserProvidedServiceActionBuilder

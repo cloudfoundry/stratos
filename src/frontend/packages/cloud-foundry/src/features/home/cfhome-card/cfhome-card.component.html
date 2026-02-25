@@ -2,34 +2,44 @@
   <app-tile-group class="cf-home-card__plain-tiles">
     <app-tile>
       <app-card-number-metric mode="plain" [link]="appLink" icon="apps" label="Applications" labelSingular="Application"
-        value="{{ (appCount$ | async) }}"></app-card-number-metric>
+      value="{{ (appCount$ | async) }}"></app-card-number-metric>
     </app-tile>
     <app-tile>
       <app-card-number-metric mode="plain" link="/cloud-foundry/{{guid}}/organizations" iconFont="stratos-icons"
-        icon="organization" label="Orgs" labelSingular="Org" value="{{ (orgCount$ | async) }}"></app-card-number-metric>
+      icon="organization" label="Orgs" labelSingular="Org" value="{{ (orgCount$ | async) }}"></app-card-number-metric>
     </app-tile>
-    <app-tile *ngIf="layout.x === 1">
-      <app-card-number-metric mode="plain" link="/cloud-foundry/{{guid}}/routes" iconFont="stratos-icons" icon="route"
+    @if (layout.x === 1) {
+      <app-tile>
+        <app-card-number-metric mode="plain" link="/cloud-foundry/{{guid}}/routes" iconFont="stratos-icons" icon="route"
         label="Routes" value="{{ (routeCount$ | async) }}"></app-card-number-metric>
-    </app-tile>
+      </app-tile>
+    }
   </app-tile-group>
-  <app-tile-group>
+  <app-tile-group class="tile-group-1-cols">
     <app-tile>
-      <app-card-cf-recent-apps *ngIf="cardLoaded && recentAppsRows > 0" [hideWhenEmpty]="true" [noStats]="true"
-        dateMode="subtle" [showDate]="layout.x === 1" [maxRows]="recentAppsRows" mode="plain" [endpoint]="guid">
-      </app-card-cf-recent-apps>
-      <app-card-cf-recent-apps *ngIf="!cardLoaded && recentAppsRows > 0" [placeholderMode]="true"
+      @if (cardLoaded && recentAppsRows > 0) {
+        <app-card-cf-recent-apps [hideWhenEmpty]="true" [noStats]="true"
+          dateMode="subtle" [showDate]="layout.x === 1" [maxRows]="recentAppsRows" mode="plain" [endpoint]="guid">
+        </app-card-cf-recent-apps>
+      }
+      @if (!cardLoaded && recentAppsRows > 0) {
+        <app-card-cf-recent-apps [placeholderMode]="true"
         [maxRows]="recentAppsRows" mode="plain"></app-card-cf-recent-apps>
+      }
 
-      <div *ngIf="(hasNoApps$ | async)" class="cf-home-card__no-apps">
-        <mat-icon>apps</mat-icon>
-        <div class="cf-home-card__no-apps-title">You don't have any applications</div>
-        <div *ngIf="showDeployAppTiles">
-          <div class="cf-home-card__no-apps-deploy">Get started by deploying an Application from ...</div>
-          <app-tile-selector [options]="tileSelectorConfig$ | async" [compactTiles]="true"
-            (selection)="selectedTile = $event"></app-tile-selector>
+      @if ((hasNoApps$ | async)) {
+        <div class="cf-home-card__no-apps">
+          <span class="material-icons">apps</span>
+          <div class="cf-home-card__no-apps-title">You don't have any applications</div>
+          @if (showDeployAppTiles) {
+            <div>
+              <div class="cf-home-card__no-apps-deploy">Get started by deploying an Application from ...</div>
+              <app-tile-selector [options]="tileSelectorConfig$ | async" [compactTiles]="true"
+              (selection)="selectedTile = $event"></app-tile-selector>
+            </div>
+          }
         </div>
-      </div>
+      }
     </app-tile>
   </app-tile-group>
 </app-tile-grid>

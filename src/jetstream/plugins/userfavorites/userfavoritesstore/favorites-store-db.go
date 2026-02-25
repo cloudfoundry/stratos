@@ -86,9 +86,21 @@ func (p *FavoritesDBStore) Delete(userGUID string, guid string) error {
 
 // SetMetadata will set the metadata for a User Favorite from the datastore
 func (p *FavoritesDBStore) SetMetadata(userGUID string, guid string, metadata string) error {
-	if _, err := p.db.Exec(setMetadata, metadata, userGUID, guid); err != nil {
+	result, err := p.db.Exec(setMetadata, metadata, userGUID, guid)
+	if err != nil {
 		return fmt.Errorf("Unable to set metadata on User Favorite record: %v", err)
 	}
+
+	// Check if any rows were actually updated
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("Unable to check rows affected: %v", err)
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("Favorite not found: user_guid=%s, guid=%s", userGUID, guid)
+	}
+
 	return nil
 }
 

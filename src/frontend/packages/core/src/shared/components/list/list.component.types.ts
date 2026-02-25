@@ -1,6 +1,5 @@
-import { Type } from '@angular/core';
+import { Type, WritableSignal } from '@angular/core';
 import { ActionState, defaultClientPaginationPageSize, ListView } from '@stratosui/store';
-import moment from 'moment';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, startWith, switchMap } from 'rxjs/operators';
 
@@ -9,7 +8,10 @@ import { ListDataSource } from './data-sources-controllers/list-data-source';
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
 import { CardTypes } from './list-cards/card/card.component';
 import { ITableColumn, ITableText } from './list-table/table.types';
-import { CardCell } from './list.types';
+import { CardCell, TableCellCustom } from './list.types';
+
+// Re-export for external use
+export { TableCellCustom };
 
 export enum ListViewTypes {
   CARD_ONLY = 'cardOnly',
@@ -111,7 +113,7 @@ export interface IListConfig<T> {
   /**
    * Custom time window validation for metrics range selector
    */
-  customTimeValidation?: (start: moment.Moment, end: moment.Moment) => string;
+  customTimeValidation?: (start: Date, end: Date) => string;
   /**
    * Custom time polling interval. Falsy for disabled.
    */
@@ -132,7 +134,11 @@ export interface IListMultiFilterConfig {
   hideAllOption?: boolean;
   list$: Observable<IListMultiFilterConfigItem[]>;
   loading$: Observable<boolean>;
-  select: BehaviorSubject<any>;
+  // Phase 3: Updated to support both BehaviorSubject and Signal with compatibility methods
+  select: BehaviorSubject<any> | (WritableSignal<any> & {
+    next: (value: any) => void;
+    asObservable: () => Observable<any>;
+  });
   autoSelectFirst?: boolean;
 }
 
@@ -156,9 +162,9 @@ export class ListConfig<T, A = T> implements IListConfig<T> {
   isLocal = false;
   pageSizeOptions = defaultPaginationPageSizeOptionsCards;
   viewType = ListViewTypes.BOTH;
-  text: ITableText = null;
+  text: ITableText | null = null;
   enableTextFilter = false;
-  cardComponent = null;
+  cardComponent: any | null = null;
   defaultView = 'table' as ListView;
   allowSelection = false;
   getGlobalActions = (): IGlobalListAction<T>[] => null;
@@ -253,16 +259,15 @@ export class MultiFilterManager<T> {
     );
   }
 
-  public applyValue(multiFilters: {}) {
+  public applyValue(multiFilters: Record<string, any>): void {
     this.selectItem(multiFilters[this.multiFilterConfig.key]);
-
   }
 
-  public hasValue(multiFilters: {}): boolean {
+  public hasValue(multiFilters: Record<string, any>): boolean {
     return !!multiFilters[this.multiFilterConfig.key];
   }
 
-  public selectItem(itemValue: string) {
+  public selectItem(itemValue: string): void {
     this.multiFilterConfig.loading$.pipe(
       filter(ready => !ready),
       switchMap(() => this.filterItems$),
@@ -271,7 +276,11 @@ export class MultiFilterManager<T> {
       // Ensure we actually have the item. Could be from storage and invalid
       if (itemValue === undefined || items.find(i => i.value === itemValue)) {
         this.value = itemValue;
-        this.multiFilterConfig.select.next(itemValue);
+        // Handle both BehaviorSubject (has .next) and Signal wrappers (have .next for compatibility)
+        const select = this.multiFilterConfig.select as any;
+        if (select && typeof select.next === 'function') {
+          select.next(itemValue);
+        }
       }
     });
   }

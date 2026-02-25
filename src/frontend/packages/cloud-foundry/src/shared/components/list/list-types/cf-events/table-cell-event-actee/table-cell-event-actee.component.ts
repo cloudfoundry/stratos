@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
 
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { RouterModule } from '@angular/router';
+import { CustomTooltipDirective, CustomIconComponent, TableCellCustom } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
 
 interface CellEVentActeeConfig {
   setActeeFilter: (actee: string) => void;
@@ -10,7 +11,14 @@ interface CellEVentActeeConfig {
 @Component({
   selector: 'app-table-cell-event-actee',
   templateUrl: './table-cell-event-actee.component.html',
-  styleUrls: ['./table-cell-event-actee.component.scss']
+  styleUrls: ['./table-cell-event-actee.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    RouterModule,
+    CustomIconComponent,
+    CustomTooltipDirective
+]
 })
 export class TableCellEventActeeComponent extends TableCellCustom<APIResource, CellEVentActeeConfig> {
 

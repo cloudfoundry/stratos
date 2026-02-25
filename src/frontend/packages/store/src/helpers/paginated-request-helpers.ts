@@ -13,7 +13,7 @@ export interface PaginationFlattener<T = any, C = any> {
   getTotalPages: (res: C) => number;
   getTotalResults: (res: C) => number;
   mergePages: (res: C[]) => T;
-  fetch: (...args) => Observable<C>;
+  fetch: (...args: any[]) => Observable<C>;
   buildFetchParams: (i: number) => any[];
   clearResults: (res: C, allResults: number) => Observable<C>;
 }

@@ -25,22 +25,23 @@ import {
   PaginationParam,
 } from '../../types/pagination.types';
 import { getCurrentPageRequestInfo, PaginationObservables } from './pagination-reducer.types';
+import { defaultClientPaginationPageSize } from './pagination-reducer-reset-pagination';
 
 export function removeEmptyParams(params: PaginationParam) {
-  const newObject = {};
+  const newObject: Record<string, any> = {};
   Object.keys(params).forEach(key => {
-    if (params[key]) {
-      newObject[key] = params[key];
+    if ((params as Record<string, any>)[key]) {
+      newObject[key] = (params as Record<string, any>)[key];
     }
   });
   return newObject;
 }
 
-export function getActionType(action) {
+export function getActionType(action: any) {
   return action.type;
 }
 // FIXME: Add typings, should be done with #1477
-export function getAction(action): PaginatedAction {
+export function getAction(action: any): PaginatedAction {
   if (!action) {
     return null;
   }
@@ -48,7 +49,7 @@ export function getAction(action): PaginatedAction {
 }
 
 // FIXME: Add typings, should be done with #1477
-function getEntityConfigFromAction(action): PaginatedAction {
+function getEntityConfigFromAction(action: any): PaginatedAction {
   if (action && action.entityConfig) {
     return action.entityConfig;
   }
@@ -56,7 +57,7 @@ function getEntityConfigFromAction(action): PaginatedAction {
 }
 
 // FIXME: Add typings, should be done with #1477
-export function getActionPaginationEntityKey(action): string {
+export function getActionPaginationEntityKey(action: any): string {
   const apiAction = getAction(action);
   const entityConfig = apiAction.proxyPaginationEntityConfig || getEntityConfigFromAction(action);
   return entityCatalog.getEntityKey(entityConfig);
@@ -232,7 +233,7 @@ function getObservables<T = any>(
       startWith(false)
     ),
     totalEntities$: pagination$.pipe(
-      map(pag => pag.totalResults),
+      map(pag => isLocal ? pag.clientPagination.totalResults : pag.totalResults),
       distinctUntilChanged()
     ),
     fetchingEntities$: paginationMonitor.fetchingCurrentPage$
@@ -263,7 +264,7 @@ export function isFetchingPage(pagination: PaginationEntityState): boolean {
 
 export function hasValidOrGettingPage(pagination: PaginationEntityState): boolean {
   if (pagination && Object.keys(pagination).length) {
-    const hasPage = !!pagination.ids[pagination.currentPage];
+    const hasPage = !!(pagination.ids as Record<number, any>)[pagination.currentPage];
     const currentPageRequest = getCurrentPageRequestInfo(pagination);
     return hasPage || currentPageRequest.busy;
   } else {
@@ -275,13 +276,25 @@ export function hasError(pagination: PaginationEntityState): boolean {
   return pagination && getCurrentPageRequestInfo(pagination).error;
 }
 
-export function spreadClientPagination(pag: PaginationClientPagination): PaginationClientPagination {
+export function spreadClientPagination(pag: PaginationClientPagination | undefined): PaginationClientPagination {
+  if (!pag) {
+    return {
+      pageSize: defaultClientPaginationPageSize,
+      currentPage: 1,
+      filter: {
+        string: '',
+        items: {}
+      },
+      totalResults: 0
+    };
+  }
+
   return {
     ...pag,
     filter: {
-      ...pag.filter,
+      ...(pag.filter || { string: '', items: {} }),
       items: {
-        ...pag.filter.items
+        ...(pag.filter?.items || {})
       }
     }
   };

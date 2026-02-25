@@ -1,29 +1,24 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import {
   BooleanIndicatorComponent,
 } from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { APIResource } from '@stratosui/store/types/api.types';
 import { ListCfRoute } from '../cf-routes-data-source-base';
 import { TableCellTCPRouteComponent } from './table-cell-tcproute.component';
 
 describe('TableCellTCPRouteComponent', () => {
   let component: TableCellTCPRouteComponent;
   let fixture: ComponentFixture<TableCellTCPRouteComponent>;
-
-
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [TableCellTCPRouteComponent, BooleanIndicatorComponent],
-      imports: [
-        CoreModule
-      ]
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [TableCellTCPRouteComponent, BooleanIndicatorComponent],
+      providers: [provideZonelessChangeDetection()],
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellTCPRouteComponent);
     component = fixture.componentInstance;
     component.row = {

@@ -1,34 +1,17 @@
 import { DatePipe } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import { ApplicationService } from '../../../cloud-foundry/src/features/applications/application.service';
 import {
   ApplicationEnvVarsHelper,
 } from '../../../cloud-foundry/src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { CloudFoundrySharedModule } from '../../../cloud-foundry/src/shared/cf-shared.module';
-import { CoreModule } from '../../../core/src/core/core.module';
-import { SharedModule } from '../../../core/src/shared/shared.module';
-import { AutoscalerBaseComponent } from '../features/autoscaler-base.component';
-import { AutoscalerMetricPageComponent } from '../features/autoscaler-metric-page/autoscaler-metric-page.component';
-import {
-  AutoscalerScaleHistoryPageComponent,
-} from '../features/autoscaler-scale-history-page/autoscaler-scale-history-page.component';
-import {
-  EditAutoscalerCredentialComponent,
-} from '../features/edit-autoscaler-credential/edit-autoscaler-credential.component';
+import { CoreModule } from '@stratosui/core';
+import { SharedModule } from '@stratosui/core';
+import { EditAutoscalerCredentialComponent } from '../features/edit-autoscaler-credential/edit-autoscaler-credential.component';
 import {
   EditAutoscalerPolicyStep1Component,
 } from '../features/edit-autoscaler-policy/edit-autoscaler-policy-step1/edit-autoscaler-policy-step1.component';
-import {
-  EditAutoscalerPolicyStep2Component,
-} from '../features/edit-autoscaler-policy/edit-autoscaler-policy-step2/edit-autoscaler-policy-step2.component';
-import {
-  EditAutoscalerPolicyStep3Component,
-} from '../features/edit-autoscaler-policy/edit-autoscaler-policy-step3/edit-autoscaler-policy-step3.component';
-import {
-  EditAutoscalerPolicyStep4Component,
-} from '../features/edit-autoscaler-policy/edit-autoscaler-policy-step4/edit-autoscaler-policy-step4.component';
 import { EditAutoscalerPolicyComponent } from '../features/edit-autoscaler-policy/edit-autoscaler-policy.component';
 import {
   TableCellAutoscalerEventChangeIconPipe,
@@ -48,10 +31,10 @@ import {
 import {
   AppAutoscalerComboChartComponent,
 } from '../shared/list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-card/combo-chart/combo-chart.component';
-import {
-  AppAutoscalerComboSeriesVerticalComponent,
-} from '../shared/list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-card/combo-chart/combo-series-vertical.component';
 import { AutoscalerRoutingModule } from './autoscaler.routing';
+import {
+  EditAutoscalerPolicyStep3Component,
+} from '../features/edit-autoscaler-policy/edit-autoscaler-policy-step3/edit-autoscaler-policy-step3.component';
 
 
 @NgModule({
@@ -59,27 +42,19 @@ import { AutoscalerRoutingModule } from './autoscaler.routing';
     CoreModule,
     SharedModule,
     AutoscalerRoutingModule,
-    NgxChartsModule,
     CloudFoundrySharedModule,
-  ],
-  declarations: [
-    AutoscalerBaseComponent,
-    AutoscalerMetricPageComponent,
-    AutoscalerScaleHistoryPageComponent,
-    EditAutoscalerPolicyComponent,
-    EditAutoscalerPolicyStep1Component,
-    EditAutoscalerPolicyStep2Component,
-    EditAutoscalerPolicyStep3Component,
-    EditAutoscalerPolicyStep4Component,
     EditAutoscalerCredentialComponent,
-    AppAutoscalerMetricChartCardComponent,
+    EditAutoscalerPolicyStep1Component,
+    EditAutoscalerPolicyStep3Component,
     AppAutoscalerComboChartComponent,
-    AppAutoscalerComboSeriesVerticalComponent,
+    AppAutoscalerMetricChartCardComponent,
+    EditAutoscalerPolicyComponent,
     TableCellAutoscalerEventChangeComponent,
     TableCellAutoscalerEventStatusComponent,
     TableCellAutoscalerEventStatusIconPipe,
     TableCellAutoscalerEventChangeIconPipe,
   ],
+  declarations: [],
   providers: [
     ApplicationService,
     ApplicationEnvVarsHelper,

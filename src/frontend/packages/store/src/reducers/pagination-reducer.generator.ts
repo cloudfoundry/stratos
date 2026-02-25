@@ -7,6 +7,6 @@ const reducer = createPaginationReducer([
   RequestTypes.FAILED
 ]);
 
-export function requestPaginationReducer(state, action) {
+export function requestPaginationReducer(state: any, action: any) {
   return reducer(state, action);
 }

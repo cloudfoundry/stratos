@@ -1,4 +1,6 @@
-import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, inject, Input, ChangeDetectionStrategy } from '@angular/core';
+import { CustomTooltipDirective } from '../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { UserFavoriteManager, IFavoriteMetadata, UserFavorite } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { first, tap } from 'rxjs/operators';
@@ -6,11 +8,19 @@ import { first, tap } from 'rxjs/operators';
 import { ConfirmationDialogConfig } from '../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../shared/components/confirmation-dialog.service';
 import { EndpointsService } from '../endpoints.service';
+import { CustomIconComponent } from '../../shared/components/custom-material/custom-material.component';
 
 @Component({
   selector: 'app-entity-favorite-star',
   templateUrl: './entity-favorite-star.component.html',
-  styleUrls: ['./entity-favorite-star.component.scss']
+  styleUrls: ['./entity-favorite-star.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    CustomIconComponent,
+    CustomTooltipDirective
+  ]
 })
 export class EntityFavoriteStarComponent {
 
@@ -28,21 +38,16 @@ export class EntityFavoriteStarComponent {
 
   @Input() small = false;
 
-  public isFavorite$: Observable<boolean>;
+  public isFavorite$!: Observable<boolean>;
 
   private confirmationDialogConfig = new ConfirmationDialogConfig('Unfavorite?', '', 'Yes', true);
 
-  private pFavourite: UserFavorite<IFavoriteMetadata>;
-
-  constructor(
-    private confirmDialog: ConfirmationDialogService,
-    public endpointsService: EndpointsService,
-    private userFavoriteManager: UserFavoriteManager,
-  ) {
-  }
+  private pFavourite!: UserFavorite<IFavoriteMetadata>;
+  private confirmDialog = inject(ConfirmationDialogService);
+  public endpointsService = inject(EndpointsService);
+  private userFavoriteManager = inject(UserFavoriteManager);
 
   public toggleFavorite(event: Event) {
-    event.cancelBubble = true;
     event.stopPropagation();
     if (this.confirmRemoval) {
       this.isFavorite$.pipe(

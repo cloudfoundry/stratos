@@ -1,32 +1,34 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { createBasicStoreModule } from '@stratosui/store/testing';
-
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
-import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from "@test-framework/core-test.helper";
+import { CoreTestingModule } from "@test-framework/core-test.modules";
 import { CoreModule } from '../../../core/core.module';
 import { MetricsRangeSelectorService } from '../../services/metrics-range-selector.service';
-import { DateTimeComponent } from '../date-time/date-time.component';
-import { StartEndDateComponent } from '../start-end-date/start-end-date.component';
 import { MetricsRangeSelectorComponent } from './metrics-range-selector.component';
 
 describe('MetricsRangeSelectorComponent', () => {
   let component: MetricsRangeSelectorComponent;
   let fixture: ComponentFixture<MetricsRangeSelectorComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [MetricsRangeSelectorComponent, StartEndDateComponent, DateTimeComponent],
       imports: [
+        MetricsRangeSelectorComponent,
         CoreModule,
         CoreTestingModule,
         createBasicStoreModule(),
-        NoopAnimationsModule
+        NoopAnimationsModule,
       ],
-      providers: [MetricsRangeSelectorService, EntityMonitorFactory]
-    })
-      .compileComponents();
-  }));
+      providers: [
+        ...STORE_TEST_PROVIDERS,
+        MetricsRangeSelectorService,
+        provideZonelessChangeDetection(),
+      ]
+    });
+      TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(MetricsRangeSelectorComponent);

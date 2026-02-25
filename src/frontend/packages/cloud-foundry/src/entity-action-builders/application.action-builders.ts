@@ -16,8 +16,8 @@ import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
 export interface ApplicationActionBuilders extends OrchestratedActionBuilders {
   get: (
-    guid,
-    endpointGuid,
+    guid: string,
+    endpointGuid: string,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
   ) => GetApplication;
   remove: (guid: string, endpointGuid: string) => DeleteApplication;
@@ -48,8 +48,8 @@ export interface ApplicationActionBuilders extends OrchestratedActionBuilders {
 
 export const applicationActionBuilder: ApplicationActionBuilders = {
   get: (
-    guid,
-    endpointGuid,
+    guid: string,
+    endpointGuid: string,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetApplication(guid, endpointGuid, includeRelations, populateMissing),
   remove: (guid: string, endpointGuid: string) => new DeleteApplication(guid, endpointGuid),

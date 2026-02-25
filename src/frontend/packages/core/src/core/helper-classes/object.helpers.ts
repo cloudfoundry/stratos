@@ -1,12 +1,12 @@
 class ObjectHelper {
-    public getPath(object, path: string[]) {
+    public getPath(object: any, path: string[]): any {
         try {
             return path.reduce((o, i) => o[i], object);
         } catch (err) {
             return null;
         }
     }
-    public getPathFromString(object, path: string, separator?: string) {
+    public getPathFromString(object: any, path: string, separator?: string): any {
         return this.getPath(object, path.split(separator || '.'));
     }
 }

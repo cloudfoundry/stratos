@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { ActivatedRoute, RouterOutlet } from '@angular/router';
 
 import { ServicesService } from '../services.service';
 
@@ -20,6 +20,11 @@ export function servicesServiceFactory(
       useFactory: servicesServiceFactory,
       deps: [ActivatedRoute]
     }
+  ],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    RouterOutlet
   ]
 })
 export class ServiceBaseComponent { }

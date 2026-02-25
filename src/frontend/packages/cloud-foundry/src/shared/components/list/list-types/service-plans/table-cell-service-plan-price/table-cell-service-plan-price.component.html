@@ -1,4 +1,5 @@
-<app-service-plan-price *ngIf="canShowCosts; else cannotShowCosts" [servicePlan]="row"></app-service-plan-price>
-<ng-template #cannotShowCosts>
+@if (canShowCosts) {
+  <app-service-plan-price [servicePlan]="row"></app-service-plan-price>
+} @else {
   {{ isFree ? 'Free' : 'Not Free'}}
-</ng-template>
+}

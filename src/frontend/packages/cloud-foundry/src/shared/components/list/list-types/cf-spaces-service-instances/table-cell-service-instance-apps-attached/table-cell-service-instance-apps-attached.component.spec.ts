@@ -1,35 +1,32 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import { AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
-import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { EntityServiceFactory, EntityMonitorFactory } from '@stratosui/store';
 import {
   generateCfBaseTestModulesNoShared,
-} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { TableCellServiceInstanceAppsAttachedComponent } from './table-cell-service-instance-apps-attached.component';
-
+} from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { TableCellServiceInstanceAppsAttachedComponent } from "./table-cell-service-instance-apps-attached.component";
 describe('TableCellServiceInstanceAppsAttachedComponent', () => {
   let component: TableCellServiceInstanceAppsAttachedComponent;
   let fixture: ComponentFixture<TableCellServiceInstanceAppsAttachedComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
-        TableCellServiceInstanceAppsAttachedComponent,
-        AppChipsComponent
-      ],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
-        generateCfBaseTestModulesNoShared()
+        TableCellServiceInstanceAppsAttachedComponent,
+        AppChipsComponent,
+        ...generateCfBaseTestModulesNoShared(),
       ],
       providers: [
         EntityServiceFactory,
-        EntityMonitorFactory
-      ]
+        EntityMonitorFactory,
+        provideZonelessChangeDetection(),
+      ],
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellServiceInstanceAppsAttachedComponent);
     component = fixture.componentInstance;
     component.config = {
@@ -59,7 +56,7 @@ describe('TableCellServiceInstanceAppsAttachedComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', waitForAsync(() => {
+  it('should create', () => {
     expect(component).toBeTruthy();
-  }));
+  });
 });

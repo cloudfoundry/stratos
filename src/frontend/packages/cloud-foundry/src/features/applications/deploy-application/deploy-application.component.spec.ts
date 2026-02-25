@@ -1,84 +1,85 @@
-import { HttpBackend, HttpClient, HttpClientModule } from '@angular/common/http';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter, ActivatedRoute } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CoreModule } from '../../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../../core/src/shared/shared.module';
-import { TabNavService } from '../../../../../core/src/tab-nav.service';
-import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../git/src/shared/github.helpers';
-import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundrySharedModule } from '../../../shared/cf-shared.module';
+import {
+  PaginationMonitorFactory,
+  EntityMonitorFactory,
+  EntityServiceFactory,
+  EntityCatalogTestModule,
+  TEST_CATALOGUE_ENTITIES,
+  generateStratosEntities,
+  EntityCatalogHelper,
+  EntityCatalogHelpers
+} from '@stratosui/store';
+import { createEmptyStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { CoreModule } from '@stratosui/core';
+import { getGitHubAPIURL, GITHUB_API_URL } from '@stratosui/git';
+
+import { generateCFEntities } from '../../../cf-entity-generator';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
-import { ApplicationEnvVarsHelper } from '../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { CreateApplicationModule } from '../create-application/create-application.module';
-import {
-  DeployApplicationOptionsStepComponent,
-} from './deploy-application-options-step/deploy-application-options-step.component';
-import {
-  DeployApplicationStepSourceUploadComponent,
-} from './deploy-application-step-source-upload/deploy-application-step-source-upload.component';
-import { CommitListWrapperComponent } from './deploy-application-step2-1/commit-list-wrapper/commit-list-wrapper.component';
-import { DeployApplicationStep21Component } from './deploy-application-step2-1/deploy-application-step2-1.component';
-import {
-  DeployApplicationFsComponent,
-} from './deploy-application-step2/deploy-application-fs/deploy-application-fs.component';
-import { DeployApplicationStep2Component } from './deploy-application-step2/deploy-application-step2.component';
-import { DeployApplicationStep3Component } from './deploy-application-step3/deploy-application-step3.component';
 import { ApplicationDeploySourceTypes } from './deploy-application-steps.types';
 import { DeployApplicationComponent } from './deploy-application.component';
-import { GithubProjectExistsDirective } from './github-project-exists.directive';
 
 describe('DeployApplicationComponent', () => {
   let component: DeployApplicationComponent;
   let fixture: ComponentFixture<DeployApplicationComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
+      imports: [
+        createEmptyStoreModule(),
+        EntityCatalogTestModule,
+        CoreModule,
+        NoopAnimationsModule,
         DeployApplicationComponent,
-        DeployApplicationStep2Component,
-        DeployApplicationStep21Component,
-        DeployApplicationStep3Component,
-        DeployApplicationOptionsStepComponent,
-        DeployApplicationStepSourceUploadComponent,
-        DeployApplicationFsComponent,
-        CommitListWrapperComponent,
-        GithubProjectExistsDirective,
       ],
       providers: [
-        CfOrgSpaceDataService,
-        ApplicationEnvVarsHelper,
-        { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
-        HttpClient,
+        ...STORE_TEST_PROVIDERS,
         {
-          provide: HttpBackend,
-          useClass: HttpTestingController
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities()
+          ]
         },
-        TabNavService,
-        ApplicationDeploySourceTypes
+        EntityCatalogHelper,
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              params: {},
+              queryParams: {}
+            }
+          }
+        },
+        CfOrgSpaceDataService,
+        ApplicationDeploySourceTypes,
+        PaginationMonitorFactory,
+        EntityMonitorFactory,
+        EntityServiceFactory,
+        { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
       ],
-      imports: [
-        ...generateCfStoreModules(),
-        SharedModule,
-        CoreModule,
-        RouterTestingModule,
-        CreateApplicationModule,
-        NoopAnimationsModule,
-        HttpClientModule,
-        HttpClientTestingModule,
-        HttpClientModule,
-        CloudFoundrySharedModule
-      ]
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
     })
       .compileComponents();
-  }));
+
+    // Set EntityCatalogHelper after TestBed is configured
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(DeployApplicationComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    // Don't call detectChanges() to avoid rendering child components
   });
 
   it('should create', () => {

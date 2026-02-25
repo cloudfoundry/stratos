@@ -1,34 +1,29 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import {
-  generateCfBaseTestModulesNoShared,
-} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCfBaseTestModulesNoShared } from '@test-framework/cloud-foundry-endpoint-service.helper';
 import { LongRunningCfOperationsService } from '../../../../../data-services/long-running-cf-op.service';
 import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
 import { TableCellServiceCfBreadcrumbsComponent } from './table-cell-service-cf-breadcrumbs.component';
-
 describe('TableCellServiceCfBreadcrumbsComponent', () => {
   let component: TableCellServiceCfBreadcrumbsComponent;
   let fixture: ComponentFixture<TableCellServiceCfBreadcrumbsComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
-        TableCellServiceCfBreadcrumbsComponent,
-        CfOrgSpaceLinksComponent
-        // app-cf-org-space-links
-      ],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
-        generateCfBaseTestModulesNoShared()
+        TableCellServiceCfBreadcrumbsComponent,
+        CfOrgSpaceLinksComponent,
+        ...generateCfBaseTestModulesNoShared(),
       ],
       providers: [
-        LongRunningCfOperationsService
-      ]
+        LongRunningCfOperationsService,
+        provideZonelessChangeDetection(),
+      ],
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellServiceCfBreadcrumbsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

@@ -32,14 +32,14 @@ export function paginationClearOfEntity(state: PaginationState, action: ClearPag
 
 function clearPaginationOfEntity(entityPaginationState: PaginationEntityState, guid: string) {
   // For each page in a pagination section
-  const pageWithEntity = Object.keys(entityPaginationState.ids).find(pageKey => {
+  const pageWithEntity = (entityPaginationState.ids && Object.keys(entityPaginationState.ids).find(pageKey => {
     // Does the entity exist in this page?
-    const page = entityPaginationState.ids[pageKey];
-    return page.indexOf(guid) >= 0;
-  });
+    const page = (entityPaginationState.ids as Record<string, any>)[pageKey];
+    return page?.indexOf(guid) >= 0;
+  }));
 
   if (pageWithEntity) {
-    const page = entityPaginationState.ids[pageWithEntity];
+    const page = (entityPaginationState.ids as Record<string, any>)[pageWithEntity];
     const index = page.indexOf(guid);
     // Recreate the pagination section with new values
     const newEntityPagState = {
@@ -47,8 +47,8 @@ function clearPaginationOfEntity(entityPaginationState: PaginationEntityState, g
       ids: { ...entityPaginationState.ids },
       clientPagination: spreadClientPagination(entityPaginationState.clientPagination)
     };
-    newEntityPagState.ids[pageWithEntity] = [...newEntityPagState.ids[pageWithEntity]];
-    newEntityPagState.ids[pageWithEntity].splice(index, 1);
+    (newEntityPagState.ids as Record<string, any>)[pageWithEntity] = [...(newEntityPagState.ids as Record<string, any>)[pageWithEntity]];
+    (newEntityPagState.ids as Record<string, any>)[pageWithEntity].splice(index, 1);
     newEntityPagState.totalResults--;
     const clientPag = newEntityPagState.clientPagination;
     clientPag.totalResults--;

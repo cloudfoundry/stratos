@@ -24,9 +24,9 @@ export function splitCurrentPage<T = any>(entities: (T | T[])[], pageSize: numbe
   };
 }
 
-export function getCurrentPageStartIndex<T = any>(entities: (T | T[])[], pageSize: number, requiredPage: number) {
+export function getCurrentPageStartIndex<T = any>(entities: (T | T[])[], pageSize: number, requiredPage: number): number | null {
   const data = {
-    index: null,
+    index: null as number | null,
     currentPage: 0,
     splitPages: 0
   };

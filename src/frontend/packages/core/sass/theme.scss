@@ -1,51 +1,107 @@
-@import '@angular/material/theming';
-@import './all-theme';
+// Stratos theme system migrated to Tailwind CSS
+@use './ansi-colors';
 
-// Import the theme
-@import '~@stratosui/theme';
+// CSS Custom Properties for theme colors (replacing Angular Material palettes)
+:root {
+  // Primary color palette (blue)
+  --color-primary-50: #e3f2fd;
+  --color-primary-100: #bbdefb;
+  --color-primary-200: #90caf9;
+  --color-primary-300: #64b5f6;
+  --color-primary-400: #42a5f5;
+  --color-primary-500: #2196f3;
+  --color-primary-600: #1e88e5;
+  --color-primary-700: #1976d2;
+  --color-primary-800: #1565c0;
+  --color-primary-900: #0d47a1;
 
-$stratos-dark-theme-supported: false !default;
+  // Accent color palette (cyan)
+  --color-accent-50: #e0f7fa;
+  --color-accent-100: #b2ebf2;
+  --color-accent-200: #80deea;
+  --color-accent-300: #4dd0e1;
+  --color-accent-400: #26c6da;
+  --color-accent-500: #00bcd4;
+  --color-accent-600: #00acc1;
+  --color-accent-700: #0097a7;
+  --color-accent-800: #00838f;
+  --color-accent-900: #006064;
 
-// Themes - stratos-theme() function must be supplied by the theme
-$stratos-themes: stratos-theme();
+  // Warning/error color palette (red)
+  --color-warn-50: #ffebee;
+  --color-warn-100: #ffcdd2;
+  --color-warn-200: #ef9a9a;
+  --color-warn-300: #e57373;
+  --color-warn-400: #ef5350;
+  --color-warn-500: #f44336;
+  --color-warn-600: #e53935;
+  --color-warn-700: #d32f2f;
+  --color-warn-800: #c62828;
+  --color-warn-900: #b71c1c;
 
-// stratos-theme() can return a single theme rather than a map of default and dark themes
-@if not map-has-key($stratos-themes, 'default') {
-  $tmp: $stratos-themes;
-  $stratos-themes: (
-    default: $tmp
-  )
+  // Theme-specific colors
+  --color-primary: var(--color-primary-500);
+  --color-accent: var(--color-accent-500);
+  --color-warn: var(--color-warn-500);
 }
 
-// Import any custom scss that the theme defines
-// This import defines the mixin 'apply-theme'
-@import '~@stratosui/theme/extensions';
+// Create simplified Stratos app theme using CSS custom properties
+$stratos-app-theme: (
+  app-background-color: #fafafa,
+  app-background-text-color: rgba(black, 0.65),
+  subdued-color: rgba(#2196f3, 0.7),
+  ansi-colors: $ansi-color-palette,
+  side-nav: (
+    background: var(--color-primary),
+    text: white,
+    hover: rgba(white, 0.1),
+    active: rgba(white, 0.2),
+    active-text: white,
+    hover-text: white
+  ),
+  status: (
+    success: #4caf50,
+    info: var(--color-primary),
+    warning: #ff9800,
+    danger: var(--color-warn),
+    tentative: #9e9e9e,
+    busy: var(--color-primary),
+    text: white
+  ),
+  header-background-color: var(--color-primary),
+  header-foreground-color: white,
+  header-border-color: none,
+  stratos-title-show-text: false,
+  header-background-span: false,
+  underflow-background-color: var(--color-primary),
+  underflow-foreground-color: white,
+  link-color: var(--color-primary),
+  link-active-color: var(--color-primary-700),
+  user-avatar-background-color: var(--color-primary),
+  user-avatar-foreground-color: white,
+  user-avatar-underflow-invert-colors: true,
+  user-avatar-header-invert-colors: true,
+  intro-screen-background-color: null
+);
 
-// Default theme ( = light theme)
-$stratos-theme: map-get($stratos-themes, default);
-$theme: map-get($stratos-theme, theme);
+// Legacy app-theme mixin removed - theme configuration now uses CSS custom properties
+// defined in the theme package and component-specific SCSS
+// The $stratos-app-theme map is preserved for reference but no longer applied via mixin
 
-@if map-has-key($stratos-themes, 'dark') {
-  $stratos-dark-theme-supported: true;
-  $dark-stratos-theme: map-get($stratos-themes, dark);
-  $dark-theme: map-get($dark-stratos-theme, theme);
+// Basic Stratos styling - migrated to Tailwind CSS
+html {
+  background-color: #fafafa;
+}
 
-  body.stratos {
-    .dark-theme {
-      @include angular-material-theme($dark-theme);
-      @include app-theme($dark-stratos-theme);
-      // Apply theme to extensions
-      @include apply-theme($dark-stratos-theme);
-    }
+// Legacy Material component styles - converted to CSS custom properties
+.dashboard {
+  .mat-drawer-content {
+    overflow: visible;
+  }
+  .mat-drawer-side {
+    border: 0;
   }
 }
 
-.default {
-  @include angular-material-theme($theme);
-  @include app-theme($stratos-theme);
-  // Apply theme to extensions
-  @include apply-theme($stratos-theme);
-}
-
-// Import mat-core
-@include mat-core;
+// Styles migrated to use Tailwind CSS utilities where possible
+// Remaining styles use CSS custom properties for theme consistency

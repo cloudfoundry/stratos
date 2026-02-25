@@ -1,23 +1,47 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { describe, it, expect, beforeEach } from 'vitest';
 
+import { EntityServiceFactory } from '@stratosui/store';
+import { BaseTestModules } from '../../../../../core/test-framework/core-test.helper';
 import { KubernetesNodePodsComponent } from './kubernetes-node-pods.component';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesNodeService } from '../../services/kubernetes-node.service';
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
-import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
+import { KubernetesTestingModule } from '../../kubernetes.testing.module';
 
 describe('KubernetesNodePodsComponent', () => {
   let component: KubernetesNodePodsComponent;
   let fixture: ComponentFixture<KubernetesNodePodsComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [KubernetesNodePodsComponent],
-      imports: KubernetesBaseTestModules,
-      providers: [BaseKubeGuid, KubernetesEndpointService, KubernetesNodeService]
-    })
-      .compileComponents();
-  }));
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        KubernetesNodePodsComponent,
+        ...BaseTestModules,
+        KubernetesTestingModule,
+      ],
+      providers: [
+        EntityServiceFactory,
+        BaseKubeGuid,
+        KubernetesEndpointService,
+        KubernetesNodeService,
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              queryParams: {},
+              params: {
+                nodeName: 'test-node'
+              }
+            }
+          }
+        },
+        provideZonelessChangeDetection(),
+      ]
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesNodePodsComponent);

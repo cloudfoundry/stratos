@@ -1,5 +1,9 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component  } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { Store } from '@ngrx/store';
 import {
+  AppState,
   ThemeService,
   UserProfileInfo,
 } from '@stratosui/store';
@@ -10,17 +14,36 @@ import { CurrentUserPermissionsService } from '../../../core/permissions/current
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { UserProfileService } from '../../../core/user-profile.service';
 import { UserService } from '../../../core/user.service';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { NoContentMessageComponent } from '../../../shared/components/no-content-message/no-content-message.component';
+import { UserProfileBannerComponent } from '../../../shared/components/user-profile-banner/user-profile-banner.component';
+import { MetadataItemComponent } from '../../../shared/components/metadata-item/metadata-item.component';
+import { ProfileSettingsComponent } from '../../../shared/components/profile-settings/profile-settings.component';
+import { AppChipsComponent } from '../../../shared/components/chips/chips.component';
 
 @Component({
   selector: 'app-profile-info',
   templateUrl: './profile-info.component.html',
-  styleUrls: ['./profile-info.component.scss']
+  styleUrls: ['./profile-info.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    PageHeaderComponent,
+    NoContentMessageComponent,
+    UserProfileBannerComponent,
+    MetadataItemComponent,
+    ProfileSettingsComponent,
+    AppChipsComponent
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProfileInfoComponent {
 
   isError$: Observable<boolean>;
   canEdit$: Observable<boolean>;
   userProfile$: Observable<UserProfileInfo>;
+  allowGravatar$: Observable<boolean>;
 
   primaryEmailAddress$: Observable<string>;
 
@@ -29,6 +52,7 @@ export class ProfileInfoComponent {
     public userService: UserService,
     public themeService: ThemeService,
     private currentUserPermissionsService: CurrentUserPermissionsService,
+    private store: Store<AppState>
   ) {
     this.isError$ = userProfileService.isError$;
     this.userProfile$ = userProfileService.userProfile$;
@@ -39,6 +63,10 @@ export class ProfileInfoComponent {
 
     this.primaryEmailAddress$ = this.userProfile$.pipe(
       map((profile: UserProfileInfo) => userProfileService.getPrimaryEmailAddress(profile))
+    );
+
+    this.allowGravatar$ = this.store.select(s => s.dashboard).pipe(
+      map(dashboardState => dashboardState.gravatarEnabled)
     );
 
   }

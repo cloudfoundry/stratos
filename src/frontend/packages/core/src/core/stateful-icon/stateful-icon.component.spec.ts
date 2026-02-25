@@ -1,6 +1,7 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-
-import { StratosStatus } from '../../../../store/src/types/shared.types';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { StratosStatus } from '@stratosui/store';
 import { MDAppModule } from '../md.module';
 import { StatefulIconComponent } from './stateful-icon.component';
 
@@ -9,15 +10,20 @@ describe('StatefulIconComponent', () => {
   let fixture: ComponentFixture<StatefulIconComponent>;
   let element: HTMLElement;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [StatefulIconComponent],
+
+      providers: [provideZonelessChangeDetection()],
+
       imports: [
-        MDAppModule
-      ]
-    })
-      .compileComponents();
-  }));
+        MDAppModule,
+        StatefulIconComponent,
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
+
+    });
+      TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(StatefulIconComponent);
@@ -32,6 +38,7 @@ describe('StatefulIconComponent', () => {
 
   it('should icon based on state key', () => {
     component.state = StratosStatus.OK;
+    // Setter calls markForCheck(), but we need detectChanges in zoneless mode
     fixture.detectChanges();
 
     expect(element.textContent).toContain('done');
@@ -39,8 +46,9 @@ describe('StatefulIconComponent', () => {
 
   it('should show spinner if state key is busy', () => {
     component.state = StratosStatus.BUSY;
+    // Setter calls markForCheck(), but we need detectChanges in zoneless mode
     fixture.detectChanges();
 
-    expect(element.querySelector('mat-spinner')).toBeTruthy();
+    expect(element.querySelector('app-spinner')).toBeTruthy();
   });
 });

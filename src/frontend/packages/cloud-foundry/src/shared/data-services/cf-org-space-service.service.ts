@@ -1,4 +1,5 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { computed, Injectable, OnDestroy, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import {
@@ -13,24 +14,23 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
-import { organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
-import { createEntityRelationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { safeUnsubscribe } from '../../../../core/src/core/utils.service';
+import { ListPaginationMultiFilterChange, safeUnsubscribe, valueOrCommonFalsy } from '@stratosui/core';
 import {
-  ListPaginationMultiFilterChange,
-} from '../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
-import {
-  valueOrCommonFalsy,
-} from '../../../../core/src/shared/components/list/data-sources-controllers/list-pagination-controller';
-import { ResetPagination, SetParams } from '../../../../store/src/actions/pagination.actions';
-import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
-import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { getCurrentPageRequestInfo } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
-import { connectedEndpointsOfTypesSelector } from '../../../../store/src/selectors/endpoint.selectors';
-import { APIResource } from '../../../../store/src/types/api.types';
-import { EndpointModel } from '../../../../store/src/types/endpoint.types';
-import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../../store/src/types/pagination.types';
+  APIResource,
+  connectedEndpointsOfTypesSelector,
+  EndpointModel,
+  getCurrentPageRequestInfo,
+  getPaginationObservables,
+  PaginatedAction,
+  PaginationEntityState,
+  PaginationMonitorFactory,
+  PaginationParam,
+  ResetPagination,
+  SetParams
+} from '@stratosui/store';
+import { CFAppState } from '../../cf-app-state';
+import { organizationEntityType, spaceEntityType } from '../../cf-entity-types';
+import { createEntityRelationKey } from '../../entity-relations/entity-relations.types';
 import { IOrganization, ISpace } from '../../cf-api.types';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { cfEntityFactory } from '../../cf-entity-factory';
@@ -62,8 +62,7 @@ export function createCfOrgSpaceFilterConfig(key: string, label: string, cfOrgSp
 export interface CfOrgSpaceItem<T = any> {
   list$: Observable<T[]>;
   loading$: Observable<boolean>;
-  // A lot of problems are caused by these being BehaviourSubject's (specifically auto select process in CfOrgSpaceDataService and sticky
-  // values). Ideally this would change to Subject... but some usages <behaviour subject>.value
+  // Signal-based selection with backward compatibility via BehaviorSubject wrapper
   select: BehaviorSubject<string>;
 }
 
@@ -136,14 +135,16 @@ interface InitialValues { cf: string; org: string; space: string; }
 /**
  * This service relies on OnDestroy, so must be `provided` by a component
  */
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfOrgSpaceDataService implements OnDestroy {
 
   private static CfOrgSpaceServicePaginationKey = 'endpointOrgSpaceService';
 
-  public cf: CfOrgSpaceItem<EndpointModel>;
-  public org: CfOrgSpaceItem<IOrganization>;
-  public space: CfOrgSpaceItem<ISpace>;
+  public cf!: CfOrgSpaceItem<EndpointModel>;
+  public org!: CfOrgSpaceItem<IOrganization>;
+  public space!: CfOrgSpaceItem<ISpace>;
   public isLoading$: Observable<boolean>;
 
   public paginationAction = this.createOrgPaginationAction();
@@ -163,11 +164,11 @@ export class CfOrgSpaceDataService implements OnDestroy {
   /*
    * Observable that provides initial values for drop downs, output will be parsed through initialValuesMap before emitted on first
    */
-  public initialValues$: Observable<any>;
+  public initialValues$!: Observable<any>;
   /**
    * Map values from `initialValues$` to supply initial values for drop downs
    */
-  public initialValuesMap: (param: any) => InitialValues;
+  public initialValuesMap!: (param: any) => InitialValues;
 
   constructor(
     private store: Store<CFAppState>,
@@ -199,6 +200,11 @@ export class CfOrgSpaceDataService implements OnDestroy {
     }, this.paginationAction.flattenPagination);
   }
 
+  // Signal-based selection state with BehaviorSubject wrapper for backward compatibility
+  private cfSelectSignal = signal<string | null>(null);
+  private orgSelectSignal = signal<string | null>(null);
+  private spaceSelectSignal = signal<string | null>(null);
+
   private createCf() {
     const list$ = this.store.select(connectedEndpointsOfTypesSelector(CF_ENDPOINT_TYPE)).pipe(
       // Ensure we have endpoints
@@ -206,6 +212,11 @@ export class CfOrgSpaceDataService implements OnDestroy {
       publishReplay(1),
       refCount(),
     );
+
+    // Create BehaviorSubject wrapper that updates signal
+    const cfBehaviorSubject = new BehaviorSubject<string | null>(null);
+    cfBehaviorSubject.subscribe(value => this.cfSelectSignal.set(value));
+
     this.cf = {
       list$: list$.pipe(
         // Filter out non-cf endpoints
@@ -227,7 +238,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
       loading$: list$.pipe(
         map(cfs => !cfs)
       ),
-      select: new BehaviorSubject(null) // Should be different to undefined (sticky values & reset list)
+      select: cfBehaviorSubject // BehaviorSubject wrapper synced with signal
     };
   }
 
@@ -245,10 +256,14 @@ export class CfOrgSpaceDataService implements OnDestroy {
       return [];
     }));
 
+    // Create BehaviorSubject wrapper that updates signal
+    const orgBehaviorSubject = new BehaviorSubject<string | null>(null);
+    orgBehaviorSubject.subscribe(value => this.orgSelectSignal.set(value));
+
     this.org = {
       list$: orgList$,
       loading$: this.allOrgsLoading$,
-      select: new BehaviorSubject(null) // Should be different to undefined (sticky values & reset list)
+      select: orgBehaviorSubject // BehaviorSubject wrapper synced with signal
     };
   }
 
@@ -272,10 +287,14 @@ export class CfOrgSpaceDataService implements OnDestroy {
       })
     );
 
+    // Create BehaviorSubject wrapper that updates signal
+    const spaceBehaviorSubject = new BehaviorSubject<string | null>(null);
+    spaceBehaviorSubject.subscribe(value => this.spaceSelectSignal.set(value));
+
     this.space = {
       list$: spaceList$,
       loading$: this.org.loading$,
-      select: new BehaviorSubject(null) // Should be different to undefined (sticky values & reset list)
+      select: spaceBehaviorSubject // BehaviorSubject wrapper synced with signal
     };
   }
 

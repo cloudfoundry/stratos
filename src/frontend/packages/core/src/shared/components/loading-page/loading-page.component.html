@@ -1,9 +1,22 @@
 <ng-content></ng-content>
-<div *ngIf="(isLoading | async) || (isDeleting | async)" [@leaveLoaderAnimation] class="loading-page">
-  <div class="loading-page__indicator">
-    <div *ngIf="alert" class="loading-page__indicator-alert">{{ alert }}</div>
-    <div>{{ text$ | async }}</div>
-    <mat-progress-bar class="loading-page__indicator-bar" [color]="'primary'" mode="indeterminate">
-    </mat-progress-bar>
+@if ((isLoading | async) || (isDeleting | async)) {
+  <div
+    [@leaveLoaderAnimation]
+    class="loading-page loading-page__overlay">
+    <div class="loading-page__indicator">
+      @if (alert) {
+        <div class="loading-page__alert">
+          {{ alert }}
+        </div>
+      }
+      <div class="loading-page__text">{{ text$ | async }}</div>
+      <div class="loading-page__progress">
+        <div class="loading-page__progress-bar"></div>
+      </div>
+      <!-- Spinner for better visual feedback -->
+      <div class="loading-page__spinner-container">
+        <div class="loading-page__spinner"></div>
+      </div>
+    </div>
   </div>
-</div>
+}

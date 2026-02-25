@@ -1,4 +1,5 @@
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 
 import {
   StratosBaseCatalogEntity,
@@ -32,16 +33,16 @@ export class CatalogEntityDrivenListConfig<T extends EntityPipelineEntity> exten
         ...linBuilders.map((builder, i) => ({
           columnId: builder[0],
           cellDefinition: {
-            getLink: (e: any) => {
+            getLink: (e: T): string | null => {
               return null;
             },
-            getValue: (e: any) => {
+            getValue: (e: T): string | Observable<string> => {
               return builder[1](e, store);
             }
           },
-          headerCell: () => builder[0],
+          headerCell: (): string => builder[0],
         })),
-        createTableColumnFavorite(row => {
+        createTableColumnFavorite((row: T) => {
           return new UserFavorite(
             catalogEntity.getEndpointGuidFromEntity(row),
             catalogEntity.endpointType,

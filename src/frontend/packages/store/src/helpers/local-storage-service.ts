@@ -34,7 +34,10 @@ export class LocalStorageService {
   /**
    * Make a key used by local storage that relates to a section of the user's settings in the console's store
    */
-  private static makeKey(userId: string, storeKey: LocalStorageSyncTypes) {
+  private static makeKey(userId: string | null, storeKey: LocalStorageSyncTypes): string {
+    if (!userId) {
+      return '';
+    }
     if (storeKey === LocalStorageSyncTypes.DASHBOARD) {
       // Legacy support for when we only stored dashboard
       return userId;
@@ -104,7 +107,7 @@ export class LocalStorageService {
    */
   public static storeToLocalStorageSyncReducer(reducer: ActionReducer<any>): ActionReducer<any> {
     // This is done to ensure we don't accidentally apply state from session storage from another user.
-    let globalUserId = null;
+    let globalUserId: string | null = null;
     return localStorageSync({
       // Decide the key to store each section by
       storageKeySerializer: (storeKey: LocalStorageSyncTypes) => LocalStorageService.makeKey(globalUserId, storeKey),
@@ -159,12 +162,13 @@ export class LocalStorageService {
     switch (type) {
       case LocalStorageSyncTypes.PAGINATION:
         const pagination: PaginationState = storePart as unknown as PaginationState;
+        const paginationWithIndex = pagination as Record<string, any>;
         // Convert each pagination section that we care about into an object with only the properties we care about
         // For each entity type....
-        const abs = Object.keys(pagination).reduce((res, entityTypes) => {
+        const abs = Object.keys(paginationWithIndex).reduce((res, entityTypes) => {
           // For each pagination section of the entity type...
-          const perEntity = Object.keys(pagination[entityTypes]).reduce((res2, paginationKeysOfEntityType) => {
-            const paginationSection = pagination[entityTypes][paginationKeysOfEntityType];
+          const perEntity = Object.keys(paginationWithIndex[entityTypes]).reduce((res2, paginationKeysOfEntityType) => {
+            const paginationSection = paginationWithIndex[entityTypes][paginationKeysOfEntityType];
             // Only store pagination section for lists
             if (!paginationSection.isListPagination) {
               return res2;
@@ -176,14 +180,14 @@ export class LocalStorageService {
               forcedLocalPage: paginationSection.forcedLocalPage // Value of the multi-entity filter
             };
             return res2;
-          }, {});
+          }, {} as Record<string, any>);
 
           // If this entity type has pagination section that we've cared about store it, else ignore
           if (Object.keys(perEntity).length > 0) {
             res[entityTypes] = perEntity;
           }
           return res;
-        }, {});
+        }, {} as Record<string, any>);
         return LocalStorageService.encrypt(abs);
     }
     return LocalStorageService.encrypt(storePart);
@@ -197,7 +201,8 @@ export class LocalStorageService {
         const key = LocalStorageService.makeKey(sessionId, type);
         const content = storage.getItem(key);
         // We're getting an approximate size in bytes, so just assume a character is one byte
-        return total + content.length;
+        // content can be null if the item doesn't exist in localStorage
+        return total + (content ? content.length : 0);
       }, 0);
     }
     return -1;
@@ -214,7 +219,7 @@ export class LocalStorageService {
       title: 'Are you sure?'
     };
 
-    const successAction = res => {
+    const successAction = (res: boolean) => {
       if (!res) {
         return;
       }

@@ -1,12 +1,11 @@
-import {
-  AfterContentInit,
+import { ChangeDetectionStrategy, AfterContentInit,
   Component,
   ContentChildren,
   HostBinding,
   OnInit,
   QueryList,
   ViewEncapsulation,
-} from '@angular/core';
+ } from '@angular/core';
 
 import { TileComponent } from '../tile/tile.component';
 
@@ -14,7 +13,10 @@ import { TileComponent } from '../tile/tile.component';
   selector: 'app-tile-group',
   templateUrl: './tile-group.component.html',
   styleUrls: ['./tile-group.component.scss'],
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
+  standalone: true,
+  imports: [],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TileGroupComponent implements OnInit, AfterContentInit {
 
@@ -28,7 +30,7 @@ export class TileGroupComponent implements OnInit, AfterContentInit {
   @HostBinding('class.tile-group-2-cols') private isTwoColumn = false;
   @HostBinding('class.tile-group-1-cols') private isOneColumn = false;
 
-  @ContentChildren(TileComponent) tiles: QueryList<TileComponent>;
+  @ContentChildren(TileComponent) tiles!: QueryList<TileComponent>;
 
   ngOnInit() { }
 

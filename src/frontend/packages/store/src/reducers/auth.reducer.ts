@@ -41,10 +41,10 @@ const defaultState: AuthState = {
   error: false,
   errorResponse: '',
   sessionData: null,
-  verifying: false,
+  verifying: true,  // Start as true to prevent race condition during app init
 };
 
-export function authReducer(state: AuthState = defaultState, action): AuthState {
+export function authReducer(state: AuthState = defaultState, action: any): AuthState {
   switch (action.type) {
     case LOGIN:
       return { ...state, loggingIn: true, loggedIn: false, error: false };

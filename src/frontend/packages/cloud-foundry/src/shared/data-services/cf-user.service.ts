@@ -3,23 +3,21 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, of, ReplaySubject } from 'rxjs';
 import { filter, first, map, multicast, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
-import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
-import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { getCurrentUserCFGlobalStates } from '../../../../cloud-foundry/src/store/selectors/cf-current-user-role.selectors';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
-import { LocalPaginationHelpers } from '../../../../store/src/helpers/local-list.helpers';
-import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import {
+  entityCatalog,
+  LocalPaginationHelpers,
+  PaginationMonitorFactory,
   getDefaultPaginationEntityState,
-} from '../../../../store/src/reducers/pagination-reducer/pagination-reducer-reset-pagination';
-import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import {
+  getPaginationObservables,
   getCurrentPageRequestInfo,
   PaginationObservables,
-} from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
-import { APIResource } from '../../../../store/src/types/api.types';
-import { PaginatedAction } from '../../../../store/src/types/pagination.types';
+  APIResource,
+  PaginatedAction,
+} from '@stratosui/store';
+import { CFAppState } from '../../cf-app-state';
+import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../cf-entity-types';
+import { createEntityRelationPaginationKey } from '../../entity-relations/entity-relations.types';
+import { getCurrentUserCFGlobalStates } from '../../store/selectors/cf-current-user-role.selectors';
 import { IOrganization, ISpace } from '../../cf-api.types';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { cfEntityFactory } from '../../cf-entity-factory';
@@ -47,9 +45,11 @@ import {
   UserRoleInSpace,
 } from '../../store/types/cf-user.types';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfUserService {
-  private allUsers$: Observable<PaginationObservables<APIResource<CfUser>>>;
+  private allUsers$!: Observable<PaginationObservables<APIResource<CfUser>>>;
 
   users: { [guid: string]: Observable<APIResource<CfUser>>; } = {};
 

@@ -1,19 +1,33 @@
-import { Component, Input, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 
 import { objectHelper } from '../../../../../core/helper-classes/object.helpers';
 import { pathGet } from '../../../../../core/utils.service';
 import { TableCellCustom } from '../../list.types';
 import { ICellDefinition } from '../table.types';
+import { CustomIconComponent } from '../../../../../shared/components/custom-material/custom-material.component';
 
 @Component({
   selector: 'app-table-cell-default',
   templateUrl: 'app-table-cell-default.component.html',
-  styleUrls: ['app-table-cell-default.component.scss']
+  styleUrls: ['app-table-cell-default.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    CustomIconComponent
+  ]
 })
 export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements OnDestroy {
 
-  public cellDefinition: ICellDefinition<T>;
+  constructor(private cdr: ChangeDetectorRef) {
+    super();
+  }
+
+  public cellDefinition!: ICellDefinition<T>;
 
   @Input('row')
   get row() { return super.row; }
@@ -25,7 +39,7 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
     }
   }
 
-  private pSchemaKey: string;
+  private pSchemaKey!: string;
   @Input('schemaKey')
   get schemaKey() { return this.pSchemaKey; }
   set schemaKey(schemaKey: string) {
@@ -36,14 +50,14 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
     }
   }
 
-  private asyncSub: Subscription;
+  private asyncSub!: Subscription;
 
-  public valueContext = { value: null };
+  public valueContext: { value: any } = { value: null as any };
   public isLink = false;
   public isExternalLink = false;
-  public linkValue: string;
+  public linkValue!: string;
   public linkTarget = '_self';
-  public valueGenerator: (row: T, schemaKey?: string) => string | Observable<string>;
+  public valueGenerator!: (row: T, schemaKey?: string) => string | Observable<string>;
   public showShortLink = false;
 
   public init() {
@@ -76,7 +90,7 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
     this.setupLinkDeps();
   }
 
-  private setupAsyncLink(value) {
+  private setupAsyncLink(value: any) {
     if (!this.cellDefinition.getAsyncLink) {
       return;
     }
@@ -85,14 +99,16 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
     this.setupLinkDeps();
   }
 
-  private setupAsync(row) {
+  private setupAsync(row: T) {
     if (this.asyncSub) {
       return;
     }
     const asyncConfig = this.cellDefinition.asyncValue;
-    this.asyncSub = row[asyncConfig.pathToObs].subscribe(value => {
-      this.valueContext.value = pathGet(asyncConfig.pathToValue, value);
+    const rowWithObs = row as Record<string, any>;
+    this.asyncSub = (rowWithObs[asyncConfig.pathToObs] as Observable<any>).subscribe((value: any) => {
+      this.valueContext.value = pathGet(asyncConfig.pathToValue, value as any);
       this.setupAsyncLink(value);
+      this.cdr.markForCheck();
     });
   }
 

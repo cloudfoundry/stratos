@@ -1,21 +1,21 @@
-import { Component, OnInit } from '@angular/core';
-import { MatRadioChange } from '@angular/material/radio';
+import { Component, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
+import { combineLatest, Observable, of } from 'rxjs';
 import { first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
-import { PermissionConfig } from '../../../../../../../core/src/core/permissions/current-user-permissions.config';
 import {
+  CustomFormFieldComponent,
+  PermissionConfig,
   CurrentUserPermissionsService,
-} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import {
   StackedInputActionConfig,
-} from '../../../../../../../core/src/shared/components/stacked-input-actions/stacked-input-action/stacked-input-action.component';
-import {
+  StackedInputActionsComponent,
   StackedInputActionsState,
   StackedInputActionsUpdate,
-} from '../../../../../../../core/src/shared/components/stacked-input-actions/stacked-input-actions.component';
-import { StepOnNextFunction } from '../../../../../../../core/src/shared/components/stepper/step/step.component';
+  StepOnNextFunction,
+} from '@stratosui/core';
 import {
   UsersRolesSetIsRemove,
   UsersRolesSetIsSetByUsername,
@@ -42,18 +42,26 @@ export class ManageUsersSetUsernamesHelper {
 @Component({
   selector: 'app-manage-users-set-usernames',
   templateUrl: './manage-users-set-usernames.component.html',
-  styleUrls: ['./manage-users-set-usernames.component.scss']
+  styleUrls: ['./manage-users-set-usernames.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    FormsModule,
+    CustomFormFieldComponent,
+    StackedInputActionsComponent
+  ]
 })
 export class ManageUsersSetUsernamesComponent implements OnInit {
 
-  public stepValid = new BehaviorSubject<boolean>(false);
-  public valid$: Observable<boolean> = this.stepValid.asObservable();
-  private usernames: StackedInputActionsUpdate;
-  public origin: string;
+  public stepValid = signal<boolean>(false);
+  public valid$: Observable<boolean> = toObservable(this.stepValid);
+  private usernames!: StackedInputActionsUpdate;
+  public origin!: string;
   public canAdd$: Observable<boolean>;
   public canRemove$: Observable<boolean>;
   public blocked$: Observable<boolean>;
-  public currentValue: boolean;
+  public currentValue!: boolean;
 
   public stackedActionConfig: StackedInputActionConfig = {
     isEmailInput: false,
@@ -64,13 +72,15 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
     }
   };
 
-  public stateIn = new BehaviorSubject<StackedInputActionsState[]>([]);
+  public stateIn = signal<StackedInputActionsState[]>([]);
+  public stateIn$: Observable<StackedInputActionsState[]>;
 
   constructor(
     private store: Store<CFAppState>,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     userPerms: CurrentUserPermissionsService,
   ) {
+    this.stateIn$ = toObservable(this.stateIn);
     const ffSetPermConfig = new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.set_roles_by_username);
     const ffRemovePermConfig = new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.unset_roles_by_username);
     this.canAdd$ = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
@@ -112,15 +122,15 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
     //     result: StackedInputActionResult.PROCESSING,
     //   });
     // });
-    this.stateIn.next(processingState);
+    this.stateIn.set(processingState);
   }
 
   stateOut(usernames: StackedInputActionsUpdate) {
     this.usernames = usernames;
-    this.stepValid.next(usernames.valid);
+    this.stepValid.set(usernames.valid);
   }
 
-  setIsRemove(event: MatRadioChange) {
+  setIsRemove(event: {source: any, value: boolean}) {
     this.store.dispatch(new UsersRolesSetIsRemove(event.value));
     this.currentValue = event.value;
   }

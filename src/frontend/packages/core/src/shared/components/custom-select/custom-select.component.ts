@@ -1,0 +1,287 @@
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, Output, EventEmitter, forwardRef, ViewChild, ElementRef, TemplateRef, ContentChildren, QueryList, AfterContentInit, AfterViewInit, HostListener, OnDestroy  } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { Subscription } from 'rxjs';
+
+
+export interface MatSelectChange {
+  source: CustomSelectComponent;
+  value: any;
+}
+
+@Component({
+  selector: 'app-option',
+  template: '<div #optionContent class="custom-option-content dark:text-slate-100 dark:hover:bg-slate-700" [class.selected]="selected" [class.disabled]="disabled" (click)="select($event)"><ng-content></ng-content></div>',
+  styleUrls: ['./custom-select.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class CustomOptionComponent implements AfterViewInit {
+  @Input() value: any;
+  @Input() label?: string;
+  @Input() disabled = false;
+  @Input() selected = false;
+
+  @ViewChild('optionContent', { static: false }) optionContent?: ElementRef;
+
+  @Output() onSelectionChange = new EventEmitter<CustomOptionComponent>();
+
+  private _displayText?: string;
+
+  constructor(private cdr: ChangeDetectorRef) {}
+
+  ngAfterViewInit() {
+    // Extract text content from projected content if no label is provided
+    if (!this.label && this.optionContent) {
+      this._displayText = this.optionContent.nativeElement.textContent?.trim();
+      this.cdr.markForCheck();
+    }
+  }
+
+  get displayText(): string {
+    return this.label || this._displayText || this.value;
+  }
+
+  select(event?: MouseEvent) {
+    if (this.disabled) return;
+
+    // Stop propagation to prevent document click handler from closing dropdown prematurely
+    // NOTE: This may not fully work with Angular's @HostListener, which is why we added
+    // the isOptionClick check in the parent's onDocumentClick handler
+    event?.stopPropagation();
+    event?.preventDefault();
+
+    this.onSelectionChange.emit(this);
+  }
+}
+
+@Component({
+  selector: 'app-select',
+  templateUrl: './custom-select.component.html',
+  styleUrls: ['./custom-select.component.scss'],
+  standalone: true,
+  imports: [],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => CustomSelectComponent),
+      multi: true
+    }
+  ]
+})
+export class CustomSelectComponent implements ControlValueAccessor, AfterContentInit, OnDestroy {
+  @Input() disabled = false;
+  @Input() placeholder = '';
+  @Input() multiple = false;
+  @Input() required = false;
+  @Input() name!: string;
+  @Input() id!: string;
+  @Input() invalid = false;
+  @Input() errorMessage = '';
+  @Input() autoSelectSingleOption = true; // Auto-select when only one option exists
+
+  @Input()
+  get value(): any {
+    return this.multiple ? this.selectedValues : this.selectedValues[0];
+  }
+  set value(val: any) {
+    this.writeValue(val);
+  }
+
+  @Output() selectionChange = new EventEmitter<MatSelectChange>();
+  @Output() valueChange = new EventEmitter<any>();
+
+  @ContentChildren(CustomOptionComponent) options: QueryList<CustomOptionComponent>;
+  @ViewChild('selectTrigger', { static: true }) selectTrigger!: ElementRef;
+  @ViewChild('selectOptions', { static: false }) selectOptions?: ElementRef;
+
+  isOpen = false;
+  selectedValues: any[] = [];
+  displayValue = '';
+  dropdownTop = '0px';
+  dropdownLeft = '0px';
+  dropdownWidth = '0px';
+
+  private _onChange = (value: any) => {};
+  private _onTouched = () => {};
+  private _subscriptions: Subscription[] = [];
+
+  constructor(private cdr: ChangeDetectorRef) {}
+
+  ngAfterContentInit() {
+    // Subscribe to option selection changes
+    this.subscribeToOptions();
+
+    // Subscribe to changes in the options list (for dynamic options)
+    const optionsChangeSub = this.options.changes.subscribe(() => {
+      this.subscribeToOptions();
+      this.checkAutoSelect();
+    });
+    this._subscriptions.push(optionsChangeSub);
+
+    // Check for auto-select after initial options are available
+    this.checkAutoSelect();
+
+    // Ensure display value is updated after content init
+    this.updateDisplayValue();
+  }
+
+  ngOnDestroy() {
+    // Clean up subscriptions
+    this._subscriptions.forEach(sub => sub.unsubscribe());
+  }
+
+  private subscribeToOptions() {
+    if (this.options) {
+      this.options.forEach(option => {
+        const sub = option.onSelectionChange.subscribe(selectedOption => {
+          this.selectOption(selectedOption);
+        });
+        this._subscriptions.push(sub);
+      });
+    }
+  }
+
+  private checkAutoSelect() {
+    // Auto-select single option if enabled and no value is currently selected
+    if (this.autoSelectSingleOption &&
+        !this.multiple &&
+        this.selectedValues.length === 0 &&
+        this.options &&
+        this.options.length === 1) {
+      const singleOption = this.options.first;
+      if (singleOption && !singleOption.disabled) {
+        // Auto-select the single option
+        this.selectOption(singleOption);
+      }
+    }
+  }
+
+  toggle() {
+    if (this.disabled) return;
+
+    if (!this.isOpen) {
+      // Calculate position BEFORE opening dropdown to prevent flash at wrong position
+      const rect = this.selectTrigger.nativeElement.getBoundingClientRect();
+      this.dropdownTop = `${rect.bottom + 4}px`;  // Add 4px gap for better spacing
+      this.dropdownLeft = `${rect.left}px`;
+      // Use trigger width as minimum, but allow dropdown to expand for content
+      this.dropdownWidth = `${rect.width}px`;
+    }
+
+    this.isOpen = !this.isOpen;
+    this._onTouched();
+    this.cdr.markForCheck();
+  }
+
+  selectOption(option: CustomOptionComponent) {
+    if (option.disabled) return;
+
+    if (this.multiple) {
+      const index = this.selectedValues.indexOf(option.value);
+      if (index === -1) {
+        this.selectedValues.push(option.value);
+      } else {
+        this.selectedValues.splice(index, 1);
+      }
+    } else {
+      this.selectedValues = [option.value];
+      this.isOpen = false;
+    }
+
+    this.updateDisplayValue();
+    this.updateOptions();
+
+    const value = this.multiple ? this.selectedValues : this.selectedValues[0];
+    this._onChange(value);
+
+    this.selectionChange.emit({
+      source: this,
+      value: value
+    });
+
+    this.valueChange.emit(value);
+
+    // Ensure change detection runs after selection
+    this.cdr.markForCheck();
+  }
+
+  private updateDisplayValue() {
+    if (this.selectedValues.length === 0) {
+      this.displayValue = '';
+    } else if (this.multiple) {
+      this.displayValue = `${this.selectedValues.length} selected`;
+    } else {
+      if (this.options) {
+        const selectedOption = this.options.find(opt => opt.value === this.selectedValues[0]);
+        this.displayValue = selectedOption ? selectedOption.displayText : this.selectedValues[0];
+      } else {
+        this.displayValue = this.selectedValues[0];
+      }
+    }
+    this.cdr.markForCheck();
+  }
+
+  private updateOptions() {
+    if (this.options) {
+      this.options.forEach(option => {
+        option.selected = this.selectedValues.includes(option.value);
+      });
+    }
+  }
+
+  // ControlValueAccessor implementation
+  writeValue(value: any): void {
+    if (this.multiple && Array.isArray(value)) {
+      this.selectedValues = value || [];
+    } else if (!this.multiple && value !== undefined && value !== null) {
+      this.selectedValues = [value];
+    } else {
+      this.selectedValues = [];
+    }
+    this.updateDisplayValue();
+    this.updateOptions();
+  }
+
+  registerOnChange(fn: any): void {
+    this._onChange = fn;
+  }
+
+  registerOnTouched(fn: any): void {
+    this._onTouched = fn;
+  }
+
+  setDisabledState(isDisabled: boolean): void {
+    this.disabled = isDisabled;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    if (!this.isOpen) return;
+
+    const target = event.target as HTMLElement;
+
+    // CRITICAL FIX: Check if click is on an option element first
+    // This prevents the dropdown from closing before the option's click handler runs
+    const isOptionClick = target.closest('.custom-option-content');
+    if (isOptionClick) {
+      // Let the option's click handler process this - don't interfere
+      return;
+    }
+
+    // Check if clicked inside the select component
+    const clickedTrigger = this.selectTrigger.nativeElement.contains(target);
+
+    // Check if clicked inside dropdown (with null safety for ViewChild)
+    // The ViewChild may not be available immediately after opening
+    const clickedDropdown = this.selectOptions?.nativeElement?.contains(target) || false;
+
+    const clickedInside = clickedTrigger || clickedDropdown;
+
+    if (!clickedInside) {
+      this.isOpen = false;
+      // CRITICAL: Mark for check in OnPush + zoneless mode
+      this.cdr.markForCheck();
+    }
+  }
+}

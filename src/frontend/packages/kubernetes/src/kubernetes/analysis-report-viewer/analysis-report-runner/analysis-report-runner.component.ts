@@ -1,5 +1,6 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { SidePanelService } from 'frontend/packages/core/src/shared/services/side-panel.service';
+import { AsyncPipe } from '@angular/common';
+import {Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { SidePanelService } from '@stratosui/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -9,23 +10,34 @@ import {
 } from '../../tabs/kubernetes-analysis-tab/kubernetes-analysis-info/kubernetes-analysis-info.component';
 
 @Component({
-  selector: 'app-analysis-report-runner',
+selector: 'app-analysis-report-runner',
   templateUrl: './analysis-report-runner.component.html',
-  styleUrls: ['./analysis-report-runner.component.scss']
+  styleUrls: ['./analysis-report-runner.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    AsyncPipe
+  ]
 })
 export class AnalysisReportRunnerComponent implements OnInit {
 
   canShow$: Observable<boolean>;
   analyzers$: Observable<KubernetesAnalysisType[]>;
-  @Input() kubeId: string;
-  @Input() namespace: string;
-  @Input() app: string;
+  menuOpen = false;
+  @Input() kubeId!: string;
+  @Input() namespace!: string;
+  @Input() app!: string;
+  public analysisService = inject(KubernetesAnalysisService);
+  private sidePanelService = inject(SidePanelService);
 
-  constructor(
-    public analysisService: KubernetesAnalysisService,
-    private sidePanelService: SidePanelService,
-  ) {
-    this.canShow$ = analysisService.hideAnalysis$.pipe(map(h => !h));
+
+
+  constructor() {
+
+
+    this.canShow$ = this.analysisService.hideAnalysis$.pipe(map(h => !h));
+
+
   }
 
   public runAnalysis(id: string) {

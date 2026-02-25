@@ -1,31 +1,42 @@
-import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
+import { RouterModule } from '@angular/router';
+
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { serviceInstancesEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
+import {
+  CFAppState,
+  serviceInstancesEntityType,
+  IService,
+  IServiceInstance,
+  cfEntityCatalog,
+  cfEntityFactory,
+  CfCurrentUserPermissions,
+  ServiceActionHelperService,
+  CfOrgSpaceLabelService,
+  CSI_CANCEL_URL,
+  CfOrgSpaceLinksComponent,
+} from '@stratosui/cloud-foundry';
+import { getServiceName, getServicePlanName, getServiceSummaryUrl } from '../../../../../../features/service-catalog/services-helper';
+import { ServiceInstanceLastOpComponent } from '../../../../service-instance-last-op/service-instance-last-op.component';
 import {
   CurrentUserPermissionsService,
-} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
-import { ComponentEntityMonitorConfig } from '../../../../../../../../store/src/types/shared.types';
-import { IService, IServiceInstance } from '../../../../../../cf-api-svc.types';
-import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
-import { cfEntityFactory } from '../../../../../../cf-entity-factory';
+  ClickStopPropagationDirective,
+  AppChip,
+  AppChipsComponent,
+  CardCell,
+  MetaCardComponent,
+  MetaCardItemComponent,
+  MetaCardKeyComponent,
+  MetaCardTitleComponent,
+  MetaCardValueComponent,
+  MultilineTitleComponent,
+} from '@stratosui/core';
+import { APIResource, MenuItem, ComponentEntityMonitorConfig } from '@stratosui/store';
 import {
-  getServiceName,
-  getServicePlanName,
-  getServiceSummaryUrl,
-} from '../../../../../../features/service-catalog/services-helper';
-import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
-import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
-import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
-import { CSI_CANCEL_URL } from '../../../../add-service-instance/csi-mode.service';
-import {
+  TableCellServiceBrokerComponent,
   TableCellServiceBrokerComponentConfig,
   TableCellServiceBrokerComponentMode,
 } from '../../cf-services/table-cell-service-broker/table-cell-service-broker.component';
@@ -34,19 +45,36 @@ import {
   selector: 'app-service-instance-card',
   templateUrl: './service-instance-card.component.html',
   styleUrls: ['./service-instance-card.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MetaCardComponent,
+    MetaCardTitleComponent,
+    MetaCardItemComponent,
+    MetaCardKeyComponent,
+    MetaCardValueComponent,
+    MultilineTitleComponent,
+    CfOrgSpaceLinksComponent,
+    TableCellServiceBrokerComponent,
+    ServiceInstanceLastOpComponent,
+    AppChipsComponent,
+    ClickStopPropagationDirective,
+  ]
 })
 export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceInstance>> {
 
   @Input('row')
   set row(row: APIResource<IServiceInstance>) {
     super.row = row;
-    if (row) {
+    if (row && row.entity && row.metadata) {
       this.serviceInstanceEntity = row;
       const schema = cfEntityFactory(serviceInstancesEntityType);
       this.entityConfig = new ComponentEntityMonitorConfig(row.metadata.guid, schema);
-      this.serviceInstanceTags = row.entity.tags.map(t => ({
+      this.serviceInstanceTags = row.entity.tags ? row.entity.tags.map(t => ({
         value: t
-      }));
+      })) : [];
       this.cfGuid = row.entity.cfGuid;
       this.hasMultipleBindings.next(!(row.entity.service_bindings && row.entity.service_bindings.length > 0));
       this.cardMenu = [
@@ -62,7 +90,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
         {
           label: 'Unbind',
           action: this.detach,
-          disabled: observableOf(this.serviceInstanceEntity.entity.service_bindings.length === 0),
+          disabled: observableOf(!this.serviceInstanceEntity.entity.service_bindings || this.serviceInstanceEntity.entity.service_bindings.length === 0),
           can: this.currentUserPermissionsService.can(
             CfCurrentUserPermissions.SERVICE_INSTANCE_EDIT,
             this.serviceInstanceEntity.entity.cfGuid,
@@ -79,7 +107,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
           )
         }
       ];
-      if (!this.cfOrgSpace) {
+      if (!this.cfOrgSpace && row.entity.space && row.entity.space.entity) {
         this.cfOrgSpace = new CfOrgSpaceLabelService(
           this.store,
           this.cfGuid,
@@ -87,7 +115,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
           row.entity.space_guid);
       }
 
-      if (!this.service$) {
+      if (!this.service$ && this.serviceInstanceEntity.entity.service_guid) {
         this.service$ = cfEntityCatalog.service.store.getEntityService(
           this.serviceInstanceEntity.entity.service_guid,
           this.serviceInstanceEntity.entity.cfGuid,
@@ -100,21 +128,23 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
         );
       }
 
-      if (!this.serviceName$) {
+      if (!this.serviceName$ && this.service$) {
         // See note for this.serviceBrokerName$
         this.serviceName$ = this.service$.pipe(
           map(getServiceName)
         );
       }
 
-      this.servicePlanName = this.serviceInstanceEntity.entity.service_plan ?
+      this.servicePlanName = this.serviceInstanceEntity.entity.service_plan && this.serviceInstanceEntity.entity.service_plan.entity ?
         getServicePlanName(this.serviceInstanceEntity.entity.service_plan.entity)
         : null;
 
-      this.serviceUrl = getServiceSummaryUrl(
-        this.serviceInstanceEntity.entity.cfGuid,
-        this.serviceInstanceEntity.entity.service_guid
-      );
+      if (this.serviceInstanceEntity.entity.cfGuid && this.serviceInstanceEntity.entity.service_guid) {
+        this.serviceUrl = getServiceSummaryUrl(
+          this.serviceInstanceEntity.entity.cfGuid,
+          this.serviceInstanceEntity.entity.service_guid
+        );
+      }
     }
   }
 

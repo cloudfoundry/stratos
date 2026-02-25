@@ -1,10 +1,20 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0%;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
 .log-viewer {
   display: flex;
   flex-direction: column;
   height: 100%;
-  overflow: visible;
-  position: relative;
   width: 100%;
+  position: relative;
+
   &__scrollToBotttom,
   &__message {
     align-items: flex-end;
@@ -14,17 +24,20 @@
     left: 0;
     pointer-events: none;
     position: absolute;
+    right: 0;
     top: 0;
-    width: 100%;
   }
+
   &__scrollButton {
     margin-bottom: 6px;
     pointer-events: auto;
   }
+
   &__message {
     align-items: center;
     height: auto;
   }
+
   &__messageText {
     padding: 12px;
   }
@@ -33,18 +46,20 @@
 .log-scroller {
   border-style: solid;
   border-width: 1px;
+  flex: 1 1 0%;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: relative;
+  width: 100%;
   font-family: 'Source Code Pro', monospace;
   font-size: 10pt;
-  height: 100%;
   line-height: 20px;
-  overflow-x: hidden;
-  overflow-y: scroll;
   padding: 10px 10px 20px;
-  position: relative;
   transform: translateZ(0);
   white-space: pre-wrap;
-  width: 100%;
   word-wrap: break-word;
+
   &__content {
     left: 0;
     position: absolute;

@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { DomainMismatchComponent } from './domain-mismatch.component';
 import { MDAppModule } from '../../../core/md.module';
@@ -9,15 +11,21 @@ describe('DomainMismatchComponent', () => {
   let component: DomainMismatchComponent;
   let fixture: ComponentFixture<DomainMismatchComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ DomainMismatchComponent, IntroScreenComponent, StratosTitleComponent ],
+      
+      providers: [provideZonelessChangeDetection()],
+      
       imports: [
         MDAppModule,
+        DomainMismatchComponent,
+        IntroScreenComponent,
+        StratosTitleComponent,
       ]
-    })
-    .compileComponents();
-  }));
+    
+    });
+    TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(DomainMismatchComponent);

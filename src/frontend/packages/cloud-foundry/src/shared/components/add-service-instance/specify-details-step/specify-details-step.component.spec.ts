@@ -1,9 +1,12 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { MaterialDesignFrameworkModule } from '@ajsf/material';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { EntityMonitorFactory } from '../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
-import { generateCfBaseTestModulesNoShared } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { TailwindJsonSchemaFormModule } from '@stratosui/core';
+import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
 import { LongRunningCfOperationsService } from '../../../data-services/long-running-cf-op.service';
 import { SchemaFormComponent } from '../../schema-form/schema-form.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
@@ -15,27 +18,29 @@ describe('SpecifyDetailsStepComponent', () => {
   let component: SpecifyDetailsStepComponent;
   let fixture: ComponentFixture<SpecifyDetailsStepComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        SpecifyDetailsStepComponent,
-        SchemaFormComponent
-      ],
       imports: [
-        generateCfBaseTestModulesNoShared(),
-        MaterialDesignFrameworkModule
+        SpecifyDetailsStepComponent,
+        SchemaFormComponent,
       ],
       providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          ...generateCfBaseTestModulesNoShared(),
+          TailwindJsonSchemaFormModule,
+        ),
         CreateServiceInstanceHelperServiceFactory,
         CsiGuidsService,
-        PaginationMonitorFactory,
-        EntityMonitorFactory,
         CsiModeService,
-        LongRunningCfOperationsService
+        LongRunningCfOperationsService,
       ]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SpecifyDetailsStepComponent);

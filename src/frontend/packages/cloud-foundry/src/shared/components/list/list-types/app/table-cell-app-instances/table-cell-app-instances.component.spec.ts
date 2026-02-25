@@ -1,33 +1,29 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
-import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
-import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { PaginationMonitorFactory } from '@stratosui/store';
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { RunningInstancesComponent } from '../../../../running-instances/running-instances.component';
-import { TableCellAppInstancesComponent } from './table-cell-app-instances.component';
-
+import { TableCellAppInstancesComponent } from "./table-cell-app-instances.component";
 describe('TableCellAppInstancesComponent', () => {
   let component: TableCellAppInstancesComponent<any>;
   let fixture: ComponentFixture<TableCellAppInstancesComponent<any>>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
-        TableCellAppInstancesComponent,
-        RunningInstancesComponent
-      ],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
+        TableCellAppInstancesComponent,
+        RunningInstancesComponent,
         ...generateCfStoreModules(),
-        CoreModule,
       ],
       providers: [
-        PaginationMonitorFactory
-      ]
+        PaginationMonitorFactory,
+        provideZonelessChangeDetection(),
+      ],
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellAppInstancesComponent);
     component = fixture.componentInstance;
     component.row = { entity: {}, metadata: {} };

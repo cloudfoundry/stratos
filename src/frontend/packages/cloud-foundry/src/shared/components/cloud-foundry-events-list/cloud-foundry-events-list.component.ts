@@ -1,26 +1,52 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+
+import { Component, Input, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { ReactiveFormsModule, FormControl, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
-import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
-import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
-import { APIResource } from '../../../../../store/src/types/api.types';
+import {
+  CustomFormFieldComponent,
+  AppInputDirective,
+  CustomSelectComponent,
+  CustomOptionComponent,
+  ListComponent,
+  ListConfig,
+  safeUnsubscribe
+} from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
 import { CfEventsConfigService } from '../list/list-types/cf-events/cf-events-config.service';
+
+/**
+ * Typed form interface for CF Events list filters
+ */
+interface EventsFilterForm {
+  actee: FormControl<string | null>;
+  type: FormControl<string[] | null>;
+}
 
 @Component({
   selector: 'app-cloud-foundry-events-list',
   templateUrl: './cloud-foundry-events-list.component.html',
-  styleUrls: ['./cloud-foundry-events-list.component.scss']
+  styleUrls: ['./cloud-foundry-events-list.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    ReactiveFormsModule,
+    CustomFormFieldComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
+    AppInputDirective,
+    ListComponent
+]
 })
 export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
 
   /**
    * Values in the `event` filter mist contain this value, for instance `audit.app`
    */
-  @Input() typeMustContain: string;
+  @Input() typeMustContain!: string;
 
-  filtersFormGroup: UntypedFormGroup;
+  filtersFormGroup: FormGroup<EventsFilterForm>;
   typeValues: string[] = [
     'app.crash',
     'audit.app.copy-bits',
@@ -114,11 +140,11 @@ export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
   constructor(
     listConfig: ListConfig<APIResource>,
   ) {
-    this.filtersFormGroup = new UntypedFormGroup({
-      actee: new UntypedFormControl(null, []),
-      type: new UntypedFormControl(null, []),
+    this.filtersFormGroup = new FormGroup<EventsFilterForm>({
+      actee: new FormControl<string | null>(null),
+      type: new FormControl<string[] | null>(null),
     });
-    this.config = (listConfig as CfEventsConfigService);
+    this.config = (listConfig as any as CfEventsConfigService);
 
     // Set initial filter values
     this.subs.push(
@@ -129,7 +155,7 @@ export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
           this.updateType(params.type);
           this.updateActee(params.actee);
           this.initialSet = true;
-        } else if (this.filtersFormGroup.controls.actee.value !== params.actee) {
+        } else if (this.filtersFormGroup.get('actee')?.value !== params.actee) {
           this.updateActee(params.actee);
         }
       })
@@ -140,7 +166,7 @@ export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
       this.filtersFormGroup.valueChanges.pipe(
         debounceTime(250)
       ).subscribe(values => {
-        this.config.setEventFilters(values);
+        this.config.setEventFilters(values as { actee: string; type: string[] });
         this.hasActeeFilter = !!values.actee;
       })
     );
@@ -164,13 +190,13 @@ export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
   }
 
   private updateType(type: string[]) {
-    this.filtersFormGroup.controls.type.setValue(type);
-    this.filtersFormGroup.controls.type.markAsDirty();
+    this.filtersFormGroup.get('type')?.setValue(type);
+    this.filtersFormGroup.get('type')?.markAsDirty();
   }
 
   private updateActee(actee: string) {
-    this.filtersFormGroup.controls.actee.setValue(actee);
-    this.filtersFormGroup.controls.actee.markAsDirty();
+    this.filtersFormGroup.get('actee')?.setValue(actee);
+    this.filtersFormGroup.get('actee')?.markAsDirty();
     this.hasActeeFilter = !!actee;
   }
 

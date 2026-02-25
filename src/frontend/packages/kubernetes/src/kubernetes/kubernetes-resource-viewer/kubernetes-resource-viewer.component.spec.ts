@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 
 import { SidePanelService } from '../../../../core/src/shared/services/side-panel.service';
@@ -13,10 +15,9 @@ describe('KubernetesResourceViewerComponent', () => {
   let component: KubernetesResourceViewerComponent;
   let fixture: ComponentFixture<KubernetesResourceViewerComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [KubernetesResourceViewerComponent, KubernetesResourceViewerComponent, ResourceAlertViewComponent],
-      imports: KubernetesBaseTestModules,
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [KubernetesResourceViewerComponent, ResourceAlertViewComponent, ...KubernetesBaseTestModules],
       providers: [
         KubernetesEndpointService,
         KubeBaseGuidMock,
@@ -31,11 +32,10 @@ describe('KubernetesResourceViewerComponent', () => {
             }
           }
         },
-        SidePanelService
+        SidePanelService,
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesResourceViewerComponent);

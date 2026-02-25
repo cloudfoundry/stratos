@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   GetUserFavoritesAction,
   GetUserFavoritesFailedAction,
@@ -9,6 +10,24 @@ import { getDefaultFavoriteGroupsState, IUserFavoritesGroupsState } from '../../
 import { IEndpointFavMetadata, UserFavorite } from '../../types/user-favorites.types';
 import { getEndpointIDFromFavorite } from '../../user-favorite-helpers';
 import { userFavoriteGroupsReducer } from './user-favorites-groups.reducer';
+
+// Suppress entity catalog warnings for these tests
+// The warnings occur because test data references Cloud Foundry entities that aren't registered
+// in the test catalog. This is expected behavior for unit tests that use mock data.
+beforeEach(() => {
+  vi.spyOn(console, 'warn').mockImplementation((msg: any) => {
+    // Suppress only the entity catalog warnings
+    if (typeof msg === 'string' && msg.includes('Missing catalog entity:')) {
+      return;
+    }
+    // Allow other warnings through for debugging
+    console.info('[Test Warning]', msg);
+  });
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 const endpointFavorite = () => new UserFavorite<IEndpointFavMetadata>(
   'endpoint1',
@@ -81,7 +100,7 @@ describe('userFavoritesReducer', () => {
           endpoint: {},
           ethereal: true,
           entitiesIds: [
-            fav.guid
+            fav.guid,
           ]
         }
       }
@@ -104,7 +123,7 @@ describe('userFavoritesReducer', () => {
           }
         }
       },
-      action
+      action,
     );
 
     expect(newState).toEqual({
@@ -114,7 +133,7 @@ describe('userFavoritesReducer', () => {
           endpoint: {},
           ethereal: false,
           entitiesIds: [
-            fav.guid
+            fav.guid,
           ]
         }
       }
@@ -135,7 +154,7 @@ describe('userFavoritesReducer', () => {
       endpointFav,
       endpointFav2,
       fav21,
-      fav3
+      fav3,
     ];
 
     const action = new GetUserFavoritesSuccessAction(favs);
@@ -150,7 +169,7 @@ describe('userFavoritesReducer', () => {
           endpoint: new UserFavorite('endpoint1', 'cf', 'endpoint'),
           ethereal: false,
           entitiesIds: [
-            fav.guid
+            fav.guid,
           ]
         },
         [endpointFav2.guid]: {
@@ -158,14 +177,14 @@ describe('userFavoritesReducer', () => {
           ethereal: false,
           entitiesIds: [
             fav2.guid,
-            fav21.guid
+            fav21.guid,
           ]
         },
         [endpoint3FavGuid]: {
           endpoint: {},
           ethereal: true,
           entitiesIds: [
-            fav3.guid
+            fav3.guid,
           ]
         }
       }
@@ -184,7 +203,7 @@ describe('userFavoritesReducer', () => {
           endpoint: {} as UserFavorite,
           ethereal: false,
           entitiesIds: [
-            fav.guid
+            fav.guid,
           ]
         }
       }
@@ -215,7 +234,7 @@ describe('userFavoritesReducer', () => {
           endpoint: {} as UserFavorite,
           ethereal: true,
           entitiesIds: [
-            fav.guid
+            fav.guid,
           ]
         }
       }
@@ -232,7 +251,7 @@ describe('userFavoritesReducer', () => {
     const newState = userFavoriteGroupsReducer(undefined, action);
     expect(newState).toEqual({
       ...defaultState,
-      busy: true
+      busy: true,
     } as IUserFavoritesGroupsState);
   });
 
@@ -241,11 +260,11 @@ describe('userFavoritesReducer', () => {
     const defaultState = getDefaultFavoriteGroupsState();
     const newState = userFavoriteGroupsReducer({
       ...defaultState,
-      busy: true
+      busy: true,
     }, action);
     expect(newState).toEqual({
       ...defaultState,
-      busy: false
+      busy: false,
     } as IUserFavoritesGroupsState);
   });
 
@@ -255,7 +274,7 @@ describe('userFavoritesReducer', () => {
     const newState = userFavoriteGroupsReducer({
       ...defaultState,
       busy: true,
-      error: false
+      error: false,
     }, action);
     expect(newState).toEqual({
       ...defaultState,

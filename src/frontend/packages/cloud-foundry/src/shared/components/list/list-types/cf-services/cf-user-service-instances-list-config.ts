@@ -1,25 +1,24 @@
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, of as observableOf } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   CurrentUserPermissionsService,
-} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import {
-  ListDataSource,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import {
   defaultPaginationPageSizeOptionsTable,
+  IGlobalListAction,
   IListAction,
   IListConfig,
-  ListViewTypes,
-} from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+  IListMultiFilterConfig,
+  IMultiListAction,
+  ITableColumn,
+  ITableText,
+  ListDataSource,
+  ListViewTypes
+} from '@stratosui/core';
+import { APIResource, ListView } from '@stratosui/store';
+import { CFAppState } from '../../../../../cf-app-state';
 import { IUserProvidedServiceInstance } from '../../../../../cf-api-svc.types';
 import { CloudFoundrySpaceService } from '../../../../../features/cf/services/cloud-foundry-space.service';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
@@ -53,9 +52,9 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
   pageSizeOptions = defaultPaginationPageSizeOptionsTable;
   dataSource: ListDataSource<APIResource<IUserProvidedServiceInstance>>;
   defaultView = 'table' as ListView;
-  text = {
-    title: null,
-    filter: null,
+  text: ITableText = {
+    title: null as string | null,
+    filter: null as string | null,
     noEntries: 'There are no user provided service instances'
   };
 
@@ -119,33 +118,37 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
     },
   ];
 
-  private listActionDelete: IListAction<APIResource> = {
-    action: (item: APIResource) => this.deleteServiceInstance(item),
+  private listActionDelete: IListAction<APIResource<IUserProvidedServiceInstance>> = {
+    action: (item: APIResource<IUserProvidedServiceInstance>) => this.deleteServiceInstance(item),
     label: 'Delete',
     description: 'Delete Service Instance',
     createVisible: (row$: Observable<APIResource<IUserProvidedServiceInstance>>) =>
       row$.pipe(
         switchMap(
-          row => this.can(this.canDeleteCache, CfCurrentUserPermissions.SERVICE_INSTANCE_DELETE, row.entity.cfGuid, row.entity.space_guid)
+          row => row && row.entity && row.entity.cfGuid && row.entity.space_guid ?
+            this.can(this.canDeleteCache, CfCurrentUserPermissions.SERVICE_INSTANCE_DELETE, row.entity.cfGuid, row.entity.space_guid) :
+            observableOf(false)
         )
       )
   };
 
-  private listActionDetach: IListAction<APIResource> = {
-    action: (item: APIResource) => this.deleteServiceBinding(item),
+  private listActionDetach: IListAction<APIResource<IUserProvidedServiceInstance>> = {
+    action: (item: APIResource<IUserProvidedServiceInstance>) => this.deleteServiceBinding(item),
     label: 'Unbind',
     description: 'Unbind Service Instance',
     createEnabled: (row$: Observable<APIResource<IUserProvidedServiceInstance>>) =>
-      row$.pipe(map(row => row.entity.service_bindings.length !== 0)),
+      row$.pipe(map(row => !!(row && row.entity && row.entity.service_bindings && row.entity.service_bindings.length !== 0))),
     createVisible: (row$: Observable<APIResource<IUserProvidedServiceInstance>>) =>
       row$.pipe(
         switchMap(
-          row => this.can(this.canDetachCache, CfCurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid)
+          row => row && row.entity && row.entity.cfGuid && row.entity.space_guid ?
+            this.can(this.canDetachCache, CfCurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid) :
+            observableOf(false)
         )
       )
   };
 
-  private listActionEdit: IListAction<APIResource> = {
+  private listActionEdit: IListAction<APIResource<IUserProvidedServiceInstance>> = {
     action: (item: APIResource<IUserProvidedServiceInstance>) =>
       this.serviceActionHelperService.startEditServiceBindingStepper(
         item.metadata.guid,
@@ -162,7 +165,9 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
     createVisible: (row$: Observable<APIResource<IUserProvidedServiceInstance>>) =>
       row$.pipe(
         switchMap(
-          row => this.can(this.canDetachCache, CfCurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid)
+          row => row && row.entity && row.entity.cfGuid && row.entity.space_guid ?
+            this.can(this.canDetachCache, CfCurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid) :
+            observableOf(false)
         )
       )
   };
@@ -208,11 +213,11 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
     );
   }
 
-  getGlobalActions = () => [];
-  getMultiActions = () => [];
-  getSingleActions = () => [this.listActionEdit, this.listActionDetach, this.listActionDelete];
-  getMultiFiltersConfigs = () => [];
-  getColumns = () => this.serviceInstanceColumns;
-  getDataSource = () => this.dataSource;
+  getGlobalActions = (): IGlobalListAction<APIResource<IUserProvidedServiceInstance>>[] => [];
+  getMultiActions = (): IMultiListAction<APIResource<IUserProvidedServiceInstance>>[] => [];
+  getSingleActions = (): IListAction<APIResource<IUserProvidedServiceInstance>>[] => [this.listActionEdit, this.listActionDetach, this.listActionDelete];
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
+  getColumns = (): ITableColumn<APIResource<IUserProvidedServiceInstance>>[] => this.serviceInstanceColumns;
+  getDataSource = (): ListDataSource<APIResource<IUserProvidedServiceInstance>> => this.dataSource;
 
 }

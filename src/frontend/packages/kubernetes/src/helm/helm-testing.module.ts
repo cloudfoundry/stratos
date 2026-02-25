@@ -4,8 +4,8 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { CoreModule, SharedModule } from '@stratosui/core';
+import { CoreTestingModule } from '../../../core/test-framework/core-test.modules';
 
-import { AppTestModule } from '../../../core/test-framework/core-test.helper';
 import {
   CATALOGUE_ENTITIES,
   entityCatalog,
@@ -19,21 +19,23 @@ import { generateHelmEntities } from './helm-entity-generator';
 
 
 @NgModule({
-  imports: [{
-    ngModule: EntityCatalogFeatureModule,
-    providers: [
-      {
-        provide: CATALOGUE_ENTITIES, useFactory: () => {
-          const testEntityCatalog = entityCatalog as TestEntityCatalog;
-          testEntityCatalog.clear();
-          return [
-            ...generateStratosEntities(),
-            ...generateHelmEntities(),
-          ];
-        }
-      }
-    ]
-  }]
+  imports: [
+    EntityCatalogFeatureModule,
+  ],
+  providers: [
+    {
+      provide: CATALOGUE_ENTITIES,
+      useFactory: () => {
+        const testEntityCatalog = entityCatalog as TestEntityCatalog;
+        testEntityCatalog.clear();
+        return [
+          ...generateStratosEntities(),
+          ...generateHelmEntities(),
+        ];
+      },
+      multi: true
+    }
+  ]
 })
 export class HelmTestingModule { }
 
@@ -58,15 +60,15 @@ export const HelmReleaseGuidMock = {
 };
 
 export const HelmBaseTestModules = [
-  AppTestModule,
+  CoreTestingModule,
+  createBasicStoreModule(),
   HelmTestingModule,
   RouterTestingModule,
   CoreModule,
-  createBasicStoreModule(),
   NoopAnimationsModule,
   HttpClientModule,
   SharedModule
-];
+].filter(Boolean);
 
 export const HelmBaseTestProviders = [
   HttpClient,

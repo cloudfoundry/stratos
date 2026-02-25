@@ -2,36 +2,38 @@ import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { applicationEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
-import { ISpaceFavMetadata } from '../../../../../../../cloud-foundry/src/cf-metadata-types';
 import {
   createTableColumnFavorite,
-} from '../../../../../../../core/src/shared/components/list/list-table/table-cell-favorite/table-cell-favorite.component';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import {
+  ITableColumn,
   defaultPaginationPageSizeOptionsTable,
+  IGlobalListAction,
+  IListAction,
   IListConfig,
+  IListMultiFilterConfig,
+  IMultiListAction,
   ListViewTypes,
-} from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
+} from '@stratosui/core';
+import { ListView, APIResource, UserFavorite } from '@stratosui/store';
+import { CFAppState } from '../../../../../cf-app-state';
+import { applicationEntityType } from '../../../../../cf-entity-types';
+import { ISpaceFavMetadata } from '../../../../../cf-metadata-types';
 import { IApp } from '../../../../../cf-api.types';
 import { CloudFoundrySpaceService } from '../../../../../features/cf/services/cloud-foundry-space.service';
 import { TableCellAppNameComponent } from '../app/table-cell-app-name/table-cell-app-name.component';
 import { TableCellAppStatusComponent } from '../app/table-cell-app-status/table-cell-app-status.component';
 import { CfSpaceAppsDataSource } from './cf-space-apps-data-source.service';
 
-@Injectable()
-export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
+@Injectable({
+  providedIn: 'root'
+})
+export class CfSpaceAppsListConfigService implements IListConfig<APIResource<IApp>> {
   isLocal = false;
   viewType = ListViewTypes.TABLE_ONLY;
   enableTextFilter = false;
   dataSource: CfSpaceAppsDataSource;
   defaultView = 'table' as ListView;
   text = {
-    title: null,
+    title: null as string | null,
     noEntries: 'There are no applications'
   };
   pageSizeOptions = defaultPaginationPageSizeOptionsTable;
@@ -90,9 +92,9 @@ export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
     this.dataSource = new CfSpaceAppsDataSource(this.store, cfSpaceService, this);
   }
 
-  getGlobalActions = () => [];
-  getMultiActions = () => [];
-  getSingleActions = () => [];
-  getMultiFiltersConfigs = () => [];
-  getDataSource = () => this.dataSource;
+  getGlobalActions = (): IGlobalListAction<APIResource<IApp>>[] => [];
+  getMultiActions = (): IMultiListAction<APIResource<IApp>>[] => [];
+  getSingleActions = (): IListAction<APIResource<IApp>>[] => [];
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
+  getDataSource = (): CfSpaceAppsDataSource => this.dataSource;
 }

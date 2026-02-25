@@ -1,4 +1,6 @@
-import { BehaviorSubject, Observable } from 'rxjs';
+import { signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { Observable } from 'rxjs';
 
 import { DeployApplicationFSScanner, FileScannerInfo } from './deploy-application-fs-scanner';
 
@@ -12,18 +14,19 @@ export class DeployApplicationFsUtils {
   constructor() { }
 
   // File list from a file input form field
-  handleFileInputSelection(items): Observable<FileScannerInfo> {
-    const obs$ = new BehaviorSubject<DeployApplicationFSScanner>(undefined);
+  handleFileInputSelection(items: any): Observable<FileScannerInfo> {
+    // Use signal with initialValue to avoid undefined type issues
+    const scannerSignal = signal<DeployApplicationFSScanner | undefined>(undefined);
     let scanner = new DeployApplicationFSScanner(CF_DEFAULT_IGNORES);
-    let cfIgnoreFile;
-    let manifestFile = false;
+    let cfIgnoreFile: any;
+    let manifestFile: any = false;
     let rootFolderName = '';
 
     if (items.length === 1) {
       if (scanner.isArchiveFile(items[0].name)) {
         scanner.addFile(items[0]);
         scanner.summarize();
-        obs$.next(scanner);
+        scannerSignal.set(scanner);
       }
     } else {
       // See if we can find the .cfignore file and/or the manifest file
@@ -59,10 +62,11 @@ export class DeployApplicationFsUtils {
         scanner.addFile(items.item(index));
       }
       scanner.summarize();
-      obs$.next(scanner);
+      scannerSignal.set(scanner);
     });
 
-    return obs$;
+    // Convert signal to Observable for backward compatibility
+    return toObservable(scannerSignal);
   }
 
 }

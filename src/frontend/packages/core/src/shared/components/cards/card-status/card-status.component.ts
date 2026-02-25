@@ -1,7 +1,8 @@
+import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { StratosStatus } from '../../../../../../store/src/types/shared.types';
+import { StratosStatus } from '@stratosui/store';
 
 
 export function determineCardStatus(value: number, limit: number): StratosStatus {
@@ -23,10 +24,14 @@ export function determineCardStatus(value: number, limit: number): StratosStatus
   selector: 'app-card-status',
   templateUrl: './card-status.component.html',
   styleUrls: ['./card-status.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule
+  ]
 })
 export class CardStatusComponent {
-  @Input() status$: Observable<StratosStatus>;
+  @Input() status$!: Observable<StratosStatus>;
 
   private cardStatus = StratosStatus;
 

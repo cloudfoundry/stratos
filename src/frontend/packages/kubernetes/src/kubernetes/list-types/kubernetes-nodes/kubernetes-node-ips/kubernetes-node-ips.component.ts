@@ -1,12 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
+import { CustomTooltipDirective } from '@stratosui/core';
 
 import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
 import { KubernetesAddressExternal, KubernetesAddressInternal, KubernetesNode } from '../../../store/kube.types';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-node-ips',
   templateUrl: './kubernetes-node-ips.component.html',
-  styleUrls: ['./kubernetes-node-ips.component.scss']
+  styleUrls: ['./kubernetes-node-ips.component.scss'],
+  standalone: true,
+  imports: [
+    CustomTooltipDirective,
+  ]
 })
 export class KubernetesNodeIpsComponent extends TableCellCustom<KubernetesNode> implements OnInit {
 

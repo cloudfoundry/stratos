@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
@@ -10,6 +10,10 @@ import { ITileConfig, ITileData } from '../../../../../../core/src/shared/compon
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { CSI_CANCEL_URL } from '../csi-mode.service';
 import { SERVICE_INSTANCE_TYPES } from './add-service-instance.types';
+import { PageHeaderComponent } from '../../../../../../core/src/shared/components/page-header/page-header.component';
+import { SteppersComponent } from '../../../../../../core/src/shared/components/stepper/steppers/steppers.component';
+import { StepComponent } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import { TileSelectorComponent } from '../../../../../../core/src/shared/components/tile-selector/tile-selector.component';
 
 interface ICreateServiceTilesData extends ITileData {
   type: string;
@@ -18,7 +22,15 @@ interface ICreateServiceTilesData extends ITileData {
 @Component({
   selector: 'app-add-service-instance-base-step',
   templateUrl: './add-service-instance-base-step.component.html',
-  styleUrls: ['./add-service-instance-base-step.component.scss']
+  styleUrls: ['./add-service-instance-base-step.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    TileSelectorComponent
+  ]
 })
 export class AddServiceInstanceBaseStepComponent {
   private tileManager = new TileConfigManager();

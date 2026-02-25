@@ -19,7 +19,7 @@ const BUILT_IN_TYPES = [
 
 const toString = ({}).toString;
 
-function isBuiltIn(constructor): boolean {
+function isBuiltIn(constructor: Function): boolean {
   for (const bit of BUILT_IN_TYPES) {
     if (bit === constructor) {
       return true;
@@ -28,15 +28,15 @@ function isBuiltIn(constructor): boolean {
   return false;
 }
 
-function of(obj) {
+function of(obj: unknown): (new (...args: any[]) => any) | null | undefined {
   if ((obj === null) || (obj === undefined)) {
-    return obj;
+    return obj as null | undefined;
   } else {
-    return obj.constructor;
+    return (obj as any).constructor as (new (...args: any[]) => any);
   }
 }
 
-function stringType(obj) {
+function stringType(obj: unknown): string {
   // [object Blah] -> Blah
   const stype = toString.call(obj).slice(8, -1);
   if ((obj === null) || (obj === undefined)) {
@@ -56,14 +56,14 @@ function stringType(obj) {
 
 const DRAFT = 'http://json-schema.org/draft-04/schema#';
 
-function getPropertyFormat(value) {
+function getPropertyFormat(value: unknown): string | null {
   const type = stringType(value).toLowerCase();
 
   if (type === 'date') { return 'date-time'; }
   return null;
 }
 
-function getPropertyType(value) {
+function getPropertyType(value: unknown): string {
   const type = stringType(value).toLowerCase();
 
   if (type === 'number') { return Number.isInteger(value) ? 'integer' : type; }
@@ -73,38 +73,38 @@ function getPropertyType(value) {
   return type;
 }
 
-function getUniqueKeys(a, b, c) {
-  a = Object.keys(a);
-  b = Object.keys(b);
-  c = c || [];
+function getUniqueKeys(a: Record<string, unknown>, b: Record<string, unknown>, c?: string[]): string[] {
+  const aKeys = Object.keys(a);
+  const bKeys = Object.keys(b);
+  const result = c || [];
 
-  let value;
-  let cIndex;
-  let aIndex;
+  let value: string;
+  let cIndex: number;
+  let aIndex: number;
 
-  for (let keyIndex = 0, keyLength = b.length; keyIndex < keyLength; keyIndex++) {
-    value = b[keyIndex];
-    aIndex = a.indexOf(value);
-    cIndex = c.indexOf(value);
+  for (let keyIndex = 0, keyLength = bKeys.length; keyIndex < keyLength; keyIndex++) {
+    value = bKeys[keyIndex];
+    aIndex = aKeys.indexOf(value);
+    cIndex = result.indexOf(value);
 
     if (aIndex === -1) {
       if (cIndex !== -1) {
         // Value is optional, it doesn't exist in A but exists in B(n)
-        c.splice(cIndex, 1);
+        result.splice(cIndex, 1);
       }
     } else if (cIndex === -1) {
       // Value is required, it exists in both B and A, and is not yet present in C
-      c.push(value);
+      result.push(value);
     }
   }
 
-  return c;
+  return result;
 }
 
-function processArray(array, output?, nested?: boolean) {
-  let format;
-  let oneOf;
-  let type;
+function processArray(array: unknown[], output?: Record<string, unknown>, nested?: boolean): Record<string, unknown> {
+  let format: string | null = null;
+  let oneOf: boolean | undefined;
+  let type: string | null = null;
 
   if (nested && output) {
     output = { items: output };
@@ -112,7 +112,7 @@ function processArray(array, output?, nested?: boolean) {
     output = output || {};
     output.type = getPropertyType(array);
     output.items = output.items || {};
-    type = output.items.type || null;
+    type = (output.items as any).type || null;
   }
 
   // Determine whether each item is different
@@ -121,7 +121,7 @@ function processArray(array, output?, nested?: boolean) {
     const elementFormat = getPropertyFormat(array[arrIndex]);
 
     if (type && elementType !== type) {
-      output.items.oneOf = [];
+      (output.items as any).oneOf = [];
       oneOf = true;
       break;
     } else {
@@ -132,9 +132,9 @@ function processArray(array, output?, nested?: boolean) {
 
   // Setup type otherwise
   if (!oneOf && type) {
-    output.items.type = type;
+    (output.items as any).type = type;
     if (format) {
-      output.items.format = format;
+      (output.items as any).format = format;
     }
   } else if (oneOf && type !== 'object') {
     output.items = {
@@ -144,19 +144,19 @@ function processArray(array, output?, nested?: boolean) {
   }
 
   // Process each item depending
-  if (typeof output.items.oneOf !== 'undefined' || type === 'object') {
+  if (typeof (output.items as any).oneOf !== 'undefined' || type === 'object') {
     for (let itemIndex = 0, itemLength = array.length; itemIndex < itemLength; itemIndex++) {
       const value = array[itemIndex];
       const itemType = getPropertyType(value);
       const itemFormat = getPropertyFormat(value);
-      let arrayItem;
+      let arrayItem: Record<string, unknown>;
       if (itemType === 'object') {
-        if (output.items.properties) {
-          output.items.required = false;
+        if ((output.items as any).properties) {
+          (output.items as any).required = false;
         }
-        arrayItem = processObject(value, oneOf ? {} : output.items.properties, true);
+        arrayItem = processObject(value as Record<string, unknown>, oneOf ? {} : (output.items as any).properties, true);
       } else if (itemType === 'array') {
-        arrayItem = processArray(value, oneOf ? {} : output.items.properties, true);
+        arrayItem = processArray(value as unknown[], oneOf ? {} : (output.items as any).properties, true);
       } else {
         arrayItem = {};
         arrayItem.type = itemType;
@@ -172,19 +172,19 @@ function processArray(array, output?, nested?: boolean) {
           tempObj.type = 'object';
           arrayItem = tempObj;
         }
-        output.items.oneOf.push(arrayItem);
+        (output.items as any).oneOf.push(arrayItem);
       } else {
-        if (output.items.type !== 'object') {
+        if ((output.items as any).type !== 'object') {
           continue;
         }
-        output.items.properties = arrayItem;
+        (output.items as any).properties = arrayItem;
       }
     }
   }
-  return nested ? output.items : output;
+  return nested ? (output.items as Record<string, unknown>) : output;
 }
 
-function processObject(object: any, output?: any, nested?: boolean) {
+function processObject(object: Record<string, unknown>, output?: Record<string, unknown>, nested?: boolean): Record<string, unknown> {
   if (nested && output) {
     output = { properties: output };
   } else {
@@ -202,17 +202,17 @@ function processObject(object: any, output?: any, nested?: boolean) {
     typ = typ === 'undefined' ? 'null' : typ;
 
     if (typ === 'object') {
-      output.properties[key] = processObject(value, output.properties[key]);
+      (output.properties as any)[key] = processObject(value as Record<string, unknown>, (output.properties as any)[key]);
       continue;
     }
 
     if (typ === 'array') {
-      output.properties[key] = processArray(value, output.properties[key]);
+      (output.properties as any)[key] = processArray(value as unknown[], (output.properties as any)[key]);
       continue;
     }
 
-    if (output.properties[key]) {
-      const entry = output.properties[key];
+    if ((output.properties as any)[key]) {
+      const entry = (output.properties as any)[key];
       const hasTypeArray = Array.isArray(entry.type);
 
       // When an array already exists, we check the existing
@@ -232,21 +232,21 @@ function processObject(object: any, output?: any, nested?: boolean) {
       continue;
     }
 
-    output.properties[key] = {};
-    output.properties[key].type = typ;
+    (output.properties as any)[key] = {};
+    (output.properties as any)[key].type = typ;
 
     if (format) {
-      output.properties[key].format = format;
+      (output.properties as any)[key].format = format;
     }
   }
 
-  return nested ? output.properties : output;
+  return nested ? (output.properties as Record<string, unknown>) : output;
 }
 
 
-export function generateJsonSchemaFromObject(title, object) {
-  let processOutput;
-  const output: any = {
+export function generateJsonSchemaFromObject(title: string | undefined, object: unknown): Record<string, unknown> {
+  let processOutput: Record<string, unknown> | undefined;
+  const output: Record<string, unknown> = {
     $schema: DRAFT
   };
 
@@ -263,7 +263,7 @@ export function generateJsonSchemaFromObject(title, object) {
 
   // Process object
   if (output.type === 'object') {
-    processOutput = processObject(object);
+    processOutput = processObject(object as Record<string, unknown>);
     output.type = processOutput.type;
     output.properties = processOutput.properties;
 
@@ -273,12 +273,12 @@ export function generateJsonSchemaFromObject(title, object) {
   }
 
   if (output.type === 'array') {
-    processOutput = processArray(object);
+    processOutput = processArray(object as unknown[]);
     output.type = processOutput.type;
     output.items = processOutput.items;
 
     if (output.title) {
-      output.items.title = output.title;
+      (output.items as any).title = output.title;
       output.title += ' Set';
     }
   }

@@ -1,5 +1,8 @@
 import { DatePipe } from '@angular/common';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
 import { HelmRelease } from '../../workload.types';
@@ -9,16 +12,19 @@ describe('HelmReleaseCardComponent', () => {
   let component: HelmReleaseCardComponent;
   let fixture: ComponentFixture<HelmReleaseCardComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [HelmReleaseCardComponent],
-      imports: KubernetesBaseTestModules,
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        HelmReleaseCardComponent,
+        ...KubernetesBaseTestModules,
+      ],
       providers: [
+        provideRouter([]),
         DatePipe,
+        provideZonelessChangeDetection(),
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(HelmReleaseCardComponent);
@@ -26,7 +32,7 @@ describe('HelmReleaseCardComponent', () => {
     component.row = {
       status: 'status',
       info: {
-        last_deployed: null
+        last_deployed: null,
       },
       chart: {
         metadata: {}

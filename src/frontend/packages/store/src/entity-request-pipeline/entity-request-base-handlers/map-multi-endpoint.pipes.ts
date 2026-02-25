@@ -47,8 +47,8 @@ function getEntities(
             ...newEntitiesOfType,
             [newGuid]: entity
           };
-        }, {}
-      ) : Object.values(endpointResponse.normalizedEntities[entityKey]);
+        }, {} as Record<string, any>
+      ) : Object.values(endpointResponse.normalizedEntities.entities[entityKey]);
       return {
         ...newEntities,
         [entityKey]: entities
@@ -109,7 +109,7 @@ export function mapMultiEndpointResponses(
           },
           totalPages: endpointResponse.totalPages,
           totalResults: endpointResponse.totalResults,
-          success: null
+          success: null as any
         };
       });
     const response = multiEndpointResponseMergePipe(responses);

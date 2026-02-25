@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { ApplicationRef, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { mergeMap } from 'rxjs/operators';
 
@@ -11,17 +11,18 @@ import { cfEntityCatalog } from '../../cf-entity-catalog';
 export class UpdateAppEffects {
 
   constructor(
-    private actions$: Actions
+    private actions$: Actions,
+    private appRef: ApplicationRef
   ) {
   }
 
    UpdateAppInStore$ = createEffect(() => this.actions$.pipe(
     ofType<WrapperRequestActionSuccess>(CF_APP_UPDATE_SUCCESS),
-    mergeMap((action: WrapperRequestActionSuccess) => {
+    mergeMap((action: WrapperRequestActionSuccess): any[] => {
       const updateAction = action.apiAction as UpdateExistingApplication;
       const updateEntities = updateAction.updateEntities || [AppMetadataTypes.ENV_VARS, AppMetadataTypes.STATS, AppMetadataTypes.SUMMARY];
-      const actions = [];
-      updateEntities.forEach(updateEntity => {
+      const actions: any[] = [];
+      updateEntities.forEach((updateEntity: any) => {
         switch (updateEntity) {
           case AppMetadataTypes.ENV_VARS:
             // This is done so the app metadata env vars environment_json matches that of the app
@@ -47,6 +48,7 @@ export class UpdateAppEffects {
         }
       });
 
+      this.appRef.tick();
       return actions;
     })));
 }

@@ -1,10 +1,12 @@
 import { Injectable } from '@angular/core';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class PageHeaderService {
 
   constructor() { }
 
-  headerActive: boolean;
+  headerActive: boolean = false;
 
 }

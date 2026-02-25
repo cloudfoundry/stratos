@@ -11,21 +11,22 @@ import {
   EntityMonitorFactory,
   PaginationMonitorFactory,
   stratosEntityCatalog,
+  UserFavoriteManager,
 } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, of } from 'rxjs';
 import { debounceTime, filter, first, map } from 'rxjs/operators';
-
-import { UserFavoriteManager } from '../../../../../../../store/src/user-favorite-manager';
 import { SessionService } from '../../../../services/session.service';
 import { CurrentUserPermissionsService } from '../../../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../../../core/permissions/stratos-user-permissions.checker';
 import { createTableColumnFavorite } from '../../list-table/table-cell-favorite/table-cell-favorite.component';
 import { ITableColumn } from '../../list-table/table.types';
 import {
+  IGlobalListAction,
   IListAction,
   IListConfig,
   IListMultiFilterConfig,
   IListMultiFilterConfigItem,
+  IMultiListAction,
   ListViewTypes,
 } from '../../list.component.types';
 import { BaseEndpointsDataSource } from './base-endpoints-data-source';
@@ -37,7 +38,9 @@ import { TableCellEndpointDetailsComponent } from './table-cell-endpoint-details
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   cardComponent = EndpointCardComponent;
 
@@ -46,7 +49,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   public readonly columns: ITableColumn<EndpointModel>[] = [
     {
       columnId: 'name',
-      headerCell: () => 'Name',
+      headerCell: (): string => 'Name',
       cellComponent: TableCellEndpointNameComponent,
       sort: {
         type: 'sort',
@@ -57,7 +60,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     },
     {
       columnId: 'connection',
-      headerCell: () => 'Status',
+      headerCell: (): string => 'Status',
       cellComponent: TableCellEndpointStatusComponent,
       sort: {
         type: 'sort',
@@ -71,7 +74,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     },
     {
       columnId: 'type',
-      headerCell: () => 'Type',
+      headerCell: (): string => 'Type',
       cellDefinition: {
         getValue: this.getEndpointTypeString
       },
@@ -84,7 +87,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     },
     {
       columnId: 'address',
-      headerCell: () => 'Address',
+      headerCell: (): string => 'Address',
       cellComponent: TableCellEndpointAddressComponent,
       sort: {
         type: 'sort',
@@ -95,7 +98,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     },
     {
       columnId: 'details',
-      headerCell: () => 'Details',
+      headerCell: (): string => 'Details',
       cellComponent: TableCellEndpointDetailsComponent,
       cellFlex: '4'
     }
@@ -140,7 +143,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
       if (enabled) {
         this.columns.splice(4, 0, {
           columnId: 'creator',
-          headerCell: () => 'Creator',
+          headerCell: (): string => 'Creator',
           cellDefinition: {
             valuePath: 'creator.name'
           },
@@ -164,11 +167,13 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     );
   }
 
-  public getGlobalActions = () => [];
-  public getMultiActions = () => [];
-  public getSingleActions = () => this.singleActions;
-  public getColumns = () => this.columns;
-  public getDataSource = () => this.dataSource;
+  public getGlobalActions = (): IGlobalListAction<EndpointModel>[] => [];
+  public getMultiActions = (): IMultiListAction<EndpointModel>[] => [];
+  public getSingleActions = (): IListAction<EndpointModel>[] => this.singleActions;
+  public getColumns = (): ITableColumn<EndpointModel>[] => this.columns;
+  public getDataSource(): EndpointsDataSource {
+    return this.dataSource;
+  }
 
   public getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [this.createEndpointTypeFilter()];
 
@@ -215,17 +220,15 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     };
   }
 
-  private resetEndpointTypeFilter(pagination: PaginationEntityState) {
+  private resetEndpointTypeFilter(pagination: PaginationEntityState): void {
     if (
-      pagination.clientPagination &&
-      pagination.clientPagination.filter &&
-      pagination.clientPagination.filter.items[BaseEndpointsDataSource.typeFilterKey]
+      pagination.clientPagination?.filter?.items?.[BaseEndpointsDataSource.typeFilterKey]
     ) {
       const clientPaginationFilter = {
         ...pagination.clientPagination.filter,
         items: {
-          ...pagination.clientPagination.filter.items,
-          [BaseEndpointsDataSource.typeFilterKey]: null
+          ...(pagination.clientPagination.filter.items ?? {}),
+          [BaseEndpointsDataSource.typeFilterKey]: null as string | null
         }
       };
       this.store.dispatch(

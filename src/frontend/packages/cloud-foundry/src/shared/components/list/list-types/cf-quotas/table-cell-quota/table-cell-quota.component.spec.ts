@@ -1,8 +1,11 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from '@stratosui/store/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { createBasicStoreModule } from '@stratosui/store/testing';
+import { APIResource } from '@stratosui/store/types/api.types';
+
 import { IQuotaDefinition } from '../../../../../../cf-api.types';
 import { TableCellQuotaComponent } from './table-cell-quota.component';
 
@@ -10,18 +13,17 @@ describe('TableCellQuotaComponent', () => {
   let component: TableCellQuotaComponent;
   let fixture: ComponentFixture<TableCellQuotaComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [TableCellQuotaComponent],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
+        TableCellQuotaComponent,
         RouterTestingModule,
         createBasicStoreModule(),
-      ]
+      ],
+      providers: [provideZonelessChangeDetection()],
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellQuotaComponent);
     component = fixture.componentInstance;
     component.config = {

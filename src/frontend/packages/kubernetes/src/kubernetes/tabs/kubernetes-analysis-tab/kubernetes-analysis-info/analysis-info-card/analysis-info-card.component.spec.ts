@@ -1,5 +1,7 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { AnalysisInfoCardComponent } from './analysis-info-card.component';
 
@@ -7,15 +9,15 @@ describe('AnalysisInfoCardComponent', () => {
   let component: AnalysisInfoCardComponent;
   let fixture: ComponentFixture<AnalysisInfoCardComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [ AnalysisInfoCardComponent ],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       imports: [
+        AnalysisInfoCardComponent,
         HttpClientTestingModule,
       ]
-    })
-    .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AnalysisInfoCardComponent);

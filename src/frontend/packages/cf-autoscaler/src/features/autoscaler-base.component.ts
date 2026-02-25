@@ -1,14 +1,14 @@
-import { Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ActivatedRoute, RouterOutlet } from '@angular/router';
 
-import { ApplicationService } from '../../../cloud-foundry/src/features/applications/application.service';
-import { getGuids } from '../../../cloud-foundry/src/features/applications/application/application-base.component';
-import { APP_GUID, CF_GUID } from '../../../core/src/shared/entity.tokens';
+import { ApplicationService, getGuids } from '@stratosui/cloud-foundry';
+import { APP_GUID, CF_GUID } from '@stratosui/core';
 
 @Component({
   selector: 'app-autoscaler-base',
   templateUrl: './autoscaler-base.component.html',
   styleUrls: ['./autoscaler-base.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     ApplicationService,
     {
@@ -21,7 +21,9 @@ import { APP_GUID, CF_GUID } from '../../../core/src/shared/entity.tokens';
       useFactory: getGuids(),
       deps: [ActivatedRoute]
     },
-  ]
+  ],
+  standalone: true,
+  imports: [RouterOutlet]
 })
 export class AutoscalerBaseComponent {
 }

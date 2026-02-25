@@ -1,18 +1,29 @@
-import { inject, TestBed } from '@angular/core/testing';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { generateCfBaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
-import { CfBuildpacksListConfigService } from './cf-buildpacks-list-config.service';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { generateCfBaseTestModulesNoShared } from "@test-framework/cf";
+import { CfBuildpacksListConfigService } from "./cf-buildpacks-list-config.service";
 
 describe('CfBuildpacksListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [CfBuildpacksListConfigService, ActiveRouteCfOrgSpace],
-      imports: generateCfBaseTestModules(),
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(generateCfBaseTestModulesNoShared()),
+        CfBuildpacksListConfigService,
+      ],
     });
   });
 
-  it('should be created', inject([CfBuildpacksListConfigService], (service: CfBuildpacksListConfigService) => {
+  it('should be created', () => {
+    const service = TestBed.inject(CfBuildpacksListConfigService);
     expect(service).toBeTruthy();
-  }));
+  });
 });

@@ -1,72 +1,81 @@
 import { Portal } from '@angular/cdk/portal';
-import { Injectable } from '@angular/core';
+import { Injectable, signal, Signal, computed, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
-import { asapScheduler, BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
-import { filter, map, observeOn, publishReplay, refCount, startWith } from 'rxjs/operators';
+import { combineLatest, Observable } from 'rxjs';
+import { filter, map, startWith } from 'rxjs/operators';
 
 import { IPageSideNavTab } from './features/dashboard/page-side-nav/page-side-nav.component';
 import { IHeaderBreadcrumbLink } from './shared/components/page-header/page-header.types';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class TabNavService {
+  private router = inject(Router);
 
-  static TabsNoLinkValue = null;
+  static TabsNoLinkValue: string = null;
 
-  private tabNavsSubject: BehaviorSubject<IPageSideNavTab[]>;
-  public tabNavs$: Observable<IPageSideNavTab[]>;
+  private _tabNavs = signal<IPageSideNavTab[] | undefined>(undefined);
+  public readonly tabNavs: Signal<IPageSideNavTab[] | undefined> = this._tabNavs.asReadonly();
+  public readonly tabNavs$: Observable<IPageSideNavTab[] | undefined> = toObservable(this._tabNavs);
 
-  private tabHeaderSubject: BehaviorSubject<string>;
-  public tabHeader$: Observable<string>;
+  private _tabHeader = signal<string | undefined>(undefined);
+  public readonly tabHeader: Signal<string | undefined> = this._tabHeader.asReadonly();
+  public readonly tabHeader$: Observable<string | undefined> = toObservable(this._tabHeader);
 
-  private tabSubNavSubject: BehaviorSubject<Portal<any>>;
-  public tabSubNav$: Observable<Portal<any>>;
+  private _tabSubNav = signal<Portal<any> | undefined>(undefined);
+  public readonly tabSubNav: Signal<Portal<any> | undefined> = this._tabSubNav.asReadonly();
+  public readonly tabSubNav$: Observable<Portal<any> | undefined> = toObservable(this._tabSubNav);
 
-  private tabSubNavBreadcrumbsSubject: BehaviorSubject<IHeaderBreadcrumbLink[]>;
-  public tabSubNavBreadcrumbs$: Observable<IHeaderBreadcrumbLink[]>;
+  private _tabSubNavBreadcrumbs = signal<IHeaderBreadcrumbLink[] | undefined>(undefined);
+  public readonly tabSubNavBreadcrumbs: Signal<IHeaderBreadcrumbLink[] | undefined> = this._tabSubNavBreadcrumbs.asReadonly();
+  public readonly tabSubNavBreadcrumbs$: Observable<IHeaderBreadcrumbLink[] | undefined> = toObservable(this._tabSubNavBreadcrumbs);
 
-  private pageHeaderSubject: BehaviorSubject<Portal<any>>;
-  public pageHeader$: Observable<Portal<any>>;
+  private _pageHeader = signal<Portal<any> | undefined>(undefined);
+  public readonly pageHeader: Signal<Portal<any> | undefined> = this._pageHeader.asReadonly();
+  public readonly pageHeader$: Observable<Portal<any> | undefined> = toObservable(this._pageHeader);
 
   public setTabs(tabs: IPageSideNavTab[]) {
-    this.tabNavsSubject.next(tabs);
+    this._tabNavs.set(tabs);
   }
 
   public setHeader(header?: string) {
-    this.tabHeaderSubject.next(header);
+    this._tabHeader.set(header);
   }
 
   public setSubNav(portal: Portal<any>) {
-    this.tabSubNavSubject.next(portal);
+    this._tabSubNav.set(portal);
   }
 
   public setSubNavBreadcrumbs(breadcrumbs: IHeaderBreadcrumbLink[]) {
-    this.tabSubNavBreadcrumbsSubject.next(breadcrumbs);
+    this._tabSubNavBreadcrumbs.set(breadcrumbs);
   }
 
   public setPageHeader(portal: Portal<any>) {
-    this.pageHeaderSubject.next(portal);
+    this._pageHeader.set(portal);
   }
 
   public clear() {
-    this.tabNavsSubject.next(undefined);
-    this.tabHeaderSubject.next(undefined);
+    this._tabNavs.set(undefined);
+    this._tabHeader.set(undefined);
     this.clearSubNav();
-    this.pageHeaderSubject.next(undefined);
+    this._pageHeader.set(undefined);
   }
 
   public clearSubNav() {
-    this.tabSubNavSubject.next(undefined);
-    this.tabSubNavBreadcrumbsSubject.next(undefined);
+    this._tabSubNav.set(undefined);
+    this._tabSubNavBreadcrumbs.set(undefined);
   }
 
   public getCurrentTabHeaderObservable() {
-    return combineLatest(
+    return combineLatest([
       this.router.events.pipe(
         filter(event => event instanceof NavigationEnd),
         startWith(null)
       ),
       this.tabNavs$
-    ).pipe(
+    ]).pipe(
       map(([event, tabs]) => this.getCurrentTabHeader(tabs)),
     );
   }
@@ -84,25 +93,4 @@ export class TabNavService {
     }
     return activeTab;
   };
-
-  private observeSubject(subject: Subject<any>) {
-    return subject.asObservable().pipe(
-      publishReplay(1),
-      refCount(),
-      observeOn(asapScheduler)
-    );
-  }
-
-  constructor(private router: Router) {
-    this.tabNavsSubject = new BehaviorSubject(undefined);
-    this.tabNavs$ = this.observeSubject(this.tabNavsSubject);
-    this.tabHeaderSubject = new BehaviorSubject(undefined);
-    this.tabHeader$ = this.observeSubject(this.tabHeaderSubject);
-    this.tabSubNavSubject = new BehaviorSubject(undefined);
-    this.tabSubNav$ = this.observeSubject(this.tabSubNavSubject);
-    this.tabSubNavBreadcrumbsSubject = new BehaviorSubject(undefined);
-    this.tabSubNavBreadcrumbs$ = this.observeSubject(this.tabSubNavBreadcrumbsSubject);
-    this.pageHeaderSubject = new BehaviorSubject(undefined);
-    this.pageHeader$ = this.observeSubject(this.pageHeaderSubject);
-  }
 }

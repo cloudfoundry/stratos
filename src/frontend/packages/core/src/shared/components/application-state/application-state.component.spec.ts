@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { MDAppModule } from '../../../core/md.module';
 import { ApplicationStateIconComponent } from './application-state-icon/application-state-icon.component';
@@ -9,19 +11,21 @@ describe('ApplicationStateComponent', () => {
   let component: ApplicationStateComponent;
   let fixture: ComponentFixture<ApplicationStateComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
+
+      providers: [provideZonelessChangeDetection()],
+
+      imports: [
+        MDAppModule,
         ApplicationStateComponent,
         ApplicationStateIconComponent,
-        ApplicationStateIconPipe
-      ],
-      imports: [
-        MDAppModule
+        ApplicationStateIconPipe,
       ]
-    })
-      .compileComponents();
-  }));
+
+    });
+      TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ApplicationStateComponent);

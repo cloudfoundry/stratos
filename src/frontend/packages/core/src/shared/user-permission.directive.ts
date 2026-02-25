@@ -6,16 +6,17 @@ import { PermissionTypes } from '../core/permissions/current-user-permissions.co
 import { CurrentUserPermissionsService } from '../core/permissions/current-user-permissions.service';
 
 @Directive({
-  selector: '[appUserPermission]'
+selector: '[appUserPermission]',
+standalone: true
 })
 export class UserPermissionDirective implements OnDestroy, OnInit {
   @Input()
-  public appUserPermission: PermissionTypes[];
+  public appUserPermission!: PermissionTypes[];
 
   @Input()
-  public appUserPermissionEndpointGuid: string;
+  public appUserPermissionEndpointGuid!: string;
 
-  private canSub: Subscription;
+  private canSub!: Subscription;
 
   constructor(
     private templateRef: TemplateRef<any>,

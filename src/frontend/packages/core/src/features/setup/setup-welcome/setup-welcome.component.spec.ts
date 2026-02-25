@@ -1,9 +1,14 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { generateBaseTestStoreModules } from '../../../../test-framework/core-test.helper';
+import { generateBaseTestStoreModules, STORE_TEST_PROVIDERS } from "@test-framework/core-test.helper";
+import { EntityServiceFactory } from '@stratosui/store';
 import { CoreModule } from '../../../core/core.module';
 import { MDAppModule } from '../../../core/md.module';
 import { PageHeaderModule } from '../../../shared/components/page-header/page-header.module';
@@ -16,7 +21,7 @@ describe('SetupWelcomeComponent', () => {
   let component: SetupWelcomeComponent;
   let fixture: ComponentFixture<SetupWelcomeComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         CoreModule,
@@ -30,10 +35,17 @@ describe('SetupWelcomeComponent', () => {
         ...generateBaseTestStoreModules(),
         NoopAnimationsModule,
       ],
-      providers: [TabNavService]
-    })
-      .compileComponents();
-  }));
+      providers: [
+        TabNavService,
+        EntityServiceFactory,
+        ...(STORE_TEST_PROVIDERS || []),
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ]
+    });
+      TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SetupWelcomeComponent);

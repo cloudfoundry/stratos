@@ -1,7 +1,8 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CoreModule } from '../../../../../../../../core/src/core/core.module';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { APIResource } from '@stratosui/store/types/api.types';
 import { EventTabActorIconPipe } from './event-tab-actor-icon.pipe';
 import { TableCellEventActionComponent } from './table-cell-event-action.component';
 
@@ -9,15 +10,13 @@ describe('TableCellEventActionComponent', () => {
   let component: TableCellEventActionComponent;
   let fixture: ComponentFixture<TableCellEventActionComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [TableCellEventActionComponent, EventTabActorIconPipe],
-      imports: [CoreModule]
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [TableCellEventActionComponent, EventTabActorIconPipe],
+      providers: [provideZonelessChangeDetection()],
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent<TableCellEventActionComponent>(TableCellEventActionComponent);
     component = fixture.componentInstance;
     component.row = {

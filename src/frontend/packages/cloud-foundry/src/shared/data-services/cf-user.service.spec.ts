@@ -1,28 +1,43 @@
-import { inject, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { SharedModule } from '../../../../core/src/shared/shared.module';
+import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import {
-  generateCfStoreModules,
   generateTestCfEndpointServiceProvider,
-} from '../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from '@test-framework/cloud-foundry-endpoint-service.helper';
+import { generateCFEntities } from '../../cf-entity-generator';
 import { CfUserService } from './cf-user.service';
-import { HttpClientModule } from '@angular/common/http';
 
 describe('CfUserService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [
-        ...generateCfStoreModules(),
-        SharedModule,
-        HttpClientModule
-      ],
       providers: [
-        ...generateTestCfEndpointServiceProvider()
-      ]
+        ...generateTestCfEndpointServiceProvider(),
+        ...STORE_TEST_PROVIDERS,
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities(),
+          ]
+        },
+        provideZonelessChangeDetection(),
+      ],
+      imports: [
+        createBasicStoreModule(),
+        EntityCatalogTestModule,
+      ],
     });
+
+    // Initialize EntityCatalogHelper for Angular 20 compatibility
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
   });
 
-  it('should be created', inject([CfUserService], (service: CfUserService) => {
+  it('should be created', () => {
+    const service = TestBed.inject(CfUserService);
     expect(service).toBeTruthy();
-  }));
+  });
 });

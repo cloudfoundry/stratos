@@ -1,4 +1,8 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { CoreModule } from '../../../../../core/core.module';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
@@ -9,22 +13,33 @@ describe('TableCellSelectComponent', () => {
   let component: TableCellSelectComponent<any>;
   let fixture: ComponentFixture<TableCellSelectComponent<any>>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [TableCellSelectComponent],
+
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideZonelessChangeDetection()
+      ],
+
       imports: [
         CoreModule,
+        TableCellSelectComponent,
       ]
-    })
-      .compileComponents();
-  }));
+
+    });
+      TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellSelectComponent);
     component = fixture.componentInstance;
     component.row = {};
     component.rowState = observableOf({});
-    component.dataSource = {} as IListDataSource<any>;
+    component.dataSource = {
+      selectedRows: () => new Map(),
+      getRowUniqueId: (row: any) => ''
+    } as unknown as IListDataSource<any>;
     fixture.detectChanges();
   });
 

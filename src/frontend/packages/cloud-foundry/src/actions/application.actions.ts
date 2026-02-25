@@ -45,7 +45,7 @@ const applicationEntitySchema = cfEntityFactory(applicationEntityType);
 export class GetAllApplications extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   private static sortField = 'creation'; // This is the field that 'order-direction' is applied to. Cannot be changed
 
-  constructor(public paginationKey: string, public endpointGuid: string, public includeRelations = [], public populateMissing = false) {
+  constructor(public paginationKey: string, public endpointGuid: string, public includeRelations: string[] = [], public populateMissing = false) {
     super();
     this.options = new HttpRequest(
       'GET',
@@ -69,7 +69,7 @@ export class GetAllApplications extends CFStartAction implements PaginatedAction
 }
 
 export class GetApplication extends CFStartAction implements ICFAction, EntityInlineParentAction {
-  constructor(public guid: string, public endpointGuid: string, public includeRelations = [], public populateMissing = true) {
+  constructor(public guid: string, public endpointGuid: string, public includeRelations: string[] = [], public populateMissing = true) {
     super();
     this.options = new HttpRequest(
       'GET',
@@ -141,7 +141,7 @@ export class UpdateExistingApplication extends CFStartAction implements ICFActio
   entityType = applicationEntityType;
   options: HttpRequest<any>;
   updatingKey = UpdateExistingApplication.updateKey;
-  entityMerge: ActionMergeFunction = (oldEntities, newEntities) => {
+  entityMerge: ActionMergeFunction = (oldEntities: any, newEntities: any) => {
     const keepFromOld = pick(
       oldEntities[applicationEntityType][this.guid].entity,
       Object.keys(applicationEntitySchema.schema)

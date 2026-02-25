@@ -1,10 +1,11 @@
-import { Component, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, OnDestroy , ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, of } from 'rxjs';
 import { combineLatest, filter, first, map } from 'rxjs/operators';
 
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import { PageHeaderComponent, StepComponent, StepOnNextFunction, SteppersComponent } from '@stratosui/core';
 import { UsersRolesClear, UsersRolesExecuteChanges, UsersRolesSetUsers } from '../../../../actions/users-roles.actions';
 import { CFAppState } from '../../../../cf-app-state';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
@@ -13,12 +14,26 @@ import { CfUser } from '../../../../store/types/cf-user.types';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { CfRolesService } from './cf-roles.service';
+import { UsersRolesConfirmComponent } from './manage-users-confirm/manage-users-confirm.component';
+import { UsersRolesModifyComponent } from './manage-users-modify/manage-users-modify.component';
+import { ManageUsersSetUsernamesComponent } from './manage-users-set-usernames/manage-users-set-usernames.component';
 
 
 @Component({
   selector: 'app-manage-users',
   templateUrl: './manage-users.component.html',
   styleUrls: ['./manage-users.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    ManageUsersSetUsernamesComponent,
+    UsersRolesModifyComponent,
+    UsersRolesConfirmComponent
+  ],
   providers: [
     getActiveRouteCfOrgSpaceProvider,
     CfUserService,
@@ -26,12 +41,12 @@ import { CfRolesService } from './cf-roles.service';
   ]
 })
 export class UsersRolesComponent implements OnDestroy {
-  initialUsers$: Observable<CfUser[]>;
-  singleUser$: Observable<CfUser>;
-  defaultCancelUrl: string;
+  initialUsers$!: Observable<CfUser[]>;
+  singleUser$!: Observable<CfUser | null>;
+  defaultCancelUrl!: string;
   applyStarted = false;
   setUsernames = false;
-  title$: Observable<string>;
+  title$!: Observable<string>;
 
   constructor(
     private store: Store<CFAppState>,

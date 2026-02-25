@@ -1,0 +1,215 @@
+name: Release Automation
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+      - 'v*.*.*-rc.*'
+      - 'v*.*.*-beta.*'
+      - 'v*.*.*-alpha.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., v5.0.0)'
+        required: true
+        type: string
+
+env:
+  NODE_OPTIONS: --max-old-space-size=5500
+  NODE_VERSION: '24'
+  GO_VERSION: '1.21'
+  BUN_VERSION: 'latest'
+
+jobs:
+  validate-version:
+    name: Validate Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+      is_prerelease: ${{ steps.check-prerelease.outputs.is_prerelease }}
+    steps:
+      - name: Get version from tag or input
+        id: get-version
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            VERSION="${{ inputs.version }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/}"
+          fi
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "📦 Release version: ${VERSION}"
+
+      - name: Check if prerelease
+        id: check-prerelease
+        run: |
+          VERSION="${{ steps.get-version.outputs.version }}"
+          if [[ "$VERSION" =~ (alpha|beta|rc) ]]; then
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+            echo "🧪 This is a pre-release"
+          else
+            echo "is_prerelease=false" >> $GITHUB_OUTPUT
+            echo "🚀 This is a production release"
+          fi
+
+  build-release:
+    name: Build Release Artifacts
+    runs-on: ubuntu-latest
+    needs: validate-version
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for git archive
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: src/jetstream/go.sum
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build frontend (production)
+        run: make build-frontend
+        env:
+          NODE_ENV: production
+
+      - name: Build backend (all platforms)
+        run: make build-backend-all VERSION=${{ needs.validate-version.outputs.version }}
+
+      - name: Verify binaries
+        run: |
+          echo "🔍 Verifying built binaries..."
+          for binary in dist/bin/jetstream-*; do
+            echo "✓ $(basename $binary): $(file $binary | cut -d: -f2-)"
+          done
+
+      - name: Package release archives
+        run: make package VERSION=${{ needs.validate-version.outputs.version }}
+
+      - name: Generate checksums
+        run: ./build/create-checksums.sh ${{ needs.validate-version.outputs.version }}
+
+      - name: Verify release artifacts
+        run: |
+          echo "📦 Release artifacts:"
+          ls -lh dist/release/
+          echo ""
+          echo "🔐 Checksums:"
+          cat dist/release/SHA256SUMS
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts
+          path: dist/release/*
+          retention-days: 30
+
+  create-github-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [validate-version, build-release]
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download release artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-artifacts
+          path: dist/release/
+
+      - name: Extract changelog for version
+        id: changelog
+        run: |
+          VERSION="${{ needs.validate-version.outputs.version }}"
+
+          # Try to extract version-specific changelog
+          if [ -f CHANGELOG.md ]; then
+            # Extract section between this version and next version header
+            NOTES=$(awk "/^## \[?${VERSION#v}\]?/,/^## \[?[0-9]/" CHANGELOG.md | sed '1d;$d' || echo "")
+          fi
+
+          if [ -z "$NOTES" ]; then
+            NOTES="Release $VERSION - See [CHANGELOG.md](CHANGELOG.md) for details."
+          fi
+
+          # Save to file for GitHub release
+          echo "$NOTES" > /tmp/release-notes.md
+
+          echo "📝 Release notes prepared"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.validate-version.outputs.version }}
+          name: Stratos ${{ needs.validate-version.outputs.version }}
+          body_path: /tmp/release-notes.md
+          prerelease: ${{ needs.validate-version.outputs.is_prerelease == 'true' }}
+          files: |
+            dist/release/*.tar.gz
+            dist/release/*.zip
+            dist/release/SHA256SUMS
+          draft: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release summary
+        run: |
+          echo "# 🎉 Release ${{ needs.validate-version.outputs.version }} Published!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📦 Release Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Platform | Archive | Size |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|---------|------|" >> $GITHUB_STEP_SUMMARY
+
+          cd dist/release
+          for file in *.tar.gz *.zip; do
+            if [ -f "$file" ]; then
+              SIZE=$(ls -lh "$file" | awk '{print $5}')
+              echo "| ${file#stratos-${{ needs.validate-version.outputs.version }}-} | $file | $SIZE |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🔐 Checksums" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat SHA256SUMS >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ All release artifacts uploaded successfully!" >> $GITHUB_STEP_SUMMARY
+
+  trigger-docker-build:
+    name: Trigger Docker Build
+    runs-on: ubuntu-latest
+    needs: [validate-version, create-github-release]
+    if: needs.validate-version.outputs.is_prerelease == 'false'
+    steps:
+      - name: Trigger Docker workflow
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'docker.yml',
+              ref: '${{ needs.validate-version.outputs.version }}',
+              inputs: {
+                version: '${{ needs.validate-version.outputs.version }}'
+              }
+            });
+            console.log('🐳 Docker build triggered for ${{ needs.validate-version.outputs.version }}');

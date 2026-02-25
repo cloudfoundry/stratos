@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
@@ -12,6 +14,8 @@ import {
 import { environment } from '../../../../../../../core/src/environments/environment.prod';
 import { IPageSideNavTab } from '../../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
 import { IHeaderBreadcrumb } from '../../../../../../../core/src/shared/components/page-header/page-header.types';
+import { PageHeaderComponent } from '../../../../../../../core/src/shared/components/page-header/page-header.component';
+import { LoadingPageComponent } from '../../../../../../../core/src/shared/components/loading-page/loading-page.component';
 import { EntitySchema } from '../../../../../../../store/src/helpers/entity-schema';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../../../../../../store/src/user-favorite-manager';
@@ -36,6 +40,14 @@ import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry
     CloudFoundryEndpointService,
     CloudFoundryOrganizationService,
     CloudFoundryUserProvidedServicesService
+  ],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    RouterModule,
+    PageHeaderComponent,
+    LoadingPageComponent
   ]
 })
 export class CloudFoundryOrganizationBaseComponent {

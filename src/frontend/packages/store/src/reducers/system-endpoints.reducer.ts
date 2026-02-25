@@ -12,7 +12,7 @@ import { IRequestEntityTypeState } from '../app-state';
 import { endpointConnectionStatus, EndpointModel } from '../types/endpoint.types';
 import { GET_SYSTEM_INFO, GET_SYSTEM_INFO_SUCCESS } from './../actions/system.actions';
 
-export function systemEndpointsReducer(state: IRequestEntityTypeState<EndpointModel>, action) {
+export function systemEndpointsReducer(state: IRequestEntityTypeState<EndpointModel>, action: any) {
   switch (action.type) {
     case VERIFY_SESSION:
     case GET_SYSTEM_INFO:
@@ -36,10 +36,10 @@ export function systemEndpointsReducer(state: IRequestEntityTypeState<EndpointMo
   }
 }
 
-function fetchingEndpointInfo(state) {
+function fetchingEndpointInfo(state: any) {
   const fetchingState = { ...state };
   let modified = false;
-  getAllEndpointIds(fetchingState).forEach(guid => {
+  getAllEndpointIds(fetchingState).forEach((guid: string) => {
     // Only set checking flag if we don't have a status
     if (!fetchingState[guid].connectionStatus) {
       modified = true;
@@ -52,11 +52,14 @@ function fetchingEndpointInfo(state) {
   return modified ? fetchingState : state;
 }
 
-function succeedEndpointInfo(state, action) {
+function succeedEndpointInfo(state: any, action: any) {
   const newState = { ...state };
   const payload = action.type === GET_SYSTEM_INFO_SUCCESS ? action.payload : action.sessionData;
-  Object.keys(payload.endpoints).forEach(type => {
-    getAllEndpointIds(newState[type], payload.endpoints[type]).forEach(guid => {
+  if (!payload || !payload.endpoints) {
+    return state;
+  }
+  Object.keys(payload.endpoints).forEach((type: string) => {
+    getAllEndpointIds(newState[type], payload.endpoints[type]).forEach((guid: string) => {
       const endpointInfo = payload.endpoints[type][guid] as EndpointModel;
       newState[guid] = {
         ...newState[guid],
@@ -94,7 +97,7 @@ function changeEndpointConnectionStatus(
   };
 }
 
-function getAllEndpointIds(endpoints = {}, payloadEndpoints = {}) {
+function getAllEndpointIds(endpoints: any = {}, payloadEndpoints: any = {}) {
   return new Set(Object.keys(endpoints).concat(Object.keys(payloadEndpoints)));
 }
 

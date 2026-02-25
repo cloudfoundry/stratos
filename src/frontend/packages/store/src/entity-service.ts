@@ -1,9 +1,9 @@
-import { compose, Store } from '@ngrx/store';
+import { Action, compose, Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 import { GeneralEntityAppState } from './app-state';
-import { entityCatalog } from './entity-catalog/entity-catalog';
+import type { IEntityCatalog } from './entity-catalog/entity-catalog.interface';
 import { StratosBaseCatalogEntity } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { EntityActionBuilderEntityConfig } from './entity-catalog/entity-catalog.types';
 import { EntityFetch, EntityFetchHandler } from './entity-request-pipeline/entity-request-pipeline.types';
@@ -38,7 +38,8 @@ const dispatcherFactory = <T>(
     };
 
     // Do we have a fetch handler defined by the endpoint/entity?
-    const entityFetchHandler: EntityFetchHandler<T> = catalogEntity.getEntityFetchHandler();
+    // Defensive: getEntityFetchHandler may not exist on all catalog entities
+    const entityFetchHandler: EntityFetchHandler<T> = catalogEntity.getEntityFetchHandler?.();
     const fetchHandler = entityFetchHandler ?
       entityFetchHandler(store, updatedAction) :
       (entity: T) => store.dispatch(updatedAction);
@@ -46,7 +47,10 @@ const dispatcherFactory = <T>(
     // Fetch handler requires the entity, this may be missing or stale to update if required
     return fetchEntity ? (entity: T) => {
       // Entity may be null or stale
-      store.select(selectEntity<T>(catalogEntity.entityKey, action.guid)).pipe(first()).subscribe(storeEntity => fetchHandler(storeEntity));
+      // Defensive: Ensure entityKey exists before using it
+      if (catalogEntity.entityKey) {
+        store.select(selectEntity<T>(catalogEntity.entityKey, action.guid)).pipe(first()).subscribe(storeEntity => fetchHandler(storeEntity));
+      }
       fetchHandler(entity);
     } : fetchHandler;
   };
@@ -61,17 +65,28 @@ export class EntityService<T = any> {
     store: Store<GeneralEntityAppState>,
     public entityMonitor: EntityMonitor<T>,
     actionOrConfig: EntityRequestAction | EntityActionBuilderEntityConfig,
+    private entityCatalog: IEntityCatalog,
   ) {
     this.action = this.getAction(actionOrConfig);
-    const catalogEntity = entityCatalog.getEntity(this.action);
+
+    // Defensive: Entity catalog lookup may return null if endpoint/entity type not registered yet
+    const catalogEntity = this.entityCatalog.getEntity(this.action);
+    if (!catalogEntity) {
+      throw new Error(
+        `Entity service initialization failed - catalog entity not found for ` +
+        `endpoint=${this.action.endpointType}, entity=${this.action.entityType}. ` +
+        `Ensure entity catalog is properly initialized before creating entity services.`
+      );
+    }
 
     // Setup Fetch Handler
     this.actionDispatch = dispatcherFactory<T>(store, this.action, catalogEntity);
 
     // Setup Emit Handler
-    const entityEmitHandlerBuilder = catalogEntity.getEntityEmitHandler();
+    // Defensive: getEntityEmitHandler may not exist on all catalog entities
+    const entityEmitHandlerBuilder = catalogEntity.getEntityEmitHandler?.();
     const entityEmitHandler = entityEmitHandlerBuilder ? entityEmitHandlerBuilder(
-      this.action, (action) => store.dispatch(action)
+      this.action, (action: Action) => store.dispatch(action)
     ) : () => { };
 
 
@@ -153,7 +168,7 @@ export class EntityService<T = any> {
     );
   }
 
-  private isEntityAvailable(entity, entityRequestInfo: RequestInfoState) {
+  private isEntityAvailable(entity: T, entityRequestInfo: RequestInfoState) {
     const isBlocked = isEntityBlocked(entityRequestInfo);
     return entity && !isBlocked;
   }
@@ -176,7 +191,26 @@ export class EntityService<T = any> {
         entityType,
         endpointType
       } = dispatcherConfigOrAction as EntityActionBuilderEntityConfig;
-      const actionBuilder = entityCatalog.getEntity(endpointType, entityType).actionOrchestrator.getActionBuilder('get');
+
+      // Defensive: Entity catalog lookup may return null if endpoint/entity type not registered yet
+      const catalogEntity = this.entityCatalog.getEntity(endpointType, entityType);
+      if (!catalogEntity) {
+        throw new Error(
+          `Cannot get action - catalog entity not found for ` +
+          `endpoint=${endpointType}, entity=${entityType}. ` +
+          `Ensure entity catalog is properly initialized.`
+        );
+      }
+
+      // Defensive: Verify actionOrchestrator exists
+      if (!catalogEntity.actionOrchestrator) {
+        throw new Error(
+          `Cannot get action - catalog entity for ${entityType} has no actionOrchestrator. ` +
+          `This indicates an incomplete entity registration.`
+        );
+      }
+
+      const actionBuilder = catalogEntity.actionOrchestrator.getActionBuilder('get');
       return actionBuilder(entityGuid, endpointGuid, actionMetadata);
     }
   }

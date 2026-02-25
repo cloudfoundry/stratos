@@ -1,12 +1,15 @@
-import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, Input, signal  } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { MetricsStratosAction, AppState, EndpointModel } from '@stratosui/store';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { distinctUntilChanged, filter, map, publishReplay, refCount, tap } from 'rxjs/operators';
 
 import { EndpointListDetailsComponent } from '../../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import { mapMetricsData } from '../metrics.helpers';
 import { MetricsEndpointProvider, MetricsService } from '../services/metrics-service';
+import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 
 interface MetricsDetailsInfo {
   ok: number;
@@ -18,14 +21,22 @@ interface MetricsDetailsInfo {
 @Component({
   selector: 'app-metrics-endpoint-details',
   templateUrl: './metrics-endpoint-details.component.html',
-  styleUrls: ['./metrics-endpoint-details.component.scss']
+  styleUrls: ['./metrics-endpoint-details.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    CustomIconComponent
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetricsEndpointDetailsComponent extends EndpointListDetailsComponent {
 
   data$: Observable<MetricsDetailsInfo>;
 
   // The guid of the metrics endpoint that this row shows
-  guid$ = new BehaviorSubject<string>(null);
+  private _guid = signal<string>(null);
+  public guid = this._guid.asReadonly();
+  public guid$: Observable<string>;
 
   constructor(
     public store: Store<AppState>,
@@ -38,7 +49,8 @@ export class MetricsEndpointDetailsComponent extends EndpointListDetailsComponen
       distinctUntilChanged()
     );
 
-    const guid$ = this.guid$.asObservable().pipe(
+    this.guid$ = toObservable(this._guid);
+    const guid$ = this.guid$.pipe(
       filter(guid => !!guid),
       distinctUntilChanged()
     );
@@ -82,6 +94,6 @@ export class MetricsEndpointDetailsComponent extends EndpointListDetailsComponen
   @Input()
   set row(data: EndpointModel) {
     super.row = data;
-    this.guid$.next(data.guid);
+    this._guid.set(data.guid);
   }
 }

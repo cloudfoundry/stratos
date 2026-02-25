@@ -1,5 +1,8 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
+import { EntityServiceFactory } from '@stratosui/store';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
 import { KubernetesNodesTabComponent } from './kubernetes-nodes-tab.component';
@@ -8,14 +11,19 @@ describe('KubernetesNodesTabComponent', () => {
   let component: KubernetesNodesTabComponent;
   let fixture: ComponentFixture<KubernetesNodesTabComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [KubernetesNodesTabComponent],
-      imports: KubernetesBaseTestModules,
-      providers: [BaseKubeGuid]
-    })
-      .compileComponents();
-  }));
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        KubernetesNodesTabComponent,
+        ...KubernetesBaseTestModules,
+      ],
+      providers: [
+        EntityServiceFactory,
+        BaseKubeGuid,
+        provideZonelessChangeDetection(),
+      ]
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesNodesTabComponent);

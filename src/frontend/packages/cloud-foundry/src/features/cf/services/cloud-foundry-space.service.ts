@@ -29,34 +29,36 @@ import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService, createOrgQuotaDefinition } from './cloud-foundry-organization.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CloudFoundrySpaceService {
 
   cfGuid: string;
   orgGuid: string;
   spaceGuid: string;
-  userRole$: Observable<string>;
+  userRole$!: Observable<string>;
   /**
    * Sensible quota to use for space. If there's no specific space quota set this will be the org quota. If there's no org quota
    * a mock quota with everything allowed will be used
    */
-  quotaDefinition$: Observable<ISpaceQuotaDefinition | IOrgQuotaDefinition>;
+  quotaDefinition$!: Observable<ISpaceQuotaDefinition | IOrgQuotaDefinition>;
   /**
    * Actual Space Quota. In almost all cases `quotaDefinition$` should be used instead
    */
-  spaceQuotaDefinition$: Observable<ISpaceQuotaDefinition>;
-  allowSsh$: Observable<string>;
-  totalMem$: Observable<number>;
-  routes$: Observable<APIResource<IRoute>[]>;
-  serviceInstancesCount$: Observable<number>;
-  userProvidedServiceInstancesCount$: Observable<number>;
-  appInstances$: Observable<number>;
-  apps$: Observable<APIResource<IApp>[]>;
-  appCount$: Observable<number>;
-  loadingApps$: Observable<boolean>;
-  space$: Observable<EntityInfo<APIResource<ISpace>>>;
-  usersCount$: Observable<number | null>;
-  quotaLink$: Observable<string[]>;
+  spaceQuotaDefinition$!: Observable<ISpaceQuotaDefinition | null>;
+  allowSsh$!: Observable<string>;
+  totalMem$!: Observable<number>;
+  routes$!: Observable<APIResource<IRoute>[]>;
+  serviceInstancesCount$!: Observable<number>;
+  userProvidedServiceInstancesCount$!: Observable<number>;
+  appInstances$!: Observable<number>;
+  apps$!: Observable<APIResource<IApp>[]>;
+  appCount$!: Observable<number>;
+  loadingApps$!: Observable<boolean>;
+  space$!: Observable<EntityInfo<APIResource<ISpace>>>;
+  usersCount$!: Observable<number | null>;
+  quotaLink$!: Observable<string[]>;
 
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,

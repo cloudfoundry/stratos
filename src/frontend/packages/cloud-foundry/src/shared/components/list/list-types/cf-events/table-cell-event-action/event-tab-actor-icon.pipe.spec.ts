@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { EventTabActorIconPipe } from './event-tab-actor-icon.pipe';
 
 describe('EventTabActorIconPipe', () => {

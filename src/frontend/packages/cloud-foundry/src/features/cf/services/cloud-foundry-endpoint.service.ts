@@ -1,17 +1,21 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { filter, first, map, publishReplay, refCount } from 'rxjs/operators';
 
-import { EntityService } from '../../../../../store/src/entity-service';
-import { endpointEntityType } from '../../../../../store/src/helpers/stratos-entity-factory';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { PaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
-import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
-import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
-import { EndpointModel, EndpointUser } from '../../../../../store/src/types/endpoint.types';
-import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
+import {
+  EntityService,
+  endpointEntityType,
+  PaginationMonitorFactory,
+  getPaginationObservables,
+  PaginationObservables,
+  stratosEntityCatalog,
+  APIResource,
+  EntityInfo,
+  EndpointModel,
+  EndpointUser,
+  PaginatedAction,
+} from '@stratosui/store';
 import { GetAllApplications } from '../../../actions/application.actions';
 import { GetAllRoutes } from '../../../actions/route.actions';
 import { GetSpaceRoutes } from '../../../actions/space.actions';
@@ -49,21 +53,23 @@ export function appDataSort(app1: APIResource<IApp>, app2: APIResource<IApp>): n
 }
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CloudFoundryEndpointService {
 
-  hasSSHAccess$: Observable<boolean>;
-  totalMem$: Observable<number>;
-  paginationSubscription: any;
-  appsPagObs: PaginationObservables<APIResource<IApp>>;
-  usersCount$: Observable<number | null>;
-  orgs$: Observable<APIResource<IOrganization>[]>;
-  info$: Observable<EntityInfo<APIResource<ICfV2Info>>>;
-  cfInfoEntityService: EntityService<APIResource<ICfV2Info>>;
-  endpoint$: Observable<EntityInfo<EndpointModel>>;
-  cfEndpointEntityService: EntityService<EndpointModel>;
-  connected$: Observable<boolean>;
-  currentUser$: Observable<EndpointUser>;
+  hasSSHAccess$!: Observable<boolean>;
+  totalMem$!: Observable<number>;
+  paginationSubscription!: Subscription;
+  appsPagObs!: PaginationObservables<APIResource<IApp>>;
+  usersCount$!: Observable<number | null>;
+  orgs$!: Observable<APIResource<IOrganization>[]>;
+  info$!: Observable<EntityInfo<APIResource<ICfV2Info>>>;
+  cfInfoEntityService!: EntityService<APIResource<ICfV2Info>>;
+  endpoint$!: Observable<EntityInfo<EndpointModel>>;
+  cfEndpointEntityService!: EntityService<EndpointModel>;
+  connected$!: Observable<boolean>;
+  currentUser$!: Observable<EndpointUser>;
   cfGuid: string;
 
   static createGetAllOrganizations(cfGuid: string) {
@@ -223,7 +229,7 @@ export class CloudFoundryEndpointService {
   public getMetricFromApps(apps: APIResource<IApp>[], statMetric: string): number {
     return apps ? apps
       .filter(a => a.entity && a.entity.state !== CfApplicationState.STOPPED)
-      .map(a => a.entity[statMetric] * a.entity.instances)
+      .map(a => (a.entity as Record<string, any>)[statMetric] * a.entity.instances)
       .reduce((a, t) => a + t, 0) : 0;
   }
 

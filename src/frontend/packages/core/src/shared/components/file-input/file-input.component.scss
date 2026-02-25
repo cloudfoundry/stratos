@@ -3,7 +3,7 @@
   flex-direction: column;
 
   &__disabled {
-    opacity: .5;
+    opacity: 0.5;
     pointer-events: none;
   }
   &__field {
@@ -15,7 +15,7 @@
     flex: 1;
   }
   &__none {
-    opacity: .4;
+    opacity: 0.4;
   }
   &__button {
     flex: 0;

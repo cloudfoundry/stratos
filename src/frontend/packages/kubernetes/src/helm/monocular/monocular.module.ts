@@ -38,8 +38,6 @@ const components = [
     CoreModule,
     CommonModule,
     SharedModule,
-  ],
-  declarations: [
     ...components,
   ],
   providers: [

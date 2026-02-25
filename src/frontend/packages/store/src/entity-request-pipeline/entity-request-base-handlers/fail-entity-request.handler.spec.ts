@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { EntitySchema } from '../../helpers/entity-schema';
 import { EntityRequestAction } from '../../types/request.types';
@@ -14,7 +15,7 @@ describe('failedEntityHandlers', () => {
       label: 'Entity',
       labelPlural: 'Entities',
     });
-    const spyDispatcher = jasmine.createSpy();
+    const spyDispatcher = vi.fn();
     failedEntityHandler(
       spyDispatcher,
       catalogEntity,
@@ -25,9 +26,9 @@ describe('failedEntityHandlers', () => {
         type: 'type',
       } as EntityRequestAction,
       {
-        success: false
+        success: false,
       },
-      false
+      false,
     );
     expect(spyDispatcher).toHaveBeenCalledTimes(2);
   });
@@ -41,7 +42,7 @@ describe('failedEntityHandlers', () => {
       label: 'Entity',
       labelPlural: 'Entities',
     });
-    const spyDispatcher = jasmine.createSpy();
+    const spyDispatcher = vi.fn();
     failedEntityHandler(
       spyDispatcher,
       catalogEntity,
@@ -52,9 +53,9 @@ describe('failedEntityHandlers', () => {
         type: 'type',
       } as EntityRequestAction,
       {
-        success: false
+        success: false,
       },
-      true
+      true,
     );
     expect(spyDispatcher).toHaveBeenCalledTimes(3);
   });

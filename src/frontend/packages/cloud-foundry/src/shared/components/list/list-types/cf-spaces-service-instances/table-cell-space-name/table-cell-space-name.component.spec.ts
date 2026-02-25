@@ -1,27 +1,55 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { StoreModule } from '@ngrx/store';
 
-import {
-  generateCfBaseTestModulesNoShared,
-} from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { TableCellSpaceNameComponent } from './table-cell-space-name.component';
-
+import { EntityCatalogTestModule, generateStratosEntities, TEST_CATALOGUE_ENTITIES, appReducers } from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { generateCFEntities } from '../../../../../../cf-entity-generator';
+import { TableCellSpaceNameComponent } from "./table-cell-space-name.component";
 describe('TableCellSpaceNameComponent', () => {
   let component: TableCellSpaceNameComponent;
   let fixture: ComponentFixture<TableCellSpaceNameComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [TableCellSpaceNameComponent],
-      imports: generateCfBaseTestModulesNoShared()
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        TableCellSpaceNameComponent,
+        NoopAnimationsModule,
+        StoreModule.forRoot(
+          appReducers,
+          { runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false } }
+        ),
+        {
+          ngModule: EntityCatalogTestModule,
+          providers: [
+            {
+              provide: TEST_CATALOGUE_ENTITIES,
+              useValue: [
+                ...generateStratosEntities(),
+                ...generateCFEntities()
+              ]
+            }
+          ]
+        },
+      ],
+      providers: [
+        ...STORE_TEST_PROVIDERS,
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+      ]
     })
       .compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TableCellSpaceNameComponent);
     component = fixture.componentInstance;
     component.row = {
       entity: {
+        cfGuid: 'test-cf-guid',
         service_plan_guid: 'test',
         space_guid: '',
         space: {
@@ -90,7 +118,7 @@ describe('TableCellSpaceNameComponent', () => {
                 service_plans_url: '',
                 service_plans: [],
               },
-              metadata: null
+              metadata: null,
             },
             service_instances_url: '',
           },

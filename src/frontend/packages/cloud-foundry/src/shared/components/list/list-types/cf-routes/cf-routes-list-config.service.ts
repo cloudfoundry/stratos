@@ -22,13 +22,15 @@ import { ListCfRoute } from './cf-routes-data-source-base';
 import { CfRoutesListConfigBase } from './cf-routes-list-config-base';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfRoutesListConfigService extends CfRoutesListConfigBase implements IListConfig<APIResource> {
-  private dataSource: CfRoutesDataSource;
+  private dataSource!: CfRoutesDataSource;
 
-  getDataSource: () => CfRoutesDataSource;
-  getMultiFiltersConfigs: () => IListMultiFilterConfig[];
-  getInitialised: () => Observable<boolean>;
+  getDataSource!: () => CfRoutesDataSource;
+  declare getMultiFiltersConfigs: () => IListMultiFilterConfig[];
+  getInitialised!: () => Observable<boolean>;
 
   constructor(
     store: Store<CFAppState>,

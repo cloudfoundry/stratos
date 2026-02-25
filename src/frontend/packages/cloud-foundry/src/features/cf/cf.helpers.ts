@@ -3,22 +3,26 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 
-import { PermissionConfig } from '../../../../core/src/core/permissions/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../core/src/core/permissions/current-user-permissions.service';
-import { getIdFromRoute, pathGet } from '../../../../core/src/core/utils.service';
 import {
+  CurrentUserPermissionsService,
   extractActualListEntity,
-} from '../../../../core/src/shared/components/list/data-sources-controllers/local-filtering-sorting';
-import { SetClientFilter } from '../../../../store/src/actions/pagination.actions';
-import { RouterNav } from '../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../store/src/app-state';
-import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
-import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { endpointEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
-import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
-import { APIResource } from '../../../../store/src/types/api.types';
-import { EndpointModel } from '../../../../store/src/types/endpoint.types';
-import { PaginatedAction, PaginationEntityState } from '../../../../store/src/types/pagination.types';
+  getIdFromRoute,
+  pathGet,
+  PermissionConfig
+} from '@stratosui/core';
+import {
+  APIResource,
+  AppState,
+  EndpointModel,
+  endpointEntitiesSelector,
+  getPaginationObservables,
+  PaginatedAction,
+  PaginationEntityState,
+  PaginationMonitorFactory,
+  RouterNav,
+  selectPaginationState,
+  SetClientFilter
+} from '@stratosui/store';
 import { IServiceInstance, IUserProvidedServiceInstance } from '../../cf-api-svc.types';
 import { CFFeatureFlagTypes, IApp, ISpace } from '../../cf-api.types';
 import { CFAppState } from '../../cf-app-state';
@@ -201,9 +205,9 @@ export function hasSpaceRoleWithinOrg(user: CfUser, orgGuid: string): boolean {
   return orgSpaces.some((space) => hasRoleWithinSpace(user, space.metadata.guid));
 }
 
-function hasRole(user: CfUser, guid: string, roleType: string) {
-  if (user[roleType]) {
-    const roles = user[roleType] as APIResource[];
+function hasRole(user: CfUser, guid: string, roleType: string): boolean {
+  if ((user as Record<string, any>)[roleType]) {
+    const roles = (user as Record<string, any>)[roleType] as APIResource[];
     return !!roles.find(o => o ? o.metadata.guid === guid : false);
   }
   return false;
@@ -320,11 +324,11 @@ export function fetchTotalResults(
   store: Store<AppState>,
   paginationMonitorFactory: PaginationMonitorFactory
 ): Observable<number> {
-  const newAction = {
+  const newAction: any = {
     ...action,
     paginationKey: createFetchTotalResultsPagKey(action.paginationKey),
     flattenPagination: false,
-    includeRelations: []
+    includeRelations: [] as string[]
   };
   newAction.initialParams['results-per-page'] = 1;
 

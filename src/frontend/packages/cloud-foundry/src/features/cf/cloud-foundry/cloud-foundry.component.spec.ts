@@ -1,37 +1,61 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { populateStoreWithTestEndpoint } from '@stratosui/store/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { TabNavService } from '../../../../../core/src/tab-nav.service';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import {
-  generateCfBaseTestModules,
-  generateTestCfServiceProvider,
-} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { TabNavService } from '@stratosui/core';
+import { EntityCatalogHelper, EntityCatalogHelpers, EntityCatalogTestModule, generateStratosEntities, PaginationMonitorFactory, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
+import { CF_BASE_TEST_PROVIDERS, generateCfActiveRouteMock } from '@test-framework/cf';
+
+import { generateCFEntities } from '../../../cf-entity-generator';
 import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
+import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { CloudFoundryComponent } from './cloud-foundry.component';
 
 describe('CloudFoundryComponent', () => {
   let component: CloudFoundryComponent;
   let fixture: ComponentFixture<CloudFoundryComponent>;
 
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        declarations: [
-          CloudFoundryComponent,
-          CfEndpointsMissingComponent
-        ],
-        imports: generateCfBaseTestModules(),
-        providers: [
-          PaginationMonitorFactory,
-          generateTestCfServiceProvider(),
-          TabNavService,
-        ]
-      }).compileComponents();
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        CloudFoundryComponent,
+        CfEndpointsMissingComponent,
+        NoopAnimationsModule,
+        {
+          ngModule: EntityCatalogTestModule,
+          providers: [
+            {
+              provide: TEST_CATALOGUE_ENTITIES,
+              useValue: [
+                ...generateCFEntities(),
+                ...generateStratosEntities(),
+              ]
+            }
+          ]
+        },
+      ],
+      providers: [
+        provideZonelessChangeDetection(),
+        importProvidersFrom(createBasicStoreModule()),
+        ...STORE_TEST_PROVIDERS,
+        EntityCatalogHelper,
+        ...CF_BASE_TEST_PROVIDERS,
+        generateCfActiveRouteMock(testSCFEndpointGuid),
+        PaginationMonitorFactory,
+        CloudFoundryService,
+        TabNavService,
+      ]
+    }).compileComponents();
 
-      populateStoreWithTestEndpoint();
-    })
-  );
+    // Initialize EntityCatalogHelper
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+
+    // Populate store with test endpoint data to prevent EmptyError
+    populateStoreWithTestEndpoint();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryComponent);

@@ -62,7 +62,7 @@ export interface ServiceInstanceActionBuilders extends OrchestratedActionBuilder
 export const serviceInstanceActionBuilders: ServiceInstanceActionBuilders = {
   get: (
     guid,
-    endpointGuid,
+    endpointGuid: string,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetServiceInstance(
     guid,
@@ -76,7 +76,7 @@ export const serviceInstanceActionBuilders: ServiceInstanceActionBuilders = {
   ) => new DeleteServiceInstance(endpointGuid, guid),
   create: (
     createId,
-    endpointGuid,
+    endpointGuid: string,
     meta: CreateUpdateActionMeta
   ) => new CreateServiceInstance(
     createId,
@@ -89,7 +89,7 @@ export const serviceInstanceActionBuilders: ServiceInstanceActionBuilders = {
   ),
   update: (
     guid,
-    endpointGuid,
+    endpointGuid: string,
     meta: CreateUpdateActionMeta
   ) => new UpdateServiceInstance(
     guid,
@@ -101,7 +101,7 @@ export const serviceInstanceActionBuilders: ServiceInstanceActionBuilders = {
     meta.tags
   ),
   getMultiple: (
-    endpointGuid,
+    endpointGuid: string,
     paginationKey,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetServiceInstances(endpointGuid, paginationKey, includeRelations, populateMissing),

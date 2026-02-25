@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { CoreModule, SharedModule } from '@stratosui/core';
+import { CoreModule } from '../../core/core.module';
+import { SharedModule } from '../../shared/shared.module';
 
 import { MDAppModule } from './../../core/md.module';
 import {
@@ -18,8 +19,6 @@ import { HomeShortcutsComponent } from './home/home-shortcuts/home-shortcuts.com
     RouterModule,
     MDAppModule,
     SharedModule,
-  ],
-  declarations: [
     HomePageComponent,
     HomePageEndpointCardComponent,
     FavoritesMetaCardComponent,

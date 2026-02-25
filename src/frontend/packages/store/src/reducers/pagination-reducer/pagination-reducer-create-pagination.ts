@@ -82,22 +82,23 @@ function mergePaginationSections(
   seedPagination: PaginationEntityState,
   defaultState: PaginationEntityState
 ) {
-  const seedClientPagination = spreadClientPagination(seedPagination.clientPagination);
+  const seedClientPagination = spreadClientPagination(seedPagination?.clientPagination);
+  const currentClientPagination = spreadClientPagination(currentPagination?.clientPagination);
   return {
-    ...currentPagination.clientPagination,
+    ...currentClientPagination,
     totalResults: seedClientPagination.totalResults,
     currentPage: getCurrentPage(currentPagination, seedPagination)
   };
 }
 
 function hasResultCountChanged(currentPagination: PaginationEntityState, seedPagination: PaginationEntityState) {
-  const seededTotalResults = seedPagination.clientPagination.totalResults;
-  const totalResults = currentPagination.clientPagination.totalResults;
+  const seededTotalResults = seedPagination?.clientPagination?.totalResults ?? 0;
+  const totalResults = currentPagination?.clientPagination?.totalResults ?? 0;
   return seededTotalResults !== totalResults;
 }
 
 function getCurrentPage(currentPagination: PaginationEntityState, seedPagination: PaginationEntityState) {
-  const currentPage = currentPagination.clientPagination.currentPage;
+  const currentPage = currentPagination?.clientPagination?.currentPage ?? 1;
   if (hasResultCountChanged(currentPagination, seedPagination)) {
     return 1;
   } else {

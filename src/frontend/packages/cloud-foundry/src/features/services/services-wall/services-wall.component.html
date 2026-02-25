@@ -1,13 +1,13 @@
 <app-page-header [endpointIds$]="cfIds$">
   <h1>Services</h1>
   <div class="page-header-right">
-    <ng-container *ngIf="(haveConnectedCf$ | async)">
+    @if ((haveConnectedCf$ | async)) {
       <ng-container *appCfUserPermission="canCreateServiceInstance">
-        <button mat-icon-button [routerLink]="'/services/new/'" [queryParams]="location">
-          <mat-icon>add</mat-icon>
+        <button class="btn btn-primary btn-icon" [routerLink]="'/services/new/'" [queryParams]="location">
+          <span class="material-icons">add</span>
         </button>
       </ng-container>
-    </ng-container>
+    }
   </div>
 </app-page-header>
 <app-cf-endpoints-missing></app-cf-endpoints-missing>
@@ -25,7 +25,20 @@
 }"></app-no-content-message>
 </ng-template>
 
-<app-list class="services-wall" [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter"
-  (initialised)="cfOrgSpaceService.enableAutoSelectors()"
-  *ngIf="!!(cloudFoundryService.hasRegisteredCFEndpoints$ | async) && !!(cloudFoundryService.hasConnectedCFEndpoints$ | async)">
-</app-list>
+<!-- Show loading indicator -->
+@if (!(cloudFoundryService.hasRegisteredCFEndpoints$ | async) || !(cloudFoundryService.hasConnectedCFEndpoints$ | async)) {
+  <div
+    class="flex items-center justify-center p-8">
+    <div class="flex items-center space-x-3 text-gray-500">
+      <div class="spinner spinner-primary"></div>
+      <span>Loading services...</span>
+    </div>
+  </div>
+}
+
+@if (!!(cloudFoundryService.hasRegisteredCFEndpoints$ | async) && !!(cloudFoundryService.hasConnectedCFEndpoints$ | async)) {
+  <app-list class="services-wall" [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter"
+    (initialised)="cfOrgSpaceService.enableAutoSelectors()"
+    >
+  </app-list>
+}

@@ -1,13 +1,19 @@
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { CfEvent } from '../../../../../../cf-api.types';
+import { EventMetadataComponent } from '../event-metadata/event-metadata.component';
 
 @Component({
   selector: 'app-table-cell-event-detail',
   templateUrl: './table-cell-event-detail.component.html',
-  styleUrls: ['./table-cell-event-detail.component.scss']
+  styleUrls: ['./table-cell-event-detail.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    EventMetadataComponent
+  ]
 })
 export class TableCellEventDetailComponent extends TableCellCustom<APIResource<CfEvent>> {
 }

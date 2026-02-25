@@ -1,27 +1,38 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { Observable, of as observableOf } from 'rxjs';
 import { first, map, startWith } from 'rxjs/operators';
 
-import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import {
+  EndpointsService,
   getActionsFromExtensions,
   getTabsFromExtensions,
   StratosActionMetadata,
   StratosActionType,
   StratosTabType,
-} from '../../../../../core/src/core/extension/extension-service';
-import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
-import { environment } from '../../../../../core/src/environments/environment.prod';
-import { IPageSideNavTab } from '../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
-import { UserFavoriteEndpoint } from '../../../../../store/src/types/user-favorites.types';
-import { UserFavoriteManager } from '../../../../../store/src/user-favorite-manager';
+  CurrentUserPermissionsService,
+  environment,
+  IPageSideNavTab,
+  PageHeaderComponent,
+  LoadingPageComponent
+} from '@stratosui/core';
+import { UserFavoriteEndpoint, UserFavoriteManager } from '@stratosui/store';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 
 @Component({
   selector: 'app-cloud-foundry-tabs-base',
   templateUrl: './cloud-foundry-tabs-base.component.html',
-  styleUrls: ['./cloud-foundry-tabs-base.component.scss']
+  styleUrls: ['./cloud-foundry-tabs-base.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    RouterModule,
+    PageHeaderComponent,
+    LoadingPageComponent
+  ]
 })
 export class CloudFoundryTabsBaseComponent implements OnInit {
   static firehose = 'firehose';
@@ -33,9 +44,9 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
   // Used to hide tab that is not yet implemented when in production
   isDevEnvironment = !environment.production;
 
-  isFetching$: Observable<boolean>;
+  isFetching$!: Observable<boolean>;
 
-  public canAddOrg$: Observable<boolean>;
+  public canAddOrg$!: Observable<boolean>;
   public tabsHeader = 'Cloud Foundry';
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundry);
 

@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
 import { KubernetesServicePortsComponent } from '../../kubernetes-service-ports/kubernetes-service-ports.component';
@@ -10,16 +12,14 @@ describe('KubeServiceCardComponent', () => {
   let component: KubeServiceCardComponent;
   let fixture: ComponentFixture<KubeServiceCardComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+        providers: [provideZonelessChangeDetection()],imports: [...KubernetesBaseTestModules,
         KubeServiceCardComponent,
         KubernetesServicePortsComponent,
       ],
-      imports: [...KubernetesBaseTestModules],
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubeServiceCardComponent);

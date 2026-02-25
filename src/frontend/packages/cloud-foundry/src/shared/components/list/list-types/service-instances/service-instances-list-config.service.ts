@@ -18,7 +18,9 @@ import { ServiceInstancesDataSource } from './service-instances-data-source';
  * @export
  * @extends {CfServiceInstancesListConfigBase}
  */
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ServiceInstancesListConfigService extends CfServiceInstancesListConfigBase {
 
   enableTextFilter = true;

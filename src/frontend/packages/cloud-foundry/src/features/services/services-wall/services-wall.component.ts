@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -9,9 +11,13 @@ import {
 } from '../../../../../cloud-foundry/src/shared/components/list/list-types/services-wall/service-instances-wall-list-config.service';
 import { CfOrgSpaceDataService } from '../../../../../cloud-foundry/src/shared/data-services/cf-org-space-service.service';
 import { CloudFoundryService } from '../../../../../cloud-foundry/src/shared/data-services/cloud-foundry.service';
+import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
 import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
+import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import { CSI_CANCEL_URL } from '../../../shared/components/add-service-instance/csi-mode.service';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
+import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
+import { CfUserPermissionDirective } from '../../../shared/directives/cf-user-permission/cf-user-permission.directive';
 
 @Component({
   selector: 'app-services-wall',
@@ -22,17 +28,28 @@ import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-perm
       provide: ListConfig,
       useClass: ServiceInstancesWallListConfigService
     },
-    CfOrgSpaceDataService
+    CfOrgSpaceDataService,
+    DatePipe
+  ],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    RouterModule,
+    PageHeaderComponent,
+    ListComponent,
+    CfEndpointsMissingComponent,
+    CfUserPermissionDirective
   ]
 })
 export class ServicesWallComponent {
 
   public haveConnectedCf$: Observable<boolean>;
 
-  canCreateServiceInstance: CfCurrentUserPermissions;
-  initCfOrgSpaceService: Subscription;
-  cfIds$: Observable<string[]>;
-  location: { [CSI_CANCEL_URL]: string, };
+  canCreateServiceInstance!: CfCurrentUserPermissions;
+  initCfOrgSpaceService!: Subscription;
+  cfIds$!: Observable<string[]>;
+  location!: { [CSI_CANCEL_URL]: string, };
 
   constructor(
     public cloudFoundryService: CloudFoundryService,

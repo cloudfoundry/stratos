@@ -1,4 +1,5 @@
-import { Injectable, NgModule } from '@angular/core';
+import { ApplicationRef, Injectable, NgModule, provideZonelessChangeDetection } from '@angular/core';
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Params, RouteReuseStrategy, RouterStateSnapshot } from '@angular/router';
@@ -28,7 +29,8 @@ import {
   UserFavorite,
   UserFavoriteManager
 } from '@stratosui/store';
-import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
+import { StratosThemeModule } from '../../theme/theme.module';
+import { debounceTime, filter, take, withLatestFrom } from 'rxjs/operators';
 
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
@@ -39,7 +41,6 @@ import { ExtensionService } from './core/extension/extension-service';
 import { CurrentUserPermissionsService } from './core/permissions/current-user-permissions.service';
 import { CustomImportModule } from './custom-import.module';
 import { environment } from './environments/environment';
-import { AboutModule } from './features/about/about.module';
 import { DashboardModule } from './features/dashboard/dashboard.module';
 import { HomeModule } from './features/home/home.module';
 import { LoginModule } from './features/login/login.module';
@@ -51,7 +52,8 @@ import { endpointEventKey, GlobalEventData, GlobalEventService } from './shared/
 import { SidePanelService } from './shared/services/side-panel.service';
 import { SharedModule } from './shared/shared.module';
 import { TabNavService } from './tab-nav.service';
-import { XSRFModule } from './xsrf.module';
+import { provideHttpClient, withInterceptors, HttpXsrfTokenExtractor } from '@angular/common/http';
+import { xsrfInterceptor, HttpXsrfHeaderExtractor } from './xsrf.module';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -85,7 +87,11 @@ export class CustomRouterStateSerializer
 const storeDebugImports = environment.production ? [] : [
   StoreDevtoolsModule.instrument({
     maxAge: 100,
-    logOnly: !environment.production
+    logOnly: !environment.production,
+    connectInZone: true,
+    autoPause: true,
+    trace: false,
+    traceLimit: 75
   })
 ];
 
@@ -94,13 +100,39 @@ const storeDebugImports = environment.production ? [] : [
 })
 class AppStoreDebugModule { }
 
-
+/**
+ * AppModule - Main application module
+ *
+ * CRITICAL: Module import order must be preserved for correct entity catalog initialization
+ *
+ * Entity Registration Flow:
+ * 1. EntityCatalogModule.forFeature(generateStratosEntities) - MUST BE FIRST
+ *    - Registers core Stratos entities (endpoint, systemInfo, userFavorites, etc.)
+ *    - These entities are required by all feature modules
+ *    - Registration is SYNCHRONOUS - completes before component constructors
+ *
+ * 2. Core infrastructure modules (Store, Router, etc.)
+ *    - Provide foundational services
+ *
+ * 3. CustomImportModule - MUST BE LAST
+ *    - Dynamically loads feature modules (CF, K8s, Git, Autoscaler, etc.)
+ *    - Replaced by webpack at build time with actual feature module imports
+ *    - Feature modules register their own entities via EntityCatalogModule.forFeature()
+ *
+ * Angular guarantees module constructors (including EntityCatalogFeatureModule) complete
+ * before any component constructors run, ensuring entities are always registered before access.
+ *
+ * DO NOT REORDER imports without understanding entity registration dependencies.
+ */
 @NgModule({
   declarations: [
-    AppComponent,
-    NoEndpointsNonAdminComponent,
+    AppComponent
   ],
   imports: [
+    // Standalone Components
+    NoEndpointsNonAdminComponent,
+    // Modules
+    // CRITICAL: Core Stratos entities MUST register first - required by all feature modules
     EntityCatalogModule.forFeature(generateStratosEntities),
     RouteModule,
     AppStoreModule,
@@ -109,16 +141,18 @@ class AppStoreDebugModule { }
     SharedModule,
     BrowserAnimationsModule,
     CoreModule,
+    StratosThemeModule,
     SetupModule,
     LoginModule,
     HomeModule,
     DashboardModule,
     StoreRouterConnectingModule.forRoot({ serializer: FullRouterStateSerializer }), // Create action for router navigation
-    AboutModule,
+    // CRITICAL: CustomImportModule MUST be last - loads feature modules that depend on core entities
     CustomImportModule,
-    XSRFModule,
   ],
   providers: [
+    // Enable zoneless change detection (Angular 20+ - Zone.js removed)
+    provideZonelessChangeDetection(),
     CustomizationService,
     TabNavService,
     LoggedInService,
@@ -128,7 +162,13 @@ class AppStoreDebugModule { }
     { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
     { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer }, // Create action for router navigation
     { provide: RouteReuseStrategy, useClass: CustomReuseStrategy },
-    CurrentUserPermissionsService
+    CurrentUserPermissionsService,
+    provideCharts(withDefaultRegisterables()),
+    // HTTP Client with functional interceptors (Angular 20 pattern)
+    provideHttpClient(
+      withInterceptors([xsrfInterceptor])
+    ),
+    { provide: HttpXsrfTokenExtractor, useClass: HttpXsrfHeaderExtractor }
   ],
   bootstrap: [AppComponent]
 })
@@ -140,8 +180,30 @@ export class AppModule {
     private userFavoriteManager: UserFavoriteManager,
     ech: EntityCatalogHelper,
     customizationService: CustomizationService,
+    private appRef: ApplicationRef
   ) {
     EntityCatalogHelpers.SetEntityCatalogHelper(ech);
+
+    // Validate entity catalog after all modules have loaded and registered their entities
+    // This ensures CF, K8s, and other feature modules have completed registration before validation
+    this.appRef.isStable.pipe(
+      filter(stable => stable),
+      take(1)
+    ).subscribe(() => {
+      try {
+        const validation = entityCatalog.validateCatalog();
+
+        if (!validation.valid) {
+          console.error('[EntityCatalog] Validation errors:', validation.errors);
+        }
+
+        if (validation.warnings.length > 0) {
+          console.warn('[EntityCatalog] Validation warnings:', validation.warnings);
+        }
+      } catch (error) {
+        console.error('[EntityCatalog] Error during validation:', error);
+      }
+    });
 
     eventService.addEventConfig<boolean>({
       eventTriggered: (state: GeneralEntityAppState) => new GlobalEventData(!state.dashboard.timeoutSession),
@@ -219,16 +281,21 @@ export class AppModule {
       withLatestFrom(allFavs$)
     ).subscribe(
       ([entities, [favoriteGroups, favorites]]) => {
+        if (!favoriteGroups || !favorites) {
+          return;
+        }
         Object.keys(favoriteGroups).forEach(endpointId => {
           const favoriteGroup = favoriteGroups[endpointId];
-          if (!favoriteGroup.ethereal) {
+          if (!favoriteGroup || !favoriteGroup.ethereal) {
             const endpointFavorite = favorites[endpointId];
             this.syncFavorite(endpointFavorite, entities);
           }
-          favoriteGroup.entitiesIds.forEach(id => {
-            const favorite = favorites[id];
-            this.syncFavorite(favorite, entities);
-          });
+          if (favoriteGroup?.entitiesIds) {
+            favoriteGroup.entitiesIds.forEach(id => {
+              const favorite = favorites[id];
+              this.syncFavorite(favorite, entities);
+            });
+          }
         });
       }
     );
@@ -238,12 +305,18 @@ export class AppModule {
       withLatestFrom(recents$)
     ).subscribe(
       ([entities, recents]) => {
+        if (!recents || !entities) {
+          return;
+        }
         Object.values(recents).forEach(recentEntity => {
+          if (!recentEntity) {
+            return;
+          }
           const entityKey = entityCatalog.getEntityKey(recentEntity);
           if (entities[entityKey] && entities[entityKey][recentEntity.entityId]) {
             const entity = entities[entityKey][recentEntity.entityId];
             const entityToMetadata = this.userFavoriteManager.getEntityMetadata(recentEntity, entity);
-            const name = entityToMetadata.name;
+            const name = entityToMetadata?.name;
             if (name && name !== recentEntity.name) {
               // Update the entity name
               this.store.dispatch(new SetRecentlyVisitedEntityAction({
@@ -257,16 +330,27 @@ export class AppModule {
     );
 
     customizationService.setAppNameFromTitle();
+
+    // Configure navigation behavior - hide CF-specific menu items when no CF endpoints are connected
+    customizationService.set({
+      ...customizationService.get(),
+      alwaysShowNavForEndpointTypes: (epType) => false
+    });
   }
 
   private syncFavorite(favorite: UserFavorite<IFavoriteMetadata>, entities: GeneralRequestDataState) {
-    if (favorite) {
+    if (favorite && entities) {
       const isEndpoint = (favorite.entityType === endpointEntityType);
       // If the favorite is an endpoint ensure we look in the stratosEndpoint part of the store instead of, for example, cfEndpoint
       const entityKey = isEndpoint ? entityCatalog.getEntityKey({
         ...favorite,
         endpointType: STRATOS_ENDPOINT_TYPE
       }) : entityCatalog.getEntityKey(favorite);
+
+      if (!entities[entityKey]) {
+        return;
+      }
+
       const entity = entities[entityKey][favorite.entityId || favorite.endpointId];
       if (entity) {
         const newMetadata = this.userFavoriteManager.getEntityMetadata(favorite, entity);
@@ -282,6 +366,9 @@ export class AppModule {
   private metadataHasChanged(oldMeta: IFavoriteMetadata, newMeta: IFavoriteMetadata) {
     if ((!oldMeta && newMeta) || (oldMeta && !newMeta)) {
       return true;
+    }
+    if (!oldMeta && !newMeta) {
+      return false;
     }
     const oldKeys = Object.keys(oldMeta);
     const newKeys = Object.keys(newMeta);

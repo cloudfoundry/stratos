@@ -1,8 +1,14 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import {Component, ElementRef, OnDestroy, OnInit, ViewChild, signal, WritableSignal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
+import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, pairwise, startWith, switchMap } from 'rxjs/operators';
+
+import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
+import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
+import { StepComponent } from '../../../../../core/src/shared/components/stepper/step/step.component';
 
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
@@ -18,10 +24,27 @@ import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
 import { KubernetesNamespace } from '../../store/kube.types';
 import { ChartValuesConfig, ChartValuesEditorComponent } from './../chart-values-editor/chart-values-editor.component';
 
+interface CreateReleaseForm {
+  endpoint: FormControl<string>;
+  releaseName: FormControl<string>;
+  releaseNamespace: FormControl<string>;
+  createNamespace: FormControl<boolean>;
+}
+
 @Component({
   selector: 'app-create-release',
   templateUrl: './create-release.component.html',
   styleUrls: ['./create-release.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    ChartValuesEditorComponent
+  ],
   providers: [
     ...createMonocularProviders()
   ]
@@ -35,10 +58,11 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   kubeEndpoints$: Observable<any>;
   validate$: Observable<boolean>;
 
-  details: UntypedFormGroup;
+  details: FormGroup<CreateReleaseForm>;
   namespaces$: Observable<string[]>;
 
-  private endpointChanged = new BehaviorSubject(null);
+  private endpointChangedSignal: WritableSignal<string | null> = signal(null);
+  private endpointChanged = toObservable(this.endpointChangedSignal);
 
   @ViewChild('releaseNameInputField', { static: true }) releaseNameInputField: ElementRef;
   @ViewChild('editor', { static: true }) editor: ChartValuesEditorComponent;
@@ -48,12 +72,15 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
 
   private chart: HelmChartReference;
   public config: ChartValuesConfig;
+  private route = inject(ActivatedRoute);
+  public endpointsService = inject(EndpointsService);
+  private chartsService = inject(ChartsService);
 
-  constructor(
-    private route: ActivatedRoute,
-    public endpointsService: EndpointsService,
-    private chartsService: ChartsService,
-  ) {
+
+
+  constructor() {
+
+
     const chart = this.route.snapshot.params as HelmChartReference;
     this.cancelUrl = this.chartsService.getChartSummaryRoute(chart.repo, chart.name, chart.version, this.route);
     this.chart = chart;
@@ -67,14 +94,16 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     });
 
     this.setupDetailsStep();
+
+
   }
 
   private setupDetailsStep() {
-    this.details = new UntypedFormGroup({
-      endpoint: new UntypedFormControl('', Validators.required),
-      releaseName: new UntypedFormControl('', Validators.required),
-      releaseNamespace: new UntypedFormControl('', Validators.required),
-      createNamespace: new UntypedFormControl(false),
+    this.details = new FormGroup<CreateReleaseForm>({
+      endpoint: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+      releaseName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+      releaseNamespace: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+      createNamespace: new FormControl(false, { nonNullable: true }),
     });
     this.details.controls.createNamespace.disable();
 
@@ -86,7 +115,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     );
     this.namespaces$ = combineLatest([
       allNamespaces$,
-      this.endpointChanged.asObservable(),
+      this.endpointChanged,
       this.details.controls.releaseNamespace.valueChanges.pipe(startWith(''), distinctUntilChanged())
     ]).pipe(
       // Filter out namespaces from other kubes
@@ -142,7 +171,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
 
     this.subs.push(
       this.details.controls.endpoint.valueChanges.subscribe(val => {
-        this.endpointChanged.next(val);
+        this.endpointChangedSignal.set(val);
       })
     );
 
@@ -168,7 +197,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     this.kubeEndpoints$.pipe(first()).subscribe(ep => {
       if (ep.length > 1) {
         this.details.controls.endpoint.setValue(ep[0].guid, { onlySelf: true });
-        this.endpointChanged.next(ep[0].guid);
+        this.endpointChangedSignal.set(ep[0].guid);
         setTimeout(() => {
           this.releaseNameInputField.nativeElement.focus();
         }, 1);
@@ -217,17 +246,21 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   }
 
   installChart(): Observable<StepOnNextResult> {
-    const endpoint = getMonocularEndpoint(this.route, null, null);
+    const endpoint = getMonocularEndpoint(this.route, undefined, undefined);
+    const formValue = this.details.value;
     // Build the request body
     const values: HelmInstallValues = {
-      ...this.details.value,
+      endpoint: formValue.endpoint ?? '',
+      releaseName: formValue.releaseName || '',
+      releaseNamespace: formValue.releaseNamespace || '',
       values: JSON.stringify(this.editor.getValues()),
       chart: {
         name: this.route.snapshot.params.name,
         repo: this.route.snapshot.params.repo,
         version: this.route.snapshot.params.version,
       },
-      monocularEndpoint: endpoint === stratosMonocularEndpointGuid ? null : endpoint
+      monocularEndpoint: endpoint === stratosMonocularEndpointGuid ? null : endpoint,
+      chartUrl: '' // Will be set after fetching chart info
     };
 
     // Get the chart first, so we can get then install URL, then install

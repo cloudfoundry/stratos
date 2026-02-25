@@ -14,7 +14,7 @@ export interface IFlatTree {
 
 export class EntitySchemaTreeBuilder {
 
-  private entityExcludes: string[];
+  private entityExcludes!: string[];
   public getFlatTree(treeDefinition: IRecursiveDelete, state: IRequestTypeState): IFlatTree {
     const { schema, guid } = treeDefinition;
     const denormed = denormalize(guid, schema, state);
@@ -49,7 +49,7 @@ export class EntitySchemaTreeBuilder {
     }
     const { definition } = schema;
     if (!schema.getId) {
-      return this.build(schema[schema.entityType], schema[schema.entityType], flatTree);
+      return this.build((schema as Record<string, any>)[schema.entityType], (schema as Record<string, any>)[schema.entityType], flatTree);
     }
     // Don't add the root element to the tree to avoid duplication actions when consuming tree
     if (!root) {
@@ -60,7 +60,7 @@ export class EntitySchemaTreeBuilder {
     }
     return keys.reduce((fullFlatTree, key) => {
       const newEntity = entity[key];
-      const entityDefinition = this.getDefinition(definition[key]);
+      const entityDefinition = this.getDefinition((definition as Record<string, any>)[key]);
       if (Array.isArray(newEntity)) {
         return this.build(entityDefinition, newEntity, fullFlatTree);
       }
@@ -79,14 +79,14 @@ export class EntitySchemaTreeBuilder {
     return flatTree;
   }
 
-  private getDefinition(definition): EntitySchema {
+  private getDefinition(definition: any): EntitySchema {
     if (Array.isArray(definition)) {
       return definition[0];
     }
     return definition;
   }
 
-  private handleSingleChildEntity(entityDefinition: EntitySchema, entity, flatTree: IFlatTree, key: string) {
+  private handleSingleChildEntity(entityDefinition: EntitySchema, entity: any, flatTree: IFlatTree, key: string) {
     if (!entity) {
       return flatTree;
     }

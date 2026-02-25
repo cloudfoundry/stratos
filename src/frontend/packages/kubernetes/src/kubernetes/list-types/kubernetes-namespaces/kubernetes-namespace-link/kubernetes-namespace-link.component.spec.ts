@@ -1,5 +1,9 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
+import { EntityServiceFactory } from '@stratosui/store';
 import { BaseKubeGuid } from '../../../kubernetes-page.types';
 import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
 import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
@@ -10,14 +14,21 @@ describe('KubernetesNamespaceLinkComponent', () => {
   let component: KubernetesNamespaceLinkComponent;
   let fixture: ComponentFixture<KubernetesNamespaceLinkComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [KubernetesNamespaceLinkComponent],
-      imports: KubernetesBaseTestModules,
-      providers: [KubernetesEndpointService, BaseKubeGuid]
-    })
-      .compileComponents();
-  }));
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        KubernetesNamespaceLinkComponent,
+        ...KubernetesBaseTestModules,
+      ],
+      providers: [
+        EntityServiceFactory,
+        KubernetesEndpointService,
+        BaseKubeGuid,
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+      ]
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesNamespaceLinkComponent);
@@ -27,7 +38,7 @@ describe('KubernetesNamespaceLinkComponent', () => {
         finalizers: []
       },
       status: {
-        phase: KubernetesStatus.RUNNING
+        phase: KubernetesStatus.RUNNING,
       },
       metadata: {
         namespace: 'test',

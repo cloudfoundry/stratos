@@ -1,7 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { combineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
-import { Md5 } from 'ts-md5/dist/md5';
+import { Md5 } from 'ts-md5';
 
 import { GitBranch, GitCommit, GitRepo, GitSuggestedRepo } from '../../store/git.public-types';
 import { GitSCM, SCMIcon } from './scm';
@@ -42,7 +42,7 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
       this.getAPI().pipe(switchMap(api => httpClient.get(`${api.url}/projects/${parts.join('%2F')}`, api.requestArgs)));
 
     return obs$.pipe(
-      map((data: any) => {
+      map((data: unknown) => {
         if (!data) {
           throw new HttpErrorResponse({
             status: 404
@@ -57,10 +57,11 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
     const prjNameEncoded = encodeURIComponent(projectName);
     return this.getAPI().pipe(
       switchMap(api => httpClient.get(`${api.url}/projects/${prjNameEncoded}/repository/branches/${branchName}`, api.requestArgs)),
-      map((data: any) => {
-        const nb = { ...data };
+      map((data: unknown) => {
+        const branch = data as { commit: { id: string; sha?: string } };
+        const nb = { ...branch };
         nb.commit.sha = nb.commit.id;
-        return nb;
+        return nb as unknown as GitBranch;
       })
     );
   }
@@ -76,12 +77,13 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
           [GITLAB_PER_PAGE_PARAM]: GITLAB_PER_PAGE_PARAM_VALUE.toString()
         }
       })),
-      map((data: any) => {
-        const branches = [];
-        data.forEach(b => {
+      map((data: unknown) => {
+        const branches: GitBranch[] = [];
+        const branchData = data as Array<{ commit: { id: string; sha?: string } }>;
+        branchData.forEach((b: { commit: { id: string; sha?: string } }) => {
           const nb = { ...b };
           nb.commit.sha = b.commit.id;
-          branches.push(nb);
+          branches.push(nb as unknown as GitBranch);
         });
         return branches;
       })
@@ -117,9 +119,10 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
           [GITLAB_PER_PAGE_PARAM]: GITLAB_PER_PAGE_PARAM_VALUE.toString()
         }
       })),
-      map((data: any) => {
-        const commits = [];
-        data.forEach(c => commits.push(this.convertCommit(c)));
+      map((data: unknown) => {
+        const commits: GitCommit[] = [];
+        const commitData = data as unknown[];
+        commitData.forEach((c: unknown) => commits.push(this.convertCommit(c)));
         return commits;
       })
     );
@@ -151,7 +154,7 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
           catchError(() => of([]))
         ),
       ])),
-      map(([a, b]: [any[], any[]]) => a.concat(b).map(this.convertProject)),
+      map(([a, b]: [unknown[], unknown[]]) => a.concat(b).map((prj: unknown) => this.convertProject(prj))),
     );
   }
 
@@ -163,32 +166,53 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
           [GITLAB_PER_PAGE_PARAM]: GITLAB_PER_PAGE_PARAM_VALUE.toString()
         }
       })),
-      map((projects: any[]) => projects.map(this.convertProject))
+      map((projects: unknown) => (projects as unknown[]).map((prj: unknown) => this.convertProject(prj)))
     );
   }
 
-  private convertProject(prj: any): GitRepo {
-    return {
-      ...prj,
-      full_name: prj.path_with_namespace,
-      description: prj.description || prj.name_with_namespace,
-      html_url: prj.web_url,
-      owner: {
-        name: prj.namespace.name,
-        avatar_url: prj.avatar_url || '/core/assets/gitlab-logo.svg'
-      },
-      clone_url: prj.http_url_to_repo,
-      // visibility is undefined if not using PAT (everything is public). if PAT is used then values include public, private and internal
-      private: prj.visibility !== undefined && prj.visibility !== 'public'
+  private convertProject(prj: unknown): GitRepo {
+    const project = prj as {
+      path_with_namespace: string;
+      description?: string;
+      name_with_namespace: string;
+      web_url: string;
+      namespace: { name: string };
+      avatar_url?: string;
+      http_url_to_repo: string;
+      visibility?: string;
     };
+    return {
+      ...project,
+      full_name: project.path_with_namespace,
+      description: project.description || project.name_with_namespace,
+      html_url: project.web_url,
+      owner: {
+        name: project.namespace.name,
+        avatar_url: project.avatar_url || '/core/assets/gitlab-logo.svg'
+      },
+      clone_url: project.http_url_to_repo,
+      // visibility is undefined if not using PAT (everything is public). if PAT is used then values include public, private and internal
+      private: project.visibility !== undefined && project.visibility !== 'public'
+    } as unknown as GitRepo;
   }
 
-  public convertCommit(commit: any): GitCommit {
-    const emailMD5 = Md5.hashStr(commit.author_email);
+  public convertCommit(commit: unknown): GitCommit {
+    const commitData = commit as {
+      author_email: string;
+      web_url: string;
+      created_at: string;
+      author_name: string;
+      message: string;
+      id: string;
+      guid?: string;
+      projectName?: string;
+      scmType?: string;
+    };
+    const emailMD5 = Md5.hashStr(commitData.author_email);
     const avatarURL = `https://secure.gravatar.com/avatar/${emailMD5}?s=120&d=identicon`;
 
     return {
-      html_url: commit.web_url,
+      html_url: commitData.web_url,
       author: {
         id: null,
         login: null,
@@ -197,22 +221,23 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
       },
       commit: {
         author: {
-          date: commit.created_at,
-          name: commit.author_name,
-          email: commit.author_email
+          date: commitData.created_at,
+          name: commitData.author_name,
+          email: commitData.author_email
         },
-        message: commit.message,
+        message: commitData.message,
       },
-      sha: commit.id,
-      guid: commit.guid,
-      projectName: commit.projectName,
-      scmType: commit.scmType,
+      sha: commitData.id,
+      guid: commitData.guid,
+      projectName: commitData.projectName,
+      scmType: commitData.scmType,
       endpointGuid: null,
     };
   }
 
-  parseErrorAsString(error: any): string {
-    return 'Git request failed' + (error.status ? `(${error.status})` : '');
+  parseErrorAsString(error: unknown): string {
+    const errorResponse = error as { status?: number };
+    return 'Git request failed' + (errorResponse.status ? `(${errorResponse.status})` : '');
   }
 
 }

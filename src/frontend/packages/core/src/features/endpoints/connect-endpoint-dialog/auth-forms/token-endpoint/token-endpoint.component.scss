@@ -1,9 +1,42 @@
 .token {
-  min-width: 350px;
+  width: 100%;
+  max-width: 100%;
+
+  &__help-text {
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--content-text);
+    background-color: var(--content-secondary);
+    border-radius: 4px;
+    border-left: 3px solid var(--content-border);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+
+    p {
+      margin: 0 0 12px 0;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    a {
+      color: var(--color-primary);
+      text-decoration: none;
+      word-break: break-all;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
 
   &__form {
     display: flex;
     flex-direction: column;
+    width: 100%;
 
     textarea {
       font-family: 'Source Code Pro';
@@ -11,6 +44,7 @@
       line-break: anywhere;
     }
   }
+
   &__title {
     font-size: 14px;
     margin-bottom: 12px;

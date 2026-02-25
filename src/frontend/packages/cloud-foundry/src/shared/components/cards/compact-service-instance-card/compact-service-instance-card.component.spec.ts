@@ -1,22 +1,69 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { StoreModule } from '@ngrx/store';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { AppChipsComponent } from '../../../../../../core/src/shared/components/chips/chips.component';
 import {
-  generateCfBaseTestModulesNoShared,
-} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+  EntityCatalogTestModule,
+  generateStratosEntities,
+  TEST_CATALOGUE_ENTITIES,
+  appReducers,
+  EntityCatalogHelper,
+  EntityCatalogHelpers,
+  EntityServiceFactory,
+  EntityMonitorFactory,
+  PaginationMonitorFactory
+} from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { AppChipsComponent } from '@stratosui/core';
+import { CloudFoundryTestingModule, generateCFEntities } from '@test-framework/cf';
 import { CompactServiceInstanceCardComponent } from './compact-service-instance-card.component';
 
 describe('CompactServiceInstanceCardComponent', () => {
   let component: CompactServiceInstanceCardComponent;
   let fixture: ComponentFixture<CompactServiceInstanceCardComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [CompactServiceInstanceCardComponent, AppChipsComponent],
-      imports: generateCfBaseTestModulesNoShared()
+      imports: [
+        CompactServiceInstanceCardComponent,
+        AppChipsComponent,
+      ],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideNoopAnimations(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          CloudFoundryTestingModule,
+          StoreModule.forRoot(appReducers, {
+            runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
+          }),
+          EntityCatalogTestModule
+        ),
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities(),
+          ]
+        },
+        EntityServiceFactory,
+        EntityMonitorFactory,
+        PaginationMonitorFactory,
+        EntityCatalogHelper,
+      ]
     })
       .compileComponents();
-  }));
+
+    // Initialize EntityCatalogHelper for Angular 20 compatibility
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CompactServiceInstanceCardComponent);

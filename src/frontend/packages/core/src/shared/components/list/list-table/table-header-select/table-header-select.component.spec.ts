@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { TableHeaderSelectComponent } from './table-header-select.component';
 import { CoreModule } from '../../../../../core/core.module';
@@ -8,13 +10,19 @@ describe('TableHeaderSelectComponent', () => {
   let component: TableHeaderSelectComponent<any>;
   let fixture: ComponentFixture<TableHeaderSelectComponent<any>>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [TableHeaderSelectComponent],
-      imports: [CoreModule]
-    })
-      .compileComponents();
-  }));
+      
+      providers: [provideZonelessChangeDetection()],
+      
+      imports: [
+        CoreModule,
+        TableHeaderSelectComponent,
+      ]
+    
+    });
+      TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TableHeaderSelectComponent);

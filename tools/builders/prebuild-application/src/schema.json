@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "title": "Prebuild Application Builder",
+  "description": "Builds an Angular application with prebuild script execution",
+  "type": "object",
+  "properties": {
+    "browserTarget": {
+      "type": "string",
+      "description": "A browser builder target in format project:target[:configuration]",
+      "pattern": "^[^:\\s]+:[^:\\s]+(:[^\\s]+)?$"
+    },
+    "prebuildScripts": {
+      "type": "array",
+      "description": "Scripts to execute before build",
+      "default": [],
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Display name for the script"
+          },
+          "script": {
+            "type": "string",
+            "description": "Command to execute (e.g., 'node build/script.js')"
+          },
+          "phase": {
+            "type": "number",
+            "description": "Execution phase (scripts in same phase run in parallel)",
+            "default": 1
+          },
+          "cache": {
+            "type": "boolean",
+            "description": "Enable caching for this script",
+            "default": true
+          },
+          "cacheKey": {
+            "type": "array",
+            "description": "Files/patterns to watch for cache invalidation",
+            "items": { "type": "string" }
+          },
+          "timeout": {
+            "type": "number",
+            "description": "Timeout in milliseconds",
+            "default": 60000
+          },
+          "required": {
+            "type": "boolean",
+            "description": "Whether script failure should abort build",
+            "default": true
+          }
+        },
+        "required": ["name", "script"]
+      }
+    },
+    "skipPrebuild": {
+      "type": "boolean",
+      "description": "Skip prebuild phase (for debugging)",
+      "default": false
+    },
+    "clearCache": {
+      "type": "boolean",
+      "description": "Clear cache before build",
+      "default": false
+    },
+    "verbose": {
+      "type": "boolean",
+      "description": "Enable verbose logging",
+      "default": false
+    },
+    "watch": {
+      "type": "boolean",
+      "description": "Enable watch mode (passed through to underlying builder)",
+      "default": false
+    },
+    "budgets": {
+      "type": "array",
+      "description": "Budget thresholds for build output sizes (passed through to underlying builder)",
+      "default": [],
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "required": ["browserTarget"],
+  "additionalProperties": false
+}

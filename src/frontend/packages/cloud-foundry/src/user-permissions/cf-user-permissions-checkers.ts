@@ -1,27 +1,21 @@
+import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
-
-import {
-  IPermissionConfigs,
-  PermissionConfig,
-  PermissionConfigLink,
-  PermissionTypes,
-} from '../../../core/src/core/permissions/current-user-permissions.config';
-import {
-  CurrentUserPermissionsService,
-  CUSTOM_USER_PERMISSION_CHECKERS,
-} from '../../../core/src/core/permissions/current-user-permissions.service';
 import {
   BaseCurrentUserPermissionsChecker,
+  CUSTOM_USER_PERMISSION_CHECKERS,
+  CurrentUserPermissionsService,
   IConfigGroup,
   IConfigGroups,
   ICurrentUserPermissionsChecker,
   IPermissionCheckCombiner,
-} from '../../../core/src/core/permissions/current-user-permissions.types';
-import { GeneralEntityAppState } from '../../../store/src/app-state';
-import { PermissionValues } from '../../../store/src/selectors/current-user-role.selectors';
-import { connectedEndpointsSelector } from '../../../store/src/selectors/endpoint.selectors';
+  IPermissionConfigs,
+  PermissionConfig,
+  PermissionConfigLink,
+  PermissionTypes,
+} from '@stratosui/core';
+import { GeneralEntityAppState, PermissionValues, connectedEndpointsSelector } from '@stratosui/store';
 import { CFFeatureFlagTypes, IFeatureFlag } from '../cf-api.types';
 import { cfEntityCatalog } from '../cf-entity-catalog';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
@@ -31,73 +25,15 @@ import {
   getCurrentUserCFGlobalState,
 } from '../store/selectors/cf-current-user-role.selectors';
 import { IOrgRoleState, ISpaceRoleState, ISpacesRoleState } from '../store/types/cf-current-user-roles.types';
+import {
+  CfCurrentUserPermissions,
+  CfPermissionStrings,
+  CfPermissionTypes,
+  CfScopeStrings,
+} from './cf-user-permissions.types';
 
-export const cfCurrentUserPermissionsService = [
-  {
-    provide: CUSTOM_USER_PERMISSION_CHECKERS,
-    useFactory: (store: Store<GeneralEntityAppState>) => [new CfUserPermissionsChecker(store)],
-    deps: [Store]
-  },
-  CurrentUserPermissionsService,
-];
-
-export enum CfCurrentUserPermissions {
-  APPLICATION_VIEW = 'view.application',
-  APPLICATION_EDIT = 'edit.application',
-  APPLICATION_CREATE = 'create.application',
-  APPLICATION_MANAGE = 'manage.application',
-  APPLICATION_VIEW_ENV_VARS = 'env-vars.view.application',
-  SPACE_VIEW = 'view.space',
-  SPACE_CREATE = 'create.space',
-  SPACE_DELETE = 'delete.space',
-  SPACE_EDIT = 'edit.space',
-  SPACE_CHANGE_ROLES = 'change-roles.space',
-  ROUTE_CREATE = 'create.route',
-  // ROUTE_BINDING_CREATE = 'create.binding.route',
-  QUOTA_CREATE = 'create.quota',
-  QUOTA_EDIT = 'edit.quota',
-  QUOTA_DELETE = 'delete.quota',
-  SPACE_QUOTA_CREATE = 'create.space-quota',
-  SPACE_QUOTA_EDIT = 'edit.space-quota',
-  SPACE_QUOTA_DELETE = 'delete.space-quota',
-  ORGANIZATION_CREATE = 'create.org',
-  ORGANIZATION_DELETE = 'delete.org',
-  ORGANIZATION_EDIT = 'edit.org',
-  ORGANIZATION_SUSPEND = 'suspend.org',
-  ORGANIZATION_CHANGE_ROLES = 'change-roles.org',
-  SERVICE_INSTANCE_DELETE = 'delete.service-instance',
-  SERVICE_INSTANCE_CREATE = 'create.service-instance',
-  SERVICE_BINDING_EDIT = 'edit.service-binding',
-  FIREHOSE_VIEW = 'view-firehose',
-  SERVICE_INSTANCE_EDIT = 'edit.service-instance'
-}
-
-export enum CfPermissionStrings {
-  _GLOBAL_ = 'global',
-  SPACE_MANAGER = 'isManager',
-  SPACE_AUDITOR = 'isAuditor',
-  SPACE_DEVELOPER = 'isDeveloper',
-  ORG_MANAGER = 'isManager',
-  ORG_AUDITOR = 'isAuditor',
-  ORG_BILLING_MANAGER = 'isBillingManager',
-  ORG_USER = 'isUser',
-}
-
-export enum CfScopeStrings {
-  CF_ADMIN_GROUP = 'cloud_controller.admin',
-  CF_READ_ONLY_ADMIN_GROUP = 'cloud_controller.admin_read_only',
-  CF_ADMIN_GLOBAL_AUDITOR_GROUP = 'cloud_controller.global_auditor',
-  CF_WRITE_SCOPE = 'cloud_controller.write',
-  CF_READ_SCOPE = 'cloud_controller.write',
-}
-
-export enum CfPermissionTypes {
-  SPACE = 'spaces',
-  ORGANIZATION = 'organizations',
-  ENDPOINT = 'endpoint',
-  ENDPOINT_SCOPE = 'endpoint-scope',
-  FEATURE_FLAG = 'feature-flag',
-}
+// Re-export permission types for backward compatibility
+export { CfCurrentUserPermissions, CfPermissionStrings, CfPermissionTypes, CfScopeStrings } from './cf-user-permissions.types';
 
 enum CHECKER_GROUPS {
   CF_GROUP = '__CF_TYPE__'
@@ -177,6 +113,7 @@ export const cfPermissionConfigs: IPermissionConfigs = {
   ],
 };
 
+@Injectable()
 export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker implements ICurrentUserPermissionsChecker {
   static readonly ALL_SPACES = 'PERMISSIONS__ALL_SPACES_PLEASE';
 
@@ -212,10 +149,10 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
       map(state => {
         const permissionString = permission as CfPermissionStrings;
         if (allSpacesWithinOrg) {
-          const spaceState = state[CfPermissionTypes.SPACE];
-          return this.checkAllSpacesInOrg(state[CfPermissionTypes.ORGANIZATION][orgOrSpaceGuid], spaceState, permissionString);
+          const spaceState = (state as any)[CfPermissionTypes.SPACE];
+          return this.checkAllSpacesInOrg((state as any)[CfPermissionTypes.ORGANIZATION][orgOrSpaceGuid as string], spaceState, permissionString);
         }
-        return this.selectPermission(state[type][orgOrSpaceGuid], permissionString);
+        return this.selectPermission((state as any)[type][orgOrSpaceGuid as string], permissionString);
       }),
       distinctUntilChanged(),
     );
@@ -245,7 +182,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
     }
   }
 
-  private getEndpointScopesCheck(permission: CfScopeStrings, endpointGuid?: string) {
+  private getEndpointScopesCheck(permission: CfScopeStrings, endpointGuid?: string): Observable<boolean> {
     const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
     return endpointGuids$.pipe(
       switchMap(guids => combineLatest(guids.map(guid => this.check(CfPermissionTypes.ENDPOINT_SCOPE, permission, endpointGuid)))),
@@ -257,7 +194,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
   private getEndpointScopesChecks(
     configs: PermissionConfig[],
     endpoint?: string
-  ) {
+  ): Observable<boolean>[] {
     return configs.map(config => {
       const { permission } = config;
       return this.getEndpointScopesCheck(permission as CfScopeStrings, endpoint);
@@ -302,7 +239,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
     const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
     return endpointGuids$.pipe(
       switchMap(guids => {
-        const createFFObs = guid =>
+        const createFFObs = (guid: string) =>
           // For admins we don't have the ff list which is usually fetched right at the start,
           // so this can't be a pagination monitor on its own (which doesn't fetch if list is missing)
           cfEntityCatalog.featureFlag.store.getPaginationService(guid).entities$;
@@ -323,7 +260,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
     return flag.enabled;
   }
 
-  private getAdminChecks(endpointGuid?: string) {
+  private getAdminChecks(endpointGuid?: string): Observable<boolean> {
     const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
     return endpointGuids$.pipe(
       map(guids => guids.map(guid => this.getCfAdminCheck(guid))),
@@ -334,7 +271,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
   /**
    * Includes read only admins, global auditors and users that don't have the cloud_controller.write scope
    */
-  private getReadOnlyCheck(endpointGuid: string) {
+  private getReadOnlyCheck(endpointGuid: string): Observable<boolean> {
     return this.getCfEndpointState(endpointGuid).pipe(
       map(
         cfPermissions => (
@@ -373,7 +310,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
   /**
    * If no endpoint is passed, check them all
    */
-  private getReadOnlyChecks(endpointGuid?: string) {
+  private getReadOnlyChecks(endpointGuid?: string): Observable<boolean> {
     const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
     return endpointGuids$.pipe(
       map(guids => guids.map(guid => this.getReadOnlyCheck(guid))),
@@ -381,50 +318,50 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
     );
   }
 
-  private getCfAdminCheck(endpointGuid: string) {
+  private getCfAdminCheck(endpointGuid: string): Observable<boolean> {
     return this.getCfEndpointState(endpointGuid).pipe(
       filter(cfPermissions => !!cfPermissions),
       map(cfPermissions => cfPermissions.global.isAdmin)
     );
   }
 
-  private checkAllOfType(endpointGuid: string, type: CfPermissionTypes, permission: CfPermissionStrings, orgGuid?: string) {
+  private checkAllOfType(endpointGuid: string, type: CfPermissionTypes, permission: CfPermissionStrings, orgGuid?: string): Observable<boolean> {
     return this.getCfEndpointState(endpointGuid).pipe(
       map(state => {
-        if (!state || !state[type]) {
+        if (!state || !(state as any)[type]) {
           return false;
         }
-        return Object.keys(state[type]).some(guid => {
-          return this.selectPermission(state[type][guid], permission);
+        return Object.keys((state as any)[type]).some((guid: string) => {
+          return this.selectPermission((state as any)[type][guid], permission);
         });
       })
     );
   }
 
-  private getAllEndpointGuids() {
+  private getAllEndpointGuids(): Observable<string[]> {
     return this.store.select(connectedEndpointsSelector()).pipe(
       map(endpoints => Object.values(endpoints).filter(e => e.cnsi_type === CF_ENDPOINT_TYPE).map(endpoint => endpoint.guid))
     );
   }
 
-  private getEndpointGuidObservable(endpointGuid: string) {
+  private getEndpointGuidObservable(endpointGuid: string | undefined): Observable<string[]> {
     return !endpointGuid ? this.getAllEndpointGuids() : of([endpointGuid]);
   }
 
   private selectPermission(state: IOrgRoleState | ISpaceRoleState, permission: CfPermissionStrings): boolean {
-    return state ? state[permission] || false : false;
+    return state ? (state as any)[permission] || false : false;
   }
 
-  private checkAllSpacesInOrg(orgState: IOrgRoleState, endpointSpaces: ISpacesRoleState, permission: CfPermissionStrings) {
+  private checkAllSpacesInOrg(orgState: IOrgRoleState, endpointSpaces: ISpacesRoleState, permission: CfPermissionStrings): boolean {
     const spaceGuids = !!orgState && orgState.spaceGuids ? orgState.spaceGuids : [];
     return spaceGuids.map(spaceGuid => {
       const space = endpointSpaces[spaceGuid];
-      return space ? space[permission] || false : false;
+      return space ? (space as any)[permission] || false : false;
     }).some(check => check);
 
   }
 
-  private getCfEndpointState(endpointGuid: string) {
+  private getCfEndpointState(endpointGuid: string): Observable<any> {
     return this.store.select(getCurrentUserCFEndpointRolesState(endpointGuid));
   }
 
@@ -447,7 +384,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
 
 
   private groupConfigs(configs: PermissionConfig[]): IConfigGroups {
-    return configs.reduce((grouped, config) => {
+    return configs.reduce((grouped: IConfigGroups, config: PermissionConfig) => {
       const type = this.getGroupType(config);
       return {
         ...grouped,
@@ -459,7 +396,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
     }, {});
   }
 
-  private getGroupType(config: PermissionConfig) {
+  private getGroupType(config: PermissionConfig): string {
     if (config.type === CfPermissionTypes.ORGANIZATION || config.type === CfPermissionTypes.SPACE) {
       return CHECKER_GROUPS.CF_GROUP;
     }
@@ -491,8 +428,18 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
     }
   }
 
-  public getFallbackCheck(endpointGuid: string, endpointType: string) {
+  public getFallbackCheck(endpointGuid: string, endpointType: string): Observable<boolean> | null {
     return endpointType === CF_ENDPOINT_TYPE ? this.getCfAdminCheck(endpointGuid) : null;
   }
 
 }
+
+export const cfCurrentUserPermissionsService = [
+  CfUserPermissionsChecker,
+  {
+    provide: CUSTOM_USER_PERMISSION_CHECKERS,
+    useFactory: (checker: CfUserPermissionsChecker) => [checker],
+    deps: [CfUserPermissionsChecker]
+  },
+  CurrentUserPermissionsService,
+];

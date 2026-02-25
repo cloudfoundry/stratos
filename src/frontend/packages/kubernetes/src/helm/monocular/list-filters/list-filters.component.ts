@@ -1,13 +1,15 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
+
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-list-filters',
   templateUrl: './list-filters.component.html',
   styleUrls: ['./list-filters.component.scss'],
-  /* tslint:disable-next-line:no-inputs-metadata-property */
-  inputs: ['filters']
+  standalone: true,
+  imports: []
 })
 
 export class ListFiltersComponent {
-  public filters: { title: string, items: Array<{}>, }[] = [];
+  @Input() public filters: { title: string, items: Array<Record<string, unknown>>, }[] = [];
 }

@@ -35,7 +35,7 @@ export function addCfEndpoint(state: IAllCfRolesState, action: EndpointActionCom
   return cfState;
 }
 
-export function removeCfSpaceRoles(state: IAllCfRolesState, action: APISuccessOrFailedAction) {
+export function removeCfSpaceRoles(state: IAllCfRolesState, action: APISuccessOrFailedAction): IAllCfRolesState {
   const { endpointGuid, guid } = action.apiAction;
   const removedOrgOrSpaceState = removeOrgOrSpaceRoles(state, endpointGuid as string, guid, 'spaces');
   return removeSpaceIdFromOrg(removedOrgOrSpaceState, endpointGuid as string, guid);
@@ -62,15 +62,15 @@ function removeSpaceIdFromOrg(state: IAllCfRolesState, endpointGuid: string, spa
   };
 }
 
-export function removeCfOrgRoles(state: IAllCfRolesState, action: APISuccessOrFailedAction) {
+export function removeCfOrgRoles(state: IAllCfRolesState, action: APISuccessOrFailedAction): IAllCfRolesState {
   const { endpointGuid, guid } = action.apiAction;
   if (!state[endpointGuid as string].organizations[guid]) {
     return state;
   }
   // const spaceIds = state.cf[endpointGuid].organizations[guid].spaceIds;
-  const spaceIds = [];
-  const newState = removeOrgOrSpaceRoles(state, endpointGuid, guid, 'organizations');
-  return cleanUpOrgSpaces(newState, spaceIds, endpointGuid);
+  const spaceIds: string[] = [];
+  const newState = removeOrgOrSpaceRoles(state, endpointGuid as string, guid, 'organizations');
+  return cleanUpOrgSpaces(newState, spaceIds, endpointGuid as string);
 }
 
 function removeOrgOrSpaceRoles(
@@ -78,15 +78,15 @@ function removeOrgOrSpaceRoles(
   endpointGuid: string,
   orgOrSpaceId: string,
   type: 'organizations' | 'spaces'
-) {
-  if (!state[endpointGuid][type][orgOrSpaceId]) {
+): IAllCfRolesState {
+  if (!(state[endpointGuid] as any)[type][orgOrSpaceId]) {
     return state;
   }
   // Remove orgOrSpaceId
   const {
     [orgOrSpaceId]: omit,
     ...newTypeState
-  } = state[endpointGuid][type];
+  } = (state[endpointGuid] as any)[type];
 
   const newState = {
     ...state,

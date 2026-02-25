@@ -1,10 +1,18 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { generateTestApplicationServiceProvider } from '../../../../../../test-framework/application-service-helper';
-import { generateCfBaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import {
+  generateTestApplicationServiceProvider,
+  ApplicationEnvVarsHelper,
+  ApplicationStateService,
+  generateCfBaseTestModulesNoShared,
+} from '@test-framework/cf';
+
 import { ApplicationPollingService } from '../application-polling.service';
-import { ApplicationEnvVarsHelper } from '../tabs/build-tab/application-env-vars.service';
-import { ApplicationStateService } from './../../../../../shared/services/application-state.service';
 import { ApplicationPollComponent } from './application-poll.component';
 
 describe('ApplicationPollComponent', () => {
@@ -13,22 +21,24 @@ describe('ApplicationPollComponent', () => {
 
   const appId = '1';
   const cfId = '2';
-
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [ApplicationPollComponent],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        ApplicationPollComponent,
+      ],
       providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(generateCfBaseTestModulesNoShared()),
         ApplicationPollingService,
-        generateTestApplicationServiceProvider(cfId, appId),
+        generateTestApplicationServiceProvider(appId, cfId),
         ApplicationEnvVarsHelper,
         ApplicationStateService,
       ],
-      imports: generateCfBaseTestModules()
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(ApplicationPollComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

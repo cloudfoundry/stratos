@@ -6,10 +6,11 @@ import { AppState } from '../../../store/src/app-state';
 
 @StratosLoginComponent()
 @Component({
-  selector: 'app-desktop-login',
+selector: 'app-desktop-login',
   templateUrl: './desktop-login.component.html',
   styleUrls: ['./desktop-login.component.scss'],
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
+  standalone: false
 })
 export class DesktopLoginComponent extends LoginPageComponent {
   constructor(

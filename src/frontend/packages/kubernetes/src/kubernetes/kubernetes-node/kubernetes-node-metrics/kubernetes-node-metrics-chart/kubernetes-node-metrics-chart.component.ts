@@ -1,6 +1,8 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
+import { CustomCardComponent, CustomCardHeaderComponent, CustomCardContentComponent } from '../../../../../../core/src/shared/components/custom-card/custom-card.component';
+import { CardWrapperComponent } from '../../../../../../core/src/shared/components/cards/card/card.component';
 
-import { MetricsConfig } from '../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
+import { MetricsChartComponent, MetricsConfig } from '../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
 import { MetricsLineChartConfig } from '../../../../../../core/src/shared/components/metrics-chart/metrics-chart.types';
 import { MetricsChartHelpers } from '../../../../../../core/src/shared/components/metrics-chart/metrics.component.helpers';
 import { IMetricMatrixResult } from '../../../../../../store/src/types/base-metric.types';
@@ -8,9 +10,18 @@ import { IMetricApplication } from '../../../../../../store/src/types/metric.typ
 import { FetchKubernetesMetricsAction } from '../../../store/kubernetes.actions';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-node-metrics-chart',
   templateUrl: './kubernetes-node-metrics-chart.component.html',
-  styleUrls: ['./kubernetes-node-metrics-chart.component.scss']
+  styleUrls: ['./kubernetes-node-metrics-chart.component.scss'],
+  standalone: true,
+  imports: [
+    CustomCardComponent,
+    CustomCardHeaderComponent,
+    CustomCardContentComponent,
+    MetricsChartComponent,
+    CardWrapperComponent
+  ]
 })
 export class KubernetesNodeMetricsChartComponent implements OnInit {
 
@@ -35,7 +46,7 @@ export class KubernetesNodeMetricsChartComponent implements OnInit {
     this.instanceChartConfig = MetricsChartHelpers.buildChartConfig(this.yAxisLabel);
     const query = `${this.metricName}{instance="${this.nodeName}"}[1h]&time=${(new Date()).getTime() / 1000}`;
     this.instanceMetricConfig = {
-      getSeriesName: result => result.metric.name ? result.metric.name : result.metric.id,
+      getSeriesName: result => (result.metric as any).name ? (result.metric as any).name : (result.metric as any).id || result.metric.__name__ || 'unknown',
       mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
       sort: MetricsChartHelpers.sortBySeriesName,
       mapSeriesItemValue: this.getmapSeriesItemValue(),

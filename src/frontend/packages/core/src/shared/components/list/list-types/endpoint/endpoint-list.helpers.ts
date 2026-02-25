@@ -1,15 +1,13 @@
 import { ComponentFactoryResolver, ComponentRef, Injectable, ViewContainerRef } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { stratosEntityCatalog, RouterNav, AppState, entityCatalog, EndpointModel, ActionState } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { map, pairwise } from 'rxjs/operators';
 
+import { TailwindDialogService } from '../../../../services/tailwind-dialog.service';
 import { CurrentUserPermissionsService } from '../../../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../../../core/permissions/stratos-user-permissions.checker';
-import {
-  ConnectEndpointDialogComponent,
-} from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
+import { ConnectEndpointDialogComponent } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
 import { SessionService } from '../../../../../shared/services/session.service';
 import { UserProfileService } from '../../../../../core/user-profile.service';
 import { SnackBarService } from '../../../../services/snackbar.service';
@@ -59,7 +57,7 @@ function combineCreateVisibles(
 export class EndpointListHelper {
   constructor(
     private store: Store<AppState>,
-    private dialog: MatDialog,
+    private dialog: TailwindDialogService,
     private currentUserPermissionsService: CurrentUserPermissionsService,
     private confirmDialog: ConfirmationDialogService,
     private snackBarService: SnackBarService,
@@ -126,7 +124,10 @@ export class EndpointListHelper {
               subType: item.sub_type,
               ssoAllowed: item.sso_allowed
             },
-            disableClose: true
+            disableClose: true,
+            width: '550px',
+            maxWidth: '550px',
+            panelClass: ['overflow-visible', 'p-6']
           });
         },
         label: 'Connect',

@@ -1,4 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+
+import { CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
+import { CustomSelectComponent, CustomOptionComponent } from '../../../../shared/components/custom-select/custom-select.component';
+import { CustomTooltipDirective } from '@stratosui/core';
+import { FormsModule } from '@angular/forms';
 import { entityCatalog, EndpointModel, SystemSharedUserGuid } from '@stratosui/store';
 
 import { TableCellCustom } from '../../../../shared/components/list/list.types';
@@ -8,19 +13,26 @@ import { BackupEndpointConnectionTypes, BackupEndpointTypes } from '../backup-re
 @Component({
   selector: 'app-backup-connection-cell',
   templateUrl: './backup-connection-cell.component.html',
-  styleUrls: ['./backup-connection-cell.component.scss']
+  styleUrls: ['./backup-connection-cell.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    FormsModule,
+    CustomFormFieldComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
+    CustomTooltipDirective
+]
 })
 export class BackupConnectionCellComponent extends TableCellCustom<EndpointModel> implements OnInit {
+
+  public service = inject(BackupEndpointsService);
 
   connectable = false;
   backupType = BackupEndpointTypes;
   connectionTypes = BackupEndpointConnectionTypes;
-  selected: BackupEndpointConnectionTypes;
-  userConnectionWarning: string;
-
-  constructor(public service: BackupEndpointsService) {
-    super();
-  }
+  selected!: BackupEndpointConnectionTypes;
+  userConnectionWarning!: string;
 
   ngOnInit() {
     const epType = entityCatalog.getEndpoint(this.row.cnsi_type, this.row.sub_type);

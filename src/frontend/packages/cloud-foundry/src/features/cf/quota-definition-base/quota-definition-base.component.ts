@@ -13,16 +13,16 @@ import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 
 export class QuotaDefinitionBaseComponent {
-  breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
-  quotaDefinition$: Observable<APIResource<IOrgQuotaDefinition | ISpaceQuotaDefinition>>;
-  org$: Observable<APIResource<IOrganization>>;
-  space$: Observable<APIResource<ISpace>>;
+  breadcrumbs$!: Observable<IHeaderBreadcrumb[]>;
+  quotaDefinition$!: Observable<APIResource<IOrgQuotaDefinition | ISpaceQuotaDefinition>>;
+  org$!: Observable<APIResource<IOrganization>>;
+  space$!: Observable<APIResource<ISpace>>;
   cfGuid: string;
   orgGuid: string;
   spaceGuid: string;
   quotaGuid: string;
-  detailsLoading$: Observable<boolean>;
-  orgSubscriber: Subscription;
+  detailsLoading$!: Observable<boolean>;
+  orgSubscriber!: Subscription;
 
   constructor(
     protected store: Store<AppState>,
@@ -72,7 +72,7 @@ export class QuotaDefinitionBaseComponent {
     endpoint: EndpointModel,
     org: APIResource<IOrganization>,
     space: APIResource<ISpace>
-  ) {
+  ): any {
     return null;
   }
 }

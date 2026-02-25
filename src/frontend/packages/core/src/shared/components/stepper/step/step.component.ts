@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output, TemplateRef, ViewChild } from '@angular/core';
 import { IRouterNavPayload } from '@stratosui/store';
 import { Observable, of as observableOf } from 'rxjs';
 
@@ -26,7 +26,8 @@ export type StepOnNextFunction = (index: number, step: StepComponent) => Observa
   selector: 'app-step',
   templateUrl: './step.component.html',
   styleUrls: ['./step.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true
 })
 export class StepComponent {
 
@@ -39,7 +40,7 @@ export class StepComponent {
   pHidden = false;
 
   @Input()
-  title: string;
+  title!: string;
 
   @Output() onHidden = new EventEmitter<boolean>();
 
@@ -54,7 +55,19 @@ export class StepComponent {
   }
 
   @Input()
-  valid = true;
+  set valid(value: boolean) {
+    if (this._valid !== value) {
+      this._valid = value;
+      // Emit event to notify parent stepper of validation change
+      this.onValidChange.emit(value);
+    }
+  }
+  get valid(): boolean {
+    return this._valid;
+  }
+  private _valid = true;
+
+  @Output() onValidChange = new EventEmitter<boolean>();
 
   @Input()
   canClose = true;
@@ -84,7 +97,7 @@ export class StepComponent {
   public destructiveStep = false;
 
   @ViewChild(TemplateRef, { static: true })
-  content: TemplateRef<any>;
+  content!: TemplateRef<any>;
 
   @Input()
   skip = false;

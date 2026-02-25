@@ -1,7 +1,7 @@
 import { Schema, schema } from 'normalizr';
 
 import { EntityCatalogHelpers } from '../entity-catalog/entity-catalog.helper';
-import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
+import type { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
 
 function wrapSchema(definition: Schema) {
   return {
@@ -28,7 +28,7 @@ export class StratosEntitySchema extends schema.Entity {
 export class EntitySchema extends schema.Entity implements EntityCatalogEntityConfig {
   schema: Schema;
   schemaKey: string;
-  public getId: (input, parent?, key?) => string;
+  public declare getId: (input: unknown, parent?: unknown, key?: string) => string;
   /**
    * @param entityKey As per schema.Entity ctor
    * @param [definition] As per schema.Entity ctor

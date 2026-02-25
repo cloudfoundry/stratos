@@ -1,12 +1,11 @@
-import { CommonModule } from '@angular/common';
 import { inject, TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CoreModule } from '../../../../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
-import { generateTestApplicationServiceProvider } from '../../../../../../test-framework/application-service-helper';
-import { generateCfStoreModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { ApplicationsModule } from '../../../../../features/applications/applications.module';
+import { ConfirmationDialogService } from '@stratosui/core';
+import { generateTestApplicationServiceProvider, ApplicationStateService, ApplicationEnvVarsHelper, generateCfStoreModules } from '@test-framework/cf';
 import { CfAppVariablesListConfigService } from './cf-app-variables-list-config.service';
 
 describe('CfAppVariablesListConfigService', () => {
@@ -14,19 +13,19 @@ describe('CfAppVariablesListConfigService', () => {
   beforeEach(() => {
     const cfGuid = 'cfGuid';
     const appGuid = 'appGuid';
-
     TestBed.configureTestingModule({
       providers: [
         CfAppVariablesListConfigService,
-        generateTestApplicationServiceProvider(appGuid, cfGuid)
+        ConfirmationDialogService,
+        generateTestApplicationServiceProvider(appGuid, cfGuid),
+        ApplicationStateService,
+        ApplicationEnvVarsHelper,
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
       ],
       imports: [
-        generateCfStoreModules(),
-        CommonModule,
-        CoreModule,
-        SharedModule,
-        ApplicationsModule,
-        RouterTestingModule
+        ...generateCfStoreModules(),
       ]
     });
   });
@@ -35,5 +34,6 @@ describe('CfAppVariablesListConfigService', () => {
     [CfAppVariablesListConfigService],
     (service: CfAppVariablesListConfigService) => {
       expect(service).toBeTruthy();
-    }));
+    }
+  ));
 });

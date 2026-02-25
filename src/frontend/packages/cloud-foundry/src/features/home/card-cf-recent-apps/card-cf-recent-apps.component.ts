@@ -1,12 +1,20 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output , ChangeDetectionStrategy } from '@angular/core';
+import { AsyncPipe, CommonModule } from '@angular/common';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { filter, map, startWith, tap } from 'rxjs/operators';
 
-import { PaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
-import { APIResource } from '../../../../../store/src/types/api.types';
+import { PaginationObservables, APIResource } from '@stratosui/store';
 import { IApp } from '../../../cf-api.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { appDataSort } from '../../cf/services/cloud-foundry-endpoint.service';
+import {
+  PollingIndicatorComponent,
+  CardWrapperComponent,
+  CardHeaderComponent,
+  CardTitleComponent,
+  CardContentComponent,
+} from '@stratosui/core';
+import { CompactAppCardComponent } from './compact-app-card/compact-app-card.component';
 
 
 const RECENT_ITEMS_COUNT = 10;
@@ -15,17 +23,29 @@ const RECENT_ITEMS_COUNT = 10;
   selector: 'app-card-cf-recent-apps',
   templateUrl: './card-cf-recent-apps.component.html',
   styleUrls: ['./card-cf-recent-apps.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    AsyncPipe,
+    PollingIndicatorComponent,
+    CompactAppCardComponent,
+    CardWrapperComponent,
+    CardHeaderComponent,
+    CardTitleComponent,
+    CardContentComponent,
+  ]
 })
 export class CardCfRecentAppsComponent implements OnInit {
 
   public recentApps$: Observable<APIResource<IApp>[]>;
-  @Input() allApps$: Observable<APIResource<IApp>[]>;
-  @Input() loading$: Observable<boolean>;
+  @Input() allApps$!: Observable<APIResource<IApp>[]>;
+  @Input() loading$!: Observable<boolean>;
   @Output() refresh = new EventEmitter<any>();
-  @Input() endpoint: string;
-  @Input() mode: string;
+  @Input() endpoint!: string;
+  @Input() mode!: string;
   @Input() showDate = true;
-  @Input() dateMode: string;
+  @Input() dateMode!: string;
   @Input() noStats = false;
   @Input() placeholderMode = false;
   @Input() hideWhenEmpty = false;
@@ -34,20 +54,31 @@ export class CardCfRecentAppsComponent implements OnInit {
 
   public placeholders: any[];
 
-  appsPagObs: PaginationObservables<APIResource<IApp>>;
+  appsPagObs!: PaginationObservables<APIResource<IApp>>;
 
-  hasEntities$: Observable<boolean>;
-  show$: Observable<boolean>;
+  hasEntities$!: Observable<boolean>;
+  show$!: Observable<boolean>;
 
   private maxRowsSubject = new BehaviorSubject<number>(RECENT_ITEMS_COUNT);
 
   @Input() set maxRows(value: number) {
     this.maxRowsSubject.next(value);
-    this.placeholders = new Array(value).fill(null);
+    this.placeholders = this.createPlaceholders(value);
   }
 
   constructor() {
-    this.placeholders = new Array(RECENT_ITEMS_COUNT).fill(null);
+    this.placeholders = this.createPlaceholders(RECENT_ITEMS_COUNT);
+  }
+
+  private createPlaceholders(count: number): any[] {
+    return Array.from({ length: count }, (_, i) => ({
+      metadata: { guid: `placeholder-${i}` },
+      entity: {}
+    }));
+  }
+
+  trackByAppGuid(index: number, app: any): string {
+    return app?.metadata?.guid || String(index);
   }
 
   ngOnInit() {

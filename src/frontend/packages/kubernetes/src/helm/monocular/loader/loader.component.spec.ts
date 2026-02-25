@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { CoreModule } from '@stratosui/core';
 
 import { LoaderComponent } from './loader.component';
@@ -7,14 +9,12 @@ describe('LoaderComponent', () => {
   let component: LoaderComponent;
   let fixture: ComponentFixture<LoaderComponent>;
 
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        imports: [CoreModule],
-        declarations: [LoaderComponent]
+  beforeEach(async () => {
+      await TestBed.configureTestingModule({
+        providers: [provideZonelessChangeDetection()],
+        imports: [CoreModule, LoaderComponent]
       }).compileComponents();
-    })
-  );
+    });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(LoaderComponent);

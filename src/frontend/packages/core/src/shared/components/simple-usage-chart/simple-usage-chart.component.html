@@ -1,23 +1,28 @@
 <div class="simple-graph__wrapper">
   <div class="simple-graph__title"><span class="simple-graph__title-inner-text">{{ chartTitle }}</span>
-    <mat-icon [matTooltip]="chartData.warningText" class="simple-graph__title-unknown-warning" inline
-      *ngIf="chartData.unknown > 0">warning</mat-icon>
-  </div>
-  <div class="simple-graph" [ngStyle]="{height: height}">
-    <div class="simple-graph__inner">
-      <ngx-charts-pie-chart [scheme]="chartData.colors" [animations]="false" [doughnut]="true"
-        [results]="chartData.results" [gradient]="false">
-      </ngx-charts-pie-chart>
-      <div class="simple-graph__counts" *ngIf="chartData.total; else noTotal">
+  @if (chartData.unknown > 0) {
+    <app-custom-icon [matTooltip]="chartData.warningText" class="simple-graph__title-unknown-warning" inline
+    >warning</app-custom-icon>
+  }
+</div>
+<div class="simple-graph" [ngStyle]="{height: height}">
+  <div class="simple-graph__inner">
+    <canvas baseChart
+      [data]="chartData.chartJsData"
+      [type]="'doughnut'"
+      [options]="chartOptions">
+    </canvas>
+    @if (chartData.total) {
+      <div class="simple-graph__counts">
         <div class="simple-graph__counts-count">{{ chartData.used }}</div>
         <span class="simple-graph__counts-divider">/</span>
         <div>{{ chartData.total }}</div>
       </div>
-      <ng-template #noTotal>
-        <div class="simple-graph__counts"> - </div>
-      </ng-template>
-    </div>
+    } @else {
+      <div class="simple-graph__counts"> - </div>
+    }
   </div>
+</div>
 </div>
 
 <div #colors>

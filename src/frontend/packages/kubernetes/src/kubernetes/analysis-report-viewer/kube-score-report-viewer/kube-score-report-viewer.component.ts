@@ -1,11 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
 
+import { AnalysisReport } from '../../store/kube.types';
 import { IReportViewer } from '../analysis-report-viewer.component';
 
 @Component({
+changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kube-score-report-viewer',
   templateUrl: './kube-score-report-viewer.component.html',
-  styleUrls: ['./kube-score-report-viewer.component.scss']
+  styleUrls: ['./kube-score-report-viewer.component.scss',],
+  standalone: true
 })
 export class KubeScoreReportViewerComponent implements OnInit, IReportViewer {
 
@@ -19,20 +22,21 @@ export class KubeScoreReportViewerComponent implements OnInit, IReportViewer {
     GradeAllOK    Grade = 10
   */
 
-  report: any;
-  processed: any;
+  report!: AnalysisReport;
+  processed: Array<{ _checks: unknown[]; _name: string }> = [];
 
   constructor() { }
 
   ngOnInit() {
     this.processed = [];
     // Turn the report into an array
-    if (this.report) {
-      Object.keys(this.report.report).forEach(key => {
-        const filtered = this.filter(this.report.report[key]);
+    if (this.report?.report) {
+      const reportData = this.report.report as Record<string, { Checks?: Array<{ Grade?: number; Skipped?: boolean }> }>;
+      Object.keys(reportData).forEach(key => {
+        const filtered = this.filter(reportData[key]);
         if (filtered.length > 0) {
           this.processed.push({
-            ...this.report.report[key],
+            ...reportData[key],
             _checks: filtered,
             _name: key,
           });
@@ -41,13 +45,15 @@ export class KubeScoreReportViewerComponent implements OnInit, IReportViewer {
     }
   }
 
-  public filter(report) {
-    const filtered = [];
-    report.Checks.forEach(r => {
-      if (r.Grade !== 10 && !r.Skipped) {
-        filtered.push(r);
-      }
-    });
+  public filter(report: { Checks?: Array<{ Grade?: number; Skipped?: boolean }> }): Array<{ Grade?: number; Skipped?: boolean }> {
+    const filtered: Array<{ Grade?: number; Skipped?: boolean }> = [];
+    if (report.Checks) {
+      report.Checks.forEach(r => {
+        if (r.Grade !== 10 && !r.Skipped) {
+          filtered.push(r);
+        }
+      });
+    }
     return filtered;
   }
 }

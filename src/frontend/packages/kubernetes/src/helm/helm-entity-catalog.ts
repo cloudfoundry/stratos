@@ -15,10 +15,10 @@ import { HelmVersion, MonocularChart, MonocularVersion } from './store/helm.type
  * This can be used to access functionality exposed by each specific type, such as get, update, delete, etc
  */
 export class HelmEntityCatalog {
-  endpoint: StratosCatalogEndpointEntity;
-  chart: StratosCatalogEntity<IFavoriteMetadata, MonocularChart, HelmChartActionBuilders>;
-  version: StratosCatalogEntity<IFavoriteMetadata, HelmVersion, HelmVersionActionBuilders>;
-  chartVersions: StratosCatalogEntity<IFavoriteMetadata, MonocularVersion[], HelmChartVersionsActionBuilders>;
+  endpoint!: StratosCatalogEndpointEntity;
+  chart!: StratosCatalogEntity<IFavoriteMetadata, MonocularChart, HelmChartActionBuilders>;
+  version!: StratosCatalogEntity<IFavoriteMetadata, HelmVersion, HelmVersionActionBuilders>;
+  chartVersions!: StratosCatalogEntity<IFavoriteMetadata, MonocularVersion[], HelmChartVersionsActionBuilders>;
 }
 
 /**

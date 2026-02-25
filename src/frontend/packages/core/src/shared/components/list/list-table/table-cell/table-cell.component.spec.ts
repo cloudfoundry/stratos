@@ -1,56 +1,24 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CoreModule } from '../../../../../core/core.module';
-import { UtilsService } from '../../../../../core/utils.service';
-import { PercentagePipe } from '../../../../pipes/percentage.pipe';
-import { ValuesPipe } from '../../../../pipes/values.pipe';
-import { AppActionMonitorIconComponent } from '../../../app-action-monitor-icon/app-action-monitor-icon.component';
-import {
-  ApplicationStateIconComponent,
-} from '../../../application-state/application-state-icon/application-state-icon.component';
-import { ApplicationStateIconPipe } from '../../../application-state/application-state-icon/application-state-icon.pipe';
-import { ApplicationStateComponent } from '../../../application-state/application-state.component';
-import { BooleanIndicatorComponent } from '../../../boolean-indicator/boolean-indicator.component';
-import { AppChipsComponent } from '../../../chips/chips.component';
-import { UsageGaugeComponent } from '../../../usage-gauge/usage-gauge.component';
-import { listTableCells, TableCellComponent } from './table-cell.component';
+import { TableCellComponent } from './table-cell.component';
 
 describe('TableCellComponent', () => {
   let component: TableCellComponent<any>;
   let fixture: ComponentFixture<TableCellComponent<any>>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        AppActionMonitorIconComponent,
-        TableCellComponent,
-        ...listTableCells,
-        // EventTabActorIconPipe,
-        ValuesPipe,
-        ApplicationStateComponent,
-        ApplicationStateIconComponent,
-        ApplicationStateIconPipe,
-        UsageGaugeComponent,
-        PercentagePipe,
-        // RunningInstancesComponent,
-        AppChipsComponent,
-        BooleanIndicatorComponent,
-        // CfRoleCheckboxComponent,
-        // GithubCommitAuthorComponent,
-        // ServicePlanPriceComponent,
-        // ServicePlanPublicComponent,
-        // CfOrgSpaceLinksComponent,
-        // ServiceInstanceLastOpComponent
-      ],
       imports: [
-        CoreModule
+        TableCellComponent,
       ],
       providers: [
-        UtilsService,
-      ]
-    })
-      .compileComponents();
-  }));
+        provideZonelessChangeDetection(),
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellComponent);

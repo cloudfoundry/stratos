@@ -1,0 +1,24 @@
+// Stratos theme configuration migrated to Tailwind CSS
+// Note: all-theme removed during Angular 20 migration
+
+// Import the Tailwind-based theme system
+@use '~@stratosui/theme/styles/main' as theme-main;
+
+$stratos-dark-theme-supported: false !default;
+
+// Angular Material core styles removed - using Tailwind CSS instead
+// Theme configuration is now handled via CSS custom properties in theme/styles/main.scss
+// Components should use Tailwind utility classes and CSS custom properties
+
+// Legacy theme support removed - all styling now uses:
+// 1. Tailwind utility classes
+// 2. CSS custom properties (--color-primary, --color-accent, etc.)
+// 3. Component-scoped SCSS where needed
+
+.default {
+  // Theme is applied via CSS custom properties defined in theme/styles/main.scss
+  // No additional styles needed here
+}
+
+// Migration note: Angular Material imports and theming have been removed
+// Components should now use Tailwind CSS utilities and CSS custom properties for styling

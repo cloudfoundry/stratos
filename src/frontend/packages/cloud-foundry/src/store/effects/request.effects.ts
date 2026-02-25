@@ -1,13 +1,14 @@
-import { Injectable } from '@angular/core';
+import { ApplicationRef, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
+import { EMPTY } from 'rxjs';
 import { catchError, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { SET_PAGE_BUSY } from '../../../../store/src/actions/pagination.actions';
 import { rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getAPIRequestDataState } from '../../../../store/src/selectors/api.selectors';
 import { getPaginationState } from '../../../../store/src/selectors/pagination.selectors';
-import { UpdateCfAction } from '../../../../store/src/types/request.types';
+import { ICFAction, UpdateCfAction } from '../../../../store/src/types/request.types';
 import {
   CfValidateEntitiesComplete,
   CfValidateEntitiesStart,
@@ -20,11 +21,14 @@ import { validateEntityRelations } from '../../entity-relations/entity-relations
  * Now purely looks after ad-hoc validation of an entity or list of entities
  * Does not link in to the API request chain (see new location in success-entity-request.handler)
  */
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfValidateEffects {
   constructor(
     private actions$: Actions,
     private store: Store<CFAppState>,
+    private appRef: ApplicationRef
   ) { }
 
   /**
@@ -77,6 +81,7 @@ export class CfValidateEffects {
           }));
         }),
         mergeMap(({ validatedApiResponse, independentUpdates, validation }) => {
+          this.appRef.tick();
           return [new CfValidateEntitiesComplete(
             apiAction,
             validatedApiResponse,
@@ -86,28 +91,30 @@ export class CfValidateEffects {
           )];
         })
       )
-        .pipe(catchError(error => {
+        .pipe(catchError((error: unknown): import('rxjs').Observable<never> => {
           console.warn(`Entity validation process failed`, error);
-          this.update(apiAction, false, error.message);
-          return [];
+          this.update(apiAction, false, error instanceof Error ? error.message : String(error));
+          this.appRef.tick();
+          return EMPTY;
         }));
     })
   ));
 
    completeEntities$ = createEffect(() => this.actions$.pipe(
     ofType<CfValidateEntitiesComplete>(EntitiesPipelineActionTypes.COMPLETE),
-    mergeMap(action => {
+    mergeMap((action): any[] => {
       const completeAction: CfValidateEntitiesComplete = action;
-      const actions = [];
+      const actions: any[] = [];
       if (completeAction.validationResult.started && completeAction.independentUpdates) {
         this.update(completeAction.apiAction, false, null);
       }
+      this.appRef.tick();
       return actions;
     })));
 
 
-  update(apiAction, busy: boolean, error: string) {
-    if (apiAction.paginationKey) {
+  update(apiAction: ICFAction | any, busy: boolean, error: string | null): void {
+    if ((apiAction as any).paginationKey) {
       this.store.dispatch({
         type: SET_PAGE_BUSY,
         busy,
@@ -115,8 +122,8 @@ export class CfValidateEffects {
         apiAction
       });
     } else {
-      const newAction = {
-        ...apiAction,
+      const newAction: ICFAction = {
+        ...(apiAction as ICFAction),
       };
       if (busy) {
         newAction.updatingKey = rootUpdatingKey;

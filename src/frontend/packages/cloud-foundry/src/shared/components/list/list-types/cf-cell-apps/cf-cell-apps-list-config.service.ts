@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
@@ -11,21 +11,25 @@ import { ActiveRouteCfCell } from '../../../../../features/cf/cf-page.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCellApp, CfCellAppsDataSource } from './cf-cell-apps-source';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfCellAppsListConfigService extends BaseCfListConfig<CfCellApp> {
+  private store = inject(Store<CFAppState>);
+  private activeRouteCfCell = inject(ActiveRouteCfCell);
 
   dataSource: CfCellAppsDataSource;
   defaultView = 'table' as ListView;
   viewType = ListViewTypes.TABLE_ONLY;
   enableTextFilter = false;
-  text = {
-    title: null,
+  text: { title: string | null; noEntries: string } = {
+    title: null as string | null,
     noEntries: 'There are no applications'
   };
 
-  constructor(store: Store<CFAppState>, private activeRouteCfCell: ActiveRouteCfCell) {
+  constructor() {
     super();
-    this.dataSource = new CfCellAppsDataSource(store, activeRouteCfCell.cfGuid, activeRouteCfCell.cellId, this);
+    this.dataSource = new CfCellAppsDataSource(this.store, this.activeRouteCfCell.cfGuid, this.activeRouteCfCell.cellId, this as BaseCfListConfig<CfCellApp>);
   }
 
   getColumns = (): ITableColumn<CfCellApp>[] => [

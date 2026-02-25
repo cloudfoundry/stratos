@@ -1,11 +1,28 @@
 {
   "name": "@stratosui/store",
   "version": "0.0.1",
+  "repository": "https://github.com/cloudfoundry/stratos",
+  "main": "src/public-api.ts",
+  "exports": {
+    ".": {
+      "import": "./src/public-api.ts",
+      "types": "./src/public-api.ts",
+      "default": "./src/public-api.ts"
+    },
+    "./testing": {
+      "import": "./testing/index.ts",
+      "types": "./testing/index.ts",
+      "default": "./testing/index.ts"
+    }
+  },
+  "peerDependencies": {
+    "@angular/common": "20.3.9",
+    "@angular/core": "20.3.9"
+  },
   "description": "Stratos Store",
   "license": "Apache-2.0",
-  "repository": "https://github.com/cloudfoundry/stratos",
-  "peerDependencies": {
-    "@angular/common": "^9.1.6",
-    "@angular/core": "^9.1.6"
+  "devDependencies": {
+    "@analogjs/vite-plugin-angular": "^2.0.0",
+    "@analogjs/vitest-angular": "^2.0.0"
   }
 }

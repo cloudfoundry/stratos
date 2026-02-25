@@ -1,17 +1,16 @@
-import { AfterContentInit, Component, Input, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { AfterContentInit, Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import {
+  AppActionMonitorComponent,
   AppMonitorComponentTypes,
-} from '../../../../../../../core/src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
-import {
+  ITableColumn,
   ITableCellRequestMonitorIconConfig,
-} from '../../../../../../../core/src/shared/components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+} from '@stratosui/core';
+import { entityCatalog, APIResource } from '@stratosui/store';
 import { UsersRolesClearUpdateState } from '../../../../../actions/users-roles.actions';
 import { ChangeCfUserRole } from '../../../../../actions/users.actions';
 import { CFAppState } from '../../../../../cf-app-state';
@@ -33,9 +32,17 @@ import { ManageUsersSetUsernamesHelper } from '../manage-users-set-usernames/man
 @Component({
   selector: 'app-manage-users-confirm',
   templateUrl: './manage-users-confirm.component.html',
-  styleUrls: ['./manage-users-confirm.component.scss']
+  styleUrls: ['./manage-users-confirm.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    AppActionMonitorComponent
+  ]
 })
 export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
+  private store = inject(Store<CFAppState>);
+  private cfUserService = inject(CfUserService);
 
   @Input() setUsernames = false;
 
@@ -69,7 +76,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
       cellFlex: '1'
     }
   ];
-  changes$: Observable<CfRoleChangeWithNames[]>;
+  changes$!: Observable<CfRoleChangeWithNames[]>;
   public userCatalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
 
   monitorState = AppMonitorComponentTypes.UPDATE;
@@ -97,8 +104,6 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
       getId: () => guid
     };
   }
-
-  constructor(private store: Store<CFAppState>, private cfUserService: CfUserService) { }
 
   ngOnInit() {
     this.createCfObs();
@@ -136,7 +141,9 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
   };
 
   fetchRoleName = (roleName: OrgUserRoleNames | SpaceUserRoleNames, isOrg: boolean): string => {
-    return isOrg ? UserRoleLabels.org.short[roleName] : UserRoleLabels.space.short[roleName];
+    return isOrg
+      ? UserRoleLabels.org.short[roleName as OrgUserRoleNames]
+      : UserRoleLabels.space.short[roleName as SpaceUserRoleNames];
   };
 
   private createCfObs() {

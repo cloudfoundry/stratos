@@ -1,20 +1,26 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { TableCellCustom } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
 import { IServiceInstance } from '../../../../../../cf-api-svc.types';
 
 @Component({
   selector: 'app-table-cell-space-name',
   templateUrl: './table-cell-space-name.component.html',
-  styleUrls: ['./table-cell-space-name.component.scss']
+  styleUrls: ['./table-cell-space-name.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    RouterModule
+  ]
 })
 export class TableCellSpaceNameComponent extends TableCellCustom<APIResource<IServiceInstance>> implements OnInit {
 
-  breadcrumbs: {};
-  spaceUrl: string[];
-  spaceName: Observable<string>;
+  breadcrumbs!: {};
+  spaceUrl!: string[];
+  spaceName!: Observable<string>;
 
   ngOnInit(): void {
     this.spaceUrl = [

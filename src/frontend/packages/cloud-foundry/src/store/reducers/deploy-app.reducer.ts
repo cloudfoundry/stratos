@@ -29,7 +29,7 @@ const defaultState: DeployApplicationState = {
   }
 };
 
-export function deployAppReducer(state: DeployApplicationState = defaultState, action): DeployApplicationState {
+export function deployAppReducer(state: DeployApplicationState = defaultState, action: any): DeployApplicationState {
   switch (action.type) {
     case SET_APP_SOURCE_DETAILS:
       return {

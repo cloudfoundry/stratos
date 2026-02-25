@@ -4,51 +4,52 @@
       <ng-container
         *appCfUserPermission="manageAppPermission;spaceGuid:space.metadata.guid;endpointGuid:applicationService.cfGuid">
         <app-page-sub-nav-section>
-          <button mat-icon-button name="edit" *ngIf="(applicationService.applicationState$ | async)"
+          <button class="btn btn-secondary btn-icon" name="edit" *ngIf="(applicationService.applicationState$ | async)"
             routerLink="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}/edit"
-            matTooltip="Edit">
-            <mat-icon>edit</mat-icon>
+            title="Edit">
+            <span class="material-icons">edit</span>
           </button>
-          <button mat-icon-button name="delete" (click)="redirectToDeletePage()" matTooltip="Delete">
-            <mat-icon>delete</mat-icon>
+          <button class="btn btn-danger btn-icon" name="delete" (click)="redirectToDeletePage()" title="Delete">
+            <span class="material-icons">delete</span>
           </button>
         </app-page-sub-nav-section>
         <div *ngIf="applicationService.applicationState$ | async as appState" class="app-page-header__actions">
           <app-page-sub-nav-section>
-            <button mat-icon-button name="restart" [disabled]="busy.updating || !appState.actions.restart"
-              (click)="restartApplication()" matTooltip="Restart">
-              <mat-icon>settings_backup_restore</mat-icon>
+            <button class="btn btn-secondary btn-icon" name="restart" [disabled]="busy.updating || !appState.actions.restart"
+              (click)="restartApplication()" title="Restart">
+              <span class="material-icons">refresh</span>
             </button>
-            <button mat-icon-button name="stop" [disabled]="busy.updating"
-              *ngIf="appState.actions.stop;else startButton" (click)="stopApplication()" matTooltip="Stop">
-              <mat-icon>stop</mat-icon>
+            <button class="btn btn-secondary btn-icon" name="stop" [disabled]="busy.updating"
+              *ngIf="appState.actions.stop;else startButton" (click)="stopApplication()" title="Stop">
+              <span class="material-icons">stop</span>
             </button>
             <ng-template #startButton>
-              <button mat-icon-button name="start"
+              <button class="btn btn-success btn-icon" name="start"
                 [disabled]="busy.updating || !appState.actions.start && !appState.actions.stop"
-                (click)="startApplication()" matTooltip="Start">
-                <mat-icon>play_arrow</mat-icon>
+                (click)="startApplication()" title="Start">
+                <span class="material-icons">play_arrow</span>
               </button>
             </ng-template>
-            <button mat-icon-button name="restage" [disabled]="busy.updating || !appState.actions.restage"
-              (click)="restageApplication()" matTooltip="Restage">
-              <mat-icon>redo</mat-icon>
+            <button class="btn btn-secondary btn-icon" name="restage" [disabled]="busy.updating || !appState.actions.restage"
+              (click)="restageApplication()" title="Restage">
+              <span class="material-icons">redo</span>
             </button>
           </app-page-sub-nav-section>
         </div>
       </ng-container>
     </div>
-    <a class="summary__anchor" mat-icon-button
-      [disabled]="(applicationService.applicationUrl$ | async) === null || (applicationService.application$ | async)?.app.entity.state !== 'STARTED'"
-      href="{{applicationService.applicationUrl$ | async}}" target="_blank" matTooltip="Visit">
-      <mat-icon>launch</mat-icon>
+    <a class="summary__anchor btn btn-info btn-icon"
+      [class.pointer-events-none]="(applicationService.applicationUrl$ | async) === null || (applicationService.application$ | async)?.app.entity.state !== 'STARTED'"
+      [class.opacity-50]="(applicationService.applicationUrl$ | async) === null || (applicationService.application$ | async)?.app.entity.state !== 'STARTED'"
+      href="{{applicationService.applicationUrl$ | async}}" target="_blank" title="Visit">
+      <span class="material-icons">launch</span>
     </a>
     <app-application-poll class="summary__sub-nav__poll"></app-application-poll>
   </div>
 </app-page-sub-nav>
-<div class="summary" *ngIf="applicationService.application$ | async as appSvc">
+<div class="summary" *ngIf="applicationService.application$ | async as applicationService">
   <app-tile-grid>
-    <app-tile-group>
+    <app-tile-group class="tile-group-3-cols">
       <app-tile>
         <app-card-app-status></app-card-app-status>
       </app-tile>
@@ -59,39 +60,39 @@
         <app-card-app-uptime></app-card-app-uptime>
       </app-tile>
     </app-tile-group>
-    <app-tile-group *ngIf="appSvc.app.entity.staging_failed_description as errorMsg">
+    <app-tile-group class="tile-group-1-cols" *ngIf="applicationService.app.entity.staging_failed_description as errorMsg">
       <app-tile>
-        <mat-card class="summary__staging-error">
-          <mat-icon class="text-warning">warning</mat-icon>
+        <div class="card bg-yellow-50 border-yellow-400 border-l-4 summary__staging-error">
+          <span class="material-icons text-yellow-500">warning</span>
           <div>{{ errorMsg }}</div>
-        </mat-card>
+        </div>
       </app-tile>
     </app-tile-group>
-    <app-tile-group>
+    <app-tile-group class="tile-group-2-cols">
       <app-tile>
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title>Application Info</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
+        <div class="card">
+          <div class="card-header">
+            <h3 class="text-lg font-semibold">Application Info</h3>
+          </div>
+          <div class="card-body">
             <div class="app-metadata">
               <div class="app-metadata__two-cols">
-                <app-metadata-item icon="memory" label="Memory Quota">{{ appSvc.app.entity.memory | mbToHumanSize }}
+                <app-metadata-item icon="memory" label="Memory Quota">{{ applicationService.app.entity.memory | mbToHumanSize }}
                 </app-metadata-item>
-                <app-metadata-item icon="storage" label="Disk Quota">{{ appSvc.app.entity.disk_quota | mbToHumanSize}}
+                <app-metadata-item icon="storage" label="Disk Quota">{{ applicationService.app.entity.disk_quota | mbToHumanSize}}
                 </app-metadata-item>
                 <app-metadata-item icon="date_range" label="Created">
-                  {{ appSvc.app.metadata.created_at | date:'medium' }}</app-metadata-item>
+                  {{ applicationService.app.metadata.created_at | date:'medium' }}</app-metadata-item>
                 <app-metadata-item icon="access_time" label="Modified">
-                  {{ appSvc.app.entity.package_updated_at ? (appSvc.app.entity.package_updated_at | date:'medium') : '-' }}
+                  {{ applicationService.app.entity.package_updated_at ? (applicationService.app.entity.package_updated_at | date:'medium') : '-' }}
                 </app-metadata-item>
                 <app-metadata-item icon="virtual_guest" iconFont="stratos-icons" label="SSH Enabled">
                   {{ sshStatus$ | async }}
                 </app-metadata-item>
               </div>
               <div class="app-metadata__two-cols">
-                <app-metadata-item icon="touch_app" label="App State">{{ appSvc.app.entity.state }}</app-metadata-item>
-                <app-metadata-item icon="card_travel" label="Package State">{{ appSvc.app.entity.package_state }}
+                <app-metadata-item icon="touch_app" label="App State">{{ applicationService.app.entity.state }}</app-metadata-item>
+                <app-metadata-item icon="card_travel" label="Package State">{{ applicationService.app.entity.package_state }}
                 </app-metadata-item>
                 <app-metadata-item icon="service" iconFont="stratos-icons" label="Services">
                   {{(applicationService.appSummary$ | async)?.entity?.services?.length || '0' }}
@@ -101,66 +102,65 @@
                 </app-metadata-item>
               </div>
             </div>
-          </mat-card-content>
-        </mat-card>
+          </div>
+        </div>
       </app-tile>
       <app-tile size="1of3">
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title>Cloud Foundry</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
+        <div class="card">
+          <div class="card-header">
+            <h3 class="text-lg font-semibold">Cloud Foundry</h3>
+          </div>
+          <div class="card-body">
             <app-metadata-item icon="title" label="Name">
-              <a [routerLink]="['/cloud-foundry/' + appSvc.cf?.guid]"
-                matTooltip="CF API URL: {{ getFullApiUrl(appSvc.cf) }}">{{ appSvc.cf?.name}}</a>
+              <a [routerLink]="['/cloud-foundry/' + applicationService.cf?.guid]"
+                title="CF API URL: {{ getFullApiUrl(applicationService.cf) }}">{{ applicationService.cf?.name}}</a>
             </app-metadata-item>
             <ng-container *ngIf="applicationService.appOrg$ | async as appOrg">
               <app-metadata-item iconFont="stratos-icons" icon="organization" label="Organization">
                 <a
-                  [routerLink]="['/cloud-foundry/' + appSvc.cf?.guid + '/organizations/' + appOrg.metadata.guid]">{{ appOrg.entity.name }}</a>
+                  [routerLink]="['/cloud-foundry/' + applicationService.cf?.guid + '/organizations/' + appOrg.metadata.guid]">{{ appOrg.entity.name }}</a>
               </app-metadata-item>
               <app-metadata-item *ngIf="applicationService.appSpace$ | async as appSpace" iconFont="stratos-icons"
                 icon="virtual_space" label="Space">
                 <a
-                  [routerLink]="['/cloud-foundry/' + appSvc.cf?.guid + '/organizations/' + appOrg.metadata?.guid + '/spaces/' + appSpace.metadata?.guid]">{{ appSpace.entity.name }}</a>
+                  [routerLink]="['/cloud-foundry/' + applicationService.cf?.guid + '/organizations/' + appOrg.metadata?.guid + '/spaces/' + appSpace.metadata?.guid]">{{ appSpace.entity.name }}</a>
               </app-metadata-item>
               <app-metadata-item icon="keyboard" label="CLI Info" class="cli-link">
                 <a
-                  [routerLink]="['/applications/' + appSvc.cf?.guid + '/' + appSvc.app?.metadata.guid + '/cli']">View</a>
+                  [routerLink]="['/applications/' + applicationService.cf?.guid + '/' + applicationService.app?.metadata.guid + '/cli']">View</a>
               </app-metadata-item>
             </ng-container>
-          </mat-card-content>
-        </mat-card>
+          </div>
+        </div>
       </app-tile>
     </app-tile-group>
 
     <!-- Misc -->
-    <app-tile-group>
+    <app-tile-group class="tile-group-2-cols">
       <app-tile>
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title>Build Info</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
+        <div class="card">
+          <div class="card-header">
+            <h3 class="text-lg font-semibold">Build Info</h3>
+          </div>
+          <div class="card-body">
             <app-metadata-item icon="build" label="Buildpack">
-              <app-view-buildpack [buildPack]="appSvc.app.entity.buildpack || appSvc.app.entity.detected_buildpack">
+              <app-view-buildpack [buildPack]="applicationService.app.entity.buildpack || applicationService.app.entity.detected_buildpack">
               </app-view-buildpack>
             </app-metadata-item>
-            <app-metadata-item icon="code" label="Stack">{{ appSvc.app.entity.stack?.entity.name || '-' }}
+            <app-metadata-item icon="code" label="Stack">{{ applicationService.app.entity.stack?.entity.name || '-' }}
             </app-metadata-item>
-          </mat-card-content>
-        </mat-card>
+          </div>
+        </div>
       </app-tile>
       <app-tile id="app-build-tab-deployment-info" *ngIf="(deploySource$ | async) as deploySource">
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title>Deployment Info</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
+        <div class="card">
+          <div class="card-header">
+            <h3 class="text-lg font-semibold">Deployment Info</h3>
+          </div>
+          <div class="card-body">
             <span [ngSwitch]="deploySource.type">
               <app-metadata-item *ngSwitchCase="'giturl'" icon="code" label="Git Url">
-                <div matTooltip="{{ deploySource.branch + ' ' + (deploySource.commit | slice:0:8)}}"
-                  [matTooltipHideDelay]="1500">
+                <div title="{{ deploySource.branch + ' ' + (deploySource.commit | slice:0:8)}}">
                   {{(applicationService.applicationStratProject$| async)?.deploySource.url}}
                 </div>
               </app-metadata-item>
@@ -214,41 +214,41 @@
                 <ng-template #noDockerUrl>{{deploySource.dockerImage}}</ng-template>
               </app-metadata-item>
             </span>
-          </mat-card-content>
-        </mat-card>
+          </div>
+        </div>
       </app-tile>
     </app-tile-group>
 
     <!-- Advanced info -->
-    <app-tile-group>
+    <app-tile-group class="tile-group-2-cols">
       <app-tile>
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title>Additional Application Info</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <app-metadata-item icon="fingerprint" label="Application GUID" [clipboardValue]="appSvc.app.entity.guid">
-              {{ appSvc.app.entity.guid }}</app-metadata-item>
+        <div class="card">
+          <div class="card-header">
+            <h3 class="text-lg font-semibold">Additional Application Info</h3>
+          </div>
+          <div class="card-body">
+            <app-metadata-item icon="fingerprint" label="Application GUID" [clipboardValue]="applicationService.app.entity.guid">
+              {{ applicationService.app.entity.guid }}</app-metadata-item>
             <app-metadata-item icon="chevron_right" label="Command">
-              {{ appSvc.app.entity.command || appSvc.app.entity.detected_start_command || '-' }}</app-metadata-item>
-            <app-metadata-item icon="power" label="Ports">{{ appSvc.app.entity.ports || '-' }}</app-metadata-item>
-          </mat-card-content>
-        </mat-card>
+              {{ applicationService.app.entity.command || applicationService.app.entity.detected_start_command || '-' }}</app-metadata-item>
+            <app-metadata-item icon="power" label="Ports">{{ applicationService.app.entity.ports || '-' }}</app-metadata-item>
+          </div>
+        </div>
       </app-tile>
       <app-tile>
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title>Health Check Configuration</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
+        <div class="card">
+          <div class="card-header">
+            <h3 class="text-lg font-semibold">Health Check Configuration</h3>
+          </div>
+          <div class="card-body">
             <app-metadata-item icon="favorite_border" label="Health Check Type">
-              {{ appSvc.app.entity.health_check_type }}</app-metadata-item>
+              {{ applicationService.app.entity.health_check_type }}</app-metadata-item>
             <app-metadata-item icon="schedule" label="Health Check Timeout">
-              {{ appSvc.app.entity.health_check_timeout | uptime }}</app-metadata-item>
-            <app-metadata-item *ngIf="appSvc.app.entity.health_check_type === 'http'" icon="http"
-              label="Health Check HTTP Endpoint">{{ appSvc.app.entity.health_check_http_endpoint }}</app-metadata-item>
-          </mat-card-content>
-        </mat-card>
+              {{ applicationService.app.entity.health_check_timeout | uptime }}</app-metadata-item>
+            <app-metadata-item *ngIf="applicationService.app.entity.health_check_type === 'http'" icon="http"
+              label="Health Check HTTP Endpoint">{{ applicationService.app.entity.health_check_http_endpoint }}</app-metadata-item>
+          </div>
+        </div>
       </app-tile>
     </app-tile-group>
   </app-tile-grid>

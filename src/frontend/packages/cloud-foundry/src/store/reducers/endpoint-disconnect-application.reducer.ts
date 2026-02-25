@@ -22,8 +22,8 @@ export function endpointDisconnectRemoveEntitiesReducer() {
 function deletionApplicationFromEndpoint(
   state: IRequestEntityTypeState<APIResource<StratosCFEntity> | StratosCFEntity>,
   endpointGuid: string
-) {
-  return Object.keys(state).reduce((newEntities, guid) => {
+): IRequestEntityTypeState<APIResource<StratosCFEntity> | StratosCFEntity> {
+  return Object.keys(state).reduce((newEntities: IRequestEntityTypeState<APIResource<StratosCFEntity> | StratosCFEntity>, guid: string) => {
     const entity = state[guid] as StratosCFEntity;
     const apiEntity = state[guid] as APIResource<StratosCFEntity>;
     if (apiEntity.entity) {

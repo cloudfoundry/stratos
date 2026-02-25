@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { KubeBaseGuidMock, KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
 import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
@@ -8,14 +10,18 @@ describe('NodePodCountComponent', () => {
   let component: NodePodCountComponent;
   let fixture: ComponentFixture<NodePodCountComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [NodePodCountComponent],
-      imports: KubernetesBaseTestModules,
-      providers: [KubeBaseGuidMock, KubernetesEndpointService]
-    })
-      .compileComponents();
-  }));
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        NodePodCountComponent,
+        ...KubernetesBaseTestModules,
+      ],
+      providers: [
+        KubeBaseGuidMock, KubernetesEndpointService,
+        provideZonelessChangeDetection(),
+      ]
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(NodePodCountComponent);

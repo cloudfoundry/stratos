@@ -1,14 +1,13 @@
-import { Component, ComponentFactoryResolver, ComponentRef, Input, Type, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, ComponentFactoryResolver, ComponentRef, Input, Type, ViewChild, ViewContainerRef, inject, ChangeDetectionStrategy } from '@angular/core';
 import { MultiActionListEntity } from '@stratosui/store';
 
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
-import { EndpointCardComponent } from '../../list-types/endpoint/endpoint-card/endpoint-card.component';
 import { CardCell } from '../../list.types';
 import { CardDynamicComponent, CardMultiActionComponents } from '../card.component.types';
 
-export const listCards = [
-  EndpointCardComponent
-];
+// Initialize as empty array to avoid circular dependency issues
+// Cards will be registered at runtime
+export const listCards: any[] = [];
 export type CardTypes<T> = Type<CardCell<T>> | CardMultiActionComponents | CardDynamicComponent<T>;
 
 interface ISetupData<T> {
@@ -17,14 +16,17 @@ interface ISetupData<T> {
   item: T | MultiActionListEntity;
 }
 @Component({
-    selector: 'app-card',
-    templateUrl: './card.component.html',
-    styleUrls: ['./card.component.scss']
+  selector: 'app-card',
+  templateUrl: './card.component.html',
+  styleUrls: ['./card.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: []
 })
 export class CardComponent<T> {
-  private componentRef: ComponentRef<any>;
-  private pComponent: CardTypes<T>;
-  private pDataSource: IListDataSource<T>;
+  private componentRef!: ComponentRef<any>;
+  private pComponent!: CardTypes<T>;
+  private pDataSource!: IListDataSource<T>;
 
   @Input() set dataSource(dataSource: IListDataSource<T>) {
     if (!this.pDataSource) {
@@ -44,11 +46,10 @@ export class CardComponent<T> {
     this.componentCreator({ item });
   }
 
-  @ViewChild('target', { read: ViewContainerRef, static: true }) target: ViewContainerRef;
+  @ViewChild('target', { read: ViewContainerRef, static: true }) target!: ViewContainerRef;
 
-  cardComponent: CardCell<T>;
-
-  constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
+  cardComponent!: CardCell<T>;
+  private componentFactoryResolver = inject(ComponentFactoryResolver);
 
   private componentCreator = (() => {
     let completeSetupData: Partial<ISetupData<T>> = {};
@@ -79,7 +80,7 @@ export class CardComponent<T> {
     this.updateComponentInputs(dataSource, entityKey, entity);
   }
 
-  private updateComponentInputs(dataSource, entityKey, entity) {
+  private updateComponentInputs(dataSource: any, entityKey: any, entity: any) {
     if (this.cardComponent) {
       this.cardComponent.row = entity;
       this.cardComponent.dataSource = dataSource;

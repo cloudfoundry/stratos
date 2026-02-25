@@ -63,12 +63,12 @@ export abstract class OrgSpaceQuotaHelper<T = IOrganization | ISpace> {
   private hasQuotas(): Observable<boolean> {
     return this.orgOrSpace$.pipe(
       map(resource =>
-        !!resource.entity[this.quotaPropertyName] && (
-          truthyIncludingZero(resource.entity[this.quotaPropertyName].entity.total_routes) ||
-          truthyIncludingZero(resource.entity[this.quotaPropertyName].entity.total_services) ||
-          truthyIncludingZero(resource.entity[this.quotaPropertyName].entity.total_private_domains) ||
-          truthyIncludingZero(resource.entity[this.quotaPropertyName].entity.app_instance_limit) ||
-          truthyIncludingZero(resource.entity[this.quotaPropertyName].entity.memory_limit))
+        !!(resource.entity as Record<string, any>)[this.quotaPropertyName] && (
+          truthyIncludingZero((resource.entity as Record<string, any>)[this.quotaPropertyName].entity.total_routes) ||
+          truthyIncludingZero((resource.entity as Record<string, any>)[this.quotaPropertyName].entity.total_services) ||
+          truthyIncludingZero((resource.entity as Record<string, any>)[this.quotaPropertyName].entity.total_private_domains) ||
+          truthyIncludingZero((resource.entity as Record<string, any>)[this.quotaPropertyName].entity.app_instance_limit) ||
+          truthyIncludingZero((resource.entity as Record<string, any>)[this.quotaPropertyName].entity.memory_limit))
       )
     );
   }

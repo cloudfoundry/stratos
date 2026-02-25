@@ -1,13 +1,13 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { Component, OnInit, ViewChild , ChangeDetectionStrategy } from '@angular/core';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { NEVER, Observable, Subject } from 'rxjs';
 import websocketConnect, { normalClosureMessage } from 'rxjs-websockets';
 import { catchError, first, map, switchMap, tap } from 'rxjs/operators';
-
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
+import { CustomTooltipDirective, PageHeaderComponent, IHeaderBreadcrumb } from '@stratosui/core';
 import { SshViewerComponent } from '../../../../../core/src/shared/components/ssh-viewer/ssh-viewer.component';
+import { CFAppState } from '@stratosui/cloud-foundry';
 import { IApp } from '../../../cf-api.types';
 import { ApplicationService } from '../application.service';
 
@@ -16,26 +16,35 @@ import { ApplicationService } from '../application.service';
   selector: 'app-ssh-application',
   templateUrl: './ssh-application.component.html',
   styleUrls: ['./ssh-application.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    RouterModule,
+    CustomTooltipDirective,
+    PageHeaderComponent,
+    SshViewerComponent
+  ]
 })
 export class SshApplicationComponent implements OnInit {
 
-  public messages: Observable<string>;
+  public messages!: Observable<string>;
 
   public connectionStatus = new Subject<number>();
 
-  public sshInput: Subject<string>;
+  public sshInput!: Subject<string>;
 
-  public errorMessage: string;
+  public errorMessage!: string;
 
-  public sshRoute: string;
+  public sshRoute!: string;
 
-  public connected: boolean;
+  public connected!: boolean;
 
-  public appInstanceLink: string;
+  public appInstanceLink!: string;
 
-  public instanceId: string;
+  public instanceId!: string;
 
-  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+  public breadcrumbs$!: Observable<IHeaderBreadcrumb[]>;
 
   @ViewChild('sshViewer', { static: true }) sshViewer: SshViewerComponent;
 
@@ -83,8 +92,8 @@ export class SshApplicationComponent implements OnInit {
 
       this.messages = connection.pipe(
         tap(() => this.connectionStatus.next(1)),
-        switchMap(getResponse => getResponse(this.sshInput)),
-        catchError((e: Error) => {
+        switchMap((getResponse: any): any[] => getResponse(this.sshInput)),
+        catchError((e: Error): any[] => {
           if (e.message !== normalClosureMessage) {
             this.errorMessage = 'Error connecting to web socket';
           }

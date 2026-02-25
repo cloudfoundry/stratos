@@ -1,7 +1,8 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { MatIcon } from '@angular/material/icon';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { EntityInfo } from '../../../../../../store/src/types/api.types';
+import { EntityInfo } from '@stratosui/store';
 import { TableCellAutoscalerEventChangeIconPipe } from './table-cell-autoscaler-event-change-icon.pipe';
 import { TableCellAutoscalerEventChangeComponent } from './table-cell-autoscaler-event-change.component';
 
@@ -9,12 +10,13 @@ describe('TableCellAutoscalerEventChangeComponent', () => {
   let component: TableCellAutoscalerEventChangeComponent;
   let fixture: ComponentFixture<TableCellAutoscalerEventChangeComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [TableCellAutoscalerEventChangeComponent, MatIcon, TableCellAutoscalerEventChangeIconPipe]
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
+      imports: [TableCellAutoscalerEventChangeComponent, TableCellAutoscalerEventChangeIconPipe]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent<TableCellAutoscalerEventChangeComponent>(TableCellAutoscalerEventChangeComponent);

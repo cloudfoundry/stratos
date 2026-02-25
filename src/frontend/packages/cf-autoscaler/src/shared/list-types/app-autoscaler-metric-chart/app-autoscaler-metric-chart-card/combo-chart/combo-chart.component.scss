@@ -14,7 +14,7 @@
   .card {
     &.active,
     &:hover {
-      opacity: .8;
+      opacity: 0.8;
       transition: opacity 100ms ease-in-out;
     }
 
@@ -33,7 +33,7 @@
   .line-series-range,
   .area-series {
     &.inactive {
-      opacity: .2;
+      opacity: 0.2;
       transition: opacity 100ms ease-in-out;
     }
   }
@@ -47,7 +47,7 @@
   }
 
   .area {
-    opacity: .6;
+    opacity: 0.6;
   }
 
   .circle {

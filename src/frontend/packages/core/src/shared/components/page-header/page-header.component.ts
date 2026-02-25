@@ -1,6 +1,7 @@
 import { TemplatePortal } from '@angular/cdk/portal';
-import { AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild  } from '@angular/core';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import {
   InternalEventSeverity,
@@ -14,7 +15,7 @@ import {
   selectIsMobile,
   UserProfileInfo,
 } from '@stratosui/store';
-import moment from 'moment';
+import { getTime } from 'date-fns';
 import { combineLatest, Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
@@ -27,25 +28,47 @@ import { GlobalEventService, IGlobalEvent } from '../../global-events.service';
 import { EndpointsService } from './../../../core/endpoints.service';
 import { environment } from './../../../environments/environment';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
+import { EntityFavoriteStarComponent } from '../../../core/entity-favorite-star/entity-favorite-star.component';
+import { ExtensionButtonsComponent } from '../extension-buttons/extension-buttons.component';
+import { RecentEntitiesComponent } from '../recent-entities/recent-entities.component';
+import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
+import { PageHeaderEventsComponent } from './page-header-events/page-header-events.component';
+import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
 
 @Component({
   selector: 'app-page-header',
   templateUrl: './page-header.component.html',
-  styleUrls: ['./page-header.component.scss']
+  styleUrls: ['./page-header.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    EntityFavoriteStarComponent,
+    ExtensionButtonsComponent,
+    RecentEntitiesComponent,
+    UserAvatarComponent,
+    PageHeaderEventsComponent,
+    ThemeToggleComponent
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public canAPIKeys$: Observable<boolean>;
   public breadcrumbDefinitions: IHeaderBreadcrumbLink[] = null;
   private breadcrumbKey: string;
   public eventSeverity = InternalEventSeverity;
-  public pFavorite: UserFavorite<IFavoriteMetadata>;
-  private pTabs: IPageSideNavTab[];
+  public pFavorite!: UserFavorite<IFavoriteMetadata>;
+  private pTabs!: IPageSideNavTab[];
 
   public isMobile$: Observable<boolean> = this.store.select(selectIsMobile);
 
   public environment = environment;
 
-  @ViewChild('pageHeaderTmpl', { static: true }) pageHeaderTmpl: TemplateRef<any>;
+  // Menu state for Tailwind dropdowns
+  public isHistoryMenuOpen = false;
+  public isUserMenuOpen = false;
+
+  @ViewChild('pageHeaderTmpl', { static: true }) pageHeaderTmpl!: TemplateRef<any>;
 
   @Input() hideSideNavButton = false;
 
@@ -54,7 +77,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   @Input() hideMenu = false;
 
   @Input()
-  endpointIds$: Observable<string[]>;
+  endpointIds$!: Observable<string[]>;
 
   @Input()
   set tabs(tabs: IPageSideNavTab[]) {
@@ -97,7 +120,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
         this.pFavorite = favorite;
         this.store.dispatch(new AddRecentlyVisitedEntityAction({
           guid: favorite.guid,
-          date: moment().valueOf(),
+          date: getTime(new Date()),
           entityType: favorite.entityType,
           endpointType: favorite.endpointType,
           entityId: favorite.entityId,
@@ -124,7 +147,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   }
 
   // Used when non-admin logs in with no-endpoints -> only show logout in the menu
-  @Input() logoutOnly: boolean;
+  @Input() logoutOnly?: boolean;
 
   private getBreadcrumb(breadcrumbs: IHeaderBreadcrumb[]) {
     if (!breadcrumbs || !breadcrumbs.length) {
@@ -211,6 +234,29 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   ngAfterViewInit() {
     const portal = new TemplatePortal(this.pageHeaderTmpl, undefined, {});
     this.tabNavService.setPageHeader(portal);
+  }
+
+  // Tailwind dropdown menu methods
+  toggleHistoryMenu() {
+    this.isHistoryMenuOpen = !this.isHistoryMenuOpen;
+    if (this.isHistoryMenuOpen) {
+      this.isUserMenuOpen = false; // Close user menu when opening history
+    }
+  }
+
+  toggleUserMenu() {
+    this.isUserMenuOpen = !this.isUserMenuOpen;
+    if (this.isUserMenuOpen) {
+      this.isHistoryMenuOpen = false; // Close history menu when opening user menu
+    }
+  }
+
+  closeUserMenu() {
+    this.isUserMenuOpen = false;
+  }
+
+  closeHistoryMenu() {
+    this.isHistoryMenuOpen = false;
   }
 
 }

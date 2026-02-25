@@ -1,0 +1,26 @@
+# Vitest Ignore Patterns
+#
+# Explicitly exclude files and directories that should NOT be run by Vitest.
+# These are primarily Playwright E2E tests that have their own test runner.
+
+# E2E tests (Playwright)
+e2e/
+**/e2e/**
+**/*.e2e.spec.ts
+**/*.e2e-spec.ts
+
+# Playwright-specific
+**/playwright/**
+playwright.config.ts
+
+# Build outputs
+node_modules/
+dist/
+dist-devkit/
+out-tsc/
+coverage/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/

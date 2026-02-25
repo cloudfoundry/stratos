@@ -9,8 +9,8 @@ declare -x TAG NODE_VERSION TMP_DIR
 git_url="https://github.com/cloudfoundry/stratos.git"
 git_tag="${TAG:-develop}"
 work_dir="${PWD}"
-NODE_VERSION="${NODE_VERISON:-20.13.1}"
-NODE_SHA2="${NODE_SHA2:-71ec5c92b35770170dad21ff65130f3e4201e8a0bcd32986e5dcf32b57f379e6}"
+NODE_VERSION="${NODE_VERISON:-24.10.0}"
+NODE_SHA2="${NODE_SHA2:-TBD_NEED_TO_LOOKUP_FROM_CF_BUILDPACKS}"
 TMP_DIR=/tmp
 
 node::install() {
@@ -102,7 +102,7 @@ cd stratos-ui
 if [[ -n "${stratos_version:-""}" ]]; then
   sed -i package.json -e 's/"version": ".*",$/"version": "'"$stratos_version"'",/'
 fi
-npm install
+npm install --legacy-peer-deps
 npm run prebuild-ui
 rm -Rf ./dist
 

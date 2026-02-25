@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
 import { KubernetesNamespacePreviewComponent } from './kubernetes-namespace-preview.component';
@@ -9,11 +11,14 @@ describe('KubernetesNamespacePreviewComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ KubernetesNamespacePreviewComponent ],
-      imports: [...KubernetesBaseTestModules],
-
-    })
-    .compileComponents();
+      imports: [
+        ...KubernetesBaseTestModules,
+        KubernetesNamespacePreviewComponent,
+      ],
+      providers: [
+        provideZonelessChangeDetection(),
+      ]
+    }).compileComponents();
   });
 
   beforeEach(() => {

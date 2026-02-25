@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { ApplicationRef, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap, switchMap } from 'rxjs/operators';
@@ -19,30 +19,39 @@ import { DispatchOnlyAppState } from './../app-state';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class UserProfileEffect {
 
   constructor(
     private actions$: Actions,
     private store: Store<DispatchOnlyAppState>,
     private httpClient: HttpClient,
+    private appRef: ApplicationRef,
   ) { }
 
    getUserProfileInfo$ = createEffect(() => this.actions$.pipe(
     ofType<FetchUserProfileAction>(GET_USERPROFILE),
-    mergeMap(action => {
+    mergeMap((action: FetchUserProfileAction) => {
       this.store.dispatch(new StartRequestAction(action));
       const entityKey = entityCatalog.getEntityKey(action);
       return this.httpClient.get(`/pp/${proxyAPIVersion}/users/${action.userGuid}`).pipe(
-        mergeMap((info: UserProfileInfo) => [
-          new WrapperRequestActionSuccess({
-            entities: { [entityKey]: { [action.guid]: info } },
-            result: [action.guid]
-          }, action)
-        ]),
-        catchError((e) => [
-          new WrapperRequestActionFailed('Could not get User Profile Info', action),
-        ])
+        mergeMap((info: UserProfileInfo) => {
+          this.appRef.tick();
+          return [
+            new WrapperRequestActionSuccess({
+              entities: { [entityKey]: { [action.guid]: info } },
+              result: [action.guid]
+            }, action)
+          ];
+        }),
+        catchError((e: any) => {
+          this.appRef.tick();
+          return [
+            new WrapperRequestActionFailed('Could not get User Profile Info', action),
+          ];
+        })
       );
     })));
 
@@ -52,13 +61,14 @@ export class UserProfileEffect {
       this.store.dispatch(new StartRequestAction(action, 'update'));
       const userGuid = action.profile.id;
       const version = action.profile.meta.version;
-      const headers = { 'If-Match': version.toString() };
+      const headers: Record<string, string> = { 'If-Match': version.toString() };
       if (action.password) {
         headers['x-stratos-password'] = action.password;
       }
 
       return this.httpClient.put(`/pp/${proxyAPIVersion}/users/${userGuid}`, action.profile, { headers }).pipe(
         mergeMap((info: UserProfileInfo) => {
+          this.appRef.tick();
           return [
             new WrapperRequestActionSuccess({
               entities: {},
@@ -66,9 +76,12 @@ export class UserProfileEffect {
             }, action),
           ];
         }),
-        catchError((e) => [
-          new WrapperRequestActionFailed('Could not update User Profile Info', action),
-        ]));
+        catchError((e: any) => {
+          this.appRef.tick();
+          return [
+            new WrapperRequestActionFailed('Could not update User Profile Info', action),
+          ];
+        }));
     })));
 
    updateUserPassword$ = createEffect(() => this.actions$.pipe(
@@ -82,6 +95,7 @@ export class UserProfileEffect {
       };
       return this.httpClient.put(`/pp/${proxyAPIVersion}/users/${userGuid}/password`, action.passwordChanges, { headers }).pipe(
         switchMap((info: UserProfileInfo) => {
+          this.appRef.tick();
           return [
             new WrapperRequestActionSuccess({
               entities: {},
@@ -89,9 +103,12 @@ export class UserProfileEffect {
             }, action)
           ];
         }),
-        catchError((e) => [
-          new WrapperRequestActionFailed('Could not update User Password', action),
-        ])
+        catchError((e: any) => {
+          this.appRef.tick();
+          return [
+            new WrapperRequestActionFailed('Could not update User Password', action),
+          ];
+        })
       );
     })));
 }

@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { AsyncPipe } from '@angular/common';
+import {Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -9,16 +10,14 @@ import { KubernetesNode } from '../../../store/kube.types';
 @Component({
   selector: 'app-node-pod-count',
   templateUrl: './node-pod-count.component.html',
-  styleUrls: ['./node-pod-count.component.scss']
+  styleUrls: ['./node-pod-count.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [AsyncPipe]
 })
 export class NodePodCountComponent extends TableCellCustom<KubernetesNode> implements OnInit {
   podCount$: Observable<string>;
-
-  constructor(
-    private kubeEndpointService: KubernetesEndpointService
-  ) {
-    super();
-  }
+  private kubeEndpointService = inject(KubernetesEndpointService);
 
   ngOnInit() {
 

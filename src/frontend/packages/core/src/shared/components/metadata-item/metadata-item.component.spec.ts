@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { MetadataItemComponent } from './metadata-item.component';
 import { CoreModule } from '../../../core/core.module';
@@ -8,18 +10,17 @@ describe('MetadataItemComponent', () => {
   let component: MetadataItemComponent;
   let fixture: ComponentFixture<MetadataItemComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        MetadataItemComponent,
-        CopyToClipboardComponent
-      ],
+      providers: [provideZonelessChangeDetection()],
       imports: [
-        CoreModule
+        CoreModule,
+        MetadataItemComponent,
+        CopyToClipboardComponent,
       ],
-    })
-    .compileComponents();
-  }));
+    });
+    TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(MetadataItemComponent);

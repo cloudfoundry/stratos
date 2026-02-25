@@ -1,11 +1,19 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output  } from '@angular/core';
 
 import { ITileConfig } from '../tile/tile-selector.types';
+import { TileSelectorTileComponent } from '../tile-selector-tile/tile-selector-tile.component';
 
 @Component({
   selector: 'app-tile-selector',
+  standalone: true,
+  imports: [
+    CommonModule,
+    TileSelectorTileComponent
+  ],
   templateUrl: './tile-selector.component.html',
-  styleUrls: ['./tile-selector.component.scss']
+  styleUrls: ['./tile-selector.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TileSelectorComponent {
   public pOptions: ITileConfig[] = [];

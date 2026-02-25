@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import {
   ChangeDetectorRef,
   Component,
@@ -9,11 +10,11 @@ import {
   OnInit,
   ViewChild,
   ViewContainerRef,
-} from '@angular/core';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
+  signal,
+  ChangeDetectionStrategy} from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { getRowMetadata } from '@stratosui/store';
-import { BehaviorSubject, combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import {
   catchError,
   debounceTime,
@@ -29,10 +30,14 @@ import {
 } from 'rxjs/operators';
 
 import {
+  TailwindSnackBarService,
+  TailwindSnackBarRef,
   ITableListDataSource,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+  ITableColumn,
+  EnumerateComponent,
+  TableComponent,
+} from '@stratosui/core';
+import { getRowMetadata, APIResource } from '@stratosui/store';
 import { UsersRolesFlipSetRoles, UsersRolesSetOrg } from '../../../../../actions/users-roles.actions';
 import { IOrganization } from '../../../../../cf-api.types';
 import { CFAppState } from '../../../../../cf-app-state';
@@ -60,9 +65,16 @@ interface CfUserWithWarning extends CfUser {
 }
 
 @Component({
-    selector: 'app-manage-users-modify',
-    templateUrl: './manage-users-modify.component.html',
-    styleUrls: ['./manage-users-modify.component.scss']
+  selector: 'app-manage-users-modify',
+  templateUrl: './manage-users-modify.component.html',
+  styleUrls: ['./manage-users-modify.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    EnumerateComponent,
+    TableComponent,
+  ]
 })
 export class UsersRolesModifyComponent implements OnInit, OnDestroy {
 
@@ -111,25 +123,25 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
       }
     }
   ];
-  orgDataSource: ITableListDataSource<APIResource<IOrganization>>;
+  orgDataSource!: ITableListDataSource<APIResource<IOrganization>>;
 
   @ViewChild('spaceRolesTable', { read: ViewContainerRef, static: true })
-  spaceRolesTable: ViewContainerRef;
+  spaceRolesTable!: ViewContainerRef;
 
   private wrapperFactory: ComponentFactory<SpaceRolesListWrapperComponent>;
   private wrapperRef: ComponentRef<SpaceRolesListWrapperComponent>;
-  private snackBarRef: MatSnackBarRef<SimpleSnackBar>;
+  private snackBarRef: TailwindSnackBarRef<any>;
 
-  usersNames$: Observable<string[]>;
-  blocked = new BehaviorSubject<boolean>(true);
-  blocked$: Observable<boolean> = this.blocked.asObservable().pipe(delay(0));
-  valid$: Observable<boolean>;
+  usersNames$!: Observable<string[]>;
+  blocked = signal<boolean>(true);
+  blocked$: Observable<boolean> = toObservable(this.blocked).pipe(delay(0));
+  valid$!: Observable<boolean>;
   orgRoles = OrgUserRoleNames;
-  selectedOrgGuid: string;
-  orgGuidChangedSub: Subscription;
-  usersWithWarning$: Observable<string[]>;
-  isSetByUsername$: Observable<boolean>;
-  isRemove$: Observable<boolean>;
+  selectedOrgGuid!: string;
+  orgGuidChangedSub!: Subscription;
+  usersWithWarning$!: Observable<string[]>;
+  isSetByUsername$!: Observable<boolean | undefined>;
+  isRemove$!: Observable<boolean | undefined>;
 
   constructor(
     private store: Store<CFAppState>,
@@ -137,16 +149,16 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
     private componentFactoryResolver: ComponentFactoryResolver,
     private cfRolesService: CfRolesService,
     private cd: ChangeDetectorRef,
-    private snackBar: MatSnackBar,
+    private snackBar: TailwindSnackBarService,
   ) {
     this.wrapperFactory = this.componentFactoryResolver.resolveComponentFactory(SpaceRolesListWrapperComponent);
   }
 
   ngOnInit() {
     if (this.setUsernames) {
-      this.blocked.next(false);
+      this.blocked.set(false);
     } else {
-      this.cfRolesService.loading$.subscribe(loading => this.blocked.next(loading));
+      this.cfRolesService.loading$.subscribe(loading => this.blocked.set(loading));
     }
 
     const orgEntity$ = this.store.select(selectCfUsersRolesOrgGuid).pipe(
@@ -188,7 +200,9 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
         filter(orgs => orgs && !!orgs.length),
         first()
       ).subscribe(orgs => {
-        this.store.dispatch(new UsersRolesSetOrg(orgs[0].metadata.guid, orgs[0].entity.name));
+        if (orgs[0]?.metadata?.guid && orgs[0]?.entity?.name) {
+          this.store.dispatch(new UsersRolesSetOrg(orgs[0].metadata.guid, orgs[0].entity.name));
+        }
       });
     }
 

@@ -1,16 +1,12 @@
 import { Store } from '@ngrx/store';
-import { getRowMetadata } from '@stratosui/store';
+import { getRowMetadata, APIResource } from '@stratosui/store';
+import { ListDataSource, IListConfig } from '@stratosui/core';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { applicationEntityType, spaceEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
+import { CFAppState } from '../../../../../cf-app-state';
+import { applicationEntityType, spaceEntityType } from '../../../../../cf-entity-types';
 import {
   createEntityRelationPaginationKey,
-} from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import {
-  ListDataSource,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+} from '../../../../../entity-relations/entity-relations.types';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { CloudFoundrySpaceService } from '../../../../../features/cf/services/cloud-foundry-space.service';

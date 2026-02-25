@@ -1,23 +1,30 @@
-<mat-card *ngIf="appData$ | async as appData" class="card-app-uptime">
-  <div class="card-app-uptime__contents" *ngIf="appService.applicationRunning$ | async; else notRunning">
-    <div class="card-app-uptime__main">
-      <mat-card-header>
-        <mat-card-title>Uptime</mat-card-title>
-      </mat-card-header>
-      <mat-card-content class="card-app-uptime__compact">
-        <div class="card-app-uptime__large">{{ appData.maxUptime | uptime }}</div>
-      </mat-card-content>
-    </div>
-    <div class="card-app-uptime__detail" *ngIf="appData.runningCount > 1">
-      <app-metadata-item class="card-app-uptime__metric" label="Average">{{ appData.averageUptime | uptime }}</app-metadata-item>
-      <app-metadata-item class="card-app-uptime__metric" label="Minimum">{{ appData.minUptime | uptime }}</app-metadata-item>
-    </div>
+@if (appData$ | async; as appData) {
+  <div class="card-app-uptime custom-card">
+    @if (appService.applicationRunning$ | async) {
+      <div class="card-app-uptime__contents">
+        <div class="card-app-uptime__main">
+          <div class="card-header">
+            <h2 class="card-title">Uptime</h2>
+          </div>
+          <div class="card-content card-app-uptime__compact">
+            <div class="card-app-uptime__large">{{ appData.maxUptime | uptime }}</div>
+          </div>
+        </div>
+        @if (appData.runningCount > 1) {
+          <div class="card-app-uptime__detail">
+            <app-metadata-item class="card-app-uptime__metric" label="Average">{{ appData.averageUptime | uptime }}</app-metadata-item>
+            <app-metadata-item class="card-app-uptime__metric" label="Minimum">{{ appData.minUptime | uptime }}</app-metadata-item>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="custom-card">
+        <div class="card-content">
+          <div class="card-header">
+            <h2 class="card-title">Application is not running</h2>
+          </div>
+        </div>
+      </div>
+    }
   </div>
-</mat-card>
-<ng-template #notRunning>
-  <mat-card-content>
-    <mat-card-header>
-      <mat-card-title>Application is not running</mat-card-title>
-    </mat-card-header>
-  </mat-card-content>
-</ng-template>
+}

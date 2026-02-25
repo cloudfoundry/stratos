@@ -1,4 +1,7 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { CustomIconComponent } from '../custom-material/custom-material.component';
 import { Store } from '@ngrx/store';
 import {
   AppState,
@@ -12,10 +15,10 @@ import {
 import { Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import moment from 'moment';
+import { NoContentMessageComponent } from '../no-content-message/no-content-message.component';
 
 class RenderableRecent {
-  public mostRecentHit: moment.Moment;
+  public mostRecentHit?: Date;
   public subText$: Observable<string>;
   public icon: string;
   public iconFont: string;
@@ -44,32 +47,42 @@ class RenderableRecent {
 @Component({
   selector: 'app-recent-entities',
   templateUrl: './recent-entities.component.html',
-  styleUrls: ['./recent-entities.component.scss']
+  styleUrls: ['./recent-entities.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    CustomIconComponent,
+    NoContentMessageComponent
+  ]
 })
 export class RecentEntitiesComponent {
+  private store = inject(Store<AppState>);
+
   @Input()
   public history = false;
 
-  @Input() mode: string;
+  @Input() mode?: string;
 
   public recentEntities$: Observable<RenderableRecent[]>;
   public hasHits$: Observable<boolean>;
-  constructor(store: Store<AppState>) {
-    const recentEntities$ = store.select(recentlyVisitedSelector);
+
+  constructor() {
+    const recentEntities$ = this.store.select(recentlyVisitedSelector);
     this.recentEntities$ = recentEntities$.pipe(
       map(entities => Object.values(entities)),
       map((entities: IRecentlyVisitedEntity[]) => {
         // Sort them - most recent first
         // Cap the list at the maximum we can display
         const sorted = entities.sort((a, b) => b.date - a.date).slice(0, MAX_RECENT_COUNT);
-        return sorted.map(entity => new RenderableRecent(entity, store));
+        return sorted.map(entity => new RenderableRecent(entity, this.store));
       })
     );
 
     this.hasHits$ = this.recentEntities$.pipe(
       map(recentEntities => recentEntities && recentEntities.length > 0)
     );
-
   }
 }
 

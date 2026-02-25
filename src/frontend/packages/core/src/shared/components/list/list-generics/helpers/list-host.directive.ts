@@ -1,8 +1,9 @@
-import { Directive, ViewContainerRef } from '@angular/core';
+import { Directive, ViewContainerRef, inject } from '@angular/core';
 
 @Directive({
-  selector: '[list-host]',
+selector: '[list-host]',
+standalone: true
 })
 export class ListHostDirective {
-  constructor(public viewContainerRef: ViewContainerRef) { }
+  public viewContainerRef = inject(ViewContainerRef);
 }

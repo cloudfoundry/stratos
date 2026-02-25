@@ -1,13 +1,17 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { IFeatureFlag } from '../../../../../../cf-api.types';
+import { TableCellCustom } from '@stratosui/core';
+import { IFeatureFlag } from '@stratosui/cloud-foundry';
+
 import { FeatureFlagDescriptions } from '../cf-feature-flags-data-source';
 
 @Component({
   selector: 'app-table-cell-feature-flag-description',
   templateUrl: './table-cell-feature-flag-description.component.html',
-  styleUrls: ['./table-cell-feature-flag-description.component.scss']
+  styleUrls: ['./table-cell-feature-flag-description.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: []
 })
 export class TableCellFeatureFlagDescriptionComponent extends TableCellCustom<IFeatureFlag> {
 

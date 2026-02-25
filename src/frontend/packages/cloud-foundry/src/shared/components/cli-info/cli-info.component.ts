@@ -1,4 +1,6 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
+
+import { CodeBlockComponent } from '@stratosui/core';
 
 // Context used in the CLI Info template
 export interface CFAppCLIInfoContext {
@@ -12,9 +14,14 @@ export interface CFAppCLIInfoContext {
 @Component({
   selector: 'app-cli-info',
   templateUrl: './cli-info.component.html',
-  styleUrls: ['./cli-info.component.scss']
+  styleUrls: ['./cli-info.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CodeBlockComponent
+]
 })
 export class CliInfoComponent {
-  @Input() context: CFAppCLIInfoContext;
+  @Input() context!: CFAppCLIInfoContext;
 }
 

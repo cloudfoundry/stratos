@@ -9,7 +9,7 @@ export function updateApplicationRoutesReducer() {
   return (
     state: IRequestEntityTypeState<APIResource<IApp<string>>>,
     action: APISuccessOrFailedAction
-  ): IRequestEntityTypeState<APIResource<IApp>> => {
+  ): IRequestEntityTypeState<APIResource<IApp<string>>> => {
     switch (action.type) {
       case ASSIGN_ROUTE_SUCCESS:
         const assignAction: AssignRouteToApplication = action.apiAction as AssignRouteToApplication;
@@ -23,12 +23,12 @@ export function updateApplicationRoutesReducer() {
   };
 }
 
-function applyNewRoutes(state: IRequestEntityTypeState<APIResource<IApp>>, appGuid: string, routeGuid: string, newRoutes: any[]) {
+function applyNewRoutes(state: IRequestEntityTypeState<APIResource<IApp<string>>>, appGuid: string, routeGuid: string, newRoutes: string[]): IRequestEntityTypeState<APIResource<IApp<string>>> {
   const oldEntities = Object.values(state);
-  const entities = {};
-  oldEntities.forEach(app => {
+  const entities: IRequestEntityTypeState<APIResource<IApp<string>>> = {};
+  oldEntities.forEach((app: APIResource<IApp<string>>) => {
     if (app.metadata.guid === appGuid) {
-      const newApp = {
+      const newApp: APIResource<IApp<string>> = {
         ...app,
         entity: {
           ...app.entity,
@@ -43,7 +43,7 @@ function applyNewRoutes(state: IRequestEntityTypeState<APIResource<IApp>>, appGu
   return entities;
 }
 
-function addApplicationRoutes(state: IRequestEntityTypeState<APIResource<IApp>>, appGuid: string, routeGuid: string) {
+function addApplicationRoutes(state: IRequestEntityTypeState<APIResource<IApp<string>>>, appGuid: string, routeGuid: string): IRequestEntityTypeState<APIResource<IApp<string>>> {
   if (!appGuid || !state[appGuid]) {
     return state;
   }
@@ -51,11 +51,11 @@ function addApplicationRoutes(state: IRequestEntityTypeState<APIResource<IApp>>,
   return applyNewRoutes(state, appGuid, routeGuid, [...oldRoutes, routeGuid]);
 }
 
-function removeApplicationRoute(state: IRequestEntityTypeState<APIResource<IApp<string>>>, appGuid: string, routeGuid: string) {
+function removeApplicationRoute(state: IRequestEntityTypeState<APIResource<IApp<string>>>, appGuid: string, routeGuid: string): IRequestEntityTypeState<APIResource<IApp<string>>> {
   if (!appGuid || !state[appGuid]) {
     return state;
   }
   const oldRoutes = state[appGuid].entity.routes || [];
-  const newRoutes = oldRoutes.filter(route => route !== routeGuid);
+  const newRoutes = oldRoutes.filter((route: string) => route !== routeGuid);
   return applyNewRoutes(state, appGuid, routeGuid, [...newRoutes]);
 }

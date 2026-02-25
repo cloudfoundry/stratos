@@ -1,12 +1,13 @@
-import { AfterContentInit, Component, OnDestroy } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { AfterContentInit, ChangeDetectionStrategy, Component, OnDestroy, computed, effect, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
-import { filter, map, switchMap, tap } from 'rxjs/operators';
+import { combineLatest, Observable, of as observableOf, Subject } from 'rxjs';
+import { catchError, filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 
-import { StepOnNextResult } from '../../../../../core/src/shared/components/stepper/step/step.component';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { APIResource } from '../../../../../store/src/types/api.types';
+import { CustomFormFieldComponent, MatLabelComponent, CustomSelectComponent, CustomOptionComponent, StepOnNextResult } from '@stratosui/core';
+import { PaginationMonitorFactory, APIResource } from '@stratosui/store';
 import { SetCreateServiceInstanceServiceGuid } from '../../../actions/create-service-instance.actions';
 import { IService } from '../../../cf-api-svc.types';
 import { CFAppState } from '../../../cf-app-state';
@@ -17,7 +18,15 @@ import {
   selectCreateServiceInstanceCfGuid,
   selectCreateServiceInstanceSpaceGuid,
 } from '../../../store/selectors/create-service-instance.selectors';
+import { CfServiceCardComponent } from '../list/list-types/cf-services/cf-service-card/cf-service-card.component';
 import { CsiGuidsService } from '../add-service-instance/csi-guids.service';
+
+/**
+ * Typed form interface for service selection
+ */
+interface SelectServiceForm {
+  service: FormControl<string>;
+}
 
 
 @Component({
@@ -26,33 +35,57 @@ import { CsiGuidsService } from '../add-service-instance/csi-guids.service';
   styleUrls: ['./select-service.component.scss'],
   providers: [
     ServicesWallService
+  ],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    CustomFormFieldComponent,
+    MatLabelComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
+    CfServiceCardComponent
   ]
 })
 export class SelectServiceComponent implements OnDestroy, AfterContentInit {
-  cfGuid: string;
-  serviceSubscription: Subscription;
+  private store = inject(Store<CFAppState>);
+  private paginationMonitorFactory = inject(PaginationMonitorFactory);
+  private csiGuidService = inject(CsiGuidsService);
+  private servicesWallService = inject(ServicesWallService);
+
+  cfGuid!: string;
   services$: Observable<APIResource<IService>[]>;
-  stepperForm: UntypedFormGroup;
-  validate: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  stepperForm: FormGroup<SelectServiceForm>;
+  validate = signal<boolean>(false);
   isFetching$: Observable<boolean>;
   selectedService$: Observable<APIResource<IService>>;
 
-  constructor(
-    private store: Store<CFAppState>,
-    private paginationMonitorFactory: PaginationMonitorFactory,
-    private csiGuidService: CsiGuidsService,
-    private servicesWallService: ServicesWallService
-  ) {
-    this.stepperForm = new UntypedFormGroup({
-      service: new UntypedFormControl('', [Validators.required as any]),
+  // Lifecycle management for subscriptions
+  private destroyed$ = new Subject<void>();
+  public errorMessage: string | null = null;
+
+  // Effect to track form validation status - runs in injection context
+  private readonly formValidationEffect = effect(() => {
+    // Track form status via signal
+    const isValid = this.stepperForm.controls.service.valid;
+    this.validate.set(isValid);
+  });
+
+  constructor() {
+    this.stepperForm = new FormGroup<SelectServiceForm>({
+      service: new FormControl<string>('', { validators: [Validators.required], nonNullable: true }),
     });
+
     const cfSpaceGuid$ =
-      combineLatest(
+      combineLatest([
         this.store.select(selectCreateServiceInstanceCfGuid),
         this.store.select(selectCreateServiceInstanceSpaceGuid)
-      ).pipe(
-        filter(([p, q]) => !!p && !!q)
+      ]).pipe(
+        filter(([p, q]) => !!p && !!q),
+        takeUntil(this.destroyed$)
       );
+
     const schema = cfEntityFactory(serviceEntityType);
     this.isFetching$ = cfSpaceGuid$.pipe(
       switchMap(([cfGuid, spaceGuid]) => {
@@ -62,24 +95,46 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
       }),
       tap(fetching => {
         fetching ? this.stepperForm.disable() : this.stepperForm.enable();
-      })
+      }),
+      catchError(error => {
+        console.error('Error monitoring service fetch status:', error);
+        this.stepperForm.enable();
+        return observableOf(false);
+      }),
+      takeUntil(this.destroyed$)
     );
+
     this.services$ = cfSpaceGuid$.pipe(
       tap(([cfGuid]) => this.cfGuid = cfGuid),
       switchMap(([cfGuid, spaceGuid]) => this.servicesWallService.getServicesInSpace(cfGuid, spaceGuid)),
       filter(p => !!p),
-      map(services => services.sort((a, b) => a.entity.label.localeCompare(b.entity.label))),
+      map(services => services.sort((a, b) => a?.entity?.label?.localeCompare(b?.entity?.label || '') || 0)),
       tap(services => {
         if (services.length === 1) {
-          const guid = services[0].metadata.guid;
-          this.stepperForm.controls.service.setValue(guid);
+          const guid = services[0]?.metadata?.guid;
+          if (guid) {
+            this.stepperForm.controls.service.setValue(guid);
+          }
+        } else if (services.length === 0) {
+          this.errorMessage = 'No services available in this space.';
         }
-      })
+      }),
+      catchError(error => {
+        console.error('Error fetching services:', error);
+        this.errorMessage = 'Failed to fetch services. Please try again.';
+        this.stepperForm.enable();
+        return observableOf([]);
+      }),
+      takeUntil(this.destroyed$)
     );
 
-    this.selectedService$ = combineLatest(this.services$, this.stepperForm.controls.service.statusChanges).pipe(
-      map(([services, change]) => services.filter(a => a.metadata.guid === this.stepperForm.controls.service.value)[0]),
-      filter(p => !!p)
+    this.selectedService$ = combineLatest([
+      this.services$,
+      this.stepperForm.controls.service.statusChanges
+    ]).pipe(
+      map(([services, change]) => services.filter(a => a?.metadata?.guid === this.stepperForm.controls.service.value)[0]),
+      filter(p => !!p),
+      takeUntil(this.destroyed$)
     );
   }
 
@@ -92,12 +147,16 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
   }
 
   ngAfterContentInit() {
-    this.serviceSubscription = this.stepperForm.controls.service.statusChanges.pipe(
-      map(() => this.validate.next(this.stepperForm.controls.service.valid))
+    // Effect now runs as field initializer above
+    // Original observable subscription for validation (kept for compatibility)
+    this.stepperForm.controls.service.statusChanges.pipe(
+      map(() => this.validate.set(this.stepperForm.controls.service.valid)),
+      takeUntil(this.destroyed$)
     ).subscribe();
   }
 
   ngOnDestroy(): void {
-    this.serviceSubscription.unsubscribe();
+    this.destroyed$.next();
+    this.destroyed$.complete();
   }
 }

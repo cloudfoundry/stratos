@@ -1,66 +1,63 @@
 // Import your custom theme
-@import '../../../theme.scss';
+@use '../../../theme.scss';
 
-mat-tab-body {
-  margin-top: 1em;
+// Converted from mat-tab-body to custom class
+.tab-body {
+  @apply mt-4; // 1em = 16px = spacing[4]
 }
+
 .chart-details-usage {
-  display: block;
-  margin: 2em 0;
-  box-shadow: 1px 1px 10px rgba(black, 0.07);
+  @apply block my-8 shadow-md; // 2em = 32px = spacing[8]
+
   h1 {
-    font-size: 18px;
-    margin: 0;
+    @apply text-lg m-0; // 18px = text-lg
   }
 
   &__label {
-    margin: 0 0 .1em;
-    font-size: 1em;
+    @apply mb-0 text-base; // 1em = text-base, .1em margin negligible
   }
 
   &__repository {
-    margin-bottom: 1.5em;
+    @apply mb-6; // 1.5em = 24px = spacing[6]
   }
 
   &__section {
-    display: flex;
-    flex-direction: column;
+    @apply flex flex-col;
   }
 
   &__install {
-    display: flex;
-    justify-content: flex-end;
-    margin: 35px 0;
+    @apply flex justify-end my-9; // 35px ≈ spacing[9]
   }
 
-  .mat-input-element {
-    .mat-input-wrapper {
-      margin: 1em 0 .5em;
+  // Converted from Material input classes to custom classes
+  .input-element {
+    .input-wrapper {
+      @apply my-4 mb-2; // 1em 0 .5em
     }
   }
 
-  .mat-tab-label {
+  // Converted from Material tab label
+  .tab-label {
     min-width: auto !important;
   }
-  [mat-button] {
-    margin-left: 1em;
+
+  // Converted from Material button attribute selector to class
+  .btn {
+    @apply ml-4 w-16; // 1em = spacing[4], 4em = 64px = w-16
     min-width: auto;
-    width: 4em;
+
     &.chart-details-usage__install {
-      width: auto;
+      @apply w-auto;
     }
   }
 
   svg {
-    fill: mat-color($monocular-app-primary);
+    fill: var(--color-primary);
   }
 
   p {
     &.help-link {
-      font-size: 0.8em;
-      text-align: center;
-      margin-top: 20px;
-      margin-bottom: 0;
+      @apply text-xs text-center mt-5 mb-0; // 0.8em ≈ text-xs, 20px = spacing[5]
     }
   }
 }

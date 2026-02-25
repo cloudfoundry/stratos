@@ -1,17 +1,18 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import { IListConfig, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { ISpace } from '../../../../../cf-api.types';
+import { CFAppState, ISpace } from '@stratosui/cloud-foundry';
+import { ITableColumn } from '@stratosui/core';
+import { IGlobalListAction, IListAction, IListConfig, IListMultiFilterConfig, IMultiListAction, ListViewTypes } from '@stratosui/core';
+import { ListView } from '@stratosui/store';
+import { APIResource } from '@stratosui/store';
 import { CloudFoundryOrganizationService } from '../../../../../features/cf/services/cloud-foundry-organization.service';
 import { CfSpaceCardComponent } from './cf-space-card/cf-space-card.component';
 import { CfSpacesDataSourceService } from './cf-spaces-data-source.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfSpacesListConfigService implements IListConfig<APIResource<ISpace>> {
   viewType = ListViewTypes.CARD_ONLY;
   dataSource: CfSpacesDataSourceService;
@@ -19,7 +20,7 @@ export class CfSpacesListConfigService implements IListConfig<APIResource<ISpace
   defaultView = 'cards' as ListView;
   enableTextFilter = true;
   text = {
-    title: null,
+    title: null as string | null,
     filter: 'Search by name',
     noEntries: 'There are no spaces'
   };
@@ -48,10 +49,10 @@ export class CfSpacesListConfigService implements IListConfig<APIResource<ISpace
     this.dataSource = new CfSpacesDataSourceService(cfOrgService.cfGuid, cfOrgService.orgGuid, this.store, this);
   }
 
-  getColumns = () => this.columns;
-  getGlobalActions = () => [];
-  getMultiActions = () => [];
-  getSingleActions = () => [];
-  getMultiFiltersConfigs = () => [];
-  getDataSource = () => this.dataSource;
+  getColumns = (): ITableColumn<APIResource<ISpace>>[] => this.columns;
+  getGlobalActions = (): IGlobalListAction<APIResource<ISpace>>[] => [];
+  getMultiActions = (): IMultiListAction<APIResource<ISpace>>[] => [];
+  getSingleActions = (): IListAction<APIResource<ISpace>>[] => [];
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
+  getDataSource = (): CfSpacesDataSourceService => this.dataSource;
 }

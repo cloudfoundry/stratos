@@ -1,31 +1,57 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { TabNavService } from '../../../../../core/src/tab-nav.service';
-import { generateCfBaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CfUserPermissionDirective } from '../../../shared/directives/cf-user-permission/cf-user-permission.directive';
+import { CoreModule, TabNavService } from '@stratosui/core';
+import { EntityServiceFactory, EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
+import { createEmptyStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { generateCFEntities } from '../../../cf-entity-generator';
+import { cfCurrentUserPermissionsService } from '../../../user-permissions/cf-user-permissions-checkers';
 import { ServicesService } from '../services.service';
 import { ServicesServiceMock } from '../services.service.mock';
-import { ServiceTabsBaseComponent } from './service-tabs-base.component';
+import { ServiceTabsBaseComponent } from "./service-tabs-base.component";
 
 describe('ServiceTabsBaseComponent', () => {
   let component: ServiceTabsBaseComponent;
   let fixture: ComponentFixture<ServiceTabsBaseComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
         ServiceTabsBaseComponent,
-        CfUserPermissionDirective
+        createEmptyStoreModule(),
+        EntityCatalogTestModule,
+        CoreModule,
+        NoopAnimationsModule,
       ],
-      imports: generateCfBaseTestModules(),
-      providers: [{
-        provide: ServicesService, useClass: ServicesServiceMock
-      },
-        TabNavService
+      providers: [
+        ...STORE_TEST_PROVIDERS,
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities(),
+          ]
+        },
+        EntityCatalogHelper,
+        EntityServiceFactory,
+        { provide: ServicesService, useClass: ServicesServiceMock },
+        TabNavService,
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        ...cfCurrentUserPermissionsService
       ]
     })
       .compileComponents();
-  }));
+
+    // Initialize EntityCatalogHelper manually
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServiceTabsBaseComponent);

@@ -1,18 +1,19 @@
-import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
+import { Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import {
   StackedInputActionResult,
-} from '../../../../../../../core/src/shared/components/stacked-input-actions/stacked-input-action/stacked-input-action.component';
-import {
+  StackedInputActionsComponent,
   StackedInputActionsState,
   StackedInputActionsUpdate,
-} from '../../../../../../../core/src/shared/components/stacked-input-actions/stacked-input-actions.component';
-import { StepOnNextFunction } from '../../../../../../../core/src/shared/components/stepper/step/step.component';
-import { ClearPaginationOfType } from '../../../../../../../store/src/actions/pagination.actions';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+  StepOnNextFunction,
+} from '@stratosui/core';
+import { APIResource, ClearPaginationOfType } from '@stratosui/store';
 import { IOrganization, ISpace } from '../../../../../cf-api.types';
 import { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
@@ -26,27 +27,36 @@ import { UserInviteSendSpaceRoles, UserInviteService } from '../../../user-invit
 @Component({
   selector: 'app-invite-users-create',
   templateUrl: './invite-users-create.component.html',
-  styleUrls: ['./invite-users-create.component.scss']
+  styleUrls: ['./invite-users-create.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    FormsModule,
+    StackedInputActionsComponent
+  ]
 })
 export class InviteUsersCreateComponent implements OnInit {
 
+  public stepValid = signal<boolean>(false);
   public valid$: Observable<boolean>;
-  public stepValid = new BehaviorSubject<boolean>(false);
-  public stateIn = new BehaviorSubject<StackedInputActionsState[]>([]);
-  public org$: Observable<APIResource<IOrganization>>;
-  public space$: Observable<APIResource<ISpace>>;
+  public stateIn = signal<StackedInputActionsState[]>([]);
+  public stateIn$: Observable<StackedInputActionsState[]>;
+  public org$!: Observable<APIResource<IOrganization>>;
+  public space$!: Observable<APIResource<ISpace> | null>;
   public madeChanges = false;
   public isSpace = false;
   public spaceRole: UserInviteSendSpaceRoles = UserInviteSendSpaceRoles.auditor;
   public spaceRoles: { label: string, value: UserInviteSendSpaceRoles }[] = [];
-  private users: StackedInputActionsUpdate;
+  private users!: StackedInputActionsUpdate;
 
   constructor(
     private store: Store<CFAppState>,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private userInviteService: UserInviteService
   ) {
-    this.valid$ = this.stepValid.asObservable();
+    this.valid$ = toObservable(this.stepValid);
+    this.stateIn$ = toObservable(this.stateIn);
     this.spaceRoles.push(
       {
         label: UserRoleLabels.space.short[SpaceUserRoleNames.AUDITOR],
@@ -62,7 +72,7 @@ export class InviteUsersCreateComponent implements OnInit {
 
   stateOut(users: StackedInputActionsUpdate) {
     this.users = users;
-    this.stepValid.next(users.valid);
+    this.stepValid.set(users.valid);
   }
 
   ngOnInit() {
@@ -93,7 +103,7 @@ export class InviteUsersCreateComponent implements OnInit {
         result: StackedInputActionResult.PROCESSING,
       });
     });
-    this.stateIn.next(processingState);
+    this.stateIn.set(processingState);
 
     // Kick off the invites
     return this.userInviteService.invite(
@@ -138,8 +148,8 @@ export class InviteUsersCreateComponent implements OnInit {
               });
             });
             // We've just come from a valid state, so form should be valid again
-            this.stepValid.next(true);
-            this.stateIn.next(newState);
+            this.stepValid.set(true);
+            this.stateIn.set(newState);
             res.errorMessage = 'Failed to invite one or more users. Please address per user message and try again';
           }
           return res;

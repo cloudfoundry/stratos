@@ -1,4 +1,4 @@
 export class Maintainer {
-  name: string;
-  email: string;
+  name!: string;
+  email!: string;
 }

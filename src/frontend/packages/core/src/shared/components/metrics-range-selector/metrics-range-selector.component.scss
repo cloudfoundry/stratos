@@ -1,4 +1,4 @@
-@import '../../../../sass/mixins';
+@use '../../../../sass/mixins';
 
 .metrics-range-selector {
   $animation-function: cubic-bezier(0, 0, .2, 1);
@@ -62,10 +62,10 @@
   &__selected-range-dates {
     display: none;
     font-size: 14px;
-    opacity: .6;
+    opacity: 0.6;
     padding-left: 10px;
 
-    @include breakpoint(tablet) {
+    @include mixins.breakpoint(tablet) {
       display: flex;
     }
   }

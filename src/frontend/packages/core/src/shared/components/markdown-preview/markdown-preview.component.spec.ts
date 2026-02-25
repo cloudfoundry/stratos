@@ -1,10 +1,12 @@
 import { HttpClient, HttpClientModule, HttpHandler } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from '@stratosui/store/testing';
+import { createBasicStoreModule } from "@test-framework/core-test.helper";
 
-import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
+import { CoreTestingModule } from "@test-framework/core-test.modules";
 import { SidepanelPreviewComponent } from '../sidepanel-preview/sidepanel-preview.component';
 import { MDAppModule } from './../../../core/md.module';
 import { SidePanelService } from './../../services/side-panel.service';
@@ -14,21 +16,25 @@ describe('MarkdownPreviewComponent', () => {
   let component: MarkdownPreviewComponent;
   let fixture: ComponentFixture<MarkdownPreviewComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [MarkdownPreviewComponent, SidepanelPreviewComponent],
-      providers: [HttpClient, HttpHandler, SidePanelService],
+      providers: [
+        HttpClient, HttpHandler, SidePanelService,
+        provideZonelessChangeDetection(),
+      ],
       imports: [
+        MarkdownPreviewComponent,
+        SidepanelPreviewComponent,
         MDAppModule,
         RouterTestingModule,
         HttpClientModule,
         HttpClientTestingModule,
         CoreTestingModule,
-        createBasicStoreModule()
+        createBasicStoreModule(),
       ]
-    })
-      .compileComponents();
-  }));
+    });
+      TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(MarkdownPreviewComponent);

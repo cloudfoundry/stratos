@@ -1,27 +1,30 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { AppTabExtensionComponent } from './app-tab-extension.component';
 import { CoreModule } from '../../core/core.module';
 import { RouterTestingModule } from '@angular/router/testing';
 import { SharedModule } from '../../shared/shared.module';
-import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '@test-framework/store-test-helper';
 
 describe('AppTabExtensionComponent', () => {
   let component: AppTabExtensionComponent;
   let fixture: ComponentFixture<AppTabExtensionComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       declarations: [ AppTabExtensionComponent ],
       imports: [
         CoreModule,
         RouterTestingModule,
         SharedModule,
-        createBasicStoreModule()
+        createBasicStoreModule(),
       ]
-    })
+    }),
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AppTabExtensionComponent);

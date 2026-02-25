@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
@@ -9,18 +11,19 @@ describe('ServicePlanPriceComponent', () => {
   let component: ServicePlanPriceComponent;
   let fixture: ComponentFixture<ServicePlanPriceComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ServicePlanPriceComponent],
+      providers: [provideZonelessChangeDetection()],
       imports: [
+        ServicePlanPriceComponent,
         FormsModule,
         ReactiveFormsModule,
         MDAppModule,
-        NoopAnimationsModule
-      ]
+        NoopAnimationsModule,
+      ],
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServicePlanPriceComponent);

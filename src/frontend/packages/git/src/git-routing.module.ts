@@ -1,21 +1,11 @@
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { RouterModule } from '@angular/router';
 
-// Add any lazy loaded routes here and bring in the GitModule
-const customRoutes: Routes = [
-  // {
-  //   path: 'autoscaler',
-  //   loadChildren: () => import('./core/autoscaler.module').then(m => m.GitModule),
-  //   data: {
-  //     // Required to place content in the mat-drawer-content/.page-content container
-  //     stratosNavigationPage: true
-  //   },
-  // },
-];
+import { GIT_ROUTES } from './git.routes';
 
 @NgModule({
   imports: [
-    RouterModule.forRoot(customRoutes, { relativeLinkResolution: 'legacy' }),
+    RouterModule.forChild(GIT_ROUTES),
   ],
 })
 export class GitRoutingModule { }

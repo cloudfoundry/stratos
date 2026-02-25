@@ -1,17 +1,20 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { TableCellCustom } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
 import { IService, IServiceExtra } from '../../../../../../cf-api-svc.types';
 
 @Component({
   selector: 'app-table-cell-service-provider',
   templateUrl: './table-cell-service-provider.component.html',
-  styleUrls: ['./table-cell-service-provider.component.scss']
+  styleUrls: ['./table-cell-service-provider.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: []
 })
 export class TableCellServiceProviderComponent extends TableCellCustom<APIResource<IService>>  {
 
-  extraInfo: IServiceExtra;
+  extraInfo!: IServiceExtra;
 
   @Input()
   set row(pService: APIResource<IService>) {

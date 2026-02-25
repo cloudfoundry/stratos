@@ -3,8 +3,8 @@
     <h1>{{isCreate ? 'Create' : 'Edit' }} AutoScaler Policy:
       {{ (applicationService.application$ | async)?.app.entity.name }} </h1>
     <div class="page-header-right">
-      <button mat-icon-button mat-button routerLink="{{parentUrl}}">
-        <mat-icon>clear</mat-icon>
+      <button class="btn btn-icon" routerLink="{{parentUrl}}" aria-label="Close">
+        <app-custom-icon>clear</app-custom-icon>
       </button>
     </div>
   </app-page-header>

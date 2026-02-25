@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { CardProgressOverlayComponent } from './card-progress-overlay.component';
 import { CoreModule } from '../../../core/core.module';
@@ -7,15 +9,16 @@ describe('CardProgressOverlayComponent', () => {
   let component: CardProgressOverlayComponent;
   let fixture: ComponentFixture<CardProgressOverlayComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       imports: [
+        CardProgressOverlayComponent, // Now standalone
         CoreModule,
-      ],
-      declarations: [ CardProgressOverlayComponent ]
-    })
-    .compileComponents();
-  }));
+      ]
+    });
+    TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CardProgressOverlayComponent);

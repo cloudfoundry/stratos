@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit  } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import {
   InternalEventMonitorFactory,
@@ -17,11 +18,23 @@ import { Observable, of } from 'rxjs';
 import { first, map, withLatestFrom } from 'rxjs/operators';
 
 import { eventReturnUrlParam } from '../../event-page/events-page/events-page.component';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { StatefulIconComponent } from '../../../core/stateful-icon/stateful-icon.component';
+import { MetadataItemComponent } from '../../../shared/components/metadata-item/metadata-item.component';
 
 @Component({
   selector: 'app-error-page',
   templateUrl: './error-page.component.html',
-  styleUrls: ['./error-page.component.scss']
+  styleUrls: ['./error-page.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    PageHeaderComponent,
+    StatefulIconComponent,
+    MetadataItemComponent
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ErrorPageComponent implements OnInit {
   public back$: Observable<string>;
@@ -41,7 +54,7 @@ export class ErrorPageComponent implements OnInit {
       const cfEndpointEventMonitor = this.internalEventMonitorFactory.getMonitor(endpointEntityType, of([endpointId]));
       this.errorDetails$ = cfEndpointEventMonitor.hasErroredOverTimeNoPoll(30).pipe(
         withLatestFrom(endpointMonitor.entity$),
-        map(([errors, endpoint]) => {
+        map(([errors, endpoint]: [any, EndpointModel]) => {
           return {
             endpoint,
             errors: errors ? errors[endpointId] : null
@@ -49,7 +62,7 @@ export class ErrorPageComponent implements OnInit {
         })
       );
       this.jsonDownloadHref$ = this.errorDetails$.pipe(
-        map((info) => {
+        map((info: any) => {
           const jsonString = JSON.stringify(info);
           return this.sanitizer.bypassSecurityTrustUrl('data:text/json;charset=UTF-8,' + encodeURIComponent(jsonString));
         })
@@ -64,11 +77,11 @@ export class ErrorPageComponent implements OnInit {
     private sanitizer: DomSanitizer
   ) {
     this.back$ = store.select(getPreviousRoutingState).pipe(first()).pipe(
-      map(previousState => previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : '/home')
+      map((previousState: any) => previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : '/home')
     );
 
     this.backParams$ = this.back$.pipe(
-      map(urlBack => {
+      map((urlBack: string) => {
         // If we've come from the events page ensure we pass it back it's param
         const overrideReturnUrl = this.activatedRoute.snapshot.queryParams[eventReturnUrlParam];
         return urlBack && urlBack.startsWith('/events') ? {

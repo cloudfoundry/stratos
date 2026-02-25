@@ -1,50 +1,33 @@
 import { DatePipe } from '@angular/common';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { createEmptyStoreModule } from '@stratosui/store/testing';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
-
-import {
-  ApplicationEnvVarsHelper,
-} from '../../../../../../cloud-foundry/src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import {
-  ServiceActionHelperService,
-} from '../../../../../../cloud-foundry/src/shared/data-services/service-action-helper.service';
-import { ApplicationStateService } from '../../../../../../cloud-foundry/src/shared/services/application-state.service';
-import {
-  generateTestApplicationServiceProvider,
-} from '../../../../../../cloud-foundry/test-framework/application-service-helper';
-import { CoreModule } from '../../../../../../core/src/core/core.module';
-import { ConfirmationDialogService } from '../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { AppTestModule } from '../../../../../../core/test-framework/core-test.helper';
-import {
-  EntityCatalogHelper,
-} from '../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
-import { EntityMonitorFactory } from '../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
+import { EntityServiceFactory, EntityMonitorFactory, PaginationMonitorFactory, EntityCatalogHelper } from '@stratosui/store';
+import { ApplicationEnvVarsHelper, ServiceActionHelperService, ApplicationStateService } from '@stratosui/cloud-foundry';
+import { generateTestApplicationServiceProvider } from '@test-framework/cf';
+import { CoreModule, ConfirmationDialogService } from '@stratosui/core';
+import { AppTestModule } from '@test-framework';
 import { CfAutoscalerTestingModule } from '../../../../cf-autoscaler-testing.module';
 import { AppAutoscalerMetricChartCardComponent } from './app-autoscaler-metric-chart-card.component';
-import { AppAutoscalerComboChartComponent } from './combo-chart/combo-chart.component';
 import { AppAutoscalerComboSeriesVerticalComponent } from './combo-chart/combo-series-vertical.component';
 
 
 describe('AppAutoscalerMetricChartCardComponent', () => {
   let component: AppAutoscalerMetricChartCardComponent;
   let fixture: ComponentFixture<AppAutoscalerMetricChartCardComponent>;
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        AppAutoscalerMetricChartCardComponent,
-        AppAutoscalerComboChartComponent,
-        AppAutoscalerComboSeriesVerticalComponent
-      ],
       imports: [
         CfAutoscalerTestingModule,
         createEmptyStoreModule(),
         CoreModule,
-        NgxChartsModule,
-        AppTestModule
+        AppTestModule,
+        AppAutoscalerMetricChartCardComponent,
+        AppAutoscalerComboSeriesVerticalComponent,
       ],
       providers: [
+        EntityServiceFactory,
         EntityMonitorFactory,
         EntityCatalogHelper,
         generateTestApplicationServiceProvider('1', '1'),
@@ -54,10 +37,10 @@ describe('AppAutoscalerMetricChartCardComponent', () => {
         ConfirmationDialogService,
         DatePipe,
         ServiceActionHelperService,
+        provideZonelessChangeDetection(),
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AppAutoscalerMetricChartCardComponent);

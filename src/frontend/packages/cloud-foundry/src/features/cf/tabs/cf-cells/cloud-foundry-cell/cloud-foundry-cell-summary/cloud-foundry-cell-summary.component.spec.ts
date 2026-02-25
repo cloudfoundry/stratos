@@ -1,18 +1,32 @@
 import { DatePipe } from '@angular/common';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { StoreModule } from '@ngrx/store';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { of as observableOf } from 'rxjs';
 
-import { MetricsConfig } from '../../../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
+import { MetricsConfig } from '@stratosui/core';
 import {
   MetricsChartTypes,
   MetricsLineChartConfig,
-} from '../../../../../../../../core/src/shared/components/metrics-chart/metrics-chart.types';
+} from '@stratosui/core';
 import {
   MetricsChartHelpers,
-} from '../../../../../../../../core/src/shared/components/metrics-chart/metrics.component.helpers';
-import { MetricQueryConfig } from '../../../../../../../../store/src/actions/metrics.actions';
-import { MetricQueryType } from '../../../../../../../../store/src/types/metric.types';
-import { generateCfBaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+} from '@stratosui/core';
+import {
+  EntityServiceFactory,
+  MetricQueryConfig,
+  MetricQueryType,
+  appReducers,
+  TEST_CATALOGUE_ENTITIES,
+  generateStratosEntities,
+  EntityCatalogTestModule
+} from '@stratosui/store';
+import { STORE_TEST_PROVIDERS, testSCFEndpointGuid } from '@stratosui/store/testing';
+import { generateCFEntities } from '@test-framework/cf';
 import { FetchCFCellMetricsAction } from '../../../../../../actions/cf-metrics.actions';
 import { ActiveRouteCfCell } from '../../../../cf-page.types';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
@@ -46,14 +60,14 @@ class MockCloudFoundryCellService {
       'guid',
       'cellId',
       new MetricQueryConfig(queryString, {}),
-      queryRange
-    ),
+      queryRange,
+      ),
   })
   buildChartConfig = (yAxisLabel: string): MetricsLineChartConfig => ({
     chartType: MetricsChartTypes.LINE,
     xAxisLabel: 'Time',
     yAxisLabel,
-    autoScale: true
+    autoScale: true,
   })
 
 }
@@ -62,23 +76,41 @@ describe('CloudFoundryCellSummaryComponent', () => {
   let component: CloudFoundryCellSummaryComponent;
   let fixture: ComponentFixture<CloudFoundryCellSummaryComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
-        CloudFoundryCellSummaryComponent
-      ],
-      imports: generateCfBaseTestModules(),
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [CloudFoundryCellSummaryComponent],
       providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideNoopAnimations(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          StoreModule.forRoot(appReducers, {
+            runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
+          }),
+          EntityCatalogTestModule
+        ),
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities()
+          ]
+        },
+        EntityServiceFactory,
         {
           provide: CloudFoundryCellService,
-          useValue: new MockCloudFoundryCellService()
+          useValue: new MockCloudFoundryCellService(),
         },
-        ActiveRouteCfCell,
-        DatePipe
+        {
+          provide: ActiveRouteCfCell,
+          useValue: { cfGuid: testSCFEndpointGuid, cellId: 'testCellId' }
+        },
+        DatePipe,
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryCellSummaryComponent);

@@ -1,10 +1,13 @@
-import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
+import { ListComponent } from '../../../../core/src/shared/components/list/list.component';
 import { EndpointListHelper } from '../../../../core/src/shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import { ListConfig } from '../../../../core/src/shared/components/list/list.component.types';
+import { PageHeaderComponent } from '../../../../core/src/shared/components/page-header/page-header.component';
 import { RouterNav } from '../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../store/src/public-api';
 import {
@@ -23,16 +26,24 @@ import { KubernetesService } from '../services/kubernetes.service';
     },
     EndpointListHelper,
     KubernetesService
+  ],
+  standalone: true,
+  imports: [
+    CommonModule,
+    ListComponent,
+    PageHeaderComponent
   ]
 })
 export class KubernetesComponent {
 
   connectedEndpoints$: Observable<number>;
-  constructor(
-    private store: Store<AppState>,
-    kubeService: KubernetesService
-  ) {
-    this.connectedEndpoints$ = kubeService.kubeEndpoints$.pipe(
+  private store = inject(Store<AppState>);
+  private kubeService = inject(KubernetesService);
+
+
+  constructor() {
+
+    this.connectedEndpoints$ = this.kubeService.kubeEndpoints$.pipe(
       map(kubeEndpoints => {
         const connectedEndpoints = kubeEndpoints.filter(
           c => c.connectionStatus === 'connected'
@@ -48,5 +59,6 @@ export class KubernetesComponent {
       filter(connectedEndpointsCount => connectedEndpointsCount > 1),
       first()
     );
+
   }
 }

@@ -1,11 +1,11 @@
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
-import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
-import { EntityService } from '../../../../store/src/entity-service';
-import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
-import { APIResource } from '../../../../store/src/types/api.types';
+import { ApplicationService, RunningInstancesComponent } from '@stratosui/cloud-foundry';
+import { MetadataItemComponent } from '@stratosui/core';
+import { EntityService, EntityServiceFactory, APIResource } from '@stratosui/store';
 import { GetAppAutoscalerPolicyAction } from '../../store/app-autoscaler.actions';
 import { AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
 
@@ -13,22 +13,30 @@ import { AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
 @Component({
   selector: 'app-card-autoscaler-default',
   templateUrl: './card-autoscaler-default.component.html',
-  styleUrls: ['./card-autoscaler-default.component.scss']
+  styleUrls: ['./card-autoscaler-default.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    MetadataItemComponent,
+    RunningInstancesComponent
+  ]
 })
 export class CardAutoscalerDefaultComponent implements OnInit {
 
-  @ViewChild('instanceField') instanceField: ElementRef;
+  @ViewChild('instanceField', { static: false }) instanceField!: ElementRef;
 
   constructor(
     public appService: ApplicationService,
     private entityServiceFactory: EntityServiceFactory,
     private applicationService: ApplicationService,
+    private cdr: ChangeDetectorRef
   ) {
   }
 
-  appAutoscalerPolicyService: EntityService;
-  appAutoscalerPolicy$: Observable<APIResource<AppAutoscalerPolicyLocal>>;
-  applicationInstances$: Observable<number>;
+  appAutoscalerPolicyService!: EntityService;
+  appAutoscalerPolicy$!: Observable<APIResource<AppAutoscalerPolicyLocal>>;
+  applicationInstances$!: Observable<number>;
 
   @Input()
   onUpdate: () => void = () => { }
@@ -48,6 +56,7 @@ export class CardAutoscalerDefaultComponent implements OnInit {
       publishReplay(1),
       refCount()
     );
+    this.cdr.markForCheck();
   }
 
 }

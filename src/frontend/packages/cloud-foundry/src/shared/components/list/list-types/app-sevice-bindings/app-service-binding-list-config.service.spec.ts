@@ -1,31 +1,45 @@
 import { DatePipe } from '@angular/common';
-import { inject, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { generateTestApplicationServiceProvider } from '../../../../../../test-framework/application-service-helper';
-import { generateCfBaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import {
-  ApplicationEnvVarsHelper,
-} from '../../../../../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
-import { ApplicationStateService } from '../../../../services/application-state.service';
+import { CurrentUserPermissionsService } from '@stratosui/core';
+import {ServiceActionHelperService,
+  cfCurrentUserPermissionsService} from '@stratosui/cloud-foundry';
+import { generateTestApplicationServiceProvider, generateCfStoreModules, ApplicationStateService, ApplicationEnvVarsHelper } from '@test-framework/cf';
+
 import { AppServiceBindingListConfigService } from './app-service-binding-list-config.service';
 
 describe('AppServiceBindingListConfigService', () => {
   beforeEach(() => {
+    const cfGuid = 'test-cf-guid';
+    const appGuid = 'test-app-guid';
+
     TestBed.configureTestingModule({
+      imports: [
+        ...generateCfStoreModules(),
+      ],
       providers: [
         AppServiceBindingListConfigService,
-        generateTestApplicationServiceProvider('1', '1'),
-        ApplicationEnvVarsHelper,
-        DatePipe,
-        ServiceActionHelperService,
+        generateTestApplicationServiceProvider(appGuid, cfGuid),
         ApplicationStateService,
+        ApplicationEnvVarsHelper,
+        ServiceActionHelperService,
+        ...cfCurrentUserPermissionsService,
+        DatePipe,
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
       ],
-      imports: generateCfBaseTestModules()
     });
   });
 
-  it('should be created', inject([AppServiceBindingListConfigService], (service: AppServiceBindingListConfigService) => {
+  it('should be created', () => {
+    const service = TestBed.inject(AppServiceBindingListConfigService);
     expect(service).toBeTruthy();
-  }));
+  });
 });

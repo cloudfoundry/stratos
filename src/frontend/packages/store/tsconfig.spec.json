@@ -2,8 +2,10 @@
   "extends": "../../../tsconfig.spec.json",
   "compilerOptions": {
     "outDir": "../../../../out-tsc",
-    "types": ["jasmine", "node"]
+    "types": ["vitest/globals", "node"],
+    "module": "ESNext",
+    "target": "ES2022"
   },
-  "files": ["src/test.ts"],
+  "files": ["src/test-setup.ts"],
   "include": ["**/*.spec.ts", "**/*.d.ts"]
 }

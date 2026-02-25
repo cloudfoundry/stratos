@@ -1,54 +1,64 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from '@stratosui/store/testing';
+import {
+  EntityCatalogTestModuleManualStore,
+  EntityServiceFactory,
+  generateStratosEntities,
+  TEST_CATALOGUE_ENTITIES
+} from '@stratosui/store';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { AppTestModule } from '@test-framework/core-test.helper';
 
-import { CoreTestingModule } from '../../../../../test-framework/core-test.modules';
-import { CoreModule } from '../../../../core/core.module';
-import { CurrentUserPermissionsService } from '../../../../core/permissions/current-user-permissions.service';
-import { SharedModule } from '../../../../shared/shared.module';
-import { TabNavService } from '../../../../tab-nav.service';
 import { CreateEndpointBaseStepComponent } from './create-endpoint-base-step.component';
 
 describe('CreateEndpointBaseStepComponent', () => {
   let component: CreateEndpointBaseStepComponent;
   let fixture: ComponentFixture<CreateEndpointBaseStepComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        CreateEndpointBaseStepComponent,
-      ],
       imports: [
-        CoreModule,
-        SharedModule,
-        RouterTestingModule,
-        CoreTestingModule,
         createBasicStoreModule(),
-        NoopAnimationsModule
+        AppTestModule,
+        CreateEndpointBaseStepComponent,
+        {
+          ngModule: EntityCatalogTestModuleManualStore,
+          providers: [
+            {
+              provide: TEST_CATALOGUE_ENTITIES,
+              useValue: [
+                ...generateStratosEntities(),
+              ]
+            }
+          ]
+        },
       ],
       providers: [
+        EntityServiceFactory,
+        ...(STORE_TEST_PROVIDERS || []),
         {
           provide: ActivatedRoute,
           useValue: {
             snapshot: {
               queryParams: {},
-              params: { type: 'metrics' }
+              params: {}
             }
           }
         },
-        TabNavService,
-        CurrentUserPermissionsService
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideZonelessChangeDetection(),
       ],
-    })
-      .compileComponents();
-  }));
+    });
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CreateEndpointBaseStepComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {

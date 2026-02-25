@@ -9,6 +9,7 @@ export enum UserListUsersVisible {
   NO_ROLE = 'noRole'
 }
 
-export const userHasRole = (user: CfUser, roleProperty: string): boolean => {
-  return !!user[roleProperty] && !!user[roleProperty].length;
+export const userHasRole = (user: CfUser, roleProperty: keyof CfUser): boolean => {
+  const roleValue = user[roleProperty];
+  return Array.isArray(roleValue) && roleValue.length > 0;
 };

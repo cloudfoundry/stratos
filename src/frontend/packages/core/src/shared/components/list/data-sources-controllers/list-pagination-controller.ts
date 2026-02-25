@@ -1,4 +1,4 @@
-import { NgZone } from '@angular/core';
+import { NgZone, signal } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
   ListFilter,
@@ -44,97 +44,13 @@ function onPaginationEntityState(
 }
 
 export class ListPaginationController<T> implements IListPaginationController<T> {
-  constructor(
-    private store: Store<GeneralAppState>,
-    public dataSource: IListDataSource<T>,
-    private ngZone: NgZone
-  ) {
-
-    this.pagination$ = this.createPaginationObservable(dataSource);
-
-    this.sort$ = this.dataSource.sort$;
-
-    this.filter$ = this.dataSource.filter$;
-
-    // Listen to changes to the multi filters and batch them up together. This avoids situations when there are multiple changes when one
-    // filter resets other filters.
-    this.multiFilterChanges$ = this.multiFilterStream.asObservable().pipe(
-      filter(change => !!change),
-      bufferTime(50, leaveZone(this.ngZone, asyncScheduler)),
-      filter(changes => !!changes.length),
-      observeOn(enterZone(this.ngZone, asyncScheduler)),
-      tap(this.handleMultiFilter),
-    );
-
-  }
   pagination$: Observable<ListPagination>;
   sort$: Observable<ListSort>;
   filter$: Observable<ListFilter>;
-  private multiFilterStream = new BehaviorSubject<ListPaginationMultiFilterChange>(null);
-  multiFilterChanges$: Observable<any>;
+  private multiFilterStream = signal<ListPaginationMultiFilterChange>(null);
+  private multiFilterSubject = new BehaviorSubject<ListPaginationMultiFilterChange>(null);
 
-  page(pageIndex: number) {
-    const page = pageIndex + 1;
-    if (this.dataSource.isLocal) {
-      this.store.dispatch(new SetClientPage(
-        this.dataSource, this.dataSource.paginationKey, page
-      ));
-    } else {
-      onPaginationEntityState(this.dataSource.pagination$, (paginationEntityState) => {
-        if (paginationEntityState.currentPage !== page) {
-          this.store.dispatch(new SetPage(
-            this.dataSource, this.dataSource.paginationKey, page
-          ));
-        }
-      });
-    }
-  }
-  pageSize(pageSize: number) {
-    onPaginationEntityState(this.dataSource.pagination$, (paginationEntityState) => {
-      if (this.dataSource.isLocal) {
-        if (paginationEntityState.clientPagination.pageSize !== pageSize) {
-          this.store.dispatch(new SetClientPageSize(
-            this.dataSource, this.dataSource.paginationKey, pageSize
-          ));
-        }
-      } else if (paginationEntityState.params['results-per-page'] !== pageSize) {
-        this.store.dispatch(new AddParams(this.dataSource, this.dataSource.paginationKey, {
-          ['results-per-page']: pageSize,
-        }, this.dataSource.isLocal));
-      }
-    });
-  }
-  sort = (listSort: ListSort) => {
-    onPaginationEntityState(this.dataSource.pagination$, (paginationEntityState) => {
-      if (
-        paginationEntityState.params['order-direction-field'] !== listSort.field ||
-        paginationEntityState.params['order-direction'] !== listSort.direction
-      ) {
-        this.store.dispatch(new AddParams(this.dataSource, this.dataSource.paginationKey, {
-          ['order-direction-field']: listSort.field,
-          ['order-direction']: listSort.direction
-        }, this.dataSource.isLocal));
-      }
-    });
-  };
-  filterByString = filterString => {
-    onPaginationEntityState(this.dataSource.pagination$, (paginationEntityState) => {
-      if (this.dataSource.isLocal) {
-        if (paginationEntityState.clientPagination.filter.string !== filterString) {
-          const newFilter = this.cloneMultiFilter(paginationEntityState.clientPagination.filter);
-          newFilter.string = filterString;
-          this.store.dispatch(new SetClientFilter(
-            this.dataSource,
-            this.dataSource.paginationKey,
-            newFilter
-          ));
-        }
-      } else if (this.dataSource.getFilterFromParams(paginationEntityState) !== filterString) {
-        this.dataSource.setFilterParam(filterString, paginationEntityState);
-      }
-    });
-  };
-
+  // Define handleMultiFilter before multiFilterChanges$ to ensure proper initialization order
   handleMultiFilter = (changes: ListPaginationMultiFilterChange[]) => {
     onPaginationEntityState(this.dataSource.pagination$, (paginationEntityState) => {
       if (!paginationEntityState) {
@@ -142,7 +58,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
       }
 
       // Changes may include multiple updates for the same key, so only use the very latest
-      const uniqueChanges = [];
+      const uniqueChanges: ListPaginationMultiFilterChange[] = [];
       for (let i = changes.length - 1; i >= 0; i--) {
         const change = changes[i];
         if (!uniqueChanges.find(e => e.key === change.key)) {
@@ -151,7 +67,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
       }
       // We don't want to dispatch actions if it's a no op (values are not different, falsies are treated as the same). This avoids other
       // chained actions from firing.
-      const cleanChanges = uniqueChanges.reduce((newCleanChanges, change) => {
+      const cleanChanges = uniqueChanges.reduce((newCleanChanges: Record<string, any>, change: ListPaginationMultiFilterChange) => {
         const storeFilterParamValue = valueOrCommonFalsy(paginationEntityState.clientPagination.filter.items[change.key]);
         const newFilterParamValue = valueOrCommonFalsy(change.value);
         if (storeFilterParamValue !== newFilterParamValue) {
@@ -183,11 +99,105 @@ export class ListPaginationController<T> implements IListPaginationController<T>
     });
   };
 
+  // Listen to changes to the multi filters and batch them up together. This avoids situations when there are multiple changes when one
+  // filter resets other filters.
+  multiFilterChanges$: Observable<any>;
+
+  constructor(
+    private store: Store<GeneralAppState>,
+    public dataSource: IListDataSource<T>,
+    private ngZone: NgZone
+  ) {
+    // Initialize multiFilterChanges$ using BehaviorSubject to avoid injection context requirement
+    this.multiFilterChanges$ = this.multiFilterSubject.asObservable().pipe(
+      filter(change => !!change),
+      bufferTime(50, leaveZone(this.ngZone, asyncScheduler)),
+      filter(changes => !!changes.length),
+      observeOn(enterZone(this.ngZone, asyncScheduler)),
+      tap(this.handleMultiFilter),
+    );
+
+    this.pagination$ = this.createPaginationObservable(dataSource);
+
+    this.sort$ = this.dataSource.sort$;
+
+    this.filter$ = this.dataSource.filter$;
+
+  }
+
+  page(pageIndex: number) {
+    const page = pageIndex + 1;
+    if (this.dataSource.isLocal) {
+      this.store.dispatch(new SetClientPage(
+        this.dataSource, this.dataSource.paginationKey, page
+      ));
+    } else {
+      onPaginationEntityState(this.dataSource.pagination$, (paginationEntityState) => {
+        if (paginationEntityState.currentPage !== page) {
+          this.store.dispatch(new SetPage(
+            this.dataSource, this.dataSource.paginationKey, page
+          ));
+        }
+      });
+    }
+  }
+  pageSize(pageSize: number) {
+    onPaginationEntityState(this.dataSource.pagination$, (paginationEntityState) => {
+      if (this.dataSource.isLocal) {
+        if (paginationEntityState.clientPagination.pageSize !== pageSize) {
+          this.store.dispatch(new SetClientPageSize(
+            this.dataSource, this.dataSource.paginationKey, pageSize
+          ));
+        }
+      } else {
+        const params = paginationEntityState.params as Record<string, any>;
+        if (params['results-per-page'] !== pageSize) {
+          this.store.dispatch(new AddParams(this.dataSource, this.dataSource.paginationKey, {
+            ['results-per-page']: pageSize,
+          }, this.dataSource.isLocal));
+        }
+      }
+    });
+  }
+  sort = (listSort: ListSort) => {
+    onPaginationEntityState(this.dataSource.pagination$, (paginationEntityState) => {
+      const params = paginationEntityState.params as Record<string, any>;
+      if (
+        params['order-direction-field'] !== listSort.field ||
+        params['order-direction'] !== listSort.direction
+      ) {
+        this.store.dispatch(new AddParams(this.dataSource, this.dataSource.paginationKey, {
+          ['order-direction-field']: listSort.field,
+          ['order-direction']: listSort.direction
+        }, this.dataSource.isLocal));
+      }
+    });
+  };
+  filterByString = (filterString: string) => {
+    onPaginationEntityState(this.dataSource.pagination$, (paginationEntityState) => {
+      if (this.dataSource.isLocal) {
+        if (paginationEntityState.clientPagination.filter.string !== filterString) {
+          const newFilter = this.cloneMultiFilter(paginationEntityState.clientPagination.filter);
+          newFilter.string = filterString;
+          this.store.dispatch(new SetClientFilter(
+            this.dataSource,
+            this.dataSource.paginationKey,
+            newFilter
+          ));
+        }
+      } else if (this.dataSource.getFilterFromParams(paginationEntityState) !== filterString) {
+        this.dataSource.setFilterParam(filterString, paginationEntityState);
+      }
+    });
+  };
+
   multiFilter = (filterConfig: IListMultiFilterConfig, filterValue: string) => {
     if (!this.dataSource.isLocal) {
       return;
     }
-    this.multiFilterStream.next({ key: filterConfig.key, value: filterValue });
+    const change = { key: filterConfig.key, value: filterValue };
+    this.multiFilterStream.set(change);
+    this.multiFilterSubject.next(change);
   };
 
   private cloneMultiFilter(paginationClientFilter: PaginationClientFilter) {
@@ -200,17 +210,18 @@ export class ListPaginationController<T> implements IListPaginationController<T>
     return dataSource.pagination$.pipe(
       filter(pag => !!pag),
       map(pag => {
-        const pageSize = (dataSource.isLocal ? pag.clientPagination.pageSize : pag.params['results-per-page'] as number)
+        const params = pag.params as Record<string, any>;
+        const pageSize = (dataSource.isLocal ? pag.clientPagination.pageSize : params['results-per-page'] as number)
           || defaultClientPaginationPageSize;
         const pageIndex = (dataSource.isLocal ? pag.clientPagination.currentPage : pag.currentPage) || 1;
-        // const totalResults = (dataSource.isLocal ? pag.clientPagination.totalResults : pag.totalResults) || 0;
+        const totalResults = (dataSource.isLocal ? pag.clientPagination.totalResults : pag.totalResults) || 0;
         return {
-          totalResults: pag.totalResults,
+          totalResults,
           pageSize,
           pageIndex
         };
       }),
-      distinctUntilChanged((x, y) => {
+      distinctUntilChanged((x: ListPagination, y: ListPagination) => {
         return x.pageIndex === y.pageIndex && x.pageSize === y.pageSize && x.totalResults === y.totalResults;
       }),
       tag('list-pagination')
@@ -219,7 +230,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
 
 }
 
-export function valueOrCommonFalsy(value, commonFalsy?) {
+export function valueOrCommonFalsy(value: any, commonFalsy?: any): any {
   // Flatten some specific falsies into the same common value
   if (value === null || value === undefined || value === '') {
     return commonFalsy;

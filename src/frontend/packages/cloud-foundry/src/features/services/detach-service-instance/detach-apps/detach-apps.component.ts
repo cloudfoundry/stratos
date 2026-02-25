@@ -1,9 +1,10 @@
-import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
+
+import { Component, EventEmitter, OnDestroy, Output, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
-import { APIResource } from '../../../../../../store/src/types/api.types';
+import { ListComponent, ListConfig } from '@stratosui/core';
+import { APIResource } from '@stratosui/store';
 import { IServiceBinding } from '../../../../cf-api-svc.types';
 import {
   DetachAppsListConfigService,
@@ -13,6 +14,11 @@ import {
   selector: 'app-detach-apps',
   templateUrl: './detach-apps.component.html',
   styleUrls: ['./detach-apps.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    ListComponent
+],
   providers: [
     {
       provide: ListConfig,
@@ -21,12 +27,14 @@ import {
   ]
 })
 export class DetachAppsComponent implements OnDestroy {
+  private config = inject(ListConfig<APIResource>);
 
   validate$: Observable<boolean>;
   @Output()
   public selectedApps = new EventEmitter<APIResource<IServiceBinding>[]>();
   selectedSub: Subscription;
-  constructor(private config: ListConfig<APIResource>) {
+
+  constructor() {
     this.selectedSub = this.config.getDataSource().selectedRows$.subscribe(
       (selectedApps) => {
         this.selectedApps.emit(Array.from(selectedApps.values()));

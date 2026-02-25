@@ -1,16 +1,34 @@
-<div *ngIf="alertInfo">
-  <div *ngFor="let group of alertInfo">
-    <div *ngIf="showHeader" class="alert__group">{{group.name}}</div>
-    <div *ngFor="let alert of group.alerts">
-      <div class="alert__info">
-        <div [ngSwitch]="alert.level" class="alert__icon">
-          <mat-icon class="text-info" *ngSwitchCase="1">info</mat-icon>
-          <mat-icon class="text-warning" *ngSwitchCase="2">warning</mat-icon>
-          <mat-icon class="text-danger" *ngSwitchCase="3">error</mat-icon>
-          <mat-icon class="text-tentative" *ngSwitchDefault>help_outline</mat-icon>
-        </div>
-        {{ alert.message }}
+@if (alertInfo) {
+  <div>
+    @for (group of alertInfo; track group) {
+      <div>
+        @if (showHeader) {
+          <div class="alert__group">{{group.name}}</div>
+        }
+        @for (alert of group.alerts; track alert) {
+          <div>
+            <div class="alert__info">
+              <div class="alert__icon">
+                @switch (alert.level) {
+                  @case (1) {
+                    <span class="material-symbols-outlined text-info">info</span>
+                  }
+                  @case (2) {
+                    <span class="material-symbols-outlined text-warning">warning</span>
+                  }
+                  @case (3) {
+                    <span class="material-symbols-outlined text-danger">error</span>
+                  }
+                  @default {
+                    <span class="material-symbols-outlined text-tentative">help_outline</span>
+                  }
+                }
+              </div>
+              {{ alert.message }}
+            </div>
+          </div>
+        }
       </div>
-    </div>
+    }
   </div>
-</div>
+}
