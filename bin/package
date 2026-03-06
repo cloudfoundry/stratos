@@ -2,34 +2,29 @@
 #
 # Package Stratos for Cloud Foundry deployment.
 #
-# Builds the frontend and backend, then stages a directory that can be
-# deployed with:  cf push -p dist/cf-package
+# Builds the frontend and backend for all platforms, then produces
+# per-architecture zips deployable with:
+#   cf push -f dist/cf-package-<arch>/manifest.yml -p dist/stratos-cf-<version>-<arch>.zip
 #
 # Usage:
 #   bin/package              # build + package
 #   bin/package --skip-build # package from existing build artifacts
 #
 # Environment:
-#   VERSION   - override version (default: from package.json)
-#   GOOS      - target OS for backend binary (default: linux)
-#   GOARCH    - target arch for backend binary (default: amd64)
+#   VERSION - override version (default: from package.json)
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-# Ensure we're running from the repo root
 cd "${ROOT_DIR}"
 
 VERSION="${VERSION:-$(node -p "require('./package.json').version" 2>/dev/null || echo "dev")}"
-GOOS="${GOOS:-linux}"
-GOARCH="${GOARCH:-amd64}"
 SKIP_BUILD="${1:-}"
 
 DIST_DIR="${ROOT_DIR}/dist"
-PKG_DIR="${DIST_DIR}/cf-package"
-ZIP_FILE="${DIST_DIR}/stratos-cf-${VERSION}.zip"
+CF_ARCHITECTURES=(amd64 arm64)
 
 log()   { echo "-----> $1"; }
 error() { echo "ERROR: $1" >&2; exit 1; }
@@ -49,7 +44,7 @@ preflight() {
 }
 
 # -------------------------------------------------------------------
-# Build frontend + backend
+# Build everything via Makefile
 # -------------------------------------------------------------------
 build() {
   if [[ "${SKIP_BUILD}" == "--skip-build" ]]; then
@@ -57,86 +52,80 @@ build() {
     return
   fi
 
-  log "Building frontend..."
+  log "Building frontend and backend for all platforms..."
   make build-frontend
-
-  log "Building backend (${GOOS}/${GOARCH})..."
-  cd "${ROOT_DIR}/src/jetstream"
-
-  # Generate OpenAPI docs if swag is available
-  if command -v swag >/dev/null 2>&1; then
-    swag init --parseDependency 2>/dev/null || true
-  fi
-
-  GOOS="${GOOS}" GOARCH="${GOARCH}" go build \
-    -ldflags "-X main.appVersion=${VERSION}" \
-    -o "${DIST_DIR}/jetstream"
-
-  cd "${ROOT_DIR}"
+  make build-backend-all
 }
 
 # -------------------------------------------------------------------
-# Stage the CF deployment layout
+# Find the frontend build output directory
 # -------------------------------------------------------------------
-stage() {
-  log "Staging CF package..."
+find_ui_source() {
+  if [[ -d "${DIST_DIR}/browser" ]]; then
+    echo "${DIST_DIR}/browser"
+    return
+  fi
+  if [[ -d "${DIST_DIR}/stratos" ]]; then
+    echo "${DIST_DIR}/stratos"
+    return
+  fi
+  for item in "${DIST_DIR}"/*; do
+    base="$(basename "$item")"
+    case "${base}" in
+      jetstream*|cf-package*|release|bin|"stratos-cf-"*) continue ;;
+    esac
+    if [[ -d "$item" ]]; then
+      echo "$item"
+      return
+    fi
+  done
+  error "Frontend build output not found in ${DIST_DIR}/"
+}
 
-  # Clean previous package
-  rm -rf "${PKG_DIR}"
-  mkdir -p "${PKG_DIR}"
+# -------------------------------------------------------------------
+# Stage and archive one architecture
+# -------------------------------------------------------------------
+package_arch() {
+  local arch=$1
+  local binary="${DIST_DIR}/bin/jetstream-linux-${arch}"
+  local pkg_dir="${DIST_DIR}/cf-package-${arch}"
+  local zip_file="${DIST_DIR}/stratos-cf-${VERSION}-${arch}.zip"
+
+  if [[ ! -f "${binary}" ]]; then
+    error "Backend binary not found: ${binary}"
+  fi
+
+  log "Staging CF package (${arch})..."
+  rm -rf "${pkg_dir}"
+  mkdir -p "${pkg_dir}"
 
   # Backend binary
-  if [[ -f "${DIST_DIR}/jetstream" ]]; then
-    cp "${DIST_DIR}/jetstream" "${PKG_DIR}/jetstream"
-  else
-    error "Backend binary not found at ${DIST_DIR}/jetstream. Run without --skip-build."
-  fi
-  chmod +x "${PKG_DIR}/jetstream"
+  cp "${binary}" "${pkg_dir}/jetstream"
+  chmod +x "${pkg_dir}/jetstream"
 
   # Frontend assets — backend serves from ui/
-  local ui_src=""
-  if [[ -d "${DIST_DIR}/browser" ]]; then
-    ui_src="${DIST_DIR}/browser"
-  elif [[ -d "${DIST_DIR}/stratos" ]]; then
-    ui_src="${DIST_DIR}/stratos"
-  else
-    # Angular output may be directly in dist/ (excluding our packaging artifacts)
-    ui_src=""
-    for item in "${DIST_DIR}"/*; do
-      base="$(basename "$item")"
-      case "${base}" in
-        jetstream|cf-package|release|bin|"stratos-cf-"*) continue ;;
-      esac
-      if [[ -d "$item" ]]; then
-        ui_src="$item"
-        break
-      fi
-    done
-  fi
-
-  if [[ -z "${ui_src}" ]]; then
-    error "Frontend build output not found in ${DIST_DIR}/"
-  fi
-  cp -r "${ui_src}" "${PKG_DIR}/ui"
+  local ui_src
+  ui_src="$(find_ui_source)"
+  cp -r "${ui_src}" "${pkg_dir}/ui"
 
   # Config
-  cp "${ROOT_DIR}/deploy/cloud-foundry/config.properties" "${PKG_DIR}/"
+  cp "${ROOT_DIR}/deploy/cloud-foundry/config.properties" "${pkg_dir}/"
 
   # Plugins
   if [[ -f "${ROOT_DIR}/src/jetstream/plugins.yaml" ]]; then
-    cp "${ROOT_DIR}/src/jetstream/plugins.yaml" "${PKG_DIR}/"
+    cp "${ROOT_DIR}/src/jetstream/plugins.yaml" "${pkg_dir}/"
   fi
 
   # User invite templates
   if [[ -d "${ROOT_DIR}/src/jetstream/templates" ]]; then
-    cp -r "${ROOT_DIR}/src/jetstream/templates" "${PKG_DIR}/templates"
+    cp -r "${ROOT_DIR}/src/jetstream/templates" "${pkg_dir}/templates"
   fi
 
   # Procfile for CF
-  echo "web: ./jetstream" > "${PKG_DIR}/Procfile"
+  echo "web: ./jetstream" > "${pkg_dir}/Procfile"
 
-  # Generate CF manifest for pre-built package
-  cat > "${PKG_DIR}/manifest.yml" <<MANIFEST
+  # CF manifest for pre-built package
+  cat > "${pkg_dir}/manifest.yml" <<MANIFEST
 applications:
   - name: console
     memory: 1512M
@@ -153,16 +142,12 @@ applications:
 # Turn on backend debugging
 #       LOG_LEVEL: debug
 MANIFEST
-}
 
-# -------------------------------------------------------------------
-# Create the zip
-# -------------------------------------------------------------------
-archive() {
-  log "Creating ${ZIP_FILE}..."
-  rm -f "${ZIP_FILE}"
-  cd "${PKG_DIR}"
-  zip -r "${ZIP_FILE}" . -x '*.git*' '*.DS_Store'
+  # Create zip
+  log "Creating ${zip_file}..."
+  rm -f "${zip_file}"
+  cd "${pkg_dir}"
+  zip -r "${zip_file}" . -x '*.git*' '*.DS_Store'
   cd "${ROOT_DIR}"
 }
 
@@ -173,13 +158,16 @@ summary() {
   echo ""
   log "Package complete!"
   echo "  Version:  ${VERSION}"
-  echo "  Archive:  ${ZIP_FILE}"
-  echo "  Size:     $(du -h "${ZIP_FILE}" | cut -f1)"
+  echo ""
+  for arch in "${CF_ARCHITECTURES[@]}"; do
+    local zip_file="${DIST_DIR}/stratos-cf-${VERSION}-${arch}.zip"
+    if [[ -f "${zip_file}" ]]; then
+      echo "  ${arch}:  ${zip_file}  ($(du -h "${zip_file}" | cut -f1))"
+    fi
+  done
   echo ""
   echo "Deploy with:"
-  echo "  cf push -p ${ZIP_FILE}"
-  echo "  # or"
-  echo "  cf push -p ${PKG_DIR}"
+  echo "  cf push -f dist/cf-package-<arch>/manifest.yml -p dist/stratos-cf-${VERSION}-<arch>.zip"
   echo ""
 }
 
@@ -188,6 +176,9 @@ summary() {
 # -------------------------------------------------------------------
 preflight
 build
-stage
-archive
+
+for arch in "${CF_ARCHITECTURES[@]}"; do
+  package_arch "${arch}"
+done
+
 summary
