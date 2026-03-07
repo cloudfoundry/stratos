@@ -104,9 +104,8 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
   private viewMonitorSub!: Subscription;
   private cardChangesSub!: Subscription;
-  private _checkLayout = signal<boolean>(true);
+  private _checkLayout = signal<number>(0);
   private check$ = toObservable(this._checkLayout).pipe(
-    filter(v => v),
     debounceTime(100) // Debounce the check signal itself
   );
 
@@ -228,9 +227,6 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
         return;
       }
 
-      // Reset check signal
-      this._checkLayout.set(false);
-
       // User has scrolled - check the remaining cards that have not been loaded to see if any are now visible
       const remaining: number[] = [];
       const cardsArray = this.endpointElements.toArray();
@@ -333,7 +329,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
   // Check the cards in view
   checkCardsInView() {
-    this._checkLayout.set(true);
+    this._checkLayout.update(v => v + 1);
   }
 
   public toggleShowAllEndpoints() {
