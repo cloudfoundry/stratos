@@ -1,6 +1,6 @@
 :host {
   border: 1px solid #ccc;
-  display: flex;
+  display: block;
   padding: 0 12px;
 
   :host-context(.dark) & {

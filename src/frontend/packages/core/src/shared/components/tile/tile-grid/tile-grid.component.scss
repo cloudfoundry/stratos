@@ -1,5 +1,6 @@
 app-tile-grid {
   display: grid;
+  grid-template-columns: 1fr;
   grid-auto-rows: min-content;
   gap: 1.5rem;
   overflow-y: auto;

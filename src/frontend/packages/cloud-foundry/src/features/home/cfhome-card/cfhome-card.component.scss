@@ -1,3 +1,8 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
 .cf-home-card {
   &__plain-tiles {
     display: flex !important;
