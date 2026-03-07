@@ -159,23 +159,42 @@ Note: `sgs` creates security groups the first time, upgrades do not use `sgs`.
 
 ## Packaging
 
-Golang is required, and version 1.21 is recommended as this is the version used by the Stratos build system.
+Requires `node`, `go`, and `zip`.
 
-When you want to build the `4.8.1` tag in
-[Stratos UI releases](https://github.com/cloudfoundry/stratos/releases),
-run this command:
+Build and package for all targets (linux/amd64, linux/arm64):
 
 ```bash
-./bin/package
+bin/package
 ```
-OR to package a specific tag
+
+To skip the build step and package from existing artifacts:
+
 ```bash
-TAG="4.8.1" ./bin/package
+bin/package --skip-build
+```
+
+To override the version (default: from `package.json`):
+
+```bash
+VERSION="4.8.1" bin/package
+```
+
+This produces per-target zips in `dist/`:
+
+```
+dist/stratos-cf-<version>-<os>-<arch>.zip
+```
+
+Deploy with:
+
+```bash
+cf push -f dist/cf-package-<os>-<arch>/manifest.yml \
+  -p dist/stratos-cf-<version>-<os>-<arch>.zip
 ```
 
 ### NOTE
-The original code for this feature can be found in the
-[Orange Cloud foundry Github Repository](https://github.com/orange-cloudfoundry/stratos-ui-cf-packager/). 
+The original packaging code was based on work from the
+[Orange Cloud Foundry Github Repository](https://github.com/orange-cloudfoundry/stratos-ui-cf-packager/).
 Many thanks to Benjamin & Arthur, we appreciate you both!
 
 ## License
