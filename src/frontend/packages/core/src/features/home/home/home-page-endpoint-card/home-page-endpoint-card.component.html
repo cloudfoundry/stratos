@@ -54,7 +54,7 @@
         }
       </div>
       @if (!fullView) {
-        <div class="w-80 border-l sidebar-panel" [class.w-64]="layout && layout.x < 3">
+        <div class="border-l sidebar-panel" [class.w-80]="!layout || layout.x <= 1" [class.w-48]="layout && layout.x === 2" [class.w-64]="layout && layout.x >= 3">
           @if (links$ | async; as links) {
             <div class="p-6">
               <div class="flex items-center justify-between mb-4">
