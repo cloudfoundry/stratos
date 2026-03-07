@@ -77,9 +77,16 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
     return this.pLayout;
   }
 
+  // Raw grid layout before columnSpan adjustment
+  private rawLayout: HomePageCardLayout;
+
   @Input() set layout(value: HomePageCardLayout) {
     if (value) {
-      this.pLayout = value;
+      this.rawLayout = value;
+      // Compute effective layout accounting for columnSpan
+      const span = this.definition?.homeCard?.columnSpan || 1;
+      const effectiveX = Math.max(1, value.x - span + 1);
+      this.pLayout = new HomePageCardLayout(effectiveX, value.y);
     }
     this.updateLayout();
   }
@@ -216,7 +223,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
 
   // Layout has changed
   public updateLayout() {
-    this._layout.set(this.layout);
+    this._layout.set(this.pLayout);
     if (this.ref && this.ref.instance) {
       this.ref.instance.layout = this.pLayout;
     }

@@ -74,6 +74,7 @@ export interface HomeCardMetadata {
   component?: (compiler: Compiler, injector: Injector) => Promise<ComponentFactory<HomePageEndpointCard>>;
   shortcuts?: (endpointID: string) => HomeCardShortcut[];
   fullView?: boolean;
+  columnSpan?: number;
 }
 
 /**

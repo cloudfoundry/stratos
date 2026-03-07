@@ -411,17 +411,25 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
         return !!defn.definition.homeCard;
       })),
       map(eps => {
+        // Count how many endpoints need wide cards (columnSpan > 1)
+        const wideCount = eps.filter(ep => {
+          const defn = entityCatalog.getEndpoint(ep.cnsi_type, ep.sub_type);
+          return (defn.definition.homeCard?.columnSpan || 1) > 1;
+        }).length;
+
+        // If most cards are wide, cap at 2 columns to avoid empty gaps
+        const mostlyWide = wideCount > eps.length / 2;
+
         switch (eps.length) {
           case 1:
             return this.getLayout(1, 1);
           case 2:
             return this.getLayout(1, 2);
           case 3:
-            return this.getLayout(2, 2);
           case 4:
             return this.getLayout(2, 2);
           default:
-            return this.getLayout(3, 2);
+            return this.getLayout(mostlyWide ? 2 : 3, 2);
         }
       })
     );
@@ -438,6 +446,13 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
   trackByEndpointGuid(index: number, endpoint: EndpointModel): string {
     return endpoint?.guid ?? index.toString();
+  }
+
+  // Get effective column span for an endpoint, clamped to available columns
+  getEffectiveSpan(ep: EndpointModel): number {
+    const defn = entityCatalog.getEndpoint(ep.cnsi_type, ep.sub_type);
+    const declared = defn?.definition?.homeCard?.columnSpan || 1;
+    return Math.min(declared, this.columns || 1);
   }
 
   // Dropdown menu helpers

@@ -50,7 +50,7 @@
       [class.columns-3]="columns === 3"
       #endpointsPanel>
       @for (ep of endpoints$ | async; track ep?.guid ?? $index) {
-        <div #endpointElements class="home-grid-item">
+        <div #endpointElements class="home-grid-item" [style.grid-column]="'span ' + getEffectiveSpan(ep)">
           <app-home-page-endpoint-card (loaded)="cardLoaded()" [layout]="layout()" [endpoint]="ep">
           </app-home-page-endpoint-card>
         </div>
