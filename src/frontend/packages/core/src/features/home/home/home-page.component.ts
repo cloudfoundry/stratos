@@ -357,13 +357,16 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     });
   }
 
-  // Order the endpoint cards - we always show all endpoints, order is:
+  // Order the endpoint cards:
   // 1. Endpoint has been added as a favourite
   // 2. Endpoint that has child favourites
   // 3. Remaining endpoints
+  // Within each group, sort by renderPriority (lower = first)
   private orderEndpoints(endpoints: EndpointModel[], favorites: IUserFavoritesGroups, showMode: boolean): EndpointModel[] {
     const processed: Record<string, boolean> = {};
-    const result: EndpointModel[] = [];
+    const directFavs: EndpointModel[] = [];
+    const childFavs: EndpointModel[] = [];
+    const rest: EndpointModel[] = [];
     const epMap: Record<string, EndpointModel> = {};
     endpoints.forEach(ep => epMap[ep.guid] = ep);
 
@@ -372,7 +375,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
         const id = favorites[fav].endpoint.endpointId;
         if (!!epMap[id] && !processed[id]) {
           processed[id] = true;
-          result.push(epMap[id]);
+          directFavs.push(epMap[id]);
         }
       }
     });
@@ -382,7 +385,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
         const id = favorites[fav].endpoint.endpointId;
         if (!!epMap[id] && !processed[id]) {
           processed[id] = true;
-          result.push(epMap[id]);
+          childFavs.push(epMap[id]);
         }
       }
     });
@@ -391,12 +394,22 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
       endpoints.forEach(ep => {
         if (!processed[ep.guid]) {
           processed[ep.guid] = true;
-          result.push(ep);
+          rest.push(ep);
         }
       });
     }
 
-    return result;
+    const byPriority = (a: EndpointModel, b: EndpointModel) => {
+      const pa = entityCatalog.getEndpoint(a.cnsi_type, a.sub_type)?.definition?.renderPriority ?? 1000;
+      const pb = entityCatalog.getEndpoint(b.cnsi_type, b.sub_type)?.definition?.renderPriority ?? 1000;
+      return pa - pb;
+    };
+
+    return [
+      ...directFavs.sort(byPriority),
+      ...childFavs.sort(byPriority),
+      ...rest.sort(byPriority),
+    ];
   }
 
   // Automatic layout - select the best layout based on the available endpoints
