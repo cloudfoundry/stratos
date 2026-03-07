@@ -196,11 +196,16 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
 
   public updateLayout() {
     const currentRows = this.recentAppsRows;
-    this.recentAppsRows = this.layout.y > 1 ? 5 : 10;
 
     // Hide recent apps if more than 2 columns
     if (this.layout.x > 2) {
       this.recentAppsRows = 0;
+    } else if (this.layout.y > 1) {
+      this.recentAppsRows = 5;
+    } else if (this.layout.x === 2) {
+      this.recentAppsRows = 7;
+    } else {
+      this.recentAppsRows = 10;
     }
 
     // If the layout changes and there are apps to show then we need to fetch the app stats for them
@@ -211,6 +216,8 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
 
     // Only show the deploy app tiles in the full view
     this.showDeployAppTiles = this.layout.x === 1 && this.layout.y === 1;
+
+    this.cdr.markForCheck();
   }
 
   // Fetch the app stats - we fetch two at a time
