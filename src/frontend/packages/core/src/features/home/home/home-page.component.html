@@ -51,7 +51,7 @@
       #endpointsPanel>
       @for (ep of endpoints$ | async; track ep?.guid ?? $index) {
         <div #endpointElements class="home-grid-item">
-          <app-home-page-endpoint-card (loaded)="cardLoaded()" [layout]="layout$ | async" [endpoint]="ep">
+          <app-home-page-endpoint-card (loaded)="cardLoaded()" [layout]="layout()" [endpoint]="ep">
           </app-home-page-endpoint-card>
         </div>
       }
