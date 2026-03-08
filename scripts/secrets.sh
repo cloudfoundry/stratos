@@ -69,7 +69,7 @@ cmd_decrypt() {
   [ -f "$SOPS_FILE" ] || die "Encrypted secrets file not found: $SOPS_FILE"
 
   local age_keys
-  age_keys=$(resolve_age_key_file) || die "age key file not found. Set SOPS_AGE_KEY_FILE or run: age-keygen -o \"\$(sops age-key-file-path)\""
+  age_keys=$(resolve_age_key_file) || die "age key file not found. Set SOPS_AGE_KEY_FILE or generate a keypair with: age-keygen"
 
   SOPS_AGE_KEY_FILE="$age_keys" sops --decrypt "${SOPS_COMMON[@]}" "$SOPS_FILE"
 }
