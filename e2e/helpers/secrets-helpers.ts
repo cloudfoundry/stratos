@@ -6,26 +6,42 @@ import * as path from 'path';
  * Secrets Helper
  * Migrated from Protractor secrets management
  * Loads and provides access to E2E test secrets from secrets.yaml
+ *
+ * Secrets are resolved in priority order:
+ *   1. STRATOS_SECRETS env var (raw YAML content — never touches disk)
+ *   2. secrets.yaml file on disk (legacy fallback)
  */
 export class SecretsHelper {
   private static SECRETS_FILE = 'secrets.yaml';
 
   /**
-   * Load secrets from secrets.yaml file
-   * Throws error if file doesn't exist or is invalid
+   * Load secrets from env var or secrets.yaml file
+   * Priority: STRATOS_SECRETS env var > secrets.yaml file
+   * Throws error if neither source is available
    */
   static load() {
+    const envSecrets = process.env.STRATOS_SECRETS;
+    if (envSecrets) {
+      return SecretsHelper.parse(envSecrets);
+    }
+
     const secretsPath = path.join(process.cwd(), this.SECRETS_FILE);
 
     if (!fs.existsSync(secretsPath)) {
       throw new Error(
-        `Secrets file not found at ${secretsPath}.\n` +
-        `Please provide a secrets.yaml file. See e2e/secrets.yaml.example as reference.`
+        'No secrets found. Set STRATOS_SECRETS env var or provide secrets.yaml.\n' +
+        'See e2e/secrets.yaml.template for the expected format.'
       );
     }
 
+    return SecretsHelper.parse(
+      fs.readFileSync(secretsPath, 'utf8')
+    );
+  }
+
+  private static parse(content: string) {
     try {
-      const secrets = yaml.load(fs.readFileSync(secretsPath, 'utf8')) as any;
+      const secrets = yaml.load(content) as any;
 
       return {
         // Console user credentials
@@ -56,7 +72,7 @@ export class SecretsHelper {
         raw: secrets,
       };
     } catch (e) {
-      throw new Error(`Invalid secrets.yaml configuration file: ${e}`);
+      throw new Error(`Invalid secrets configuration: ${e}`);
     }
   }
 
