@@ -6,8 +6,15 @@ module.exports = {
   favicon: 'img/favicon.ico',
   organizationName: 'cloudfoundry',
   onBrokenLinks: 'warn',
-  onBrokenMarkdownLinks: 'warn',
   projectName: 'stratos',
+  // Parse .md files as plain Markdown (not MDX) to avoid JSX errors
+  // in auto-generated docs like contributing.md
+  markdown: {
+    format: 'detect',
+    hooks: {
+      onBrokenMarkdownLinks: 'warn',
+    },
+  },
   themeConfig: {
     navbar: {
       title: 'STRATOS',
@@ -15,11 +22,13 @@ module.exports = {
         alt: 'Stratos',
         src: 'img/logo.png',
       },
-      items: [{
-        type: 'docsVersionDropdown',
-        position: 'right',
-        dropdownItemsAfter: [{to: '/versions', label: 'All versions'}],
-      },
+      items: [
+      // Uncomment when versioned_docs are generated
+      // {
+      //   type: 'docsVersionDropdown',
+      //   position: 'right',
+      //   dropdownItemsAfter: [{to: '/versions', label: 'All versions'}],
+      // },
       {
         to: 'docs/introduction',
         activeBasePath: 'docs',
