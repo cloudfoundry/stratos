@@ -1,8 +1,7 @@
 ---
 id: introduction
 title: Introduction
-slug: /
-sidebar_label: Introduction 
+sidebar_label: Introduction
 ---
 
 Stratos is an Open Source Web-based UI for Cloud Foundry and Kubernetes.
