@@ -8,24 +8,20 @@ packages to the console.
 ## Overview
 
 ```
-Frontend packages                   Backend plugins
-(Angular/TypeScript)                (Go)
-┌──────────────────┐                ┌──────────────────┐
-│ cloud-foundry    │──declares───>  │ cloudfoundry     │
-│                  │                │ cfapppush        │
-│                  │                │ cfappssh         │
-│                  │                │ userinvite       │
-├──────────────────┤                ├──────────────────┤
-│ kubernetes       │──declares───>  │ kubernetes       │
-│                  │                │ analysis         │
-│                  │                │ monocular        │
-├──────────────────┤                ├──────────────────┤
-│ cf-autoscaler    │──declares───>  │ autoscaler       │
-└──────────────────┘                └──────────────────┘
-
-    prebuild step
-    ─────────────────────────────────────────────>
-    scans package.json → generates extra_plugins.go
+plugin-config.yaml (single source of truth)
+┌──────────────────────────────────────────┐
+│ plugins:                                 │
+│   - cloudfoundry                         │
+│   - cfapppush, cfappssh, userinvite      │
+│   - autoscaler                           │
+│   - kubernetes, analysis, monocular      │
+└──────────┬──────────────────┬────────────┘
+           │                  │
+     go generate        frontend prebuild
+           │                  │
+           ▼                  ▼
+    extra_plugins.go   extra_plugins.go
+    (backend build)    (frontend build)
 ```
 
 ## Backend Plugins
@@ -99,7 +95,8 @@ Two Go files control which plugins are compiled into the binary:
 | File | Purpose | Maintained by |
 |------|---------|---------------|
 | `src/jetstream/default_plugins.go` | Core plugins always included | Developer (manual) |
-| `src/jetstream/extra_plugins.go` | Feature plugins from frontend packages | Build system (auto-generated) |
+| `src/jetstream/extra_plugins.go` | Feature plugins from plugin-config.yaml | Build system (auto-generated) |
+| `src/jetstream/plugin-config.yaml` | Extra plugin list (single source of truth) | Developer (manual) |
 
 **`default_plugins.go`** — hardcoded imports for plugins that every
 deployment needs regardless of which frontend packages are enabled:
@@ -216,9 +213,9 @@ writing Go code.
 
 ## Frontend Integration
 
-### Declaring Backend Dependencies
+### Frontend Package Metadata
 
-Frontend packages declare which backend plugins they require in their
+Frontend packages declare their Angular integration metadata in
 `package.json` under the `stratos` key:
 
 ```json
@@ -227,8 +224,7 @@ Frontend packages declare which backend plugins they require in their
   "stratos": {
     "module": "CloudFoundryPackageModule",
     "routingModule": "CloudFoundryRoutingModule",
-    "theming": "sass/_all-theme#apply-theme-stratos-cloud-foundry",
-    "backend": ["cloudfoundry", "cfapppush", "cfappssh", "userinvite"]
+    "theming": "sass/_all-theme#apply-theme-stratos-cloud-foundry"
   }
 }
 ```
@@ -239,79 +235,59 @@ The `stratos` metadata fields are:
 |-------|---------|
 | `module` | Angular standalone module class name |
 | `routingModule` | Routing module for lazy-loaded routes |
-| `backend` | Array of backend plugin names required by this package |
 | `theming` | SASS theme file and mixin to apply |
 | `assets` | Asset configuration |
 
-### Frontend Package to Backend Plugin Mapping
+Backend plugin declarations are managed centrally in
+`src/jetstream/plugin-config.yaml`, not in individual package.json
+files.
 
-| Frontend Package | Backend Plugins |
-|------------------|----------------|
-| `@stratosui/cloud-foundry` | cloudfoundry, cfapppush, cfappssh, userinvite |
-| `@stratosui/kubernetes` | analysis, kubernetes, monocular |
-| `@stratosui/cf-autoscaler` | autoscaler |
-| `@stratosui/desktop-extensions` | desktop |
-| `@stratosui/core` | (none — base package) |
-| `@stratosui/store` | (none) |
-| `@stratosui/git` | (none) |
-| `@stratosui/theme` | (none) |
+## Plugin Configuration
 
-## Cross-Build Dependency
+The list of extra plugins is defined in
+`src/jetstream/plugin-config.yaml`, which serves as the single source
+of truth for both the backend and frontend builds.
 
-The frontend and backend builds are coupled through
-`src/jetstream/extra_plugins.go`. The frontend prebuild step must run
-before the Go backend can compile.
+### Backend Build (go generate)
 
-### How It Works
+The backend uses a standard `go generate` directive to produce
+`extra_plugins.go` from `plugin-config.yaml`:
 
-1. The **build orchestrator** (`build/build-orchestrator.js`) runs as
-   the npm `prebuild` hook, before the Angular build starts.
+```
+cd src/jetstream && go generate ./...
+  └── cmd/gen-plugins/main.go
+        → reads plugin-config.yaml
+        → validates plugin dirs exist
+        → writes extra_plugins.go
+```
 
-2. Its first tool, the **Backend Plugin Generator**
-   (`src/frontend/packages/devkit/src/backend.ts`), instantiates
-   `StratosConfig` which scans all frontend `package.json` files.
+The Makefile's `build-backend` target runs `go generate` automatically
+before `go build`.
 
-3. For each package with a `stratos.backend` array, the generator
-   collects the plugin names, validates that each corresponding
-   directory exists in `src/jetstream/plugins/`, and writes the Go
-   import statements to `extra_plugins.go`.
+### Frontend Build (prebuild)
 
-4. The **Go build** then compiles `extra_plugins.go` along with the
-   rest of Jetstream. The blank imports trigger each plugin's `init()`
-   function, which registers the plugin via `api.AddPlugin()`.
-
-### Build Sequence
+The frontend prebuild pipeline also reads `plugin-config.yaml` to
+generate the same `extra_plugins.go`:
 
 ```
 npm prebuild
   └── build-orchestrator.js
-        └── backend.ts → scans package.json files
+        └── backend.ts → reads plugin-config.yaml
                         → validates plugin dirs exist
                         → writes extra_plugins.go
 
 npm build (ng build)
   └── Angular CLI compiles frontend
-
-make build-backend
-  └── go build (consumes extra_plugins.go)
 ```
 
-### Decoupling Options
+### Decoupled Builds
 
-The current design requires Node.js to generate a Go source file.
-Approaches to decouple the builds:
+Either build can run independently. The backend only needs Go tooling
+(`go generate ./...`). The frontend prebuild reads the same YAML file
+with Node.js. Both produce identical `extra_plugins.go` output.
 
-1. **Standalone shell generator** — A shell script using `jq` to parse
-   `stratos.backend` arrays from `package.json` and emit the Go file.
-   Removes the Node.js dependency for backend-only builds.
-
-2. **Move plugin list to backend config** — Define enabled plugins in a
-   backend-owned file (e.g., `plugins.yaml` or a Go build tag system).
-   Both frontend and backend read from this single source of truth.
-
-3. **Commit the generated file** — Check `extra_plugins.go` into source
-   control and update it manually when plugins change. Simplest but
-   risks getting out of sync.
+The `stratos.yaml` `backend` key is still supported as an override
+mechanism for custom builds.
 
 ## Creating a New Plugin
 
@@ -370,20 +346,20 @@ func (p *MyPlugin) getData(c echo.Context) error {
 }
 ```
 
-### Connecting to a Frontend Package
+### Enabling an Extra Plugin
 
-Add the backend dependency to your frontend package's `package.json`:
+Add the plugin name to `src/jetstream/plugin-config.yaml`:
 
-```json
-{
-  "stratos": {
-    "backend": ["myplugin"]
-  }
-}
+```yaml
+plugins:
+  - cloudfoundry
+  - cfapppush
+  # ...
+  - myplugin
 ```
 
-The prebuild step will automatically pick this up and add the import
-to `extra_plugins.go` on the next build.
+Run `go generate ./...` from `src/jetstream/` to regenerate
+`extra_plugins.go`.
 
 ### Adding a Default Plugin
 
@@ -417,8 +393,11 @@ For simple token-authenticated endpoints, add an entry to
 | `src/jetstream/load_plugins.go` | Plugin loader with dependency resolution |
 | `src/jetstream/default_plugins.go` | Hardcoded default plugin imports |
 | `src/jetstream/extra_plugins.go` | Auto-generated plugin imports (do not edit) |
+| `src/jetstream/plugin-config.yaml` | Extra plugin list (single source of truth) |
+| `src/jetstream/generate.go` | `go:generate` directive for extra_plugins.go |
+| `src/jetstream/cmd/gen-plugins/main.go` | Go generator that reads plugin-config.yaml |
 | `src/jetstream/plugins.yaml` | YAML config for runtime-generated endpoint types |
 | `src/jetstream/plugins/yamlgenerated/main.go` | YAML plugin generator |
-| `src/frontend/packages/devkit/src/backend.ts` | Prebuild script that generates extra_plugins.go |
-| `src/frontend/packages/devkit/src/lib/stratos.config.ts` | Config parser that reads stratos metadata from package.json |
+| `src/frontend/packages/devkit/src/backend.ts` | Prebuild script that generates extra_plugins.go from plugin-config.yaml |
+| `src/frontend/packages/devkit/src/lib/stratos.config.ts` | Config parser that reads stratos/package metadata |
 | `build/build-orchestrator.js` | Prebuild pipeline orchestrator |
