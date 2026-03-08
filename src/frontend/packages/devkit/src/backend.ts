@@ -29,7 +29,20 @@ const backendPluginsFile = path.join(backendFolder, 'extra_plugins.go');
 console.log('Reading backend plugin list from plugin-config.yaml');
 
 const configData = yaml.load(fs.readFileSync(configFile, 'utf8')) as { plugins: string[] };
-const backendPlugins: string[] = configData.plugins || [];
+const plugins: Record<string, boolean> = {};
+(configData.plugins || []).forEach(name => { plugins[name] = true; });
+
+// Merge stratos.yaml backend overrides if present
+const stratosYaml = path.join(rootDir, 'stratos.yaml');
+if (fs.existsSync(stratosYaml)) {
+  const stratosConfig = yaml.load(fs.readFileSync(stratosYaml, 'utf8')) as { backend?: string[] };
+  if (stratosConfig && stratosConfig.backend) {
+    console.log('Merging backend overrides from stratos.yaml');
+    stratosConfig.backend.forEach(name => { plugins[name] = true; });
+  }
+}
+
+const backendPlugins: string[] = Object.keys(plugins);
 
 fs.writeFileSync(backendPluginsFile, 'package main\n\n');
 fs.appendFileSync(backendPluginsFile, '// This file is auto-generated - DO NOT EDIT\n\n');
