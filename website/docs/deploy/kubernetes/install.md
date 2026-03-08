@@ -26,7 +26,7 @@ Check the repository was successfully added by searching for the `console`, for 
 ```
 helm search repo console
 NAME               	CHART VERSION   APP VERSION	DESCRIPTION                                  
-stratos/console    	3.2.0           3.2.0      	A Helm chart for deploying Stratos UI Console
+stratos/console    	4.3.0           4.3.0      	A Helm chart for deploying Stratos UI Console
 ```
 
 > Note: Version numbers will depend on the version of Stratos available from the Helm repository
@@ -62,6 +62,8 @@ The following table lists the configurable parameters of the Stratos Helm chart 
 |imagePullPolicy|Image pull policy|IfNotPresent|
 |console.sessionStoreSecret|Secret to use when encrypting session tokens|auto-generated random value|
 |console.ssoLogin|Whether to enable SSO Login and use the UAA Login UI instead of the built-in one|false|
+|console.ssoOptions|Advanced options to customize the SSO experience||
+|console.ssoAllowList|List of permitted redirect URLs for SSO authentication||
 |console.backendLogLevel|Log level for backend (info, debug)|info|
 |console.service.externalIPs|External IPs to add to the console service|[]|
 |console.service.loadBalancerIP|IP address to assign to the load balancer for the metrics service (if supported)||
@@ -70,15 +72,16 @@ The following table lists the configurable parameters of the Stratos Helm chart 
 |console.service.servicePort|Service port for the console service|443|
 |console.service.externalName|External name for the console service when service type is ExternalName||
 |console.service.nodePort|Node port to use for the console service when service type is NodePort or LoadBalancer||
-|console.ingress.enabled|Enable ingress for the console service|false|
-|console.ingress.host|Host for the ingress resource|||
-|console.ingress.secretName|Name of an existing secret containing the TLS certificate for ingress|||
+|console.service.ingress.enabled|Enable ingress for the console service|false|
+|console.service.ingress.host|Host for the ingress resource|||
+|console.service.ingress.secretName|Name of an existing secret containing the TLS certificate for ingress|||
 |console.service.http.enabled|Enabled HTTP access to the console service (as well as HTTPS)|false|
 |console.service.http.servicePort|Service port for HTTP access to the console service when enabled|80|
 |console.service.http.nodePort|Node port for HTTP access to the console service (as well as HTTPS)||
 |console.templatesConfigMapName|Name of config map that provides the template files for user invitation emails||
 |console.userInviteSubject|Email subject of the user invitation message||
 |console.techPreview|Enable/disable Tech Preview features|false|
+|console.apiKeysEnabled|Enable/disable API key-based access to Stratos API (disabled, admin_only, all_users)|admin_only|
 |console.userEndpointsEnabled|Enable/disable user endpoints or let only admins view and manage user endpoints (disabled, admin_only, enabled)|disabled|
 |console.ui.listMaxSize|Override the default maximum number of entities that a configured list can fetch. When a list meets this amount additional pages are not fetched||
 |console.ui.listAllowLoadMaxed|If the maximum list size is met give the user the option to fetch all results|false|
@@ -92,6 +95,7 @@ The following table lists the configurable parameters of the Stratos Helm chart 
 |console.mariadb.host|Hostname of the database when using an external db||
 |console.mariadb.port|Port of the database when using an external db|3306|
 |console.mariadb.tls|TLS mode when connecting to database (true, false, skip-verify, preferred)|false|
+|console.artifactHubDisabled|Disable the Helm Artifact Hub Endpoint|false|
 |uaa.endpoint|URL of the UAA endpoint to authenticate with ||
 |uaa.consoleClient|Client to use when authenticating with the UAA|cf|
 |uaa.consoleClientSecret|Client secret to use when authenticating with the UAA||
@@ -120,9 +124,15 @@ The following table lists the configurable parameters of the Stratos Helm chart 
 |console.service.extraLabels|Additional labels to be added to all service resources||
 |console.service.ingress.annotations|Annotations to be added to the ingress resource||
 |console.service.ingress.extraLabels|Additional labels to be added to the ingress resource||
+|console.sslProtocols|SSL Protocols to use for the nginx configuration|TLSv1.2 TLSv1.3|
+|console.sslCiphers|SSL Ciphers to use for the nginx configuration|HIGH:!aNULL:!MD5|
 |console.nodeSelector|Node selectors to use for the console Pod||
 |mariadb.nodeSelector|Node selectors to use for the database Pod||
 |configInit.nodeSelector|Node selectors to use for the configuration Pod||
+|console.pspEnabled|Enable Pod Security Policies. Set this to true if you cluster is configured with PSPs enabled|false|
+|console.pspName|Name of an existing Pod Security Policy to use instead of the one created by the chart when PSPs are enabled||
+|console.pspAnnotations|Annotations to be added to all pod security policy resources||
+|console.pspExtraLabels|Additional labels to be added to all pod security policy resources||
 
 ## Accessing the Console
 
@@ -191,6 +201,32 @@ helm install my-console stratos/console --namespace=console --set console.servic
 
 ## Using an Ingress Controller
 
+### Bare minimum Stratos deployment with an Ingress
+
+1. Deploy `ingress-nginx` Ingress controller into your Kubernetes cluster using the [Helm chart](https://artifacthub.io/packages/helm/ingress-nginx/ingress-nginx) or [Kubernetes spec files](https://kubernetes.github.io/ingress-nginx/deploy/).
+2. Create `values.yaml` with the following Stratos Helm chart configuration values:
+```
+console:
+  service:
+    ingress:
+      enabled: true
+```
+3. Install Stratos:
+```
+helm repo add stratos https://cloudfoundry.github.io/stratos
+kubectl create namespace console
+helm install my-console stratos/console --namespace=console --values values.yaml
+```
+4. Obtain Ingress address by running `kubectl get ingress --namespace=console`, your Stratos installation should be accessible at that address.
+
+Note that configuration above would result in a deployment with self-signed HTTPS certificates and Stratos service being a default backend for the Ingress. The following steps most likely would be required for a production deployment:
+
+1. Acquire a static IP address for the Ingress.
+2. Assign a domain name to the static IP via a DNS record and set `console.service.ingress.host` value.
+3. Create a Kubernetes secret containing valid HTTPS certificates for the domain and set `console.service.ingress.secretName` value.
+
+### Ingress configuration
+
 If your Kubernetes Cluster supports Ingress, you can expose Stratos through Ingress by supplying the appropriate ingress configuration when installing.
 
 This configuration is described below:
@@ -203,7 +239,7 @@ This configuration is described below:
 |console.service.ingress.host|The host name that will be used for the Stratos service.||
 |console.service.ingress.secretName|The existing TLS secret that contains the certificate for ingress.||
 
-You must provide `console.service.ingress.host` when enabling ingress.
+If `console.service.ingress.host` isn't provided, Stratos service will be used as the default backend.
 
 By default a certificate will be generated for TLS. You can provide your own certificate by creating a secret and specifying this with `console.service.ingress.secretName`.
 
@@ -315,7 +351,7 @@ helm install my-console stratos/console --namespace=console --set console.localA
 
 In some scenarios it is useful to be able to add custom annotations and/or labels to the Kubernetes resources that the Stratos Helm chart creates.
 
-The Stratos Helm chart exposes a number of Helm chart values that cabe specified in order to do this - they are:
+The Stratos Helm chart exposes a number of Helm chart values that can be specified in order to do this - they are:
 
 |Parameter|Description|Default|
 |----|---|---|
