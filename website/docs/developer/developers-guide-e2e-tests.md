@@ -53,10 +53,10 @@ For disconnected environments, decrypt the SOPS-encrypted file into an env var:
 ```bash
 npm run e2e:offline
 # or equivalently:
-STRATOS_SECRETS=$(sops -d secrets.yaml.enc) npm run e2e
+STRATOS_SECRETS=$(./scripts/secrets.sh decrypt) npm run e2e
 ```
 
-Prerequisites: `sops` and `age` installed, age keypair at `~/.config/sops/age/keys.txt`. Create the encrypted file with `./scripts/secrets.sh encrypt`.
+Prerequisites: `sops` and `age` installed, age keypair in the platform default location (macOS: `~/Library/Application Support/sops/age/keys.txt`, Linux: `~/.config/sops/age/keys.txt`) or `SOPS_AGE_KEY_FILE` set. Create the encrypted file with `./scripts/secrets.sh encrypt`.
 
 #### Option 3: secrets.yaml file (legacy — plaintext on disk)
 

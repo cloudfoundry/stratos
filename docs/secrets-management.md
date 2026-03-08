@@ -47,6 +47,20 @@ filesystem.
 **Legacy — secrets.yaml file:** Still supported as a last resort, but
 discouraged.
 
+### What are SOPS and age?
+
+**[age](https://github.com/FiloSottile/age)** is a simple, modern file
+encryption tool. It uses public-key cryptography: you encrypt with a public key
+(`age1...`) and decrypt with the corresponding private key. No passwords, no
+key servers, no configuration — just a keypair in a file.
+
+**[SOPS](https://github.com/getsops/sops)** (Secrets OPerationS) is a tool for
+encrypting structured files (YAML, JSON, ENV). Unlike full-file encryption,
+SOPS encrypts only the *values* while leaving keys and structure visible. This
+means you can `git diff` an encrypted file and see which fields changed, without
+exposing the actual secrets. SOPS uses age (or other backends like AWS KMS) for
+the actual cryptographic operations.
+
 ## Where Secrets Live in Bitwarden
 
 | Field | Convention | Example |
@@ -72,19 +86,50 @@ brew install bitwarden-cli sops age
 
 ### Generate age keypair
 
+Generate a keypair and store it where SOPS expects to find it:
+
 ```bash
-mkdir -p ~/.config/sops/age
-age-keygen -o ~/.config/sops/age/keys.txt
+# macOS (SOPS default location)
+mkdir -p "$HOME/Library/Application Support/sops/age"
+age-keygen -o "$HOME/Library/Application Support/sops/age/keys.txt"
+
+# Linux (XDG default)
+mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}/sops/age"
+age-keygen -o "${XDG_CONFIG_HOME:-$HOME/.config}/sops/age/keys.txt"
 ```
 
-Save the public key (`age1...`) — you will need it for `.sops.yaml`.
+You can also set `SOPS_AGE_KEY_FILE` to point to any location.
+
+Save the public key (`age1...`) printed during generation — you will need it
+for `.sops.yaml`.
 
 ### Store secrets in Bitwarden
 
-1. Open the Bitwarden vault (web or desktop)
-2. Create a Secure Note named `stratos-e2e-secrets`
-3. Paste the YAML content (see `e2e/secrets.yaml.template` for the format)
-4. Save in the appropriate collection
+You can create the Secure Note via the web/desktop app or the CLI:
+
+```bash
+# Create from the template (edit with actual values afterwards)
+./scripts/secrets.sh create-note
+
+# Or from an existing secrets.yaml file
+./scripts/secrets.sh create-note secrets.yaml
+```
+
+Then edit the note contents with your actual credentials (web UI or
+`bw edit item <id>`).
+
+### Bitwarden session management
+
+> **Important:** `bw unlock` creates a session token (`BW_SESSION`) that is
+> local to the current shell. Every new terminal needs its own
+> `export BW_SESSION=...`. The `bw unlock --check` command also requires
+> `BW_SESSION` to be set — without it, the vault always appears locked even
+> if you unlocked it in another terminal.
+>
+> ```bash
+> export BW_SESSION=$(bw unlock --raw)
+> # This session is only valid in this shell
+> ```
 
 ### Validate setup
 
@@ -117,7 +162,7 @@ exec my-command "$@"
 
 ### 3. Set up SOPS for offline use
 
-Create `.sops.yaml` in the project root:
+Create `.sops.yaml` in the project root to document your age public key:
 
 ```yaml
 creation_rules:
@@ -126,17 +171,28 @@ creation_rules:
       age1your_public_key_here
 ```
 
-Encrypt secrets:
+Encrypt secrets (using a temp file — SOPS does not reliably read from stdin):
 
 ```bash
-bw get notes "my-project-secrets" | sops --encrypt --age "age1..." /dev/stdin > secrets.yaml.enc
+tmpfile=$(mktemp)
+bw get notes "my-project-secrets" > "$tmpfile"
+SOPS_AGE_RECIPIENTS="age1..." sops --encrypt \
+  --input-type yaml --output-type yaml --config /dev/null \
+  "$tmpfile" > secrets.yaml.enc
+rm "$tmpfile"
 ```
 
 Decrypt to env var:
 
 ```bash
-export MY_PROJECT_SECRETS=$(sops -d secrets.yaml.enc)
+export MY_PROJECT_SECRETS=$(sops -d \
+  --input-type yaml --output-type yaml --config /dev/null \
+  secrets.yaml.enc)
 ```
+
+The `--config /dev/null` flag skips `.sops.yaml` matching (which fails on
+temp files). The `--input-type` and `--output-type` flags are needed because
+SOPS cannot always infer the format from the filename.
 
 ### 4. Gitignore all secrets artifacts
 
@@ -181,10 +237,12 @@ npm run e2e
 | Problem | Fix |
 |---------|-----|
 | `bw: command not found` | `brew install bitwarden-cli` |
-| `Vault is locked` | `bw unlock` and export `BW_SESSION` |
+| `Vault is locked` | `export BW_SESSION=$(bw unlock --raw)` — required per shell |
+| `Vault is locked` (after unlocking) | `BW_SESSION` is per-shell; re-export in each new terminal |
 | `Not logged in` | `bw login` |
 | `Item not found` | Verify the Secure Note name matches `stratos-e2e-secrets` |
 | `sops: command not found` | `brew install sops` |
-| `Failed to decrypt` | Ensure `~/.config/sops/age/keys.txt` exists and matches the public key in `.sops.yaml` |
 | `age-keygen: command not found` | `brew install age` |
+| `Failed to decrypt` / key not found | Ensure age `keys.txt` is in the platform default location or set `SOPS_AGE_KEY_FILE` |
+| `no matching creation rules` | Scripts use `--config /dev/null`; check you're using `scripts/secrets.sh` not raw `sops` |
 | `STRATOS_SECRETS is empty` | Check that `bw get notes` returns content; item may be empty |
