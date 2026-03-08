@@ -149,6 +149,7 @@ build-frontend-dev:
 build-backend:
 	@echo "$(BLUE)🔨 Building backend for $(CURRENT_PLATFORM)...$(NC)"
 	@mkdir -p $(BIN_DIR)
+	cd src/jetstream && go generate ./...
 	cd src/jetstream && \
 		go build \
 		-ldflags "-X main.appVersion=$(VERSION) -X main.buildDate=$(BUILD_DATE) -X main.gitCommit=$(GIT_COMMIT)" \

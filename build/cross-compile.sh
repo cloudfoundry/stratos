@@ -25,6 +25,8 @@ mkdir -p dist/bin
 
 cd src/jetstream
 
+go generate ./...
+
 for platform in "${PLATFORMS[@]}"; do
   GOOS=${platform%/*}
   GOARCH=${platform#*/}
