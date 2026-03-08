@@ -1,4 +1,7 @@
+# SOPS configuration — documents the age public key used for encryption.
+# scripts/secrets.sh uses --config /dev/null and passes --age explicitly,
+# so this file serves as a reference rather than being read by the scripts.
 creation_rules:
   - path_regex: secrets\.yaml\.enc$
     age: >-
-      age1TODO_REPLACE_WITH_YOUR_PUBLIC_KEY
+      age1c2de3wx3zzkjaznpsxpzrvuuv0vm9quhcv4f4swjdqc3zh9es5gs9ve4wp

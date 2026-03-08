@@ -72,7 +72,7 @@
     "e2e:dev": "STRATOS_E2E_BASE_URL=https://127.0.0.1:4200 playwright test",
     "e2e:local": "STRATOS_E2E_BASE_URL=https://127.0.0.1 playwright test",
     "e2e:bw": "scripts/secrets.sh run-e2e",
-    "e2e:offline": "STRATOS_SECRETS=$(sops -d secrets.yaml.enc) playwright test",
+    "e2e:offline": "STRATOS_SECRETS=$(scripts/secrets.sh decrypt) playwright test",
     "e2e:report": "playwright show-report e2e-reports/html",
     "climate": "codeclimate analyze $(git diff --name-only master)",
     "gate-check": "bun run lint && bun run test-headless",

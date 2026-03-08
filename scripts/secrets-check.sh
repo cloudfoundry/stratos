@@ -6,17 +6,36 @@ set -euo pipefail
 
 PASS=0
 FAIL=0
-AGE_KEY_FILE="${SOPS_AGE_KEY_FILE:-$HOME/.config/sops/age/keys.txt}"
+
+# Resolve age key file: SOPS_AGE_KEY_FILE > platform default
+resolve_age_key_file() {
+  if [ -n "${SOPS_AGE_KEY_FILE:-}" ]; then
+    echo "$SOPS_AGE_KEY_FILE"
+    return
+  fi
+  local xdg="${XDG_CONFIG_HOME:-}"
+  if [ -n "$xdg" ] && [ -f "$xdg/sops/age/keys.txt" ]; then
+    echo "$xdg/sops/age/keys.txt"
+  elif [ -f "$HOME/Library/Application Support/sops/age/keys.txt" ]; then
+    echo "$HOME/Library/Application Support/sops/age/keys.txt"
+  elif [ -f "$HOME/.config/sops/age/keys.txt" ]; then
+    echo "$HOME/.config/sops/age/keys.txt"
+  else
+    return 1
+  fi
+}
+
+AGE_KEY_FILE=$(resolve_age_key_file 2>/dev/null) || AGE_KEY_FILE="(not found)"
 
 check() {
   local label="$1"
   shift
   if "$@" >/dev/null 2>&1; then
     echo "  PASS  $label"
-    ((PASS++))
+    ((PASS++)) || true
   else
     echo "  FAIL  $label"
-    ((FAIL++))
+    ((FAIL++)) || true
   fi
 }
 
@@ -50,10 +69,10 @@ if [ "$FAIL" -gt 0 ]; then
   command -v bw   >/dev/null 2>&1 || echo "  brew install bitwarden-cli"
   command -v sops >/dev/null 2>&1 || echo "  brew install sops"
   command -v age  >/dev/null 2>&1 || echo "  brew install age"
-  [ -f "$AGE_KEY_FILE" ]         || echo "  age-keygen -o $AGE_KEY_FILE"
+  [ -f "$AGE_KEY_FILE" ] 2>/dev/null || echo "  age-keygen (then place keys.txt where sops expects it)"
   if command -v bw >/dev/null 2>&1; then
     bw login --check >/dev/null 2>&1   || echo "  bw login"
-    bw unlock --check >/dev/null 2>&1  || echo "  bw unlock"
+    bw unlock --check >/dev/null 2>&1  || echo "  bw unlock  (then export BW_SESSION — required for every shell)"
   fi
   exit 1
 fi
