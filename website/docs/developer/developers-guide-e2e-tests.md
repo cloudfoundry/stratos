@@ -30,9 +30,49 @@ The tests require an instance of Cloud Foundry with the following:
 To meet the above requirements we recommend running the Stratos CF E2E set up script which is kept up to date with the latest test requirements.
 More information can be found [below](#running-the-e2e-set-up-script).
 
-Before running the E2E tests, you need to create a file named `secrets.yaml` in the root of the Stratos folder. An example template is included in [e2e/secrets.yaml.example](https://github.com/cloudfoundry/stratos/blob/master/e2e/secrets.yaml.example) - copy this to `secrets.yaml` and edit accordingly.
+### Secrets Configuration
 
-If you want to run the tests in headless Chrome, add the following to the secrets file:
+E2E tests need credentials and endpoint URLs. There are three ways to provide them, listed in order of preference:
+
+#### Option 1: Bitwarden (recommended — no secrets on disk)
+
+Fetch secrets from Bitwarden and run tests in one step. Secrets only exist in process memory.
+
+```bash
+npm run e2e:bw
+# or equivalently:
+./scripts/secrets.sh run-e2e
+```
+
+Prerequisites: `bw` CLI installed, logged in, and vault unlocked. Secrets stored as a Bitwarden Secure Note named `stratos-e2e-secrets` (see `e2e/secrets.yaml.template` for the expected YAML format).
+
+#### Option 2: SOPS+age (offline fallback — encrypted on disk)
+
+For disconnected environments, decrypt the SOPS-encrypted file into an env var:
+
+```bash
+npm run e2e:offline
+# or equivalently:
+STRATOS_SECRETS=$(sops -d secrets.yaml.enc) npm run e2e
+```
+
+Prerequisites: `sops` and `age` installed, age keypair at `~/.config/sops/age/keys.txt`. Create the encrypted file with `./scripts/secrets.sh encrypt`.
+
+#### Option 3: secrets.yaml file (legacy — plaintext on disk)
+
+Copy the template and fill in your values:
+
+```bash
+cp e2e/secrets.yaml.template secrets.yaml
+# Edit secrets.yaml with your credentials
+npm run e2e
+```
+
+> **Note:** This leaves plaintext credentials on disk. Prefer Bitwarden or SOPS instead.
+
+See [docs/secrets-management.md](../../../docs/secrets-management.md) for the full secrets management guide.
+
+If you want to run the tests in headless Chrome, add the following to the secrets:
 
 ```
 headless: true
