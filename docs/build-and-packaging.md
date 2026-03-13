@@ -42,6 +42,30 @@ Single source of truth for building, testing, and packaging Stratos.
 | `make release github` | `make build all` | Create all release archives | `dist/release/` (7 archives) |
 | `make release` | All of the above | Create both CF zip and GitHub archives | Both |
 
+### Development
+
+| Command | What it does |
+|---------|-------------|
+| `make install` | Install dependencies (`bun install`) |
+| `make dev frontend` | Start frontend dev server with hot reload |
+| `make dev backend` | Start backend dev server |
+| `make stage` | Stage production build into `dist/install/` for local testing |
+
+### Clean
+
+| Command | What it does |
+|---------|-------------|
+| `make clean` | Remove all build output (frontend, backend, release artifacts) |
+| `make clean frontend` | Remove frontend build only (`dist/frontend/`, `.angular`) |
+| `make clean backend` | Remove backend binaries only (`dist/bin/`) |
+| `make clean all` | Remove everything including `node_modules` |
+
+### Diagnostics
+
+| Command | What it does |
+|---------|-------------|
+| `make dump version` | Print resolved semver, VCS metadata, and Go ldflags |
+
 ### Common Workflows
 
 **Local development:**
@@ -99,13 +123,19 @@ steps blocked packaging.
 
 | Old | New |
 |-----|-----|
-| `bin/package` | `make build && make release cf` |
+| `bin/package` | `make build all && make release cf` |
 | `bin/package --skip-build` | `make release cf` (validates artifacts exist) |
 | `build/package.sh` | `make release github` |
 | `make build-frontend` | `make build frontend` |
 | `make build-backend` | `make build backend` |
 | `make build-backend-all` | `make build backend-all` |
 | `make package` | `make release` |
+| `make dev-frontend` | `make dev frontend` |
+| `make dev-backend` | `make dev backend` |
+| `make install` (old) | `make install` (unchanged — installs dependencies) |
+| `make clean-dev` | `make clean` |
+| `make clean-deep` | `make clean all` |
+| `make debug-version` | `make dump version` |
 
 ## Version and Build Metadata
 
