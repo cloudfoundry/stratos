@@ -40,8 +40,9 @@ BUILD_VCS_ID_DATE := $(shell git log -1 --format=%cI 2>/dev/null || echo "unknow
 GO_LDFLAGS := -X main.appVersion=$(SEMVER_VERSION) -X main.buildDate=$(BUILD_DATE) -X main.gitCommit=$(BUILD_VCS_ID)
 
 # ── Introspection ─────────────────────────────────────────────
-.PHONY: debug-version
-debug-version:
+.PHONY: dump dump-version
+dump: dump-version
+dump-version:
 	@echo "SEMVER_VERSION    $(SEMVER_VERSION)"
 	@echo "SEMVER_MAJOR      $(SEMVER_MAJOR)"
 	@echo "SEMVER_MINOR      $(SEMVER_MINOR)"

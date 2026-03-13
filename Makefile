@@ -12,8 +12,13 @@
 #   make release                Release all targets (cf + github)
 #   make release cf             CF-pushable zip
 #   make release github         GitHub release archives
-#   make install                Stage for local testing
-#   make debug-version          Print resolved version variables
+#   make install                Install dependencies
+#   make stage                  Stage for local testing
+#   make clean                  Remove all build output
+#   make clean frontend         Remove frontend build only
+#   make clean backend          Remove backend binaries only
+#   make clean all              Remove everything (including node_modules)
+#   make dump version           Print resolved version variables
 #
 # See docs/build-and-packaging.md for full documentation.
 
@@ -91,8 +96,8 @@ ifeq ($(WANT_CF)$(WANT_GITHUB),)
 endif
 
 # No-op targets so modifiers don't error
-.PHONY: frontend backend backend-all all cf github
-frontend backend backend-all all cf github:
+.PHONY: frontend backend backend-all all cf github dist version
+frontend backend backend-all all cf github dist version:
 	@:
 
 # Dispatch helpers
@@ -211,15 +216,32 @@ vuln:
 	@which govulncheck > /dev/null || (echo "govulncheck not installed. Run: go install golang.org/x/vuln/cmd/govulncheck@latest" && exit 1)
 	cd src/jetstream && govulncheck ./... || true
 
+# ── Clean selection ────────────────────────────────────────────
+WANT_CLEAN_DIST :=
+HAVE_EXPLICIT_TARGET :=
+
+ifneq ($(filter frontend backend backend-all dist,$(MAKECMDGOALS)),)
+  HAVE_EXPLICIT_TARGET := yes
+endif
+ifneq ($(filter dist all,$(MAKECMDGOALS)),)
+  WANT_CLEAN_DIST := yes
+endif
+
 # ── Cleanup ───────────────────────────────────────────────────
-.PHONY: clean clean-dev clean-deep
-clean:
-	rm -rf $(DIST_DIR) .angular dist-devkit
+.PHONY: clean clean-fe clean-be clean-release clean-dist
+clean: $(call FE,clean-fe) $(call BE,clean-be,clean-be) $(if $(HAVE_EXPLICIT_TARGET),,clean-release) $(if $(WANT_CLEAN_DIST),clean-dist)
+
+clean-fe:
+	rm -rf $(DIST_DIR)/frontend .angular dist-devkit
+
+clean-be:
+	rm -rf $(DIST_DIR)/bin
 	cd src/jetstream && rm -f jetstream jetstream.exe jetstream.darwin
 
-clean-dev: clean
+clean-release:
+	rm -rf $(DIST_DIR)/release $(DIST_DIR)/cf-package $(DIST_DIR)/install $(DIST_DIR)/stratos-cf-*.zip
 
-clean-deep: clean
+clean-dist: clean-fe clean-be clean-release
 	rm -rf node_modules src/frontend/packages/*/node_modules
 
 # ── Deprecation helpers ───────────────────────────────────────
@@ -240,6 +262,18 @@ build-backend-all:
 package:
 	@echo "DEPRECATED: use 'make release' instead"
 	@$(MAKE) release
+
+clean-dev:
+	@echo "DEPRECATED: use 'make clean' instead"
+	@$(MAKE) clean
+
+clean-deep:
+	@echo "DEPRECATED: use 'make clean all' instead"
+	@$(MAKE) clean all
+
+debug-version:
+	@echo "DEPRECATED: use 'make dump version' instead"
+	@$(MAKE) dump version
 
 # ── Help ──────────────────────────────────────────────────────
 .PHONY: help
@@ -268,11 +302,15 @@ help:
 	@echo "  make install              Install dependencies (bun install)"
 	@echo "  make stage                Stage production build for local testing"
 	@echo ""
+	@echo "Clean:"
+	@echo "  make clean                Remove all build output"
+	@echo "  make clean frontend       Remove frontend build only"
+	@echo "  make clean backend        Remove backend binaries only"
+	@echo "  make clean all            Remove everything (including node_modules)"
+	@echo ""
 	@echo "Other:"
-	@echo "  make clean                Remove build artifacts"
-	@echo "  make clean-deep           Remove everything (including node_modules)"
 	@echo "  make security             Run security scans"
-	@echo "  make debug-version        Print version and build metadata"
+	@echo "  make dump version         Print version and build metadata"
 	@echo ""
 	@echo "Development:"
 	@echo "  make dev frontend         Start frontend dev server"
