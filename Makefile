@@ -1,340 +1,279 @@
-# Stratos Makefile - Simple, Powerful, Cross-Platform
-# Usage: make <target>
+# Stratos Makefile — verb + target pattern
+#
+# Usage:
+#   make build                  Build frontend + backend (current platform)
+#   make build frontend         Build frontend only
+#   make build backend          Build backend only (current platform)
+#   make build backend-all      Cross-compile backend for 6 platforms
+#   make build all              Frontend + cross-compile all backends
+#   make test                   Run all tests
+#   make test frontend          Frontend tests only
+#   make test backend           Backend tests only
+#   make release                Release all targets (cf + github)
+#   make release cf             CF-pushable zip
+#   make release github         GitHub release archives
+#   make install                Stage for local testing
+#   make debug-version          Print resolved version variables
+#
+# See docs/build-and-packaging.md for full documentation.
 
-.PHONY: help install build build-frontend build-backend build-backend-all
-.PHONY: dev-frontend dev-backend dev-restart
-.PHONY: test test-unit test-e2e lint
-.PHONY: release release-candidate package
-.PHONY: clean clean-deep clean-dev
-.PHONY: security gosec trivy vuln install-tools
+include version.mk
 
-# Default target
-.DEFAULT_GOAL := help
+# ── Directories ───────────────────────────────────────────────
+DIST_DIR    := dist
+RELEASE_DIR := $(DIST_DIR)/release
+BIN_DIR     := $(DIST_DIR)/bin
 
-# Version management
-VERSION ?= $(shell node -p "require('./package.json').version")
-BUILD_DATE = $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
-GIT_COMMIT = $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
-
-# Colors for output
-BLUE := \033[0;34m
-GREEN := \033[0;32m
-YELLOW := \033[0;33m
-RED := \033[0;31m
-CYAN := \033[0;36m
-NC := \033[0m
-
-# Detect platform
+# ── Platform detection ────────────────────────────────────────
 UNAME_S := $(shell uname -s)
 UNAME_M := $(shell uname -m)
 
 ifeq ($(UNAME_S),Linux)
-    PLATFORM := linux
-endif
-ifeq ($(UNAME_S),Darwin)
-    PLATFORM := darwin
+  PLATFORM := linux
+else ifeq ($(UNAME_S),Darwin)
+  PLATFORM := darwin
+else
+  PLATFORM := $(UNAME_S)
 endif
 
 ifeq ($(UNAME_M),x86_64)
-    ARCH := amd64
-endif
-ifeq ($(UNAME_M),aarch64)
-    ARCH := arm64
-endif
-ifeq ($(UNAME_M),arm64)
-    ARCH := arm64
+  ARCH := amd64
+else ifeq ($(UNAME_M),aarch64)
+  ARCH := arm64
+else ifeq ($(UNAME_M),arm64)
+  ARCH := arm64
+else
+  ARCH := $(UNAME_M)
 endif
 
 CURRENT_PLATFORM := $(PLATFORM)-$(ARCH)
 
-# Cross-compilation platforms
-PLATFORMS := linux-amd64 linux-arm64 darwin-amd64 darwin-arm64 windows-amd64 windows-arm64
+# ── Component selection ───────────────────────────────────────
+WANT_FRONTEND :=
+WANT_BACKEND  :=
+WANT_BE_ALL   :=
 
-# Directories
-DIST_DIR := dist
-RELEASE_DIR := $(DIST_DIR)/release
-BIN_DIR := $(DIST_DIR)/bin
+ifneq ($(filter frontend,$(MAKECMDGOALS)),)
+  WANT_FRONTEND := yes
+endif
+ifneq ($(filter backend,$(MAKECMDGOALS)),)
+  WANT_BACKEND := yes
+endif
+ifneq ($(filter backend-all,$(MAKECMDGOALS)),)
+  WANT_BACKEND := yes
+  WANT_BE_ALL  := yes
+endif
+ifneq ($(filter all,$(MAKECMDGOALS)),)
+  WANT_FRONTEND := yes
+  WANT_BACKEND  := yes
+  WANT_BE_ALL   := yes
+endif
 
-#
-# Help target - default
-#
-help:
-	@echo "$(BLUE)╔════════════════════════════════════════════════════════════╗$(NC)"
-	@echo "$(BLUE)║           Stratos Build System (v5.0.0  )                  ║$(NC)"
-	@echo "$(BLUE)╚════════════════════════════════════════════════════════════╝$(NC)"
-	@echo ""
-	@echo "$(CYAN)📦 Setup:$(NC)"
-	@echo "  make install              Install all dependencies (bootstrap automatic!)"
-	@echo ""
-	@echo "$(CYAN)🚀 Development:$(NC)"
-	@echo "  make dev-frontend         Start frontend dev server (https://127.0.0.1:5440)"
-	@echo "  make dev-backend          Start backend dev server"
-	@echo "  make dev-restart          Quick rebuild and restart backend"
-	@echo ""
-	@echo "$(CYAN)🔨 Building:$(NC)"
-	@echo "  make build                Build frontend + backend ($(CURRENT_PLATFORM))"
-	@echo "  make build-frontend       Build frontend only (production)"
-	@echo "  make build-backend        Build backend only ($(CURRENT_PLATFORM))"
-	@echo "  make build-backend-all    Build backend for all 6 platforms"
-	@echo ""
-	@echo "$(CYAN)🧪 Testing:$(NC)"
-	@echo "  make test                 Run all tests"
-	@echo "  make test-unit            Run unit tests (Vitest)"
-	@echo "  make test-e2e             Run E2E tests (Playwright)"
-	@echo "  make lint                 Run linters"
-	@echo ""
-	@echo "$(CYAN)📦 Release:$(NC)"
-	@echo "  make release VERSION=v5.0.0     Create production release"
-	@echo "  make release-candidate VERSION=v5.0.0-rc.1  Create RC"
-	@echo "  make package                    Package current build"
-	@echo ""
-	@echo "$(CYAN)🔒 Security:$(NC)"
-	@echo "  make security             Run all security scans"
-	@echo "  make gosec                Run gosec security scanner"
-	@echo "  make trivy                Run trivy vulnerability scanner"
-	@echo "  make vuln                 Run govulncheck"
-	@echo ""
-	@echo "$(CYAN)🧹 Cleanup:$(NC)"
-	@echo "  make clean                Remove build artifacts"
-	@echo "  make clean-dev            Remove development artifacts"
-	@echo "  make clean-deep           Remove everything (including node_modules)"
-	@echo ""
-	@echo "$(CYAN)🎯 Quick Start:$(NC)"
-	@echo "  git clone stratos && cd stratos"
-	@echo "  make install              # Bootstrap happens automatically!"
-	@echo "  make dev-frontend         # Terminal 1"
-	@echo "  make dev-backend          # Terminal 2"
-	@echo "  # Visit https://127.0.0.1:5440"
-	@echo ""
-	@echo "$(YELLOW)Current platform: $(CURRENT_PLATFORM) | Version: $(VERSION)$(NC)"
-	@echo ""
+# Default: frontend + backend when none specified
+ifeq ($(WANT_FRONTEND)$(WANT_BACKEND),)
+  WANT_FRONTEND := yes
+  WANT_BACKEND  := yes
+endif
 
-#
-# Setup
-#
-install:
-	@echo "$(BLUE)📦 Installing dependencies...$(NC)"
-	@echo "$(YELLOW)Note: Bootstrap happens automatically via preinstall hook$(NC)"
-	bun install
-	@echo "$(GREEN)✅ Dependencies installed!$(NC)"
-	@echo ""
-	@echo "$(CYAN)Next steps:$(NC)"
-	@echo "  make dev-frontend    # Start development"
-	@echo "  make build           # Build for production"
+# ── Release target selection ──────────────────────────────────
+WANT_CF     :=
+WANT_GITHUB :=
 
-# Legacy bootstrap target (deprecated)
-bootstrap:
-	@echo "$(YELLOW)⚠️  Bootstrap is no longer required!$(NC)"
-	@echo "$(CYAN)Just run: make install$(NC)"
-	@echo ""
-	@echo "The bootstrap process now happens automatically during 'bun install'"
-	@echo "via the preinstall hook (build/ensure-devkit.cjs)"
+ifneq ($(filter cf,$(MAKECMDGOALS)),)
+  WANT_CF := yes
+endif
+ifneq ($(filter github,$(MAKECMDGOALS)),)
+  WANT_GITHUB := yes
+endif
+ifeq ($(WANT_CF)$(WANT_GITHUB),)
+  WANT_CF     := yes
+  WANT_GITHUB := yes
+endif
 
-#
-# Building
-#
-build: build-frontend build-backend
-	@echo "$(GREEN)✅ Full build complete (frontend + backend)$(NC)"
+# No-op targets so modifiers don't error
+.PHONY: frontend backend backend-all all cf github
+frontend backend backend-all all cf github:
+	@:
 
-build-frontend:
-	@echo "$(BLUE)🔨 Building frontend (production)...$(NC)"
+# Dispatch helpers
+FE = $(if $(WANT_FRONTEND),$1)
+BE = $(if $(WANT_BACKEND),$(if $(WANT_BE_ALL),$2,$1))
+CF = $(if $(WANT_CF),$1)
+GH = $(if $(WANT_GITHUB),$1)
+
+# ── Build targets ─────────────────────────────────────────────
+.PHONY: build fe-build be-build be-build-all
+build: $(call FE,fe-build) $(call BE,be-build,be-build-all)
+
+fe-build:
+	@echo "Building frontend (production)..."
 	bun run build
-	@echo "$(GREEN)✅ Frontend built$(NC)"
+	@echo "Frontend built: $(DIST_DIR)/frontend/browser/"
 
-build-frontend-dev:
-	@echo "$(BLUE)🔨 Building frontend (development)...$(NC)"
-	bun run build-dev
-	@echo "$(GREEN)✅ Frontend built (dev mode)$(NC)"
-
-build-backend:
-	@echo "$(BLUE)🔨 Building backend for $(CURRENT_PLATFORM)...$(NC)"
+be-build:
+	@echo "Building backend for $(CURRENT_PLATFORM)..."
 	@mkdir -p $(BIN_DIR)
-	cd src/jetstream && go generate ./...
-	cd src/jetstream && \
-		go build \
-		-ldflags "-X main.appVersion=$(VERSION) -X main.buildDate=$(BUILD_DATE) -X main.gitCommit=$(GIT_COMMIT)" \
-		-o ../../$(BIN_DIR)/jetstream
-	@echo "$(GREEN)✅ Backend built: $(BIN_DIR)/jetstream$(NC)"
+	cd src/jetstream && go build -ldflags "$(GO_LDFLAGS)" -o ../../$(BIN_DIR)/jetstream
+	@echo "Backend built: $(BIN_DIR)/jetstream"
 
-build-backend-all:
-	@echo "$(BLUE)🔨 Building backend for all 6 platforms...$(NC)"
+be-build-all:
+	@echo "Cross-compiling backend for all platforms..."
 	@chmod +x build/cross-compile.sh
-	@./build/cross-compile.sh "$(VERSION)" "$(BUILD_DATE)" "$(GIT_COMMIT)"
-	@echo "$(GREEN)✅ All platform binaries built in $(BIN_DIR)/$(NC)"
+	./build/cross-compile.sh "$(SEMVER_VERSION)" "$(BUILD_DATE)" "$(BUILD_VCS_ID)"
+	@echo "All platform binaries built: $(BIN_DIR)/"
 
-#
-# Development
-#
-dev-frontend:
-	@echo "$(BLUE)🚀 Starting frontend dev server...$(NC)"
-	@echo "$(CYAN)╔════════════════════════════════════════════════════════════╗$(NC)"
-	@echo "$(CYAN)║  Frontend Dev Server                                       ║$(NC)"
-	@echo "$(CYAN)╠════════════════════════════════════════════════════════════╣$(NC)"
-	@echo "$(CYAN)║  URL:        https://127.0.0.1:5440                        ║$(NC)"
-	@echo "$(CYAN)║  Source Maps: ✅ Enabled                                   ║$(NC)"
-	@echo "$(CYAN)║  Hot Reload:  ✅ Enabled                                   ║$(NC)"
-	@echo "$(CYAN)║  SSL/WSS:     ✅ Enabled                                   ║$(NC)"
-	@echo "$(CYAN)║  API Proxy:   → https://127.0.0.1:5443                     ║$(NC)"
-	@echo "$(CYAN)╚════════════════════════════════════════════════════════════╝$(NC)"
-	@echo ""
+# ── Test targets ──────────────────────────────────────────────
+.PHONY: test fe-test be-test
+test: $(call FE,fe-test) $(call BE,be-test,be-test)
+
+fe-test:
+	@echo "Running frontend tests..."
+	bun run test
+
+be-test:
+	@echo "Running backend tests..."
+	cd src/jetstream && go test ./... -v -count=1
+
+# ── Release targets ───────────────────────────────────────────
+.PHONY: release release-cf release-github
+release: $(call CF,release-cf) $(call GH,release-github)
+
+release-cf:
+	@chmod +x build/release-cf.sh
+	@./build/release-cf.sh "$(SEMVER_VERSION)"
+
+release-github:
+	@chmod +x build/release-github.sh
+	@./build/release-github.sh "$(SEMVER_VERSION)"
+
+# ── Install target ────────────────────────────────────────────
+.PHONY: stage install-local
+stage: install-local
+
+install-local:
+	@chmod +x build/install-local.sh
+	@./build/install-local.sh
+
+# ── Development ───────────────────────────────────────────────
+.PHONY: dev dev-fe dev-be dev-restart
+dev: $(call FE,dev-fe) $(call BE,dev-be,dev-be)
+
+dev-fe:
 	bun run start
 
-dev-backend:
-	@echo "$(BLUE)🚀 Starting backend dev server...$(NC)"
+dev-be:
 	@if [ ! -f $(BIN_DIR)/jetstream ]; then \
-		echo "$(YELLOW)⚠️  Backend not built, building now...$(NC)"; \
-		$(MAKE) build-backend; \
+		echo "Backend not built, building now..."; \
+		$(MAKE) build backend; \
 	fi
-	@echo "$(CYAN)╔════════════════════════════════════════════════════════════╗$(NC)"
-	@echo "$(CYAN)║  Jetstream Backend API                                     ║$(NC)"
-	@echo "$(CYAN)╠════════════════════════════════════════════════════════════╣$(NC)"
-	@echo "$(CYAN)║  URL:        https://127.0.0.1:5443                        ║$(NC)"
-	@echo "$(CYAN)║  API:        /pp/* and /api/*                              ║$(NC)"
-	@echo "$(CYAN)║  Admin User: admin/admin                                   ║$(NC)"
-	@echo "$(CYAN)║  CORS:       ✅ Enabled for dev                            ║$(NC)"
-	@echo "$(CYAN)╚════════════════════════════════════════════════════════════╝$(NC)"
-	@echo ""
 	cd src/jetstream && ../../$(BIN_DIR)/jetstream
 
 dev-restart:
-	@echo "$(BLUE)🔄 Quick rebuild and restart...$(NC)"
-	@$(MAKE) build-backend
-	@echo ""
-	@echo "$(GREEN)✅ Backend rebuilt!$(NC)"
-	@echo "$(YELLOW)Restart 'make dev-backend' to use new version$(NC)"
+	@$(MAKE) build backend
+	@echo "Backend rebuilt. Restart 'make dev backend' to use new version."
 
-# Alias for compatibility
-dev-full-build: build-backend
-	@echo "$(GREEN)✅ Backend built!$(NC)"
-	@echo ""
-	@echo "$(CYAN)Next steps:$(NC)"
-	@echo "  Terminal 1: make dev-frontend"
-	@echo "  Terminal 2: make dev-backend"
+# Deprecation shims for old dev targets
+.PHONY: dev-frontend dev-backend
+dev-frontend:
+	@echo "DEPRECATED: use 'make dev frontend' instead"
+	@$(MAKE) dev frontend
 
-#
-# Testing
-#
-test: test-unit
-	@echo "$(GREEN)✅ All tests passed!$(NC)"
+dev-backend:
+	@echo "DEPRECATED: use 'make dev backend' instead"
+	@$(MAKE) dev backend
 
-test-unit:
-	@echo "$(BLUE)🧪 Running unit tests (Vitest)...$(NC)"
-	bun run test
-	@echo "$(GREEN)✅ Unit tests complete$(NC)"
+# ── Dependency setup ──────────────────────────────────────────
+.PHONY: install
+install:
+	@echo "Installing dependencies..."
+	bun install
+	@echo "Dependencies installed."
 
-test-e2e:
-	@echo "$(BLUE)🧪 Running E2E tests (Playwright)...$(NC)"
-	bun run e2e
-	@echo "$(GREEN)✅ E2E tests complete$(NC)"
-
+# ── Lint ──────────────────────────────────────────────────────
+.PHONY: lint
 lint:
-	@echo "$(BLUE)🔍 Running linters...$(NC)"
 	bun run lint
 	cd src/jetstream && go fmt ./... && go vet ./...
-	@echo "$(GREEN)✅ Linting complete$(NC)"
 
-#
-# Security
-#
+# ── Security ──────────────────────────────────────────────────
+.PHONY: security gosec trivy vuln
 security: gosec trivy vuln
-	@echo "$(GREEN)✅ All security checks complete$(NC)"
-
-install-tools:
-	@echo "$(BLUE)🔧 Installing security tools...$(NC)"
-	@go install github.com/securego/gosec/v2/cmd/gosec@latest
-	@go install golang.org/x/vuln/cmd/govulncheck@latest
-	@echo "$(YELLOW)Note: Install trivy from https://github.com/aquasecurity/trivy$(NC)"
-	@echo "$(GREEN)✅ Tool installation complete$(NC)"
 
 gosec:
-	@echo "$(BLUE)🔒 Running gosec security scanner...$(NC)"
-	@which gosec > /dev/null || (echo "$(RED)gosec not installed. Run 'make install-tools'$(NC)" && exit 1)
-	@cd src/jetstream && gosec -quiet -fmt json -out gosec-report.json ./... || true
-	@cd src/jetstream && gosec -quiet ./... || true
-	@echo "$(GREEN)✅ Gosec scan complete$(NC)"
+	@which gosec > /dev/null || (echo "gosec not installed. Run: go install github.com/securego/gosec/v2/cmd/gosec@latest" && exit 1)
+	cd src/jetstream && gosec -quiet ./... || true
 
 trivy:
-	@echo "$(BLUE)🔒 Running trivy vulnerability scanner...$(NC)"
-	@which trivy > /dev/null || (echo "$(RED)trivy not installed. Run 'make install-tools'$(NC)" && exit 1)
-	@trivy fs --security-checks vuln,config src/jetstream || true
-	@echo "$(GREEN)✅ Trivy scan complete$(NC)"
+	@which trivy > /dev/null || (echo "trivy not installed. See https://github.com/aquasecurity/trivy" && exit 1)
+	trivy fs --security-checks vuln,config src/jetstream || true
 
 vuln:
-	@echo "$(BLUE)🔒 Running govulncheck...$(NC)"
-	@which govulncheck > /dev/null || (echo "$(RED)govulncheck not installed. Run 'make install-tools'$(NC)" && exit 1)
-	@cd src/jetstream && govulncheck ./... || true
-	@echo "$(GREEN)✅ Govulncheck complete$(NC)"
+	@which govulncheck > /dev/null || (echo "govulncheck not installed. Run: go install golang.org/x/vuln/cmd/govulncheck@latest" && exit 1)
+	cd src/jetstream && govulncheck ./... || true
 
-#
-# Release Management
-#
-release: verify-version
-	@echo "$(BLUE)📦 Creating release $(VERSION)...$(NC)"
-	@$(MAKE) build
-	@$(MAKE) build-backend-all
-	@$(MAKE) package
-	@chmod +x build/create-checksums.sh 2>/dev/null || true
-	@if [ -f build/create-checksums.sh ]; then ./build/create-checksums.sh "$(VERSION)"; fi
-	@chmod +x build/create-git-tag.sh 2>/dev/null || true
-	@if [ -f build/create-git-tag.sh ]; then ./build/create-git-tag.sh "$(VERSION)"; fi
-	@echo ""
-	@echo "$(GREEN)✅ Release $(VERSION) complete!$(NC)"
-	@echo "$(CYAN)Artifacts in: $(RELEASE_DIR)$(NC)"
-	@echo ""
-	@echo "$(YELLOW)Next steps:$(NC)"
-	@echo "  1. Test release archives"
-	@echo "  2. Push tag: git push origin $(VERSION)"
-	@echo "  3. Create GitHub release: gh release create $(VERSION) $(RELEASE_DIR)/*"
-
-release-candidate: verify-version
-	@echo "$(BLUE)📦 Creating release candidate $(VERSION)...$(NC)"
-	@$(MAKE) build
-	@$(MAKE) build-backend-all
-	@$(MAKE) package
-	@chmod +x build/create-checksums.sh 2>/dev/null || true
-	@if [ -f build/create-checksums.sh ]; then ./build/create-checksums.sh "$(VERSION)"; fi
-	@echo "$(GREEN)✅ Release candidate $(VERSION) complete!$(NC)"
-
-package:
-	@echo "$(BLUE)📦 Packaging release archives...$(NC)"
-	@if [ ! -f build/package.sh ]; then \
-		echo "$(RED)❌ build/package.sh not found$(NC)"; \
-		echo "$(YELLOW)This will be created in Phase 3$(NC)"; \
-		exit 0; \
-	fi
-	@chmod +x build/package.sh
-	@./build/package.sh "$(VERSION)"
-	@echo "$(GREEN)✅ Archives created$(NC)"
-
-verify-version:
-	@if [ -z "$(VERSION)" ]; then \
-		echo "$(RED)❌ VERSION not set$(NC)"; \
-		exit 1; \
-	fi
-	@if ! echo "$(VERSION)" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+(-[a-z0-9\.]+)?$$'; then \
-		echo "$(RED)❌ Invalid version format: $(VERSION)$(NC)"; \
-		echo "Expected: vMAJOR.MINOR.PATCH[-PRERELEASE]"; \
-		exit 1; \
-	fi
-	@echo "$(GREEN)✅ Version $(VERSION) validated$(NC)"
-
-#
-# Cleanup
-#
+# ── Cleanup ───────────────────────────────────────────────────
+.PHONY: clean clean-dev clean-deep
 clean:
-	@echo "$(BLUE)🧹 Cleaning build artifacts...$(NC)"
 	rm -rf $(DIST_DIR) .angular dist-devkit
 	cd src/jetstream && rm -f jetstream jetstream.exe jetstream.darwin
-	@echo "$(GREEN)✅ Clean complete$(NC)"
 
-clean-dev:
-	@echo "$(BLUE)🧹 Cleaning development artifacts...$(NC)"
-	rm -rf $(DIST_DIR)/ .angular/
-	rm -rf src/jetstream/jetstream src/jetstream/jetstream.darwin
-	@echo "$(GREEN)✅ Development artifacts cleaned$(NC)"
+clean-dev: clean
 
 clean-deep: clean
-	@echo "$(BLUE)🧹 Deep clean (including node_modules)...$(NC)"
 	rm -rf node_modules src/frontend/packages/*/node_modules
-	@echo "$(GREEN)✅ Deep clean complete$(NC)"
-	@echo "$(YELLOW)Run 'make install' to reinstall dependencies$(NC)"
+
+# ── Deprecation helpers ───────────────────────────────────────
+# Old hyphenated targets redirect to new verb+target pattern
+.PHONY: build-frontend build-backend build-backend-all package
+build-frontend:
+	@echo "DEPRECATED: use 'make build frontend' instead"
+	@$(MAKE) build frontend
+
+build-backend:
+	@echo "DEPRECATED: use 'make build backend' instead"
+	@$(MAKE) build backend
+
+build-backend-all:
+	@echo "DEPRECATED: use 'make build backend-all' instead"
+	@$(MAKE) build backend-all
+
+package:
+	@echo "DEPRECATED: use 'make release' instead"
+	@$(MAKE) release
+
+# ── Help ──────────────────────────────────────────────────────
+.PHONY: help
+help:
+	@echo "Stratos Build System ($(SEMVER_VERSION) | $(CURRENT_PLATFORM))"
+	@echo ""
+	@echo "Building:"
+	@echo "  make build                Build frontend + backend (current platform)"
+	@echo "  make build frontend       Build frontend only"
+	@echo "  make build backend        Build backend only (current platform)"
+	@echo "  make build backend-all    Cross-compile backend for 6 platforms"
+	@echo "  make build all            Frontend + cross-compile all backends"
+	@echo ""
+	@echo "Testing:"
+	@echo "  make test                 Run all tests"
+	@echo "  make test frontend        Frontend tests only"
+	@echo "  make test backend         Backend tests only"
+	@echo "  make lint                 Run linters"
+	@echo ""
+	@echo "Release:"
+	@echo "  make release              Create CF zip + GitHub archives"
+	@echo "  make release cf           CF-pushable zip only"
+	@echo "  make release github       GitHub release archives only"
+	@echo ""
+	@echo "Setup:"
+	@echo "  make install              Install dependencies (bun install)"
+	@echo "  make stage                Stage production build for local testing"
+	@echo ""
+	@echo "Other:"
+	@echo "  make clean                Remove build artifacts"
+	@echo "  make clean-deep           Remove everything (including node_modules)"
+	@echo "  make security             Run security scans"
+	@echo "  make debug-version        Print version and build metadata"
+	@echo ""
+	@echo "Development:"
+	@echo "  make dev frontend         Start frontend dev server"
+	@echo "  make dev backend          Start backend dev server"

@@ -80,13 +80,10 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      - name: Build frontend (production)
-        run: make build-frontend
+      - name: Build all (frontend + cross-compile backends)
+        run: make build all VERSION=${{ needs.validate-version.outputs.version }}
         env:
           NODE_ENV: production
-
-      - name: Build backend (all platforms)
-        run: make build-backend-all VERSION=${{ needs.validate-version.outputs.version }}
 
       - name: Verify binaries
         run: |
@@ -96,7 +93,7 @@ jobs:
           done
 
       - name: Package release archives
-        run: make package VERSION=${{ needs.validate-version.outputs.version }}
+        run: make release github VERSION=${{ needs.validate-version.outputs.version }}
 
       - name: Generate checksums
         run: ./build/create-checksums.sh ${{ needs.validate-version.outputs.version }}
