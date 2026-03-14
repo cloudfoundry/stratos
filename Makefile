@@ -160,18 +160,21 @@ install-local:
 	@./build/install-local.sh
 
 # ── Development ───────────────────────────────────────────────
+BACKEND_PORT  ?= 5443
+FRONTEND_PORT ?= 5440
+
 .PHONY: dev dev-fe dev-be dev-restart
 dev: $(call FE,dev-fe) $(call BE,dev-be,dev-be)
 
 dev-fe:
-	bun run start
+	BACKEND_PORT=$(BACKEND_PORT) bun run ng serve --port $(FRONTEND_PORT) --proxy-config proxy.conf.cjs
 
 dev-be:
 	@if [ ! -f $(BIN_DIR)/jetstream ]; then \
 		echo "Backend not built, building now..."; \
 		$(MAKE) build backend; \
 	fi
-	cd src/jetstream && ../../$(BIN_DIR)/jetstream
+	cd src/jetstream && CONSOLE_PROXY_TLS_ADDRESS=:$(BACKEND_PORT) ../../$(BIN_DIR)/jetstream
 
 dev-restart:
 	@$(MAKE) build backend
@@ -313,5 +316,7 @@ help:
 	@echo "  make dump version         Print version and build metadata"
 	@echo ""
 	@echo "Development:"
-	@echo "  make dev frontend         Start frontend dev server"
-	@echo "  make dev backend          Start backend dev server"
+	@echo "  make dev frontend         Start frontend dev server (port $(FRONTEND_PORT))"
+	@echo "  make dev backend          Start backend dev server (port $(BACKEND_PORT))"
+	@echo "  Override ports:  make dev backend BACKEND_PORT=5543"
+	@echo "                   make dev frontend FRONTEND_PORT=5540 BACKEND_PORT=5543"
