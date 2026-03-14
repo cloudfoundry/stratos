@@ -53,7 +53,9 @@ export class SecretsHelper {
 
   /**
    * Load secrets from secrets.yaml file
-   * Throws error if file doesn't exist or is invalid
+   * Supports profiles via STRATOS_E2E_PROFILE environment variable.
+   * When set, loads from the named profile under the top-level 'profiles' key.
+   * Falls back to top-level keys for backwards compatibility.
    */
   static load() {
     const secretsPath = path.join(process.cwd(), this.SECRETS_FILE);
@@ -66,7 +68,17 @@ export class SecretsHelper {
     }
 
     try {
-      const secrets = yaml.load(fs.readFileSync(secretsPath, 'utf8')) as any;
+      const raw = yaml.load(fs.readFileSync(secretsPath, 'utf8')) as any;
+      const profile = process.env.STRATOS_E2E_PROFILE;
+
+      let secrets: any;
+      if (profile && raw.profiles?.[profile]) {
+        secrets = { ...raw, ...raw.profiles[profile] };
+      } else if (profile) {
+        throw new Error(`Profile '${profile}' not found in secrets.yaml. Available: ${Object.keys(raw.profiles || {}).join(', ')}`);
+      } else {
+        secrets = raw;
+      }
 
       // Get CF endpoints and resolve any missing GUIDs from names
       const cfEndpoints = secrets.cloudFoundry || secrets.endpoints?.cf || [];
