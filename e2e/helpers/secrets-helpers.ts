@@ -5,8 +5,15 @@ import * as path from 'path';
 
 /**
  * Secrets Helper
- * Migrated from Protractor secrets management
- * Loads and provides access to E2E test secrets from secrets.yaml
+ * Loads and provides access to E2E test secrets.
+ *
+ * Secret sources (checked in order):
+ *   1. STRATOS_SECRETS env var — YAML content injected by scripts/secrets.sh run-e2e
+ *   2. secrets.<env>.yaml file — when STRATOS_E2E_ENV is set
+ *   3. secrets.yaml file — default fallback
+ *
+ * Profile selection:
+ *   STRATOS_E2E_PROFILE selects a named profile within the secrets file.
  */
 export class SecretsHelper {
   private static SECRETS_FILE = 'secrets.yaml';
@@ -52,68 +59,99 @@ export class SecretsHelper {
   }
 
   /**
-   * Load secrets from secrets.yaml file
+   * Parse raw YAML content into the secrets object.
+   */
+  private static parse(content: string): any {
+    return yaml.load(content) as any;
+  }
+
+  /**
+   * Resolve the secrets file path, checking env-specific file first.
+   */
+  private static resolveSecretsPath(): string {
+    const env = process.env.STRATOS_E2E_ENV;
+    if (env) {
+      const envPath = path.join(process.cwd(), `secrets.${env}.yaml`);
+      if (fs.existsSync(envPath)) {
+        return envPath;
+      }
+    }
+    return path.join(process.cwd(), this.SECRETS_FILE);
+  }
+
+  /**
+   * Load secrets from env var, env-specific file, or default file.
    * Supports profiles via STRATOS_E2E_PROFILE environment variable.
    * When set, loads from the named profile under the top-level 'profiles' key.
    * Falls back to top-level keys for backwards compatibility.
    */
   static load() {
-    const secretsPath = path.join(process.cwd(), this.SECRETS_FILE);
+    let raw: any;
 
-    if (!fs.existsSync(secretsPath)) {
-      throw new Error(
-        `Secrets file not found at ${secretsPath}.\n` +
-        `Please provide a secrets.yaml file. See e2e/secrets.yaml.example as reference.`
-      );
-    }
-
-    try {
-      const raw = yaml.load(fs.readFileSync(secretsPath, 'utf8')) as any;
-      const profile = process.env.STRATOS_E2E_PROFILE;
-
-      let secrets: any;
-      if (profile && raw.profiles?.[profile]) {
-        secrets = { ...raw, ...raw.profiles[profile] };
-      } else if (profile) {
-        throw new Error(`Profile '${profile}' not found in secrets.yaml. Available: ${Object.keys(raw.profiles || {}).join(', ')}`);
-      } else {
-        secrets = raw;
+    // Source 1: STRATOS_SECRETS env var (injected by scripts/secrets.sh run-e2e)
+    const envSecrets = process.env.STRATOS_SECRETS;
+    if (envSecrets) {
+      try {
+        raw = this.parse(envSecrets);
+      } catch (e) {
+        throw new Error(`Failed to parse STRATOS_SECRETS env var: ${e}`);
       }
-
-      // Get CF endpoints and resolve any missing GUIDs from names
-      const cfEndpoints = secrets.cloudFoundry || secrets.endpoints?.cf || [];
-      this.resolveEndpointGuids(cfEndpoints);
-
-      return {
-        // Console user credentials
-        console: {
-          admin: {
-            username: secrets.consoleUsers?.admin?.username || '',
-            password: secrets.consoleUsers?.admin?.password || '',
-          },
-          user: {
-            username: secrets.consoleUsers?.user?.username || secrets.consoleUsers?.nonAdmin?.username || '',
-            password: secrets.consoleUsers?.user?.password || secrets.consoleUsers?.nonAdmin?.password || '',
-          },
-        },
-
-        // Cloud Foundry configuration
-        cloudFoundry: cfEndpoints,
-
-        // GitHub configuration
-        github: {
-          apiUrl: secrets.stratosGitHubApiUrl || 'https://api.github.com',
-        },
-
-        // Headless mode
-        headless: secrets.headless || false,
-
-        // All raw secrets (for compatibility)
-        raw: secrets,
-      };
-    } catch (e) {
-      throw new Error(`Invalid secrets.yaml configuration file: ${e}`);
+    } else {
+      // Source 2/3: env-specific file or default file
+      const secretsPath = this.resolveSecretsPath();
+      if (!fs.existsSync(secretsPath)) {
+        throw new Error(
+          `Secrets file not found at ${secretsPath}.\n` +
+          `Provide secrets via:\n` +
+          `  - STRATOS_SECRETS env var (from scripts/secrets.sh run-e2e)\n` +
+          `  - secrets.<env>.yaml file (with STRATOS_E2E_ENV=<env>)\n` +
+          `  - secrets.yaml file\n` +
+          `See e2e/secrets.yaml.template for reference.`
+        );
+      }
+      try {
+        raw = this.parse(fs.readFileSync(secretsPath, 'utf8'));
+      } catch (e) {
+        throw new Error(`Failed to parse ${secretsPath}: ${e}`);
+      }
     }
+
+    const profile = process.env.STRATOS_E2E_PROFILE;
+
+    let secrets: any;
+    if (profile && raw.profiles?.[profile]) {
+      secrets = { ...raw, ...raw.profiles[profile] };
+    } else if (profile) {
+      throw new Error(
+        `Profile '${profile}' not found in secrets. ` +
+        `Available: ${Object.keys(raw.profiles || {}).join(', ')}`
+      );
+    } else {
+      secrets = raw;
+    }
+
+    // Get CF endpoints and resolve any missing GUIDs from names
+    const cfEndpoints = secrets.cloudFoundry || secrets.endpoints?.cf || [];
+    this.resolveEndpointGuids(cfEndpoints);
+
+    return {
+      console: {
+        admin: {
+          username: secrets.consoleUsers?.admin?.username || '',
+          password: secrets.consoleUsers?.admin?.password || '',
+        },
+        user: {
+          username: secrets.consoleUsers?.user?.username || secrets.consoleUsers?.nonAdmin?.username || '',
+          password: secrets.consoleUsers?.user?.password || secrets.consoleUsers?.nonAdmin?.password || '',
+        },
+      },
+      cloudFoundry: cfEndpoints,
+      github: {
+        apiUrl: secrets.stratosGitHubApiUrl || 'https://api.github.com',
+      },
+      headless: secrets.headless || false,
+      raw: secrets,
+    };
   }
 
   /**
