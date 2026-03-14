@@ -1,5 +1,6 @@
 import { APIRequestContext, request as playwrightRequest } from '@playwright/test';
 import { SecretsHelper } from './secrets-helpers';
+import { detectAuthType, apiLogin, AuthType } from './auth.helper';
 
 /**
  * User Type Enum
@@ -19,6 +20,7 @@ export class RequestHelper {
   private xsrfToken?: string;
   private baseURL: string;
   private secrets = SecretsHelper.load();
+  private authType?: AuthType;
 
   constructor(baseURL: string = 'https://127.0.0.1:4200') {
     this.baseURL = baseURL;
@@ -36,10 +38,23 @@ export class RequestHelper {
         'Accept': 'application/json'
       }
     });
+
+    // Detect auth type once
+    if (!this.authType) {
+      this.authType = await detectAuthType(this.baseURL);
+    }
   }
 
   /**
-   * Create a session by logging in
+   * Get the detected auth type for this instance
+   */
+  getAuthType(): AuthType {
+    return this.authType || 'local';
+  }
+
+  /**
+   * Create a session by logging in.
+   * Supports both local auth (password POST) and SSO (OAuth redirect flow).
    */
   async createSession(userType: ConsoleUserType): Promise<void> {
     if (!this.context) {
@@ -50,19 +65,16 @@ export class RequestHelper {
       ? { username: this.secrets.console.admin.username, password: this.secrets.console.admin.password }
       : { username: this.secrets.console.user.username, password: this.secrets.console.user.password };
 
-    const formData = new URLSearchParams();
-    formData.append('username', creds.username);
-    formData.append('password', creds.password);
+    const result = await apiLogin(
+      this.context!,
+      this.baseURL,
+      creds.username,
+      creds.password,
+      this.authType || 'local'
+    );
 
-    const response = await this.context!.post('/pp/v1/auth/login/uaa', {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      data: formData.toString()
-    });
-
-    // Extract XSRF token from headers
-    const xsrfToken = response.headers()['x-xsrf-token'];
-    if (xsrfToken) {
-      this.xsrfToken = xsrfToken;
+    if (result.xsrfToken) {
+      this.xsrfToken = result.xsrfToken;
     }
   }
 

@@ -1,6 +1,7 @@
 import { Page, Locator } from '@playwright/test';
 import { BasePage } from './base.page';
 import { fillAngularLogin } from '../helpers/angular-input.helper';
+import { AuthType } from '../helpers/auth.helper';
 
 /**
  * Login Page Object

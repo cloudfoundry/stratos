@@ -4,7 +4,7 @@ import { EndpointManagementHelper } from '../helpers/endpoint-management.helper'
 import { ConsoleUserType, RequestHelper } from '../helpers/request.helper';
 import { CFApiHelper } from '../helpers/cf-api.helper';
 import { ApplicationTestHelper, TestApp } from '../helpers/application-test.helper';
-import { fillAngularLogin } from '../helpers/angular-input.helper';
+import { detectAuthType, browserLogin, AuthType } from '../helpers/auth.helper';
 
 /**
  * Test Fixtures
@@ -14,6 +14,7 @@ import { fillAngularLogin } from '../helpers/angular-input.helper';
 
 type TestFixtures = {
   secrets: ReturnType<typeof SecretsHelper.load>;
+  authType: AuthType;
   endpointManager: EndpointManagementHelper;
   authenticatedPage: Page;
   adminPage: Page;
@@ -43,6 +44,14 @@ export const test = base.extend<TestFixtures>({
   },
 
   /**
+   * Auth type fixture - detects local vs SSO auth
+   */
+  authType: async ({ baseURL }, use) => {
+    const type = await detectAuthType(baseURL || 'https://localhost:5540');
+    await use(type);
+  },
+
+  /**
    * Endpoint Manager fixture - provides endpoint management operations
    */
   endpointManager: async ({ baseURL }, use) => {
@@ -53,35 +62,11 @@ export const test = base.extend<TestFixtures>({
 
   /**
    * Authenticated page fixture - automatically logs in as admin before each test
-   * Usage: test('should do something', async ({ authenticatedPage }) => { ... })
+   * Supports both local auth and SSO (auto-detected).
    */
-  authenticatedPage: async ({ page, secrets }, use) => {
-    // Navigate to login page
-    await page.goto('/login');
-
-    // Fill credentials using Angular-compatible input helper
-    await page.locator('input[name="username"]').first().waitFor({ state: 'visible', timeout: 10000 });
-    await fillAngularLogin(page, secrets.console.admin.username, secrets.console.admin.password);
-
-    // Click login button
-    await page.locator('button[type="submit"]').click();
-
-    // Wait for navigation away from login
-    await page.waitForURL(/^(?!.*\/login)/, { timeout: 10000 });
-
-    // Wait for dashboard or no-endpoints page
-    try {
-      await page.locator('app-dashboard-base').waitFor({ timeout: 5000 });
-    } catch {
-      // May navigate to no-endpoints page
-      try {
-        await page.locator('app-no-endpoints-non-admin').waitFor({ timeout: 5000 });
-      } catch {
-        await page.locator('app-endpoints-page').waitFor({ timeout: 5000 });
-      }
-    }
-
-    // Use the authenticated page
+  authenticatedPage: async ({ page, secrets, authType }, use) => {
+    await browserLogin(page, secrets.console.admin.username, secrets.console.admin.password, authType);
+    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
     await use(page);
   },
 
@@ -94,22 +79,11 @@ export const test = base.extend<TestFixtures>({
 
   /**
    * User page fixture - automatically logs in as regular user
+   * Supports both local auth and SSO (auto-detected).
    */
-  userPage: async ({ page, secrets }, use) => {
-    // Navigate to login page
-    await page.goto('/login');
-
-    // Fill credentials using Angular-compatible input helper
-    await page.locator('input[name="username"]').first().waitFor({ state: 'visible', timeout: 10000 });
-    await fillAngularLogin(page, secrets.console.user.username, secrets.console.user.password);
-
-    // Click login button
-    await page.locator('button[type="submit"]').click();
-
-    // Wait for navigation away from login
-    await page.waitForURL(/^(?!.*\/login)/, { timeout: 10000 });
-
-    // Use the authenticated user page
+  userPage: async ({ page, secrets, authType }, use) => {
+    await browserLogin(page, secrets.console.user.username, secrets.console.user.password, authType);
+    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
     await use(page);
   },
 
@@ -117,28 +91,10 @@ export const test = base.extend<TestFixtures>({
    * No Endpoints Admin Page - Admin user with all endpoints cleared
    * Migrated from: e2e.setup(ConsoleUserType.admin).clearAllEndpoints()
    */
-  noEndpointsAdminPage: async ({ page, secrets, endpointManager }, use) => {
-    // Clear all endpoints first
+  noEndpointsAdminPage: async ({ page, secrets, authType, endpointManager }, use) => {
     await endpointManager.clearAllEndpoints();
-
-    // Navigate to login page
-    await page.goto('/login');
-
-    // Login as admin
-    await page.locator('input[name="username"]').first().waitFor({ state: 'visible', timeout: 10000 });
-    await fillAngularLogin(page, secrets.console.admin.username, secrets.console.admin.password);
-    await page.locator('button[type="submit"]').click();
-
-    // Wait for navigation
-    await page.waitForURL(/^(?!.*\/login)/, { timeout: 10000 });
-
-    // Should be on endpoints page with no endpoints
-    try {
-      await page.locator('app-endpoints-page').waitFor({ timeout: 5000 });
-    } catch {
-      // May be on different page depending on configuration
-    }
-
+    await browserLogin(page, secrets.console.admin.username, secrets.console.admin.password, authType);
+    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
     await use(page);
   },
 
@@ -146,29 +102,10 @@ export const test = base.extend<TestFixtures>({
    * No Endpoints User Page - Regular user with all endpoints cleared
    * Migrated from: e2e.setup(ConsoleUserType.user).clearAllEndpoints()
    */
-  noEndpointsUserPage: async ({ page, secrets, endpointManager }, use) => {
-    // Clear all endpoints first
+  noEndpointsUserPage: async ({ page, secrets, authType, endpointManager }, use) => {
     await endpointManager.clearAllEndpoints();
-
-    // Navigate to login page
-    await page.goto('/login');
-
-    // Login as user
-    await page.locator('input[name="username"]').first().waitFor({ state: 'visible', timeout: 10000 });
-    await fillAngularLogin(page, secrets.console.user.username, secrets.console.user.password);
-    await page.locator('button[type="submit"]').click();
-
-    // Wait for navigation
-    await page.waitForURL(/^(?!.*\/login)/, { timeout: 10000 });
-
-    // Should show no-endpoints message for non-admin
-    try {
-      await page.locator('app-no-endpoints-non-admin').waitFor({ timeout: 5000 });
-    } catch {
-      // Fallback to endpoints page
-      await page.locator('app-endpoints-page').waitFor({ timeout: 5000 });
-    }
-
+    await browserLogin(page, secrets.console.user.username, secrets.console.user.password, authType);
+    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
     await use(page);
   },
 
@@ -176,42 +113,22 @@ export const test = base.extend<TestFixtures>({
    * Registered Endpoints Page - Admin with default CF registered but not connected
    * Migrated from: e2e.setup(ConsoleUserType.admin).clearAllEndpoints().registerDefaultCloudFoundry()
    */
-  registeredEndpointsPage: async ({ page, secrets, endpointManager }, use) => {
-    // Setup: clear all and register default CF
+  registeredEndpointsPage: async ({ page, secrets, authType, endpointManager }, use) => {
     await endpointManager.clearAllEndpoints();
     await endpointManager.registerDefaultCloudFoundry();
+    await browserLogin(page, secrets.console.admin.username, secrets.console.admin.password, authType);
+    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
 
-    // Navigate to login page
-    await page.goto('/login');
-
-    // Login as admin
-    await page.locator('input[name="username"]').first().waitFor({ state: 'visible', timeout: 10000 });
-    await fillAngularLogin(page, secrets.console.admin.username, secrets.console.admin.password);
-    await page.locator('button[type="submit"]').click();
-
-    // Wait for navigation
-    await page.waitForURL(/^(?!.*\/login)/, { timeout: 10000 });
-
-    // Wait for endpoints page
-    await page.locator('app-endpoints-page').waitFor({ timeout: 5000 });
-
-    // Wait for snackbar to appear (welcome message)
+    // Dismiss snackbar if present
     try {
       const snackbar = page.locator('mat-snack-bar-container, .mat-mdc-snack-bar-container, simple-snack-bar');
       await snackbar.waitFor({ state: 'visible', timeout: 3000 });
-
-      // Close snackbar if it has a close button
       const closeButton = snackbar.locator('button').filter({ hasText: /close|dismiss/i });
-      const hasClose = await closeButton.isVisible().catch(() => false);
-      if (hasClose) {
+      if (await closeButton.isVisible().catch(() => false)) {
         await closeButton.click();
       }
-
-      // Wait for snackbar to disappear
       await snackbar.waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
-    } catch {
-      // Snackbar may not appear in all scenarios
-    }
+    } catch { /* snackbar may not appear */ }
 
     await use(page);
   },
@@ -220,24 +137,14 @@ export const test = base.extend<TestFixtures>({
    * Connected Endpoints Admin Page - Admin with default CF registered and connected
    * Migrated from: e2e.setup(ConsoleUserType.admin).clearAllEndpoints().registerDefaultCloudFoundry().connectAllEndpoints(ConsoleUserType.admin)
    */
-  connectedEndpointsAdminPage: async ({ page, secrets, endpointManager, baseURL }, use) => {
+  connectedEndpointsAdminPage: async ({ page, secrets, authType, endpointManager, baseURL }, use) => {
     // Setup: clear all, register, and connect
     await endpointManager.clearAllEndpoints();
     await endpointManager.registerDefaultCloudFoundry();
     await endpointManager.connectAllEndpoints(ConsoleUserType.admin);
 
-    // Navigate to login page
-    await page.goto('/login');
-
-    // Login as admin
-    await page.locator('input[name="username"]').first().waitFor({ state: 'visible', timeout: 10000 });
-    await fillAngularLogin(page, secrets.console.admin.username, secrets.console.admin.password);
-    await page.locator('button[type="submit"]').click();
-
-    // Wait for navigation
-    await page.waitForURL(/^(?!.*\/login)/, { timeout: 10000 });
-
-    // Wait for any post-login page to load
+    // Login via browser (local or SSO)
+    await browserLogin(page, secrets.console.admin.username, secrets.console.admin.password, authType);
     await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
 
     // Get CF endpoint GUID
@@ -269,24 +176,14 @@ export const test = base.extend<TestFixtures>({
    * Connected Endpoints User Page - Regular user with default CF connected
    * Migrated from: e2e.setup(ConsoleUserType.user).clearAllEndpoints().registerDefaultCloudFoundry().connectAllEndpoints(ConsoleUserType.user)
    */
-  connectedEndpointsUserPage: async ({ page, secrets, endpointManager, baseURL }, use) => {
+  connectedEndpointsUserPage: async ({ page, secrets, authType, endpointManager, baseURL }, use) => {
     // Setup: clear all, register, and connect as user
     await endpointManager.clearAllEndpoints();
     await endpointManager.registerDefaultCloudFoundry();
     await endpointManager.connectAllEndpoints(ConsoleUserType.user);
 
-    // Navigate to login page
-    await page.goto('/login');
-
-    // Login as user
-    await page.locator('input[name="username"]').first().waitFor({ state: 'visible', timeout: 10000 });
-    await fillAngularLogin(page, secrets.console.user.username, secrets.console.user.password);
-    await page.locator('button[type="submit"]').click();
-
-    // Wait for navigation
-    await page.waitForURL(/^(?!.*\/login)/, { timeout: 10000 });
-
-    // Wait for any post-login page to load
+    // Login via browser (local or SSO)
+    await browserLogin(page, secrets.console.user.username, secrets.console.user.password, authType);
     await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
 
     // Get CF endpoint GUID
