@@ -402,16 +402,10 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       startWith(false)
     );
 
-    // Determine if we should hide the paginator
-    this.hidePaginator$ = observableCombineLatest(this.hasRows$, this.paginationController.pagination$).pipe(
-      map(([hasRows, pagination]) => {
-        const minPageSize = (
-          this.paginatorSettings.pageSizeOptions && this.paginatorSettings.pageSizeOptions.length ?
-            this.paginatorSettings.pageSizeOptions[0] : -1
-        );
-        return !hasRows ||
-          pagination && (pagination.totalResults <= minPageSize);
-      }));
+    // Show paginator whenever there are rows so the user always has page size control
+    this.hidePaginator$ = this.hasRows$.pipe(
+      map(hasRows => !hasRows)
+    );
 
 
     this.paginatorSettings.pageSizeOptions = this.config?.pageSizeOptions ||
