@@ -60,7 +60,8 @@ export default defineConfig({
   },
 
   // Global timeout for each test
-  timeout: 40000, // Matches Protractor allScriptsTimeout
+  // SSO login fixtures can take 15-20s each (headless browser OAuth flow)
+  timeout: 90000,
 
   // Report test environment status before tests start
   globalSetup: './e2e/global-setup.ts',

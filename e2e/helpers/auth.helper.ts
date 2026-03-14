@@ -1,4 +1,4 @@
-import { Page, APIRequestContext, request as playwrightRequest } from '@playwright/test';
+import { Page, APIRequestContext, request as playwrightRequest, chromium } from '@playwright/test';
 import { fillAngularLogin } from './angular-input.helper';
 
 /**
@@ -159,67 +159,71 @@ async function apiLoginLocal(
 }
 
 /**
- * SSO API login — follow OAuth redirect chain via HTTP requests.
+ * SSO API login — uses a headless browser to complete the OAuth flow.
  *
- * The Playwright request context follows redirects and maintains cookies,
- * so we can simulate the browser SSO flow:
- *   1. GET /pp/v1/auth/sso_login → redirect to UAA authorize
- *   2. GET UAA authorize → redirect to UAA login page
- *   3. POST UAA login form → redirect to Stratos callback
- *   4. Stratos callback sets session cookie
+ * Raw HTTP requests can't handle the SSO flow reliably because:
+ * - UAA login form requires a CSRF token (X-Uaa-Csrf)
+ * - Cookies need to be maintained across domain boundaries (Stratos ↔ UAA)
+ * - Multiple redirects with state parameters
  *
- * We use a separate request context that follows redirects to handle this,
- * then transfer the session cookie to the main context.
+ * Instead, we launch a headless browser, complete the SSO login, extract
+ * the session cookie, and recreate the API context with that cookie.
  */
 async function apiLoginSSO(
-  context: APIRequestContext,
+  _context: APIRequestContext,
   baseURL: string,
   username: string,
   password: string
 ): Promise<{ xsrfToken?: string }> {
-  // Create a context that follows redirects for the OAuth dance
-  const ssoContext = await playwrightRequest.newContext({
-    baseURL,
-    ignoreHTTPSErrors: true,
-  });
+  const browser = await chromium.launch();
+  const browserContext = await browser.newContext({ ignoreHTTPSErrors: true });
 
   try {
-    // Step 1: Initiate SSO login — this redirects to UAA
-    const stateUrl = encodeURIComponent(baseURL);
-    const ssoResp = await ssoContext.get(`/pp/v1/auth/sso_login?state=${stateUrl}`);
-    const ssoBody = await ssoResp.text();
+    const page = await browserContext.newPage();
 
-    // Step 2: Parse the UAA login form to find the action URL
-    // The redirect lands on the UAA login page with a form
-    const formActionMatch = ssoBody.match(/action="([^"]+)"/);
-    const uaaLoginUrl = ssoResp.url(); // Final URL after redirects
+    // Complete SSO login via browser
+    await page.goto(`${baseURL}/login`);
 
-    // Step 3: POST credentials to UAA login form
-    const formData = new URLSearchParams();
-    formData.append('username', username);
-    formData.append('password', password);
+    // Click SSO sign in button
+    const ssoButton = page.locator('button').filter({ hasText: /sign in|sso|log in/i }).first();
+    const ssoVisible = await ssoButton.isVisible({ timeout: 5000 }).catch(() => false);
 
-    // Determine form action — either from form HTML or the login URL
-    const loginPostUrl = formActionMatch
-      ? formActionMatch[1].replace(/&amp;/g, '&')
-      : uaaLoginUrl;
+    if (ssoVisible) {
+      await ssoButton.click();
+    }
 
-    const loginResp = await ssoContext.post(loginPostUrl, {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      data: formData.toString(),
-    });
+    // Wait for UAA login page
+    await page.waitForURL(/.*login.*|.*uaa.*|.*oauth.*/, { timeout: 15000 });
 
-    // After successful login, UAA redirects to Stratos callback
-    // which sets the session cookie. Extract XSRF token.
-    const xsrfToken = loginResp.headers()['x-xsrf-token'];
+    // Fill UAA form (standard HTML — fill() works fine)
+    const uaaUsername = page.locator('input[name="username"], input[id="username"]').first();
+    const uaaPassword = page.locator('input[name="password"], input[id="password"]').first();
+    const uaaSubmit = page.locator('input[type="submit"], button[type="submit"]').first();
 
-    // Transfer session to the original context by making a verify call
-    // The ssoContext now has the session cookie
-    const verifyResp = await ssoContext.get('/api/v1/auth/verify');
-    const verifyXsrf = verifyResp.headers()['x-xsrf-token'];
+    await uaaUsername.waitFor({ state: 'visible', timeout: 10000 });
+    await uaaUsername.fill(username);
+    await uaaPassword.fill(password);
+    await uaaSubmit.click();
 
-    return { xsrfToken: xsrfToken || verifyXsrf };
+    // Wait for redirect back to Stratos
+    await page.waitForURL(/^(?!.*(uaa|login\.sys|oauth))/, { timeout: 20000 });
+
+    // Extract session cookie and XSRF token from the browser context
+    const cookies = await browserContext.cookies(baseURL);
+    const sessionCookie = cookies.find(c => c.name === 'console-session');
+
+    // Get XSRF token via API call using browser's session
+    const verifyResp = await page.request.get('/api/v1/auth/verify');
+    const xsrfToken = verifyResp.headers()['x-xsrf-token'];
+
+    // Store cookies globally so the original context can be recreated with them
+    // We attach the cookie info to the return value for the caller to use
+    return {
+      xsrfToken,
+      sessionCookie: sessionCookie ? `${sessionCookie.name}=${sessionCookie.value}` : undefined,
+      cookies,
+    } as any;
   } finally {
-    await ssoContext.dispose();
+    await browser.close();
   }
 }

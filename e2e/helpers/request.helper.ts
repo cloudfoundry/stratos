@@ -55,6 +55,9 @@ export class RequestHelper {
   /**
    * Create a session by logging in.
    * Supports both local auth (password POST) and SSO (OAuth redirect flow).
+   *
+   * For SSO, the login is done via a headless browser. The session cookie
+   * is extracted and used to recreate the API request context.
    */
   async createSession(userType: ConsoleUserType): Promise<void> {
     if (!this.context) {
@@ -75,6 +78,29 @@ export class RequestHelper {
 
     if (result.xsrfToken) {
       this.xsrfToken = result.xsrfToken;
+    }
+
+    // For SSO, recreate the context with the session cookie from the browser.
+    // The Cookie header is set globally so every request carries the session.
+    const ssoResult = result as any;
+    if (ssoResult.sessionCookie) {
+      await this.context!.dispose();
+      this.context = await playwrightRequest.newContext({
+        baseURL: this.baseURL,
+        ignoreHTTPSErrors: true,
+        extraHTTPHeaders: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Cookie': ssoResult.sessionCookie,
+        },
+      });
+
+      // Fetch a fresh XSRF token using the new context
+      const verifyResp = await this.context.get('/api/v1/auth/verify');
+      const freshXsrf = verifyResp.headers()['x-xsrf-token'];
+      if (freshXsrf) {
+        this.xsrfToken = freshXsrf;
+      }
     }
   }
 
