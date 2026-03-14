@@ -6,7 +6,6 @@ replace (
 	github.com/cloudfoundry/stratos/src/jetstream/api => ./api
 	github.com/cloudfoundry/stratos/src/jetstream/api/config => ./api/config
 	github.com/cloudfoundry/stratos/src/jetstream/crypto => ./crypto
-	//	github.com/cloudfoundry/stratos/src/jetstream/docs => ./docs
 	github.com/cloudfoundry/stratos/src/jetstream/plugins/cfapppush => ./plugins/cfapppush
 	github.com/cloudfoundry/stratos/src/jetstream/plugins/cloudfoundry => ./plugins/cloudfoundry
 	github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes => ./plugins/kubernetes
@@ -32,7 +31,6 @@ require (
 	github.com/cloudfoundry/noaa/v2 v2.5.0
 	github.com/cloudfoundry/sonde-go v0.0.0-20250505082611-517434ece96d
 	github.com/cloudfoundry/stratos/src/jetstream/api v0.0.0-20250312201517-2a076063346f
-	github.com/cloudfoundry/stratos/src/jetstream/docs v0.0.0-00010101000000-000000000000
 	github.com/cloudfoundry/stratos/src/jetstream/plugins/cfapppush v0.0.0-00010101000000-000000000000
 	github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes v0.0.0-20250312201517-2a076063346f
 	github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/auth v0.0.0-20250312201517-2a076063346f
