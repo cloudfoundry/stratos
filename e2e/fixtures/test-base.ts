@@ -4,6 +4,7 @@ import { EndpointManagementHelper } from '../helpers/endpoint-management.helper'
 import { ConsoleUserType, RequestHelper } from '../helpers/request.helper';
 import { CFApiHelper } from '../helpers/cf-api.helper';
 import { ApplicationTestHelper, TestApp } from '../helpers/application-test.helper';
+import { fillAngularLogin } from '../helpers/angular-input.helper';
 
 /**
  * Test Fixtures
@@ -58,9 +59,9 @@ export const test = base.extend<TestFixtures>({
     // Navigate to login page
     await page.goto('/login');
 
-    // Fill in credentials
-    await page.locator('input[name="username"]').first().fill(secrets.console.admin.username);
-    await page.locator('input[name="password"]').first().fill(secrets.console.admin.password);
+    // Fill credentials using Angular-compatible input helper
+    await page.locator('input[name="username"]').first().waitFor({ state: 'visible', timeout: 10000 });
+    await fillAngularLogin(page, secrets.console.admin.username, secrets.console.admin.password);
 
     // Click login button
     await page.locator('button[type="submit"]').click();
@@ -98,9 +99,9 @@ export const test = base.extend<TestFixtures>({
     // Navigate to login page
     await page.goto('/login');
 
-    // Fill in user credentials
-    await page.locator('input[name="username"]').first().fill(secrets.console.user.username);
-    await page.locator('input[name="password"]').first().fill(secrets.console.user.password);
+    // Fill credentials using Angular-compatible input helper
+    await page.locator('input[name="username"]').first().waitFor({ state: 'visible', timeout: 10000 });
+    await fillAngularLogin(page, secrets.console.user.username, secrets.console.user.password);
 
     // Click login button
     await page.locator('button[type="submit"]').click();
@@ -124,8 +125,8 @@ export const test = base.extend<TestFixtures>({
     await page.goto('/login');
 
     // Login as admin
-    await page.locator('input[name="username"]').first().fill(secrets.console.admin.username);
-    await page.locator('input[name="password"]').first().fill(secrets.console.admin.password);
+    await page.locator('input[name="username"]').first().waitFor({ state: 'visible', timeout: 10000 });
+    await fillAngularLogin(page, secrets.console.admin.username, secrets.console.admin.password);
     await page.locator('button[type="submit"]').click();
 
     // Wait for navigation
@@ -153,8 +154,8 @@ export const test = base.extend<TestFixtures>({
     await page.goto('/login');
 
     // Login as user
-    await page.locator('input[name="username"]').first().fill(secrets.console.user.username);
-    await page.locator('input[name="password"]').first().fill(secrets.console.user.password);
+    await page.locator('input[name="username"]').first().waitFor({ state: 'visible', timeout: 10000 });
+    await fillAngularLogin(page, secrets.console.user.username, secrets.console.user.password);
     await page.locator('button[type="submit"]').click();
 
     // Wait for navigation
@@ -184,8 +185,8 @@ export const test = base.extend<TestFixtures>({
     await page.goto('/login');
 
     // Login as admin
-    await page.locator('input[name="username"]').first().fill(secrets.console.admin.username);
-    await page.locator('input[name="password"]').first().fill(secrets.console.admin.password);
+    await page.locator('input[name="username"]').first().waitFor({ state: 'visible', timeout: 10000 });
+    await fillAngularLogin(page, secrets.console.admin.username, secrets.console.admin.password);
     await page.locator('button[type="submit"]').click();
 
     // Wait for navigation
@@ -229,20 +230,15 @@ export const test = base.extend<TestFixtures>({
     await page.goto('/login');
 
     // Login as admin
-    await page.locator('input[name="username"]').first().fill(secrets.console.admin.username);
-    await page.locator('input[name="password"]').first().fill(secrets.console.admin.password);
+    await page.locator('input[name="username"]').first().waitFor({ state: 'visible', timeout: 10000 });
+    await fillAngularLogin(page, secrets.console.admin.username, secrets.console.admin.password);
     await page.locator('button[type="submit"]').click();
 
     // Wait for navigation
     await page.waitForURL(/^(?!.*\/login)/, { timeout: 10000 });
 
-    // Should navigate to home/dashboard
-    try {
-      await page.locator('app-dashboard-base, app-home-page').waitFor({ timeout: 5000 });
-    } catch {
-      // May still be on endpoints page
-      await page.locator('app-endpoints-page').waitFor({ timeout: 5000 });
-    }
+    // Wait for any post-login page to load
+    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
 
     // Get CF endpoint GUID
     const request = new RequestHelper(baseURL || 'http://localhost:4200');
@@ -283,19 +279,15 @@ export const test = base.extend<TestFixtures>({
     await page.goto('/login');
 
     // Login as user
-    await page.locator('input[name="username"]').first().fill(secrets.console.user.username);
-    await page.locator('input[name="password"]').first().fill(secrets.console.user.password);
+    await page.locator('input[name="username"]').first().waitFor({ state: 'visible', timeout: 10000 });
+    await fillAngularLogin(page, secrets.console.user.username, secrets.console.user.password);
     await page.locator('button[type="submit"]').click();
 
     // Wait for navigation
     await page.waitForURL(/^(?!.*\/login)/, { timeout: 10000 });
 
-    // Should navigate to home/dashboard
-    try {
-      await page.locator('app-dashboard-base, app-home-page').waitFor({ timeout: 5000 });
-    } catch {
-      await page.locator('app-endpoints-page').waitFor({ timeout: 5000 });
-    }
+    // Wait for any post-login page to load
+    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
 
     // Get CF endpoint GUID
     const request = new RequestHelper(baseURL || 'http://localhost:4200');

@@ -12,7 +12,8 @@ export class CfTopLevelPage extends BasePage {
   constructor(page: Page, navLink: string = '/cloud-foundry') {
     super(page);
     this.navLink = navLink;
-    this.tabs = page.locator('app-page-tabs, mat-tab-group');
+    // CF page uses sidebar navigation (mat-nav-list), not tab-group
+    this.tabs = page.locator('mat-nav-list, app-page-tabs, mat-tab-group');
   }
 
   static forEndpoint(page: Page, guid: string): CfTopLevelPage {
@@ -40,6 +41,14 @@ export class CfTopLevelPage extends BasePage {
    */
   async navigateTo(): Promise<void> {
     await this.page.goto(this.navLink);
+  }
+
+  /**
+   * Wait for page to be loaded
+   */
+  async waitForPage(): Promise<void> {
+    await this.page.waitForURL(new RegExp(this.navLink), { timeout: 10000 });
+    await this.tabs.waitFor({ state: 'visible', timeout: 10000 });
   }
 
   /**
@@ -86,9 +95,10 @@ export class CfTopLevelPage extends BasePage {
   }
 
   private async goToTab(label: string, urlSuffix: string): Promise<void> {
-    const tabButton = this.tabs.locator(`button, a`).filter({ hasText: label });
-    await tabButton.waitFor({ state: 'visible', timeout: 10000 });
-    await tabButton.click();
+    // Navigation uses sidebar links (a elements in mat-nav-list)
+    const navLink = this.page.locator('a, button').filter({ hasText: new RegExp(`^\\s*${label}\\s*$`) }).first();
+    await navLink.waitFor({ state: 'visible', timeout: 10000 });
+    await navLink.click();
     await this.page.waitForURL(new RegExp(`${this.navLink}.*/${urlSuffix}`), { timeout: 10000 });
   }
 

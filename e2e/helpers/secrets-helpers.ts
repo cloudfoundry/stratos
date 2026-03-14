@@ -151,6 +151,16 @@ export class SecretsHelper {
       },
       headless: secrets.headless || false,
       raw: secrets,
+
+      /** Get a Cloud Foundry endpoint config by index */
+      getCloudfoundryEndpoint(index: number) {
+        return cfEndpoints[index] || null;
+      },
+
+      /** Get the full merged config (profile + top-level) */
+      getConfig() {
+        return secrets;
+      },
     };
   }
 

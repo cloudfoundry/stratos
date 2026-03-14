@@ -1,5 +1,6 @@
 import { Page, Locator } from '@playwright/test';
 import { BasePage } from './base.page';
+import { fillAngularLogin } from '../helpers/angular-input.helper';
 
 /**
  * Login Page Object
@@ -57,26 +58,8 @@ export class LoginPage extends BasePage {
     await this.usernameInput.waitFor({ state: 'visible', timeout: 10000 });
     await this.passwordInput.waitFor({ state: 'visible', timeout: 10000 });
 
-    // Set values via native setter + events to trigger Angular OnPush + ngModel
-    await this.page.evaluate(({ user, pass }) => {
-      const userInput = document.querySelector('input[name="username"]') as HTMLInputElement;
-      const passInput = document.querySelector('input[name="password"]') as HTMLInputElement;
-
-      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-        window.HTMLInputElement.prototype, 'value'
-      )!.set!;
-
-      nativeInputValueSetter.call(userInput, user);
-      userInput.dispatchEvent(new Event('input', { bubbles: true }));
-      userInput.dispatchEvent(new Event('change', { bubbles: true }));
-
-      nativeInputValueSetter.call(passInput, pass);
-      passInput.dispatchEvent(new Event('input', { bubbles: true }));
-      passInput.dispatchEvent(new Event('change', { bubbles: true }));
-    }, { user: username, pass: password });
-
-    // Allow Angular change detection to process
-    await this.page.waitForTimeout(200);
+    // Use native setter + events to trigger Angular OnPush + ngModel
+    await fillAngularLogin(this.page, username, password);
   }
 
   /**

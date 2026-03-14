@@ -100,6 +100,17 @@ export class EndpointManagementHelper {
 
     const defaultCF = cfEndpoints[0];
 
+    // Check if already registered (idempotent)
+    const existing = await this.adminRequest.get('/api/v1/endpoints');
+    const alreadyRegistered = existing?.some((ep: any) => {
+      const host = ep.api_endpoint?.Host || '';
+      return host && defaultCF.url.includes(host);
+    });
+
+    if (alreadyRegistered) {
+      return;
+    }
+
     await this.adminRequest.postForm('/api/v1/endpoints?endpoint_type=cf', {
       api_endpoint: defaultCF.url,
       cnsi_name: defaultCF.name,
