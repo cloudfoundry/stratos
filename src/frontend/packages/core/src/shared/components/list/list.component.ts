@@ -402,9 +402,27 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       startWith(false)
     );
 
-    // Show paginator whenever there are rows so the user always has page size control
-    this.hidePaginator$ = this.hasRows$.pipe(
-      map(hasRows => !hasRows)
+    // Show paginator when there are visible rows and results exceed the smallest
+    // page size. For non-maxed lists this restores the original hide-when-small
+    // behavior. For maxed lists (e.g. CF tab pages with client-side pagination)
+    // the paginator is always shown so the user can control page size.
+    this.hidePaginator$ = observableCombineLatest(
+      hasPages$, this.dataSource.maxedResults$, this.paginationController.pagination$
+    ).pipe(
+      map(([hasPages, maxedResults, pagination]) => {
+        if (!hasPages) {
+          return true; // no data, hide
+        }
+        if (maxedResults) {
+          return false; // maxed list with data, always show paginator
+        }
+        // Non-maxed: hide when total fits in smallest page size
+        const minPageSize = (
+          this.paginatorSettings.pageSizeOptions && this.paginatorSettings.pageSizeOptions.length ?
+            this.paginatorSettings.pageSizeOptions[0] : -1
+        );
+        return pagination && (pagination.totalResults <= minPageSize);
+      })
     );
 
 
