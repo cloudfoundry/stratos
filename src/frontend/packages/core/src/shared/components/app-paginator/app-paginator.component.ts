@@ -34,10 +34,7 @@ export class AppPaginatorComponent {
 
   /** Display label for a page size option */
   getPageSizeLabel(size: number): string {
-    if (size !== PAGE_SIZE_ALL) {
-      return String(size);
-    }
-    return this.length > 0 ? `All (${this.length})` : 'All';
+    return size === PAGE_SIZE_ALL ? 'All' : String(size);
   }
 
   @Output() page = new EventEmitter<TailwindPageEvent>();
