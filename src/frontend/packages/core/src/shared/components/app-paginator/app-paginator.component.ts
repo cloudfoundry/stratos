@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from 
 
 import { FormsModule } from '@angular/forms';
 import { TailwindPaginator, TailwindPageEvent } from '../../services/tailwind-paginator.service';
+import { PAGE_SIZE_ALL } from '../list/list.component.types';
 
 @Component({
   selector: 'app-paginator',
@@ -14,9 +15,22 @@ import { TailwindPaginator, TailwindPageEvent } from '../../services/tailwind-pa
 export class AppPaginatorComponent {
   @Input() length = 0;
   @Input() pageSize = 50;
-  @Input() pageSizeOptions: number[] = [9, 30, 80];
+  @Input() pageSizeOptions: number[] = [6, 12, 24, 48, 96, PAGE_SIZE_ALL];
   @Input() pageIndex = 0;
   @Input() showFirstLastButtons = true;
+
+  /** Resolve "All" (-1) to the actual length */
+  getEffectivePageSize(size: number): number {
+    return size === PAGE_SIZE_ALL ? this.length : size;
+  }
+
+  /** Display label for a page size option */
+  getPageSizeLabel(size: number): string {
+    if (size !== PAGE_SIZE_ALL) {
+      return String(size);
+    }
+    return this.length > 0 ? `All (${this.length})` : 'All';
+  }
 
   @Output() page = new EventEmitter<TailwindPageEvent>();
 
@@ -73,11 +87,12 @@ export class AppPaginatorComponent {
   }
 
   changePageSize(newPageSize: number): void {
+    const effective = this.getEffectivePageSize(newPageSize);
     const startIndex = this.pageIndex * this.pageSize;
     const previousPageIndex = this.pageIndex;
 
-    this.pageSize = newPageSize;
-    this.pageIndex = Math.floor(startIndex / newPageSize) || 0;
+    this.pageSize = effective;
+    this.pageIndex = effective > 0 ? Math.floor(startIndex / effective) || 0 : 0;
 
     this.emitPageEvent(previousPageIndex);
   }

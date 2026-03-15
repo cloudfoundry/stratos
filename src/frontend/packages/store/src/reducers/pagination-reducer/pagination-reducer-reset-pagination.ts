@@ -3,7 +3,9 @@ import { ResetPagination } from '../../actions/pagination.actions';
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
 import { PaginationEntityState, PaginationEntityTypeState, PaginationState } from '../../types/pagination.types';
 
-export const defaultClientPaginationPageSize = 9;
+export const defaultClientPaginationPageSizeCards = 6;
+export const defaultClientPaginationPageSizeTable = 10;
+export const defaultClientPaginationPageSize = defaultClientPaginationPageSizeCards;
 
 const defaultPaginationEntityState: PaginationEntityState = {
   pageCount: 0,

@@ -155,8 +155,10 @@ export interface IListMultiFilterConfigItem {
   value: string;
 }
 
-export const defaultPaginationPageSizeOptionsCards = [defaultClientPaginationPageSize, 30, 80];
-export const defaultPaginationPageSizeOptionsTable = [defaultClientPaginationPageSize, 20, 80];
+// Page size options. -1 represents "All" — rendered as "All (N)" in the paginator.
+export const PAGE_SIZE_ALL = -1;
+export const defaultPaginationPageSizeOptionsCards = [6, 12, 24, 48, 96, PAGE_SIZE_ALL];
+export const defaultPaginationPageSizeOptionsTable = [10, 25, 50, 100, PAGE_SIZE_ALL];
 
 export class ListConfig<T, A = T> implements IListConfig<T> {
   isLocal = false;

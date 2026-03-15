@@ -8,7 +8,7 @@
       (change)="changePageSize(+$any($event.target).value)">
       @for (option of pageSizeOptions; track option) {
         <option [value]="option">
-          {{option}}
+          {{getPageSizeLabel(option)}}
         </option>
       }
     </select>

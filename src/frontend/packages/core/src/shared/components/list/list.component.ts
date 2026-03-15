@@ -22,6 +22,7 @@ import { ChangeDetectionStrategy, AfterViewInit,
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule, NgForm, NgModel } from '@angular/forms';
 import { MatPaginator, PageEvent } from '../../../shared/services/tailwind-material-replacements';
+import { PageSizeSessionService } from '../../../shared/services/page-size-session.service';
 export type SortDirection = 'asc' | 'desc' | '';
 import { Store } from '@ngrx/store';
 import {
@@ -269,6 +270,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   }
 
   private store = inject(Store<GeneralAppState>);
+  private pageSizeSession = inject(PageSizeSessionService);
   private cd = inject(ChangeDetectorRef);
   public config = inject(ListConfig<T>, { optional: true });
   private ngZone = inject(NgZone);
@@ -429,13 +431,18 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     this.paginatorSettings.pageSizeOptions = this.config?.pageSizeOptions ||
       (this.config?.viewType === ListViewTypes.TABLE_ONLY ? defaultPaginationPageSizeOptionsTable : defaultPaginationPageSizeOptionsCards);
 
-    // Ensure we set a pageSize that's relevant to the configured set of page sizes. The default is 9 and in some cases is not a valid
-    // pageSize
+    // Set initial page size: session memory > store value > first option
     this.paginationController.pagination$.pipe(first()).subscribe(pagination => {
       this.initialPageEvent = new PageEvent();
       this.initialPageEvent.pageIndex = pagination.pageIndex - 1;
       this.initialPageEvent.pageSize = pagination.pageSize;
-      if (this.paginatorSettings.pageSizeOptions.findIndex(pageSize => pageSize === pagination.pageSize) < 0) {
+
+      // Check session for a remembered page size
+      const sessionSize = this.pageSizeSession.get(this.dataSource.paginationKey);
+      if (sessionSize !== undefined && this.paginatorSettings.pageSizeOptions.includes(sessionSize)) {
+        this.initialPageEvent.pageSize = sessionSize;
+        this.paginationController.pageSize(sessionSize);
+      } else if (this.paginatorSettings.pageSizeOptions.findIndex(pageSize => pageSize === pagination.pageSize) < 0) {
         this.initialPageEvent.pageSize = this.paginatorSettings.pageSizeOptions[0];
         this.paginationController.pageSize(this.paginatorSettings.pageSizeOptions[0]);
       }
@@ -723,6 +730,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
     if (pageSizeChanged) {
       this.paginationController.pageSize(pageEvent.pageSize);
+      // Remember the user's explicit choice for this session
+      this.pageSizeSession.set(this.dataSource.paginationKey, pageEvent.pageSize);
       if (this.dataSource.isLocal) {
         this.paginationController.page(0);
       }
