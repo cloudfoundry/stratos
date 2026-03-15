@@ -295,6 +295,8 @@ router-outlet + * {
     @apply transition-all duration-200 cursor-pointer;
     @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
     @apply disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none;
+    /* Ensure text is visible against both light and dark backgrounds */
+    color: var(--content-text);
   }
 
   /* Primary Button */
@@ -401,8 +403,14 @@ router-outlet + * {
 
   /* Ghost Button */
   .btn-ghost {
-    @apply bg-transparent border-gray-300 text-gray-700;
-    @apply hover:bg-gray-100 hover:border-gray-400;
+    @apply bg-transparent;
+    color: var(--content-text);
+    border-color: var(--content-border);
+
+    &:hover:not(:disabled) {
+      background-color: color-mix(in srgb, var(--card-bg) 90%, var(--content-text));
+      border-color: var(--content-text);
+    }
   }
 
   /* Outline Variants */
@@ -418,8 +426,14 @@ router-outlet + * {
   }
 
   .btn-outline-secondary {
-    @apply bg-transparent border-2 border-gray-300 text-gray-700;
-    @apply hover:bg-gray-100 hover:border-gray-400;
+    @apply bg-transparent border-2;
+    color: var(--content-text);
+    border-color: var(--content-border);
+
+    &:hover:not(:disabled) {
+      background-color: color-mix(in srgb, var(--card-bg) 90%, var(--content-text));
+      border-color: var(--content-text);
+    }
   }
 
   /* Icon Buttons - DRY approach with shared base */
@@ -431,6 +445,11 @@ router-outlet + * {
   .btn-icon {
     @extend %btn-icon-base;
     @apply w-9 h-9 min-w-[36px] min-h-[36px];
+    color: var(--content-text);
+
+    &:hover:not(:disabled) {
+      background-color: color-mix(in srgb, var(--card-bg) 90%, var(--content-text));
+    }
   }
 
   .btn-icon-sm {
