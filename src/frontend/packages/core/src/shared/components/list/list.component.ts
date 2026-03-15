@@ -429,18 +429,20 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     );
 
 
-    // Set initial page size options based on view type
-    this.paginatorSettings.pageSizeOptions = this.config?.pageSizeOptions ||
-      (this.config?.viewType === ListViewTypes.TABLE_ONLY ? defaultPaginationPageSizeOptionsTable : defaultPaginationPageSizeOptionsCards);
-
-    // Swap page size options when toggling between card and table views
-    if (!this.config?.pageSizeOptions && this.config?.viewType === ListViewTypes.BOTH) {
-      this.view$.subscribe(view => {
+    // Set page size options based on current view type, swap on toggle
+    if (this.config?.pageSizeOptions) {
+      this.paginatorSettings.pageSizeOptions = this.config.pageSizeOptions;
+    } else {
+      const setOptionsForView = (view: string) => {
         this.paginatorSettings.pageSizeOptions = view === 'table'
           ? [...defaultPaginationPageSizeOptionsTable]
           : [...defaultPaginationPageSizeOptionsCards];
         this.cd.markForCheck();
-      });
+      };
+
+      // Set initial + subscribe to changes
+      this.view$.pipe(first()).subscribe(view => setOptionsForView(view));
+      this.view$.subscribe(view => setOptionsForView(view));
     }
 
     // Set initial page size: session memory > store value > first option
