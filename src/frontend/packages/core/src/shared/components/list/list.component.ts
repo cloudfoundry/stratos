@@ -80,6 +80,7 @@ import { ITableColumn } from './list-table/table.types';
 import {
   defaultPaginationPageSizeOptionsCards,
   defaultPaginationPageSizeOptionsTable,
+  PAGE_SIZE_ALL,
   IGlobalListAction,
   IListConfig,
   IListFilter,
@@ -428,8 +429,18 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     );
 
 
+    // Set initial page size options based on view type
     this.paginatorSettings.pageSizeOptions = this.config?.pageSizeOptions ||
       (this.config?.viewType === ListViewTypes.TABLE_ONLY ? defaultPaginationPageSizeOptionsTable : defaultPaginationPageSizeOptionsCards);
+
+    // Swap page size options when toggling between card and table views
+    if (!this.config?.pageSizeOptions && this.config?.viewType === ListViewTypes.BOTH) {
+      this.view$.subscribe(view => {
+        this.paginatorSettings.pageSizeOptions = view === 'table'
+          ? defaultPaginationPageSizeOptionsTable
+          : defaultPaginationPageSizeOptionsCards;
+      });
+    }
 
     // Set initial page size: session memory > store value > first option
     this.paginationController.pagination$.pipe(first()).subscribe(pagination => {
@@ -437,14 +448,25 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       this.initialPageEvent.pageIndex = pagination.pageIndex - 1;
       this.initialPageEvent.pageSize = pagination.pageSize;
 
-      // Check session for a remembered page size
+      // Determine the right initial page size
       const sessionSize = this.pageSizeSession.get(this.dataSource.paginationKey);
-      if (sessionSize !== undefined && this.paginatorSettings.pageSizeOptions.includes(sessionSize)) {
-        this.initialPageEvent.pageSize = sessionSize;
-        this.paginationController.pageSize(sessionSize);
+      let targetSize: number | undefined;
+
+      if (sessionSize === PAGE_SIZE_ALL) {
+        // "All" was selected — resolve to current total
+        targetSize = pagination.totalResults || pagination.pageSize;
+      } else if (sessionSize !== undefined && this.paginatorSettings.pageSizeOptions.includes(sessionSize)) {
+        // Session has an explicit or inherited choice for this list
+        targetSize = sessionSize;
       } else if (this.paginatorSettings.pageSizeOptions.findIndex(pageSize => pageSize === pagination.pageSize) < 0) {
-        this.initialPageEvent.pageSize = this.paginatorSettings.pageSizeOptions[0];
-        this.paginationController.pageSize(this.paginatorSettings.pageSizeOptions[0]);
+        // Store has a page size not in our options (e.g., old default of 9)
+        targetSize = this.paginatorSettings.pageSizeOptions[0];
+      }
+
+      if (targetSize !== undefined) {
+        this.initialPageEvent.pageSize = targetSize;
+        // Use setTimeout to ensure this runs after the store-to-widget sync
+        setTimeout(() => this.paginationController.pageSize(targetSize!));
       }
     });
 
@@ -730,8 +752,11 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
     if (pageSizeChanged) {
       this.paginationController.pageSize(pageEvent.pageSize);
-      // Remember the user's explicit choice for this session
-      this.pageSizeSession.set(this.dataSource.paginationKey, pageEvent.pageSize);
+      // Remember the user's explicit choice for this session.
+      // Store PAGE_SIZE_ALL (-1) when "All" is selected so it can be
+      // matched back to the option on return.
+      const isAll = pageEvent.pageSize === pageEvent.length;
+      this.pageSizeSession.set(this.dataSource.paginationKey, isAll ? PAGE_SIZE_ALL : pageEvent.pageSize);
       if (this.dataSource.isLocal) {
         this.paginationController.page(0);
       }

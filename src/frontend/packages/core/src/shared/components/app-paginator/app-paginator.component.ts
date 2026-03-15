@@ -19,9 +19,17 @@ export class AppPaginatorComponent {
   @Input() pageIndex = 0;
   @Input() showFirstLastButtons = true;
 
+  /** The raw value for the select (-1 for All, or a number) */
+  get selectValue(): number {
+    return this.isAllSelected ? PAGE_SIZE_ALL : this.pageSize;
+  }
+
+  /** Whether "All" is currently selected */
+  private isAllSelected = false;
+
   /** Resolve "All" (-1) to the actual length */
   getEffectivePageSize(size: number): number {
-    return size === PAGE_SIZE_ALL ? this.length : size;
+    return size === PAGE_SIZE_ALL ? (this.length || 1) : size;
   }
 
   /** Display label for a page size option */
@@ -87,6 +95,7 @@ export class AppPaginatorComponent {
   }
 
   changePageSize(newPageSize: number): void {
+    this.isAllSelected = newPageSize === PAGE_SIZE_ALL;
     const effective = this.getEffectivePageSize(newPageSize);
     const startIndex = this.pageIndex * this.pageSize;
     const previousPageIndex = this.pageIndex;

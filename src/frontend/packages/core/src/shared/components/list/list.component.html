@@ -195,7 +195,7 @@
           }
           <!-- Item count (always visible when there are items) -->
           @if (paginatorSettings.length > 0) {
-            <span class="list-component__header__item-count text-sm text-gray-500">
+            <span class="list-component__header__item-count text-sm" style="color: var(--content-muted)">
               {{paginatorSettings.length}} {{paginatorSettings.length === 1 ? 'item' : 'items'}}
             </span>
           }

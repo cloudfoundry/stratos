@@ -1,10 +1,10 @@
 <div class="paginator flex items-center justify-between p-4">
   <div class="paginator-page-size flex items-center gap-2">
-    <label for="pageSize" class="text-sm text-gray-600">Items per page:</label>
+    <label for="pageSize" class="text-sm" style="color: var(--content-muted)">Items per page:</label>
     <select
       id="pageSize"
       class="select select-sm"
-      [value]="pageSize"
+      [value]="selectValue"
       (change)="changePageSize(+$any($event.target).value)">
       @for (option of pageSizeOptions; track option) {
         <option [value]="option">
@@ -14,7 +14,7 @@
     </select>
   </div>
 
-  <div class="paginator-info text-sm text-gray-600">
+  <div class="paginator-info text-sm" style="color: var(--content-muted)">
     @if (length > 0) {
       <span>{{getStartIndex()}} - {{getEndIndex()}} of {{length}}</span>
     }
