@@ -437,8 +437,9 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     if (!this.config?.pageSizeOptions && this.config?.viewType === ListViewTypes.BOTH) {
       this.view$.subscribe(view => {
         this.paginatorSettings.pageSizeOptions = view === 'table'
-          ? defaultPaginationPageSizeOptionsTable
-          : defaultPaginationPageSizeOptionsCards;
+          ? [...defaultPaginationPageSizeOptionsTable]
+          : [...defaultPaginationPageSizeOptionsCards];
+        this.cd.markForCheck();
       });
     }
 
