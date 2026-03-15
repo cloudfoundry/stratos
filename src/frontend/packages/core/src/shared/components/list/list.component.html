@@ -193,6 +193,12 @@
               </button>
             </div>
           }
+          <!-- Item count (always visible when there are items) -->
+          @if (paginatorSettings.length > 0) {
+            <span class="list-component__header__item-count text-sm text-gray-500">
+              {{paginatorSettings.length}} {{paginatorSettings.length === 1 ? 'item' : 'items'}}
+            </span>
+          }
           <!-- Select table or cards view button -->
           @if (config.viewType === 'both' && !(isAddingOrSelecting$ | async) && ((dataSource.isLoadingPage$ | async) || (hasRowsOrIsFiltering$ | async))) {
             <div id="list-card-toggle"
