@@ -42,6 +42,7 @@ import {
   ResetPaginationSortFilter,
   PaginatedAction,
   defaultClientPaginationPageSize,
+  SetClientPageSize,
 } from '@stratosui/store';
 import {
   asapScheduler,
@@ -272,6 +273,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
   private store = inject(Store<GeneralAppState>);
   private pageSizeSession = inject(PageSizeSessionService);
+  private currentView: string = 'cards';
   private cd = inject(ChangeDetectorRef);
   public config = inject(ListConfig<T>, { optional: true });
   private ngZone = inject(NgZone);
@@ -429,46 +431,71 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     );
 
 
-    // Set page size options based on current view type, swap on toggle
-    if (this.config?.pageSizeOptions) {
-      this.paginatorSettings.pageSizeOptions = this.config.pageSizeOptions;
+    // Set page size options based on current view type.
+    // If the config has a custom override (not the default cards/table arrays),
+    // use it as-is. Otherwise, swap options when toggling between views.
+    const hasCustomPageSizeOptions = this.config?.pageSizeOptions
+      && this.config.pageSizeOptions !== defaultPaginationPageSizeOptionsCards
+      && this.config.pageSizeOptions !== defaultPaginationPageSizeOptionsTable;
+
+    if (hasCustomPageSizeOptions) {
+      this.paginatorSettings.pageSizeOptions = this.config!.pageSizeOptions!;
     } else {
-      const setOptionsForView = (view: string) => {
-        this.paginatorSettings.pageSizeOptions = view === 'table'
+      this.view$.subscribe(view => {
+        this.currentView = view;
+        const newOptions = view === 'table'
           ? [...defaultPaginationPageSizeOptionsTable]
           : [...defaultPaginationPageSizeOptionsCards];
-        this.cd.markForCheck();
-      };
+        this.paginatorSettings.pageSizeOptions = newOptions;
 
-      // Set initial + subscribe to changes
-      this.view$.pipe(first()).subscribe(view => setOptionsForView(view));
-      this.view$.subscribe(view => setOptionsForView(view));
+        // Restore the remembered size for this view, or use the
+        // view's default if the current store value isn't valid.
+        const viewKey = `${this.dataSource.paginationKey}:${view}`;
+        const remembered = this.pageSizeSession.get(viewKey);
+        const targetSize = remembered !== undefined && newOptions.includes(remembered)
+          ? remembered
+          : newOptions[0];
+
+        // Always force the page size to match the current view's options
+        this.paginatorSettings.pageSize = targetSize;
+        if (this.dataSource.isLocal) {
+          this.store.dispatch(new SetClientPageSize(
+            this.dataSource, this.dataSource.paginationKey, targetSize
+          ));
+          this.paginationController.page(0);
+        } else {
+          this.paginationController.pageSize(targetSize);
+        }
+
+        this.cd.markForCheck();
+      });
     }
 
-    // Set initial page size: session memory > store value > first option
-    this.paginationController.pagination$.pipe(first()).subscribe(pagination => {
+    // Set initial page size: session memory > store value > first option.
+    // Wait for both view$ (sets options) and pagination$ (gives current state).
+    observableCombineLatest([
+      this.view$.pipe(first()),
+      this.paginationController.pagination$.pipe(first())
+    ]).subscribe(([view, pagination]) => {
       this.initialPageEvent = new PageEvent();
       this.initialPageEvent.pageIndex = pagination.pageIndex - 1;
       this.initialPageEvent.pageSize = pagination.pageSize;
 
-      // Determine the right initial page size
+      // Options are now set by the view$ subscription above
+      const options = this.paginatorSettings.pageSizeOptions;
       const sessionSize = this.pageSizeSession.get(this.dataSource.paginationKey);
       let targetSize: number | undefined;
 
       if (sessionSize === PAGE_SIZE_ALL) {
-        // "All" was selected — resolve to current total
         targetSize = pagination.totalResults || pagination.pageSize;
-      } else if (sessionSize !== undefined && this.paginatorSettings.pageSizeOptions.includes(sessionSize)) {
-        // Session has an explicit or inherited choice for this list
+      } else if (sessionSize !== undefined && options.includes(sessionSize)) {
         targetSize = sessionSize;
-      } else if (this.paginatorSettings.pageSizeOptions.findIndex(pageSize => pageSize === pagination.pageSize) < 0) {
-        // Store has a page size not in our options (e.g., old default of 9)
-        targetSize = this.paginatorSettings.pageSizeOptions[0];
+      } else if (!options.includes(pagination.pageSize)) {
+        targetSize = options[0];
       }
 
       if (targetSize !== undefined) {
         this.initialPageEvent.pageSize = targetSize;
-        // Use setTimeout to ensure this runs after the store-to-widget sync
         setTimeout(() => this.paginationController.pageSize(targetSize!));
       }
     });
@@ -755,11 +782,13 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
     if (pageSizeChanged) {
       this.paginationController.pageSize(pageEvent.pageSize);
-      // Remember the user's explicit choice for this session.
-      // Store PAGE_SIZE_ALL (-1) when "All" is selected so it can be
-      // matched back to the option on return.
+      // Remember the user's explicit choice per view (cards/table).
       const isAll = pageEvent.pageSize === pageEvent.length;
-      this.pageSizeSession.set(this.dataSource.paginationKey, isAll ? PAGE_SIZE_ALL : pageEvent.pageSize);
+      const sizeToStore = isAll ? PAGE_SIZE_ALL : pageEvent.pageSize;
+      const viewKey = `${this.dataSource.paginationKey}:${this.currentView}`;
+      this.pageSizeSession.set(viewKey, sizeToStore);
+      // Also store without view suffix for cross-screen inheritance
+      this.pageSizeSession.set(this.dataSource.paginationKey, sizeToStore);
       if (this.dataSource.isLocal) {
         this.paginationController.page(0);
       }
