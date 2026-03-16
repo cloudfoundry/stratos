@@ -113,9 +113,18 @@
           <div class="filter" id="listSearchFilter"
             [hidden]="!config.enableTextFilter || (!(hasRows$ | async) && !filter) || (dataSource.isAdding$ | async) || (dataSource.maxedResults$ | async)">
             <div class="form-field list-component__header__right-filter">
-              <input class="input" [ngModel]="filterString" #filter="ngModel"
-                [disabled]="(filterColumns.length > 1 && filterSelected === undefined) || (dataSource.isLoadingPage$ | async)"
-                name="filter" placeholder="{{ filterSelected?.placeholder || config.text?.filter || 'Filter'}}">
+              <div class="relative">
+                <input class="input pr-8" [ngModel]="filterString" #filter="ngModel"
+                  [disabled]="(filterColumns.length > 1 && filterSelected === undefined) || (dataSource.isLoadingPage$ | async)"
+                  name="filter" placeholder="{{ filterSelected?.placeholder || config.text?.filter || 'Filter'}}"
+                  (keydown.escape)="clearFilterText(); $event.stopPropagation()">
+                @if (filterString) {
+                  <button class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center bg-transparent border-none p-0 cursor-pointer text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                    type="button" (click)="clearFilterText()" title="Clear filter">
+                    <span class="material-icons text-lg">close</span>
+                  </button>
+                }
+              </div>
             </div>
           </div>
           <!-- Sort Button & Drop down -->

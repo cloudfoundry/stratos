@@ -384,4 +384,92 @@ test.describe('Pagination', () => {
       expect(cardNormalInfo).toMatch(/1\s*-\s*12\s*of\s*\d+/);
     });
   });
+
+  test.describe('Filter Clear (FWT-810)', () => {
+
+    /** Navigate to Applications page */
+    async function goToAppsPage(page: any): Promise<boolean> {
+      const appsNav = page.locator('a').filter({ hasText: /Applications/i }).first();
+      const visible = await appsNav.isVisible({ timeout: 10000 }).catch(() => false);
+      if (!visible) return false;
+      await appsNav.click();
+      await page.waitForLoadState('networkidle');
+      const paginatorInfo = page.locator('app-paginator .paginator-info span').first();
+      try {
+        await paginatorInfo.filter({ hasNotText: '0 of 0' }).waitFor({ timeout: 60000 });
+      } catch {
+        return false;
+      }
+      return true;
+    }
+
+    test('should show X button when filter has text and hide when empty', async ({ authenticatedPage }) => {
+      const page = authenticatedPage;
+      if (!await goToAppsPage(page)) {
+        test.skip('Applications page not reachable or no data');
+      }
+
+      const filterInput = page.locator('#listSearchFilter input[name="filter"]');
+      const clearBtn = page.locator('#listSearchFilter button[title="Clear filter"]');
+
+      // X button should not be visible initially
+      await expect(clearBtn).not.toBeVisible();
+
+      // Type in filter
+      await filterInput.fill('console');
+      await page.waitForTimeout(500);
+
+      // X button should now be visible
+      await expect(clearBtn).toBeVisible();
+
+      // Click X — filter should clear
+      await clearBtn.click();
+      await page.waitForTimeout(500);
+
+      const value = await filterInput.inputValue();
+      expect(value).toBe('');
+
+      // X button should be hidden again
+      await expect(clearBtn).not.toBeVisible();
+    });
+
+    test('should clear filter with Escape key', async ({ authenticatedPage }) => {
+      const page = authenticatedPage;
+      if (!await goToAppsPage(page)) {
+        test.skip('Applications page not reachable or no data');
+      }
+
+      const filterInput = page.locator('#listSearchFilter input[name="filter"]');
+      const info = page.locator('app-paginator .paginator-info span').first();
+
+      // Get initial count
+      const initialInfo = (await info.textContent()) || '';
+      const initialMatch = initialInfo.match(/of\s*(\d+)/);
+      const totalItems = initialMatch ? parseInt(initialMatch[1]) : 0;
+
+      // Type filter text to reduce results
+      await filterInput.fill('console');
+      await page.waitForTimeout(500);
+
+      // Results should be filtered (fewer items)
+      const filteredInfo = (await info.textContent()) || '';
+      const filteredMatch = filteredInfo.match(/of\s*(\d+)/);
+      const filteredItems = filteredMatch ? parseInt(filteredMatch[1]) : 0;
+      expect(filteredItems).toBeLessThanOrEqual(totalItems);
+
+      // Press Escape to clear
+      await filterInput.press('Escape');
+      await page.waitForTimeout(500);
+
+      // Input should be empty
+      const value = await filterInput.inputValue();
+      expect(value).toBe('');
+
+      // Results should be back to original count
+      const restoredInfo = (await info.textContent()) || '';
+      const restoredMatch = restoredInfo.match(/of\s*(\d+)/);
+      const restoredItems = restoredMatch ? parseInt(restoredMatch[1]) : 0;
+      expect(restoredItems).toBe(totalItems);
+    });
+  });
 });

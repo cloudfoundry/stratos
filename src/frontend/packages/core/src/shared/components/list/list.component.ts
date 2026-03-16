@@ -750,6 +750,11 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     }
   }
 
+  public clearFilterText() {
+    this.filterString = '';
+    this.paginationController.filterByString('');
+  }
+
   public resetFilteringAndSort() {
     /* tslint:disable-next-line:no-string-literal  */
     const pAction: PaginatedAction = (this.dataSource.action as any)['length'] ? (this.dataSource.action as any)[0] : this.dataSource.action;
