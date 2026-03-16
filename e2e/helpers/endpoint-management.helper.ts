@@ -24,6 +24,11 @@ export class EndpointManagementHelper {
   private adminSessionCreated = false;
   private userSessionCreated = false;
 
+  /** Map API endpoint types to secrets keys */
+  private static readonly ENDPOINT_TYPE_MAP: Record<string, string> = {
+    cf: 'cloudFoundry',
+  };
+
   constructor(baseURL: string = 'https://127.0.0.1:4200') {
     this.adminRequest = new RequestHelper(baseURL);
     this.userRequest = new RequestHelper(baseURL);
@@ -95,6 +100,17 @@ export class EndpointManagementHelper {
 
     const defaultCF = cfEndpoints[0];
 
+    // Check if already registered (idempotent)
+    const existing = await this.adminRequest.get('/api/v1/endpoints');
+    const alreadyRegistered = existing?.some((ep: any) => {
+      const host = ep.api_endpoint?.Host || '';
+      return host && defaultCF.url.includes(host);
+    });
+
+    if (alreadyRegistered) {
+      return;
+    }
+
     await this.adminRequest.postForm('/api/v1/endpoints?endpoint_type=cf', {
       api_endpoint: defaultCF.url,
       cnsi_name: defaultCF.name,
@@ -137,17 +153,21 @@ export class EndpointManagementHelper {
     }
 
     for (const endpoint of endpoints) {
-      // Find credentials in secrets
+      // Find credentials in secrets — map API type (e.g. 'cf') to secrets key (e.g. 'cloudFoundry')
       const endpointType = endpoint.cnsi_type;
-      const secretEndpoints = this.secrets[endpointType as keyof typeof this.secrets] as any[];
+      const secretsKey = EndpointManagementHelper.ENDPOINT_TYPE_MAP[endpointType] || endpointType;
+      const secretEndpoints = this.secrets[secretsKey as keyof typeof this.secrets] as any[];
 
       if (!secretEndpoints) {
-        console.warn(`No credentials found for endpoint type: ${endpointType}`);
+        console.warn(`No credentials found for endpoint type: ${endpointType} (secrets key: ${secretsKey})`);
         continue;
       }
 
+      // Match by URL host
+      const endpointHost = endpoint.api_endpoint?.Host ||
+        (typeof endpoint.api_endpoint === 'string' ? new URL(endpoint.api_endpoint).host : '');
       const found = secretEndpoints.find((ep: any) =>
-        endpoint.api_endpoint?.Host && ep.url.includes(endpoint.api_endpoint.Host)
+        endpointHost && ep.url.includes(endpointHost)
       );
 
       if (found) {
@@ -178,7 +198,8 @@ export class EndpointManagementHelper {
 
     for (const endpoint of endpoints) {
       const endpointType = endpoint.cnsi_type;
-      const secretEndpoints = this.secrets[endpointType as keyof typeof this.secrets] as any[];
+      const secretsKey = EndpointManagementHelper.ENDPOINT_TYPE_MAP[endpointType] || endpointType;
+      const secretEndpoints = this.secrets[secretsKey as keyof typeof this.secrets] as any[];
 
       if (!secretEndpoints) {
         continue;

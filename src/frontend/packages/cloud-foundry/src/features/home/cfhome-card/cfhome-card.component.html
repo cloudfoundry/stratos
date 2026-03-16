@@ -8,7 +8,7 @@
       <app-card-number-metric mode="plain" link="/cloud-foundry/{{guid}}/organizations" iconFont="stratos-icons"
       icon="organization" label="Orgs" labelSingular="Org" value="{{ (orgCount$ | async) }}"></app-card-number-metric>
     </app-tile>
-    @if (layout.x === 1) {
+    @if (layout.x <= 2) {
       <app-tile>
         <app-card-number-metric mode="plain" link="/cloud-foundry/{{guid}}/routes" iconFont="stratos-icons" icon="route"
         label="Routes" value="{{ (routeCount$ | async) }}"></app-card-number-metric>
@@ -19,7 +19,7 @@
     <app-tile>
       @if (cardLoaded && recentAppsRows > 0) {
         <app-card-cf-recent-apps [hideWhenEmpty]="true" [noStats]="true"
-          dateMode="subtle" [showDate]="layout.x === 1" [maxRows]="recentAppsRows" mode="plain" [endpoint]="guid">
+          dateMode="subtle" [showDate]="true" [maxRows]="recentAppsRows" mode="plain" [endpoint]="guid">
         </app-card-cf-recent-apps>
       }
       @if (!cardLoaded && recentAppsRows > 0) {

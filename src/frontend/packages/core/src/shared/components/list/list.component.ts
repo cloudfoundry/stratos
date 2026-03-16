@@ -3,6 +3,7 @@ import { AsyncPipe, CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, AfterViewInit,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   EventEmitter,
   forwardRef,
   inject,
@@ -22,6 +23,7 @@ import { ChangeDetectionStrategy, AfterViewInit,
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule, NgForm, NgModel } from '@angular/forms';
 import { MatPaginator, PageEvent } from '../../../shared/services/tailwind-material-replacements';
+import { PageSizeSessionService } from '../../../shared/services/page-size-session.service';
 export type SortDirection = 'asc' | 'desc' | '';
 import { Store } from '@ngrx/store';
 import {
@@ -41,6 +43,7 @@ import {
   ResetPaginationSortFilter,
   PaginatedAction,
   defaultClientPaginationPageSize,
+  SetClientPageSize,
 } from '@stratosui/store';
 import {
   asapScheduler,
@@ -79,6 +82,9 @@ import { ITableColumn } from './list-table/table.types';
 import {
   defaultPaginationPageSizeOptionsCards,
   defaultPaginationPageSizeOptionsTable,
+  PAGE_SIZE_ALL,
+  isPageSizeSentinel,
+  resolvePageSize,
   IGlobalListAction,
   IListConfig,
   IListFilter,
@@ -269,7 +275,10 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   }
 
   private store = inject(Store<GeneralAppState>);
+  private pageSizeSession = inject(PageSizeSessionService);
+  private currentView: string = 'cards';
   private cd = inject(ChangeDetectorRef);
+  private elRef = inject(ElementRef);
   public config = inject(ListConfig<T>, { optional: true });
   private ngZone = inject(NgZone);
   private injector = inject(Injector);
@@ -402,30 +411,104 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       startWith(false)
     );
 
-    // Determine if we should hide the paginator
-    this.hidePaginator$ = observableCombineLatest(this.hasRows$, this.paginationController.pagination$).pipe(
-      map(([hasRows, pagination]) => {
+    // Show paginator when there are visible rows and results exceed the smallest
+    // page size. For non-maxed lists this restores the original hide-when-small
+    // behavior. For maxed lists (e.g. CF tab pages with client-side pagination)
+    // the paginator is always shown so the user can control page size.
+    this.hidePaginator$ = observableCombineLatest(
+      hasPages$, this.dataSource.maxedResults$, this.paginationController.pagination$
+    ).pipe(
+      map(([hasPages, maxedResults, pagination]) => {
+        if (!hasPages) {
+          return true; // no data, hide
+        }
+        if (maxedResults) {
+          return false; // maxed list with data, always show paginator
+        }
+        // Non-maxed: hide when total fits in smallest page size
         const minPageSize = (
           this.paginatorSettings.pageSizeOptions && this.paginatorSettings.pageSizeOptions.length ?
             this.paginatorSettings.pageSizeOptions[0] : -1
         );
-        return !hasRows ||
-          pagination && (pagination.totalResults <= minPageSize);
-      }));
+        return pagination && (pagination.totalResults <= minPageSize);
+      })
+    );
 
 
-    this.paginatorSettings.pageSizeOptions = this.config?.pageSizeOptions ||
-      (this.config?.viewType === ListViewTypes.TABLE_ONLY ? defaultPaginationPageSizeOptionsTable : defaultPaginationPageSizeOptionsCards);
+    // Set page size options based on current view type.
+    // If the config has a custom override (not the default cards/table arrays),
+    // use it as-is. Otherwise, swap options when toggling between views.
+    const hasCustomPageSizeOptions = this.config?.pageSizeOptions
+      && this.config.pageSizeOptions !== defaultPaginationPageSizeOptionsCards
+      && this.config.pageSizeOptions !== defaultPaginationPageSizeOptionsTable;
 
-    // Ensure we set a pageSize that's relevant to the configured set of page sizes. The default is 9 and in some cases is not a valid
-    // pageSize
-    this.paginationController.pagination$.pipe(first()).subscribe(pagination => {
+    if (hasCustomPageSizeOptions) {
+      this.paginatorSettings.pageSizeOptions = this.config!.pageSizeOptions!;
+    } else {
+      this.view$.subscribe(view => {
+        this.currentView = view;
+        const newOptions = view === 'table'
+          ? [...defaultPaginationPageSizeOptionsTable]
+          : [...defaultPaginationPageSizeOptionsCards];
+        this.paginatorSettings.pageSizeOptions = newOptions;
+
+        // Restore the remembered size for this view, or use the
+        // view's default if the current store value isn't valid.
+        // Use hasExplicit + direct get to avoid cross-view fallback
+        // (lastExplicit from a different view would pollute this one).
+        const viewKey = `${this.dataSource.paginationKey}:${view}`;
+        const remembered = this.pageSizeSession.hasExplicit(viewKey)
+          ? this.pageSizeSession.get(viewKey)
+          : undefined;
+        const targetSize = remembered !== undefined && newOptions.includes(remembered)
+          ? remembered
+          : newOptions[0];
+
+        // Resolve sentinels (e.g., PAGE_SIZE_ALL = -1) to actual item count for the store.
+        // The paginator select handles sentinel display via its own setter.
+        const effectiveSize = resolvePageSize(targetSize, this.paginatorSettings.length);
+
+        // Always force the page size to match the current view's options
+        this.paginatorSettings.pageSize = targetSize;
+        if (this.dataSource.isLocal) {
+          this.store.dispatch(new SetClientPageSize(
+            this.dataSource, this.dataSource.paginationKey, effectiveSize
+          ));
+          this.paginationController.page(0);
+        } else {
+          this.paginationController.pageSize(effectiveSize);
+        }
+
+        this.cd.markForCheck();
+      });
+    }
+
+    // Set initial page size: session memory > store value > first option.
+    // Wait for both view$ (sets options) and pagination$ (gives current state).
+    observableCombineLatest([
+      this.view$.pipe(first()),
+      this.paginationController.pagination$.pipe(first())
+    ]).subscribe(([view, pagination]) => {
       this.initialPageEvent = new PageEvent();
       this.initialPageEvent.pageIndex = pagination.pageIndex - 1;
       this.initialPageEvent.pageSize = pagination.pageSize;
-      if (this.paginatorSettings.pageSizeOptions.findIndex(pageSize => pageSize === pagination.pageSize) < 0) {
-        this.initialPageEvent.pageSize = this.paginatorSettings.pageSizeOptions[0];
-        this.paginationController.pageSize(this.paginatorSettings.pageSizeOptions[0]);
+
+      // Options are now set by the view$ subscription above
+      const options = this.paginatorSettings.pageSizeOptions;
+      const sessionSize = this.pageSizeSession.get(this.dataSource.paginationKey);
+      let targetSize: number | undefined;
+
+      if (sessionSize !== undefined && isPageSizeSentinel(sessionSize)) {
+        targetSize = resolvePageSize(sessionSize, pagination.totalResults);
+      } else if (sessionSize !== undefined && options.includes(sessionSize)) {
+        targetSize = sessionSize;
+      } else if (!options.includes(pagination.pageSize)) {
+        targetSize = options[0];
+      }
+
+      if (targetSize !== undefined) {
+        this.initialPageEvent.pageSize = targetSize;
+        setTimeout(() => this.paginationController.pageSize(targetSize!));
       }
     });
 
@@ -641,6 +724,17 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
   ngAfterViewInit() {
     this.cd.detectChanges();
+    // Check scroll shadow when data changes
+    if (this.hasRows$) {
+      this.subs.push(
+        this.hasRows$.subscribe(() => setTimeout(() => this.updateScrollShadow()))
+      );
+    }
+    if (this.paginationController?.pagination$) {
+      this.subs.push(
+        this.paginationController.pagination$.subscribe(() => setTimeout(() => this.updateScrollShadow()))
+      );
+    }
   }
 
   ngOnDestroy() {
@@ -668,6 +762,44 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
         return this.config?.defaultView || 'table';
     }
   }
+
+  public clearFilterText() {
+    this.filterString = '';
+    this.paginationController.filterByString('');
+  }
+
+  getVisibleStart(): number {
+    return this.paginatorSettings.length > 0
+      ? this.paginatorSettings.pageIndex * this.paginatorSettings.pageSize + 1
+      : 0;
+  }
+
+  getVisibleEnd(): number {
+    return Math.min(
+      (this.paginatorSettings.pageIndex + 1) * this.paginatorSettings.pageSize,
+      this.paginatorSettings.length
+    );
+  }
+
+  showScrollShadow = signal(false);
+
+  onBodyScroll(event: Event) {
+    const el = event.target as HTMLElement;
+    this.updateScrollShadow(el);
+  }
+
+  private updateScrollShadow(el?: HTMLElement) {
+    if (!el) {
+      el = this.elRef.nativeElement.querySelector('.list-component__body-inner') as HTMLElement;
+    }
+    if (!el) return;
+    const hasMore = el.scrollHeight > el.clientHeight && el.scrollTop + el.clientHeight < el.scrollHeight - 4;
+    if (this.showScrollShadow() !== hasMore) {
+      this.showScrollShadow.set(hasMore);
+      this.cd.markForCheck();
+    }
+  }
+
 
   public resetFilteringAndSort() {
     /* tslint:disable-next-line:no-string-literal  */
@@ -711,6 +843,16 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
     if (pageSizeChanged) {
       this.paginationController.pageSize(pageEvent.pageSize);
+      // Remember the user's explicit choice per view (cards/table).
+      // If the effective size equals the total, find which sentinel matches.
+      const matchingSentinel = this.paginatorSettings.pageSizeOptions.find(opt =>
+        isPageSizeSentinel(opt) && resolvePageSize(opt, pageEvent.length) === pageEvent.pageSize
+      );
+      const sizeToStore = matchingSentinel !== undefined ? matchingSentinel : pageEvent.pageSize;
+      const viewKey = `${this.dataSource.paginationKey}:${this.currentView}`;
+      this.pageSizeSession.set(viewKey, sizeToStore);
+      // Also store without view suffix for cross-screen inheritance
+      this.pageSizeSession.set(this.dataSource.paginationKey, sizeToStore);
       if (this.dataSource.isLocal) {
         this.paginationController.page(0);
       }

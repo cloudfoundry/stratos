@@ -1,6 +1,6 @@
 :host {
   border: 1px solid #ccc;
-  display: flex;
+  display: block;
   padding: 0 12px;
 
   :host-context(.dark) & {
@@ -17,9 +17,10 @@
   display: flex;
   flex-direction: row;
   font-size: 14px;
-  height: 40px;
+  min-height: 40px;
   width: 100%;
   color: rgba(0, 0, 0, 0.87);
+  flex-wrap: wrap;
 
   :host-context(.dark) & {
     color: rgba(255, 255, 255, 0.87);
@@ -27,18 +28,24 @@
 
   &__name {
     flex: 1;
+    min-width: 0;
     padding-left: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  &__name a {
+    color: rgb(37 99 235); // blue-600
 
-    a {
-      color: rgb(37 99 235); // blue-600
-
-      :host-context(.dark) & {
-        color: rgb(96 165 250); // blue-400
-      }
+    :host-context(.dark) & {
+      color: rgb(96 165 250); // blue-400
     }
   }
   &__updated {
     color: rgba(0, 0, 0, 0.6);
+    white-space: nowrap;
+    margin-left: auto;
+    padding-left: 8px;
 
     :host-context(.dark) & {
       color: rgba(255, 255, 255, 0.6);

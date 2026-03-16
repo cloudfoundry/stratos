@@ -42,11 +42,15 @@ const noConnectedMsg = {
   icon: 'settings_ethernet'
 };
 
-const noFavoritesMsg = {
-  firstLine: 'There are no favorites',
-  secondLine: { text: 'Use the Endpoints view to favorite Endpoints'},
+const noFavoritesMsg = (endpointCount: number, favoriteCount: number) => ({
+  firstLine: endpointCount > 0
+    ? `You have ${endpointCount} endpoint${endpointCount !== 1 ? 's' : ''} and ${favoriteCount > 0 ? favoriteCount : 'none'} ha${favoriteCount === 1 ? 's' : 've'} been selected to be on your home page.`
+    : 'You have no endpoints.',
+  secondLine: { text: endpointCount > 0
+    ? 'Use the layout menu above to show all endpoints, or star an endpoint to add it here.'
+    : 'Use the Endpoints view to register and connect an endpoint.' },
   icon: 'star_outline'
-};
+});
 
 @Component({
   selector: 'app-home-page',
@@ -92,7 +96,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     new HomePageCardLayout(3, 2, 'Three Column'),
   ];
 
-  noneAvailableMsg = noFavoritesMsg;
+  noneAvailableMsg = noFavoritesMsg(0, 0);
 
   @ViewChild('endpointsPanel', { static: false }) endpointsPanel: ElementRef;
   @ViewChildren(HomePageEndpointCardComponent) endpointCards: QueryList<HomePageEndpointCardComponent>;
@@ -104,9 +108,8 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
   private viewMonitorSub!: Subscription;
   private cardChangesSub!: Subscription;
-  private _checkLayout = signal<boolean>(true);
+  private _checkLayout = signal<number>(0);
   private check$ = toObservable(this._checkLayout).pipe(
-    filter(v => v),
     debounceTime(100) // Debounce the check signal itself
   );
 
@@ -184,9 +187,10 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
           this.showAllEndpoints = showMode;
           // Persist the state
           this.store.dispatch(new SetDashboardStateValueAction('homeShowAllEndpoints', this.showAllEndpoints));
-          this.noneAvailableMsg = showMode ? noConnectedMsg : noFavoritesMsg;
         }
         const ordered = this.orderEndpoints(endpoints, favGroups, showMode);
+        const favoriteCount = showMode ? 0 : ordered.length;
+        this.noneAvailableMsg = showMode ? noConnectedMsg : noFavoritesMsg(endpoints.length, favoriteCount);
         return ordered.filter(ep => {
           const defn = entityCatalog.getEndpoint(ep.cnsi_type, ep.sub_type);
           const connected = defn.definition.unConnectable || ep.connectionStatus === 'connected';
@@ -227,9 +231,6 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
       if (this.isLoadingACard || this.notLoadedCardIndices.length === 0) {
         return;
       }
-
-      // Reset check signal
-      this._checkLayout.set(false);
 
       // User has scrolled - check the remaining cards that have not been loaded to see if any are now visible
       const remaining: number[] = [];
@@ -333,7 +334,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
   // Check the cards in view
   checkCardsInView() {
-    this._checkLayout.set(true);
+    this._checkLayout.update(v => v + 1);
   }
 
   public toggleShowAllEndpoints() {
@@ -361,13 +362,16 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     });
   }
 
-  // Order the endpoint cards - we always show all endpoints, order is:
+  // Order the endpoint cards:
   // 1. Endpoint has been added as a favourite
   // 2. Endpoint that has child favourites
   // 3. Remaining endpoints
+  // Within each group, sort by renderPriority (lower = first)
   private orderEndpoints(endpoints: EndpointModel[], favorites: IUserFavoritesGroups, showMode: boolean): EndpointModel[] {
     const processed: Record<string, boolean> = {};
-    const result: EndpointModel[] = [];
+    const directFavs: EndpointModel[] = [];
+    const childFavs: EndpointModel[] = [];
+    const rest: EndpointModel[] = [];
     const epMap: Record<string, EndpointModel> = {};
     endpoints.forEach(ep => epMap[ep.guid] = ep);
 
@@ -376,7 +380,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
         const id = favorites[fav].endpoint.endpointId;
         if (!!epMap[id] && !processed[id]) {
           processed[id] = true;
-          result.push(epMap[id]);
+          directFavs.push(epMap[id]);
         }
       }
     });
@@ -386,7 +390,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
         const id = favorites[fav].endpoint.endpointId;
         if (!!epMap[id] && !processed[id]) {
           processed[id] = true;
-          result.push(epMap[id]);
+          childFavs.push(epMap[id]);
         }
       }
     });
@@ -395,12 +399,22 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
       endpoints.forEach(ep => {
         if (!processed[ep.guid]) {
           processed[ep.guid] = true;
-          result.push(ep);
+          rest.push(ep);
         }
       });
     }
 
-    return result;
+    const byPriority = (a: EndpointModel, b: EndpointModel) => {
+      const pa = entityCatalog.getEndpoint(a.cnsi_type, a.sub_type)?.definition?.renderPriority ?? 1000;
+      const pb = entityCatalog.getEndpoint(b.cnsi_type, b.sub_type)?.definition?.renderPriority ?? 1000;
+      return pa - pb;
+    };
+
+    return [
+      ...directFavs.sort(byPriority),
+      ...childFavs.sort(byPriority),
+      ...rest.sort(byPriority),
+    ];
   }
 
   // Automatic layout - select the best layout based on the available endpoints
@@ -411,17 +425,25 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
         return !!defn.definition.homeCard;
       })),
       map(eps => {
+        // Count how many endpoints need wide cards (columnSpan > 1)
+        const wideCount = eps.filter(ep => {
+          const defn = entityCatalog.getEndpoint(ep.cnsi_type, ep.sub_type);
+          return (defn.definition.homeCard?.columnSpan || 1) > 1;
+        }).length;
+
+        // If most cards are wide, cap at 2 columns to avoid empty gaps
+        const mostlyWide = wideCount > eps.length / 2;
+
         switch (eps.length) {
           case 1:
             return this.getLayout(1, 1);
           case 2:
             return this.getLayout(1, 2);
           case 3:
-            return this.getLayout(2, 2);
           case 4:
             return this.getLayout(2, 2);
           default:
-            return this.getLayout(3, 2);
+            return this.getLayout(mostlyWide ? 2 : 3, 2);
         }
       })
     );
@@ -438,6 +460,13 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
   trackByEndpointGuid(index: number, endpoint: EndpointModel): string {
     return endpoint?.guid ?? index.toString();
+  }
+
+  // Get effective column span for an endpoint, clamped to available columns
+  getEffectiveSpan(ep: EndpointModel): number {
+    const defn = entityCatalog.getEndpoint(ep.cnsi_type, ep.sub_type);
+    const declared = defn?.definition?.homeCard?.columnSpan || 1;
+    return Math.min(declared, this.columns || 1);
   }
 
   // Dropdown menu helpers

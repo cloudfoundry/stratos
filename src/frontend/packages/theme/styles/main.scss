@@ -34,7 +34,7 @@
 /* CSS Custom Properties for theme customization */
 :root {
   /* Brand colors - these will be overridden by StratosThemeService */
-  --color-primary: #1e293b;
+  --color-primary: #3b82f6;
   --color-secondary: #60a5fa;
   --color-accent: #60a5fa;
   --color-success: #22c55e;
@@ -317,7 +317,7 @@ router-outlet + * {
     }
   }
 
-  /* Secondary Button */
+  /* Secondary Button — theme-aware text and background */
   .btn-secondary {
     @apply shadow-sm;
     color: var(--content-text);
@@ -401,8 +401,14 @@ router-outlet + * {
 
   /* Ghost Button */
   .btn-ghost {
-    @apply bg-transparent border-gray-300 text-gray-700;
-    @apply hover:bg-gray-100 hover:border-gray-400;
+    @apply bg-transparent;
+    color: var(--content-text);
+    border-color: var(--content-border);
+
+    &:hover:not(:disabled) {
+      background-color: color-mix(in srgb, var(--card-bg) 90%, var(--content-text));
+      border-color: var(--content-text);
+    }
   }
 
   /* Outline Variants */
@@ -418,8 +424,14 @@ router-outlet + * {
   }
 
   .btn-outline-secondary {
-    @apply bg-transparent border-2 border-gray-300 text-gray-700;
-    @apply hover:bg-gray-100 hover:border-gray-400;
+    @apply bg-transparent border-2;
+    color: var(--content-text);
+    border-color: var(--content-border);
+
+    &:hover:not(:disabled) {
+      background-color: color-mix(in srgb, var(--card-bg) 90%, var(--content-text));
+      border-color: var(--content-text);
+    }
   }
 
   /* Icon Buttons - DRY approach with shared base */
@@ -431,6 +443,11 @@ router-outlet + * {
   .btn-icon {
     @extend %btn-icon-base;
     @apply w-9 h-9 min-w-[36px] min-h-[36px];
+    color: var(--content-text);
+
+    &:hover:not(:disabled) {
+      background-color: color-mix(in srgb, var(--card-bg) 90%, var(--content-text));
+    }
   }
 
   .btn-icon-sm {

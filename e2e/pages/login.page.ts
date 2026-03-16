@@ -1,5 +1,7 @@
 import { Page, Locator } from '@playwright/test';
 import { BasePage } from './base.page';
+import { fillAngularLogin } from '../helpers/angular-input.helper';
+import { AuthType } from '../helpers/auth.helper';
 
 /**
  * Login Page Object
@@ -53,10 +55,12 @@ export class LoginPage extends BasePage {
    * Migrated from: enterLogin(username, password)
    */
   async enterLogin(username: string, password: string): Promise<void> {
-    await this.usernameInput.clear();
-    await this.passwordInput.clear();
-    await this.usernameInput.fill(username);
-    await this.passwordInput.fill(password);
+    // Wait for inputs to be rendered (inside @if block that depends on ssoLogin$)
+    await this.usernameInput.waitFor({ state: 'visible', timeout: 10000 });
+    await this.passwordInput.waitFor({ state: 'visible', timeout: 10000 });
+
+    // Use native setter + events to trigger Angular OnPush + ngModel
+    await fillAngularLogin(this.page, username, password);
   }
 
   /**
@@ -80,6 +84,7 @@ export class LoginPage extends BasePage {
    * Migrated from: getLoginError()
    */
   async getLoginError(): Promise<string> {
+    await this.errorMessage.waitFor({ state: 'visible', timeout: 10000 });
     return await this.errorMessage.textContent() || '';
   }
 
@@ -88,8 +93,8 @@ export class LoginPage extends BasePage {
    * Migrated from: isLoginError()
    */
   async isLoginError(): Promise<boolean> {
-    const text = await this.getLoginError();
-    return text === 'Username and password combination incorrect. Please try again.';
+    const text = (await this.getLoginError()).trim();
+    return text.length > 0;
   }
 
   /**

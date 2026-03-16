@@ -27,7 +27,7 @@ const tools = [
     script: '../src/frontend/packages/devkit/src/backend.ts',
     required: true,
     description: 'Generates extra_plugins.go for Jetstream backend',
-    watchPaths: ['src/frontend/packages/*/package.json'],
+    watchPaths: ['src/jetstream/plugin-config.yaml'],
     useTsx: true  // Run with tsx for TypeScript support
   },
   {

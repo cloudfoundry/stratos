@@ -9,6 +9,7 @@
   display: grid;
   gap: 1.5rem;
   grid-auto-rows: min-content;
+  grid-auto-flow: dense;
   width: 100%;
 
   /* Mobile-first: 1 column */

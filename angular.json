@@ -66,7 +66,7 @@
         "build-internal": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist",
+            "outputPath": "dist/frontend",
             "index": "src/frontend/packages/core/src/index.html",
             "browser": "src/frontend/packages/core/src/main.ts",
             "polyfills": [

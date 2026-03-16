@@ -273,6 +273,7 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
       }),
       shortcuts: cfShortcuts,
       fullView: false,
+      columnSpan: 2,
     },
     listDetailsComponent: CfEndpointDetailsComponent,
     renderPriority: 1,

@@ -10,12 +10,12 @@
         (click)="openRegisterModal()"
         matTooltip="Register Endpoint"
         >
-        <app-custom-icon>add</app-custom-icon>
+        <span class="material-icons">add</span>
       </button>
       @if (canBackupRestore$ | async) {
         <button id="stratos-restore-backup" class="btn btn-icon" type="button"
           [routerLink]="'/endpoints/backup-restore'" matTooltip="Backup/Restore Endpoints">
-          <app-custom-icon>settings_backup_restore</app-custom-icon>
+          <span class="material-icons">settings_backup_restore</span>
         </button>
       }
     </div>

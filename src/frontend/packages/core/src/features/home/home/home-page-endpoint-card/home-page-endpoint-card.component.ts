@@ -77,9 +77,13 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
     return this.pLayout;
   }
 
+  // Raw grid layout before columnSpan adjustment
+  private rawLayout: HomePageCardLayout;
+
   @Input() set layout(value: HomePageCardLayout) {
     if (value) {
-      this.pLayout = value;
+      this.rawLayout = value;
+      this.computeEffectiveLayout();
     }
     this.updateLayout();
   }
@@ -154,6 +158,9 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
       this.favorite = this.userFavoriteManager.getFavoriteEndpointFromEntity(this.endpoint);
       this.fullView = this.definition?.homeCard?.fullView;
       this.link = this.favorite.getLink();
+      // Recompute effective layout now that definition is available
+      this.computeEffectiveLayout();
+      this.updateLayout();
     }
 
     this.links$ = combineLatest([this.favorites$, this.layout$]).pipe(
@@ -214,9 +221,17 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
     }
   }
 
+  private computeEffectiveLayout() {
+    if (this.rawLayout) {
+      const span = this.definition?.homeCard?.columnSpan || 1;
+      const effectiveX = Math.max(1, this.rawLayout.x - span + 1);
+      this.pLayout = new HomePageCardLayout(effectiveX, this.rawLayout.y);
+    }
+  }
+
   // Layout has changed
   public updateLayout() {
-    this._layout.set(this.layout);
+    this._layout.set(this.pLayout);
     if (this.ref && this.ref.instance) {
       this.ref.instance.layout = this.pLayout;
     }

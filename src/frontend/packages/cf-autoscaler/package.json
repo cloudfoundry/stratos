@@ -9,7 +9,6 @@
   "stratos": {
     "module": "CfAutoscalerPackageModule",
     "routingModule": "CfAutoscalerRoutingModule",
-    "theming": "sass/_all-theme#apply-theme-stratos-autoscaler",
-    "backend": ["autoscaler"]
+    "theming": "sass/_all-theme#apply-theme-stratos-autoscaler"
   }
 }

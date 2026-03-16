@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from 
 
 import { FormsModule } from '@angular/forms';
 import { TailwindPaginator, TailwindPageEvent } from '../../services/tailwind-paginator.service';
+import { isPageSizeSentinel, resolvePageSize, getPageSizeLabel as getSizeLabel } from '../list/list.component.types';
 
 @Component({
   selector: 'app-paginator',
@@ -13,10 +14,51 @@ import { TailwindPaginator, TailwindPageEvent } from '../../services/tailwind-pa
 })
 export class AppPaginatorComponent {
   @Input() length = 0;
-  @Input() pageSize = 50;
-  @Input() pageSizeOptions: number[] = [9, 30, 80];
+  @Input() pageSizeOptions: number[] = [6, 12, 24, 48, 96, -1];
   @Input() pageIndex = 0;
   @Input() showFirstLastButtons = true;
+
+  private _pageSize = 50;
+  /** The sentinel value when the user explicitly selected a sentinel, or null. */
+  private _activeSentinel: number | null = null;
+
+  @Input()
+  set pageSize(value: number) {
+    if (isPageSizeSentinel(value)) {
+      this._pageSize = resolvePageSize(value, this.length);
+      this._activeSentinel = value;
+    } else {
+      this._pageSize = value;
+      this._activeSentinel = null;
+    }
+  }
+  get pageSize(): number {
+    return this._pageSize;
+  }
+
+  /** The raw value for the select — returns the sentinel value when active. */
+  get selectValue(): number {
+    // Explicit sentinel selection takes priority
+    if (this._activeSentinel !== null) return this._activeSentinel;
+    // If the current size matches a known option, show it
+    if (this.pageSizeOptions.includes(this._pageSize)) return this._pageSize;
+    // Size not in options — find a sentinel whose resolved value matches
+    const sentinel = this.pageSizeOptions.find(opt =>
+      isPageSizeSentinel(opt) && resolvePageSize(opt, this.length) === this._pageSize
+    );
+    if (sentinel !== undefined) return sentinel;
+    return this._pageSize;
+  }
+
+  /** Resolve a sentinel to an effective page size, or return as-is. */
+  getEffectivePageSize(size: number): number {
+    return resolvePageSize(size, this.length);
+  }
+
+  /** Display label for a page size option. */
+  getPageSizeLabel(size: number): string {
+    return getSizeLabel(size);
+  }
 
   @Output() page = new EventEmitter<TailwindPageEvent>();
 
@@ -73,11 +115,13 @@ export class AppPaginatorComponent {
   }
 
   changePageSize(newPageSize: number): void {
+    this._activeSentinel = isPageSizeSentinel(newPageSize) ? newPageSize : null;
+    const effective = this.getEffectivePageSize(newPageSize);
     const startIndex = this.pageIndex * this.pageSize;
     const previousPageIndex = this.pageIndex;
 
-    this.pageSize = newPageSize;
-    this.pageIndex = Math.floor(startIndex / newPageSize) || 0;
+    this.pageSize = effective;
+    this.pageIndex = effective > 0 ? Math.floor(startIndex / effective) || 0 : 0;
 
     this.emitPageEvent(previousPageIndex);
   }

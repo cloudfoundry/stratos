@@ -1,0 +1,16 @@
+# Backend plugins compiled into the jetstream binary.
+# Default plugins (backup, cloudfoundryhosting, metrics, userfavorites,
+# userinfo) are always included via default_plugins.go.
+#
+# Each entry must have a corresponding directory under
+# src/jetstream/plugins/<name>.
+
+plugins:
+  - cloudfoundry
+  - cfapppush
+  - cfappssh
+  - userinvite
+  - autoscaler
+  - kubernetes
+  - analysis
+  - monocular

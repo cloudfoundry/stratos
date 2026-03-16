@@ -1,13 +1,13 @@
-// Defualt proxy conf when running a local backend
-// npm install will copy this one to the root of the repository
-// if there is not ont there already, as a convenience to quick start
+// Proxy config for local backend
+// Backend port is configurable via BACKEND_PORT env var (default: 5443)
+const port = parseInt(process.env.BACKEND_PORT || '5443');
 
 const PROXY_CONFIG = {
   "/pp": {
     "target": {
       "host": "127.0.0.1",
       "protocol": "https:",
-      "port": 5443
+      "port": port
     },
     "ws": true,
     "secure": false,
@@ -17,7 +17,7 @@ const PROXY_CONFIG = {
     "target": {
       "host": "127.0.0.1",
       "protocol": "https:",
-      "port": 5443
+      "port": port
     },
     "ws": true,
     "secure": false,

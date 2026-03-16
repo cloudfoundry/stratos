@@ -40,7 +40,6 @@ import { SnackBarService } from '../../../shared/services/snackbar.service';
 import { SessionService } from '../../../shared/services/session.service';
 import { EndpointModalService } from '../endpoint-register-modal/endpoint-modal.service';
 import { EndpointRegisterModalComponent } from '../endpoint-register-modal/endpoint-register-modal.component';
-import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 
 @Component({
   selector: 'app-endpoints-page',
@@ -55,7 +54,6 @@ import { CustomIconComponent } from '../../../shared/components/custom-material/
   imports: [
     CommonModule,
     RouterModule,
-    CustomIconComponent,
     CustomTooltipDirective,
     PageHeaderComponent,
     ListComponent,

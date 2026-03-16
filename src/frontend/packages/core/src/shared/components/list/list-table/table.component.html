@@ -13,7 +13,7 @@
     <div class="card-content app-table__content">
       <div class="table-container app-table__inner" #table [hidden]="hideTable">
         <div class="table-wrapper" role="table">
-          <div class="table-header" role="rowgroup">
+          <div class="table-header sticky top-0 z-10 bg-white dark:bg-gray-900" role="rowgroup">
             <div class="table-header-row flex items-center app-table__header-row"
               [ngClass]="{'in-expanded-row': !!inExpandedRow, 'has-expanded-row': expandComponent, 'app-table__inner--has-expanded-columns': !!expandComponent}"
               [hidden]="hideTable"

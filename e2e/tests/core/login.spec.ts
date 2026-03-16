@@ -5,78 +5,121 @@ import { LoginPage } from '../../pages/login.page';
  * Login E2E Tests
  * Migrated from src/test-e2e/login/login-e2e.spec.ts
  *
- * Tests the authentication flow including:
- * - Reaching the login page
- * - Rejecting invalid credentials
- * - Accepting valid credentials
+ * Tests the authentication flow for both local and SSO auth:
+ * - Local: Angular form with username/password fields
+ * - SSO:   "Sign In" button redirects to UAA login page
  */
 test.describe('Login', () => {
-  let loginPage: LoginPage;
 
-  test.beforeEach(async ({ page }) => {
-    loginPage = new LoginPage(page);
+  test('should reach log in page', async ({ page, authType }) => {
+    const loginPage = new LoginPage(page);
     await loginPage.navigateTo();
+
+    if (authType === 'local') {
+      // Local auth shows username/password form
+      expect(await loginPage.isLoginPage()).toBeTruthy();
+      await expect(loginPage.loginButton()).toBeVisible();
+    } else {
+      // SSO shows "Sign In" button that redirects to UAA
+      const ssoButton = page.locator('button').filter({ hasText: /sign in/i }).first();
+      await expect(ssoButton).toBeVisible();
+    }
   });
 
-  test('should reach log in page', async ({ page }) => {
-    // Verify we're on the login page
-    expect(await loginPage.isLoginPage()).toBeTruthy();
+  test.describe('Local Auth', () => {
+    test.beforeEach(async ({ authType }) => {
+      test.skip(authType !== 'local', 'Local auth tests — skipped in SSO mode');
+    });
 
-    // Verify login button is present
-    await expect(loginPage.loginButton()).toBeVisible();
+    test('should reject bad user', async ({ page }) => {
+      const loginPage = new LoginPage(page);
+      await loginPage.navigateTo();
+      await loginPage.enterLogin('badusername', 'badpassword');
+      await expect(loginPage.loginButton()).toBeEnabled();
+      await loginPage.clickLogin();
+      expect(await loginPage.isLoginError()).toBeTruthy();
+      expect(await loginPage.isLoginPage()).toBeTruthy();
+    });
+
+    test('should reject bad password', async ({ page, secrets }) => {
+      const loginPage = new LoginPage(page);
+      await loginPage.navigateTo();
+      await loginPage.enterLogin(secrets.console.admin.username, 'badpassword');
+      await expect(loginPage.loginButton()).toBeEnabled();
+      await loginPage.clickLogin();
+      expect(await loginPage.isLoginError()).toBeTruthy();
+      expect(await loginPage.isLoginPage()).toBeTruthy();
+    });
+
+    test('should accept correct details', async ({ page, secrets }) => {
+      const loginPage = new LoginPage(page);
+      await loginPage.navigateTo();
+      await loginPage.enterLogin(secrets.console.admin.username, secrets.console.admin.password);
+      await expect(loginPage.loginButton()).toBeEnabled();
+      await loginPage.clickLogin();
+      await loginPage.waitForApplicationPage();
+      expect(await loginPage.isLoginPage()).toBeFalsy();
+    });
   });
 
-  test('should reject bad user', async ({ page, secrets }) => {
-    // Enter invalid credentials
-    await loginPage.enterLogin('badusername', 'badpassword');
+  test.describe('SSO Auth', () => {
+    test.beforeEach(async ({ authType }) => {
+      test.skip(authType !== 'sso', 'SSO auth tests — skipped in local mode');
+    });
 
-    // Verify button is enabled
-    await expect(loginPage.loginButton()).toBeEnabled();
+    test('should redirect to UAA login page', async ({ page }) => {
+      await page.goto('/login');
 
-    // Click login
-    await loginPage.clickLogin();
+      // Click SSO sign in button
+      const ssoButton = page.locator('button').filter({ hasText: /sign in/i }).first();
+      await ssoButton.click();
 
-    // Should show error message
-    expect(await loginPage.isLoginError()).toBeTruthy();
+      // Should redirect to UAA
+      await page.waitForURL(/.*login\.sys.*|.*uaa.*/, { timeout: 15000 });
+      const url = page.url();
+      expect(url).toMatch(/login|uaa|oauth/);
+    });
 
-    // Should still be on login page
-    expect(await loginPage.isLoginPage()).toBeTruthy();
-  });
+    test('should reject bad credentials on UAA', async ({ page }) => {
+      await page.goto('/login');
 
-  test('should reject bad password', async ({ page, secrets }) => {
-    // Enter valid username but invalid password
-    await loginPage.enterLogin(secrets.console.admin.username, 'badpassword');
+      const ssoButton = page.locator('button').filter({ hasText: /sign in/i }).first();
+      await ssoButton.click();
+      await page.waitForURL(/.*login\.sys.*|.*uaa.*/, { timeout: 15000 });
 
-    // Verify button is enabled
-    await expect(loginPage.loginButton()).toBeEnabled();
+      // UAA login page — standard HTML, fill() works
+      const uaaUsername = page.locator('input[name="username"], input[id="username"]').first();
+      const uaaPassword = page.locator('input[name="password"], input[id="password"]').first();
+      const uaaSubmit = page.locator('input[type="submit"], button[type="submit"]').first();
 
-    // Click login
-    await loginPage.clickLogin();
+      await uaaUsername.fill('badusername');
+      await uaaPassword.fill('badpassword');
+      await uaaSubmit.click();
 
-    // Should show error message
-    expect(await loginPage.isLoginError()).toBeTruthy();
+      // Should show error on UAA page
+      const errorMessage = page.locator('.alert-error, .error, [role="alert"]');
+      await expect(errorMessage.first()).toBeVisible({ timeout: 5000 });
+    });
 
-    // Should still be on login page
-    expect(await loginPage.isLoginPage()).toBeTruthy();
-  });
+    test('should accept correct credentials via UAA', async ({ page, secrets }) => {
+      await page.goto('/login');
 
-  test('should accept correct details', async ({ page, secrets }) => {
-    // Enter valid credentials
-    await loginPage.enterLogin(
-      secrets.console.admin.username,
-      secrets.console.admin.password
-    );
+      const ssoButton = page.locator('button').filter({ hasText: /sign in/i }).first();
+      await ssoButton.click();
+      await page.waitForURL(/.*login\.sys.*|.*uaa.*/, { timeout: 15000 });
 
-    // Verify button is enabled
-    await expect(loginPage.loginButton()).toBeEnabled();
+      // Fill UAA login form
+      const uaaUsername = page.locator('input[name="username"], input[id="username"]').first();
+      const uaaPassword = page.locator('input[name="password"], input[id="password"]').first();
+      const uaaSubmit = page.locator('input[type="submit"], button[type="submit"]').first();
 
-    // Click login
-    await loginPage.clickLogin();
+      await uaaUsername.fill(secrets.console.admin.username);
+      await uaaPassword.fill(secrets.console.admin.password);
+      await uaaSubmit.click();
 
-    // Wait for application page
-    await loginPage.waitForApplicationPage();
-
-    // Should not be on login page anymore
-    expect(await loginPage.isLoginPage()).toBeFalsy();
+      // Should redirect back to Stratos
+      await page.waitForURL(/^(?!.*(uaa|login\.sys|oauth))/, { timeout: 20000 });
+      expect(page.url()).not.toContain('/login');
+    });
   });
 });

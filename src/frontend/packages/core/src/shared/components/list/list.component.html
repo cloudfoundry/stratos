@@ -113,9 +113,18 @@
           <div class="filter" id="listSearchFilter"
             [hidden]="!config.enableTextFilter || (!(hasRows$ | async) && !filter) || (dataSource.isAdding$ | async) || (dataSource.maxedResults$ | async)">
             <div class="form-field list-component__header__right-filter">
-              <input class="input" [ngModel]="filterString" #filter="ngModel"
-                [disabled]="(filterColumns.length > 1 && filterSelected === undefined) || (dataSource.isLoadingPage$ | async)"
-                name="filter" placeholder="{{ filterSelected?.placeholder || config.text?.filter || 'Filter'}}">
+              <div class="relative">
+                <input class="input pr-8" [ngModel]="filterString" #filter="ngModel"
+                  [disabled]="(filterColumns.length > 1 && filterSelected === undefined) || (dataSource.isLoadingPage$ | async)"
+                  name="filter" placeholder="{{ filterSelected?.placeholder || config.text?.filter || 'Filter'}}"
+                  (keydown.escape)="clearFilterText(); $event.stopPropagation()">
+                @if (filterString) {
+                  <button class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center bg-transparent border-none p-0 cursor-pointer text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                    type="button" (click)="clearFilterText()" title="Clear filter">
+                    <span class="material-icons text-lg">close</span>
+                  </button>
+                }
+              </div>
             </div>
           </div>
           <!-- Sort Button & Drop down -->
@@ -193,6 +202,12 @@
               </button>
             </div>
           }
+          <!-- Item count (always visible when there are items) -->
+          @if (paginatorSettings.length > 0) {
+            <span class="list-component__header__item-count text-sm" style="color: var(--content-muted)">
+              {{getVisibleStart()}} - {{getVisibleEnd()}} of {{paginatorSettings.length}}
+            </span>
+          }
           <!-- Select table or cards view button -->
           @if (config.viewType === 'both' && !(isAddingOrSelecting$ | async) && ((dataSource.isLoadingPage$ | async) || (hasRowsOrIsFiltering$ | async))) {
             <div id="list-card-toggle"
@@ -233,8 +248,10 @@
         }
       </div>
     }
-    <div class="list-component__body">
-      <div class="list-component__body-inner" [hidden]="!(hasRows$ | async)" [@list]="(pageState$ | async)">
+    <div class="list-component__body relative">
+      <div class="list-component__body-inner"
+        (scroll)="onBodyScroll($event)"
+        [hidden]="!(hasRows$ | async)" [@list]="(pageState$ | async)">
         @if ((view$ | async) === 'cards') {
           <app-cards #cards [dataSource]="dataSource"
           [component]="config.cardComponent" [hidden]="!(hasRows$ | async)"></app-cards>
@@ -247,6 +264,8 @@
           </app-table>
         }
       </div>
+      <div class="absolute bottom-[67px] inset-x-0 h-8 pointer-events-none z-50 bg-gradient-to-t from-app-bg to-transparent transition-opacity duration-200"
+        [class.opacity-0]="!showScrollShadow()"></div>
       <div class="card list-component__paginator" [hidden]="(hidePaginator$ | async)">
         <app-paginator
           [length]="paginatorSettings.length"

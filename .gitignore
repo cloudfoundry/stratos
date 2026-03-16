@@ -91,6 +91,9 @@ src/backend/*/vendor/
 
 *.bak
 /secrets.yaml
+/secrets.*.yaml
+/secrets.yaml.enc
+cl.resume
 build/dev_config.json
 e2e-reports/
 .stratos-git-metadata.json
@@ -161,6 +164,5 @@ src/jetstream/jetstream.exe
 build/src/
 src/frontend/packages/store/node_modules/
 test-results/
-secrets.yaml
 node_modules
 *.darwin

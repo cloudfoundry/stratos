@@ -51,13 +51,13 @@ check_prerequisites() {
   log "Checking prerequisites..."
 
   # Check frontend build
-  if [ ! -d "${DIST_DIR}" ] || [ -z "$(ls -A ${DIST_DIR} 2>/dev/null | grep -v bin | grep -v release)" ]; then
-    error "Frontend not built. Run: make build-frontend"
+  if [ ! -d "${DIST_DIR}/frontend/browser" ] && [ ! -d "${DIST_DIR}/frontend/stratos" ]; then
+    error "Frontend not built. Run: make build frontend"
   fi
 
   # Check backend binaries
   if [ ! -d "${BIN_DIR}" ]; then
-    error "Backend binaries not found. Run: make build-backend-all"
+    error "Backend binaries not found. Run: make build backend-all"
   fi
 
   local missing_binaries=()
@@ -73,7 +73,7 @@ check_prerequisites() {
   done
 
   if [ ${#missing_binaries[@]} -gt 0 ]; then
-    error "Missing binaries: ${missing_binaries[*]}. Run: make build-backend-all"
+    error "Missing binaries: ${missing_binaries[*]}. Run: make build backend-all"
   fi
 
   success "Prerequisites OK"
@@ -115,17 +115,10 @@ package_platform() {
   chmod +x "${stagedir}/bin/jetstream${ext}"
 
   # Copy frontend build
-  if [ -d "${DIST_DIR}/browser" ]; then
-    cp -r "${DIST_DIR}/browser"/* "${stagedir}/ui/" 2>/dev/null || true
-  elif [ -d "${DIST_DIR}/stratos" ]; then
-    cp -r "${DIST_DIR}/stratos"/* "${stagedir}/ui/" 2>/dev/null || true
-  else
-    # Try to copy anything that's not bin or release
-    for item in "${DIST_DIR}"/*; do
-      if [ "$(basename "$item")" != "bin" ] && [ "$(basename "$item")" != "release" ]; then
-        cp -r "$item" "${stagedir}/ui/" 2>/dev/null || true
-      fi
-    done
+  if [ -d "${DIST_DIR}/frontend/browser" ]; then
+    cp -r "${DIST_DIR}/frontend/browser"/* "${stagedir}/ui/" 2>/dev/null || true
+  elif [ -d "${DIST_DIR}/frontend/stratos" ]; then
+    cp -r "${DIST_DIR}/frontend/stratos"/* "${stagedir}/ui/" 2>/dev/null || true
   fi
 
   # Copy configuration

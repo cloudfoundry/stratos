@@ -1,5 +1,6 @@
 :host {
-  display: flex;
+  display: block;
+  width: 100%;
 }
 .recent-apps-card {
   display: flex;
@@ -13,7 +14,10 @@
 
   &__content {
     display: flex;
+    flex-direction: column;
+    flex: 1;
     overflow-y: auto;
+    width: 100%;
   }
 
   &__header {

@@ -202,13 +202,19 @@ export class StratosConfig implements Logger {
   }
 
   public getBackendPlugins(): string[] {
+    const configFile = path.join(this.rootDir, 'src', 'jetstream', 'plugin-config.yaml');
     const plugins = {};
-    this.packages.packages.forEach(pkg => {
-      pkg.backendPlugins.forEach(name => {
-        plugins[name] = true;
-      });
-    });
 
+    if (fs.existsSync(configFile)) {
+      const config = yaml.load(fs.readFileSync(configFile, 'utf8')) as { plugins?: string[] };
+      if (config && config.plugins) {
+        config.plugins.forEach(name => {
+          plugins[name] = true;
+        });
+      }
+    }
+
+    // stratos.yaml backend overrides still supported
     if (this.stratosConfig.backend) {
       this.stratosConfig.backend.forEach(name => {
         plugins[name] = true;

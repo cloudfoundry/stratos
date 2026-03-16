@@ -1,10 +1,18 @@
 import { defineConfig, devices } from '@playwright/test';
 
+// Default secrets profile to 'local' unless overridden
+process.env.STRATOS_E2E_PROFILE ??= 'local';
+
+// Test environment ports (separate from dev to avoid conflicts)
+const BACKEND_PORT = process.env.BACKEND_PORT || '5543';
+const FRONTEND_PORT = process.env.FRONTEND_PORT || '5540';
+
 /**
  * Playwright configuration for Stratos E2E tests
  * Migrated from Protractor configuration
  */
 export default defineConfig({
+
   // Test directory
   testDir: './e2e/tests',
 
@@ -30,7 +38,7 @@ export default defineConfig({
   // Shared settings for all the projects below
   use: {
     // Base URL for navigation
-    baseURL: process.env.STRATOS_E2E_BASE_URL || 'https://localhost:5440',
+    baseURL: process.env.STRATOS_E2E_BASE_URL || `https://localhost:${FRONTEND_PORT}`,
 
     // Collect trace when retrying the failed test
     trace: 'on-first-retry',
@@ -52,13 +60,14 @@ export default defineConfig({
   },
 
   // Global timeout for each test
-  timeout: 40000, // Matches Protractor allScriptsTimeout
+  // SSO login fixtures can take 15-20s each (headless browser OAuth flow)
+  timeout: 90000,
 
-  // Global setup timeout
-  globalSetup: undefined,
+  // Report test environment status before tests start
+  globalSetup: './e2e/global-setup.ts',
 
-  // Global teardown timeout
-  globalTeardown: undefined,
+  // Kill test servers (identified by STRATOS_E2E env var) after tests complete
+  globalTeardown: './e2e/global-teardown.ts',
 
   // Expect timeout
   expect: {
@@ -96,13 +105,33 @@ export default defineConfig({
     // },
   ],
 
-  // Run your local dev server before starting the tests
-  // Comment out if running against a different server
-  webServer: {
-    command: 'bun run start',
-    url: 'https://localhost:5440',
-    reuseExistingServer: true, // Always reuse existing server (dev server + backend must be running)
-    ignoreHTTPSErrors: true,
-    timeout: 120000, // 2 minutes to start server
-  },
+  // Auto-start backend and frontend for tests using dedicated ports.
+  // Reuses existing servers if already running on these ports.
+  //
+  // Process identification: STRATOS_E2E=e2e:<backend_port> is set as an env
+  // var on both backend and frontend processes. This appears in the command
+  // line visible to pkill/pgrep, enabling targeted cleanup without PID files
+  // (which can become stale if a process crashes).
+  //
+  // The backend port is the session ID — one ID covers both processes.
+  //
+  //   ps aux | grep 'STRATOS_E2E=e2e'       # find all test sessions
+  //   ps aux | grep 'e2e:5543'             # find a specific session
+  //   pkill -f 'e2e:5543'                  # kill a specific session
+  webServer: [
+    {
+      command: `cd src/jetstream && STRATOS_E2E=e2e:${BACKEND_PORT} CONSOLE_PROXY_TLS_ADDRESS=:${BACKEND_PORT} ../../dist/bin/jetstream`,
+      url: `https://localhost:${BACKEND_PORT}/pp/v1/info`,
+      reuseExistingServer: true,
+      ignoreHTTPSErrors: true,
+      timeout: 30000,
+    },
+    {
+      command: `STRATOS_E2E=e2e:${BACKEND_PORT} BACKEND_PORT=${BACKEND_PORT} bun run ng serve --port ${FRONTEND_PORT} --proxy-config proxy.conf.cjs`,
+      url: `https://localhost:${FRONTEND_PORT}`,
+      reuseExistingServer: true,
+      ignoreHTTPSErrors: true,
+      timeout: 120000,
+    },
+  ],
 });
