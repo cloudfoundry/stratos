@@ -42,11 +42,15 @@ const noConnectedMsg = {
   icon: 'settings_ethernet'
 };
 
-const noFavoritesMsg = {
-  firstLine: 'There are no favorites',
-  secondLine: { text: 'Use the Endpoints view to favorite Endpoints'},
+const noFavoritesMsg = (endpointCount: number, favoriteCount: number) => ({
+  firstLine: endpointCount > 0
+    ? `You have ${endpointCount} endpoint${endpointCount !== 1 ? 's' : ''} and ${favoriteCount > 0 ? favoriteCount : 'none'} ha${favoriteCount === 1 ? 's' : 've'} been selected to be on your home page.`
+    : 'You have no endpoints.',
+  secondLine: { text: endpointCount > 0
+    ? 'Use the layout menu above to show all endpoints, or star an endpoint to add it here.'
+    : 'Use the Endpoints view to register and connect an endpoint.' },
   icon: 'star_outline'
-};
+});
 
 @Component({
   selector: 'app-home-page',
@@ -92,7 +96,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     new HomePageCardLayout(3, 2, 'Three Column'),
   ];
 
-  noneAvailableMsg = noFavoritesMsg;
+  noneAvailableMsg = noFavoritesMsg(0, 0);
 
   @ViewChild('endpointsPanel', { static: false }) endpointsPanel: ElementRef;
   @ViewChildren(HomePageEndpointCardComponent) endpointCards: QueryList<HomePageEndpointCardComponent>;
@@ -183,9 +187,10 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
           this.showAllEndpoints = showMode;
           // Persist the state
           this.store.dispatch(new SetDashboardStateValueAction('homeShowAllEndpoints', this.showAllEndpoints));
-          this.noneAvailableMsg = showMode ? noConnectedMsg : noFavoritesMsg;
         }
         const ordered = this.orderEndpoints(endpoints, favGroups, showMode);
+        const favoriteCount = showMode ? 0 : ordered.length;
+        this.noneAvailableMsg = showMode ? noConnectedMsg : noFavoritesMsg(endpoints.length, favoriteCount);
         return ordered.filter(ep => {
           const defn = entityCatalog.getEndpoint(ep.cnsi_type, ep.sub_type);
           const connected = defn.definition.unConnectable || ep.connectionStatus === 'connected';
