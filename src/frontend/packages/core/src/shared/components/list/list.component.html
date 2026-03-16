@@ -205,7 +205,7 @@
           <!-- Item count (always visible when there are items) -->
           @if (paginatorSettings.length > 0) {
             <span class="list-component__header__item-count text-sm" style="color: var(--content-muted)">
-              {{paginatorSettings.length}} {{paginatorSettings.length === 1 ? 'item' : 'items'}}
+              {{getVisibleStart()}} - {{getVisibleEnd()}} of {{paginatorSettings.length}}
             </span>
           }
           <!-- Select table or cards view button -->
@@ -248,8 +248,10 @@
         }
       </div>
     }
-    <div class="list-component__body">
-      <div class="list-component__body-inner" [hidden]="!(hasRows$ | async)" [@list]="(pageState$ | async)">
+    <div class="list-component__body relative">
+      <div class="list-component__body-inner"
+        (scroll)="onBodyScroll($event)"
+        [hidden]="!(hasRows$ | async)" [@list]="(pageState$ | async)">
         @if ((view$ | async) === 'cards') {
           <app-cards #cards [dataSource]="dataSource"
           [component]="config.cardComponent" [hidden]="!(hasRows$ | async)"></app-cards>
@@ -262,6 +264,8 @@
           </app-table>
         }
       </div>
+      <div class="absolute bottom-[67px] inset-x-0 h-8 pointer-events-none z-50 bg-gradient-to-t from-app-bg to-transparent transition-opacity duration-200"
+        [class.opacity-0]="!showScrollShadow()"></div>
       <div class="card list-component__paginator" [hidden]="(hidePaginator$ | async)">
         <app-paginator
           [length]="paginatorSettings.length"

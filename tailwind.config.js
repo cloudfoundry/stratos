@@ -26,6 +26,9 @@ module.exports = {
     'bg-danger-shade-400',
     'bg-danger-shade-500',
     'bg-danger-shade-600',
+    // Scroll shadow gradient
+    'from-app-bg',
+    'bg-gradient-to-t',
   ],
   theme: {
     extend: {

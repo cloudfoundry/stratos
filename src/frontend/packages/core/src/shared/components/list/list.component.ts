@@ -3,6 +3,7 @@ import { AsyncPipe, CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, AfterViewInit,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   EventEmitter,
   forwardRef,
   inject,
@@ -277,6 +278,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   private pageSizeSession = inject(PageSizeSessionService);
   private currentView: string = 'cards';
   private cd = inject(ChangeDetectorRef);
+  private elRef = inject(ElementRef);
   public config = inject(ListConfig<T>, { optional: true });
   private ngZone = inject(NgZone);
   private injector = inject(Injector);
@@ -722,6 +724,17 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
   ngAfterViewInit() {
     this.cd.detectChanges();
+    // Check scroll shadow when data changes
+    if (this.hasRows$) {
+      this.subs.push(
+        this.hasRows$.subscribe(() => setTimeout(() => this.updateScrollShadow()))
+      );
+    }
+    if (this.paginationController?.pagination$) {
+      this.subs.push(
+        this.paginationController.pagination$.subscribe(() => setTimeout(() => this.updateScrollShadow()))
+      );
+    }
   }
 
   ngOnDestroy() {
@@ -754,6 +767,39 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     this.filterString = '';
     this.paginationController.filterByString('');
   }
+
+  getVisibleStart(): number {
+    return this.paginatorSettings.length > 0
+      ? this.paginatorSettings.pageIndex * this.paginatorSettings.pageSize + 1
+      : 0;
+  }
+
+  getVisibleEnd(): number {
+    return Math.min(
+      (this.paginatorSettings.pageIndex + 1) * this.paginatorSettings.pageSize,
+      this.paginatorSettings.length
+    );
+  }
+
+  showScrollShadow = signal(false);
+
+  onBodyScroll(event: Event) {
+    const el = event.target as HTMLElement;
+    this.updateScrollShadow(el);
+  }
+
+  private updateScrollShadow(el?: HTMLElement) {
+    if (!el) {
+      el = this.elRef.nativeElement.querySelector('.list-component__body-inner') as HTMLElement;
+    }
+    if (!el) return;
+    const hasMore = el.scrollHeight > el.clientHeight && el.scrollTop + el.clientHeight < el.scrollHeight - 4;
+    if (this.showScrollShadow() !== hasMore) {
+      this.showScrollShadow.set(hasMore);
+      this.cd.markForCheck();
+    }
+  }
+
 
   public resetFilteringAndSort() {
     /* tslint:disable-next-line:no-string-literal  */
