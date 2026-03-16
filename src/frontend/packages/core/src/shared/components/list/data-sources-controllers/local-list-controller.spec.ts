@@ -262,4 +262,18 @@ describe('LocalListController', () => {
     ]);
     expect(data.index).toEqual(null);
   });
+
+  it('should return all items as single page when pageSize is -1 (PAGE_SIZE_ALL)', () => {
+    const items = [0, 1, 2, 3, 4, 5];
+    const data = splitCurrentPage(items, -1, 1);
+    expect(data.entities).toEqual([items]);
+    expect(data.index).toEqual(0);
+  });
+
+  it('should return all items as single page when pageSize is 0', () => {
+    const items = [0, 1, 2];
+    const data = splitCurrentPage(items, 0, 1);
+    expect(data.entities).toEqual([items]);
+    expect(data.index).toEqual(0);
+  });
 });

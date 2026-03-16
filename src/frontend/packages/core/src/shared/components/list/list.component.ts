@@ -82,6 +82,8 @@ import {
   defaultPaginationPageSizeOptionsCards,
   defaultPaginationPageSizeOptionsTable,
   PAGE_SIZE_ALL,
+  isPageSizeSentinel,
+  resolvePageSize,
   IGlobalListAction,
   IListConfig,
   IListFilter,
@@ -450,21 +452,29 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
         // Restore the remembered size for this view, or use the
         // view's default if the current store value isn't valid.
+        // Use hasExplicit + direct get to avoid cross-view fallback
+        // (lastExplicit from a different view would pollute this one).
         const viewKey = `${this.dataSource.paginationKey}:${view}`;
-        const remembered = this.pageSizeSession.get(viewKey);
+        const remembered = this.pageSizeSession.hasExplicit(viewKey)
+          ? this.pageSizeSession.get(viewKey)
+          : undefined;
         const targetSize = remembered !== undefined && newOptions.includes(remembered)
           ? remembered
           : newOptions[0];
+
+        // Resolve sentinels (e.g., PAGE_SIZE_ALL = -1) to actual item count for the store.
+        // The paginator select handles sentinel display via its own setter.
+        const effectiveSize = resolvePageSize(targetSize, this.paginatorSettings.length);
 
         // Always force the page size to match the current view's options
         this.paginatorSettings.pageSize = targetSize;
         if (this.dataSource.isLocal) {
           this.store.dispatch(new SetClientPageSize(
-            this.dataSource, this.dataSource.paginationKey, targetSize
+            this.dataSource, this.dataSource.paginationKey, effectiveSize
           ));
           this.paginationController.page(0);
         } else {
-          this.paginationController.pageSize(targetSize);
+          this.paginationController.pageSize(effectiveSize);
         }
 
         this.cd.markForCheck();
@@ -486,8 +496,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       const sessionSize = this.pageSizeSession.get(this.dataSource.paginationKey);
       let targetSize: number | undefined;
 
-      if (sessionSize === PAGE_SIZE_ALL) {
-        targetSize = pagination.totalResults || pagination.pageSize;
+      if (sessionSize !== undefined && isPageSizeSentinel(sessionSize)) {
+        targetSize = resolvePageSize(sessionSize, pagination.totalResults);
       } else if (sessionSize !== undefined && options.includes(sessionSize)) {
         targetSize = sessionSize;
       } else if (!options.includes(pagination.pageSize)) {
@@ -783,8 +793,11 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     if (pageSizeChanged) {
       this.paginationController.pageSize(pageEvent.pageSize);
       // Remember the user's explicit choice per view (cards/table).
-      const isAll = pageEvent.pageSize === pageEvent.length;
-      const sizeToStore = isAll ? PAGE_SIZE_ALL : pageEvent.pageSize;
+      // If the effective size equals the total, find which sentinel matches.
+      const matchingSentinel = this.paginatorSettings.pageSizeOptions.find(opt =>
+        isPageSizeSentinel(opt) && resolvePageSize(opt, pageEvent.length) === pageEvent.pageSize
+      );
+      const sizeToStore = matchingSentinel !== undefined ? matchingSentinel : pageEvent.pageSize;
       const viewKey = `${this.dataSource.paginationKey}:${this.currentView}`;
       this.pageSizeSession.set(viewKey, sizeToStore);
       // Also store without view suffix for cross-screen inheritance

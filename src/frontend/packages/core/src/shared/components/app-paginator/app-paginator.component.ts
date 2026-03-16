@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from 
 
 import { FormsModule } from '@angular/forms';
 import { TailwindPaginator, TailwindPageEvent } from '../../services/tailwind-paginator.service';
-import { PAGE_SIZE_ALL } from '../list/list.component.types';
+import { isPageSizeSentinel, resolvePageSize, getPageSizeLabel as getSizeLabel } from '../list/list.component.types';
 
 @Component({
   selector: 'app-paginator',
@@ -14,27 +14,50 @@ import { PAGE_SIZE_ALL } from '../list/list.component.types';
 })
 export class AppPaginatorComponent {
   @Input() length = 0;
-  @Input() pageSize = 50;
-  @Input() pageSizeOptions: number[] = [6, 12, 24, 48, 96, PAGE_SIZE_ALL];
+  @Input() pageSizeOptions: number[] = [6, 12, 24, 48, 96, -1];
   @Input() pageIndex = 0;
   @Input() showFirstLastButtons = true;
 
-  /** The raw value for the select (-1 for All, or a number) */
+  private _pageSize = 50;
+  /** The sentinel value when the user explicitly selected a sentinel, or null. */
+  private _activeSentinel: number | null = null;
+
+  @Input()
+  set pageSize(value: number) {
+    if (isPageSizeSentinel(value)) {
+      this._pageSize = resolvePageSize(value, this.length);
+      this._activeSentinel = value;
+    } else {
+      this._pageSize = value;
+      this._activeSentinel = null;
+    }
+  }
+  get pageSize(): number {
+    return this._pageSize;
+  }
+
+  /** The raw value for the select — returns the sentinel value when active. */
   get selectValue(): number {
-    return this.isAllSelected ? PAGE_SIZE_ALL : this.pageSize;
+    // Explicit sentinel selection takes priority
+    if (this._activeSentinel !== null) return this._activeSentinel;
+    // If the current size matches a known option, show it
+    if (this.pageSizeOptions.includes(this._pageSize)) return this._pageSize;
+    // Size not in options — find a sentinel whose resolved value matches
+    const sentinel = this.pageSizeOptions.find(opt =>
+      isPageSizeSentinel(opt) && resolvePageSize(opt, this.length) === this._pageSize
+    );
+    if (sentinel !== undefined) return sentinel;
+    return this._pageSize;
   }
 
-  /** Whether "All" is currently selected */
-  private isAllSelected = false;
-
-  /** Resolve "All" (-1) to the actual length */
+  /** Resolve a sentinel to an effective page size, or return as-is. */
   getEffectivePageSize(size: number): number {
-    return size === PAGE_SIZE_ALL ? (this.length || 1) : size;
+    return resolvePageSize(size, this.length);
   }
 
-  /** Display label for a page size option */
+  /** Display label for a page size option. */
   getPageSizeLabel(size: number): string {
-    return size === PAGE_SIZE_ALL ? 'All' : String(size);
+    return getSizeLabel(size);
   }
 
   @Output() page = new EventEmitter<TailwindPageEvent>();
@@ -92,7 +115,7 @@ export class AppPaginatorComponent {
   }
 
   changePageSize(newPageSize: number): void {
-    this.isAllSelected = newPageSize === PAGE_SIZE_ALL;
+    this._activeSentinel = isPageSizeSentinel(newPageSize) ? newPageSize : null;
     const effective = this.getEffectivePageSize(newPageSize);
     const startIndex = this.pageIndex * this.pageSize;
     const previousPageIndex = this.pageIndex;

@@ -4,10 +4,9 @@
     <select
       id="pageSize"
       class="select select-sm"
-      [value]="selectValue"
       (change)="changePageSize(+$any($event.target).value)">
       @for (option of pageSizeOptions; track option) {
-        <option [value]="option">
+        <option [value]="option" [selected]="option === selectValue">
           {{getPageSizeLabel(option)}}
         </option>
       }

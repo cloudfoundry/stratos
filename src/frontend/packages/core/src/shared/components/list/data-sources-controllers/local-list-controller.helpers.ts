@@ -5,6 +5,13 @@ export function splitCurrentPage<T = any>(entities: (T | T[])[], pageSize: numbe
       index: 0
     };
   }
+  // Sentinel values (negative) or zero: return all items as a single page
+  if (pageSize <= 0) {
+    return {
+      entities: [entities as unknown as T[]],
+      index: 0
+    };
+  }
   const index = getCurrentPageStartIndex(entities, pageSize, currentPage);
   if (index === null || Array.isArray(entities[index])) {
     return {
