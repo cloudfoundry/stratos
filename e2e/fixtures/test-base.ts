@@ -91,30 +91,27 @@ export const test = base.extend<TestFixtures>({
    * No Endpoints Admin Page - Admin user with all endpoints cleared
    * Migrated from: e2e.setup(ConsoleUserType.admin).clearAllEndpoints()
    */
-  noEndpointsAdminPage: async ({ page, secrets, authType, endpointManager }, use) => {
-    await endpointManager.clearAllEndpoints();
+  noEndpointsAdminPage: async ({ page, secrets, authType }, use) => {
+    // Note: clearAllEndpoints removed — destructive to shared environments.
+    // Tests using this fixture should handle the case where endpoints exist.
     await browserLogin(page, secrets.console.admin.username, secrets.console.admin.password, authType);
     await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
     await use(page);
   },
 
   /**
-   * No Endpoints User Page - Regular user with all endpoints cleared
-   * Migrated from: e2e.setup(ConsoleUserType.user).clearAllEndpoints()
+   * No Endpoints User Page - Regular user logged in
    */
-  noEndpointsUserPage: async ({ page, secrets, authType, endpointManager }, use) => {
-    await endpointManager.clearAllEndpoints();
+  noEndpointsUserPage: async ({ page, secrets, authType }, use) => {
     await browserLogin(page, secrets.console.user.username, secrets.console.user.password, authType);
     await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
     await use(page);
   },
 
   /**
-   * Registered Endpoints Page - Admin with default CF registered but not connected
-   * Migrated from: e2e.setup(ConsoleUserType.admin).clearAllEndpoints().registerDefaultCloudFoundry()
+   * Registered Endpoints Page - Admin with default CF registered
    */
   registeredEndpointsPage: async ({ page, secrets, authType, endpointManager }, use) => {
-    await endpointManager.clearAllEndpoints();
     await endpointManager.registerDefaultCloudFoundry();
     await browserLogin(page, secrets.console.admin.username, secrets.console.admin.password, authType);
     await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
@@ -138,8 +135,7 @@ export const test = base.extend<TestFixtures>({
    * Migrated from: e2e.setup(ConsoleUserType.admin).clearAllEndpoints().registerDefaultCloudFoundry().connectAllEndpoints(ConsoleUserType.admin)
    */
   connectedEndpointsAdminPage: async ({ page, secrets, authType, endpointManager, baseURL }, use) => {
-    // Setup: clear all, register, and connect
-    await endpointManager.clearAllEndpoints();
+    // Ensure endpoint is registered and connected (idempotent, non-destructive)
     await endpointManager.registerDefaultCloudFoundry();
     await endpointManager.connectAllEndpoints(ConsoleUserType.admin);
 

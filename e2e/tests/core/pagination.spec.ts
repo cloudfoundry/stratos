@@ -34,7 +34,7 @@ test.describe('Pagination', () => {
     // Wait for paginator to show data (not "0 of 0")
     const paginatorInfo = page.locator('app-paginator .paginator-info span').first();
     try {
-      await paginatorInfo.filter({ hasNotText: '0 of 0' }).waitFor({ timeout: 30000 });
+      await paginatorInfo.filter({ hasNotText: '0 of 0' }).waitFor({ timeout: 60000 });
     } catch {
       return false;
     }
@@ -182,10 +182,10 @@ test.describe('Pagination', () => {
       await appsNav.click();
       await page.waitForLoadState('networkidle');
 
-      // Wait for data to load
+      // Wait for data to load — allow extra time after fresh deploys (cold start)
       const paginatorInfo = page.locator('app-paginator .paginator-info span').first();
       try {
-        await paginatorInfo.filter({ hasNotText: '0 of 0' }).waitFor({ timeout: 30000 });
+        await paginatorInfo.filter({ hasNotText: '0 of 0' }).waitFor({ timeout: 60000 });
       } catch {
         return false;
       }
@@ -312,6 +312,76 @@ test.describe('Pagination', () => {
       await page.waitForTimeout(1000);
       const tableValue = await select.inputValue();
       expect(tableValue).toBe('50');
+    });
+
+    test('should sync dropdown and paginator info after "All" toggle', async ({ authenticatedPage }) => {
+      const page = authenticatedPage;
+      if (!await goToAppsPage(page)) {
+        test.skip('Applications page not reachable or no data');
+      }
+
+      const select = page.locator('app-paginator select#pageSize');
+      const info = page.locator('app-paginator .paginator-info span').first();
+      const tableToggle = page.locator('button[title="Table view"]');
+      const cardToggle = page.locator('button[title="Card view"]');
+
+      // Ensure we start in card view
+      if (await cardToggle.isVisible({ timeout: 3000 }).catch(() => false)) {
+        await cardToggle.click();
+        await page.waitForTimeout(1000);
+      }
+
+      // Select "All" in card view
+      await select.selectOption('-1');
+      await page.waitForTimeout(500);
+
+      // Dropdown should show "All" (-1) and paginator should show all items
+      const allValue = await select.inputValue();
+      expect(allValue).toBe('-1');
+      const allInfo = (await info.textContent()) || '';
+      const allMatch = allInfo.match(/1\s*-\s*(\d+)\s*of\s*(\d+)/);
+      if (allMatch) {
+        expect(allMatch[1]).toBe(allMatch[2]); // showing all items
+      }
+
+      // Switch to table — dropdown should show table default, not "All"
+      await tableToggle.click();
+      await page.waitForTimeout(1000);
+      const tableValue = await select.inputValue();
+      expect(tableValue).not.toBe('-1');
+      const tableInfo = (await info.textContent()) || '';
+      expect(tableInfo).not.toContain('0 of 0');
+
+      // Switch back to card — should show "All" again
+      await cardToggle.click();
+      await page.waitForTimeout(1000);
+      const cardAllValue = await select.inputValue();
+      expect(cardAllValue).toBe('-1');
+      const cardAllInfo = (await info.textContent()) || '';
+      const cardAllMatch = cardAllInfo.match(/1\s*-\s*(\d+)\s*of\s*(\d+)/);
+      if (cardAllMatch) {
+        expect(cardAllMatch[1]).toBe(cardAllMatch[2]); // still showing all items
+      }
+
+      // Switch to table and back to card with a normal size
+      await tableToggle.click();
+      await page.waitForTimeout(1000);
+      await cardToggle.click();
+      await page.waitForTimeout(1000);
+
+      // Set card to a specific size (12)
+      await select.selectOption('12');
+      await page.waitForTimeout(500);
+
+      // Toggle to table and back — should show 12, not "All"
+      await tableToggle.click();
+      await page.waitForTimeout(1000);
+      await cardToggle.click();
+      await page.waitForTimeout(1000);
+      const cardNormalValue = await select.inputValue();
+      expect(cardNormalValue).toBe('12');
+      const cardNormalInfo = (await info.textContent()) || '';
+      expect(cardNormalInfo).toMatch(/1\s*-\s*12\s*of\s*\d+/);
     });
   });
 });
