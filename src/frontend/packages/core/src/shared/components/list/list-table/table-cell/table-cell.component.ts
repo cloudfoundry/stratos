@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Component,
   ComponentFactoryResolver,
   Input,
@@ -53,6 +54,7 @@ export class TableCellComponent<T> implements OnInit {
 
   private cellComponent!: TableCellCustom<T>;
   private componentFactoryResolver = inject(ComponentFactoryResolver);
+  private cdr = inject(ChangeDetectorRef);
 
   private getComponent() {
     if (this.cellDefinition) {
@@ -100,6 +102,8 @@ export class TableCellComponent<T> implements OnInit {
         defaultTableCell.cellDefinition = this.cellDefinition;
         defaultTableCell.init();
       }
+      // Zoneless + OnPush: force CD on dynamically created component
+      component.changeDetectorRef.detectChanges();
     }
   }
 

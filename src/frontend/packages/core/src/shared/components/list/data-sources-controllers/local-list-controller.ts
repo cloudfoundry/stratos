@@ -20,7 +20,7 @@ export class LocalListController<T = any> {
     this.page$ = this.buildCurrentPageObservable(pagesObservable$, currentPageIndexObservable$, currentPageSizeObservable$);
   }
 
-  private pageSplitCache: (T | T[])[] = null;
+  // pageSplitCache removed — was causing stale data after filtering (FWT-837)
 
   /*
    * Emit the core set of entities that are sorted and filtered but not paginated
@@ -49,7 +49,6 @@ export class LocalListController<T = any> {
       cleanPage$
     ).pipe(
       map(([paginationEntity, entities]) => {
-        this.pageSplitCache = null;
         // `entities` can become out of sync with `paginationEntity.ids`. If either are empty just return empty,
         // otherwise this leads to churn and result count flip flopping
         if (!entities || !entities.length || Object.keys(paginationEntity.ids).length === 0) {
@@ -108,19 +107,15 @@ export class LocalListController<T = any> {
   ): Observable<T[]> {
     return combineLatest(
       entities$,
-      currentPageSizeObservable$.pipe(tap(() => {
-        this.pageSplitCache = null;
-      })),
+      currentPageSizeObservable$,
       currentPageNumber$,
     ).pipe(
       map(([entities, pageSize, currentPage]) => {
-        const pages = this.pageSplitCache ? this.pageSplitCache : entities;
         const data = splitCurrentPage(
-          pages,
+          entities,
           pageSize,
           currentPage
         );
-        this.pageSplitCache = data.entities;
         return (data.entities[data.index] || []) as T[];
       }),
       shareReplay({ bufferSize: 1, refCount: true }),

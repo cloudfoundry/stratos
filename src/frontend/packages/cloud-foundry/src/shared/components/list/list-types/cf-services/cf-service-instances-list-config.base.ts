@@ -17,7 +17,7 @@ import {
   ListDataSource,
   ListViewTypes
 } from '@stratosui/core';
-import { APIResource, ListView } from '@stratosui/store';
+import { APIResource, ListView, MultiActionListEntity } from '@stratosui/store';
 import { CFAppState } from '../../../../../cf-app-state';
 import { IServiceInstance } from '../../../../../cf-api-svc.types';
 import { isUserProvidedServiceInstance } from '../../../../../features/cf/cf.helpers';
@@ -63,7 +63,15 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
       columnId: 'name',
       headerCell: () => 'Name',
       cellDefinition: {
-        getValue: (row) => `${row.entity.name}`
+        getValue: (row) => {
+          const entity = MultiActionListEntity.getEntity(row);
+          return `${entity.entity.name}`;
+        }
+      },
+      sort: {
+        type: 'sort',
+        orderKey: 'name',
+        field: 'entity.name'
       },
       cellFlex: '2'
     },
@@ -90,7 +98,10 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
       headerCell: () => 'Dashboard',
       cellDefinition: {
         externalLink: true,
-        getLink: (row: APIResource<IServiceInstance>) => row.entity.dashboard_url,
+        getLink: (row: APIResource<IServiceInstance>) => {
+          const entity = MultiActionListEntity.getEntity(row);
+          return entity.entity.dashboard_url;
+        },
         newTab: true,
         showShortLink: true
       },
@@ -111,7 +122,10 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
     {
       columnId: 'creation', headerCell: () => 'Creation Date',
       cellDefinition: {
-        getValue: (row: APIResource) => `${this.datePipe.transform(row.metadata.created_at, 'medium')}`
+        getValue: (row: APIResource) => {
+          const entity = MultiActionListEntity.getEntity(row);
+          return `${this.datePipe.transform(entity.metadata.created_at, 'medium')}`;
+        }
       },
       sort: {
         type: 'sort',

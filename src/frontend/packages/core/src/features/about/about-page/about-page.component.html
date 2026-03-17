@@ -28,8 +28,29 @@
 @if ((sessionData$ | async); as session) {
   <div class="card mb-6">
     <div class="card-body space-y-4">
-      <app-metadata-item icon="web_asset" label="Version">{{ session.version.proxy_version }}</app-metadata-item>
       <app-metadata-item icon="person" label="User">{{ session.user.name }}</app-metadata-item>
+    </div>
+  </div>
+  <div class="card mb-6">
+    <div class="card-body space-y-4">
+      <div class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Frontend</div>
+      <app-metadata-item icon="web_asset" label="Version">{{ buildInfo.version }}</app-metadata-item>
+      <app-metadata-item icon="commit" label="Commit">{{ buildInfo.gitCommit }}</app-metadata-item>
+      <app-metadata-item icon="account_tree" label="Branch">{{ buildInfo.gitBranch }}</app-metadata-item>
+      <app-metadata-item icon="schedule" label="Built">{{ buildInfo.buildDate }}</app-metadata-item>
+    </div>
+  </div>
+  <div class="card mb-6">
+    <div class="card-body space-y-4">
+      <div class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Backend</div>
+      <app-metadata-item icon="dns" label="Version">{{ session.version.proxy_version }}</app-metadata-item>
+      @if (session.version.git_commit) {
+        <app-metadata-item icon="commit" label="Commit">{{ session.version.git_commit }}</app-metadata-item>
+      }
+      @if (session.version.build_date) {
+        <app-metadata-item icon="schedule" label="Built">{{ session.version.build_date }}</app-metadata-item>
+      }
+      <app-metadata-item icon="storage" label="Database">{{ session.version.database_version }}</app-metadata-item>
     </div>
   </div>
 }

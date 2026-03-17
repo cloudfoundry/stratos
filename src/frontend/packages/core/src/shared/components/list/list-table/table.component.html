@@ -24,13 +24,19 @@
                   [ngClass]="[column.class || '', column.headerClass || '']"
                   [style.flex]="column.cellFlex"
                   role="columnheader">
-                  <div class="flex items-center gap-1"
+                  <div class="flex items-center gap-1 select-none"
                     [class.cursor-pointer]="column.sort"
                     (click)="column.sort && handleSort(column)">
                     <app-table-cell [component]="column.headerCellComponent" [func]="column.headerCell"
                     [dataSource]="dataSource"></app-table-cell>
                     @if (column.sort) {
-                      <span class="material-icons text-sm opacity-70" style="color: var(--table-header-text)">sort</span>
+                      @if (getSortDirection(column.columnId) === 'asc') {
+                        <span class="material-icons text-base opacity-60">sort</span>
+                      } @else if (getSortDirection(column.columnId) === 'desc') {
+                        <span class="material-icons text-base opacity-60 rotate-180">sort</span>
+                      } @else {
+                        <span class="material-icons text-base opacity-20">sort</span>
+                      }
                     }
                   </div>
                 </div>
@@ -38,7 +44,7 @@
             </div>
           </div>
           <div class="table-body" role="rowgroup">
-            @for (row of dataSource.connect(null) | async; track $index; let i = $index) {
+            @for (row of dataSource.connect(null) | async; track dataSource.trackBy(i, row); let i = $index) {
               <app-table-row class="app-table__row"
                 [columns]="columns"
                 [dataSource]="dataSource"

@@ -19,6 +19,7 @@ import { PageHeaderComponent } from '../../../shared/components/page-header/page
 import { StratosTitleComponent } from '../../../shared/components/stratos-title/stratos-title.component';
 import { ProductNameComponent } from '../../../shared/components/product-name.ccomponent';
 import { MetadataItemComponent } from '../../../shared/components/metadata-item/metadata-item.component';
+import { BUILD_INFO } from '../../../environments/build-info';
 
 @Component({
   selector: 'app-about-page',
@@ -40,6 +41,7 @@ export class AboutPageComponent implements OnInit, OnDestroy {
   sessionData$!: Observable<SessionData>;
   versionNumber$!: Observable<string>;
   userIsAdmin$!: Observable<boolean>;
+  buildInfo = BUILD_INFO;
 
   @ViewChild('aboutInfoContainer', { read: ViewContainerRef, static: true }) aboutInfoContainer!: ViewContainerRef;
   @ViewChild('supportInfoContainer', { read: ViewContainerRef, static: true }) supportInfoContainer!: ViewContainerRef;

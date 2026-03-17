@@ -516,6 +516,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       this.paginatorSettings.length = pagination.totalResults;
       this.paginatorSettings.pageIndex = pagination.pageIndex - 1;
       this.paginatorSettings.pageSize = pagination.pageSize;
+      this.cd.markForCheck();
     }));
 
     this.sortColumns = (this.columns || []).filter((column: ITableColumn<T>) => {
@@ -572,6 +573,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
           filterManager.applyValue(paginationFilter.items);
 
         });
+        this.cd.markForCheck();
       }),
     );
 

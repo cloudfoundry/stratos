@@ -85,7 +85,7 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
     columnId: 'label',
     headerCell: () => 'Name',
     cellDefinition: {
-      valuePath: 'entity.label',
+      getValue: (row: APIResource<any>) => row.entity.label,
       getLink: (service: APIResource<any>) => `/marketplace/${service.entity.cfGuid}/${service.metadata.guid}`
     },
     sort: {
@@ -98,7 +98,7 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
     columnId: 'description',
     headerCell: () => 'Description',
     cellDefinition: {
-      valuePath: 'entity.description',
+      getValue: (row: APIResource<any>) => row.entity.description,
     },
     cellFlex: '3'
   }, {
