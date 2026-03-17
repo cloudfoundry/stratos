@@ -282,6 +282,8 @@ type EndpointDetail struct {
 type Versions struct {
 	ProxyVersion    string `json:"proxy_version"`
 	DatabaseVersion int64  `json:"database_version"`
+	BuildDate       string `json:"build_date"`
+	GitCommit       string `json:"git_commit"`
 }
 
 // AuthEndpointType - Restrict the possible values of the configured

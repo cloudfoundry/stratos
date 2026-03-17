@@ -39,6 +39,18 @@ BUILD_VCS_ID_DATE := $(shell git log -1 --format=%cI 2>/dev/null || echo "unknow
 # ── Go ldflags ────────────────────────────────────────────────
 GO_LDFLAGS := -X main.appVersion=$(SEMVER_VERSION) -X main.buildDate=$(BUILD_DATE) -X main.gitCommit=$(BUILD_VCS_ID)
 
+# ── Frontend build info ──────────────────────────────────────
+BUILD_INFO_TS := src/frontend/packages/core/src/environments/build-info.ts
+BUILD_VCS_BRANCH := $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+
+.PHONY: fe-version
+fe-version:
+	@mkdir -p $(dir $(BUILD_INFO_TS))
+	@printf "export const BUILD_INFO = {\n  version: '%s',\n  gitCommit: '%s',\n  gitBranch: '%s',\n  buildDate: '%s',\n};\n" \
+		"$(SEMVER_VERSION)" "$(BUILD_VCS_ID)" "$(BUILD_VCS_BRANCH)" "$(BUILD_DATE)" \
+		> $(BUILD_INFO_TS)
+	@echo "Generated $(BUILD_INFO_TS)"
+
 # ── Introspection ─────────────────────────────────────────────
 .PHONY: dump dump-version
 dump: dump-version

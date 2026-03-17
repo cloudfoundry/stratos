@@ -27,6 +27,8 @@ func (p *portalProxy) getVersionsData() (*api.Versions, error) {
 	resp := &api.Versions{
 		ProxyVersion:    proxyVersion,
 		DatabaseVersion: databaseVersion,
+		BuildDate:       buildDate,
+		GitCommit:       gitCommit,
 	}
 
 	return resp, nil

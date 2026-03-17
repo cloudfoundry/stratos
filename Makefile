@@ -30,28 +30,57 @@ RELEASE_DIR := $(DIST_DIR)/release
 BIN_DIR     := $(DIST_DIR)/bin
 
 # ── Platform detection ────────────────────────────────────────
+# Override with: make build PLATFORM=linux/amd64
 UNAME_S := $(shell uname -s)
 UNAME_M := $(shell uname -m)
 
+# Detect host OS
 ifeq ($(UNAME_S),Linux)
-  PLATFORM := linux
+  _HOST_OS := linux
 else ifeq ($(UNAME_S),Darwin)
-  PLATFORM := darwin
+  _HOST_OS := darwin
 else
-  PLATFORM := $(UNAME_S)
+  _HOST_OS := $(UNAME_S)
 endif
 
+# Detect host arch
 ifeq ($(UNAME_M),x86_64)
-  ARCH := amd64
+  _HOST_ARCH := amd64
 else ifeq ($(UNAME_M),aarch64)
-  ARCH := arm64
+  _HOST_ARCH := arm64
 else ifeq ($(UNAME_M),arm64)
-  ARCH := arm64
+  _HOST_ARCH := arm64
 else
-  ARCH := $(UNAME_M)
+  _HOST_ARCH := $(UNAME_M)
 endif
 
-CURRENT_PLATFORM := $(PLATFORM)-$(ARCH)
+# If PLATFORM is overridden (e.g., linux/amd64, linux-amd64, or linux_amd64), parse OS/ARCH
+ifdef PLATFORM
+  # Normalize separators: replace '/', '-', '_' with space, then take first two words
+  _PLAT_WORDS := $(subst /, ,$(subst -, ,$(subst _, ,$(PLATFORM))))
+  ifneq ($(word 2,$(_PLAT_WORDS)),)
+    TARGET_OS   := $(word 1,$(_PLAT_WORDS))
+    TARGET_ARCH := $(word 2,$(_PLAT_WORDS))
+  else
+    # Single word — just OS, use host arch
+    TARGET_OS   := $(PLATFORM)
+    TARGET_ARCH := $(_HOST_ARCH)
+  endif
+else
+  TARGET_OS   := $(_HOST_OS)
+  TARGET_ARCH := $(_HOST_ARCH)
+endif
+
+CURRENT_PLATFORM := $(TARGET_OS)/$(TARGET_ARCH)
+
+# Cross-compilation: set GOOS/GOARCH when target differs from host
+GO_ENV :=
+ifneq ($(TARGET_OS),$(_HOST_OS))
+  GO_ENV += GOOS=$(TARGET_OS)
+endif
+ifneq ($(TARGET_ARCH),$(_HOST_ARCH))
+  GO_ENV += GOARCH=$(TARGET_ARCH)
+endif
 
 # ── Component selection ───────────────────────────────────────
 WANT_FRONTEND :=
@@ -110,7 +139,7 @@ GH = $(if $(WANT_GITHUB),$1)
 .PHONY: build fe-build be-build be-build-all
 build: $(call FE,fe-build) $(call BE,be-build,be-build-all)
 
-fe-build:
+fe-build: fe-version
 	@echo "Building frontend (production)..."
 	bun run build
 	@echo "Frontend built: $(DIST_DIR)/frontend/browser/"
@@ -118,7 +147,7 @@ fe-build:
 be-build:
 	@echo "Building backend for $(CURRENT_PLATFORM)..."
 	@mkdir -p $(BIN_DIR)
-	cd src/jetstream && go build -ldflags "$(GO_LDFLAGS)" -o ../../$(BIN_DIR)/jetstream
+	cd src/jetstream && $(GO_ENV) go build -ldflags "$(GO_LDFLAGS)" -o ../../$(BIN_DIR)/jetstream
 	@echo "Backend built: $(BIN_DIR)/jetstream"
 
 be-build-all:
