@@ -333,6 +333,17 @@ export class CfOrgSpaceDataService implements OnDestroy {
     ).pagination$.pipe(
       filter(p => !!p?.clientPagination?.filter),
     );
+
+    // Sync BehaviorSubjects with persisted store values so
+    // dropdowns and list filtering are consistent from first render
+    this.initialValues$.pipe(
+      first(),
+      map(this.initialValuesMap),
+    ).subscribe(values => {
+      if (values.cf) { this.selectSet(this.cf.select, values.cf); }
+      if (values.org) { this.selectSet(this.org.select, values.org); }
+      if (values.space) { this.selectSet(this.space.select, values.space); }
+    });
   }
 
   private getInitialValues(): Observable<InitialValues> {
