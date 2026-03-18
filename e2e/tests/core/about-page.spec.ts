@@ -12,16 +12,16 @@ import { test, expect } from '../../fixtures/test-base';
  */
 test.describe('About Page', () => {
 
-  test('should display the about page', async ({ loggedInAdminPage }) => {
-    const page = loggedInAdminPage.page;
+  test('should display the about page', async ({ connectedEndpointsAdminPage }) => {
+    const page = connectedEndpointsAdminPage.page;
     await page.goto('/about');
     await page.waitForLoadState('networkidle');
 
     await expect(page.locator('app-page-header')).toBeVisible();
   });
 
-  test('should display frontend version information', async ({ loggedInAdminPage }) => {
-    const page = loggedInAdminPage.page;
+  test('should display frontend version information', async ({ connectedEndpointsAdminPage }) => {
+    const page = connectedEndpointsAdminPage.page;
     await page.goto('/about');
     await page.waitForLoadState('networkidle');
 
@@ -35,8 +35,8 @@ test.describe('About Page', () => {
     expect(versionText).toMatch(/v?\d+\.\d+\.\d+/);
   });
 
-  test('should display frontend commit and branch', async ({ loggedInAdminPage }) => {
-    const page = loggedInAdminPage.page;
+  test('should display frontend commit and branch', async ({ connectedEndpointsAdminPage }) => {
+    const page = connectedEndpointsAdminPage.page;
     await page.goto('/about');
     await page.waitForLoadState('networkidle');
 
@@ -53,8 +53,8 @@ test.describe('About Page', () => {
     expect(branchText?.replace('Branch', '').trim().length).toBeGreaterThan(0);
   });
 
-  test('should display backend version information', async ({ loggedInAdminPage }) => {
-    const page = loggedInAdminPage.page;
+  test('should display backend version information', async ({ connectedEndpointsAdminPage }) => {
+    const page = connectedEndpointsAdminPage.page;
     await page.goto('/about');
     await page.waitForLoadState('networkidle');
 
@@ -67,8 +67,8 @@ test.describe('About Page', () => {
     await expect(backendVersionItems).toHaveCount(2);
   });
 
-  test('should display database version', async ({ loggedInAdminPage }) => {
-    const page = loggedInAdminPage.page;
+  test('should display database version', async ({ connectedEndpointsAdminPage }) => {
+    const page = connectedEndpointsAdminPage.page;
     await page.goto('/about');
     await page.waitForLoadState('networkidle');
 
@@ -78,8 +78,8 @@ test.describe('About Page', () => {
     expect(dbText?.replace('Database', '').trim().length).toBeGreaterThan(0);
   });
 
-  test('should show admin diagnostics button for admin users', async ({ loggedInAdminPage }) => {
-    const page = loggedInAdminPage.page;
+  test('should show admin diagnostics button for admin users', async ({ connectedEndpointsAdminPage }) => {
+    const page = connectedEndpointsAdminPage.page;
     await page.goto('/about');
     await page.waitForLoadState('networkidle');
 
@@ -87,8 +87,8 @@ test.describe('About Page', () => {
     await expect(page.locator('button:has-text("View Diagnostics")')).toBeVisible();
   });
 
-  test('frontend and backend versions should both be present', async ({ loggedInAdminPage }) => {
-    const page = loggedInAdminPage.page;
+  test('frontend and backend versions should both be present', async ({ connectedEndpointsAdminPage }) => {
+    const page = connectedEndpointsAdminPage.page;
     await page.goto('/about');
     await page.waitForLoadState('networkidle');
 
