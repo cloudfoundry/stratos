@@ -165,6 +165,49 @@ CI workflows use outdated tool versions. Tracked in
 | documentation-versioning | Node.js | 12 | 24 |
 | All | Package manager | npm | bun |
 
+## CF Release Build Process
+
+`make release cf` packages the app for CF deployment but does **not** build.
+The backend binary must be pre-built for the target Linux platform.
+
+### Build naming
+
+| Command | Output | Purpose |
+|---------|--------|---------|
+| `make build` | `dist/bin/jetstream` | Single binary for current or specified platform |
+| `make build all` | `dist/bin/jetstream-linux-amd64`, `jetstream-darwin-arm64`, etc. | All platforms with OS/arch suffix |
+
+### CF release workflow
+
+```bash
+# 1. Build frontend + Linux backend (specify platform — CF runs Linux)
+make build PLATFORM=linux/amd64
+
+# 2. Package for CF
+make release cf
+
+# 3. Deploy
+cf target -o system -s stratos
+cf push -f dist/cf-package/manifest.yml -p dist/stratos-cf-<version>.zip
+```
+
+`make release cf` validates that `dist/bin/jetstream` is a Linux ELF binary
+before packaging. If it's a macOS or Windows binary, the packaging fails with
+a clear error.
+
+### On CI (Linux)
+
+`make build` produces a Linux binary natively — no `PLATFORM` flag needed.
+
+### On macOS
+
+Must specify the target platform explicitly:
+
+```bash
+make build PLATFORM=linux/amd64    # or linux/arm64 for ARM CF deployments
+make release cf
+```
+
 ## Further Reading
 
 - [Contributing Guide](contributing_guide.md) — step-by-step workflow
