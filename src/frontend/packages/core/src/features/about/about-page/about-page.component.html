@@ -1,70 +1,143 @@
 <app-page-header [showUnderFlow]="true">About</app-page-header>
-@if (!customizations.aboutInfoComponent) {
-  <div class="card mb-6">
-    <div class="card-body">
-      <app-stratos-title></app-stratos-title>
-      <div class="space-y-4">
-        <div class="text-lg font-semibold text-gray-600">{{ (versionNumber$ | async) }}</div>
-        <div class="text-base text-gray-700 leading-relaxed">
-          <app-product-name></app-product-name> provides an easy-to-use web-based UI that allows developers and administrators to manage their applications and Cloud Foundry deployments
-        </div>
-      </div>
-    </div>
-  </div>
-}
+
 <template #aboutInfoContainer></template>
-
-@if (customizations.hasEula) {
-  <div class="card mb-6">
-    <div class="card-body">
-      <div class="mb-4 text-gray-700">Use of this software is subject to the End-User License Agreement</div>
-      <button [routerLink]="['eula']" class="btn btn-primary">View EULA</button>
-    </div>
-  </div>
-}
-
 <template #supportInfoContainer></template>
 
 @if ((sessionData$ | async); as session) {
-  <div class="card mb-6">
-    <div class="card-body space-y-4">
-      <app-metadata-item icon="person" label="User">{{ session.user.name }}</app-metadata-item>
-    </div>
-  </div>
-  <div class="card mb-6">
-    <div class="card-body space-y-4">
-      <div class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Frontend</div>
-      <app-metadata-item icon="web_asset" label="Version">{{ buildInfo.version }}</app-metadata-item>
-      <app-metadata-item icon="commit" label="Commit">{{ buildInfo.gitCommit }}</app-metadata-item>
-      <app-metadata-item icon="account_tree" label="Branch">{{ buildInfo.gitBranch }}</app-metadata-item>
-      <app-metadata-item icon="schedule" label="Built">{{ buildInfo.buildDate }}</app-metadata-item>
-    </div>
-  </div>
-  <div class="card mb-6">
-    <div class="card-body space-y-4">
-      <div class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Backend</div>
-      <app-metadata-item icon="dns" label="Version">{{ session.version.proxy_version }}</app-metadata-item>
-      @if (session.version.git_commit) {
-        <app-metadata-item icon="commit" label="Commit">{{ session.version.git_commit }}</app-metadata-item>
-      }
-      @if (session.version.build_date) {
-        <app-metadata-item icon="schedule" label="Built">{{ session.version.build_date }}</app-metadata-item>
-      }
-      <app-metadata-item icon="storage" label="Database">{{ session.version.database_version }}</app-metadata-item>
-    </div>
-  </div>
-}
 
-@if ((this.userIsAdmin$ | async)) {
-  <div class="card mb-6 border-orange-200 bg-orange-50">
-    <div class="card-body">
-      <div class="flex items-center space-x-4">
-        <span class="material-icons text-orange-600 text-2xl">security</span>
-        <div class="flex-1">
-          <div class="text-gray-800 font-medium mb-2">You have administrative privileges</div>
-          <button [routerLink]="['diagnostics']" class="btn btn-primary">View Diagnostics</button>
+  <div class="card overflow-hidden">
+
+    <!-- Main layout: logo | frontend+backend (2-col) | user/login -->
+    <!-- Desktop: 3 cols | Tablet: 2 cols | Phone: 1 col -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1fr_3fr_auto] divide-y sm:divide-y-0 sm:divide-x divide-gray-200 dark:divide-gray-700">
+
+      <!-- Col 1: Logo / Theme (hidden on phone) -->
+      @if (!customizations.aboutInfoComponent) {
+        <div class="hidden sm:flex p-6 flex-col items-center justify-start text-center gap-2 bg-content-bg/30">
+          <app-stratos-title></app-stratos-title>
+          <div class="text-sm text-content-muted">{{ (versionNumber$ | async) }}</div>
+        </div>
+      }
+
+      <!-- Col 2: Frontend + Backend nested 2-col grid -->
+      <div class="lg:col-span-1">
+        <div class="grid grid-cols-2 divide-x divide-gray-200 dark:divide-gray-700 h-full">
+
+          <!-- Frontend -->
+          <div class="p-5">
+            <div class="text-xs font-semibold text-content-muted uppercase tracking-wider mb-3">Frontend</div>
+            <dl class="text-sm space-y-2">
+              <div class="flex gap-2">
+                <dt class="text-content-muted w-20 shrink-0">Version</dt>
+                <dd class="text-content-text font-medium min-w-0 truncate" [title]="buildInfo.version">{{ buildInfo.version }}</dd>
+              </div>
+              <div class="flex gap-2">
+                <dt class="text-content-muted w-20 shrink-0">Commit</dt>
+                <dd class="text-content-text font-mono min-w-0 truncate" [title]="buildInfo.gitCommit">
+                  @if (gitCommitLink) {
+                    <a [href]="gitCommitLink" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">{{ buildInfo.gitCommit }}</a>
+                  } @else {
+                    {{ buildInfo.gitCommit }}
+                  }
+                </dd>
+              </div>
+              <div class="flex gap-2">
+                <dt class="text-content-muted w-20 shrink-0">Built</dt>
+                <dd class="text-content-text min-w-0 truncate" [title]="buildInfo.buildDate">{{ buildInfo.buildDate | date:"yyyy-MM-dd HH:mm 'UTC'":"UTC" }}</dd>
+              </div>
+              <div class="flex gap-2">
+                <dt class="text-content-muted w-20 shrink-0">Branch</dt>
+                <dd class="text-content-text min-w-0 truncate" [title]="buildInfo.gitBranch">
+                  @if (gitBranchLink) {
+                    <a [href]="gitBranchLink" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">{{ buildInfo.gitBranch }}</a>
+                  } @else {
+                    {{ buildInfo.gitBranch }}
+                  }
+                </dd>
+              </div>
+            </dl>
+          </div>
+
+          <!-- Backend -->
+          <div class="p-5">
+            <div class="text-xs font-semibold text-content-muted uppercase tracking-wider mb-3">Backend</div>
+            <dl class="text-sm space-y-2">
+              <div class="flex gap-2">
+                <dt class="text-content-muted w-20 shrink-0">Version</dt>
+                <dd class="text-content-text font-medium min-w-0 truncate" [title]="session.version.proxy_version">{{ session.version.proxy_version }}</dd>
+              </div>
+              <div class="flex gap-2">
+                <dt class="text-content-muted w-20 shrink-0">Commit</dt>
+                <dd class="text-content-text font-mono min-w-0 truncate" [title]="session.version.git_commit">
+                  @if (backendCommitLink(session.version.git_commit)) {
+                    <a [href]="backendCommitLink(session.version.git_commit)" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">{{ session.version.git_commit }}</a>
+                  } @else {
+                    {{ session.version.git_commit || '—' }}
+                  }
+                </dd>
+              </div>
+              <div class="flex gap-2">
+                <dt class="text-content-muted w-20 shrink-0">Built</dt>
+                <dd class="text-content-text min-w-0 truncate" [title]="session.version.build_date">{{ session.version.build_date ? (session.version.build_date | date:"yyyy-MM-dd HH:mm 'UTC'":"UTC") : '—' }}</dd>
+              </div>
+              <div class="flex gap-2">
+                <dt class="text-content-muted w-20 shrink-0">Branch</dt>
+                <dd class="text-content-text min-w-0 truncate" [title]="session.version.git_branch">
+                  @if (backendBranchLink(session.version.git_branch)) {
+                    <a [href]="backendBranchLink(session.version.git_branch)" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">{{ session.version.git_branch }}</a>
+                  } @else {
+                    {{ session.version.git_branch || '—' }}
+                  }
+                </dd>
+              </div>
+              @if (session.diagnostics?.databaseBackend) {
+                <div class="flex gap-2">
+                  <dt class="text-content-muted w-20 shrink-0">Database</dt>
+                  <dd class="text-content-text truncate" [title]="session.diagnostics.databaseBackend">{{ session.diagnostics.databaseBackend }}</dd>
+                </div>
+              }
+              @if (session.diagnostics?.deploymentType) {
+                <div class="flex gap-2">
+                  <dt class="text-content-muted w-20 shrink-0">Deployed</dt>
+                  <dd class="text-content-text truncate" [title]="session.diagnostics.deploymentType">{{ session.diagnostics.deploymentType }}</dd>
+                </div>
+              }
+            </dl>
+          </div>
+
         </div>
       </div>
+
+      <!-- Col 3: User / Login info — top aligned, centered -->
+      <div class="p-6 flex flex-col items-center justify-start text-center gap-2 min-w-[120px]">
+        <div class="text-xs font-semibold text-content-muted uppercase tracking-wider">Signed in as</div>
+        <div class="font-medium text-content-text text-base">{{ session.user.name }}</div>
+        @if ((this.userIsAdmin$ | async)) {
+          <span class="text-xs bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 px-2 py-0.5 rounded-full">Admin</span>
+        }
+      </div>
+
     </div>
+
+    <!-- EULA row (conditional, full width) -->
+    @if (customizations.hasEula) {
+      <div class="border-t border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
+        <div class="text-content-muted">Use of this software is subject to the End-User License Agreement</div>
+        <button [routerLink]="['eula']" class="btn btn-primary">View EULA</button>
+      </div>
+    }
+
+    <!-- Admin row: full width, subtle orange tint -->
+    @if ((this.userIsAdmin$ | async)) {
+      <div class="border-t border-gray-200 dark:border-gray-700 bg-orange-50 dark:bg-orange-900/20 px-6 py-3 flex items-center justify-end gap-4">
+        <div class="flex items-center gap-2 text-sm text-orange-700 dark:text-orange-300">
+          <span class="material-icons text-base">security</span>
+          <span>You have administrative privileges</span>
+        </div>
+        <button [routerLink]="['diagnostics']" class="btn btn-primary btn-sm">View Diagnostics</button>
+      </div>
+    }
+
   </div>
+
 }
