@@ -20,7 +20,7 @@
                     [ngClass]="{
                       'text-danger-500': status === 'error',
                       'text-warning-500': status === 'warning',
-                      'text-gray-900 dark:text-slate-100': status !== 'error' && status !== 'warning'
+                      'text-content-text': status !== 'error' && status !== 'warning'
                     }">{{ formattedValue }}</span>
                   @if (limit) {
                     <span class="text-lg text-gray-500 dark:text-slate-400"> / {{ formattedLimit }}</span>
@@ -69,9 +69,9 @@
         <div class="number-metric-card__container-inner"
           [ngClass]="{'number-metric-card__container-inner-reverse': labelAtTop}">
           @if ((status$ | async); as status) {
-            <div class="number-metric-card__value text-gray-900 dark:text-slate-100">
+            <div class="number-metric-card__value text-content-text">
               <span class="number-metric-card__usage-count"
-              [ngClass]="{'text-danger-500': status === 'error', 'text-warning-500': status === 'warning', 'dark:text-slate-100': status !== 'error' && status !== 'warning'}">{{ formattedValue }}</span>
+              [ngClass]="{'text-danger-500': status === 'error', 'text-warning-500': status === 'warning', 'text-content-text': status !== 'error' && status !== 'warning'}">{{ formattedValue }}</span>
               @if (limit) {
                 <span class="number-metric-card__limit text-gray-500 dark:text-slate-400"> / {{ formattedLimit }}</span>
               }
