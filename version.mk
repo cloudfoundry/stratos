@@ -35,13 +35,13 @@ BUILD_VCS_URL     := $(shell git remote get-url origin 2>/dev/null || echo "unkn
 BUILD_VCS_ID      := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 BUILD_VCS_ID_FULL := $(shell git rev-parse HEAD 2>/dev/null || echo "unknown")
 BUILD_VCS_ID_DATE := $(shell git log -1 --format=%cI 2>/dev/null || echo "unknown")
+BUILD_VCS_BRANCH  := $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
 
 # ── Go ldflags ────────────────────────────────────────────────
-GO_LDFLAGS := -X main.appVersion=$(SEMVER_VERSION) -X main.buildDate=$(BUILD_DATE) -X main.gitCommit=$(BUILD_VCS_ID)
+GO_LDFLAGS := -X main.appVersion=$(SEMVER_VERSION) -X main.buildDate=$(BUILD_DATE) -X main.gitCommit=$(BUILD_VCS_ID) -X main.gitBranch=$(BUILD_VCS_BRANCH)
 
 # ── Frontend build info ──────────────────────────────────────
 BUILD_INFO_TS := src/frontend/packages/core/src/environments/build-info.ts
-BUILD_VCS_BRANCH := $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
 
 .PHONY: fe-version
 fe-version:
