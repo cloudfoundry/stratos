@@ -58,6 +58,7 @@ export interface SessionData {
     database_version: number;
     build_date?: string;
     git_commit?: string;
+    git_branch?: string;
   };
   valid: boolean;
   uaaError?: boolean;
