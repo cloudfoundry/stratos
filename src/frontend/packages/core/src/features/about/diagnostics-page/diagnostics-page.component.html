@@ -6,7 +6,7 @@
   <div>
     <app-card class="diagnostics-page__card">
       <app-metadata-item icon="web_asset" label="Version">{{ session.version.proxy_version }}</app-metadata-item>
-      <app-metadata-item icon="date_range" label="Build Date">{{ buildDate }}</app-metadata-item>
+      <app-metadata-item icon="date_range" label="Build Date">{{ buildInfo.buildDate | date:"yyyy-MM-dd HH:mm 'UTC'":"UTC" }}</app-metadata-item>
       @if ((this.userIsAdmin$ | async); as isAdminUser) {
         <div>
           @if (!isAdminUser) {
@@ -77,6 +77,13 @@
           </div>
         }
       </div>
+    </app-card>
+    <app-card class="diagnostics-page__card">
+      <div class="text-xs font-semibold text-content-muted uppercase tracking-wider mb-3 px-4 pt-4">Runtime Versions</div>
+      <app-metadata-item icon="code" label="Angular">{{ angularVersion }}</app-metadata-item>
+      <app-metadata-item icon="code" label="TypeScript">{{ buildInfo.typescriptVersion }}</app-metadata-item>
+      <app-metadata-item icon="code" label="Node.js">{{ buildInfo.nodeVersion }}</app-metadata-item>
+      <app-metadata-item icon="code" label="Bun">{{ buildInfo.bunVersion }}</app-metadata-item>
     </app-card>
     <app-card class="diagnostics-page__card">
       <app-metadata-item icon="storage" label="Database">{{ session.diagnostics.databaseBackend || 'N/A' }}

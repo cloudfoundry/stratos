@@ -36,6 +36,9 @@ BUILD_VCS_ID      := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unk
 BUILD_VCS_ID_FULL := $(shell git rev-parse HEAD 2>/dev/null || echo "unknown")
 BUILD_VCS_ID_DATE := $(shell git log -1 --format=%cI 2>/dev/null || echo "unknown")
 BUILD_VCS_BRANCH  := $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+BUILD_NODE_VERSION := $(shell node --version 2>/dev/null || echo "unknown")
+BUILD_TS_VERSION   := $(shell npx tsc --version 2>/dev/null | awk '{print $$2}' || echo "unknown")
+BUILD_BUN_VERSION  := $(shell bun --version 2>/dev/null || echo "unknown")
 
 # ── Go ldflags ────────────────────────────────────────────────
 GO_LDFLAGS := -X main.appVersion=$(SEMVER_VERSION) -X main.buildDate=$(BUILD_DATE) -X main.gitCommit=$(BUILD_VCS_ID) -X main.gitBranch=$(BUILD_VCS_BRANCH)
@@ -46,8 +49,9 @@ BUILD_INFO_TS := src/frontend/packages/core/src/environments/build-info.ts
 .PHONY: fe-version
 fe-version:
 	@mkdir -p $(dir $(BUILD_INFO_TS))
-	@printf "export const BUILD_INFO = {\n  version: '%s',\n  gitCommit: '%s',\n  gitBranch: '%s',\n  buildDate: '%s',\n};\n" \
+	@printf "export const BUILD_INFO = {\n  version: '%s',\n  gitCommit: '%s',\n  gitBranch: '%s',\n  buildDate: '%s',\n  nodeVersion: '%s',\n  typescriptVersion: '%s',\n  bunVersion: '%s',\n};\n" \
 		"$(SEMVER_VERSION)" "$(BUILD_VCS_ID)" "$(BUILD_VCS_BRANCH)" "$(BUILD_DATE)" \
+		"$(BUILD_NODE_VERSION)" "$(BUILD_TS_VERSION)" "$(BUILD_BUN_VERSION)" \
 		> $(BUILD_INFO_TS)
 	@echo "Generated $(BUILD_INFO_TS)"
 

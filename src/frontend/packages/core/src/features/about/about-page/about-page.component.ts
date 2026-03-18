@@ -5,6 +5,7 @@ import { ChangeDetectionStrategy, Component,
   ComponentRef,
   OnDestroy,
   OnInit,
+  VERSION,
   ViewChild,
   ViewContainerRef,
  } from '@angular/core';
@@ -41,6 +42,7 @@ export class AboutPageComponent implements OnInit, OnDestroy {
   versionNumber$!: Observable<string>;
   userIsAdmin$!: Observable<boolean>;
   buildInfo = BUILD_INFO;
+  angularVersion = VERSION.full;
 
   // VCS URLs (GitHub only — derived from stratos meta tags)
   gitHubRepository: string;

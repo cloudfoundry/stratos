@@ -68,4 +68,9 @@ describe('AboutPageComponent', () => {
   it('should expose versionNumber$ observable', () => {
     expect(component.versionNumber$).toBeDefined();
   });
+
+  it('should expose angularVersion matching semver', () => {
+    expect(component.angularVersion).toBeDefined();
+    expect(component.angularVersion).toMatch(/^\d+\.\d+\.\d+/);
+  });
 });
