@@ -17,7 +17,7 @@ test.describe('About Page', () => {
     await page.goto('/about');
     await page.waitForLoadState('networkidle');
 
-    await expect(page.locator('app-page-header')).toBeVisible();
+    await expect(page.locator('.page-header').first()).toBeVisible();
   });
 
   test('should display frontend version information', async ({ connectedEndpointsAdminPage }) => {
@@ -28,11 +28,12 @@ test.describe('About Page', () => {
     // Frontend section heading
     await expect(page.locator('text=Frontend')).toBeVisible({ timeout: 10000 });
 
-    // Version field should be visible and non-empty
-    const versionItem = page.locator('app-metadata-item').filter({ hasText: /^Version/ }).first();
-    await expect(versionItem).toBeVisible();
-    const versionText = await versionItem.textContent();
-    expect(versionText).toMatch(/v?\d+\.\d+\.\d+/);
+    // Version field should be visible and match semver
+    const versionDt = page.locator('dt', { hasText: 'Version' }).first();
+    await expect(versionDt).toBeVisible();
+    const versionDd = versionDt.locator('..').locator('dd');
+    const versionText = await versionDd.textContent();
+    expect(versionText?.trim()).toMatch(/v?\d+\.\d+\.\d+/);
   });
 
   test('should display frontend commit and branch', async ({ connectedEndpointsAdminPage }) => {
@@ -41,16 +42,18 @@ test.describe('About Page', () => {
     await page.waitForLoadState('networkidle');
 
     // Commit should be a short SHA
-    const commitItem = page.locator('app-metadata-item').filter({ hasText: /^Commit/ }).first();
-    await expect(commitItem).toBeVisible({ timeout: 10000 });
-    const commitText = await commitItem.textContent();
-    expect(commitText?.replace('Commit', '').trim().length).toBeGreaterThan(0);
+    const commitDt = page.locator('dt', { hasText: 'Commit' }).first();
+    await expect(commitDt).toBeVisible({ timeout: 10000 });
+    const commitDd = commitDt.locator('..').locator('dd');
+    const commitText = await commitDd.textContent();
+    expect(commitText?.trim().length).toBeGreaterThan(0);
 
     // Branch should be visible
-    const branchItem = page.locator('app-metadata-item').filter({ hasText: /^Branch/ });
-    await expect(branchItem).toBeVisible();
-    const branchText = await branchItem.textContent();
-    expect(branchText?.replace('Branch', '').trim().length).toBeGreaterThan(0);
+    const branchDt = page.locator('dt', { hasText: 'Branch' }).first();
+    await expect(branchDt).toBeVisible();
+    const branchDd = branchDt.locator('..').locator('dd');
+    const branchText = await branchDd.textContent();
+    expect(branchText?.trim().length).toBeGreaterThan(0);
   });
 
   test('should display backend version information', async ({ connectedEndpointsAdminPage }) => {
@@ -61,10 +64,9 @@ test.describe('About Page', () => {
     // Backend section heading
     await expect(page.locator('text=Backend')).toBeVisible({ timeout: 10000 });
 
-    // Backend version should be visible
-    const backendVersionItems = page.locator('app-metadata-item').filter({ hasText: /^Version/ });
-    // There are two Version fields (frontend + backend)
-    await expect(backendVersionItems).toHaveCount(2);
+    // Both frontend and backend have Version fields
+    const versionFields = page.locator('dt', { hasText: 'Version' });
+    await expect(versionFields).toHaveCount(2);
   });
 
   test('should display database version', async ({ connectedEndpointsAdminPage }) => {
@@ -72,10 +74,11 @@ test.describe('About Page', () => {
     await page.goto('/about');
     await page.waitForLoadState('networkidle');
 
-    const dbItem = page.locator('app-metadata-item').filter({ hasText: /^Database/ });
-    await expect(dbItem).toBeVisible({ timeout: 10000 });
-    const dbText = await dbItem.textContent();
-    expect(dbText?.replace('Database', '').trim().length).toBeGreaterThan(0);
+    const dbDt = page.locator('dt', { hasText: 'Database' });
+    await expect(dbDt).toBeVisible({ timeout: 10000 });
+    const dbDd = dbDt.locator('..').locator('dd');
+    const dbText = await dbDd.textContent();
+    expect(dbText?.trim().length).toBeGreaterThan(0);
   });
 
   test('should show admin diagnostics button for admin users', async ({ connectedEndpointsAdminPage }) => {
@@ -87,24 +90,33 @@ test.describe('About Page', () => {
     await expect(page.locator('button:has-text("View Diagnostics")')).toBeVisible();
   });
 
+  test('should display Angular version in frontend section', async ({ connectedEndpointsAdminPage }) => {
+    const page = connectedEndpointsAdminPage.page;
+    await page.goto('/about');
+    await page.waitForLoadState('networkidle');
+
+    const angularDt = page.locator('dt', { hasText: 'Angular' });
+    await expect(angularDt).toBeVisible({ timeout: 10000 });
+    const angularDd = angularDt.locator('..').locator('dd');
+    const text = await angularDd.textContent();
+    expect(text?.trim()).toMatch(/^\d+\.\d+\.\d+/);
+  });
+
   test('frontend and backend versions should both be present', async ({ connectedEndpointsAdminPage }) => {
     const page = connectedEndpointsAdminPage.page;
     await page.goto('/about');
     await page.waitForLoadState('networkidle');
 
-    // Get all version text content for manual verification
-    const allVersionItems = page.locator('app-metadata-item').filter({ hasText: /^Version/ });
-    const count = await allVersionItems.count();
+    // Both frontend and backend Version fields
+    const versionFields = page.locator('dt', { hasText: 'Version' });
+    const count = await versionFields.count();
     expect(count).toBe(2);
 
-    const versions = await allVersionItems.allTextContents();
-    // Log for manual verification during testing
-    console.log('Frontend version:', versions[0]);
-    console.log('Backend version:', versions[1]);
-
-    // Both should have actual version strings
-    for (const v of versions) {
-      expect(v.trim().length).toBeGreaterThan('Version'.length);
+    // Both should have non-empty values
+    for (let i = 0; i < count; i++) {
+      const dd = versionFields.nth(i).locator('..').locator('dd');
+      const text = await dd.textContent();
+      expect(text?.trim().length).toBeGreaterThan(0);
     }
   });
 
