@@ -36,16 +36,17 @@ else
   fail=1
 fi
 
-# Backend binary — CF requires linux/amd64
-jetstream_bin=""
-if [[ -f "${BIN_DIR}/jetstream-linux-amd64" ]]; then
-  jetstream_bin="${BIN_DIR}/jetstream-linux-amd64"
-fi
+# Backend binary — CF requires a Linux ELF binary (amd64 or arm64)
+jetstream_bin="${BIN_DIR}/jetstream"
 
-if [[ -z "${jetstream_bin}" ]]; then
-  error "Linux backend binary not found at dist/bin/jetstream-linux-amd64"
-  error "  Run: make build backend-all"
-  error "  Or:  GOOS=linux GOARCH=amd64 make build backend"
+if [[ ! -f "${jetstream_bin}" ]]; then
+  error "Backend binary not found at dist/bin/jetstream"
+  error "  Run: make build PLATFORM=linux/amd64  (or linux/arm64)"
+  fail=1
+elif ! file "${jetstream_bin}" | grep -q "ELF"; then
+  error "Backend binary is not a Linux binary — CF requires a Linux ELF binary"
+  error "  Current binary: $(file "${jetstream_bin}")"
+  error "  Run: make build PLATFORM=linux/amd64  (or linux/arm64)"
   fail=1
 fi
 
