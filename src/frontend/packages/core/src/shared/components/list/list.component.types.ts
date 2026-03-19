@@ -241,7 +241,7 @@ export class MultiFilterManager<T> {
   public filterItems$: Observable<IListMultiFilterConfigItem[]>;
   public hasItems$: Observable<boolean>;
   public hasOneOrLessItems$: Observable<boolean>;
-  public value: string;
+  public value$ = new BehaviorSubject<string | undefined>(undefined);
 
   public filterKey: string;
   public allLabel: string;
@@ -311,7 +311,7 @@ export class MultiFilterManager<T> {
     ).subscribe(items => {
       // Ensure we actually have the item. Could be from storage and invalid
       if (isClearing || items.find(i => i.value === itemValue)) {
-        this.value = itemValue;
+        this.value$.next(itemValue);
         // Handle both BehaviorSubject (has .next) and Signal wrappers (have .next for compatibility)
         const select = this.multiFilterConfig.select as any;
         if (select && typeof select.next === 'function') {

@@ -154,11 +154,7 @@ test.describe('Apps list filter sync (FWT-834)', () => {
     expect(countAfterBack).toBe(filteredCount);
   });
 
-  // Known limitation: MultiFilterManager.selectItem sets this.value in an
-  // async subscribe that doesn't trigger Angular change detection, so the
-  // dropdown display may not update after cross-route navigation even though
-  // the store and BehaviorSubjects have the correct filter values.
-  test.fixme('should preserve filters after navigating to Endpoints and back via side nav', async ({ adminPage: page }) => {
+  test('should preserve filters after navigating to Endpoints and back via side nav', async ({ adminPage: page }) => {
     await page.goto('/applications');
     await dismissErrorBanner(page);
     const list = new ListComponent(page);
@@ -190,11 +186,10 @@ test.describe('Apps list filter sync (FWT-834)', () => {
     await listAfter.waitUntilShown();
     await waitForListLoaded(page, listAfter);
 
-    // Dropdown should reflect the persisted org selection (may take time
-    // for async selectItem to fire after options load + change detection)
+    // Dropdown should reflect the persisted org selection
     const orgSelectAfter = page.locator('select#org');
     await expect(orgSelectAfter).toBeVisible({ timeout: 10000 });
-    await expect(orgSelectAfter).toHaveValue(orgValue, { timeout: 15000 });
+    await expect(orgSelectAfter).toHaveValue(orgValue, { timeout: 30000 });
 
     const countAfter = await listAfter.getTotalResults();
     expect(countAfter).toBe(filteredCount);

@@ -62,15 +62,16 @@
               @if (!isFirst || !(multiFilterManager.hasOneOrLessItems$ | async)) {
                 <div class="form-field">
                   <label class="label">{{multiFilterManager.multiFilterConfig.label}}</label>
-                  <select class="select" id="{{multiFilterManager.filterKey}}" [value]="multiFilterManager.value"
+                  <select class="select" id="{{multiFilterManager.filterKey}}"
                     [disabled]="!(multiFilterManager.filterIsReady$ | async)"
                     (change)="multiFilterManager.selectItem($any($event.target).value)">
                     @if (!multiFilterManager.hideAllOption) {
-                      <option value="">{{ multiFilterManager.allLabel }}</option>
+                      <option value="" [selected]="!(multiFilterManager.value$ | async)">{{ multiFilterManager.allLabel }}</option>
                     }
                     @for (selectItem of multiFilterManager.filterItems$ | async; track selectItem.value) {
                       <option
-                        [value]="selectItem.value">
+                        [value]="selectItem.value"
+                        [selected]="selectItem.value === (multiFilterManager.value$ | async)">
                         {{selectItem.label}}
                       </option>
                     }
