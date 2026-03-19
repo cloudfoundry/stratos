@@ -2,7 +2,7 @@
   [ngClass]="{'list-component__table': (view$ | async) === 'table', 'list-component__cards': (view$ | async) === 'cards' }">
   @if (!(initialised$ | async) || (showProgressBar$ | async)) {
     <div class="progress-bar">
-      <div class="progress-bar-indeterminate bg-primary-500"></div>
+      <div class="progress-bar-indeterminate bg-primary"></div>
     </div>
   }
   @if (initialised$ | async) {
