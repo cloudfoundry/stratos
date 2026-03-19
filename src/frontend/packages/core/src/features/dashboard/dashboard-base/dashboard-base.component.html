@@ -78,11 +78,16 @@
             }
 
             <!-- Main page content -->
-            <div #content class="flex-1 flex flex-col min-h-0 overflow-x-hidden overflow-y-auto bg-content-bg text-content-text"
-              [ngClass]="{'p-6': !(noMargin$ | async), 'p-0': noMargin$ | async}">
-              <div class="flex-1 flex flex-col min-h-0">
-                <router-outlet></router-outlet>
+            <div class="relative flex-1 flex flex-col min-h-0 overflow-hidden">
+              <div #content class="flex-1 flex flex-col min-h-0 overflow-x-hidden overflow-y-auto bg-content-bg text-content-text"
+                [ngClass]="{'p-6': !(noMargin$ | async), 'p-0': noMargin$ | async}"
+                (scroll)="onContentScroll($event)">
+                <div class="flex-1 flex flex-col min-h-0">
+                  <router-outlet></router-outlet>
+                </div>
               </div>
+              <div class="absolute bottom-0 inset-x-0 h-12 pointer-events-none z-50 bg-gradient-to-t from-black/15 dark:from-white/25 to-transparent transition-opacity duration-200"
+                [class.opacity-0]="!showScrollShadow()"></div>
             </div>
           </div>
         </div>
