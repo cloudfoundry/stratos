@@ -47,11 +47,11 @@ Tracking ticket: https://fivetwenty.atlassian.net/browse/FWT-811
 | 1 | 810.1 | Clear filter button (X) | 1-2h | High | Done |
 | 2 | 810.2 | Escape key to clear filter | 1h | High | Done |
 | 3 | 800 | Better page size options | 1-2h | High | Done |
-| 4 | 815.1 | "Showing X of Y" count | 2-3h | High | |
+| 4 | 815.1 | "Showing X of Y" count | 2-3h | High | Done |
 | 5 | 825 | Style login error messages | 2-3h | High | |
 | 6 | 804 | Sticky table headers | 3-4h | High | Done |
 | 7 | 817 | Button contrast fix (themes) | 4-6h | High | Done |
-| 8 | 815.2 | Shadow overflow indicator | 3-4h | High | |
+| 8 | 815.2 | Shadow overflow indicator | 3-4h | High | Done |
 | 9 | 805.1 | Persist dark mode | 3-4h | High | |
 | 10 | 821 | Validate autoscaler screens | 4-6h | High | |
 | 11 | 824 | Validate Prometheus integration | 4-6h | High | |
