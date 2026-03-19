@@ -3,8 +3,8 @@
   padding: 16px;
   margin: 8px 0;
   border-radius: 4px;
-  background-color: white;
-  color: inherit;
+  background-color: var(--card-bg);
+  color: var(--content-text);
   font-family: inherit;
   transition: box-shadow 0.3s ease;
 
@@ -17,7 +17,7 @@
   }
 
   &.outlined {
-    border: 1px solid #e0e0e0;
+    border: 1px solid var(--card-border);
     box-shadow: none;
   }
 }
@@ -33,7 +33,7 @@
   font-weight: 500;
   line-height: 1.4;
   margin: 0;
-  color: rgba(0, 0, 0, 0.87);
+  color: var(--content-text);
 }
 
 :host ::ng-deep .custom-card-subtitle {
@@ -41,7 +41,7 @@
   font-weight: 400;
   line-height: 1.4;
   margin: 0;
-  color: rgba(0, 0, 0, 0.6);
+  color: var(--content-muted);
   margin-top: 4px;
 }
 
@@ -76,6 +76,6 @@
 :host ::ng-deep .custom-card-footer {
   padding: 16px 0 0 0;
   margin-top: 16px;
-  border-top: 1px solid #e0e0e0;
-  color: rgba(0, 0, 0, 0.6);
+  border-top: 1px solid var(--card-border);
+  color: var(--content-muted);
 }

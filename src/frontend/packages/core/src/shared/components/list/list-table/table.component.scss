@@ -17,6 +17,7 @@
   display: flex;
   align-items: center;
   border-bottom: 1px solid var(--table-border);
+  background-color: var(--table-header-bg);
   min-height: 48px;
   padding: 0 24px;
 }
@@ -24,8 +25,10 @@
 .table-header-cell {
   flex: 1 1 200px;
   padding: 8px;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   color: var(--table-header-text);
 
   app-table-cell {
