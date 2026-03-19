@@ -273,17 +273,35 @@ export class CfOrgSpaceDataService implements OnDestroy {
       this.allOrgs.entities$
     ).pipe(
       map(([selectedOrgGuid, orgs]) => {
-        const selectedOrg = orgs.find(org => {
-          return org.metadata.guid === selectedOrgGuid;
-        });
-        if (selectedOrg && selectedOrg.entity && selectedOrg.entity.spaces) {
-          return selectedOrg.entity.spaces.map(space => {
-            const entity = { ...space.entity };
-            entity.guid = space.metadata.guid;
-            return entity;
-          }).sort((a, b) => a.name.localeCompare(b.name));
+        if (selectedOrgGuid) {
+          const selectedOrg = orgs.find(org => org.metadata.guid === selectedOrgGuid);
+          if (selectedOrg?.entity?.spaces) {
+            return selectedOrg.entity.spaces.map(space => {
+              const entity = { ...space.entity };
+              entity.guid = space.metadata.guid;
+              return entity;
+            }).sort((a, b) => a.name.localeCompare(b.name));
+          }
+          return [];
         }
-        return [];
+        // No org selected ("All"): aggregate spaces from every org, deduplicate by GUID
+        // Prefix space name with org name for disambiguation
+        const seen = new Set<string>();
+        const allSpaces: ISpace[] = [];
+        for (const org of orgs) {
+          if (org.entity?.spaces) {
+            for (const space of org.entity.spaces) {
+              if (!seen.has(space.metadata.guid)) {
+                seen.add(space.metadata.guid);
+                const entity = { ...space.entity };
+                entity.guid = space.metadata.guid;
+                entity.name = `${space.entity.name} (${org.entity.name})`;
+                allSpaces.push(entity);
+              }
+            }
+          }
+        }
+        return allSpaces.sort((a, b) => a.name.localeCompare(b.name));
       })
     );
 
