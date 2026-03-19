@@ -812,6 +812,18 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       this.store.dispatch(new ResetPagination(pAction, pAction.paginationKey));
     }
 
+    // Reset the multi-filter dropdowns (org/space selections)
+    if (this.multiFilterManagers) {
+      this.multiFilterManagers.forEach(filterManager => {
+        if (filterManager.multiFilterConfig.select) {
+          filterManager.multiFilterConfig.select.next(undefined);
+        }
+      });
+    }
+
+    // Reset text filter
+    this.clearFilterText();
+
     // Reset the multi-entity filter
     this.entitySelectValue.set(undefined);
     this.entitySelectValueSubject.next(undefined);
