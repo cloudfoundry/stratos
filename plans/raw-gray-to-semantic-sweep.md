@@ -1,6 +1,6 @@
 # Raw Gray → Semantic Color Sweep
 
-## Status: Analysis complete, not started
+## Status: Priority 1 complete, Priority 2-3 remaining
 
 ## Context
 
@@ -61,19 +61,21 @@ correct Tailwind usage and should not be converted to semantic classes.
 These files render text on theme-controlled backgrounds where raw grays either
 break in dark mode or override the `.card` semantic color.
 
-### Priority 1 — Broken in dark mode (no dark variant)
+### Priority 1 — Broken in dark mode (no dark variant) ✅ DONE
 
-| File | Lines | Current | Fix |
-|------|-------|---------|-----|
-| `tailwind-json-schema-form.component.html` | 103, 111 | `text-gray-500` (no dark) | → `text-content-muted` |
-| `deploy-application-options-step.component.html` | 21,27,58,85,92,116 | `text-gray-500` (no dark) | → `text-content-muted` |
-| `deploy-application-step2.component.html` | 143 | `text-gray-500` (no dark) | → `text-content-muted` |
-| `application-wall.component.html` | 31 | `text-gray-500` (no dark) | → `text-content-muted` |
-| `services-wall.component.html` | 32 | `text-gray-500` (no dark) | → `text-content-muted` |
-| `endpoints-page.component.html` | 28 | `text-gray-500` (no dark) | → `text-content-muted` |
-| `chips.component.html` | 2 | `text-gray-500` (no dark) | → `text-content-muted` |
-| `file-input.component.html` | 10 | `text-gray-500` (no dark) | → `text-content-muted` |
-| `card-autoscaler-default.component.html` | 19, 29 | `text-gray-500` (no dark) | → `text-content-muted` |
+All 9 files fixed: `text-gray-500` → `text-content-muted` (2026-03-18)
+
+| File | Lines | Status |
+|------|-------|--------|
+| `tailwind-json-schema-form.component.html` | 103, 111 | ✅ |
+| `deploy-application-options-step.component.html` | 21,27,58,85,92,116 | ✅ |
+| `deploy-application-step2.component.html` | 143 | ✅ |
+| `application-wall.component.html` | 31 | ✅ |
+| `services-wall.component.html` | 32 | ✅ |
+| `endpoints-page.component.html` | 28 | ✅ |
+| `chips.component.html` | 2 | ✅ |
+| `file-input.component.html` | 10 | ✅ |
+| `card-autoscaler-default.component.html` | 19, 29 | ✅ |
 
 ### Priority 2 — Overrides `.card` semantic color
 

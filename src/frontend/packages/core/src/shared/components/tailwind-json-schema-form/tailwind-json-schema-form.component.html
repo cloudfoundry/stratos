@@ -100,7 +100,7 @@
             </label>
           </div>
           @if (field.property.description) {
-            <div class="mt-1 text-sm text-gray-500">
+            <div class="mt-1 text-sm text-content-muted">
               {{ field.property.description }}
             </div>
           }
@@ -108,7 +108,7 @@
       }
       <!-- Description -->
       @if (field.property.description && !isTextarea(field.property) && getFieldType(field.property) !== 'checkbox') {
-        <div class="mt-1 text-sm text-gray-500">
+        <div class="mt-1 text-sm text-content-muted">
           {{ field.property.description }}
         </div>
       }
