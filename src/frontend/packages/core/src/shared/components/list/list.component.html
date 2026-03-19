@@ -120,7 +120,7 @@
                   name="filter" placeholder="{{ filterSelected?.placeholder || config.text?.filter || 'Filter'}}"
                   (keydown.escape)="clearFilterText(); $event.stopPropagation()">
                 @if (filterString) {
-                  <button class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center bg-transparent border-none p-0 cursor-pointer text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                  <button class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center bg-transparent border-none p-0 cursor-pointer text-content-muted hover:text-content-text"
                     type="button" (click)="clearFilterText()" title="Clear filter">
                     <span class="material-icons text-lg">close</span>
                   </button>
@@ -280,7 +280,7 @@
     </div>
     <ng-template #defaultNoEntries>
       <div class="card list-component__default-no-entries">
-        <div class="card-content p-6 text-center text-gray-500">
+        <div class="card-content p-6 text-center text-content-muted">
           <div class="no-rows">{{config.text?.noEntries || 'There are no entries'}}</div>
         </div>
       </div>

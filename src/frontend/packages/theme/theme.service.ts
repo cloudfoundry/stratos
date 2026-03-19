@@ -108,8 +108,25 @@ export class StratosThemeService {
     root.style.setProperty('--login-bg', theme.login.backgroundColor || theme.layout.background);
     root.style.setProperty('--login-bg-image', `url(${theme.login.backgroundImage || ''})`);
     root.style.setProperty('--login-card-bg', theme.login.cardBackground || '#ffffff');
-    
-    console.log('[StratosThemeService] CSS variables set on document root');
+
+    // Apply derived component variables inline to avoid CSS load-order race
+    const isDark = this._isDarkMode();
+    root.style.setProperty('--card-bg', isDark ? '#1e293b' : '#ffffff');
+    root.style.setProperty('--card-border', isDark ? '#334155' : '#e5e7eb');
+    root.style.setProperty('--card-header-bg', isDark ? '#0f172a' : '#f9fafb');
+    root.style.setProperty('--card-shadow', isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)');
+    root.style.setProperty('--table-header-bg', isDark ? '#0f172a' : '#f9fafb');
+    root.style.setProperty('--table-header-text', isDark ? '#cbd5e1' : '#1e293b');
+    root.style.setProperty('--table-row-hover', isDark ? '#334155' : '#f9fafb');
+    root.style.setProperty('--table-border', isDark ? '#334155' : '#e5e7eb');
+    root.style.setProperty('--input-bg', isDark ? '#1e293b' : '#ffffff');
+    root.style.setProperty('--input-border', isDark ? '#475569' : '#d1d5db');
+    root.style.setProperty('--input-text', isDark ? '#f1f5f9' : '#1e293b');
+    root.style.setProperty('--input-placeholder', isDark ? '#64748b' : '#9ca3af');
+    root.style.setProperty('--input-disabled-bg', isDark ? '#0f172a' : '#f3f4f6');
+    root.style.setProperty('--shadow-sm', isDark ? '0 1px 2px 0 rgba(0,0,0,0.3)' : '0 1px 2px 0 rgba(0,0,0,0.05)');
+    root.style.setProperty('--shadow-md', isDark ? '0 4px 6px -1px rgba(0,0,0,0.4)' : '0 4px 6px -1px rgba(0,0,0,0.1)');
+    root.style.setProperty('--shadow-lg', isDark ? '0 10px 15px -3px rgba(0,0,0,0.5)' : '0 10px 15px -3px rgba(0,0,0,0.1)');
   }
 
   private updateBranding(theme: StratosTheme) {

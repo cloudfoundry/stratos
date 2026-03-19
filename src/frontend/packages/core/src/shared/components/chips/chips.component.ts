@@ -91,7 +91,7 @@ export class AppChipsComponent implements OnInit {
 
   public getChipClasses(color?: string): string {
     if (!color) {
-      return 'bg-gray-100 border-gray-300 text-gray-800';
+      return 'bg-content-secondary border-content-border text-content-text';
     }
     const colorMap: { [key: string]: string } = {
       'primary': 'bg-blue-100 border-blue-300 text-blue-800',
@@ -100,7 +100,7 @@ export class AppChipsComponent implements OnInit {
       'danger': 'bg-red-100 border-red-300 text-red-800',
       'info': 'bg-cyan-100 border-cyan-300 text-cyan-800'
     };
-    return colorMap[color] || 'bg-gray-100 border-gray-300 text-gray-800';
+    return colorMap[color] || 'bg-content-secondary border-content-border text-content-text';
   }
 
 }

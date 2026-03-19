@@ -29,11 +29,11 @@
         [alt]="themeDisplayName() || 'Logo'"
         />
       <div class="login-title-section flex-1">
-        <h1 class="login-title text-xl font-bold text-gray-900 mb-1">
+        <h1 class="login-title text-xl font-bold text-content-text mb-1">
           {{ themeDisplayName() || themeTitle() || 'Stratos' }}
         </h1>
         @if (themeSubtitle()) {
-          <p class="login-subtitle text-sm text-gray-600">
+          <p class="login-subtitle text-sm text-content-muted">
             {{ themeSubtitle() }}
           </p>
         }

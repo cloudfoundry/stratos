@@ -241,7 +241,7 @@ export class TailwindDialogService {
 
     // Base classes - only include essentials, let config override sizing/overflow
     let panelClasses = [
-      'bg-white', 'dark:bg-gray-800', 'rounded-lg', 'shadow-xl',
+      'bg-content-bg', 'rounded-lg', 'shadow-xl',
       'transform', 'transition-all', 'duration-300', 'ease-out',
       'scale-95', 'opacity-0'
     ];
