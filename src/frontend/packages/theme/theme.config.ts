@@ -59,33 +59,33 @@ export interface StratosTheme {
   };
 }
 
-// Light theme (default)
+// Light theme (default) — values must match :root in main.scss
 export const defaultTheme: StratosTheme = {
   colors: {
-    primary: '#2196f3',
-    secondary: '#00bcd4',
-    accent: '#ff9800',
-    success: '#4caf50',
-    warning: '#ff9800',
-    danger: '#f44336',
-    info: '#2196f3',
+    primary: '#3b82f6',
+    secondary: '#60a5fa',
+    accent: '#60a5fa',
+    success: '#22c55e',
+    warning: '#f59e0b',
+    danger: '#ef4444',
+    info: '#3b82f6',
   },
   navigation: {
-    background: '#2196f3',
+    background: '#1e293b',
     text: '#ffffff',
     textMuted: 'rgba(255, 255, 255, 0.7)',
     hover: 'rgba(255, 255, 255, 0.1)',
-    active: 'rgba(255, 255, 255, 0.2)',
+    active: 'rgba(255, 255, 255, 0.15)',
     border: 'rgba(255, 255, 255, 0.1)',
     tooltip: '#374151',
   },
   layout: {
-    background: '#fafafa',
-    bodyBackground: '#fafafa',
-    text: 'rgba(0, 0, 0, 0.87)',
+    background: '#f8fafc',
+    bodyBackground: '#f1f5f9',
+    text: '#1e293b',
     textMuted: '#64748b',
-    headerBackground: '#2196f3',
-    headerText: '#ffffff',
+    headerBackground: '#ffffff',
+    headerText: '#1e293b',
     headerBorder: '#e2e8f0',
     contentBackground: '#ffffff',
     contentSecondary: '#f8fafc',

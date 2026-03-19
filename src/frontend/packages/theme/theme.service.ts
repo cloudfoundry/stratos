@@ -1,4 +1,4 @@
-import { Injectable, Optional, signal, computed, Signal } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { StratosTheme, defaultTheme, darkTheme } from './theme.config';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
@@ -17,14 +17,18 @@ export class StratosThemeService {
   public isDarkMode = this._isDarkMode.asReadonly();
 
   private readonly THEME_MODE_KEY = 'stratos-theme-mode';
-  private readonly THEME_STORAGE_KEY = 'stratos-theme';
+  private readonly BRANDING_STORAGE_KEY = 'stratos-branding';
   private mediaQueryList!: MediaQueryList;
+
+  // Custom branding/login overrides that persist across mode switches
+  private _customBranding: Partial<StratosTheme['branding']> | null = null;
+  private _customLogin: Partial<StratosTheme['login']> | null = null;
 
   constructor() {
     this.initializeTheme();
   }
 
-  private async initializeTheme() {
+  private initializeTheme() {
     // Add initializing class to prevent FOUC (Flash of Unstyled Content)
     document.body.classList.add('theme-initializing');
 
@@ -32,14 +36,14 @@ export class StratosThemeService {
     this.mediaQueryList = window.matchMedia('(prefers-color-scheme: dark)');
     this.mediaQueryList.addEventListener('change', this.onSystemThemeChange.bind(this));
 
+    // Load custom branding overrides (independent of dark/light)
+    this.loadBrandingFromStorage();
+
     // Load theme mode preference from localStorage
     const savedMode = this.loadThemeModeFromStorage();
     this._themeMode.set(savedMode);
 
-    // Load theme configuration
-    await this.loadThemeFromConfig();
-
-    // Apply the theme based on mode
+    // Apply the theme based on mode (sets correct colors + merges branding)
     this.applyThemeMode(savedMode);
     this.updateBranding(this._theme());
 
@@ -55,7 +59,6 @@ export class StratosThemeService {
     this._theme.set(newTheme);
     this.applyTheme(newTheme);
     this.updateBranding(newTheme);
-    this.saveThemeToStorage(newTheme);
   }
 
   getTheme(): StratosTheme {
@@ -127,8 +130,10 @@ export class StratosThemeService {
     }
   }
 
-  // Company branding methods
+  // Company branding methods — these persist across dark/light switches
   setCompanyBranding(branding: Partial<StratosTheme['branding']>) {
+    this._customBranding = { ...(this._customBranding || {}), ...branding };
+    this.saveBrandingToStorage();
     const currentTheme = this._theme();
     const updatedTheme = {
       ...currentTheme,
@@ -138,6 +143,8 @@ export class StratosThemeService {
   }
 
   setLoginCustomization(login: Partial<StratosTheme['login']>) {
+    this._customLogin = { ...(this._customLogin || {}), ...login };
+    this.saveBrandingToStorage();
     const currentTheme = this._theme();
     const updatedTheme = {
       ...currentTheme,
@@ -155,37 +162,29 @@ export class StratosThemeService {
     this.setTheme(updatedTheme);
   }
 
-  // Load theme from various sources
-  private async loadThemeFromConfig() {
+  // Branding persistence — stored separately from mode so it survives dark/light switches
+  private loadBrandingFromStorage() {
     try {
-      // Try to load from localStorage first
-      const savedTheme = localStorage.getItem('stratos-theme');
-      if (savedTheme) {
-        const theme = JSON.parse(savedTheme);
-        this._theme.set(theme);
-        return;
-      }
-
-      // Try to load from config file
-      const response = await fetch('/core/assets/theme-config.json');
-      if (response.ok) {
-        const themeConfig = await response.json();
-        this._theme.set({ ...defaultTheme, ...themeConfig });
-        return;
+      const saved = localStorage.getItem(this.BRANDING_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        this._customBranding = parsed.branding || null;
+        this._customLogin = parsed.login || null;
       }
     } catch (error) {
-      // Silently fall back to default theme
+      // Silently fall back to defaults
     }
-
-    // Fallback to default theme
-    this._theme.set(defaultTheme);
   }
 
-  private saveThemeToStorage(theme: StratosTheme) {
+  private saveBrandingToStorage() {
     try {
-      localStorage.setItem(this.THEME_STORAGE_KEY, JSON.stringify(theme));
+      const data = {
+        branding: this._customBranding,
+        login: this._customLogin,
+      };
+      localStorage.setItem(this.BRANDING_STORAGE_KEY, JSON.stringify(data));
     } catch (error) {
-      console.warn('Could not save theme to localStorage');
+      console.warn('Could not save branding to localStorage');
     }
   }
 
@@ -222,9 +221,22 @@ export class StratosThemeService {
       document.documentElement.classList.remove('dark');
     }
 
-    // Update theme colors based on mode
-    // This allows the theme service to maintain its color system
-    // while respecting dark/light mode
+    // Start with the correct base theme for the mode
+    const baseTheme = isDark ? darkTheme : defaultTheme;
+
+    // Merge custom branding/login overrides (these persist across mode switches)
+    const theme: StratosTheme = {
+      ...baseTheme,
+      branding: this._customBranding
+        ? { ...baseTheme.branding, ...this._customBranding }
+        : baseTheme.branding,
+      login: this._customLogin
+        ? { ...baseTheme.login, ...this._customLogin }
+        : baseTheme.login,
+    };
+
+    this._theme.set(theme);
+    this.applyTheme(theme);
   }
 
   private resolveThemeMode(mode: ThemeMode): boolean {
@@ -255,8 +267,8 @@ export class StratosThemeService {
     } catch (error) {
       console.warn('Could not load theme mode from localStorage');
     }
-    // Default to system preference
-    return 'system';
+    // Default to light when no preference saved
+    return 'light';
   }
 
   private saveThemeModeToStorage(mode: ThemeMode) {
@@ -290,8 +302,10 @@ export class StratosThemeService {
 
   // Reset to default theme
   resetTheme() {
-    this.setTheme(defaultTheme);
-    localStorage.removeItem('stratos-theme');
+    this._customBranding = null;
+    this._customLogin = null;
+    localStorage.removeItem(this.BRANDING_STORAGE_KEY);
+    this.applyThemeMode(this._themeMode());
   }
 
   // Export/import theme configuration
