@@ -16,6 +16,9 @@ Track Stratos Jira tickets, their status, and decisions made during work session
 
 | Ticket | Summary | Branch | Notes |
 |--------|---------|--------|-------|
+| FWT-849 | Space dropdown when Org is "All" | `feature/ui-additional-cleanup` | `space (org)` labels, dedup by GUID |
+| FWT-836 | Scroll shadow on non-list pages | `feature/ui-additional-cleanup` | Dashboard-base gradient overlay + E2E tests |
+| FWT-852 | Material Design dependency analysis | `feature/ui-additional-cleanup` | @angular/material fully removed, CDK kept |
 | FWT-810 | Clear filter button + contextual help | `feature/rewrite-packaging-script` | Includes FWT-815, 825, 804, 817, 800 |
 | FWT-799 | Fix card list scrolling | `feature/rewrite-packaging-script` | |
 | FWT-340 | Angular 20 update | — | Umbrella ticket |
@@ -24,11 +27,8 @@ Track Stratos Jira tickets, their status, and decisions made during work session
 
 | Ticket | Priority | Summary | Effort | Notes |
 |--------|----------|---------|--------|-------|
-| FWT-849 | Medium | Space dropdown when Org is "All" | Small-medium | Modify `createSpace()` to aggregate spaces |
-| FWT-847 | Medium | Raw grays → semantic colors | Small per file | 40 templates, plan in `plans/raw-gray-to-semantic-sweep.md` |
-| FWT-852 | Medium | Analyze Material Design dependencies | Medium | Full migration analysis needed |
+| FWT-847 | Medium | Raw grays → semantic colors | Small per file | P1 done (9 files), P2-3 remaining, plan in `plans/raw-gray-to-semantic-sweep.md` |
 | FWT-837 | — | Filter shows wrong rows | Unknown | May be related to FWT-834 root cause |
-| FWT-836 | — | Scroll shadow on non-list pages | Small | |
 | FWT-811 | — | UI patterns umbrella (44 items) | Large | Priority list in `plans/ui-enhancement-analysis.md` |
 
 ## Backlog — Testing & Infrastructure
