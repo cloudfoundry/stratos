@@ -117,7 +117,7 @@
               <div class="relative">
                 <input class="input pr-8" [ngModel]="filterString" #filter="ngModel"
                   [disabled]="(filterColumns.length > 1 && filterSelected === undefined) || (dataSource.isLoadingPage$ | async)"
-                  name="filter" placeholder="{{ filterSelected?.placeholder || config.text?.filter || 'Filter'}}"
+                  name="filter" placeholder="{{ filterSelected?.placeholder || config.text?.filter || 'Search by name'}}"
                   (keydown.escape)="clearFilterText(); $event.stopPropagation()">
                 @if (filterString) {
                   <button class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center bg-transparent border-none p-0 cursor-pointer text-content-muted hover:text-content-text"
@@ -131,7 +131,7 @@
           <!-- Sort Button & Drop down -->
           <div class="sort"
             [hidden]="(view$ | async) === 'table' || sortColumns.length < 1 || (isAddingOrSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && !(hasRowsOrIsFiltering$ | async))">
-            <div class="form-field list-component__header__right-sort">
+            <div class="flex items-center gap-1 pl-3 border-l-2 border-content-border">
               <select class="select" name="sort-field" [(ngModel)]="headerSort.value"
                 [disabled]="(disableActions$ | async)"
                 (change)="updateListSort(headerSort.value, headerSort.direction)">
