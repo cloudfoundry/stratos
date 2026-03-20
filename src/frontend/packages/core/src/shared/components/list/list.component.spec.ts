@@ -160,7 +160,7 @@ describe('ListComponent', () => {
       component = fixture.componentInstance;
     });
 
-    describe('clearFilterText (FWT-810)', () => {
+    describe('clearFilterText', () => {
       it('should clear filterString and call paginationController.filterByString', () => {
         // Set up component state as if initialised
         const componentAny = component as any;
@@ -189,7 +189,7 @@ describe('ListComponent', () => {
       });
     });
 
-    describe('getVisibleStart / getVisibleEnd (FWT-815.1)', () => {
+    describe('getVisibleStart / getVisibleEnd', () => {
       it('should return 1-based start for first page', () => {
         const componentAny = component as any;
         componentAny.paginatorSettings = { pageIndex: 0, pageSize: 6, length: 49 };
@@ -231,7 +231,7 @@ describe('ListComponent', () => {
       });
     });
 
-    describe('scroll shadow (FWT-815.2)', () => {
+    describe('scroll shadow', () => {
       it('should start with showScrollShadow as false', () => {
         expect(component.showScrollShadow()).toBe(false);
       });

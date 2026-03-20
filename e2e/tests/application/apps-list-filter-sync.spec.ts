@@ -3,7 +3,7 @@ import { test, expect } from '../../fixtures/test-base';
 import { ListComponent } from '../../components/list.component';
 
 /**
- * FWT-834: Apps list filter sync regression test
+ * Apps list filter sync regression test
  *
  * Verifies that org/space filter dropdowns stay in sync with the
  * underlying NgRx store, preventing the 49→2 regression where
@@ -56,7 +56,7 @@ async function clickSideNavLink(page: Page, label: string, urlPattern: RegExp): 
   await page.waitForTimeout(500);
 }
 
-test.describe('Apps list filter sync (FWT-834)', () => {
+test.describe('Apps list filter sync', () => {
 
   test('should show all apps with dropdowns at "All" on fresh load', async ({ adminPage: page }) => {
     await page.goto('/applications');

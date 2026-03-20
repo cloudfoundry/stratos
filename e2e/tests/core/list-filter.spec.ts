@@ -1,7 +1,7 @@
 import { test, expect } from '../../fixtures/test-base';
 
 /**
- * List Filter E2E Tests (FWT-810)
+ * List Filter E2E Tests
  *
  * Tests that typing in the filter input actually filters the displayed
  * rows/cards, not just the count. Covers both table and card views.

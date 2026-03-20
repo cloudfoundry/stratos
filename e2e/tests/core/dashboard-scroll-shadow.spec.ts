@@ -1,7 +1,7 @@
 import { test, expect } from '../../fixtures/test-base';
 
 /**
- * Dashboard Content Scroll Shadow Tests (FWT-836)
+ * Dashboard Content Scroll Shadow Tests
  *
  * Validates the scroll shadow overlay on the dashboard-base content
  * container. Non-list pages (About, Diagnostics) use this container
@@ -24,7 +24,7 @@ const WRAPPER_SELECTOR = 'app-dashboard-base .dashboard-main > div:last-child';
 
 const SELECTORS = { content: CONTENT_SELECTOR, shadow: SHADOW_SELECTOR, wrapper: WRAPPER_SELECTOR };
 
-test.describe('Dashboard Content Scroll Shadow (FWT-836)', () => {
+test.describe('Dashboard Content Scroll Shadow', () => {
 
   /**
    * Dismiss any error banner that may appear after login/navigation

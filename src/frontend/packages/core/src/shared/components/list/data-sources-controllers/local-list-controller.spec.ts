@@ -6,7 +6,7 @@ import { LocalListController } from './local-list-controller';
 import { getDataFunctionList } from './local-filtering-sorting';
 
 /**
- * Diagnostic tests for FWT-810/815: full LocalListController pipeline
+ * Diagnostic tests: full LocalListController pipeline
  * with filtering to verify the filter actually removes non-matching entities.
  */
 describe('LocalListController filter pipeline', () => {

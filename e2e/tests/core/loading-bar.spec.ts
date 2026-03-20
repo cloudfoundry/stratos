@@ -1,7 +1,7 @@
 import { test, expect } from '../../fixtures/test-base';
 
 /**
- * Loading Bar Tests (FWT-855)
+ * Loading Bar Tests
  *
  * Verifies the indeterminate progress bar renders and animates
  * during data loading in list/table views.
@@ -11,7 +11,7 @@ import { test, expect } from '../../fixtures/test-base';
  *   STRATOS_E2E_PROFILE=adepttech npx playwright test loading-bar
  */
 
-test.describe('Loading Bar (FWT-855)', () => {
+test.describe('Loading Bar', () => {
 
   test.describe('CSS animation definition', () => {
 
