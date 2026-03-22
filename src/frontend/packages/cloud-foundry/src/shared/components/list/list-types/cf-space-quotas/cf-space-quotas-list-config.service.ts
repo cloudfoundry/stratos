@@ -48,7 +48,7 @@ export class CfSpaceQuotasListConfigService extends BaseCfListConfig<APIResource
   enableTextFilter = true;
   text = {
     title: null as string | null,
-    filter: 'Search by name',
+    filter: 'Filter by Name',
     noEntries: 'There are no quotas'
   };
   columns: ITableColumn<APIResource<IQuotaDefinition>>[] = [

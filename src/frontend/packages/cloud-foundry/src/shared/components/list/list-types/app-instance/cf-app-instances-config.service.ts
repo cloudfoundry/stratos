@@ -144,7 +144,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
   enableTextFilter = true;
   text: { title: string | null; filter: string; noEntries: string } = {
     title: null,
-    filter: 'Search by state',
+    filter: 'Filter by State',
     noEntries: 'There are no application instances'
   };
   private initialised$: Observable<boolean>;

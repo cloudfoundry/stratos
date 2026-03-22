@@ -21,7 +21,7 @@ export class CfSpacesListConfigService implements IListConfig<APIResource<ISpace
   enableTextFilter = true;
   text = {
     title: null as string | null,
-    filter: 'Search by name',
+    filter: 'Filter by Name',
     noEntries: 'There are no spaces'
   };
   columns: ITableColumn<APIResource<ISpace>>[] = [{

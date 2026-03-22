@@ -79,7 +79,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
   enableTextFilter = true;
   text: ITableText = {
     title: null,
-    filter: 'Search by username',
+    filter: 'Filter by Username',
     noEntries: 'There are no users',
     maxedResults: {
       icon: 'people',

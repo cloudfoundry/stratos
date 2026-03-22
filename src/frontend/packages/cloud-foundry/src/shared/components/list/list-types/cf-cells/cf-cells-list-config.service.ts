@@ -37,7 +37,7 @@ export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResu
   enableTextFilter = true;
   text = {
     title: null as string,
-    filter: 'Search by id',
+    filter: 'Filter by ID',
     noEntries: 'There are no cells'
   };
   private init$: Observable<any>;

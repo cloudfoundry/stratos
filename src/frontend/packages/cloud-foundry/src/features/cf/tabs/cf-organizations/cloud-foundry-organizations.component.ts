@@ -73,7 +73,7 @@ export class CloudFoundryOrganizationsComponent {
       }],
       text: {
         title: null,
-        filter: 'Search by name',
+        filter: 'Filter by Name',
         noEntries: 'There are no organizations'
       },
     });

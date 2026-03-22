@@ -42,7 +42,7 @@ export class ServiceInstancesWallListConfigService extends CfServiceInstancesLis
   endpointType = 'cf';
   text: ITableText = {
     title: null,
-    filter: 'Search by name',
+    filter: 'Filter by Name',
     noEntries: 'There are no service instances',
     maxedResults: {
       icon: 'service',

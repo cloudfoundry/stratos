@@ -23,7 +23,7 @@
         <div class="charts__gallery__content">
           <div class="charts__gallery__content__topbar">
             <app-custom-icon svgIcon="search"></app-custom-icon>
-            <input type="text" placeholder="Search charts..." value="{{searchTerm}}" (keyup)="searchChange($event)" />
+            <input type="text" placeholder="Filter by Name" value="{{searchTerm}}" (keyup)="searchChange($event)" />
           </div>
           <app-chart-list [charts]="orderedCharts"></app-chart-list>
         </div>

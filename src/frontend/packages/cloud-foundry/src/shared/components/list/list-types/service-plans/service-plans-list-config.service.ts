@@ -44,7 +44,7 @@ export class ServicePlansListConfigService implements IListConfig<APIResource<IS
   defaultView = 'table' as ListView;
   text: { title: string | null; filter: string; noEntries: string } = {
     title: null,
-    filter: 'Search by name',
+    filter: 'Filter by Name',
     noEntries: 'There are no service plans'
   };
   enableTextFilter = true;

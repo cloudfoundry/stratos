@@ -72,7 +72,7 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
   multiFilterConfigs: IListMultiFilterConfig[] = [];
   text: ITableText = {
     title: null,
-    filter: 'Search by name and tags',
+    filter: 'Filter by Name and Tags',
     noEntries: 'There are no services',
     maxedResults: {
       icon: 'store',
