@@ -6,10 +6,14 @@ correctly in templates and styles.
 
 ## System Overview
 
-The theme system has four layers that work together:
+The theme system has five layers that work together:
 
 ```
 ┌─────────────────────────────────────────────────────┐
+│  CompanyConfigService (Angular)                     │
+│  Loads company-config.json at startup               │
+│  Applies branding, colors, login to theme service   │
+├─────────────────────────────────────────────────────┤
 │  StratosThemeService (Angular)                      │
 │  Sets inline CSS variables on <html>                │
 │  Manages dark/light mode + branding persistence     │
@@ -32,12 +36,15 @@ The theme system has four layers that work together:
 
 | File | Purpose |
 |------|---------|
+| `src/frontend/packages/theme/company-config.interface.ts` | CompanyConfig interface — company info, logos, colors, login, footer |
+| `src/frontend/packages/theme/company-config.service.ts` | Loads `company-config.json`, applies branding to theme service |
 | `src/frontend/packages/theme/theme.service.ts` | Angular service — mode switching, CSS variable application, branding persistence |
 | `src/frontend/packages/theme/theme.config.ts` | Light/dark theme definitions (StratosTheme interface) |
 | `src/frontend/packages/theme/styles/main.scss` | CSS custom properties (:root defaults, .dark-theme overrides), component base styles |
 | `src/frontend/packages/theme/theme-transitions.scss` | FOUC prevention, smooth transitions, reduced-motion support |
 | `tailwind.config.js` | Semantic color tokens mapping CSS variables to Tailwind classes |
 | `src/frontend/packages/core/src/shared/components/theme-toggle/` | Toggle button UI |
+| `src/frontend/packages/core/src/features/login/login-page/` | Login page component (themed via signals) |
 
 ## CSS Variable Categories
 
@@ -305,14 +312,293 @@ transitions, then component styles.
 6. Optionally add a semantic Tailwind token in `tailwind.config.js`
    under `theme.extend.colors`
 
-## Known Gaps
+## Company Branding
 
-As of 2026-03-19:
+The `CompanyConfigService` is the primary entry point for deployers who
+want to customize the look and feel of Stratos for their organization.
 
-- **38+ template files** use raw gray classes without dark mode variants
-- **16+ files** use `bg-white` without `dark:` or semantic alternatives
-- **308+ hardcoded hex colors** in SCSS files across 27 files
-- **Page side nav** has no dark mode support
-- **Dialog/snackbar services** generate hardcoded Tailwind classes
+### Configuration File
 
-See FWT-811 comments for the full gap analysis.
+At startup, `CompanyConfigService` attempts to load branding from:
+
+1. `/assets/company-config.json` (primary)
+2. `/assets/config/company.json` (environment-specific fallback)
+3. Built-in defaults (if neither file exists)
+
+### CompanyConfig Interface
+
+```typescript
+interface CompanyConfig {
+  company: {
+    name: string;          // Company name
+    website?: string;      // Company website URL
+    supportEmail?: string; // Support contact
+  };
+  logos: {
+    main: string;           // Login page and headers
+    navigation: string;     // Navigation bar logo
+    navigationIcon: string; // Collapsed nav icon
+    favicon: string;        // Browser tab icon
+    loginBackground?: string; // Login page background image
+  };
+  theme: {
+    primary: string;   // Primary brand color
+    secondary: string; // Secondary brand color
+    accent: string;    // Accent highlights
+    success: string;   // Success status
+    warning: string;   // Warning status
+    danger: string;    // Error/danger
+    info: string;      // Informational
+  };
+  navigation: {
+    background: string; // Sidebar background
+    text: string;       // Sidebar text
+    hover: string;      // Hover effect
+    active: string;     // Active item highlight
+  };
+  layout: {
+    background: string;       // Page background
+    text: string;             // Primary text color
+    headerBackground: string; // Header bar background
+    headerText: string;       // Header bar text
+  };
+  login: {
+    title: string;           // Login page heading
+    subtitle?: string;       // Subtitle under heading
+    showLogo: boolean;       // Show/hide logo
+    showTitle: boolean;      // Show/hide title
+    backgroundColor?: string; // Page background color
+    cardBackground?: string;  // Login form card color
+    customMessage?: string;   // Custom message text
+  };
+  footer: {
+    copyright?: string;      // Copyright text
+    additionalInfo?: string; // Extra footer text
+  };
+}
+```
+
+### Example: company-config.json
+
+```json
+{
+  "company": {
+    "name": "Acme Corp",
+    "website": "https://acme.example.com",
+    "supportEmail": "support@acme.example.com"
+  },
+  "logos": {
+    "main": "/assets/acme-logo.png",
+    "navigation": "/assets/acme-logo.png",
+    "navigationIcon": "/assets/acme-icon.png",
+    "favicon": "/assets/acme-favicon.ico",
+    "loginBackground": "/assets/acme-login-bg.jpg"
+  },
+  "theme": {
+    "primary": "#1a73e8",
+    "secondary": "#00897b",
+    "accent": "#ff6f00",
+    "success": "#2e7d32",
+    "warning": "#f57f17",
+    "danger": "#c62828",
+    "info": "#1565c0"
+  },
+  "navigation": {
+    "background": "#1a237e",
+    "text": "#ffffff",
+    "hover": "rgba(255, 255, 255, 0.1)",
+    "active": "rgba(255, 255, 255, 0.2)"
+  },
+  "layout": {
+    "background": "#fafafa",
+    "text": "#212121",
+    "headerBackground": "#1a73e8",
+    "headerText": "#ffffff"
+  },
+  "login": {
+    "title": "Acme Cloud Console",
+    "subtitle": "Powered by Cloud Foundry",
+    "showLogo": true,
+    "showTitle": true,
+    "backgroundColor": "#1a1a2e",
+    "cardBackground": "#ffffff"
+  },
+  "footer": {
+    "copyright": "© 2026 Acme Corp. All rights reserved."
+  }
+}
+```
+
+### How Branding Flows
+
+```
+company-config.json
+  │
+  ▼
+CompanyConfigService.loadCompanyConfig()
+  ├── config.theme     → themeService.setColors()
+  ├── config.logos      → themeService.setCompanyBranding()
+  ├── config.login      → themeService.setLoginCustomization()
+  ├── config.navigation → themeService.setTheme()
+  └── config.layout     → themeService.setTheme()
+       │
+       ▼
+  StratosThemeService.applyTheme()
+       │
+       ▼
+  CSS variables on <html> element
+       │
+       ▼
+  Tailwind classes resolve to new values
+```
+
+Branding is persisted to `localStorage` under the
+`stratos-company-config` key so it survives page refreshes.
+
+## Login Page Theming
+
+The login page uses Angular signals to reactively apply theme values.
+All visual properties come from the `StratosTheme` object, which is
+populated either by `theme.config.ts` defaults or by the company
+config.
+
+### Login Page Structure
+
+```
+┌─────────────────────────────────────────────┐
+│  login.backgroundImage / backgroundColor    │
+│                                             │
+│        ┌─────────────────────┐              │
+│        │ login.cardBackground│              │
+│        │                     │              │
+│        │  [logo]  Title      │              │
+│        │          Subtitle   │              │
+│        │                     │              │
+│        │  [ Username       ] │              │
+│        │  [ Password       ] │              │
+│        │  [ Sign In        ] │              │
+│        └─────────────────────┘              │
+│                                             │
+└─────────────────────────────────────────────┘
+```
+
+### Themeable Login Properties
+
+| Property | Source | Controls |
+|----------|--------|----------|
+| Background image | `login.backgroundImage` | Full-screen page background |
+| Background color | `login.backgroundColor` | Fallback when no image |
+| Card background | `login.cardBackground` | Login form card |
+| Logo | `branding.logo` | Image in card header |
+| Title | `branding.displayName` or `branding.loginTitle` | Main heading |
+| Subtitle | `branding.loginSubtitle` | Text below heading |
+
+### Login Page Signals
+
+The login component exposes these as computed signals that
+automatically update when the theme changes:
+
+- `loginBackground()` — CSS `background-image` value
+- `loginBackgroundColor()` — CSS `background-color` value
+- `loginCardBackground()` — card `background-color`
+- `themeLogo()` — logo image URL
+- `themeTitle()` — heading text
+- `themeSubtitle()` — subtitle text
+
+## Styling Common Elements
+
+### Cards
+
+```html
+<div class="card bg-card-bg border border-card-border rounded-lg
+  shadow-sm">
+  <div class="bg-card-header-bg px-4 py-3 border-b
+    border-card-border">
+    <h3 class="text-content-text font-medium">Card Title</h3>
+  </div>
+  <div class="p-4 text-content-text">
+    <p class="text-content-muted">Secondary information</p>
+  </div>
+</div>
+```
+
+### Tables
+
+```html
+<table class="w-full">
+  <thead>
+    <tr class="bg-table-header-bg text-table-header-text">
+      <th class="border-b border-table-border px-4 py-2">Name</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="hover:bg-table-row-hover border-b border-table-border">
+      <td class="px-4 py-2 text-content-text">Value</td>
+    </tr>
+  </tbody>
+</table>
+```
+
+### Buttons
+
+```html
+<!-- Primary action -->
+<button class="btn btn-primary">Save</button>
+
+<!-- Danger action -->
+<button class="bg-danger text-white px-4 py-2 rounded">Delete</button>
+
+<!-- Ghost/subtle action -->
+<button class="text-content-muted hover:text-content-text">
+  Cancel
+</button>
+```
+
+### Form Inputs
+
+```html
+<input class="input w-full" placeholder="Filter by Name">
+
+<!-- Disabled -->
+<input class="input w-full bg-input-disabled-bg" disabled>
+```
+
+The `.input` class applies `--input-bg`, `--input-border`,
+`--input-text`, and `--input-placeholder` variables. Focus states
+use `--input-focus-border`.
+
+### Status Badges
+
+```html
+<span class="bg-status-success-bg text-status-success-text
+  border border-status-success-border px-2 py-0.5 rounded text-xs">
+  Running
+</span>
+
+<span class="bg-status-warning-bg text-status-warning-text
+  border border-status-warning-border px-2 py-0.5 rounded text-xs">
+  Stopped
+</span>
+
+<span class="bg-status-danger-bg text-status-danger-text
+  border border-status-danger-border px-2 py-0.5 rounded text-xs">
+  Error
+</span>
+```
+
+## Dark Mode Testing Checklist
+
+When styling a new component or modifying existing styles, verify
+in both light and dark mode:
+
+1. **Text readability** — content text and muted text are legible
+2. **Backgrounds** — cards, inputs, and content areas contrast with
+   the page background
+3. **Borders** — visible but not overpowering
+4. **Hover states** — distinguishable from resting state
+5. **Status colors** — success/warning/danger badges remain clear
+6. **Form inputs** — placeholder text visible, focus ring clear,
+   disabled state distinguishable
+7. **No hardcoded colors** — grep your changes for hex values
+   (`#fff`, `#1e293b`) and raw Tailwind grays (`text-gray-`,
+   `bg-gray-`, `border-gray-`)
