@@ -19,6 +19,7 @@
 #   make clean frontend         Remove frontend build only
 #   make clean backend          Remove backend binaries only
 #   make clean all              Remove everything (including node_modules)
+#   make stamp frontend         Generate build-info.ts with version metadata
 #   make dump version           Print resolved version variables
 #
 # See docs/build-and-packaging.md for full documentation.
@@ -152,7 +153,7 @@ GH = $(if $(WANT_GITHUB),$1)
 .PHONY: build fe-build be-build be-build-all
 build: $(call FE,fe-build) $(call BE,be-build,be-build-all)
 
-fe-build: fe-version
+fe-build: stamp-fe
 	@echo "Building frontend (production)..."
 	bun run build
 	@echo "Frontend built: $(DIST_DIR)/frontend/browser/"
@@ -361,6 +362,7 @@ help:
 	@echo "  make clean all            Remove everything (including node_modules)"
 	@echo ""
 	@echo "Other:"
+	@echo "  make stamp frontend       Generate build-info.ts with version metadata"
 	@echo "  make security             Run security scans"
 	@echo "  make dump version         Print version and build metadata"
 	@echo ""

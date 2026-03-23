@@ -46,14 +46,27 @@ GO_LDFLAGS := -X main.appVersion=$(SEMVER_VERSION) -X main.buildDate=$(BUILD_DAT
 # ── Frontend build info ──────────────────────────────────────
 BUILD_INFO_TS := src/frontend/packages/core/src/environments/build-info.ts
 
-.PHONY: fe-version
-fe-version:
+# stamp: embed version/git metadata into build artifacts
+# Usage: make stamp frontend   (generate build-info.ts)
+#        make stamp             (same — frontend is the default)
+.PHONY: stamp stamp-fe fe-version
+stamp: $(call FE,stamp-fe)
+ifeq ($(WANT_FRONTEND)$(WANT_BACKEND),)
+stamp: stamp-fe
+endif
+
+stamp-fe:
 	@mkdir -p $(dir $(BUILD_INFO_TS))
-	@printf "export const BUILD_INFO = {\n  version: '%s',\n  gitCommit: '%s',\n  gitBranch: '%s',\n  buildDate: '%s',\n  nodeVersion: '%s',\n  typescriptVersion: '%s',\n  bunVersion: '%s',\n};\n" \
-		"$(SEMVER_VERSION)" "$(BUILD_VCS_ID)" "$(BUILD_VCS_BRANCH)" "$(BUILD_DATE)" \
+	@printf "export const BUILD_INFO = {\n  version: '%s',\n  gitProject: '%s',\n  gitCommit: '%s',\n  gitBranch: '%s',\n  buildDate: '%s',\n  nodeVersion: '%s',\n  typescriptVersion: '%s',\n  bunVersion: '%s',\n};\n" \
+		"$(SEMVER_VERSION)" "$(BUILD_VCS_URL)" "$(BUILD_VCS_ID)" "$(BUILD_VCS_BRANCH)" "$(BUILD_DATE)" \
 		"$(BUILD_NODE_VERSION)" "$(BUILD_TS_VERSION)" "$(BUILD_BUN_VERSION)" \
 		> $(BUILD_INFO_TS)
 	@echo "Generated $(BUILD_INFO_TS)"
+
+# Deprecation shim
+fe-version:
+	@echo "DEPRECATED: use 'make stamp frontend' instead"
+	@$(MAKE) stamp frontend
 
 # ── Introspection ─────────────────────────────────────────────
 .PHONY: dump dump-version
