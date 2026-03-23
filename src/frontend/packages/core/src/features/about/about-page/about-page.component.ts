@@ -98,7 +98,7 @@ export class AboutPageComponent implements OnInit, OnDestroy {
   }
 
   private initVcsLinks() {
-    const gitProject = this.getMeta('stratos_git_project');
+    const gitProject = BUILD_INFO.gitProject || this.getMeta('stratos_git_project');
     const gitBranch = BUILD_INFO.gitBranch === 'HEAD' ? null : BUILD_INFO.gitBranch;
     const gitCommit = BUILD_INFO.gitCommit;
 

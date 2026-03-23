@@ -86,10 +86,10 @@ export class DiagnosticsPageComponent implements OnInit {
       })
     );
 
-    this.gitProject = this.getMeta('stratos_git_project');
-    this.gitBranch = this.getMeta('stratos_git_branch');
-    this.gitCommit = this.getMeta('stratos_git_commit');
-    this.buildDate = this.getMeta('stratos_build_date');
+    this.gitProject = this.buildInfo.gitProject || this.getMeta('stratos_git_project');
+    this.gitBranch = this.buildInfo.gitBranch || this.getMeta('stratos_git_branch');
+    this.gitCommit = this.buildInfo.gitCommit || this.getMeta('stratos_git_commit');
+    this.buildDate = this.buildInfo.buildDate || this.getMeta('stratos_build_date');
 
     // Don't show branch if it is recorded as HEAD
     if (this.gitBranch === 'HEAD') {
