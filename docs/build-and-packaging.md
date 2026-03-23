@@ -8,7 +8,7 @@ Single source of truth for building, testing, and packaging Stratos.
 |------|---------|---------|
 | Node.js | 24+ | Frontend build tooling |
 | Bun | 1.2+ | Package manager, script runner |
-| Go | 1.21+ | Backend compilation |
+| Go | 1.25+ | Backend compilation |
 | Git | any | Source control, `git archive` for source packages |
 | `zip` | any | CF and Windows release archives |
 | `swag` | optional | OpenAPI documentation generation |
@@ -24,6 +24,7 @@ Single source of truth for building, testing, and packaging Stratos.
 | `make build backend` | Build backend for current platform | `dist/bin/jetstream` |
 | `make build backend-all` | Cross-compile backend for 6 platforms | `dist/bin/jetstream-{os}-{arch}` |
 | `make build all` | Frontend + cross-compile all backends | All of the above |
+| `make build cf` | Build frontend + linux/amd64 backend (CF deploy) | `dist/frontend/browser/`, `dist/bin/jetstream` |
 
 ### Testing
 
@@ -61,10 +62,11 @@ Single source of truth for building, testing, and packaging Stratos.
 | `make clean backend` | Remove backend binaries only (`dist/bin/`) |
 | `make clean all` | Remove everything including `node_modules` |
 
-### Diagnostics
+### Metadata and Diagnostics
 
 | Command | What it does |
 |---------|-------------|
+| `make stamp frontend` | Generate `build-info.ts` with version and git metadata |
 | `make dump version` | Print resolved semver, VCS metadata, and Go ldflags |
 
 ### Common Workflows
@@ -80,12 +82,19 @@ dist/install/run.sh
 **CF deployment:**
 
 ```bash
-make build all
-make release cf
+# Build and package in one command (cf modifier forces linux/amd64):
+make build release cf
+
+# Or with explicit version override:
+make VERSION=v5.0.0 build release cf
+
+# Deploy (via site.mk or manually):
+cf target -o system -s stratos
 cf push -f dist/cf-package/manifest.yml -p dist/stratos-cf-{VERSION}.zip
-# or from the staging directory:
-cd dist/cf-package && cf push
 ```
+
+The `cf` modifier automatically sets `PLATFORM=linux/amd64` for backend
+compilation. The version can be overridden without editing `package.json`.
 
 Note: `cf push -p` does not read `manifest.yml` from inside the zip —
 the manifest must be passed separately with `-f` or be in the current directory.
@@ -95,6 +104,15 @@ the manifest must be passed separately with `-f` or be in the current directory.
 ```bash
 make build all
 make release github
+```
+
+**Version override:**
+
+Any make target respects `VERSION=` to override the version from `package.json`:
+
+```bash
+make VERSION=v5.0.0-rc.1 build release cf
+make VERSION=v5.0.0 dump version
 ```
 
 ## Site-Specific Overrides (site.mk)
