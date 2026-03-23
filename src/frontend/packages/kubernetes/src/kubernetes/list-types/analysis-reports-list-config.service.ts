@@ -39,7 +39,7 @@ export class AnalysisReportsListConfig implements IListConfig<AnalysisReport> {
         getLink: (row: AnalysisReport) => row.status === 'completed' ? `/kubernetes/${this.guid}/analysis/report/${row.id}` : null
       },
       sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: 'name',
         field: 'name'
       },

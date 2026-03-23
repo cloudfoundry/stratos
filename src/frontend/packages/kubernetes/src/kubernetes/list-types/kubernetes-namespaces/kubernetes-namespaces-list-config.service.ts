@@ -30,7 +30,7 @@ export class KubernetesNamespacesListConfigService implements IListConfig<Kubern
       columnId: 'name', headerCell: () => 'Name',
       cellComponent: KubernetesNamespaceLinkComponent,
       sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: 'name',
         field: 'metadata.name'
       },

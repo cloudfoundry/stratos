@@ -29,7 +29,7 @@ export class DetachAppsListConfigService implements IListConfig<APIResource<ISer
       valuePath: 'entity.app.entity.name'
     },
     sort: {
-      type: 'sort',
+      type: 'natural-sort',
       orderKey: 'name',
       field: 'entity.app.entity.name'
     }

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { APIResource, PaginationEntityState } from '@stratosui/store';
-import { getFilterFunction } from './local-filtering-sorting';
+import { getDataFunctionList, getFilterFunction } from './local-filtering-sorting';
 
 /**
  * Tests for local filtering and sorting utility functions.
@@ -216,6 +216,115 @@ describe('local-filtering-sorting', () => {
         expect(result).toHaveLength(2);
         expect(result[0].description).toContain('hello');
         expect(result[1].description).toContain('Hello');
+      });
+    });
+  });
+
+  describe('sort functions', () => {
+    const createSortPaginationState = (orderKey: string, direction: string): PaginationEntityState => ({
+      currentPage: 1,
+      totalResults: 0,
+      pageCount: 1,
+      ids: {},
+      params: {
+        'order-direction-field': orderKey,
+        'order-direction': direction,
+      },
+      pageRequests: {},
+      clientPagination: {
+        pageSize: 10,
+        currentPage: 1,
+        filter: { string: '', items: {} },
+        totalResults: 0,
+      },
+      maxedState: {},
+      isListPagination: false,
+    });
+
+    describe('lexicographic sort (type: sort)', () => {
+      it('sorts strings lexicographically', () => {
+        const [sortFn] = getDataFunctionList([{ type: 'sort', orderKey: 'name', field: 'name' }]);
+        const entities = [{ name: 'cherry' }, { name: 'apple' }, { name: 'banana' }];
+        const result = sortFn(entities, createSortPaginationState('name', 'desc'));
+        expect(result.map(e => e.name)).toEqual(['apple', 'banana', 'cherry']);
+      });
+
+      it('puts app-10 before app-2 (documenting lexicographic behavior)', () => {
+        const [sortFn] = getDataFunctionList([{ type: 'sort', orderKey: 'name', field: 'name' }]);
+        const entities = [{ name: 'app-1' }, { name: 'app-10' }, { name: 'app-2' }];
+        const result = sortFn(entities, createSortPaginationState('name', 'desc'));
+        expect(result.map(e => e.name)).toEqual(['app-1', 'app-10', 'app-2']);
+      });
+
+      it('reverses order with asc direction', () => {
+        const [sortFn] = getDataFunctionList([{ type: 'sort', orderKey: 'name', field: 'name' }]);
+        const entities = [{ name: 'apple' }, { name: 'cherry' }, { name: 'banana' }];
+        const result = sortFn(entities, createSortPaginationState('name', 'asc'));
+        expect(result.map(e => e.name)).toEqual(['cherry', 'banana', 'apple']);
+      });
+
+      it('returns entities unchanged when orderKey does not match', () => {
+        const [sortFn] = getDataFunctionList([{ type: 'sort', orderKey: 'name', field: 'name' }]);
+        const entities = [{ name: 'cherry' }, { name: 'apple' }];
+        const result = sortFn(entities, createSortPaginationState('other', 'asc'));
+        expect(result.map(e => e.name)).toEqual(['cherry', 'apple']);
+      });
+    });
+
+    describe('natural sort (type: natural-sort)', () => {
+      // Note: the existing sort convention is inverted — 'desc' produces A-Z, 'asc' produces Z-A.
+      // Natural sort matches this convention for consistency with the UI toggle.
+
+      it('sorts numeric segments naturally', () => {
+        const [sortFn] = getDataFunctionList([{ type: 'natural-sort', orderKey: 'name', field: 'name' }]);
+        const entities = [{ name: 'app-1' }, { name: 'app-10' }, { name: 'app-2' }, { name: 'app-20' }, { name: 'app-3' }];
+        const result = sortFn(entities, createSortPaginationState('name', 'desc'));
+        expect(result.map(e => e.name)).toEqual(['app-1', 'app-2', 'app-3', 'app-10', 'app-20']);
+      });
+
+      it('sorts pure alpha strings alphabetically', () => {
+        const [sortFn] = getDataFunctionList([{ type: 'natural-sort', orderKey: 'name', field: 'name' }]);
+        const entities = [{ name: 'cherry' }, { name: 'apple' }, { name: 'banana' }];
+        const result = sortFn(entities, createSortPaginationState('name', 'desc'));
+        expect(result.map(e => e.name)).toEqual(['apple', 'banana', 'cherry']);
+      });
+
+      it('is case-insensitive', () => {
+        const [sortFn] = getDataFunctionList([{ type: 'natural-sort', orderKey: 'name', field: 'name' }]);
+        const entities = [{ name: 'App-10' }, { name: 'app-1' }, { name: 'APP-2' }];
+        const result = sortFn(entities, createSortPaginationState('name', 'desc'));
+        expect(result.map(e => e.name)).toEqual(['app-1', 'APP-2', 'App-10']);
+      });
+
+      it('reverses order with asc direction', () => {
+        const [sortFn] = getDataFunctionList([{ type: 'natural-sort', orderKey: 'name', field: 'name' }]);
+        const entities = [{ name: 'app-1' }, { name: 'app-10' }, { name: 'app-2' }];
+        const result = sortFn(entities, createSortPaginationState('name', 'asc'));
+        expect(result.map(e => e.name)).toEqual(['app-10', 'app-2', 'app-1']);
+      });
+
+      it('handles nested fields', () => {
+        const [sortFn] = getDataFunctionList([{ type: 'natural-sort', orderKey: 'name', field: 'entity.name' }]);
+        const entities = [
+          { entity: { name: 'space-10' } },
+          { entity: { name: 'space-2' } },
+          { entity: { name: 'space-1' } },
+        ];
+        const result = sortFn(entities, createSortPaginationState('name', 'desc'));
+        expect(result.map(e => e.entity.name)).toEqual(['space-1', 'space-2', 'space-10']);
+      });
+
+      it('handles missing field values', () => {
+        const [sortFn] = getDataFunctionList([{ type: 'natural-sort', orderKey: 'name', field: 'name' }]);
+        const entities = [{ name: 'beta' }, { other: 'field' } as any, { name: 'alpha' }];
+        expect(() => sortFn(entities, createSortPaginationState('name', 'asc'))).not.toThrow();
+      });
+
+      it('returns entities unchanged when orderKey does not match', () => {
+        const [sortFn] = getDataFunctionList([{ type: 'natural-sort', orderKey: 'name', field: 'name' }]);
+        const entities = [{ name: 'app-10' }, { name: 'app-2' }];
+        const result = sortFn(entities, createSortPaginationState('other', 'asc'));
+        expect(result.map(e => e.name)).toEqual(['app-10', 'app-2']);
       });
     });
   });

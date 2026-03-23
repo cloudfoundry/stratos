@@ -37,7 +37,7 @@ export class CfUsersSpaceRolesListConfigService implements IListConfig<APIResour
       valuePath: 'entity.name'
     },
     sort: {
-      type: 'sort',
+      type: 'natural-sort',
       orderKey: 'name',
       field: 'entity.name'
     }

@@ -52,7 +52,7 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
         showShortLink: false
       },
       sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: 'name',
         field: 'name'
       },
@@ -72,7 +72,7 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
         getLink: (row: HelmRelease) => `/kubernetes/${row.endpointId}/namespaces/${row.namespace}`
       },
       sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: 'namespace',
         field: 'namespace'
       },

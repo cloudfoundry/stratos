@@ -89,7 +89,7 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
       getLink: (service: APIResource<any>) => `/marketplace/${service.entity.cfGuid}/${service.metadata.guid}`
     },
     sort: {
-      type: 'sort',
+      type: 'natural-sort',
       orderKey: 'label',
       field: 'entity.label'
     },

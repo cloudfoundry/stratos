@@ -44,7 +44,7 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
       columnId: 'name', headerCell: () => 'Name',
       cellComponent: KubernetesNodeLinkComponent,
       sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: 'name',
         field: 'metadata.name'
       },

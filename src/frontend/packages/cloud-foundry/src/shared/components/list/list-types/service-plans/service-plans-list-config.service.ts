@@ -57,7 +57,7 @@ export class ServicePlansListConfigService implements IListConfig<APIResource<IS
         getValue: (row: APIResource<IServicePlan>) => getServicePlanName(row.entity)
       },
       sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: 'name',
         field: 'entity.name'
       },

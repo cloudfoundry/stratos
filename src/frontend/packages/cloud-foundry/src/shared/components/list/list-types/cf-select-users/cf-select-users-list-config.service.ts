@@ -51,7 +51,7 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
         getValue: row => this.getUsername(row.entity)
       },
       sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: 'username',
         field: 'entity.username'
       }

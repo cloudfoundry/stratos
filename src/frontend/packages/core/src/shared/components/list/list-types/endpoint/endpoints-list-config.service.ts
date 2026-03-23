@@ -52,7 +52,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
       headerCell: (): string => 'Name',
       cellComponent: TableCellEndpointNameComponent,
       sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: 'name',
         field: 'name'
       },
@@ -148,7 +148,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
             valuePath: 'creator.name'
           },
           sort: {
-            type: 'sort',
+            type: 'natural-sort',
             orderKey: 'creator',
             field: 'creator.name'
           },

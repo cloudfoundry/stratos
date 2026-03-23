@@ -41,7 +41,7 @@ export class MonocularChartsListConfig implements IListConfig<MonocularChart> {
         ),
       },
       sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: 'name',
         field: 'name'
       },
@@ -53,7 +53,7 @@ export class MonocularChartsListConfig implements IListConfig<MonocularChart> {
         getValue: (row) => row.attributes.description,
       },
       sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: 'description',
         field: 'attributes.description'
       },
@@ -65,7 +65,7 @@ export class MonocularChartsListConfig implements IListConfig<MonocularChart> {
         getValue: (row) => row.attributes.repo.name
       },
       sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: 'repository',
         field: 'attributes.repo.name'
       },

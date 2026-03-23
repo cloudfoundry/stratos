@@ -69,7 +69,7 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
         }
       },
       sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: 'name',
         field: 'entity.name'
       },

@@ -45,7 +45,7 @@ export class ApiKeyListConfigService implements IListConfig<ApiKey> {
         valuePath: 'comment'
       },
       sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: ApiKeyListConfigService.comment,
         field: 'comment'
       },

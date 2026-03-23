@@ -28,7 +28,7 @@ export class CfSpacesListConfigService implements IListConfig<APIResource<ISpace
     columnId: 'name',
     headerCell: () => 'Name',
     sort: {
-      type: 'sort',
+      type: 'natural-sort',
       orderKey: 'name',
       field: 'entity.name'
     }

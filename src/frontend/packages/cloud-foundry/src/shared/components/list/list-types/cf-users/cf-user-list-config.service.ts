@@ -58,7 +58,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
         getValue: row => row.entity.username || row.metadata.guid
       },
       sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: 'username',
         field: 'entity.username'
       }

@@ -41,7 +41,7 @@ export abstract class BaseKubernetesPodsListConfigService implements ISimpleList
       columnId: 'name', headerCell: () => 'Name',
       cellComponent: TableCellSidePanelComponent,
       sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: 'name',
         field: 'metadata.name'
       },
@@ -71,7 +71,7 @@ export abstract class BaseKubernetesPodsListConfigService implements ISimpleList
         getLink: (row: KubernetesPod) => this.showNamespaceLink ? `/kubernetes/${row.metadata.kubeId}/namespaces/${row.metadata.namespace}` : null
       },
       sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: BaseKubernetesPodsListConfigService.namespaceColumnId,
         field: 'metadata.namespace'
       },
@@ -85,7 +85,7 @@ export abstract class BaseKubernetesPodsListConfigService implements ISimpleList
         getLink: (pod: KubernetesPod) => `/kubernetes/${pod.metadata.kubeId}/nodes/${pod.spec.nodeName}/summary`
       },
       sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: BaseKubernetesPodsListConfigService.nodeColumnId,
         field: 'spec.nodeName'
       },

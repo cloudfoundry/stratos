@@ -65,7 +65,7 @@ export class CfQuotasListConfigService extends BaseCfListConfig<APIResource<IQuo
         ]
       },
       sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: 'name',
         field: 'entity.name'
       }

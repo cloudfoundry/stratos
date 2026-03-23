@@ -9,6 +9,7 @@ export * from './core/extension/extension-service';
 
 // Utils
 export { getIdFromRoute, pathGet, safeStringToObj, urlValidationExpression, truthyIncludingZeroString } from './core/utils.service';
+export { naturalCollator, naturalCompare } from './shared/utils/natural-sort';
 export { environment } from './environments/environment';
 export { isValidJsonValidator } from './shared/form-validators';
 

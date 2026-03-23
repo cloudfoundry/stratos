@@ -74,7 +74,7 @@ export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResu
       },
       cellFlex: '1',
       sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: 'name',
         field: CfCellsDataSource.cellNamePath
       }

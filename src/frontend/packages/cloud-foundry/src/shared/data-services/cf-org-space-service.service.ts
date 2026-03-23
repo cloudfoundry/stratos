@@ -14,7 +14,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { ListPaginationMultiFilterChange, safeUnsubscribe, valueOrCommonFalsy } from '@stratosui/core';
+import { ListPaginationMultiFilterChange, naturalCompare, safeUnsubscribe, valueOrCommonFalsy } from '@stratosui/core';
 import {
   APIResource,
   connectedEndpointsOfTypesSelector,
@@ -232,7 +232,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
         }),
         first(),
         map((endpoints: EndpointModel[]) => {
-          return Object.values(endpoints).sort((a: EndpointModel, b: EndpointModel) => a.name.localeCompare(b.name));
+          return Object.values(endpoints).sort((a: EndpointModel, b: EndpointModel) => naturalCompare(a.name, b.name));
         }),
       ),
       loading$: list$.pipe(
@@ -251,7 +251,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
         return entities
           .map(org => org.entity)
           .filter(org => org.cfGuid === selectedCF)
-          .sort((a, b) => a.name.localeCompare(b.name));
+          .sort((a, b) => naturalCompare(a.name, b.name));
       }
       return [];
     }));
@@ -280,7 +280,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
               const entity = { ...space.entity };
               entity.guid = space.metadata.guid;
               return entity;
-            }).sort((a, b) => a.name.localeCompare(b.name));
+            }).sort((a, b) => naturalCompare(a.name, b.name));
           }
           return [];
         }
@@ -301,7 +301,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
             }
           }
         }
-        return allSpaces.sort((a, b) => a.name.localeCompare(b.name));
+        return allSpaces.sort((a, b) => naturalCompare(a.name, b.name));
       })
     );
 

@@ -58,7 +58,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
         valuePath: 'name'
       },
       sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: 'name',
         field: 'name'
       }, cellFlex: '5'
