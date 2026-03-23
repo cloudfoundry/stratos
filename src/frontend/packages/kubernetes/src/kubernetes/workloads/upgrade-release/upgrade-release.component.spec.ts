@@ -7,7 +7,7 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { provideStore } from '@ngrx/store';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { NEVER } from 'rxjs';
+import { of } from 'rxjs';
 
 import { TabNavService } from '@stratosui/core';
 import { TEST_CATALOGUE_ENTITIES, EntityCatalogTestModule, EntityCatalogHelper, EntityCatalogHelpers, appReducers } from '@stratosui/store';
@@ -33,8 +33,8 @@ describe('UpgradeReleaseComponent', () => {
     // Mock HelmReleaseHelperService to prevent constructor subscription errors
     mockHelmReleaseHelper = {
       guid: 'test-endpoint:test-namespace:test-release',
-      hasUpgrade: vi.fn().mockReturnValue(NEVER),
-      release$: NEVER,
+      hasUpgrade: vi.fn().mockReturnValue(of(null)),
+      release$: of(null),
       releaseTitle: 'test-release',
       endpointGuid: 'test-endpoint',
       namespace: 'test-namespace'
