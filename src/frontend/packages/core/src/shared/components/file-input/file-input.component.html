@@ -7,7 +7,7 @@
         [class.cursor-not-allowed]="disabled"
         (click)="!disabled && selectFile($event)">
         @if (!fileCount) {
-          <div class="file-input__input file-input__none text-gray-500">No file selected</div>
+          <div class="file-input__input file-input__none text-content-muted">No file selected</div>
         }
         @if (fileCount) {
           <div class="file-input__input flex-1">{{ name }}</div>

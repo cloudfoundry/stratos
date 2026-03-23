@@ -214,7 +214,11 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       new LocalListController<T>(transformedEntities$, pagination$, setResultCount, dataFunctions).page$
       : transformedEntities$;
 
-    this.page$ = page$.pipe(
+    // For local lists, use the controller's page$ directly — it already has
+    // shareReplay(1) and doesn't need isLoadingPage$ gating (data is loaded).
+    // The extra publishReplay(1)/refCount() layer was causing filtered emissions
+    // to be lost due to stale replays during subscriber churn.
+    this.page$ = this.isLocal ? page$ : page$.pipe(
       withLatestFrom(this.isLoadingPage$.pipe(startWith(false))),
       filter(([page, isLoading]) => !isLoading),
       map(([page]) => page),
@@ -562,10 +566,14 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     }
   }
 
+  private _connectObs: Observable<T[]>;
   connect(): Observable<T[]> {
-    return this.page$.pipe(
-      tag('actual-page-obs')
-    );
+    if (!this._connectObs) {
+      this._connectObs = this.page$.pipe(
+        tag('actual-page-obs')
+      );
+    }
+    return this._connectObs;
   }
 
   public getFilterFromParams(pag: PaginationEntityState) {

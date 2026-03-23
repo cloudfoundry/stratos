@@ -54,8 +54,11 @@ export interface SessionData {
   endpoints?: SessionEndpoints;
   user?: SessionUser;
   version?: {
-    proxy_version: string,
+    proxy_version: string;
     database_version: number;
+    build_date?: string;
+    git_commit?: string;
+    git_branch?: string;
   };
   valid: boolean;
   uaaError?: boolean;

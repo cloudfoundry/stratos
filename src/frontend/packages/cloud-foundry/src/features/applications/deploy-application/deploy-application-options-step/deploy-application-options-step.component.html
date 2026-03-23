@@ -18,13 +18,13 @@
         <div class="form-field">
           <div class="relative">
             <input class="input pr-10" name="diskQuota" placeholder="Disk Quota" formControlName="disk_quota" type="number">
-            <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">MB</span>
+            <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-content-muted">MB</span>
           </div>
         </div>
         <div class="form-field">
           <div class="relative">
             <input class="input pr-10" name="memoryQuota" placeholder="Memory Quota" formControlName="memory" type="number">
-            <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">MB</span>
+            <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-content-muted">MB</span>
           </div>
         </div>
         <!--- End Section -->
@@ -55,7 +55,7 @@
         </div>
         <div class="form-field">
           <div class="relative">
-            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">/&nbsp;</span>
+            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-content-muted">/&nbsp;</span>
             <input class="input pl-8" name="path" placeholder="Path" formControlName="path">
           </div>
         </div>
@@ -82,14 +82,14 @@
         </div>
         <div class="form-field">
           <input class="input" name="buildpack" placeholder="Custom buildpack" formControlName="buildpack">
-          <p class="mt-1 text-sm text-gray-500">Custom buildpack by name or Git URL</p>
+          <p class="mt-1 text-sm text-content-muted">Custom buildpack by name or Git URL</p>
         </div>
         <div class="form-field" [ngClass]="{'hidden': sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG}">
           <input class="input" placeholder="Docker Image" formControlName="dockerImage">
         </div>
         <div class="form-field" [ngClass]="{'hidden': sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG}">
           <input class="input" placeholder="Docker Username" formControlName="dockerUsername">
-          <p class="mt-1 text-sm text-gray-500">Docker Username works with the Application's `CF_DOCKER_PASSWORD` environment variable</p>
+          <p class="mt-1 text-sm text-content-muted">Docker Username works with the Application's `CF_DOCKER_PASSWORD` environment variable</p>
         </div>
         <!--- End Section -->
       </div>
@@ -113,7 +113,7 @@
           <div class="relative">
             <input class="input pr-20" name="healthCheckTimeout" placeholder="Health Check Timeout" formControlName="time"
               type="number">
-            <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">seconds</span>
+            <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-content-muted">seconds</span>
           </div>
         </div>
         <!--- End Section -->

@@ -80,6 +80,9 @@ const (
 )
 
 var appVersion string
+var buildDate string
+var gitCommit string
+var gitBranch string
 
 // getEnvironmentLookup return a search path for configuration settings
 func getEnvironmentLookup() *env.VarSet {

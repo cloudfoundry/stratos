@@ -1,7 +1,7 @@
 import { test, expect } from '../../fixtures/test-base';
 
 /**
- * Pagination E2E Tests (FWT-800)
+ * Pagination E2E Tests
  *
  * Tests page size options, "All" option, and session memory.
  * Uses the CF Organizations page on adepttech (55 orgs) as the
@@ -385,7 +385,7 @@ test.describe('Pagination', () => {
     });
   });
 
-  test.describe('Filter Clear (FWT-810)', () => {
+  test.describe('Filter Clear', () => {
 
     /** Navigate to Applications page */
     async function goToAppsPage(page: any): Promise<boolean> {

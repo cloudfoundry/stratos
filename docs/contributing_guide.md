@@ -1,17 +1,29 @@
 # Stratos Contributor Guide
 
-Welcome to the Stratos project! This guide will help you get started contributing to Stratos, from setting up your development environment to submitting your first pull request.
+Welcome to Stratos. This guide walks you through setting up a development
+environment and making your first contribution.
 
 ---
 
-## 🚀 Quick Start (5 Minutes)
+## Quick Start
 
 ### Prerequisites
 
-- **Node.js 24+** - [Download](https://nodejs.org/)
-- **Bun** - [Install](https://bun.sh/)
-- **Go 1.21+** - [Download](https://golang.org/dl/)
-- **Git** - [Download](https://git-scm.com/)
+| Tool | Version | Install |
+|------|---------|---------|
+| Node.js | 24+ | [nodejs.org](https://nodejs.org/) or `mise install` |
+| Bun | 1.2+ | [bun.sh](https://bun.sh/) or `mise install` |
+| Go | 1.24.2+ | [golang.org/dl](https://golang.org/dl/) or `mise install` |
+| Git | any | [git-scm.com](https://git-scm.com/) |
+| Make | any | Included with Xcode CLI tools (macOS) or `build-essential` (Linux) |
+
+**Recommended**: Install [mise](https://mise.jdx.dev/) to manage runtime versions
+automatically. The repo includes a `.tool-versions` file that specifies exact
+versions. After installing mise:
+
+```bash
+mise install       # installs Node, Bun, and Go at the right versions
+```
 
 ### First-Time Setup
 
@@ -20,152 +32,165 @@ Welcome to the Stratos project! This guide will help you get started contributin
 git clone https://github.com/YOUR_USERNAME/stratos.git
 cd stratos
 
-# 2. Install dependencies (devkit builds automatically!)
-bun install
+# 2. Install dependencies
+make install
 
-# 3. Start development
-make dev-frontend
+# 3. Generate dev SSL certificates
+mkdir -p dev-ssl
+openssl req -x509 -newkey rsa:4096 -keyout dev-ssl/server.key \
+  -out dev-ssl/server.crt -days 365 -nodes \
+  -subj '/CN=localhost'
+
+# 4. Create backend configuration
+cp src/jetstream/config.example src/jetstream/config.properties
+
+# 5. Set the encryption key (required for backend to start)
+# Generate a key and add it to config.properties:
+echo "ENCRYPTION_KEY=$(openssl rand -hex 32)" >> src/jetstream/config.properties
+
+# 6. For local development without a UAA server, enable local auth:
+# Add these lines to config.properties:
+#   AUTH_ENDPOINT_TYPE=local
+#   LOCAL_USER=admin
+#   LOCAL_USER_PASSWORD=admin
+#   LOCAL_USER_SCOPE=stratos.admin
+
+# 7. Build everything
+make build
+
+# 8. Start development (two terminals)
+make dev backend      # Terminal 1: backend on port 5443
+make dev frontend     # Terminal 2: frontend on port 5440
 ```
 
-That's it! The dev server is now running at https://127.0.0.1:5440
+Open https://127.0.0.1:5440 (accept the self-signed certificate warning).
 
-### Quick Commands
+### Common Commands
 
 ```bash
-make help              # Show all available commands
-make dev-frontend      # Start frontend dev server
-make dev-backend       # Start backend API server
-make test              # Run all tests
-make lint              # Check code style
+make help              # show all available commands
+make dev frontend      # start frontend dev server (hot reload)
+make dev backend       # start backend API server
+make test              # run all tests
+make test frontend     # frontend tests only (Vitest)
+make test backend      # backend tests only (Go)
+make lint              # check code style
+make dump version      # show current version info
 ```
 
 ---
 
-## 📋 Development Workflow
+## Development Workflow
 
 ### 1. Choose an Issue
 
-Browse [open issues](https://github.com/cloudfoundry/stratos/issues) and find one that interests you:
+Browse [open issues](https://github.com/cloudfoundry/stratos/issues):
 - Look for `good-first-issue` labels for beginner-friendly tasks
 - Comment on the issue to let others know you're working on it
 - Ask questions if anything is unclear
 
 ### 2. Create a Feature Branch
 
-```bash
-# Update your fork
-git checkout master
-git pull upstream master
+All changes go to feature branches off `develop`. Never push directly to
+`develop` or `master`.
 
-# Create feature branch
-git checkout -b feature/my-awesome-feature
+```bash
+git checkout develop
+git pull origin develop
+git checkout -b feature/my-feature
 ```
 
-**Branch Naming:**
-- `feature/` - New features
-- `fix/` - Bug fixes
-- `docs/` - Documentation updates
-- `refactor/` - Code refactoring
-- `test/` - Test improvements
+Branch naming:
+- `feature/` — new features
+- `fix/` — bug fixes
+- `docs/` — documentation
+- `refactor/` — code restructuring
+- `test/` — test improvements
 
 ### 3. Make Your Changes
 
 ```bash
-# Start dev servers
-make dev-frontend      # Terminal 1: Frontend (port 5440)
-make dev-backend       # Terminal 2: Backend (port 5443)
-
-# Make changes, test locally
-# Frontend auto-reloads on file changes
+# Two terminals
+make dev backend       # Terminal 1
+make dev frontend      # Terminal 2
 ```
 
-**Code Style:**
-- Follow existing patterns in the codebase
-- Use TypeScript strict mode for frontend
-- Format code: `bun run format`
-- Lint: `make lint`
+The frontend auto-reloads on file changes. After Go changes, rebuild the
+backend:
+
+```bash
+make dev-restart       # rebuilds backend binary
+```
 
 ### 4. Write Tests
 
 ```bash
-# Run tests
-make test                       # All tests
-bun run test-frontend:core      # Specific package
-make test-backend               # Backend tests
+# Frontend (Vitest)
+make test frontend          # all frontend tests
+bun run test:core           # specific package
+bun run test:watch          # watch mode for TDD
+bun run test:coverage       # with coverage report
 
-# Watch mode for TDD
-bun run test:watch
+# Backend (Go)
+make test backend
+
+# E2E (Playwright)
+bun run e2e                 # headless
+bun run e2e:headed          # visible browser
+bun run e2e:ui              # interactive UI
 ```
 
-**Testing Guidelines:**
+Guidelines:
 - Add tests for new features
 - Update tests for bug fixes
-- Maintain or improve test coverage
-- Use Vitest for frontend, Go testing for backend
+- Frontend: Vitest with Angular TestBed
+- Backend: Go `testing` package with GoConvey
 
 ### 5. Commit Your Changes
 
 ```bash
-# Stage changes
-git add .
-
-# Commit with meaningful message
-git commit -m "feat: add user profile export feature
-
-- Add export button to profile page
-- Implement CSV and JSON export formats
-- Add unit tests for export functionality
-- Update documentation
-
-Closes #123"
+git add src/frontend/packages/core/src/features/my-feature/
+git commit
 ```
 
-**Commit Message Format:**
+Commit message style:
+- Subject line: max 48 characters, imperative mood
+- Body: max 72 characters wide, explain *why* not *what*
+- One atomic concept per commit
+- Keep style changes separate from functional changes
+
 ```
-<type>(<scope>): <subject>
+Add user profile export to about page
 
-<body>
-
-<footer>
+Profile export allows admins to download user data as CSV
+for audit compliance. Requested in issue #123.
 ```
 
-**Types:**
-- `feat:` - New feature
-- `fix:` - Bug fix
-- `docs:` - Documentation
-- `style:` - Formatting
-- `refactor:` - Code restructuring
-- `test:` - Adding tests
-- `chore:` - Maintenance
+Do **not** use the `<type>: <subject>` format (e.g., `feat: add export`).
 
 ### 6. Push and Create Pull Request
 
 ```bash
-# Push to your fork
-git push origin feature/my-awesome-feature
+git push -u origin feature/my-feature
+```
 
-# Create pull request
-gh pr create --title "Add user profile export feature" --body "
-## Description
-Implements CSV and JSON export for user profiles.
+Create a PR against the `develop` branch:
 
-## Changes
-- Added export button to profile page
-- Implemented export service with CSV/JSON formats
-- Added unit tests
+```bash
+gh pr create --base develop --title "Add user profile export" --body "
+## Summary
+- Added export button to about page
+- CSV format for admin audit use
 
-## Testing
-- Tested manually on dev server
-- All unit tests pass
-- E2E tests added
-
-Closes #123
+## Test plan
+- [ ] Manual test on dev server
+- [ ] Unit tests pass
+- [ ] E2E test for export flow
 "
 ```
 
-**PR Guidelines:**
-- Clear, descriptive title
-- Comprehensive description
+Guidelines:
+- Clear, descriptive title (under 70 characters)
 - Link related issues
 - Include testing notes
 - Add screenshots for UI changes
@@ -173,528 +198,176 @@ Closes #123
 ### 7. Address Review Feedback
 
 ```bash
-# Make requested changes
+# Make requested changes, then commit as a new commit
 git add .
-git commit -m "fix: address review feedback"
+git commit -m "Address review feedback on export format"
 git push
-
-# Tests re-run automatically
 ```
-
-**Review Process:**
-- Automated tests run on every push
-- Maintainers review code
-- Address feedback promptly
-- Be open to suggestions
-- Ask questions if unclear
 
 ---
 
-## 🏗️ Architecture Overview
+## Project Structure
 
 ### Frontend (`src/frontend/packages/`)
 
-**Monorepo Structure:**
 ```
 packages/
-├── core/           # Core UI, components, services
-├── store/          # NgRx state management
-├── cloud-foundry/  # CF-specific features
-├── kubernetes/     # K8s integration
-├── git/            # Git integration
-├── shared/         # Shared utilities
-└── devkit/         # Custom Angular builders
+├── core/           App shell, shared components, about/diagnostics pages
+├── store/          NgRx state management, entity types, auth types
+├── shared/         Cross-cutting utilities and services
+├── cloud-foundry/  CF-specific pages (orgs, spaces, apps, services)
+├── kubernetes/     K8s integration pages
+├── cf-autoscaler/  CF autoscaler plugin UI
+├── git/            Git integration UI
+├── extension/      Extension system for custom modules
+├── theme/          Theming (custom builder)
+└── devkit/         Build tooling (prebuild scripts, extension generator)
 ```
 
-**Key Technologies:**
-- Angular 20 (zoneless change detection)
+Key technologies:
+- Angular 20 with standalone components
 - NgRx for state management
 - RxJS for reactive programming
-- Tailwind CSS for styling
-- Vitest for testing
-- AnalogJS 2.0 for builds
-
-**State Management Pattern:**
-```typescript
-// 1. Dispatch action
-store.dispatch(loadUsers());
-
-// 2. Effect handles async
-@Effect()
-loadUsers$ = this.actions$.pipe(
-  ofType(loadUsers),
-  switchMap(() => this.api.getUsers()),
-  map(users => loadUsersSuccess({ users }))
-);
-
-// 3. Reducer updates state
-on(loadUsersSuccess, (state, { users }) => ({
-  ...state,
-  users
-}));
-
-// 4. Selector provides data
-const selectUsers = createSelector(
-  selectState,
-  state => state.users
-);
-```
+- Tailwind CSS for styling (preferred for new code)
+- SCSS for pseudo-elements and complex selectors only
+- Vitest for unit tests, Playwright for E2E
 
 ### Backend (`src/jetstream/`)
 
-**Plugin Architecture:**
 ```
 jetstream/
-├── api/           # Core API definitions
-├── plugins/       # Feature plugins
-│   ├── cloudfoundry/
-│   ├── kubernetes/
-│   └── metrics/
-├── repository/    # Database layer
-└── datastore/     # Migrations
+├── api/            Core API definitions and config structs
+├── plugins/        Feature plugins
+│   ├── cfapppush/      CF app deployment
+│   ├── kubernetes/     K8s dashboard, terminal
+│   ├── monocular/      Helm chart browser
+│   ├── analysis/       Container analysis
+│   └── userinvite/     Email-based invitations
+├── repository/     Database layer (per-domain packages)
+├── datastore/      Migrations (Goose, dialect-aware)
+└── main.go         Entry point, config loading
 ```
 
-**Key Technologies:**
-- Go 1.21
-- Echo web framework
-- PostgreSQL/MySQL
+Key technologies:
+- Go 1.24.2
+- Echo v4 HTTP framework
+- PostgreSQL, MySQL/MariaDB, or SQLite (developer's choice)
+- Goose for database migrations
 - Plugin-based architecture
 
-**Adding a Plugin:**
-```go
-// 1. Create plugin
-package myplugin
+### Build System
 
-func Init(portalProxy interfaces.PortalProxy) error {
-  // Register routes
-  portalProxy.RegisterEndpoint("/my-endpoint", handler)
-  return nil
-}
+The Makefile uses a verb + target pattern:
 
-// 2. Register in extra_plugins.go
-import _ "github.com/cloudfoundry/stratos/src/jetstream/plugins/myplugin"
+```bash
+make build frontend       # build frontend only
+make build backend        # build backend only
+make build                # build both
+make release cf           # package for Cloud Foundry
 ```
+
+See `docs/build-and-packaging.md` for full details.
 
 ---
 
-## 🧪 Testing Guide
+## Styling
 
-### Frontend Testing
-
-**Unit Tests (Vitest):**
-```typescript
-import { describe, it, expect } from 'vitest';
-import { TestBed } from '@angular/core/testing';
-import { MyComponent } from './my.component';
-
-describe('MyComponent', () => {
-  it('should create', () => {
-    TestBed.configureTestingModule({
-      imports: [MyComponent]
-    });
-    const component = TestBed.createComponent(MyComponent).componentInstance;
-    expect(component).toBeTruthy();
-  });
-});
-```
-
-**Running Tests:**
-```bash
-# All frontend tests
-make test-unit
-
-# Specific package
-bun run test-frontend:core
-
-# Watch mode
-bun run test:watch
-
-# Coverage
-bun run test:coverage
-```
-
-### Backend Testing
-
-**Go Tests:**
-```go
-func TestMyFunction(t *testing.T) {
-  result := MyFunction("input")
-  if result != "expected" {
-    t.Errorf("Expected 'expected', got '%s'", result)
-  }
-}
-```
-
-**Running Tests:**
-```bash
-# All backend tests
-make test-backend
-
-# Specific package
-cd src/jetstream/plugins/cloudfoundry
-go test
-
-# With coverage
-go test -cover ./...
-```
-
-### E2E Tests (Playwright)
-
-```bash
-# Run E2E tests
-make test-e2e
-
-# Interactive mode
-bun run e2e:ui
-
-# Specific test
-bunx playwright test auth.spec.ts
-```
-
----
-
-## 🎨 UI Development
-
-### Component Structure
-
-```typescript
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-
-@Component({
-  selector: 'app-my-component',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './my-component.component.html',
-  styleUrls: ['./my-component.component.scss']
-})
-export class MyComponent {
-  // Component logic
-}
-```
-
-### Styling with Tailwind
+Prefer Tailwind CSS utility classes for new code:
 
 ```html
 <div class="flex flex-col gap-4 p-4">
-  <h1 class="text-2xl font-bold">My Component</h1>
-  <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-    Click Me
-  </button>
+  <h1 class="text-2xl font-bold">Title</h1>
+  <button class="btn btn-primary">Action</button>
 </div>
 ```
 
-### Form Handling
-
-```typescript
-import { FormBuilder, Validators } from '@angular/forms';
-
-export class MyFormComponent {
-  form = this.fb.group({
-    name: ['', Validators.required],
-    email: ['', [Validators.required, Validators.email]]
-  });
-
-  constructor(private fb: FormBuilder) {}
-
-  onSubmit() {
-    if (this.form.valid) {
-      console.log(this.form.value);
-    }
-  }
-}
-```
+Use SCSS only when Tailwind can't express what you need (pseudo-elements,
+complex selectors, animations).
 
 ---
 
-## 🔧 Common Tasks
+## Database
 
-### Adding a New Frontend Package
+Stratos supports PostgreSQL, MySQL/MariaDB, and SQLite. For local development,
+SQLite is the default (zero setup).
 
-```bash
-# 1. Create package directory
-mkdir -p src/frontend/packages/my-package/src
-
-# 2. Create package.json
-cat > src/frontend/packages/my-package/package.json << 'EOF'
-{
-  "name": "@stratosui/my-package",
-  "version": "1.0.0",
-  "type": "module"
-}
-EOF
-
-# 3. Add to workspace
-# Edit package.json (root) to include new package
-```
-
-### Adding a New Backend Plugin
+For PostgreSQL (closer to production):
 
 ```bash
-# 1. Create plugin directory
-mkdir -p src/jetstream/plugins/myplugin
+# Start Postgres via Docker, Podman, OrbStack, or Colima
+docker compose up -d
 
-# 2. Create plugin file
-cat > src/jetstream/plugins/myplugin/main.go << 'EOF'
-package myplugin
-
-import "github.com/cloudfoundry/stratos/src/jetstream/repository/interfaces"
-
-func Init(portalProxy interfaces.PortalProxy) error {
-  // Plugin initialization
-  return nil
-}
-EOF
-
-# 3. Register plugin in extra_plugins.go
+# Update config.properties:
+# DATABASE_PROVIDER=pgsql
+# DB_HOST=localhost
+# DB_PORT=5432
+# DB_USER=stratos
+# DB_PASSWORD=strat0s
+# DB_DATABASE_NAME=stratosdb
 ```
 
-### Adding a New API Endpoint
-
-```go
-// Backend (Go)
-func RegisterRoutes(router *echo.Group) {
-  router.GET("/my-endpoint", handleMyEndpoint)
-}
-
-func handleMyEndpoint(c echo.Context) error {
-  return c.JSON(200, map[string]string{
-    "message": "Hello from my endpoint"
-  })
-}
-```
-
-```typescript
-// Frontend (TypeScript)
-this.http.get('/pp/v1/my-endpoint').subscribe(
-  response => console.log(response)
-);
-```
+Migrations run automatically on startup.
 
 ---
 
-## 🐛 Debugging
+## AI Tool Usage
 
-### Frontend Debugging
+Cloud Foundry RFC-0047 (Accepted) requires disclosure of AI tooling used in
+contributions. This applies to all CFF Technical Community projects including
+Stratos.
 
-**Browser DevTools:**
-```bash
-# Start dev server
-make dev-frontend
+**Required**: Disclose AI tool usage in your PR description, commit messages,
+or by including the AI tool as a co-author on commits.
 
-# Open https://127.0.0.1:5440
-# Press F12 for DevTools
-# Source maps enabled for debugging
+Examples of acceptable disclosure:
+
+```
+# In PR description
+AI tools used: GitHub Copilot (code completion), Claude (architecture review)
+
+# As commit co-author
+Co-authored-by: Claude <claude@anthropic.com>
 ```
 
-**Angular DevTools:**
-```bash
-# Install Chrome extension
-# "Angular DevTools"
-# Inspect component tree, state, performance
-```
+Additional guidelines:
+- Review all AI-generated code before submitting — you are responsible for
+  what you contribute
+- AI-generated code must meet the same quality bar as hand-written code
+- Approvers and Reviewers are exempt from disclosure requirements per RFC-0047
 
-**Console Logging:**
-```typescript
-console.log('Debug:', variable);
-console.error('Error:', error);
-console.table(arrayOfObjects);
-```
-
-### Backend Debugging
-
-**Debug Logging:**
-```go
-import "github.com/cloudfoundry/stratos/src/jetstream/repository/interfaces"
-
-log.Println("Debug message")
-log.Printf("Variable: %v", variable)
-```
-
-**Delve Debugger:**
-```bash
-# Install Delve
-go install github.com/go-delve/delve/cmd/dlv@latest
-
-# Debug backend
-cd src/jetstream
-dlv debug --headless --listen=:2345 --api-version=2
-```
+Reference: [RFC-0047 Require AI Tooling Disclosures](https://github.com/cloudfoundry/community/blob/main/toc/rfc/rfc-0047-ai-disclosures.md)
 
 ---
 
-## 📝 Code Style Guide
+## Contribution Checklist
 
-### TypeScript
+Before submitting a PR:
 
-```typescript
-// Use TypeScript strict mode
-// Use interfaces for data structures
-interface User {
-  id: string;
-  name: string;
-  email: string;
-}
-
-// Use const for immutable values
-const MAX_RETRIES = 3;
-
-// Use arrow functions
-const processUser = (user: User) => {
-  return user.name.toUpperCase();
-};
-
-// Use async/await over promises
-async function fetchData() {
-  try {
-    const response = await fetch('/api/data');
-    return await response.json();
-  } catch (error) {
-    console.error('Error:', error);
-  }
-}
-```
-
-### Go
-
-```go
-// Follow Go conventions
-// Use camelCase for private, PascalCase for public
-type User struct {
-  ID    string
-  Name  string
-  Email string
-}
-
-// Error handling
-func processUser(user User) error {
-  if user.Name == "" {
-    return errors.New("name is required")
-  }
-  return nil
-}
-
-// Use context for cancellation
-func fetchData(ctx context.Context) ([]byte, error) {
-  req, err := http.NewRequestWithContext(ctx, "GET", "/api/data", nil)
-  if err != nil {
-    return nil, err
-  }
-  // ... rest of implementation
-  return data, nil
-}
-```
-
----
-
-## 🤝 Communication
-
-### Getting Help
-
-- **GitHub Discussions**: Ask questions, share ideas
-- **GitHub Issues**: Report bugs, request features
-- **Pull Requests**: Code reviews, feedback
-- **Documentation**: Check docs/ directory
-
-### Being a Good Contributor
-
-✅ **Do:**
-- Ask questions when unclear
-- Be patient with reviewers
-- Accept feedback gracefully
-- Help others when you can
-- Follow the code of conduct
-
-❌ **Don't:**
-- Demand immediate responses
-- Take criticism personally
-- Ignore review feedback
-- Submit incomplete work
-- Be disrespectful
-
----
-
-## 🎯 Contribution Checklist
-
-Before submitting a PR, ensure:
-
-- [ ] Code follows project style guidelines
-- [ ] Tests added for new features
+- [ ] Code follows existing patterns in the codebase
+- [ ] Tests added for new features, updated for bug fixes
 - [ ] All tests pass locally (`make test`)
 - [ ] Linting passes (`make lint`)
-- [ ] Documentation updated if needed
-- [ ] Commit messages follow convention
-- [ ] PR description is clear and complete
-- [ ] Related issues are linked
-- [ ] No sensitive data in commits
+- [ ] Commit messages use imperative mood, 48-char subjects
+- [ ] PR targets the `develop` branch
+- [ ] PR description is clear with testing notes
+- [ ] No sensitive data in commits (.env, credentials, keys)
+- [ ] AI usage acknowledged if applicable
 
 ---
 
-## 🚀 Advanced Topics
+## Getting Help
 
-### Performance Optimization
-
-**Frontend:**
-- Use `OnPush` change detection
-- Implement `trackBy` for `*ngFor`
-- Lazy load routes and modules
-- Optimize bundle size
-
-**Backend:**
-- Use database connection pooling
-- Implement caching where appropriate
-- Profile with pprof
-- Optimize database queries
-
-### Security Best Practices
-
-- Validate all user input
-- Use parameterized queries
-- Implement CSRF protection
-- Follow OWASP guidelines
-- Keep dependencies updated
-
-### Accessibility
-
-- Use semantic HTML
-- Provide alt text for images
-- Ensure keyboard navigation
-- Test with screen readers
-- Follow WCAG guidelines
+- **GitHub Issues**: Report bugs, request features
+- **GitHub Discussions**: Ask questions, share ideas
+- **Pull Requests**: Code reviews and feedback
+- **Documentation**: `docs/` directory, `make help`
 
 ---
 
-## 📚 Learning Resources
+## Further Reading
 
-### Angular
-- [Angular Documentation](https://angular.dev/)
-- [Angular Style Guide](https://angular.dev/style-guide)
-- [NgRx Documentation](https://ngrx.io/)
-
-### Go
-- [Effective Go](https://golang.org/doc/effective_go.html)
-- [Go by Example](https://gobyexample.com/)
-- [Go Documentation](https://golang.org/doc/)
-
-### Stratos-Specific
-- [CLAUDE.md](../CLAUDE.md) - Project overview
-- [Architecture Docs](../claudedocs/) - Detailed guides
-- [API Documentation](API.md) - API reference
-
----
-
-## 🎓 Next Steps
-
-Now that you're familiar with the basics:
-
-1. **Find an issue**: Browse [good-first-issue](https://github.com/cloudfoundry/stratos/labels/good-first-issue) labels
-2. **Join the community**: Introduce yourself in GitHub Discussions
-3. **Start coding**: Follow the workflow above
-4. **Ask questions**: We're here to help!
-
-Welcome to the Stratos community! 🎉
-
----
-
-**Last Updated:** 2025-11-06
-**Questions?** Open a [GitHub Discussion](https://github.com/cloudfoundry/stratos/discussions)
+- [Build and Packaging](build-and-packaging.md) — build system details
+- [Developer Environment](developer-environment.md) — full toolchain reference
+- [Pagination Architecture](pagination-architecture.md) — list/table patterns
+- [Plugin Architecture](plugin-architecture.md) — backend plugin system
+- [Secrets Management](secrets-management.md) — encryption key handling

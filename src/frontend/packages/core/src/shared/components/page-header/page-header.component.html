@@ -82,9 +82,9 @@
                 <!-- History dropdown menu -->
                 @if (isHistoryMenuOpen) {
                   <div
-                    class="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                    class="absolute right-0 top-full mt-2 bg-content-bg rounded-lg shadow-lg border border-content-border z-50">
                     <div class="page-header-history p-4 w-80">
-                      <h3 class="page-header-history-title text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+                      <h3 class="page-header-history-title text-lg font-semibold text-content-text mb-4">Recent Activity</h3>
                       <app-recent-entities mode="menu" class="page-header-history-list" history="true">
                       </app-recent-entities>
                     </div>
@@ -120,30 +120,30 @@
                 <!-- User dropdown menu -->
                 @if (isUserMenuOpen) {
                   <div
-                    class="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                    class="absolute right-0 top-full mt-2 bg-content-bg rounded-lg shadow-lg border border-content-border z-50">
                     <div class="page-header-menu-inner p-4 w-64">
                       <!-- User info -->
-                      <div class="page-header-username flex items-center space-x-3 pb-4 border-b border-gray-200 mb-4">
+                      <div class="page-header-username flex items-center space-x-3 pb-4 border-b border-content-border mb-4">
                         <app-user-avatar [allowGravatar]="allowGravatar$ | async" [user]="user$ | async"></app-user-avatar>
                         <div class="page-header-username-text">
-                          <div class="font-medium text-gray-900">{{ username$ | async }}</div>
+                          <div class="font-medium text-content-text">{{ username$ | async }}</div>
                         </div>
                       </div>
                       <!-- Menu items -->
                       @if (!logoutOnly) {
                         <div class="space-y-1">
-                          <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                          <button class="w-full text-left px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors"
                             routerLink="/about"
                             (click)="closeUserMenu()">
                             <span>About</span>
                           </button>
-                          <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                          <button class="w-full text-left px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors"
                             routerLink="/user-profile"
                             (click)="closeUserMenu()">
                             <span>Profile</span>
                           </button>
                           @if (canAPIKeys$ | async) {
-                            <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                            <button class="w-full text-left px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors"
                               routerLink="/api-keys"
                               (click)="closeUserMenu()"
                               >
@@ -151,12 +151,12 @@
                             </button>
                           }
                           @if (canLogout$ | async) {
-                            <div class="page-header-menu-separator border-t border-gray-200 my-2"></div>
+                            <div class="page-header-menu-separator border-t border-content-border my-2"></div>
                           }
                         </div>
                       }
                       @if (canLogout$ | async) {
-                        <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                        <button class="w-full text-left px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors"
                           (click)="logout(); closeUserMenu()"
                           >
                           <span>Logout</span>

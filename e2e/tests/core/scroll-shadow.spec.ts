@@ -1,7 +1,7 @@
 import { test, expect } from '../../fixtures/test-base';
 
 /**
- * Scroll Shadow Diagnostic Tests (FWT-815.2)
+ * Scroll Shadow Diagnostic Tests
  *
  * Inspects the actual DOM/CSS state of the scroll shadow overlay
  * to diagnose rendering issues. Reports "expected X but got Y" style
@@ -12,7 +12,7 @@ import { test, expect } from '../../fixtures/test-base';
  *   STRATOS_E2E_PROFILE=adepttech npx playwright test scroll-shadow
  */
 
-test.describe('Scroll Shadow (FWT-815.2)', () => {
+test.describe('Scroll Shadow', () => {
 
   /** Navigate to Applications page and wait for cards to render */
   async function goToAppsPage(page: any): Promise<boolean> {

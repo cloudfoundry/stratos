@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, VERSION } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Meta } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
@@ -9,6 +9,7 @@ import { filter, map } from 'rxjs/operators';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { MetadataItemComponent } from '../../../shared/components/metadata-item/metadata-item.component';
 import { BooleanIndicatorComponent } from '../../../shared/components/boolean-indicator/boolean-indicator.component';
+import { BUILD_INFO } from '../../../environments/build-info';
 
 @Component({
   selector: 'app-diagnostics-page',
@@ -35,6 +36,9 @@ export class DiagnosticsPageComponent implements OnInit {
       breadcrumbs: [{ value: 'About', routerLink: '/about' }]
     }
   ];
+
+  angularVersion = VERSION.full;
+  buildInfo = BUILD_INFO;
 
   public gitProject: string;
   public gitBranch: string;

@@ -5,7 +5,7 @@ import { test, expect } from '../../../fixtures/test-base';
  * Verifies that list views have pagination controls present (not hidden)
  * when items exceed the minimum page size.
  *
- * Regression test for FWT-799: list views had the paginator clipped off-screen
+ * Regression test: list views had the paginator clipped off-screen
  * due to broken flex chain between app-list host element and its container.
  *
  * Uses authenticatedPage (login only) and endpointManager to connect

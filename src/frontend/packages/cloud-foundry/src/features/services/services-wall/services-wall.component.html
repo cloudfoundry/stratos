@@ -29,7 +29,7 @@
 @if (!(cloudFoundryService.hasRegisteredCFEndpoints$ | async) || !(cloudFoundryService.hasConnectedCFEndpoints$ | async)) {
   <div
     class="flex items-center justify-center p-8">
-    <div class="flex items-center space-x-3 text-gray-500">
+    <div class="flex items-center space-x-3 text-content-muted">
       <div class="spinner spinner-primary"></div>
       <span>Loading services...</span>
     </div>

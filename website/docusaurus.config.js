@@ -36,12 +36,16 @@ module.exports = {
       links: [{
         title: 'Docs',
         items: [{
-          label: 'Getting Started',
+          label: 'Introduction',
           to: 'docs/introduction',
         },
         {
-          label: 'Deploying Stratos',
+          label: 'Getting Started',
           to: 'docs/deploy/overview',
+        },
+        {
+          label: 'Deploying Stratos',
+          to: 'docs/deploy/cloud-foundry/cloud-foundry',
         },
         ],
       },

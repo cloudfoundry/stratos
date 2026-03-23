@@ -144,7 +144,7 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
   viewType = ListViewTypes.BOTH;
   text: ITableText = {
     title: '',
-    filter: 'Search by name',
+    filter: 'Filter by Name',
     noEntries: 'There are no applications',
     maxedResults: {
       icon: 'apps',

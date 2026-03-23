@@ -5,9 +5,11 @@ import { ChangeDetectionStrategy, Component,
   ComponentRef,
   OnDestroy,
   OnInit,
+  VERSION,
   ViewChild,
   ViewContainerRef,
  } from '@angular/core';
+import { Meta } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { GeneralEntityAppState, AuthState, SessionData } from '@stratosui/store';
@@ -18,7 +20,7 @@ import { CustomizationService, CustomizationsMetadata } from '../../../core/cust
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { StratosTitleComponent } from '../../../shared/components/stratos-title/stratos-title.component';
 import { ProductNameComponent } from '../../../shared/components/product-name.ccomponent';
-import { MetadataItemComponent } from '../../../shared/components/metadata-item/metadata-item.component';
+import { BUILD_INFO } from '../../../environments/build-info';
 
 @Component({
   selector: 'app-about-page',
@@ -31,7 +33,6 @@ import { MetadataItemComponent } from '../../../shared/components/metadata-item/
     PageHeaderComponent,
     StratosTitleComponent,
     ProductNameComponent,
-    MetadataItemComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -40,6 +41,13 @@ export class AboutPageComponent implements OnInit, OnDestroy {
   sessionData$!: Observable<SessionData>;
   versionNumber$!: Observable<string>;
   userIsAdmin$!: Observable<boolean>;
+  buildInfo = BUILD_INFO;
+  angularVersion = VERSION.full;
+
+  // VCS URLs (GitHub only — derived from stratos meta tags)
+  gitHubRepository: string;
+  gitCommitLink: string;
+  gitBranchLink: string;
 
   @ViewChild('aboutInfoContainer', { read: ViewContainerRef, static: true }) aboutInfoContainer!: ViewContainerRef;
   @ViewChild('supportInfoContainer', { read: ViewContainerRef, static: true }) supportInfoContainer!: ViewContainerRef;
@@ -52,6 +60,7 @@ export class AboutPageComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store<GeneralEntityAppState>,
     private resolver: ComponentFactoryResolver,
+    private meta: Meta,
     cs: CustomizationService,
   ) {
     this.customizations = cs.get();
@@ -74,6 +83,7 @@ export class AboutPageComponent implements OnInit, OnDestroy {
       })
     );
 
+    this.initVcsLinks();
     this.addAboutInfoComponent();
     this.addSupportInfo();
   }
@@ -85,6 +95,48 @@ export class AboutPageComponent implements OnInit, OnDestroy {
     if (this.componentRef) {
       this.componentRef.destroy();
     }
+  }
+
+  private initVcsLinks() {
+    const gitProject = this.getMeta('stratos_git_project');
+    const gitBranch = BUILD_INFO.gitBranch === 'HEAD' ? null : BUILD_INFO.gitBranch;
+    const gitCommit = BUILD_INFO.gitCommit;
+
+    this.gitHubRepository = this.getGitHubProject(gitProject);
+    if (this.gitHubRepository) {
+      if (gitCommit) {
+        this.gitCommitLink = `https://github.com/${this.gitHubRepository}/commit/${gitCommit}`;
+      }
+      if (gitBranch) {
+        this.gitBranchLink = `https://github.com/${this.gitHubRepository}/tree/${gitBranch}`;
+      }
+    }
+  }
+
+  backendCommitLink(commit: string): string {
+    if (!this.gitHubRepository || !commit) { return null; }
+    return `https://github.com/${this.gitHubRepository}/commit/${commit}`;
+  }
+
+  backendBranchLink(branch: string): string {
+    if (!this.gitHubRepository || !branch || branch === 'HEAD') { return null; }
+    return `https://github.com/${this.gitHubRepository}/tree/${branch}`;
+  }
+
+  private getGitHubProject(prj: string): string {
+    if (!prj) { return ''; }
+    let projectUrl = prj.endsWith('.git') ? prj.slice(0, -4) : prj;
+    if (projectUrl.toLowerCase().startsWith('git@github.com:')) {
+      return projectUrl.slice(15);
+    } else if (projectUrl.toLowerCase().startsWith('https://github.com/')) {
+      return projectUrl.slice(19);
+    }
+    return '';
+  }
+
+  private getMeta(name: string): string {
+    const metaValue = this.meta.getTag(`name=${name}`);
+    return metaValue ? metaValue.content : '';
   }
 
   addAboutInfoComponent() {

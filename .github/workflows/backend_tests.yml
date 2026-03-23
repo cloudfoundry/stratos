@@ -7,20 +7,25 @@ on:
       - master
   pull_request:
 
+env:
+  GO_VERSION: '1.25'
+
 jobs:
   test_suite:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-go@v4
+    - uses: actions/checkout@v4
+
+    - name: Setup Go
+      uses: actions/setup-go@v5
       with:
-        go-version: '1.21.0'
-        cache-dependency-path: |
-          src/jetstream/go.sum
+        go-version: ${{ env.GO_VERSION }}
+        cache-dependency-path: src/jetstream/go.sum
 
     - name: Create extra_plugins.go
-      run:  |
-        echo 'package main
+      run: |
+        cat > src/jetstream/extra_plugins.go << 'EOF'
+        package main
         // This file is auto-generated - DO NOT EDIT
         import _ "github.com/cloudfoundry/stratos/src/jetstream/plugins/autoscaler"
         import _ "github.com/cloudfoundry/stratos/src/jetstream/plugins/cloudfoundry"
@@ -29,7 +34,8 @@ jobs:
         import _ "github.com/cloudfoundry/stratos/src/jetstream/plugins/userinvite"
         import _ "github.com/cloudfoundry/stratos/src/jetstream/plugins/analysis"
         import _ "github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes"
-        import _ "github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular"' > src/jetstream/extra_plugins.go
+        import _ "github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular"
+        EOF
 
     - name: Run tests
-      run:  build/bk-build.sh test
+      run: make test backend

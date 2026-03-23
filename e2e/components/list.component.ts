@@ -325,7 +325,7 @@ export class ListPaginationComponent {
   }
 
   async getTotalResults(): Promise<number> {
-    const label = this.paginator.locator('.mat-paginator-range-label, .mat-mdc-paginator-range-label');
+    const label = this.paginator.locator('.paginator-info, .mat-paginator-range-label, .mat-mdc-paginator-range-label');
     const text = await label.textContent() || '';
 
     const match = text.match(/of\s+(\d+)/);
@@ -433,7 +433,7 @@ export class ListComponent {
   }
 
   getLoadingIndicator(): Locator {
-    return this.locator.locator('.list-component > mat-progress-bar');
+    return this.locator.locator('.list-component > .progress-bar, .list-component > mat-progress-bar');
   }
 
   async isLoading(): Promise<boolean> {

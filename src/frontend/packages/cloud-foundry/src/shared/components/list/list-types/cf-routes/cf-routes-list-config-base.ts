@@ -77,7 +77,7 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
   text: ITableText = {
     title: null,
     noEntries: 'There are no routes',
-    filter: 'Search by Route',
+    filter: 'Filter by Route',
     maxedResults: {
       icon: 'route',
       iconFont: 'stratos-icons',

@@ -2,7 +2,7 @@
   [ngClass]="{'list-component__table': (view$ | async) === 'table', 'list-component__cards': (view$ | async) === 'cards' }">
   @if (!(initialised$ | async) || (showProgressBar$ | async)) {
     <div class="progress-bar">
-      <div class="progress-bar-indeterminate bg-primary-500"></div>
+      <div class="progress-bar-indeterminate bg-primary"></div>
     </div>
   }
   @if (initialised$ | async) {
@@ -62,15 +62,16 @@
               @if (!isFirst || !(multiFilterManager.hasOneOrLessItems$ | async)) {
                 <div class="form-field">
                   <label class="label">{{multiFilterManager.multiFilterConfig.label}}</label>
-                  <select class="select" id="{{multiFilterManager.filterKey}}" [value]="multiFilterManager.value"
+                  <select class="select" id="{{multiFilterManager.filterKey}}"
                     [disabled]="!(multiFilterManager.filterIsReady$ | async)"
                     (change)="multiFilterManager.selectItem($any($event.target).value)">
                     @if (!multiFilterManager.hideAllOption) {
-                      <option value="">{{ multiFilterManager.allLabel }}</option>
+                      <option value="" [selected]="!(multiFilterManager.value$ | async)">{{ multiFilterManager.allLabel }}</option>
                     }
                     @for (selectItem of multiFilterManager.filterItems$ | async; track selectItem.value) {
                       <option
-                        [value]="selectItem.value">
+                        [value]="selectItem.value"
+                        [selected]="selectItem.value === (multiFilterManager.value$ | async)">
                         {{selectItem.label}}
                       </option>
                     }
@@ -116,10 +117,10 @@
               <div class="relative">
                 <input class="input pr-8" [ngModel]="filterString" #filter="ngModel"
                   [disabled]="(filterColumns.length > 1 && filterSelected === undefined) || (dataSource.isLoadingPage$ | async)"
-                  name="filter" placeholder="{{ filterSelected?.placeholder || config.text?.filter || 'Filter'}}"
+                  name="filter" placeholder="{{ filterSelected?.placeholder || config.text?.filter || 'Filter by Name'}}"
                   (keydown.escape)="clearFilterText(); $event.stopPropagation()">
                 @if (filterString) {
-                  <button class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center bg-transparent border-none p-0 cursor-pointer text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                  <button class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center bg-transparent border-none p-0 cursor-pointer text-content-muted hover:text-content-text"
                     type="button" (click)="clearFilterText()" title="Clear filter">
                     <span class="material-icons text-lg">close</span>
                   </button>
@@ -130,7 +131,7 @@
           <!-- Sort Button & Drop down -->
           <div class="sort"
             [hidden]="(view$ | async) === 'table' || sortColumns.length < 1 || (isAddingOrSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && !(hasRowsOrIsFiltering$ | async))">
-            <div class="form-field list-component__header__right-sort">
+            <div class="flex items-center gap-1 pl-3 border-l-2 border-content-border">
               <select class="select" name="sort-field" [(ngModel)]="headerSort.value"
                 [disabled]="(disableActions$ | async)"
                 (change)="updateListSort(headerSort.value, headerSort.direction)">
@@ -264,7 +265,7 @@
           </app-table>
         }
       </div>
-      <div class="absolute bottom-[67px] inset-x-0 h-8 pointer-events-none z-50 bg-gradient-to-t from-app-bg to-transparent transition-opacity duration-200"
+      <div class="absolute bottom-0 inset-x-0 h-12 pointer-events-none z-50 bg-gradient-to-t from-black/10 dark:from-white/20 to-transparent transition-opacity duration-200"
         [class.opacity-0]="!showScrollShadow()"></div>
       <div class="card list-component__paginator" [hidden]="(hidePaginator$ | async)">
         <app-paginator
@@ -279,7 +280,7 @@
     </div>
     <ng-template #defaultNoEntries>
       <div class="card list-component__default-no-entries">
-        <div class="card-content p-6 text-center text-gray-500">
+        <div class="card-content p-6 text-center text-content-muted">
           <div class="no-rows">{{config.text?.noEntries || 'There are no entries'}}</div>
         </div>
       </div>

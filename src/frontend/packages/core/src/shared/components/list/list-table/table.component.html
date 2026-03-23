@@ -3,7 +3,7 @@
     <div class="app-table__loading">
       @if (dataSource.isTableLoading$ | async) {
         <div class="progress-bar">
-          <div class="progress-bar-indeterminate bg-primary-500"></div>
+          <div class="progress-bar-indeterminate bg-primary"></div>
         </div>
       }
     </div>
@@ -13,7 +13,7 @@
     <div class="card-content app-table__content">
       <div class="table-container app-table__inner" #table [hidden]="hideTable">
         <div class="table-wrapper" role="table">
-          <div class="table-header sticky top-0 z-10 bg-white dark:bg-gray-900" role="rowgroup">
+          <div class="table-header sticky top-0 z-10 bg-content-bg" role="rowgroup">
             <div class="table-header-row flex items-center app-table__header-row"
               [ngClass]="{'in-expanded-row': !!inExpandedRow, 'has-expanded-row': expandComponent, 'app-table__inner--has-expanded-columns': !!expandComponent}"
               [hidden]="hideTable"
@@ -24,13 +24,19 @@
                   [ngClass]="[column.class || '', column.headerClass || '']"
                   [style.flex]="column.cellFlex"
                   role="columnheader">
-                  <div class="flex items-center gap-1"
+                  <div class="flex items-center gap-1 select-none"
                     [class.cursor-pointer]="column.sort"
                     (click)="column.sort && handleSort(column)">
                     <app-table-cell [component]="column.headerCellComponent" [func]="column.headerCell"
                     [dataSource]="dataSource"></app-table-cell>
                     @if (column.sort) {
-                      <span class="material-icons text-sm opacity-70" style="color: var(--table-header-text)">sort</span>
+                      @if (getSortDirection(column.columnId) === 'asc') {
+                        <span class="material-icons text-base opacity-60">sort</span>
+                      } @else if (getSortDirection(column.columnId) === 'desc') {
+                        <span class="material-icons text-base opacity-60 rotate-180">sort</span>
+                      } @else {
+                        <span class="material-icons text-base opacity-20">sort</span>
+                      }
                     }
                   </div>
                 </div>
@@ -38,7 +44,7 @@
             </div>
           </div>
           <div class="table-body" role="rowgroup">
-            @for (row of dataSource.connect(null) | async; track $index; let i = $index) {
+            @for (row of dataSource.connect(null) | async; track dataSource.trackBy(i, row); let i = $index) {
               <app-table-row class="app-table__row"
                 [columns]="columns"
                 [dataSource]="dataSource"

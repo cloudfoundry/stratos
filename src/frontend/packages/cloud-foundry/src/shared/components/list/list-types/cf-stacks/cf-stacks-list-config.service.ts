@@ -21,7 +21,7 @@ export class CfStacksListConfigService extends BaseCfListConfig<APIResource<any>
   enableTextFilter = true;
   text = {
     title: null as string | null,
-    filter: 'Search by name',
+    filter: 'Filter by Name',
     noEntries: 'There are no stacks'
   };
   columns: ITableColumn<APIResource<any>>[] = [{

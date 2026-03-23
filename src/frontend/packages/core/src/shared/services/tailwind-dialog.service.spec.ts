@@ -101,7 +101,7 @@ describe('TailwindDialogService', () => {
       expect(backdrop).toBeTruthy();
 
       // Check dialog panel
-      const panel = document.querySelector('.bg-white.rounded-lg.shadow-xl');
+      const panel = document.querySelector('.bg-content-bg.rounded-lg.shadow-xl');
       expect(panel).toBeTruthy();
 
       // Check content container

@@ -4,7 +4,7 @@ import { test, expect } from '../../fixtures/test-base';
  * Home Page Layout Tests
  * Verifies that recent applications data persists across layout changes
  *
- * Bug: FWT-678 - Timestamps disappear when switching from single to two column
+ * Bug: Timestamps disappear when switching from single to two column
  * Root cause: cfhome-card.component.html binds [showDate]="layout.x === 1"
  */
 test.describe('Home Page Layout', () => {

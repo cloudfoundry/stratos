@@ -1,6 +1,6 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Portal, PortalModule } from '@angular/cdk/portal';
-import { ChangeDetectionStrategy, AfterViewInit, Component, NgZone, OnDestroy, OnInit, ViewChild, ViewContainerRef  } from '@angular/core';
+import { ChangeDetectionStrategy, AfterViewInit, ChangeDetectorRef, Component, ElementRef, NgZone, OnDestroy, OnInit, signal, ViewChild, ViewContainerRef  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDrawer } from '../../../shared/services/tailwind-material-replacements';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router, RouterModule } from '@angular/router';
@@ -18,7 +18,7 @@ import {
   entityCatalog,
 } from '@stratosui/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { distinctUntilChanged, filter, map, startWith, withLatestFrom } from 'rxjs/operators';
+import { delay, distinctUntilChanged, filter, map, startWith, withLatestFrom } from 'rxjs/operators';
 
 import { CustomizationService } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
@@ -60,6 +60,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   private dashboardState$: Observable<DashboardState> = of({} as DashboardState);
   public noMargin$: Observable<boolean> = of(false);
   private closeSub!: Subscription;
+  private routerSub!: Subscription;
   private mobileSub: Subscription;
   private drawer: MatDrawer;
   public iconModeOpen = false;
@@ -70,7 +71,9 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
 
   @ViewChild('previewPanelContainer', { read: ViewContainerRef, static: false }) previewPanelContainer!: ViewContainerRef;
 
-  @ViewChild('content', { static: false }) public content: any;
+  @ViewChild('content', { static: false }) public content!: ElementRef<HTMLElement>;
+
+  showScrollShadow = signal(false);
 
   // Slide-in side panel mode
   sidePanelMode: SidePanelMode = SidePanelMode.Modal;
@@ -85,7 +88,8 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     public tabNavService: TabNavService,
     private ngZone: NgZone,
     public sidePanelService: SidePanelService,
-    private cs: CustomizationService
+    private cs: CustomizationService,
+    private cd: ChangeDetectorRef
   ) {
     this.noMargin$ = this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
@@ -173,6 +177,13 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     this.dispatchRelations();
     // Initialize user favorites - fire and forget action, no subscription needed
     stratosEntityCatalog.userFavorite.api.getAll();
+
+    // Re-evaluate scroll shadow after route changes (content height changes)
+    // Use delay(100) to let the new route's content render before measuring
+    this.routerSub = this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      delay(100)
+    ).subscribe(() => this.updateScrollShadow());
   }
 
   ngOnDestroy() {
@@ -182,7 +193,27 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     if (this.closeSub) {
       this.closeSub.unsubscribe();
     }
+    if (this.routerSub) {
+      this.routerSub.unsubscribe();
+    }
     this.sidePanelService.unsetContainer();
+  }
+
+  onContentScroll(event: Event) {
+    const el = event.target as HTMLElement;
+    this.updateScrollShadow(el);
+  }
+
+  private updateScrollShadow(el?: HTMLElement) {
+    if (!el) {
+      el = this.content?.nativeElement;
+    }
+    if (!el) return;
+    const hasMore = el.scrollHeight > el.clientHeight && el.scrollTop + el.clientHeight < el.scrollHeight - 4;
+    if (this.showScrollShadow() !== hasMore) {
+      this.showScrollShadow.set(hasMore);
+      this.cd.markForCheck();
+    }
   }
 
   isNoMarginView(route: ActivatedRouteSnapshot): boolean {

@@ -23,7 +23,7 @@ export class CfBuildpacksListConfigService extends BaseCfListConfig<APIResource<
   enableTextFilter = true;
   text: { title: string | null; filter: string; noEntries: string } = {
     title: null as string | null,
-    filter: 'Search by name',
+    filter: 'Filter by Name',
     noEntries: 'There are no buildpacks'
   };
   columns: ITableColumn<APIResource>[] = [{

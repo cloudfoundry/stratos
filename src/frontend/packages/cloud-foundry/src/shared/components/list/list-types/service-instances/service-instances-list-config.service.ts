@@ -26,7 +26,7 @@ export class ServiceInstancesListConfigService extends CfServiceInstancesListCon
   enableTextFilter = true;
   text: ITableText = {
     title: null,
-    filter: 'Search by name',
+    filter: 'Filter by Name',
     noEntries: 'There are no service instances',
   };
 

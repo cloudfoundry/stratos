@@ -9,35 +9,27 @@ on:
 
 env:
   NODE_OPTIONS: --max-old-space-size=5500
+  NODE_VERSION: '24'
+  BUN_VERSION: 'latest'
 
 jobs:
   test_suite:
     runs-on: ubuntu-latest
     steps:
-    - name: Set up Node
-      uses: actions/setup-node@v3
+    - uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
       with:
-        node-version: 16
+        node-version: ${{ env.NODE_VERSION }}
 
-    - uses: actions/checkout@v2
-
-    - name: Get npm cache directory
-      id: npm-cache-dir
-      shell: bash
-      run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
-
-    - uses: actions/cache@v3
-      id: npm-cache # use this to check for `cache-hit` ==> if: steps.npm-cache.outputs.cache-hit != 'true'
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
       with:
-        path: ${{ steps.npm-cache-dir.outputs.dir }}
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-node-
+        bun-version: ${{ env.BUN_VERSION }}
 
     - name: Install Dependencies
-      run: npm install
+      run: bun install
 
     - name: Run Tests
-      uses: coactions/setup-xvfb@v1
-      with:
-        run: npm run test
+      run: bun run test

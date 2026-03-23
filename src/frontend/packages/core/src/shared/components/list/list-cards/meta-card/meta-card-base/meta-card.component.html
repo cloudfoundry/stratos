@@ -38,13 +38,13 @@
             <app-custom-icon>more_vert</app-custom-icon>
           </button>
           @if (menuOpen) {
-            <div class="absolute right-0 top-full mt-1 bg-white dark:bg-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50 min-w-[160px]">
+            <div class="absolute right-0 top-full mt-1 bg-content-bg rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50 min-w-[160px]">
               <div class="py-1" role="menu">
                 @for (menuItem of actionMenu; track menuItem) {
                   @if (menuItem.can | async) {
                     @if (!menuItem.separator) {
                       <button
-                        class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        class="w-full text-left px-4 py-2 text-sm text-content-text hover:bg-content-secondary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                         [disabled]="menuItem.disabled | async"
                         (click)="menuItemClick(menuItem)">
                         @if (menuItem.icon) {
@@ -54,7 +54,7 @@
                       </button>
                     }
                     @if (menuItem.separator) {
-                      <div class="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+                      <div class="border-t border-content-border my-1"></div>
                     }
                   }
                 }

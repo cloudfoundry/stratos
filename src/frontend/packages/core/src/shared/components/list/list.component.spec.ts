@@ -140,6 +140,169 @@ describe('ListComponent', () => {
     });
   });
 
+  describe('UI enhancement methods', () => {
+    let component: ListComponent<any>;
+
+    beforeEach(async () => {
+      await TestBed.configureTestingModule({
+        imports: [
+          ...BaseTestModules,
+        ],
+        providers: [
+          ...STORE_TEST_PROVIDERS,
+          { provide: ListConfig, useClass: MockListConfig },
+          provideZonelessChangeDetection(),
+        ],
+        schemas: [CUSTOM_ELEMENTS_SCHEMA]
+      }).compileComponents();
+
+      const fixture = TestBed.createComponent<ListComponent<any>>(ListComponent);
+      component = fixture.componentInstance;
+    });
+
+    describe('clearFilterText', () => {
+      it('should clear filterString and call paginationController.filterByString', () => {
+        // Set up component state as if initialised
+        const componentAny = component as any;
+        componentAny.filterString = 'some search text';
+        componentAny.paginationController = {
+          filterByString: vi.fn()
+        };
+
+        component.clearFilterText();
+
+        expect(componentAny.filterString).toBe('');
+        expect(componentAny.paginationController.filterByString).toHaveBeenCalledWith('');
+      });
+
+      it('should work when filterString is already empty', () => {
+        const componentAny = component as any;
+        componentAny.filterString = '';
+        componentAny.paginationController = {
+          filterByString: vi.fn()
+        };
+
+        component.clearFilterText();
+
+        expect(componentAny.filterString).toBe('');
+        expect(componentAny.paginationController.filterByString).toHaveBeenCalledWith('');
+      });
+    });
+
+    describe('getVisibleStart / getVisibleEnd', () => {
+      it('should return 1-based start for first page', () => {
+        const componentAny = component as any;
+        componentAny.paginatorSettings = { pageIndex: 0, pageSize: 6, length: 49 };
+
+        expect(component.getVisibleStart()).toBe(1);
+        expect(component.getVisibleEnd()).toBe(6);
+      });
+
+      it('should return correct range for second page', () => {
+        const componentAny = component as any;
+        componentAny.paginatorSettings = { pageIndex: 1, pageSize: 6, length: 49 };
+
+        expect(component.getVisibleStart()).toBe(7);
+        expect(component.getVisibleEnd()).toBe(12);
+      });
+
+      it('should clamp end to total on last page', () => {
+        const componentAny = component as any;
+        componentAny.paginatorSettings = { pageIndex: 8, pageSize: 6, length: 49 };
+
+        expect(component.getVisibleStart()).toBe(49);
+        expect(component.getVisibleEnd()).toBe(49);
+      });
+
+      it('should return 0 start when length is 0', () => {
+        const componentAny = component as any;
+        componentAny.paginatorSettings = { pageIndex: 0, pageSize: 6, length: 0 };
+
+        expect(component.getVisibleStart()).toBe(0);
+        expect(component.getVisibleEnd()).toBe(0);
+      });
+
+      it('should handle "All" page size (all items on one page)', () => {
+        const componentAny = component as any;
+        componentAny.paginatorSettings = { pageIndex: 0, pageSize: 49, length: 49 };
+
+        expect(component.getVisibleStart()).toBe(1);
+        expect(component.getVisibleEnd()).toBe(49);
+      });
+    });
+
+    describe('scroll shadow', () => {
+      it('should start with showScrollShadow as false', () => {
+        expect(component.showScrollShadow()).toBe(false);
+      });
+
+      it('should set showScrollShadow to true when content overflows', () => {
+        const mockEl = {
+          scrollHeight: 500,
+          clientHeight: 300,
+          scrollTop: 0,
+        } as HTMLElement;
+        const mockEvent = { target: mockEl } as unknown as Event;
+
+        component.onBodyScroll(mockEvent);
+
+        expect(component.showScrollShadow()).toBe(true);
+      });
+
+      it('should set showScrollShadow to false when scrolled to bottom', () => {
+        const mockEl = {
+          scrollHeight: 500,
+          clientHeight: 300,
+          scrollTop: 200,
+        } as HTMLElement;
+        const mockEvent = { target: mockEl } as unknown as Event;
+
+        component.onBodyScroll(mockEvent);
+
+        expect(component.showScrollShadow()).toBe(false);
+      });
+
+      it('should set showScrollShadow to false when content fits without scrolling', () => {
+        const mockEl = {
+          scrollHeight: 300,
+          clientHeight: 300,
+          scrollTop: 0,
+        } as HTMLElement;
+        const mockEvent = { target: mockEl } as unknown as Event;
+
+        component.onBodyScroll(mockEvent);
+
+        expect(component.showScrollShadow()).toBe(false);
+      });
+
+      it('should keep shadow true when near bottom but not quite there (>4px threshold)', () => {
+        const mockEl = {
+          scrollHeight: 500,
+          clientHeight: 300,
+          scrollTop: 194, // 194 + 300 = 494, which is < 500 - 4 = 496
+        } as HTMLElement;
+        const mockEvent = { target: mockEl } as unknown as Event;
+
+        component.onBodyScroll(mockEvent);
+
+        expect(component.showScrollShadow()).toBe(true);
+      });
+
+      it('should hide shadow when within 4px threshold of bottom', () => {
+        const mockEl = {
+          scrollHeight: 500,
+          clientHeight: 300,
+          scrollTop: 197, // 197 + 300 = 497, which is >= 500 - 4 = 496
+        } as HTMLElement;
+        const mockEvent = { target: mockEl } as unknown as Event;
+
+        component.onBodyScroll(mockEvent);
+
+        expect(component.showScrollShadow()).toBe(false);
+      });
+    });
+  });
+
   describe.skip('full test bed - SKIPPED: entity catalog setup complexity', () => {
     // REASON FOR SKIP:
     // These tests use EndpointsListConfigService which requires full entity catalog setup

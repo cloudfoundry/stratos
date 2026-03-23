@@ -64,6 +64,7 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
     this.setValueGenerator();
     this.setValue(this.row);
     this.setSyncLink();
+    this.cdr.markForCheck();
   }
 
   private setupLinkDeps() {

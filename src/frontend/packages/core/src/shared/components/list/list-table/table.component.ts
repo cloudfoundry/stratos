@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { MatSort, Sort } from '../../../services/tailwind-material-replacements';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { ListSort } from '@stratosui/store';
-import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 import { ITableListDataSource, RowState } from '../data-sources-controllers/list-data-source-types';
@@ -58,8 +57,7 @@ const tableColumnAction: ITableColumn<any> = {
 export class TableComponent<T> implements OnInit, OnDestroy {
 
   private uberSub: Subscription;
-
-  @ViewChild(MatSort, { static: true }) sort: MatSort;
+  private currentSort: { field: string; direction: string } = { field: '', direction: '' };
 
   constructor(private cdr: ChangeDetectorRef) { }
 
@@ -107,37 +105,12 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   }
 
   initWidgetStore() {
-    // If sort directive is not available (not in template), skip initialization
-    if (!this.sort) {
-      return;
-    }
-
-    const sortStoreToWidget = this.paginationController.sort$.pipe(
+    // Sync sort state from store to local tracking
+    this.uberSub = this.paginationController.sort$.pipe(
       tap((sort: ListSort) => {
-        if (this.sort.active !== sort.field || this.sort.direction !== sort.direction) {
-          this.sort.sort({
-            id: sort.field,
-            start: sort.direction as 'asc' | 'desc',
-            disableClear: true
-          });
-          this.cdr.markForCheck();
-        }
-      })
-    );
-
-    const sortWidgetToStore = this.sort.sortChange.pipe(
-      tap((sort: Sort) => {
-        this.paginationController.sort({
-          field: sort.active,
-          direction: sort.direction,
-        });
+        this.currentSort = { field: sort.field, direction: sort.direction };
         this.cdr.markForCheck();
       })
-    );
-
-    this.uberSub = observableCombineLatest(
-      sortStoreToWidget,
-      sortWidgetToStore,
     ).subscribe();
   }
 
@@ -149,13 +122,22 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   }
 
   handleSort(column: ITableColumn<T>): void {
-    if (column.sort && this.sort) {
-      this.sort.sort({
-        id: column.columnId,
-        start: this.sort.direction === 'asc' ? 'desc' : 'asc',
-        disableClear: true
-      });
+    if (!column.sort || !this.paginationController) {
+      return;
     }
+    // Toggle direction: asc → desc → asc
+    const newDirection = this.currentSort.field === column.columnId && this.currentSort.direction === 'asc'
+      ? 'desc' : 'asc';
+    this.currentSort = { field: column.columnId, direction: newDirection };
+    this.paginationController.sort({
+      field: column.columnId,
+      direction: newDirection,
+    });
+    this.cdr.markForCheck();
+  }
+
+  getSortDirection(columnId: string): string {
+    return this.currentSort.field === columnId ? this.currentSort.direction : '';
   }
 
   ngOnDestroy() {

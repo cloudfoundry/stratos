@@ -1,12 +1,12 @@
 <div class="details-card">
   <div [class.block]="busy" [class.hidden]="!busy" class="details-card__loading">
     <div class="progress-bar">
-      <div class="progress-bar-indeterminate bg-primary-500"></div>
+      <div class="progress-bar-indeterminate bg-primary"></div>
     </div>
   </div>
   <div class="card">
     <div class="card-header">
-      <h2 class="text-lg font-semibold text-gray-900">{{ title }}</h2>
+      <h2 class="text-lg font-semibold text-content-text">{{ title }}</h2>
     </div>
     <div class="card-content">
       <ng-content></ng-content>

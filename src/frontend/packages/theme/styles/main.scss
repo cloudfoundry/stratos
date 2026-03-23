@@ -94,7 +94,7 @@
 
   /* Table colors */
   --table-header-bg: #f9fafb;
-  --table-header-text: #374151;
+  --table-header-text: #1e293b;
   --table-row-hover: #f9fafb;
   --table-border: #e5e7eb;
 
@@ -856,8 +856,29 @@ mat-chip {
 }
 
 .progress-bar {
-  @apply h-2 rounded-full transition-all duration-300;
+  @apply relative h-1 w-full overflow-hidden;
+  background-color: color-mix(in srgb, var(--color-primary) 20%, transparent);
+}
+
+.progress-bar-indeterminate {
+  @apply absolute inset-y-0 rounded-full;
   background-color: var(--color-primary);
+  animation: progress-slide 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes progress-slide {
+  0% {
+    left: -35%;
+    width: 35%;
+  }
+  50% {
+    left: 25%;
+    width: 50%;
+  }
+  100% {
+    left: 100%;
+    width: 35%;
+  }
 }
 
 /* Alert styles */
