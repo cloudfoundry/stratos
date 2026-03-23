@@ -26,6 +26,9 @@ src/frontend/packages/devkit/package-lock.json
 .vscode/launch.json
 !.vscode/extensions.json
 
+# Site-specific overrides
+site.mk
+
 # misc
 /.angular/cache
 /.sass-cache

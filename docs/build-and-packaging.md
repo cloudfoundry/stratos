@@ -32,6 +32,7 @@ Single source of truth for building, testing, and packaging Stratos.
 | `make test` | Run all tests (frontend + backend) |
 | `make test frontend` | Frontend tests only (Vitest) |
 | `make test backend` | Backend tests only (Go) |
+| `make test e2e` | Playwright E2E tests against deployed instance |
 
 ### Packaging and Release
 
@@ -95,6 +96,67 @@ the manifest must be passed separately with `-f` or be in the current directory.
 make build all
 make release github
 ```
+
+## Site-Specific Overrides (site.mk)
+
+The Makefile supports site-specific customization through an optional `site.mk`
+file. This file is loaded via `-include site.mk` at the end of the Makefile,
+so it can extend or override any variable or target.
+
+`site.mk` is gitignored — it is never committed. A `site.mk.example` is
+provided as a starting point.
+
+### When to use site.mk
+
+Use `site.mk` for operations that depend on your deployment environment:
+
+- Deploy targets (`make deploy cf`) with org/space configuration
+- Environment-specific variable overrides
+- Custom CI or automation targets
+- Integration with site-specific tooling
+
+Do **not** put secrets in `site.mk`. Use environment variables or a secrets
+manager instead.
+
+### Getting started
+
+```bash
+cp site.mk.example site.mk
+# Edit site.mk to match your environment
+```
+
+### Adding help text
+
+If your `site.mk` defines a `site-help` target, `make help` will include it
+automatically:
+
+```makefile
+.PHONY: site-help
+site-help:
+	@echo ""
+	@echo "Site-specific:"
+	@echo "  make deploy cf    Push to current CF target"
+```
+
+Without a `site-help` target, `make help` shows a generic note that site.mk
+exists. Without `site.mk` at all, nothing extra is shown.
+
+### Design pattern
+
+The Makefile uses a **verb + modifier** pattern where order does not matter:
+
+```
+make <verb> [modifier...]
+make build cf              # verb=build, modifier=cf
+make cf build release      # same modifiers, different order — same result
+```
+
+Modifiers are no-op targets that set flags. The `cf` modifier forces
+`PLATFORM=linux/amd64` for build targets. Site-specific targets follow the
+same pattern — `site.mk` adds new verbs (like `deploy`) that compose with
+existing modifiers.
+
+See `site.mk.example` for the full deploy target pattern.
 
 ## Validation Behavior
 

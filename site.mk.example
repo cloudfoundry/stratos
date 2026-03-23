@@ -1,0 +1,37 @@
+# site.mk — Site-specific Makefile overrides
+#
+# Copy this file to site.mk and customize for your environment.
+# site.mk is gitignored and will not be committed.
+#
+# All variables and targets from the main Makefile are available.
+# Targets defined here extend (not replace) the main Makefile.
+
+# ── Site Help ─────────────────────────────────────────────────
+# This target is called by 'make help' when site.mk exists.
+.PHONY: site-help
+site-help:
+	@echo ""
+	@echo "Site-specific:"
+	@echo "  make build release deploy cf  Build, package, and push to current CF target"
+	@echo "  make deploy cf                Push existing CF zip to current CF target"
+
+# ── Deploy ───────────────────────────────────────────────────
+# Deploy to Cloud Foundry. Requires cf CLI authenticated and targeted.
+#
+# Usage:
+#   make deploy cf                Push existing CF zip
+#   make build release deploy cf  Build, package, and push
+
+.PHONY: deploy deploy-cf
+deploy: $(call CF,deploy-cf)
+
+deploy-cf:
+	@echo "Deploying to CF..."
+	@cf target | grep -E "org:|space:" || \
+		(echo "ERROR: No CF target set. Run 'cf target -o ORG -s SPACE' first."; exit 1)
+	@ZIP=$$(ls -t $(DIST_DIR)/stratos-cf-*.zip 2>/dev/null | head -1); \
+	if [ -z "$$ZIP" ]; then \
+		echo "ERROR: No CF zip found. Run 'make build release cf' first."; exit 1; \
+	fi; \
+	echo "Deploying $$ZIP..."; \
+	cf push -f $(DIST_DIR)/cf-package/manifest.yml -p "$$ZIP"

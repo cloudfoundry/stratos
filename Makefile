@@ -9,6 +9,7 @@
 #   make test                   Run all tests
 #   make test frontend          Frontend tests only
 #   make test backend           Backend tests only
+#   make test e2e               Run Playwright E2E tests
 #   make release                Release all targets (cf + github)
 #   make release cf             CF-pushable zip
 #   make release github         GitHub release archives
@@ -86,6 +87,7 @@ endif
 WANT_FRONTEND :=
 WANT_BACKEND  :=
 WANT_BE_ALL   :=
+WANT_E2E      :=
 
 ifneq ($(filter frontend,$(MAKECMDGOALS)),)
   WANT_FRONTEND := yes
@@ -97,14 +99,17 @@ ifneq ($(filter backend-all,$(MAKECMDGOALS)),)
   WANT_BACKEND := yes
   WANT_BE_ALL  := yes
 endif
+ifneq ($(filter e2e,$(MAKECMDGOALS)),)
+  WANT_E2E := yes
+endif
 ifneq ($(filter all,$(MAKECMDGOALS)),)
   WANT_FRONTEND := yes
   WANT_BACKEND  := yes
   WANT_BE_ALL   := yes
 endif
 
-# Default: frontend + backend when none specified
-ifeq ($(WANT_FRONTEND)$(WANT_BACKEND),)
+# Default: frontend + backend when none specified (unless e2e)
+ifeq ($(WANT_FRONTEND)$(WANT_BACKEND)$(WANT_E2E),)
   WANT_FRONTEND := yes
   WANT_BACKEND  := yes
 endif
@@ -124,9 +129,17 @@ ifeq ($(WANT_CF)$(WANT_GITHUB),)
   WANT_GITHUB := yes
 endif
 
+# When cf modifier is present, force linux/amd64 for build
+ifeq ($(WANT_CF),yes)
+  TARGET_OS   := linux
+  TARGET_ARCH := amd64
+  GO_ENV      := GOOS=linux GOARCH=amd64
+  CURRENT_PLATFORM := linux/amd64
+endif
+
 # No-op targets so modifiers don't error
-.PHONY: frontend backend backend-all all cf github dist version
-frontend backend backend-all all cf github dist version:
+.PHONY: frontend backend backend-all all cf github dist version e2e
+frontend backend backend-all all cf github dist version e2e:
 	@:
 
 # Dispatch helpers
@@ -158,7 +171,7 @@ be-build-all:
 
 # ── Test targets ──────────────────────────────────────────────
 .PHONY: test fe-test be-test
-test: $(call FE,fe-test) $(call BE,be-test,be-test)
+test: $(call FE,fe-test) $(call BE,be-test,be-test) $(if $(WANT_E2E),fe-test-e2e)
 
 fe-test:
 	@echo "Running frontend tests..."
@@ -167,6 +180,12 @@ fe-test:
 be-test:
 	@echo "Running backend tests..."
 	cd src/jetstream && go test ./... -v -count=1
+
+# ── E2E test targets ─────────────────────────────────────────
+.PHONY: fe-test-e2e
+fe-test-e2e:
+	@echo "Running Playwright E2E tests..."
+	bun run e2e
 
 # ── Release targets ───────────────────────────────────────────
 .PHONY: release release-cf release-github
@@ -323,6 +342,7 @@ help:
 	@echo "  make test                 Run all tests"
 	@echo "  make test frontend        Frontend tests only"
 	@echo "  make test backend         Backend tests only"
+	@echo "  make test e2e             Run Playwright E2E tests"
 	@echo "  make lint                 Run linters"
 	@echo ""
 	@echo "Release:"
@@ -349,3 +369,9 @@ help:
 	@echo "  make dev backend          Start backend dev server (port $(BACKEND_PORT))"
 	@echo "  Override ports:  make dev backend BACKEND_PORT=5543"
 	@echo "                   make dev frontend FRONTEND_PORT=5540 BACKEND_PORT=5543"
+	@if [ -f site.mk ]; then $(MAKE) --no-print-directory site-help 2>/dev/null || (echo "" && echo "Site-specific targets available (see site.mk)"); fi
+
+# ── Site-specific overrides ──────────────────────────────────
+# site.mk is gitignored and loaded if present.
+# See site.mk.example for the expected structure.
+-include site.mk
