@@ -1,5 +1,9 @@
 import { Injectable, signal } from '@angular/core';
 import { StratosTheme, defaultTheme, darkTheme } from './theme.config';
+import { BUILD_INFO } from '../core/src/environments/build-info';
+
+const APP_VERSION_KEY = 'stratos-app-version';
+const NON_USER_KEYS = ['stratos-theme-mode', 'stratos-branding', 'stratos-company-config', 'stratos-show-all-menu-items'];
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 
@@ -31,6 +35,9 @@ export class StratosThemeService {
   private initializeTheme() {
     // Add initializing class to prevent FOUC (Flash of Unstyled Content)
     document.body.classList.add('theme-initializing');
+
+    // Check app version — clear non-user-scoped preferences on version change
+    this.checkAppVersion();
 
     // Initialize media query listener for system theme preference
     this.mediaQueryList = window.matchMedia('(prefers-color-scheme: dark)');
@@ -272,6 +279,23 @@ export class StratosThemeService {
     // Only update if current mode is 'system'
     if (this._themeMode() === 'system') {
       this.applyThemeMode('system');
+    }
+  }
+
+  private checkAppVersion() {
+    try {
+      const storedVersion = localStorage.getItem(APP_VERSION_KEY);
+      const currentVersion = BUILD_INFO.version;
+
+      if (storedVersion !== currentVersion) {
+        if (storedVersion) {
+          console.log(`Stratos version changed (${storedVersion} → ${currentVersion}), clearing app preferences`);
+        }
+        NON_USER_KEYS.forEach(key => localStorage.removeItem(key));
+        localStorage.setItem(APP_VERSION_KEY, currentVersion);
+      }
+    } catch (error) {
+      console.warn('Could not check app version in localStorage');
     }
   }
 

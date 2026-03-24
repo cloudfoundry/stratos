@@ -4,7 +4,7 @@
 
 // Helpers
 export * from './helpers/store-helpers';
-export { LocalStorageService } from './helpers/local-storage-service';
+export { LocalStorageService, LocalStorageSyncTypes } from './helpers/local-storage-service';
 
 // Used by store testing module
 export { getDefaultRequestState } from './reducers/api-request-reducer/types';

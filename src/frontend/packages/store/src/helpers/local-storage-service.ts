@@ -3,6 +3,7 @@ import { localStorageSync } from 'ngrx-store-localstorage';
 
 import { ConfirmationDialogConfig } from '../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../core/src/shared/components/confirmation-dialog.service';
+import { BUILD_INFO } from '../../../core/src/environments/build-info';
 import { HydrateDashboardStateAction } from '../actions/dashboard-actions';
 import { HydrateListsStateAction } from '../actions/list.actions';
 import { HydratePaginationStateAction } from '../actions/pagination.actions';
@@ -45,6 +46,36 @@ export class LocalStorageService {
     return userId + '-' + storeKey;
   }
 
+  private static VERSION_SUFFIX = '-version';
+
+  /**
+   * Check if stored preferences match the current app version.
+   * If not, clear all user-scoped preferences and start fresh.
+   */
+  private static checkVersionAndClear(storage: Storage, sessionId: string): boolean {
+    const versionKey = sessionId + LocalStorageService.VERSION_SUFFIX;
+    const storedVersion = storage.getItem(versionKey);
+    const currentVersion = BUILD_INFO.version;
+
+    if (storedVersion === currentVersion) {
+      return true; // Version matches, proceed with hydration
+    }
+
+    if (storedVersion) {
+      console.log(`Stratos version changed (${storedVersion} → ${currentVersion}), clearing stored preferences`);
+    }
+
+    // Clear all user-scoped keys
+    Object.values(LocalStorageSyncTypes).forEach(type => {
+      const key = LocalStorageService.makeKey(sessionId, type);
+      storage.removeItem(key);
+    });
+
+    // Write current version
+    storage.setItem(versionKey, currentVersion);
+    return false; // Preferences cleared, skip hydration
+  }
+
   /**
    * Normally used on app init, move local storage data into the console's store
    */
@@ -54,6 +85,11 @@ export class LocalStorageService {
     if (storage && sessionData.user) {
       const sessionId = LocalStorageService.getLocalStorageSessionId(sessionData.user.name);
       if (sessionId) {
+        // Check version — clear stale preferences if version changed
+        if (!LocalStorageService.checkVersionAndClear(storage, sessionId)) {
+          return; // Preferences cleared, use defaults
+        }
+
         LocalStorageService.localStorageToStoreSection(
           LocalStorageSyncTypes.DASHBOARD,
           dataForStore => store.dispatch(new HydrateDashboardStateAction(dataForStore)),
@@ -230,7 +266,8 @@ export class LocalStorageService {
         Object.values(LocalStorageSyncTypes).forEach(type => {
           const key = LocalStorageService.makeKey(sessionId, type);
           storage.removeItem(key);
-        }, 0);
+        });
+        storage.removeItem(sessionId + LocalStorageService.VERSION_SUFFIX);
 
         // This is a brutal approach but is a lot easier than reverting all user changes in the store
         window.location.assign(reloadTo);
@@ -240,6 +277,33 @@ export class LocalStorageService {
     };
 
     confirmationService.openWithCancel(config, successAction, () => { });
+  }
+
+  /**
+   * Clear specific localStorage sections for the user
+   */
+  public static clearSections(sessionData: SessionData, sections: LocalStorageSyncTypes[]) {
+    const storage = LocalStorageService.getStorage();
+    const sessionId = LocalStorageService.getLocalStorageSessionId(sessionData.user.name);
+    if (storage && sessionId) {
+      sections.forEach(type => {
+        const key = LocalStorageService.makeKey(sessionId, type);
+        storage.removeItem(key);
+      });
+    }
+  }
+
+  /**
+   * Clear non-user-scoped theme preferences
+   */
+  public static clearThemePreferences() {
+    const storage = LocalStorageService.getStorage();
+    if (storage) {
+      storage.removeItem('stratos-theme-mode');
+      storage.removeItem('stratos-branding');
+      storage.removeItem('stratos-company-config');
+      storage.removeItem('stratos-show-all-menu-items');
+    }
   }
 
   private static encrypt(obj: {}) {

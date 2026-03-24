@@ -9,6 +9,7 @@ import { filter, first, map } from 'rxjs/operators';
 import {
   AppState,
   LocalStorageService,
+  LocalStorageSyncTypes,
   selectDashboardState,
   selectSessionData,
   SetGravatarEnabledAction,
@@ -142,6 +143,50 @@ export class ProfileSettingsComponent {
         LocalStorageService.clearLocalStorage(sessionData, this.confirmationService);
       }
     });
+  }
+
+  resetTheme() {
+    this.confirmAndReset('Reset theme to default?', () => {
+      LocalStorageService.clearThemePreferences();
+    });
+  }
+
+  resetListPreferences() {
+    this.sessionData$.pipe(first()).subscribe(sessionData => {
+      if (sessionData?.user) {
+        this.confirmAndReset('Reset list and pagination preferences?', () => {
+          LocalStorageService.clearSections(sessionData, [
+            LocalStorageSyncTypes.PAGINATION,
+            LocalStorageSyncTypes.LISTS,
+          ]);
+        });
+      }
+    });
+  }
+
+  resetDashboard() {
+    this.sessionData$.pipe(first()).subscribe(sessionData => {
+      if (sessionData?.user) {
+        this.confirmAndReset('Reset dashboard preferences (sidebar, home layout)?', () => {
+          LocalStorageService.clearSections(sessionData, [
+            LocalStorageSyncTypes.DASHBOARD,
+          ]);
+        });
+      }
+    });
+  }
+
+  private confirmAndReset(message: string, action: () => void) {
+    this.confirmationService.openWithCancel(
+      { message, confirm: 'Reset', critical: false, title: 'Reset Preferences' },
+      (confirmed: boolean) => {
+        if (confirmed) {
+          action();
+          window.location.assign('/user-profile');
+        }
+      },
+      () => {}
+    );
   }
 
 }

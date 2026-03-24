@@ -78,16 +78,20 @@
   @if (show[types.STORAGE] && localStorageSize$ | async; as localStorageSize) {
     <div class="user-profile__section user-profile__local-storage"
       >
-      <app-card-title class="user-profile__section">Clear Settings</app-card-title>
+      <app-card-title class="user-profile__section">Reset Preferences</app-card-title>
       <div class="user-profile__option">
         <div class="user-profile__option-inner">
           <div class="user-profile__local-storage--div">Your browser's local storage is used to persist local
-            settings
-            This covers the options in this section and some changes to lists such as filters and sorting.
+            settings. Preferences are automatically cleared when the application version changes.
           </div>
           <div class="user-profile__local-storage--div">Size of local storage:
-            ~{{ localStorageSize | bytesToHumanSize }} <button class="btn btn-danger" type="button"
-          (click)="clearLocalStorage()">Clear</button></div>
+            ~{{ localStorageSize | bytesToHumanSize }}</div>
+          <div class="user-profile__local-storage--div flex gap-2 flex-wrap mt-2">
+            <button class="btn btn-ghost" type="button" (click)="resetTheme()">Reset Theme</button>
+            <button class="btn btn-ghost" type="button" (click)="resetListPreferences()">Reset Lists</button>
+            <button class="btn btn-ghost" type="button" (click)="resetDashboard()">Reset Dashboard</button>
+            <button class="btn btn-danger" type="button" (click)="clearLocalStorage()">Reset All</button>
+          </div>
         </div>
       </div>
     </div>
