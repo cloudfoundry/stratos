@@ -60,7 +60,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [core, store, cloud-foundry, kubernetes, git, shared]
+        package: [core, store, cloud-foundry, kubernetes, git, shared, extension]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
