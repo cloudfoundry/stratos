@@ -29,6 +29,9 @@ src/frontend/packages/devkit/package-lock.json
 # Site-specific overrides
 site.mk
 
+# Screenshot comparison artifacts
+e2e-screenshots/
+
 # misc
 /.angular/cache
 /.sass-cache
