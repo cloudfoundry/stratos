@@ -33,70 +33,75 @@ async function captureAuthenticatedPages(page: any, cfGuid: string) {
 
   // Applications - cards view
   await page.goto(`/cloud-foundry/${cfGuid}/applications`);
-  await page.waitForLoadState('domcontentloaded');
+  await page.locator('app-card-app, app-meta-card, .list-component__card-wrapper .card').first()
+    .waitFor({ state: 'visible', timeout: 30000 }).catch(() => console.warn('App cards did not appear within 30s'));
   await page.waitForTimeout(1000);
   await capture(page, '03-applications-cards');
 
   // Applications - table view (find the list/table toggle icon)
-  const tableIcon = page.locator('button:has(span.material-icons:text("list")), button:has(span:text("view_list"))');
+  const tableIcon = page.locator('.list-component button span.material-icons').filter({ hasText: /list|view_list/ });
   if (await tableIcon.count() > 0) {
     await tableIcon.first().click();
     await page.waitForTimeout(1000);
     await capture(page, '04-applications-table');
   }
 
-  // App summary - click the first card to navigate
-  const firstCard = page.locator('.card, [class*="card"]').first();
-  if (await firstCard.count() > 0) {
-    await firstCard.click();
+  // App summary - click the first app name link
+  const appLink = page.locator('.list-component a[href*="application"]').first();
+  if (await appLink.count() > 0) {
+    await appLink.click();
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(2000);
-    // Check if we navigated to an app page
-    if (page.url().includes('/application/')) {
-      await capture(page, '05-app-summary');
-    }
+    await capture(page, '05-app-summary');
   }
 
   // CF pages
   await page.goto(`/cloud-foundry/${cfGuid}/summary`);
   await capture(page, '06-cf-summary');
 
-  await page.goto(`/cloud-foundry/${cfGuid}/organizations`);
-  await page.waitForTimeout(2000);
-  await capture(page, '07-cf-organizations');
-
-  // Click first org card to discover org GUID from URL
-  const firstOrgCard = page.locator('.card, [class*="card"]').first();
+  // Discover org and space GUIDs via Stratos proxy API
   let orgGuid = '';
-  if (await firstOrgCard.count() > 0) {
-    await firstOrgCard.click();
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(2000);
-    const orgUrl = page.url();
-    const orgMatch = orgUrl.match(/\/organizations\/([^/]+)/);
-    if (orgMatch) orgGuid = orgMatch[1];
+  let spaceGuid = '';
+  try {
+    const orgsResponse = await page.evaluate(async (cfGuid) => {
+      const res = await fetch(`/pp/v1/proxy/v2/organizations?order-direction=asc&page=1&results-per-page=1`, {
+        headers: { 'x-cap-cnsi-list': cfGuid, 'x-cap-passthrough': 'true' }
+      });
+      return res.json();
+    }, cfGuid);
+    if (orgsResponse?.resources?.[0]) {
+      orgGuid = orgsResponse.resources[0].metadata.guid;
+      // Get first space from this org
+      const spacesResponse = await page.evaluate(async ({ cfGuid, orgGuid }) => {
+        const res = await fetch(`/pp/v1/proxy/v2/organizations/${orgGuid}/spaces?order-direction=asc&page=1&results-per-page=1`, {
+          headers: { 'x-cap-cnsi-list': cfGuid, 'x-cap-passthrough': 'true' }
+        });
+        return res.json();
+      }, { cfGuid, orgGuid });
+      if (spacesResponse?.resources?.[0]) {
+        spaceGuid = spacesResponse.resources[0].metadata.guid;
+      }
+    }
+  } catch (e) {
+    console.warn('Could not fetch org/space GUIDs from API:', e);
   }
 
+  console.log(`Discovered: orgGuid=${orgGuid}, spaceGuid=${spaceGuid}`);
+
+  await page.goto(`/cloud-foundry/${cfGuid}/organizations`);
+  await page.waitForTimeout(5000);
+  await capture(page, '07-cf-organizations');
+
   if (orgGuid) {
+    await page.goto(`/cloud-foundry/${cfGuid}/organizations/${orgGuid}/summary`);
     await capture(page, '08-org-summary');
 
     await page.goto(`/cloud-foundry/${cfGuid}/organizations/${orgGuid}/spaces`);
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(5000);
     await capture(page, '09-org-spaces');
 
-    // Click first space card to discover space GUID from URL
-    const firstSpaceCard = page.locator('.card, [class*="card"]').first();
-    let spaceGuid = '';
-    if (await firstSpaceCard.count() > 0) {
-      await firstSpaceCard.click();
-      await page.waitForLoadState('domcontentloaded');
-      await page.waitForTimeout(2000);
-      const spaceUrl = page.url();
-      const spaceMatch = spaceUrl.match(/\/spaces\/([^/]+)/);
-      if (spaceMatch) spaceGuid = spaceMatch[1];
-    }
-
     if (spaceGuid) {
+      await page.goto(`/cloud-foundry/${cfGuid}/organizations/${orgGuid}/spaces/${spaceGuid}/summary`);
       await capture(page, '10-space-summary');
       await page.goto(`/cloud-foundry/${cfGuid}/organizations/${orgGuid}/spaces/${spaceGuid}/apps`);
       await capture(page, '11-space-apps');
@@ -105,6 +110,8 @@ async function captureAuthenticatedPages(page: any, cfGuid: string) {
       await page.goto(`/cloud-foundry/${cfGuid}/organizations/${orgGuid}/spaces/${spaceGuid}/service-instances`);
       await capture(page, '13-space-services');
     }
+  } else {
+    console.warn('Could not discover org GUID — CF API may be slow');
   }
 
   // Marketplace
@@ -123,7 +130,7 @@ async function captureAuthenticatedPages(page: any, cfGuid: string) {
 }
 
 test.describe('Visual Comparison Screenshots', () => {
-  test.setTimeout(120_000);
+  test.setTimeout(300_000);
 
   test.describe('Unauthenticated', () => {
     test('01-login (light)', async ({ page }) => {
