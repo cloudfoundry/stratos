@@ -1,10 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { LocalStorageService, LocalStorageSyncTypes } from './local-storage-service';
+import { BUILD_INFO } from '../../../core/src/environments/build-info';
 
-// Mock BUILD_INFO
-vi.mock('../../../core/src/environments/build-info', () => ({
-  BUILD_INFO: { version: 'v5.0.0-test' }
-}));
+const CURRENT_VERSION = BUILD_INFO.version;
 
 describe('LocalStorageService', () => {
 
@@ -34,12 +32,12 @@ describe('LocalStorageService', () => {
       expect(localStorage.getItem('stratos-testuser-lists')).toBeNull();
 
       // Should write current version
-      expect(localStorage.getItem('stratos-testuser-version')).toBe('v5.0.0-test');
+      expect(localStorage.getItem('stratos-testuser-version')).toBe(CURRENT_VERSION);
     });
 
     it('should hydrate normally when version matches', () => {
       localStorage.setItem('stratos-testuser', JSON.stringify({ sidenavOpen: true }));
-      localStorage.setItem('stratos-testuser-version', 'v5.0.0-test');
+      localStorage.setItem('stratos-testuser-version', CURRENT_VERSION);
 
       const store = { dispatch: vi.fn() } as any;
       const sessionData = { user: { name: 'testuser', guid: 'test-guid', admin: false, scopes: [] } } as any;
@@ -58,7 +56,7 @@ describe('LocalStorageService', () => {
       LocalStorageService.localStorageToStore(store, sessionData);
 
       // Should write version even on first login
-      expect(localStorage.getItem('stratos-newuser-version')).toBe('v5.0.0-test');
+      expect(localStorage.getItem('stratos-newuser-version')).toBe(CURRENT_VERSION);
     });
   });
 
@@ -67,7 +65,7 @@ describe('LocalStorageService', () => {
       localStorage.setItem('stratos-testuser', 'dashboard');
       localStorage.setItem('stratos-testuser-pagination', 'pagination');
       localStorage.setItem('stratos-testuser-lists', 'lists');
-      localStorage.setItem('stratos-testuser-version', 'v5.0.0-test');
+      localStorage.setItem('stratos-testuser-version', CURRENT_VERSION);
 
       const sessionData = { user: { name: 'testuser', guid: 'test-guid', admin: false, scopes: [] } } as any;
       const mockConfirmation = {
