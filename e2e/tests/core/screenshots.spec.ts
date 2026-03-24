@@ -108,7 +108,7 @@ async function captureAuthenticatedPages(page: any, cfGuid: string) {
   }
 
   // Marketplace
-  await page.goto(`/marketplace/${cfGuid}`);
+  await page.goto('/marketplace');
   await capture(page, '15-marketplace');
 
   // About, diagnostics, and profile
