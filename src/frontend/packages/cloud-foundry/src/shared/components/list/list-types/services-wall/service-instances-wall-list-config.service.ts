@@ -4,13 +4,9 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-// eslint-disable-next-line @stratosui/no-relative-imports
 import { CFAppState } from '../../../../../cf-app-state';
-// eslint-disable-next-line @stratosui/no-relative-imports
 import { getCFEntityKey } from '../../../../../cf-entity-helpers';
-// eslint-disable-next-line @stratosui/no-relative-imports
 import { serviceInstancesEntityType, userProvidedServiceInstanceEntityType } from '../../../../../cf-entity-types';
-// eslint-disable-next-line @stratosui/no-relative-imports
 import { cfOrgSpaceFilter } from '../../../../../features/cf/cf.helpers';
 import { CfOrgSpaceDataService, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';

@@ -18,11 +18,8 @@ import {
   ListViewTypes,
 } from '@stratosui/core';
 import { APIResource, IFavoriteMetadata, ListView, UserFavorite } from '@stratosui/store';
-// eslint-disable-next-line @stratosui/no-relative-imports
 import { IApp } from '../../../../../cf-api.types';
-// eslint-disable-next-line @stratosui/no-relative-imports
 import { CFAppState } from '../../../../../cf-app-state';
-// eslint-disable-next-line @stratosui/no-relative-imports
 import { applicationEntityType } from '../../../../../cf-entity-types';
 import { CfOrgSpaceDataService, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
 import { CardAppComponent } from './card/card-app.component';
