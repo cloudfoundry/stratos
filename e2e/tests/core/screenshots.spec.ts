@@ -13,8 +13,8 @@ let currentMode: 'light' | 'dark' = 'light';
 async function capture(page: any, name: string) {
   const dir = path.join(SCREENSHOT_DIR, `${label}-${currentMode}`);
   fs.mkdirSync(dir, { recursive: true });
-  await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(500);
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForTimeout(2000); // settle for async data
   await page.screenshot({ path: path.join(dir, `${name}.png`), fullPage: true });
 }
 
@@ -22,7 +22,7 @@ async function setThemeMode(page: any, mode: 'light' | 'dark') {
   currentMode = mode;
   await page.evaluate((m: string) => localStorage.setItem('stratos-theme-mode', m), mode);
   await page.reload();
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
 }
 
 
@@ -33,65 +33,70 @@ async function captureAuthenticatedPages(page: any, cfGuid: string) {
 
   // Applications - cards view
   await page.goto(`/cloud-foundry/${cfGuid}/applications`);
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
   await page.waitForTimeout(1000);
   await capture(page, '03-applications-cards');
 
-  // Applications - table view
-  const tableToggle = page.locator('[data-test="list-view-toggle-table"], button[aria-label="Table view"]');
-  if (await tableToggle.count() > 0) {
-    await tableToggle.first().click();
-    await page.waitForTimeout(500);
+  // Applications - table view (find the list/table toggle icon)
+  const tableIcon = page.locator('button:has(span.material-icons:text("list")), button:has(span:text("view_list"))');
+  if (await tableIcon.count() > 0) {
+    await tableIcon.first().click();
+    await page.waitForTimeout(1000);
     await capture(page, '04-applications-table');
   }
 
-  // App summary - click first app if available
-  const firstAppLink = page.locator('a[href*="/applications/"]').first();
-  if (await firstAppLink.count() > 0) {
-    await firstAppLink.click();
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
-    await capture(page, '05-app-summary');
+  // App summary - click the first card to navigate
+  const firstCard = page.locator('.card, [class*="card"]').first();
+  if (await firstCard.count() > 0) {
+    await firstCard.click();
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(2000);
+    // Check if we navigated to an app page
+    if (page.url().includes('/application/')) {
+      await capture(page, '05-app-summary');
+    }
   }
 
-  // CF pages - discover org and space from the UI
+  // CF pages
   await page.goto(`/cloud-foundry/${cfGuid}/summary`);
   await capture(page, '06-cf-summary');
 
   await page.goto(`/cloud-foundry/${cfGuid}/organizations`);
-  await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(2000);
   await capture(page, '07-cf-organizations');
 
-  // Get first org GUID
-  const orgLink = page.locator('a[href*="/organizations/"]').first();
+  // Click first org card to discover org GUID from URL
+  const firstOrgCard = page.locator('.card, [class*="card"]').first();
   let orgGuid = '';
-  if (await orgLink.count() > 0) {
-    const href = await orgLink.getAttribute('href') || '';
-    const match = href.match(/\/organizations\/([^/]+)/);
-    if (match) orgGuid = match[1];
+  if (await firstOrgCard.count() > 0) {
+    await firstOrgCard.click();
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(2000);
+    const orgUrl = page.url();
+    const orgMatch = orgUrl.match(/\/organizations\/([^/]+)/);
+    if (orgMatch) orgGuid = orgMatch[1];
   }
 
   if (orgGuid) {
-    await page.goto(`/cloud-foundry/${cfGuid}/organizations/${orgGuid}/summary`);
     await capture(page, '08-org-summary');
 
     await page.goto(`/cloud-foundry/${cfGuid}/organizations/${orgGuid}/spaces`);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(2000);
     await capture(page, '09-org-spaces');
 
-    // Get first space GUID
-    const spaceLink = page.locator('a[href*="/spaces/"]').first();
+    // Click first space card to discover space GUID from URL
+    const firstSpaceCard = page.locator('.card, [class*="card"]').first();
     let spaceGuid = '';
-    if (await spaceLink.count() > 0) {
-      const href = await spaceLink.getAttribute('href') || '';
-      const match = href.match(/\/spaces\/([^/]+)/);
-      if (match) spaceGuid = match[1];
+    if (await firstSpaceCard.count() > 0) {
+      await firstSpaceCard.click();
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(2000);
+      const spaceUrl = page.url();
+      const spaceMatch = spaceUrl.match(/\/spaces\/([^/]+)/);
+      if (spaceMatch) spaceGuid = spaceMatch[1];
     }
 
     if (spaceGuid) {
-      await page.goto(`/cloud-foundry/${cfGuid}/organizations/${orgGuid}/spaces/${spaceGuid}/summary`);
       await capture(page, '10-space-summary');
       await page.goto(`/cloud-foundry/${cfGuid}/organizations/${orgGuid}/spaces/${spaceGuid}/apps`);
       await capture(page, '11-space-apps');
@@ -106,11 +111,15 @@ async function captureAuthenticatedPages(page: any, cfGuid: string) {
   await page.goto(`/marketplace/${cfGuid}`);
   await capture(page, '15-marketplace');
 
-  // About and profile
+  // About, diagnostics, and profile
   await page.goto('/about');
   await capture(page, '16-about');
+  await page.goto('/about/diagnostics');
+  await capture(page, '18-diagnostics');
   await page.goto('/user-profile');
   await capture(page, '17-user-profile');
+  await page.goto('/endpoints');
+  await capture(page, '14-endpoints');
 }
 
 test.describe('Visual Comparison Screenshots', () => {
@@ -143,26 +152,22 @@ test.describe('Visual Comparison Screenshots', () => {
       currentMode = 'light';
       await setThemeMode(page, 'light');
 
-      // Discover CF GUID from endpoints page
-      await page.goto('/endpoints');
-      await capture(page, '14-endpoints');
-
-      // Get first CF endpoint GUID from the page
-      const cfLink = page.locator('a[href*="/cloud-foundry/"]').first();
-      let cfGuid = '';
-      if (await cfLink.count() > 0) {
-        const href = await cfLink.getAttribute('href') || '';
-        const match = href.match(/\/cloud-foundry\/([^/]+)/);
-        if (match) cfGuid = match[1];
-      }
+      // Discover CF GUID by navigating to /cloud-foundry (redirects to /cloud-foundry/{guid}/summary)
+      await page.goto('/cloud-foundry');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(1000);
+      const url = page.url();
+      const cfMatch = url.match(/\/cloud-foundry\/([^/]+)/);
+      const cfGuid = cfMatch ? cfMatch[1] : '';
 
       if (cfGuid) {
         await captureAuthenticatedPages(page, cfGuid);
       } else {
         console.warn('No CF endpoint found — skipping CF pages');
-        // Capture non-CF pages only
         await page.goto('/');
         await capture(page, '02-home');
+        await page.goto('/endpoints');
+        await capture(page, '14-endpoints');
         await page.goto('/about');
         await capture(page, '16-about');
         await page.goto('/user-profile');
@@ -178,16 +183,12 @@ test.describe('Visual Comparison Screenshots', () => {
       currentMode = 'dark';
       await setThemeMode(page, 'dark');
 
-      await page.goto('/endpoints');
-      await capture(page, '14-endpoints');
-
-      const cfLink = page.locator('a[href*="/cloud-foundry/"]').first();
-      let cfGuid = '';
-      if (await cfLink.count() > 0) {
-        const href = await cfLink.getAttribute('href') || '';
-        const match = href.match(/\/cloud-foundry\/([^/]+)/);
-        if (match) cfGuid = match[1];
-      }
+      await page.goto('/cloud-foundry');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(1000);
+      const url = page.url();
+      const cfMatch = url.match(/\/cloud-foundry\/([^/]+)/);
+      const cfGuid = cfMatch ? cfMatch[1] : '';
 
       if (cfGuid) {
         await captureAuthenticatedPages(page, cfGuid);
@@ -195,6 +196,8 @@ test.describe('Visual Comparison Screenshots', () => {
         console.warn('No CF endpoint found — skipping CF pages');
         await page.goto('/');
         await capture(page, '02-home');
+        await page.goto('/endpoints');
+        await capture(page, '14-endpoints');
         await page.goto('/about');
         await capture(page, '16-about');
         await page.goto('/user-profile');
