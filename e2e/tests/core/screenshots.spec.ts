@@ -31,9 +31,9 @@ async function captureAuthenticatedPages(page: any, cfGuid: string) {
   await page.goto('/');
   await capture(page, '02-home');
 
-  // Applications - cards view
-  await page.goto(`/cloud-foundry/${cfGuid}/applications`);
-  await page.locator('.app-card').first()
+  // Applications - cards view (use /applications — works on both v4 and v5)
+  await page.goto('/applications');
+  await page.locator('.app-card, .meta-card').first()
     .waitFor({ state: 'visible', timeout: 30000 }).catch(() => console.warn('App cards did not appear within 30s'));
   await page.waitForTimeout(1000);
   await capture(page, '03-applications-cards');
