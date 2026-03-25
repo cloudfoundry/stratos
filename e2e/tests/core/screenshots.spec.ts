@@ -14,7 +14,10 @@ async function capture(page: any, name: string) {
   const dir = path.join(SCREENSHOT_DIR, `${label}-${currentMode}`);
   fs.mkdirSync(dir, { recursive: true });
   await page.waitForLoadState('domcontentloaded');
-  await page.waitForTimeout(2000); // settle for async data
+  // Wait for loading indicators to disappear
+  await page.locator('app-loading-page, .loading-page, text="Retrieving"').first()
+    .waitFor({ state: 'hidden', timeout: 30000 }).catch(() => {});
+  await page.waitForTimeout(1000); // final settle
   await page.screenshot({ path: path.join(dir, `${name}.png`), fullPage: true });
 }
 
