@@ -33,25 +33,25 @@ async function captureAuthenticatedPages(page: any, cfGuid: string) {
 
   // Applications - cards view
   await page.goto(`/cloud-foundry/${cfGuid}/applications`);
-  await page.locator('app-card-app, app-meta-card, .list-component__card-wrapper .card').first()
+  await page.locator('.app-card').first()
     .waitFor({ state: 'visible', timeout: 30000 }).catch(() => console.warn('App cards did not appear within 30s'));
   await page.waitForTimeout(1000);
   await capture(page, '03-applications-cards');
 
   // Applications - table view (find the list/table toggle icon)
-  const tableIcon = page.locator('.list-component button span.material-icons').filter({ hasText: /list|view_list/ });
+  const tableIcon = page.locator('.list-component button.btn-icon span.material-icons').filter({ hasText: /view_list|list/ });
   if (await tableIcon.count() > 0) {
     await tableIcon.first().click();
     await page.waitForTimeout(1000);
     await capture(page, '04-applications-table');
   }
 
-  // App summary - click the first app name link
-  const appLink = page.locator('.list-component a[href*="application"]').first();
-  if (await appLink.count() > 0) {
-    await appLink.click();
+  // App summary - click the first app card title
+  const appTitle = page.locator('.app-card .meta-card__title').first();
+  if (await appTitle.count() > 0) {
+    await appTitle.click();
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(3000);
     await capture(page, '05-app-summary');
   }
 
@@ -89,7 +89,9 @@ async function captureAuthenticatedPages(page: any, cfGuid: string) {
   console.log(`Discovered: orgGuid=${orgGuid}, spaceGuid=${spaceGuid}`);
 
   await page.goto(`/cloud-foundry/${cfGuid}/organizations`);
-  await page.waitForTimeout(5000);
+  await page.locator('.meta-card').first()
+    .waitFor({ state: 'visible', timeout: 30000 }).catch(() => console.warn('Org cards did not appear within 30s'));
+  await page.waitForTimeout(1000);
   await capture(page, '07-cf-organizations');
 
   if (orgGuid) {
@@ -97,7 +99,9 @@ async function captureAuthenticatedPages(page: any, cfGuid: string) {
     await capture(page, '08-org-summary');
 
     await page.goto(`/cloud-foundry/${cfGuid}/organizations/${orgGuid}/spaces`);
-    await page.waitForTimeout(5000);
+    await page.locator('.meta-card').first()
+      .waitFor({ state: 'visible', timeout: 30000 }).catch(() => console.warn('Space cards did not appear within 30s'));
+    await page.waitForTimeout(1000);
     await capture(page, '09-org-spaces');
 
     if (spaceGuid) {
