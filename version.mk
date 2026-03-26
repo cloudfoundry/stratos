@@ -1,85 +1,81 @@
-# version.mk — shared semver resolution
+# version.mk — shared semver resolution and build metadata
 #
-# Reads VERSION from package.json (or environment override), then exposes:
+# Public variables (user-settable):
+#   VERSION            Override version from package.json
+#
+# Hidden variables (internal, toggle with: make _HIDE= ...):
 #   SEMVER_VERSION, SEMVER_MAJOR, SEMVER_MINOR, SEMVER_PATCH,
 #   SEMVER_PRERELEASE, SEMVER_BUILDMETA
 #   BUILD_DATE, BUILD_VCS_URL, BUILD_VCS_ID, BUILD_VCS_ID_DATE
+#   GO_LDFLAGS, BUILD_INFO_TS
+
+# ── Hidden prefix ────────────────────────────────────────────
+# Prefixes internal names with _ to hide from tab completion.
+# Debug mode: make _HIDE= <target>  (exposes all variables)
+_HIDE := _
 
 # ── Version ───────────────────────────────────────────────────
 VERSION       ?= $(shell node -p "require('./package.json').version" 2>/dev/null || echo "0.0.0-unknown")
-SEMVER_VERSION := $(VERSION)
+$(_HIDE)SEMVER_VERSION := $(VERSION)
 
 # Strip leading 'v' for parsing
-_V := $(patsubst v%,%,$(SEMVER_VERSION))
+$(_HIDE)V := $(patsubst v%,%,$($(_HIDE)SEMVER_VERSION))
 
 # Split on '-' to separate core from prerelease+buildmeta
-_CORE       := $(firstword $(subst -, ,$(_V)))
-_PRE_BUILD  := $(word 2,$(subst -, ,$(_V)))
+$(_HIDE)CORE       := $(firstword $(subst -, ,$($(_HIDE)V)))
+$(_HIDE)PRE_BUILD  := $(word 2,$(subst -, ,$($(_HIDE)V)))
 
-SEMVER_MAJOR      := $(word 1,$(subst ., ,$(_CORE)))
-SEMVER_MINOR      := $(word 2,$(subst ., ,$(_CORE)))
-SEMVER_PATCH      := $(word 3,$(subst ., ,$(_CORE)))
+$(_HIDE)SEMVER_MAJOR      := $(word 1,$(subst ., ,$($(_HIDE)CORE)))
+$(_HIDE)SEMVER_MINOR      := $(word 2,$(subst ., ,$($(_HIDE)CORE)))
+$(_HIDE)SEMVER_PATCH      := $(word 3,$(subst ., ,$($(_HIDE)CORE)))
 
 # Prerelease: everything after first '-', before any '+'
-SEMVER_PRERELEASE := $(firstword $(subst +, ,$(patsubst $(_CORE)-%,%,$(_V))))
-ifeq ($(SEMVER_PRERELEASE),$(_V))
-  SEMVER_PRERELEASE :=
+$(_HIDE)SEMVER_PRERELEASE := $(firstword $(subst +, ,$(patsubst $($(_HIDE)CORE)-%,%,$($(_HIDE)V))))
+ifeq ($($(_HIDE)SEMVER_PRERELEASE),$($(_HIDE)V))
+  $(_HIDE)SEMVER_PRERELEASE :=
 endif
 
 # Build metadata: everything after '+'
-SEMVER_BUILDMETA  := $(word 2,$(subst +, ,$(_V)))
+$(_HIDE)SEMVER_BUILDMETA  := $(word 2,$(subst +, ,$($(_HIDE)V)))
 
 # ── Build metadata ────────────────────────────────────────────
-BUILD_DATE        := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
-BUILD_VCS_URL     := $(shell git remote get-url origin 2>/dev/null || echo "unknown")
-BUILD_VCS_ID      := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
-BUILD_VCS_ID_FULL := $(shell git rev-parse HEAD 2>/dev/null || echo "unknown")
-BUILD_VCS_ID_DATE := $(shell git log -1 --format=%cI 2>/dev/null || echo "unknown")
-BUILD_VCS_BRANCH  := $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
-BUILD_NODE_VERSION := $(shell node --version 2>/dev/null || echo "unknown")
-BUILD_TS_VERSION   := $(shell npx tsc --version 2>/dev/null | awk '{print $$2}' || echo "unknown")
-BUILD_BUN_VERSION  := $(shell bun --version 2>/dev/null || echo "unknown")
+$(_HIDE)BUILD_DATE        := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+$(_HIDE)BUILD_VCS_URL     := $(shell git remote get-url origin 2>/dev/null || echo "unknown")
+$(_HIDE)BUILD_VCS_ID      := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+$(_HIDE)BUILD_VCS_ID_FULL := $(shell git rev-parse HEAD 2>/dev/null || echo "unknown")
+$(_HIDE)BUILD_VCS_ID_DATE := $(shell git log -1 --format=%cI 2>/dev/null || echo "unknown")
+$(_HIDE)BUILD_VCS_BRANCH  := $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+$(_HIDE)BUILD_NODE_VERSION := $(shell node --version 2>/dev/null || echo "unknown")
+$(_HIDE)BUILD_TS_VERSION   := $(shell npx tsc --version 2>/dev/null | awk '{print $$2}' || echo "unknown")
+$(_HIDE)BUILD_BUN_VERSION  := $(shell bun --version 2>/dev/null || echo "unknown")
 
 # ── Go ldflags ────────────────────────────────────────────────
-GO_LDFLAGS := -X main.appVersion=$(SEMVER_VERSION) -X main.buildDate=$(BUILD_DATE) -X main.gitCommit=$(BUILD_VCS_ID) -X main.gitBranch=$(BUILD_VCS_BRANCH)
+$(_HIDE)GO_LDFLAGS := -X main.appVersion=$($(_HIDE)SEMVER_VERSION) -X main.buildDate=$($(_HIDE)BUILD_DATE) -X main.gitCommit=$($(_HIDE)BUILD_VCS_ID) -X main.gitBranch=$($(_HIDE)BUILD_VCS_BRANCH)
 
-# ── Frontend build info ──────────────────────────────────────
-BUILD_INFO_TS := src/frontend/packages/core/src/environments/build-info.ts
+# ── Frontend build info path ─────────────────────────────────
+$(_HIDE)BUILD_INFO_TS := src/frontend/packages/core/src/environments/build-info.ts
 
-# stamp: embed version/git metadata into build artifacts
-# Usage: make stamp frontend   (generate build-info.ts)
-#        make stamp             (same — frontend is the default)
-.PHONY: stamp stamp-fe fe-version
-stamp: $(call FE,stamp-fe)
-ifeq ($(WANT_FRONTEND)$(WANT_BACKEND),)
-stamp: stamp-fe
-endif
-
-stamp-fe:
-	@mkdir -p $(dir $(BUILD_INFO_TS))
+# ── Stamp action ─────────────────────────────────────────────
+define stamp.frontend
+	@mkdir -p $(dir $($(_HIDE)BUILD_INFO_TS))
 	@printf "export const BUILD_INFO = {\n  version: '%s',\n  gitProject: '%s',\n  gitCommit: '%s',\n  gitBranch: '%s',\n  buildDate: '%s',\n  nodeVersion: '%s',\n  typescriptVersion: '%s',\n  bunVersion: '%s',\n};\n" \
-		"$(SEMVER_VERSION)" "$(BUILD_VCS_URL)" "$(BUILD_VCS_ID)" "$(BUILD_VCS_BRANCH)" "$(BUILD_DATE)" \
-		"$(BUILD_NODE_VERSION)" "$(BUILD_TS_VERSION)" "$(BUILD_BUN_VERSION)" \
-		> $(BUILD_INFO_TS)
-	@echo "Generated $(BUILD_INFO_TS)"
+		"$($(_HIDE)SEMVER_VERSION)" "$($(_HIDE)BUILD_VCS_URL)" "$($(_HIDE)BUILD_VCS_ID)" "$($(_HIDE)BUILD_VCS_BRANCH)" "$($(_HIDE)BUILD_DATE)" \
+		"$($(_HIDE)BUILD_NODE_VERSION)" "$($(_HIDE)BUILD_TS_VERSION)" "$($(_HIDE)BUILD_BUN_VERSION)" \
+		> $($(_HIDE)BUILD_INFO_TS)
+	@echo "Generated $($(_HIDE)BUILD_INFO_TS)"
+endef
 
-# Deprecation shim
-fe-version:
-	@echo "DEPRECATED: use 'make stamp frontend' instead"
-	@$(MAKE) stamp frontend
-
-# ── Introspection ─────────────────────────────────────────────
-.PHONY: dump dump-version
-dump: dump-version
-dump-version:
-	@echo "SEMVER_VERSION    $(SEMVER_VERSION)"
-	@echo "SEMVER_MAJOR      $(SEMVER_MAJOR)"
-	@echo "SEMVER_MINOR      $(SEMVER_MINOR)"
-	@echo "SEMVER_PATCH      $(SEMVER_PATCH)"
-	@echo "SEMVER_PRERELEASE $(SEMVER_PRERELEASE)"
-	@echo "SEMVER_BUILDMETA  $(SEMVER_BUILDMETA)"
-	@echo "BUILD_DATE        $(BUILD_DATE)"
-	@echo "BUILD_VCS_URL     $(BUILD_VCS_URL)"
-	@echo "BUILD_VCS_ID      $(BUILD_VCS_ID)"
-	@echo "BUILD_VCS_ID_DATE $(BUILD_VCS_ID_DATE)"
-	@echo "GO_LDFLAGS        $(GO_LDFLAGS)"
+# ── Dump action ──────────────────────────────────────────────
+define dump.version
+	@echo "SEMVER_VERSION    $($(_HIDE)SEMVER_VERSION)"
+	@echo "SEMVER_MAJOR      $($(_HIDE)SEMVER_MAJOR)"
+	@echo "SEMVER_MINOR      $($(_HIDE)SEMVER_MINOR)"
+	@echo "SEMVER_PATCH      $($(_HIDE)SEMVER_PATCH)"
+	@echo "SEMVER_PRERELEASE $($(_HIDE)SEMVER_PRERELEASE)"
+	@echo "SEMVER_BUILDMETA  $($(_HIDE)SEMVER_BUILDMETA)"
+	@echo "BUILD_DATE        $($(_HIDE)BUILD_DATE)"
+	@echo "BUILD_VCS_URL     $($(_HIDE)BUILD_VCS_URL)"
+	@echo "BUILD_VCS_ID      $($(_HIDE)BUILD_VCS_ID)"
+	@echo "BUILD_VCS_ID_DATE $($(_HIDE)BUILD_VCS_ID_DATE)"
+	@echo "GO_LDFLAGS        $($(_HIDE)GO_LDFLAGS)"
+endef

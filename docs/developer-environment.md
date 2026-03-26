@@ -123,16 +123,43 @@ No IDE is prescribed. Stratos works with any editor that supports LSP.
 Angular Language Service is included in devDependencies for template
 type-checking in any IDE.
 
-## Platform Notes
+## Supported Platforms
 
-### macOS
+### Developer build platforms
+
+| OS | Arch | Notes |
+|----|------|-------|
+| macOS | arm64 (Apple Silicon) | Primary dev platform |
+| macOS | amd64 (Intel) | Supported |
+| Linux | amd64 | CI and dev |
+| Linux | arm64 | Supported |
+
+### Target platforms (cross-compilation)
+
+| OS | Arch | Use case |
+|----|------|----------|
+| linux | amd64 | Cloud Foundry, Docker, most servers |
+| linux | arm64 | ARM servers, Graviton |
+| darwin | amd64 | macOS Intel |
+| darwin | arm64 | macOS Apple Silicon |
+| windows | amd64 | Windows servers |
+| windows | arm64 | Windows ARM |
+
+Platform detection uses `uname -s | tr '[:upper:]' '[:lower:]'` for OS and
+normalizes architecture (`x86_64` → `amd64`, `aarch64` → `arm64`) to match
+Go's `GOOS`/`GOARCH` conventions. Override with `PLATFORM=os/arch`.
+
+### Platform-specific notes
+
+#### macOS
 
 - Xcode Command Line Tools required (`xcode-select --install`) for Make and Git
+- GNU Make 3.81+ required (ships with Xcode CLI tools)
 - `openssl` from Homebrew recommended over LibreSSL for cert generation
 - Apple Silicon (arm64) is the native build target; use `PLATFORM=linux/amd64`
   for CF release builds
 
-### Linux
+#### Linux
 
 - `build-essential` package provides Make and GCC
 - If using SQLite locally, GCC is required for cgo (until modernc.org/sqlite
@@ -174,16 +201,18 @@ The backend binary must be pre-built for the target Linux platform.
 
 | Command | Output | Purpose |
 |---------|--------|---------|
-| `make build` | `dist/bin/jetstream` | Single binary for current or specified platform |
-| `make build all` | `dist/bin/jetstream-linux-amd64`, `jetstream-darwin-arm64`, etc. | All platforms with OS/arch suffix |
+| `make build` | `dist/bin/jetstream-{os}-{arch}` (all platforms) | Frontend + all backend platforms |
+| `make build backend PLATFORM=linux/amd64` | `dist/bin/jetstream` | Single backend platform |
+| `make dev backend` | `dist/bin/jetstream` | Host platform only (development) |
 
 ### CF release workflow
 
 ```bash
-# 1. Build frontend + Linux backend (specify platform — CF runs Linux)
-make build PLATFORM=linux/amd64
+# 1. Build and package in one command (cf modifier forces linux/amd64):
+make build release cf
 
-# 2. Package for CF
+# Or step by step:
+make build cf
 make release cf
 
 # 3. Deploy
@@ -197,15 +226,16 @@ a clear error.
 
 ### On CI (Linux)
 
-`make build` produces a Linux binary natively — no `PLATFORM` flag needed.
+`make build cf` produces a Linux binary natively. Or `make build release cf` to
+build and package in one step.
 
 ### On macOS
 
-Must specify the target platform explicitly:
+The `cf` modifier automatically sets `PLATFORM=linux/amd64`:
 
 ```bash
-make build PLATFORM=linux/amd64    # or linux/arm64 for ARM CF deployments
-make release cf
+make build release cf                          # linux/amd64 (default)
+make build release cf PLATFORM=linux/arm64     # ARM CF deployments
 ```
 
 ## Further Reading

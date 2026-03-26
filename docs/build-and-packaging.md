@@ -19,11 +19,10 @@ Single source of truth for building, testing, and packaging Stratos.
 
 | Command | What it does | Output |
 |---------|-------------|--------|
-| `make build` | Build frontend + backend for current platform | `dist/frontend/browser/`, `dist/bin/jetstream` |
+| `make build` | Build frontend + all backend platforms | `dist/frontend/browser/`, `dist/bin/jetstream-{os}-{arch}` |
 | `make build frontend` | Build frontend only (production) | `dist/frontend/browser/` |
-| `make build backend` | Build backend for current platform | `dist/bin/jetstream` |
-| `make build backend-all` | Cross-compile backend for 6 platforms | `dist/bin/jetstream-{os}-{arch}` |
-| `make build all` | Frontend + cross-compile all backends | All of the above |
+| `make build backend` | Cross-compile backend for all platforms | `dist/bin/jetstream-{os}-{arch}` |
+| `make build backend PLATFORM=linux/amd64` | Build backend for one platform | `dist/bin/jetstream` |
 | `make build cf` | Build frontend + linux/amd64 backend (CF deploy) | `dist/frontend/browser/`, `dist/bin/jetstream` |
 
 ### Testing
@@ -41,7 +40,7 @@ Single source of truth for building, testing, and packaging Stratos.
 |---------|--------------|-------------|--------|
 | `make stage` | `make build` | Stage artifacts for local testing | `dist/install/` with `run.sh` |
 | `make release cf` | `make build` (linux/amd64) | Create CF-pushable zip | `dist/stratos-cf-{VERSION}.zip` |
-| `make release github` | `make build all` | Create all release archives | `dist/release/` (7 archives) |
+| `make release github` | `make build` | Create all release archives | `dist/release/` (7 archives) |
 | `make release` | All of the above | Create both CF zip and GitHub archives | Both |
 
 ### Development
@@ -60,7 +59,8 @@ Single source of truth for building, testing, and packaging Stratos.
 | `make clean` | Remove all build output (frontend, backend, release artifacts) |
 | `make clean frontend` | Remove frontend build only (`dist/frontend/`, `.angular`) |
 | `make clean backend` | Remove backend binaries only (`dist/bin/`) |
-| `make clean all` | Remove everything including `node_modules` |
+| `make clean dist` | Remove everything including `node_modules` |
+| `make clean repo` | Full reset — everything gitignored |
 
 ### Metadata and Diagnostics
 
@@ -102,7 +102,7 @@ the manifest must be passed separately with `-f` or be in the current directory.
 **GitHub release (automated via CI):**
 
 ```bash
-make build all
+make build
 make release github
 ```
 
@@ -193,7 +193,7 @@ ERROR: Backend binary not found at dist/bin/jetstream
 
 ```
 ERROR: Cross-compiled binaries missing: jetstream-linux-arm64 jetstream-darwin-amd64
-  Run: make build backend-all
+  Run: make build backend
 ```
 
 Packaging never auto-builds. This avoids the old problem where unwanted build
@@ -203,18 +203,18 @@ steps blocked packaging.
 
 | Old | New |
 |-----|-----|
-| `bin/package` | `make build all && make release cf` |
+| `bin/package` | `make build && make release cf` |
 | `bin/package --skip-build` | `make release cf` (validates artifacts exist) |
 | `build/package.sh` | `make release github` |
 | `make build-frontend` | `make build frontend` |
-| `make build-backend` | `make build backend` |
-| `make build-backend-all` | `make build backend-all` |
+| `make build-backend` | `make build backend PLATFORM=linux/amd64` |
+| `make build-backend-all` | `make build backend` |
 | `make package` | `make release` |
 | `make dev-frontend` | `make dev frontend` |
 | `make dev-backend` | `make dev backend` |
 | `make install` (old) | `make install` (unchanged — installs dependencies) |
 | `make clean-dev` | `make clean` |
-| `make clean-deep` | `make clean all` |
+| `make clean-deep` | `make clean dist` |
 | `make debug-version` | `make dump version` |
 
 ## Version and Build Metadata
@@ -253,9 +253,12 @@ Injected via Go ldflags at compile time:
 
 | Variable | Used by | Default | Description |
 |----------|---------|---------|-------------|
-| `GOOS` | `make build backend` | Current OS | Target OS |
-| `GOARCH` | `make build backend` | Current arch | Target architecture |
+| `PLATFORM` | `make build backend` | Host OS/arch | Target platform (`linux/amd64`, `darwin/arm64`, etc.) |
 | `VERSION` | All targets | From `package.json` | Override version string |
+
+Platform detection uses `uname` and normalizes to Go conventions (`darwin`,
+`linux`, `amd64`, `arm64`). The `PLATFORM` variable accepts any separator:
+`linux/amd64`, `linux-amd64`, or `linux_amd64`.
 
 ## Package Contents
 

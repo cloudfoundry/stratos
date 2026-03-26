@@ -8,8 +8,8 @@
 
 # ── Site Help ─────────────────────────────────────────────────
 # This target is called by 'make help' when site.mk exists.
-.PHONY: site-help
-site-help:
+.PHONY: $(_HIDE)site-help
+$(_HIDE)site-help:
 	@echo ""
 	@echo "Site-specific:"
 	@echo "  make build release deploy cf  Build, package, and push to current CF target"
@@ -22,16 +22,17 @@ site-help:
 #   make deploy cf                Push existing CF zip
 #   make build release deploy cf  Build, package, and push
 
-.PHONY: deploy deploy-cf
-deploy: $(call CF,deploy-cf)
-
-deploy-cf:
+define deploy.cf
 	@echo "Deploying to CF..."
 	@cf target | grep -E "org:|space:" || \
 		(echo "ERROR: No CF target set. Run 'cf target -o ORG -s SPACE' first."; exit 1)
-	@ZIP=$$(ls -t $(DIST_DIR)/stratos-cf-*.zip 2>/dev/null | head -1); \
+	@ZIP=$$(ls -t $($(_HIDE)DIST_DIR)/stratos-cf-*.zip 2>/dev/null | head -1); \
 	if [ -z "$$ZIP" ]; then \
 		echo "ERROR: No CF zip found. Run 'make build release cf' first."; exit 1; \
 	fi; \
 	echo "Deploying $$ZIP..."; \
-	cf push -f $(DIST_DIR)/cf-package/manifest.yml -p "$$ZIP"
+	cf push -f $($(_HIDE)DIST_DIR)/cf-package/manifest.yml -p "$$ZIP"
+endef
+$(call register, deploy, cf)
+
+$(call declare_verb, deploy)
