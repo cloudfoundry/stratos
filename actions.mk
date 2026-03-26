@@ -21,7 +21,6 @@ $(_HIDE)FLAG_cf          := $($(_HIDE)WANT_CF)
 $(_HIDE)FLAG_github      := $($(_HIDE)WANT_GITHUB)
 $(_HIDE)FLAG_e2e         := $($(_HIDE)WANT_E2E)
 $(_HIDE)FLAG_dist        := $($(_HIDE)WANT_CLEAN_DIST)
-$(_HIDE)FLAG_repo        := $($(_HIDE)WANT_CLEAN_REPO)
 
 # ── register(verb,modifier,[prereqs]) ───────────────────────
 # Generates hidden target via $(eval). The $(_HIDE) prefix on

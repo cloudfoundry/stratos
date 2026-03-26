@@ -18,7 +18,6 @@
 #   make clean frontend         Remove frontend build only
 #   make clean backend          Remove backend binaries only
 #   make clean dist             Remove everything (including node_modules)
-#   make clean repo             Full reset (everything gitignored)
 #   make stamp frontend         Generate build-info.ts with version metadata
 #   make dump version           Print resolved version variables
 #
@@ -107,22 +106,18 @@ ifeq ($($(_HIDE)WANT_CF),yes)
 endif
 
 $(_HIDE)WANT_CLEAN_DIST :=
-$(_HIDE)WANT_CLEAN_REPO :=
 $(_HIDE)HAVE_EXPLICIT_TARGET :=
 
-ifneq ($(filter frontend backend dist repo,$(MAKECMDGOALS)),)
+ifneq ($(filter frontend backend dist,$(MAKECMDGOALS)),)
   $(_HIDE)HAVE_EXPLICIT_TARGET := yes
 endif
 ifneq ($(filter dist,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_CLEAN_DIST := yes
 endif
-ifneq ($(filter repo,$(MAKECMDGOALS)),)
-  $(_HIDE)WANT_CLEAN_REPO := yes
-endif
 
 # No-op targets so modifiers don't error
-.PHONY: frontend backend cf github dist repo version e2e
-frontend backend cf github dist repo version e2e:
+.PHONY: frontend backend cf github dist version e2e
+frontend backend cf github dist version e2e:
 	@:
 
 # ── Load action registry ─────────────────────────────────────
@@ -247,7 +242,6 @@ endif
 # make clean frontend  — frontend build only
 # make clean backend   — backend binaries only
 # make clean dist      — above + node_modules
-# make clean repo      — full reset (everything gitignored)
 
 define clean.release
 	rm -rf $($(_HIDE)DIST_DIR)/release $($(_HIDE)DIST_DIR)/cf-package $($(_HIDE)DIST_DIR)/install $($(_HIDE)DIST_DIR)/stratos-cf-*.zip
@@ -259,16 +253,11 @@ define clean.dist
 	rm -rf node_modules src/frontend/packages/*/node_modules
 endef
 
-define clean.repo
-	git clean -fdx -e site.mk -e .env -e secrets.yaml
-endef
-
 $(call register_always, clean, release)
 $(call register_always, clean, dist, $(_HIDE)clean.release)
-$(call register_always, clean, repo)
 
 .PHONY: clean
-clean: $($(_HIDE)DEPS_clean) $(if $($(_HIDE)HAVE_EXPLICIT_TARGET),,$(_HIDE)clean.release) $(if $($(_HIDE)WANT_CLEAN_DIST),$(_HIDE)clean.dist) $(if $($(_HIDE)WANT_CLEAN_REPO),$(_HIDE)clean.repo)
+clean: $($(_HIDE)DEPS_clean) $(if $($(_HIDE)HAVE_EXPLICIT_TARGET),,$(_HIDE)clean.release) $(if $($(_HIDE)WANT_CLEAN_DIST),$(_HIDE)clean.dist)
 
 # ── Dump (introspection) ─────────────────────────────────────
 # dump.version recipe is defined in version.mk (shared library)
@@ -343,7 +332,6 @@ help:
 	@echo "  make clean frontend       Remove frontend build only"
 	@echo "  make clean backend        Remove backend binaries only"
 	@echo "  make clean dist           Remove everything (including node_modules)"
-	@echo "  make clean repo           Full reset (everything gitignored)"
 	@echo ""
 	@echo "Other:"
 	@echo "  make stamp frontend       Generate build-info.ts with version metadata"
