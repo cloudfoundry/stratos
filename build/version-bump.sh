@@ -63,7 +63,7 @@ commit_version() {
     echo "${new_version}"
     return
   fi
-  jq ".version = \"${new_version}\"" "${PACKAGE_JSON}" > "${PACKAGE_JSON}.tmp"
+  jq --arg v "${new_version}" '.version = $v' "${PACKAGE_JSON}" > "${PACKAGE_JSON}.tmp"
   mv "${PACKAGE_JSON}.tmp" "${PACKAGE_JSON}"
 
   # Update backend VERSION file if it exists or can be created
@@ -129,7 +129,7 @@ case "${1:-}" in
     ;;
   validate)
     validate_version "${2:-}"
-    echo "Valid: ${2}"
+    echo "Valid: ${2:-}"
     ;;
   *)
     usage
