@@ -121,6 +121,11 @@ endif
 frontend backend cf github dist version e2e actions:
 	@:
 
+# No-op targets for bump modifiers (dev is already a verb, handled separately)
+.PHONY: major minor patch rc
+major minor patch rc:
+	@:
+
 # ── Load action registry ─────────────────────────────────────
 # Variable path prevents tab-completion parsers from following
 # the include (template syntax would confuse static parsers).
@@ -314,6 +319,21 @@ vuln:
 	@which govulncheck > /dev/null || (echo "govulncheck not installed. Run: go install golang.org/x/vuln/cmd/govulncheck@latest" && exit 1)
 	cd src/jetstream && govulncheck ./... || true
 
+# ── Bump (version management) ─────────────────────────────────
+# bump uses its own modifier set not shared with other verbs,
+# so it is wired manually rather than via register/declare_verb.
+
+$(_HIDE)BUMP_MOD := $(filter major minor patch dev rc,$(MAKECMDGOALS))
+
+.PHONY: bump
+bump:
+	@if [ -z "$($(_HIDE)BUMP_MOD)" ]; then \
+		echo "Usage: make bump <major|minor|patch|dev|rc>" >&2; \
+		exit 1; \
+	fi
+	@chmod +x build/version-bump.sh
+	@./build/version-bump.sh bump $($(_HIDE)BUMP_MOD)
+
 # ── Help ──────────────────────────────────────────────────────
 .PHONY: help
 help:
@@ -357,6 +377,13 @@ help:
 	@echo "  make dev backend          Start backend dev server (port $(BACKEND_PORT))"
 	@echo "  Override ports:  make dev backend BACKEND_PORT=5543"
 	@echo "                   make dev frontend FRONTEND_PORT=5540 BACKEND_PORT=5543"
+	@echo ""
+	@echo "Version:"
+	@echo "  make bump major           Next major release (v5.0.0)"
+	@echo "  make bump minor           Next minor release (v4.10.0)"
+	@echo "  make bump patch           Next patch release (v4.9.4)"
+	@echo "  make bump dev             Increment dev prerelease (dev.39)"
+	@echo "  make bump rc              Set/increment rc prerelease (rc.1)"
 	@echo ""
 	@echo "Registry:"
 	@echo "  make dump actions         List all registered verb+modifier pairs"
