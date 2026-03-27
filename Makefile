@@ -122,8 +122,8 @@ frontend backend cf github dist version e2e actions:
 	@:
 
 # No-op targets for bump modifiers (dev is already a verb, handled separately)
-.PHONY: major minor patch rc
-major minor patch rc:
+.PHONY: major minor patch rc alpha beta prerelease release
+major minor patch rc alpha beta prerelease release:
 	@:
 
 # ── Load action registry ─────────────────────────────────────
@@ -323,13 +323,13 @@ vuln:
 # bump uses its own modifier set not shared with other verbs,
 # so it is wired manually rather than via register/declare_verb.
 
-$(_HIDE)BUMP_MOD := $(filter major minor patch dev rc,$(MAKECMDGOALS))
+$(_HIDE)BUMP_MOD := $(filter major minor patch dev alpha beta rc prerelease release,$(MAKECMDGOALS))
 
 .PHONY: bump
 bump:
 	@set -- $($(_HIDE)BUMP_MOD); \
 	if [ $$# -eq 0 ]; then \
-		echo "Usage: make bump <major|minor|patch|dev|rc>" >&2; \
+		echo "Usage: make bump <major|minor|patch|dev|alpha|beta|rc|prerelease|release>" >&2; \
 		exit 1; \
 	elif [ $$# -gt 1 ]; then \
 		echo "Only one bump modifier allowed" >&2; \
@@ -386,8 +386,12 @@ help:
 	@echo "  make bump major           Next major release (v5.0.0)"
 	@echo "  make bump minor           Next minor release (v4.10.0)"
 	@echo "  make bump patch           Next patch release (v4.9.4)"
-	@echo "  make bump dev             Increment dev prerelease (dev.39)"
-	@echo "  make bump rc              Set/increment rc prerelease (rc.1)"
+	@echo "  make bump dev             Increment dev prerelease (dev.N)"
+	@echo "  make bump alpha           Set/increment alpha prerelease (alpha.N)"
+	@echo "  make bump beta            Set/increment beta prerelease (beta.N)"
+	@echo "  make bump rc              Set/increment rc prerelease (rc.N)"
+	@echo "  make bump prerelease      Set/increment prerelease (prerelease.N)"
+	@echo "  make bump release         Promote to release (strip prerelease)"
 	@echo ""
 	@echo "Registry:"
 	@echo "  make dump actions         List all registered verb+modifier pairs"

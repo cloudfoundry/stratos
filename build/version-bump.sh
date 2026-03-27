@@ -8,6 +8,14 @@ ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 # PACKAGE_JSON can be overridden for testing
 PACKAGE_JSON="${PACKAGE_JSON:-${ROOT_DIR}/package.json}"
 
+# ── Build metadata ───────────────────────────────────────────
+build_metadata() {
+  local date_stamp sha_stamp
+  date_stamp=$(date -u +%Y%m%d)
+  sha_stamp=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+  echo "+build.${date_stamp}.${sha_stamp}"
+}
+
 # ── Parse flags ───────────────────────────────────────────────
 DRY_RUN=false
 ARGS=()
@@ -27,37 +35,44 @@ usage() {
 Usage: $0 <command> [--dry-run]
 
 Commands:
-  bump <major|minor|patch>  Bump semver component (strips prerelease)
-  bump dev                  Increment dev.N prerelease (creates dev.1 if none)
-  bump rc                   Increment rc.N prerelease (creates rc.1 if none)
-  set <version>             Set explicit version (vMAJOR.MINOR.PATCH[-PRE])
-  show                      Show current version
-  validate <version>        Validate version format
+  bump <major|minor|patch>             Bump semver component (strips prerelease)
+  bump <dev|alpha|beta|rc|prerelease>  Increment prerelease stage (creates .1 if new)
+  bump release                         Promote to release (strips prerelease)
+  set <version>                        Set explicit version
+  show                                 Show current version
+  validate <version>                   Validate version format
+
+Stages (lifecycle order):
+  dev → alpha → beta → rc → prerelease → release
 
 Flags:
   --dry-run                 Print new version without modifying files
 
 Examples:
-  $0 bump patch             # v4.9.3-dev.38 → v4.9.4
-  $0 bump dev               # v4.9.3-dev.38 → v4.9.3-dev.39
-  $0 bump rc                # v4.9.3-dev.38 → v4.9.3-rc.1
+  $0 bump dev               # v4.9.3-dev.41 → v4.9.3-dev.42+build.YYYYMMDD.SHA
+  $0 bump alpha             # v4.9.3-dev.42 → v4.9.3-alpha.1+build.YYYYMMDD.SHA
+  $0 bump rc                # v4.9.3-beta.1 → v4.9.3-rc.1+build.YYYYMMDD.SHA
+  $0 bump release           # v4.9.3-rc.2   → v4.9.3+build.YYYYMMDD.SHA
+  $0 bump patch             # v4.9.3-rc.2   → v4.9.4+build.YYYYMMDD.SHA
   $0 set v5.0.0-rc.1        # Set explicit version
-  $0 bump patch --dry-run   # Preview without writing
+  $0 bump dev --dry-run     # Preview without writing
 EOF
   exit 1
 }
 
 validate_version() {
   local version=$1
-  if [[ ! $version =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-z0-9\.]+)?$ ]]; then
+  if [[ ! $version =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*)?(\+[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*)?$ ]]; then
     echo "Invalid version format: ${version}" >&2
-    echo "Expected: vMAJOR.MINOR.PATCH[-PRERELEASE]" >&2
+    echo "Expected: vMAJOR.MINOR.PATCH[-PRERELEASE][+BUILDMETA]" >&2
     exit 1
   fi
 }
 
 commit_version() {
   local new_version=$1
+  # Append build metadata
+  new_version="${new_version}$(build_metadata)"
   validate_version "${new_version}"
   if [ "${DRY_RUN}" = true ]; then
     echo "${new_version}"
@@ -78,8 +93,9 @@ commit_version() {
 
 bump_semver() {
   local component=$1
-  # Strip 'v' prefix and any prerelease suffix
+  # Strip 'v' prefix, build metadata, then prerelease suffix
   local base=${current_version#v}
+  base=${base%%+*}
   base=${base%%-*}
   IFS='.' read -r major minor patch <<< "${base}"
   case "${component}" in
@@ -93,8 +109,9 @@ bump_semver() {
 
 bump_prerelease() {
   local kind=$1  # "dev" or "rc"
-  # Extract base (semver core) and current prerelease
+  # Extract base (semver core) and current prerelease, stripping metadata
   local base=${current_version#v}
+  base=${base%%+*}
   local core=${base%%-*}
   local pre
   if [[ "${base}" == *-* ]]; then
@@ -112,12 +129,27 @@ bump_prerelease() {
   commit_version "v${core}-${kind}.${counter}"
 }
 
+bump_release() {
+  # Strip 'v' prefix and build metadata
+  local base=${current_version#v}
+  base=${base%%+*}
+  local core=${base%%-*}
+  # Check if there's a prerelease to strip
+  if [[ "${base}" == "${core}" ]]; then
+    echo "Already a release version: ${current_version}" >&2
+    echo "Nothing to promote." >&2
+    exit 1
+  fi
+  commit_version "v${core}"
+}
+
 # ── Main ──────────────────────────────────────────────────────
 case "${1:-}" in
   bump)
     case "${2:-}" in
-      major|minor|patch) bump_semver "${2}" ;;
-      dev|rc)            bump_prerelease "${2}" ;;
+      major|minor|patch)            bump_semver "${2}" ;;
+      dev|alpha|beta|rc|prerelease) bump_prerelease "${2}" ;;
+      release)                      bump_release ;;
       *)  echo "Unknown bump type: '${2:-}'" >&2; usage ;;
     esac
     ;;
