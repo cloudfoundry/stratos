@@ -43,6 +43,7 @@ register = $(eval $(call $(_HIDE)register_impl,$(strip $1),$(strip $2),$(strip $
 # Like register, but the target is always created (no flag check)
 # and the modifier is NOT added to VALID_MODS or REGISTRY.
 # Use for targets with custom wiring (e.g., clean.release, dump.version).
+# If the modifier is flag-gated, pair with allow() to suppress warnings.
 define $(_HIDE)register_always_impl
 .PHONY: $(_HIDE)$1.$2
 $(_HIDE)$1.$2: $3
