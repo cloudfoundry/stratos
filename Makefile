@@ -225,6 +225,11 @@ $(call register, release, github)
 # Verb wiring — declare each verb after all objects are registered.
 # ══════════════════════════════════════════════════════════════
 
+# ── Cross-cutting modifier allowances ────────────────────────
+# These modifiers affect build behavior through variables (e.g.,
+# cf forces PLATFORM=linux/amd64) rather than via a registered recipe.
+$(call allow, build, cf)
+
 $(call declare_verb, build)
 $(call declare_verb, test)
 $(call declare_verb, release)
