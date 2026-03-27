@@ -117,8 +117,8 @@ ifneq ($(filter dist,$(MAKECMDGOALS)),)
 endif
 
 # No-op targets so modifiers don't error
-.PHONY: frontend backend cf github dist version e2e
-frontend backend cf github dist version e2e:
+.PHONY: frontend backend cf github dist version e2e actions
+frontend backend cf github dist version e2e actions:
 	@:
 
 # ── Load action registry ─────────────────────────────────────
