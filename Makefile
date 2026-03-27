@@ -268,8 +268,17 @@ $(call declare_verb_default, clean, $(_HIDE)clean.release)
 # dump.version recipe is defined in version.mk (shared library)
 $(call register_always, dump, version)
 
+define dump.actions
+	@echo "Registered verb+modifier pairs:"
+	@for pair in $($(_HIDE)REGISTRY); do \
+		verb=$${pair%%.*}; mod=$${pair#*.}; \
+		printf "  make %-12s %s\n" "$$verb" "$$mod"; \
+	done
+endef
+$(call register_always, dump, actions)
+
 .PHONY: dump
-dump: $(_HIDE)dump.version
+dump: $(_HIDE)dump.version $(_HIDE)dump.actions
 
 # ── Development ports ─────────────────────────────────────────
 BACKEND_PORT  ?= 5443
@@ -348,6 +357,9 @@ help:
 	@echo "  make dev backend          Start backend dev server (port $(BACKEND_PORT))"
 	@echo "  Override ports:  make dev backend BACKEND_PORT=5543"
 	@echo "                   make dev frontend FRONTEND_PORT=5540 BACKEND_PORT=5543"
+	@echo ""
+	@echo "Registry:"
+	@echo "  make dump actions         List all registered verb+modifier pairs"
 	@if [ -f site.mk ]; then $(MAKE) --no-print-directory $(_HIDE)site-help 2>/dev/null || (echo "" && echo "Site-specific targets available (see site.mk)"); fi
 
 # ── Deprecated target shims ──────────────────────────────────
