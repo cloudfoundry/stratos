@@ -62,12 +62,29 @@ Single source of truth for building, testing, and packaging Stratos.
 | `make clean dist` | Remove everything including `node_modules` |
 | `make clean repo` | Full reset — everything gitignored |
 
+### Version Management
+
+| Command | Example input | Result |
+|---------|--------------|--------|
+| `make bump patch` | `v4.9.3-dev.38` | `v4.9.4` |
+| `make bump minor` | `v4.9.3-dev.38` | `v4.10.0` |
+| `make bump major` | `v4.9.3-dev.38` | `v5.0.0` |
+| `make bump dev` | `v4.9.3` | `v4.9.3-dev.1` |
+| `make bump dev` | `v4.9.3-dev.38` | `v4.9.3-dev.39` |
+| `make bump rc` | `v4.9.3-dev.38` | `v4.9.3-rc.1` |
+| `make bump rc` | `v4.9.3-rc.1` | `v4.9.3-rc.2` |
+
+`bump major/minor/patch` strips any prerelease and bumps the component.
+`bump dev` and `bump rc` operate on the current base version without touching the semver core.
+For an explicit version string, use `build/version-bump.sh set vX.Y.Z-pre` directly.
+
 ### Metadata and Diagnostics
 
 | Command | What it does |
 |---------|-------------|
 | `make stamp frontend` | Generate `build-info.ts` with version and git metadata |
 | `make dump version` | Print resolved semver, VCS metadata, and Go ldflags |
+| `make dump actions` | List all registered verb+modifier pairs |
 
 ### Common Workflows
 
