@@ -62,7 +62,7 @@ allow = $(eval $(_HIDE)VALID_MODS_$(strip $1) += $(strip $2))
 # Called inside declare_verb and declare_verb_default. Emits a
 # parse-time warning for each active modifier not registered or
 # allowed for this verb.
-$(_HIDE)check_mods = $(foreach mod,$($(_HIDE)KNOWN_MODS),$(if $(and $($(_HIDE)FLAG_$(mod)),$(if $(filter $(mod),$($(_HIDE)VALID_MODS_$1)),,x)),$(warning WARNING: 'make $1 $(mod)' — '$(mod)' is not a valid modifier for '$1' (ignored))))
+$(_HIDE)check_mods = $(if $(filter $1,$(MAKECMDGOALS)),$(foreach mod,$($(_HIDE)KNOWN_MODS),$(if $(and $($(_HIDE)FLAG_$(mod)),$(if $(filter $(mod),$($(_HIDE)VALID_MODS_$1)),,x)),$(warning WARNING: 'make $1 $(mod)' — '$(mod)' is not a valid modifier for '$1' (ignored)))))
 
 # ── declare_verb(verb) ──────────────────────────────────────
 define $(_HIDE)declare_verb_impl

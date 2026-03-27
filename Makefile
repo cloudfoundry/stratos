@@ -92,9 +92,11 @@ endif
 ifneq ($(filter github,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_GITHUB := yes
 endif
+ifneq ($(filter release,$(MAKECMDGOALS)),)
 ifeq ($($(_HIDE)WANT_CF)$($(_HIDE)WANT_GITHUB),)
   $(_HIDE)WANT_CF     := yes
   $(_HIDE)WANT_GITHUB := yes
+endif
 endif
 
 # cf modifier defaults to linux/amd64 unless PLATFORM is set
