@@ -74,10 +74,13 @@ ifneq ($(filter e2e,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_E2E := yes
 endif
 
-# Default: frontend + backend when none specified (unless e2e)
+# Default: frontend + backend when none specified (unless e2e),
+# but only for verbs that use these modifiers (not clean/dump).
+ifneq ($(filter build test dev stamp,$(MAKECMDGOALS)),)
 ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_E2E),)
   $(_HIDE)WANT_FRONTEND := yes
   $(_HIDE)WANT_BACKEND  := yes
+endif
 endif
 
 $(_HIDE)WANT_CF     :=
@@ -106,11 +109,7 @@ ifeq ($($(_HIDE)WANT_CF),yes)
 endif
 
 $(_HIDE)WANT_CLEAN_DIST :=
-$(_HIDE)HAVE_EXPLICIT_TARGET :=
 
-ifneq ($(filter frontend backend dist,$(MAKECMDGOALS)),)
-  $(_HIDE)HAVE_EXPLICIT_TARGET := yes
-endif
 ifneq ($(filter dist,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_CLEAN_DIST := yes
 endif
@@ -259,10 +258,9 @@ define clean.dist
 endef
 
 $(call register_always, clean, release)
-$(call register_always, clean, dist, $(_HIDE)clean.release)
+$(call register, clean, dist, $(_HIDE)clean.release)
 
-.PHONY: clean
-clean: $($(_HIDE)DEPS_clean) $(if $($(_HIDE)HAVE_EXPLICIT_TARGET),,$(_HIDE)clean.release) $(if $($(_HIDE)WANT_CLEAN_DIST),$(_HIDE)clean.dist)
+$(call declare_verb_default, clean, $(_HIDE)clean.release)
 
 # ── Dump (introspection) ─────────────────────────────────────
 # dump.version recipe is defined in version.mk (shared library)

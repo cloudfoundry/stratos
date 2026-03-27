@@ -78,7 +78,7 @@ declare_verb = $(call $(_HIDE)check_mods,$(strip $1))$(eval $(call $(_HIDE)decla
 # should have a sensible default action.
 define $(_HIDE)declare_verb_default_impl
 .PHONY: $1
-$1: $$($(_HIDE)DEPS_$1) $$(if $$($(_HIDE)DEPS_$1),,$(strip $2))
+$1: $$($(_HIDE)DEPS_$1) $$(if $$(strip $$($(_HIDE)DEPS_$1)),,$(strip $2))
 endef
 
 declare_verb_default = $(call $(_HIDE)check_mods,$(strip $1))$(eval $(call $(_HIDE)declare_verb_default_impl,$(strip $1),$(strip $2)))
