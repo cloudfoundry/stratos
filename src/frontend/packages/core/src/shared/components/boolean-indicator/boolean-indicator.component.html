@@ -1,17 +1,17 @@
 @if (booleanOutput) {
-  <div class="boolean-indicator flex items-center">
+  <div class="boolean-indicator flex items-center justify-end">
     <div class="boolean-indicator-container flex items-center" [ngClass]="{'space-x-2': showText}">
       <span
         class="material-icons text-lg"
       [ngClass]="{
-        'text-gray-400': booleanOutput.subtle,
+        'text-content-muted': booleanOutput.subtle,
         'text-success-500': booleanOutput.isTrue && !booleanOutput.subtle,
         'text-danger-500': !booleanOutput.isTrue && !booleanOutput.subtle
       }">
         {{ booleanOutput.icon }}
       </span>
       @if (showText) {
-        <span class="text-sm text-gray-700">
+        <span class="text-sm text-content-muted">
           {{ booleanOutput.text }}
         </span>
       }

@@ -17,6 +17,7 @@ import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
+import { InfoCardComponent } from '../../../shared/components/info-card/info-card.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { StratosTitleComponent } from '../../../shared/components/stratos-title/stratos-title.component';
 import { ProductNameComponent } from '../../../shared/components/product-name.ccomponent';
@@ -30,6 +31,7 @@ import { BUILD_INFO } from '../../../environments/build-info';
   imports: [
     CommonModule,
     RouterModule,
+    InfoCardComponent,
     PageHeaderComponent,
     StratosTitleComponent,
     ProductNameComponent,

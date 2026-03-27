@@ -156,7 +156,8 @@
       &--multi-filters {
         display: flex;
         gap: 0.75rem;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
+        align-items: center;
 
         @media (max-width: 767px) {
           width: 100%;

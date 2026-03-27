@@ -7,8 +7,9 @@ import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
-import { MetadataItemComponent } from '../../../shared/components/metadata-item/metadata-item.component';
 import { BooleanIndicatorComponent } from '../../../shared/components/boolean-indicator/boolean-indicator.component';
+import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
+import { InfoCardComponent } from '../../../shared/components/info-card/info-card.component';
 import { BUILD_INFO } from '../../../environments/build-info';
 
 @Component({
@@ -19,8 +20,9 @@ import { BUILD_INFO } from '../../../environments/build-info';
   imports: [
     CommonModule,
     PageHeaderComponent,
-    MetadataItemComponent,
-    BooleanIndicatorComponent
+    BooleanIndicatorComponent,
+    CustomIconComponent,
+    InfoCardComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -122,6 +124,13 @@ export class DiagnosticsPageComponent implements OnInit {
       return projectUrl.substr(19);
     }
     return '';
+  }
+
+  getMigrationSummary(migrations: any[]): string {
+    if (!migrations || migrations.length === 0) return 'None';
+    const applied = migrations.filter(m => m.is_applied).length;
+    if (applied === migrations.length) return `${migrations.length} applied`;
+    return `${applied}/${migrations.length} applied`;
   }
 
   private getMeta(name: string): string {
