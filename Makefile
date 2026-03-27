@@ -327,8 +327,12 @@ $(_HIDE)BUMP_MOD := $(filter major minor patch dev rc,$(MAKECMDGOALS))
 
 .PHONY: bump
 bump:
-	@if [ -z "$($(_HIDE)BUMP_MOD)" ]; then \
+	@set -- $($(_HIDE)BUMP_MOD); \
+	if [ $$# -eq 0 ]; then \
 		echo "Usage: make bump <major|minor|patch|dev|rc>" >&2; \
+		exit 1; \
+	elif [ $$# -gt 1 ]; then \
+		echo "Only one bump modifier allowed" >&2; \
 		exit 1; \
 	fi
 	@chmod +x build/version-bump.sh
