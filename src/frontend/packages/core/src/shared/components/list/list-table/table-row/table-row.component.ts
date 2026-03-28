@@ -3,7 +3,6 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ComponentFactoryResolver,
   ComponentRef,
   Input,
   OnChanges,
@@ -68,7 +67,6 @@ export class TableRowComponent<T = any> implements OnInit, OnChanges {
   private expandedComponentRef: ComponentRef<any>;
 
   constructor(
-    private componentFactoryResolver: ComponentFactoryResolver,
     public expandedService: TableRowExpandedService,
     private cdr: ChangeDetectorRef
   ) { }
@@ -123,9 +121,7 @@ export class TableRowComponent<T = any> implements OnInit, OnChanges {
     if (!this.expandComponent) {
       return;
     }
-    return this.componentFactoryResolver.resolveComponentFactory(
-      this.expandComponent
-    );
+    return this.expandComponent;
   }
 
   private createComponent() {

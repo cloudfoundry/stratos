@@ -1,7 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component,
-  ComponentFactory,
-  ComponentFactoryResolver,
   ComponentRef,
   EventEmitter,
   Injector,
@@ -48,7 +46,6 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
 
   constructor(
     protected store: Store<GeneralEntityAppState>,
-    private resolver: ComponentFactoryResolver,
     private injector: Injector,
   ) {
     const types = store.select(selectSessionData()).pipe(
@@ -145,12 +142,10 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
           parent: this.injector
         });
 
-        const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(
-          endpoint.definition.registrationComponent
-        );
-        
         // Create the component with the custom injector
-        this.componentRef = this.endpointFormContainer.createComponent(factory, 0, componentInjector);
+        this.componentRef = this.endpointFormContainer.createComponent(
+          endpoint.definition.registrationComponent, { index: 0, injector: componentInjector }
+        );
 
         console.log('Registration component created successfully:', this.componentRef);
 
@@ -174,8 +169,6 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
     try {
       // Import and load the create-endpoint component
       import('../create-endpoint/create-endpoint.component').then(module => {
-        const factory = this.resolver.resolveComponentFactory(module.CreateEndpointComponent);
-        
         // Create mock route parameters
         const mockParams: Params = {
           type: epType,
@@ -206,7 +199,9 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
           parent: this.injector
         });
 
-        this.componentRef = this.endpointFormContainer.createComponent(factory, 0, componentInjector);
+        this.componentRef = this.endpointFormContainer.createComponent(
+          module.CreateEndpointComponent, { index: 0, injector: componentInjector }
+        );
         console.log('Create-endpoint component loaded:', this.componentRef);
         
         this.hookIntoComponentSuccess();

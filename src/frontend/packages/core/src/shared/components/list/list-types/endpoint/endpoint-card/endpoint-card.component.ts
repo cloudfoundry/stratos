@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy, Component,
-  ComponentFactoryResolver,
   ComponentRef,
   Input,
   OnDestroy,
@@ -188,7 +187,6 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   constructor(
     private store: Store<AppState>,
     private endpointListHelper: EndpointListHelper,
-    private componentFactoryResolver: ComponentFactoryResolver,
     private userFavoriteManager: UserFavoriteManager,
     private currentUserPermissionsService: CurrentUserPermissionsService,
     private sessionService: SessionService,
@@ -234,7 +232,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
     if (!this.component) {
       const res =
-        this.endpointListHelper.createEndpointDetails(e.listDetailsComponent, this.endpointDetails, this.componentFactoryResolver);
+        this.endpointListHelper.createEndpointDetails(e.listDetailsComponent, this.endpointDetails);
       this.componentRef = res.componentRef;
       this.component = res.component;
     }

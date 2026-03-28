@@ -1,7 +1,6 @@
 import {
   ChangeDetectorRef,
   Component,
-  ComponentFactoryResolver,
   Input,
   OnInit,
   Type,
@@ -53,18 +52,13 @@ export class TableCellComponent<T> implements OnInit {
   @Input() config: object | undefined;
 
   private cellComponent!: TableCellCustom<T>;
-  private componentFactoryResolver = inject(ComponentFactoryResolver);
   private cdr = inject(ChangeDetectorRef);
 
   private getComponent() {
     if (this.cellDefinition) {
-      return this.componentFactoryResolver.resolveComponentFactory(
-        TableCellDefaultComponent
-      );
+      return TableCellDefaultComponent;
     } else if (this.component) {
-      return this.componentFactoryResolver.resolveComponentFactory(
-        this.component
-      );
+      return this.component;
     }
     return null;
   }

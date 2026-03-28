@@ -1,7 +1,5 @@
 import { DOCUMENT } from '@angular/common';
 import {
-  ComponentFactory,
-  ComponentFactoryResolver,
   ComponentRef,
   Inject,
   Injectable,
@@ -43,7 +41,6 @@ export class SidePanelService {
   private container: ViewContainerRef;
 
   constructor(
-    private componentFactoryResolver: ComponentFactoryResolver,
     private router: Router,
     @Inject(DOCUMENT) private document: Document,
   ) {
@@ -66,12 +63,12 @@ export class SidePanelService {
    * Show the preview panel in the given mode
    */
   public showMode(
-    mode: SidePanelMode, component: object, props?: { [key: string]: any }, componentFactoryResolver?: ComponentFactoryResolver) {
+    mode: SidePanelMode, component: object, props?: { [key: string]: any }) {
     if (!this.container) {
       throw new Error('SidePanelService: container must be set');
     }
 
-    this.render(component, props, componentFactoryResolver);
+    this.render(component, props);
     this._previewMode.set(mode);
     this.open();
   }
@@ -79,15 +76,15 @@ export class SidePanelService {
   /**
    * Show the preview panel in a preview style - does not overlap title bar and colours are more muted
    */
-  public show(component: object, props?: { [key: string]: any }, componentFactoryResolver?: ComponentFactoryResolver) {
-    this.showMode(SidePanelMode.Normal, component, props, componentFactoryResolver);
+  public show(component: object, props?: { [key: string]: any }) {
+    this.showMode(SidePanelMode.Normal, component, props);
   }
 
   /**
    * Show the preview panel in a modal style - full height overlaps title bar
    */
-  public showModal(component: object, props?: { [key: string]: any }, componentFactoryResolver?: ComponentFactoryResolver) {
-    this.showMode(SidePanelMode.Modal, component, props, componentFactoryResolver);
+  public showModal(component: object, props?: { [key: string]: any }) {
+    this.showMode(SidePanelMode.Modal, component, props);
   }
 
   // Re-open the panel with its current contents
@@ -114,14 +111,12 @@ export class SidePanelService {
   render(
     component: object,
     props: { [key: string]: any },
-    componentFactoryResolver: ComponentFactoryResolver = this.componentFactoryResolver
   ) {
     if (this.container.length) {
       this.container.remove(0);
     }
 
-    const factory: ComponentFactory<any> = componentFactoryResolver.resolveComponentFactory(component as any);
-    const componentRef: ComponentRef<any> = this.container.createComponent(factory);
+    const componentRef: ComponentRef<any> = this.container.createComponent(component as any);
 
     if (props) {
       componentRef.instance.setProps(props);

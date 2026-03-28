@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component,
-  ComponentFactoryResolver,
   ComponentRef,
   Input,
   OnDestroy,
@@ -33,9 +32,7 @@ export class TableCellEndpointDetailsComponent extends TableCellCustom<EndpointM
   cell: EndpointListDetailsComponent;
 
   constructor(
-    private componentFactoryResolver: ComponentFactoryResolver,
     private endpointListHelper: EndpointListHelper,
-
   ) {
     super();
   }
@@ -49,7 +46,7 @@ export class TableCellEndpointDetailsComponent extends TableCellCustom<EndpointM
     }
     if (!this.cell) {
       const res =
-        this.endpointListHelper.createEndpointDetails(e.listDetailsComponent, this.endpointDetails, this.componentFactoryResolver);
+        this.endpointListHelper.createEndpointDetails(e.listDetailsComponent, this.endpointDetails);
       this.componentRef = res.componentRef;
       this.cell = res.component;
     }

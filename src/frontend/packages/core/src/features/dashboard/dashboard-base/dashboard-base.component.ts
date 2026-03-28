@@ -2,7 +2,6 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Portal, PortalModule } from '@angular/cdk/portal';
 import { ChangeDetectionStrategy, AfterViewInit, ChangeDetectorRef, Component, ElementRef, NgZone, OnDestroy, OnInit, signal, ViewChild, ViewContainerRef  } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatDrawer } from '../../../shared/services/tailwind-material-replacements';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router, RouterModule } from '@angular/router';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { Store } from '@ngrx/store';
@@ -62,7 +61,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   private closeSub!: Subscription;
   private routerSub!: Subscription;
   private mobileSub: Subscription;
-  private drawer: MatDrawer;
+  private drawer: any;
   public iconModeOpen = false;
   public sideNavWidth = 54;
 
@@ -124,7 +123,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
       .subscribe(isMobile => isMobile ? this.store.dispatch(new EnableMobileNav()) : this.store.dispatch(new DisableMobileNav()));
   }
 
-  @ViewChild('sidenav') set sidenav(drawer: MatDrawer) {
+  @ViewChild('sidenav') set sidenav(drawer: any) {
     this.drawer = drawer;
     if (!this.closeSub && drawer && drawer.closedStart) {
       // We need this for mobile to ensure the state is synced when the dashboard is closed by clicking on the backdrop.

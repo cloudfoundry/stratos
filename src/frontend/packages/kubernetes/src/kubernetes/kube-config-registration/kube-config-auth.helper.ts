@@ -1,4 +1,4 @@
-import { ComponentFactoryResolver, Injector } from '@angular/core';
+import { createComponent, EnvironmentInjector, Injector } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 
 import { ConnectEndpointData } from '../../../../core/src/features/endpoints/connect.service';
@@ -138,7 +138,7 @@ export class KubeConfigAuthHelper {
   }
 
   // Use the auto component to get the data in the correct format for connecting to the endpoint
-  public getAuthDataForConnect(resolver: ComponentFactoryResolver, injector: Injector, fb: FormBuilder, user: KubeConfigFileUser)
+  public getAuthDataForConnect(environmentInjector: EnvironmentInjector, injector: Injector, fb: FormBuilder, user: KubeConfigFileUser)
     : ConnectEndpointData | null {
 
     let data = null;
@@ -147,9 +147,7 @@ export class KubeConfigAuthHelper {
     if (user && user._authData) {
       const authType = this.authTypes[user._authData.authType];
 
-      const factory = resolver.resolveComponentFactory<IAuthForm>(authType.component);
-
-      const ref = factory.create(injector);
+      const ref = createComponent<IAuthForm>(authType.component, { environmentInjector, elementInjector: injector });
 
       const form = fb.group({
         authType: authType.value,

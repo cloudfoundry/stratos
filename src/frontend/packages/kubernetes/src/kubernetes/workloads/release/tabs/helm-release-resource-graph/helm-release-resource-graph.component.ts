@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {Component, ComponentFactoryResolver, OnDestroy, OnInit, signal, WritableSignal, inject, ChangeDetectionStrategy } from '@angular/core';
+import {Component, OnDestroy, OnInit, signal, WritableSignal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AppProgressBarComponent } from '../../../../../../../core/src/shared/components/progress-bar/app-progress-bar.component';
 import { CustomIconComponent } from '../../../../../../../core/src/shared/components/custom-material/custom-material.component';
@@ -108,7 +108,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
     distinctUntilChanged(),
     publishReplay(1),
     refCount()
-  );  private componentFactoryResolver = inject(ComponentFactoryResolver);
+  );
   private helper = inject(HelmReleaseHelperService);
   public analyzerService = inject(KubernetesAnalysisService);
   private previewPanel = inject(SidePanelService);
@@ -227,8 +227,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
           resource$: this.getResource(node),
           analysis,
           resourceKind: node.data.kind
-        },
-        this.componentFactoryResolver
+        }
       );
     });
 

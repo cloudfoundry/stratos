@@ -1,6 +1,5 @@
 
 import { ChangeDetectionStrategy, Component,
-  ComponentFactoryResolver,
   ComponentRef,
   EventEmitter,
   Input,
@@ -94,7 +93,6 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
 
   constructor(
     private fb: FormBuilder,
-    private resolver: ComponentFactoryResolver,
   ) { }
 
   private init(config: ConnectEndpointConfig) {
@@ -182,8 +180,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
       this.authFormComponentRef.destroy();
     }
 
-    const factory = this.resolver.resolveComponentFactory<IAuthForm>(authType.component);
-    this.authFormComponentRef = this.container.createComponent<IAuthForm>(factory);
+    this.authFormComponentRef = this.container.createComponent<IAuthForm>(authType.component);
     this.authFormComponentRef.instance.formGroup = this.endpointForm;
     this.authFormComponentRef.instance.config = authType.config;
     this.pDisabled ? this.endpointForm.disable() : this.endpointForm.enable();

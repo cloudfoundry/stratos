@@ -1,10 +1,7 @@
 
 import {
   Component,
-  ComponentFactory,
-  ComponentFactoryResolver,
   ComponentRef,
-  Injector,
   ViewChild,
   ViewContainerRef,
   ChangeDetectionStrategy
@@ -34,15 +31,11 @@ export class DeployApplicationStep21Component {
 
   @ViewChild('target', { read: ViewContainerRef, static: true })
   target!: ViewContainerRef;
-  wrapperFactory: ComponentFactory<CommitListWrapperComponent>;
   wrapperRef!: ComponentRef<CommitListWrapperComponent>;
 
   constructor(
     private store: Store<CFAppState>,
-    private componentFactoryResolver: ComponentFactoryResolver,
-    private injector: Injector
   ) {
-    this.wrapperFactory = this.componentFactoryResolver.resolveComponentFactory(CommitListWrapperComponent);
   }
 
   onLeave = () => {
@@ -52,7 +45,7 @@ export class DeployApplicationStep21Component {
 
   onEnter = () => {
     // Wrap the list component in another component. This means it's recreated every time to include changes in the github repo
-    this.wrapperRef = this.target.createComponent(this.wrapperFactory);
+    this.wrapperRef = this.target.createComponent(CommitListWrapperComponent);
     const wrapper = this.wrapperRef.instance as CommitListWrapperComponent;
     this.selectedCommit$ = wrapper.selectedCommit$;
     this.validate = this.selectedCommit$.pipe(

@@ -1,8 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, AfterViewInit,
   Component,
-  ComponentFactory,
-  ComponentFactoryResolver,
   ComponentRef,
   NgZone,
   OnDestroy,
@@ -85,7 +83,6 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     public endpointsService: EndpointsService,
     public store: Store<EndpointOnlyAppState>,
     private ngZone: NgZone,
-    private resolver: ComponentFactoryResolver,
     private snackBarService: SnackBarService,
     cs: CustomizationService,
     currentUserPermissionsService: CurrentUserPermissionsService,
@@ -211,8 +208,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
           }
           if (!haveRegistered && this.customizations.noEndpointsComponent) {
             try {
-              const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(this.customizations.noEndpointsComponent);
-              this.customContentComponentRef = this.customNoEndpointsContainer.createComponent(factory);
+              this.customContentComponentRef = this.customNoEndpointsContainer.createComponent(this.customizations.noEndpointsComponent);
             } catch (error) {
               console.error('Error creating custom no-endpoints component:', error);
             }

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentFactoryResolver, Input } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@angular/core';
 
 import { SidePanelService } from '../../../../services/side-panel.service';
 import { TableCellCustom } from '../../list.types';
@@ -36,7 +36,6 @@ export class TableCellSidePanelComponent<T = any, A = any> extends TableCellCust
   }
 
   constructor(
-    private componentFactoryResolver: ComponentFactoryResolver,
     private previewPanel: SidePanelService,
     private cdr: ChangeDetectorRef
   ) {
@@ -47,7 +46,6 @@ export class TableCellSidePanelComponent<T = any, A = any> extends TableCellCust
     this.previewPanel.show(
       this.actualConfig.sidePanelComponent,
       this.actualConfig.sidePanelConfig,
-      this.componentFactoryResolver
     );
   }
 

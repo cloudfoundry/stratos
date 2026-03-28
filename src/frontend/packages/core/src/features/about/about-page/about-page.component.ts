@@ -1,7 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component,
-  ComponentFactory,
-  ComponentFactoryResolver,
   ComponentRef,
   OnDestroy,
   OnInit,
@@ -61,7 +59,6 @@ export class AboutPageComponent implements OnInit, OnDestroy {
 
   constructor(
     private store: Store<GeneralEntityAppState>,
-    private resolver: ComponentFactoryResolver,
     private meta: Meta,
     cs: CustomizationService,
   ) {
@@ -144,16 +141,14 @@ export class AboutPageComponent implements OnInit, OnDestroy {
   addAboutInfoComponent() {
     this.aboutInfoContainer.clear();
     if (this.customizations.aboutInfoComponent) {
-      const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(this.customizations.aboutInfoComponent);
-      this.aboutInfoComponentRef = this.aboutInfoContainer.createComponent(factory);
+      this.aboutInfoComponentRef = this.aboutInfoContainer.createComponent(this.customizations.aboutInfoComponent);
     }
   }
 
   addSupportInfo() {
     this.supportInfoContainer.clear();
     if (this.customizations.supportInfoComponent) {
-      const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(this.customizations.supportInfoComponent);
-      this.componentRef = this.supportInfoContainer.createComponent(factory);
+      this.componentRef = this.supportInfoContainer.createComponent(this.customizations.supportInfoComponent);
     }
   }
 }

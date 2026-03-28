@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import {Component, ComponentFactoryResolver, OnDestroy, signal, computed, inject, ChangeDetectionStrategy, Injector, runInInjectionContext } from '@angular/core';
+import {Component, OnDestroy, signal, computed, inject, ChangeDetectionStrategy, Injector, runInInjectionContext } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
@@ -119,7 +119,6 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
 
   private analysisReportId = signal<string | null>(null);
   private analysisReportUpdated$ = toObservable(this.analysisReportId).pipe(distinctUntilChanged());
-  private componentFactoryResolver = inject(ComponentFactoryResolver);
   public helmReleaseHelper = inject(HelmReleaseHelperService);
   private store = inject(Store<AppState>);
   private confirmDialog = inject(ConfirmationDialogService);
@@ -342,8 +341,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
       {
         resource,
         alerts,
-      },
-      this.componentFactoryResolver
+      }
     );
   }
 }

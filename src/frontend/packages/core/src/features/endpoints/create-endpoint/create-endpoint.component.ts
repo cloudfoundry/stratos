@@ -1,7 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component,
-  ComponentFactory,
-  ComponentFactoryResolver,
   ComponentRef,
   OnDestroy,
   OnInit,
@@ -43,7 +41,6 @@ export class CreateEndpointComponent implements OnInit, OnDestroy {
 
   constructor(
     activatedRoute: ActivatedRoute,
-    private resolver: ComponentFactoryResolver,
   ) {
     const epType = getIdFromRoute(activatedRoute, 'type');
     const epSubType = getIdFromRoute(activatedRoute, 'subtype');
@@ -61,8 +58,7 @@ export class CreateEndpointComponent implements OnInit, OnDestroy {
       this.componentRef.destroy();
     }
     if (this.component) {
-      const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(this.component);
-      this.componentRef = this.customComponentContainer.createComponent(factory);
+      this.componentRef = this.customComponentContainer.createComponent(this.component);
     }
   }
 

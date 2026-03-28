@@ -2,7 +2,6 @@ import { AsyncPipe, CommonModule, TitleCasePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
-  ComponentFactoryResolver,
   OnDestroy,
   signal,
   ViewChild,
@@ -101,7 +100,6 @@ export class SelectPlanStepComponent implements OnDestroy {
     private store: Store<CFAppState>,
     private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
     activatedRoute: ActivatedRoute,
-    private componentFactoryResolver: ComponentFactoryResolver,
     private modeService: CsiModeService
 
   ) {
@@ -199,10 +197,7 @@ export class SelectPlanStepComponent implements OnDestroy {
   }
 
   private createNoPlansComponent() {
-    const component = this.componentFactoryResolver.resolveComponentFactory(
-      NoServicePlansComponent
-    );
-    return this.noPlansDiv.createComponent(component);
+    return this.noPlansDiv.createComponent(NoServicePlansComponent);
   }
   private clearNoPlans() {
     return this.noPlansDiv.clear();

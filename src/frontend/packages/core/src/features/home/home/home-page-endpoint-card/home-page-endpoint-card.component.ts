@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, AfterViewInit,
   Compiler,
   Component,
-  ComponentFactoryResolver,
   ComponentRef,
   EventEmitter,
   Injector,
@@ -132,7 +131,6 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
     private sidePanelService: SidePanelService,
     private compiler: Compiler,
     private injector: Injector,
-    private componentFactoryResolver: ComponentFactoryResolver,
   ) {
     this.layout$ = toObservable(this._layout);
     this.status$ = toObservable(this._status);
@@ -242,7 +240,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
 
     let component: any;
     if (!endpointEntity) {
-      component = this.componentFactoryResolver.resolveComponentFactory(DefaultEndpointHomeComponent);
+      component = DefaultEndpointHomeComponent;
     } else {
       component = await endpointEntity.definition.homeCard.component(this.compiler, this.injector);
     }

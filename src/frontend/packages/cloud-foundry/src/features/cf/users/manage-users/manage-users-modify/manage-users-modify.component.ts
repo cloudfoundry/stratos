@@ -2,8 +2,6 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectorRef,
   Component,
-  ComponentFactory,
-  ComponentFactoryResolver,
   ComponentRef,
   Input,
   OnDestroy,
@@ -128,7 +126,6 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   @ViewChild('spaceRolesTable', { read: ViewContainerRef, static: true })
   spaceRolesTable!: ViewContainerRef;
 
-  private wrapperFactory: ComponentFactory<SpaceRolesListWrapperComponent>;
   private wrapperRef: ComponentRef<SpaceRolesListWrapperComponent>;
   private snackBarRef: TailwindSnackBarRef<any>;
 
@@ -146,12 +143,10 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store<CFAppState>,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private componentFactoryResolver: ComponentFactoryResolver,
     private cfRolesService: CfRolesService,
     private cd: ChangeDetectorRef,
     private snackBar: TailwindSnackBarService,
   ) {
-    this.wrapperFactory = this.componentFactoryResolver.resolveComponentFactory(SpaceRolesListWrapperComponent);
   }
 
   ngOnInit() {
@@ -281,7 +276,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
         // The org has changed, completely recreate the roles table
         this.destroySpacesList();
 
-        this.wrapperRef = this.spaceRolesTable.createComponent(this.wrapperFactory);
+        this.wrapperRef = this.spaceRolesTable.createComponent(SpaceRolesListWrapperComponent);
         this.cd.detectChanges();
       }
     });
