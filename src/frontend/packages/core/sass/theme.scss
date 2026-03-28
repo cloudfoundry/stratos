@@ -93,15 +93,5 @@ html {
   background-color: #fafafa;
 }
 
-// Legacy Material component styles - converted to CSS custom properties
-.dashboard {
-  .mat-drawer-content {
-    overflow: visible;
-  }
-  .mat-drawer-side {
-    border: 0;
-  }
-}
-
 // Styles migrated to use Tailwind CSS utilities where possible
 // Remaining styles use CSS custom properties for theme consistency

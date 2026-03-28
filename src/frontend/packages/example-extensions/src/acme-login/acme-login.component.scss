@@ -1,11 +1,8 @@
 .acme-login {
-  &__card.mat-card {
+  &__card {
     box-shadow: 0 0 20px 9px rgba(0, 0, 0, .2);
     padding: 0;
     width: 320px;
-    mat-form-field {
-      width: 100%;
-    }
   }
   &__body {
     padding: 24px;

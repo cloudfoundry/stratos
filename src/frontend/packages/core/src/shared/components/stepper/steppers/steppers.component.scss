@@ -157,12 +157,6 @@
     &__next {
       display: flex;
       justify-content: center;
-      .mat-button-wrapper {
-        align-items: center;
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-      }
     }
   }
   .stepper-form {
@@ -171,11 +165,8 @@
     flex-direction: column;
     margin-top: 10px;
     max-width: 450px;
-    mat-form-field {
+    .custom-form-field {
       width: 100%;
-    }
-    mat-form-field,
-    mat-slide-toggle {
       padding-top: 10px;
     }
   }
