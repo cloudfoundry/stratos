@@ -43,6 +43,7 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
     },
   ];
   viewType = ListViewTypes.TABLE_ONLY;
+  pageSizeOptions = [10, 25, 50, 100];
   text = {
     title: null as string,
     noEntries: 'There are no events'

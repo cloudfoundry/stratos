@@ -180,9 +180,9 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
     if (this.multiple) {
       const index = this.selectedValues.indexOf(option.value);
       if (index === -1) {
-        this.selectedValues.push(option.value);
+        this.selectedValues = [...this.selectedValues, option.value];
       } else {
-        this.selectedValues.splice(index, 1);
+        this.selectedValues = this.selectedValues.filter((_, i) => i !== index);
       }
     } else {
       this.selectedValues = [option.value];
@@ -209,9 +209,10 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   private updateDisplayValue() {
     if (this.selectedValues.length === 0) {
       this.displayValue = '';
-    } else if (this.multiple) {
+    } else if (this.multiple && this.selectedValues.length > 1) {
       this.displayValue = `${this.selectedValues.length} selected`;
     } else {
+      // Single selection, or multi with exactly 1 selected — show the item name
       if (this.options) {
         const selectedOption = this.options.find(opt => opt.value === this.selectedValues[0]);
         this.displayValue = selectedOption ? selectedOption.displayText : this.selectedValues[0];
@@ -233,10 +234,22 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   // ControlValueAccessor implementation
   writeValue(value: any): void {
     if (this.multiple && Array.isArray(value)) {
-      this.selectedValues = value || [];
+      const incoming = value || [];
+      // Skip if values are equivalent — prevents store echo from clobbering in-progress selections
+      if (incoming.length === this.selectedValues.length &&
+          incoming.every((v: any, i: number) => v === this.selectedValues[i])) {
+        return;
+      }
+      this.selectedValues = incoming;
     } else if (!this.multiple && value !== undefined && value !== null) {
+      if (this.selectedValues.length === 1 && this.selectedValues[0] === value) {
+        return;
+      }
       this.selectedValues = [value];
     } else {
+      if (this.selectedValues.length === 0) {
+        return;
+      }
       this.selectedValues = [];
     }
     this.updateDisplayValue();

@@ -5,6 +5,8 @@ import { Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 import {
+  arraysEqual,
+  valueOrCommonFalsy,
   CustomFormFieldComponent,
   AppInputDirective,
   CustomSelectComponent,
@@ -30,6 +32,7 @@ interface EventsFilterForm {
   styleUrls: ['./cloud-foundry-events-list.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { class: 'flex flex-col flex-1 min-h-0' },
   imports: [
     ReactiveFormsModule,
     CustomFormFieldComponent,
@@ -146,22 +149,29 @@ export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
     });
     this.config = (listConfig as any as CfEventsConfigService);
 
-    // Set initial filter values
+    // Store → form sync with deep comparison to prevent feedback loops.
+    // After init, only sync when the store clears filters (reset button).
     this.subs.push(
       this.config.getEventFilters().pipe(
-        distinctUntilChanged()
+        distinctUntilChanged((a, b) =>
+          arraysEqual(a.type, b.type) &&
+          valueOrCommonFalsy(a.actee) === valueOrCommonFalsy(b.actee)
+        )
       ).subscribe(params => {
         if (!this.initialSet) {
           this.updateType(params.type);
           this.updateActee(params.actee);
           this.initialSet = true;
-        } else if (this.filtersFormGroup.get('actee')?.value !== params.actee) {
-          this.updateActee(params.actee);
+        } else {
+          const storeCleared = (!params.type || params.type.length === 0) && !params.actee;
+          if (storeCleared) {
+            this.updateType(params.type);
+            this.updateActee(params.actee);
+          }
         }
       })
     );
 
-    // Set new filter values
     this.subs.push(
       this.filtersFormGroup.valueChanges.pipe(
         debounceTime(250)
@@ -190,13 +200,11 @@ export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
   }
 
   private updateType(type: string[]) {
-    this.filtersFormGroup.get('type')?.setValue(type);
-    this.filtersFormGroup.get('type')?.markAsDirty();
+    this.filtersFormGroup.get('type')?.setValue(type, { emitEvent: false });
   }
 
   private updateActee(actee: string) {
-    this.filtersFormGroup.get('actee')?.setValue(actee);
-    this.filtersFormGroup.get('actee')?.markAsDirty();
+    this.filtersFormGroup.get('actee')?.setValue(actee, { emitEvent: false });
     this.hasActeeFilter = !!actee;
   }
 

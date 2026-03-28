@@ -7,7 +7,7 @@
   }
   @if (initialised$ | async) {
     <div class="list-component__header"
-      [hidden]="!(hasControls$ | async) && ((noRowsNotFiltering$ | async) && noEntries)">
+      [hidden]="!customFilters && !(hasControls$ | async) && ((noRowsNotFiltering$ | async) && noEntries)">
       <div
         [ngClass]="{'list-component__header--selected': (dataSource.isSelecting$ | async), 'table-header-row': (view$ | async) === 'table'}"
         class="card list-component__header-card">
@@ -194,7 +194,7 @@
               </button>
             </div>
           }
-          @if (!(isAddingOrSelecting$ | async) && ((dataSource.isLoadingPage$ | async) || (hasRowsOrIsFiltering$ | async))) {
+          @if (!(isAddingOrSelecting$ | async) && (customFilters || (dataSource.isLoadingPage$ | async) || (hasRowsOrIsFiltering$ | async))) {
             <div
               >
               <button [title]="'Reset Filters & Sort'" class="btn btn-icon"

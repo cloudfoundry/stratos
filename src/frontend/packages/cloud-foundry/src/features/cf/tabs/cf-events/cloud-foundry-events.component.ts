@@ -15,6 +15,7 @@ import { CloudFoundryEventsListComponent } from '../../../../shared/components/c
   }],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { class: 'flex flex-col flex-1 min-h-0' },
   imports: [
     CloudFoundryEventsListComponent
   ]
