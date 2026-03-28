@@ -13,7 +13,7 @@
     </span>
   </div>
   @if (canCopy) {
-    <span class="material-icons copy__copy-icon cursor-pointer text-gray-500 hover:text-gray-700 transition-colors"
+    <span class="material-icons copy__copy-icon cursor-pointer text-content-muted hover:text-content-text transition-colors"
       [ngClass]="{'text-sm': compact, 'text-base': !compact}"
       (click)="copyToClipboard($event)"
       [title]="tooltip">

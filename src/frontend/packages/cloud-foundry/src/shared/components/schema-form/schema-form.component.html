@@ -5,11 +5,11 @@
     <div class="flex gap-4 mb-4">
       <label class="inline-flex items-center cursor-pointer">
         <input type="radio" [(ngModel)]="schemaView" value="schemaForm" (change)="onSchemaViewChanged()" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
-        <span class="ml-2 text-sm font-medium text-gray-900">Form</span>
+        <span class="ml-2 text-sm font-medium text-content-text">Form</span>
       </label>
       <label class="inline-flex items-center cursor-pointer">
         <input type="radio" [(ngModel)]="schemaView" value="schemaJson" (change)="onSchemaViewChanged()" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
-        <span class="ml-2 text-sm font-medium text-gray-900">JSON</span>
+        <span class="ml-2 text-sm font-medium text-content-text">JSON</span>
       </label>
     </div>
     @if (schemaView === 'schemaForm') {

@@ -1,6 +1,6 @@
 @if (appAutoscalerPolicy$ | async; as policy) {
   <div class="p-6">
-    <p class="text-gray-700 mb-6">Use minimum and maximum instance counts to provide default values for your policy.</p>
+    <p class="text-content-text mb-6">Use minimum and maximum instance counts to provide default values for your policy.</p>
     <!-- Instance counts are used to define the default minimal and maximal instance number of your application. -->
     <form [formGroup]="editLimitForm" validate class="space-y-4">
       <div class="form-group">

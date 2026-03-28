@@ -7,7 +7,7 @@
     <app-steppers>
       <app-step title="UAA Endpoint" [valid]="validateUAAForm | async" [onNext]="uaaFormNext">
         <div class="space-y-6">
-          <p class="text-gray-700">Please enter the following information to allow <app-product-name></app-product-name> to authenticate
+          <p class="text-content-text">Please enter the following information to allow <app-product-name></app-product-name> to authenticate
           with
         your UAA:</p>
         <form [formGroup]="uaaForm" class="space-y-6">
@@ -18,7 +18,7 @@
             </div>
             <label class="flex items-center space-x-2 cursor-pointer">
               <input type="checkbox" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500" formControlName="skipSSL">
-              <span class="text-sm text-gray-700">Skip SSL validation for the UAA</span>
+              <span class="text-sm text-content-text">Skip SSL validation for the UAA</span>
             </label>
             <div class="form-field">
               <label class="form-label" for="clientId">Client ID</label>
@@ -40,7 +40,7 @@
             </div>
           </div>
           <div class="border-t pt-6">
-            <p class="text-gray-700 mb-4">Enter the username and password of an admin user (this is used to
+            <p class="text-content-text mb-4">Enter the username and password of an admin user (this is used to
               retrieve
             scope metadata)</p>
             <div class="space-y-4">
@@ -66,11 +66,11 @@
           </div>
           <!-- Single Sign-on -->
           <div class="border-t pt-6">
-            <p class="text-gray-700 mb-4">UAA Single Sign On (SSO)</p>
+            <p class="text-content-text mb-4">UAA Single Sign On (SSO)</p>
             <div class="space-y-4">
               <label class="flex items-start space-x-2 cursor-pointer">
                 <input type="checkbox" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 mt-0.5" formControlName="useSSO">
-                <span class="text-sm text-gray-700">Use SSO (Use the UAA's UI to login rather than the <app-product-name></app-product-name>
+                <span class="text-sm text-content-text">Use SSO (Use the UAA's UI to login rather than the <app-product-name></app-product-name>
               login UI)</span>
             </label>
             @if (uaaForm.value.useSSO) {
@@ -90,7 +90,7 @@
     <app-loading-page [isLoading]="applyingSetup()" alert="Saving configuration"
       text="Please wait - this will take a few moments">
       <div class="space-y-4">
-        <p class="text-gray-700">Please select the UAA scope to use to identify users as <app-product-name></app-product-name> Administrators:</p>
+        <p class="text-content-text">Please select the UAA scope to use to identify users as <app-product-name></app-product-name> Administrators:</p>
         <form class="space-y-4">
           <div class="form-field">
             <label class="form-label" for="uaaScope">UAA Scope</label>

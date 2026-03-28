@@ -15,10 +15,10 @@
                     class="mt-1 text-primary-600 focus:ring-primary-500 border-gray-300"
                     [attr.aria-disabled]="gitTypeEntry.value.exists ? 'true' : null">
                   <div class="flex-1">
-                    <div class="font-medium text-gray-900">{{ gitTypeEntry.value.label }}</div>
+                    <div class="font-medium text-content-text">{{ gitTypeEntry.value.label }}</div>
                     @if (gitTypeEntry.value.description) {
-                      <div class="mt-1 text-sm text-gray-600"
-                        [class.text-gray-400]="gitTypeEntry.value.exists">
+                      <div class="mt-1 text-sm text-content-muted"
+                        [class.text-content-muted]="gitTypeEntry.value.exists">
                         @for (p of gitTypeEntry.value.description; track p) {
                           <p class="mb-1">{{p}}</p>
                         }

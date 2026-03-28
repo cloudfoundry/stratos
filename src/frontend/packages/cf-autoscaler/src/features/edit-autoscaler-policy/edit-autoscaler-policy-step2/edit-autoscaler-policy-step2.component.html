@@ -1,6 +1,6 @@
 @if (appAutoscalerPolicy$ | async; as policy) {
   <div class="p-6">
-    <p class="text-gray-700 mb-6">Add scaling rules that work with built-in metrics to scale your application. Metrics are averaged over all the
+    <p class="text-content-text mb-6">Add scaling rules that work with built-in metrics to scale your application. Metrics are averaged over all the
     instances of your application.</p>
     <app-tile-grid class="space-y-4">
       @for (rule of policy.scaling_rules_form; track $index; let index = $index) {
@@ -14,7 +14,7 @@
               </div>
               <div class="card-content p-4">
                 @if (editIndex!=index) {
-                  <div class="text-gray-700">
+                  <div class="text-content-text">
                     If average {{rule.metric_type}} {{rule.operator}} {{rule.threshold}}
                     {{getMetricUnit(rule.metric_type, rule.unit)}}
                     for {{rule.breach_duration_secs}} seconds, then {{rule.adjustment}} instances. Cooldown:
