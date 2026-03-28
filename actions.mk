@@ -25,6 +25,9 @@ $(_HIDE)FLAG_dist        := $($(_HIDE)WANT_CLEAN_DIST)
 # Known modifiers — the set checked during validation in declare_verb
 $(_HIDE)KNOWN_MODS := frontend backend cf github e2e dist
 
+# Known verbs — populated by declare_verb, checked for collisions
+$(_HIDE)KNOWN_VERBS :=
+
 # ── register(verb,modifier,[prereqs]) ───────────────────────
 # Generates hidden target via $(eval). The $(_HIDE) prefix on
 # generated target names hides them from tab completion.
@@ -34,10 +37,11 @@ $(_HIDE)$1.$2: $3
 	$$($1.$2)
 $(_HIDE)DEPS_$1 += $$(if $$($(_HIDE)FLAG_$2),$(_HIDE)$1.$2)
 $(_HIDE)VALID_MODS_$1 += $2
+$(_HIDE)ALL_MODS += $2
 $(_HIDE)REGISTRY += $1.$2
 endef
 
-register = $(eval $(call $(_HIDE)register_impl,$(strip $1),$(strip $2),$(strip $3)))
+register = $(if $(filter $(strip $2),$($(_HIDE)KNOWN_VERBS)),$(warning COLLISION: modifier '$(strip $2)' in 'register($(strip $1),$(strip $2))' is also a declared verb — 'make $(strip $1) $(strip $2)' will run both))$(eval $(call $(_HIDE)register_impl,$(strip $1),$(strip $2),$(strip $3)))
 
 # ── register_always(verb,modifier,[prereqs]) ─────────────────
 # Like register, but the target is always created (no flag check)
@@ -70,7 +74,7 @@ define $(_HIDE)declare_verb_impl
 $1: $$($(_HIDE)DEPS_$1)
 endef
 
-declare_verb = $(call $(_HIDE)check_mods,$(strip $1))$(eval $(call $(_HIDE)declare_verb_impl,$(strip $1)))
+declare_verb = $(if $(filter $(strip $1),$($(_HIDE)KNOWN_MODS) $($(_HIDE)ALL_MODS)),$(warning COLLISION: verb '$(strip $1)' in 'declare_verb($(strip $1))' is also a registered modifier — 'make <verb> $(strip $1)' will conflict))$(eval $(_HIDE)KNOWN_VERBS += $(strip $1))$(call $(_HIDE)check_mods,$(strip $1))$(eval $(call $(_HIDE)declare_verb_impl,$(strip $1)))
 
 # ── declare_verb_default(verb,default_dep) ──────────────────
 # Like declare_verb, but runs default_dep when no flag-gated deps
@@ -81,4 +85,4 @@ define $(_HIDE)declare_verb_default_impl
 $1: $$($(_HIDE)DEPS_$1) $$(if $$(strip $$($(_HIDE)DEPS_$1)),,$(strip $2))
 endef
 
-declare_verb_default = $(call $(_HIDE)check_mods,$(strip $1))$(eval $(call $(_HIDE)declare_verb_default_impl,$(strip $1),$(strip $2)))
+declare_verb_default = $(if $(filter $(strip $1),$($(_HIDE)KNOWN_MODS) $($(_HIDE)ALL_MODS)),$(warning COLLISION: verb '$(strip $1)' in 'declare_verb_default($(strip $1))' is also a registered modifier — 'make <verb> $(strip $1)' will conflict))$(eval $(_HIDE)KNOWN_VERBS += $(strip $1))$(call $(_HIDE)check_mods,$(strip $1))$(eval $(call $(_HIDE)declare_verb_default_impl,$(strip $1),$(strip $2)))

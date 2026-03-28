@@ -121,7 +121,7 @@ endif
 frontend backend cf github dist version e2e actions:
 	@:
 
-# No-op targets for bump modifiers (dev is already a verb, handled separately)
+# No-op targets for bump modifiers (consumed by BUMP_MOD filter).
 .PHONY: major minor patch rc alpha beta prerelease release
 major minor patch rc alpha beta prerelease release:
 	@:
@@ -240,7 +240,13 @@ $(call declare_verb, build)
 $(call declare_verb, test)
 $(call declare_verb, release)
 $(call declare_verb, stamp)
+# Skip dev verb declaration when 'dev' is used as a bump modifier
+ifeq ($(filter bump,$(MAKECMDGOALS)),)
 $(call declare_verb, dev)
+else
+.PHONY: dev
+dev: ;@:
+endif
 
 # ── Stamp defaults ────────────────────────────────────────────
 # stamp with no modifier stamps frontend
