@@ -10,34 +10,71 @@ const SCREENSHOT_DIR = path.resolve('e2e-screenshots');
 
 let currentMode: 'light' | 'dark' = 'light';
 
+// All known loading indicators across Stratos page types
+const LOADING_SELECTORS = [
+  '.loading-page__spinner',           // app-loading-page overlay spinner
+  '.progress-bar-indeterminate',      // list progress bar
+  '.spinner',                         // inline spinners (app wall, etc.)
+  '.loading-spinner',                 // generic loading spinner
+  'mat-spinner',                      // Material spinners
+];
+
+// Substantive content — at least one should be visible when a page is ready
+const CONTENT_SELECTORS = [
+  'app-list table tbody tr',          // list table rows
+  '.meta-card',                       // card view cards
+  'app-tile-grid',                    // summary tile grids
+  'app-info-card',                    // info cards (about/diagnostics)
+  '.app-metadata',                    // metadata sections
+  '.home-page-endpoint-card',         // home page cards
+  '.card-number-metric',              // home page metrics
+  'form',                             // profile/settings forms
+  '.login',                           // login page
+  '.boolean-list-component',          // feature flags boolean list
+];
+
+async function waitForPage(page: any, timeout: number): Promise<{ loaded: boolean; elapsed: number }> {
+  const startTime = Date.now();
+  while (Date.now() - startTime < timeout) {
+    let anyLoading = false;
+    for (const sel of LOADING_SELECTORS) {
+      if (await page.locator(sel).first().isVisible().catch(() => false)) {
+        anyLoading = true;
+        break;
+      }
+    }
+
+    let hasContent = false;
+    for (const sel of CONTENT_SELECTORS) {
+      if (await page.locator(sel).first().isVisible().catch(() => false)) {
+        hasContent = true;
+        break;
+      }
+    }
+
+    if (!anyLoading && hasContent) {
+      return { loaded: true, elapsed: Date.now() - startTime };
+    }
+    // No loaders visible but no content either — page may genuinely be empty
+    if (!anyLoading && (Date.now() - startTime > timeout / 2)) {
+      return { loaded: false, elapsed: Date.now() - startTime };
+    }
+    await page.waitForTimeout(2000);
+  }
+  return { loaded: false, elapsed: Date.now() - startTime };
+}
+
 async function capture(page: any, name: string, { timeout = 60000 } = {}) {
   const dir = path.join(SCREENSHOT_DIR, `${label}-${currentMode}`);
   fs.mkdirSync(dir, { recursive: true });
   await page.waitForLoadState('domcontentloaded');
 
-  // Wait for page-level loading indicators to disappear
-  const loadingSelectors = [
-    'app-loading-page',
-    '.loading-page',
-    '.loading-spinner',
-    'text="Retrieving"',
-  ];
-
-  const startTime = Date.now();
-  while (Date.now() - startTime < timeout) {
-    let anyLoading = false;
-    for (const sel of loadingSelectors) {
-      const visible = await page.locator(sel).first().isVisible().catch(() => false);
-      if (visible) {
-        anyLoading = true;
-        break;
-      }
-    }
-    if (!anyLoading) break;
-    await page.waitForTimeout(2000);
+  const { loaded, elapsed } = await waitForPage(page, timeout);
+  if (!loaded) {
+    console.warn(`${name}: page did not fully load (${(elapsed / 1000).toFixed(0)}s)`);
   }
 
-  await page.waitForTimeout(2000); // final settle after loading done
+  await page.waitForTimeout(1500); // final settle for animations
   await page.screenshot({ path: path.join(dir, `${name}.png`), fullPage: true });
 }
 
@@ -50,61 +87,29 @@ async function setThemeMode(page: any, mode: 'light' | 'dark') {
 
 
 async function captureAuthenticatedPages(page: any, cfGuid: string) {
-  // Home — capture loading progression until content appears or 3min timeout
+  // Home — long timeout because it aggregates data from all endpoints
   await page.goto('/');
-  {
-    const startTime = Date.now();
-    const timeout = 180000; // 3 minutes
-    let attempt = 0;
-    let loaded = false;
-    while (Date.now() - startTime < timeout) {
-      attempt++;
-      const elapsed = ((Date.now() - startTime) / 1000).toFixed(0);
-      const spinnerVisible = await page.locator('mat-spinner, .loading-spinner, app-loading-page').first()
-        .isVisible().catch(() => false);
-      const hasContent = await page.locator('.home-page-endpoint-card, .card-number-metric, .card-boolean-metric').first()
-        .isVisible().catch(() => false);
-      if (!spinnerVisible && hasContent) {
-        console.log(`Home page loaded after ${elapsed}s`);
-        loaded = true;
-        break;
-      }
-      await capture(page, `02-home-loading-${elapsed}s`);
-      await page.waitForTimeout(10000);
-    }
-    const finalElapsed = ((Date.now() - startTime) / 1000).toFixed(0);
-    if (!loaded) {
-      console.warn(`Home page did not fully load within 3 minutes — capturing at ${finalElapsed}s`);
-    }
-    await page.waitForTimeout(1000);
-    await capture(page, `02-home-${finalElapsed}s`);
-  }
+  await capture(page, '02-home', { timeout: 180000 });
 
-  // Applications - cards view (use /applications — works on both v4 and v5)
+  // Applications - cards view
   await page.goto('/applications');
-  await page.locator('.app-card, .meta-card').first()
-    .waitFor({ state: 'visible', timeout: 30000 }).catch(() => console.warn('App cards did not appear within 30s'));
-  await page.waitForTimeout(1000);
   await capture(page, '03-applications-cards');
 
-  // Applications - table view (find the list/table toggle icon)
+  // Applications - table view (toggle if the list/table icon exists)
   const tableIcon = page.locator('.list-component button.btn-icon span.material-icons').filter({ hasText: /view_list|list/ });
   if (await tableIcon.count() > 0) {
     await tableIcon.first().click();
-    await page.waitForTimeout(1000);
     await capture(page, '04-applications-table');
   }
 
-  // App summary - click the first app card title
-  const appTitle = page.locator('.app-card .meta-card__title').first();
-  if (await appTitle.count() > 0) {
-    await appTitle.click();
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(3000);
+  // App summary — navigate into the first app from the current list
+  const appLink = page.locator('a[href*="/application/"]').first();
+  if (await appLink.count() > 0) {
+    await appLink.click();
     await capture(page, '05-app-summary');
   }
 
-  // CF pages
+  // CF summary
   await page.goto(`/cloud-foundry/${cfGuid}/summary`);
   await capture(page, '06-cf-summary');
 
@@ -113,7 +118,7 @@ async function captureAuthenticatedPages(page: any, cfGuid: string) {
   let spaceGuid = '';
   try {
     const orgsResponse = await Promise.race([
-      page.evaluate(async (cfGuid) => {
+      page.evaluate(async (cfGuid: string) => {
         const res = await fetch(`/pp/v1/proxy/v2/organizations?order-direction=asc&page=1&results-per-page=1`, {
           headers: { 'x-cap-cnsi-list': cfGuid, 'x-cap-passthrough': 'true' }
         });
@@ -124,7 +129,7 @@ async function captureAuthenticatedPages(page: any, cfGuid: string) {
     if (orgsResponse?.resources?.[0]) {
       orgGuid = orgsResponse.resources[0].metadata.guid;
       const spacesResponse = await Promise.race([
-        page.evaluate(async ({ cfGuid, orgGuid }) => {
+        page.evaluate(async ({ cfGuid, orgGuid }: { cfGuid: string; orgGuid: string }) => {
           const res = await fetch(`/pp/v1/proxy/v2/organizations/${orgGuid}/spaces?order-direction=asc&page=1&results-per-page=1`, {
             headers: { 'x-cap-cnsi-list': cfGuid, 'x-cap-passthrough': 'true' }
           });
@@ -142,10 +147,8 @@ async function captureAuthenticatedPages(page: any, cfGuid: string) {
 
   console.log(`Discovered: orgGuid=${orgGuid}, spaceGuid=${spaceGuid}`);
 
+  // CF organizations
   await page.goto(`/cloud-foundry/${cfGuid}/organizations`);
-  await page.locator('.meta-card').first()
-    .waitFor({ state: 'visible', timeout: 30000 }).catch(() => console.warn('Org cards did not appear within 30s'));
-  await page.waitForTimeout(1000);
   await capture(page, '07-cf-organizations');
 
   if (orgGuid) {
@@ -153,42 +156,60 @@ async function captureAuthenticatedPages(page: any, cfGuid: string) {
     await capture(page, '08-org-summary');
 
     await page.goto(`/cloud-foundry/${cfGuid}/organizations/${orgGuid}/spaces`);
-    await page.locator('.meta-card').first()
-      .waitFor({ state: 'visible', timeout: 30000 }).catch(() => console.warn('Space cards did not appear within 30s'));
-    await page.waitForTimeout(1000);
     await capture(page, '09-org-spaces');
+
+    await page.goto(`/cloud-foundry/${cfGuid}/organizations/${orgGuid}/users`);
+    await capture(page, '10-org-users');
 
     if (spaceGuid) {
       await page.goto(`/cloud-foundry/${cfGuid}/organizations/${orgGuid}/spaces/${spaceGuid}/summary`);
-      await capture(page, '10-space-summary');
+      await capture(page, '11-space-summary');
       await page.goto(`/cloud-foundry/${cfGuid}/organizations/${orgGuid}/spaces/${spaceGuid}/apps`);
-      await capture(page, '11-space-apps');
+      await capture(page, '12-space-apps');
       await page.goto(`/cloud-foundry/${cfGuid}/organizations/${orgGuid}/spaces/${spaceGuid}/routes`);
-      await capture(page, '12-space-routes');
+      await capture(page, '13-space-routes');
       await page.goto(`/cloud-foundry/${cfGuid}/organizations/${orgGuid}/spaces/${spaceGuid}/service-instances`);
-      await capture(page, '13-space-services');
+      await capture(page, '14-space-services');
+      await page.goto(`/cloud-foundry/${cfGuid}/organizations/${orgGuid}/spaces/${spaceGuid}/users`);
+      await capture(page, '15-space-users');
     }
   } else {
     console.warn('Could not discover org GUID — CF API may be slow');
   }
 
+  // CF platform pages (no org/space needed)
+  await page.goto(`/cloud-foundry/${cfGuid}/feature-flags`);
+  await capture(page, '20-feature-flags');
+  await page.goto(`/cloud-foundry/${cfGuid}/build-packs`);
+  await capture(page, '21-buildpacks');
+  await page.goto(`/cloud-foundry/${cfGuid}/stacks`);
+  await capture(page, '22-stacks');
+  await page.goto(`/cloud-foundry/${cfGuid}/security-groups`);
+  await capture(page, '23-security-groups');
+  await page.goto(`/cloud-foundry/${cfGuid}/quota-definitions`);
+  await capture(page, '24-org-quotas');
+  await page.goto(`/cloud-foundry/${cfGuid}/events`);
+  await capture(page, '25-events');
+
   // Marketplace
   await page.goto('/marketplace');
-  await capture(page, '15-marketplace');
+  await capture(page, '30-marketplace');
+
+  // Endpoints
+  await page.goto('/endpoints');
+  await capture(page, '31-endpoints');
 
   // About, diagnostics, and profile
   await page.goto('/about');
-  await capture(page, '16-about');
+  await capture(page, '40-about');
   await page.goto('/about/diagnostics');
-  await capture(page, '18-diagnostics');
+  await capture(page, '41-diagnostics');
   await page.goto('/user-profile');
-  await capture(page, '17-user-profile');
-  await page.goto('/endpoints');
-  await capture(page, '14-endpoints');
+  await capture(page, '42-user-profile');
 }
 
 test.describe('Visual Comparison Screenshots', () => {
-  test.setTimeout(300_000);
+  test.setTimeout(600_000); // 10 min — 25+ pages, home page alone can take 3 min
 
   test.describe('Unauthenticated', () => {
     test('01-login (light)', async ({ page }) => {

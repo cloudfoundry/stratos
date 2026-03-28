@@ -1,7 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
 
-// Default secrets profile to 'local' unless overridden
-process.env.STRATOS_E2E_PROFILE ??= 'local';
+// Default secrets profile — auto-detect from base URL, fall back to 'local'
+if (!process.env.STRATOS_E2E_PROFILE) {
+  const baseUrl = process.env.STRATOS_E2E_BASE_URL || '';
+  process.env.STRATOS_E2E_PROFILE = baseUrl.includes('adepttech') ? 'adepttech' : 'local';
+}
 
 // Test environment ports (separate from dev to avoid conflicts)
 const BACKEND_PORT = process.env.BACKEND_PORT || '5543';
