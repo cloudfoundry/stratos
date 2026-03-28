@@ -10,14 +10,34 @@ const SCREENSHOT_DIR = path.resolve('e2e-screenshots');
 
 let currentMode: 'light' | 'dark' = 'light';
 
-async function capture(page: any, name: string) {
+async function capture(page: any, name: string, { timeout = 60000 } = {}) {
   const dir = path.join(SCREENSHOT_DIR, `${label}-${currentMode}`);
   fs.mkdirSync(dir, { recursive: true });
   await page.waitForLoadState('domcontentloaded');
-  // Wait for loading indicators to disappear
-  await page.locator('app-loading-page, .loading-page, text="Retrieving"').first()
-    .waitFor({ state: 'hidden', timeout: 30000 }).catch(() => {});
-  await page.waitForTimeout(1000); // final settle
+
+  // Wait for page-level loading indicators to disappear
+  const loadingSelectors = [
+    'app-loading-page',
+    '.loading-page',
+    '.loading-spinner',
+    'text="Retrieving"',
+  ];
+
+  const startTime = Date.now();
+  while (Date.now() - startTime < timeout) {
+    let anyLoading = false;
+    for (const sel of loadingSelectors) {
+      const visible = await page.locator(sel).first().isVisible().catch(() => false);
+      if (visible) {
+        anyLoading = true;
+        break;
+      }
+    }
+    if (!anyLoading) break;
+    await page.waitForTimeout(2000);
+  }
+
+  await page.waitForTimeout(2000); // final settle after loading done
   await page.screenshot({ path: path.join(dir, `${name}.png`), fullPage: true });
 }
 
@@ -30,9 +50,35 @@ async function setThemeMode(page: any, mode: 'light' | 'dark') {
 
 
 async function captureAuthenticatedPages(page: any, cfGuid: string) {
-  // Home
+  // Home — capture loading progression until content appears or 3min timeout
   await page.goto('/');
-  await capture(page, '02-home');
+  {
+    const startTime = Date.now();
+    const timeout = 180000; // 3 minutes
+    let attempt = 0;
+    let loaded = false;
+    while (Date.now() - startTime < timeout) {
+      attempt++;
+      const elapsed = ((Date.now() - startTime) / 1000).toFixed(0);
+      const spinnerVisible = await page.locator('mat-spinner, .loading-spinner, app-loading-page').first()
+        .isVisible().catch(() => false);
+      const hasContent = await page.locator('.home-page-endpoint-card, .card-number-metric, .card-boolean-metric').first()
+        .isVisible().catch(() => false);
+      if (!spinnerVisible && hasContent) {
+        console.log(`Home page loaded after ${elapsed}s`);
+        loaded = true;
+        break;
+      }
+      await capture(page, `02-home-loading-${elapsed}s`);
+      await page.waitForTimeout(10000);
+    }
+    const finalElapsed = ((Date.now() - startTime) / 1000).toFixed(0);
+    if (!loaded) {
+      console.warn(`Home page did not fully load within 3 minutes — capturing at ${finalElapsed}s`);
+    }
+    await page.waitForTimeout(1000);
+    await capture(page, `02-home-${finalElapsed}s`);
+  }
 
   // Applications - cards view (use /applications — works on both v4 and v5)
   await page.goto('/applications');
@@ -66,21 +112,26 @@ async function captureAuthenticatedPages(page: any, cfGuid: string) {
   let orgGuid = '';
   let spaceGuid = '';
   try {
-    const orgsResponse = await page.evaluate(async (cfGuid) => {
-      const res = await fetch(`/pp/v1/proxy/v2/organizations?order-direction=asc&page=1&results-per-page=1`, {
-        headers: { 'x-cap-cnsi-list': cfGuid, 'x-cap-passthrough': 'true' }
-      });
-      return res.json();
-    }, cfGuid);
-    if (orgsResponse?.resources?.[0]) {
-      orgGuid = orgsResponse.resources[0].metadata.guid;
-      // Get first space from this org
-      const spacesResponse = await page.evaluate(async ({ cfGuid, orgGuid }) => {
-        const res = await fetch(`/pp/v1/proxy/v2/organizations/${orgGuid}/spaces?order-direction=asc&page=1&results-per-page=1`, {
+    const orgsResponse = await Promise.race([
+      page.evaluate(async (cfGuid) => {
+        const res = await fetch(`/pp/v1/proxy/v2/organizations?order-direction=asc&page=1&results-per-page=1`, {
           headers: { 'x-cap-cnsi-list': cfGuid, 'x-cap-passthrough': 'true' }
         });
         return res.json();
-      }, { cfGuid, orgGuid });
+      }, cfGuid),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('org fetch timeout')), 30000))
+    ]) as any;
+    if (orgsResponse?.resources?.[0]) {
+      orgGuid = orgsResponse.resources[0].metadata.guid;
+      const spacesResponse = await Promise.race([
+        page.evaluate(async ({ cfGuid, orgGuid }) => {
+          const res = await fetch(`/pp/v1/proxy/v2/organizations/${orgGuid}/spaces?order-direction=asc&page=1&results-per-page=1`, {
+            headers: { 'x-cap-cnsi-list': cfGuid, 'x-cap-passthrough': 'true' }
+          });
+          return res.json();
+        }, { cfGuid, orgGuid }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('space fetch timeout')), 30000))
+      ]) as any;
       if (spacesResponse?.resources?.[0]) {
         spaceGuid = spacesResponse.resources[0].metadata.guid;
       }

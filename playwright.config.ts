@@ -118,20 +118,23 @@ export default defineConfig({
   //   ps aux | grep 'STRATOS_E2E=e2e'       # find all test sessions
   //   ps aux | grep 'e2e:5543'             # find a specific session
   //   pkill -f 'e2e:5543'                  # kill a specific session
-  webServer: [
-    {
-      command: `cd src/jetstream && STRATOS_E2E=e2e:${BACKEND_PORT} CONSOLE_PROXY_TLS_ADDRESS=:${BACKEND_PORT} ../../dist/bin/jetstream`,
-      url: `https://localhost:${BACKEND_PORT}/pp/v1/info`,
-      reuseExistingServer: true,
-      ignoreHTTPSErrors: true,
-      timeout: 30000,
-    },
-    {
-      command: `STRATOS_E2E=e2e:${BACKEND_PORT} BACKEND_PORT=${BACKEND_PORT} bun run ng serve --port ${FRONTEND_PORT} --proxy-config proxy.conf.cjs`,
-      url: `https://localhost:${FRONTEND_PORT}`,
-      reuseExistingServer: true,
-      ignoreHTTPSErrors: true,
-      timeout: 120000,
-    },
-  ],
+  // Skip local servers when targeting a remote deployment
+  ...(process.env.STRATOS_E2E_BASE_URL ? {} : {
+    webServer: [
+      {
+        command: `cd src/jetstream && STRATOS_E2E=e2e:${BACKEND_PORT} CONSOLE_PROXY_TLS_ADDRESS=:${BACKEND_PORT} ../../dist/bin/jetstream`,
+        url: `https://localhost:${BACKEND_PORT}/pp/v1/info`,
+        reuseExistingServer: true,
+        ignoreHTTPSErrors: true,
+        timeout: 30000,
+      },
+      {
+        command: `STRATOS_E2E=e2e:${BACKEND_PORT} BACKEND_PORT=${BACKEND_PORT} bun run ng serve --port ${FRONTEND_PORT} --proxy-config proxy.conf.cjs`,
+        url: `https://localhost:${FRONTEND_PORT}`,
+        reuseExistingServer: true,
+        ignoreHTTPSErrors: true,
+        timeout: 120000,
+      },
+    ],
+  }),
 });
