@@ -1,6 +1,6 @@
 import { TemplatePortal } from '@angular/cdk/portal';
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild  } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild  } from '@angular/core';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import {
@@ -144,6 +144,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   @Input()
   set breadcrumbs(breadcrumbs: IHeaderBreadcrumb[]) {
     this.breadcrumbDefinitions = this.getBreadcrumb(breadcrumbs);
+    this.cdr.markForCheck();
   }
 
   // Used when non-admin logs in with no-endpoints -> only show logout in the menu
@@ -183,6 +184,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     private cups: CurrentUserPermissionsService,
     private endpointsService: EndpointsService,
     private currentUserPermissionsService: CurrentUserPermissionsService,
+    private cdr: ChangeDetectorRef,
   ) {
     this.events$ = eventService.events$.pipe(
       startWith([])

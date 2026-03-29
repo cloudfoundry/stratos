@@ -23,14 +23,14 @@
               <div class="page-header-breadcrumbs flex items-center space-x-2">
                 @for (breadcrumbDef of breadcrumbDefinitions; track $index) {
                   @if (breadcrumbDef.routerLink) {
-                    <span class="page-header-breadcrumb text-white/90 hover:text-white cursor-pointer"
+                    <span class="page-header-breadcrumb text-header-text opacity-80 hover:opacity-100 cursor-pointer"
                     [routerLink]="breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
                   }
                   @if (!breadcrumbDef.routerLink) {
-                    <span class="page-header-breadcrumb text-white/70"
+                    <span class="page-header-breadcrumb text-header-text opacity-60"
                     >{{ breadcrumbDef.value }}</span>
                   }
-                  <span class="material-icons text-white/50 text-sm">chevron_right</span>
+                  <span class="material-icons text-header-text opacity-50 text-sm">chevron_right</span>
                 }
               </div>
             }
