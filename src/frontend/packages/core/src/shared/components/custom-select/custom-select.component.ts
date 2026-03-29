@@ -102,6 +102,9 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   dropdownLeft = '0px';
   dropdownWidth = '0px';
 
+  // Interaction lock: ignore external writeValue while user is actively selecting in multi-select
+  private _interacting = false;
+
   private _onChange = (value: any) => {};
   private _onTouched = () => {};
   private _subscriptions: Subscription[] = [];
@@ -170,6 +173,7 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
     }
 
     this.isOpen = !this.isOpen;
+    this._interacting = this.isOpen && this.multiple;
     this._onTouched();
     this.cdr.markForCheck();
   }
@@ -233,23 +237,18 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
 
   // ControlValueAccessor implementation
   writeValue(value: any): void {
+    // Interaction lock: ignore external writes while user is actively selecting.
+    // Always allow clears (reset button) even during interaction.
+    if (this._interacting && value !== null && value !== undefined &&
+        (!Array.isArray(value) || value.length > 0)) {
+      return;
+    }
+
     if (this.multiple && Array.isArray(value)) {
-      const incoming = value || [];
-      // Skip if values are equivalent — prevents store echo from clobbering in-progress selections
-      if (incoming.length === this.selectedValues.length &&
-          incoming.every((v: any, i: number) => v === this.selectedValues[i])) {
-        return;
-      }
-      this.selectedValues = incoming;
+      this.selectedValues = value || [];
     } else if (!this.multiple && value !== undefined && value !== null) {
-      if (this.selectedValues.length === 1 && this.selectedValues[0] === value) {
-        return;
-      }
       this.selectedValues = [value];
     } else {
-      if (this.selectedValues.length === 0) {
-        return;
-      }
       this.selectedValues = [];
     }
     this.updateDisplayValue();
@@ -293,6 +292,7 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
 
     if (!clickedInside) {
       this.isOpen = false;
+      this._interacting = false;
       // CRITICAL: Mark for check in OnPush + zoneless mode
       this.cdr.markForCheck();
     }
