@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, Output, EventEmitter, forwardRef, ViewChild, ElementRef, ContentChildren, QueryList, AfterContentInit, AfterViewInit, HostListener, OnDestroy, booleanAttribute  } from '@angular/core';
+import { NgClass } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
@@ -10,9 +11,19 @@ export interface MatSelectChange {
 
 @Component({
   selector: 'app-option',
-  template: '<div #optionContent class="custom-option-content dark:text-slate-100 dark:hover:bg-slate-700" [class.selected]="selected" [class.disabled]="disabled"><ng-content></ng-content></div>',
+  template: `<div #optionContent
+    class="custom-option-content py-2 px-3 cursor-pointer whitespace-nowrap"
+    [class.selected]="selected"
+    [class.disabled]="disabled"
+    [ngClass]="{
+      'bg-blue-50 text-blue-700 dark:bg-slate-800 dark:text-blue-400': selected,
+      'text-content-primary dark:text-slate-100 hover:bg-gray-100 dark:hover:bg-slate-700': !selected,
+      'opacity-50 cursor-not-allowed hover:bg-transparent': disabled
+    }"
+    ><ng-content></ng-content></div>`,
   styleUrls: ['./custom-select.component.scss'],
   standalone: true,
+  imports: [NgClass],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomOptionComponent implements AfterViewInit {

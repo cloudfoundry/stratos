@@ -156,44 +156,7 @@
   // Container for options
 }
 
-:host ::ng-deep .custom-option-content {
-  padding: 8px 12px;
-  cursor: pointer;
-  color: var(--content-text, inherit);
-  white-space: nowrap;
-
-  &:hover {
-    background-color: var(--table-row-hover, #f5f5f5);
-  }
-
-  &.selected {
-    background-color: var(--info-bg, #e3f2fd);
-    color: var(--info-text, var(--color-primary, #1976d2));
-  }
-
-  &.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-
-    &:hover {
-      background-color: transparent;
-    }
-  }
-
-  // Dark theme support - backup for browsers without Tailwind dark mode
-  .dark-theme & {
-    color: var(--content-text, #e2e8f0);
-
-    &:hover {
-      background-color: var(--table-row-hover, #334155);
-    }
-
-    &.selected {
-      background-color: var(--info-bg, #1e3a5f);
-      color: var(--info-text, #60a5fa);
-    }
-  }
-}
+// Option content styles migrated to Tailwind via ngClass on the template
 
 .select-error {
   margin-top: 4px;
