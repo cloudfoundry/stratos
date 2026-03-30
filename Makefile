@@ -99,6 +99,23 @@ ifeq ($($(_HIDE)WANT_CF)$($(_HIDE)WANT_GITHUB),)
 endif
 endif
 
+$(_HIDE)WANT_VERSION :=
+$(_HIDE)WANT_ACTIONS :=
+
+ifneq ($(filter version,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_VERSION := yes
+endif
+ifneq ($(filter actions,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_ACTIONS := yes
+endif
+# Default: version + actions when none specified for dump
+ifneq ($(filter dump,$(MAKECMDGOALS)),)
+ifeq ($($(_HIDE)WANT_VERSION)$($(_HIDE)WANT_ACTIONS),)
+  $(_HIDE)WANT_VERSION := yes
+  $(_HIDE)WANT_ACTIONS := yes
+endif
+endif
+
 # cf modifier defaults to linux/amd64 unless PLATFORM is set
 ifeq ($($(_HIDE)WANT_CF),yes)
   ifndef PLATFORM
@@ -277,7 +294,7 @@ $(call declare_verb_default, clean, $(_HIDE)clean.release)
 
 # ── Dump (introspection) ─────────────────────────────────────
 # dump.version recipe is defined in version.mk (shared library)
-$(call register_always, dump, version)
+$(call register, dump, version)
 
 define dump.actions
 	@echo "Registered verb+modifier pairs:"
@@ -286,10 +303,9 @@ define dump.actions
 		printf "  make %-12s %s\n" "$$verb" "$$mod"; \
 	done
 endef
-$(call register_always, dump, actions)
+$(call register, dump, actions)
 
-.PHONY: dump
-dump: $(_HIDE)dump.version $(_HIDE)dump.actions
+$(call declare_verb, dump)
 
 # ── Development ports ─────────────────────────────────────────
 BACKEND_PORT  ?= 5443

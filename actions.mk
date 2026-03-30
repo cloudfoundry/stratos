@@ -21,9 +21,11 @@ $(_HIDE)FLAG_cf          := $($(_HIDE)WANT_CF)
 $(_HIDE)FLAG_github      := $($(_HIDE)WANT_GITHUB)
 $(_HIDE)FLAG_e2e         := $($(_HIDE)WANT_E2E)
 $(_HIDE)FLAG_dist        := $($(_HIDE)WANT_CLEAN_DIST)
+$(_HIDE)FLAG_version     := $($(_HIDE)WANT_VERSION)
+$(_HIDE)FLAG_actions     := $($(_HIDE)WANT_ACTIONS)
 
 # Known modifiers — the set checked during validation in declare_verb
-$(_HIDE)KNOWN_MODS := frontend backend cf github e2e dist
+$(_HIDE)KNOWN_MODS := frontend backend cf github e2e dist version actions
 
 # Known verbs — populated by declare_verb, checked for collisions
 $(_HIDE)KNOWN_VERBS :=
