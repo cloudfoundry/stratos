@@ -109,7 +109,7 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   private _onTouched = () => {};
   private _subscriptions: Subscription[] = [];
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  constructor(private cdr: ChangeDetectorRef, private elementRef: ElementRef) {}
 
   ngAfterContentInit() {
     // Subscribe to option selection changes
@@ -273,28 +273,16 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
 
     const target = event.target as HTMLElement;
 
-    // CRITICAL FIX: Check if click is on an option element first
-    // This prevents the dropdown from closing before the option's click handler runs
-    const isOptionClick = target.closest('.custom-option-content');
-    if (isOptionClick) {
-      // Let the option's click handler process this - don't interfere
+    // Check if click is inside this component (trigger, dropdown, or option).
+    // The dropdown is rendered inside the host element, so a single
+    // contains() check covers all internal clicks — including option
+    // clicks where stopPropagation doesn't prevent the HostListener.
+    if (this.elementRef.nativeElement.contains(target)) {
       return;
     }
 
-    // Check if clicked inside the select component
-    const clickedTrigger = this.selectTrigger.nativeElement.contains(target);
-
-    // Check if clicked inside dropdown (with null safety for ViewChild)
-    // The ViewChild may not be available immediately after opening
-    const clickedDropdown = this.selectOptions?.nativeElement?.contains(target) || false;
-
-    const clickedInside = clickedTrigger || clickedDropdown;
-
-    if (!clickedInside) {
-      this.isOpen = false;
-      this._interacting = false;
-      // CRITICAL: Mark for check in OnPush + zoneless mode
-      this.cdr.markForCheck();
-    }
+    this.isOpen = false;
+    this._interacting = false;
+    this.cdr.markForCheck();
   }
 }
