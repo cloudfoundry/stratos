@@ -3,9 +3,15 @@
   <div class="firehose-filter-panel flex-none">
     <div class="firehose-filter-panel__controls">
       <span class="controls-label">Select:</span>
-      <a class="firehose-filter-panel__link" (click)="formatter.showAll(true)">All</a>
+      <a class="firehose-filter-panel__link" role="button" tabindex="0"
+        (click)="formatter.showAll(true)"
+        (keydown.enter)="formatter.showAll(true)"
+        (keydown.space)="formatter.showAll(true); $event.preventDefault()">All</a>
       <span>|</span>
-      <a class="firehose-filter-panel__link" (click)="formatter.showAll(false)">None</a>
+      <a class="firehose-filter-panel__link" role="button" tabindex="0"
+        (click)="formatter.showAll(false)"
+        (keydown.enter)="formatter.showAll(false)"
+        (keydown.space)="formatter.showAll(false); $event.preventDefault()">None</a>
     </div>
 
     <div class="firehose-filter-panel__filters">

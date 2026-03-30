@@ -1,6 +1,6 @@
 <div class="connection-dialog__loading-wrapper">
   <app-progress-bar class="connection-dialog__loading"
-    [color]="(connectingError$ | async) && !(isBusy$ | async) ? 'warn' : 'primary'"
+    [color]="(connectingError$ | async) && (isBusy$ | async) === false ? 'warn' : 'primary'"
     [mode]="(isBusy$ | async) ? 'indeterminate' : 'solid'">
   </app-progress-bar>
 </div>

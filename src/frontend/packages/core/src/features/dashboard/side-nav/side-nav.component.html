@@ -51,7 +51,7 @@
     <ul class="nav-items flex-1 py-2 space-y-1">
       @for (tab of tabs; track tab) {
         <li class="nav-item-container">
-          @if (showAllMenuItems || !tab.hidden || (tab.hidden && !(tab.hidden | async))) {
+          @if (showAllMenuItems || !tab.hidden || (tab.hidden && (tab.hidden | async) === false)) {
             <a
               class="nav-item nav-item-link flex items-center pl-0 pr-3 py-3 text-nav-muted hover:text-nav-text hover:bg-nav-hover transition-all duration-200 relative group"
               [class.nav-item--active]="isActiveRoute(tab.link)"

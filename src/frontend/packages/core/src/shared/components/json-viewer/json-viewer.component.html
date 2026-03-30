@@ -3,7 +3,11 @@
     <section
       [ngClass]="['segment', 'segment-type-' + segment.type]">
       <section
+        [attr.role]="isExpandable(segment) ? 'button' : null"
+        [attr.tabindex]="isExpandable(segment) ? 0 : null"
         (click)="toggle(segment)"
+        (keydown.enter)="toggle(segment)"
+        (keydown.space)="toggle(segment); $event.preventDefault()"
       [ngClass]="{
         'segment-main': true,
         'expandable': isExpandable(segment),

@@ -49,7 +49,7 @@
                     @if (projectInfo$ | async; as projectInfo) {
                       <div class="deploy-step2-form__project-info-group">
                         <div>
-                          <img src="{{projectInfo.owner.avatar_url}}">
+                          <img src="{{projectInfo.owner.avatar_url}}" alt="">
                         </div>
                         <div src="description">
                           <div>
@@ -79,7 +79,7 @@
                     <div
                       class="deploy-step2-form__project-info-group deploy-step2-form__commit">
                       <div>
-                        <img src="{{commitInfo.author.avatar_url}}">
+                        <img src="{{commitInfo.author.avatar_url}}" alt="">
                       </div>
                       <div src="description">
                         <div>

@@ -4,10 +4,14 @@
       @for (tab of getTabsArray(); track $index; let i = $index) {
         <div
           class="tab-label"
+          role="tab" tabindex="0"
+          [attr.aria-selected]="tab.isActive"
           [class.active]="tab.isActive"
           [class.disabled]="tab.disabled"
           [attr.data-color]="color"
           (click)="selectTab(i)"
+          (keydown.enter)="selectTab(i)"
+          (keydown.space)="selectTab(i); $event.preventDefault()"
           >
           {{ tab.label || tab.textLabel }}
         </div>

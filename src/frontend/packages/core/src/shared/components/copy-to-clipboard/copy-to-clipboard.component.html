@@ -15,7 +15,10 @@
   @if (canCopy) {
     <span class="material-icons copy__copy-icon cursor-pointer text-content-muted hover:text-content-text transition-colors"
       [ngClass]="{'text-sm': compact, 'text-base': !compact}"
+      role="button" tabindex="0"
       (click)="copyToClipboard($event)"
+      (keydown.enter)="copyToClipboard($event)"
+      (keydown.space)="copyToClipboard($event); $event.preventDefault()"
       [title]="tooltip">
       content_copy
     </span>

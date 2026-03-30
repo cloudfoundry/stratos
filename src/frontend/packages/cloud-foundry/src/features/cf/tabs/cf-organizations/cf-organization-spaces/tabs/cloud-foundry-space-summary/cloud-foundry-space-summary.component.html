@@ -80,7 +80,7 @@
 
       <app-tile-group class="tile-group-1-cols">
         <app-tile>
-          @if (!(detailsLoading$ | async)) {
+          @if ((detailsLoading$ | async) === false) {
             <app-card-cf-recent-apps [allApps$]="cfSpaceService.apps$"
               [endpoint]="cfEndpointService.cfGuid"
             [loading$]="cfSpaceService.loadingApps$" (refresh)="cfSpaceService.fetchApps()"></app-card-cf-recent-apps>

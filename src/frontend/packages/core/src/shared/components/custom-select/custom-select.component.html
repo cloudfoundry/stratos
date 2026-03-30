@@ -5,7 +5,13 @@
   [attr.aria-invalid]="invalid || null"
   [attr.aria-describedby]="invalid && errorMessage ? 'error-' + (id || name) : null">
 
-  <div class="select-trigger" #selectTrigger (click)="toggle()">
+  <div class="select-trigger" #selectTrigger role="combobox" tabindex="0"
+    [attr.aria-expanded]="isOpen"
+    aria-haspopup="listbox"
+    [attr.aria-controls]="isOpen ? 'select-listbox-' + (id || name) : null"
+    (click)="toggle()"
+    (keydown.enter)="toggle()"
+    (keydown.space)="toggle(); $event.preventDefault()">
     <span class="select-value" [class.placeholder]="!displayValue || displayValue === ''">
       {{ displayValue && displayValue !== '' ? displayValue : (placeholder || 'Select...') }}
     </span>
@@ -24,7 +30,11 @@
     [style.top]="dropdownTop"
     [style.left]="dropdownLeft"
     [style.min-width]="dropdownWidth">
-    <div class="options-container" (click)="onOptionsClick($event)">
+    <div class="options-container" role="listbox" tabindex="-1"
+      [id]="'select-listbox-' + (id || name)"
+      (click)="onOptionsClick($event)"
+      (keydown.enter)="onOptionsClick($event)"
+      (keydown.space)="onOptionsClick($event); $event.preventDefault()">
       <ng-content></ng-content>
     </div>
   </div>

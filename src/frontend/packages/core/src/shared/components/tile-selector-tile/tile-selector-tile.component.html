@@ -1,13 +1,16 @@
 @if (tile) {
   <div class="tile-selector-parent" [ngClass]="{'smaller': smaller, 'compact': compact}">
-    <div class="tile-selector" [ngClass]="{'tile-selector__active': active, 'tile-selector__taller': !!tile.description}"
-      (click)="onClick(tile)">
+    <div class="tile-selector" role="button" tabindex="0"
+      [ngClass]="{'tile-selector__active': active, 'tile-selector__taller': !!tile.description}"
+      (click)="onClick(tile)"
+      (keydown.enter)="onClick(tile)"
+      (keydown.space)="onClick(tile); $event.preventDefault()">
       <div class="tile-selector__header">
         @if (tile.graphic.matIcon) {
           <app-custom-icon class="tile-selector__icon"
           [fontSet]="tile.graphic.matIconFont"> {{ tile.graphic.matIcon }}</app-custom-icon>
         } @else {
-          <img src="{{tile.graphic.location}}" [style.transform]="tile.graphic.transform" />
+          <img src="{{tile.graphic.location}}" [style.transform]="tile.graphic.transform" alt="" />
         }
       </div>
       <div class="tile-selector__content">

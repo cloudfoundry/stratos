@@ -20,7 +20,7 @@
         <app-form-field>
           <input appInput placeholder="Primary Email Address" formControlName="emailAddress">
         </app-form-field>
-        @if (!(canChangePassword | async) && needsPasswordForEmailChange) {
+        @if ((canChangePassword | async) === false && needsPasswordForEmailChange) {
           <p>Current password is required when
           changing email address</p>
         }

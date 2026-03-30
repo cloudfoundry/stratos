@@ -4,7 +4,11 @@
     <ng-container *ngTemplateOutlet="tile; context:{ options: hiddenOptions, selected: selected }"></ng-container>
   }
   @if (hiddenOptions.length > 0) {
-    <div (click)="toggleMore()" class="tile-selector__more">
+    <div role="button" tabindex="0"
+      (click)="toggleMore()"
+      (keydown.enter)="toggleMore()"
+      (keydown.space)="toggleMore(); $event.preventDefault()"
+      class="tile-selector__more">
       {{ showingMore ? 'Show less' : 'Show more' }}
     </div>
   }

@@ -80,7 +80,7 @@
             <!-- Main page content -->
             <div class="relative flex-1 flex flex-col min-h-0 overflow-hidden">
               <div #content class="flex-1 flex flex-col min-h-0 overflow-x-hidden overflow-y-auto bg-content-bg text-content-text"
-                [ngClass]="{'p-6': !(noMargin$ | async), 'p-0': noMargin$ | async}"
+                [ngClass]="{'p-6': (noMargin$ | async) === false, 'p-0': noMargin$ | async}"
                 (scroll)="onContentScroll($event)">
                 <div class="flex-1 flex flex-col min-h-0">
                   <router-outlet></router-outlet>
@@ -103,7 +103,11 @@
          'translate-x-full': !sidePanelService.opened(),
          'dashboard-side-preview w-96': sidePanelService.previewMode() >= 0
        }"
-    (click)="sideHelpClosed()">
+    role="button" tabindex="0"
+    (click)="sideHelpClosed()"
+    (keydown.enter)="sideHelpClosed()"
+    (keydown.space)="sideHelpClosed(); $event.preventDefault()"
+    (keydown.escape)="sideHelpClosed()">
     <div class="dashboard-side-help h-full overflow-auto"
       [ngClass]="{'dashboard-side-narrow w-80': sidePanelService.previewMode() === 2, 'w-96': sidePanelService.previewMode() !== 2}">
       <template #previewPanelContainer></template>

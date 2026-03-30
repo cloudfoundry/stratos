@@ -3,9 +3,12 @@
   @if (!buttonLabel) {
     <div class="form-field file-input__form-field">
       <div class="file-input__field input flex items-center justify-between cursor-pointer"
+        role="button" [attr.tabindex]="disabled ? -1 : 0"
         [class.opacity-50]="disabled"
         [class.cursor-not-allowed]="disabled"
-        (click)="!disabled && selectFile($event)">
+        (click)="!disabled && selectFile($event)"
+        (keydown.enter)="!disabled && selectFile($event)"
+        (keydown.space)="!disabled && selectFile($event); $event.preventDefault()">
         @if (!fileCount) {
           <div class="file-input__input file-input__none text-content-muted">No file selected</div>
         }

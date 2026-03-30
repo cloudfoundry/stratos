@@ -1,13 +1,13 @@
-@if (!(blocked$ | async)) {
+@if ((blocked$ | async) === false) {
   <div class="usernames">
     <div class="usernames__addRemove">
       <div class="flex flex-col gap-3 mb-4">
-        <label class="inline-flex items-center cursor-pointer" [class.opacity-50]="!(canAdd$ | async)" [class.pointer-events-none]="!(canAdd$ | async)">
-          <input type="radio" [checked]="currentValue === false" (change)="setIsRemove({source: null, value: false})" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2" [disabled]="!(canAdd$ | async)">
+        <label class="inline-flex items-center cursor-pointer" [class.opacity-50]="(canAdd$ | async) === false" [class.pointer-events-none]="(canAdd$ | async) === false">
+          <input type="radio" [checked]="currentValue === false" (change)="setIsRemove({source: null, value: false})" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2" [disabled]="(canAdd$ | async) === false">
           <span class="ml-2 text-sm font-medium text-content-text">Add Roles{{(canAdd$ | async) ? '' : ' (Disabled via feature flag)'}}</span>
         </label>
-        <label class="inline-flex items-center cursor-pointer" [class.opacity-50]="!(canRemove$ | async)" [class.pointer-events-none]="!(canRemove$ | async)">
-          <input type="radio" [checked]="currentValue === true" (change)="setIsRemove({source: null, value: true})" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2" [disabled]="!(canRemove$ | async)">
+        <label class="inline-flex items-center cursor-pointer" [class.opacity-50]="(canRemove$ | async) === false" [class.pointer-events-none]="(canRemove$ | async) === false">
+          <input type="radio" [checked]="currentValue === true" (change)="setIsRemove({source: null, value: true})" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2" [disabled]="(canRemove$ | async) === false">
           <span class="ml-2 text-sm font-medium text-content-text">Remove Roles{{(canRemove$ | async) ? '' : ' (Disabled via feature flag)'}}</span>
         </label>
       </div>

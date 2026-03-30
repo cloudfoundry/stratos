@@ -26,7 +26,11 @@
                   role="columnheader">
                   <div class="flex items-center gap-1 select-none"
                     [class.cursor-pointer]="column.sort"
-                    (click)="column.sort && handleSort(column)">
+                    [attr.role]="column.sort ? 'button' : null"
+                    [attr.tabindex]="column.sort ? 0 : null"
+                    (click)="column.sort && handleSort(column)"
+                    (keydown.enter)="column.sort && handleSort(column)"
+                    (keydown.space)="column.sort && handleSort(column); $event.preventDefault()">
                     <app-table-cell [component]="column.headerCellComponent" [func]="column.headerCell"
                     [dataSource]="dataSource"></app-table-cell>
                     @if (column.sort) {

@@ -1,7 +1,7 @@
 <app-card class="recent-instances">
   <app-card-header class="recent-instances__header">
     <app-card-title>Recently updated service instances</app-card-title>
-    @if (!(serviceInstances$ | async)) {
+    @if ((serviceInstances$ | async) === null) {
       <app-stateful-icon [state]="'busy'"></app-stateful-icon>
     }
   </app-card-header>

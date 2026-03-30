@@ -17,9 +17,9 @@
         </div>
       </div>
       @if (service.file$ | async; as file) {
-        @if (!!service.unparsableFileContent || !(service.validDb$ | async)) {
+        @if (!!service.unparsableFileContent || (service.validDb$ | async) === false) {
           <div class="space-y-4">
-            @if (!service.unparsableFileContent && !(service.validDb$ | async)) {
+            @if (!service.unparsableFileContent && (service.validDb$ | async) === false) {
               <div class="alert alert-warning">
                 <div class="flex items-start space-x-3">
                   <span class="material-icons text-warning-600 mt-0.5">warning</span>

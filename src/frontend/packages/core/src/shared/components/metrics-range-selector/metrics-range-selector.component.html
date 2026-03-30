@@ -13,7 +13,10 @@
         <button class="btn btn-secondary" type="button" (click)="showOverlay = false">Cancel</button>
       </div>
     </div>
-    <div class="metrics-range-selector__overlay-click" (click)="showOverlay = false"></div>
+    <div class="metrics-range-selector__overlay-click" role="button" tabindex="0"
+      (click)="showOverlay = false"
+      (keydown.enter)="showOverlay = false"
+      (keydown.space)="showOverlay = false; $event.preventDefault()"></div>
   </div>
   <app-form-field>
     <app-select [(value)]="rangeSelectorManager.selectedTimeRange">
@@ -42,7 +45,10 @@
         No dates selected
       }
       @if (rangeSelectorManager.selectedTimeRange && rangeSelectorManager.selectedTimeRange.queryType === rangeTypes.RANGE_QUERY && !showOverlay) {
-        <a class="metrics-range-selector__selected-range-edit" (click)="showOverlay = true"
+        <a class="metrics-range-selector__selected-range-edit" role="button" tabindex="0"
+          (click)="showOverlay = true"
+          (keydown.enter)="showOverlay = true"
+          (keydown.space)="showOverlay = true; $event.preventDefault()"
         >Change</a>
       }
     </div>

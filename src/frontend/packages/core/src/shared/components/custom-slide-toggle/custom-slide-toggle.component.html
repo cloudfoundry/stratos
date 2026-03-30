@@ -16,7 +16,11 @@
         </span>
       }
 
-      <div class="slide-toggle-bar" (click)="toggle()">
+      <div class="slide-toggle-bar" role="switch" tabindex="0"
+        [attr.aria-checked]="checked"
+        (click)="toggle()"
+        (keydown.enter)="toggle()"
+        (keydown.space)="toggle(); $event.preventDefault()">
         <input
           type="checkbox"
           class="slide-toggle-input"

@@ -2,7 +2,11 @@
   <div class="card hover:shadow-md transition-shadow duration-200 fav-card"
     [class.cursor-pointer]="!!routerLink"
     [class.fav-card--clickable]="!!routerLink"
+    [attr.role]="routerLink ? 'button' : null"
+    [attr.tabindex]="routerLink ? 0 : null"
     (click)="openFavorite()"
+    (keydown.enter)="openFavorite()"
+    (keydown.space)="openFavorite(); $event.preventDefault()"
     >
     <div class="card-body">
       <div class="flex items-start justify-between space-x-4">

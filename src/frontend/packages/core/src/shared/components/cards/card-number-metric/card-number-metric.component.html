@@ -39,7 +39,10 @@
         </div>
         <!-- Alert badges -->
         @if (alertInfo) {
-          <div class="number-metric-card-alerts mt-3 space-y-2" (click)="alertsClicked()">
+          <div class="number-metric-card-alerts mt-3 space-y-2" role="button" tabindex="0"
+            (click)="alertsClicked()"
+            (keydown.enter)="alertsClicked()"
+            (keydown.space)="alertsClicked(); $event.preventDefault()">
             @if (alertInfo.info) {
               <div
                 class="alert alert-info flex items-center space-x-2 p-2 text-xs cursor-pointer">
@@ -90,7 +93,11 @@
 
 @if (link) {
   <ng-container #text>
-    <a (click)="goToLink()" class="number-metric-card__anchor">
+    <a role="button" tabindex="0"
+      (click)="goToLink()"
+      (keydown.enter)="goToLink()"
+      (keydown.space)="goToLink(); $event.preventDefault()"
+      class="number-metric-card__anchor">
       <ng-container *ngTemplateOutlet="content"></ng-container>
     </a>
   </ng-container>

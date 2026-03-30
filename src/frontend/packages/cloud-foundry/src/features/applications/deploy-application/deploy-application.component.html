@@ -15,13 +15,13 @@
     <app-deploy-application-step2 [isRedeploy]="isRedeploy" #step2></app-deploy-application-step2>
   </app-step>
   <!-- Select the commit if source type is git -->
-  <app-step [hidden]="appGuid || !(step2.sourceTypeGithub$ | async)" [title]="'Source Config'"
+  <app-step [hidden]="appGuid || (step2.sourceTypeGithub$ | async) === false" [title]="'Source Config'"
     [valid]="step2_1.validate | async" [skip]="skipConfig$ | async" [onLeave]="step2_1.onLeave"
     [onEnter]="step2_1.onEnter" [onNext]="step2_1.onNext">
     <app-deploy-application-step2-1 #step2_1></app-deploy-application-step2-1>
   </app-step>
   <!-- Upload the source if source type is folder/archive  -->
-  <app-step [hidden]="isRedeploy || !(step2.sourceTypeNeedsUpload$ | async)" title="Source Upload"
+  <app-step [hidden]="isRedeploy || (step2.sourceTypeNeedsUpload$ | async) === false" title="Source Upload"
     [valid]="step2_2.valid$ | async" [skip]="step2_2.skip$ | async" [onLeave]="step2_2.onLeave"
     [onEnter]="step2_2.onEnter" [onNext]="step2_2.onNext">
     <app-deploy-application-step-source-upload #step2_2></app-deploy-application-step-source-upload>

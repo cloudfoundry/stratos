@@ -1,5 +1,10 @@
 <div class="card meta-card {{status$ && statusBackground? (status$ | async): '' }}"
-  [ngClass]="{'meta-card-pointer': clickAction, 'meta-card__plain': mode === 'plain'}" (click)="clickAction ? clickAction() : null">
+  [ngClass]="{'meta-card-pointer': clickAction, 'meta-card__plain': mode === 'plain'}"
+  [attr.role]="clickAction ? 'button' : null"
+  [attr.tabindex]="clickAction ? 0 : null"
+  (click)="clickAction ? clickAction() : null"
+  (keydown.enter)="clickAction ? clickAction() : null"
+  (keydown.space)="clickAction ? clickAction() : null; $event.preventDefault()">
   @if (isDeleting$ | async) {
     <div class="meta-card__deleting-overlay">
       <div class="meta-card__deleting-overlay-inner">

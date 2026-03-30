@@ -23,7 +23,7 @@
 </app-page-header>
 
 <!-- Show loading while initializing -->
-@if (!(isInitialised$ | async)) {
+@if ((isInitialised$ | async) === false) {
   <div class="flex items-center justify-center p-8">
     <div class="flex items-center space-x-3 text-content-muted">
       <div class="spinner spinner-primary"></div>

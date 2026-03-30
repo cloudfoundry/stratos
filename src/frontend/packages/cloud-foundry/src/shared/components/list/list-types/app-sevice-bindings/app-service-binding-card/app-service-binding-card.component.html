@@ -57,7 +57,10 @@
   <app-meta-card-item>
     <app-meta-card-key>Environment Variables</app-meta-card-key>
     <app-meta-card-value>
-      <a class="app-service-card__env-link" (click)="showEnvVars(envVarData)">View</a>
+      <a class="app-service-card__env-link" role="button" tabindex="0"
+        (click)="showEnvVars(envVarData)"
+        (keydown.enter)="showEnvVars(envVarData)"
+        (keydown.space)="showEnvVars(envVarData); $event.preventDefault()">View</a>
     </app-meta-card-value>
   </app-meta-card-item>
 }

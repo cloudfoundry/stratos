@@ -1,5 +1,7 @@
 <div class="custom-checkbox-wrapper">
-  <div class="custom-checkbox"
+  <div class="custom-checkbox" role="checkbox"
+    [attr.aria-checked]="indeterminate ? 'mixed' : checked"
+    [attr.tabindex]="disabled ? -1 : 0"
     [class.disabled]="disabled"
     [class.checked]="checked"
     [class.indeterminate]="indeterminate"
@@ -9,7 +11,9 @@
     [class.color-warn]="color === 'warn'"
     [attr.aria-invalid]="invalid || null"
     [attr.aria-describedby]="invalid && errorMessage ? 'error-' + (id || name) : null"
-    (click)="toggle()">
+    (click)="toggle()"
+    (keydown.enter)="toggle()"
+    (keydown.space)="toggle(); $event.preventDefault()">
 
     <div class="checkbox-container">
       <input type="checkbox"

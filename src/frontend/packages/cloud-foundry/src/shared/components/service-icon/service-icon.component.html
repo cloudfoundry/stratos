@@ -3,6 +3,6 @@
     <app-custom-icon [fontSet]="'stratos-icons'">service</app-custom-icon>
   }
   @if (image) {
-    <img [src]="image" (error)="imageLoadError()">
+    <img [src]="image" (error)="imageLoadError()" alt="">
   }
 </div>
