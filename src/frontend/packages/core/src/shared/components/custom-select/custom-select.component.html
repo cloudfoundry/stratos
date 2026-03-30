@@ -18,15 +18,14 @@
     </div>
   </div>
 
-  @if (isOpen) {
-    <div class="select-options"
-      #selectOptions
-      [style.top]="dropdownTop"
-      [style.left]="dropdownLeft"
-      [style.min-width]="dropdownWidth">
-      <div class="options-container">
-        <ng-content></ng-content>
-      </div>
+  <div class="select-options"
+    #selectOptions
+    [class.hidden]="!isOpen"
+    [style.top]="dropdownTop"
+    [style.left]="dropdownLeft"
+    [style.min-width]="dropdownWidth">
+    <div class="options-container" (click)="onOptionsClick($event)">
+      <ng-content></ng-content>
     </div>
-  }
+  </div>
 </div>

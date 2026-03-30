@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, Output, EventEmitter, forwardRef, ViewChild, ElementRef, TemplateRef, ContentChildren, QueryList, AfterContentInit, AfterViewInit, HostListener, OnDestroy  } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, Output, EventEmitter, forwardRef, ViewChild, ElementRef, ContentChildren, QueryList, AfterContentInit, AfterViewInit, HostListener, OnDestroy, booleanAttribute  } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
@@ -10,7 +10,7 @@ export interface MatSelectChange {
 
 @Component({
   selector: 'app-option',
-  template: '<div #optionContent class="custom-option-content dark:text-slate-100 dark:hover:bg-slate-700" [class.selected]="selected" [class.disabled]="disabled" (click)="select($event)"><ng-content></ng-content></div>',
+  template: '<div #optionContent class="custom-option-content dark:text-slate-100 dark:hover:bg-slate-700" [class.selected]="selected" [class.disabled]="disabled"><ng-content></ng-content></div>',
   styleUrls: ['./custom-select.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -21,16 +21,13 @@ export class CustomOptionComponent implements AfterViewInit {
   @Input() disabled = false;
   @Input() selected = false;
 
-  @ViewChild('optionContent', { static: false }) optionContent?: ElementRef;
-
-  @Output() onSelectionChange = new EventEmitter<CustomOptionComponent>();
+  @ViewChild('optionContent', { static: true }) optionContent!: ElementRef;
 
   private _displayText?: string;
 
   constructor(private cdr: ChangeDetectorRef) {}
 
   ngAfterViewInit() {
-    // Extract text content from projected content if no label is provided
     if (!this.label && this.optionContent) {
       this._displayText = this.optionContent.nativeElement.textContent?.trim();
       this.cdr.markForCheck();
@@ -39,18 +36,6 @@ export class CustomOptionComponent implements AfterViewInit {
 
   get displayText(): string {
     return this.label || this._displayText || this.value;
-  }
-
-  select(event?: MouseEvent) {
-    if (this.disabled) return;
-
-    // Stop propagation to prevent document click handler from closing dropdown prematurely
-    // NOTE: This may not fully work with Angular's @HostListener, which is why we added
-    // the isOptionClick check in the parent's onDocumentClick handler
-    event?.stopPropagation();
-    event?.preventDefault();
-
-    this.onSelectionChange.emit(this);
   }
 }
 
@@ -72,7 +57,7 @@ export class CustomOptionComponent implements AfterViewInit {
 export class CustomSelectComponent implements ControlValueAccessor, AfterContentInit, OnDestroy {
   @Input() disabled = false;
   @Input() placeholder = '';
-  @Input() multiple = false;
+  @Input({ transform: booleanAttribute }) multiple = false;
   @Input() required = false;
   @Input() name!: string;
   @Input() id!: string;
@@ -93,7 +78,7 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
 
   @ContentChildren(CustomOptionComponent) options: QueryList<CustomOptionComponent>;
   @ViewChild('selectTrigger', { static: true }) selectTrigger!: ElementRef;
-  @ViewChild('selectOptions', { static: false }) selectOptions?: ElementRef;
+  @ViewChild('selectOptions', { static: true }) selectOptions!: ElementRef;
 
   isOpen = false;
   selectedValues: any[] = [];
@@ -112,37 +97,20 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   constructor(private cdr: ChangeDetectorRef, private elementRef: ElementRef) {}
 
   ngAfterContentInit() {
-    // Subscribe to option selection changes
-    this.subscribeToOptions();
-
-    // Subscribe to changes in the options list (for dynamic options)
+    // Sync option visual state when options change (dynamic @for lists)
     const optionsChangeSub = this.options.changes.subscribe(() => {
-      this.subscribeToOptions();
       this.checkAutoSelect();
+      this.updateOptions();
     });
     this._subscriptions.push(optionsChangeSub);
 
-    // Check for auto-select after initial options are available
     this.checkAutoSelect();
-
-    // Ensure display value is updated after content init
     this.updateDisplayValue();
+    this.updateOptions();
   }
 
   ngOnDestroy() {
-    // Clean up subscriptions
     this._subscriptions.forEach(sub => sub.unsubscribe());
-  }
-
-  private subscribeToOptions() {
-    if (this.options) {
-      this.options.forEach(option => {
-        const sub = option.onSelectionChange.subscribe(selectedOption => {
-          this.selectOption(selectedOption);
-        });
-        this._subscriptions.push(sub);
-      });
-    }
   }
 
   private checkAutoSelect() {
@@ -178,6 +146,26 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
     this.cdr.markForCheck();
   }
 
+  /**
+   * Event delegation handler for option clicks.
+   * Finds the clicked option by matching the DOM element to the
+   * ContentChildren QueryList, bypassing subscription timing issues.
+   */
+  onOptionsClick(event: MouseEvent) {
+    const clickTarget = event.target as HTMLElement;
+    const target = clickTarget.closest('.custom-option-content');
+    if (!target) return;
+
+    // Find the matching option component by DOM element match
+    const option = this.options?.find(opt =>
+      opt.optionContent?.nativeElement === target
+    );
+
+    if (option) {
+      this.selectOption(option);
+    }
+  }
+
   selectOption(option: CustomOptionComponent) {
     if (option.disabled) return;
 
@@ -205,8 +193,6 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
     });
 
     this.valueChange.emit(value);
-
-    // Ensure change detection runs after selection
     this.cdr.markForCheck();
   }
 
@@ -230,7 +216,11 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   private updateOptions() {
     if (this.options) {
       this.options.forEach(option => {
-        option.selected = this.selectedValues.includes(option.value);
+        const isSelected = this.selectedValues.includes(option.value);
+        if (option.selected !== isSelected) {
+          option.selected = isSelected;
+          option['cdr'].markForCheck();
+        }
       });
     }
   }
