@@ -77,12 +77,21 @@ export default defineConfig({
     timeout: 5000,
   },
 
-  // Configure projects for major browsers
+  // Configure projects — auth setup runs once, then tests reuse saved state
   projects: [
     {
+      name: 'setup',
+      testDir: './e2e',
+      testMatch: /auth\.setup\.ts/,
+      use: { storageState: undefined },
+    },
+    {
       name: 'chromium',
+      dependencies: ['setup'],
       use: {
         ...devices['Desktop Chrome'],
+        // Default to admin state — fixtures override per-test as needed
+        storageState: 'e2e/.auth/admin.json',
         // Chrome-specific options matching Protractor config
         launchOptions: {
           args: [
@@ -98,13 +107,15 @@ export default defineConfig({
     // Uncomment to test on Firefox
     // {
     //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
+    //   dependencies: ['setup'],
+    //   use: { ...devices['Desktop Firefox'], storageState: 'e2e/.auth/admin.json' },
     // },
 
     // Uncomment to test on WebKit (Safari)
     // {
     //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
+    //   dependencies: ['setup'],
+    //   use: { ...devices['Desktop Safari'], storageState: 'e2e/.auth/admin.json' },
     // },
   ],
 

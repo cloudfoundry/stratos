@@ -5,6 +5,7 @@ import { ConsoleUserType, RequestHelper } from '../helpers/request.helper';
 import { CFApiHelper } from '../helpers/cf-api.helper';
 import { ApplicationTestHelper, TestApp } from '../helpers/application-test.helper';
 import { detectAuthType, browserLogin, AuthType } from '../helpers/auth.helper';
+import { ADMIN_STATE, USER_STATE } from '../auth.constants';
 
 /**
  * Test Fixtures
@@ -61,11 +62,12 @@ export const test = base.extend<TestFixtures>({
   },
 
   /**
-   * Authenticated page fixture - automatically logs in as admin before each test
-   * Supports both local auth and SSO (auto-detected).
+   * Authenticated page fixture - pre-authenticated as admin via storageState.
+   * The setup project saves admin cookies; the chromium project loads them.
+   * Just navigate to trigger the stored session.
    */
-  authenticatedPage: async ({ page, secrets, authType }, use) => {
-    await browserLogin(page, secrets.console.admin.username, secrets.console.admin.password, authType);
+  authenticatedPage: async ({ page }, use) => {
+    await page.goto('/');
     await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
     await use(page);
   },
@@ -78,42 +80,43 @@ export const test = base.extend<TestFixtures>({
   },
 
   /**
-   * User page fixture - automatically logs in as regular user
-   * Supports both local auth and SSO (auto-detected).
+   * User page fixture - uses saved user storageState
    */
-  userPage: async ({ page, secrets, authType }, use) => {
-    await browserLogin(page, secrets.console.user.username, secrets.console.user.password, authType);
+  userPage: async ({ browser }, use) => {
+    const context = await browser.newContext({ storageState: USER_STATE });
+    const page = await context.newPage();
+    await page.goto('/');
+    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+    await use(page);
+    await context.close();
+  },
+
+  /**
+   * No Endpoints Admin Page - Admin user (pre-authenticated via storageState)
+   */
+  noEndpointsAdminPage: async ({ page }, use) => {
+    await page.goto('/');
     await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
     await use(page);
   },
 
   /**
-   * No Endpoints Admin Page - Admin user with all endpoints cleared
-   * Migrated from: e2e.setup(ConsoleUserType.admin).clearAllEndpoints()
+   * No Endpoints User Page - Regular user (pre-authenticated via storageState)
    */
-  noEndpointsAdminPage: async ({ page, secrets, authType }, use) => {
-    // Note: clearAllEndpoints removed — destructive to shared environments.
-    // Tests using this fixture should handle the case where endpoints exist.
-    await browserLogin(page, secrets.console.admin.username, secrets.console.admin.password, authType);
+  noEndpointsUserPage: async ({ browser }, use) => {
+    const context = await browser.newContext({ storageState: USER_STATE });
+    const page = await context.newPage();
+    await page.goto('/');
     await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
     await use(page);
+    await context.close();
   },
 
   /**
-   * No Endpoints User Page - Regular user logged in
+   * Registered Endpoints Page - Admin with default CF registered (pre-authenticated)
    */
-  noEndpointsUserPage: async ({ page, secrets, authType }, use) => {
-    await browserLogin(page, secrets.console.user.username, secrets.console.user.password, authType);
-    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
-    await use(page);
-  },
-
-  /**
-   * Registered Endpoints Page - Admin with default CF registered
-   */
-  registeredEndpointsPage: async ({ page, secrets, authType, endpointManager }, use) => {
-    await endpointManager.registerDefaultCloudFoundry();
-    await browserLogin(page, secrets.console.admin.username, secrets.console.admin.password, authType);
+  registeredEndpointsPage: async ({ page, endpointManager }, use) => {
+    await page.goto('/');
     await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
 
     // Dismiss snackbar if present
@@ -131,97 +134,79 @@ export const test = base.extend<TestFixtures>({
   },
 
   /**
-   * Connected Endpoints Admin Page - Admin with default CF registered and connected
-   * Migrated from: e2e.setup(ConsoleUserType.admin).clearAllEndpoints().registerDefaultCloudFoundry().connectAllEndpoints(ConsoleUserType.admin)
+   * Connected Endpoints Admin Page - Admin with default CF registered and connected.
+   * Pre-authenticated via storageState. Endpoint setup done in auth.setup.ts.
+   * Uses page.request to get endpoint GUID (no extra browser launch).
    */
-  connectedEndpointsAdminPage: async ({ page, secrets, authType, endpointManager, baseURL }, use) => {
-    // Ensure endpoint is registered and connected (idempotent, non-destructive)
-    await endpointManager.registerDefaultCloudFoundry();
-    await endpointManager.connectAllEndpoints(ConsoleUserType.admin);
-
-    // Login via browser (local or SSO)
-    await browserLogin(page, secrets.console.admin.username, secrets.console.admin.password, authType);
+  connectedEndpointsAdminPage: async ({ page, secrets }, use) => {
+    await page.goto('/');
     await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
 
-    // Get CF endpoint GUID
-    const request = new RequestHelper(baseURL || 'http://localhost:4200');
-    await request.init();
-    await request.createSession(ConsoleUserType.admin);
-
-    const endpointsList = await request.get('/api/v1/endpoints');
+    // Get CF endpoint GUID using the page's existing session
+    const response = await page.request.get('/api/v1/endpoints');
+    const endpointsList = await response.json();
     const cfEndpoint = endpointsList.find((ep: any) => ep.cnsi_type === 'cf');
 
     if (!cfEndpoint) {
       throw new Error('No CF endpoint found');
     }
 
-    const cfGuid = cfEndpoint.guid;
     const cfConfig = secrets.cloudFoundry[0];
 
     await use({
       page,
-      cfGuid,
+      cfGuid: cfEndpoint.guid,
       orgGuid: cfConfig.testOrgGuid,
       spaceGuid: cfConfig.testSpaceGuid
     });
-
-    await request.dispose();
   },
 
   /**
-   * Connected Endpoints User Page - Regular user with default CF connected
-   * Migrated from: e2e.setup(ConsoleUserType.user).clearAllEndpoints().registerDefaultCloudFoundry().connectAllEndpoints(ConsoleUserType.user)
+   * Connected Endpoints User Page - Regular user with default CF connected.
+   * Pre-authenticated via storageState. Uses page.request for GUID lookup.
    */
-  connectedEndpointsUserPage: async ({ page, secrets, authType, endpointManager, baseURL }, use) => {
-    // Setup: clear all, register, and connect as user
-    await endpointManager.clearAllEndpoints();
-    await endpointManager.registerDefaultCloudFoundry();
-    await endpointManager.connectAllEndpoints(ConsoleUserType.user);
-
-    // Login via browser (local or SSO)
-    await browserLogin(page, secrets.console.user.username, secrets.console.user.password, authType);
+  connectedEndpointsUserPage: async ({ browser, secrets }, use) => {
+    const context = await browser.newContext({ storageState: USER_STATE });
+    const page = await context.newPage();
+    await page.goto('/');
     await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
 
-    // Get CF endpoint GUID
-    const request = new RequestHelper(baseURL || 'http://localhost:4200');
-    await request.init();
-    await request.createSession(ConsoleUserType.user);
-
-    const endpointsList = await request.get('/api/v1/endpoints');
+    // Get CF endpoint GUID using the page's existing session
+    const response = await page.request.get('/api/v1/endpoints');
+    const endpointsList = await response.json();
     const cfEndpoint = endpointsList.find((ep: any) => ep.cnsi_type === 'cf');
 
     if (!cfEndpoint) {
       throw new Error('No CF endpoint found');
     }
 
-    const cfGuid = cfEndpoint.guid;
     const cfConfig = secrets.cloudFoundry[0];
 
     await use({
       page,
-      cfGuid,
+      cfGuid: cfEndpoint.guid,
       orgGuid: cfConfig.testOrgGuid,
       spaceGuid: cfConfig.testSpaceGuid
     });
 
-    await request.dispose();
+    await context.close();
   },
 
   /**
    * CF API Helper - Provides Cloud Foundry V3 API operations
-   * Requires connected CF endpoint
+   * Requires connected CF endpoint.
+   * Still uses RequestHelper for ongoing API calls, but reuses
+   * storageState session to avoid extra SSO login.
    */
-  cfApi: async ({ baseURL, secrets, endpointManager }, use) => {
-    // Ensure we have endpoints
+  cfApi: async ({ baseURL, secrets }, use) => {
     const endpoints = secrets.cloudFoundry;
     if (!endpoints || endpoints.length === 0) {
       throw new Error('No Cloud Foundry endpoints configured in secrets');
     }
 
-    // Create request helper and get CF endpoint GUID
+    // Create request helper with pre-authenticated state
     const request = new RequestHelper(baseURL || 'http://localhost:4200');
-    await request.init();
-    await request.createSession(ConsoleUserType.admin);
+    await request.initFromStorageState(ADMIN_STATE);
 
     // Get registered endpoints
     const endpointsList = await request.get('/api/v1/endpoints');
@@ -237,13 +222,9 @@ export const test = base.extend<TestFixtures>({
     const cfApi = new CFApiHelper(request, cfEndpoint.guid);
     await cfApi.init();
 
-    // Use the CF API helper
     await use(cfApi);
 
-    // Cleanup: remove all test resources
     await cfApi.cleanupTestResources();
-
-    // Dispose request helper
     await request.dispose();
   },
 

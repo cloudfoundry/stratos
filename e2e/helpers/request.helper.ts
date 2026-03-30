@@ -1,4 +1,5 @@
 import { APIRequestContext, request as playwrightRequest } from '@playwright/test';
+import * as fs from 'fs';
 import { SecretsHelper } from './secrets-helpers';
 import { detectAuthType, apiLogin, AuthType } from './auth.helper';
 
@@ -40,6 +41,37 @@ export class RequestHelper {
     });
 
     // Detect auth type once
+    if (!this.authType) {
+      this.authType = await detectAuthType(this.baseURL);
+    }
+  }
+
+  /**
+   * Initialize from a saved storageState file (avoids SSO login).
+   * Reads cookies from the state file and sets them as a Cookie header.
+   */
+  async initFromStorageState(statePath: string): Promise<void> {
+    const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+    const cookies = state.cookies || [];
+    const cookieHeader = cookies.map((c: any) => `${c.name}=${c.value}`).join('; ');
+
+    this.context = await playwrightRequest.newContext({
+      baseURL: this.baseURL,
+      ignoreHTTPSErrors: true,
+      extraHTTPHeaders: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        ...(cookieHeader ? { 'Cookie': cookieHeader } : {}),
+      }
+    });
+
+    // Get XSRF token from the existing session
+    const resp = await this.context.get('/api/v1/auth/verify');
+    const xsrf = resp.headers()['x-xsrf-token'];
+    if (xsrf) {
+      this.xsrfToken = xsrf;
+    }
+
     if (!this.authType) {
       this.authType = await detectAuthType(this.baseURL);
     }

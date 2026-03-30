@@ -102,6 +102,7 @@ src/backend/*/vendor/
 cl.resume
 build/dev_config.json
 e2e-reports/
+e2e/.auth/
 .stratos-git-metadata.json
 src/jetstream/jetstream
 console-database.db
