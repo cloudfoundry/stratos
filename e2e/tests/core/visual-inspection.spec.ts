@@ -11,20 +11,25 @@ import { test, expect } from '../../fixtures/test-base';
 test.use({ viewport: { width: 1440, height: 900 } });
 
 /** Wait for the page to fully render: network idle + no progress bars + content visible */
-async function waitForPageReady(page: import('@playwright/test').Page) {
-  await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => {});
+async function waitForPageReady(page: import('@playwright/test').Page, { extraWait = 0 } = {}) {
+  await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
 
   // Wait for progress bars to disappear (Stratos shows indeterminate progress during load)
-  await page.locator('.progress-bar').waitFor({ state: 'hidden', timeout: 15000 }).catch(() => {});
+  await page.locator('.progress-bar').waitFor({ state: 'hidden', timeout: 20000 }).catch(() => {});
 
   // Wait for the main content area to have visible children
   await page.locator('.list-component, .card, app-info-card, .dashboard-page, .home-page')
     .first()
+    .waitFor({ state: 'visible', timeout: 15000 })
+    .catch(() => {});
+
+  // Wait for any data tables/cards to populate
+  await page.locator('app-table tr, .meta-card, .list-component__body').first()
     .waitFor({ state: 'visible', timeout: 10000 })
     .catch(() => {});
 
-  // Small settle time for animations/transitions
-  await page.waitForTimeout(1000);
+  // Settle time for animations/transitions + extra for slow pages
+  await page.waitForTimeout(1500 + extraWait);
 }
 
 // CF pages need the GUID — resolve it once
@@ -92,12 +97,14 @@ test.describe('Visual Inspection', () => {
     });
   });
 
-  // CF sub-pages (use resolved GUID)
+  // CF sub-pages (use resolved GUID) — extra wait for API-heavy pages
+  const slowCfPages = ['cf-orgs', 'cf-users', 'cf-routes', 'cf-events'];
   for (const { name, suffix } of cfSubPages) {
     test(`screenshot ${name}`, async ({ adminPage }) => {
       test.skip(!cfBaseUrl, 'Could not resolve CF GUID');
       await adminPage.goto(`${cfBaseUrl}${suffix}`);
-      await waitForPageReady(adminPage);
+      const extra = slowCfPages.includes(name) ? 3000 : 0;
+      await waitForPageReady(adminPage, { extraWait: extra });
       await adminPage.screenshot({
         path: `e2e-screenshots/visual-inspection/${name}.png`,
         fullPage: true,
@@ -139,16 +146,23 @@ test.describe('Visual Inspection', () => {
     }
   });
 
-  // Dark mode screenshots
+  // Dark mode screenshots — visits 3 pages, needs extra time
   test('screenshot dark mode', async ({ adminPage }) => {
+    test.setTimeout(180000);
     await adminPage.goto('/');
     await waitForPageReady(adminPage);
 
-    // Toggle dark mode via the theme button
-    const darkToggle = adminPage.locator('[class*="theme-toggle"], button').filter({ hasText: /dark/i }).first();
-    if (await darkToggle.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await darkToggle.click();
-      await adminPage.waitForTimeout(1000);
+    // Toggle dark mode via the theme-toggle-button
+    const themeToggle = adminPage.locator('button.theme-toggle-button');
+    await themeToggle.waitFor({ state: 'visible', timeout: 5000 });
+
+    // Check current label — click to toggle to dark if currently showing "Light"
+    const label = await themeToggle.locator('.theme-label').textContent();
+    if (label?.trim() === 'Light') {
+      await themeToggle.click();
+      // Wait for dark-theme class to appear on body
+      await adminPage.waitForFunction(() => document.body.classList.contains('dark-theme'), { timeout: 5000 });
+      await adminPage.waitForTimeout(500);
     }
 
     await adminPage.screenshot({
@@ -164,10 +178,18 @@ test.describe('Visual Inspection', () => {
     });
 
     await adminPage.goto('/marketplace');
-    await waitForPageReady(adminPage);
+    await waitForPageReady(adminPage, { extraWait: 2000 });
     await adminPage.screenshot({
       path: 'e2e-screenshots/visual-inspection/marketplace-dark.png',
       fullPage: true,
     });
+
+    // Toggle back to light for other tests
+    const toggleBack = adminPage.locator('button.theme-toggle-button');
+    const darkLabel = await toggleBack.locator('.theme-label').textContent();
+    if (darkLabel?.trim() === 'Dark') {
+      await toggleBack.click();
+      await adminPage.waitForTimeout(500);
+    }
   });
 });
