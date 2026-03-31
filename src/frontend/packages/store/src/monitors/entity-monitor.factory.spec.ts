@@ -1,8 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { TestBed } from '@angular/core/testing';
 import { TestEntityCatalog } from '../entity-catalog/entity-catalog';
 import { EntityMonitorFactory } from './entity-monitor.factory.service';
 import { Store } from '@ngrx/store';
 import { AppState } from '../app-state';
+import { ENTITY_CATALOG_TOKEN } from '../tokens/store-injection.tokens';
 
 describe('EntityMonitor', () => {
   let service: EntityMonitorFactory;
@@ -10,12 +12,18 @@ describe('EntityMonitor', () => {
   let mockEntityCatalog: TestEntityCatalog;
 
   beforeEach(() => {
-    // Create mocks
     mockStore = {} as Store<AppState>;
     mockEntityCatalog = new TestEntityCatalog();
 
-    // Create service directly with mocked dependencies
-    service = new EntityMonitorFactory(mockStore, mockEntityCatalog);
+    TestBed.configureTestingModule({
+      providers: [
+        EntityMonitorFactory,
+        { provide: Store, useValue: mockStore },
+        { provide: ENTITY_CATALOG_TOKEN, useValue: mockEntityCatalog },
+      ],
+    });
+
+    service = TestBed.inject(EntityMonitorFactory);
   });
 
   it('should be created', () => {
