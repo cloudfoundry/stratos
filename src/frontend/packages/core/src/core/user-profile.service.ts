@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
   SessionData,
@@ -20,6 +20,8 @@ import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/ope
   providedIn: 'root'
 })
 export class UserProfileService {
+  private store = inject<Store<AppState>>(Store);
+
 
   isError$: Observable<boolean>;
 
@@ -31,9 +33,7 @@ export class UserProfileService {
 
   private userGuid$: Observable<string>;
 
-  constructor(
-    private store: Store<AppState>,
-  ) {
+  constructor() {
     this.userGuid$ = this.store.select(s => s.auth).pipe(
       filter((auth: AuthState) => !!(auth && auth.sessionData)),
       map((auth: AuthState) => auth.sessionData),

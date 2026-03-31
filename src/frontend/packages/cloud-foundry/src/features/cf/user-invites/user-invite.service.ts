@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { TailwindSnackBarService } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
@@ -57,12 +57,10 @@ interface UserInviteSend {
   providedIn: 'root'
 })
 export class UserInviteConfigureService {
+  private http = inject(HttpClient);
+  private snackBar = inject(TailwindSnackBarService);
+  private confirmDialog = inject(ConfirmationDialogService);
 
-  constructor(
-    private http: HttpClient,
-    private snackBar: TailwindSnackBarService,
-    private confirmDialog: ConfirmationDialogService,
-  ) { }
 
   configure(cfGUID: string, clientID: string, clientSecret: string): Observable<UserInviteBaseResponse> {
     const formData: FormData = new FormData();
@@ -129,18 +127,19 @@ export class UserInviteConfigureService {
   providedIn: 'root'
 })
 export class UserInviteService {
+  private store = inject<Store<CFAppState>>(Store);
+  private http = inject(HttpClient);
+  private currentUserPermissionsService = inject(CurrentUserPermissionsService);
+  private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+
 
   configured$!: Observable<boolean>;
   enabled$!: Observable<boolean>;
   canConfigure$!: Observable<boolean>;
 
-  constructor(
-    private store: Store<CFAppState>,
-    private http: HttpClient,
-    cfEndpointService: CloudFoundryEndpointService,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-  ) {
+  constructor() {
+    const cfEndpointService = inject(CloudFoundryEndpointService);
+
     this.configured$ = cfEndpointService.endpoint$.pipe(
       filter(v => !!v && !!v.entity),
       // Note - metadata could be falsy if smtp server not configured/other metadata properties are missing

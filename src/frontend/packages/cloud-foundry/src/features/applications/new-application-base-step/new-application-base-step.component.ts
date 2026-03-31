@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -41,6 +41,9 @@ export interface IAppTileData extends ITileData {
   ]
 })
 export class NewApplicationBaseStepComponent {
+  private store = inject<Store<CFAppState>>(Store);
+  private activatedRoute = inject(ActivatedRoute);
+
 
   public serviceType!: string;
   public tileSelectorConfig$: Observable<ITileConfig<IAppTileData>[]>;
@@ -69,11 +72,9 @@ export class NewApplicationBaseStepComponent {
     }
   }
 
-  constructor(
-    private store: Store<CFAppState>,
-    appDeploySourceTypes: ApplicationDeploySourceTypes,
-    private activatedRoute: ActivatedRoute,
-  ) {
+  constructor() {
+    const appDeploySourceTypes = inject(ApplicationDeploySourceTypes);
+
     this.tileSelectorConfig$ = appDeploySourceTypes.types$.pipe(
       map(types => {
         return [

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { ListSort } from '@stratosui/store';
 import { Observable, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -55,11 +55,11 @@ const tableColumnAction: ITableColumn<any> = {
   ]
 })
 export class TableComponent<T> implements OnInit, OnDestroy {
+  private cdr = inject(ChangeDetectorRef);
+
 
   private uberSub: Subscription;
   private currentSort: { field: string; direction: string } = { field: '', direction: '' };
-
-  constructor(private cdr: ChangeDetectorRef) { }
 
   // See https://github.com/angular/angular-cli/issues/2034 for weird definition
   @Input() hideTable = false;

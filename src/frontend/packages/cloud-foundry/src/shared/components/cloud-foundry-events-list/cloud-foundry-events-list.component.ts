@@ -1,5 +1,5 @@
 
-import { Component, Input, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -140,9 +140,9 @@ export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
   private initialSet = false;
   public hasActeeFilter = false;
 
-  constructor(
-    listConfig: ListConfig<APIResource>,
-  ) {
+  constructor() {
+    const listConfig = inject<ListConfig<APIResource>>(ListConfig);
+
     this.filtersFormGroup = new FormGroup<EventsFilterForm>({
       actee: new FormControl<string | null>(null),
       type: new FormControl<string[] | null>(null),

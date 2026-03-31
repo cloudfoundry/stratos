@@ -1,4 +1,4 @@
-import { Component, signal , ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
@@ -51,16 +51,18 @@ import { ListComponent } from '../../../../../../../core/src/shared/components/l
   ],
 })
 export class UsersRolesSelectComponent {
+  private store = inject<Store<CFAppState>>(Store);
+  private listConfig = inject<ListConfig<APIResource<CfUser>>>(ListConfig);
+  private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+  cfRolesService = inject(CfRolesService);
+
 
   selectedUsers$: Observable<CfUser[]>;
   valid$ = signal<boolean>(false);
 
-  constructor(
-    private store: Store<CFAppState>,
-    private listConfig: ListConfig<APIResource<CfUser>>,
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    public cfRolesService: CfRolesService
-  ) {
+  constructor() {
+    const listConfig = this.listConfig;
+
     this.selectedUsers$ = listConfig.getInitialised().pipe(
       filter(initialised => initialised),
       first(),

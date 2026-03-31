@@ -1,6 +1,6 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Portal, PortalModule } from '@angular/cdk/portal';
-import { ChangeDetectionStrategy, AfterViewInit, ChangeDetectorRef, Component, ElementRef, NgZone, OnDestroy, OnInit, signal, ViewChild, ViewContainerRef  } from '@angular/core';
+import { ChangeDetectionStrategy, AfterViewInit, ChangeDetectorRef, Component, ElementRef, NgZone, OnDestroy, OnInit, signal, ViewChild, ViewContainerRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router, RouterModule } from '@angular/router';
 import { ScrollingModule } from '@angular/cdk/scrolling';
@@ -49,6 +49,18 @@ import { ShowPageHeaderComponent } from '../../../shared/components/page-header/
 })
 
 export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit {
+  pageHeaderService = inject(PageHeaderService);
+  private store = inject<Store<DashboardOnlyAppState>>(Store);
+  private breakpointObserver = inject(BreakpointObserver);
+  private router = inject(Router);
+  private activatedRoute = inject(ActivatedRoute);
+  private endpointsService = inject(EndpointsService);
+  tabNavService = inject(TabNavService);
+  private ngZone = inject(NgZone);
+  sidePanelService = inject(SidePanelService);
+  private cs = inject(CustomizationService);
+  private cd = inject(ChangeDetectorRef);
+
   public activeTabLabel$!: Observable<string>;
   public subNavData$!: Observable<[string, Portal<any>, IPageSideNavTab, IHeaderBreadcrumbLink[]]>;
   public isMobile$: Observable<boolean> = of(false);
@@ -77,19 +89,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   // Slide-in side panel mode
   sidePanelMode: SidePanelMode = SidePanelMode.Modal;
 
-  constructor(
-    public pageHeaderService: PageHeaderService,
-    private store: Store<DashboardOnlyAppState>,
-    private breakpointObserver: BreakpointObserver,
-    private router: Router,
-    private activatedRoute: ActivatedRoute,
-    private endpointsService: EndpointsService,
-    public tabNavService: TabNavService,
-    private ngZone: NgZone,
-    public sidePanelService: SidePanelService,
-    private cs: CustomizationService,
-    private cd: ChangeDetectorRef
-  ) {
+  constructor() {
     this.noMargin$ = this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
       map(() => this.isNoMarginView(this.activatedRoute.snapshot)),

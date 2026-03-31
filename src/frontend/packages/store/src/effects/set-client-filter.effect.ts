@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
@@ -9,11 +9,9 @@ import { InternalAppState } from '../app-state';
 
 @Injectable()
 export class SetClientFilterEffect {
+  private actions$ = inject(Actions);
+  private store = inject<Store<InternalAppState>>(Store);
 
-  constructor(
-    private actions$: Actions,
-    private store: Store<InternalAppState>,
-  ) { }
 
    clearPageNumber$ = createEffect(() => this.actions$.pipe(
     ofType<SetClientFilter>(SET_CLIENT_FILTER),

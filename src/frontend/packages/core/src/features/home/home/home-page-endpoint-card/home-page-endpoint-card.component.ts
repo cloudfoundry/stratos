@@ -1,18 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterViewInit,
-  Compiler,
-  Component,
-  ComponentRef,
-  EventEmitter,
-  Injector,
-  Input,
-  OnDestroy,
-  OnInit,
-  Output,
-  ViewChild,
-  ViewContainerRef,
-  signal,
- } from '@angular/core';
+import { ChangeDetectionStrategy, AfterViewInit, Compiler, Component, ComponentRef, EventEmitter, Injector, Input, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, signal, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
@@ -65,6 +52,11 @@ enum Status {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterViewInit {
+  private userFavoriteManager = inject(UserFavoriteManager);
+  private sidePanelService = inject(SidePanelService);
+  private compiler = inject(Compiler);
+  private injector = inject(Injector);
+
 
   @ViewChild('customCard', { read: ViewContainerRef, static: true }) customCard!: ViewContainerRef;
 
@@ -126,12 +118,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
   // If not, then don't show favorites, as there can never be any
   hasFavEntities = false;
 
-  constructor(
-    private userFavoriteManager: UserFavoriteManager,
-    private sidePanelService: SidePanelService,
-    private compiler: Compiler,
-    private injector: Injector,
-  ) {
+  constructor() {
     this.layout$ = toObservable(this._layout);
     this.status$ = toObservable(this._status);
   }

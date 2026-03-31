@@ -1,4 +1,4 @@
-import { Component, ViewChild , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
@@ -33,9 +33,9 @@ export class CreateQuotaStepComponent {
   @ViewChild('form', { static: true })
   form!: QuotaDefinitionFormComponent;
 
-  constructor(
-    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-  ) {
+  constructor() {
+    const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
   }
 

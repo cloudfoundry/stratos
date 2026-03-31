@@ -1,5 +1,5 @@
 
-import { ChangeDetectionStrategy, Component, OnDestroy  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { Observable, of } from 'rxjs';
@@ -29,6 +29,9 @@ import { CustomIconComponent } from '../../../../shared/components/custom-materi
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
+  private endpointsService = inject(EndpointsService);
+  private sidePanelService = inject(SidePanelService);
+
 
   public validate!: Observable<boolean>;
   public valid = false;
@@ -36,12 +39,6 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
   public connectService!: ConnectEndpointService;
 
   public doConnect = false;
-
-  constructor(
-    private endpointsService: EndpointsService,
-    private sidePanelService: SidePanelService,
-  ) {
-  }
 
   showHelp() {
     this.sidePanelService.showModal(MarkdownPreviewComponent, { documentUrl: this.helpDocumentUrl });

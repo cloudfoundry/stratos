@@ -1,4 +1,4 @@
-import { Inject, NgModule } from '@angular/core';
+import { NgModule, inject } from '@angular/core';
 import { ReducerManager, Store } from '@ngrx/store';
 
 import { InitCatalogEntitiesAction } from './entity-catalog.actions';
@@ -19,11 +19,11 @@ export const TEST_CATALOGUE_ENTITIES = '__TEST_CATALOGUE_ENTITIES__';
   ]
 })
 export class EntityCatalogTestModule {
-  constructor(
-    store: Store<any>,
-    reducerManager: ReducerManager,
-    @Inject(TEST_CATALOGUE_ENTITIES) entityGroups: StratosBaseCatalogEntity[],
-  ) {
+  constructor() {
+    const store = inject<Store<any>>(Store);
+    const reducerManager = inject(ReducerManager);
+    const entityGroups = inject<StratosBaseCatalogEntity[]>(TEST_CATALOGUE_ENTITIES as any);
+
     baseEntityCatalogSetup(store, reducerManager, entityGroups);
   }
 }
@@ -40,10 +40,10 @@ export class EntityCatalogTestModule {
   ]
 })
 export class EntityCatalogTestModuleManualStore {
-  constructor(
-    reducerManager: ReducerManager,
-    @Inject(TEST_CATALOGUE_ENTITIES) entityGroups: StratosBaseCatalogEntity[],
-  ) {
+  constructor() {
+    const reducerManager = inject(ReducerManager);
+    const entityGroups = inject<StratosBaseCatalogEntity[]>(TEST_CATALOGUE_ENTITIES as any);
+
     baseEntityCatalogSetup(null, reducerManager, entityGroups);
   }
 }

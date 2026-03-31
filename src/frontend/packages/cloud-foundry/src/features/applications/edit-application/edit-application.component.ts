@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { CustomFormFieldComponent } from '@stratosui/core';
 import { RouterModule } from '@angular/router';
@@ -56,6 +56,11 @@ interface EditApplicationForm {
   ]
 })
 export class EditApplicationComponent implements OnInit, OnDestroy {
+  applicationService = inject(ApplicationService);
+  private store = inject<Store<CFAppState>>(Store);
+  private fb = inject(FormBuilder);
+  private http = inject(HttpClient);
+
 
   editAppForm: FormGroup<EditApplicationForm>;
 
@@ -63,13 +68,8 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
 
   appNameChecking: AppNameUniqueChecking = new AppNameUniqueChecking();
 
-  constructor(
-    public applicationService: ApplicationService,
-    private store: Store<CFAppState>,
-    private fb: FormBuilder,
-    private http: HttpClient,
-  ) {
-    this.uniqueNameValidator = new AppNameUniqueDirective(this.store, this.http);
+  constructor() {
+    this.uniqueNameValidator = new AppNameUniqueDirective();
     this.editAppForm = this.fb.group<EditApplicationForm>({
       name: new FormControl('', {
         nonNullable: true,

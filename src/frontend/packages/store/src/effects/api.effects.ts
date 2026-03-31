@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { mergeMap, withLatestFrom } from 'rxjs/operators';
@@ -17,11 +17,10 @@ import { InternalAppState } from './../app-state';
   providedIn: 'root'
 })
 export class APIEffect {
-  constructor(
-    private actions$: Actions,
-    private store: Store<InternalAppState>,
-    private httpClient: PipelineHttpClient,
-  ) { }
+  private actions$ = inject(Actions);
+  private store = inject<Store<InternalAppState>>(Store);
+  private httpClient = inject(PipelineHttpClient);
+
 
   
   apiRequest$ = createEffect(() => this.actions$.pipe(

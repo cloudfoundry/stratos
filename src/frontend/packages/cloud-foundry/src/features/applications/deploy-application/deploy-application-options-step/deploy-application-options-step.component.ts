@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
@@ -59,6 +59,11 @@ interface DeployOptionsForm {
   ]
 })
 export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy {
+  private fb = inject(FormBuilder);
+  private store = inject<Store<CFAppState>>(Store);
+  private appEnvVarsService = inject(ApplicationEnvVarsHelper);
+  private activatedRoute = inject(ActivatedRoute);
+
 
   valid$: Observable<boolean>;
   domains$!: Observable<APIResource<IDomain>[]>;
@@ -72,12 +77,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
   public sourceType$!: Observable<SourceType>;
   public DEPLOY_TYPES_IDS = DEPLOY_TYPES_IDS;
 
-  constructor(
-    private fb: FormBuilder,
-    private store: Store<CFAppState>,
-    private appEnvVarsService: ApplicationEnvVarsHelper,
-    private activatedRoute: ActivatedRoute
-  ) {
+  constructor() {
     this.deployOptionsForm = this.fb.group<DeployOptionsForm>({
       name: new FormControl<string | null>(null),
       instances: new FormControl<number | null>(null, [

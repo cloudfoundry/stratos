@@ -1,5 +1,5 @@
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AuthOnlyAppState, AuthState } from '@stratosui/store';
 import { map } from 'rxjs/operators';
@@ -13,7 +13,9 @@ export class UserService {
   isAdmin$: Observable<boolean>;
   isEndpointAdmin$: Observable<boolean>;
 
-  constructor(store: Store<AuthOnlyAppState>) {
+  constructor() {
+    const store = inject<Store<AuthOnlyAppState>>(Store);
+
     this.isAdmin$ = store.select(s => s.auth).pipe(
       map((auth: AuthState) => auth.sessionData && auth.sessionData.user && auth.sessionData.user.admin));
 

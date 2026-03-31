@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
   GitCommit,
@@ -32,13 +32,14 @@ import { ApplicationService } from '../../../../../features/applications/applica
   providedIn: 'root'
 })
 export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfigServiceBase {
+  private scmService = inject(GitSCMService);
+  private applicationService = inject(ApplicationService);
 
-  constructor(
-    store: Store<CFAppState>,
-    datePipe: DatePipe,
-    private scmService: GitSCMService,
-    private applicationService: ApplicationService,
-  ) {
+
+  constructor() {
+    const store = inject<Store<CFAppState>>(Store);
+    const datePipe = inject(DatePipe);
+
     super(store, datePipe);
     this.setGuids();
     this.setGithubDetails();

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
@@ -52,6 +52,11 @@ interface EditOrganizationForm {
   ]
 })
 export class EditOrganizationStepComponent implements OnInit, OnDestroy {
+  private store = inject<Store<CFAppState>>(Store);
+  private paginationMonitorFactory = inject(PaginationMonitorFactory);
+  private cfOrgService = inject(CloudFoundryOrganizationService);
+  private fb = inject(FormBuilder);
+
 
   fetchOrgsSub!: Subscription;
   allOrgsInEndpoint: string[];
@@ -70,12 +75,9 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
 
   get quotaDefinition(): FormControl<string | null> { return this.editOrgName ? this.editOrgName.get('quotaDefinition') as FormControl<string | null> : new FormControl(null); }
 
-  constructor(
-    private store: Store<CFAppState>,
-    private paginationMonitorFactory: PaginationMonitorFactory,
-    private cfOrgService: CloudFoundryOrganizationService,
-    private fb: FormBuilder
-  ) {
+  constructor() {
+    const cfOrgService = this.cfOrgService;
+
     this.orgGuid = cfOrgService.orgGuid;
     this.cfGuid = cfOrgService.cfGuid;
     this.status = false;

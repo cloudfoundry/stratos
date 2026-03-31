@@ -1,16 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component,
-  ElementRef,
-  EventEmitter,
-  Host,
-  Input,
-  OnDestroy,
-  OnInit,
-  Optional,
-  Output,
-  SkipSelf,
-  ViewChild,
- } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, inject } from '@angular/core';
 import { ControlContainer, FormGroupName } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
@@ -28,6 +17,8 @@ import { safeUnsubscribe } from '../../../core/utils.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FileInputComponent implements OnInit, OnDestroy {
+  private parent = inject(ControlContainer, { optional: true, host: true, skipSelf: true });
+
 
   @ViewChild('inputFile', { static: true }) nativeInputFile!: ElementRef;
 
@@ -46,10 +37,6 @@ export class FileInputComponent implements OnInit, OnDestroy {
   private formGroupControl!: FormGroupName;
   public disabled = false;
   private sub: Subscription;
-
-  constructor(
-    @Optional() @Host() @SkipSelf() private parent: ControlContainer,
-  ) { }
 
   ngOnInit(): void {
     if (this.parent instanceof FormGroupName) {

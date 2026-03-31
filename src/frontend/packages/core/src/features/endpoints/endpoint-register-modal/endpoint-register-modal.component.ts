@@ -1,14 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component,
-  ComponentRef,
-  EventEmitter,
-  Injector,
-  OnDestroy,
-  OnInit,
-  Output,
-  ViewChild,
-  ViewContainerRef,
- } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ComponentRef, EventEmitter, Injector, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, inject } from '@angular/core';
 import { ActivatedRoute, ActivatedRouteSnapshot, Params } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
@@ -35,6 +26,9 @@ import { TileSelectorComponent } from '../../../shared/components/tile-selector/
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EndpointRegisterModalComponent extends BaseEndpointTileManager implements OnInit, OnDestroy {
+  protected store: Store<GeneralEntityAppState>;
+  private injector = inject(Injector);
+
   @Output() closeModalEvent = new EventEmitter<void>();
   @Output() endpointRegistered = new EventEmitter<any>();
 
@@ -44,15 +38,16 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
   selectedEndpointInfo: ITileConfig<ICreateEndpointTilesData> | null = null;
   componentRef: ComponentRef<any>;
 
-  constructor(
-    protected store: Store<GeneralEntityAppState>,
-    private injector: Injector,
-  ) {
+  constructor() {
+    const store = inject<Store<GeneralEntityAppState>>(Store);
+
     const types = store.select(selectSessionData()).pipe(
       // Get a list of all known endpoint types
       map(sessionData => entityCatalog.getAllEndpointTypes(sessionData.config.enableTechPreview || false))
     );
     super(types, store);
+    this.store = store;
+
     
     // Add escape key listener
     document.addEventListener('keydown', this.handleEscapeKey.bind(this));

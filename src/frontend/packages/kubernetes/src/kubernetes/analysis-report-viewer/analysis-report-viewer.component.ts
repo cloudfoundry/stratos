@@ -1,14 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  ComponentRef,
-  Input,
-  OnDestroy,
-  Type,
-  ViewChild,
-  ViewContainerRef,
-} from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, Input, OnDestroy, Type, ViewChild, ViewContainerRef, inject } from '@angular/core';
 
 import { AnalysisReport } from '../store/kube.types';
 import { KubeScoreReportViewerComponent } from './kube-score-report-viewer/kube-score-report-viewer.component';
@@ -26,6 +16,8 @@ selector: 'app-analysis-report-viewer',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AnalysisReportViewerComponent implements OnDestroy {
+  private cdr = inject(ChangeDetectorRef);
+
 
   // Component reference for the dynamically created auth form
   @ViewChild('reportViewer', { read: ViewContainerRef, static: true })
@@ -33,8 +25,6 @@ export class AnalysisReportViewerComponent implements OnDestroy {
   private reportComponentRef: ComponentRef<IReportViewer>;
 
   private id!: string;
-
-  constructor(private cdr: ChangeDetectorRef) {}
 
   @Input('report')
   set report(report: AnalysisReport) {

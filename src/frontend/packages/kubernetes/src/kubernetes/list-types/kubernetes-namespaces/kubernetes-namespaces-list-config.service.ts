@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { filter } from 'rxjs/operators';
 
@@ -23,6 +23,8 @@ import { KubernetesNamespacesDataSource } from './kubernetes-namespaces-data-sou
   providedIn: 'root'
 })
 export class KubernetesNamespacesListConfigService implements IListConfig<KubernetesNamespace> {
+  private kubeId = inject(BaseKubeGuid);
+
   podsDataSource: KubernetesNamespacesDataSource;
 
   columns: Array<ITableColumn<KubernetesNamespace>> = [
@@ -76,10 +78,9 @@ export class KubernetesNamespacesListConfigService implements IListConfig<Kubern
   getDataSource = (): KubernetesNamespacesDataSource => this.podsDataSource;
   getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
 
-  constructor(
-    store: Store<AppState>,
-    private kubeId: BaseKubeGuid,
-  ) {
+  constructor() {
+    const store = inject<Store<AppState>>(Store);
+
     this.podsDataSource = new KubernetesNamespacesDataSource(store, this.kubeId, this);
   }
 

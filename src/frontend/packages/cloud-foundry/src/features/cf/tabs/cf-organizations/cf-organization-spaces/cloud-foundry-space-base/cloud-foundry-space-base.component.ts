@@ -1,4 +1,4 @@
-import { Component, OnDestroy , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -56,6 +56,12 @@ import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-spa
   ]
 })
 export class CloudFoundrySpaceBaseComponent implements OnDestroy {
+  cfEndpointService = inject(CloudFoundryEndpointService);
+  cfSpaceService = inject(CloudFoundrySpaceService);
+  cfOrgService = inject(CloudFoundryOrganizationService);
+  private store = inject<Store<CFAppState>>(Store);
+  private confirmDialog = inject(ConfirmationDialogService);
+
 
   tabLinks: IPageSideNavTab[] = [
     {
@@ -117,14 +123,12 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundryOrg);
   public favorite$: Observable<UserFavorite<ISpaceFavMetadata>>;
 
-  constructor(
-    public cfEndpointService: CloudFoundryEndpointService,
-    public cfSpaceService: CloudFoundrySpaceService,
-    public cfOrgService: CloudFoundryOrganizationService,
-    private store: Store<CFAppState>,
-    private confirmDialog: ConfirmationDialogService,
-    userFavoriteManager: UserFavoriteManager
-  ) {
+  constructor() {
+    const cfEndpointService = this.cfEndpointService;
+    const cfSpaceService = this.cfSpaceService;
+    const cfOrgService = this.cfOrgService;
+    const userFavoriteManager = inject(UserFavoriteManager);
+
     this.favorite$ = cfSpaceService.space$.pipe(
       map(space => userFavoriteManager.getFavorite<ISpaceFavMetadata>(space.entity, spaceEntityType, CF_ENDPOINT_TYPE))
     );

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, inject } from '@angular/core';
 
 import { SidePanelService } from '../../../../services/side-panel.service';
 import { TableCellCustom } from '../../list.types';
@@ -18,6 +18,9 @@ export interface TableCellSidePanelConfig<T> {
   standalone: true
 })
 export class TableCellSidePanelComponent<T = any, A = any> extends TableCellCustom<T, object | CellConfigFunction<T>> {
+  private previewPanel = inject(SidePanelService);
+  private cdr = inject(ChangeDetectorRef);
+
 
   public actualConfig!: TableCellSidePanelConfig<A>;
 
@@ -33,13 +36,6 @@ export class TableCellSidePanelComponent<T = any, A = any> extends TableCellCust
   set config(config: object | CellConfigFunction<T>) {
     super.config = config;
     this.updateConfig();
-  }
-
-  constructor(
-    private previewPanel: SidePanelService,
-    private cdr: ChangeDetectorRef
-  ) {
-    super();
   }
 
   showSidePanel() {

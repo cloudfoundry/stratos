@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, TailwindDialogRef, CodeBlockComponent } from '@stratosui/core';
 
 
@@ -15,14 +15,12 @@ import { MAT_DIALOG_DATA, TailwindDialogRef, CodeBlockComponent } from '@stratos
   ]
 })
 export class EnvVarViewComponent {
+  data = inject<{
+    key: string;
+    value: any;
+}>(MAT_DIALOG_DATA);
+  dialogRef = inject<TailwindDialogRef<EnvVarViewComponent>>('TailwindDialogRef' as any);
 
-  constructor(
-    @Inject(MAT_DIALOG_DATA) public data: {
-      key: string,
-      value: any
-    },
-    @Inject('TailwindDialogRef') public dialogRef: TailwindDialogRef<EnvVarViewComponent>
-  ) { }
 
   isObject(test: any): boolean {
     return typeof test === 'object';

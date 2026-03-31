@@ -1,14 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  ChangeDetectionStrategy, Component,
-  ComponentRef,
-  Input,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-  ViewContainerRef,
-  ChangeDetectorRef,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, ComponentRef, Input, OnDestroy, OnInit, ViewChild, ViewContainerRef, ChangeDetectorRef, inject } from '@angular/core';
 import { CustomTooltipDirective } from '../../../../custom-tooltip/custom-tooltip.directive';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -75,6 +66,13 @@ import { DisableRouterLinkDirective } from '../../../../../../core/disable-route
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EndpointCardComponent extends CardCell<EndpointModel> implements OnInit, OnDestroy {
+  private store = inject<Store<AppState>>(Store);
+  private endpointListHelper = inject(EndpointListHelper);
+  private userFavoriteManager = inject(UserFavoriteManager);
+  private currentUserPermissionsService = inject(CurrentUserPermissionsService);
+  private sessionService = inject(SessionService);
+  private cdr = inject(ChangeDetectorRef);
+
 
   public rowObs = new ReplaySubject<EndpointModel>();
   public favorite?: UserFavoriteEndpoint;
@@ -184,14 +182,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     }
   }
 
-  constructor(
-    private store: Store<AppState>,
-    private endpointListHelper: EndpointListHelper,
-    private userFavoriteManager: UserFavoriteManager,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-    private sessionService: SessionService,
-    private cdr: ChangeDetectorRef,
-  ) {
+  constructor() {
     super();
     this.endpointIds$ = this.endpointIds.asObservable();
   }

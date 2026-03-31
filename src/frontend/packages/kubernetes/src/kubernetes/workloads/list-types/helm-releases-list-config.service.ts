@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { ITableColumn } from '@stratosui/core';
@@ -28,6 +28,10 @@ import { KubernetesNamespacesFilterItem, KubernetesNamespacesFilterService } fro
   providedIn: 'root'
 })
 export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
+  private store = inject<Store<AppState>>(Store);
+  activatedRoute = inject(ActivatedRoute);
+  private datePipe = inject(DatePipe);
+
 
   isLocal = true;
   dataSource: HelmReleasesDataSource;
@@ -121,12 +125,9 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
 
   private multiFilterConfigs: IListMultiFilterConfig[];
 
-  constructor(
-    private store: Store<AppState>,
-    public activatedRoute: ActivatedRoute,
-    private datePipe: DatePipe,
-    kubeNamespaceService: KubernetesNamespacesFilterService
-  ) {
+  constructor() {
+    const kubeNamespaceService = inject(KubernetesNamespacesFilterService);
+
     this.dataSource = new HelmReleasesDataSource(this.store, this);
 
     this.multiFilterConfigs = [

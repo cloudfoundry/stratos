@@ -1,4 +1,4 @@
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
@@ -28,10 +28,10 @@ import { EditQuotaStepComponent } from './edit-quota-step/edit-quota-step.compon
 })
 export class EditQuotaComponent {
   cfQuotasUrl: string;
-  constructor(
-    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    activatedRoute: ActivatedRoute
-  ) {
+  constructor() {
+    const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+    const activatedRoute = inject(ActivatedRoute);
+
     const cfId = activeRouteCfOrgSpace.cfGuid;
     const quotaId = activatedRoute.snapshot.params.quotaId;
     const orgGuid = activatedRoute.snapshot.queryParams[QUOTA_ORG_GUID];

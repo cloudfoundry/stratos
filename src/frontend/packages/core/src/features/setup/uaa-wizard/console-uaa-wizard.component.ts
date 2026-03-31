@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject, OnInit, ViewEncapsulation, signal  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
@@ -55,11 +55,13 @@ import { LoadingPageComponent } from '../../../shared/components/loading-page/lo
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConsoleUaaWizardComponent implements OnInit {
+  private store = inject<Store<Pick<InternalAppState, 'uaaSetup' | 'auth'>>>(Store);
+  title = inject(APP_TITLE);
+
 
   private clientRedirectURI: string;
 
-  constructor(
-    private store: Store<Pick<InternalAppState, 'uaaSetup' | 'auth'>>, @Inject(APP_TITLE) public title: string) {
+  constructor() {
     // Client Redirect URI for SSO
     this.clientRedirectURI = getSSOClientRedirectURI();
   }

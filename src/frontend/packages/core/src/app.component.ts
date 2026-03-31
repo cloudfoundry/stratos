@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { AfterContentInit, ChangeDetectionStrategy, Component, HostBinding, Inject, OnDestroy, OnInit } from '@angular/core';
+import { AfterContentInit, ChangeDetectionStrategy, Component, HostBinding, OnDestroy, OnInit, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AuthOnlyAppState, ThemeService, VerifySession } from '@stratosui/store';
 import { Observable } from 'rxjs';
@@ -18,18 +18,18 @@ import { LoggedInService } from './logged-in.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
+  private loggedInService = inject(LoggedInService);
+  private store = inject<Store<AuthOnlyAppState>>(Store);
+  themeService = inject(ThemeService);
+  private stratosThemeService = inject(StratosThemeService);
+  private document = inject<Document>(DOCUMENT);
+
 
   @HostBinding('@.disabled')
   public animationsDisabled = false;
   public userId$: Observable<string>;
 
-  constructor(
-    private loggedInService: LoggedInService,
-    private store: Store<AuthOnlyAppState>,
-    public themeService: ThemeService,
-    private stratosThemeService: StratosThemeService,
-    @Inject(DOCUMENT) private document: Document,
-  ) {
+  constructor() {
     // Dispatch initial session verification BEFORE routing starts
     // This prevents the authGuard from blocking indefinitely waiting for verifying=false
     this.store.dispatch(new VerifySession());

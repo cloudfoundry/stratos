@@ -1,4 +1,4 @@
-import { ApplicationRef, Injectable } from '@angular/core';
+import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
@@ -14,12 +14,10 @@ import { WrapperRequestActionFailed } from '../types/request.types';
   providedIn: 'root'
 })
 export class EndpointApiError {
+  private actions$ = inject(Actions);
+  private store = inject<Store<InternalAppState>>(Store);
+  private appRef = inject(ApplicationRef);
 
-  constructor(
-    private actions$: Actions,
-    private store: Store<InternalAppState>,
-    private appRef: ApplicationRef,
-  ) { }
 
    endpointApiError$ = createEffect(() => this.actions$.pipe(
     ofType<WrapperRequestActionFailed>(RequestTypes.FAILED),

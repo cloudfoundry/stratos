@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef, inject } from '@angular/core';
 
 import { getRowMetadata, EntitySchema, APIResource } from '@stratosui/store';
 
@@ -28,13 +28,11 @@ selector: 'app-table-cell-request-monitor-icon',
 ]
 })
 export class TableCellRequestMonitorIconComponent<T = any> extends TableCellCustom<T, Config<T>> implements OnInit, OnChanges {
+  private cdr = inject(ChangeDetectorRef);
+
   public configObj!: ITableCellRequestMonitorIconConfig;
 
   public id!: string;
-
-  constructor(private cdr: ChangeDetectorRef) {
-    super();
-  }
 
   ngOnInit() {
     this.updateConfig();

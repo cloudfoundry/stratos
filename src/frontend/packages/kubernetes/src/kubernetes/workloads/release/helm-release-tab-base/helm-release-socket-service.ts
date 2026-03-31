@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { of, Subject, Subscription } from 'rxjs';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
@@ -27,18 +27,14 @@ interface SocketMessage {
 
 @Injectable()
 export class HelmReleaseSocketService implements OnDestroy {
+  private helmReleaseHelper = inject(HelmReleaseHelperService);
+  private store = inject<Store<AppState>>(Store);
+  private snackbarService = inject(SnackBarService);
+
 
   private sub: Subscription;
   private sendToSocket = new Subject<any>();
   public isPaused = false;
-
-  constructor(
-    private helmReleaseHelper: HelmReleaseHelperService,
-    private store: Store<AppState>,
-    private snackbarService: SnackBarService,
-  ) {
-
-  }
 
   public start() {
     if (this.isStarted()) {

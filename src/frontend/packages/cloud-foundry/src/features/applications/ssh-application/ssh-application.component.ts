@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { NEVER, Observable, Subject } from 'rxjs';
@@ -27,6 +27,10 @@ import { ApplicationService } from '../application.service';
   ]
 })
 export class SshApplicationComponent implements OnInit {
+  private activatedRoute = inject(ActivatedRoute);
+  private store = inject<Store<CFAppState>>(Store);
+  private applicationService = inject(ApplicationService);
+
 
   public messages!: Observable<string>;
 
@@ -60,12 +64,6 @@ export class SshApplicationComponent implements OnInit {
       },
     ];
   }
-
-  constructor(
-    private activatedRoute: ActivatedRoute,
-    private store: Store<CFAppState>,
-    private applicationService: ApplicationService,
-  ) { }
 
   ngOnInit() {
     this.connectionStatus.next(0);

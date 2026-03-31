@@ -1,5 +1,5 @@
 import { AsyncPipe, DatePipe } from '@angular/common';
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { filter, first, map, pairwise, shareReplay, startWith, switchMap, tap } from 'rxjs/operators';
@@ -64,6 +64,11 @@ import {
   ]
 })
 export class ApplicationDeleteComponent<T> {
+  private store = inject<Store<GeneralEntityAppState>>(Store);
+  private applicationService = inject(ApplicationService);
+  private paginationMonitorFactory = inject(PaginationMonitorFactory);
+  private datePipe = inject(DatePipe);
+
   relatedEntities$: Observable<{ instances: APIResource<IServiceBinding>[], routes: APIResource<IRoute>[]; }>;
   public deleteStarted = false;
   public instanceDeleteColumns: ITableColumn<APIResource<IServiceBinding>>[] = [
@@ -169,12 +174,9 @@ export class ApplicationDeleteComponent<T> {
   public siCatalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
   public upsiCatalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, userProvidedServiceInstanceEntityType);
 
-  constructor(
-    private store: Store<GeneralEntityAppState>,
-    private applicationService: ApplicationService,
-    private paginationMonitorFactory: PaginationMonitorFactory,
-    private datePipe: DatePipe
-  ) {
+  constructor() {
+    const applicationService = this.applicationService;
+
     this.setupAppMonitor();
     this.cancelUrl = `/applications/${applicationService.cfGuid}/${applicationService.appGuid}`;
     const { fetch, monitors } = this.buildRelatedEntitiesActionMonitors();

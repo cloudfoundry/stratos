@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Injector, Input, OnDestroy, signal , ChangeDetectionStrategy } from '@angular/core';
+import { Component, Injector, Input, OnDestroy, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
   combineLatest as observableCombineLatest,
@@ -30,6 +30,11 @@ import { DeployApplicationDeployer } from '../deploy-application-deployer';
   ]
 })
 export class DeployApplicationStep3Component implements OnDestroy {
+  private store = inject<Store<CFAppState>>(Store);
+  private snackBarService = inject(SnackBarService);
+  cfOrgSpaceService = inject(CfOrgSpaceDataService);
+  private injector = inject(Injector);
+
 
   @Input() appGuid!: string;
 
@@ -51,12 +56,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
 
   public busy = false;
 
-  constructor(
-    private store: Store<CFAppState>,
-    private snackBarService: SnackBarService,
-    public cfOrgSpaceService: CfOrgSpaceDataService,
-    private injector: Injector
-  ) {
+  constructor() {
     this.valid$ = observableOf(false);
     this.closeable$ = observableOf(false);
   }

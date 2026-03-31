@@ -11,7 +11,10 @@ export class TableCellStatusDirective implements OnChanges {
   private readonly el: ElementRef;
   private readonly renderer: Renderer2;
 
-  constructor(el: ElementRef, renderer: Renderer2) {
+  constructor() {
+    const el = inject(ElementRef);
+    const renderer = inject(Renderer2);
+
     this.el = el;
     this.renderer = renderer;
   }

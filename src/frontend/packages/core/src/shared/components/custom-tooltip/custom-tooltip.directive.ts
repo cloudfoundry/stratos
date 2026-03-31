@@ -1,10 +1,13 @@
-import { Directive, Input, ElementRef, Renderer2, OnDestroy, HostListener } from '@angular/core';
+import { Directive, Input, ElementRef, Renderer2, OnDestroy, HostListener, inject } from '@angular/core';
 
 @Directive({
   selector: '[matTooltip]',
   standalone: true
 })
 export class CustomTooltipDirective implements OnDestroy {
+  private elementRef = inject(ElementRef);
+  private renderer = inject(Renderer2);
+
   @Input('matTooltip') tooltipText: string = '';
   @Input('matTooltipPosition') position: 'above' | 'below' | 'left' | 'right' = 'above';
   @Input('matTooltipClass') tooltipClass: string = '';
@@ -15,11 +18,6 @@ export class CustomTooltipDirective implements OnDestroy {
   private tooltipElement: HTMLElement | null = null;
   private showTimeout: any;
   private hideTimeout: any;
-
-  constructor(
-    private elementRef: ElementRef,
-    private renderer: Renderer2
-  ) {}
 
   @HostListener('mouseenter', ['$event'])
   onMouseEnter(event: MouseEvent) {

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
@@ -115,11 +115,9 @@ export const cfPermissionConfigs: IPermissionConfigs = {
 
 @Injectable()
 export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker implements ICurrentUserPermissionsChecker {
-  static readonly ALL_SPACES = 'PERMISSIONS__ALL_SPACES_PLEASE';
+  private store = inject<Store<GeneralEntityAppState>>(Store);
 
-  constructor(private store: Store<GeneralEntityAppState>) {
-    super();
-  }
+  static readonly ALL_SPACES = 'PERMISSIONS__ALL_SPACES_PLEASE';
 
   getPermissionConfig(action: string) {
     return cfPermissionConfigs[action];

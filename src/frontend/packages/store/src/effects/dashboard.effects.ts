@@ -1,4 +1,4 @@
-import { ApplicationRef, Injectable } from '@angular/core';
+import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { map } from 'rxjs/operators';
 
@@ -10,12 +10,10 @@ import { ThemeService } from '../theme.service';
   providedIn: 'root'
 })
 export class DashboardEffect {
+  private actions$ = inject(Actions);
+  private themeService = inject(ThemeService);
+  private appRef = inject(ApplicationRef);
 
-  constructor(
-    private actions$: Actions,
-    private themeService: ThemeService,
-    private appRef: ApplicationRef,
-  ) { }
 
    hydrate$ = createEffect(() => this.actions$.pipe(
     ofType<HydrateDashboardStateAction>(HYDRATE_DASHBOARD_STATE),

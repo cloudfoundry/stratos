@@ -1,4 +1,4 @@
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
@@ -49,19 +49,22 @@ import { CardCfSpaceDetailsComponent } from '../../../../../../../shared/compone
   ]
 })
 export class CloudFoundrySpaceSummaryComponent {
+  cfEndpointService = inject(CloudFoundryEndpointService);
+  cfOrgService = inject(CloudFoundryOrganizationService);
+  cfSpaceService = inject(CloudFoundrySpaceService);
+  private confirmDialog = inject(ConfirmationDialogService);
+  private store = inject<Store<AppState>>(Store);
+  private snackBar = inject(TailwindSnackBarService);
+
   detailsLoading$: Observable<boolean>;
   name$: Observable<string>;
   public permsSpaceEdit = CfCurrentUserPermissions.SPACE_EDIT;
   public permsSpaceDelete = CfCurrentUserPermissions.SPACE_DELETE;
 
-  constructor(
-    public cfEndpointService: CloudFoundryEndpointService,
-    public cfOrgService: CloudFoundryOrganizationService,
-    public cfSpaceService: CloudFoundrySpaceService,
-    private confirmDialog: ConfirmationDialogService,
-    private store: Store<AppState>,
-    private snackBar: TailwindSnackBarService,
-  ) {
+  constructor() {
+    const cfEndpointService = this.cfEndpointService;
+    const cfSpaceService = this.cfSpaceService;
+
     this.detailsLoading$ = combineLatest([
       // Wait for the apps to have been fetched, this will determine if multiple small cards are shown or now
       cfEndpointService.appsPagObs.fetchingEntities$.pipe(

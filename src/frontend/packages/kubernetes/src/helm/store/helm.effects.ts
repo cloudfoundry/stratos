@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { ApplicationRef, Injectable } from '@angular/core';
+import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { TailwindSnackBarService } from '../../../../core/src/shared/services/tailwind-snackbar.service';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
@@ -104,14 +104,12 @@ const addMonocularId = (endpointId: string, response: MonocularChartsResponse): 
   providedIn: 'root'
 })
 export class HelmEffects {
+  private httpClient = inject(HttpClient);
+  private actions$ = inject(Actions);
+  private store = inject<Store<AppState>>(Store);
+  snackBar = inject(TailwindSnackBarService);
+  private appRef = inject(ApplicationRef);
 
-  constructor(
-    private httpClient: HttpClient,
-    private actions$: Actions,
-    private store: Store<AppState>,
-    public snackBar: TailwindSnackBarService,
-    private appRef: ApplicationRef
-  ) { }
 
   // Endpoints that we know are synchronizing
   private syncing: Record<string, boolean> = {};

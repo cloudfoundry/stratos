@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { of as observableOf } from 'rxjs';
@@ -34,6 +34,10 @@ interface EditLimitForm {
   ]
 })
 export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDirective implements OnInit {
+  applicationService = inject(ApplicationService);
+  private fb = inject(FormBuilder);
+  private cdr = inject(ChangeDetectorRef);
+
 
   policyAlert = PolicyAlert;
   timezoneOptions = Intl.supportedValuesOf('timeZone');
@@ -41,13 +45,10 @@ export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDire
 
   private editLimitValid = true;
 
-  constructor(
-    public applicationService: ApplicationService,
-    private fb: FormBuilder,
-    service: EditAutoscalerPolicyService,
-    route: ActivatedRoute,
-    private cdr: ChangeDetectorRef
-  ) {
+  constructor() {
+    const service = inject(EditAutoscalerPolicyService);
+    const route = inject(ActivatedRoute);
+
     super(service, route);
     this.editLimitForm = this.fb.group<EditLimitForm>({
       instance_min_count: this.fb.nonNullable.control(0, [Validators.required, this.validateGlobalLimitMin()]),

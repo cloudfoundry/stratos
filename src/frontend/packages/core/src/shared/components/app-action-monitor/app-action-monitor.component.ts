@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input, OnInit  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit, inject } from '@angular/core';
 import { rootUpdatingKey, EntitySchema, EntityMonitorFactory } from '@stratosui/store';
 import { schema } from 'normalizr';
 import { never as observableNever, Observable, of as observableOf } from 'rxjs';
@@ -29,6 +29,8 @@ import { TableComponent } from '../list/list-table/table.component';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppActionMonitorComponent<T> implements OnInit {
+  private entityMonitorFactory = inject(EntityMonitorFactory);
+
 
   @Input()
   public data$: Observable<Array<T>> = observableNever();
@@ -68,11 +70,6 @@ export class AppActionMonitorComponent<T> implements OnInit {
   public dataSource: ITableListDataSource<T>;
 
   public allColumns: ITableColumn<T>[] = [];
-
-  constructor(
-    private entityMonitorFactory: EntityMonitorFactory
-  ) {
-  }
 
   ngOnInit() {
     const defaultGetCellConfig = () => ({

@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
@@ -45,6 +45,8 @@ export interface SpaceQuotaFormValues {
 ]
 })
 export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
+  private activatedRoute = inject(ActivatedRoute);
+
   quotasSubscription!: Subscription;
   cfGuid: string;
   orgGuid: string;
@@ -66,10 +68,9 @@ export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
 
   @Input() quota: IQuotaDefinition;
 
-  constructor(
-    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private activatedRoute: ActivatedRoute,
-  ) {
+  constructor() {
+    const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.orgGuid = this.activatedRoute.snapshot.params.orgId;
   }

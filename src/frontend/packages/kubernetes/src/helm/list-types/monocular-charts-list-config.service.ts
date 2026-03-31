@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { filter } from 'rxjs/operators';
 
@@ -23,6 +23,8 @@ import { MonocularChartsDataSource } from './monocular-charts-data-source';
   providedIn: 'root'
 })
 export class MonocularChartsListConfig implements IListConfig<MonocularChart> {
+  private chartsService = inject(ChartsService);
+
   dataSource!: MonocularChartsDataSource;
   isLocal = true;
   multiFilterConfigs!: IListMultiFilterConfig[];
@@ -85,10 +87,9 @@ export class MonocularChartsListConfig implements IListConfig<MonocularChart> {
   };
 
 
-  constructor(
-    store: Store<AppState>,
-    private chartsService: ChartsService
-  ) {
+  constructor() {
+    const store = inject<Store<AppState>>(Store);
+
     this.dataSource = new MonocularChartsDataSource(store, this);
   }
 

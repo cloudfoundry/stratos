@@ -1,4 +1,4 @@
-import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Observable, of as observableOf } from 'rxjs';
@@ -35,6 +35,9 @@ import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.
   ]
 })
 export class CloudFoundryTabsBaseComponent implements OnInit {
+  cfEndpointService = inject(CloudFoundryEndpointService);
+  private currentUserPermissionsService = inject(CurrentUserPermissionsService);
+
   static firehose = 'firehose';
   static users = 'users';
   static cells = 'cells';
@@ -52,12 +55,11 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
 
   public favorite$: Observable<UserFavoriteEndpoint>;
 
-  constructor(
-    public cfEndpointService: CloudFoundryEndpointService,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-    endpointsService: EndpointsService,
-    userFavoriteManager: UserFavoriteManager
-  ) {
+  constructor() {
+    const cfEndpointService = this.cfEndpointService;
+    const endpointsService = inject(EndpointsService);
+    const userFavoriteManager = inject(UserFavoriteManager);
+
     this.favorite$ = endpointsService.endpoints$.pipe(
       first(),
       map(endpoints => endpoints[this.cfEndpointService.cfGuid]),

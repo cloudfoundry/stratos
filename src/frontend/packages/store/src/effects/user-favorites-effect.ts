@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -32,14 +32,11 @@ const favoriteUrlPath = `/pp/${proxyAPIVersion}/favorites`;
 
 @Injectable()
 export class UserFavoritesEffect {
+  private http = inject(HttpClient);
+  private actions$ = inject(Actions);
+  private store = inject<Store<InternalAppState>>(Store);
+  private userFavoriteManager = inject(UserFavoriteManager);
 
-  constructor(
-    private http: HttpClient,
-    private actions$: Actions,
-    private store: Store<InternalAppState>,
-    private userFavoriteManager: UserFavoriteManager
-  ) {
-  }
 
    saveFavorite = createEffect(() => this.actions$.pipe(
     ofType<SaveUserFavoriteAction>(SaveUserFavoriteAction.ACTION_TYPE),

@@ -1,13 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import {
-  ComponentRef,
-  Inject,
-  Injectable,
-  ViewContainerRef,
-  signal,
-  computed,
-  Signal,
-} from '@angular/core';
+import { ComponentRef, Injectable, ViewContainerRef, signal, computed, Signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { filter, tap } from 'rxjs/operators';
 
@@ -32,6 +24,9 @@ export enum SidePanelMode {
   providedIn: 'root'
 })
 export class SidePanelService {
+  private router = inject(Router);
+  private document = inject<Document>(DOCUMENT);
+
   private _opened = signal<boolean>(false);
   public opened = this._opened.asReadonly();
 
@@ -40,10 +35,7 @@ export class SidePanelService {
 
   private container: ViewContainerRef;
 
-  constructor(
-    private router: Router,
-    @Inject(DOCUMENT) private document: Document,
-  ) {
+  constructor() {
     this.setupRouterListener();
   }
 

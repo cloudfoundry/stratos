@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 
@@ -19,13 +19,13 @@ import { ApplicationService } from '../../application.service';
   providedIn: 'root'
 })
 export class AppDeleteRoutesListConfigService extends CfAppRoutesListConfigServiceBase implements IListConfig<APIResource> {
-  constructor(
-    store: Store<CFAppState>,
-    appService: ApplicationService,
-    confirmDialog: ConfirmationDialogService,
-    datePipe: DatePipe,
-    currentUserPermissionsService: CurrentUserPermissionsService,
-  ) {
+  constructor() {
+    const store = inject<Store<CFAppState>>(Store);
+    const appService = inject(ApplicationService);
+    const confirmDialog = inject(ConfirmationDialogService);
+    const datePipe = inject(DatePipe);
+    const currentUserPermissionsService = inject(CurrentUserPermissionsService);
+
     super(store, appService, confirmDialog, datePipe, currentUserPermissionsService, null, false, false);
 
     this.setupList();

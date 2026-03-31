@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
@@ -23,6 +23,8 @@ import { CFAppCLIInfoContext, CliInfoComponent } from '../../../shared/component
   ]
 })
 export class CliInfoApplicationComponent implements OnInit {
+  private applicationService = inject(ApplicationService);
+
 
   cfEndpointEntityService!: EntityService<EndpointModel>;
   public previousUrl!: string;
@@ -33,9 +35,7 @@ export class CliInfoApplicationComponent implements OnInit {
   public context$!: Observable<CFAppCLIInfoContext>;
   public breadcrumbs$!: Observable<IHeaderBreadcrumb[]>;
 
-  constructor(
-    private applicationService: ApplicationService,
-  ) {
+  constructor() {
     this.breadcrumbs$ = new BehaviorSubject<IHeaderBreadcrumb[]>([]);
   }
 

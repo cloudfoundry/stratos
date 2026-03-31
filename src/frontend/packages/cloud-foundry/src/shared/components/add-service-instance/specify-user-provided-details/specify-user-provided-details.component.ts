@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
-import { Component, Input, OnDestroy, computed, signal , ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnDestroy, computed, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
@@ -63,13 +63,15 @@ const { proxyAPIVersion, cfAPIVersion } = environment;
   ]
 })
 export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
+  private route = inject(ActivatedRoute);
+  private upsService = inject(CloudFoundryUserProvidedServicesService);
+  modeService = inject(CsiModeService);
+  private store = inject<Store<CFAppState>>(Store);
 
-  constructor(
-    private route: ActivatedRoute,
-    private upsService: CloudFoundryUserProvidedServicesService,
-    public modeService: CsiModeService,
-    private store: Store<CFAppState>,
-  ) {
+
+  constructor() {
+    const route = this.route;
+
     const { endpointId, serviceInstanceId } =
       route && route.snapshot ? route.snapshot.params : { endpointId: null, serviceInstanceId: null };
     this.isUpdate = endpointId && serviceInstanceId;

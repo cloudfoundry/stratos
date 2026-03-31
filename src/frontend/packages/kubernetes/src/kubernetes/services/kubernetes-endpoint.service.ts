@@ -51,6 +51,10 @@ export interface CaaspNodeData {
   providedIn: 'root'
 })
 export class KubernetesEndpointService {
+  baseKube = inject(BaseKubeGuid);
+  private store = inject<Store<AppState>>(Store);
+  private entityServiceFactory = inject(EntityServiceFactory);
+
   info$: Observable<EntityInfo<any>>;
   cfInfoEntityService: EntityService<any>;
   endpoint$: Observable<EntityInfo<EndpointModel>>;
@@ -108,11 +112,9 @@ export class KubernetesEndpointService {
     );
   }
 
-  constructor(
-    public baseKube: BaseKubeGuid,
-    private store: Store<AppState>,
-    private entityServiceFactory: EntityServiceFactory,
-  ) {
+  constructor() {
+    const baseKube = this.baseKube;
+
     const kubeGuid = baseKube.guid;
 
     if (kubeGuid) {

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import {
@@ -46,7 +46,9 @@ export class CreateEndpointBaseStepComponent extends BaseEndpointTileManager {
     }
   }
 
-  constructor(store: Store<GeneralEntityAppState>) {
+  constructor() {
+    const store = inject<Store<GeneralEntityAppState>>(Store);
+
     const types = store.select(selectSessionData()).pipe(
       // Get a list of all known endpoint types
       map(sessionData => entityCatalog.getAllEndpointTypes(sessionData.config.enableTechPreview || false))

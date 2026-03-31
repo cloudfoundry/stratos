@@ -1,4 +1,4 @@
-import { computed, Injectable, OnDestroy, signal } from '@angular/core';
+import { computed, Injectable, OnDestroy, signal, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
@@ -139,6 +139,9 @@ interface InitialValues { cf: string; org: string; space: string; }
   providedIn: 'root'
 })
 export class CfOrgSpaceDataService implements OnDestroy {
+  private store = inject<Store<CFAppState>>(Store);
+  paginationMonitorFactory = inject(PaginationMonitorFactory);
+
 
   private static CfOrgSpaceServicePaginationKey = 'endpointOrgSpaceService';
 
@@ -170,10 +173,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
    */
   public initialValuesMap!: (param: any) => InitialValues;
 
-  constructor(
-    private store: Store<CFAppState>,
-    public paginationMonitorFactory: PaginationMonitorFactory,
-  ) {
+  constructor() {
     this.createCf();
     this.createOrg();
     this.createSpace();

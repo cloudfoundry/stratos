@@ -1,4 +1,4 @@
-import { Directive, Input, OnDestroy, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
+import { Directive, Input, OnDestroy, OnInit, TemplateRef, ViewContainerRef, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
@@ -12,6 +12,11 @@ import { CfCurrentUserPermissions, waitForCFPermissions } from '@stratosui/cloud
   standalone: true
 })
 export class CfUserPermissionDirective implements OnDestroy, OnInit {
+  private store = inject<Store<AppState>>(Store);
+  private templateRef = inject<TemplateRef<any>>(TemplateRef);
+  private viewContainer = inject(ViewContainerRef);
+  private currentUserPermissionsService = inject(CurrentUserPermissionsService);
+
   @Input()
   public appCfUserPermission!: CfCurrentUserPermissions;
 
@@ -25,13 +30,6 @@ export class CfUserPermissionDirective implements OnDestroy, OnInit {
   private appCfUserPermissionSpaceGuid!: string;
 
   private canSub!: Subscription;
-
-  constructor(
-    private store: Store<AppState>,
-    private templateRef: TemplateRef<any>,
-    private viewContainer: ViewContainerRef,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-  ) { }
 
   public ngOnInit() {
     this.canSub = this.waitForEndpointPermissions(this.appCfUserPermissionEndpointGuid).pipe(

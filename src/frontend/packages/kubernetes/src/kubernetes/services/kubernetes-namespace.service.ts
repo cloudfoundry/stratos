@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -12,14 +12,17 @@ import { KubernetesEndpointService } from './kubernetes-endpoint.service';
   providedIn: 'root'
 })
 export class KubernetesNamespaceService {
+  kubeEndpointService = inject(KubernetesEndpointService);
+  activatedRoute = inject(ActivatedRoute);
+
   namespaceName: string;
   kubeGuid: string;
   namespace$: Observable<KubernetesNamespace>;
 
-  constructor(
-    public kubeEndpointService: KubernetesEndpointService,
-    public activatedRoute: ActivatedRoute,
-  ) {
+  constructor() {
+    const kubeEndpointService = this.kubeEndpointService;
+    const activatedRoute = this.activatedRoute;
+
 
     this.namespaceName = getIdFromRoute(activatedRoute, 'namespaceName');
     this.kubeGuid = kubeEndpointService.kubeGuid;

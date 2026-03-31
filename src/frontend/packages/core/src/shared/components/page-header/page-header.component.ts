@@ -1,6 +1,6 @@
 import { TemplatePortal } from '@angular/cdk/portal';
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild  } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild, inject } from '@angular/core';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import {
@@ -53,6 +53,16 @@ import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PageHeaderComponent implements OnDestroy, AfterViewInit {
+  private store = inject<Store<AppState>>(Store);
+  private route = inject(ActivatedRoute);
+  private tabNavService = inject(TabNavService);
+  private router = inject(Router);
+  private userProfileService = inject(UserProfileService);
+  private cups = inject(CurrentUserPermissionsService);
+  private endpointsService = inject(EndpointsService);
+  private currentUserPermissionsService = inject(CurrentUserPermissionsService);
+  private cdr = inject(ChangeDetectorRef);
+
   public canAPIKeys$: Observable<boolean>;
   public breadcrumbDefinitions: IHeaderBreadcrumbLink[] = null;
   private breadcrumbKey: string;
@@ -174,18 +184,10 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     this.store.dispatch(new ToggleSideNav());
   }
 
-  constructor(
-    private store: Store<AppState>,
-    private route: ActivatedRoute,
-    private tabNavService: TabNavService,
-    private router: Router,
-    eventService: GlobalEventService,
-    private userProfileService: UserProfileService,
-    private cups: CurrentUserPermissionsService,
-    private endpointsService: EndpointsService,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-    private cdr: ChangeDetectorRef,
-  ) {
+  constructor() {
+    const route = this.route;
+    const eventService = inject(GlobalEventService);
+
     this.events$ = eventService.events$.pipe(
       startWith([])
     );

@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { ApplicationRef, Injectable } from '@angular/core';
+import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, combineLatest, EMPTY, Observable, of as observableOf, of } from 'rxjs';
@@ -34,14 +34,12 @@ import { CfRoleChange, UsersRolesState } from '../types/users-roles.types';
   providedIn: 'root'
 })
 export class UsersRolesEffects {
+  private httpClient = inject(HttpClient);
+  private actions$ = inject(Actions);
+  private store = inject<Store<CFAppState>>(Store);
+  private cfUserService = inject(CfUserService);
+  private appRef = inject(ApplicationRef);
 
-  constructor(
-    private httpClient: HttpClient,
-    private actions$: Actions,
-    private store: Store<CFAppState>,
-    private cfUserService: CfUserService,
-    private appRef: ApplicationRef
-  ) { }
 
   getCurrentUsersPermissions$ = createEffect(() => this.actions$.pipe(
     ofType<GetCurrentCfUserRelations>(GET_CURRENT_CF_USER_RELATION),

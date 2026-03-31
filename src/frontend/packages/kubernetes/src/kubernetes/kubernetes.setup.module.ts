@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { NgModule, Optional, SkipSelf } from '@angular/core';
+import { NgModule, inject } from '@angular/core';
 
 import { CoreModule, SharedModule } from '@stratosui/core';
 import { EndpointsService } from '../../../core/src/core/endpoints.service';
@@ -89,11 +89,11 @@ import { KubernetesService } from './services/kubernetes.service';
     ]
 })
 export class KubernetesSetupModule {
-  constructor(
-    endpointService: EndpointsService,
-    uiConfigService: KubernetesUIConfigService,
-    @Optional() @SkipSelf() parentModule: KubernetesSetupModule
-  ) {
+  constructor() {
+    const endpointService = inject(EndpointsService);
+    const uiConfigService = inject(KubernetesUIConfigService);
+    const parentModule = inject(KubernetesSetupModule, { optional: true, skipSelf: true });
+
     if (parentModule) {
       // Module has already been imported
     } else {

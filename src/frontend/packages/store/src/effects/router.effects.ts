@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { map, tap } from 'rxjs/operators';
@@ -11,11 +11,9 @@ import { RouterActions, RouterNav } from '../actions/router.actions';
   providedIn: 'root'
 })
 export class RouterEffect {
+  private actions$ = inject(Actions);
+  private router = inject(Router);
 
-  constructor(
-    private actions$: Actions,
-    private router: Router,
-  ) { }
 
   
   routerGoUrl$ = createEffect(() => this.actions$.pipe(

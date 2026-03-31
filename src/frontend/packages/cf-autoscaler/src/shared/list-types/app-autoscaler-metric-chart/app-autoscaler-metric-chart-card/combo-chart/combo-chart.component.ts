@@ -1,13 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  EventEmitter,
-  Input,
-  Output,
-  ViewEncapsulation,
-  OnChanges,
-} from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output, ViewEncapsulation, OnChanges, inject } from '@angular/core';
 import { ChartConfiguration, ChartEvent, ActiveElement } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 
@@ -23,6 +14,8 @@ import { BaseChartDirective } from 'ng2-charts';
   ]
 })
 export class AppAutoscalerComboChartComponent implements OnChanges {
+  private cdr = inject(ChangeDetectorRef);
+
 
   @Input() width = 400;
   @Input() height = 300;
@@ -37,8 +30,6 @@ export class AppAutoscalerComboChartComponent implements OnChanges {
   @Output() select = new EventEmitter();
   @Output() activate = new EventEmitter();
   @Output() deactivate = new EventEmitter();
-
-  constructor(private cdr: ChangeDetectorRef) {}
 
   public comboChartData: ChartConfiguration['data'] = { labels: [], datasets: [] };
   public comboChartOptions: ChartConfiguration['options'] = {

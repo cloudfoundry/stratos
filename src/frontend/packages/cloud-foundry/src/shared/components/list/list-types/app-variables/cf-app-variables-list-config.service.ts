@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { of as observableOf, Subject } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
@@ -30,6 +30,10 @@ import { TableCellEditVariableComponent } from './table-cell-edit-variable/table
   providedIn: 'root'
 })
 export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVar> {
+  private store = inject<Store<CFAppState>>(Store);
+  private appService = inject(ApplicationService);
+  private confirmDialog = inject(ConfirmationDialogService);
+
   envVarsDataSource: CfAppVariablesDataSource;
 
   private multiListActionDelete: IMultiListAction<ListAppEnvVar> = {
@@ -147,11 +151,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
   getDataSource = (): CfAppVariablesDataSource => this.envVarsDataSource;
   getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
 
-  constructor(
-    private store: Store<CFAppState>,
-    private appService: ApplicationService,
-    private confirmDialog: ConfirmationDialogService,
-  ) {
+  constructor() {
     this.envVarsDataSource = new CfAppVariablesDataSource(this.store, this.appService, this);
   }
 

@@ -1,16 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ScrollDispatcher } from '@angular/cdk/scrolling';
-import { ChangeDetectionStrategy, AfterViewInit,
-  Component,
-  ElementRef,
-  HostListener,
-  OnDestroy,
-  OnInit,
-  QueryList,
-  ViewChild,
-  ViewChildren,
-  signal,
- } from '@angular/core';
+import { ChangeDetectionStrategy, AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren, signal, inject } from '@angular/core';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import {
@@ -67,6 +57,11 @@ const noFavoritesMsg = (endpointCount: number, favoriteCount: number) => ({
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
+  endpointsService = inject(EndpointsService);
+  private store = inject<Store<AppState>>(Store);
+  userFavoriteManager = inject(UserFavoriteManager);
+  private scrollDispatcher = inject(ScrollDispatcher);
+
   public allEndpointIds$: Observable<string[]>;
   public haveRegistered$: Observable<boolean>;
 
@@ -113,12 +108,11 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     debounceTime(100) // Debounce the check signal itself
   );
 
-  constructor(
-    public endpointsService: EndpointsService,
-    private store: Store<AppState>,
-    public userFavoriteManager: UserFavoriteManager,
-    private scrollDispatcher: ScrollDispatcher,
-  ) {
+  constructor() {
+    const endpointsService = this.endpointsService;
+    const store = this.store;
+    const userFavoriteManager = this.userFavoriteManager;
+
     // Ensure endpoints are loaded from the backend
     // This is necessary because the home page relies on endpoint data being present in the store
     // Without this, the CF home cards will timeout trying to fetch data

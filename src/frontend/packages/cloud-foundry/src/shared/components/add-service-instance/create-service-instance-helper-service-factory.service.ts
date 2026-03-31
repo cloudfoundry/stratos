@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
@@ -9,14 +9,13 @@ import { CreateServiceInstanceHelper } from './create-service-instance-helper.se
   providedIn: 'root'
 })
 export class CreateServiceInstanceHelperServiceFactory {
+  private store = inject<Store<CFAppState>>(Store);
+  private paginationMonitorFactory = inject(PaginationMonitorFactory);
+
 
   private serviceInstanceCache: {
     [key: string]: CreateServiceInstanceHelper
   } = {};
-  constructor(
-    private store: Store<CFAppState>,
-    private paginationMonitorFactory: PaginationMonitorFactory
-  ) { }
 
   create<T>(
     cfGuid: string,

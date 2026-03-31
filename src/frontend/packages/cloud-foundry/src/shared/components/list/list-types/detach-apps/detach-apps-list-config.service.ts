@@ -48,7 +48,9 @@ export class DetachAppsListConfigService implements IListConfig<APIResource<ISer
   private store = inject(Store<CFAppState>);
   private datePipe = inject(DatePipe);
 
-  constructor(activatedRoute: ActivatedRoute) {
+  constructor() {
+    const activatedRoute = inject(ActivatedRoute);
+
     const { serviceInstanceId, endpointId } = activatedRoute.snapshot.params;
     this.dataSource = new DetachAppsDataSource(endpointId, serviceInstanceId, this.store, this);
   }

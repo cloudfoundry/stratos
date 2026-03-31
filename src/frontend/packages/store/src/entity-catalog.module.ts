@@ -1,4 +1,4 @@
-import { Inject, ModuleWithProviders, NgModule } from '@angular/core';
+import { ModuleWithProviders, NgModule, inject } from '@angular/core';
 import { ReducerManager, Store } from '@ngrx/store';
 
 import { InitCatalogEntitiesAction } from './entity-catalog.actions';
@@ -29,11 +29,11 @@ export const CATALOGUE_ENTITIES = '__CATALOGUE_ENTITIES__';
  */
 @NgModule({})
 export class EntityCatalogFeatureModule {
-  constructor(
-    store: Store<any>,
-    reducerManager: ReducerManager,
-    @Inject(CATALOGUE_ENTITIES) entityGroups: StratosBaseCatalogEntity[][]
-  ) {
+  constructor() {
+    const store = inject<Store<any>>(Store);
+    const reducerManager = inject(ReducerManager);
+    const entityGroups = inject<StratosBaseCatalogEntity[][]>(CATALOGUE_ENTITIES as any);
+
     // Flatten multi-provider arrays and register all entities synchronously
     const entities = entityGroups.flat();
 

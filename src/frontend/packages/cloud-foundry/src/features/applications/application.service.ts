@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map, pairwise, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
@@ -64,17 +64,20 @@ export interface ApplicationData {
   providedIn: 'root'
 })
 export class ApplicationService {
+  cfGuid = inject(CF_GUID);
+  appGuid = inject(APP_GUID);
+  private store = inject<Store<CFAppState>>(Store);
+  private appStateService = inject(ApplicationStateService);
+  private appEnvVarsService = inject(ApplicationEnvVarsHelper);
+
 
   public entityService: EntityService<APIResource<IApp>>;
   private appSummaryEntityService: EntityService<IAppSummary>;
 
-  constructor(
-    @Inject(CF_GUID) public cfGuid: string,
-    @Inject(APP_GUID) public appGuid: string,
-    private store: Store<CFAppState>,
-    private appStateService: ApplicationStateService,
-    private appEnvVarsService: ApplicationEnvVarsHelper,
-  ) {
+  constructor() {
+    const cfGuid = this.cfGuid;
+    const appGuid = this.appGuid;
+
     this.entityService = cfEntityCatalog.application.store.getEntityService(
       appGuid,
       cfGuid,

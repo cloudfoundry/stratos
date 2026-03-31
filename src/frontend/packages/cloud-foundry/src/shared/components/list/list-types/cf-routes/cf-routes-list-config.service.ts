@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
@@ -32,14 +32,14 @@ export class CfRoutesListConfigService extends CfRoutesListConfigBase implements
   declare getMultiFiltersConfigs: () => IListMultiFilterConfig[];
   getInitialised!: () => Observable<boolean>;
 
-  constructor(
-    store: Store<CFAppState>,
-    confirmDialog: ConfirmationDialogService,
-    cfService: CloudFoundryEndpointService,
-    datePipe: DatePipe,
-    currentUserPermissionsService: CurrentUserPermissionsService,
-    cfOrgSpaceService: CfOrgSpaceDataService,
-  ) {
+  constructor() {
+    const store = inject<Store<CFAppState>>(Store);
+    const confirmDialog = inject(ConfirmationDialogService);
+    const cfService = inject(CloudFoundryEndpointService);
+    const datePipe = inject(DatePipe);
+    const currentUserPermissionsService = inject(CurrentUserPermissionsService);
+    const cfOrgSpaceService = inject(CfOrgSpaceDataService);
+
     const canEditRoute = (route$: Observable<APIResource<ListCfRoute>>) => {
       return route$.pipe(
         switchMap(route => currentUserPermissionsService.can(

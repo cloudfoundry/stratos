@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BaseChartDirective } from 'ng2-charts';
 import { Observable } from 'rxjs';
@@ -36,6 +36,11 @@ import { AppAutoscalerComboChartComponent } from './combo-chart/combo-chart.comp
 })
 
 export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<AppScalingTrigger>> implements IListRowCell {
+  private appService = inject(ApplicationService);
+  private store = inject<Store<AppState>>(Store);
+  private paginationMonitorFactory = inject(PaginationMonitorFactory);
+  private cdr = inject(ChangeDetectorRef);
+
   static columns = 1;
   listData!: {
     label: string;
@@ -85,15 +90,6 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
         this.metricData$ = this.getAppMetric(this.metricType, row.entity, this.paramsMetrics);
       }
     }
-  }
-
-  constructor(
-    private appService: ApplicationService,
-    private store: Store<AppState>,
-    private paginationMonitorFactory: PaginationMonitorFactory,
-    private cdr: ChangeDetectorRef
-  ) {
-    super();
   }
 
   public metricData$!: Observable<AppAutoscalerMetricData[]>;

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 export type SortDirection = 'asc' | 'desc' | '';
 import { Store } from '@ngrx/store';
 import { ApiKey, stratosEntityCatalog, ListView, AppState } from '@stratosui/store';
@@ -14,6 +14,8 @@ import { ApiKeyDataSource } from './apiKey-data-source';
   providedIn: 'root'
 })
 export class ApiKeyListConfigService implements IListConfig<ApiKey> {
+  private confirmDialog = inject(ConfirmationDialogService);
+
 
   private static comment = 'comment';
   private static lastUsedName = 'last_used';
@@ -76,10 +78,9 @@ export class ApiKeyListConfigService implements IListConfig<ApiKey> {
   };
   enableTextFilter = true;
 
-  constructor(
-    store: Store<AppState>,
-    private confirmDialog: ConfirmationDialogService,
-  ) {
+  constructor() {
+    const store = inject<Store<AppState>>(Store);
+
     const action = stratosEntityCatalog.apiKey.actions.getMultiple();
     action.initialParams = {
       'order-direction': 'desc' as SortDirection,

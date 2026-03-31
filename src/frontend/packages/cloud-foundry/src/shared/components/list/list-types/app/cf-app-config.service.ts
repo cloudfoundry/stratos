@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
@@ -36,16 +36,16 @@ import { TableCellAppStatusComponent } from './table-cell-app-status/table-cell-
   providedIn: 'root'
 })
 export class CfAppConfigService extends ListConfig<APIResource> implements IListConfig<APIResource> {
+  private datePipe = inject(DatePipe);
+  private store = inject<Store<CFAppState>>(Store);
+  private utilsService = inject(UtilsService);
+  private cfOrgSpaceService = inject(CfOrgSpaceDataService);
+
 
   multiFilterConfigs: IListMultiFilterConfig[];
   initialised$: Observable<boolean>;
 
-  constructor(
-    private datePipe: DatePipe,
-    private store: Store<CFAppState>,
-    private utilsService: UtilsService,
-    private cfOrgSpaceService: CfOrgSpaceDataService,
-  ) {
+  constructor() {
     super();
 
     // Apply the initial cf guid to the data source. Normally this is done via applying the selection to the filter... however this is too

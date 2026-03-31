@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterContentInit, Component, Input, OnDestroy, signal, ChangeDetectionStrategy } from '@angular/core';
+import { AfterContentInit, Component, Input, OnDestroy, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subject } from 'rxjs';
@@ -33,6 +33,9 @@ interface BindAppsForm {
   ]
 })
 export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
+  private store = inject<Store<CFAppState>>(Store);
+  private fb = inject(FormBuilder);
+
 
   @Input()
   boundAppId!: string;
@@ -55,10 +58,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
     return this.stepperForm.get('apps') as FormControl<string | null>;
   }
 
-  constructor(
-    private store: Store<CFAppState>,
-    private fb: FormBuilder,
-  ) {
+  constructor() {
     this.stepperForm = this.fb.group<BindAppsForm>({
       apps: new FormControl<string | null>(null),
     });

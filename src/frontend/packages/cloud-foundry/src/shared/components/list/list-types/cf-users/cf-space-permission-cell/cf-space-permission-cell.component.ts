@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
@@ -36,16 +36,20 @@ import { CfPermissionCellDirective, ICellPermissionList } from '../cf-permission
   ]
 })
 export class CfSpacePermissionCellComponent extends CfPermissionCellDirective<SpaceUserRoleNames> {
+  store: Store<CFAppState>;
+  private userPerms = inject(CurrentUserPermissionsService);
+
 
   missingRoles$: Observable<boolean | null>;
 
-  constructor(
-    public store: Store<CFAppState>,
-    cfUserService: CfUserService,
-    private userPerms: CurrentUserPermissionsService,
-    confirmDialog: ConfirmationDialogService,
-  ) {
+  constructor() {
+    const store = inject<Store<CFAppState>>(Store);
+    const cfUserService = inject(CfUserService);
+    const confirmDialog = inject(ConfirmationDialogService);
+
     super(store, confirmDialog, cfUserService);
+    this.store = store;
+
 
     const spaces$: Observable<APIResource<ISpace>[]> = this.config$.pipe(
       switchMap(config => (config.spaces$ || observableOf([])) as Observable<APIResource<ISpace>[]>)

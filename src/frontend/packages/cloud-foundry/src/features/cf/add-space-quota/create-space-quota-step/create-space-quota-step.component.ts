@@ -1,4 +1,4 @@
-import { Component, ViewChild , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
@@ -26,6 +26,8 @@ import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-
 ]
 })
 export class CreateSpaceQuotaStepComponent {
+  private activatedRoute = inject(ActivatedRoute);
+
 
   quotasSubscription!: Subscription;
   cfGuid: string;
@@ -35,10 +37,9 @@ export class CreateSpaceQuotaStepComponent {
   @ViewChild('form', { static: true })
   form!: SpaceQuotaDefinitionFormComponent;
 
-  constructor(
-    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private activatedRoute: ActivatedRoute,
-  ) {
+  constructor() {
+    const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.orgGuid = this.activatedRoute.snapshot.params.orgId;
   }

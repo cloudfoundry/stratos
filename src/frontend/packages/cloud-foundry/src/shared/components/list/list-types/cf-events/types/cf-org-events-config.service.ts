@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { IListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
@@ -13,7 +13,10 @@ import { CfEventsConfigService } from '../cf-events-config.service';
 })
 export class CfOrganizationEventsConfigService extends CfEventsConfigService implements IListConfig<APIResource> {
 
-  constructor(store: Store<CFAppState>, orgService: CloudFoundryOrganizationService) {
+  constructor() {
+    const store = inject<Store<CFAppState>>(Store);
+    const orgService = inject(CloudFoundryOrganizationService);
+
     super(
       store,
       orgService.cfGuid,

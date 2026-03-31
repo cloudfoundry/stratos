@@ -1,5 +1,5 @@
 import { AsyncPipe, DatePipe } from '@angular/common';
-import { Component, signal , ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -41,6 +41,10 @@ import { DetachAppsComponent } from './detach-apps/detach-apps.component';
   ]
 })
 export class DetachServiceInstanceComponent {
+  private store = inject<Store<CFAppState>>(Store);
+  private datePipe = inject(DatePipe);
+  private serviceActionHelperService = inject(ServiceActionHelperService);
+
 
   title$!: Observable<string>;
   cfGuid!: string;
@@ -73,12 +77,9 @@ export class DetachServiceInstanceComponent {
   // Convert signal to Observable for component expecting Observable input
   public selectedBindings$ = toObservable(this._selectedBindings);
 
-  constructor(
-    private store: Store<CFAppState>,
-    private datePipe: DatePipe,
-    private serviceActionHelperService: ServiceActionHelperService,
-    activatedRoute: ActivatedRoute,
-  ) {
+  constructor() {
+    const activatedRoute = inject(ActivatedRoute);
+
     this.cfGuid = activatedRoute.snapshot.params.endpointId;
     const serviceInstanceId = activatedRoute.snapshot.params.serviceInstanceId;
     this.title$ = cfEntityCatalog.serviceInstance.store.getEntityService(serviceInstanceId, this.cfGuid).waitForEntity$.pipe(

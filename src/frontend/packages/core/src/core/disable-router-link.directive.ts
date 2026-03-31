@@ -1,4 +1,4 @@
-import { Directive, Input, Optional } from '@angular/core';
+import { Directive, Input, inject } from '@angular/core';
 import { RouterLink, RouterLinkWithHref } from '@angular/router';
 
 @Directive({
@@ -9,11 +9,10 @@ export class DisableRouterLinkDirective {
 
   @Input() appDisableRouterLink: boolean = false;
 
-  constructor(
-    // Inject routerLink
-    @Optional() routerLink: RouterLink,
-    @Optional() routerLinkWithHref: RouterLinkWithHref
-  ) {
+  constructor() {
+    const routerLink = inject(RouterLink, { optional: true });
+    const routerLinkWithHref = inject(RouterLinkWithHref, { optional: true });
+
 
     const link = routerLink || routerLinkWithHref;
 

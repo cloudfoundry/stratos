@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { switchMap } from 'rxjs/operators';
 
@@ -16,6 +16,12 @@ import { AppServiceBindingDataSource } from './app-service-binding-data-source';
   providedIn: 'root'
 })
 export class AppServiceBindingListConfigService extends BaseCfListConfig<APIResource<IServiceBinding>> {
+  private store = inject<Store<CFAppState>>(Store);
+  private appService = inject(ApplicationService);
+  private datePipe = inject(DatePipe);
+  protected currentUserPermissionsService = inject(CurrentUserPermissionsService);
+  private serviceActionHelperService = inject(ServiceActionHelperService);
+
   dataSource: AppServiceBindingDataSource;
   cardComponent = AppServiceBindingCardComponent;
   viewType = ListViewTypes.BOTH;
@@ -146,14 +152,10 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
   }
 
 
-  constructor(
-    private store: Store<CFAppState>,
-    private appService: ApplicationService,
-    private datePipe: DatePipe,
-    protected currentUserPermissionsService: CurrentUserPermissionsService,
-    private serviceActionHelperService: ServiceActionHelperService
-  ) {
+  constructor() {
     super();
+    const appService = this.appService;
+
     this.dataSource = new AppServiceBindingDataSource(this.store, appService, this);
   }
 

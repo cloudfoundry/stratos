@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
 import { CustomSlideToggleComponent } from '../custom-slide-toggle/custom-slide-toggle.component';
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 import { Store } from '@ngrx/store';
@@ -51,6 +51,11 @@ export enum ProfileSettingsTypes {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProfileSettingsComponent {
+  private store = inject<Store<AppState>>(Store);
+  themeService = inject(ThemeService);
+  private confirmationService = inject(ConfirmationDialogService);
+  private currentUserPermissionsService = inject(CurrentUserPermissionsService);
+
 
   @Input() show: { [settingName: string]: boolean; } = {
     [ProfileSettingsTypes.GRAVATAR]: true,
@@ -123,13 +128,10 @@ export class ProfileSettingsComponent {
     this.store.dispatch(new SetGravatarEnabledAction(gravatarEnabled));
   }
 
-  constructor(
-    userProfileService: UserProfileService,
-    private store: Store<AppState>,
-    public themeService: ThemeService,
-    private confirmationService: ConfirmationDialogService,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-  ) {
+  constructor() {
+    const userProfileService = inject(UserProfileService);
+    const themeService = this.themeService;
+
     this.hasMultipleThemes = themeService.getThemes().length > 1;
 
     const canEdit = userProfileService.isError$.pipe(map(e => !e));

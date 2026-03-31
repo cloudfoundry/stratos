@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, of, ReplaySubject } from 'rxjs';
 import { filter, first, map, multicast, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
@@ -49,15 +49,13 @@ import {
   providedIn: 'root'
 })
 export class CfUserService {
+  private store = inject<Store<CFAppState>>(Store);
+  paginationMonitorFactory = inject(PaginationMonitorFactory);
+  activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+
   private allUsers$!: Observable<PaginationObservables<APIResource<CfUser>>>;
 
   users: { [guid: string]: Observable<APIResource<CfUser>>; } = {};
-
-  constructor(
-    private store: Store<CFAppState>,
-    public paginationMonitorFactory: PaginationMonitorFactory,
-    public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-  ) { }
 
   getUsers = (endpointGuid: string, filterEmpty = true): Observable<APIResource<CfUser>[]> =>
     this.getAllUsers(endpointGuid).pipe(

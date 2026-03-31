@@ -1,12 +1,5 @@
 import { AsyncPipe, CommonModule, TitleCasePipe } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  OnDestroy,
-  signal,
-  ViewChild,
-  ViewContainerRef,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, signal, ViewChild, ViewContainerRef, inject } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
@@ -83,6 +76,10 @@ interface SelectPlanForm {
 ]
 })
 export class SelectPlanStepComponent implements OnDestroy {
+  private store = inject<Store<CFAppState>>(Store);
+  private cSIHelperServiceFactory = inject(CreateServiceInstanceHelperServiceFactory);
+  private modeService = inject(CsiModeService);
+
   selectedPlan$!: Observable<APIResource<IServicePlan>>;
   private selectedPlanAccessibilitySignal = signal<StratosStatus | null>(null);
   selectedPlanAccessibility = this.selectedPlanAccessibilitySignal.asReadonly();
@@ -96,13 +93,7 @@ export class SelectPlanStepComponent implements OnDestroy {
   servicePlans$: Observable<APIResource<IServicePlan>[]>;
   displayNames: { [guid: string]: string } = {};
 
-  constructor(
-    private store: Store<CFAppState>,
-    private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
-    activatedRoute: ActivatedRoute,
-    private modeService: CsiModeService
-
-  ) {
+  constructor() {
     this.stepperForm = new FormGroup<SelectPlanForm>({
       servicePlans: new FormControl<string>('', { validators: Validators.required, nonNullable: true }),
     });

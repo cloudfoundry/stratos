@@ -1,4 +1,4 @@
-import { ApplicationRef, Injectable } from '@angular/core';
+import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
@@ -12,12 +12,10 @@ import { APISuccessOrFailedAction } from '../../../../store/src/types/request.ty
   providedIn: 'root'
 })
 export class RouteEffect {
+  private actions$ = inject(Actions);
+  private store = inject<Store<CFAppState>>(Store);
+  private appRef = inject(ApplicationRef);
 
-  constructor(
-    private actions$: Actions,
-    private store: Store<CFAppState>,
-    private appRef: ApplicationRef
-  ) { }
 
 
   unmapEffect$ = createEffect(() => this.actions$.pipe(

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
@@ -21,6 +21,8 @@ import { CFEndpointsDataSource } from './cf-endpoints-data-source';
   providedIn: 'root'
 })
 export class CFEndpointsListConfigService implements IListConfig<EndpointModel> {
+  private store = inject<Store<CFAppState>>(Store);
+
   columns: ITableColumn<EndpointModel>[];
   isLocal = true;
   dataSource: CFEndpointsDataSource;
@@ -33,13 +35,12 @@ export class CFEndpointsListConfigService implements IListConfig<EndpointModel> 
   };
   enableTextFilter = true;
 
-  constructor(
-    private store: Store<CFAppState>,
-    paginationMonitorFactory: PaginationMonitorFactory,
-    entityMonitorFactory: EntityMonitorFactory,
-    internalEventMonitorFactory: InternalEventMonitorFactory,
-    endpointsListConfigService: EndpointsListConfigService,
-  ) {
+  constructor() {
+    const paginationMonitorFactory = inject(PaginationMonitorFactory);
+    const entityMonitorFactory = inject(EntityMonitorFactory);
+    const internalEventMonitorFactory = inject(InternalEventMonitorFactory);
+    const endpointsListConfigService = inject(EndpointsListConfigService);
+
     this.columns = endpointsListConfigService.columns.filter((column: any) => {
       return column.columnId !== 'type';
     });

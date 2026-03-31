@@ -1,15 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  ChangeDetectorRef,
-  Component,
-  ComponentRef,
-  Input,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-  ViewContainerRef,
-  signal,
-  ChangeDetectionStrategy} from '@angular/core';
+import { ChangeDetectorRef, Component, ComponentRef, Input, OnDestroy, OnInit, ViewChild, ViewContainerRef, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
@@ -75,6 +65,12 @@ interface CfUserWithWarning extends CfUser {
   ]
 })
 export class UsersRolesModifyComponent implements OnInit, OnDestroy {
+  private store = inject<Store<CFAppState>>(Store);
+  private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+  private cfRolesService = inject(CfRolesService);
+  private cd = inject(ChangeDetectorRef);
+  private snackBar = inject(TailwindSnackBarService);
+
 
 
   @Input() setUsernames = false;
@@ -139,15 +135,6 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   usersWithWarning$!: Observable<string[]>;
   isSetByUsername$!: Observable<boolean | undefined>;
   isRemove$!: Observable<boolean | undefined>;
-
-  constructor(
-    private store: Store<CFAppState>,
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private cfRolesService: CfRolesService,
-    private cd: ChangeDetectorRef,
-    private snackBar: TailwindSnackBarService,
-  ) {
-  }
 
   ngOnInit() {
     if (this.setUsernames) {

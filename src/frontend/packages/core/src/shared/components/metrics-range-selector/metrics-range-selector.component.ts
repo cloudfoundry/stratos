@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomFormFieldComponent } from '../custom-form-field/custom-form-field.component';
@@ -29,13 +29,13 @@ import { StartEndDateComponent } from '../start-end-date/start-end-date.componen
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetricsRangeSelectorComponent implements OnDestroy {
+  private entityMonitorFactory = inject(EntityMonitorFactory);
+  rangeSelectorManager = inject(MetricsRangeSelectorManagerService);
+
   private rangeSelectorSub: Subscription;
   actionSub: Subscription;
 
-  constructor(
-    private entityMonitorFactory: EntityMonitorFactory,
-    public rangeSelectorManager: MetricsRangeSelectorManagerService
-  ) {
+  constructor() {
     this.rangeSelectorSub = this.rangeSelectorManager.timeWindow$.subscribe(selectedTimeRangeValue => {
       if (selectedTimeRangeValue.queryType === MetricQueryType.RANGE_QUERY) {
         if (!this.rangeSelectorManager.committedStartEnd[0] || !this.rangeSelectorManager.committedStartEnd[1]) {

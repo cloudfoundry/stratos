@@ -1,4 +1,4 @@
-import { Component, Inject, InjectionToken , ChangeDetectionStrategy } from '@angular/core';
+import { Component, InjectionToken, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 
@@ -34,6 +34,14 @@ import { UserInviteConfigureService } from '../user-invite.service';
   ]
 })
 export class UserInviteConfigurationDialogComponent {
+  fb = inject(FormBuilder);
+  dialogRef = inject<TailwindDialogRef<UserInviteConfigurationDialogComponent>>('TailwindDialogRef' as any);
+  snackBar = inject(TailwindSnackBarService);
+  userInviteConfigureService = inject(UserInviteConfigureService);
+  data = inject<{
+    guid: string;
+}>(DIALOG_DATA);
+
   connecting$!: Observable<boolean>;
   connectingError$!: Observable<boolean>;
   fetchingInfo$!: Observable<boolean>;
@@ -58,15 +66,7 @@ export class UserInviteConfigurationDialogComponent {
   guid!: string;
   public showSecret = false;
 
-  constructor(
-    public fb: FormBuilder,
-    @Inject('TailwindDialogRef') public dialogRef: TailwindDialogRef<UserInviteConfigurationDialogComponent>,
-    public snackBar: TailwindSnackBarService,
-    public userInviteConfigureService: UserInviteConfigureService,
-    @Inject(DIALOG_DATA) public data: {
-      guid: string
-    }
-  ) {
+  constructor() {
     this.endpointForm = this.fb.group<UserInviteConfigForm>({
       clientID: this.fb.nonNullable.control('', Validators.required),
       clientSecret: this.fb.nonNullable.control('', Validators.required),

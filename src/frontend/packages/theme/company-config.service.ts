@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CompanyConfig } from './company-config.interface';
 import { StratosThemeService } from './theme.service';
@@ -54,13 +54,13 @@ const defaultCompanyConfig: CompanyConfig = {
   providedIn: 'root'
 })
 export class CompanyConfigService {
+  private http = inject(HttpClient);
+  private themeService = inject(StratosThemeService);
+
   private _config = signal<CompanyConfig>(defaultCompanyConfig);
   public config = this._config.asReadonly();
 
-  constructor(
-    private http: HttpClient,
-    private themeService: StratosThemeService
-  ) {
+  constructor() {
     this.loadCompanyConfig();
   }
 

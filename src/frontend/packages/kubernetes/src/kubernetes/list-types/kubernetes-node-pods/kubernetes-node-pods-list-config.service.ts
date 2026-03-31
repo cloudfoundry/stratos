@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { AppState } from '../../../../../store/src/public-api';
@@ -11,17 +11,20 @@ import { KubernetesNodePodsDataSource } from './kubernetes-node-pods-data-source
   providedIn: 'root'
 })
 export class KubernetesNodePodsListConfigService extends BaseKubernetesPodsListConfigService {
+  kubeNodeService = inject(KubernetesNodeService);
+
 
   private podsDataSource: KubernetesNodePodsDataSource;
 
   getDataSource = () => this.podsDataSource;
 
-  constructor(
-    store: Store<AppState>,
-    kubeId: BaseKubeGuid,
-    public kubeNodeService: KubernetesNodeService,
-  ) {
+  constructor() {
+    const store = inject<Store<AppState>>(Store);
+    const kubeId = inject(BaseKubeGuid);
+
     super([BaseKubernetesPodsListConfigService.nodeColumnId]);
+    const kubeNodeService = this.kubeNodeService;
+
     this.podsDataSource = new KubernetesNodePodsDataSource(store, kubeId, this, kubeNodeService);
   }
 

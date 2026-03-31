@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 
@@ -27,19 +27,21 @@ export const QUOTA_FROM_LIST = 'list';
   providedIn: 'root'
 })
 export class CfQuotasListConfigService extends BaseCfListConfig<APIResource<IQuotaDefinition>> {
+  private store = inject<Store<CFAppState>>(Store);
+  private datePipe = inject(DatePipe);
+  private confirmDialog = inject(ConfirmationDialogService);
+  private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+  private currentUserPermissionsService = inject(CurrentUserPermissionsService);
+
   dataSource: CfQuotasDataSourceService;
   deleteSubscription!: Subscription;
   canEdit: Observable<boolean>;
   canDelete: Observable<boolean>;
 
-  constructor(
-    private store: Store<CFAppState>,
-    private datePipe: DatePipe,
-    private confirmDialog: ConfirmationDialogService,
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-  ) {
+  constructor() {
     super();
+    const activeRouteCfOrgSpace = this.activeRouteCfOrgSpace;
+
     this.dataSource = new CfQuotasDataSourceService(this.store, activeRouteCfOrgSpace.cfGuid, this);
     this.canEdit = this.currentUserPermissionsService.can(CfCurrentUserPermissions.QUOTA_EDIT, this.activeRouteCfOrgSpace.cfGuid);
     this.canDelete = this.currentUserPermissionsService.can(CfCurrentUserPermissions.QUOTA_DELETE, this.activeRouteCfOrgSpace.cfGuid);

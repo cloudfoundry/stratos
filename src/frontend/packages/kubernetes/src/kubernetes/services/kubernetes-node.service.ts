@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -25,17 +25,20 @@ export enum KubeNodeMetric {
   providedIn: 'root'
 })
 export class KubernetesNodeService {
+  kubeEndpointService = inject(KubernetesEndpointService);
+  activatedRoute = inject(ActivatedRoute);
+  store = inject<Store<AppState>>(Store);
+  entityMonitorFactory = inject(EntityMonitorFactory);
+
   public nodeName: string;
   public kubeGuid: string;
   public node$: Observable<EntityInfo<KubernetesNode>>;
   nodeEntity$: Observable<KubernetesNode>;
 
-  constructor(
-    public kubeEndpointService: KubernetesEndpointService,
-    public activatedRoute: ActivatedRoute,
-    public store: Store<AppState>,
-    public entityMonitorFactory: EntityMonitorFactory
-  ) {
+  constructor() {
+    const kubeEndpointService = this.kubeEndpointService;
+    const activatedRoute = this.activatedRoute;
+
     this.nodeName = getIdFromRoute(activatedRoute, 'nodeName');
     this.kubeGuid = kubeEndpointService.kubeGuid;
 

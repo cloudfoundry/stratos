@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { filter, map, pairwise } from 'rxjs/operators';
 
@@ -58,6 +58,8 @@ const defaultViewDetail = {
   providedIn: 'root'
 })
 export class CsiModeService {
+  private activatedRoute = inject(ActivatedRoute);
+
 
   private mode!: string;
   public viewDetail!: ViewDetail;
@@ -68,10 +70,10 @@ export class CsiModeService {
   // This property is only used when launching the Create Service Instance Wizard from the Marketplace
   spaceScopedDetails: SpaceScopedService = { isSpaceScoped: false };
 
-  constructor(
-    private activatedRoute: ActivatedRoute,
-    router: Router
-  ) {
+  constructor() {
+    const activatedRoute = this.activatedRoute;
+    const router = inject(Router);
+
     const serviceId = getIdFromRoute(activatedRoute, 'serviceId');
     const serviceInstanceId = getIdFromRoute(activatedRoute, 'serviceInstanceId');
     this.cancelUrl = `/services`;

@@ -1,5 +1,5 @@
 import { DOCUMENT, CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Inject, Input, OnInit  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit, inject } from '@angular/core';
 
 @Component({
   selector: 'app-copy-to-clipboard',
@@ -22,9 +22,9 @@ export class CopyToClipboardComponent implements OnInit {
   // Show smaller icon
   @Input() compact = false;
 
-  constructor(
-    @Inject(DOCUMENT) document: Document,
-  ) {
+  constructor() {
+    const document = inject<Document>(DOCUMENT);
+
     this.document = document;
   }
 

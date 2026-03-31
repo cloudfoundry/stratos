@@ -1,11 +1,4 @@
-import { ChangeDetectionStrategy, Component,
-  ComponentRef,
-  Input,
-  OnDestroy,
-  Type,
-  ViewChild,
-  ViewContainerRef,
- } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ComponentRef, Input, OnDestroy, Type, ViewChild, ViewContainerRef, inject } from '@angular/core';
 import { entityCatalog, EndpointModel } from '@stratosui/store';
 
 import { TableCellCustom } from '../../../list.types';
@@ -20,6 +13,8 @@ import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-li
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TableCellEndpointDetailsComponent extends TableCellCustom<EndpointModel> implements OnDestroy {
+  private endpointListHelper = inject(EndpointListHelper);
+
 
   private componentRef!: ComponentRef<EndpointListDetailsComponent>;
   @Input() component: Type<EndpointListDetailsComponent>;
@@ -30,12 +25,6 @@ export class TableCellEndpointDetailsComponent extends TableCellCustom<EndpointM
   }
 
   cell: EndpointListDetailsComponent;
-
-  constructor(
-    private endpointListHelper: EndpointListHelper,
-  ) {
-    super();
-  }
 
   @Input('row')
   set row(row: EndpointModel) {

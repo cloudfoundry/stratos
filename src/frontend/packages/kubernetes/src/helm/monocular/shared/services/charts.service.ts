@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
@@ -17,14 +17,13 @@ import { ConfigService } from './config.service';
   providedIn: 'root'
 })
 export class ChartsService {
+  private http = inject(HttpClient);
+  private route = inject(ActivatedRoute);
+
   hostname: string;
   cacheCharts: { [repo: string]: Chart[] };
 
-  constructor(
-    private http: HttpClient,
-    config: ConfigService,
-    private route: ActivatedRoute,
-  ) {
+  constructor() {
     this.cacheCharts = {};
     this.hostname = '/pp/v1/chartsvc';
   }

@@ -1,5 +1,5 @@
 
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, inject } from '@angular/core';
 import { IFavoriteMetadata, UserFavorite } from '@stratosui/store';
 
 import { EntityFavoriteStarComponent } from '../../../../../core/entity-favorite-star/entity-favorite-star.component';
@@ -90,10 +90,8 @@ selector: 'app-table-cell-favorite',
 })
 export class TableCellFavoriteComponent<T, Y extends IFavoriteMetadata> extends
   TableCellCustom<T, TableCellFavoriteComponentConfig<T, Y>> {
+  private cdr = inject(ChangeDetectorRef);
 
-  constructor(private cdr: ChangeDetectorRef) {
-    super();
-  }
 
   public favorite!: UserFavorite<Y>;
   public canFavorite = false;

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, Output, EventEmitter, forwardRef, ViewChild, ElementRef, ContentChildren, QueryList, AfterContentInit, AfterViewInit, HostListener, OnDestroy, booleanAttribute  } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, Output, EventEmitter, forwardRef, ViewChild, ElementRef, ContentChildren, QueryList, AfterContentInit, AfterViewInit, HostListener, OnDestroy, booleanAttribute, inject } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -27,6 +27,8 @@ export interface MatSelectChange {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomOptionComponent implements AfterViewInit {
+  private cdr = inject(ChangeDetectorRef);
+
   @Input() value: any;
   @Input() label?: string;
   @Input() disabled = false;
@@ -35,8 +37,6 @@ export class CustomOptionComponent implements AfterViewInit {
   @ViewChild('optionContent', { static: true }) optionContent!: ElementRef;
 
   private _displayText?: string;
-
-  constructor(private cdr: ChangeDetectorRef) {}
 
   ngAfterViewInit() {
     if (!this.label && this.optionContent) {
@@ -66,6 +66,9 @@ export class CustomOptionComponent implements AfterViewInit {
   ]
 })
 export class CustomSelectComponent implements ControlValueAccessor, AfterContentInit, OnDestroy {
+  private cdr = inject(ChangeDetectorRef);
+  private elementRef = inject(ElementRef);
+
   @Input() disabled = false;
   @Input() placeholder = '';
   @Input({ transform: booleanAttribute }) multiple = false;
@@ -104,8 +107,6 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   private _onChange = (value: any) => {};
   private _onTouched = () => {};
   private _subscriptions: Subscription[] = [];
-
-  constructor(private cdr: ChangeDetectorRef, private elementRef: ElementRef) {}
 
   ngAfterContentInit() {
     // Sync option visual state when options change (dynamic @for lists)

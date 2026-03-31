@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { Observable, Subscription } from 'rxjs';
@@ -39,15 +39,17 @@ import { cfEntityCatalog } from '../../../../cf-entity-catalog';
   ]
 })
 export class ServiceBrokerCardComponent implements OnDestroy {
+  private servicesService = inject(ServicesService);
+
 
   spaceName!: string;
   spaceLink!: string[];
   serviceBroker$: Observable<APIResource<IServiceBroker>>;
   subs: Subscription[] = [];
 
-  constructor(
-    private servicesService: ServicesService
-  ) {
+  constructor() {
+    const servicesService = this.servicesService;
+
     this.serviceBroker$ = this.servicesService.serviceBroker$;
     this.subs.push(this.serviceBroker$.pipe(
       filter(o => !!o && !!o.entity),

@@ -32,16 +32,8 @@ import { ApplicationService } from '../../../../../application.service';
     DatePipe,
     {
       provide: ListConfig,
-      useFactory: (
-        store: Store<CFAppState>,
-        appService: ApplicationService,
-        confirmDialog: ConfirmationDialogService,
-        datePipe: DatePipe,
-        cups: CurrentUserPermissionsService
-      ) => {
-        return new CfAppRoutesListConfigService(store, appService, confirmDialog, datePipe, cups);
-      },
-      deps: [Store, ApplicationService, ConfirmationDialogService, DatePipe, CurrentUserPermissionsService]
+      useFactory: () => new CfAppRoutesListConfigService(),
+      deps: []
     },
     CfOrgSpaceDataService
   ]

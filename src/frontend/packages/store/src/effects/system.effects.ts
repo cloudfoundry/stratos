@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { ApplicationRef, Injectable } from '@angular/core';
+import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
@@ -14,12 +14,11 @@ import { SystemInfo } from '../types/system.types';
   providedIn: 'root'
 })
 export class SystemEffects {
-  constructor(
-    private httpClient: HttpClient,
-    private actions$: Actions,
-    private store: Store<InternalAppState>,
-    private appRef: ApplicationRef,
-  ) { }
+  private httpClient = inject(HttpClient);
+  private actions$ = inject(Actions);
+  private store = inject<Store<InternalAppState>>(Store);
+  private appRef = inject(ApplicationRef);
+
 
    getInfo$ = createEffect(() => this.actions$.pipe(
     ofType<GetSystemInfo>(GET_SYSTEM_INFO),

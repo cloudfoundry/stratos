@@ -1,4 +1,4 @@
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
@@ -33,6 +33,9 @@ interface ICreateServiceTilesData extends ITileData {
   ]
 })
 export class AddServiceInstanceBaseStepComponent {
+  private route = inject(ActivatedRoute);
+  store = inject<Store<CFAppState>>(Store);
+
   private tileManager = new TileConfigManager();
   public serviceType: string;
   public cancelUrl = '/services';
@@ -73,10 +76,7 @@ export class AddServiceInstanceBaseStepComponent {
   private cfId: string;
   private appId: string;
 
-  constructor(
-    private route: ActivatedRoute,
-    public store: Store<CFAppState>
-  ) {
+  constructor() {
     this.bindApp = !!this.route.snapshot.data.bind;
     if (this.bindApp) {
       this.cfId = getIdFromRoute(this.route, 'endpointId');

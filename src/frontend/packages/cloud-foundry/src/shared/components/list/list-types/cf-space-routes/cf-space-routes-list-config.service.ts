@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { publishReplay, refCount } from 'rxjs/operators';
 import { CurrentUserPermissionsService, ConfirmationDialogService, IListConfig } from '@stratosui/core';
@@ -20,13 +20,13 @@ export class CfSpaceRoutesListConfigService extends CfRoutesListConfigBase imple
 
   getDataSource!: () => CfSpaceRoutesDataSource;
 
-  constructor(
-    store: Store<CFAppState>,
-    confirmDialog: ConfirmationDialogService,
-    cfSpaceService: CloudFoundrySpaceService,
-    datePipe: DatePipe,
-    currentUserPermissionsService: CurrentUserPermissionsService
-  ) {
+  constructor() {
+    const store = inject<Store<CFAppState>>(Store);
+    const confirmDialog = inject(ConfirmationDialogService);
+    const cfSpaceService = inject(CloudFoundrySpaceService);
+    const datePipe = inject(DatePipe);
+    const currentUserPermissionsService = inject(CurrentUserPermissionsService);
+
     const canEditAppsInSpace = currentUserPermissionsService.can(
       CfCurrentUserPermissions.APPLICATION_EDIT,
       cfSpaceService.cfGuid,

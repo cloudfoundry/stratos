@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { TailwindSnackBarService, TailwindSnackBarRef } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { GitCommit, gitEntityCatalog, GitMeta, GitRepo, GitSCMService, GitSCMType, SCMIcon, GithubCommitAuthorComponent } from '@stratosui/git';
@@ -57,18 +57,16 @@ import { TruncatePipe } from '../../../../../../../../core/src/core/truncate.pip
     DatePipe,
     {
       provide: ListConfig,
-      useFactory: (
-        store: Store<CFAppState>,
-        datePipe: DatePipe,
-        scmService: GitSCMService,
-        applicationService: ApplicationService) => {
-        return new GithubCommitsListConfigServiceAppTab(store, datePipe, scmService, applicationService);
-      },
-      deps: [Store, DatePipe, GitSCMService, ApplicationService]
+      useFactory: () => new GithubCommitsListConfigServiceAppTab(),
+      deps: []
     }
   ],
 })
 export class GitSCMTabComponent implements OnInit, OnDestroy {
+  appService = inject(ApplicationService);
+  private snackBar = inject(TailwindSnackBarService);
+  private scmService = inject(GitSCMService);
+
 
   public hasRepo$!: Observable<boolean>;
   public isLoading$!: Observable<boolean>;
@@ -97,12 +95,6 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
       this.gitSCMRepoErrorSub.unsubscribe();
     }
   }
-
-  constructor(
-    public appService: ApplicationService,
-    private snackBar: TailwindSnackBarService,
-    private scmService: GitSCMService
-  ) { }
 
   private createBaseGitMeta(stProject: EnvVarStratosProject): GitMeta {
     // Fallback to type if scm is not set (legacy support)

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, VERSION } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, VERSION, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Meta } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
@@ -27,6 +27,9 @@ import { BUILD_INFO } from '../../../environments/build-info';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DiagnosticsPageComponent implements OnInit {
+  private meta = inject(Meta);
+  private store = inject<Store<GeneralEntityAppState>>(Store);
+
 
   sessionData$!: Observable<SessionData>;
   versionNumber$!: Observable<string>;
@@ -50,11 +53,6 @@ export class DiagnosticsPageComponent implements OnInit {
   public gitHubRepositoryLink: string;
   public gitBranchLink: string;
   public gitCommitLink: string;
-
-  constructor(
-    private meta: Meta,
-    private store: Store<GeneralEntityAppState>,
-  ) { }
 
   ngOnInit() {
 

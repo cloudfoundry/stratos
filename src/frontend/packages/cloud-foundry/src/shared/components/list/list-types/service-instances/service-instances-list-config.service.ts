@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
@@ -30,12 +30,13 @@ export class ServiceInstancesListConfigService extends CfServiceInstancesListCon
     noEntries: 'There are no service instances',
   };
 
-  constructor(
-    store: Store<CFAppState>,
-    servicesService: ServicesService,
-    datePipe: DatePipe,
-    currentUserPermissionsService: CurrentUserPermissionsService,
-    serviceActionHelperService: ServiceActionHelperService) {
+  constructor() {
+    const store = inject<Store<CFAppState>>(Store);
+    const servicesService = inject(ServicesService);
+    const datePipe = inject(DatePipe);
+    const currentUserPermissionsService = inject(CurrentUserPermissionsService);
+    const serviceActionHelperService = inject(ServiceActionHelperService);
+
     super(
       store,
       datePipe,

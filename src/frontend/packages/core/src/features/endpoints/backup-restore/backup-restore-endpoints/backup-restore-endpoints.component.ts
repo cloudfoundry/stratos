@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AppState, RouterNav } from '@stratosui/store';
 
@@ -26,6 +26,8 @@ interface IAppTileData extends ITileData {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BackupRestoreEndpointsComponent {
+  private store = inject<Store<AppState>>(Store);
+
 
   public serviceType!: string;
   public tileSelectorConfig: ITileConfig<IAppTileData>[];
@@ -37,8 +39,7 @@ export class BackupRestoreEndpointsComponent {
     }
   }
 
-  constructor(
-    private store: Store<AppState>) {
+  constructor() {
     this.tileSelectorConfig = [
       new ITileConfig<IAppTileData>(
         'Backup',

@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { ITableColumn } from '@stratosui/core';
 import {
@@ -25,6 +25,8 @@ import { AnalysisStatusCellComponent } from './analysis-status-cell/analysis-sta
   providedIn: 'root'
 })
 export class AnalysisReportsListConfig implements IListConfig<AnalysisReport> {
+  private analysisService = inject(KubernetesAnalysisService);
+
   AppsDataSource: AnalysisReportsDataSource;
   isLocal = true;
   multiFilterConfigs: IListMultiFilterConfig[];
@@ -96,12 +98,11 @@ export class AnalysisReportsListConfig implements IListConfig<AnalysisReport> {
     noEntries: 'There are no Analysis Reports'
   };
 
-  constructor(
-    store: Store<AppState>,
-    kubeEndpointService: KubernetesEndpointService,
-    private analysisService: KubernetesAnalysisService,
-    ngZone: NgZone,
-  ) {
+  constructor() {
+    const store = inject<Store<AppState>>(Store);
+    const kubeEndpointService = inject(KubernetesEndpointService);
+    const ngZone = inject(NgZone);
+
     this.guid = kubeEndpointService.baseKube.guid;
     this.AppsDataSource = new AnalysisReportsDataSource(store, this, kubeEndpointService, ngZone);
   }

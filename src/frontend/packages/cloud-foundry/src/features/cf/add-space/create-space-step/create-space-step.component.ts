@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { CustomFormFieldComponent } from '@stratosui/core';
-import { Component, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
 import { ActivatedRoute } from '@angular/router';
@@ -38,6 +38,8 @@ interface CreateSpaceForm {
   ]
 })
 export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements OnInit, OnDestroy {
+  private fb = inject(FormBuilder);
+
 
   cfUrl!: string;
   createSpaceForm!: FormGroup<CreateSpaceForm>;
@@ -58,12 +60,11 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
     }
   }
 
-  constructor(
-    store: Store<CFAppState>,
-    activatedRoute: ActivatedRoute,
-    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private fb: FormBuilder,
-  ) {
+  constructor() {
+    const store = inject<Store<CFAppState>>(Store);
+    const activatedRoute = inject(ActivatedRoute);
+    const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+
     super(store, activatedRoute, activeRouteCfOrgSpace);
   }
 

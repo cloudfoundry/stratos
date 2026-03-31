@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 
 import { PageHeaderComponent } from '@stratosui/core';
 import { StepComponent } from '@stratosui/core';
@@ -36,12 +36,14 @@ import { InviteUsersCreateComponent } from './invite-users-create/invite-users-c
   ]
 })
 export class InviteUsersComponent {
+  private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+
 
   defaultCancelUrl: string;
 
-  constructor(
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
-  ) {
+  constructor() {
+    const activeRouteCfOrgSpace = this.activeRouteCfOrgSpace;
+
     this.defaultCancelUrl = this.createReturnUrl(activeRouteCfOrgSpace);
   }
 

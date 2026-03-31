@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { Store } from '@ngrx/store';
@@ -51,11 +51,11 @@ export class CloudFoundryOrganizationUsersComponent {
     params: { [name: string]: any }
   }>;
 
-  constructor(
-    store: Store<CFAppState>,
-    userPerms: CurrentUserPermissionsService,
-    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
-  ) {
+  constructor() {
+    const store = inject<Store<CFAppState>>(Store);
+    const userPerms = inject(CurrentUserPermissionsService);
+    const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+
     const requiredFeatureFlags = [
       CFFeatureFlagTypes.set_roles_by_username,
       CFFeatureFlagTypes.unset_roles_by_username

@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, computed, ApplicationRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, computed, ApplicationRef, inject } from '@angular/core';
 import { NgForm, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -28,6 +28,12 @@ import { ShowHideButtonComponent } from '../../../core/show-hide-button/show-hid
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoginPageComponent implements OnInit {
+  private store = inject<Store<Pick<InternalAppState, 'endpoints' | 'auth'>>>(Store);
+  private themeService = inject(StratosThemeService);
+  private router = inject(Router);
+  private actions$ = inject(Actions);
+  private appRef = inject(ApplicationRef);
+
 
   // Theme-related signals
   public loginBackground = computed(() => {
@@ -175,14 +181,6 @@ export class LoginPageComponent implements OnInit {
     sessionStorage.removeItem(this.REDIRECT_COUNTER_KEY);
     this.redirectAttemptsSubject$.next(0);
   }
-
-  constructor(
-    private store: Store<Pick<InternalAppState, 'endpoints' | 'auth'>>,
-    private themeService: StratosThemeService,
-    private router: Router,
-    private actions$: Actions,
-    private appRef: ApplicationRef
-  ) {}
 
   ngOnInit() {
     // Initialize the BehaviorSubject with current value

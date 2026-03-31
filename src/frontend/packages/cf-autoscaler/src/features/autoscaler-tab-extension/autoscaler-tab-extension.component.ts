@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BaseChartDirective } from 'ng2-charts';
@@ -141,6 +141,14 @@ import { CardAutoscalerDefaultComponent } from '../../shared/card-autoscaler-def
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
+  private store = inject<Store<AppState>>(Store);
+  private applicationService = inject(ApplicationService);
+  private entityServiceFactory = inject(EntityServiceFactory);
+  private paginationMonitorFactory = inject(PaginationMonitorFactory);
+  private appAutoscalerPolicySnackBar = inject(TailwindSnackBarService);
+  private appAutoscalerScalingHistorySnackBar = inject(TailwindSnackBarService);
+  private confirmDialog = inject(ConfirmationDialogService);
+
 
   canManageCredentials$!: Observable<boolean>;
 
@@ -197,16 +205,6 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     }
     safeUnsubscribe(this.appAutoscalerPolicyErrorSub, this.appAutoscalerScalingHistoryErrorSub);
   }
-
-  constructor(
-    private store: Store<AppState>,
-    private applicationService: ApplicationService,
-    private entityServiceFactory: EntityServiceFactory,
-    private paginationMonitorFactory: PaginationMonitorFactory,
-    private appAutoscalerPolicySnackBar: TailwindSnackBarService,
-    private appAutoscalerScalingHistorySnackBar: TailwindSnackBarService,
-    private confirmDialog: ConfirmationDialogService
-  ) { }
 
   ngOnInit() {
 

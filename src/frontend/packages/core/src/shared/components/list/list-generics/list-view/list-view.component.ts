@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, Injector, Input, OnDestroy, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, Injector, Input, OnDestroy, ViewChild, inject } from '@angular/core';
 
 import { ListComponent } from '../../list.component';
 import { IListConfig, ListConfig } from '../../list.component.types';
@@ -16,6 +16,9 @@ import { ListConfigProvider } from '../list-config-provider.types';
   ]
 })
 export class ListViewComponent<T> implements OnDestroy {
+  private injector = inject(Injector);
+  private cdr = inject(ChangeDetectorRef);
+
 
   @Input() set config(config: ListConfigProvider<T>) {
     if (config) {
@@ -27,11 +30,6 @@ export class ListViewComponent<T> implements OnDestroy {
   public listHost!: ListHostDirective;
 
   private componentRef!: ComponentRef<ListComponent<unknown>>;
-
-  constructor(
-    private injector: Injector,
-    private cdr: ChangeDetectorRef
-  ) { }
 
   ngOnDestroy() {
     if (this.componentRef) {

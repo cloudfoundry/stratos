@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, Output, EventEmitter, TemplateRef, ContentChild  } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, Output, EventEmitter, TemplateRef, ContentChild, inject } from '@angular/core';
 
 
 @Component({
@@ -112,6 +112,8 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, Output, E
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomExpansionPanelComponent {
+  private cdr = inject(ChangeDetectorRef);
+
   @Input() disabled = false;
   @Input() expanded = false;
   @Input() hideToggle = false;
@@ -121,8 +123,6 @@ export class CustomExpansionPanelComponent {
   @Output() closed = new EventEmitter<void>();
 
   @ContentChild('header', { static: false }) headerTemplate!: TemplateRef<any>;
-
-  constructor(private cdr: ChangeDetectorRef) {}
 
   toggle() {
     if (this.disabled) return;

@@ -1,12 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component,
-  ComponentRef,
-  OnDestroy,
-  OnInit,
-  VERSION,
-  ViewChild,
-  ViewContainerRef,
- } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ComponentRef, OnDestroy, OnInit, VERSION, ViewChild, ViewContainerRef, inject } from '@angular/core';
 import { Meta } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -37,6 +30,9 @@ import { BUILD_INFO } from '../../../environments/build-info';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AboutPageComponent implements OnInit, OnDestroy {
+  private store = inject<Store<GeneralEntityAppState>>(Store);
+  private meta = inject(Meta);
+
 
   sessionData$!: Observable<SessionData>;
   versionNumber$!: Observable<string>;
@@ -57,11 +53,9 @@ export class AboutPageComponent implements OnInit, OnDestroy {
 
   customizations: CustomizationsMetadata;
 
-  constructor(
-    private store: Store<GeneralEntityAppState>,
-    private meta: Meta,
-    cs: CustomizationService,
-  ) {
+  constructor() {
+    const cs = inject(CustomizationService);
+
     this.customizations = cs.get();
   }
 

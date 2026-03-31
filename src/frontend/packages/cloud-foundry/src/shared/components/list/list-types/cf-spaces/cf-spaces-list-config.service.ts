@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CFAppState, ISpace } from '@stratosui/cloud-foundry';
@@ -14,6 +14,8 @@ import { CfSpacesDataSourceService } from './cf-spaces-data-source.service';
   providedIn: 'root'
 })
 export class CfSpacesListConfigService implements IListConfig<APIResource<ISpace>> {
+  private store = inject<Store<CFAppState>>(Store);
+
   viewType = ListViewTypes.CARD_ONLY;
   dataSource: CfSpacesDataSourceService;
   cardComponent = CfSpaceCardComponent;
@@ -42,10 +44,9 @@ export class CfSpacesListConfigService implements IListConfig<APIResource<ISpace
     },
   }];
 
-  constructor(
-    private store: Store<CFAppState>,
-    cfOrgService: CloudFoundryOrganizationService,
-  ) {
+  constructor() {
+    const cfOrgService = inject(CloudFoundryOrganizationService);
+
     this.dataSource = new CfSpacesDataSourceService(cfOrgService.cfGuid, cfOrgService.orgGuid, this.store, this);
   }
 

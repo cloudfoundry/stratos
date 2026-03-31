@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -39,7 +39,9 @@ export class EditSpaceComponent {
   spaceName$: Observable<string>;
   spaceUrl: string;
 
-  constructor(cfSpaceService: CloudFoundrySpaceService) {
+  constructor() {
+    const cfSpaceService = inject(CloudFoundrySpaceService);
+
 
     this.spaceUrl = '/cloud-foundry/' +
       `${cfSpaceService.cfGuid}/organizations/` +

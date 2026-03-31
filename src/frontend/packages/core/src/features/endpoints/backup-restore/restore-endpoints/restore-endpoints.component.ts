@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatCheckboxChange } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
@@ -38,17 +38,17 @@ import { ProductNameComponent } from '../../../../shared/components/product-name
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RestoreEndpointsComponent {
+  private store = inject<Store<GeneralEntityAppState>>(Store);
+  service = inject(RestoreEndpointsService);
+  private confirmDialog = inject(ConfirmationDialogService);
+
 
   // Step 2
   passwordValid$!: Observable<boolean>;
   passwordForm!: FormGroup;
   show = false;
 
-  constructor(
-    private store: Store<GeneralEntityAppState>,
-    public service: RestoreEndpointsService,
-    private confirmDialog: ConfirmationDialogService,
-  ) {
+  constructor() {
     this.setupPasswordStep();
   }
 

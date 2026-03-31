@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, Input, OnInit, Optional , ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { TailwindDialogService, MAT_DIALOG_DATA } from '@stratosui/core';
 
 @Component({
@@ -13,6 +13,13 @@ import { TailwindDialogService, MAT_DIALOG_DATA } from '@stratosui/core';
   ]
 })
 export class EventMetadataComponent implements OnInit {
+  private dialog = inject(TailwindDialogService);
+  data? = inject<{
+    metadata: {
+        [name: string]: string;
+    };
+}>(MAT_DIALOG_DATA, { optional: true });
+
 
   static maxValuesLength = 500;
   static maxKeys = 5;
@@ -22,12 +29,9 @@ export class EventMetadataComponent implements OnInit {
   showPopup = false;
   isPopup = false;
 
-  constructor(
-    private dialog: TailwindDialogService,
-    @Optional() @Inject(MAT_DIALOG_DATA) public data?: {
-      metadata: { [name: string]: string, },
-    },
-  ) {
+  constructor() {
+    const data = this.data;
+
 
     if (this.data) {
       this.metadata = data.metadata;

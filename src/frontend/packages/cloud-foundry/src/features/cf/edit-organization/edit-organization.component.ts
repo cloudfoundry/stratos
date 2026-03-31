@@ -1,4 +1,4 @@
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { PageHeaderComponent, SteppersComponent, StepComponent } from '@stratosui/core';
 
 import { EditOrganizationStepComponent } from './edit-organization-step/edit-organization-step.component';
@@ -23,7 +23,9 @@ export class EditOrganizationComponent {
 
   orgUrl: string;
 
-  constructor(activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
+  constructor() {
+    const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+
     const { cfGuid, orgGuid } = activeRouteCfOrgSpace;
     this.orgUrl = `/cloud-foundry/${cfGuid}/organizations/${orgGuid}`;
   }

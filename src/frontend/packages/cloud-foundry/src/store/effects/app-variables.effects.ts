@@ -1,4 +1,4 @@
-import { ApplicationRef, Injectable } from '@angular/core';
+import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { map } from 'rxjs/operators';
 
@@ -11,11 +11,9 @@ import { cfEntityCatalog } from '../../cf-entity-catalog';
   providedIn: 'root'
 })
 export class AppVariablesEffect {
+  private actions$ = inject(Actions);
+  private appRef = inject(ApplicationRef);
 
-  constructor(
-    private actions$: Actions,
-    private appRef: ApplicationRef
-  ) { }
 
    apiRequestStart$ = createEffect(() => this.actions$.pipe(
     ofType<AppVariablesUpdate>(AppVariables.UPDATE),

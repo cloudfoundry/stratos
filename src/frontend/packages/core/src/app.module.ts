@@ -1,4 +1,4 @@
-import { ApplicationRef, Injectable, NgModule, provideZonelessChangeDetection } from '@angular/core';
+import { ApplicationRef, Injectable, NgModule, provideZonelessChangeDetection, inject } from '@angular/core';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -173,15 +173,16 @@ class AppStoreDebugModule { }
   bootstrap: [AppComponent]
 })
 export class AppModule {
-  constructor(
-    ext: ExtensionService,
-    private store: Store<GeneralEntityAppState>,
-    eventService: GlobalEventService,
-    private userFavoriteManager: UserFavoriteManager,
-    ech: EntityCatalogHelper,
-    customizationService: CustomizationService,
-    private appRef: ApplicationRef
-  ) {
+  private store = inject<Store<GeneralEntityAppState>>(Store);
+  private userFavoriteManager = inject(UserFavoriteManager);
+  private appRef = inject(ApplicationRef);
+
+  constructor() {
+    const ext = inject(ExtensionService);
+    const eventService = inject(GlobalEventService);
+    const ech = inject(EntityCatalogHelper);
+    const customizationService = inject(CustomizationService);
+
     EntityCatalogHelpers.SetEntityCatalogHelper(ech);
 
     // Validate entity catalog after all modules have loaded and registered their entities

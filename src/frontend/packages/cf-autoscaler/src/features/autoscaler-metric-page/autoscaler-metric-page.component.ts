@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
@@ -34,14 +34,14 @@ import {
   ],
 })
 export class AutoscalerMetricPageComponent implements OnInit {
+  applicationService = inject(ApplicationService);
+  private cdr = inject(ChangeDetectorRef);
+
 
   parentUrl: string;
   applicationName$!: Observable<string>;
 
-  constructor(
-    public applicationService: ApplicationService,
-    private cdr: ChangeDetectorRef
-  ) {
+  constructor() {
     this.parentUrl = `/applications/${this.applicationService.cfGuid}/${this.applicationService.appGuid}/autoscale`;
   }
 

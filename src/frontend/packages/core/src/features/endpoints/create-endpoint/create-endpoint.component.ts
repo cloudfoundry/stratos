@@ -1,11 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component,
-  ComponentRef,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-  ViewContainerRef,
- } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ComponentRef, OnDestroy, OnInit, ViewChild, ViewContainerRef, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { entityCatalog } from '@stratosui/store';
 
@@ -39,9 +33,9 @@ export class CreateEndpointComponent implements OnInit, OnDestroy {
   @ViewChild('customComponentContainer', { read: ViewContainerRef, static: true }) customComponentContainer!: ViewContainerRef;
   componentRef!: ComponentRef<any>;
 
-  constructor(
-    activatedRoute: ActivatedRoute,
-  ) {
+  constructor() {
+    const activatedRoute = inject(ActivatedRoute);
+
     const epType = getIdFromRoute(activatedRoute, 'type');
     const epSubType = getIdFromRoute(activatedRoute, 'subtype');
     const endpoint = entityCatalog.getEndpoint(epType, epSubType);

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AsyncPipe, CommonModule, DatePipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -28,6 +28,10 @@ import { ActiveRouteCfOrgSpace } from '../../../cf/cf-page.types';
   ]
 })
 export class CompactAppCardComponent implements OnInit {
+  private store = inject<Store<CFAppState>>(Store);
+  private appStateService = inject(ApplicationStateService);
+  private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+
 
   @Input() app!: any;
 
@@ -41,14 +45,6 @@ export class CompactAppCardComponent implements OnInit {
   appStatus$!: Observable<StratosStatus>;
 
   bcType!: any;
-
-
-  constructor(
-    private store: Store<CFAppState>,
-    private appStateService: ApplicationStateService,
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-
-  ) { }
   ngOnInit() {
     if (this.activeRouteCfOrgSpace) {
       this.bcType = this.setBreadcrumbType(this.activeRouteCfOrgSpace);

@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { ApplicationRef, Injectable } from '@angular/core';
+import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
@@ -19,12 +19,10 @@ import { LocalAdminSetupData, UaaSetupData } from './../types/uaa-setup.types';
   providedIn: 'root'
 })
 export class UAASetupEffect {
+  private http = inject(HttpClient);
+  private actions$ = inject(Actions);
+  private appRef = inject(ApplicationRef);
 
-  constructor(
-    private http: HttpClient,
-    private actions$: Actions,
-    private appRef: ApplicationRef
-  ) { }
 
   getSetupScopesUrl = '/pp/v1/setup/check';
   saveSetupUrl = '/pp/v1/setup/save';

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { differenceInMilliseconds, isBefore } from 'date-fns';
 
@@ -27,6 +27,9 @@ import { AppAutoscalerMetricChartDataSource } from './app-autoscaler-metric-char
   providedIn: 'root'
 })
 export class AppAutoscalerMetricChartListConfigService extends BaseCfListConfig<APIResource<AppScalingTrigger>> {
+  private store = inject<Store<CFAppState>>(Store);
+  private appService = inject(ApplicationService);
+
   autoscalerMetricSource: AppAutoscalerMetricChartDataSource;
   cardComponent = AppAutoscalerMetricChartCardComponent;
   viewType = ListViewTypes.CARD_ONLY;
@@ -85,10 +88,9 @@ export class AppAutoscalerMetricChartListConfigService extends BaseCfListConfig<
     return null;
   }
 
-  constructor(
-    private store: Store<CFAppState>,
-    private appService: ApplicationService,
-    metricsRangeService: MetricsRangeSelectorService) {
+  constructor() {
+    const metricsRangeService = inject(MetricsRangeSelectorService);
+
     super();
     this.autoscalerMetricSource = new AppAutoscalerMetricChartDataSource(
       this.store,

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CustomTooltipDirective, TailwindSnackBarService } from '@stratosui/core';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -50,18 +50,22 @@ import { CfUserPermissionDirective } from '../../../../../shared/directives/cf-u
   ]
 })
 export class CloudFoundryOrganizationSummaryComponent {
+  private store = inject<Store<CFAppState>>(Store);
+  cfEndpointService = inject(CloudFoundryEndpointService);
+  cfOrgService = inject(CloudFoundryOrganizationService);
+  private confirmDialog = inject(ConfirmationDialogService);
+  private snackBar = inject(TailwindSnackBarService);
+
   appLink: () => void;
   detailsLoading$: Observable<boolean>;
   public permsOrgEdit = CfCurrentUserPermissions.ORGANIZATION_EDIT;
   public permsOrgDelete = CfCurrentUserPermissions.ORGANIZATION_DELETE;
 
-  constructor(
-    private store: Store<CFAppState>,
-    public cfEndpointService: CloudFoundryEndpointService,
-    public cfOrgService: CloudFoundryOrganizationService,
-    private confirmDialog: ConfirmationDialogService,
-    private snackBar: TailwindSnackBarService
-  ) {
+  constructor() {
+    const store = this.store;
+    const cfEndpointService = this.cfEndpointService;
+    const cfOrgService = this.cfOrgService;
+
     this.appLink = () => {
       goToAppWall(store, cfOrgService.cfGuid, cfOrgService.orgGuid);
     };

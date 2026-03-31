@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { gitRepositoryUrlValidator, normalizeUrl } from '../../../../../core/src/shared/validators';
@@ -79,6 +79,13 @@ interface GitRegistrationForm {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GitRegistrationComponent extends CreateEndpointHelperComponent implements OnDestroy {
+  private fb = inject(FormBuilder);
+  private snackBarService = inject(SnackBarService);
+  private endpointsService = inject(EndpointsService);
+  sessionService: SessionService;
+  currentUserPermissionsService: CurrentUserPermissionsService;
+  userProfileService: UserProfileService;
+
 
   public gitTypes: EndpointSubTypes;
 
@@ -94,17 +101,18 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
 
   urlValidation: string;
 
-  constructor(
-    gitSCMService: GitSCMService,
-    activatedRoute: ActivatedRoute,
-    private fb: FormBuilder,
-    private snackBarService: SnackBarService,
-    private endpointsService: EndpointsService,
-    public sessionService: SessionService,
-    public currentUserPermissionsService: CurrentUserPermissionsService,
-    public userProfileService: UserProfileService
-  ) {
+  constructor() {
+    const gitSCMService = inject(GitSCMService);
+    const activatedRoute = inject(ActivatedRoute);
+    const sessionService = inject(SessionService);
+    const currentUserPermissionsService = inject(CurrentUserPermissionsService);
+    const userProfileService = inject(UserProfileService);
+
     super(sessionService, currentUserPermissionsService, userProfileService);
+    this.sessionService = sessionService;
+    this.currentUserPermissionsService = currentUserPermissionsService;
+    this.userProfileService = userProfileService;
+
     this.epSubType = getIdFromRoute(activatedRoute, 'subtype');
     const githubLabel = entityCatalog.getEndpoint(GIT_ENDPOINT_TYPE, GIT_ENDPOINT_SUB_TYPES.GITHUB).definition.label || 'Github';
     const gitlabLabel = entityCatalog.getEndpoint(GIT_ENDPOINT_TYPE, GIT_ENDPOINT_SUB_TYPES.GITLAB).definition.label || 'Gitlab';

@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 
@@ -34,12 +34,13 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
   ]
 })
 export class CloudFoundryQuotasComponent {
+  cfEndpointService = inject(CloudFoundryEndpointService);
+
   public canAddQuota$: Observable<boolean>;
 
-  constructor(
-    public cfEndpointService: CloudFoundryEndpointService,
-    currentUserPermissionsService: CurrentUserPermissionsService
-  ) {
+  constructor() {
+    const currentUserPermissionsService = inject(CurrentUserPermissionsService);
+
     this.canAddQuota$ = currentUserPermissionsService.can(CfCurrentUserPermissions.QUOTA_CREATE, this.cfEndpointService.cfGuid);
   }
 }

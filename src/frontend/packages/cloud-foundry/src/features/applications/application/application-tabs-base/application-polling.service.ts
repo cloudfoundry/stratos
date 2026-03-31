@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, first, map, startWith, take, tap } from 'rxjs/operators';
@@ -13,6 +13,10 @@ import { ApplicationService } from '../../application.service';
   providedIn: 'root'
 })
 export class ApplicationPollingService {
+  applicationService = inject(ApplicationService);
+  private store = inject<Store<AppState>>(Store);
+  private ngZone = inject(NgZone);
+
 
   private pollingSub!: Subscription;
   private autoRefreshString = 'auto-refresh';
@@ -23,11 +27,7 @@ export class ApplicationPollingService {
 
   public isEnabled$: Observable<boolean>;
 
-  constructor(
-    public applicationService: ApplicationService,
-    private store: Store<AppState>,
-    private ngZone: NgZone,
-  ) {
+  constructor() {
     this.isEnabled$ = this.store.select(selectDashboardState).pipe(
       filter(dashboardState => !!dashboardState),
       map(dashboardState => dashboardState.pollingEnabled),

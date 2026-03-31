@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, first, map, publishReplay, refCount } from 'rxjs/operators';
@@ -57,6 +57,11 @@ export function appDataSort(app1: APIResource<IApp>, app2: APIResource<IApp>): n
   providedIn: 'root'
 })
 export class CloudFoundryEndpointService {
+  activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+  private store = inject<Store<CFAppState>>(Store);
+  private cfUserService = inject(CfUserService);
+  private pmf = inject(PaginationMonitorFactory);
+
 
   hasSSHAccess$!: Observable<boolean>;
   totalMem$!: Observable<number>;
@@ -160,12 +165,9 @@ export class CloudFoundryEndpointService {
     }, getAllOrgsAction.flattenPagination).entities$;
   }
 
-  constructor(
-    public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private store: Store<CFAppState>,
-    private cfUserService: CfUserService,
-    private pmf: PaginationMonitorFactory,
-  ) {
+  constructor() {
+    const activeRouteCfOrgSpace = this.activeRouteCfOrgSpace;
+
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.cfEndpointEntityService = stratosEntityCatalog.endpoint.store.getEntityService(this.cfGuid);
 

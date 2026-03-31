@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, Injector, Input, OnDestroy, OnInit, Renderer2, Signal, signal, ViewChild, WritableSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, Injector, Input, OnDestroy, OnInit, Renderer2, Signal, signal, ViewChild, WritableSignal, inject } from '@angular/core';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
@@ -37,6 +37,12 @@ function createSignalWrapper<T>(initialValue: T, injector: Injector) {
   ]
 })
 export class TableCellActionsComponent<T> extends TableCellCustom<T> implements OnDestroy {
+  private store = inject<Store<AppState>>(Store);
+  listConfig = inject<ListConfig<T>>(ListConfig);
+  private injector = inject(Injector);
+  private elementRef = inject(ElementRef);
+  private renderer = inject(Renderer2);
+
 
   @Input()
   declare rowState: Observable<RowState>;
@@ -70,14 +76,10 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
   private documentClickListener?: () => void;
   private rowStateSubscription?: Subscription;
 
-  constructor(
-    private store: Store<AppState>,
-    public listConfig: ListConfig<T>,
-    private injector: Injector,
-    private elementRef: ElementRef,
-    private renderer: Renderer2
-  ) {
+  constructor() {
     super();
+    const listConfig = this.listConfig;
+
     this.actions = listConfig.getSingleActions();
   }
 

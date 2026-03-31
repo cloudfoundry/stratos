@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, AfterContentInit, Component, ContentChild, Input, OnDestroy, OnInit  } from '@angular/core';
+import { ChangeDetectionStrategy, AfterContentInit, Component, ContentChild, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChartConfiguration } from 'chart.js';
 import { Store } from '@ngrx/store';
@@ -46,6 +46,9 @@ export interface MetricsConfig<T = any> {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentInit {
+  private store = inject<Store<AppState>>(Store);
+  private entityMonitorFactory = inject(EntityMonitorFactory);
+
   @Input()
   public metricsConfig!: MetricsConfig;
   @Input()
@@ -101,11 +104,6 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
 
   public isRefreshing$!: Observable<boolean>;
   public isFetching$!: Observable<boolean>;
-
-  constructor(
-    private store: Store<AppState>,
-    private entityMonitorFactory: EntityMonitorFactory
-  ) { }
   private sort(metricsArray: ChartSeries[]) {
     if (this.metricsConfig.sort) {
       const newMetricsArray = [

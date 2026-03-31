@@ -1,5 +1,5 @@
 
-import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 
 import { BREADCRUMB_URL_PARAM, IBreadcrumb, IBreadcrumbLink } from './breadcrumbs.types';
@@ -41,7 +41,9 @@ export class BreadcrumbsComponent {
     }) || breadcrumbs[0];
   }
 
-  constructor(route: ActivatedRoute) {
+  constructor() {
+    const route = inject(ActivatedRoute);
+
     this.breadcrumbKey = route.snapshot.queryParams[BREADCRUMB_URL_PARAM] || null;
   }
 }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -48,6 +48,14 @@ interface AutoscalerCredentialForm {
   ]
 })
 export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
+  applicationService = inject(ApplicationService);
+  private fb = inject(FormBuilder);
+  private store = inject<Store<AppState>>(Store);
+  private entityServiceFactory = inject(EntityServiceFactory);
+  private appAutoscalerCredentialSnackBar = inject(TailwindSnackBarService);
+  private confirmDialog = inject(ConfirmationDialogService);
+  private cdr = inject(ChangeDetectorRef);
+
 
   parentUrl: string;
   applicationName$!: Observable<string>;
@@ -64,15 +72,7 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
   private deleting = new BehaviorSubject(false);
   public deleting$ = this.deleting.asObservable();
 
-  constructor(
-    public applicationService: ApplicationService,
-    private fb: FormBuilder,
-    private store: Store<AppState>,
-    private entityServiceFactory: EntityServiceFactory,
-    private appAutoscalerCredentialSnackBar: TailwindSnackBarService,
-    private confirmDialog: ConfirmationDialogService,
-    private cdr: ChangeDetectorRef
-  ) {
+  constructor() {
     this.parentUrl = `/applications/${this.applicationService.cfGuid}/${this.applicationService.appGuid}/autoscale`;
     this.editCredentialForm = this.fb.group<AutoscalerCredentialForm>({
       actype: this.fb.nonNullable.control({ value: true, disabled: false }),

@@ -1,4 +1,4 @@
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 
 import { TableCellCustom, TailwindDialogService } from '@stratosui/core';
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
@@ -13,12 +13,8 @@ import { ListAppEnvVar } from '../cf-app-variables-data-source';
   imports: []
 })
 export class TableCellEditVariableComponent extends TableCellCustom<ListAppEnvVar> {
+  private dialog = inject(TailwindDialogService);
 
-  constructor(
-    private dialog: TailwindDialogService,
-  ) {
-    super();
-  }
 
   showPopup = () => {
     let value = this.row.value;

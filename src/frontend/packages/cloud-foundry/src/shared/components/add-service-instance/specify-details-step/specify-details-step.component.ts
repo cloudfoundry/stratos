@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
-import { AfterContentInit, Component, Input, OnDestroy, signal,
-  ChangeDetectionStrategy} from '@angular/core';
+import { AfterContentInit, Component, Input, OnDestroy, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AbstractControl, ValidatorFn, Validators, ReactiveFormsModule, FormsModule, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -84,6 +83,12 @@ interface CreateNewInstanceForm {
   ]
 })
 export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit {
+  private store = inject<Store<CFAppState>>(Store);
+  private cSIHelperServiceFactory = inject(CreateServiceInstanceHelperServiceFactory);
+  private csiGuidsService = inject(CsiGuidsService);
+  modeService = inject(CsiModeService);
+  longRunningOpService = inject(LongRunningCfOperationsService);
+
 
   serviceInstancesInit$: Observable<boolean>;
   hasInstances$: Observable<boolean>;
@@ -143,13 +148,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       !this.checkName(formField.value) ? { nameTaken: { value: formField.value } } : null;
   };
 
-  constructor(
-    private store: Store<CFAppState>,
-    private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
-    private csiGuidsService: CsiGuidsService,
-    public modeService: CsiModeService,
-    public longRunningOpService: LongRunningCfOperationsService
-  ) {
+  constructor() {
     this.setupForms();
 
     this.selectCreateInstance$ = this.store.select(selectCreateServiceInstance).pipe(

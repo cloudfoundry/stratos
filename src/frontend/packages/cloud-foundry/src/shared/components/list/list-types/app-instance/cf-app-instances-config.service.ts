@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest as combineLatestObs, Observable } from 'rxjs';
@@ -49,6 +49,12 @@ export function createAppInstancesMetricAction(appGuid: string, cfGuid: string):
   providedIn: 'root'
 })
 export class CfAppInstancesConfigService implements IListConfig<ListAppInstance> {
+  private store = inject<Store<CFAppState>>(Store);
+  private appService = inject(ApplicationService);
+  private utilsService = inject(UtilsService);
+  private router = inject(Router);
+  private confirmDialog = inject(ConfirmationDialogService);
+
 
   instancesSource: CfAppInstancesDataSource;
   metricResults$!: Observable<IMetricMatrixResult<IMetricApplication>[]>;
@@ -207,16 +213,13 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
 
   private canEditApp$: Observable<boolean>;
 
-  constructor(
-    private store: Store<CFAppState>,
-    private appService: ApplicationService,
-    private utilsService: UtilsService,
-    private router: Router,
-    private confirmDialog: ConfirmationDialogService,
-    entityServiceFactory: EntityServiceFactory,
-    paginationMonitorFactory: PaginationMonitorFactory,
-    cups: CurrentUserPermissionsService
-  ) {
+  constructor() {
+    const store = this.store;
+    const appService = this.appService;
+    const entityServiceFactory = inject(EntityServiceFactory);
+    const paginationMonitorFactory = inject(PaginationMonitorFactory);
+    const cups = inject(CurrentUserPermissionsService);
+
     const cellHelper = new CfCellHelper(store, paginationMonitorFactory);
 
     this.initialised$ = cellHelper.hasCellMetrics(appService.cfGuid).pipe(

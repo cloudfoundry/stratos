@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 
@@ -22,10 +22,8 @@ import { CustomIconComponent } from '../../../../../shared/components/custom-mat
   ]
 })
 export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements OnDestroy {
+  private cdr = inject(ChangeDetectorRef);
 
-  constructor(private cdr: ChangeDetectorRef) {
-    super();
-  }
 
   public cellDefinition!: ICellDefinition<T>;
 

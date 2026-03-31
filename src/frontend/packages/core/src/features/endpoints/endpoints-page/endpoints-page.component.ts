@@ -1,13 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterViewInit,
-  Component,
-  ComponentRef,
-  NgZone,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-  ViewContainerRef,
- } from '@angular/core';
+import { ChangeDetectionStrategy, AfterViewInit, Component, ComponentRef, NgZone, OnDestroy, OnInit, ViewChild, ViewContainerRef, inject } from '@angular/core';
 import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -61,6 +53,13 @@ import { EndpointRegisterModalComponent } from '../endpoint-register-modal/endpo
   ]
 })
 export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit {
+  endpointsService = inject(EndpointsService);
+  store = inject<Store<EndpointOnlyAppState>>(Store);
+  private ngZone = inject(NgZone);
+  private snackBarService = inject(SnackBarService);
+  sessionService = inject(SessionService);
+  private endpointModalService = inject(EndpointModalService);
+
   public canRegisterEndpoint: Observable<StratosCurrentUserPermissions[]>;
   private healthCheckTimeout!: number;
 
@@ -79,16 +78,11 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
 
   public customizations: CustomizationsMetadata;
 
-  constructor(
-    public endpointsService: EndpointsService,
-    public store: Store<EndpointOnlyAppState>,
-    private ngZone: NgZone,
-    private snackBarService: SnackBarService,
-    cs: CustomizationService,
-    currentUserPermissionsService: CurrentUserPermissionsService,
-    public sessionService: SessionService,
-    private endpointModalService: EndpointModalService
-  ) {
+  constructor() {
+    const endpointsService = this.endpointsService;
+    const cs = inject(CustomizationService);
+    const currentUserPermissionsService = inject(CurrentUserPermissionsService);
+
     this.customizations = cs.get();
 
     // Redirect to /applications if not enabled.

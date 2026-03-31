@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -53,6 +53,9 @@ export class ManageUsersSetUsernamesHelper {
   ]
 })
 export class ManageUsersSetUsernamesComponent implements OnInit {
+  private store = inject<Store<CFAppState>>(Store);
+  private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+
 
   public stepValid = signal<boolean>(false);
   public valid$: Observable<boolean> = toObservable(this.stepValid);
@@ -75,11 +78,11 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
   public stateIn = signal<StackedInputActionsState[]>([]);
   public stateIn$: Observable<StackedInputActionsState[]>;
 
-  constructor(
-    private store: Store<CFAppState>,
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    userPerms: CurrentUserPermissionsService,
-  ) {
+  constructor() {
+    const store = this.store;
+    const activeRouteCfOrgSpace = this.activeRouteCfOrgSpace;
+    const userPerms = inject(CurrentUserPermissionsService);
+
     this.stateIn$ = toObservable(this.stateIn);
     const ffSetPermConfig = new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.set_roles_by_username);
     const ffRemovePermConfig = new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.unset_roles_by_username);

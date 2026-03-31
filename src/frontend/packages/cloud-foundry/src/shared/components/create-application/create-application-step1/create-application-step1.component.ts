@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterContentInit, Component, Input, OnInit, ViewChild,
-  ChangeDetectionStrategy} from '@angular/core';
+import { AfterContentInit, Component, Input, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -30,14 +29,13 @@ import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-servi
   ]
 })
 export class CreateApplicationStep1Component implements OnInit, AfterContentInit {
+  private store = inject<Store<CFAppState>>(Store);
+  cfOrgSpaceService = inject(CfOrgSpaceDataService);
+  route = inject(ActivatedRoute);
+
 
   @Input()
   isMarketplaceMode!: boolean;
-  constructor(
-    private store: Store<CFAppState>,
-    public cfOrgSpaceService: CfOrgSpaceDataService,
-    public route: ActivatedRoute
-  ) { }
 
   public spaces$!: Observable<ISpace[]>;
   public hasSpaces$!: Observable<boolean>;

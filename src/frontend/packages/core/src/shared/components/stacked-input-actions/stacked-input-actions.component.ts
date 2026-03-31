@@ -1,16 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef,
-  Component,
-  EventEmitter,
-  Injector,
-  Input,
-  OnDestroy,
-  OnInit,
-  Output,
-  ViewChild,
-  ViewContainerRef,
-  signal,
-  Signal,
- } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Injector, Input, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, signal, Signal, inject } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 
@@ -46,6 +34,9 @@ export interface StackedInputActionsUpdate { values: { [key: string]: string }; 
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StackedInputActionsComponent implements OnInit, OnDestroy {
+  private cd = inject(ChangeDetectorRef);
+  private injector = inject(Injector);
+
 
   @Input() stateIn$!: Observable<StackedInputActionsState[]>;
   @Input() isEmailInput = true;
@@ -68,11 +59,6 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
     }
   } = {};
   private subs: Subscription[] = [];
-
-  constructor(
-    private cd: ChangeDetectorRef,
-    private injector: Injector,
-  ) { }
 
   addComponent(): void {
     const component = this.inputs.createComponent(StackedInputActionComponent);

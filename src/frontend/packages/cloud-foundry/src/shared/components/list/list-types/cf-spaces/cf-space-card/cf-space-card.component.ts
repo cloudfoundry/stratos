@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
@@ -74,6 +74,16 @@ import { CfUserService } from '../../../../../data-services/cf-user.service';
   ]
 })
 export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implements OnInit, OnDestroy {
+  private cfUserService = inject(CfUserService);
+  cfEndpointService = inject(CloudFoundryEndpointService);
+  private store = inject<Store<CFAppState>>(Store);
+  private cfOrgService = inject(CloudFoundryOrganizationService);
+  private currentUserPermissionsService = inject(CurrentUserPermissionsService);
+  private confirmDialog = inject(ConfirmationDialogService);
+  private paginationMonitorFactory = inject(PaginationMonitorFactory);
+  private emf = inject(EntityMonitorFactory);
+  private userFavoriteManager = inject(UserFavoriteManager);
+
   cardMenu!: MenuItem[];
   spaceGuid!: string;
   appInstancesCount!: number;
@@ -89,20 +99,6 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
   entityConfig!: ComponentEntityMonitorConfig;
   favorite: UserFavorite<ISpaceFavMetadata> | undefined;
   spaceStatus$!: Observable<StratosStatus>;
-
-  constructor(
-    private cfUserService: CfUserService,
-    public cfEndpointService: CloudFoundryEndpointService,
-    private store: Store<CFAppState>,
-    private cfOrgService: CloudFoundryOrganizationService,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-    private confirmDialog: ConfirmationDialogService,
-    private paginationMonitorFactory: PaginationMonitorFactory,
-    private emf: EntityMonitorFactory,
-    private userFavoriteManager: UserFavoriteManager
-  ) {
-    super();
-  }
 
   ngOnInit() {
     this.spaceGuid = this.row.metadata.guid;

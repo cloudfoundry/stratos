@@ -1,5 +1,5 @@
 
-import { Component, OnDestroy, ViewChild , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
@@ -28,6 +28,9 @@ import { QuotaDefinitionFormComponent } from '../../quota-definition-form/quota-
 ]
 })
 export class EditQuotaStepComponent implements OnDestroy {
+  private store = inject<Store<AppState>>(Store);
+  private activatedRoute = inject(ActivatedRoute);
+
 
   cfGuid: string;
   quotaGuid: string;
@@ -38,11 +41,9 @@ export class EditQuotaStepComponent implements OnDestroy {
   @ViewChild('form', { static: false })
   form!: QuotaDefinitionFormComponent;
 
-  constructor(
-    private store: Store<AppState>,
-    private activatedRoute: ActivatedRoute,
-    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-  ) {
+  constructor() {
+    const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.quotaGuid = this.activatedRoute.snapshot.params.quotaId;
 

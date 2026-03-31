@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, InjectionToken, Input, OnInit, Output, computed  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, InjectionToken, Input, OnInit, Output, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -41,6 +41,10 @@ export interface SideNavItem extends TabNavItem {
 })
 
 export class SideNavComponent implements OnInit {
+  private store = inject<Store<AppState>>(Store);
+  private router = inject(Router);
+  private themeService = inject(StratosThemeService);
+
 
   public customizations: CustomizationsMetadata;
 
@@ -66,12 +70,9 @@ export class SideNavComponent implements OnInit {
 
   private readonly SHOW_ALL_MENU_ITEMS_KEY = 'stratos-show-all-menu-items';
 
-  constructor(
-    private store: Store<AppState>,
-    private router: Router,
-    cs: CustomizationService,
-    private themeService: StratosThemeService
-  ) {
+  constructor() {
+    const cs = inject(CustomizationService);
+
     this.customizations = cs.get();
   }
   @Input() set iconMode(isIconMode: boolean) {

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
@@ -60,6 +60,12 @@ interface EditSpecificDateForm {
   ]
 })
 export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDirective implements OnInit {
+  applicationService = inject(ApplicationService);
+  private store = inject<Store<AppState>>(Store);
+  private fb = inject(FormBuilder);
+  private entityServiceFactory = inject(EntityServiceFactory);
+  private cdr = inject(ChangeDetectorRef);
+
 
   policyAlert = PolicyAlert;
   editSpecificDateForm: FormGroup<EditSpecificDateForm>;
@@ -74,15 +80,10 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
   private action!: CreateAppAutoscalerPolicyAction | UpdateAppAutoscalerPolicyAction;
   private createUpdateTest!: string;
 
-  constructor(
-    public applicationService: ApplicationService,
-    private store: Store<AppState>,
-    private fb: FormBuilder,
-    private entityServiceFactory: EntityServiceFactory,
-    service: EditAutoscalerPolicyService,
-    route: ActivatedRoute,
-    private cdr: ChangeDetectorRef
-  ) {
+  constructor() {
+    const service = inject(EditAutoscalerPolicyService);
+    const route = inject(ActivatedRoute);
+
     super(service, route);
     this.editSpecificDateForm = this.fb.group<EditSpecificDateForm>({
       instance_min_count: new FormControl<number>(0, { nonNullable: true }),

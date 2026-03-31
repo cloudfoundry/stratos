@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { ApplicationRef, Injectable } from '@angular/core';
+import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, map, mergeMap } from 'rxjs/operators';
@@ -20,13 +20,11 @@ import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuc
   providedIn: 'root'
 })
 export class MetricsEffect {
+  private actions$ = inject(Actions);
+  private httpClient = inject(HttpClient);
+  private store = inject<Store<DispatchOnlyAppState>>(Store);
+  private appRef = inject(ApplicationRef);
 
-  constructor(
-    private actions$: Actions,
-    private httpClient: HttpClient,
-    private store: Store<DispatchOnlyAppState>,
-    private appRef: ApplicationRef
-  ) { }
 
    metrics$ = createEffect(() => this.actions$.pipe(
     ofType<MetricsAction>(METRICS_START),

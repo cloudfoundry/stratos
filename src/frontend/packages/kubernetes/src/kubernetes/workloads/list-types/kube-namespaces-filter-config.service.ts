@@ -67,6 +67,8 @@ export interface KubernetesNamespacesFilterItem<T = any> {
   providedIn: 'root'
 })
 export class KubernetesNamespacesFilterService implements OnDestroy {
+  private store = inject<Store<AppState>>(Store);
+
   public kube: KubernetesNamespacesFilterItem<EndpointModel>;
   public namespace: KubernetesNamespacesFilterItem<KubernetesNamespace>;
 
@@ -78,9 +80,7 @@ export class KubernetesNamespacesFilterService implements OnDestroy {
     pag => getCurrentPageRequestInfo(pag).busy
   ));
 
-  constructor(
-    private store: Store<AppState>,
-  ) {
+  constructor() {
     this.kube = this.createKube();
     this.namespace = this.createNamespace();
 

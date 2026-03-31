@@ -1,4 +1,4 @@
-import { inject, Inject, Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { GeneralEntityAppState } from './app-state';
@@ -11,12 +11,10 @@ import { EntityRequestAction } from './types/request.types';
 
 @Injectable()
 export class EntityServiceFactory {
+  private store = inject<Store<GeneralEntityAppState>>(Store);
+  private entityMonitorFactory = inject(EntityMonitorFactory);
+  private entityCatalog = inject<IEntityCatalog>(ENTITY_CATALOG_TOKEN);
 
-  constructor(
-    private store: Store<GeneralEntityAppState>,
-    private entityMonitorFactory: EntityMonitorFactory,
-    @Inject(ENTITY_CATALOG_TOKEN) private entityCatalog: IEntityCatalog
-  ) {}
 
   private isConfig(config: string | EntityActionBuilderEntityConfig) {
     if (config) {

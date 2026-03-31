@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -20,18 +20,19 @@ import { ApplicationService } from '../../application.service';
   providedIn: 'root'
 })
 export class AppDeleteServiceInstancesListConfigService extends AppServiceBindingListConfigService {
+  private paginationMonitorFactory = inject(PaginationMonitorFactory);
+
   hideRefresh!: boolean;
   allowSelection: boolean;
   obsCache: { [serviceGuid: string]: Observable<RowState>, } = {};
 
-  constructor(
-    store: Store<CFAppState>,
-    appService: ApplicationService,
-    datePipe: DatePipe,
-    currentUserPermissionService: CurrentUserPermissionsService,
-    private paginationMonitorFactory: PaginationMonitorFactory,
-    serviceActionHelperService: ServiceActionHelperService
-  ) {
+  constructor() {
+    const store = inject<Store<CFAppState>>(Store);
+    const appService = inject(ApplicationService);
+    const datePipe = inject(DatePipe);
+    const currentUserPermissionService = inject(CurrentUserPermissionsService);
+    const serviceActionHelperService = inject(ServiceActionHelperService);
+
     super(store, appService, datePipe, currentUserPermissionService, serviceActionHelperService);
 
     this.getGlobalActions = () => null;

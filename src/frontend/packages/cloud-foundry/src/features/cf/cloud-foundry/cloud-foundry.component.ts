@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
@@ -36,11 +36,12 @@ import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpo
   ]
 })
 export class CloudFoundryComponent {
+  private store = inject<Store<CFAppState>>(Store);
+
   connectedEndpoints$: Observable<number>;
-  constructor(
-    private store: Store<CFAppState>,
-    cfService: CloudFoundryService
-  ) {
+  constructor() {
+    const cfService = inject(CloudFoundryService);
+
     this.connectedEndpoints$ = cfService.connectedCFEndpoints$.pipe(
       map(connectedEndpoints => {
         const hasOne = connectedEndpoints.length === 1;

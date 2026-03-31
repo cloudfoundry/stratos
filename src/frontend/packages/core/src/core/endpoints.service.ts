@@ -28,6 +28,12 @@ import { UserService } from './user.service';
   providedIn: 'root'
 })
 export class EndpointsService {
+  private store = inject<Store<EndpointOnlyAppState>>(Store);
+  private userService = inject(UserService);
+  private endpointHealthChecks = inject(EndpointHealthChecks);
+  private sessionService = inject(SessionService);
+  private appRef = inject(ApplicationRef);
+
 
   endpoints$: Observable<IRequestEntityTypeState<EndpointModel>>;
   haveRegistered$: Observable<boolean>;
@@ -77,13 +83,9 @@ export class EndpointsService {
     }
   }
 
-  constructor(
-    private store: Store<EndpointOnlyAppState>,
-    private userService: UserService,
-    private endpointHealthChecks: EndpointHealthChecks,
-    private sessionService: SessionService,
-    private appRef: ApplicationRef
-  ) {
+  constructor() {
+    const store = this.store;
+
     // TIMING FIX: Defer entity catalog validation until application is stable
     // This ensures all feature modules (CloudFoundryPackageModule, KubernetesSetupModule, etc.)
     // have completed their entity registration before validation runs.

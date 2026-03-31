@@ -1,5 +1,5 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -86,11 +86,10 @@ function createAutoscalerErrorMessage(requestType: string, error: any): string {
   providedIn: 'root'
 })
 export class AutoscalerEffects {
-  constructor(
-    private http: HttpClient,
-    private actions$: Actions,
-    private store: Store<AppState>,
-  ) { }
+  private http = inject(HttpClient);
+  private actions$ = inject(Actions);
+  private store = inject<Store<AppState>>(Store);
+
 
 
   fetchAutoscalerInfo$ = createEffect(() => this.actions$.pipe(

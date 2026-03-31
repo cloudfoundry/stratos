@@ -1,11 +1,5 @@
 
-import {
-  Component,
-  ComponentRef,
-  ViewChild,
-  ViewContainerRef,
-  ChangeDetectionStrategy
-} from '@angular/core';
+import { Component, ComponentRef, ViewChild, ViewContainerRef, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
@@ -25,6 +19,8 @@ import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wr
   imports: []
 })
 export class DeployApplicationStep21Component {
+  private store = inject<Store<CFAppState>>(Store);
+
 
   validate!: Observable<boolean>;
   selectedCommit$!: Observable<GitCommit>;
@@ -32,11 +28,6 @@ export class DeployApplicationStep21Component {
   @ViewChild('target', { read: ViewContainerRef, static: true })
   target!: ViewContainerRef;
   wrapperRef!: ComponentRef<CommitListWrapperComponent>;
-
-  constructor(
-    private store: Store<CFAppState>,
-  ) {
-  }
 
   onLeave = () => {
     this.wrapperRef.destroy();

@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable, signal, computed, Injector } from '@angular/core';
+import { Injectable, signal, computed, Injector, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { selectSessionData, GeneralEntityAppState, BrowserStandardEncoder, SessionData } from '@stratosui/store';
 import { combineLatest, Observable } from 'rxjs';
@@ -21,6 +21,10 @@ interface RestoreEndpointsData {
   providedIn: 'root'
 })
 export class RestoreEndpointsService {
+  private store = inject<Store<GeneralEntityAppState>>(Store);
+  private http = inject(HttpClient);
+  private injector = inject(Injector);
+
 
   // Step 1
   private _file = signal<{
@@ -61,11 +65,7 @@ export class RestoreEndpointsService {
   // Step 2
   private password!: string;
 
-  constructor(
-    private store: Store<GeneralEntityAppState>,
-    private http: HttpClient,
-    private injector: Injector,
-  ) {
+  constructor() {
     // Initialize signals with injector context
     this.currentDbVersionSignal = toSignal(
       this.store.select(selectSessionData()).pipe(

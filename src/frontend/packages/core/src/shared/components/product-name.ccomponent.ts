@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 
 import { CustomizationService } from '../../core/customizations.types';
 
@@ -12,9 +12,9 @@ export class ProductNameComponent {
 
   name: string;
 
-  constructor(
-    customizationService: CustomizationService
-  ) {
+  constructor() {
+    const customizationService = inject(CustomizationService);
+
     this.name = customizationService.get().appName;
   }
 }
