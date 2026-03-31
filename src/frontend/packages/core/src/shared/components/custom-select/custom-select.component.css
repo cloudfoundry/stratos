@@ -1,0 +1,83 @@
+/* Host element */
+:host {
+  display: block;
+}
+
+/* Disabled trigger override */
+.custom-select.disabled .select-trigger {
+  background-color: var(--input-disabled-bg, #f3f4f6);
+  color: var(--text-muted, #9ca3af);
+  border-color: var(--input-border, #d1d5db);
+}
+
+/* Invalid trigger border */
+.custom-select.invalid .select-trigger {
+  border-color: var(--color-danger, #ef4444);
+  border-width: 2px;
+}
+
+/* Scrollbar styling for dropdown */
+.select-options::-webkit-scrollbar {
+  width: 8px;
+}
+
+.select-options::-webkit-scrollbar-track {
+  background: var(--scrollbar-track, #f1f1f1);
+  border-radius: 4px;
+}
+
+.select-options::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb, #888);
+  border-radius: 4px;
+}
+
+.select-options::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover, #555);
+}
+
+/* Dark theme scrollbar */
+.dark-theme .select-options::-webkit-scrollbar-track {
+  background: var(--scrollbar-track, #334155);
+}
+
+.dark-theme .select-options::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb, #64748b);
+}
+
+.dark-theme .select-options::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover, #94a3b8);
+}
+
+/* Error message */
+.select-error {
+  margin-top: 4px;
+  padding: 4px 0;
+  font-size: 0.75rem;
+  line-height: 1.25;
+  color: var(--color-danger, #ef4444);
+  animation: slideDown 0.3s ease-out;
+}
+
+.select-error div {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .select-error {
+    animation: none;
+  }
+}

@@ -21,7 +21,7 @@ export interface MatSelectChange {
       'opacity-50 cursor-not-allowed hover:bg-transparent': disabled
     }"
     ><ng-content></ng-content></div>`,
-  styleUrls: ['./custom-select.component.scss'],
+  styleUrls: ['./custom-select.component.css'],
   standalone: true,
   imports: [NgClass],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -53,9 +53,9 @@ export class CustomOptionComponent implements AfterViewInit {
 @Component({
   selector: 'app-select',
   templateUrl: './custom-select.component.html',
-  styleUrls: ['./custom-select.component.scss'],
+  styleUrls: ['./custom-select.component.css'],
   standalone: true,
-  imports: [],
+  imports: [NgClass],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {

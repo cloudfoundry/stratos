@@ -1,22 +1,28 @@
-<div class="custom-select"
-  [class.disabled]="disabled"
-  [class.open]="isOpen"
-  [class.invalid]="invalid"
+<div class="custom-select relative inline-block w-full min-w-[100px] font-inherit bg-[var(--input-bg)] text-[var(--input-text)] border-none rounded-md"
+  [ngClass]="{
+    'opacity-60 pointer-events-none cursor-not-allowed': disabled,
+    'open': isOpen,
+    'invalid': invalid
+  }"
   [attr.aria-invalid]="invalid || null"
   [attr.aria-describedby]="invalid && errorMessage ? 'error-' + (id || name) : null">
 
-  <div class="select-trigger" #selectTrigger role="combobox" tabindex="0"
+  <div class="select-trigger flex items-center justify-between py-1.5 px-2.5 border border-[var(--input-border,#d1d5db)] rounded-md bg-[var(--input-bg)] text-[var(--input-text)] cursor-pointer select-none min-h-[32px] transition-[border-color] duration-150 ease-in-out hover:border-[var(--input-border-hover,#9ca3af)] focus-within:outline-none"
+    #selectTrigger role="combobox" tabindex="0"
+    [class.border-primary]="isOpen"
     [attr.aria-expanded]="isOpen"
     aria-haspopup="listbox"
     [attr.aria-controls]="isOpen ? 'select-listbox-' + (id || name) : null"
     (click)="toggle()"
     (keydown.enter)="toggle()"
     (keydown.space)="toggle(); $event.preventDefault()">
-    <span class="select-value" [class.placeholder]="!displayValue || displayValue === ''">
+    <span class="flex-1 text-[var(--input-text)]"
+      [ngClass]="{'text-[var(--input-placeholder,#9ca3af)] dark:text-[var(--input-placeholder,#64748b)]': !displayValue || displayValue === ''}">
       {{ displayValue && displayValue !== '' ? displayValue : (placeholder || 'Select...') }}
     </span>
-    <div class="select-suffix">
-      <div class="select-arrow">
+    <div class="flex items-center gap-1 ml-2">
+      <div class="text-[var(--text-muted,#666)] flex items-center transition-transform duration-200"
+        [class.rotate-180]="isOpen">
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
@@ -24,7 +30,7 @@
     </div>
   </div>
 
-  <div class="select-options"
+  <div class="select-options fixed z-[9999] bg-[var(--card-bg,white)] dark:bg-[var(--card-bg,#1e293b)] border border-[var(--content-border,#e5e7eb)] dark:border-[var(--content-border,#475569)] rounded-md shadow-lg max-h-80 overflow-y-auto min-w-[240px] max-w-max w-auto"
     #selectOptions
     [class.hidden]="!isOpen"
     [style.top]="dropdownTop"
