@@ -104,19 +104,17 @@ export default defineConfig({
       },
     },
 
-    // Uncomment to test on Firefox
-    // {
-    //   name: 'firefox',
-    //   dependencies: ['setup'],
-    //   use: { ...devices['Desktop Firefox'], storageState: 'e2e/.auth/admin.json' },
-    // },
+    {
+      name: 'firefox',
+      dependencies: ['setup'],
+      use: { ...devices['Desktop Firefox'], storageState: 'e2e/.auth/admin.json' },
+    },
 
-    // Uncomment to test on WebKit (Safari)
-    // {
-    //   name: 'webkit',
-    //   dependencies: ['setup'],
-    //   use: { ...devices['Desktop Safari'], storageState: 'e2e/.auth/admin.json' },
-    // },
+    {
+      name: 'webkit',
+      dependencies: ['setup'],
+      use: { ...devices['Desktop Safari'], storageState: 'e2e/.auth/admin.json' },
+    },
   ],
 
   // Auto-start backend and frontend for tests using dedicated ports.

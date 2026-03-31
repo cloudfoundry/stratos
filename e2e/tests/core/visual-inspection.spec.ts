@@ -1,13 +1,36 @@
 import { test, expect } from '../../fixtures/test-base';
 
 /**
- * Visual inspection — screenshot key pages to verify no regressions
- * after ESLint accessibility/template fixes.
+ * Visual inspection — screenshot key pages to verify no regressions.
+ * Waits for data to fully render before capturing.
  *
  * Run: STRATOS_E2E_BASE_URL=https://console.run.adepttech.ca npx playwright test visual-inspection
  */
 
-const pages = [
+// Set a wide viewport so pages render fully
+test.use({ viewport: { width: 1440, height: 900 } });
+
+/** Wait for the page to fully render: network idle + no progress bars + content visible */
+async function waitForPageReady(page: import('@playwright/test').Page) {
+  await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => {});
+
+  // Wait for progress bars to disappear (Stratos shows indeterminate progress during load)
+  await page.locator('.progress-bar').waitFor({ state: 'hidden', timeout: 15000 }).catch(() => {});
+
+  // Wait for the main content area to have visible children
+  await page.locator('.list-component, .card, app-info-card, .dashboard-page, .home-page')
+    .first()
+    .waitFor({ state: 'visible', timeout: 10000 })
+    .catch(() => {});
+
+  // Small settle time for animations/transitions
+  await page.waitForTimeout(1000);
+}
+
+// CF pages need the GUID — resolve it once
+let cfBaseUrl: string;
+
+const corePages = [
   { name: 'home', path: '/' },
   { name: 'about', path: '/about' },
   { name: 'about-diagnostics', path: '/about/diagnostics' },
@@ -15,25 +38,43 @@ const pages = [
   { name: 'applications', path: '/applications' },
   { name: 'marketplace', path: '/marketplace' },
   { name: 'services', path: '/services' },
-  { name: 'cf-summary', path: '/cloud-foundry' },
-  { name: 'cf-orgs', path: '/cloud-foundry/organizations' },
-  { name: 'cf-users', path: '/cloud-foundry/users' },
-  { name: 'cf-routes', path: '/cloud-foundry/routes' },
-  { name: 'cf-events', path: '/cloud-foundry/events' },
-  { name: 'cf-feature-flags', path: '/cloud-foundry/feature-flags' },
-  { name: 'cf-build-packs', path: '/cloud-foundry/build-packs' },
-  { name: 'cf-stacks', path: '/cloud-foundry/stacks' },
-  { name: 'cf-security-groups', path: '/cloud-foundry/security-groups' },
+];
+
+// CF sub-pages that need the CF GUID prefix
+const cfSubPages = [
+  { name: 'cf-orgs', suffix: '/organizations' },
+  { name: 'cf-users', suffix: '/users' },
+  { name: 'cf-routes', suffix: '/routes' },
+  { name: 'cf-events', suffix: '/events' },
+  { name: 'cf-feature-flags', suffix: '/feature-flags' },
+  { name: 'cf-build-packs', suffix: '/build-packs' },
+  { name: 'cf-stacks', suffix: '/stacks' },
+  { name: 'cf-security-groups', suffix: '/security-groups' },
 ];
 
 test.describe('Visual Inspection', () => {
-  for (const { name, path } of pages) {
+
+  // Resolve CF GUID before CF sub-page tests
+  test.beforeAll(async ({ browser }) => {
+    const context = await browser.newContext({
+      storageState: 'e2e/.auth/admin.json',
+      ignoreHTTPSErrors: true,
+    });
+    const page = await context.newPage();
+    await page.goto('/cloud-foundry');
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => {});
+    await page.waitForTimeout(3000);
+    cfBaseUrl = page.url(); // e.g., .../cloud-foundry/<guid>/summary
+    // Strip /summary if present to get the base CF URL
+    cfBaseUrl = cfBaseUrl.replace(/\/summary$/, '');
+    await context.close();
+  });
+
+  // Core pages (no CF GUID needed)
+  for (const { name, path } of corePages) {
     test(`screenshot ${name}`, async ({ adminPage }) => {
       await adminPage.goto(path);
-      // Wait for content to settle
-      await adminPage.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
-      // Extra settle time for async data
-      await adminPage.waitForTimeout(2000);
+      await waitForPageReady(adminPage);
       await adminPage.screenshot({
         path: `e2e-screenshots/visual-inspection/${name}.png`,
         fullPage: true,
@@ -41,31 +82,41 @@ test.describe('Visual Inspection', () => {
     });
   }
 
-  test('screenshot events multi-select', async ({ adminPage }) => {
-    // Navigate to a CF endpoint's events page
+  // CF Summary (uses redirected URL)
+  test('screenshot cf-summary', async ({ adminPage }) => {
     await adminPage.goto('/cloud-foundry');
-    await adminPage.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+    await waitForPageReady(adminPage);
+    await adminPage.screenshot({
+      path: 'e2e-screenshots/visual-inspection/cf-summary.png',
+      fullPage: true,
+    });
+  });
 
-    // Find the CF GUID from the URL redirect
-    await adminPage.waitForTimeout(2000);
-    const url = adminPage.url();
-    const cfGuidMatch = url.match(/cloud-foundry\/([^/]+)/);
-    if (!cfGuidMatch) {
-      test.skip(true, 'Could not determine CF GUID');
-      return;
-    }
+  // CF sub-pages (use resolved GUID)
+  for (const { name, suffix } of cfSubPages) {
+    test(`screenshot ${name}`, async ({ adminPage }) => {
+      test.skip(!cfBaseUrl, 'Could not resolve CF GUID');
+      await adminPage.goto(`${cfBaseUrl}${suffix}`);
+      await waitForPageReady(adminPage);
+      await adminPage.screenshot({
+        path: `e2e-screenshots/visual-inspection/${name}.png`,
+        fullPage: true,
+      });
+    });
+  }
 
-    await adminPage.goto(`${url}/events`);
-    await adminPage.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
-    await adminPage.waitForTimeout(3000);
+  // Events multi-select interaction
+  test('screenshot events multi-select', async ({ adminPage }) => {
+    test.skip(!cfBaseUrl, 'Could not resolve CF GUID');
+    await adminPage.goto(`${cfBaseUrl}/events`);
+    await waitForPageReady(adminPage);
 
-    // Screenshot initial state
     await adminPage.screenshot({
       path: 'e2e-screenshots/visual-inspection/events-initial.png',
       fullPage: true,
     });
 
-    // Open the type dropdown and screenshot
+    // Open the type dropdown
     const typeSelect = adminPage.locator('app-select[name="type"]');
     if (await typeSelect.isVisible()) {
       await typeSelect.click();
@@ -79,7 +130,7 @@ test.describe('Visual Inspection', () => {
       const firstOption = adminPage.locator('app-option').first();
       if (await firstOption.isVisible()) {
         await firstOption.click();
-        await adminPage.waitForTimeout(1000);
+        await adminPage.waitForTimeout(2000);
         await adminPage.screenshot({
           path: 'e2e-screenshots/visual-inspection/events-one-selected.png',
           fullPage: true,
@@ -88,14 +139,14 @@ test.describe('Visual Inspection', () => {
     }
   });
 
+  // Dark mode screenshots
   test('screenshot dark mode', async ({ adminPage }) => {
     await adminPage.goto('/');
-    await adminPage.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
-    await adminPage.waitForTimeout(2000);
+    await waitForPageReady(adminPage);
 
-    // Toggle dark mode
-    const darkToggle = adminPage.locator('button, a, div').filter({ hasText: /dark/i }).first();
-    if (await darkToggle.isVisible()) {
+    // Toggle dark mode via the theme button
+    const darkToggle = adminPage.locator('[class*="theme-toggle"], button').filter({ hasText: /dark/i }).first();
+    if (await darkToggle.isVisible({ timeout: 3000 }).catch(() => false)) {
       await darkToggle.click();
       await adminPage.waitForTimeout(1000);
     }
@@ -105,19 +156,15 @@ test.describe('Visual Inspection', () => {
       fullPage: true,
     });
 
-    // Applications in dark mode
     await adminPage.goto('/applications');
-    await adminPage.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
-    await adminPage.waitForTimeout(2000);
+    await waitForPageReady(adminPage);
     await adminPage.screenshot({
       path: 'e2e-screenshots/visual-inspection/applications-dark.png',
       fullPage: true,
     });
 
-    // Marketplace in dark mode (has boolean indicators)
     await adminPage.goto('/marketplace');
-    await adminPage.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
-    await adminPage.waitForTimeout(2000);
+    await waitForPageReady(adminPage);
     await adminPage.screenshot({
       path: 'e2e-screenshots/visual-inspection/marketplace-dark.png',
       fullPage: true,
