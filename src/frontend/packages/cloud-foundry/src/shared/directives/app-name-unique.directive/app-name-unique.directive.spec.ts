@@ -24,8 +24,8 @@ describe('AppNameUniqueDirective', () => {
       ]
     });
   });
-  it('should create an instance', inject([Store, HttpClient], (store: Store<CFAppState>, http: HttpClient) => {
-    const directive = new AppNameUniqueDirective(store, http);
+  it('should create an instance', () => {
+    const directive = TestBed.runInInjectionContext(() => new AppNameUniqueDirective());
     expect(directive).toBeTruthy();
-  }));
+  });
 });

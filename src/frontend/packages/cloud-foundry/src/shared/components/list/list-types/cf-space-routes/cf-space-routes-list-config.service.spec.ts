@@ -71,22 +71,7 @@ describe('CfSpaceRoutesListConfigService', () => {
         },
         {
           provide: CfSpaceRoutesListConfigService,
-          useFactory: (
-            store: Store<CFAppState>,
-            confirmDialog: ConfirmationDialogService,
-            cfSpaceService: CloudFoundrySpaceService,
-            datePipe: DatePipe,
-            currentUserPermissionsService: CurrentUserPermissionsService
-          ) => {
-            return new CfSpaceRoutesListConfigService(
-              store,
-              confirmDialog,
-              cfSpaceService,
-              datePipe,
-              currentUserPermissionsService
-            );
-          },
-          deps: [Store, ConfirmationDialogService, CloudFoundrySpaceService, DatePipe, CurrentUserPermissionsService]
+          useFactory: () => new CfSpaceRoutesListConfigService(),
         },
         DatePipe,
         ...cfCurrentUserPermissionsService,

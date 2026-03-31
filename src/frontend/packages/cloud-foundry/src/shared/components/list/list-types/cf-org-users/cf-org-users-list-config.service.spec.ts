@@ -47,15 +47,7 @@ describe('CfOrgUsersListConfigService', () => {
         },
         {
           provide: CfOrgUsersListConfigService,
-          useFactory: (
-            store: Store<CFAppState>,
-            cfOrgService: CloudFoundryOrganizationService,
-            cfUserService: CfUserService,
-            router: Router,
-            activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-            userPerms: CurrentUserPermissionsService,
-          ) => new CfOrgUsersListConfigService(store, cfOrgService, cfUserService, router, activeRouteCfOrgSpace, userPerms),
-          deps: [Store, CloudFoundryOrganizationService, CfUserService, Router, ActiveRouteCfOrgSpace, CurrentUserPermissionsService]
+          useFactory: () => new CfOrgUsersListConfigService(),
         },
         { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock },
         { provide: CloudFoundryOrganizationService, useClass: CloudFoundryOrganizationServiceMock },
