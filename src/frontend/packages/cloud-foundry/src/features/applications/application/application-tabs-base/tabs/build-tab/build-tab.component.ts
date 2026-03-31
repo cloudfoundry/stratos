@@ -174,7 +174,7 @@ export class BuildTabComponent implements OnInit {
       this.applicationService.application$
     ).pipe(
       map(([project, app]) => {
-        if (!!project) {
+        if (project) {
           const deploySource: CustomEnvVarStratosProjectSource = { ...project.deploySource };
 
           // Legacy

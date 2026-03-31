@@ -99,12 +99,12 @@ export class DiagnosticsPageComponent implements OnInit {
     }
 
     this.gitHubRepository = this.getGitHubProject(this.gitProject);
-    if (!!this.gitHubRepository) {
+    if (this.gitHubRepository) {
       this.gitHubRepositoryLink = `https://github.com/${this.gitHubRepository}`;
-      if (!!this.gitBranch) {
+      if (this.gitBranch) {
         this.gitBranchLink = `https://github.com/${this.gitHubRepository}/tree/${this.gitBranch}`;
       }
-      if (!!this.gitCommit) {
+      if (this.gitCommit) {
         this.gitCommitLink = `https://github.com/${this.gitHubRepository}/commit/${this.gitCommit}`;
       }
     }

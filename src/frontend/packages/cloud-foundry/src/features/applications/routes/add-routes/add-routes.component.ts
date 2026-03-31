@@ -217,7 +217,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     } else {
       try {
         return this.isRouteSelected();
-      } catch (e) { }
+      } catch (e) { /* intentionally empty */ }
 
       return false;
     }

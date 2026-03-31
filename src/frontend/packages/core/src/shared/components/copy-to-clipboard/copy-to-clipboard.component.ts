@@ -31,7 +31,7 @@ export class CopyToClipboardComponent implements OnInit {
   ngOnInit() {
     try {
       this.canCopy = this.document.queryCommandSupported('copy');
-    } finally { }
+    } finally { /* intentionally empty */ }
   }
 
   copyToClipboard(event: MouseEvent = null) {

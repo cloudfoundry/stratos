@@ -336,8 +336,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       this.config?.getMultiActions() ?? []
     );
     this.hasSingleActions = (this.config?.getSingleActions() || []).length > 0;
-    this.columns = this.config?.getColumns()!;
-    this.dataSource = this.config?.getDataSource()!;
+    this.columns = this.config?.getColumns();
+    this.dataSource = this.config?.getDataSource();
     this.entitySelectConfig = this.dataSource.entitySelectConfig;
 
     this.dataSource.pagination$.pipe(

@@ -18,7 +18,7 @@ const fgAnsiToNames: Record<number, string> = {
 // Map of ANSI background color codes to color names
 const bgAnsiToNames: Record<number, string> = {};
 for (const ansiColor in fgAnsiToNames) {
-  if (!fgAnsiToNames.hasOwnProperty(ansiColor)) {
+  if (!Object.prototype.hasOwnProperty.call(fgAnsiToNames, ansiColor)) {
     continue;
   }
   const colorCode = parseInt(ansiColor, 10);

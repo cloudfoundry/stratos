@@ -124,7 +124,7 @@ export class AboutPageComponent implements OnInit, OnDestroy {
 
   private getGitHubProject(prj: string): string {
     if (!prj) { return ''; }
-    let projectUrl = prj.endsWith('.git') ? prj.slice(0, -4) : prj;
+    const projectUrl = prj.endsWith('.git') ? prj.slice(0, -4) : prj;
     if (projectUrl.toLowerCase().startsWith('git@github.com:')) {
       return projectUrl.slice(15);
     } else if (projectUrl.toLowerCase().startsWith('https://github.com/')) {

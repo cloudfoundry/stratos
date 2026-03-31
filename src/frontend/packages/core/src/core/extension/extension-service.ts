@@ -167,7 +167,7 @@ export class ExtensionService {
     let needsReset = false;
     if (dashboardRoute) {
       // Move any stratos extension routes under the dashboard base route
-      while (this.moveExtensionRoute(routeConfig, dashboardRoute)) { }
+      while (this.moveExtensionRoute(routeConfig, dashboardRoute)) { /* intentionally empty */ }
       needsReset = true;
     }
 

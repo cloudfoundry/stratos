@@ -126,7 +126,7 @@ export class TableRowComponent<T = any> implements OnInit, OnChanges {
 
   private createComponent() {
     const component = this.getComponent();
-    return !!component ? this.expandedComponent.createComponent(component) : null;
+    return component ? this.expandedComponent.createComponent(component) : null;
   }
 
   public panelOpened() {

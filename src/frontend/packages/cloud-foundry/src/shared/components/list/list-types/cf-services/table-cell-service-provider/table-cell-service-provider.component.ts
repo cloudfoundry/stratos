@@ -22,7 +22,7 @@ export class TableCellServiceProviderComponent extends TableCellCustom<APIResour
     if (!!pService && !!pService.entity.extra && !this.extraInfo) {
       try {
         this.extraInfo = JSON.parse(pService.entity.extra);
-      } catch { }
+      } catch { /* intentionally empty */ }
     }
   }
 

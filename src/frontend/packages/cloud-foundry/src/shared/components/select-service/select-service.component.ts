@@ -94,7 +94,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
         return paginationMonitor.fetchingCurrentPage$;
       }),
       tap(fetching => {
-        fetching ? this.stepperForm.disable() : this.stepperForm.enable();
+        if (fetching) { this.stepperForm.disable(); } else { this.stepperForm.enable(); }
       }),
       catchError(error => {
         console.error('Error monitoring service fetch status:', error);

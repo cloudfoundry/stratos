@@ -116,7 +116,7 @@ export class GitIgnoreFilter {
   }
 
   private escapeRegex(pattern: string) {
-    return pattern.replace(/[\-\[\]\/\{\}\(\)\+\?\.\\\^\$\|]/g, '\\$&');
+    return pattern.replace(/[-[\]/{}()+?.\\^$|]/g, '\\$&');
   }
 
 }

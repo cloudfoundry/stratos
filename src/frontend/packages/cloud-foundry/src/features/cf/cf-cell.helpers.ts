@@ -23,7 +23,7 @@ export class CfCellHelper {
   }
 
   public createCellMetricAction(cfId: string, cellId?: string): Observable<FetchCFCellMetricsPaginatedAction> {
-    const cellIdString = !!cellId ? `{bosh_job_id="${cellId}"}` : '';
+    const cellIdString = cellId ? `{bosh_job_id="${cellId}"}` : '';
 
     const newMetricAction: FetchCFCellMetricsPaginatedAction = new FetchCFCellMetricsPaginatedAction(
       cfId,
@@ -56,7 +56,7 @@ export class CfCellHelper {
     }).entities$.pipe(
       filter(entities => !!entities && !!entities.length),
       first(),
-      map(entities => !!entities.find(entity => !!entity.data && !!entity.data.result.length) ? action : null),
+      map(entities => entities.find(entity => entity.data && entity.data.result.length) ? action : null),
       publishReplay(1),
       refCount()
     );

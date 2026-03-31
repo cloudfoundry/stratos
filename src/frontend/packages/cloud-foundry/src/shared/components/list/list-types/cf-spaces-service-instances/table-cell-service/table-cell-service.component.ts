@@ -36,7 +36,7 @@ export class TableCellServiceComponent extends TableCellCustom<APIResource<IServ
   serviceUrl$!: Observable<string>;
   service$!: Observable<APIResource<IService>>;
   // tslint:disable-next-line:ban-types
-  isUserProvidedServiceInstance!: Boolean;
+  isUserProvidedServiceInstance!: boolean;
 
   brokerNameConfig: TableCellServiceBrokerComponentConfig = {
     mode: TableCellServiceBrokerComponentMode.NAME

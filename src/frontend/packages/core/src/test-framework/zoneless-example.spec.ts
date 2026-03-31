@@ -2,7 +2,6 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   detectChanges,
@@ -20,7 +19,7 @@ import {
 @Component({
   selector: 'app-example',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [ReactiveFormsModule],
   template: `
     <div class="example-container">
       <h1>{{ title }}</h1>
@@ -43,9 +42,11 @@ import {
           placeholder="Enter name"
           class="name-input"
         />
-        <span class="validation-error" *ngIf="form.get('name')?.invalid && form.get('name')?.touched">
+        @if (form.get('name')?.invalid && form.get('name')?.touched) {
+        <span class="validation-error">
           Name is required
         </span>
+        }
       </form>
 
       <ul class="item-list">
@@ -298,7 +299,7 @@ describe('Zoneless Example Tests', () => {
       detectChanges(fixture);
 
       // Verify empty list initially
-      let items = getAllElements(fixture, '.item');
+      const items = getAllElements(fixture, '.item');
       expect(items.length).toBe(0);
 
       // Best practice: Build items array first, then update component once

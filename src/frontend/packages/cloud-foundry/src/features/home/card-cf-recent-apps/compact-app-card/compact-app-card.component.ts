@@ -77,10 +77,10 @@ export class CompactAppCardComponent implements OnInit {
 
   private setBreadcrumbType = (activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) => {
     let bcType = 'cf';
-    if (!!activeRouteCfOrgSpace.cfGuid) {
-      if (!!activeRouteCfOrgSpace.orgGuid) {
+    if (activeRouteCfOrgSpace.cfGuid) {
+      if (activeRouteCfOrgSpace.orgGuid) {
         bcType = 'org';
-        if (!!activeRouteCfOrgSpace.spaceGuid) {
+        if (activeRouteCfOrgSpace.spaceGuid) {
           bcType = 'space-summary';
         }
       }

@@ -60,7 +60,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
 
   @Input() set disabled(disabled: boolean) {
     if (this.endpointForm) {
-      disabled ? this.endpointForm.disable() : this.endpointForm.enable();
+      if (disabled) { this.endpointForm.disable(); } else { this.endpointForm.enable(); }
     }
     this.pDisabled = disabled;
   }
@@ -183,7 +183,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     this.authFormComponentRef = this.container.createComponent<IAuthForm>(authType.component);
     this.authFormComponentRef.instance.formGroup = this.endpointForm;
     this.authFormComponentRef.instance.config = authType.config;
-    this.pDisabled ? this.endpointForm.disable() : this.endpointForm.enable();
+    if (this.pDisabled) { this.endpointForm.disable(); } else { this.endpointForm.enable(); }
   }
 
   private sameAuthTypeFormFields(a: string[], b: string[]): boolean {

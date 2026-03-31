@@ -40,7 +40,7 @@ const properties = {
 export function cfUserReducer(state: IRequestEntityTypeState<APIResource<CfUser>>, action: APISuccessOrFailedAction) {
   switch (action.type) {
     case ADD_CF_ROLE_SUCCESS:
-    case REMOVE_CF_ROLE_SUCCESS:
+    case REMOVE_CF_ROLE_SUCCESS: {
       // Ensure that a user's roles collections are updated when we call add/remove
       const permAction = action.apiAction as ChangeCfUserRole;
       if (permAction.username) {
@@ -54,6 +54,7 @@ export function cfUserReducer(state: IRequestEntityTypeState<APIResource<CfUser>
           entity: updatePermission(state[userGuid].entity, entityGuid, isSpace, permissionTypeKey, action.type === ADD_CF_ROLE_SUCCESS),
         }
       };
+    }
     case GET_ORGANIZATION_USERS_SUCCESS:
       // Determine if any of the user's roles have not been provided
       return updateUserMissingRoles(state, action);
@@ -64,7 +65,7 @@ export function cfUserReducer(state: IRequestEntityTypeState<APIResource<CfUser>
 export function endpointDisconnectUserReducer(state: IRequestEntityTypeState<APIResource<CfUser>>, action: DisconnectEndpoint): IRequestEntityTypeState<APIResource<CfUser>> {
   if (action.endpointType === CF_ENDPOINT_TYPE) {
     switch (action.type) {
-      case DISCONNECT_ENDPOINTS_SUCCESS:
+      case DISCONNECT_ENDPOINTS_SUCCESS: {
         const cfGuid = action.guid;
         // remove users that belong to this CF
         const newUsers: IRequestEntityTypeState<APIResource<CfUser>> = {};
@@ -74,6 +75,7 @@ export function endpointDisconnectUserReducer(state: IRequestEntityTypeState<API
             newUsers[u.metadata.guid] = u;
           });
         return newUsers;
+      }
     }
   }
   return state;
@@ -103,11 +105,12 @@ export function userSpaceOrgReducer<T = StateEntity>(isSpace: boolean) {
   return (state: StateEntities<T>, action: APISuccessOrFailedAction) => {
     switch (action.type) {
       case ADD_CF_ROLE_SUCCESS:
-      case REMOVE_CF_ROLE_SUCCESS:
+      case REMOVE_CF_ROLE_SUCCESS: {
         // Ensure that an org or space's roles lists are updated when we call add/remove
         const permAction = action.apiAction as ChangeCfUserRole;
-        const isAdd = action.type === ADD_CF_ROLE_SUCCESS ? true : false;
+        const isAdd = action.type === ADD_CF_ROLE_SUCCESS;
         return (isSpace && !!permAction.isSpace) || (!isSpace && !permAction.isSpace) ? newEntityState<T>(state, permAction, isAdd) : state;
+      }
     }
     return state;
   };

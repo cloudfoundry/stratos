@@ -126,12 +126,11 @@ function createActionsForExistingEntities(config: HandleRelationsConfig): Action
 
   const paramAction = action || createAction(config);
   // We've got the value already, ensure we create a pagination section for them
-  let response: NormalizedResponse;
   const guids = childEntitiesAsGuids(childEntitiesAsArray);
   const safeEntities = newEntities || {};
   const entities = pick(safeEntities[childRelation.entityKey], guids as [string]) ||
     pick(allEntities[childRelation.entityKey], guids as [string]);
-  response = {
+  const response: NormalizedResponse = {
     entities: {
       [childRelation.entityKey]: entities
     },

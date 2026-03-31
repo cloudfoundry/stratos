@@ -64,7 +64,7 @@ export function addCfRelationParams(request: HttpRequest<any>, action: EntityReq
 
 function setQParams(requestParams: HttpParams, params: PaginationParam): HttpParams {
   // No params or no q params? Not interested
-  if (!params || !params.hasOwnProperty('q')) {
+  if (!params || !Object.prototype.hasOwnProperty.call(params, 'q')) {
     return requestParams;
   }
 

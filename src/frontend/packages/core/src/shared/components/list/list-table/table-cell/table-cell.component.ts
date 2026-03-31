@@ -65,7 +65,7 @@ export class TableCellComponent<T> implements OnInit {
 
   private createComponent() {
     const component = this.getComponent();
-    return !!component ? this.target.createComponent(component) : null;
+    return component ? this.target.createComponent(component) : null;
   }
 
   private getRowData(rowData: T | MultiActionListEntity) {

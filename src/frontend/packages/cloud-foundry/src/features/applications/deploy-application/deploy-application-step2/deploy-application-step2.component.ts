@@ -89,7 +89,7 @@ export class DeployApplicationStep2Component
   sourceTypeGithub$!: Observable<boolean>;
   sourceTypeNeedsUpload$!: Observable<boolean>;
   // tslint:disable-next-line:ban-types
-  canDeployType$!: Observable<Boolean>;
+  canDeployType$!: Observable<boolean>;
   isLoading$!: Observable<boolean>;
 
   // Local FS data when file or folder upload
@@ -331,7 +331,7 @@ export class DeployApplicationStep2Component
         this.sourceType = sourceTypes.find(s => s.id === p.id && (p.endpointGuid ? s.endpointGuid === p.endpointGuid : true));
 
         const newScm = this.scmService.getSCM(this.sourceType.id as GitSCMType, this.sourceType.endpointGuid);
-        if (!!newScm) {
+        if (newScm) {
           // User selected one of the SCM options
           if (this.scm && newScm.getType() !== this.scm.getType()) {
             // User changed the SCM type, so reset the project and branch

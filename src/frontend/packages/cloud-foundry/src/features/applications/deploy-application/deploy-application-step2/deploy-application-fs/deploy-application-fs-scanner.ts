@@ -130,10 +130,9 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
   }
 
   readItemContents(item: any): Promise<string> {
-    const scanner = this;
     return new Promise((resolve, reject) => {
       item.file((file: any) => {
-        scanner.readFileContents(file).then((data: string) => {
+        this.readFileContents(file).then((data: string) => {
           resolve(data);
         }).catch(() => {
           reject();

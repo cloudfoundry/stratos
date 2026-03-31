@@ -56,9 +56,10 @@ export function createServiceInstanceReducer(state: CreateServiceInstanceState =
       return { ...state, serviceGuid: action.serviceGuid, servicePlanGuid: null };
     case SET_SERVICE_INSTANCE_GUID:
       return { ...state, serviceInstanceGuid: action.guid };
-    case SET_SERVICE_INSTANCE_APP:
+    case SET_SERVICE_INSTANCE_APP: {
       const scsia: SetCreateServiceInstanceApp = action as SetCreateServiceInstanceApp;
       return { ...state, bindAppGuid: scsia.appGuid, bindAppParams: scsia.params };
+    }
     case SET_SERVICE_INSTANCE_SPACE_SCOPED:
       return setSpaceScopedFlag(state, action);
     case SET_CREATE_SERVICE_INSTANCE:

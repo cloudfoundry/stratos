@@ -278,11 +278,12 @@ export class MatSuffixDirective {
 
 @Component({
   selector: 'app-label',
-  template: '<label class="mat-form-field-label"><ng-content></ng-content></label>',
+  template: '<label class="mat-form-field-label" [attr.for]="labelFor"><ng-content></ng-content></label>',
   styleUrls: ['./custom-form-field.component.scss'],
   standalone: true
 })
 export class MatLabelComponent {
+  @Input() labelFor = '';
 }
 
 @Component({

@@ -28,7 +28,7 @@ export class UpdateAppEffects {
             // This is done so the app metadata env vars environment_json matches that of the app
             actions.push(cfEntityCatalog.appEnvVar.actions.getMultiple(action.apiAction.guid, action.apiAction.endpointGuid));
             break;
-          case AppMetadataTypes.STATS:
+          case AppMetadataTypes.STATS: {
             const statsAction = cfEntityCatalog.appStats.actions.getMultiple(
               action.apiAction.guid,
               action.apiAction.endpointGuid as string
@@ -42,6 +42,7 @@ export class UpdateAppEffects {
               actions.push(statsAction);
             }
             break;
+          }
           case AppMetadataTypes.SUMMARY:
             actions.push(cfEntityCatalog.appSummary.actions.get(action.apiAction.guid, action.apiAction.endpointGuid));
             break;

@@ -40,7 +40,7 @@ export class ApiKeysPageComponent {
 
   /* tslint:disable:ban-types  */
   // This is intentionally typed, property can be null and there's different logic associated with it
-  public hasKeys$: Observable<Boolean>;
+  public hasKeys$: Observable<boolean>;
   /* tslint:enable */
 
   constructor(

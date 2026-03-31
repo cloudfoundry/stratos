@@ -73,7 +73,7 @@ export class FileInputComponent implements OnInit, OnDestroy {
       this.files = Array.from(fs);
       this.onFileSelect.emit(this.files[0]);
 
-      if (!!this.formGroupControl) {
+      if (this.formGroupControl) {
         this.handleFileData(this.files[0], (value: string | ArrayBuffer | null) => this.updateFileState(value));
       } else {
         this.handleFileData(this.files[0], (value: string | ArrayBuffer | null) => this.onFileData.emit(value as string));

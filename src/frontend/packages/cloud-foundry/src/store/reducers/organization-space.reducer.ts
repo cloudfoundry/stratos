@@ -11,14 +11,16 @@ type entityOrgType = APIResource<IOrganization<string>>;
 export function updateOrganizationSpaceReducer() {
   return (state: IRequestEntityTypeState<entityOrgType>, action: APISuccessOrFailedAction<NormalizedResponse>) => {
     switch (action.type) {
-      case DELETE_SPACE_SUCCESS:
+      case DELETE_SPACE_SUCCESS: {
         const deleteSpaceAction: DeleteSpace = action.apiAction as DeleteSpace;
         return removeSpaceFromOrg(state, deleteSpaceAction.orgGuid, deleteSpaceAction.guid);
-      case CREATE_SPACE_SUCCESS:
+      }
+      case CREATE_SPACE_SUCCESS: {
         const createSpaceAction = action.apiAction as CreateSpace;
         const response = action.response;
         const space = response.entities[getCFEntityKey(spaceEntityType)][response.result[0]];
         return addSpaceToOrg(state, createSpaceAction.orgGuid, space);
+      }
     }
     return state;
   };

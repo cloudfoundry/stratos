@@ -81,7 +81,7 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
       if (this.serviceEntity.entity.extra) {
         try {
           this.extraInfo = JSON.parse(this.serviceEntity.entity.extra);
-        } catch { }
+        } catch { /* intentionally empty */ }
       }
 
       if (!this.cfOrgSpace) {

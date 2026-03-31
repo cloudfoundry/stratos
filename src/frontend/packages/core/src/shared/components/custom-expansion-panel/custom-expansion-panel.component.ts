@@ -9,7 +9,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, Output, E
   [class.toggle-before]="togglePosition === 'before'"
   [class.toggle-after]="togglePosition === 'after'">
 
-  <div class="expansion-header" (click)="toggle()" [class.hide-toggle]="hideToggle">
+  <div class="expansion-header" role="button" tabindex="0" (click)="toggle()" (keydown.enter)="toggle()" (keydown.space)="$event.preventDefault(); toggle()" [class.hide-toggle]="hideToggle">
     <ng-content select="app-expansion-panel-header"></ng-content>
     @if (!hideToggle) {
       <button class="toggle-button" [class.before]="togglePosition === 'before'" [class.after]="togglePosition === 'after'">

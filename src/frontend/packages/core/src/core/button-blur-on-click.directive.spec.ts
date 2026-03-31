@@ -7,7 +7,7 @@ import { ButtonBlurOnClickDirective } from './button-blur-on-click.directive';
 
 @Component({
   standalone: false,
-  template: `<button mat-icon-button></button>`
+  template: `<button mat-icon-button aria-label="Test button"></button>`
 })
 class TestButtonComponent {
 }
