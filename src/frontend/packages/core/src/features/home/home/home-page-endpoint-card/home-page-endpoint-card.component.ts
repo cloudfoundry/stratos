@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterViewInit, Compiler, Component, ComponentRef, EventEmitter, Injector, Input, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, signal, inject } from '@angular/core';
+import { ChangeDetectionStrategy, AfterViewInit, Component, ComponentRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, signal, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
@@ -54,8 +54,8 @@ enum Status {
 export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterViewInit {
   private userFavoriteManager = inject(UserFavoriteManager);
   private sidePanelService = inject(SidePanelService);
-  private compiler = inject(Compiler);
-  private injector = inject(Injector);
+
+
 
 
   @ViewChild('customCard', { read: ViewContainerRef, static: true }) customCard!: ViewContainerRef;
@@ -229,7 +229,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
     if (!endpointEntity) {
       component = DefaultEndpointHomeComponent;
     } else {
-      component = await endpointEntity.definition.homeCard.component(this.compiler, this.injector);
+      component = await endpointEntity.definition.homeCard.component();
     }
 
     this.ref = this.customCard.createComponent(component);

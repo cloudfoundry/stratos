@@ -144,14 +144,7 @@ To add a custom home card for a new endpoint type:
 
 ```typescript
 homeCard: {
-  component: (compiler: Compiler, injector: Injector) =>
-    import('./home/my-home-card.module').then(m => {
-      return compiler.compileModuleAndAllComponentsAsync(m.MyHomeCardModule)
-        .then(cm => {
-          const mod = cm.ngModuleFactory.create(injector);
-          return mod.instance.createHomeCard(mod.componentFactoryResolver);
-        });
-    }),
+  component: () => import('./home/my-home-card.component').then(m => m.MyHomeCardComponent),
   fullView: false,
   columnSpan: 2
 }

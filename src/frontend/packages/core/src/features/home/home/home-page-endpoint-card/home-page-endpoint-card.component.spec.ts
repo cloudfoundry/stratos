@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NO_ERRORS_SCHEMA, provideZonelessChangeDetection } from '@angular/core';
+import { Component, NO_ERRORS_SCHEMA, provideZonelessChangeDetection } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientModule } from '@angular/common/http';
@@ -81,5 +81,30 @@ describe('HomePageEndpointCardComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should load default component when no endpoint entity provided', async () => {
+    await component.createCard(undefined);
+    expect(component['ref']).toBeTruthy();
+  });
+
+  it('should load component from homeCard.component() when endpoint entity provided', async () => {
+    @Component({ selector: 'app-mock-card', template: '', standalone: true })
+    class MockCardComponent {
+      endpoint: any;
+      layout: any;
+    }
+
+    const mockEntity = {
+      definition: {
+        homeCard: {
+          component: () => Promise.resolve(MockCardComponent),
+        },
+      },
+    };
+
+    await component.createCard(mockEntity);
+    expect(component['ref']).toBeTruthy();
+    expect(component['ref'].instance).toBeInstanceOf(MockCardComponent);
   });
 });

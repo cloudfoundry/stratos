@@ -1,4 +1,4 @@
-import { ComponentFactoryResolver, NgModule } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { CoreModule } from '@stratosui/core';
@@ -20,9 +20,4 @@ import { KubernetesHomeCardComponent } from './kubernetes-home-card.component';
     KubernetesHomeCardComponent,
   ],
 })
-export class KubernetesHomeCardModule {
-
-  public createHomeCard(componentFactoryResolver: ComponentFactoryResolver) {
-    return componentFactoryResolver.resolveComponentFactory(KubernetesHomeCardComponent);
-  }
-}
+export class KubernetesHomeCardModule {}

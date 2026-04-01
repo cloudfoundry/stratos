@@ -1,4 +1,5 @@
-import { Compiler, Injector } from '@angular/core';
+
+
 import { Action, Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { first, map } from 'rxjs/operators';
@@ -265,12 +266,7 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
     logoUrl: '/core/assets/endpoint-icons/cloudfoundry.png',
     authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.SSO],
     homeCard: {
-      component: (compiler: Compiler, injector: Injector) => import('./features/home/cfhome-card/cfhome-card.module').then(m => {
-        return compiler.compileModuleAndAllComponentsAsync(m.CFHomeCardModule).then(cm => {
-          const mod = cm.ngModuleFactory.create(injector);
-          return mod.instance.createHomeCard(mod.componentFactoryResolver);
-        });
-      }),
+      component: () => import('./features/home/cfhome-card/cfhome-card.component').then(m => m.CFHomeCardComponent),
       shortcuts: cfShortcuts,
       fullView: false,
       columnSpan: 2,

@@ -1,4 +1,5 @@
-import { Compiler, Injector } from '@angular/core';
+
+
 import { Validators } from '@angular/forms';
 import { formatDuration, intervalToDuration } from 'date-fns';
 
@@ -307,12 +308,7 @@ export class KubeEntityCatalog {
           renderPriority: 6
         }],
       homeCard: {
-        component: (compiler: Compiler, injector: Injector) => import('./home/kubernetes-home-card.module').then((m) => {
-          return compiler.compileModuleAndAllComponentsAsync(m.KubernetesHomeCardModule).then(cm => {
-            const mod = cm.ngModuleFactory.create(injector);
-            return mod.instance.createHomeCard(mod.componentFactoryResolver);
-          });
-        }),
+        component: () => import('./home/kubernetes-home-card.component').then(m => m.KubernetesHomeCardComponent),
         fullView: false
       }
     };
