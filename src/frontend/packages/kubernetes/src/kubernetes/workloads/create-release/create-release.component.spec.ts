@@ -147,6 +147,8 @@ describe('CreateReleaseComponent', () => {
   });
 
   afterEach(() => {
+    // Absorb any pending company-config request from StratosBrandingService before verify
+    httpMock.match('/assets/company-config.json');
     httpMock.verify();
   });
 });

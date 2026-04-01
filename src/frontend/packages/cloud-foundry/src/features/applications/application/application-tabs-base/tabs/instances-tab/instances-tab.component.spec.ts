@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { of } from 'rxjs';
@@ -49,6 +51,8 @@ describe('InstancesTabComponent', () => {
         InstancesTabComponent,
       ],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideZonelessChangeDetection(),
         { provide: Store, useValue: mockStore },
         { provide: PaginationMonitorFactory, useValue: mockPmf },
@@ -77,6 +81,9 @@ describe('InstancesTabComponent', () => {
 
   // Explicitly destroy fixture to avoid cleanup errors
   afterEach(() => {
+    // Absorb any pending company-config request from StratosBrandingService
+    const httpMock = TestBed.inject(HttpTestingController);
+    httpMock.match(() => true);
     if (fixture) {
       try {
         fixture.destroy();

@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
@@ -72,6 +74,8 @@ describe('CatalogTabComponent', () => {
         CatalogTabComponent,
       ],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         ...STORE_TEST_PROVIDERS,
         { provide: ChartsService, useValue: new MockChartService() },
         { provide: ActivatedRoute, useValue: {
@@ -107,6 +111,9 @@ describe('CatalogTabComponent', () => {
       mockChartMonitor.hasEntities$.complete();
       mockChartMonitor.totalEntities$.complete();
     }
+    // Absorb any pending company-config request from StratosBrandingService
+    const httpMock = TestBed.inject(HttpTestingController);
+    httpMock.match(() => true);
     if (fixture) {
       fixture.destroy();
     }

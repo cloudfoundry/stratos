@@ -1,7 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 import { EntityServiceFactory } from '@stratosui/store';
 import { BaseTestModules } from '../../../../../core/test-framework/core-test.helper';
@@ -23,6 +25,8 @@ describe('KubernetesNodePodsComponent', () => {
         KubernetesTestingModule,
       ],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         EntityServiceFactory,
         BaseKubeGuid,
         KubernetesEndpointService,
@@ -47,6 +51,12 @@ describe('KubernetesNodePodsComponent', () => {
     fixture = TestBed.createComponent(KubernetesNodePodsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    // Absorb any pending company-config request from StratosBrandingService
+    const httpMock = TestBed.inject(HttpTestingController);
+    httpMock.match(() => true);
   });
 
   it('should create', () => {
