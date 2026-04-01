@@ -6,17 +6,16 @@ correctly in templates and styles.
 
 ## System Overview
 
-The theme system has five layers that work together:
+The theme system has five layers that work together. For the
+service-level architecture and four-layer preference cascade, see
+[branding-architecture.md](branding-architecture.md).
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│  CompanyConfigService (Angular)                     │
-│  Loads company-config.json at startup               │
-│  Applies branding, colors, login to theme service   │
-├─────────────────────────────────────────────────────┤
-│  StratosThemeService (Angular)                      │
-│  Sets inline CSS variables on <html>                │
-│  Manages dark/light mode + branding persistence     │
+│  StratosBrandingService (Angular)                   │
+│  Unified service: loads company-config.json,        │
+│  applies branding/colors/login, manages dark/light  │
+│  mode, persists preferences to localStorage         │
 ├─────────────────────────────────────────────────────┤
 │  main.scss (:root / .dark-theme)                    │
 │  Defines all CSS custom properties                  │
@@ -37,8 +36,7 @@ The theme system has five layers that work together:
 | File | Purpose |
 |------|---------|
 | `src/frontend/packages/theme/company-config.interface.ts` | CompanyConfig interface — company info, logos, colors, login, footer |
-| `src/frontend/packages/theme/company-config.service.ts` | Loads `company-config.json`, applies branding to theme service |
-| `src/frontend/packages/theme/theme.service.ts` | Angular service — mode switching, CSS variable application, branding persistence |
+| `src/frontend/packages/theme/stratos-branding.service.ts` | Unified service — config loading, mode switching, CSS variables, branding |
 | `src/frontend/packages/theme/theme.config.ts` | Light/dark theme definitions (StratosTheme interface) |
 | `src/frontend/packages/theme/styles/main.scss` | CSS custom properties (:root defaults, .dark-theme overrides), component base styles |
 | `src/frontend/packages/theme/theme-transitions.scss` | FOUC prevention, smooth transitions, reduced-motion support |
@@ -247,43 +245,49 @@ When Tailwind classes aren't sufficient:
 ## Initialization Sequence
 
 ```
-1. StratosThemeService constructor
+1. StratosBrandingService constructor
    │
-2. initializeTheme()
+2. initializeBranding() — Layers 1+2 only
    ├── Add 'theme-initializing' class (disables transitions)
+   ├── checkAppVersion() — clear stale prefs on upgrade
    ├── Set up prefers-color-scheme media query listener
-   ├── Load custom branding from localStorage ('stratos-branding')
-   ├── Load saved mode from localStorage ('stratos-theme-mode')
-   │   └── Default: 'light' (if no saved preference)
+   ├── applyTheme(defaultTheme) — Layer 1 CSS vars
+   ├── Async load company-config.json (updates Layer 1)
+   └── setTimeout 100ms → remove 'theme-initializing' class
    │
-3. applyThemeMode(mode)
-   ├── Resolve mode → boolean isDark
-   │   └── 'system' checks window.matchMedia('(prefers-color-scheme: dark)')
-   ├── Toggle CSS classes on DOM:
-   │   ├── <body>: add/remove 'dark-theme'
-   │   └── <html>: add/remove 'dark'
-   ├── Select base theme: darkTheme or defaultTheme
-   ├── Merge custom branding overrides
-   └── applyTheme() → set 40+ CSS variables on <html>
+3. Login page renders (Layers 1+2 — no dark/light mode)
    │
-4. updateBranding() → set page title and favicon
+4. User authenticates → auth.effects.ts
    │
-5. setTimeout 100ms → remove 'theme-initializing' class
-   └── Transitions now enabled for smooth theme switching
+5. activateUserPreferences() — Layer 3
+   ├── Load branding overrides from localStorage
+   ├── Load theme mode from localStorage or config defaults
+   └── applyThemeMode(mode)
+       ├── Resolve mode → boolean isDark
+       │   └── 'system' checks prefers-color-scheme
+       ├── Toggle CSS classes: dark-theme on <body>, dark on <html>
+       ├── Select base theme: darkTheme or defaultTheme
+       ├── Merge custom branding overrides
+       └── applyTheme() → set 40+ CSS variables on <html>
+   │
+6. Dashboard renders (all four layers active)
 ```
 
 ## Persistence
 
-Two independent localStorage keys:
-
 | Key | Content | Purpose |
 |-----|---------|---------|
-| `stratos-theme-mode` | `'light'` / `'dark'` / `'system'` | User's mode preference |
-| `stratos-branding` | JSON `{ branding: {...}, login: {...} }` | Custom company branding |
+| `stratos-theme-mode` | `'light'` / `'dark'` / `'system'` | User's mode preference (Layer 3) |
+| `stratos-branding` | JSON `{ branding: {...}, login: {...} }` | Custom branding overrides (Layer 3) |
+| `stratos-company-config` | Full `CompanyConfig` JSON | Loaded config (Layer 1) |
+| `stratos-app-version` | Build version string | Version gate |
 
-These are independent so that:
+Theme mode and branding are independent so that:
 - Switching dark/light preserves custom branding
 - Custom branding doesn't store color values that conflict with mode
+
+Non-user keys are cleared on app version change to prevent stale
+config from persisting across upgrades.
 
 ## Build Integration
 
@@ -308,18 +312,18 @@ transitions, then component styles.
 3. Add to `defaultTheme` in `theme.config.ts` (must match `:root`)
 4. Add to `darkTheme` in `theme.config.ts` (must match `.dark-theme`)
 5. If needed as inline style, add `root.style.setProperty()` call in
-   `applyTheme()` in `theme.service.ts`
+   `applyTheme()` in `stratos-branding.service.ts`
 6. Optionally add a semantic Tailwind token in `tailwind.config.js`
    under `theme.extend.colors`
 
 ## Company Branding
 
-The `CompanyConfigService` is the primary entry point for deployers who
+`StratosBrandingService` is the primary entry point for deployers who
 want to customize the look and feel of Stratos for their organization.
 
 ### Configuration File
 
-At startup, `CompanyConfigService` attempts to load branding from:
+At startup, `StratosBrandingService` attempts to load branding from:
 
 1. `/assets/company-config.json` (primary)
 2. `/assets/config/company.json` (environment-specific fallback)
@@ -374,6 +378,19 @@ interface CompanyConfig {
   footer: {
     copyright?: string;      // Copyright text
     additionalInfo?: string; // Extra footer text
+  };
+  defaults?: {
+    themeMode?: 'light' | 'dark' | 'system';
+    sidebarOpen?: boolean;
+    sidebarPinned?: boolean;
+    pollingEnabled?: boolean;
+    sessionTimeout?: boolean;
+    gravatarEnabled?: boolean;
+    pageSize?: number;
+    pageSizeCards?: number[];
+    pageSizeTable?: number[];
+    viewMode?: 'table' | 'cards';
+    sortDirection?: 'asc' | 'desc';
   };
 }
 ```
@@ -435,15 +452,15 @@ interface CompanyConfig {
 company-config.json
   │
   ▼
-CompanyConfigService.loadCompanyConfig()
-  ├── config.theme     → themeService.setColors()
-  ├── config.logos      → themeService.setCompanyBranding()
-  ├── config.login      → themeService.setLoginCustomization()
-  ├── config.navigation → themeService.setTheme()
-  └── config.layout     → themeService.setTheme()
+StratosBrandingService.loadCompanyConfig()
+  ├── config.theme      → setColors()
+  ├── config.logos       → setCompanyBranding()
+  ├── config.login       → setLoginCustomization()
+  ├── config.navigation  → setTheme()
+  └── config.layout      → setTheme()
        │
        ▼
-  StratosThemeService.applyTheme()
+  applyTheme()
        │
        ▼
   CSS variables on <html> element
@@ -454,6 +471,9 @@ CompanyConfigService.loadCompanyConfig()
 
 Branding is persisted to `localStorage` under the
 `stratos-company-config` key so it survives page refreshes.
+
+For the full service API and four-layer cascade details, see
+[branding-architecture.md](branding-architecture.md).
 
 ## Login Page Theming
 
