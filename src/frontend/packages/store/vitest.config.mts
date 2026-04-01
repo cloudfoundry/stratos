@@ -44,6 +44,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      '@stratosui/theme': join(__dirname, '../theme/index.ts'),
       '@stratosui/core': join(__dirname, '../core/src/public-api.ts'),
       '@stratosui/store/testing': join(__dirname, 'testing'),
       '@stratosui/store': join(__dirname, 'src/public-api.ts'),
