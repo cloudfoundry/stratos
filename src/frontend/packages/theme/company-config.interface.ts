@@ -58,4 +58,22 @@ export interface CompanyConfig {
     copyright?: string;     // Copyright text
     additionalInfo?: string; // Additional footer information
   };
+
+  // Deployment defaults — overridden by user/page preferences once set
+  defaults?: {
+    // User preference defaults (Layer 3)
+    themeMode?: 'light' | 'dark' | 'system';
+    sidebarOpen?: boolean;
+    sidebarPinned?: boolean;
+    pollingEnabled?: boolean;
+    sessionTimeout?: boolean;
+    gravatarEnabled?: boolean;
+
+    // Page preference defaults (Layer 4)
+    pageSize?: number;
+    pageSizeCards?: number[];
+    pageSizeTable?: number[];
+    viewMode?: 'table' | 'cards';
+    sortDirection?: 'asc' | 'desc';
+  };
 }
