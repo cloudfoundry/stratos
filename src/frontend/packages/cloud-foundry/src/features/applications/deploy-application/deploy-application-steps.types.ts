@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
@@ -26,6 +26,9 @@ export const AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM = 'auto-select-deploy-endpoi
 
 @Injectable()
 export class ApplicationDeploySourceTypes {
+  private perms = inject(CurrentUserPermissionsService);
+  private scmService = inject(GitSCMService);
+
 
   private baseTypes: SourceType[] = [
     {
@@ -83,10 +86,7 @@ export class ApplicationDeploySourceTypes {
   public types$: Observable<SourceType[]>;
 
 
-  constructor(
-    private perms: CurrentUserPermissionsService,
-    private scmService: GitSCMService
-  ) {
+  constructor() {
     const scms: { [deployId: string]: GitSCM; } = {
       [DEPLOY_TYPES_IDS.GITHUB]: this.scmService.getSCM('github', null),
       [DEPLOY_TYPES_IDS.GITLAB]: this.scmService.getSCM('gitlab', null)

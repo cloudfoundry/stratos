@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
 import { CustomSlideToggleComponent } from '../custom-slide-toggle/custom-slide-toggle.component';
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 import { Store } from '@ngrx/store';
@@ -9,13 +9,14 @@ import { filter, first, map } from 'rxjs/operators';
 import {
   AppState,
   LocalStorageService,
+  LocalStorageSyncTypes,
   selectDashboardState,
   selectSessionData,
   SetGravatarEnabledAction,
   SetPollingEnabledAction,
   SetSessionTimeoutAction,
-  ThemeService,
 } from '@stratosui/store';
+import { StratosBrandingService, ThemeMode } from '@stratosui/theme';
 import { BytesToHumanSize } from '../../../core/byte-formatters.pipe';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
@@ -50,6 +51,11 @@ export enum ProfileSettingsTypes {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProfileSettingsComponent {
+  private store = inject<Store<AppState>>(Store);
+  stratosBranding = inject(StratosBrandingService);
+  private confirmationService = inject(ConfirmationDialogService);
+  private currentUserPermissionsService = inject(CurrentUserPermissionsService);
+
 
   @Input() show: { [settingName: string]: boolean; } = {
     [ProfileSettingsTypes.GRAVATAR]: true,
@@ -59,7 +65,7 @@ export class ProfileSettingsComponent {
     [ProfileSettingsTypes.STORAGE]: true,
   };
 
-  hasMultipleThemes: boolean;
+  hasMultipleThemes = true;
 
   private dashboardState$ = this.store.select(selectDashboardState);
   private sessionData$ = this.store.select(selectSessionData()).pipe(
@@ -106,8 +112,8 @@ export class ProfileSettingsComponent {
     this.setGravatarEnabled(newVal);
   }
 
-  public updateTheme(themeKey: string) {
-    this.themeService.setTheme(themeKey);
+  public updateTheme(mode: string) {
+    this.stratosBranding.setThemeMode(mode as ThemeMode);
   }
 
   private setSessionTimeout(timeoutSession: boolean) {
@@ -122,14 +128,8 @@ export class ProfileSettingsComponent {
     this.store.dispatch(new SetGravatarEnabledAction(gravatarEnabled));
   }
 
-  constructor(
-    userProfileService: UserProfileService,
-    private store: Store<AppState>,
-    public themeService: ThemeService,
-    private confirmationService: ConfirmationDialogService,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-  ) {
-    this.hasMultipleThemes = themeService.getThemes().length > 1;
+  constructor() {
+    const userProfileService = inject(UserProfileService);
 
     const canEdit = userProfileService.isError$.pipe(map(e => !e));
     const hasEditPermissions = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_PROFILE);
@@ -142,6 +142,50 @@ export class ProfileSettingsComponent {
         LocalStorageService.clearLocalStorage(sessionData, this.confirmationService);
       }
     });
+  }
+
+  resetTheme() {
+    this.confirmAndReset('Reset theme to default?', () => {
+      LocalStorageService.clearThemePreferences();
+    });
+  }
+
+  resetListPreferences() {
+    this.sessionData$.pipe(first()).subscribe(sessionData => {
+      if (sessionData?.user) {
+        this.confirmAndReset('Reset list and pagination preferences?', () => {
+          LocalStorageService.clearSections(sessionData, [
+            LocalStorageSyncTypes.PAGINATION,
+            LocalStorageSyncTypes.LISTS,
+          ]);
+        });
+      }
+    });
+  }
+
+  resetDashboard() {
+    this.sessionData$.pipe(first()).subscribe(sessionData => {
+      if (sessionData?.user) {
+        this.confirmAndReset('Reset dashboard preferences (sidebar, home layout)?', () => {
+          LocalStorageService.clearSections(sessionData, [
+            LocalStorageSyncTypes.DASHBOARD,
+          ]);
+        });
+      }
+    });
+  }
+
+  private confirmAndReset(message: string, action: () => void) {
+    this.confirmationService.openWithCancel(
+      { message, confirm: 'Reset', critical: false, title: 'Reset Preferences' },
+      (confirmed: boolean) => {
+        if (confirmed) {
+          action();
+          window.location.assign('/user-profile');
+        }
+      },
+      () => {}
+    );
   }
 
 }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ContentChild, ContentChildren, Input, OnDestroy, QueryList, HostListener  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ContentChild, ContentChildren, Input, OnDestroy, QueryList, HostListener, inject } from '@angular/core';
 import { combineLatest, Observable, of as observableOf, of, Subscription } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
@@ -48,6 +48,9 @@ export function createMetaCardMenuItemSeparator(): MenuItem {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetaCardComponent implements OnDestroy {
+  private entityMonitorFactory = inject(EntityMonitorFactory);
+  private userFavoriteManager = inject(UserFavoriteManager);
+
 
   public menuOpen = false;
 
@@ -136,11 +139,6 @@ export class MetaCardComponent implements OnDestroy {
   public showMenu$!: Observable<boolean>;
   public isDeleting$: Observable<boolean> = observableOf(false);
   private pActionMenu!: MenuItem[];
-
-  constructor(
-    private entityMonitorFactory: EntityMonitorFactory,
-    private userFavoriteManager: UserFavoriteManager,
-  ) { }
 
   ngOnDestroy() {
     safeUnsubscribe(this.entityMonitorSub);

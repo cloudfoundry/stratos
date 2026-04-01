@@ -4,7 +4,7 @@
       <!-- Text Input -->
       @if (!isTextarea(field.property) && !isSelect(field.property) && getFieldType(field.property) !== 'checkbox') {
         <div class="form-group">
-          <label [for]="field.key" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label [for]="field.key" class="block text-sm font-medium text-content-text mb-1">
             {{ field.property.title || field.key }}
             @if (field.required) {
               <span class="text-red-500">*</span>
@@ -30,7 +30,7 @@
       <!-- Textarea -->
       @if (isTextarea(field.property)) {
         <div class="form-group">
-          <label [for]="field.key" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label [for]="field.key" class="block text-sm font-medium text-content-text mb-1">
             {{ field.property.title || field.key }}
             @if (field.required) {
               <span class="text-red-500">*</span>
@@ -56,7 +56,7 @@
       <!-- Select -->
       @if (isSelect(field.property)) {
         <div class="form-group">
-          <label [for]="field.key" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label [for]="field.key" class="block text-sm font-medium text-content-text mb-1">
             {{ field.property.title || field.key }}
             @if (field.required) {
               <span class="text-red-500">*</span>
@@ -92,7 +92,7 @@
               [formControlName]="field.key"
               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700"
               />
-            <label [for]="field.key" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+            <label [for]="field.key" class="ml-2 block text-sm text-content-text">
               {{ field.property.title || field.key }}
               @if (field.required) {
                 <span class="text-red-500">*</span>

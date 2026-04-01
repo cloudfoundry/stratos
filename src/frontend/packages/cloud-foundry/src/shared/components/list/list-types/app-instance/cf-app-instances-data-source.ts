@@ -38,7 +38,7 @@ export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, Ap
           }
 
           // Extract from array if needed
-          let data = Array.isArray(instancesData) ? instancesData[0] : instancesData;
+          const data = Array.isArray(instancesData) ? instancesData[0] : instancesData;
 
           if (!data || typeof data !== 'object') {
             return [];

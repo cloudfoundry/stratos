@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -45,6 +45,10 @@ interface CreateOrganizationForm {
   ]
 })
 export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
+  private store = inject<Store<CFAppState>>(Store);
+  private paginationMonitorFactory = inject(PaginationMonitorFactory);
+  private fb = inject(FormBuilder);
+
 
   orgSubscription!: Subscription;
   submitSubscription!: Subscription;
@@ -59,12 +63,9 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
 
   get quotaDefinition(): FormControl<string | null> { return this.addOrg ? this.addOrg.get('quotaDefinition') as FormControl<string | null> : new FormControl(null); }
 
-  constructor(
-    private store: Store<CFAppState>,
-    activatedRoute: ActivatedRoute,
-    private paginationMonitorFactory: PaginationMonitorFactory,
-    private fb: FormBuilder,
-  ) {
+  constructor() {
+    const activatedRoute = inject(ActivatedRoute);
+
     this.cfGuid = activatedRoute.snapshot.params.endpointId;
   }
 

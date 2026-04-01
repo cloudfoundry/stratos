@@ -3,7 +3,7 @@ app-tile {
   flex-direction: column;
   min-width: 0; // Prevent grid blowout
 
-  .mat-card {
+  mat-card {
     height: 100%;
     display: flex;
     flex-direction: column;

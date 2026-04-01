@@ -149,7 +149,7 @@ export class SimpleUsageChartComponent {
     const percentage = (used / total) * 100;
     // I'm sure this can be tidies up - NJ
     if (this.thresholds) {
-      if (this.thresholds.hasOwnProperty('danger')) {
+      if (Object.prototype.hasOwnProperty.call(this.thresholds, 'danger')) {
         if (this.thresholds.inverted) {
           if (percentage < this.thresholds.danger) {
             return this.getColorScheme('danger');
@@ -159,7 +159,7 @@ export class SimpleUsageChartComponent {
         }
       }
 
-      if (this.thresholds.hasOwnProperty('warning')) {
+      if (Object.prototype.hasOwnProperty.call(this.thresholds, 'warning')) {
         if (this.thresholds.inverted) {
           if (percentage < this.thresholds.warning) {
             return this.getColorScheme('warning');

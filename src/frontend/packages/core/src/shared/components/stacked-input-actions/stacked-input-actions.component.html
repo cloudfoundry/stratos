@@ -1,4 +1,4 @@
-<div class="stacked-input__inputs" (keydown)="onKeydown($event)">
+<div class="stacked-input__inputs" tabindex="-1" (keydown)="onKeydown($event)">
   <div #inputs></div>
 </div>
 <button class="stacked-input__add btn btn-ghost" type="button" (click)="addComponent()" [disabled]="disabled">

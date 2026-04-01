@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { differenceInMilliseconds, isBefore } from 'date-fns';
 
@@ -27,6 +27,10 @@ import {
 export class CfAppAutoscalerEventsConfigService
   extends ListConfig<APIResource<AppAutoscalerEvent>>
   implements IListConfig<APIResource<AppAutoscalerEvent>> {
+  private store = inject<Store<CFAppState>>(Store);
+  private appService = inject(ApplicationService);
+  private datePipe = inject(DatePipe);
+
   autoscalerEventSource: CfAppAutoscalerEventsDataSource;
   columns: Array<ITableColumn<APIResource<AppAutoscalerEvent>>> = [
     {
@@ -126,11 +130,9 @@ export class CfAppAutoscalerEventsConfigService
     return null;
   }
 
-  constructor(
-    private store: Store<CFAppState>,
-    private appService: ApplicationService,
-    private datePipe: DatePipe,
-    metricsRangeService: MetricsRangeSelectorService) {
+  constructor() {
+    const metricsRangeService = inject(MetricsRangeSelectorService);
+
     super();
     this.autoscalerEventSource = new CfAppAutoscalerEventsDataSource(
       this.store,

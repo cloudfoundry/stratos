@@ -21,14 +21,8 @@
   }
 
   &__header {
-    @apply flex flex-1 h-10 justify-between;
-
     .card-title {
       @apply mb-0;
-    }
-
-    app-polling-indicator {
-      @apply -mr-2.5 -mt-2.5;
     }
   }
 

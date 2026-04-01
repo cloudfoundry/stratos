@@ -35,16 +35,7 @@ describe('CfAppMapRoutesListConfigService', () => {
         },
         {
           provide: CfAppMapRoutesListConfigService,
-          useFactory: (
-            store: Store<CFAppState>,
-            appService: ApplicationService,
-            confirmDialog: ConfirmationDialogService,
-            datePipe: DatePipe,
-            activatedRoute: ActivatedRoute,
-            cups: CurrentUserPermissionsService) => {
-            return new CfAppMapRoutesListConfigService(store, appService, confirmDialog, datePipe, activatedRoute, cups);
-          },
-          deps: [Store, ApplicationService, ConfirmationDialogService, DatePipe, ActivatedRoute, CurrentUserPermissionsService]
+          useFactory: () => new CfAppMapRoutesListConfigService(),
         },
         DatePipe,
         ConfirmationDialogService,

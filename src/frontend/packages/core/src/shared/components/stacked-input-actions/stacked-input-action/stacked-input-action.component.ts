@@ -162,7 +162,7 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
         this.state = incState;
         this.textFormControl.enable();
         break;
-      case StackedInputActionResult.OTHER_VALUES_UPDATED:
+      case StackedInputActionResult.OTHER_VALUES_UPDATED: {
         const oldValues = this.otherValues || [];
         this.otherValues = incState.otherValues;
         if (!this.compare(oldValues, this.otherValues)) {
@@ -170,6 +170,7 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
           this.textFormControl.setValue(this.textFormControl.value);
         }
         break;
+      }
     }
   }
 

@@ -24,7 +24,11 @@
 
 @if (link) {
   <ng-container #text>
-    <a (click)="goToLink()" class="boolean-metric-card-anchor cursor-pointer hover:bg-content-secondary transition-colors rounded-lg">
+    <a role="button" tabindex="0"
+      (click)="goToLink()"
+      (keydown.enter)="goToLink()"
+      (keydown.space)="goToLink(); $event.preventDefault()"
+      class="boolean-metric-card-anchor cursor-pointer hover:bg-content-secondary transition-colors rounded-lg">
       <ng-container *ngTemplateOutlet="content"></ng-container>
     </a>
   </ng-container>

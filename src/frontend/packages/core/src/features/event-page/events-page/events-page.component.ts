@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, signal  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { CustomTooltipDirective } from '@stratosui/core';
@@ -37,6 +37,10 @@ export enum EventFilterValues {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EventsPageComponent implements OnInit {
+  private eventService = inject(GlobalEventService);
+  private store = inject<Store<AppState>>(Store);
+  private activatedRoute = inject(ActivatedRoute);
+
   public unreadEvents$: Observable<IGlobalEvent[]>;
   public readEvents$: Observable<IGlobalEvent[]>;
   public events$: Observable<IGlobalEvent[]>;
@@ -48,11 +52,7 @@ export class EventsPageComponent implements OnInit {
   private _selectedFilter = signal<EventFilterValues>(this.selectedFilter);
   public selectedFilterSignal = this._selectedFilter.asReadonly();
   public selectedFilterSubject$: Observable<EventFilterValues>;
-  constructor(
-    private eventService: GlobalEventService,
-    private store: Store<AppState>,
-    private activatedRoute: ActivatedRoute
-  ) {
+  constructor() {
     const pathSegment = this.activatedRoute.snapshot.url[0];
     const path = pathSegment ? pathSegment.path : null;
     this.endpointOnly = path === 'endpoints';

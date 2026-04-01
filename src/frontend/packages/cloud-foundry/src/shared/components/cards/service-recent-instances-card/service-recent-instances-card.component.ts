@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
@@ -34,11 +34,10 @@ const RECENT_ITEMS_COUNT = 10;
   ]
 })
 export class ServiceRecentInstancesCardComponent implements OnInit {
+  private servicesService = inject(ServicesService);
+
 
   serviceInstances$!: Observable<APIResource<IServiceInstance>[]>;
-  constructor(
-    private servicesService: ServicesService
-  ) { }
 
   ngOnInit() {
     this.serviceInstances$ = this.servicesService.serviceInstances$.pipe(

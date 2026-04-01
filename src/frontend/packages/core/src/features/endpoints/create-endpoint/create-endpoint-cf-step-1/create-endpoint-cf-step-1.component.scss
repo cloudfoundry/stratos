@@ -5,14 +5,14 @@ $checkbox-margin: 20px;
   width: 100%;
 }
 
-mat-checkbox {
+app-checkbox {
   padding-top: $checkbox-margin;
 }
 
 form.stepper-form {
   max-width: unset;
 
-  mat-form-field {
+  .custom-form-field {
     max-width: 450px;
   }
 
@@ -38,14 +38,14 @@ form.stepper-form {
   display: flex;
   flex-direction: column;
 
-  mat-checkbox {
+  app-checkbox {
     padding-top: $checkbox-margin;
     max-width: unset;
   }
 }
 
 .create-endpoint__options-column {
-  mat-checkbox {
+  app-checkbox {
     // Reduce top padding for option checkboxes after the title
     &:not(:first-of-type) {
       padding-top: 15px;

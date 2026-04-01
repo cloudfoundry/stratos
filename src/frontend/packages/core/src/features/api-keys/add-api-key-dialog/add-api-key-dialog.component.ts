@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, Inject, signal  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { TailwindDialogRef } from '../../../shared/services/tailwind-dialog.service';
@@ -30,6 +30,9 @@ interface AddApiKeyForm {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AddApiKeyDialogComponent implements OnDestroy {
+  private fb = inject(FormBuilder);
+  dialogRef = inject<TailwindDialogRef<ApiKey>>('TailwindDialogRef' as any);
+
 
   public hasErrored = signal<string | null>(null);
   public isBusy = signal<boolean>(false);
@@ -38,10 +41,7 @@ export class AddApiKeyDialogComponent implements OnDestroy {
 
   public formGroup: FormGroup<AddApiKeyForm>;
 
-  constructor(
-    private fb: FormBuilder,
-    @Inject('TailwindDialogRef') public dialogRef: TailwindDialogRef<ApiKey>,
-  ) {
+  constructor() {
     this.formGroup = this.fb.group<AddApiKeyForm>({
       comment: new FormControl('', { nonNullable: true, validators: [Validators.required] })
     });

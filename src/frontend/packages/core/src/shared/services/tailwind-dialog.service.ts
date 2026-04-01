@@ -1,4 +1,4 @@
-import { Injectable, ComponentRef, ApplicationRef, Injector, EmbeddedViewRef, createComponent, EnvironmentInjector, Type, InjectionToken } from '@angular/core';
+import { Injectable, ComponentRef, ApplicationRef, Injector, EmbeddedViewRef, createComponent, EnvironmentInjector, Type, InjectionToken, inject } from '@angular/core';
 import { Subject, Observable } from 'rxjs';
 
 // Define the MAT_DIALOG_DATA token for providing dialog data
@@ -95,14 +95,12 @@ export class TailwindDialogRefImpl<T = any, R = any> extends TailwindDialogRef<T
   providedIn: 'root'
 })
 export class TailwindDialogService {
+  private appRef = inject(ApplicationRef);
+  private injector = inject(Injector);
+  private environmentInjector = inject(EnvironmentInjector);
+
   private openDialogs: HTMLElement[] = [];
   private static baseZIndex = 1000;
-
-  constructor(
-    private appRef: ApplicationRef,
-    private injector: Injector,
-    private environmentInjector: EnvironmentInjector
-  ) {}
 
   open<T, D = any, R = any>(
     component: Type<T>,

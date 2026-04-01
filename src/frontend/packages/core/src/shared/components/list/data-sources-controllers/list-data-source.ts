@@ -55,7 +55,7 @@ import {
 import { getDataFunctionList } from './local-filtering-sorting';
 import { LocalListController } from './local-list-controller';
 
-export type DataFunctionDefinitionType = 'sort' | 'filter';
+export type DataFunctionDefinitionType = 'sort' | 'natural-sort' | 'filter';
 
 export class DataFunctionDefinition {
   type!: DataFunctionDefinitionType;

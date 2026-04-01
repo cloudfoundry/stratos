@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -49,6 +49,10 @@ import { RunningInstancesComponent } from '../../../../running-instances/running
   ]
 })
 export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnInit {
+  private store = inject<Store<CFAppState>>(Store);
+  private appStateService = inject(ApplicationStateService);
+  private userFavoriteManager = inject(UserFavoriteManager);
+
 
   applicationState$!: Observable<ApplicationStateData>;
 
@@ -57,14 +61,6 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
   cfOrgSpace!: CfOrgSpaceLabelService;
 
   public favorite: UserFavorite<IFavoriteMetadata>;
-
-  constructor(
-    private store: Store<CFAppState>,
-    private appStateService: ApplicationStateService,
-    private userFavoriteManager: UserFavoriteManager
-  ) {
-    super();
-  }
 
   ngOnInit() {
     this.entityConfig = new ComponentEntityMonitorConfig(this.row.metadata.guid, cfEntityFactory(applicationEntityType));

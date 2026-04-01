@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, NgZone, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { GitSCMService, GitSCMType } from '@stratosui/git';
@@ -60,6 +60,14 @@ import { ApplicationPollingService } from './application-polling.service';
   ]
 })
 export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
+  applicationService = inject(ApplicationService);
+  private store = inject<Store<CFAppState>>(Store);
+  private endpointsService = inject(EndpointsService);
+  private ngZone = inject(NgZone);
+  private currentUserPermissionsService = inject(CurrentUserPermissionsService);
+  private userFavoriteManager = inject(UserFavoriteManager);
+  private appPollingService = inject(ApplicationPollingService);
+
   public appState$!: Observable<ApplicationStateData>;
   public schema: EntitySchema;
   public favorite$: Observable<any>;
@@ -68,16 +76,11 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.Application);
 
-  constructor(
-    public applicationService: ApplicationService,
-    private store: Store<CFAppState>,
-    private endpointsService: EndpointsService,
-    private ngZone: NgZone,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-    scmService: GitSCMService,
-    private userFavoriteManager: UserFavoriteManager,
-    private appPollingService: ApplicationPollingService
-  ) {
+  constructor() {
+    const applicationService = this.applicationService;
+    const store = this.store;
+    const scmService = inject(GitSCMService);
+
     // Initialize favorite$ after applicationService is available
     this.favorite$ = this.applicationService.app$.pipe(
       filter(app => !!app),

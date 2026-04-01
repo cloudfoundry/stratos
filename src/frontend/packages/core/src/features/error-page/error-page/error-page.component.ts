@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ActivatedRoute, RouterModule } from '@angular/router';
@@ -37,6 +37,11 @@ import { MetadataItemComponent } from '../../../shared/components/metadata-item/
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ErrorPageComponent implements OnInit {
+  private activatedRoute = inject(ActivatedRoute);
+  private store = inject<Store<AppState>>(Store);
+  private internalEventMonitorFactory = inject(InternalEventMonitorFactory);
+  private sanitizer = inject(DomSanitizer);
+
   public back$: Observable<string>;
   public backParams$: Observable<object>;
   public errorDetails$: Observable<{ endpoint: EndpointModel; errors: InternalEventState[], }>;
@@ -70,12 +75,9 @@ export class ErrorPageComponent implements OnInit {
     }
   }
 
-  constructor(
-    private activatedRoute: ActivatedRoute,
-    private store: Store<AppState>,
-    private internalEventMonitorFactory: InternalEventMonitorFactory,
-    private sanitizer: DomSanitizer
-  ) {
+  constructor() {
+    const store = this.store;
+
     this.back$ = store.select(getPreviousRoutingState).pipe(first()).pipe(
       map((previousState: any) => previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : '/home')
     );

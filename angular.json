@@ -109,6 +109,11 @@
                 "glob": "**/*",
                 "input": "node_modules/@cfstratos/monaco-yaml/lib",
                 "output": "/core/assets/monaco/vs/language/yaml"
+              },
+              {
+                "glob": "company-config.json",
+                "input": "src/frontend/packages/theme",
+                "output": "/assets"
               }
             ],
             "styles": [
@@ -285,14 +290,11 @@
           }
         },
         "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
+          "builder": "@angular-eslint/builder:lint",
           "options": {
-            "tsConfig": [
-              "src/tsconfig.json"
-            ],
-            "tslintConfig": "src/frontend/packages/extension/tslint.json",
-            "files": [
-              "src/frontend/packages/extension/src/**/*.ts"
+            "lintFilePatterns": [
+              "src/frontend/packages/extension/src/**/*.ts",
+              "src/frontend/packages/extension/src/**/*.html"
             ]
           }
         }

@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy, signal, WritableSignal, computed, Injector, inject, runInInjectionContext } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { safeUnsubscribe } from '@stratosui/core';
+import { naturalCompare, safeUnsubscribe } from '@stratosui/core';
 import {
   AppState,
   connectedEndpointsOfTypesSelector,
@@ -67,6 +67,8 @@ export interface KubernetesNamespacesFilterItem<T = any> {
   providedIn: 'root'
 })
 export class KubernetesNamespacesFilterService implements OnDestroy {
+  private store = inject<Store<AppState>>(Store);
+
   public kube: KubernetesNamespacesFilterItem<EndpointModel>;
   public namespace: KubernetesNamespacesFilterItem<KubernetesNamespace>;
 
@@ -78,9 +80,7 @@ export class KubernetesNamespacesFilterService implements OnDestroy {
     pag => getCurrentPageRequestInfo(pag).busy
   ));
 
-  constructor(
-    private store: Store<AppState>,
-  ) {
+  constructor() {
     this.kube = this.createKube();
     this.namespace = this.createNamespace();
 
@@ -106,7 +106,7 @@ export class KubernetesNamespacesFilterService implements OnDestroy {
         map(endpoints => Object.values(endpoints)),
         first(undefined, []), // Provide default empty array to prevent EmptyError
         map((endpoints: EndpointModel[]) => {
-          return Object.values(endpoints).sort((a: EndpointModel, b: EndpointModel) => a.name.localeCompare(b.name));
+          return Object.values(endpoints).sort((a: EndpointModel, b: EndpointModel) => naturalCompare(a.name, b.name));
         }),
       ),
       loading$: list$.pipe(map(kubes => !kubes)),
@@ -134,7 +134,7 @@ export class KubernetesNamespacesFilterService implements OnDestroy {
         if (selectedKubeId && entities) {
           return (entities as KubernetesNamespace[])
             .filter((namespace: KubernetesNamespace) => namespace.metadata?.kubeId === selectedKubeId)
-            .sort((a: KubernetesNamespace, b: KubernetesNamespace) => (a.metadata?.name ?? '').localeCompare(b.metadata?.name ?? ''));
+            .sort((a: KubernetesNamespace, b: KubernetesNamespace) => naturalCompare(a.metadata?.name ?? '', b.metadata?.name ?? ''));
         }
         return [];
       });

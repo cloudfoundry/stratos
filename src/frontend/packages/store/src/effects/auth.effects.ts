@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { ApplicationRef, Injectable } from '@angular/core';
+import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, map, mergeMap, switchMap, tap } from 'rxjs/operators';
@@ -30,6 +30,7 @@ import { BrowserStandardEncoder } from '../browser-encoder';
 import { LocalStorageService } from '../helpers/local-storage-service';
 import { stratosEntityCatalog } from '../stratos-entity-catalog';
 import { SessionDataEnvelope } from '../types/auth.types';
+import { StratosBrandingService } from '@stratosui/theme';
 
 const SETUP_HEADER = 'stratos-setup-required';
 const UPGRADE_HEADER = 'retry-after';
@@ -40,13 +41,12 @@ const SSO_HEADER = 'x-stratos-sso-login';
   providedIn: 'root'
 })
 export class AuthEffect {
+  private http = inject(HttpClient);
+  private actions$ = inject(Actions);
+  private store = inject<Store<DispatchOnlyAppState>>(Store);
+  private appRef = inject(ApplicationRef);
+  private branding = inject(StratosBrandingService);
 
-  constructor(
-    private http: HttpClient,
-    private actions$: Actions,
-    private store: Store<DispatchOnlyAppState>,
-    private appRef: ApplicationRef,
-  ) { }
 
    loginRequest$ = createEffect(() => this.actions$.pipe(
     ofType<Login>(LOGIN),
@@ -100,6 +100,7 @@ export class AuthEffect {
             const sessionData = envelope.data;
             sessionData.sessionExpiresOn = parseInt(response.headers.get('x-cap-session-expires-on'), 10) * 1000;
             LocalStorageService.localStorageToStore(this.store, sessionData);
+            this.branding.activateUserPreferences();
             this.appRef.tick();
             return [
               stratosEntityCatalog.systemInfo.actions.getSystemInfo(true),

@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
@@ -11,13 +11,13 @@ import { ConfigService } from './config.service';
   providedIn: 'root'
 })
 export class ReposService {
+  private http = inject(HttpClient);
+  private config = inject(ConfigService);
+
 
   hostname: string;
 
-  constructor(
-    private http: HttpClient,
-    private config: ConfigService,
-  ) {
+  constructor() {
     this.hostname = `/pp/v1/chartrepos`;
   }
 

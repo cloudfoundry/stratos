@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { IListConfig } from '@stratosui/core';
@@ -13,7 +13,10 @@ import { CfEventsConfigService } from '../cf-events-config.service';
 })
 export class CfSpaceEventsConfigService extends CfEventsConfigService implements IListConfig<APIResource> {
 
-  constructor(store: Store<CFAppState>, spaceService: CloudFoundrySpaceService) {
+  constructor() {
+    const store = inject<Store<CFAppState>>(Store);
+    const spaceService = inject(CloudFoundrySpaceService);
+
     super(
       store,
       spaceService.cfGuid,

@@ -97,7 +97,7 @@ export const getServiceName = (serviceEntity: APIResource<IService>): string => 
   let extraInfo: IServiceExtra = null;
   try {
     extraInfo = serviceEntity.entity.extra ? JSON.parse(serviceEntity.entity.extra) : null;
-  } catch (e) { }
+  } catch (e) { /* intentionally empty */ }
   return extraInfo && extraInfo.displayName ? extraInfo.displayName : serviceEntity.entity.label;
 };
 

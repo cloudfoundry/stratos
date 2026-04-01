@@ -1,12 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, AfterContentInit,
-  Component,
-  ContentChildren,
-  Input,
-  OnDestroy,
-  OnInit,
-  QueryList,
-  ViewEncapsulation,
- } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, AfterContentInit, Component, ContentChildren, Input, OnDestroy, OnInit, QueryList, ViewEncapsulation, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TailwindSnackBarService, TailwindSnackBarRef } from '../../../services/tailwind-snackbar.service';
@@ -36,6 +28,12 @@ import { DotContentComponent } from '../../../../core/dot-content/dot-content.co
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
+  private steppersService = inject(SteppersService);
+  private store = inject<Store<AppState>>(Store);
+  private snackBar = inject(TailwindSnackBarService);
+  private route = inject(ActivatedRoute);
+  private cdr = inject(ChangeDetectorRef);
+
 
   private nextSub!: Subscription;
   cancel$: Observable<string>;
@@ -63,13 +61,9 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   cancelQueryParams$: Observable<{
     [key: string]: string;
   }>;
-  constructor(
-    private steppersService: SteppersService,
-    private store: Store<AppState>,
-    private snackBar: TailwindSnackBarService,
-    private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef
-  ) {
+  constructor() {
+    const store = this.store;
+
     const previousRoute$ = store.select(getPreviousRoutingState).pipe(first());
     this.cancel$ = previousRoute$.pipe(
       map(previousState => {

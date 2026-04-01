@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { CustomFormFieldComponent, MatInputDirective } from '@stratosui/core';
-import { Component, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { Store } from '@ngrx/store';
@@ -31,6 +31,10 @@ import { selectCfUsersRolesOrgGuid } from '../../../../../../store/selectors/cf-
   ]
 })
 export class TableCellSelectOrgComponent extends TableCellCustom<APIResource<IOrganization>> implements OnInit, OnDestroy {
+  private store = inject<Store<CFAppState>>(Store);
+  private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+  private cfRolesService = inject(CfRolesService);
+
 
   /**
    * Observable which is populated if only a single org is to be used
@@ -39,14 +43,6 @@ export class TableCellSelectOrgComponent extends TableCellCustom<APIResource<IOr
   organizations$: Observable<APIResource<IOrganization>[]>;
   selectedOrgGuid: string;
   orgGuidChangedSub: Subscription;
-
-  constructor(
-    private store: Store<CFAppState>,
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private cfRolesService: CfRolesService,
-  ) {
-    super();
-  }
 
   ngOnInit() {
     if (this.activeRouteCfOrgSpace.orgGuid) {

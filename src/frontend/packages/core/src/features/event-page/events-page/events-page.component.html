@@ -23,7 +23,7 @@
         class="px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200"
         [class.bg-blue-600]="(selectedFilterSubject | async) === filterValues.UNREAD"
         [class.text-white]="(selectedFilterSubject | async) === filterValues.UNREAD"
-        [class.text-gray-700]="(selectedFilterSubject | async) !== filterValues.UNREAD"
+        [class.text-content-text]="(selectedFilterSubject | async) !== filterValues.UNREAD"
         [class.hover:bg-gray-100]="(selectedFilterSubject | async) !== filterValues.UNREAD"
         (click)="selectedFilterSubject.next(filterValues.UNREAD)"
         [attr.aria-pressed]="(selectedFilterSubject | async) === filterValues.UNREAD">
@@ -33,7 +33,7 @@
         class="px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200"
         [class.bg-blue-600]="(selectedFilterSubject | async) === filterValues.READ"
         [class.text-white]="(selectedFilterSubject | async) === filterValues.READ"
-        [class.text-gray-700]="(selectedFilterSubject | async) !== filterValues.READ"
+        [class.text-content-text]="(selectedFilterSubject | async) !== filterValues.READ"
         [class.hover:bg-gray-100]="(selectedFilterSubject | async) !== filterValues.READ"
         (click)="selectedFilterSubject.next(filterValues.READ)"
         [attr.aria-pressed]="(selectedFilterSubject | async) === filterValues.READ">
@@ -43,7 +43,7 @@
         class="px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200"
         [class.bg-blue-600]="(selectedFilterSubject | async) === filterValues.ALL"
         [class.text-white]="(selectedFilterSubject | async) === filterValues.ALL"
-        [class.text-gray-700]="(selectedFilterSubject | async) !== filterValues.ALL"
+        [class.text-content-text]="(selectedFilterSubject | async) !== filterValues.ALL"
         [class.hover:bg-gray-100]="(selectedFilterSubject | async) !== filterValues.ALL"
         (click)="selectedFilterSubject.next(filterValues.ALL)"
         [attr.aria-pressed]="(selectedFilterSubject | async) === filterValues.ALL">
@@ -63,7 +63,7 @@
           <div class="event-page__event-row flex items-center gap-4 p-4" role="listitem">
             <app-stateful-icon class="event-page__event-row-icon flex-shrink-0" [state]="event.stratosStatus">
             </app-stateful-icon>
-            <span class="event-page__event-message flex-1 text-sm text-gray-900">{{event.message}}</span>
+            <span class="event-page__event-message flex-1 text-sm text-content-text">{{event.message}}</span>
             @if (event.link) {
               <button class="event-page__event-row-button btn btn-primary" type="button"
               [routerLink]="event.link" [queryParams]="createQueryParams(event.link) | async">View</button>
@@ -81,7 +81,7 @@
       }
       @if (events.length === 0) {
         <app-card class="event-page__no-event-message">
-          <div class="p-4 text-center text-sm text-gray-600" role="listitem">
+          <div class="p-4 text-center text-sm text-content-muted" role="listitem">
             @if (endpointOnly) {
               <div>You have no unread endpoint notifications.</div>
             }

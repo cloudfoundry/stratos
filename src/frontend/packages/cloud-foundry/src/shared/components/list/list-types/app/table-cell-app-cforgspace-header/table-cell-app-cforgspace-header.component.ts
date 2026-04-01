@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../cf-app-state';
@@ -17,7 +17,9 @@ import { TableCellAppCfOrgSpaceBase } from '../TableCellAppCfOrgSpaceBase';
 })
 export class TableCellAppCfOrgSpaceHeaderComponent extends TableCellAppCfOrgSpaceBase {
 
-  constructor(store: Store<CFAppState>) {
+  constructor() {
+    const store = inject<Store<CFAppState>>(Store);
+
     super(store);
     this.init();
   }

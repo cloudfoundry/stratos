@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest as obsCombineLatest, Observable, of as observableOf } from 'rxjs';
@@ -47,6 +47,13 @@ selector: 'app-remove-user',
   ]
 })
 export class RemoveUserComponent implements OnDestroy {
+  private store = inject<Store<AppState>>(Store);
+  private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+  private cfUserService = inject(CfUserService);
+  private cfRolesService = inject(CfRolesService);
+  private route = inject(ActivatedRoute);
+  private userPerms = inject(CurrentUserPermissionsService);
+
   initialUsers$!: Observable<CfUser[]>;
   singleUser$!: Observable<CfUser>;
   defaultCancelUrl!: string;
@@ -57,14 +64,9 @@ export class RemoveUserComponent implements OnDestroy {
   onlySpaces = false;
   isBlocked$!: Observable<boolean>;
 
-  constructor(
-    private store: Store<AppState>,
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private cfUserService: CfUserService,
-    private cfRolesService: CfRolesService,
-    private route: ActivatedRoute,
-    private userPerms: CurrentUserPermissionsService
-  ) {
+  constructor() {
+    const activeRouteCfOrgSpace = this.activeRouteCfOrgSpace;
+
     this.defaultCancelUrl = this.createReturnUrl(activeRouteCfOrgSpace);
     this.cfGuid = this.activeRouteCfOrgSpace.cfGuid;
     this.orgGuid = this.activeRouteCfOrgSpace.orgGuid;

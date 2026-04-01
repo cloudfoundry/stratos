@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
@@ -37,6 +37,10 @@ import { UserInviteSendSpaceRoles, UserInviteService } from '../../../user-invit
   ]
 })
 export class InviteUsersCreateComponent implements OnInit {
+  private store = inject<Store<CFAppState>>(Store);
+  private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+  private userInviteService = inject(UserInviteService);
+
 
   public stepValid = signal<boolean>(false);
   public valid$: Observable<boolean>;
@@ -50,11 +54,7 @@ export class InviteUsersCreateComponent implements OnInit {
   public spaceRoles: { label: string, value: UserInviteSendSpaceRoles }[] = [];
   private users!: StackedInputActionsUpdate;
 
-  constructor(
-    private store: Store<CFAppState>,
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private userInviteService: UserInviteService
-  ) {
+  constructor() {
     this.valid$ = toObservable(this.stepValid);
     this.stateIn$ = toObservable(this.stateIn);
     this.spaceRoles.push(

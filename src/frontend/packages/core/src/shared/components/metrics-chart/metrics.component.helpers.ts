@@ -22,7 +22,7 @@ export class MetricsChartHelpers {
     const lineChartConfig = new MetricsLineChartConfig();
     lineChartConfig.xAxisLabel = 'Time';
     lineChartConfig.yAxisLabel = yLabel;
-    if (!!yAxisTickFormatter) {
+    if (yAxisTickFormatter) {
       lineChartConfig.yAxisTickFormatting = yAxisTickFormatter;
     }
     return lineChartConfig;

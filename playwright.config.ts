@@ -1,7 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
 
-// Default secrets profile to 'local' unless overridden
-process.env.STRATOS_E2E_PROFILE ??= 'local';
+// Default secrets profile — auto-detect from base URL, fall back to 'local'
+if (!process.env.STRATOS_E2E_PROFILE) {
+  const baseUrl = process.env.STRATOS_E2E_BASE_URL || '';
+  process.env.STRATOS_E2E_PROFILE = baseUrl.includes('adepttech') ? 'adepttech' : 'local';
+}
 
 // Test environment ports (separate from dev to avoid conflicts)
 const BACKEND_PORT = process.env.BACKEND_PORT || '5543';
@@ -74,12 +77,21 @@ export default defineConfig({
     timeout: 5000,
   },
 
-  // Configure projects for major browsers
+  // Configure projects — auth setup runs once, then tests reuse saved state
   projects: [
     {
+      name: 'setup',
+      testDir: './e2e',
+      testMatch: /auth\.setup\.ts/,
+      use: { storageState: undefined },
+    },
+    {
       name: 'chromium',
+      dependencies: ['setup'],
       use: {
         ...devices['Desktop Chrome'],
+        // Default to admin state — fixtures override per-test as needed
+        storageState: 'e2e/.auth/admin.json',
         // Chrome-specific options matching Protractor config
         launchOptions: {
           args: [
@@ -92,17 +104,17 @@ export default defineConfig({
       },
     },
 
-    // Uncomment to test on Firefox
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
+    {
+      name: 'firefox',
+      dependencies: ['setup'],
+      use: { ...devices['Desktop Firefox'], storageState: 'e2e/.auth/admin.json' },
+    },
 
-    // Uncomment to test on WebKit (Safari)
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
-    // },
+    {
+      name: 'webkit',
+      dependencies: ['setup'],
+      use: { ...devices['Desktop Safari'], storageState: 'e2e/.auth/admin.json' },
+    },
   ],
 
   // Auto-start backend and frontend for tests using dedicated ports.
@@ -118,20 +130,23 @@ export default defineConfig({
   //   ps aux | grep 'STRATOS_E2E=e2e'       # find all test sessions
   //   ps aux | grep 'e2e:5543'             # find a specific session
   //   pkill -f 'e2e:5543'                  # kill a specific session
-  webServer: [
-    {
-      command: `cd src/jetstream && STRATOS_E2E=e2e:${BACKEND_PORT} CONSOLE_PROXY_TLS_ADDRESS=:${BACKEND_PORT} ../../dist/bin/jetstream`,
-      url: `https://localhost:${BACKEND_PORT}/pp/v1/info`,
-      reuseExistingServer: true,
-      ignoreHTTPSErrors: true,
-      timeout: 30000,
-    },
-    {
-      command: `STRATOS_E2E=e2e:${BACKEND_PORT} BACKEND_PORT=${BACKEND_PORT} bun run ng serve --port ${FRONTEND_PORT} --proxy-config proxy.conf.cjs`,
-      url: `https://localhost:${FRONTEND_PORT}`,
-      reuseExistingServer: true,
-      ignoreHTTPSErrors: true,
-      timeout: 120000,
-    },
-  ],
+  // Skip local servers when targeting a remote deployment
+  ...(process.env.STRATOS_E2E_BASE_URL ? {} : {
+    webServer: [
+      {
+        command: `cd src/jetstream && STRATOS_E2E=e2e:${BACKEND_PORT} CONSOLE_PROXY_TLS_ADDRESS=:${BACKEND_PORT} ../../dist/bin/jetstream`,
+        url: `https://localhost:${BACKEND_PORT}/pp/v1/info`,
+        reuseExistingServer: true,
+        ignoreHTTPSErrors: true,
+        timeout: 30000,
+      },
+      {
+        command: `STRATOS_E2E=e2e:${BACKEND_PORT} BACKEND_PORT=${BACKEND_PORT} bun run ng serve --port ${FRONTEND_PORT} --proxy-config proxy.conf.cjs`,
+        url: `https://localhost:${FRONTEND_PORT}`,
+        reuseExistingServer: true,
+        ignoreHTTPSErrors: true,
+        timeout: 120000,
+      },
+    ],
+  }),
 });

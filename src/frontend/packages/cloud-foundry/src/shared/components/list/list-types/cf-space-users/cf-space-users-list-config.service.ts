@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 
@@ -17,14 +17,15 @@ import { CfUserListConfigService } from '../cf-users/cf-user-list-config.service
   providedIn: 'root'
 })
 export class CfSpaceUsersListConfigService extends CfUserListConfigService {
-  constructor(
-    store: Store<CFAppState>,
-    cfSpaceService: CloudFoundrySpaceService,
-    cfOrgService: CloudFoundryOrganizationService,
-    cfUserService: CfUserService,
-    router: Router,
-    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    userPerms: CurrentUserPermissionsService) {
+  constructor() {
+    const store = inject<Store<CFAppState>>(Store);
+    const cfSpaceService = inject(CloudFoundrySpaceService);
+    const cfOrgService = inject(CloudFoundryOrganizationService);
+    const cfUserService = inject(CfUserService);
+    const router = inject(Router);
+    const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+    const userPerms = inject(CurrentUserPermissionsService);
+
     super(
       store,
       cfUserService,

@@ -1,6 +1,6 @@
 import { animate, query, style, transition, trigger } from '@angular/animations';
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, OnDestroy , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -53,18 +53,20 @@ import { goToAppWall } from '../../cf/cf.helpers';
   ]
 })
 export class ApplicationWallComponent implements OnDestroy {
+  cloudFoundryService = inject(CloudFoundryService);
+  private store = inject<Store<CFAppState>>(Store);
+  cfOrgSpaceService = inject(CfOrgSpaceDataService);
+
   public cfIds$!: Observable<string[]>;
 
   public canCreateApplication!: string;
 
   public haveConnectedCf$!: Observable<boolean>;
 
-  constructor(
-    public cloudFoundryService: CloudFoundryService,
-    private store: Store<CFAppState>,
-    public cfOrgSpaceService: CfOrgSpaceDataService,
-    activatedRoute: ActivatedRoute,
-  ) {
+  constructor() {
+    const cloudFoundryService = this.cloudFoundryService;
+    const activatedRoute = inject(ActivatedRoute);
+
     // If we have an endpoint ID, select it and redirect
     const { endpointId } = activatedRoute.snapshot.params;
     if (endpointId) {

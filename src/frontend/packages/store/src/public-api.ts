@@ -4,7 +4,7 @@
 
 // Helpers
 export * from './helpers/store-helpers';
-export { LocalStorageService } from './helpers/local-storage-service';
+export { LocalStorageService, LocalStorageSyncTypes } from './helpers/local-storage-service';
 
 // Used by store testing module
 export { getDefaultRequestState } from './reducers/api-request-reducer/types';
@@ -61,7 +61,6 @@ export {
   GeneralEntityAppState,
   InternalAppState,
 } from './app-state';
-export { ThemeService } from './theme.service';
 export { internalEventStateSelector } from './selectors/internal-events.selectors';
 export { Login, Logout, VerifySession, VerifiedSession, SESSION_VERIFIED } from './actions/auth.actions';
 export { RequestTypes, APIResponse } from './actions/request.actions';

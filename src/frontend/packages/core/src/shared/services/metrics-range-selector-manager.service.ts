@@ -1,4 +1,4 @@
-import { ApplicationRef, Injectable, NgZone } from '@angular/core';
+import { ApplicationRef, Injectable, NgZone, inject } from '@angular/core';
 import { MetricsAction, MetricQueryType, EntityMonitor, IMetrics } from '@stratosui/store';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, takeWhile, tap } from 'rxjs/operators';
@@ -11,6 +11,10 @@ import { ITimeRange } from './metrics-range-selector.types';
   providedIn: 'root'
 })
 export class MetricsRangeSelectorManagerService {
+  metricRangeService = inject(MetricsRangeSelectorService);
+  private ngZone = inject(NgZone);
+  private appRef = inject(ApplicationRef);
+
 
   public timeWindow$ = new Subject<ITimeRange>();
 
@@ -43,12 +47,6 @@ export class MetricsRangeSelectorManagerService {
   private pollIndex: number;
 
   public pollInterval = 10000;
-
-  constructor(
-    public metricRangeService: MetricsRangeSelectorService,
-    private ngZone: NgZone,
-    private appRef: ApplicationRef
-    ) { }
 
   private commitDate(date: Date, type: 'start' | 'end') {
     const index = type === 'start' ? this.startIndex : this.endIndex;

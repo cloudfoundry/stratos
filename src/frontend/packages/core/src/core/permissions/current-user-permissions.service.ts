@@ -1,4 +1,4 @@
-import { Inject, Injectable, Optional } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { stratosEntityCatalog, InternalAppState } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
@@ -23,11 +23,12 @@ export const CUSTOM_USER_PERMISSION_CHECKERS = 'custom_user_perm_checkers';
   providedIn: 'root'
 })
 export class CurrentUserPermissionsService {
+  private store = inject<Store<InternalAppState>>(Store);
+
   private allCheckers: ICurrentUserPermissionsChecker[];
-  constructor(
-    private store: Store<InternalAppState>,
-    @Optional() @Inject(CUSTOM_USER_PERMISSION_CHECKERS) customCheckers: ICurrentUserPermissionsChecker[],
-  ) {
+  constructor() {
+    const customCheckers = inject<ICurrentUserPermissionsChecker[]>(CUSTOM_USER_PERMISSION_CHECKERS as any, { optional: true });
+
     // Cannot set default value for parameter as the Optional decorator sets it to null
     const nullSafeCustomCheckers = customCheckers || [];
     this.allCheckers = [

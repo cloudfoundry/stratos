@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { GithubCommitsDataSource, GithubCommitsListConfigServiceBase, GitSCMService, GitSCMType } from '@stratosui/git';
 import { filter, first, map } from 'rxjs/operators';
@@ -16,11 +16,11 @@ import {
   providedIn: 'root'
 })
 export class GithubCommitsListConfigServiceDeploy extends GithubCommitsListConfigServiceBase {
-  constructor(
-    store: Store<CFAppState>,
-    datePipe: DatePipe,
-    scmService: GitSCMService
-  ) {
+  constructor() {
+    const store = inject<Store<CFAppState>>(Store);
+    const datePipe = inject(DatePipe);
+    const scmService = inject(GitSCMService);
+
     super(store, datePipe);
     this.text.title = 'Select a commit';
     this.columns.unshift({

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
@@ -70,6 +70,15 @@ selector: 'app-cf-org-card',
   ]
 })
 export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> implements OnInit, OnDestroy {
+  private cfUserService = inject(CfUserService);
+  cfEndpointService = inject(CloudFoundryEndpointService);
+  private store = inject<Store<CFAppState>>(Store);
+  private currentUserPermissionsService = inject(CurrentUserPermissionsService);
+  private confirmDialog = inject(ConfirmationDialogService);
+  private paginationMonitorFactory = inject(PaginationMonitorFactory);
+  private emf = inject(EntityMonitorFactory);
+  private userFavoriteManager = inject(UserFavoriteManager);
+
   cardMenu: MenuItem[];
   orgGuid!: string;
   normalisedMemoryUsage!: number;
@@ -85,16 +94,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
   public favorite!: UserFavorite<IFavoriteMetadata> | null;
   public orgStatus$!: Observable<StratosStatus>;
 
-  constructor(
-    private cfUserService: CfUserService,
-    public cfEndpointService: CloudFoundryEndpointService,
-    private store: Store<CFAppState>,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-    private confirmDialog: ConfirmationDialogService,
-    private paginationMonitorFactory: PaginationMonitorFactory,
-    private emf: EntityMonitorFactory,
-    private userFavoriteManager: UserFavoriteManager
-  ) {
+  constructor() {
     super();
 
     this.cardMenu = [

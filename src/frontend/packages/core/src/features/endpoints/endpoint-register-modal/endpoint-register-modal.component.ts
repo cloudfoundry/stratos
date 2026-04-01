@@ -1,16 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component,
-  ComponentFactory,
-  ComponentFactoryResolver,
-  ComponentRef,
-  EventEmitter,
-  Injector,
-  OnDestroy,
-  OnInit,
-  Output,
-  ViewChild,
-  ViewContainerRef,
- } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ComponentRef, EventEmitter, Injector, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, inject } from '@angular/core';
 import { ActivatedRoute, ActivatedRouteSnapshot, Params } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
@@ -37,6 +26,9 @@ import { TileSelectorComponent } from '../../../shared/components/tile-selector/
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EndpointRegisterModalComponent extends BaseEndpointTileManager implements OnInit, OnDestroy {
+  protected store: Store<GeneralEntityAppState>;
+  private injector = inject(Injector);
+
   @Output() closeModalEvent = new EventEmitter<void>();
   @Output() endpointRegistered = new EventEmitter<any>();
 
@@ -46,16 +38,16 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
   selectedEndpointInfo: ITileConfig<ICreateEndpointTilesData> | null = null;
   componentRef: ComponentRef<any>;
 
-  constructor(
-    protected store: Store<GeneralEntityAppState>,
-    private resolver: ComponentFactoryResolver,
-    private injector: Injector,
-  ) {
+  constructor() {
+    const store = inject<Store<GeneralEntityAppState>>(Store);
+
     const types = store.select(selectSessionData()).pipe(
       // Get a list of all known endpoint types
       map(sessionData => entityCatalog.getAllEndpointTypes(sessionData.config.enableTechPreview || false))
     );
     super(types, store);
+    this.store = store;
+
     
     // Add escape key listener
     document.addEventListener('keydown', this.handleEscapeKey.bind(this));
@@ -145,12 +137,10 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
           parent: this.injector
         });
 
-        const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(
-          endpoint.definition.registrationComponent
-        );
-        
         // Create the component with the custom injector
-        this.componentRef = this.endpointFormContainer.createComponent(factory, 0, componentInjector);
+        this.componentRef = this.endpointFormContainer.createComponent(
+          endpoint.definition.registrationComponent, { index: 0, injector: componentInjector }
+        );
 
         console.log('Registration component created successfully:', this.componentRef);
 
@@ -174,8 +164,6 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
     try {
       // Import and load the create-endpoint component
       import('../create-endpoint/create-endpoint.component').then(module => {
-        const factory = this.resolver.resolveComponentFactory(module.CreateEndpointComponent);
-        
         // Create mock route parameters
         const mockParams: Params = {
           type: epType,
@@ -206,7 +194,9 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
           parent: this.injector
         });
 
-        this.componentRef = this.endpointFormContainer.createComponent(factory, 0, componentInjector);
+        this.componentRef = this.endpointFormContainer.createComponent(
+          module.CreateEndpointComponent, { index: 0, injector: componentInjector }
+        );
         console.log('Create-endpoint component loaded:', this.componentRef);
         
         this.hookIntoComponentSuccess();

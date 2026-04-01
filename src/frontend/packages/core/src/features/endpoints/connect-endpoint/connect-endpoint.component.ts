@@ -1,15 +1,5 @@
 
-import { ChangeDetectionStrategy, Component,
-  ComponentFactoryResolver,
-  ComponentRef,
-  EventEmitter,
-  Input,
-  OnDestroy,
-  OnInit,
-  Output,
-  ViewChild,
-  ViewContainerRef,
- } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ComponentRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, inject } from '@angular/core';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup, AbstractControl } from '@angular/forms';
 import { CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
 import { CustomCheckboxComponent } from '../../../shared/components/custom-checkbox/custom-checkbox.component';
@@ -46,6 +36,8 @@ interface EndpointForm {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConnectEndpointComponent implements OnInit, OnDestroy {
+  private fb = inject(FormBuilder);
+
   private pDisabled = false;
   private pConnectService!: ConnectEndpointService;
   @Input() set connectService(service: ConnectEndpointService) {
@@ -61,7 +53,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
 
   @Input() set disabled(disabled: boolean) {
     if (this.endpointForm) {
-      disabled ? this.endpointForm.disable() : this.endpointForm.enable();
+      if (disabled) { this.endpointForm.disable(); } else { this.endpointForm.enable(); }
     }
     this.pDisabled = disabled;
   }
@@ -91,11 +83,6 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   private authFormComponentRef!: ComponentRef<IAuthForm>;
 
   private subs: Subscription[] = [];
-
-  constructor(
-    private fb: FormBuilder,
-    private resolver: ComponentFactoryResolver,
-  ) { }
 
   private init(config: ConnectEndpointConfig) {
     const endpoint = entityCatalog.getEndpoint(config.type, config.subType);
@@ -182,11 +169,10 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
       this.authFormComponentRef.destroy();
     }
 
-    const factory = this.resolver.resolveComponentFactory<IAuthForm>(authType.component);
-    this.authFormComponentRef = this.container.createComponent<IAuthForm>(factory);
+    this.authFormComponentRef = this.container.createComponent<IAuthForm>(authType.component);
     this.authFormComponentRef.instance.formGroup = this.endpointForm;
     this.authFormComponentRef.instance.config = authType.config;
-    this.pDisabled ? this.endpointForm.disable() : this.endpointForm.enable();
+    if (this.pDisabled) { this.endpointForm.disable(); } else { this.endpointForm.enable(); }
   }
 
   private sameAuthTypeFormFields(a: string[], b: string[]): boolean {

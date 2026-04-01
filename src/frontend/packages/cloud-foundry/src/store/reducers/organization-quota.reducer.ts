@@ -11,13 +11,14 @@ export function updateOrganizationQuotaReducer(
 ) {
   switch (action.type) {
     // TODO: This action type is not strictly defined anywhere
-    case '[Organizations] Update Org success':
+    case '[Organizations] Update Org success': {
       const response = action.response;
       const entityKey = getCFEntityKey(action.apiAction.entityType);
       const newOrg = response.entities[entityKey][response.result[0]];
       const quotaDefinitionGuid = newOrg.entity.quota_definition_guid;
       const org = state[newOrg.metadata.guid];
       return applyQuotaDefinition(state, org, quotaDefinitionGuid);
+    }
   }
   return state;
 }

@@ -43,6 +43,7 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
     },
   ];
   viewType = ListViewTypes.TABLE_ONLY;
+  pageSizeOptions = [10, 25, 50, 100];
   text = {
     title: null as string,
     noEntries: 'There are no events'
@@ -89,25 +90,15 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
   }
 
   setEventFilters(values: { actee: string, type: string[] }): void {
-    this.getEventFilters().pipe(
-      first()
-    ).subscribe(currentFilters => {
-      const action = this.eventSource.action as PaginatedAction;
-
-      // Recreate the whole q param and set it again using 'AddParams'
-      const typeChanged = !arraysEqual(values.type, currentFilters.type);
-      const acteeChanged = valueOrCommonFalsy(values.actee) !== valueOrCommonFalsy(currentFilters.actee);
-      if (typeChanged || acteeChanged) {
-        const newQ: string[] = [];
-        if (values.type && values.type.length) {
-          newQ.push(new QParam('type', values.type, QParamJoiners.in).toString());
-        }
-        if (values.actee && values.actee.length) {
-          newQ.push(new QParam('actee', values.actee, QParamJoiners.in).toString());
-        }
-        this.store.dispatch(new AddParams(action, this.eventSource.paginationKey, { q: newQ }));
-      }
-    });
+    const action = this.eventSource.action as PaginatedAction;
+    const newQ: string[] = [];
+    if (values.type && values.type.length) {
+      newQ.push(new QParam('type', values.type, QParamJoiners.in).toString());
+    }
+    if (values.actee && values.actee.length) {
+      newQ.push(new QParam('actee', values.actee, QParamJoiners.in).toString());
+    }
+    this.store.dispatch(new AddParams(action, this.eventSource.paginationKey, { q: newQ }));
   }
 
   getEventFilters(): Observable<{

@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
@@ -43,6 +43,10 @@ import { CfUserPermissionDirective } from '../../../shared/directives/cf-user-pe
   ]
 })
 export class ServicesWallComponent {
+  cloudFoundryService = inject(CloudFoundryService);
+  store = inject<Store<CFAppState>>(Store);
+  cfOrgSpaceService = inject(CfOrgSpaceDataService);
+
 
   public haveConnectedCf$: Observable<boolean>;
 
@@ -51,10 +55,9 @@ export class ServicesWallComponent {
   cfIds$!: Observable<string[]>;
   location!: { [CSI_CANCEL_URL]: string, };
 
-  constructor(
-    public cloudFoundryService: CloudFoundryService,
-    public store: Store<CFAppState>,
-    public cfOrgSpaceService: CfOrgSpaceDataService) {
+  constructor() {
+    const cloudFoundryService = this.cloudFoundryService;
+
 
     this.canCreateServiceInstance = CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE;
     this.cfIds$ = cloudFoundryService.cFEndpoints$.pipe(

@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
@@ -26,12 +26,13 @@ import { CfSpacesServiceInstancesDataSource } from './cf-spaces-service-instance
 export class CfSpacesServiceInstancesListConfigService extends CfServiceInstancesListConfigBase
   implements IListConfig<APIResource<IServiceInstance>>  {
 
-  constructor(
-    store: Store<CFAppState>,
-    cfSpaceService: CloudFoundrySpaceService,
-    datePipe: DatePipe,
-    currentUserPermissionsService: CurrentUserPermissionsService,
-    serviceActionHelperService: ServiceActionHelperService) {
+  constructor() {
+    const store = inject<Store<CFAppState>>(Store);
+    const cfSpaceService = inject(CloudFoundrySpaceService);
+    const datePipe = inject(DatePipe);
+    const currentUserPermissionsService = inject(CurrentUserPermissionsService);
+    const serviceActionHelperService = inject(ServiceActionHelperService);
+
     super(
       store,
       datePipe,

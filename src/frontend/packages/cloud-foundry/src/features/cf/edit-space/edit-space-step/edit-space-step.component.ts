@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -46,6 +46,8 @@ interface EditSpaceForm {
   ]
 })
 export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDestroy {
+  private cfSpaceService = inject(CloudFoundrySpaceService);
+
 
   originalName: any;
   spaceSubscription!: Subscription;
@@ -55,12 +57,11 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
   editSpaceForm: FormGroup<EditSpaceForm>;
   originalSpaceQuotaGuid!: string;
 
-  constructor(
-    store: Store<CFAppState>,
-    activatedRoute: ActivatedRoute,
-    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private cfSpaceService: CloudFoundrySpaceService,
-  ) {
+  constructor() {
+    const store = inject<Store<CFAppState>>(Store);
+    const activatedRoute = inject(ActivatedRoute);
+    const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+
     super(store, activatedRoute, activeRouteCfOrgSpace);
     this.spaceGuid = activatedRoute.snapshot.params.spaceId;
     this.editSpaceForm = new FormGroup<EditSpaceForm>({

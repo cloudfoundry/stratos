@@ -1,4 +1,4 @@
-import { ApplicationRef, Injectable } from '@angular/core';
+import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
@@ -18,12 +18,10 @@ import { AppState } from '../app-state';
   providedIn: 'root'
 })
 export class PaginationEffects {
+  private actions$ = inject(Actions);
+  private store = inject<Store<AppState>>(Store);
+  private appRef = inject(ApplicationRef);
 
-  constructor(
-    private actions$: Actions,
-    private store: Store<AppState>,
-    private appRef: ApplicationRef,
-  ) { }
 
    clearPaginationOnParamChange$ = createEffect(() => this.actions$.pipe(
     ofType<SetParams | AddParams | RemoveParams>(SET_PARAMS, ADD_PARAMS, REMOVE_PARAMS),

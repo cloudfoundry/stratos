@@ -26,7 +26,7 @@
 </ng-template>
 
 <!-- Show loading indicator -->
-@if (!(cloudFoundryService.hasRegisteredCFEndpoints$ | async) || !(cloudFoundryService.hasConnectedCFEndpoints$ | async)) {
+@if ((cloudFoundryService.hasRegisteredCFEndpoints$ | async) === false || (cloudFoundryService.hasConnectedCFEndpoints$ | async) === false) {
   <div
     class="flex items-center justify-center p-8">
     <div class="flex items-center space-x-3 text-content-muted">
@@ -36,7 +36,7 @@
   </div>
 }
 
-@if (!!(cloudFoundryService.hasRegisteredCFEndpoints$ | async) && !!(cloudFoundryService.hasConnectedCFEndpoints$ | async)) {
+@if ((cloudFoundryService.hasRegisteredCFEndpoints$ | async) && (cloudFoundryService.hasConnectedCFEndpoints$ | async)) {
   <app-list class="services-wall" [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter"
     (initialised)="cfOrgSpaceService.enableAutoSelectors()"
     >

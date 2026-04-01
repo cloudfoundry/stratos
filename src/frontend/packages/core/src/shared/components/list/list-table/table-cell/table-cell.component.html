@@ -1,6 +1,6 @@
 <!-- Ensure any key presses are retained within this element. This stops parent expansion panel from consuming space
 key (see edit env var) -->
-<div (keydown)="$event.stopPropagation()">
+<div tabindex="-1" (keydown)="$event.stopPropagation()">
   <div #target>
     @if (func && !component) {
       <div>

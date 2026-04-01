@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest } from 'rxjs';
 import { switchMap, take } from 'rxjs/operators';
@@ -16,15 +16,19 @@ import { CfAppRoutesListConfigServiceBase } from './cf-app-routes-list-config-ba
   providedIn: 'root'
 })
 export class CfAppRoutesListConfigService extends CfAppRoutesListConfigServiceBase implements IListConfig<APIResource> {
+  private currentUserPermissionsService: CurrentUserPermissionsService;
 
-  constructor(
-    store: Store<CFAppState>,
-    appService: ApplicationService,
-    confirmDialog: ConfirmationDialogService,
-    datePipe: DatePipe,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-  ) {
+
+  constructor() {
+    const store = inject<Store<CFAppState>>(Store);
+    const appService = inject(ApplicationService);
+    const confirmDialog = inject(ConfirmationDialogService);
+    const datePipe = inject(DatePipe);
+    const currentUserPermissionsService = inject(CurrentUserPermissionsService);
+
     super(store, appService, confirmDialog, datePipe, currentUserPermissionsService, null, true);
+    this.currentUserPermissionsService = currentUserPermissionsService;
+
 
     this.setupList(store, appService);
     this.allowSelection = false; // Allow the multi action visibility to determine this

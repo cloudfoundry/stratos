@@ -9,7 +9,7 @@
         @if (obs.visible[action.label] | async) {
           <button class="table-cell-actions__button"
             (click)="action.action(row); toggleMenu()"
-            [disabled]="!(obs.enabled[action.label] | async)"
+            [disabled]="(obs.enabled[action.label] | async) === false"
             [title]="action.description"
             [ngClass]="{'hasIcon': !!action.icon}">
             @if (!!action.icon) {

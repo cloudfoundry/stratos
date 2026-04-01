@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { ApplicationRef, Injectable } from '@angular/core';
+import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap, switchMap } from 'rxjs/operators';
@@ -23,13 +23,11 @@ import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuc
   providedIn: 'root'
 })
 export class UserProfileEffect {
+  private actions$ = inject(Actions);
+  private store = inject<Store<DispatchOnlyAppState>>(Store);
+  private httpClient = inject(HttpClient);
+  private appRef = inject(ApplicationRef);
 
-  constructor(
-    private actions$: Actions,
-    private store: Store<DispatchOnlyAppState>,
-    private httpClient: HttpClient,
-    private appRef: ApplicationRef,
-  ) { }
 
    getUserProfileInfo$ = createEffect(() => this.actions$.pipe(
     ofType<FetchUserProfileAction>(GET_USERPROFILE),

@@ -34,7 +34,7 @@ describe('TableCellQuotaComponent', () => {
         'orgGuid',
         'space-quota-definitions'
       ]
-    },
+    };
     component.row = {
       metadata: {
         guid: '',

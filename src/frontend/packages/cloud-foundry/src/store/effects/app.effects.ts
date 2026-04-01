@@ -1,4 +1,4 @@
-import { ApplicationRef, Injectable } from '@angular/core';
+import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { first, map } from 'rxjs/operators';
@@ -17,12 +17,10 @@ import {
   providedIn: 'root'
 })
 export class AppEffects {
+  private actions$ = inject(Actions);
+  private store = inject<Store<EndpointOnlyAppState>>(Store);
+  private appRef = inject(ApplicationRef);
 
-  constructor(
-    private actions$: Actions,
-    private store: Store<EndpointOnlyAppState>,
-    private appRef: ApplicationRef
-  ) { }
 
    updateSummary$ = createEffect(() => this.actions$.pipe(
     ofType<APISuccessOrFailedAction>(ASSIGN_ROUTE_SUCCESS),

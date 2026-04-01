@@ -1,4 +1,4 @@
-import { ApplicationRef, Injectable } from '@angular/core';
+import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { EMPTY } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
@@ -13,12 +13,10 @@ import { LongRunningCfOperationsService } from '../../shared/data-services/long-
   providedIn: 'root'
 })
 export class ServiceInstanceEffects {
+  private actions$ = inject(Actions);
+  private longRunningOpService = inject(LongRunningCfOperationsService);
+  private appRef = inject(ApplicationRef);
 
-  constructor(
-    private actions$: Actions,
-    private longRunningOpService: LongRunningCfOperationsService,
-    private appRef: ApplicationRef
-  ) { }
 
    updateSummary$ = createEffect(() => this.actions$.pipe(
     ofType<APISuccessOrFailedAction>(DELETE_SERVICE_INSTANCE_ACTIONS[2]),

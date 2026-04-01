@@ -1,10 +1,9 @@
-import { ChangeDetectionStrategy, Component  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import {
   AppState,
-  ThemeService,
   UserProfileInfo,
 } from '@stratosui/store';
 import { combineLatest, Observable } from 'rxjs';
@@ -39,6 +38,10 @@ import { AppChipsComponent } from '../../../shared/components/chips/chips.compon
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProfileInfoComponent {
+  userService = inject(UserService);
+  private currentUserPermissionsService = inject(CurrentUserPermissionsService);
+  private store = inject<Store<AppState>>(Store);
+
 
   isError$: Observable<boolean>;
   canEdit$: Observable<boolean>;
@@ -47,13 +50,9 @@ export class ProfileInfoComponent {
 
   primaryEmailAddress$: Observable<string>;
 
-  constructor(
-    userProfileService: UserProfileService,
-    public userService: UserService,
-    public themeService: ThemeService,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-    private store: Store<AppState>
-  ) {
+  constructor() {
+    const userProfileService = inject(UserProfileService);
+
     this.isError$ = userProfileService.isError$;
     this.userProfile$ = userProfileService.userProfile$;
 

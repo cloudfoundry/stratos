@@ -4,14 +4,14 @@ $checkbox-margin: 30px;
   flex: 1;
 }
 
-mat-checkbox {
+app-checkbox {
   padding-top: $checkbox-margin;
 }
 
 form.stepper-form {
   max-width: unset;
-  mat-form-field,
-  mat-checkbox {
+  .custom-form-field,
+  app-checkbox {
     max-width: 450px;
   }
   P {

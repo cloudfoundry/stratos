@@ -5,6 +5,7 @@ export interface DashboardState {
   isMobile: boolean;
   isMobileNavOpen: boolean;
   sideNavPinned: boolean;
+  /** @deprecated Theme mode now managed by StratosBrandingService via localStorage */
   themeKey: string;
   headerEventMinimized: boolean;
   gravatarEnabled: boolean;

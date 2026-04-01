@@ -88,7 +88,7 @@ export function dashboardReducer(state: DashboardState = defaultDashboardState, 
       const setThemeAction = action as SetThemeAction;
       return {
         ...state,
-        themeKey: setThemeAction.theme ? setThemeAction.theme.key : null
+        themeKey: null
       };
     default:
       return state;

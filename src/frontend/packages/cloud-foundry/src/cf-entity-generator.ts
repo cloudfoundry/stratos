@@ -597,8 +597,8 @@ function generateCFUserProvidedServiceInstanceEntity(endpointDefinition: Stratos
   const definition: IStratosEntityDefinition = {
     type: userProvidedServiceInstanceEntityType,
     schema: cfEntityFactory(userProvidedServiceInstanceEntityType),
-    label: 'User Provided Service Instance',
-    labelPlural: 'User Provided Service Instances',
+    label: 'User Provided Service',
+    labelPlural: 'User Provided Services',
     endpoint: endpointDefinition,
   };
   cfEntityCatalog.userProvidedService = new StratosCatalogEntity<
@@ -844,8 +844,8 @@ function generateCFServiceInstanceEntity(endpointDefinition: StratosEndpointExte
       [serviceInstancesWithSpaceEntityType]: cfEntityFactory(serviceInstancesWithSpaceEntityType),
       [serviceInstancesWithNoBindingsEntityType]: cfEntityFactory(serviceInstancesWithNoBindingsEntityType),
     },
-    label: 'Marketplace Service Instance',
-    labelPlural: 'Marketplace Service Instances',
+    label: 'Marketplace Service',
+    labelPlural: 'Marketplace Services',
     endpoint: endpointDefinition,
   };
   cfEntityCatalog.serviceInstance = new StratosCatalogEntity<

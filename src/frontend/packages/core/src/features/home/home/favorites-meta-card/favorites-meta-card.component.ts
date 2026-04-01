@@ -1,5 +1,5 @@
 
-import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -20,6 +20,10 @@ import { ConfirmationDialogService } from '../../../../shared/components/confirm
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FavoritesMetaCardComponent {
+  private router = inject(Router);
+  private confirmDialog = inject(ConfirmationDialogService);
+  private userFavoriteManager = inject(UserFavoriteManager);
+
 
   @Input()
   public endpoint: any;
@@ -37,12 +41,6 @@ export class FavoritesMetaCardComponent {
   public icon: FavoriteIconData;
 
   public valid = true;
-
-  constructor(
-    private router: Router,
-    private confirmDialog: ConfirmationDialogService,
-    private userFavoriteManager: UserFavoriteManager,
-  ) {}
 
   @Input()
   set favoriteEntity(favoriteEntity: UserFavorite<IFavoriteMetadata>) {

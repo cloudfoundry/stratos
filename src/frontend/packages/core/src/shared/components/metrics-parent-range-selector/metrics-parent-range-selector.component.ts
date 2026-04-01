@@ -1,5 +1,5 @@
 
-import { ChangeDetectionStrategy, AfterContentInit, Component, ContentChildren, OnDestroy, QueryList  } from '@angular/core';
+import { ChangeDetectionStrategy, AfterContentInit, Component, ContentChildren, OnDestroy, QueryList, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CardWrapperComponent } from '../cards/card/card.component';
 import { CustomFormFieldComponent } from '../custom-form-field/custom-form-field.component';
@@ -30,17 +30,15 @@ import { StartEndDateComponent } from '../start-end-date/start-end-date.componen
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetricsParentRangeSelectorComponent implements AfterContentInit, OnDestroy {
+  private entityMonitorFactory = inject(EntityMonitorFactory);
+  rangeSelectorManager = inject(MetricsRangeSelectorManagerService);
+
   private actionSub!: Subscription;
 
   @ContentChildren(MetricsChartComponent)
   private metricsCharts!: QueryList<MetricsChartComponent>;
 
   public rangeTypes = MetricQueryType;
-
-  constructor(
-    private entityMonitorFactory: EntityMonitorFactory,
-    public rangeSelectorManager: MetricsRangeSelectorManagerService
-  ) { }
 
   ngAfterContentInit() {
     if (!this.metricsCharts || !this.metricsCharts.first) {

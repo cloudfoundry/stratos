@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -37,14 +37,16 @@ import { ServiceRecentInstancesCardComponent } from '../../../shared/components/
   ]
 })
 export class ServiceSummaryComponent {
+  private servicesService = inject(ServicesService);
+  private store = inject<Store<CFAppState>>(Store);
+
 
   isBrokerAvailable$: Observable<boolean>;
   servicePlans$: Observable<APIResource<IServicePlan>[]>;
   instances$: Observable<APIResource<IServiceInstance>[]>;
-  constructor(
-    private servicesService: ServicesService,
-    private store: Store<CFAppState>,
-  ) {
+  constructor() {
+    const servicesService = this.servicesService;
+
 
     this.instances$ = servicesService.serviceInstances$;
     this.servicePlans$ = servicesService.servicePlans$;

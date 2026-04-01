@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
@@ -48,6 +48,12 @@ interface CanCache {
 
 @Injectable()
 export class CfUserServiceInstancesListConfigBase implements IListConfig<APIResource<IUserProvidedServiceInstance>> {
+  protected store = inject<Store<CFAppState>>(Store);
+  private cfSpaceService = inject(CloudFoundrySpaceService);
+  protected datePipe = inject(DatePipe);
+  protected currentUserPermissionsService = inject(CurrentUserPermissionsService);
+  private serviceActionHelperService = inject(ServiceActionHelperService);
+
   viewType = ListViewTypes.TABLE_ONLY;
   pageSizeOptions = defaultPaginationPageSizeOptionsTable;
   dataSource: ListDataSource<APIResource<IUserProvidedServiceInstance>>;
@@ -181,13 +187,9 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
     return can;
   }
 
-  constructor(
-    protected store: Store<CFAppState>,
-    private cfSpaceService: CloudFoundrySpaceService,
-    protected datePipe: DatePipe,
-    protected currentUserPermissionsService: CurrentUserPermissionsService,
-    private serviceActionHelperService: ServiceActionHelperService
-  ) {
+  constructor() {
+    const cfSpaceService = this.cfSpaceService;
+
     this.dataSource = new CfSpacesUserServiceInstancesDataSource(cfSpaceService.cfGuid, cfSpaceService.spaceGuid, this.store, this);
     this.serviceInstanceColumns.find(column => column.columnId === 'attachedApps').cellConfig = {
       breadcrumbs: 'space-user-services'

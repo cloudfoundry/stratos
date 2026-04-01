@@ -19,10 +19,12 @@
           } @else {
             <div class="app-chip__label">{{chip[displayProperty]}}</div>
           }
-          @if (chip.clearAction && !(chip.hideClearButton$ | async)) {
-            @if (!chip.busy || !(chip.busy | async)) {
-              <span
+          @if (chip.clearAction && (chip.hideClearButton$ | async) === false) {
+            @if (!chip.busy || (chip.busy | async) === false) {
+              <span role="button" tabindex="0"
                 (click)="chip.clearAction(chip)"
+                (keydown.enter)="chip.clearAction(chip)"
+                (keydown.space)="chip.clearAction(chip); $event.preventDefault()"
                 class="material-icons text-sm app-chip__close cursor-pointer hover:text-red-600">
                 close
               </span>

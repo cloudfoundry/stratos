@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, VERSION } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, VERSION, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Meta } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
@@ -7,8 +7,9 @@ import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
-import { MetadataItemComponent } from '../../../shared/components/metadata-item/metadata-item.component';
 import { BooleanIndicatorComponent } from '../../../shared/components/boolean-indicator/boolean-indicator.component';
+import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
+import { InfoCardComponent } from '../../../shared/components/info-card/info-card.component';
 import { BUILD_INFO } from '../../../environments/build-info';
 
 @Component({
@@ -19,12 +20,16 @@ import { BUILD_INFO } from '../../../environments/build-info';
   imports: [
     CommonModule,
     PageHeaderComponent,
-    MetadataItemComponent,
-    BooleanIndicatorComponent
+    BooleanIndicatorComponent,
+    CustomIconComponent,
+    InfoCardComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DiagnosticsPageComponent implements OnInit {
+  private meta = inject(Meta);
+  private store = inject<Store<GeneralEntityAppState>>(Store);
+
 
   sessionData$!: Observable<SessionData>;
   versionNumber$!: Observable<string>;
@@ -48,11 +53,6 @@ export class DiagnosticsPageComponent implements OnInit {
   public gitHubRepositoryLink: string;
   public gitBranchLink: string;
   public gitCommitLink: string;
-
-  constructor(
-    private meta: Meta,
-    private store: Store<GeneralEntityAppState>,
-  ) { }
 
   ngOnInit() {
 
@@ -86,10 +86,10 @@ export class DiagnosticsPageComponent implements OnInit {
       })
     );
 
-    this.gitProject = this.getMeta('stratos_git_project');
-    this.gitBranch = this.getMeta('stratos_git_branch');
-    this.gitCommit = this.getMeta('stratos_git_commit');
-    this.buildDate = this.getMeta('stratos_build_date');
+    this.gitProject = this.buildInfo.gitProject || this.getMeta('stratos_git_project');
+    this.gitBranch = this.buildInfo.gitBranch || this.getMeta('stratos_git_branch');
+    this.gitCommit = this.buildInfo.gitCommit || this.getMeta('stratos_git_commit');
+    this.buildDate = this.buildInfo.buildDate || this.getMeta('stratos_build_date');
 
     // Don't show branch if it is recorded as HEAD
     if (this.gitBranch === 'HEAD') {
@@ -97,12 +97,12 @@ export class DiagnosticsPageComponent implements OnInit {
     }
 
     this.gitHubRepository = this.getGitHubProject(this.gitProject);
-    if (!!this.gitHubRepository) {
+    if (this.gitHubRepository) {
       this.gitHubRepositoryLink = `https://github.com/${this.gitHubRepository}`;
-      if (!!this.gitBranch) {
+      if (this.gitBranch) {
         this.gitBranchLink = `https://github.com/${this.gitHubRepository}/tree/${this.gitBranch}`;
       }
-      if (!!this.gitCommit) {
+      if (this.gitCommit) {
         this.gitCommitLink = `https://github.com/${this.gitHubRepository}/commit/${this.gitCommit}`;
       }
     }
@@ -122,6 +122,13 @@ export class DiagnosticsPageComponent implements OnInit {
       return projectUrl.substr(19);
     }
     return '';
+  }
+
+  getMigrationSummary(migrations: any[]): string {
+    if (!migrations || migrations.length === 0) return 'None';
+    const applied = migrations.filter(m => m.is_applied).length;
+    if (applied === migrations.length) return `${migrations.length} applied`;
+    return `${applied}/${migrations.length} applied`;
   }
 
   private getMeta(name: string): string {

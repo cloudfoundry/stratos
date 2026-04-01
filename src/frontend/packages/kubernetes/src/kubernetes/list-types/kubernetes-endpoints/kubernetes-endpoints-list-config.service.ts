@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
@@ -22,6 +22,8 @@ import { KubernetesEndpointsDataSource } from './kubernetes-endpoints-data-sourc
   providedIn: 'root'
 })
 export class KubernetesEndpointsListConfigService implements IListConfig<EndpointModel> {
+  private store = inject<Store<AppState>>(Store);
+
   columns: ITableColumn<EndpointModel>[];
   isLocal = true;
   dataSource: BaseEndpointsDataSource;
@@ -35,13 +37,12 @@ export class KubernetesEndpointsListConfigService implements IListConfig<Endpoin
   enableTextFilter = true;
 
 
-  constructor(
-    private store: Store<AppState>,
-    paginationMonitorFactory: PaginationMonitorFactory,
-    entityMonitorFactory: EntityMonitorFactory,
-    internalEventMonitorFactory: InternalEventMonitorFactory,
-    endpointsListConfigService: EndpointsListConfigService,
-  ) {
+  constructor() {
+    const paginationMonitorFactory = inject(PaginationMonitorFactory);
+    const entityMonitorFactory = inject(EntityMonitorFactory);
+    const internalEventMonitorFactory = inject(InternalEventMonitorFactory);
+    const endpointsListConfigService = inject(EndpointsListConfigService);
+
     this.columns = endpointsListConfigService.columns.filter(column => {
       return column.columnId !== 'type';
     });

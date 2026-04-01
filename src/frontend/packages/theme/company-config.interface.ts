@@ -2,6 +2,7 @@ export interface CompanyConfig {
   // Company branding
   company: {
     name: string;
+    displayName?: string;  // Shown in nav/title — falls back to name
     website?: string;
     supportEmail?: string;
   };
@@ -57,5 +58,23 @@ export interface CompanyConfig {
   footer: {
     copyright?: string;     // Copyright text
     additionalInfo?: string; // Additional footer information
+  };
+
+  // Deployment defaults — overridden by user/page preferences once set
+  defaults?: {
+    // User preference defaults (Layer 3)
+    themeMode?: 'light' | 'dark' | 'system';
+    sidebarOpen?: boolean;
+    sidebarPinned?: boolean;
+    pollingEnabled?: boolean;
+    sessionTimeout?: boolean;
+    gravatarEnabled?: boolean;
+
+    // Page preference defaults (Layer 4)
+    pageSize?: number;
+    pageSizeCards?: number[];
+    pageSizeTable?: number[];
+    viewMode?: 'table' | 'cards';
+    sortDirection?: 'asc' | 'desc';
   };
 }

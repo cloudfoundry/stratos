@@ -2,6 +2,7 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, of, BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { APP_GUID, CF_GUID } from '@stratosui/core';
 import { EntityService, RequestInfoState, APIResource, EntityInfo } from '@stratosui/store';
 import { ApplicationService } from '@stratosui/cloud-foundry';
 import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../src/cf-api.types';
@@ -105,28 +106,14 @@ export class ApplicationServiceMock {
 }
 
 export function generateTestApplicationServiceProvider(appGuid: string, cfGuid: string) {
-  return {
-    provide: ApplicationService,
-    useFactory: (
-      store: Store<CFAppState>,
-      applicationStateService: ApplicationStateService,
-      applicationEnvVarsService: ApplicationEnvVarsHelper,
-    ) => {
-      const appService = new ApplicationService(
-        cfGuid,
-        appGuid,
-        store,
-        applicationStateService,
-        applicationEnvVarsService,
-      );
-      return appService;
+  return [
+    { provide: CF_GUID, useValue: cfGuid },
+    { provide: APP_GUID, useValue: appGuid },
+    {
+      provide: ApplicationService,
+      useFactory: () => new ApplicationService(),
     },
-    deps: [
-      Store,
-      ApplicationStateService,
-      ApplicationEnvVarsHelper,
-    ]
-  };
+  ];
 }
 
 

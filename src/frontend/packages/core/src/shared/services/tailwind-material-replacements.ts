@@ -1,10 +1,5 @@
 import { InjectionToken } from '@angular/core';
 
-// Type aliases for Material Design replacements
-// MatSnackBar is exported from tailwind-snackbar.service
-export type MatSnackBarRef<T> = any; // Will be replaced with TailwindSnackBarRef<T>
-// SimpleSnackBar is exported from tailwind-snackbar.service
-
 // Re-export Tailwind services directly (no aliases)
 export {
   TailwindDialogService,
@@ -17,25 +12,6 @@ export {
 export {
   TailwindDefaultErrorStateMatcher as DefaultErrorStateMatcher
 } from './tailwind-error-state-matcher';
-export type MatSidenav = any; // Will be replaced with TailwindSidenav
-export type MatSidenavContainer = any; // Will be replaced with TailwindSidenavService
-// MatSort is exported from tailwind-sort.service
-export type MatSortHeader = any; // Will be replaced with TailwindSortHeaderDirective
-// MatPaginator is exported from tailwind-paginator.service
-// PageEvent is exported from tailwind-paginator.service
-export type MatDrawer = any; // Will be replaced with TailwindSidenav
-
-// Additional Angular Material types
-export type MatChipInputEvent = any;
-export type MatRadioChange = any;
-export type MatCheckboxChange = any;
-export type MatIcon = any;
-export type Sort = any; // Will be replaced with TailwindSort
-
-// Angular Flex Layout types (replaced with Tailwind CSS classes)
-export type FlexLayoutModule = any;
-export type FlexModule = any;
-export type GridModule = any;
 
 // Full Material component implementations
 export {

@@ -28,7 +28,7 @@ export class CfStacksListConfigService extends BaseCfListConfig<APIResource<any>
     columnId: 'name',
     headerCell: () => 'Name',
     sort: {
-      type: 'sort',
+      type: 'natural-sort',
       orderKey: 'name',
       field: 'entity.name'
     }

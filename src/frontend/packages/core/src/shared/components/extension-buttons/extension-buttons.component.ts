@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
@@ -27,14 +27,12 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExtensionButtonsComponent implements OnInit {
+  private store = inject<Store<AppState>>(Store);
+
 
   public extensionActions: StratosActionMetadata[] = [];
 
   @Input() type!: StratosActionType;
-
-  constructor(
-    private store: Store<AppState>
-  ) { }
 
   ngOnInit() {
     this.extensionActions = getActionsFromExtensions(this.type).map(value => ({

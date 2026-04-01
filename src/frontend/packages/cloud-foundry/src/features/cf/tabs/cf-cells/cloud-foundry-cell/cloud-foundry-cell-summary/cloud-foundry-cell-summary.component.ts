@@ -1,4 +1,4 @@
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -52,12 +52,14 @@ import { ListComponent } from '../../../../../../../../core/src/shared/component
   ]
 })
 export class CloudFoundryCellSummaryComponent {
+  cfCellService = inject(CloudFoundryCellService);
+
 
   public status$: Observable<StratosStatus>;
 
-  constructor(
-    public cfCellService: CloudFoundryCellService
-  ) {
+  constructor() {
+    const cfCellService = this.cfCellService;
+
     this.status$ = cfCellService.healthy$.pipe(
       map(health => {
         if (health === undefined) {

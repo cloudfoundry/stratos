@@ -1,14 +1,5 @@
 
-import {
-  Component,
-  ComponentFactory,
-  ComponentFactoryResolver,
-  ComponentRef,
-  Injector,
-  ViewChild,
-  ViewContainerRef,
-  ChangeDetectionStrategy
-} from '@angular/core';
+import { Component, ComponentRef, ViewChild, ViewContainerRef, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
@@ -28,22 +19,15 @@ import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wr
   imports: []
 })
 export class DeployApplicationStep21Component {
+  private store = inject<Store<CFAppState>>(Store);
+
 
   validate!: Observable<boolean>;
   selectedCommit$!: Observable<GitCommit>;
 
   @ViewChild('target', { read: ViewContainerRef, static: true })
   target!: ViewContainerRef;
-  wrapperFactory: ComponentFactory<CommitListWrapperComponent>;
   wrapperRef!: ComponentRef<CommitListWrapperComponent>;
-
-  constructor(
-    private store: Store<CFAppState>,
-    private componentFactoryResolver: ComponentFactoryResolver,
-    private injector: Injector
-  ) {
-    this.wrapperFactory = this.componentFactoryResolver.resolveComponentFactory(CommitListWrapperComponent);
-  }
 
   onLeave = () => {
     this.wrapperRef.destroy();
@@ -52,7 +36,7 @@ export class DeployApplicationStep21Component {
 
   onEnter = () => {
     // Wrap the list component in another component. This means it's recreated every time to include changes in the github repo
-    this.wrapperRef = this.target.createComponent(this.wrapperFactory);
+    this.wrapperRef = this.target.createComponent(CommitListWrapperComponent);
     const wrapper = this.wrapperRef.instance as CommitListWrapperComponent;
     this.selectedCommit$ = wrapper.selectedCommit$;
     this.validate = this.selectedCommit$.pipe(

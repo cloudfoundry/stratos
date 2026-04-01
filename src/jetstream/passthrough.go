@@ -297,9 +297,22 @@ func (p *portalProxy) ProxyRequest(c echo.Context, uri *url.URL) (map[string]*ap
 	responses := make(map[string]*api.CNSIRequest)
 
 	if !longRunning {
+		// Use an overall timeout to prevent blocking forever if a goroutine hangs
+		// This prevents 504s from the upstream load balancer/gorouter
+		requestTimeout := time.Duration(p.GetConfig().HTTPClientTimeoutInSecs) * time.Second
+		if requestTimeout <= 0 {
+			requestTimeout = 60 * time.Second
+		}
+		deadline := time.After(requestTimeout)
 		for range cnsiList {
-			res := <-done
-			responses[res.GUID] = res
+			select {
+			case res := <-done:
+				responses[res.GUID] = res
+			case <-deadline:
+				// Return whatever we have so far rather than blocking
+				log.Warn("Proxy request timed out waiting for all responses")
+				return responses, nil
+			}
 		}
 	} else {
 		// Long running has a timeout

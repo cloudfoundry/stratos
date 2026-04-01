@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import {
@@ -27,6 +27,10 @@ import { CfSpaceAppsDataSource } from './cf-space-apps-data-source.service';
   providedIn: 'root'
 })
 export class CfSpaceAppsListConfigService implements IListConfig<APIResource<IApp>> {
+  private store = inject<Store<CFAppState>>(Store);
+  private datePipe = inject(DatePipe);
+  private cfSpaceService = inject(CloudFoundrySpaceService);
+
   isLocal = false;
   viewType = ListViewTypes.TABLE_ONLY;
   enableTextFilter = false;
@@ -84,11 +88,9 @@ export class CfSpaceAppsListConfigService implements IListConfig<APIResource<IAp
     }),
   ]
 
-  constructor(
-    private store: Store<CFAppState>,
-    private datePipe: DatePipe,
-    private cfSpaceService: CloudFoundrySpaceService
-  ) {
+  constructor() {
+    const cfSpaceService = this.cfSpaceService;
+
     this.dataSource = new CfSpaceAppsDataSource(this.store, cfSpaceService, this);
   }
 

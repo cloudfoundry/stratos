@@ -1,4 +1,4 @@
-import { Directive, Input, OnDestroy, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
+import { Directive, Input, OnDestroy, OnInit, TemplateRef, ViewContainerRef, inject } from '@angular/core';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -10,6 +10,10 @@ selector: '[appUserPermission]',
 standalone: true
 })
 export class UserPermissionDirective implements OnDestroy, OnInit {
+  private templateRef = inject<TemplateRef<any>>(TemplateRef);
+  private viewContainer = inject(ViewContainerRef);
+  private currentUserPermissionsService = inject(CurrentUserPermissionsService);
+
   @Input()
   public appUserPermission!: PermissionTypes[];
 
@@ -17,12 +21,6 @@ export class UserPermissionDirective implements OnDestroy, OnInit {
   public appUserPermissionEndpointGuid!: string;
 
   private canSub!: Subscription;
-
-  constructor(
-    private templateRef: TemplateRef<any>,
-    private viewContainer: ViewContainerRef,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-  ) { }
 
   public ngOnInit() {
     // execute a permission check for every give permissiontype

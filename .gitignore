@@ -26,6 +26,12 @@ src/frontend/packages/devkit/package-lock.json
 .vscode/launch.json
 !.vscode/extensions.json
 
+# Site-specific overrides
+site.mk
+
+# Screenshot comparison artifacts
+e2e-screenshots/
+
 # misc
 /.angular/cache
 /.sass-cache
@@ -96,6 +102,7 @@ src/backend/*/vendor/
 cl.resume
 build/dev_config.json
 e2e-reports/
+e2e/.auth/
 .stratos-git-metadata.json
 src/jetstream/jetstream
 console-database.db

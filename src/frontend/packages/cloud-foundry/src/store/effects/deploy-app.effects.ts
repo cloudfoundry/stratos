@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { ApplicationRef, Injectable } from '@angular/core';
+import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { GitSCMService } from '@stratosui/git';
@@ -21,13 +21,12 @@ import { selectDeployAppState } from '../selectors/deploy-application.selector';
   providedIn: 'root'
 })
 export class DeployAppEffects {
-  constructor(
-    private actions$: Actions,
-    private store: Store<CFAppState>,
-    private httpClient: HttpClient,
-    private gitSCMService: GitSCMService,
-    private appRef: ApplicationRef
-  ) { }
+  private actions$ = inject(Actions);
+  private store = inject<Store<CFAppState>>(Store);
+  private httpClient = inject(HttpClient);
+  private gitSCMService = inject(GitSCMService);
+  private appRef = inject(ApplicationRef);
+
 
   
   checkAppExists$ = createEffect(() => this.actions$.pipe(

@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CustomTooltipDirective } from '@stratosui/core';
 import { RouterModule } from '@angular/router';
 
@@ -30,7 +30,9 @@ export class EulaPageComponent {
   public eulaHtml = '';
 
   // Load the EULA
-  constructor(http: HttpClient) {
+  constructor() {
+    const http = inject(HttpClient);
+
     http.get('/core/assets/eula.html', {responseType: 'text'}).subscribe(
       (html: string) => this.eulaHtml = html,
       () => this.eulaHtml = 'An error occurred retrieving the EULA'

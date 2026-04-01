@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { Store } from '@ngrx/store';
@@ -32,15 +32,16 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
   ]
 })
 export class CloudFoundryOrganizationsComponent {
+  cfEndpointService = inject(CloudFoundryEndpointService);
+  private store = inject<Store<any>>(Store);
+
   public canAddOrg$: Observable<boolean>;
 
   public provider: ActionListConfigProvider<APIResource<IOrganization>>;
 
-  constructor(
-    public cfEndpointService: CloudFoundryEndpointService,
-    currentUserPermissionsService: CurrentUserPermissionsService,
-    private store: Store<any>,
-  ) {
+  constructor() {
+    const currentUserPermissionsService = inject(CurrentUserPermissionsService);
+
     this.canAddOrg$ = currentUserPermissionsService.can(CfCurrentUserPermissions.ORGANIZATION_CREATE, this.cfEndpointService.cfGuid);
 
     this.provider = this.createProvider(this.cfEndpointService.cfGuid);
@@ -58,7 +59,7 @@ export class CloudFoundryOrganizationsComponent {
         columnId: 'name',
         headerCell: () => 'Name',
         sort: {
-          type: 'sort',
+          type: 'natural-sort',
           orderKey: 'name',
           field: 'entity.name'
         }

@@ -29,21 +29,6 @@ body {
   }
 }
 
-// Dashboard specific styles
-.dashboard {
-  .mat-drawer-content {
-    @apply overflow-visible;
-  }
-  .mat-drawer-side {
-    @apply border-0;
-  }
-}
-
-// Legacy Material styles that may still be needed
-button.mat-simple-snackbar-action {
-  @apply ml-0;
-}
-
 // Theme feature flags
 .dark-theme-supported {
   @apply hidden;

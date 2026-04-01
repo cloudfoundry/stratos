@@ -41,10 +41,6 @@
   form {
     min-width: 400px;
     width: 100%;
-
-    mat-checkbox {
-      padding: 6px 0;
-    }
   }
   app-steppers {
     @apply flex flex-1 my-6; // 24px = spacing[6]
@@ -55,7 +51,7 @@
       @apply mt-0 max-w-none;
     }
     .form-field,
-    .mat-form-field {
+    .custom-form-field {
       @apply max-w-[450px];
     }
     .steppers__contents {

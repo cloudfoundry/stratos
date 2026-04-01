@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, of } from 'rxjs';
@@ -41,6 +41,11 @@ import { ManageUsersSetUsernamesComponent } from './manage-users-set-usernames/m
   ]
 })
 export class UsersRolesComponent implements OnDestroy {
+  private store = inject<Store<CFAppState>>(Store);
+  private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+  private cfUserService = inject(CfUserService);
+  private route = inject(ActivatedRoute);
+
   initialUsers$!: Observable<CfUser[]>;
   singleUser$!: Observable<CfUser | null>;
   defaultCancelUrl!: string;
@@ -48,12 +53,10 @@ export class UsersRolesComponent implements OnDestroy {
   setUsernames = false;
   title$!: Observable<string>;
 
-  constructor(
-    private store: Store<CFAppState>,
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private cfUserService: CfUserService,
-    private route: ActivatedRoute
-  ) {
+  constructor() {
+    const activeRouteCfOrgSpace = this.activeRouteCfOrgSpace;
+    const route = this.route;
+
 
     this.defaultCancelUrl = this.createReturnUrl(activeRouteCfOrgSpace);
 

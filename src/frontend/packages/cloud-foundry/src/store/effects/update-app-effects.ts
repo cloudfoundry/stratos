@@ -1,4 +1,4 @@
-import { ApplicationRef, Injectable } from '@angular/core';
+import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { mergeMap } from 'rxjs/operators';
 
@@ -9,12 +9,9 @@ import { cfEntityCatalog } from '../../cf-entity-catalog';
 
 @Injectable()
 export class UpdateAppEffects {
+  private actions$ = inject(Actions);
+  private appRef = inject(ApplicationRef);
 
-  constructor(
-    private actions$: Actions,
-    private appRef: ApplicationRef
-  ) {
-  }
 
    UpdateAppInStore$ = createEffect(() => this.actions$.pipe(
     ofType<WrapperRequestActionSuccess>(CF_APP_UPDATE_SUCCESS),
@@ -28,7 +25,7 @@ export class UpdateAppEffects {
             // This is done so the app metadata env vars environment_json matches that of the app
             actions.push(cfEntityCatalog.appEnvVar.actions.getMultiple(action.apiAction.guid, action.apiAction.endpointGuid));
             break;
-          case AppMetadataTypes.STATS:
+          case AppMetadataTypes.STATS: {
             const statsAction = cfEntityCatalog.appStats.actions.getMultiple(
               action.apiAction.guid,
               action.apiAction.endpointGuid as string
@@ -42,6 +39,7 @@ export class UpdateAppEffects {
               actions.push(statsAction);
             }
             break;
+          }
           case AppMetadataTypes.SUMMARY:
             actions.push(cfEntityCatalog.appSummary.actions.get(action.apiAction.guid, action.apiAction.endpointGuid));
             break;

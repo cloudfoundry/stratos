@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input, OnInit  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
@@ -33,6 +33,12 @@ export interface IPageSideNavTab extends StratosTabMetadata {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PageSideNavComponent implements OnInit {
+  tabNavService = inject(TabNavService);
+  private store = inject<Store<AppState>>(Store);
+  private esf = inject(EntityServiceFactory);
+  private activatedRoute = inject(ActivatedRoute);
+  private cups = inject(CurrentUserPermissionsService);
+
 
   pTabs: IPageSideNavTab[] = [];
   @Input() set tabs(tabs: IPageSideNavTab[]) {
@@ -57,13 +63,7 @@ export class PageSideNavComponent implements OnInit {
   public activeTab$!: Observable<string>;
   public breadcrumbs$!: Observable<IBreadcrumb[]>;
   public isMobile$: Observable<boolean>;
-  constructor(
-    public tabNavService: TabNavService,
-    private store: Store<AppState>,
-    private esf: EntityServiceFactory,
-    private activatedRoute: ActivatedRoute,
-    private cups: CurrentUserPermissionsService
-  ) {
+  constructor() {
     this.isMobile$ = this.store.select(selectIsMobile);
   }
 

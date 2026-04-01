@@ -11,7 +11,7 @@ import { ConfirmationDialogConfig } from '../../../../../core/src/shared/compone
 import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
 import { TailwindJsonSchemaFormComponent } from '../../../../../core/src/shared/components/tailwind-json-schema-form/tailwind-json-schema-form.component';
 import { MonacoEditorComponent } from '../../../../../core/src/shared/components/monaco-editor/monaco-editor.component';
-import { ThemeService } from '../../../../../store/src/theme.service';
+import { StratosBrandingService } from '@stratosui/theme';
 import { diffObjects } from './diffvalues';
 import { generateJsonSchemaFromObject } from './json-schema-generator';
 import { mergeObjects } from './merge';
@@ -158,7 +158,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   );  private elRef = inject(ElementRef);
   private renderer = inject(Renderer2);
   private httpClient = inject(HttpClient);
-  private themeService = inject(ThemeService);
+  private branding = inject(StratosBrandingService);
   private confirmDialog = inject(ConfirmationDialogService);
 
   ngOnInit(): void {
@@ -301,9 +301,9 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
     });
 
     // Watch for theme changes - set light/dark theme in the monaco editor as the Stratos theme changes
-    this.themeSub = this.themeService.getTheme().subscribe((theme: any) => {
+    this.themeSub = toObservable(this.branding.isDarkMode).subscribe((isDark: boolean) => {
       const monaco = (window as any).monaco;
-      const monacoTheme = (theme.styleName === 'dark-theme') ? 'vs-dark' : 'vs';
+      const monacoTheme = isDark ? 'vs-dark' : 'vs';
       monaco.editor.setTheme(monacoTheme);
     });
   }

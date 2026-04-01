@@ -1,4 +1,4 @@
-import { inject, Inject, Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { AppState } from '../app-state';
@@ -9,15 +9,13 @@ import { EntityMonitor } from './entity-monitor';
 
 @Injectable()
 export class EntityMonitorFactory {
+  private store = inject<Store<AppState>>(Store);
+  private entityCatalog = inject<IEntityCatalog>(ENTITY_CATALOG_TOKEN);
+
 
   private monitorCache: {
     [key: string]: EntityMonitor
   } = {};
-
-  constructor(
-    private store: Store<AppState>,
-    @Inject(ENTITY_CATALOG_TOKEN) private entityCatalog: IEntityCatalog
-  ) {}
 
   public create<T>(
     id: string,

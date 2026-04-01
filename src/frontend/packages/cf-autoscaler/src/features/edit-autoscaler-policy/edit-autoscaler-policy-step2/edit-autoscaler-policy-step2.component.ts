@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
@@ -53,6 +53,10 @@ interface EditTriggerForm {
   ]
 })
 export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDirective implements OnInit, OnDestroy {
+  applicationService = inject(ApplicationService);
+  private fb = inject(FormBuilder);
+  private cdr = inject(ChangeDetectorRef);
+
 
   policyAlert = PolicyAlert;
   metricTypes = AutoscalerConstants.MetricTypes;
@@ -71,13 +75,10 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   private editAdjustmentType = 'value';
   private subs: Subscription[] = [];
 
-  constructor(
-    public applicationService: ApplicationService,
-    private fb: FormBuilder,
-    service: EditAutoscalerPolicyService,
-    route: ActivatedRoute,
-    private cdr: ChangeDetectorRef
-  ) {
+  constructor() {
+    const service = inject(EditAutoscalerPolicyService);
+    const route = inject(ActivatedRoute);
+
     super(service, route);
     this.editTriggerForm = this.fb.group<EditTriggerForm>({
       metric_type: this.fb.control('', { validators: [Validators.required, this.validateTriggerMetricType()], nonNullable: true }),

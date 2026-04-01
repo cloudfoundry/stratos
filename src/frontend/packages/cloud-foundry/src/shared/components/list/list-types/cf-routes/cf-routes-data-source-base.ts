@@ -111,8 +111,8 @@ export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResourc
     this.appGuid = appGuid;
 
     this.setMultiFilter = (changes: ListPaginationMultiFilterChange[], params: PaginationParam) => {
-      return createCfOrSpaceMultipleFilterFn(store, action, this.setQParam)
-        (changes, params);
+      const filterFn = createCfOrSpaceMultipleFilterFn(store, action, this.setQParam);
+      return filterFn(changes, params);
     };
   }
 

@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { ApplicationRef, Injectable } from '@angular/core';
+import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, flatMap, mergeMap } from 'rxjs/operators';
@@ -28,14 +28,12 @@ import { AnalysisReport } from './kube.types';
   providedIn: 'root'
 })
 export class AnalysisEffects {
-  proxyAPIVersion = environment.proxyAPIVersion;
+  private http = inject(HttpClient);
+  private actions$ = inject(Actions);
+  private store = inject<Store<AppState>>(Store);
+  private appRef = inject(ApplicationRef);
 
-  constructor(
-    private http: HttpClient,
-    private actions$: Actions,
-    private store: Store<AppState>,
-    private appRef: ApplicationRef
-  ) { }
+  proxyAPIVersion = environment.proxyAPIVersion;
 
   
   fetchAnalysisReports$ = createEffect(() => this.actions$.pipe(

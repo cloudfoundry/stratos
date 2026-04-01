@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, ReactiveFormsModule, FormBuilder, FormGroup, FormControl, ValidatorFn, Validators } from '@angular/forms';
 import { CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
@@ -48,17 +48,17 @@ interface EditProfileForm {
   ]
 })
 export class EditProfileInfoComponent implements OnInit, OnDestroy {
+  private userProfileService = inject(UserProfileService);
+  private fb = inject(FormBuilder);
+  private currentUserPermissionsService = inject(CurrentUserPermissionsService);
+
 
   editProfileForm: FormGroup<EditProfileForm>;
   showPassword: boolean[] = [];
 
   needsPasswordForEmailChange: boolean;
 
-  constructor(
-    private userProfileService: UserProfileService,
-    private fb: FormBuilder,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-  ) {
+  constructor() {
     this.editProfileForm = this.fb.group<EditProfileForm>({
       givenName: new FormControl('', { nonNullable: true }),
       familyName: new FormControl('', { nonNullable: true }),

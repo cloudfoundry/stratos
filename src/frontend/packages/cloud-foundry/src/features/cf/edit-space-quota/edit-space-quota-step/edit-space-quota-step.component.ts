@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ViewChild , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
@@ -27,6 +27,10 @@ import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-
 ]
 })
 export class EditSpaceQuotaStepComponent implements OnDestroy {
+  private store = inject<Store<AppState>>(Store);
+  private activatedRoute = inject(ActivatedRoute);
+  private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+
 
   spaceQuotaSubscription!: Subscription;
   cfGuid: string;
@@ -38,11 +42,7 @@ export class EditSpaceQuotaStepComponent implements OnDestroy {
   @ViewChild('form', { static: false })
   form!: SpaceQuotaDefinitionFormComponent;
 
-  constructor(
-    private store: Store<AppState>,
-    private activatedRoute: ActivatedRoute,
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
-  ) {
+  constructor() {
 
     this.cfGuid = this.activeRouteCfOrgSpace.cfGuid;
     this.spaceQuotaGuid = this.activatedRoute.snapshot.params.quotaId;

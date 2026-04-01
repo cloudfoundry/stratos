@@ -1,6 +1,6 @@
 
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, ElementRef, Input, SecurityContext, ViewChild  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Input, SecurityContext, ViewChild, inject } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 
 import { PreviewableComponent } from '../../previewable-component';
@@ -21,6 +21,9 @@ import { MarkdownContentObserverDirective } from './markdown-content-observer.di
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MarkdownPreviewComponent implements PreviewableComponent {
+  private httpClient = inject(HttpClient);
+  private domSanitizer = inject(DomSanitizer);
+
 
   markdownHtml!: string;
   documentUrl!: string;
@@ -36,11 +39,6 @@ export class MarkdownPreviewComponent implements PreviewableComponent {
   }
 
   @ViewChild('markdown', { static: true }) public markdown: ElementRef;
-
-  constructor(
-    private httpClient: HttpClient,
-    private domSanitizer: DomSanitizer
-  ) { }
 
   private parseInline(tokens: any[]): string {
     return tokens.map((token: any) => {

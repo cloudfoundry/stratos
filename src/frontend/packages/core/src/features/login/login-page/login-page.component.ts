@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, computed, ApplicationRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, computed, ApplicationRef, inject } from '@angular/core';
 import { NgForm, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -8,7 +8,7 @@ import { InternalAppState, RouterRedirect, Login, VerifySession, AuthState } fro
 import { LOGIN_SUCCESS } from '../../../../../store/src/actions/auth.actions';
 import { Observable, combineLatest, BehaviorSubject } from 'rxjs';
 import { map, startWith, distinctUntilChanged, shareReplay, filter, tap, switchMap, take } from 'rxjs/operators';
-import { StratosThemeService } from '../../../../../theme/theme.service';
+import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
 
 import { queryParamMap } from '../../../core/auth-guard.service';
 import { IntroScreenComponent } from '../../../shared/components/intro-screen/intro-screen.component';
@@ -28,36 +28,42 @@ import { ShowHideButtonComponent } from '../../../core/show-hide-button/show-hid
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoginPageComponent implements OnInit {
+  private store = inject<Store<Pick<InternalAppState, 'endpoints' | 'auth'>>>(Store);
+  private branding = inject(StratosBrandingService);
+  private router = inject(Router);
+  private actions$ = inject(Actions);
+  private appRef = inject(ApplicationRef);
+
 
   // Theme-related signals
   public loginBackground = computed(() => {
-    const theme = this.themeService.theme();
+    const theme = this.branding.theme();
     const bgImage = theme?.login?.backgroundImage;
     return bgImage ? `url(${bgImage})` : 'none';
   });
 
   public loginBackgroundColor = computed(() =>
-    this.themeService.theme()?.login?.backgroundColor || '#ffffff'
+    this.branding.theme()?.login?.backgroundColor || '#ffffff'
   );
 
   public loginCardBackground = computed(() =>
-    this.themeService.theme()?.login?.cardBackground || '#ffffff'
+    this.branding.theme()?.login?.cardBackground || '#ffffff'
   );
 
   public themeLogo = computed(() =>
-    this.themeService.theme()?.branding?.logo || '/core/assets/logo.png'
+    this.branding.theme()?.branding?.logo || '/core/assets/logo.png'
   );
 
   public themeTitle = computed(() =>
-    this.themeService.theme()?.branding?.loginTitle || 'Stratos'
+    this.branding.theme()?.branding?.loginTitle || 'Stratos'
   );
 
   public themeDisplayName = computed(() =>
-    this.themeService.theme()?.branding?.displayName || ''
+    this.branding.theme()?.branding?.displayName || ''
   );
 
   public themeSubtitle = computed(() =>
-    this.themeService.theme()?.branding?.loginSubtitle || ''
+    this.branding.theme()?.branding?.loginSubtitle || ''
   );
 
   // Form state
@@ -175,14 +181,6 @@ export class LoginPageComponent implements OnInit {
     sessionStorage.removeItem(this.REDIRECT_COUNTER_KEY);
     this.redirectAttemptsSubject$.next(0);
   }
-
-  constructor(
-    private store: Store<Pick<InternalAppState, 'endpoints' | 'auth'>>,
-    private themeService: StratosThemeService,
-    private router: Router,
-    private actions$: Actions,
-    private appRef: ApplicationRef
-  ) {}
 
   ngOnInit() {
     // Initialize the BehaviorSubject with current value

@@ -28,8 +28,8 @@
       <p>Protect the backup by providing a password. You will need this password when restoring from this backup</p>
       <form [formGroup]="passwordForm" class="stepper-form">
         <div class="form-field">
-          <label class="form-label">Password</label>
-          <input class="form-input" formControlName="password" name="password" required
+          <label class="form-label" for="backup-password">Password</label>
+          <input class="form-input" id="backup-password" formControlName="password" name="password" required
             [type]="!showPassword[1] ? 'password' : 'text'">
           <span class="form-suffix">
             <app-show-hide-button (changed)="showPassword[1] = $event"></app-show-hide-button>
@@ -45,8 +45,8 @@
           }
         </div>
         <div class="form-field">
-          <label class="form-label">Confirm Password</label>
-          <input class="form-input" formControlName="password2" name="password2" required
+          <label class="form-label" for="backup-password2">Confirm Password</label>
+          <input class="form-input" id="backup-password2" formControlName="password2" name="password2" required
             [type]="!showPassword[2] ? 'password' : 'text'">
           <span class="form-suffix">
             <app-show-hide-button (changed)="showPassword[2] = $event"></app-show-hide-button>

@@ -1,4 +1,4 @@
-import { ComponentFactoryResolver, ComponentRef, Injectable, ViewContainerRef } from '@angular/core';
+import { ComponentRef, Injectable, ViewContainerRef, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { stratosEntityCatalog, RouterNav, AppState, entityCatalog, EndpointModel, ActionState } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
@@ -55,15 +55,14 @@ function combineCreateVisibles(
 
 @Injectable()
 export class EndpointListHelper {
-  constructor(
-    private store: Store<AppState>,
-    private dialog: TailwindDialogService,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-    private confirmDialog: ConfirmationDialogService,
-    private snackBarService: SnackBarService,
-    private sessionService: SessionService,
-    private userProfileService: UserProfileService
-  ) { }
+  private store = inject<Store<AppState>>(Store);
+  private dialog = inject(TailwindDialogService);
+  private currentUserPermissionsService = inject(CurrentUserPermissionsService);
+  private confirmDialog = inject(ConfirmationDialogService);
+  private snackBarService = inject(SnackBarService);
+  private sessionService = inject(SessionService);
+  private userProfileService = inject(UserProfileService);
+
 
   endpointActions(includeSeparators = false): IListAction<EndpointModel>[] {
     // Add any additional actions that are per endpoint type
@@ -228,10 +227,9 @@ export class EndpointListHelper {
     });
   }
 
-  createEndpointDetails(listDetailsComponent: any, container: ViewContainerRef, componentFactoryResolver: ComponentFactoryResolver):
+  createEndpointDetails(listDetailsComponent: any, container: ViewContainerRef):
     EndpointDetailsContainerRefs {
-    const componentFactory = componentFactoryResolver.resolveComponentFactory<EndpointListDetailsComponent>(listDetailsComponent);
-    const componentRef = container.createComponent<EndpointListDetailsComponent>(componentFactory);
+    const componentRef = container.createComponent<EndpointListDetailsComponent>(listDetailsComponent);
     const component = isEndpointListDetailsComponent(componentRef.instance);
     const refs = {
       componentRef,

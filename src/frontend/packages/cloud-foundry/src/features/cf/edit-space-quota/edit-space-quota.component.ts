@@ -1,4 +1,4 @@
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { PageHeaderComponent, StepComponent, SteppersComponent } from '@stratosui/core';
@@ -26,10 +26,10 @@ import { EditSpaceQuotaStepComponent } from './edit-space-quota-step/edit-space-
 })
 export class EditSpaceQuotaComponent {
   cfSpaceQuotaUrl: string;
-  constructor(
-    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    activatedRoute: ActivatedRoute
-  ) {
+  constructor() {
+    const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+    const activatedRoute = inject(ActivatedRoute);
+
     const cfId = activeRouteCfOrgSpace.cfGuid;
     const orgId = activeRouteCfOrgSpace.orgGuid;
     const spaceQuotaId = activatedRoute.snapshot.params.quotaId;

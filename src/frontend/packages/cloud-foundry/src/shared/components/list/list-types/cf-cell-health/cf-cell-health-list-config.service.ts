@@ -1,6 +1,6 @@
 /* tslint:disable:max-line-length */
 import { DatePipe } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { first, tap } from 'rxjs/operators';
@@ -31,6 +31,10 @@ import { CfCellHealthDataSource, CfCellHealthEntry, CfCellHealthState } from './
   providedIn: 'root'
 })
 export class CfCellHealthListConfigService extends BaseCfListConfig<CfCellHealthEntry> {
+  private store = inject<Store<CFAppState>>(Store);
+  private datePipe = inject(DatePipe);
+  private paginationMonitorFactory = inject(PaginationMonitorFactory);
+
 
   dataSource!: CfCellHealthDataSource;
   defaultView = 'table' as ListView;
@@ -50,11 +54,9 @@ export class CfCellHealthListConfigService extends BaseCfListConfig<CfCellHealth
     showText: true
   };
 
-  constructor(
-    private store: Store<CFAppState>,
-    cloudFoundryCellService: CloudFoundryCellService,
-    private datePipe: DatePipe,
-    private paginationMonitorFactory: PaginationMonitorFactory) {
+  constructor() {
+    const cloudFoundryCellService = inject(CloudFoundryCellService);
+
     super();
 
     this.init$ = this.createMetricsAction(cloudFoundryCellService.cfGuid, cloudFoundryCellService.cellId).pipe(

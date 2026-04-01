@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -29,14 +29,14 @@ import {
   ]
 })
 export class AutoscalerScaleHistoryPageComponent implements OnInit {
+  applicationService = inject(ApplicationService);
+  private cdr = inject(ChangeDetectorRef);
+
 
   parentUrl: string;
   applicationName$!: Observable<string>;
 
-  constructor(
-    public applicationService: ApplicationService,
-    private cdr: ChangeDetectorRef
-  ) {
+  constructor() {
     this.parentUrl = `/applications/${this.applicationService.cfGuid}/${this.applicationService.appGuid}/autoscale`;
   }
 

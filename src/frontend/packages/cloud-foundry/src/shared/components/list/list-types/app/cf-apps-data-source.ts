@@ -119,8 +119,8 @@ export class CfAppsDataSource extends CFListDataSource<APIResource> {
   }
 
   public setMultiFilter(changes: ListPaginationMultiFilterChange[], params: PaginationParam) {
-    return createCfOrSpaceMultipleFilterFn(this.store as Store<CFAppState>, this.action, this.setQParam)
-      (changes, params);
+    const filterFn = createCfOrSpaceMultipleFilterFn(this.store as Store<CFAppState>, this.action, this.setQParam);
+    return filterFn(changes, params);
   }
 
 }

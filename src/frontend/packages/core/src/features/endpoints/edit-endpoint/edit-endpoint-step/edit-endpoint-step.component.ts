@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -74,9 +74,9 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
   showCACertField = false;
   lastSkipSSLValue = false;
 
-  constructor(
-    activatedRoute: ActivatedRoute,
-  ) {
+  constructor() {
+    const activatedRoute = inject(ActivatedRoute);
+
     this.editEndpoint = new FormGroup<EditEndpointForm>({
       name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
       url: new FormControl('', { nonNullable: true, validators: [Validators.required] }),

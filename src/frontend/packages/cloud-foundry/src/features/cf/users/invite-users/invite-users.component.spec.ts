@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
@@ -8,16 +8,23 @@ import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 describe('InviteUsersComponent', () => {
   let component: InviteUsersComponent;
 
+  function createComponent(mock: ActiveRouteCfOrgSpace): InviteUsersComponent {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        { provide: ActiveRouteCfOrgSpace, useValue: mock },
+      ],
+    });
+    return TestBed.runInInjectionContext(() => new InviteUsersComponent());
+  }
+
   beforeEach(() => {
-    // Create mock ActiveRouteCfOrgSpace directly
-    const mockActiveRouteCfOrgSpace: ActiveRouteCfOrgSpace = {
+    component = createComponent({
       cfGuid: 'test-cf-guid',
       orgGuid: 'test-org-guid',
-      spaceGuid: 'test-space-guid'
-    };
-
-    // Create component instance directly with mock dependency
-    component = new InviteUsersComponent(mockActiveRouteCfOrgSpace);
+      spaceGuid: 'test-space-guid',
+    });
   });
 
   it('should create', () => {
@@ -25,34 +32,31 @@ describe('InviteUsersComponent', () => {
   });
 
   it('should set defaultCancelUrl correctly for space level', () => {
-    const mockActiveRouteCfOrgSpace: ActiveRouteCfOrgSpace = {
+    component = createComponent({
       cfGuid: 'cf-123',
       orgGuid: 'org-456',
-      spaceGuid: 'space-789'
-    };
-    component = new InviteUsersComponent(mockActiveRouteCfOrgSpace);
+      spaceGuid: 'space-789',
+    });
 
     expect(component.defaultCancelUrl).toBe('/cloud-foundry/cf-123/organizations/org-456/spaces/space-789/users');
   });
 
   it('should set defaultCancelUrl correctly for org level', () => {
-    const mockActiveRouteCfOrgSpace: ActiveRouteCfOrgSpace = {
+    component = createComponent({
       cfGuid: 'cf-123',
       orgGuid: 'org-456',
-      spaceGuid: ''
-    };
-    component = new InviteUsersComponent(mockActiveRouteCfOrgSpace);
+      spaceGuid: '',
+    });
 
     expect(component.defaultCancelUrl).toBe('/cloud-foundry/cf-123/organizations/org-456/users');
   });
 
   it('should set defaultCancelUrl correctly for cf level', () => {
-    const mockActiveRouteCfOrgSpace: ActiveRouteCfOrgSpace = {
+    component = createComponent({
       cfGuid: 'cf-123',
       orgGuid: '',
-      spaceGuid: ''
-    };
-    component = new InviteUsersComponent(mockActiveRouteCfOrgSpace);
+      spaceGuid: '',
+    });
 
     expect(component.defaultCancelUrl).toBe('/cloud-foundry/cf-123/users');
   });

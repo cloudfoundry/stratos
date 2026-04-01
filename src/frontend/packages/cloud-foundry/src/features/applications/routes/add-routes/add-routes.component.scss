@@ -38,7 +38,7 @@
     &-toggle {
       margin-bottom: 10px;
       margin-top: 24px;
-      mat-checkbox {
+      app-checkbox {
         margin-left: 12px;
       }
     }
@@ -47,7 +47,7 @@
       flex: 1;
       flex-direction: column;
 
-      mat-checkbox {
+      app-checkbox {
         display: inline-block;
         margin-top: 24px;
       }

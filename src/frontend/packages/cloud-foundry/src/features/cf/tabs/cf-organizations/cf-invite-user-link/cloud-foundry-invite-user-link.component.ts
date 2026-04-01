@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
@@ -27,14 +27,12 @@ interface UserInviteStepperLink {
   ]
 })
 export class CloudFoundryInviteUserLinkComponent implements OnInit {
+  private userInviteService = inject(UserInviteService);
+  private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+  private router = inject(Router);
+
 
   inviteUserDetails$!: Observable<UserInviteStepperLink | null>;
-
-  constructor(
-    private userInviteService: UserInviteService,
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private router: Router
-  ) { }
 
   ngOnInit() {
     this.inviteUserDetails$ = this.createInviteUserDetails(

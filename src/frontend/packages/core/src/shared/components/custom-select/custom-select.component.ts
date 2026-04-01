@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, Output, EventEmitter, forwardRef, ViewChild, ElementRef, TemplateRef, ContentChildren, QueryList, AfterContentInit, AfterViewInit, HostListener, OnDestroy  } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, Output, EventEmitter, forwardRef, ViewChild, ElementRef, ContentChildren, QueryList, AfterContentInit, AfterViewInit, HostListener, OnDestroy, booleanAttribute, inject } from '@angular/core';
+import { NgClass } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
@@ -10,27 +11,34 @@ export interface MatSelectChange {
 
 @Component({
   selector: 'app-option',
-  template: '<div #optionContent class="custom-option-content dark:text-slate-100 dark:hover:bg-slate-700" [class.selected]="selected" [class.disabled]="disabled" (click)="select($event)"><ng-content></ng-content></div>',
-  styleUrls: ['./custom-select.component.scss'],
+  template: `<div #optionContent
+    class="custom-option-content py-2 px-3 cursor-pointer whitespace-nowrap"
+    [class.selected]="selected"
+    [class.disabled]="disabled"
+    [ngClass]="{
+      'bg-blue-50 text-blue-700 dark:bg-slate-800 dark:text-blue-400': selected,
+      'text-content-primary dark:text-slate-100 hover:bg-gray-100 dark:hover:bg-slate-700': !selected,
+      'opacity-50 cursor-not-allowed hover:bg-transparent': disabled
+    }"
+    ><ng-content></ng-content></div>`,
+  styleUrls: ['./custom-select.component.css'],
   standalone: true,
+  imports: [NgClass],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomOptionComponent implements AfterViewInit {
+  private cdr = inject(ChangeDetectorRef);
+
   @Input() value: any;
   @Input() label?: string;
   @Input() disabled = false;
   @Input() selected = false;
 
-  @ViewChild('optionContent', { static: false }) optionContent?: ElementRef;
-
-  @Output() onSelectionChange = new EventEmitter<CustomOptionComponent>();
+  @ViewChild('optionContent', { static: true }) optionContent!: ElementRef;
 
   private _displayText?: string;
 
-  constructor(private cdr: ChangeDetectorRef) {}
-
   ngAfterViewInit() {
-    // Extract text content from projected content if no label is provided
     if (!this.label && this.optionContent) {
       this._displayText = this.optionContent.nativeElement.textContent?.trim();
       this.cdr.markForCheck();
@@ -40,26 +48,14 @@ export class CustomOptionComponent implements AfterViewInit {
   get displayText(): string {
     return this.label || this._displayText || this.value;
   }
-
-  select(event?: MouseEvent) {
-    if (this.disabled) return;
-
-    // Stop propagation to prevent document click handler from closing dropdown prematurely
-    // NOTE: This may not fully work with Angular's @HostListener, which is why we added
-    // the isOptionClick check in the parent's onDocumentClick handler
-    event?.stopPropagation();
-    event?.preventDefault();
-
-    this.onSelectionChange.emit(this);
-  }
 }
 
 @Component({
   selector: 'app-select',
   templateUrl: './custom-select.component.html',
-  styleUrls: ['./custom-select.component.scss'],
+  styleUrls: ['./custom-select.component.css'],
   standalone: true,
-  imports: [],
+  imports: [NgClass],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
@@ -70,9 +66,12 @@ export class CustomOptionComponent implements AfterViewInit {
   ]
 })
 export class CustomSelectComponent implements ControlValueAccessor, AfterContentInit, OnDestroy {
+  private cdr = inject(ChangeDetectorRef);
+  private elementRef = inject(ElementRef);
+
   @Input() disabled = false;
   @Input() placeholder = '';
-  @Input() multiple = false;
+  @Input({ transform: booleanAttribute }) multiple = false;
   @Input() required = false;
   @Input() name!: string;
   @Input() id!: string;
@@ -93,7 +92,7 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
 
   @ContentChildren(CustomOptionComponent) options: QueryList<CustomOptionComponent>;
   @ViewChild('selectTrigger', { static: true }) selectTrigger!: ElementRef;
-  @ViewChild('selectOptions', { static: false }) selectOptions?: ElementRef;
+  @ViewChild('selectOptions', { static: true }) selectOptions!: ElementRef;
 
   isOpen = false;
   selectedValues: any[] = [];
@@ -102,44 +101,28 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   dropdownLeft = '0px';
   dropdownWidth = '0px';
 
+  // Interaction lock: ignore external writeValue while user is actively selecting in multi-select
+  private _interacting = false;
+
   private _onChange = (value: any) => {};
   private _onTouched = () => {};
   private _subscriptions: Subscription[] = [];
 
-  constructor(private cdr: ChangeDetectorRef) {}
-
   ngAfterContentInit() {
-    // Subscribe to option selection changes
-    this.subscribeToOptions();
-
-    // Subscribe to changes in the options list (for dynamic options)
+    // Sync option visual state when options change (dynamic @for lists)
     const optionsChangeSub = this.options.changes.subscribe(() => {
-      this.subscribeToOptions();
       this.checkAutoSelect();
+      this.updateOptions();
     });
     this._subscriptions.push(optionsChangeSub);
 
-    // Check for auto-select after initial options are available
     this.checkAutoSelect();
-
-    // Ensure display value is updated after content init
     this.updateDisplayValue();
+    this.updateOptions();
   }
 
   ngOnDestroy() {
-    // Clean up subscriptions
     this._subscriptions.forEach(sub => sub.unsubscribe());
-  }
-
-  private subscribeToOptions() {
-    if (this.options) {
-      this.options.forEach(option => {
-        const sub = option.onSelectionChange.subscribe(selectedOption => {
-          this.selectOption(selectedOption);
-        });
-        this._subscriptions.push(sub);
-      });
-    }
   }
 
   private checkAutoSelect() {
@@ -170,8 +153,29 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
     }
 
     this.isOpen = !this.isOpen;
+    this._interacting = this.isOpen && this.multiple;
     this._onTouched();
     this.cdr.markForCheck();
+  }
+
+  /**
+   * Event delegation handler for option clicks.
+   * Finds the clicked option by matching the DOM element to the
+   * ContentChildren QueryList, bypassing subscription timing issues.
+   */
+  onOptionsClick(event: MouseEvent) {
+    const clickTarget = event.target as HTMLElement;
+    const target = clickTarget.closest('.custom-option-content');
+    if (!target) return;
+
+    // Find the matching option component by DOM element match
+    const option = this.options?.find(opt =>
+      opt.optionContent?.nativeElement === target
+    );
+
+    if (option) {
+      this.selectOption(option);
+    }
   }
 
   selectOption(option: CustomOptionComponent) {
@@ -180,9 +184,9 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
     if (this.multiple) {
       const index = this.selectedValues.indexOf(option.value);
       if (index === -1) {
-        this.selectedValues.push(option.value);
+        this.selectedValues = [...this.selectedValues, option.value];
       } else {
-        this.selectedValues.splice(index, 1);
+        this.selectedValues = this.selectedValues.filter((_, i) => i !== index);
       }
     } else {
       this.selectedValues = [option.value];
@@ -201,17 +205,16 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
     });
 
     this.valueChange.emit(value);
-
-    // Ensure change detection runs after selection
     this.cdr.markForCheck();
   }
 
   private updateDisplayValue() {
     if (this.selectedValues.length === 0) {
       this.displayValue = '';
-    } else if (this.multiple) {
+    } else if (this.multiple && this.selectedValues.length > 1) {
       this.displayValue = `${this.selectedValues.length} selected`;
     } else {
+      // Single selection, or multi with exactly 1 selected — show the item name
       if (this.options) {
         const selectedOption = this.options.find(opt => opt.value === this.selectedValues[0]);
         this.displayValue = selectedOption ? selectedOption.displayText : this.selectedValues[0];
@@ -225,13 +228,24 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   private updateOptions() {
     if (this.options) {
       this.options.forEach(option => {
-        option.selected = this.selectedValues.includes(option.value);
+        const isSelected = this.selectedValues.includes(option.value);
+        if (option.selected !== isSelected) {
+          option.selected = isSelected;
+          option['cdr'].markForCheck();
+        }
       });
     }
   }
 
   // ControlValueAccessor implementation
   writeValue(value: any): void {
+    // Interaction lock: ignore external writes while user is actively selecting.
+    // Always allow clears (reset button) even during interaction.
+    if (this._interacting && value !== null && value !== undefined &&
+        (!Array.isArray(value) || value.length > 0)) {
+      return;
+    }
+
     if (this.multiple && Array.isArray(value)) {
       this.selectedValues = value || [];
     } else if (!this.multiple && value !== undefined && value !== null) {
@@ -261,27 +275,16 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
 
     const target = event.target as HTMLElement;
 
-    // CRITICAL FIX: Check if click is on an option element first
-    // This prevents the dropdown from closing before the option's click handler runs
-    const isOptionClick = target.closest('.custom-option-content');
-    if (isOptionClick) {
-      // Let the option's click handler process this - don't interfere
+    // Check if click is inside this component (trigger, dropdown, or option).
+    // The dropdown is rendered inside the host element, so a single
+    // contains() check covers all internal clicks — including option
+    // clicks where stopPropagation doesn't prevent the HostListener.
+    if (this.elementRef.nativeElement.contains(target)) {
       return;
     }
 
-    // Check if clicked inside the select component
-    const clickedTrigger = this.selectTrigger.nativeElement.contains(target);
-
-    // Check if clicked inside dropdown (with null safety for ViewChild)
-    // The ViewChild may not be available immediately after opening
-    const clickedDropdown = this.selectOptions?.nativeElement?.contains(target) || false;
-
-    const clickedInside = clickedTrigger || clickedDropdown;
-
-    if (!clickedInside) {
-      this.isOpen = false;
-      // CRITICAL: Mark for check in OnPush + zoneless mode
-      this.cdr.markForCheck();
-    }
+    this.isOpen = false;
+    this._interacting = false;
+    this.cdr.markForCheck();
   }
 }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { MetricsAPIAction, MetricsAPITargets, MetricsStratosAction, AppState } from '@stratosui/store';
@@ -53,6 +53,10 @@ interface PrometheusJobs {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetricsComponent {
+  private activatedRoute = inject(ActivatedRoute);
+  private metricsService = inject(MetricsService);
+  private store = inject<Store<AppState>>(Store);
+
   public metricsEndpoint$: Observable<MetricsEndpointProvider>;
   public metricsInfo$: Observable<MetricsEndpointInfo[]>;
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
@@ -61,11 +65,7 @@ export class MetricsComponent {
   // Was there an error retrieving data from the Prometheus server?
   public error = false;
 
-  constructor(
-    private activatedRoute: ActivatedRoute,
-    private metricsService: MetricsService,
-    private store: Store<AppState>,
-  ) {
+  constructor() {
 
     const metricsGuid = getIdFromRoute(this.activatedRoute, 'metricsId');
     this.store.dispatch(new MetricsAPIAction(metricsGuid, 'targets'));

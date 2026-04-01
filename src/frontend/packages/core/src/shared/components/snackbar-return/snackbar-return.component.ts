@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 
 import { TailwindSnackBarRef } from '../../services/tailwind-snackbar.service';
 import { MAT_SNACK_BAR_DATA, SimpleSnackBar } from '../../../shared/services/tailwind-material-replacements';
@@ -14,16 +14,22 @@ import { RouterNav, AppState } from '@stratosui/store';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SnackBarReturnComponent extends SimpleSnackBar {
+  data: any;
+  private store = inject<Store<AppState>>(Store);
+  private snackRef: TailwindSnackBarRef<any>;
+
   returnLabel: string;
   returnUrl: string;
   message: string;
 
-  constructor(
-    @Inject(MAT_SNACK_BAR_DATA) public data: any,
-    private store: Store<AppState>,
-    @Inject('TailwindSnackBarRef') private snackRef: TailwindSnackBarRef<any>,
-  ) {
+  constructor() {
+    const data = inject(MAT_SNACK_BAR_DATA);
+    const snackRef = inject<TailwindSnackBarRef<any>>('TailwindSnackBarRef' as any);
+
     super(snackRef, data);
+    this.data = data;
+    this.snackRef = snackRef;
+
     this.returnLabel = data.returnLabel || 'Return';
     this.message = data.message;
     this.returnUrl = data.returnUrl;

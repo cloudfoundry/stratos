@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
@@ -33,11 +33,11 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
 export class CloudFoundryCellsComponent {
   hasCellMetrics$: Observable<boolean>;
 
-  constructor(
-    cfEndpointService: CloudFoundryEndpointService,
-    store: Store<AppState>,
-    paginationMonitorFactory: PaginationMonitorFactory
-  ) {
+  constructor() {
+    const cfEndpointService = inject(CloudFoundryEndpointService);
+    const store = inject<Store<AppState>>(Store);
+    const paginationMonitorFactory = inject(PaginationMonitorFactory);
+
     const cellHelper = new CfCellHelper(store, paginationMonitorFactory);
     this.hasCellMetrics$ = cellHelper.hasCellMetrics(cfEndpointService.cfGuid);
   }

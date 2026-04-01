@@ -43,7 +43,7 @@
     <div class="login-body">
       <div class="login-form-outer" [ngClass]="{'login-sso': (ssoLogin$ | async)}">
         <form class="login-form space-y-6" name="loginForm" (ngSubmit)="login()" #loginForm="ngForm">
-          @if (!(ssoLogin$ | async)) {
+          @if ((ssoLogin$ | async) === false) {
             <div class="space-y-1">
               <label for="username" class="sr-only">Username</label>
               <input
@@ -59,7 +59,7 @@
             </div>
           }
 
-          @if (!(ssoLogin$ | async)) {
+          @if ((ssoLogin$ | async) === false) {
             <div class="space-y-1 relative">
               <label for="password" class="sr-only">Password</label>
               <input
@@ -82,7 +82,7 @@
             <button
               class="btn btn-primary w-full py-3"
               type="submit"
-              [disabled]="!(ssoLogin$ | async) && !loginForm.valid"
+              [disabled]="(ssoLogin$ | async) === false && !loginForm.valid"
               >
               Sign In
             </button>
@@ -90,7 +90,7 @@
         </form>
       </div>
 
-      <div id="login-loading" class="login-loading mt-4" [class.hidden]="!(busy$ | async)">
+      <div id="login-loading" class="login-loading mt-4" [class.hidden]="(busy$ | async) === false">
         <div class="progress">
           <div class="progress-bar w-full animate-pulse"></div>
         </div>

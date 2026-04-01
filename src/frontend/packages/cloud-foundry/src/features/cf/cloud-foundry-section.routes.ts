@@ -161,22 +161,8 @@ export const CLOUD_FOUNDRY_SECTION_ROUTES: Routes = [{
       // Root for attaching CF wide actions (i.e assignments, tabs)
       component: CloudFoundryBaseComponent,
       children: [
-        {
-          path: 'quota-definitions/:quotaId',
-          component: QuotaDefinitionComponent
-        },
-        {
-          path: 'quota-definitions/:quotaId/edit-quota',
-          component: EditQuotaComponent
-        },
-        {
-          path: 'organizations/:orgId/space-quota-definitions/:quotaId/edit-space-quota',
-          component: EditSpaceQuotaComponent
-        },
-        {
-          path: 'organizations/:orgId/space-quota-definitions/:quotaId',
-          component: SpaceQuotaDefinitionComponent
-        },
+        // Quota detail and edit routes moved to CloudFoundryTabsBaseComponent children
+        // to get the CF side navigation. See the tabs block below.
         {
           path: 'organizations/:orgId/edit-org',
           component: EditOrganizationComponent
@@ -254,6 +240,22 @@ export const CLOUD_FOUNDRY_SECTION_ROUTES: Routes = [{
             {
               path: 'quota-definitions',
               component: CloudFoundryQuotasComponent
+            },
+            {
+              path: 'quota-definitions/:quotaId',
+              component: QuotaDefinitionComponent
+            },
+            {
+              path: 'quota-definitions/:quotaId/edit-quota',
+              component: EditQuotaComponent
+            },
+            {
+              path: 'organizations/:orgId/space-quota-definitions/:quotaId',
+              component: SpaceQuotaDefinitionComponent
+            },
+            {
+              path: 'organizations/:orgId/space-quota-definitions/:quotaId/edit-space-quota',
+              component: EditSpaceQuotaComponent
             },
             {
               path: 'events',

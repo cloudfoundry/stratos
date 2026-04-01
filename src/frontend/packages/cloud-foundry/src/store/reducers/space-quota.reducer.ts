@@ -18,7 +18,7 @@ export function updateSpaceQuotaReducer(
   let space;
 
   switch (action.type) {
-    case ASSOCIATE_SPACE_QUOTA_DEFINITION_SUCCESS:
+    case ASSOCIATE_SPACE_QUOTA_DEFINITION_SUCCESS: {
       const associateAction = action.apiAction as AssociateSpaceQuota;
       const response = action.response;
       const entityKey = getCFEntityKey(action.apiAction.entityType);
@@ -26,11 +26,13 @@ export function updateSpaceQuotaReducer(
       space = state[associateAction.spaceGuid];
 
       return applySpaceQuota(state, space, newSpaceQuota);
-    case DISASSOCIATE_SPACE_QUOTA_DEFINITION_SUCCESS:
+    }
+    case DISASSOCIATE_SPACE_QUOTA_DEFINITION_SUCCESS: {
       const disassociateAction = action.apiAction as DisassociateSpaceQuota;
       space = state[disassociateAction.spaceGuid];
 
       return removeSpaceQuota(state, space);
+    }
   }
   return state;
 }

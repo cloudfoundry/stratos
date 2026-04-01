@@ -9,20 +9,8 @@ import { ApplicationStateService } from '../../../shared/services/application-st
 import { ApplicationService } from '../application.service';
 import { ApplicationEnvVarsHelper } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
 
-export function applicationServiceFactory(
-  cfId: string,
-  id: string,
-  store: Store<CFAppState>,
-  appStateService: ApplicationStateService,
-  appEnvVarsService: ApplicationEnvVarsHelper,
-) {
-  return new ApplicationService(
-    cfId,
-    id,
-    store,
-    appStateService,
-    appEnvVarsService,
-  );
+export function applicationServiceFactory() {
+  return new ApplicationService();
 }
 
 export function getGuids(type?: string) {
@@ -59,13 +47,7 @@ export function getGuids(type?: string) {
     {
       provide: ApplicationService,
       useFactory: applicationServiceFactory,
-      deps: [
-        CF_GUID,
-        APP_GUID,
-        Store,
-        ApplicationStateService,
-        ApplicationEnvVarsHelper,
-      ]
+      deps: []
     }
   ]
 })

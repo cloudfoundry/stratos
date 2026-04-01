@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -47,12 +47,14 @@ export interface VariableTabAllEnvVarType {
   ]
 })
 export class VariablesTabComponent implements OnInit {
+  private store = inject<Store<CFAppState>>(Store);
+  private appService = inject(ApplicationService);
+  private listConfig = inject<ListConfig<ListAppEnvVar>>(ListConfig);
 
-  constructor(
-    private store: Store<CFAppState>,
-    private appService: ApplicationService,
-    private listConfig: ListConfig<ListAppEnvVar>,
-  ) {
+
+  constructor() {
+    const listConfig = this.listConfig;
+
     this.envVarsDataSource = listConfig.getDataSource();
   }
 

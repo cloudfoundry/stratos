@@ -2,9 +2,6 @@
   &__blocked {
     .table-row {
       cursor: not-allowed;
-      mat-checkbox {
-        cursor: not-allowed;
-      }
       &__inner {
         * {
           opacity: 0.65;
@@ -22,13 +19,10 @@
       display: flex;
     }
   }
-  &__highlighted.mat-expansion-panel {
+  &__highlighted {
     border-left-style: solid;
     border-left-width: 4px;
     border-radius: 0;
-    mat-expansion-panel-header {
-      margin-left: -4px; // Cancel out highlighted padding (border left in theme)
-    }
   }
 }
 
@@ -100,11 +94,7 @@
     width: 100%;
     padding: 0 24px;
 
-    .mat-expansion-panel-body {
-      padding: 0;
-    }
-
-    .table-row__inner__expansion.mat-expansion-panel {
+    .table-row__inner__expansion {
       border-radius: unset;
       width: 100%;
 

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { TableCellCustom } from '../../list.types';
@@ -19,10 +19,8 @@ export interface TableCellIconComponentConfig<T> {
   ]
 })
 export class TableCellIconComponent<T = any> extends TableCellCustom<T, TableCellIconComponentConfig<T>> {
+  private cdr = inject(ChangeDetectorRef);
 
-  constructor(private cdr: ChangeDetectorRef) {
-    super();
-  }
 
   @Input('row')
   get row() { return super.row; }

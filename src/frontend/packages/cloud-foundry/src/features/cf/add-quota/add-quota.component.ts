@@ -1,4 +1,4 @@
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 
 import { PageHeaderComponent } from '@stratosui/core';
 import { StepComponent, SteppersComponent } from '@stratosui/core';
@@ -25,9 +25,9 @@ import { CreateQuotaStepComponent } from './create-quota-step/create-quota-step.
 })
 export class AddQuotaComponent {
   cfQuotasUrl: string;
-  constructor(
-    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
-  ) {
+  constructor() {
+    const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+
     const cfId = activeRouteCfOrgSpace.cfGuid;
     this.cfQuotasUrl = `/cloud-foundry/${cfId}/quota-definitions`;
   }

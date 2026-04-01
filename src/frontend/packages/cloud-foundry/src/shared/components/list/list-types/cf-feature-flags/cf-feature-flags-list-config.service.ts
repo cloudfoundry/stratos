@@ -44,7 +44,7 @@ export class CfFeatureFlagsListConfigService extends BaseCfListConfig<IFeatureFl
       class: 'table-column-select',
       cellFlex: '2',
       sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: 'name',
         field: 'name'
       }

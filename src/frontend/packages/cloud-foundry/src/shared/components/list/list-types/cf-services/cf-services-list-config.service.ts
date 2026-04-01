@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
@@ -31,11 +31,12 @@ import { TableCellServiceTagsComponent } from './table-cell-service-tags/table-c
   providedIn: 'root'
 })
 export class CfServicesListConfigService implements IListConfig<APIResource> {
+  private store = inject<Store<CFAppState>>(Store);
 
-  constructor(
-    private store: Store<CFAppState>,
-    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
-  ) {
+
+  constructor() {
+    const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+
     this.dataSource = new CfServicesDataSource(this.store, activeRouteCfOrgSpace.cfGuid, this);
     this.cf = {
       list$: this.store.select(connectedEndpointsOfTypesSelector(CF_ENDPOINT_TYPE)).pipe(
@@ -89,7 +90,7 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
       getLink: (service: APIResource<any>) => `/marketplace/${service.entity.cfGuid}/${service.metadata.guid}`
     },
     sort: {
-      type: 'sort',
+      type: 'natural-sort',
       orderKey: 'label',
       field: 'entity.label'
     },

@@ -30,7 +30,7 @@ export abstract class GithubCommitsListConfigServiceBase implements IListConfig<
         valuePath: 'commit.message'
       },
       sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: 'message',
         field: 'commit.message'
       },
@@ -58,7 +58,7 @@ export abstract class GithubCommitsListConfigServiceBase implements IListConfig<
       headerCell: () => 'Author',
       cellComponent: TableCellCommitAuthorComponent,
       sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: 'author',
         field: 'commit.author.name'
       },

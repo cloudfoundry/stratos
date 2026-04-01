@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
 import { GITHUB_API_URL } from '../github.helpers';
 import { GitHubSCM } from './github-scm';
@@ -13,11 +13,8 @@ export type GitSCMType = 'github' | 'gitlab';
   providedIn: 'root'
 })
 export class GitSCMService {
+  private gitHubURL = inject(GITHUB_API_URL);
 
-  constructor(
-    @Inject(GITHUB_API_URL) private gitHubURL: string
-  ) {
-  }
 
   public getSCM(type: GitSCMType, endpointGuid: string): GitSCM {
     switch (type) {

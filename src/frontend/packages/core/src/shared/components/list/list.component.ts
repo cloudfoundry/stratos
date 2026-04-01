@@ -70,6 +70,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
+import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import {
   EntitySelectConfig,
@@ -282,6 +283,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   public config = inject(ListConfig<T>, { optional: true });
   private ngZone = inject(NgZone);
   private injector = inject(Injector);
+  private branding = inject(StratosBrandingService);
 
   ngOnInit() {
     // null list means we have list bound but no value available yet
@@ -336,8 +338,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       this.config?.getMultiActions() ?? []
     );
     this.hasSingleActions = (this.config?.getSingleActions() || []).length > 0;
-    this.columns = this.config?.getColumns()!;
-    this.dataSource = this.config?.getDataSource()!;
+    this.columns = this.config?.getColumns();
+    this.dataSource = this.config?.getDataSource();
     this.entitySelectConfig = this.dataSource.entitySelectConfig;
 
     this.dataSource.pagination$.pipe(
@@ -460,9 +462,10 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
         const remembered = this.pageSizeSession.hasExplicit(viewKey)
           ? this.pageSizeSession.get(viewKey)
           : undefined;
+        const configDefault = this.branding.getDefaultPageSize();
         const targetSize = remembered !== undefined && newOptions.includes(remembered)
           ? remembered
-          : newOptions[0];
+          : newOptions.includes(configDefault) ? configDefault : newOptions[0];
 
         // Resolve sentinels (e.g., PAGE_SIZE_ALL = -1) to actual item count for the store.
         // The paginator select handles sentinel display via its own setter.
@@ -483,7 +486,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       });
     }
 
-    // Set initial page size: session memory > store value > first option.
+    // Set initial page size: session memory > config default > store value > first option.
     // Wait for both view$ (sets options) and pagination$ (gives current state).
     observableCombineLatest([
       this.view$.pipe(first()),
@@ -502,8 +505,14 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
         targetSize = resolvePageSize(sessionSize, pagination.totalResults);
       } else if (sessionSize !== undefined && options.includes(sessionSize)) {
         targetSize = sessionSize;
-      } else if (!options.includes(pagination.pageSize)) {
-        targetSize = options[0];
+      } else {
+        // No stored session preference — try config default, then fall back
+        const configDefault = this.branding.getDefaultPageSize();
+        if (options.includes(configDefault)) {
+          targetSize = configDefault;
+        } else if (!options.includes(pagination.pageSize)) {
+          targetSize = options[0];
+        }
       }
 
       if (targetSize !== undefined) {
@@ -761,7 +770,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       case ListViewTypes.CARD_ONLY:
         return 'cards';
       default:
-        return this.config?.defaultView || 'table';
+        return this.config?.defaultView || this.branding.getDefaultViewMode() || 'table';
     }
   }
 

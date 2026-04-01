@@ -1,10 +1,10 @@
 <div class="stratos-title text-center">
-  <img class="stratos-title__logo mx-auto mb-4" [src]="themeLogo()" />
-  <h1 class="stratos-title__header text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+  <img class="stratos-title__logo mx-auto mb-4" [src]="themeLogo()" alt="" />
+  <h1 class="stratos-title__header text-2xl font-bold text-content-text mb-2">
     {{ title || themeTitle() }}
   </h1>
   @if (themeSubtitle()) {
-    <p class="stratos-title__subtitle text-gray-600 dark:text-gray-400 text-sm">
+    <p class="stratos-title__subtitle text-content-muted text-sm">
       {{ themeSubtitle() }}
     </p>
   }

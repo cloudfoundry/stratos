@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
@@ -27,14 +27,15 @@ import { ApplicationService } from '../../application.service';
   ]
 })
 export class MapRoutesComponent implements OnInit, OnDestroy {
+  private appService = inject(ApplicationService);
+
   paginationSubscription: any;
   subscription!: Subscription;
   @Input() selectedRoute$!: BehaviorSubject<APIResource>;
 
-  constructor(
-    private appService: ApplicationService,
-    listConfig: ListConfig<APIResource>
-  ) {
+  constructor() {
+    const listConfig = inject<ListConfig<APIResource>>(ListConfig);
+
     this.routesDataSource = listConfig.getDataSource() as CfAppRoutesDataSource;
   }
   routesDataSource: CfAppRoutesDataSource;

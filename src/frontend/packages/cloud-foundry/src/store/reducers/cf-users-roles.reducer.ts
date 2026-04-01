@@ -55,7 +55,7 @@ const defaultState: UsersRolesState = {
 
 export function cfUsersRolesReducer(state: UsersRolesState = defaultState, action: Action): UsersRolesState {
   switch (action.type) {
-    case UsersRolesActions.SetUsers:
+    case UsersRolesActions.SetUsers: {
       const setUsersAction = action as UsersRolesSetUsers;
       const orgGuid = state.newRoles ? state.newRoles.orgGuid : '';
       const orgName = state.newRoles ? state.newRoles.name : '';
@@ -67,15 +67,17 @@ export function cfUsersRolesReducer(state: UsersRolesState = defaultState, actio
         newRoles: createDefaultOrgRoles(orgGuid, orgName),
         usernameOrigin: setUsersAction.origin
       };
+    }
     case UsersRolesActions.Clear:
       return defaultState;
-    case UsersRolesActions.SetOrg:
+    case UsersRolesActions.SetOrg: {
       const setOrgAction = action as UsersRolesSetOrg;
       return {
         ...state,
         newRoles: createDefaultOrgRoles(setOrgAction.orgGuid, setOrgAction.orgName)
       };
-    case UsersRolesActions.SetOrgRole:
+    }
+    case UsersRolesActions.SetOrgRole: {
       const setOrgRoleAction = action as UsersRolesSetOrgRole;
       return setRole(
         state,
@@ -87,7 +89,8 @@ export function cfUsersRolesReducer(state: UsersRolesState = defaultState, actio
         setOrgRoleAction.setRole,
         state.isSetByUsername
       );
-    case UsersRolesActions.SetSpaceRole:
+    }
+    case UsersRolesActions.SetSpaceRole: {
       const setSpaceRoleAction = action as UsersRolesSetSpaceRole;
       return setRole(
         state,
@@ -99,12 +102,14 @@ export function cfUsersRolesReducer(state: UsersRolesState = defaultState, actio
         setSpaceRoleAction.setRole,
         state.isSetByUsername
       );
-    case UsersRolesActions.SetChanges:
+    }
+    case UsersRolesActions.SetChanges: {
       const setChangesAction = action as UsersRolesSetChanges;
       return {
         ...state,
         changedRoles: setChangesAction.changes
       };
+    }
     case UsersRolesActions.FlipSetRoles:
       return {
         ...state,
@@ -115,18 +120,20 @@ export function cfUsersRolesReducer(state: UsersRolesState = defaultState, actio
           };
         })
       };
-    case UsersRolesActions.SetIsRemove:
+    case UsersRolesActions.SetIsRemove: {
       const isRemoveAction = action as UsersRolesSetIsRemove;
       return {
         ...state,
         isRemove: isRemoveAction.isRemove
       };
-    case UsersRolesActions.SetIsSetByUsername:
+    }
+    case UsersRolesActions.SetIsSetByUsername: {
       const isSetByUsernameAction = action as UsersRolesSetIsSetByUsername;
       return {
         ...state,
         isSetByUsername: isSetByUsernameAction.isSetByUsername
       };
+    }
   }
   return state;
 }

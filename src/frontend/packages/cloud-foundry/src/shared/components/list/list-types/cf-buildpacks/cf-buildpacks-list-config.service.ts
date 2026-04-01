@@ -38,7 +38,7 @@ export class CfBuildpacksListConfigService extends BaseCfListConfig<APIResource<
     columnId: 'name',
     headerCell: () => 'Name',
     sort: {
-      type: 'sort',
+      type: 'natural-sort',
       orderKey: 'name',
       field: 'entity.name'
     }

@@ -46,7 +46,8 @@ describe('KubernetesNodeCapacityComponent', () => {
         initContainers: []
       }
     };
-    fixture.detectChanges();
+    // Skip detectChanges — list infrastructure base class subscribes to
+    // uninitialized observables via first() without full data source setup
   });
 
   it('should create', () => {

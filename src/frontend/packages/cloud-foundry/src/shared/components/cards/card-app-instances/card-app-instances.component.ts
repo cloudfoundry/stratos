@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { combineLatest, Observable, Subscription } from 'rxjs';
@@ -39,6 +39,11 @@ const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig('Set Ins
   ]
 })
 export class CardAppInstancesComponent implements OnInit, OnDestroy {
+  appService = inject(ApplicationService);
+  private renderer = inject(Renderer2);
+  private confirmDialog = inject(ConfirmationDialogService);
+  private snackBar = inject(TailwindSnackBarService);
+
 
   // Should the card show the actions to scale/down the number of instances?
   @Input() showActions = false;
@@ -51,13 +56,10 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
 
   public canEditApp$: Observable<boolean>;
 
-  constructor(
-    public appService: ApplicationService,
-    private renderer: Renderer2,
-    private confirmDialog: ConfirmationDialogService,
-    private snackBar: TailwindSnackBarService,
-    cups: CurrentUserPermissionsService
-  ) {
+  constructor() {
+    const appService = this.appService;
+    const cups = inject(CurrentUserPermissionsService);
+
     this.status$ = this.appService.applicationState$.pipe(
       map(state => state.indicator)
     );

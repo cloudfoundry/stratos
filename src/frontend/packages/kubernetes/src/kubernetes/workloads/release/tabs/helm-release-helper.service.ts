@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
@@ -104,9 +104,9 @@ export class HelmReleaseHelperService {
   public namespace: string;
   public releaseTitle: string;
 
-  constructor(
-    helmReleaseGuid: HelmReleaseGuid,
-  ) {
+  constructor() {
+    const helmReleaseGuid = inject(HelmReleaseGuid);
+
     this.guid = helmReleaseGuid.guid;
     const { endpointId, namespace, releaseTitle } = getHelmReleaseDetailsFromGuid(this.guid);
     this.releaseTitle = releaseTitle;

@@ -1,4 +1,4 @@
-import { Injectable, signal, WritableSignal } from '@angular/core';
+import { Injectable, signal, WritableSignal, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import * as yaml from 'js-yaml';
 import { combineLatest, Observable, of } from 'rxjs';
@@ -48,6 +48,8 @@ function createSignalWrapper<T>(initialValue: T) {
  */
 @Injectable()
 export class KubeConfigHelper {
+  endpointsService = inject(EndpointsService);
+
 
   authHelper = new KubeConfigAuthHelper();
 
@@ -55,11 +57,6 @@ export class KubeConfigHelper {
   clusters$ = this._clusters.asObservable().pipe(
     filter(clusters => !!clusters)
   );
-
-  constructor(
-    public endpointsService: EndpointsService,
-  ) {
-  }
 
   public clustersChanged!: () => void;
   public update = (cluster: KubeConfigFileCluster) => {

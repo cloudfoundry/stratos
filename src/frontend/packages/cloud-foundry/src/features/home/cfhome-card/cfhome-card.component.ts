@@ -1,5 +1,5 @@
 import { AsyncPipe, CommonModule } from '@angular/common';
-import { Component, Input, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
@@ -55,6 +55,10 @@ import { TileSelectorComponent } from '@stratosui/core';
   ]
 })
 export class CFHomeCardComponent implements HomePageEndpointCard {
+  private store = inject<Store<CFAppState>>(Store);
+  private pmf = inject(PaginationMonitorFactory);
+  private cdr = inject(ChangeDetectorRef);
+
 
   pLayout!: HomePageCardLayout;
 
@@ -96,12 +100,9 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
 
   showDeployAppTiles = false;
 
-  constructor(
-    private store: Store<CFAppState>,
-    private pmf: PaginationMonitorFactory,
-    appDeploySourceTypes: ApplicationDeploySourceTypes,
-    private cdr: ChangeDetectorRef,
-  ) {
+  constructor() {
+    const appDeploySourceTypes = inject(ApplicationDeploySourceTypes);
+
     // Set a default layout
     this.pLayout = new HomePageCardLayout(1, 1);
 

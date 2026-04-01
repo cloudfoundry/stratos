@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, signal } from '@angular/core';
+import { Component, OnInit, ViewChild, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, signal, inject } from '@angular/core';
 
 import { NgModel } from '@angular/forms';
 import { Store } from '@ngrx/store';
@@ -37,6 +37,10 @@ interface ConnectionError {
 ]
 })
 export class LogStreamTabComponent implements OnInit, OnDestroy {
+  private applicationService = inject(ApplicationService);
+  private store = inject<Store<CFAppState>>(Store);
+  private cdr = inject(ChangeDetectorRef);
+
   public messages!: Observable<string>;
   private connectionStatusSubject = new Subject<number>();
   public connectionStatus!: Observable<number>;
@@ -55,11 +59,7 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
 
   private colorizer = new AnsiColorizer();
 
-  constructor(
-    private applicationService: ApplicationService,
-    private store: Store<CFAppState>,
-    private cdr: ChangeDetectorRef
-  ) {
+  constructor() {
     this.filter = this.jsonFilter.bind(this);
   }
 

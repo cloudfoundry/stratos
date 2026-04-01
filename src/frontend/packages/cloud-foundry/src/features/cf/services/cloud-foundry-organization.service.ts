@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Route } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -65,6 +65,13 @@ export const createSpaceQuotaDefinition = (orgGuid: string): ISpaceQuotaDefiniti
   providedIn: 'root'
 })
 export class CloudFoundryOrganizationService {
+  activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+  private store = inject<Store<CFAppState>>(Store);
+  private cfUserService = inject(CfUserService);
+  private paginationMonitorFactory = inject(PaginationMonitorFactory);
+  private cfEndpointService = inject(CloudFoundryEndpointService);
+  private cfUserProvidedServicesService = inject(CloudFoundryUserProvidedServicesService);
+
   orgGuid: string;
   cfGuid: string;
   quotaLink$!: Observable<string[]>;
@@ -84,14 +91,9 @@ export class CloudFoundryOrganizationService {
   org$!: Observable<EntityInfo<APIResource<IOrganization>>>;
   usersCount$!: Observable<number | null>;
 
-  constructor(
-    public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private store: Store<CFAppState>,
-    private cfUserService: CfUserService,
-    private paginationMonitorFactory: PaginationMonitorFactory,
-    private cfEndpointService: CloudFoundryEndpointService,
-    private cfUserProvidedServicesService: CloudFoundryUserProvidedServicesService
-  ) {
+  constructor() {
+    const activeRouteCfOrgSpace = this.activeRouteCfOrgSpace;
+
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
 

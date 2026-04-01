@@ -1,4 +1,4 @@
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
@@ -25,9 +25,9 @@ import { CreateOrganizationStepComponent } from './create-organization-step/crea
 })
 export class AddOrganizationComponent {
   cfUrl: string;
-  constructor(
-    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
-  ) {
+  constructor() {
+    const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+
     const cfId = activeRouteCfOrgSpace.cfGuid;
     this.cfUrl = `/cloud-foundry/${cfId}/organizations`;
   }

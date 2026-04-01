@@ -64,7 +64,7 @@ export class TailwindJsonSchemaFormComponent implements OnInit {
       const property = this.schema.properties[key];
       const isRequired = this.schema.required && this.schema.required.includes(key);
 
-      let validators = [];
+      const validators = [];
       if (isRequired) {
         validators.push(Validators.required);
       }

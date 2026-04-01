@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 
 import { Observable, of as observableOf } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -44,11 +44,13 @@ import { ServiceIconComponent } from '../../service-icon/service-icon.component'
   ]
 })
 export class ServiceSummaryCardComponent {
+  servicesService = inject(ServicesService);
+
   tags: AppChip<ServiceTag>[] = [];
   service$: Observable<APIResource<IService>>;
-  constructor(
-    public servicesService: ServicesService
-  ) {
+  constructor() {
+    const servicesService = this.servicesService;
+
     this.service$ = servicesService.service$;
 
     this.service$.pipe(

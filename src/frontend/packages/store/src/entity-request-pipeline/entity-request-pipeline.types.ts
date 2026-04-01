@@ -80,7 +80,7 @@ export interface PipelineResult {
   totalPages?: number;
 }
 
-export type EntityRequestPipeline<> = (
+export type EntityRequestPipeline = (
   store: Store<AppState>,
   httpClient: PipelineHttpClient,
   config: BasePipelineConfig

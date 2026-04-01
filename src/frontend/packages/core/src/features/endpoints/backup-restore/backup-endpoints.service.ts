@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable, signal, Injector } from '@angular/core';
+import { Injectable, signal, Injector, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { GeneralEntityAppState, BrowserStandardEncoder, EndpointModel, entityCatalog } from '@stratosui/store';
 import { Observable } from 'rxjs';
@@ -23,6 +23,10 @@ interface BackupRequest {
   providedIn: 'root'
 })
 export class BackupEndpointsService {
+  private store = inject<Store<GeneralEntityAppState>>(Store);
+  private http = inject(HttpClient);
+  private injector = inject(Injector);
+
 
   private _hasChanges = signal<boolean>(false);
   public hasChanges = this._hasChanges.asReadonly();
@@ -34,11 +38,7 @@ export class BackupEndpointsService {
   state: BackupEndpointsConfig<BackupEndpointConfigUI> = {};
   password!: string;
 
-  constructor(
-    private store: Store<GeneralEntityAppState>,
-    private http: HttpClient,
-    private injector: Injector
-  ) {
+  constructor() {
     this.hasChanges$ = toObservable(this._hasChanges, { injector: this.injector });
     this.allChanged$ = toObservable(this._allChanged, { injector: this.injector });
   }

@@ -7,12 +7,12 @@
         <div class="flex items-start space-x-4">
           <span class="material-icons text-primary-600 text-2xl mt-1">equalizer</span>
           <div class="flex-1">
-            <div class="text-lg font-semibold text-gray-900 mb-1">{{ ep.provider.name }}</div>
+            <div class="text-lg font-semibold text-content-text mb-1">{{ ep.provider.name }}</div>
             <h2 class="text-sm mb-2">
               <a target="metrics" href="{{ ep.provider.token_endpoint }}" class="text-primary-600 hover:text-primary-700 underline">{{ ep.provider.token_endpoint }}</a>
             </h2>
             @if (error) {
-              <div class="text-gray-600">
+              <div class="text-content-muted">
                 <p>This metrics endpoint does not provide a <app-product-name></app-product-name> metadata file</p>
               </div>
             }
@@ -23,7 +23,7 @@
     @if (metricsInfo$ | async; as infos) {
       <div>
         @if (infos.length === 0) {
-          <div class="text-center py-8 text-gray-500">
+          <div class="text-center py-8 text-content-muted">
             <p>This metrics endpoint does not provide data for any endpoints</p>
           </div>
         }
@@ -38,8 +38,8 @@
                   <div class="flex items-start space-x-4">
                     <span class="material-icons text-primary-600 text-2xl mt-1" [attr.data-font]="info.icon.font">{{info.icon.name }}</span>
                     <div class="flex-1">
-                      <div class="text-lg font-semibold text-gray-900 mb-1">{{ info.name }}</div>
-                      <div class="text-sm text-gray-600 mb-4">{{ info.type }}</div>
+                      <div class="text-lg font-semibold text-content-text mb-1">{{ info.name }}</div>
+                      <div class="text-sm text-content-muted mb-4">{{ info.type }}</div>
                       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="space-y-3">
                           <app-metadata-item icon="link" label="Address" [clipboardValue]="info.url">{{ info.url }}

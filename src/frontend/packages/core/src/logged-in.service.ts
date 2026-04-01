@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { Inject, Injectable, NgZone } from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
 import { TailwindDialogService } from './shared/services/tailwind-dialog.service';
 import { Store } from '@ngrx/store';
 import { VerifySession, selectDashboardState, DashboardState, AppState, AuthState } from '@stratosui/store';
@@ -15,6 +15,12 @@ import { StratosCurrentUserPermissions } from './core/permissions/stratos-user-p
   providedIn: 'root'
 })
 export class LoggedInService {
+  private document = inject<Document>(DOCUMENT);
+  private store = inject<Store<AppState>>(Store);
+  private dialog = inject(TailwindDialogService);
+  private ngZone = inject(NgZone);
+  private currentUserPermissionsService = inject(CurrentUserPermissionsService);
+
   private userInteractionChecker!: Subscription;
   private lastUserInteraction = Date.now();
   private sessionChecker!: Subscription;
@@ -38,14 +44,6 @@ export class LoggedInService {
   private sub!: Subscription;
   private destroying = false;
   private initialized = false;
-
-  constructor(
-    @Inject(DOCUMENT) private document: Document,
-    private store: Store<AppState>,
-    private dialog: TailwindDialogService,
-    private ngZone: NgZone,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-  ) { }
 
   init() {
     // Prevent multiple initializations

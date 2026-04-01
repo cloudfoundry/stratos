@@ -9,7 +9,7 @@
 
     <!-- Main layout: logo | frontend+backend (2-col) | user/login -->
     <!-- Desktop: 3 cols | Tablet: 2 cols | Phone: 1 col -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1fr_3fr_auto] divide-y sm:divide-y-0 sm:divide-x divide-gray-200 dark:divide-gray-700">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1fr_3fr_auto] divide-y sm:divide-y-0 sm:divide-x divide-content-border">
 
       <!-- Col 1: Logo / Theme (hidden on phone) -->
       @if (!customizations.aboutInfoComponent) {
@@ -21,7 +21,7 @@
 
       <!-- Col 2: Frontend + Backend nested 2-col grid -->
       <div class="lg:col-span-1">
-        <div class="grid grid-cols-2 divide-x divide-gray-200 dark:divide-gray-700 h-full">
+        <div class="grid grid-cols-2 divide-x divide-content-border h-full">
 
           <!-- Frontend -->
           <div class="p-5">
@@ -117,7 +117,7 @@
         <div class="text-xs font-semibold text-content-muted uppercase tracking-wider">Signed in as</div>
         <div class="font-medium text-content-text text-base">{{ session.user.name }}</div>
         @if ((this.userIsAdmin$ | async)) {
-          <span class="text-xs bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 px-2 py-0.5 rounded-full">Admin</span>
+          <span class="text-xs bg-warning-100 text-warning-700 dark:bg-warning-900/30 dark:text-warning-300 px-2 py-0.5 rounded-full">Admin</span>
         }
       </div>
 
@@ -125,7 +125,7 @@
 
     <!-- EULA row (conditional, full width) -->
     @if (customizations.hasEula) {
-      <div class="border-t border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
+      <div class="border-t border-content-border px-6 py-4 flex items-center justify-between">
         <div class="text-content-muted">Use of this software is subject to the End-User License Agreement</div>
         <button [routerLink]="['eula']" class="btn btn-primary">View EULA</button>
       </div>
@@ -133,8 +133,8 @@
 
     <!-- Admin row: full width, subtle orange tint -->
     @if ((this.userIsAdmin$ | async)) {
-      <div class="border-t border-gray-200 dark:border-gray-700 bg-orange-50 dark:bg-orange-900/20 px-6 py-3 flex items-center justify-end gap-4">
-        <div class="flex items-center gap-2 text-sm text-orange-700 dark:text-orange-300">
+      <div class="border-t border-content-border bg-warning-50 dark:bg-warning-900/20 px-6 py-3 flex items-center justify-end gap-4">
+        <div class="flex items-center gap-2 text-sm text-warning-700 dark:text-warning-300">
           <span class="material-icons text-base">security</span>
           <span>You have administrative privileges</span>
         </div>

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 
 import { CustomTooltipDirective, CurrentUserPermissionsService, PageHeaderComponent, IHeaderBreadcrumb, PageSubNavComponent, BooleanIndicatorComponent, LoadingPageComponent, CardNumberMetricComponent, TileGridComponent, TileGroupComponent, TileComponent } from '@stratosui/core';
@@ -40,6 +40,8 @@ export const QUOTA_ORG_GUID = 'org';
   ]
 })
 export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
+  protected store: Store<AppState>;
+
   declare breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
   declare quotaDefinition$: Observable<APIResource<IOrgQuotaDefinition>>;
   declare org$: Observable<APIResource<IOrganization>>;
@@ -55,13 +57,15 @@ export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
   public canEditQuota$!: Observable<boolean>;
   public isCf = false;
 
-  constructor(
-    protected store: Store<AppState>,
-    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    activatedRoute: ActivatedRoute,
-    currentUserPermissionsService: CurrentUserPermissionsService
-  ) {
+  constructor() {
+    const store = inject<Store<AppState>>(Store);
+    const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+    const activatedRoute = inject(ActivatedRoute);
+    const currentUserPermissionsService = inject(CurrentUserPermissionsService);
+
     super(store, activeRouteCfOrgSpace, activatedRoute);
+    this.store = store;
+
     this.setupQuotaDefinitionObservable();
     const { cfGuid, orgGuid } = activeRouteCfOrgSpace;
     this.canEditQuota$ = currentUserPermissionsService.can(CfCurrentUserPermissions.QUOTA_EDIT, cfGuid);

@@ -42,9 +42,10 @@ export const currentCfUserRolesReducer: EntityUserRolesReducer<IAllCfRolesState>
   action: Action
 ): IAllCfRolesState => {
   switch (action.type) {
-    case GET_CURRENT_CF_USER_RELATION_SUCCESS:
+    case GET_CURRENT_CF_USER_RELATION_SUCCESS: {
       const gcursAction = action as GetCurrentCfUserRelationsComplete;
       return currentUserBaseCFRolesReducer(state, gcursAction);
+    }
     case SESSION_VERIFIED:
       return cfRoleInfoFromSessionReducer(state, action as VerifiedSession);
     case REGISTER_ENDPOINTS_SUCCESS:

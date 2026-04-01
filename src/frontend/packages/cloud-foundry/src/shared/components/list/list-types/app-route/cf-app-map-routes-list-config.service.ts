@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
@@ -15,14 +15,14 @@ import { CfAppRoutesListConfigServiceBase } from './cf-app-routes-list-config-ba
 })
 export class CfAppMapRoutesListConfigService extends CfAppRoutesListConfigServiceBase implements IListConfig<APIResource> {
 
-  constructor(
-    store: Store<CFAppState>,
-    appService: ApplicationService,
-    confirmDialog: ConfirmationDialogService,
-    datePipe: DatePipe,
-    activatedRoute: ActivatedRoute,
-    currentUserPermissionsService: CurrentUserPermissionsService,
-  ) {
+  constructor() {
+    const store = inject<Store<CFAppState>>(Store);
+    const appService = inject(ApplicationService);
+    const confirmDialog = inject(ConfirmationDialogService);
+    const datePipe = inject(DatePipe);
+    const activatedRoute = inject(ActivatedRoute);
+    const currentUserPermissionsService = inject(CurrentUserPermissionsService);
+
     const spaceGuid = activatedRoute.snapshot.queryParamMap.get('spaceGuid');
     const action = cfEntityCatalog.route.actions.getAllInSpace(
       spaceGuid,

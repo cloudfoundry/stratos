@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { LongRunningOperationsService } from '../../../../core/src/shared/services/long-running-op.service';
@@ -10,12 +10,8 @@ import { cfEntityCatalog } from '../../cf-entity-catalog';
   providedIn: 'root'
 })
 export class LongRunningCfOperationsService extends LongRunningOperationsService {
+  private snackBarService = inject(SnackBarService);
 
-  constructor(
-    private snackBarService: SnackBarService
-  ) {
-    super();
-  }
 
   handleLongRunningCreateService(bindApp: boolean) {
     const message = `The operation to create the service instance is taking a long time and will continue in the background.

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { DataFunction } from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
@@ -44,7 +44,7 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
       columnId: 'name', headerCell: () => 'Name',
       cellComponent: KubernetesNodeLinkComponent,
       sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: 'name',
         field: 'metadata.name'
       },
@@ -128,10 +128,10 @@ export class KubernetesNodesListConfigService implements IListConfig<KubernetesN
   getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
   getFilters = (): IListFilter[] => this.filters;
 
-  constructor(
-    store: Store<AppState>,
-    kubeId: BaseKubeGuid,
-  ) {
+  constructor() {
+    const store = inject<Store<AppState>>(Store);
+    const kubeId = inject(BaseKubeGuid);
+
     const transformEntities: DataFunction<KubernetesNode>[] = [
       (entities: KubernetesNode[], paginationState: PaginationEntityState) => {
         if (!paginationState.clientPagination.filter.string) {

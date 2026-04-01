@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, of as observableOf } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
@@ -29,14 +29,18 @@ import { CfPermissionCellDirective, ICellPermissionList } from '../cf-permission
   ]
 })
 export class CfOrgPermissionCellComponent extends CfPermissionCellDirective<OrgUserRoleNames> {
+  store: Store<CFAppState>;
+  private userPerms = inject(CurrentUserPermissionsService);
 
-  constructor(
-    public store: Store<CFAppState>,
-    cfUserService: CfUserService,
-    private userPerms: CurrentUserPermissionsService,
-    confirmDialog: ConfirmationDialogService,
-  ) {
+
+  constructor() {
+    const store = inject<Store<CFAppState>>(Store);
+    const cfUserService = inject(CfUserService);
+    const confirmDialog = inject(ConfirmationDialogService);
+
     super(store, confirmDialog, cfUserService);
+    this.store = store;
+
     this.chipsConfig$ = combineLatest([
       this.rowSubject.asObservable(),
       this.config$.pipe(switchMap(config => config.org$ || observableOf(null)))

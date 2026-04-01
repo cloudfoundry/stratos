@@ -7,7 +7,7 @@ import { IAppSummary, IRoute } from '../../cf-api.types';
 
 export function routeReducer(state: IRequestEntityTypeState<APIResource<IRoute<string>>>, action: APISuccessOrFailedAction): IRequestEntityTypeState<APIResource<IRoute<string>>> {
   switch (action.type) {
-    case ASSIGN_ROUTE_SUCCESS:
+    case ASSIGN_ROUTE_SUCCESS: {
       const mapRouteAction = action.apiAction as AssignRouteToApplication;
       const addAppRoute = state[mapRouteAction.routeGuid];
       return {
@@ -17,7 +17,8 @@ export function routeReducer(state: IRequestEntityTypeState<APIResource<IRoute<s
           entity: addAppFromRoute(addAppRoute.entity, mapRouteAction.guid) as IRoute<string>,
         }
       };
-    case RouteEvents.UNMAP_ROUTE_SUCCESS:
+    }
+    case RouteEvents.UNMAP_ROUTE_SUCCESS: {
       const unmapRouteAction = action.apiAction as UnmapRoute;
       const removeAppRoute = state[unmapRouteAction.routeGuid];
       return {
@@ -27,6 +28,7 @@ export function routeReducer(state: IRequestEntityTypeState<APIResource<IRoute<s
           entity: removeAppFromRoute(removeAppRoute.entity, unmapRouteAction.appGuid),
         }
       };
+    }
     default:
       return state;
   }
@@ -35,12 +37,13 @@ export function updateAppSummaryRoutesReducer(state: IRequestEntityTypeState<IAp
   let currentState: IAppSummary;
   let routeGuid: string;
   switch (action.type) {
-    case RouteEvents.UNMAP_ROUTE_SUCCESS:
+    case RouteEvents.UNMAP_ROUTE_SUCCESS: {
       const unmapRouteAction = action.apiAction as UnmapRoute;
       currentState = state[unmapRouteAction.appGuid];
       routeGuid = unmapRouteAction.routeGuid;
       return newState(currentState, unmapRouteAction.appGuid, routeGuid, state);
-    case RouteEvents.DELETE_SUCCESS:
+    }
+    case RouteEvents.DELETE_SUCCESS: {
       const deleteAction = action.apiAction as DeleteRoute;
       routeGuid = deleteAction.guid;
       if (deleteAction.appGuids) {
@@ -56,6 +59,7 @@ export function updateAppSummaryRoutesReducer(state: IRequestEntityTypeState<IAp
         return newState(currentState, deleteAction.appGuid, routeGuid, state);
       }
       return state;
+    }
     default:
       return state;
   }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Inject, OnDestroy, signal, Injector  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, signal, Injector, inject } from '@angular/core';
 import { AppProgressBarComponent } from '../../../shared/components/progress-bar/app-progress-bar.component';
 import { MAT_DIALOG_DATA, TailwindDialogRef } from '../../../shared/services/tailwind-dialog.service';
 import { Observable, Subscription } from 'rxjs';
@@ -30,6 +30,12 @@ import { ConnectEndpointConfig, ConnectEndpointService } from '../connect.servic
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConnectEndpointDialogComponent implements OnDestroy {
+  dialogRef = inject<TailwindDialogRef<ConnectEndpointDialogComponent>>(TailwindDialogRef);
+  data = inject<ConnectEndpointConfig>(MAT_DIALOG_DATA);
+  private sidePanelService = inject(SidePanelService);
+  private snackBarService = inject(SnackBarService);
+  private injector = inject(Injector);
+
 
   public valid = false;
   public connectService: ConnectEndpointService;
@@ -40,14 +46,10 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   public helpDocument = this._helpDocument.asReadonly();
   public helpDocument$: Observable<string | null>;
 
-  constructor(
-    public dialogRef: TailwindDialogRef<ConnectEndpointDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ConnectEndpointConfig,
-    endpointsService: EndpointsService,
-    private sidePanelService: SidePanelService,
-    private snackBarService: SnackBarService,
-    private injector: Injector,
-  ) {
+  constructor() {
+    const data = this.data;
+    const endpointsService = inject(EndpointsService);
+
     this.connectService = new ConnectEndpointService(endpointsService, data);
 
     this.hasConnected = this.connectService.hasConnected$.subscribe(() => {

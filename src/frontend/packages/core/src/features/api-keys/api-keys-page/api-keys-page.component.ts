@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { TailwindDialogService } from '../../../shared/services/tailwind-dialog.service';
@@ -34,18 +34,18 @@ import { CustomIconComponent } from '../../../shared/components/custom-material/
   ]
 })
 export class ApiKeysPageComponent {
+  private dialog = inject(TailwindDialogService);
+
 
   public keyDetails = new Subject<string>();
   public keyDetails$ = this.keyDetails.asObservable();
 
   /* tslint:disable:ban-types  */
   // This is intentionally typed, property can be null and there's different logic associated with it
-  public hasKeys$: Observable<Boolean>;
+  public hasKeys$: Observable<boolean>;
   /* tslint:enable */
 
-  constructor(
-    private dialog: TailwindDialogService,
-  ) {
+  constructor() {
     this.hasKeys$ = stratosEntityCatalog.apiKey.store.getPaginationService().entities$.pipe(
       map(entities => entities && !!entities.length),
       startWith(null),

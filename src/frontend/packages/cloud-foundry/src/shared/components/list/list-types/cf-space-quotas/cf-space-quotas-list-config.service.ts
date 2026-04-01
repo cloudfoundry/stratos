@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 
@@ -26,19 +26,21 @@ import { CfOrgSpaceQuotasDataSourceService } from './cf-space-quotas-data-source
   providedIn: 'root'
 })
 export class CfSpaceQuotasListConfigService extends BaseCfListConfig<APIResource<IQuotaDefinition>> {
+  private store = inject<Store<CFAppState>>(Store);
+  private datePipe = inject(DatePipe);
+  private confirmDialog = inject(ConfirmationDialogService);
+  private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+  private currentUserPermissionsService = inject(CurrentUserPermissionsService);
+
   dataSource!: CfOrgSpaceQuotasDataSourceService;
   deleteSubscription!: Subscription;
   canEdit: Observable<boolean>;
   canDelete: Observable<boolean>;
 
-  constructor(
-    private store: Store<CFAppState>,
-    private datePipe: DatePipe,
-    private confirmDialog: ConfirmationDialogService,
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-  ) {
+  constructor() {
     super();
+    const activeRouteCfOrgSpace = this.activeRouteCfOrgSpace;
+
     this.dataSource = new CfOrgSpaceQuotasDataSourceService(this.store, activeRouteCfOrgSpace.orgGuid, activeRouteCfOrgSpace.cfGuid, this);
     const { cfGuid, orgGuid } = this.activeRouteCfOrgSpace;
     this.canEdit = this.currentUserPermissionsService.can(CfCurrentUserPermissions.SPACE_QUOTA_EDIT, cfGuid, orgGuid);
@@ -66,7 +68,7 @@ export class CfSpaceQuotasListConfigService extends BaseCfListConfig<APIResource
         ]
       },
       sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: 'name',
         field: 'entity.name'
       }

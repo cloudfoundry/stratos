@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, signal , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Validators, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
@@ -58,6 +58,9 @@ interface TCPRouteFormModel {
 ]
 })
 export class AddRoutesComponent implements OnInit, OnDestroy {
+  private applicationService = inject(ApplicationService);
+  private store = inject<Store<CFAppState>>(Store);
+
   subscriptions: Subscription[] = [];
   model!: Route;
   domains: APIResource<IDomain>[] = [];
@@ -96,10 +99,9 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   ];
   addRouteMode: RouteMode;
   useRandomPort = false;
-  constructor(
-    private applicationService: ApplicationService,
-    private store: Store<CFAppState>,
-  ) {
+  constructor() {
+    const applicationService = this.applicationService;
+
     this.appGuid = applicationService.appGuid;
     this.cfGuid = applicationService.cfGuid;
     this.appUrl = `/applications/${this.cfGuid}/${this.appGuid}/routes`;
@@ -217,7 +219,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     } else {
       try {
         return this.isRouteSelected();
-      } catch (e) { }
+      } catch (e) { /* intentionally empty */ }
 
       return false;
     }

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import {
@@ -41,6 +41,10 @@ import { canUpdateOrgSpaceRoles } from '../../cf.helpers';
   providedIn: 'root'
 })
 export class CfRolesService {
+  private store = inject<Store<CFAppState>>(Store);
+  private cfUserService = inject(CfUserService);
+  private userPerms = inject(CurrentUserPermissionsService);
+
 
   existingRoles$: Observable<CfUserRolesSelected>;
   newRoles$: Observable<IUserPermissionInOrg>;
@@ -88,11 +92,7 @@ export class CfRolesService {
     );
   }
 
-  constructor(
-    private store: Store<CFAppState>,
-    private cfUserService: CfUserService,
-    private userPerms: CurrentUserPermissionsService,
-  ) {
+  constructor() {
     this.existingRoles$ = this.store.select(selectCfUsersRolesPicked).pipe(
       combineLatestOperators(this.store.select(selectCfUsersRolesCf)),
       filter(([users, cfGuid]) => !!cfGuid),

@@ -1,6 +1,6 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input, OnInit  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AppState } from '@stratosui/store';
@@ -37,6 +37,10 @@ import { CustomIconComponent } from '../../../../shared/components/custom-materi
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PageHeaderEventsComponent implements OnInit {
+  private activatedRoute = inject(ActivatedRoute);
+  private store = inject<Store<AppState>>(Store);
+  private eventService = inject(GlobalEventService);
+
   @Input()
   public endpointIds$!: Observable<string[]>;
   @Input()
@@ -45,11 +49,6 @@ export class PageHeaderEventsComponent implements OnInit {
   public errorMessage$!: Observable<string>;
   endpointId: any;
   private events$!: Observable<any>;
-  constructor(
-    private activatedRoute: ActivatedRoute,
-    private store: Store<AppState>,
-    private eventService: GlobalEventService,
-  ) { }
 
   public markEventsAsRead() {
     this.events$.pipe(

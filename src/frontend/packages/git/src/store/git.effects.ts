@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { ApplicationRef, Injectable } from '@angular/core';
+import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
@@ -31,12 +31,11 @@ import {
   providedIn: 'root'
 })
 export class GitEffects {
-  constructor(
-    private actions$: Actions,
-    private store: Store<AppState>,
-    private httpClient: HttpClient,
-    private appRef: ApplicationRef
-  ) { }
+  private actions$ = inject(Actions);
+  private store = inject<Store<AppState>>(Store);
+  private httpClient = inject(HttpClient);
+  private appRef = inject(ApplicationRef);
+
 
   
   fetchRep$ = createEffect(() => this.actions$.pipe(

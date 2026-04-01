@@ -1,4 +1,4 @@
-import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TailwindDialogService } from '@stratosui/core';
@@ -72,6 +72,11 @@ interface EnvVarData {
   ]
 })
 export class AppServiceBindingCardComponent extends CardCell<APIResource<IServiceBinding>> implements OnInit, IListRowCell {
+  private dialog = inject(TailwindDialogService);
+  private appService = inject(ApplicationService);
+  private serviceActionHelperService = inject(ServiceActionHelperService);
+  private currentUserPermissionsService = inject(CurrentUserPermissionsService);
+
 
   envVarsAvailable$!: Observable<EnvVarData | null>;
   listData!: {
@@ -97,12 +102,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     mode: TableCellServiceBrokerComponentMode.SCOPE,
   };
 
-  constructor(
-    private dialog: TailwindDialogService,
-    private appService: ApplicationService,
-    private serviceActionHelperService: ServiceActionHelperService,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-  ) {
+  constructor() {
     super();
     this.cardMenu = [
       {

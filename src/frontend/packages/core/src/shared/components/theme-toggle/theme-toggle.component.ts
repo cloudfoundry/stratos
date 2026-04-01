@@ -1,6 +1,6 @@
 
 import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
-import { StratosThemeService, ThemeMode } from '../../../../../theme/theme.service';
+import { StratosBrandingService, ThemeMode } from '../../../../../theme/stratos-branding.service';
 
 @Component({
   selector: 'app-theme-toggle',
@@ -11,17 +11,17 @@ import { StratosThemeService, ThemeMode } from '../../../../../theme/theme.servi
   imports: []
 })
 export class ThemeToggleComponent {
-  private themeService = inject(StratosThemeService);
+  private branding = inject(StratosBrandingService);
 
-  isDarkMode = computed(() => this.themeService.isDarkMode());
-  currentMode = computed(() => this.themeService.themeMode());
+  isDarkMode = computed(() => this.branding.isDarkMode());
+  currentMode = computed(() => this.branding.themeMode());
 
   toggleTheme() {
-    this.themeService.toggleTheme();
+    this.branding.toggleTheme();
   }
 
   setMode(mode: ThemeMode) {
-    this.themeService.setThemeMode(mode);
+    this.branding.setThemeMode(mode);
   }
 
   getIcon(): string {

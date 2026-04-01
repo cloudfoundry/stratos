@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, inject } from '@angular/core';
 
 import { BooleanIndicatorComponent } from '../../../boolean-indicator/boolean-indicator.component';
 import { TableCellCustom } from '../../list.types';
@@ -21,10 +21,8 @@ selector: 'app-table-cell-boolean-indicator',
   ]
 })
 export class TableCellBooleanIndicatorComponent<T = any> extends TableCellCustom<T, TableCellBooleanIndicatorComponentConfig<T>> {
+  private cdr = inject(ChangeDetectorRef);
 
-  constructor(private cdr: ChangeDetectorRef) {
-    super();
-  }
 
   @Input('row')
   get row() { return super.row; }

@@ -180,7 +180,7 @@ export class KubernetesResourceListComponent implements OnDestroy {
         columnId: 'name', headerCell: () => 'Name',
         cellComponent: TableCellSidePanelComponent,
         sort: {
-          type: 'sort',
+          type: 'natural-sort',
           orderKey: 'name',
           field: 'metadata.name'
         },
@@ -207,7 +207,7 @@ export class KubernetesResourceListComponent implements OnDestroy {
           getLink: row => this.showNamespaceLink ? `/kubernetes/${this.kubeId}/namespaces/${row.metadata.namespace}` : null
         },
         sort: {
-          type: 'sort',
+          type: 'natural-sort',
           orderKey: namespaceColumnId,
           field: 'metadata.namespace'
         },
@@ -252,7 +252,7 @@ export class KubernetesResourceListComponent implements OnDestroy {
 
     if (cell.sort && typeof (cell.field) === 'string') {
       tableCell.sort = {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: tableCell.columnId,
         field: cell.field as string
       };

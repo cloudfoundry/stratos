@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Input, OnInit, ViewChild, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
@@ -23,16 +23,13 @@ import { AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
   ]
 })
 export class CardAutoscalerDefaultComponent implements OnInit {
+  appService = inject(ApplicationService);
+  private entityServiceFactory = inject(EntityServiceFactory);
+  private applicationService = inject(ApplicationService);
+  private cdr = inject(ChangeDetectorRef);
+
 
   @ViewChild('instanceField', { static: false }) instanceField!: ElementRef;
-
-  constructor(
-    public appService: ApplicationService,
-    private entityServiceFactory: EntityServiceFactory,
-    private applicationService: ApplicationService,
-    private cdr: ChangeDetectorRef
-  ) {
-  }
 
   appAutoscalerPolicyService!: EntityService;
   appAutoscalerPolicy$!: Observable<APIResource<AppAutoscalerPolicyLocal>>;

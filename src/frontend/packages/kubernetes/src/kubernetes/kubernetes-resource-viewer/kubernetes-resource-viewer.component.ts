@@ -3,8 +3,6 @@ import { Portal, TemplatePortal } from '@angular/cdk/portal';
 import {
   AfterViewInit,
   Component,
-  ComponentFactory,
-  ComponentFactoryResolver,
   ComponentRef,
   OnDestroy,
   TemplateRef,
@@ -72,7 +70,6 @@ selector: 'app-kubernetes-resource-viewer',
 })
 export class KubernetesResourceViewerComponent implements PreviewableComponent, OnDestroy, AfterViewInit {  private endpointsService = inject(EndpointsService);
   private kubeEndpointService = inject(KubernetesEndpointService);
-  private resolver = inject(ComponentFactoryResolver);
   private userFavoriteManager = inject(UserFavoriteManager);
   private viewContainerRef = inject(ViewContainerRef);
   private confirmDialog = inject(ConfirmationDialogService);
@@ -117,8 +114,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
   createCustomComponent(): void {
     this.removeCustomComponent();
     if (this.component && this.customComponentContainer) {
-      const factory: ComponentFactory<PreviewableComponent> = this.resolver.resolveComponentFactory(this.component);
-      this.componentRef = this.customComponentContainer.createComponent(factory);
+      this.componentRef = this.customComponentContainer.createComponent(this.component);
       this.componentRef.instance.setProps(this.data);
     }
   }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { Store } from '@ngrx/store';
@@ -64,6 +64,10 @@ import {
   ]
 })
 export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceInstance>> {
+  private store = inject<Store<CFAppState>>(Store);
+  private serviceActionHelperService = inject(ServiceActionHelperService);
+  private currentUserPermissionsService = inject(CurrentUserPermissionsService);
+
 
   @Input('row')
   set row(row: APIResource<IServiceInstance>) {
@@ -146,14 +150,6 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
         );
       }
     }
-  }
-
-  constructor(
-    private store: Store<CFAppState>,
-    private serviceActionHelperService: ServiceActionHelperService,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-  ) {
-    super();
   }
 
   static done = false;

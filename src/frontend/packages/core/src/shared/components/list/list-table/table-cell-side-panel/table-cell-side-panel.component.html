@@ -1,3 +1,6 @@
-<a class="link text-primary-600 hover:text-primary-800 cursor-pointer" (click)="showSidePanel(); $event.stopPropagation()">
+<a class="link text-primary-600 hover:text-primary-800 cursor-pointer" role="button" tabindex="0"
+  (click)="showSidePanel(); $event.stopPropagation()"
+  (keydown.enter)="showSidePanel(); $event.stopPropagation()"
+  (keydown.space)="showSidePanel(); $event.stopPropagation(); $event.preventDefault()">
   {{actualConfig?.text}}
 </a>

@@ -398,7 +398,7 @@ export class DeployApplicationDeployer {
         this.onClose(log, 'Deploy Failed!',
           'Failed to deploy app!');
         break;
-      case SocketEventTypes.SOURCE_REQUIRED:
+      case SocketEventTypes.SOURCE_REQUIRED: {
         const sourceInfo = this.sendProjectInfo(this.applicationSource);
         if (!sourceInfo) {
           this.onClose(log, 'Deploy Failed - Unknown source type',
@@ -407,13 +407,14 @@ export class DeployApplicationDeployer {
           this.inputStream.next(sourceInfo);
         }
         break;
-      case SocketEventTypes.OVERRIDES_REQUIRED:
+      }
+      case SocketEventTypes.OVERRIDES_REQUIRED: {
         const overrides = this.sendAppOverride(this.applicationOverrides);
         this.inputStream.next(overrides);
         break;
+      }
       case SocketEventTypes.EVENT_CLONED:
       case SocketEventTypes.EVENT_FETCHED_MANIFEST:
-      case SocketEventTypes.MANIFEST:
         break;
       case SocketEventTypes.SOURCE_FILE_ACK:
         this.sendNextFile();

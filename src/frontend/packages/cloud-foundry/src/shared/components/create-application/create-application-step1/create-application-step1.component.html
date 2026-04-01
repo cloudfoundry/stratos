@@ -2,11 +2,11 @@
 <form #cfForm="ngForm" class="create-app-step-1 stepper-form">
   @if (!isMarketplaceMode) {
     <div class="mb-4">
-      <label class="block text-sm font-medium mb-1">Cloud Foundry *</label>
-      <app-select #cfSelect="ngModel" [disabled]="(cfOrgSpaceService.cf.loading$ | async)"
+      <label class="block text-sm font-medium mb-1" for="cf">Cloud Foundry *</label>
+      <app-select id="cf" #cfSelect="ngModel" [disabled]="(cfOrgSpaceService.cf.loading$ | async)"
         [ngModel]="cfOrgSpaceService.cf.select.getValue()"
         (selectionChange)="cfOrgSpaceService.cf.select.next($event.value)" required name="cf" [disabled]="isRedeploy"
-        [appFocus]="!(cfOrgSpaceService.cf.loading$ | async)"
+        [appFocus]="(cfOrgSpaceService.cf.loading$ | async) === false"
         class="block w-full border-b border-gray-300 dark:border-gray-600 pb-2">
         @for (cf of cfOrgSpaceService.cf.list$ | async; track cf) {
           <app-option [value]="cf.guid" [label]="cf.name">
@@ -17,8 +17,8 @@
     </div>
   }
   <div class="mb-4">
-    <label class="block text-sm font-medium mb-1">Organization *</label>
-    <app-select #orgSelect="ngModel"
+    <label class="block text-sm font-medium mb-1" for="org">Organization *</label>
+    <app-select id="org" #orgSelect="ngModel"
       [disabled]="!cfOrgSpaceService.cf.select.getValue() || (cfOrgSpaceService.org.loading$ | async) || isRedeploy"
       [ngModel]="cfOrgSpaceService.org.select.getValue()"
       (selectionChange)="cfOrgSpaceService.org.select.next($event.value)" required name="org"
@@ -30,15 +30,15 @@
         </app-option>
       }
     </app-select>
-    @if (!(hasOrgs$ | async)) {
+    @if ((hasOrgs$ | async) === false) {
       <p class="text-sm text-red-600 dark:text-red-400 mt-1">
         There are no organizations in this Cloud Foundry
       </p>
     }
   </div>
   <div class="mb-4">
-    <label class="block text-sm font-medium mb-1">Space *</label>
-    <app-select #spaceSelect="ngModel"
+    <label class="block text-sm font-medium mb-1" for="space">Space *</label>
+    <app-select id="space" #spaceSelect="ngModel"
       [disabled]="!cfOrgSpaceService.org.select.getValue() || (cfOrgSpaceService.space.loading$ | async) || isRedeploy"
       [ngModel]="cfOrgSpaceService.space.select.getValue()"
       (selectionChange)="cfOrgSpaceService.space.select.next($event.value)" required name="space"
@@ -49,11 +49,11 @@
         </app-option>
       }
     </app-select>
-    @if (!(hasSpaces$ | async)) {
+    @if ((hasSpaces$ | async) === false) {
       <p class="text-sm text-red-600 dark:text-red-400 mt-1">
         There are no spaces in this organization
       </p>
     }
   </div>
-  <p class="text-sm text-gray-600 dark:text-gray-400">Don't see your organization or space? Please make sure you have the relevant permissions.</p>
+  <p class="text-sm text-content-muted">Don't see your organization or space? Please make sure you have the relevant permissions.</p>
 </form>

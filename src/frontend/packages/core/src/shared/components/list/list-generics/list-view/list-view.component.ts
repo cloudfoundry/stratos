@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentFactoryResolver, ComponentRef, Injector, Input, OnDestroy, Type, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, Injector, Input, OnDestroy, ViewChild, inject } from '@angular/core';
 
 import { ListComponent } from '../../list.component';
 import { IListConfig, ListConfig } from '../../list.component.types';
@@ -16,6 +16,9 @@ import { ListConfigProvider } from '../list-config-provider.types';
   ]
 })
 export class ListViewComponent<T> implements OnDestroy {
+  private injector = inject(Injector);
+  private cdr = inject(ChangeDetectorRef);
+
 
   @Input() set config(config: ListConfigProvider<T>) {
     if (config) {
@@ -28,12 +31,6 @@ export class ListViewComponent<T> implements OnDestroy {
 
   private componentRef!: ComponentRef<ListComponent<unknown>>;
 
-  constructor(
-    private componentFactoryResolver: ComponentFactoryResolver,
-    private injector: Injector,
-    private cdr: ChangeDetectorRef
-  ) { }
-
   ngOnDestroy() {
     if (this.componentRef) {
       this.componentRef.destroy();
@@ -44,7 +41,6 @@ export class ListViewComponent<T> implements OnDestroy {
     // Clean up old component
     this.ngOnDestroy();
 
-    // const componentFactory = this.componentFactoryResolver.resolveComponentFactory(ListComponent);
     const viewContainerRef = this.listHost.viewContainerRef;
     this.componentRef = viewContainerRef.createComponent(ListComponent,{
       injector: this.makeCustomConfigInjector(listConfig.getListConfig())

@@ -1,4 +1,4 @@
-import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Observable, Subject } from 'rxjs';
 import { catchError, filter, map, share, switchMap } from 'rxjs/operators';
@@ -21,6 +21,9 @@ import { CloudFoundryFirehoseFormatter } from './cloud-foundry-firehose-formatte
 ]
 })
 export class CloudFoundryFirehoseComponent implements OnInit {
+  private cfEndpointService = inject(CloudFoundryEndpointService);
+  private utilsService = inject(UtilsService);
+
   messages!: Observable<string>;
   connectionStatus!: Observable<number>;
 
@@ -28,11 +31,6 @@ export class CloudFoundryFirehoseComponent implements OnInit {
 
   // Formatter for fire hose log messages
   formatter!: CloudFoundryFirehoseFormatter;
-
-  constructor(
-    private cfEndpointService: CloudFoundryEndpointService,
-    private utilsService: UtilsService
-  ) { }
 
   ngOnInit() {
     const host = window.location.host;

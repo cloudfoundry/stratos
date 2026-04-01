@@ -1,4 +1,4 @@
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
@@ -36,7 +36,9 @@ export class CfEndpointsMissingComponent extends EndpointsMissingComponent {
   showToolbarHint = false;
   showNoConnected = true;
 
-  constructor(cloudFoundryService: CloudFoundryService) {
+  constructor() {
+    const cloudFoundryService = inject(CloudFoundryService);
+
     super();
     this.haveConnected$ = cloudFoundryService.hasConnectedCFEndpoints$;
     this.haveRegistered$ = cloudFoundryService.hasRegisteredCFEndpoints$;

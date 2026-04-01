@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
@@ -25,11 +25,11 @@ export class CfAdminAddUserWarningComponent {
   isOrg: boolean;
   show$: Observable<boolean>;
 
-  constructor(
-    store: Store<CFAppState>,
-    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    cfUserService: CfUserService
-  ) {
+  constructor() {
+    const store = inject<Store<CFAppState>>(Store);
+    const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+    const cfUserService = inject(CfUserService);
+
     this.isOrg = !activeRouteCfOrgSpace.spaceGuid;
     this.show$ = waitForCFPermissions(
       store,

@@ -158,7 +158,7 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
   private deleteSingleRoute(item: APIResource<ListCfRoute>): void {
     const confirmation = new ConfirmationDialogConfig(
       'Delete Route',
-      `Are you sure you want to delete the route \n\'${item.entity.url}\'?`,
+      `Are you sure you want to delete the route \n'${item.entity.url}'?`,
       'Delete',
       true
     );
@@ -182,13 +182,13 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
 
   // If the data source only caters for a single app ensure we update that app alone
   private getSingleOrMultiAppGuids = (route: APIResource<ListCfRoute>): string[] =>
-    !!this.getDataSource().appGuid ? [this.getDataSource().appGuid] : route.entity.apps.map(app => app.metadata.guid)
+    this.getDataSource().appGuid ? [this.getDataSource().appGuid] : route.entity.apps.map(app => app.metadata.guid)
 
   private unmapSingleRoute(item: APIResource<ListCfRoute>): void {
-    const appText = !!this.getDataSource().appGuid ? '' : ` from ${item.entity.apps.length} application/s`;
+    const appText = this.getDataSource().appGuid ? '' : ` from ${item.entity.apps.length} application/s`;
     const confirmation = new ConfirmationDialogConfig(
       'Unmap Route',
-      `Are you sure you want to unmap the route \'${item.entity.url}\'${appText}?`,
+      `Are you sure you want to unmap the route '${item.entity.url}'${appText}?`,
       'Unmap',
       true
     );
@@ -199,7 +199,7 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
   }
 
   private unmapMultipleRoutes(items: APIResource<ListCfRoute>[]): void {
-    const appText = !!this.getDataSource().appGuid ? '' : ' from multiple applications';
+    const appText = this.getDataSource().appGuid ? '' : ' from multiple applications';
     const confirmation = new ConfirmationDialogConfig(
       'Unmap Routes',
       `Are you sure you want to unmap ${items.length} routes${appText}?`,

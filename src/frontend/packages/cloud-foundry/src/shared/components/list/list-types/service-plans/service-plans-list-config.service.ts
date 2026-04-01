@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import {
@@ -37,6 +37,8 @@ import {
   providedIn: 'root'
 })
 export class ServicePlansListConfigService implements IListConfig<APIResource<IServicePlan>> {
+  protected datePipe = inject(DatePipe);
+
 
   viewType = ListViewTypes.TABLE_ONLY;
   pageSizeOptions = defaultPaginationPageSizeOptionsTable;
@@ -57,7 +59,7 @@ export class ServicePlansListConfigService implements IListConfig<APIResource<IS
         getValue: (row: APIResource<IServicePlan>) => getServicePlanName(row.entity)
       },
       sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: 'name',
         field: 'entity.name'
       },
@@ -104,11 +106,10 @@ export class ServicePlansListConfigService implements IListConfig<APIResource<IS
   ];
 
 
-  constructor(
-    store: Store<CFAppState>,
-    protected datePipe: DatePipe,
-    servicesService: ServicesService
-  ) {
+  constructor() {
+    const store = inject<Store<CFAppState>>(Store);
+    const servicesService = inject(ServicesService);
+
     this.dataSource = new ServicePlansDataSource(servicesService.cfGuid, servicesService.serviceGuid, store, this);
   }
 

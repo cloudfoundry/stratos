@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
@@ -54,6 +54,10 @@ interface EditRecurringScheduleForm {
   ]
 })
 export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDirective implements OnInit {
+  applicationService = inject(ApplicationService);
+  private fb = inject(FormBuilder);
+  private cdr = inject(ChangeDetectorRef);
+
 
   policyAlert = PolicyAlert;
   weekdayOptions = AutoscalerConstants.WeekdayOptions;
@@ -70,13 +74,10 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
     time: true
   };
 
-  constructor(
-    public applicationService: ApplicationService,
-    private fb: FormBuilder,
-    service: EditAutoscalerPolicyService,
-    route: ActivatedRoute,
-    private cdr: ChangeDetectorRef
-  ) {
+  constructor() {
+    const service = inject(EditAutoscalerPolicyService);
+    const route = inject(ActivatedRoute);
+
     super(service, route);
     this.editRecurringScheduleForm = this.fb.group<EditRecurringScheduleForm>({
       days_of_week: this.fb.control<number[]>([], { nonNullable: true }),

@@ -3,7 +3,7 @@
     <!-- <img *ngIf="imagePath" class="entity-summary__logo" title="{{ title }}'s image" src="{{ imagePath }}"> -->
     @if (image) {
       <img class="entity-summary__img" title="{{ title }}'s image" [src]="image"
-        (error)="failedImageLoad()">
+        (error)="failedImageLoad()" alt="{{ title }}">
     } @else {
       <app-custom-icon class="entity-summary__logo" fontSet="{{fallBackIconFont}}">{{fallBackIcon}}</app-custom-icon>
     }

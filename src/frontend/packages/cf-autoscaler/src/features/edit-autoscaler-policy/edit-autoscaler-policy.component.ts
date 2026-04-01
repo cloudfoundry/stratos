@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { Observable } from 'rxjs';
@@ -37,16 +37,16 @@ import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
   ]
 })
 export class EditAutoscalerPolicyComponent implements OnInit {
+  applicationService = inject(ApplicationService);
+  private route = inject(ActivatedRoute);
+  private cdr = inject(ChangeDetectorRef);
+
 
   parentUrl: string;
   applicationName$!: Observable<string>;
   isCreate = false;
 
-  constructor(
-    public applicationService: ApplicationService,
-    private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef
-  ) {
+  constructor() {
     this.parentUrl = `/applications/${this.applicationService.cfGuid}/${this.applicationService.appGuid}/autoscale`;
   }
 

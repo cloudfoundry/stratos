@@ -8,7 +8,7 @@ Single source of truth for building, testing, and packaging Stratos.
 |------|---------|---------|
 | Node.js | 24+ | Frontend build tooling |
 | Bun | 1.2+ | Package manager, script runner |
-| Go | 1.21+ | Backend compilation |
+| Go | 1.25+ | Backend compilation |
 | Git | any | Source control, `git archive` for source packages |
 | `zip` | any | CF and Windows release archives |
 | `swag` | optional | OpenAPI documentation generation |
@@ -19,11 +19,11 @@ Single source of truth for building, testing, and packaging Stratos.
 
 | Command | What it does | Output |
 |---------|-------------|--------|
-| `make build` | Build frontend + backend for current platform | `dist/frontend/browser/`, `dist/bin/jetstream` |
+| `make build` | Build frontend + all backend platforms | `dist/frontend/browser/`, `dist/bin/jetstream-{os}-{arch}` |
 | `make build frontend` | Build frontend only (production) | `dist/frontend/browser/` |
-| `make build backend` | Build backend for current platform | `dist/bin/jetstream` |
-| `make build backend-all` | Cross-compile backend for 6 platforms | `dist/bin/jetstream-{os}-{arch}` |
-| `make build all` | Frontend + cross-compile all backends | All of the above |
+| `make build backend` | Cross-compile backend for all platforms | `dist/bin/jetstream-{os}-{arch}` |
+| `make build backend PLATFORM=linux/amd64` | Build backend for one platform | `dist/bin/jetstream` |
+| `make build cf` | Build frontend + linux/amd64 backend (CF deploy) | `dist/frontend/browser/`, `dist/bin/jetstream` |
 
 ### Testing
 
@@ -32,6 +32,7 @@ Single source of truth for building, testing, and packaging Stratos.
 | `make test` | Run all tests (frontend + backend) |
 | `make test frontend` | Frontend tests only (Vitest) |
 | `make test backend` | Backend tests only (Go) |
+| `make test e2e` | Playwright E2E tests against deployed instance |
 
 ### Packaging and Release
 
@@ -39,7 +40,7 @@ Single source of truth for building, testing, and packaging Stratos.
 |---------|--------------|-------------|--------|
 | `make stage` | `make build` | Stage artifacts for local testing | `dist/install/` with `run.sh` |
 | `make release cf` | `make build` (linux/amd64) | Create CF-pushable zip | `dist/stratos-cf-{VERSION}.zip` |
-| `make release github` | `make build all` | Create all release archives | `dist/release/` (7 archives) |
+| `make release github` | `make build` | Create all release archives | `dist/release/` (7 archives) |
 | `make release` | All of the above | Create both CF zip and GitHub archives | Both |
 
 ### Development
@@ -58,13 +59,32 @@ Single source of truth for building, testing, and packaging Stratos.
 | `make clean` | Remove all build output (frontend, backend, release artifacts) |
 | `make clean frontend` | Remove frontend build only (`dist/frontend/`, `.angular`) |
 | `make clean backend` | Remove backend binaries only (`dist/bin/`) |
-| `make clean all` | Remove everything including `node_modules` |
+| `make clean dist` | Remove everything including `node_modules` |
+| `make clean repo` | Full reset — everything gitignored |
 
-### Diagnostics
+### Version Management
+
+| Command | Example input | Result |
+|---------|--------------|--------|
+| `make bump patch` | `v4.9.3-dev.38` | `v4.9.4` |
+| `make bump minor` | `v4.9.3-dev.38` | `v4.10.0` |
+| `make bump major` | `v4.9.3-dev.38` | `v5.0.0` |
+| `make bump dev` | `v4.9.3` | `v4.9.3-dev.1` |
+| `make bump dev` | `v4.9.3-dev.38` | `v4.9.3-dev.39` |
+| `make bump rc` | `v4.9.3-dev.38` | `v4.9.3-rc.1` |
+| `make bump rc` | `v4.9.3-rc.1` | `v4.9.3-rc.2` |
+
+`bump major/minor/patch` strips any prerelease and bumps the component.
+`bump dev` and `bump rc` operate on the current base version without touching the semver core.
+For an explicit version string, use `build/version-bump.sh set vX.Y.Z-pre` directly.
+
+### Metadata and Diagnostics
 
 | Command | What it does |
 |---------|-------------|
+| `make stamp frontend` | Generate `build-info.ts` with version and git metadata |
 | `make dump version` | Print resolved semver, VCS metadata, and Go ldflags |
+| `make dump actions` | List all registered verb+modifier pairs |
 
 ### Common Workflows
 
@@ -79,12 +99,19 @@ dist/install/run.sh
 **CF deployment:**
 
 ```bash
-make build all
-make release cf
+# Build and package in one command (cf modifier forces linux/amd64):
+make build release cf
+
+# Or with explicit version override:
+make VERSION=v5.0.0 build release cf
+
+# Deploy (via site.mk or manually):
+cf target -o system -s stratos
 cf push -f dist/cf-package/manifest.yml -p dist/stratos-cf-{VERSION}.zip
-# or from the staging directory:
-cd dist/cf-package && cf push
 ```
+
+The `cf` modifier automatically sets `PLATFORM=linux/amd64` for backend
+compilation. The version can be overridden without editing `package.json`.
 
 Note: `cf push -p` does not read `manifest.yml` from inside the zip —
 the manifest must be passed separately with `-f` or be in the current directory.
@@ -92,9 +119,79 @@ the manifest must be passed separately with `-f` or be in the current directory.
 **GitHub release (automated via CI):**
 
 ```bash
-make build all
+make build
 make release github
 ```
+
+**Version override:**
+
+Any make target respects `VERSION=` to override the version from `package.json`:
+
+```bash
+make VERSION=v5.0.0-rc.1 build release cf
+make VERSION=v5.0.0 dump version
+```
+
+## Site-Specific Overrides (site.mk)
+
+The Makefile supports site-specific customization through an optional `site.mk`
+file. This file is loaded via `-include site.mk` at the end of the Makefile,
+so it can extend or override any variable or target.
+
+`site.mk` is gitignored — it is never committed. A `site.mk.example` is
+provided as a starting point.
+
+### When to use site.mk
+
+Use `site.mk` for operations that depend on your deployment environment:
+
+- Deploy targets (`make deploy cf`) with org/space configuration
+- Environment-specific variable overrides
+- Custom CI or automation targets
+- Integration with site-specific tooling
+
+Do **not** put secrets in `site.mk`. Use environment variables or a secrets
+manager instead.
+
+### Getting started
+
+```bash
+cp site.mk.example site.mk
+# Edit site.mk to match your environment
+```
+
+### Adding help text
+
+If your `site.mk` defines a `site-help` target, `make help` will include it
+automatically:
+
+```makefile
+.PHONY: site-help
+site-help:
+	@echo ""
+	@echo "Site-specific:"
+	@echo "  make deploy cf    Push to current CF target"
+```
+
+Without a `site-help` target, `make help` shows a generic note that site.mk
+exists. Without `site.mk` at all, nothing extra is shown.
+
+### Design pattern
+
+The Makefile uses a **verb + modifier** pattern where order does not matter:
+
+```
+make <verb> [modifier...]
+make build cf              # verb=build, modifier=cf
+make cf build release      # same modifiers, different order — same result
+```
+
+Modifiers are no-op targets that set flags. The `cf` modifier forces
+`PLATFORM=linux/amd64` for build targets. Site-specific targets follow the
+same pattern — `site.mk` adds new verbs (like `deploy`) that compose with
+existing modifiers.
+
+See `site.mk.example` for the full deploy target pattern.
 
 ## Validation Behavior
 
@@ -113,7 +210,7 @@ ERROR: Backend binary not found at dist/bin/jetstream
 
 ```
 ERROR: Cross-compiled binaries missing: jetstream-linux-arm64 jetstream-darwin-amd64
-  Run: make build backend-all
+  Run: make build backend
 ```
 
 Packaging never auto-builds. This avoids the old problem where unwanted build
@@ -123,18 +220,18 @@ steps blocked packaging.
 
 | Old | New |
 |-----|-----|
-| `bin/package` | `make build all && make release cf` |
+| `bin/package` | `make build && make release cf` |
 | `bin/package --skip-build` | `make release cf` (validates artifacts exist) |
 | `build/package.sh` | `make release github` |
 | `make build-frontend` | `make build frontend` |
-| `make build-backend` | `make build backend` |
-| `make build-backend-all` | `make build backend-all` |
+| `make build-backend` | `make build backend PLATFORM=linux/amd64` |
+| `make build-backend-all` | `make build backend` |
 | `make package` | `make release` |
 | `make dev-frontend` | `make dev frontend` |
 | `make dev-backend` | `make dev backend` |
 | `make install` (old) | `make install` (unchanged — installs dependencies) |
 | `make clean-dev` | `make clean` |
-| `make clean-deep` | `make clean all` |
+| `make clean-deep` | `make clean dist` |
 | `make debug-version` | `make dump version` |
 
 ## Version and Build Metadata
@@ -173,9 +270,12 @@ Injected via Go ldflags at compile time:
 
 | Variable | Used by | Default | Description |
 |----------|---------|---------|-------------|
-| `GOOS` | `make build backend` | Current OS | Target OS |
-| `GOARCH` | `make build backend` | Current arch | Target architecture |
+| `PLATFORM` | `make build backend` | Host OS/arch | Target platform (`linux/amd64`, `darwin/arm64`, etc.) |
 | `VERSION` | All targets | From `package.json` | Override version string |
+
+Platform detection uses `uname` and normalizes to Go conventions (`darwin`,
+`linux`, `amd64`, `arm64`). The `PLATFORM` variable accepts any separator:
+`linux/amd64`, `linux-amd64`, or `linux_amd64`.
 
 ## Package Contents
 

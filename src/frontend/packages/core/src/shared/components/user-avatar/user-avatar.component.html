@@ -3,9 +3,9 @@
     <span class="material-icons user-avatar__placeholder">account_circle</span>
   }
   @if (initials) {
-    <div [ngClass]="{'user-avatar__header': color == 'header'}" class="user-avatar__initials">{{ initials }}</div>
+    <div [ngClass]="{'user-avatar__header': color === 'header'}" class="user-avatar__initials">{{ initials }}</div>
   }
   @if (gravatar) {
-    <img class="user-avatar__gravatar" [src]="gravatar">
+    <img class="user-avatar__gravatar" [src]="gravatar" alt="">
   }
 </div>

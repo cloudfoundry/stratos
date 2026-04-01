@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders, HttpParams, HttpRequest, HttpResponse } from '@angular/common/http';
-import { Directive, forwardRef, Input, OnInit } from '@angular/core';
+import { Directive, forwardRef, Input, OnInit, inject } from '@angular/core';
 import { AbstractControl, AsyncValidator, NG_ASYNC_VALIDATORS } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, throwError as observableThrowError, timer as observableTimer } from 'rxjs';
@@ -43,15 +43,15 @@ selector: '[appApplicationNameUnique][formControlName],[appApplicationNameUnique
 standalone: true
 })
 export class AppNameUniqueDirective implements AsyncValidator, OnInit {
+  private store = inject<Store<CFAppState>>(Store);
+  private http = inject(HttpClient);
+
 
   @Input() appApplicationNameUnique!: AppNameUniqueChecking;
   @Input() appApplicationNameUniqueRequest!: UniqueValidatorRequestBuilder;
   @Input() appApplicationNameUniqueValidator: NameTaken = (res: HttpResponse<any>) => res.body.total_results > 0;
 
-  constructor(
-    private store: Store<CFAppState>,
-    private http: HttpClient,
-  ) {
+  constructor() {
     if (!this.appApplicationNameUnique) {
       this.appApplicationNameUnique = new AppNameUniqueChecking();
     }

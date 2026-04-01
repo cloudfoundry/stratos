@@ -5,6 +5,8 @@
   </div>
 }
 @if (row.name !== dataSource.editRow?.name) {
-  <span class="cell-value-variable"
-  (click)="showPopup()">{{row.value}}</span>
+  <span class="cell-value-variable" role="button" tabindex="0"
+    (click)="showPopup()"
+    (keydown.enter)="showPopup()"
+    (keydown.space)="showPopup(); $event.preventDefault()">{{row.value}}</span>
 }

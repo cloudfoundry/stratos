@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { GitCommit, gitEntityCatalog, GitRepo, GitSCMService, GitSCMType, SCMIcon } from '@stratosui/git';
@@ -96,18 +96,16 @@ interface CustomEnvVarStratosProjectSource extends EnvVarStratosProjectSource {
   ]
 })
 export class BuildTabComponent implements OnInit {
+  applicationService = inject(ApplicationService);
+  private scmService = inject(GitSCMService);
+  private store = inject<Store<CFAppState>>(Store);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private confirmDialog = inject(ConfirmationDialogService);
+  private cups = inject(CurrentUserPermissionsService);
+
   public isBusyUpdating$!: Observable<{ updating: boolean, }>;
   public manageAppPermission = CfCurrentUserPermissions.APPLICATION_MANAGE;
-
-  constructor(
-    public applicationService: ApplicationService,
-    private scmService: GitSCMService,
-    private store: Store<CFAppState>,
-    private route: ActivatedRoute,
-    private router: Router,
-    private confirmDialog: ConfirmationDialogService,
-    private cups: CurrentUserPermissionsService
-  ) { }
 
   cardTwoFetching$!: Observable<boolean>;
 
@@ -174,7 +172,7 @@ export class BuildTabComponent implements OnInit {
       this.applicationService.application$
     ).pipe(
       map(([project, app]) => {
-        if (!!project) {
+        if (project) {
           const deploySource: CustomEnvVarStratosProjectSource = { ...project.deploySource };
 
           // Legacy

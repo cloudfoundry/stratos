@@ -1,4 +1,4 @@
-import {Component, ComponentFactoryResolver, Injector, OnDestroy, signal, WritableSignal, inject, ChangeDetectionStrategy } from '@angular/core';
+import {Component, EnvironmentInjector, Injector, OnDestroy, signal, WritableSignal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 
 import { UntypedFormBuilder } from '@angular/forms';
@@ -124,7 +124,7 @@ export class KubeConfigImportComponent implements OnDestroy {
 
   private connectService: ConnectEndpointService;
   public store = inject(Store<AppState>);
-  public resolver = inject(ComponentFactoryResolver);
+  private environmentInjector = inject(EnvironmentInjector);
   private injector = inject(Injector);
   private fb = inject(UntypedFormBuilder);
   private endpointsService = inject(EndpointsService);
@@ -196,7 +196,7 @@ export class KubeConfigImportComponent implements OnDestroy {
       return;
     }
     const helper = new KubeConfigAuthHelper();
-    const data = helper.getAuthDataForConnect(this.resolver, this.injector, this.fb, connect.user);
+    const data = helper.getAuthDataForConnect(this.environmentInjector, this.injector, this.fb, connect.user);
     if (data) {
       const obs$ = this.connectEndpoint(connect, data);
 

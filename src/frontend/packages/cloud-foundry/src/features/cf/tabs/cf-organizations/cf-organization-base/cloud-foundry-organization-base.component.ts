@@ -1,4 +1,4 @@
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
@@ -51,6 +51,9 @@ import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry
   ]
 })
 export class CloudFoundryOrganizationBaseComponent {
+  cfEndpointService = inject(CloudFoundryEndpointService);
+  cfOrgService = inject(CloudFoundryOrganizationService);
+
 
   tabLinks: IPageSideNavTab[] = [
     {
@@ -101,11 +104,10 @@ export class CloudFoundryOrganizationBaseComponent {
 
   public favorite$: Observable<UserFavorite<IFavoriteMetadata>>;
 
-  constructor(
-    public cfEndpointService: CloudFoundryEndpointService,
-    public cfOrgService: CloudFoundryOrganizationService,
-    userFavoriteManager: UserFavoriteManager
-  ) {
+  constructor() {
+    const cfOrgService = this.cfOrgService;
+    const userFavoriteManager = inject(UserFavoriteManager);
+
     this.schema = cfEntityFactory(organizationEntityType);
     this.favorite$ = cfOrgService.org$.pipe(
       first(),

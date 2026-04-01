@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import {  signal, provideZonelessChangeDetection } from '@angular/core';
 
 import { StratosTitleComponent } from './stratos-title.component';
-import { StratosThemeService } from '@stratosui/theme';
+import { StratosBrandingService } from '@stratosui/theme';
 
 describe('StratosTitleComponent', () => {
   let component: StratosTitleComponent;
@@ -27,7 +27,7 @@ describe('StratosTitleComponent', () => {
       imports: [ StratosTitleComponent ],
       providers: [
 
-        { provide: StratosThemeService, useValue: mockThemeService },
+        { provide: StratosBrandingService, useValue: mockThemeService },
 
         provideZonelessChangeDetection(),
       ]

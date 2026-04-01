@@ -85,7 +85,7 @@ export function deployAppReducer(state: DeployApplicationState = defaultState, a
           data: action.error
         }
       };
-    case SAVE_APP_DETAILS:
+    case SAVE_APP_DETAILS: {
       const saveAppDetails = action as SaveAppDetails;
       return {
         ...state,
@@ -95,6 +95,7 @@ export function deployAppReducer(state: DeployApplicationState = defaultState, a
           dockerDetails: saveAppDetails.docker || state.applicationSource.dockerDetails,
         }
       };
+    }
     case SAVE_APP_OVERRIDE_DETAILS:
       return {
         ...state,

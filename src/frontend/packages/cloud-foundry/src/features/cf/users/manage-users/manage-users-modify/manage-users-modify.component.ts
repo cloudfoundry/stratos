@@ -1,17 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  ChangeDetectorRef,
-  Component,
-  ComponentFactory,
-  ComponentFactoryResolver,
-  ComponentRef,
-  Input,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-  ViewContainerRef,
-  signal,
-  ChangeDetectionStrategy} from '@angular/core';
+import { ChangeDetectorRef, Component, ComponentRef, Input, OnDestroy, OnInit, ViewChild, ViewContainerRef, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
@@ -77,6 +65,12 @@ interface CfUserWithWarning extends CfUser {
   ]
 })
 export class UsersRolesModifyComponent implements OnInit, OnDestroy {
+  private store = inject<Store<CFAppState>>(Store);
+  private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+  private cfRolesService = inject(CfRolesService);
+  private cd = inject(ChangeDetectorRef);
+  private snackBar = inject(TailwindSnackBarService);
+
 
 
   @Input() setUsernames = false;
@@ -128,7 +122,6 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   @ViewChild('spaceRolesTable', { read: ViewContainerRef, static: true })
   spaceRolesTable!: ViewContainerRef;
 
-  private wrapperFactory: ComponentFactory<SpaceRolesListWrapperComponent>;
   private wrapperRef: ComponentRef<SpaceRolesListWrapperComponent>;
   private snackBarRef: TailwindSnackBarRef<any>;
 
@@ -142,17 +135,6 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   usersWithWarning$!: Observable<string[]>;
   isSetByUsername$!: Observable<boolean | undefined>;
   isRemove$!: Observable<boolean | undefined>;
-
-  constructor(
-    private store: Store<CFAppState>,
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private componentFactoryResolver: ComponentFactoryResolver,
-    private cfRolesService: CfRolesService,
-    private cd: ChangeDetectorRef,
-    private snackBar: TailwindSnackBarService,
-  ) {
-    this.wrapperFactory = this.componentFactoryResolver.resolveComponentFactory(SpaceRolesListWrapperComponent);
-  }
 
   ngOnInit() {
     if (this.setUsernames) {
@@ -281,7 +263,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
         // The org has changed, completely recreate the roles table
         this.destroySpacesList();
 
-        this.wrapperRef = this.spaceRolesTable.createComponent(this.wrapperFactory);
+        this.wrapperRef = this.spaceRolesTable.createComponent(SpaceRolesListWrapperComponent);
         this.cd.detectChanges();
       }
     });

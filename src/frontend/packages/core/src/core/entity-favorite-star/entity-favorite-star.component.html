@@ -1,5 +1,8 @@
-@if (!(endpointsService.disablePersistenceFeatures$ | async)) {
-  <div class="favorite-star" (click)="toggleFavorite($event)"
+@if ((endpointsService.disablePersistenceFeatures$ | async) === false) {
+  <div class="favorite-star" role="button" tabindex="0"
+    (click)="toggleFavorite($event)"
+    (keydown.enter)="toggleFavorite($event)"
+    (keydown.space)="toggleFavorite($event); $event.preventDefault()"
     [ngClass]="{'favorite-star__small': small}">
     @switch (isFavorite$ | async) {
       @case (true) {

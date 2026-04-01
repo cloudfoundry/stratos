@@ -1,5 +1,6 @@
 import { MultiActionListEntity } from '@stratosui/store';
 
+import { naturalCollator } from '../../../utils/natural-sort';
 import { DataFunction, DataFunctionDefinition } from './list-data-source';
 
 export function getDataFunctionList(entityFunctions: (DataFunction<any> | DataFunctionDefinition)[]): DataFunction<any>[] {
@@ -9,6 +10,8 @@ export function getDataFunctionList(entityFunctions: (DataFunction<any> | DataFu
       switch (def.type) {
         case 'sort':
           return getSortFunction(def);
+        case 'natural-sort':
+          return getNaturalSortFunction(def);
         case 'filter':
           return getFilterFunction(def);
       }
@@ -69,6 +72,29 @@ function getSortFunction(def: DataFunctionDefinition): DataFunction<any> {
     } else {
       return entities;
     }
+  };
+}
+
+function getNaturalSortFunction(def: DataFunctionDefinition): DataFunction<any> {
+  const fieldArray = getFieldArray(def);
+  return (entities, paginationState) => {
+    const orderKey = paginationState.params['order-direction-field'];
+    if (orderKey === def.orderKey) {
+      const orderDirection = paginationState.params['order-direction'];
+      if (!entities || !orderKey) {
+        return entities;
+      }
+
+      return entities.sort((a, b) => {
+        a = extractActualListEntity(a);
+        b = extractActualListEntity(b);
+        const valueA = String(getValue(a, fieldArray) ?? '');
+        const valueB = String(getValue(b, fieldArray) ?? '');
+        const result = naturalCollator.compare(valueA, valueB);
+        return orderDirection === 'desc' ? result : -result;
+      });
+    }
+    return entities;
   };
 }
 

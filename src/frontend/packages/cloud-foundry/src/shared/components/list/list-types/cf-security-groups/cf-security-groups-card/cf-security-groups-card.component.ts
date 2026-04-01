@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import {
@@ -38,6 +38,8 @@ import { CloudFoundryEndpointService } from '../../../../../../features/cf/servi
   ]
 })
 export class CfSecurityGroupsCardComponent extends CardCell<APIResource<any>> implements OnInit {
+  private cfEndpointService = inject(CloudFoundryEndpointService);
+
 
   tags: AppChip<IRule>[] = [];
   private typeColors: Record<string, string> = {
@@ -45,11 +47,6 @@ export class CfSecurityGroupsCardComponent extends CardCell<APIResource<any>> im
     all: 'all-class',
     udp: 'udp-class'
   };
-  constructor(
-    private cfEndpointService: CloudFoundryEndpointService
-  ) {
-    super();
-  }
 
   ngOnInit(): void {
     this.tags = this.row.entity.rules.map((t: IRule) => ({

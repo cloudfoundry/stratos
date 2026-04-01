@@ -1,18 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  ComponentFactoryResolver,
-  ComponentRef,
-  Input,
-  OnChanges,
-  OnInit,
-  SimpleChanges,
-  ViewChild,
-  ViewContainerRef,
-  ViewEncapsulation,
-} from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, Input, OnChanges, OnInit, SimpleChanges, ViewChild, ViewContainerRef, ViewEncapsulation, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -39,6 +26,9 @@ selector: 'app-table-row',
   ]
 })
 export class TableRowComponent<T = any> implements OnInit, OnChanges {
+  expandedService = inject(TableRowExpandedService);
+  private cdr = inject(ChangeDetectorRef);
+
 
   @ViewChild('expandedComponent', { read: ViewContainerRef, static: true })
   expandedComponent!: ViewContainerRef;
@@ -66,12 +56,6 @@ export class TableRowComponent<T = any> implements OnInit, OnChanges {
   public isExpanded = false;
 
   private expandedComponentRef: ComponentRef<any>;
-
-  constructor(
-    private componentFactoryResolver: ComponentFactoryResolver,
-    public expandedService: TableRowExpandedService,
-    private cdr: ChangeDetectorRef
-  ) { }
 
   ngOnInit() {
     if (this.rowState) {
@@ -123,14 +107,12 @@ export class TableRowComponent<T = any> implements OnInit, OnChanges {
     if (!this.expandComponent) {
       return;
     }
-    return this.componentFactoryResolver.resolveComponentFactory(
-      this.expandComponent
-    );
+    return this.expandComponent;
   }
 
   private createComponent() {
     const component = this.getComponent();
-    return !!component ? this.expandedComponent.createComponent(component) : null;
+    return component ? this.expandedComponent.createComponent(component) : null;
   }
 
   public panelOpened() {

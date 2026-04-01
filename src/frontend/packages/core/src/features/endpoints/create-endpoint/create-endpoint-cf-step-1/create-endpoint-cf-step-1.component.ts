@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterContentInit, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, AfterContentInit, Component, Input, inject } from '@angular/core';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { cfEndpointUrlValidator, normalizeUrl } from '../../../../shared/validators';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
@@ -56,6 +56,9 @@ interface CreateEndpointForm {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponent implements IStepperStep, AfterContentInit {
+  private fb = inject(FormBuilder);
+  private snackBarService = inject(SnackBarService);
+
 
   registerForm: FormGroup<CreateEndpointForm>;
 
@@ -90,14 +93,12 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   showAdvancedOptions = false;
   lastSkipSSLValue = false;
 
-  constructor(
-    private fb: FormBuilder,
-    activatedRoute: ActivatedRoute,
-    private snackBarService: SnackBarService,
-    sessionService: SessionService,
-    currentUserPermissionsService: CurrentUserPermissionsService,
-    userProfileService: UserProfileService
-  ) {
+  constructor() {
+    const activatedRoute = inject(ActivatedRoute);
+    const sessionService = inject(SessionService);
+    const currentUserPermissionsService = inject(CurrentUserPermissionsService);
+    const userProfileService = inject(UserProfileService);
+
     super(sessionService, currentUserPermissionsService, userProfileService);
 
     this.registerForm = this.fb.group<CreateEndpointForm>({

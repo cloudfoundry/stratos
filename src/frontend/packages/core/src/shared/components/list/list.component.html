@@ -1,24 +1,24 @@
 <div class="list-component"
   [ngClass]="{'list-component__table': (view$ | async) === 'table', 'list-component__cards': (view$ | async) === 'cards' }">
-  @if (!(initialised$ | async) || (showProgressBar$ | async)) {
+  @if ((initialised$ | async) === false || (showProgressBar$ | async)) {
     <div class="progress-bar">
       <div class="progress-bar-indeterminate bg-primary"></div>
     </div>
   }
   @if (initialised$ | async) {
     <div class="list-component__header"
-      [hidden]="!(hasControls$ | async) && ((noRowsNotFiltering$ | async) && noEntries)">
+      [hidden]="!customFilters && (hasControls$ | async) === false && ((noRowsNotFiltering$ | async) && noEntries)">
       <div
         [ngClass]="{'list-component__header--selected': (dataSource.isSelecting$ | async), 'table-header-row': (view$ | async) === 'table'}"
         class="card list-component__header-card">
         <div class="list-component__header__left">
           <!-- List Title -->
-          @if (!(isAddingOrSelecting$ | async) && config.text?.title) {
+          @if ((isAddingOrSelecting$ | async) === false && config.text?.title) {
             <div class="list-component__header__left--text">{{
             config.text?.title }}</div>
           }
           <!-- Time range selector -->
-          @if (config.showCustomTime && !(isAddingOrSelecting$ | async)) {
+          @if (config.showCustomTime && (isAddingOrSelecting$ | async) === false) {
             <div class="list-component__header__left--metrics-range"
               >
               <app-metrics-range-selector [baseAction]="config.getDataSource().masterAction"
@@ -34,7 +34,7 @@
               @for (action of multiActions; track $index) {
                 @if (action.visible$ | async) {
                   <button class="btn btn-icon" (click)="executeActionMultiple(action)"
-                    [disabled]="!(action.enabled$ | async)" [title]="action.description">
+                    [disabled]="(action.enabled$ | async) === false" [title]="action.description">
                     <span class="material-icons">{{action.icon}}</span>
                   </button>
                 }
@@ -57,16 +57,16 @@
           }
           <!-- Multi filters, such as filter app wall by cf/org/space -->
           <div class="list-component__header__left--multi-filters"
-            [hidden]="(!(hasRows$ | async) && !filter) || (isAddingOrSelecting$ | async)">
+            [hidden]="((hasRows$ | async) === false && !filter) || (isAddingOrSelecting$ | async)">
             @for (multiFilterManager of multiFilterManagers; track multiFilterManager.filterKey; let isFirst = $first) {
-              @if (!isFirst || !(multiFilterManager.hasOneOrLessItems$ | async)) {
+              @if (!isFirst || (multiFilterManager.hasOneOrLessItems$ | async) === false) {
                 <div class="form-field">
-                  <label class="label">{{multiFilterManager.multiFilterConfig.label}}</label>
+                  <label class="label" for="{{multiFilterManager.filterKey}}">{{multiFilterManager.multiFilterConfig.label}}</label>
                   <select class="select" id="{{multiFilterManager.filterKey}}"
-                    [disabled]="!(multiFilterManager.filterIsReady$ | async)"
+                    [disabled]="(multiFilterManager.filterIsReady$ | async) === false"
                     (change)="multiFilterManager.selectItem($any($event.target).value)">
                     @if (!multiFilterManager.hideAllOption) {
-                      <option value="" [selected]="!(multiFilterManager.value$ | async)">{{ multiFilterManager.allLabel }}</option>
+                      <option value="" [selected]="(multiFilterManager.value$ | async) === false">{{ multiFilterManager.allLabel }}</option>
                     }
                     @for (selectItem of multiFilterManager.filterItems$ | async; track selectItem.value) {
                       <option
@@ -82,11 +82,11 @@
           </div>
         </div>
         <div class="list-component__header__right">
-          @if (entitySelectConfig && !(dataSource.maxedResults$ | async)) {
+          @if (entitySelectConfig && (dataSource.maxedResults$ | async) === false) {
             <div class="filter">
               <div class="form-field">
-                <label class="label">{{entitySelectConfig.selectPlaceholder}}</label>
-                <select class="select" [value]="entitySelectValue$ | async" (change)="setEntityPage($any($event.target).value)">
+                <label class="label" for="entityPageSelect">{{entitySelectConfig.selectPlaceholder}}</label>
+                <select class="select" id="entityPageSelect" [value]="entitySelectValue$ | async" (change)="setEntityPage($any($event.target).value)">
                   <option value="">{{ entitySelectConfig.selectEmptyText }}</option>
                   @for (item of entitySelectConfig.entitySelectItems; track item.page) {
                     <option [value]="item.page">
@@ -99,10 +99,10 @@
           }
           <!-- Filter by text input -->
           <div class="filter" id="listFilterSelect"
-            [hidden]="filterColumns.length < 1 || !config.enableTextFilter || (!(hasRows$ | async) && !filter) || (dataSource.isAdding$ | async) || (dataSource.maxedResults$ | async)">
+            [hidden]="filterColumns.length < 1 || !config.enableTextFilter || ((hasRows$ | async) === false && !filter) || (dataSource.isAdding$ | async) || (dataSource.maxedResults$ | async)">
             <div class="form-field">
-              <label class="label">Filter Selection</label>
-              <select class="select" [(ngModel)]="filterSelected" (change)="updateListFilter(filterSelected)">
+              <label class="label" for="listFilterSelection">Filter Selection</label>
+              <select class="select" id="listFilterSelection" [(ngModel)]="filterSelected" (change)="updateListFilter(filterSelected)">
                 @for (filter of filterColumns; track filter.key) {
                   <option [ngValue]="filter">
                     {{ filter.label }}
@@ -112,7 +112,7 @@
             </div>
           </div>
           <div class="filter" id="listSearchFilter"
-            [hidden]="!config.enableTextFilter || (!(hasRows$ | async) && !filter) || (dataSource.isAdding$ | async) || (dataSource.maxedResults$ | async)">
+            [hidden]="!config.enableTextFilter || ((hasRows$ | async) === false && !filter) || (dataSource.isAdding$ | async) || (dataSource.maxedResults$ | async)">
             <div class="form-field list-component__header__right-filter">
               <div class="relative">
                 <input class="input pr-8" [ngModel]="filterString" #filter="ngModel"
@@ -130,7 +130,7 @@
           </div>
           <!-- Sort Button & Drop down -->
           <div class="sort"
-            [hidden]="(view$ | async) === 'table' || sortColumns.length < 1 || (isAddingOrSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && !(hasRowsOrIsFiltering$ | async))">
+            [hidden]="(view$ | async) === 'table' || sortColumns.length < 1 || (isAddingOrSelecting$ | async) || ((dataSource.isLoadingPage$ | async) === false && (hasRowsOrIsFiltering$ | async) === false)">
             <div class="flex items-center gap-1 pl-3 border-l-2 border-content-border">
               <select class="select" name="sort-field" [(ngModel)]="headerSort.value"
                 [disabled]="(disableActions$ | async)"
@@ -158,12 +158,12 @@
             }
           </div>
           <!-- Global actions (those not applied to specific rows) -->
-          @if (!(isAddingOrSelecting$ | async) && globalActions?.length > 0) {
+          @if ((isAddingOrSelecting$ | async) === false && globalActions?.length > 0) {
             <div>
               @for (action of globalActions; track $index) {
                 @if (action.visible$ | async) {
                   <button class="btn btn-icon" (click)="executeActionGlobal(action)"
-                    [disabled]="!(action.enabled$ | async)" [title]="action.description">
+                    [disabled]="(action.enabled$ | async) === false" [title]="action.description">
                     <span class="material-icons">{{action.icon}}</span>
                   </button>
                 }
@@ -171,7 +171,7 @@
             </div>
           }
           <!-- Add new row form -->
-          @if (addForm && (dataSource.isAdding$ | async) && !(dataSource.isSelecting$ | async)) {
+          @if (addForm && (dataSource.isAdding$ | async) && (dataSource.isSelecting$ | async) === false) {
             <div
               class="add-container">
               <div class="spacer"></div>
@@ -186,7 +186,7 @@
             </div>
           }
           <!-- Add form button -->
-          @if (addForm && !(isAddingOrSelecting$ | async)) {
+          @if (addForm && (isAddingOrSelecting$ | async) === false) {
             <div>
               <button class="btn btn-icon" [disabled]="(dataSource.isLoadingPage$ | async)"
                 (click)="addForm?.reset();dataSource.startAdd();">
@@ -194,7 +194,7 @@
               </button>
             </div>
           }
-          @if (!(isAddingOrSelecting$ | async) && ((dataSource.isLoadingPage$ | async) || (hasRowsOrIsFiltering$ | async))) {
+          @if ((isAddingOrSelecting$ | async) === false && (customFilters || (dataSource.isLoadingPage$ | async) || (hasRowsOrIsFiltering$ | async))) {
             <div
               >
               <button [title]="'Reset Filters & Sort'" class="btn btn-icon"
@@ -210,7 +210,7 @@
             </span>
           }
           <!-- Select table or cards view button -->
-          @if (config.viewType === 'both' && !(isAddingOrSelecting$ | async) && ((dataSource.isLoadingPage$ | async) || (hasRowsOrIsFiltering$ | async))) {
+          @if (config.viewType === 'both' && (isAddingOrSelecting$ | async) === false && ((dataSource.isLoadingPage$ | async) || (hasRowsOrIsFiltering$ | async))) {
             <div id="list-card-toggle"
               >
               @if ((view$ | async)==='table') {
@@ -231,19 +231,19 @@
           }
           @if (dataSource.refresh) {
             <app-polling-indicator id="app-list-refresh-button"
-              [manualPoll]="!(dataSource.isLoadingPage$ | async) && !(isAddingOrSelecting$ | async)" (poll)="refresh()"
+              [manualPoll]="(dataSource.isLoadingPage$ | async) === false && (isAddingOrSelecting$ | async) === false" (poll)="refresh()"
               [isPolling]="(isRefreshing$ | async)">
             </app-polling-indicator>
           }
         </div>
       </div>
     </div>
-    @if (dataSource.refresh && !(hasControls$ | async) && (!(hasRowsOrIsFiltering$ | async) && noEntries)) {
+    @if (dataSource.refresh && (hasControls$ | async) === false && ((hasRowsOrIsFiltering$ | async) === false && noEntries)) {
       <div class="refresh-button__no-header"
         >
-        @if (!(isAddingOrSelecting$ | async)) {
+        @if ((isAddingOrSelecting$ | async) === false) {
           <app-polling-indicator id="app-list-refresh-button"
-            [manualPoll]="!(dataSource.isLoadingPage$ | async) && !(isAddingOrSelecting$ | async)" (poll)="refresh()"
+            [manualPoll]="(dataSource.isLoadingPage$ | async) === false && (isAddingOrSelecting$ | async) === false" (poll)="refresh()"
             [isPolling]="(isRefreshing$ | async)" [fabButton]="true">
           </app-polling-indicator>
         }
@@ -252,21 +252,22 @@
     <div class="list-component__body relative">
       <div class="list-component__body-inner"
         (scroll)="onBodyScroll($event)"
-        [hidden]="!(hasRows$ | async)" [@list]="(pageState$ | async)">
+        [hidden]="(hasRows$ | async) === false" [@list]="(pageState$ | async)">
         @if ((view$ | async) === 'cards') {
           <app-cards #cards [dataSource]="dataSource"
-          [component]="config.cardComponent" [hidden]="!(hasRows$ | async)"></app-cards>
+          [component]="config.cardComponent" [hidden]="(hasRows$ | async) === false"></app-cards>
         }
         @if ((view$ | async) === 'table') {
           <app-table #table [dataSource]="dataSource" [addActions]="hasSingleActions"
             [addSelect]="config.allowSelection || (haveMultiActions | async)"
             [paginationController]="paginationController" [columns]="columns" [minRowHeight]="config.minRowHeight"
-            [hidden]="!(hasRows$ | async)" [expandComponent]="config.expandComponent">
+            [hidden]="(hasRows$ | async) === false" [expandComponent]="config.expandComponent">
           </app-table>
         }
       </div>
-      <div class="absolute bottom-0 inset-x-0 h-12 pointer-events-none z-50 bg-gradient-to-t from-black/10 dark:from-white/20 to-transparent transition-opacity duration-200"
-        [class.opacity-0]="!showScrollShadow()"></div>
+      <div class="absolute inset-x-0 h-12 pointer-events-none z-50 bg-gradient-to-t from-black/10 dark:from-black/50 to-transparent transition-opacity duration-200"
+        [class.opacity-0]="!showScrollShadow()"
+        [ngStyle]="{'bottom': (hidePaginator$ | async) ? '0' : '67px'}"></div>
       <div class="card list-component__paginator" [hidden]="(hidePaginator$ | async)">
         <app-paginator
           [length]="paginatorSettings.length"

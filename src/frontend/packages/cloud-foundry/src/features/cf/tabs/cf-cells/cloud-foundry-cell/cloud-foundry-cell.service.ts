@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
@@ -45,6 +45,8 @@ export const enum CellMetrics {
   providedIn: 'root'
 })
 export class CloudFoundryCellService {
+  private entityServiceFactory = inject(EntityServiceFactory);
+
 
   cfGuid!: string;
   cellId!: string;
@@ -66,11 +68,11 @@ export class CloudFoundryCellService {
   remainingMemory$!: Observable<string>;
   totalMemory$!: Observable<string>;
 
-  constructor(
-    activeRouteCfCell: ActiveRouteCfCell,
-    private entityServiceFactory: EntityServiceFactory,
-    store: Store<AppState>,
-    paginationMonitorFactory: PaginationMonitorFactory) {
+  constructor() {
+    const activeRouteCfCell = inject(ActiveRouteCfCell);
+    const store = inject<Store<AppState>>(Store);
+    const paginationMonitorFactory = inject(PaginationMonitorFactory);
+
 
     this.cellId = activeRouteCfCell.cellId;
     this.cfGuid = activeRouteCfCell.cfGuid;

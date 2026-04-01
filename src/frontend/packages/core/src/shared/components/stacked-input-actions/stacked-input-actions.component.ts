@@ -1,18 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef,
-  Component,
-  ComponentFactory,
-  ComponentFactoryResolver,
-  EventEmitter,
-  Injector,
-  Input,
-  OnDestroy,
-  OnInit,
-  Output,
-  ViewChild,
-  ViewContainerRef,
-  signal,
-  Signal,
- } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Injector, Input, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, signal, Signal, inject } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 
@@ -48,6 +34,9 @@ export interface StackedInputActionsUpdate { values: { [key: string]: string }; 
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StackedInputActionsComponent implements OnInit, OnDestroy {
+  private cd = inject(ChangeDetectorRef);
+  private injector = inject(Injector);
+
 
   @Input() stateIn$!: Observable<StackedInputActionsState[]>;
   @Input() isEmailInput = true;
@@ -61,7 +50,6 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
   disabled = false;
   private count = 0;
 
-  private wrapperFactory: ComponentFactory<StackedInputActionComponent>;
   private components: {
     [key: string]: {
       stateInSignal: Signal<StackedInputActionsState>,
@@ -72,16 +60,8 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
   } = {};
   private subs: Subscription[] = [];
 
-  constructor(
-    private componentFactoryResolver: ComponentFactoryResolver,
-    private cd: ChangeDetectorRef,
-    private injector: Injector,
-  ) {
-    this.wrapperFactory = this.componentFactoryResolver.resolveComponentFactory(StackedInputActionComponent);
-  }
-
   addComponent(): void {
-    const component = this.inputs.createComponent(this.wrapperFactory);
+    const component = this.inputs.createComponent(StackedInputActionComponent);
 
     const stackedAction = component.instance;
     // Track a unique key for the component and it's position in the stack

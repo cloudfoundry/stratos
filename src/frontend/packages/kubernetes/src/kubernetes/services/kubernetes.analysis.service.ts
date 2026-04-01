@@ -27,6 +27,11 @@ export interface KubernetesAnalysisType {
   providedIn: 'root'
 })
 export class KubernetesAnalysisService {
+  kubeEndpointService = inject(KubernetesEndpointService);
+  activatedRoute = inject(ActivatedRoute);
+  store = inject<Store<AppState>>(Store);
+  private snackbarService = inject(SnackBarService);
+
   kubeGuid: string;
 
   public analyzers$: Observable<KubernetesAnalysisType[]>;
@@ -47,12 +52,10 @@ export class KubernetesAnalysisService {
 
   private injector = inject(Injector);
 
-  constructor(
-    public kubeEndpointService: KubernetesEndpointService,
-    public activatedRoute: ActivatedRoute,
-    public store: Store<AppState>,
-    private snackbarService: SnackBarService
-  ) {
+  constructor() {
+    const kubeEndpointService = this.kubeEndpointService;
+    const activatedRoute = this.activatedRoute;
+
     this.kubeGuid = kubeEndpointService.kubeGuid || getHelmReleaseDetailsFromGuid(activatedRoute.snapshot.params.guid).endpointId;
 
     // Is the backend plugin available?

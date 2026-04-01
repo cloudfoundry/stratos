@@ -59,6 +59,24 @@ export class SecretsHelper {
   }
 
   /**
+   * Auto-detect secrets profile by matching STRATOS_E2E_BASE_URL hostname
+   * against profile names. E.g., base URL containing "adepttech" matches
+   * the "adepttech" profile.
+   */
+  private static detectProfileFromUrl(profiles: Record<string, any> | undefined): string | undefined {
+    if (!profiles) return undefined;
+    const baseUrl = process.env.STRATOS_E2E_BASE_URL;
+    if (!baseUrl) return undefined;
+    const hostname = new URL(baseUrl).hostname.toLowerCase();
+    for (const name of Object.keys(profiles)) {
+      if (name !== 'local' && hostname.includes(name.toLowerCase())) {
+        return name;
+      }
+    }
+    return undefined;
+  }
+
+  /**
    * Parse raw YAML content into the secrets object.
    */
   private static parse(content: string): any {
@@ -116,7 +134,9 @@ export class SecretsHelper {
       }
     }
 
-    const profile = process.env.STRATOS_E2E_PROFILE;
+    // Auto-detect profile from base URL if not explicitly set
+    const profile = process.env.STRATOS_E2E_PROFILE
+      || this.detectProfileFromUrl(raw.profiles);
 
     let secrets: any;
     if (profile && raw.profiles?.[profile]) {

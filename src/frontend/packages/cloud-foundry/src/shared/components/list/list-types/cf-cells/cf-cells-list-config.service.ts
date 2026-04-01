@@ -1,5 +1,5 @@
 // tslint:disable:max-line-length
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { first, tap } from 'rxjs/operators';
@@ -30,6 +30,8 @@ import { CfCellsDataSource } from './cf-cells-data-source';
   providedIn: 'root'
 })
 export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResult<IMetricCell>> {
+  private activeRouteCfCell = inject(ActiveRouteCfCell);
+
 
   dataSource!: CfCellsDataSource;
   defaultView = 'table' as ListView;
@@ -74,7 +76,7 @@ export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResu
       },
       cellFlex: '1',
       sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: 'name',
         field: CfCellsDataSource.cellNamePath
       }
@@ -106,11 +108,13 @@ export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResu
     },
   ];
 
-  constructor(
-    store: Store<CFAppState>,
-    private activeRouteCfCell: ActiveRouteCfCell,
-    paginationMonitorFactory: PaginationMonitorFactory) {
+  constructor() {
+    const store = inject<Store<CFAppState>>(Store);
+    const paginationMonitorFactory = inject(PaginationMonitorFactory);
+
     super();
+    const activeRouteCfCell = this.activeRouteCfCell;
+
     const cellHelper = new CfCellHelper(store, paginationMonitorFactory);
     this.init$ = cellHelper.createCellMetricAction(activeRouteCfCell.cfGuid).pipe(
       first(),

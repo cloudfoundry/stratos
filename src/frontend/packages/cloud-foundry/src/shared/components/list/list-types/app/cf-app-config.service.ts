@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
@@ -18,11 +18,8 @@ import {
   ListViewTypes,
 } from '@stratosui/core';
 import { APIResource, IFavoriteMetadata, ListView, UserFavorite } from '@stratosui/store';
-// eslint-disable-next-line @stratosui/no-relative-imports
 import { IApp } from '../../../../../cf-api.types';
-// eslint-disable-next-line @stratosui/no-relative-imports
 import { CFAppState } from '../../../../../cf-app-state';
-// eslint-disable-next-line @stratosui/no-relative-imports
 import { applicationEntityType } from '../../../../../cf-entity-types';
 import { CfOrgSpaceDataService, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
 import { CardAppComponent } from './card/card-app.component';
@@ -39,16 +36,16 @@ import { TableCellAppStatusComponent } from './table-cell-app-status/table-cell-
   providedIn: 'root'
 })
 export class CfAppConfigService extends ListConfig<APIResource> implements IListConfig<APIResource> {
+  private datePipe = inject(DatePipe);
+  private store = inject<Store<CFAppState>>(Store);
+  private utilsService = inject(UtilsService);
+  private cfOrgSpaceService = inject(CfOrgSpaceDataService);
+
 
   multiFilterConfigs: IListMultiFilterConfig[];
   initialised$: Observable<boolean>;
 
-  constructor(
-    private datePipe: DatePipe,
-    private store: Store<CFAppState>,
-    private utilsService: UtilsService,
-    private cfOrgSpaceService: CfOrgSpaceDataService,
-  ) {
+  constructor() {
     super();
 
     // Apply the initial cf guid to the data source. Normally this is done via applying the selection to the filter... however this is too
@@ -76,7 +73,7 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
   columns: Array<ITableColumn<APIResource<IApp>>> = [
     {
       columnId: 'name', headerCell: () => 'Name', cellComponent: TableCellAppNameComponent, cellFlex: '2', sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: 'name',
         field: 'entity.name'
       }

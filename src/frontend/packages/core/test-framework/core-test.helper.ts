@@ -1,6 +1,6 @@
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { NgModule } from '@angular/core';
+import { NgModule, inject } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { StoreModule } from '@ngrx/store';
@@ -37,9 +37,9 @@ import { CoreTestingModule } from './core-test.modules';
   ]
 })
 export class AppTestModule {
-  constructor(
-    ech: EntityCatalogHelper
-  ) {
+  constructor() {
+    const ech = inject(EntityCatalogHelper);
+
     EntityCatalogHelpers.SetEntityCatalogHelper(ech);
   }
 }

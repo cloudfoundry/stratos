@@ -8,31 +8,32 @@
     "main": "/core/assets/logo.png",
     "navigation": "/core/assets/logo.png",
     "navigationIcon": "/core/assets/logo.png",
-    "favicon": "/favicon.ico"
+    "favicon": "/favicon.ico",
+    "loginBackground": "/core/assets/login-bg.jpg"
   },
   "theme": {
-    "primary": "#2196f3",
-    "secondary": "#00bcd4",
-    "accent": "#ff9800",
-    "success": "#4caf50",
-    "warning": "#ff9800",
-    "danger": "#f44336",
-    "info": "#2196f3"
+    "primary": "#3b82f6",
+    "secondary": "#60a5fa",
+    "accent": "#60a5fa",
+    "success": "#22c55e",
+    "warning": "#f59e0b",
+    "danger": "#ef4444",
+    "info": "#3b82f6"
   },
   "navigation": {
-    "background": "#2196f3",
+    "background": "#1e293b",
     "text": "#ffffff",
     "hover": "rgba(255, 255, 255, 0.1)",
-    "active": "rgba(255, 255, 255, 0.2)"
+    "active": "rgba(255, 255, 255, 0.15)"
   },
   "layout": {
-    "background": "#fafafa",
-    "text": "rgba(0, 0, 0, 0.87)",
-    "headerBackground": "#2196f3",
-    "headerText": "#ffffff"
+    "background": "#f8fafc",
+    "text": "#1e293b",
+    "headerBackground": "#ffffff",
+    "headerText": "#1e293b"
   },
   "login": {
-    "title": "Console",
+    "title": "Stratos Console",
     "subtitle": "Multi-Cloud Management Platform",
     "showLogo": true,
     "showTitle": true,
@@ -40,6 +41,16 @@
     "cardBackground": "#ffffff"
   },
   "footer": {
-    "copyright": "Your Company Name"
+    "copyright": "Stratos"
+  },
+  "defaults": {
+    "themeMode": "light",
+    "sidebarOpen": true,
+    "sidebarPinned": true,
+    "pollingEnabled": true,
+    "sessionTimeout": true,
+    "gravatarEnabled": true,
+    "pageSize": 9,
+    "viewMode": "cards"
   }
 }

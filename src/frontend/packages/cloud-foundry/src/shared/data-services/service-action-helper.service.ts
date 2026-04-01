@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map, pairwise } from 'rxjs/operators';
@@ -17,11 +17,9 @@ import { SERVICE_INSTANCE_TYPES } from '../components/add-service-instance/add-s
   providedIn: 'root'
 })
 export class ServiceActionHelperService {
+  private confirmDialog = inject(ConfirmationDialogService);
+  private store = inject<Store<CFAppState>>(Store);
 
-  constructor(
-    private confirmDialog: ConfirmationDialogService,
-    private store: Store<CFAppState>,
-  ) { }
 
   detachServiceBinding = (
     serviceBindings: APIResource<IServiceBinding>[],

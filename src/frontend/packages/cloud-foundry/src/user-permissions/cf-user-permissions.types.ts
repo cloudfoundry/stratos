@@ -36,6 +36,9 @@ export enum CfCurrentUserPermissions {
   SERVICE_INSTANCE_EDIT = 'edit.service-instance'
 }
 
+// Org and space entities share the same role property names (isManager, isAuditor, etc.)
+// so duplicate enum values here are intentional — they are used in different entity contexts.
+/* eslint-disable @typescript-eslint/no-duplicate-enum-values */
 export enum CfPermissionStrings {
   _GLOBAL_ = 'global',
   SPACE_MANAGER = 'isManager',
@@ -46,13 +49,14 @@ export enum CfPermissionStrings {
   ORG_USER = 'isUser',
   ORG_BILLING_MANAGER = 'isBillingManager',
 }
+/* eslint-enable @typescript-eslint/no-duplicate-enum-values */
 
 export enum CfScopeStrings {
   CF_ADMIN_GROUP = 'cloud_controller.admin',
   CF_READ_ONLY_ADMIN_GROUP = 'cloud_controller.admin_read_only',
   CF_ADMIN_GLOBAL_AUDITOR_GROUP = 'cloud_controller.global_auditor',
   CF_WRITE_SCOPE = 'cloud_controller.write',
-  CF_READ_SCOPE = 'cloud_controller.write',
+  CF_READ_SCOPE = 'cloud_controller.read',
 }
 
 export enum CfPermissionTypes {

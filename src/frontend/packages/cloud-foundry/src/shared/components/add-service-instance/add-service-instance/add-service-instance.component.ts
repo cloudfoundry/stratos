@@ -1,6 +1,5 @@
 import { AsyncPipe, CommonModule, TitleCasePipe } from '@angular/common';
-import { ChangeDetectorRef, Component, OnDestroy, OnInit, signal,
-  ChangeDetectionStrategy} from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -91,6 +90,14 @@ import { SpecifyUserProvidedDetailsComponent } from '../specify-user-provided-de
 ]
 })
 export class AddServiceInstanceComponent implements OnInit, OnDestroy {
+  private cSIHelperServiceFactory = inject(CreateServiceInstanceHelperServiceFactory);
+  private activatedRoute = inject(ActivatedRoute);
+  private store = inject<Store<CFAppState>>(Store);
+  private cfOrgSpaceService = inject(CfOrgSpaceDataService);
+  private csiGuidsService = inject(CsiGuidsService);
+  modeService = inject(CsiModeService);
+  private cdr = inject(ChangeDetectorRef);
+
   initialisedService$!: Observable<boolean>;
   apps$!: Observable<APIResource<IApp>[]>;
   skipApps$!: Observable<boolean>;
@@ -122,16 +129,9 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   );
   public errorMessage: string | null = null;
 
-  constructor(
-    private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
-    private activatedRoute: ActivatedRoute,
-    private store: Store<CFAppState>,
-    private cfOrgSpaceService: CfOrgSpaceDataService,
-    private csiGuidsService: CsiGuidsService,
-    public modeService: CsiModeService,
-    private cdr: ChangeDetectorRef,
-    route: ActivatedRoute
-  ) {
+  constructor() {
+    const route = inject(ActivatedRoute);
+
     const cfGuid = getIdFromRoute(this.activatedRoute, 'endpointId');
     this.cfGuid$ = cfGuid ? observableOf(cfGuid) : this.cfDetails$.pipe(
       map(details => details?.cfGuid),

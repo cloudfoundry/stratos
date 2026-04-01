@@ -1,4 +1,4 @@
-<span [ngClass]="(themeService.getTheme() | async).styleName">
+<span [ngClass]="branding.isDarkMode() ? 'dark-theme' : 'default-theme'">
 
   <router-outlet></router-outlet>
   @if (userId$ | async; as userId) {

@@ -121,7 +121,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
               this.statusMessage$.next({ message: '' });
               console.log('Log stream connected successfully');
               break;
-            case -1:
+            case -1: {
               // Connection failed permanently
               this.connectionAttempts++;
               const errorMsg = this.getDetailedErrorMessage();
@@ -139,7 +139,8 @@ export class LogViewerComponent implements OnInit, OnDestroy {
               });
               console.error('Log stream connection failed:', this.lastConnectionError);
               break;
-            case -2:
+            }
+            case -2: {
               // Retrying connection
               this.connectionAttempts++;
               const retryMsg = `Connection lost. Retrying (attempt ${this.connectionAttempts}/${this.maxReconnectAttempts})...`;
@@ -149,6 +150,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
               });
               console.warn('Log stream retrying connection:', retryMsg);
               break;
+            }
             default:
               this.statusMessage$.next({ message: '' });
               break;

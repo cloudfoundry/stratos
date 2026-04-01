@@ -1,4 +1,4 @@
-import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
@@ -23,6 +23,8 @@ import { cfEntityCatalog } from '../../../cf-entity-catalog';
   ]
 })
 export class ServicePlanPublicComponent {
+  private servicesService = inject(ServicesService);
+
   planAccessibility$: Observable<StratosStatus>;
   planAccessibilityMessage$: Observable<string>;
   private pServicePlan: APIResource<IServicePlan>;
@@ -51,11 +53,6 @@ export class ServicePlanPublicComponent {
         }
       })
     );
-  }
-
-  constructor(
-    private servicesService: ServicesService,
-  ) {
   }
 
   private getServiceBroker(serviceGuid: string, cfGuid: string): Observable<APIResource<IServiceBroker>> {

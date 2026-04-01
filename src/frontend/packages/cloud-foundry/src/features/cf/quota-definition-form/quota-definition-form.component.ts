@@ -1,5 +1,5 @@
 
-import { Component, Input, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
@@ -69,9 +69,9 @@ export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
 
   @Input() quota!: IQuotaDefinition;
 
-  constructor(
-    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-  ) {
+  constructor() {
+    const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
   }
 

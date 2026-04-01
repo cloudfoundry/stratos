@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
@@ -33,6 +33,14 @@ import { CloudFoundryOrganizationService, createOrgQuotaDefinition } from './clo
   providedIn: 'root'
 })
 export class CloudFoundrySpaceService {
+  activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+  private store = inject<Store<CFAppState>>(Store);
+  private cfUserService = inject(CfUserService);
+  private paginationMonitorFactory = inject(PaginationMonitorFactory);
+  private cfEndpointService = inject(CloudFoundryEndpointService);
+  private cfUserProvidedServicesService = inject(CloudFoundryUserProvidedServicesService);
+  private cfOrgService = inject(CloudFoundryOrganizationService);
+
 
   cfGuid: string;
   orgGuid: string;
@@ -60,15 +68,9 @@ export class CloudFoundrySpaceService {
   usersCount$!: Observable<number | null>;
   quotaLink$!: Observable<string[]>;
 
-  constructor(
-    public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private store: Store<CFAppState>,
-    private cfUserService: CfUserService,
-    private paginationMonitorFactory: PaginationMonitorFactory,
-    private cfEndpointService: CloudFoundryEndpointService,
-    private cfUserProvidedServicesService: CloudFoundryUserProvidedServicesService,
-    private cfOrgService: CloudFoundryOrganizationService
-  ) {
+  constructor() {
+    const activeRouteCfOrgSpace = this.activeRouteCfOrgSpace;
+
 
     this.spaceGuid = activeRouteCfOrgSpace.spaceGuid;
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;

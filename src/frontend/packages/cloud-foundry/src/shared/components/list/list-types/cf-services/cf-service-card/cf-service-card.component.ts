@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import {
@@ -59,6 +59,8 @@ export interface ServiceTag {
   ]
 })
 export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
+  private store = inject<Store<CFAppState>>(Store);
+
   serviceEntity: APIResource<IService>;
   cfOrgSpace: CfOrgSpaceLabelService;
   extraInfo: IServiceExtra;
@@ -81,19 +83,13 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
       if (this.serviceEntity.entity.extra) {
         try {
           this.extraInfo = JSON.parse(this.serviceEntity.entity.extra);
-        } catch { }
+        } catch { /* intentionally empty */ }
       }
 
       if (!this.cfOrgSpace) {
         this.cfOrgSpace = new CfOrgSpaceLabelService(this.store, this.serviceEntity.entity.cfGuid);
       }
     }
-  }
-
-  constructor(
-    private store: Store<CFAppState>,
-  ) {
-    super();
   }
 
   getDisplayName() {

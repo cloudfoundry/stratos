@@ -1,4 +1,4 @@
-import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, of as observableOf } from 'rxjs';
@@ -48,6 +48,10 @@ selector: 'app-user-provided-service-instance-card',
   ]
 })
 export class UserProvidedServiceInstanceCardComponent extends CardCell<APIResource<IUserProvidedServiceInstance>> {
+  private store = inject<Store<CFAppState>>(Store);
+  private serviceActionHelperService = inject(ServiceActionHelperService);
+  private currentUserPermissionsService = inject(CurrentUserPermissionsService);
+
   serviceInstanceEntity: APIResource<IUserProvidedServiceInstance>;
   cfGuid: string;
   cardMenu: MenuItem[];
@@ -112,14 +116,6 @@ export class UserProvidedServiceInstanceCardComponent extends CardCell<APIResour
         row.entity.space.entity.organization_guid,
         row.entity.space_guid);
     }
-  }
-
-  constructor(
-    private store: Store<CFAppState>,
-    private serviceActionHelperService: ServiceActionHelperService,
-    private currentUserPermissionsService: CurrentUserPermissionsService
-  ) {
-    super();
   }
 
   private detach = () => {

@@ -1,14 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component,
-  ComponentFactory,
-  ComponentFactoryResolver,
-  ComponentRef,
-  OnDestroy,
-  OnInit,
-  VERSION,
-  ViewChild,
-  ViewContainerRef,
- } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ComponentRef, OnDestroy, OnInit, VERSION, ViewChild, ViewContainerRef, inject } from '@angular/core';
 import { Meta } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -17,6 +8,7 @@ import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
+import { InfoCardComponent } from '../../../shared/components/info-card/info-card.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { StratosTitleComponent } from '../../../shared/components/stratos-title/stratos-title.component';
 import { ProductNameComponent } from '../../../shared/components/product-name.ccomponent';
@@ -30,6 +22,7 @@ import { BUILD_INFO } from '../../../environments/build-info';
   imports: [
     CommonModule,
     RouterModule,
+    InfoCardComponent,
     PageHeaderComponent,
     StratosTitleComponent,
     ProductNameComponent,
@@ -37,6 +30,9 @@ import { BUILD_INFO } from '../../../environments/build-info';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AboutPageComponent implements OnInit, OnDestroy {
+  private store = inject<Store<GeneralEntityAppState>>(Store);
+  private meta = inject(Meta);
+
 
   sessionData$!: Observable<SessionData>;
   versionNumber$!: Observable<string>;
@@ -57,12 +53,9 @@ export class AboutPageComponent implements OnInit, OnDestroy {
 
   customizations: CustomizationsMetadata;
 
-  constructor(
-    private store: Store<GeneralEntityAppState>,
-    private resolver: ComponentFactoryResolver,
-    private meta: Meta,
-    cs: CustomizationService,
-  ) {
+  constructor() {
+    const cs = inject(CustomizationService);
+
     this.customizations = cs.get();
   }
 
@@ -98,7 +91,7 @@ export class AboutPageComponent implements OnInit, OnDestroy {
   }
 
   private initVcsLinks() {
-    const gitProject = this.getMeta('stratos_git_project');
+    const gitProject = BUILD_INFO.gitProject || this.getMeta('stratos_git_project');
     const gitBranch = BUILD_INFO.gitBranch === 'HEAD' ? null : BUILD_INFO.gitBranch;
     const gitCommit = BUILD_INFO.gitCommit;
 
@@ -125,7 +118,7 @@ export class AboutPageComponent implements OnInit, OnDestroy {
 
   private getGitHubProject(prj: string): string {
     if (!prj) { return ''; }
-    let projectUrl = prj.endsWith('.git') ? prj.slice(0, -4) : prj;
+    const projectUrl = prj.endsWith('.git') ? prj.slice(0, -4) : prj;
     if (projectUrl.toLowerCase().startsWith('git@github.com:')) {
       return projectUrl.slice(15);
     } else if (projectUrl.toLowerCase().startsWith('https://github.com/')) {
@@ -142,16 +135,14 @@ export class AboutPageComponent implements OnInit, OnDestroy {
   addAboutInfoComponent() {
     this.aboutInfoContainer.clear();
     if (this.customizations.aboutInfoComponent) {
-      const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(this.customizations.aboutInfoComponent);
-      this.aboutInfoComponentRef = this.aboutInfoContainer.createComponent(factory);
+      this.aboutInfoComponentRef = this.aboutInfoContainer.createComponent(this.customizations.aboutInfoComponent);
     }
   }
 
   addSupportInfo() {
     this.supportInfoContainer.clear();
     if (this.customizations.supportInfoComponent) {
-      const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(this.customizations.supportInfoComponent);
-      this.componentRef = this.supportInfoContainer.createComponent(factory);
+      this.componentRef = this.supportInfoContainer.createComponent(this.customizations.supportInfoComponent);
     }
   }
 }

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { TableCellCustom } from '../../list.types';
@@ -14,11 +14,9 @@ import { TableCellCustom } from '../../list.types';
   ]
 })
 export class TableCellRadioComponent<T> extends TableCellCustom<T> implements OnInit {
-  disable!: boolean;
+  private cdr = inject(ChangeDetectorRef);
 
-  constructor(private cdr: ChangeDetectorRef) {
-    super();
-  }
+  disable!: boolean;
 
   @Input('row')
   get row() { return super.row; }

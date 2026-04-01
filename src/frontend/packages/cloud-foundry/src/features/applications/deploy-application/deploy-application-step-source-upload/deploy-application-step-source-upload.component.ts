@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Injector, OnDestroy , ChangeDetectionStrategy } from '@angular/core';
+import { Component, Injector, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
@@ -24,16 +24,19 @@ import { FileScannerInfo } from '../deploy-application-step2/deploy-application-
   ]
 })
 export class DeployApplicationStepSourceUploadComponent implements OnDestroy {
+  cfOrgSpaceService = inject(CfOrgSpaceDataService);
+  private injector = inject(Injector);
+
 
   public deployer: DeployApplicationDeployer;
 
   public valid$: Observable<boolean>;
 
-  constructor(
-    store: Store<CFAppState>,
-    public cfOrgSpaceService: CfOrgSpaceDataService,
-    private injector: Injector
-  ) {
+  constructor() {
+    const store = inject<Store<CFAppState>>(Store);
+    const cfOrgSpaceService = this.cfOrgSpaceService;
+    const injector = this.injector;
+
     this.deployer = new DeployApplicationDeployer(store, cfOrgSpaceService, injector);
     this.valid$ = this.deployer.fileTransferStatus$.asObservable().pipe(
       filter(status => !!status),

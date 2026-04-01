@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
@@ -28,13 +28,9 @@ import { QParam, QParamJoiners } from '../q-param';
   providedIn: 'root'
 })
 export class CloudFoundryUserProvidedServicesService {
+  private store = inject<Store<CFAppState>>(Store);
+  private paginationMonitorFactory = inject(PaginationMonitorFactory);
 
-  constructor(
-    private store: Store<CFAppState>,
-    private paginationMonitorFactory: PaginationMonitorFactory,
-  ) {
-
-  }
 
   public getUserProvidedServices(cfGuid: string, spaceGuid?: string, relations = getUserProvidedServiceInstanceRelations)
     : Observable<APIResource<IUserProvidedServiceInstance>[]> {

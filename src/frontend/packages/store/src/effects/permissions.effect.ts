@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { combineLatest, EMPTY, of } from 'rxjs';
@@ -22,11 +22,10 @@ const failedAction: Action = { type: GET_CURRENT_USER_RELATIONS_FAILED };
 
 @Injectable()
 export class PermissionsEffects {
-  constructor(
-    private httpClient: HttpClient,
-    private actions$: Actions,
-    private store: Store<AppState>,
-  ) { }
+  private httpClient = inject(HttpClient);
+  private actions$ = inject(Actions);
+  private store = inject<Store<AppState>>(Store);
+
 
    getCurrentUsersPermissions$ = createEffect(() => this.actions$.pipe(
     ofType<GetCurrentUsersRelations>(GET_CURRENT_USER_RELATIONS),

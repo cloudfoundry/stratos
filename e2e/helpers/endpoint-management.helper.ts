@@ -1,5 +1,6 @@
 import { RequestHelper, ConsoleUserType } from './request.helper';
 import { SecretsHelper } from './secrets-helpers';
+import { detectAuthType } from './auth.helper';
 
 /**
  * Endpoint Configuration Interface
@@ -29,7 +30,10 @@ export class EndpointManagementHelper {
     cf: 'cloudFoundry',
   };
 
+  private baseURL: string;
+
   constructor(baseURL: string = 'https://127.0.0.1:4200') {
+    this.baseURL = baseURL;
     this.adminRequest = new RequestHelper(baseURL);
     this.userRequest = new RequestHelper(baseURL);
   }
@@ -149,6 +153,13 @@ export class EndpointManagementHelper {
     const endpoints = await request.get('/api/v1/endpoints');
 
     if (!endpoints || endpoints.length === 0) {
+      return;
+    }
+
+    // SSO deployments auto-connect endpoints during browser login —
+    // the password grant POST to /api/v1/tokens will fail with 401.
+    const authType = await detectAuthType(this.baseURL);
+    if (authType === 'sso') {
       return;
     }
 

@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { GitCommit, GitSCMService } from '@stratosui/git';
 import { Observable } from 'rxjs';
@@ -24,23 +24,18 @@ import {
   providers: [
     {
       provide: ListConfig,
-      useFactory: (
-        store: Store<CFAppState>,
-        datePipe: DatePipe,
-        scmService: GitSCMService) => {
-        return new GithubCommitsListConfigServiceDeploy(store, datePipe, scmService);
-      },
-      deps: [Store, DatePipe, GitSCMService]
+      useFactory: () => new GithubCommitsListConfigServiceDeploy(),
+      deps: []
     }
   ],
 })
 export class CommitListWrapperComponent {
+  private listConfig = inject<ListConfig<GitCommit>>(ListConfig);
+
 
   selectedCommit$: Observable<GitCommit>;
 
-  constructor(
-    private listConfig: ListConfig<GitCommit>
-  ) {
+  constructor() {
     const initialised$ = this.listConfig.getInitialised().pipe(
       filter(initialised => initialised)
     );

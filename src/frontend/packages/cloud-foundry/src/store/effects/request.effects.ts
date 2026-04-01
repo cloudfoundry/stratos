@@ -1,4 +1,4 @@
-import { ApplicationRef, Injectable } from '@angular/core';
+import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { EMPTY } from 'rxjs';
@@ -25,11 +25,10 @@ import { validateEntityRelations } from '../../entity-relations/entity-relations
   providedIn: 'root'
 })
 export class CfValidateEffects {
-  constructor(
-    private actions$: Actions,
-    private store: Store<CFAppState>,
-    private appRef: ApplicationRef
-  ) { }
+  private actions$ = inject(Actions);
+  private store = inject<Store<CFAppState>>(Store);
+  private appRef = inject(ApplicationRef);
+
 
   /**
    * Ensure all required inline parameters specified by the entity/s associated with the request exist.

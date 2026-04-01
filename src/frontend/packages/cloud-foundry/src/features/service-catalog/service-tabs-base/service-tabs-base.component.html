@@ -5,7 +5,7 @@
   <div class="page-header-right">
     <ng-container *appCfUserPermission="canCreateServiceInstance">
       <button class="btn btn-primary btn-icon" name="add-service-instance" [routerLink]="addServiceInstanceLink"
-        [queryParams]="isServiceSpaceScoped$ | async" [disabled]="!(hasVisiblePlans$ | async)"
+        [queryParams]="isServiceSpaceScoped$ | async" [disabled]="(hasVisiblePlans$ | async) === false"
         [title]="toolTipText$ | async">
         <span class="material-icons">add</span>
       </button>

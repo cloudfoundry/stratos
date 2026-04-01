@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, Optional , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 
 import { CustomTooltipDirective } from '@stratosui/core';
 import { Store } from '@ngrx/store';
@@ -52,6 +52,12 @@ import { CloudFoundrySpaceService } from '../services/cloud-foundry-space.servic
   ]
 })
 export class CliInfoCloudFoundryComponent implements OnInit {
+  private store = inject<Store<CFAppState>>(Store);
+  activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+  private cfEndpointService = inject(CloudFoundryEndpointService);
+  private cfOrgService = inject(CloudFoundryOrganizationService, { optional: true });
+  private cfSpaceService = inject(CloudFoundrySpaceService, { optional: true });
+
 
   permsOrgEdit = CfCurrentUserPermissions.ORGANIZATION_EDIT;
   permsSpaceEdit = CfCurrentUserPermissions.SPACE_EDIT;
@@ -75,13 +81,9 @@ export class CliInfoCloudFoundryComponent implements OnInit {
     EntityInfo<APIResource<ISpace>>
   ]>;
 
-  constructor(
-    private store: Store<CFAppState>,
-    public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private cfEndpointService: CloudFoundryEndpointService,
-    @Optional() private cfOrgService: CloudFoundryOrganizationService,
-    @Optional() private cfSpaceService: CloudFoundrySpaceService
-  ) {
+  constructor() {
+    const activeRouteCfOrgSpace = this.activeRouteCfOrgSpace;
+
     this.breadcrumbs$ = new BehaviorSubject<IHeaderBreadcrumb[]>([]);
     if (activeRouteCfOrgSpace.orgGuid) {
       this.orgGuid = activeRouteCfOrgSpace.orgGuid;

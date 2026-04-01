@@ -69,7 +69,9 @@
                         </div>
                       }
                       @if (data[1]; as portal) {
-                        <ng-container [cdkPortalOutlet]="portal"></ng-container>
+                        <div class="flex-1 flex items-center">
+                          <ng-container [cdkPortalOutlet]="portal"></ng-container>
+                        </div>
                       }
                     </div>
                   </div>
@@ -80,13 +82,13 @@
             <!-- Main page content -->
             <div class="relative flex-1 flex flex-col min-h-0 overflow-hidden">
               <div #content class="flex-1 flex flex-col min-h-0 overflow-x-hidden overflow-y-auto bg-content-bg text-content-text"
-                [ngClass]="{'p-6': !(noMargin$ | async), 'p-0': noMargin$ | async}"
+                [ngClass]="{'p-6': (noMargin$ | async) === false, 'p-0': noMargin$ | async}"
                 (scroll)="onContentScroll($event)">
                 <div class="flex-1 flex flex-col min-h-0">
                   <router-outlet></router-outlet>
                 </div>
               </div>
-              <div class="absolute bottom-0 inset-x-0 h-12 pointer-events-none z-50 bg-gradient-to-t from-black/15 dark:from-white/25 to-transparent transition-opacity duration-200"
+              <div class="absolute bottom-0 inset-x-0 h-16 pointer-events-none z-50 bg-gradient-to-t from-black/25 dark:from-black/50 to-transparent transition-opacity duration-200"
                 [class.opacity-0]="!showScrollShadow()"></div>
             </div>
           </div>
@@ -103,7 +105,11 @@
          'translate-x-full': !sidePanelService.opened(),
          'dashboard-side-preview w-96': sidePanelService.previewMode() >= 0
        }"
-    (click)="sideHelpClosed()">
+    role="button" tabindex="0"
+    (click)="sideHelpClosed()"
+    (keydown.enter)="sideHelpClosed()"
+    (keydown.space)="sideHelpClosed(); $event.preventDefault()"
+    (keydown.escape)="sideHelpClosed()">
     <div class="dashboard-side-help h-full overflow-auto"
       [ngClass]="{'dashboard-side-narrow w-80': sidePanelService.previewMode() === 2, 'w-96': sidePanelService.previewMode() !== 2}">
       <template #previewPanelContainer></template>

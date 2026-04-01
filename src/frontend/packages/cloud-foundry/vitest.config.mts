@@ -44,6 +44,9 @@ export default defineConfig({
   },
   resolve: {
     alias: [
+      // Theme alias
+      { find: '@stratosui/theme', replacement: join(__dirname, '../theme/index.ts') },
+
       // Test framework aliases (more specific first)
       { find: '@test-framework/application-service-helper', replacement: join(__dirname, 'test-framework/application-service-helper.ts') },
       { find: '@test-framework/cloud-foundry-endpoint-service.helper', replacement: join(__dirname, 'test-framework/cloud-foundry-endpoint-service.helper.ts') },

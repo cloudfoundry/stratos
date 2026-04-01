@@ -22,7 +22,7 @@ export abstract class BaseKubernetesServicesListConfig implements ISimpleListCon
       columnId: 'name', headerCell: () => 'Name',
       cellComponent: TableCellSidePanelComponent,
       sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: 'name',
         field: 'metadata.name'
       },

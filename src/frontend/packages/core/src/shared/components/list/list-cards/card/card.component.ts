@@ -1,4 +1,4 @@
-import { Component, ComponentFactoryResolver, ComponentRef, Input, Type, ViewChild, ViewContainerRef, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ComponentRef, Input, Type, ViewChild, ViewContainerRef, inject, ChangeDetectionStrategy } from '@angular/core';
 import { MultiActionListEntity } from '@stratosui/store';
 
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
@@ -49,7 +49,6 @@ export class CardComponent<T> {
   @ViewChild('target', { read: ViewContainerRef, static: true }) target!: ViewContainerRef;
 
   cardComponent!: CardCell<T>;
-  private componentFactoryResolver = inject(ComponentFactoryResolver);
 
   private componentCreator = (() => {
     let completeSetupData: Partial<ISetupData<T>> = {};
@@ -70,12 +69,9 @@ export class CardComponent<T> {
     }
     const { component, entityKey, entity } = this.getComponent(componentType, item);
     if (!this.cardComponent && component) {
-      const componentFactory = this.componentFactoryResolver.resolveComponentFactory(component);
-      if (componentFactory) {
-        this.clear();
-        this.componentRef = this.target.createComponent(componentFactory);
-        this.cardComponent = this.componentRef.instance as CardCell<T>;
-      }
+      this.clear();
+      this.componentRef = this.target.createComponent(component);
+      this.cardComponent = this.componentRef.instance as CardCell<T>;
     }
     this.updateComponentInputs(dataSource, entityKey, entity);
   }

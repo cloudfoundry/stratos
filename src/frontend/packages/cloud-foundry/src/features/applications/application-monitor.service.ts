@@ -1,7 +1,7 @@
 
 import { share, map } from 'rxjs/operators';
 import { ApplicationService } from './application.service';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
 export class AppMonitorState {
@@ -66,12 +66,12 @@ export class AppMonitorState {
   providedIn: 'root'
 })
 export class ApplicationMonitorService {
+  private applicationService = inject(ApplicationService);
+
 
   appMonitor$: Observable<AppMonitorState>;
 
-  constructor(
-    private applicationService: ApplicationService,
-  ) {
+  constructor() {
     // Do we need share()? Or should this be on the app stats observable?
     this.appMonitor$ = this.applicationService.appStats$.pipe(map(stats => {
       const res = new AppMonitorState();

@@ -1,17 +1,10 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
-import { StratosThemeService } from './theme.service';
-import { CompanyConfigService } from './company-config.service';
+import { StratosBrandingService } from './stratos-branding.service';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    HttpClientModule
-  ],
-  providers: [
-    StratosThemeService,
-    CompanyConfigService
-  ]
+  imports: [CommonModule, HttpClientModule],
+  providers: [StratosBrandingService]
 })
 export class StratosThemeModule { }

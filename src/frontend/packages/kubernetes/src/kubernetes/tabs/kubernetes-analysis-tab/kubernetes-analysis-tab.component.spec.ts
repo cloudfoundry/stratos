@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
@@ -19,6 +21,8 @@ describe('KubernetesAnalysisTabComponent', () => {
         ...KubernetesBaseTestModules,
       ],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         KubernetesAnalysisService,
         KubernetesEndpointService,
         KubeBaseGuidMock,
@@ -40,6 +44,12 @@ describe('KubernetesAnalysisTabComponent', () => {
     fixture = TestBed.createComponent(KubernetesAnalysisTabComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    // Absorb any pending company-config request from StratosBrandingService
+    const httpMock = TestBed.inject(HttpTestingController);
+    httpMock.match(() => true);
   });
 
   it('should create', () => {

@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild,
-  ChangeDetectionStrategy} from '@angular/core';
+import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -74,6 +73,12 @@ selector: 'app-deploy-application-step2',
 })
 export class DeployApplicationStep2Component
   implements OnInit, OnDestroy, AfterContentInit {
+  private store = inject<Store<CFAppState>>(Store);
+  private route = inject(ActivatedRoute);
+  private scmService = inject(GitSCMService);
+  private httpClient = inject(HttpClient);
+  private appDeploySourceTypes = inject(ApplicationDeploySourceTypes);
+
 
   @Input() isRedeploy = false;
 
@@ -89,7 +94,7 @@ export class DeployApplicationStep2Component
   sourceTypeGithub$!: Observable<boolean>;
   sourceTypeNeedsUpload$!: Observable<boolean>;
   // tslint:disable-next-line:ban-types
-  canDeployType$!: Observable<Boolean>;
+  canDeployType$!: Observable<boolean>;
   isLoading$!: Observable<boolean>;
 
   // Local FS data when file or folder upload
@@ -133,15 +138,6 @@ export class DeployApplicationStep2Component
     if (this.commitSubscription) {
       this.commitSubscription.unsubscribe();
     }
-  }
-
-  constructor(
-    private store: Store<CFAppState>,
-    private route: ActivatedRoute,
-    private scmService: GitSCMService,
-    private httpClient: HttpClient,
-    private appDeploySourceTypes: ApplicationDeploySourceTypes
-  ) {
   }
 
   onNext: StepOnNextFunction = () => {
@@ -331,7 +327,7 @@ export class DeployApplicationStep2Component
         this.sourceType = sourceTypes.find(s => s.id === p.id && (p.endpointGuid ? s.endpointGuid === p.endpointGuid : true));
 
         const newScm = this.scmService.getSCM(this.sourceType.id as GitSCMType, this.sourceType.endpointGuid);
-        if (!!newScm) {
+        if (newScm) {
           // User selected one of the SCM options
           if (this.scm && newScm.getType() !== this.scm.getType()) {
             // User changed the SCM type, so reset the project and branch

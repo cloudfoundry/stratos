@@ -1,30 +1,28 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { Store } from '@ngrx/store';
+
 import { TestEntityCatalog } from './entity-catalog/entity-catalog';
 import { EntityServiceFactory } from './entity-service-factory.service';
 import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
-import { Store } from '@ngrx/store';
-import { GeneralEntityAppState } from './app-state';
+import { ENTITY_CATALOG_TOKEN } from './tokens/store-injection.tokens';
 
 describe('EntityServiceFactoryService', () => {
   let service: EntityServiceFactory;
-  let mockStore: any;
-  let mockEntityMonitorFactory: any;
-  let mockEntityCatalog: TestEntityCatalog;
 
   beforeEach(() => {
-    // Create mocks
-    mockStore = {} as Store<GeneralEntityAppState>;
-    mockEntityMonitorFactory = {
-      create: vi.fn(),
-    } as any;
-    mockEntityCatalog = new TestEntityCatalog();
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        EntityServiceFactory,
+        { provide: Store, useValue: {} },
+        { provide: EntityMonitorFactory, useValue: { create: vi.fn() } },
+        { provide: ENTITY_CATALOG_TOKEN, useValue: new TestEntityCatalog() },
+      ],
+    });
 
-    // Create service directly with mocked dependencies
-    service = new EntityServiceFactory(
-      mockStore,
-      mockEntityMonitorFactory,
-      mockEntityCatalog,
-    );
+    service = TestBed.inject(EntityServiceFactory);
   });
 
   it('should be created', () => {

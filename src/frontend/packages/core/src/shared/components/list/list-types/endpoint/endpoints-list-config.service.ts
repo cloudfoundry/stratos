@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
   ListView,
@@ -42,6 +42,8 @@ import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/t
   providedIn: 'root'
 })
 export class EndpointsListConfigService implements IListConfig<EndpointModel> {
+  private store = inject<Store<AppState>>(Store);
+
   cardComponent = EndpointCardComponent;
 
   private singleActions: IListAction<EndpointModel>[];
@@ -52,7 +54,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
       headerCell: (): string => 'Name',
       cellComponent: TableCellEndpointNameComponent,
       sort: {
-        type: 'sort',
+        type: 'natural-sort',
         orderKey: 'name',
         field: 'name'
       },
@@ -114,16 +116,15 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   };
   enableTextFilter = true;
 
-  constructor(
-    private store: Store<AppState>,
-    paginationMonitorFactory: PaginationMonitorFactory,
-    entityMonitorFactory: EntityMonitorFactory,
-    internalEventMonitorFactory: InternalEventMonitorFactory,
-    endpointListHelper: EndpointListHelper,
-    userFavoriteManager: UserFavoriteManager,
-    currentUserPermissionsService: CurrentUserPermissionsService,
-    sessionService: SessionService
-  ) {
+  constructor() {
+    const paginationMonitorFactory = inject(PaginationMonitorFactory);
+    const entityMonitorFactory = inject(EntityMonitorFactory);
+    const internalEventMonitorFactory = inject(InternalEventMonitorFactory);
+    const endpointListHelper = inject(EndpointListHelper);
+    const userFavoriteManager = inject(UserFavoriteManager);
+    const currentUserPermissionsService = inject(CurrentUserPermissionsService);
+    const sessionService = inject(SessionService);
+
     this.singleActions = endpointListHelper.endpointActions();
     const favoriteCell = createTableColumnFavorite(
       (row: EndpointModel) => userFavoriteManager.getFavoriteEndpointFromEntity(row)
@@ -148,7 +149,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
             valuePath: 'creator.name'
           },
           sort: {
-            type: 'sort',
+            type: 'natural-sort',
             orderKey: 'creator',
             field: 'creator.name'
           },

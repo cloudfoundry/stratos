@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
@@ -61,10 +61,10 @@ export class CloudFoundryCellBaseComponent {
   public cfCellService!: CloudFoundryCellService;
 
 
-  constructor(
-    cfEndpointService: CloudFoundryEndpointService,
-    cfCellService: CloudFoundryCellService
-  ) {
+  constructor() {
+    const cfEndpointService = inject(CloudFoundryEndpointService);
+    const cfCellService = inject(CloudFoundryCellService);
+
 
     this.waitForEntityId = cfCellService.healthyMetricId;
     this.name$ = cfCellService.cellMetric$.pipe(

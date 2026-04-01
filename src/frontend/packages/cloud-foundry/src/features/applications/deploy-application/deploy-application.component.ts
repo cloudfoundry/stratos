@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -57,6 +57,10 @@ import { DeployApplicationStep3Component } from './deploy-application-step3/depl
 ]
 })
 export class DeployApplicationComponent implements OnInit, OnDestroy {
+  private store = inject<Store<CFAppState>>(Store);
+  private cfOrgSpaceService = inject(CfOrgSpaceDataService);
+  private activatedRoute = inject(ActivatedRoute);
+
 
   appGuid: string;
   initCfOrgSpaceService: Subscription[] = [];
@@ -65,12 +69,10 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   isRedeploy: boolean;
   selectedSourceType$: Observable<SourceType>;
   entityKey: string;
-  constructor(
-    private store: Store<CFAppState>,
-    private cfOrgSpaceService: CfOrgSpaceDataService,
-    private activatedRoute: ActivatedRoute,
-    appDeploySourceTypes: ApplicationDeploySourceTypes
-  ) {
+  constructor() {
+    const activatedRoute = this.activatedRoute;
+    const appDeploySourceTypes = inject(ApplicationDeploySourceTypes);
+
     this.entityKey = getCFEntityKey(applicationEntityType);
     this.appGuid = this.activatedRoute.snapshot.queryParams.appGuid;
     this.isRedeploy = !!this.appGuid;

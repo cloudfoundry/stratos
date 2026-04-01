@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, Output, EventEmitter, TemplateRef, ContentChild  } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, Output, EventEmitter, TemplateRef, ContentChild, inject } from '@angular/core';
 
 
 @Component({
@@ -9,7 +9,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, Output, E
   [class.toggle-before]="togglePosition === 'before'"
   [class.toggle-after]="togglePosition === 'after'">
 
-  <div class="expansion-header" (click)="toggle()" [class.hide-toggle]="hideToggle">
+  <div class="expansion-header" role="button" tabindex="0" (click)="toggle()" (keydown.enter)="toggle()" (keydown.space)="$event.preventDefault(); toggle()" [class.hide-toggle]="hideToggle">
     <ng-content select="app-expansion-panel-header"></ng-content>
     @if (!hideToggle) {
       <button class="toggle-button" [class.before]="togglePosition === 'before'" [class.after]="togglePosition === 'after'">
@@ -112,6 +112,8 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, Output, E
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomExpansionPanelComponent {
+  private cdr = inject(ChangeDetectorRef);
+
   @Input() disabled = false;
   @Input() expanded = false;
   @Input() hideToggle = false;
@@ -121,8 +123,6 @@ export class CustomExpansionPanelComponent {
   @Output() closed = new EventEmitter<void>();
 
   @ContentChild('header', { static: false }) headerTemplate!: TemplateRef<any>;
-
-  constructor(private cdr: ChangeDetectorRef) {}
 
   toggle() {
     if (this.disabled) return;

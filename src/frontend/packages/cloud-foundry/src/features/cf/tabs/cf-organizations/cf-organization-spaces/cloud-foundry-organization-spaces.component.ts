@@ -1,4 +1,4 @@
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { CustomTooltipDirective } from '@stratosui/core';
@@ -35,11 +35,8 @@ import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry
   ]
 })
 export class CloudFoundryOrganizationSpacesComponent {
-  public permsSpaceCreate = CfCurrentUserPermissions.SPACE_CREATE;
-  constructor(
-    public cfEndpointService: CloudFoundryEndpointService,
-    public cfOrgService: CloudFoundryOrganizationService
-  ) {
+  cfEndpointService = inject(CloudFoundryEndpointService);
+  cfOrgService = inject(CloudFoundryOrganizationService);
 
-  }
+  public permsSpaceCreate = CfCurrentUserPermissions.SPACE_CREATE;
 }

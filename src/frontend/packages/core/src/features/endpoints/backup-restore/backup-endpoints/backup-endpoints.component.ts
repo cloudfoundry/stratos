@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnDestroy, Injector  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, Injector, inject } from '@angular/core';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { format } from 'date-fns';
 import { httpErrorResponseToSafeString, entityCatalog, stratosEntityCatalog, EndpointModel } from '@stratosui/store';
@@ -49,6 +49,10 @@ interface BackupPasswordForm {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BackupEndpointsComponent implements OnDestroy {
+  service = inject(BackupEndpointsService);
+  private confirmDialog = inject(ConfirmationDialogService);
+  private injector = inject(Injector);
+
 
   sub!: Subscription;
 
@@ -100,11 +104,7 @@ export class BackupEndpointsComponent implements OnDestroy {
     return password === password2 ? null : { passwordMismatch: true };
   };
 
-  constructor(
-    public service: BackupEndpointsService,
-    private confirmDialog: ConfirmationDialogService,
-    private injector: Injector,
-  ) {
+  constructor() {
     this.setupSelectStep();
     this.setupPasswordStep();
   }
