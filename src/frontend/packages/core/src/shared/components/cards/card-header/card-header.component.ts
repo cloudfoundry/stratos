@@ -9,7 +9,7 @@ import { ChangeDetectionStrategy, Component  } from '@angular/core';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="px-6 py-4 border-b" style="border-color: var(--card-border)">
+    <div class="px-6 py-4 border-b flex items-center justify-between" style="border-color: var(--card-border)">
       <ng-content></ng-content>
     </div>
   `,

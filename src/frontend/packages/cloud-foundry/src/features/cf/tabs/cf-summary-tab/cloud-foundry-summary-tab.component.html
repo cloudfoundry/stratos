@@ -2,6 +2,11 @@
   <button class="btn btn-secondary btn-icon" name="cli" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/cli" title="CLI Info">
     <span class="material-icons">keyboard</span>
   </button>
+  <app-polling-indicator class="ml-auto"
+    [manualPoll]="(cfEndpointService.appsPagObs.fetchingEntities$ | async) === false"
+    [isPolling]="(cfEndpointService.appsPagObs.fetchingEntities$ | async)"
+    (poll)="cfEndpointService.fetchApps()">
+  </app-polling-indicator>
 </app-page-sub-nav>
 
 <div class="summary">

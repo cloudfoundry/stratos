@@ -27,6 +27,7 @@ import { LoadingPageComponent } from '../../../../../../../core/src/shared/compo
 import { CardNumberMetricComponent } from '../../../../../../../core/src/shared/components/cards/card-number-metric/card-number-metric.component';
 import { CardCfRecentAppsComponent } from '../../../../home/card-cf-recent-apps/card-cf-recent-apps.component';
 import { CfUserPermissionDirective } from '../../../../../shared/directives/cf-user-permission/cf-user-permission.directive';
+import { PollingIndicatorComponent } from '../../../../../../../core/src/shared/components/polling-indicator/polling-indicator.component';
 
 @Component({
   selector: 'app-cloud-foundry-organization-summary',
@@ -46,7 +47,8 @@ import { CfUserPermissionDirective } from '../../../../../shared/directives/cf-u
     LoadingPageComponent,
     CardNumberMetricComponent,
     CardCfRecentAppsComponent,
-    CfUserPermissionDirective
+    CfUserPermissionDirective,
+    PollingIndicatorComponent
   ]
 })
 export class CloudFoundryOrganizationSummaryComponent {

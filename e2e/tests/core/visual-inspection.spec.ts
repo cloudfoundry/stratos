@@ -112,6 +112,25 @@ test.describe('Visual Inspection', () => {
     });
   }
 
+  // Org summary — navigate to first org and screenshot
+  test('screenshot org-summary', async ({ adminPage }) => {
+    test.setTimeout(120000);
+    test.skip(!cfBaseUrl, 'Could not resolve CF GUID');
+    await adminPage.goto(`${cfBaseUrl}/organizations`);
+    await waitForPageReady(adminPage, { extraWait: 3000 });
+
+    // Org cards use clickAction (not <a> tags) — click the first card
+    const orgCard = adminPage.locator('app-meta-card').first();
+    const hasOrgs = await orgCard.isVisible({ timeout: 15000 }).catch(() => false);
+    test.skip(!hasOrgs, 'No organizations loaded (CF backend may be unavailable)');
+    await orgCard.click();
+    await waitForPageReady(adminPage);
+    await adminPage.screenshot({
+      path: 'e2e-screenshots/visual-inspection/org-summary.png',
+      fullPage: true,
+    });
+  });
+
   // Events multi-select interaction
   test('screenshot events multi-select', async ({ adminPage }) => {
     test.skip(!cfBaseUrl, 'Could not resolve CF GUID');

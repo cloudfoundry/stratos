@@ -69,7 +69,9 @@
                         </div>
                       }
                       @if (data[1]; as portal) {
-                        <ng-container [cdkPortalOutlet]="portal"></ng-container>
+                        <div class="flex-1 flex items-center">
+                          <ng-container [cdkPortalOutlet]="portal"></ng-container>
+                        </div>
                       }
                     </div>
                   </div>

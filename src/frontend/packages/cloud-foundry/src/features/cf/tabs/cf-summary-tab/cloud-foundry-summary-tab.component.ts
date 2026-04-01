@@ -18,6 +18,7 @@ import { goToAppWall } from '../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { CardCfInfoComponent } from '../../../../shared/components/cards/card-cf-info/card-cf-info.component';
 import { CardCfRecentAppsComponent } from '../../../home/card-cf-recent-apps/card-cf-recent-apps.component';
+import { PollingIndicatorComponent } from '../../../../../../core/src/shared/components/polling-indicator/polling-indicator.component';
 
 @Component({
   selector: 'app-cloud-foundry-summary-tab',
@@ -35,7 +36,8 @@ import { CardCfRecentAppsComponent } from '../../../home/card-cf-recent-apps/car
     LoadingPageComponent,
     CardNumberMetricComponent,
     CardCfInfoComponent,
-    CardCfRecentAppsComponent
+    CardCfRecentAppsComponent,
+    PollingIndicatorComponent
   ]
 })
 export class CloudFoundrySummaryTabComponent {

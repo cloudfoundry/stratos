@@ -8,7 +8,12 @@ app-tile-group {
   // Default: 1 column (mobile-first)
   grid-template-columns: 1fr;
 
-  // Modern responsive grid classes
+  // Auto-fit fallback — MUST come before specific column rules so they take precedence
+  &.tile-group-auto {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+
+  // Specific column classes (override auto when both present)
   &.tile-group-1-cols {
     grid-template-columns: 1fr;
   }
@@ -45,6 +50,22 @@ app-tile-group {
     }
   }
 
+  &.tile-group-5-cols {
+    grid-template-columns: 1fr;
+
+    @media (min-width: 640px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    @media (min-width: 1024px) {
+      grid-template-columns: repeat(5, 1fr);
+    }
+  }
+
   &.tile-group-6-cols {
     grid-template-columns: 1fr;
 
@@ -59,11 +80,6 @@ app-tile-group {
     @media (min-width: 1280px) {
       grid-template-columns: repeat(6, 1fr);
     }
-  }
-
-  // Auto-fit grid (responsive without breakpoints)
-  &.tile-group-auto {
-    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
   }
 
   // Compact gap variant

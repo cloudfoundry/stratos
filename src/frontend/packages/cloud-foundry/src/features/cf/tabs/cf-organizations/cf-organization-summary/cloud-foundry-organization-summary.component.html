@@ -14,6 +14,11 @@
     matTooltip="CLI Info">
     <span class="material-icons">keyboard</span>
   </button>
+  <app-polling-indicator class="ml-auto"
+    [manualPoll]="(cfOrgService.loadingApps$ | async) === false"
+    [isPolling]="(cfOrgService.loadingApps$ | async)"
+    (poll)="cfOrgService.fetchApps()">
+  </app-polling-indicator>
 </app-page-sub-nav>
 <div>
   <app-tile-grid fit="true">

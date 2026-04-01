@@ -27,7 +27,18 @@ var (
 func initializeHTTPClients(timeout int64, timeoutMutating int64, connectionTimeout int64) {
 	log.Debug("initializeHTTPClients")
 
-	// Store defaut timeouts for when we create a client when a CA Cert is used
+	// Apply sensible defaults when not configured via environment variables
+	if timeout <= 0 {
+		timeout = 60
+	}
+	if timeoutMutating <= 0 {
+		timeoutMutating = 120
+	}
+	if connectionTimeout <= 0 {
+		connectionTimeout = 10
+	}
+
+	// Store default timeouts for when we create a client when a CA Cert is used
 	defaultHTTPClientTimeout = timeout
 	defaultHTTPClientMutatingTimeout = timeoutMutating
 	defaultHTTPClientConnectionTimeout = connectionTimeout
@@ -59,7 +70,7 @@ func createTransport(tlsConfig *tls.Config) *http.Transport {
 		Dial:                dial,
 		TLSHandshakeTimeout: 10 * time.Second, // 10 seconds is a sound default value (default is 0)
 		TLSClientConfig:     tlsConfig,
-		MaxIdleConnsPerHost: 6, // (default is 2)
+		MaxIdleConnsPerHost: 20, // Increased from 6 to handle burst parallel API requests
 	}
 
 	return tr
