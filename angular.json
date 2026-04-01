@@ -109,6 +109,11 @@
                 "glob": "**/*",
                 "input": "node_modules/@cfstratos/monaco-yaml/lib",
                 "output": "/core/assets/monaco/vs/language/yaml"
+              },
+              {
+                "glob": "company-config.json",
+                "input": "src/frontend/packages/theme",
+                "output": "/assets"
               }
             ],
             "styles": [
