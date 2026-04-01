@@ -225,16 +225,41 @@ export class StratosBrandingService {
     // Map CompanyConfig colors → StratosTheme colors
     this.setColors(config.theme);
 
-    // Apply branding
-    this.setCompanyBranding({
+    // Apply navigation — map config nav fields to theme nav fields
+    const navOverride: Partial<StratosTheme['navigation']> = {};
+    if (config.navigation.background) navOverride.background = config.navigation.background;
+    if (config.navigation.text) navOverride.text = config.navigation.text;
+    if (config.navigation.hover) navOverride.hover = config.navigation.hover;
+    if (config.navigation.active) navOverride.active = config.navigation.active;
+    if (Object.keys(navOverride).length) {
+      const currentTheme = this._theme();
+      this.setTheme({ navigation: { ...currentTheme.navigation, ...navOverride } });
+    }
+
+    // Apply layout — map config layout fields to theme layout fields
+    const layoutOverride: Partial<StratosTheme['layout']> = {};
+    if (config.layout.background) layoutOverride.background = config.layout.background;
+    if (config.layout.text) layoutOverride.text = config.layout.text;
+    if (config.layout.headerBackground) layoutOverride.headerBackground = config.layout.headerBackground;
+    if (config.layout.headerText) layoutOverride.headerText = config.layout.headerText;
+    if (Object.keys(layoutOverride).length) {
+      const currentTheme = this._theme();
+      this.setTheme({ layout: { ...currentTheme.layout, ...layoutOverride } });
+    }
+
+    // Apply branding — only include defined values to avoid overwriting theme defaults
+    const brandingOverride: Partial<StratosTheme['branding']> = {
       logo: config.logos.main,
       navLogo: config.logos.navigation,
       navLogoIcon: config.logos.navigationIcon,
       favicon: config.logos.favicon,
       companyName: config.company.name,
       loginTitle: config.login.title,
-      loginSubtitle: config.login.subtitle,
-    });
+    };
+    if (config.company.displayName) brandingOverride.displayName = config.company.displayName;
+    if (config.login.subtitle) brandingOverride.loginSubtitle = config.login.subtitle;
+    if (config.logos.loginBackground) brandingOverride.loginBackground = config.logos.loginBackground;
+    this.setCompanyBranding(brandingOverride);
 
     // Apply login customization — only include defined values to avoid overwriting theme defaults
     const loginCustom: Partial<StratosTheme['login']> = {

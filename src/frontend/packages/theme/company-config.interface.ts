@@ -2,6 +2,7 @@ export interface CompanyConfig {
   // Company branding
   company: {
     name: string;
+    displayName?: string;  // Shown in nav/title — falls back to name
     website?: string;
     supportEmail?: string;
   };
