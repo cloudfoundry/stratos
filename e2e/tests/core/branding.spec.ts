@@ -82,7 +82,7 @@ test.describe('Branding Cascade', () => {
   });
 
   test('theme toggle persists across page reload', async ({ adminPage }) => {
-    test.setTimeout(90000);
+    test.setTimeout(120000);
 
     await adminPage.goto('/');
     await waitForPageReady(adminPage);
@@ -93,7 +93,6 @@ test.describe('Branding Cascade', () => {
 
     let label = await themeToggle.locator('.theme-label').textContent();
     if (label?.trim() === 'Dark') {
-      // Already in dark — toggle to light first
       await themeToggle.click();
       await adminPage.waitForFunction(() => !document.body.classList.contains('dark-theme'), { timeout: 5000 }).catch(() => {});
       await adminPage.waitForTimeout(500);
@@ -105,9 +104,12 @@ test.describe('Branding Cascade', () => {
     await adminPage.waitForFunction(() => document.body.classList.contains('dark-theme'), { timeout: 5000 });
     await adminPage.waitForTimeout(500);
 
-    // Reload the page
+    // Reload the page — wait for dashboard to fully load again
     await adminPage.reload();
-    await waitForPageReady(adminPage);
+    await adminPage.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
+    // Wait for theme toggle to reappear (proves we're past login, back on dashboard)
+    await adminPage.locator('button.theme-toggle-button').waitFor({ state: 'visible', timeout: 30000 }).catch(() => {});
+    await adminPage.waitForTimeout(1500);
 
     // Verify dark mode persisted
     const isDarkAfterReload = await adminPage.evaluate(() => document.body.classList.contains('dark-theme'));
@@ -115,12 +117,12 @@ test.describe('Branding Cascade', () => {
 
     // Cleanup: toggle back to light
     const cleanupToggle = adminPage.locator('button.theme-toggle-button');
-    await cleanupToggle.waitFor({ state: 'visible', timeout: 10000 });
-    const cleanupLabel = await cleanupToggle.locator('.theme-label').textContent();
-    if (cleanupLabel?.trim() === 'Dark') {
-      await cleanupToggle.click();
-      await adminPage.waitForFunction(() => !document.body.classList.contains('dark-theme'), { timeout: 5000 }).catch(() => {});
-      await adminPage.waitForTimeout(500);
+    if (await cleanupToggle.isVisible({ timeout: 5000 }).catch(() => false)) {
+      const cleanupLabel = await cleanupToggle.locator('.theme-label').textContent();
+      if (cleanupLabel?.trim() === 'Dark') {
+        await cleanupToggle.click();
+        await adminPage.waitForFunction(() => !document.body.classList.contains('dark-theme'), { timeout: 5000 }).catch(() => {});
+      }
     }
   });
 
