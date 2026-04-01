@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, computed, inject, ChangeDetectionStrategy } from '@angular/core';
-import { StratosThemeService } from '../../../../../theme/theme.service';
+import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
 
 @Component({
   selector: 'app-stratos-title',
@@ -13,23 +13,23 @@ import { StratosThemeService } from '../../../../../theme/theme.service';
   ]
 })
 export class StratosTitleComponent {
-  private themeService = inject(StratosThemeService);
+  private branding = inject(StratosBrandingService);
 
   // Optional title
   @Input() title?: string;
 
   // Theme-related signals (computed from theme service)
   public themeTitle = computed(() =>
-    this.themeService.theme()?.branding?.companyName ||
-    this.themeService.theme()?.branding?.loginTitle ||
+    this.branding.theme()?.branding?.companyName ||
+    this.branding.theme()?.branding?.loginTitle ||
     'Stratos'
   );
 
   public themeSubtitle = computed(() =>
-    this.themeService.theme()?.branding?.loginSubtitle || ''
+    this.branding.theme()?.branding?.loginSubtitle || ''
   );
 
   public themeLogo = computed(() =>
-    this.themeService.theme()?.branding?.logo || '/core/assets/logo.png'
+    this.branding.theme()?.branding?.logo || '/core/assets/logo.png'
   );
 }

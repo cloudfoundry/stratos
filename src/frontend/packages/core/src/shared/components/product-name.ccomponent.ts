@@ -1,21 +1,15 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 
-import { CustomizationService } from '../../core/customizations.types';
+import { StratosBrandingService } from '../../../../theme/stratos-branding.service';
 
 @Component({
   selector: 'app-product-name',
-  template: '{{ name }}',
+  template: '{{ name() }}',
   standalone: true,
   imports: []
 })
 export class ProductNameComponent {
-
-  name: string;
-
-  constructor() {
-    const customizationService = inject(CustomizationService);
-
-    this.name = customizationService.get().appName;
-  }
+  private branding = inject(StratosBrandingService);
+  name = computed(() => this.branding.getCompanyName());
 }
 

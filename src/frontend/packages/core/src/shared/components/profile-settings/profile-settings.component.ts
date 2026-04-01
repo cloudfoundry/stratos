@@ -15,8 +15,8 @@ import {
   SetGravatarEnabledAction,
   SetPollingEnabledAction,
   SetSessionTimeoutAction,
-  ThemeService,
 } from '@stratosui/store';
+import { StratosBrandingService, ThemeMode } from '@stratosui/theme';
 import { BytesToHumanSize } from '../../../core/byte-formatters.pipe';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
@@ -52,7 +52,7 @@ export enum ProfileSettingsTypes {
 })
 export class ProfileSettingsComponent {
   private store = inject<Store<AppState>>(Store);
-  themeService = inject(ThemeService);
+  stratosBranding = inject(StratosBrandingService);
   private confirmationService = inject(ConfirmationDialogService);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
 
@@ -65,7 +65,7 @@ export class ProfileSettingsComponent {
     [ProfileSettingsTypes.STORAGE]: true,
   };
 
-  hasMultipleThemes: boolean;
+  hasMultipleThemes = true;
 
   private dashboardState$ = this.store.select(selectDashboardState);
   private sessionData$ = this.store.select(selectSessionData()).pipe(
@@ -112,8 +112,8 @@ export class ProfileSettingsComponent {
     this.setGravatarEnabled(newVal);
   }
 
-  public updateTheme(themeKey: string) {
-    this.themeService.setTheme(themeKey);
+  public updateTheme(mode: string) {
+    this.stratosBranding.setThemeMode(mode as ThemeMode);
   }
 
   private setSessionTimeout(timeoutSession: boolean) {
@@ -130,9 +130,6 @@ export class ProfileSettingsComponent {
 
   constructor() {
     const userProfileService = inject(UserProfileService);
-    const themeService = this.themeService;
-
-    this.hasMultipleThemes = themeService.getThemes().length > 1;
 
     const canEdit = userProfileService.isError$.pipe(map(e => !e));
     const hasEditPermissions = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_PROFILE);

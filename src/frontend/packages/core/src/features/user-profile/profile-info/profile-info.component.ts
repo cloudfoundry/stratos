@@ -4,7 +4,6 @@ import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import {
   AppState,
-  ThemeService,
   UserProfileInfo,
 } from '@stratosui/store';
 import { combineLatest, Observable } from 'rxjs';
@@ -40,7 +39,6 @@ import { AppChipsComponent } from '../../../shared/components/chips/chips.compon
 })
 export class ProfileInfoComponent {
   userService = inject(UserService);
-  themeService = inject(ThemeService);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
   private store = inject<Store<AppState>>(Store);
 

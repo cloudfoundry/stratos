@@ -1,17 +1,14 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, InjectionToken, Input, OnInit, Output, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { ToggleSideNav, AppState, Logout } from '@stratosui/store';
 import { Observable } from 'rxjs';
 
-import { StratosThemeService } from '../../../../../theme/theme.service';
-import { StratosTheme } from '../../../../../theme/theme.config';
+import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 import { environment } from '../../../environments/environment';
 import { TabNavItem } from '../../../tab-nav.types';
-
-export const SIDENAV_COPYRIGHT = new InjectionToken<string>('Optional copyright string for side nav');
 
 export interface SideNavItem extends TabNavItem {
   label: string;
@@ -43,25 +40,27 @@ export interface SideNavItem extends TabNavItem {
 export class SideNavComponent implements OnInit {
   private store = inject<Store<AppState>>(Store);
   private router = inject(Router);
-  private themeService = inject(StratosThemeService);
+  private branding = inject(StratosBrandingService);
 
 
   public customizations: CustomizationsMetadata;
 
-  // Theme-related signals (computed from theme service)
+  // Theme-related signals (computed from branding service)
   public navLogo = computed(() =>
-    this.themeService.theme()?.branding?.navLogo || '/core/assets/logo.png'
+    this.branding.theme()?.branding?.navLogo || '/core/assets/logo.png'
   );
 
   public navLogoIcon = computed(() =>
-    this.themeService.theme()?.branding?.navLogoIcon || '/core/assets/logo.png'
+    this.branding.theme()?.branding?.navLogoIcon || '/core/assets/logo.png'
   );
 
   public displayName = computed(() =>
-    this.themeService.theme()?.branding?.displayName ||
-    this.themeService.theme()?.branding?.companyName ||
+    this.branding.theme()?.branding?.displayName ||
+    this.branding.theme()?.branding?.companyName ||
     'Stratos'
   );
+
+  public copyright = computed(() => this.branding.getCopyrightText());
 
   public environment = environment;
   public showAllMenuItems = false;

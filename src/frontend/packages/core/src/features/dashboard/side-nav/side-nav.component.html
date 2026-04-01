@@ -103,11 +103,11 @@
     </div>
 
     <!-- Navigation Footer -->
-    @if (!!customizations.copyright) {
+    @if (copyright()) {
       <div class="nav-bottom p-4 border-t border-nav-border">
         <div class="nav-copyright text-nav-muted text-xs text-center" [class.hidden]="iconMode">
           <div class="nav-copyright-icon inline">&copy;</div>
-          <div class="nav-copyright-text inline ml-1" [innerHTML]="customizations.copyright"></div>
+          <div class="nav-copyright-text inline ml-1" [innerHTML]="copyright()"></div>
         </div>
       </div>
     }

@@ -62,13 +62,11 @@
       <app-card-title class="user-profile__section">Theme</app-card-title>
       <div class="user-profile__option">
         <div class="user-profile__option-inner">
-          <app-button-toggle-group [value]="(themeService.getTheme() | async)?.key"
+          <app-button-toggle-group [value]="stratosBranding.themeMode()"
             (change)="updateTheme($event.value)" name="theme" aria-label="Theme">
-            @for (theme of themeService.getThemes(); track theme) {
-              <app-button-toggle [value]="theme.key">
-                {{ theme.label }}
-              </app-button-toggle>
-            }
+            <app-button-toggle value="light">Light</app-button-toggle>
+            <app-button-toggle value="dark">Dark</app-button-toggle>
+            <app-button-toggle value="system">System</app-button-toggle>
           </app-button-toggle-group>
         </div>
       </div>

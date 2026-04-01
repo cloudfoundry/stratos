@@ -1,11 +1,11 @@
 import { DOCUMENT } from '@angular/common';
 import { AfterContentInit, ChangeDetectionStrategy, Component, HostBinding, OnDestroy, OnInit, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AuthOnlyAppState, ThemeService, VerifySession } from '@stratosui/store';
+import { AuthOnlyAppState, VerifySession } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { create } from 'rxjs-spy';
 
-import { StratosThemeService } from '../../theme/theme.service';
+import { StratosBrandingService } from '../../theme/stratos-branding.service';
 
 import { environment } from './environments/environment';
 import { LoggedInService } from './logged-in.service';
@@ -20,8 +20,7 @@ import { LoggedInService } from './logged-in.service';
 export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
   private loggedInService = inject(LoggedInService);
   private store = inject<Store<AuthOnlyAppState>>(Store);
-  themeService = inject(ThemeService);
-  private stratosThemeService = inject(StratosThemeService);
+  branding = inject(StratosBrandingService);
   private document = inject<Document>(DOCUMENT);
 
 
