@@ -8,7 +8,8 @@
     "main": "/core/assets/logo.png",
     "navigation": "/core/assets/logo.png",
     "navigationIcon": "/core/assets/logo.png",
-    "favicon": "/favicon.ico"
+    "favicon": "/favicon.ico",
+    "loginBackground": "/core/assets/login-bg.jpg"
   },
   "theme": {
     "primary": "#3b82f6",

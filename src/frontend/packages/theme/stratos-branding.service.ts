@@ -21,6 +21,7 @@ const defaultCompanyConfig: CompanyConfig = {
     navigation: '/core/assets/logo.png',
     navigationIcon: '/core/assets/logo.png',
     favicon: '/favicon.ico',
+    loginBackground: '/core/assets/login-bg.jpg',
   },
   theme: {
     primary: '#3b82f6',
@@ -235,15 +236,16 @@ export class StratosBrandingService {
       loginSubtitle: config.login.subtitle,
     });
 
-    // Apply login customization
-    this.setLoginCustomization({
+    // Apply login customization — only include defined values to avoid overwriting theme defaults
+    const loginCustom: Partial<StratosTheme['login']> = {
       showLogo: config.login.showLogo,
       showTitle: config.login.showTitle,
-      backgroundColor: config.login.backgroundColor,
-      cardBackground: config.login.cardBackground,
-      customMessage: config.login.customMessage,
-      backgroundImage: config.logos.loginBackground,
-    });
+    };
+    if (config.login.backgroundColor) loginCustom.backgroundColor = config.login.backgroundColor;
+    if (config.login.cardBackground) loginCustom.cardBackground = config.login.cardBackground;
+    if (config.login.customMessage) loginCustom.customMessage = config.login.customMessage;
+    if (config.logos.loginBackground) loginCustom.backgroundImage = config.logos.loginBackground;
+    this.setLoginCustomization(loginCustom);
   }
 
   private saveConfigToStorage(config: CompanyConfig) {
