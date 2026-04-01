@@ -61,7 +61,6 @@ export {
   GeneralEntityAppState,
   InternalAppState,
 } from './app-state';
-export { ThemeService } from './theme.service';
 export { internalEventStateSelector } from './selectors/internal-events.selectors';
 export { Login, Logout, VerifySession, VerifiedSession, SESSION_VERIFIED } from './actions/auth.actions';
 export { RequestTypes, APIResponse } from './actions/request.actions';

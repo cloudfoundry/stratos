@@ -3,7 +3,6 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { map } from 'rxjs/operators';
 
 import { HYDRATE_DASHBOARD_STATE, HydrateDashboardStateAction } from '../actions/dashboard-actions';
-import { ThemeService } from '../theme.service';
 
 
 @Injectable({
@@ -11,15 +10,12 @@ import { ThemeService } from '../theme.service';
 })
 export class DashboardEffect {
   private actions$ = inject(Actions);
-  private themeService = inject(ThemeService);
   private appRef = inject(ApplicationRef);
 
 
    hydrate$ = createEffect(() => this.actions$.pipe(
     ofType<HydrateDashboardStateAction>(HYDRATE_DASHBOARD_STATE),
     map(() => {
-      // Ensure the previous theme is applied after dashboard is hydrated
-      this.themeService.initialize();
       this.appRef.tick();
     })
   ), { dispatch: false });
