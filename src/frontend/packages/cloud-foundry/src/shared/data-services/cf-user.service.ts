@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, of, ReplaySubject } from 'rxjs';
-import { filter, first, map, multicast, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
+import { take, filter, map, multicast, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
 import {
   entityCatalog,
@@ -12,8 +12,7 @@ import {
   getCurrentPageRequestInfo,
   PaginationObservables,
   APIResource,
-  PaginatedAction,
-} from '@stratosui/store';
+  PaginatedAction } from '@stratosui/store';
 import { CFAppState } from '../../cf-app-state';
 import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../entity-relations/entity-relations.types';
@@ -32,8 +31,7 @@ import {
   isSpaceAuditor,
   isSpaceDeveloper,
   isSpaceManager,
-  waitForCFPermissions,
-} from '../../features/cf/cf.helpers';
+  waitForCFPermissions } from '../../features/cf/cf.helpers';
 import { selectCfPaginationState } from '../../store/selectors/pagination.selectors';
 import {
   CfUser,
@@ -42,8 +40,7 @@ import {
   IUserPermissionInOrg,
   IUserPermissionInSpace,
   UserRoleInOrg,
-  UserRoleInSpace,
-} from '../../store/types/cf-user.types';
+  UserRoleInSpace } from '../../store/types/cf-user.types';
 
 @Injectable({
   providedIn: 'root'
@@ -256,7 +253,7 @@ export class CfUserService {
           isOrgUser(user.entity, orgGuid)
         );
       }),
-      first()
+      take(1)
     );
   };
 
@@ -342,8 +339,7 @@ export class CfUserService {
               entities$: observableOf(null),
               hasEntities$: observableOf(false),
               totalEntities$: observableOf(0),
-              fetchingEntities$: observableOf(false),
-            });
+              fetchingEntities$: observableOf(false) });
           }
         }),
         multicast(() => new ReplaySubject<any>(1)),
@@ -381,11 +377,11 @@ export class CfUserService {
           !paginationState.pageRequests[paginationState.currentPage] // Had list, not loading
         ),
         map(paginationState => paginationState ? !LocalPaginationHelpers.isPaginationMaxed(paginationState) : false),
-        first()
+        take(1)
       );
       // Will we max out if attempting to fetch all users?
       const willBeMaxed$ = this.fetchTotalUsers(cfGuid).pipe(
-        first(),
+        take(1),
         switchMap(totalResults => combineLatest([
           of(totalResults),
           cfUserEntityConfig.getPaginationConfig().maxedStateStartAt(this.store, allCfUsersAction)
@@ -398,7 +394,7 @@ export class CfUserService {
 
 
       return hasAllUsers$.pipe(
-        first(),
+        take(1),
         switchMap(hasAllUsers => {
           if (hasAllUsers) {
             return of(false);
@@ -469,6 +465,6 @@ export class CfUserService {
     this.store.select(getCurrentUserCFGlobalStates(cfGuid)).pipe(
       filter(state => !!state),
       map(state => state.isAdmin),
-      first()
+      take(1)
     );
 }

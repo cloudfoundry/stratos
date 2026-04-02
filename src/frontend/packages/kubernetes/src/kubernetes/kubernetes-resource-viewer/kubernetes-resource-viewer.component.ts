@@ -11,7 +11,7 @@ import {
   inject, ChangeDetectionStrategy } from '@angular/core';
 import { formatDistance } from 'date-fns';
 import { Observable, of } from 'rxjs';
-import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
+import { take, filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../core/src/core/endpoints.service';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
@@ -51,8 +51,8 @@ interface KubernetesResourceViewerResource {
   jsonView: KubeAPIResource;
   age: string;
   creationTimestamp: string;
-  labels: { name: string, value: string, }[];
-  annotations: { name: string, value: string, }[];
+  labels: { name: string, value: string }[];
+  annotations: { name: string, value: string }[];
   kind: string;
   apiVersion: string;
 }
@@ -68,7 +68,7 @@ selector: 'app-kubernetes-resource-viewer',
     SidepanelPreviewComponent
   ]
 })
-export class KubernetesResourceViewerComponent implements PreviewableComponent, OnDestroy, AfterViewInit {  private endpointsService = inject(EndpointsService);
+export class KubernetesResourceViewerComponent implements PreviewableComponent, OnDestroy, AfterViewInit { private endpointsService = inject(EndpointsService);
   private kubeEndpointService = inject(KubernetesEndpointService);
   private userFavoriteManager = inject(UserFavoriteManager);
   private viewContainerRef = inject(ViewContainerRef);
@@ -198,7 +198,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
     this.hasPodMetrics$ = props.resourceKind === 'pod' ?
       this.resource$.pipe(
         switchMap(resource => this.endpointsService.hasMetrics(this.getEndpointId(resource.raw))),
-        first(),
+        take(1),
       ) :
       of(false);
 
@@ -273,7 +273,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
           this.data.resource.metadata.namespace
         ).pipe(
           entityDeleted(),
-          first()
+          take(1)
         ).subscribe((result: DeleteActionState) => {
           const msg = result.error ? `Could not delete resource: ${result.message}` : `Deleted resource '${this.data.resource.metadata.name}'`;
           this.snackBarService.show(msg);

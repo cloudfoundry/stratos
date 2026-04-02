@@ -1,7 +1,7 @@
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
-import { filter, first, map, switchMap, tap } from 'rxjs/operators';
+import { take, filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { CFAppState } from '@stratosui/cloud-foundry';
 import { CurrentUserPermissionsService, ITableColumn, ITableText, IListAction, IListMultiFilterConfig, IMultiListAction, ListConfig, ListViewTypes } from '@stratosui/core';
@@ -17,8 +17,7 @@ import {
   hasRoleWithin,
   hasRoleWithinSpace,
   hasSpaceRoleWithinOrg,
-  waitForCFPermissions,
-} from '../../../../../features/cf/cf.helpers';
+  waitForCFPermissions } from '../../../../../features/cf/cf.helpers';
 import { CfUser } from '../../../../../store/types/cf-user.types';
 import { CfUserPermissionsChecker } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfUserService } from './../../../../data-services/cf-user.service';
@@ -112,8 +111,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     },
     icon: 'people',
     label: 'Manage',
-    description: `Manage roles`,
-  };
+    description: `Manage roles` };
 
   removeUserActions(): IListAction<APIResource<CfUser>>[] {
     const activeRouteCfOrgSpace = this.cfUserService.activeRouteCfOrgSpace;
@@ -240,7 +238,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     const entityKey = entityCatalog.getEntityKey(action);
     this.store.select(selectPaginationState(entityKey, action.paginationKey)).pipe(
       filter((pag) => !!pag),
-      first(),
+      take(1),
     ).subscribe(pag => {
       const currentFilter = pag.clientPagination.filter.items[userListUserVisibleKey];
       if (!currentFilter) {

@@ -4,7 +4,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { distinctUntilChanged, filter, first, map, pairwise, startWith, switchMap } from 'rxjs/operators';
+import { take, distinctUntilChanged, filter, map, pairwise, startWith, switchMap } from 'rxjs/operators';
 
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
@@ -62,7 +62,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   namespaces$: Observable<string[]>;
 
   private endpointChangedSignal: WritableSignal<string | null> = signal(null);
-  private endpointChanged = toObservable(this.endpointChangedSignal);
+  private endpointChanged: Observable<string | null>;
 
   @ViewChild('releaseNameInputField', { static: true }) releaseNameInputField: ElementRef;
   @ViewChild('editor', { static: true }) editor: ChartValuesEditorComponent;
@@ -79,14 +79,14 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
 
 
   constructor() {
-
+    this.endpointChanged = toObservable(this.endpointChangedSignal);
 
     const chart = this.route.snapshot.params as HelmChartReference;
     this.cancelUrl = this.chartsService.getChartSummaryRoute(chart.repo, chart.name, chart.version, this.route);
     this.chart = chart;
 
     // Fetch the Chart Version metadata so we can get the correct URL for the Chart's JSON Schema
-    this.chartsService.getVersion(this.chart.repo, this.chart.name, this.chart.version).pipe(first()).subscribe(ch => {
+    this.chartsService.getVersion(this.chart.repo, this.chart.name, this.chart.version).pipe(take(1)).subscribe(ch => {
       this.config = {
         valuesUrl: `/pp/v1/monocular/values/${this.chart.endpoint}/${this.chart.repo}/${chart.name}/${this.chart.version}`,
         schemaUrl: this.chartsService.getChartSchemaURL(ch, ch.relationships.chart.data.name, ch.relationships.chart.data.repo)
@@ -103,15 +103,14 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
       endpoint: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
       releaseName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
       releaseNamespace: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-      createNamespace: new FormControl(false, { nonNullable: true }),
-    });
+      createNamespace: new FormControl(false, { nonNullable: true }) });
     this.details.controls.createNamespace.disable();
 
     this.kubeEndpoints$ = this.endpointsService.connectedEndpointsOfTypes(KUBERNETES_ENDPOINT_TYPE);
 
     const allNamespaces$ = kubeEntityCatalog.namespace.store.getPaginationService(null).entities$.pipe(
       filter(namespaces => !!namespaces),
-      first()
+      take(1)
     );
     this.namespaces$ = combineLatest([
       allNamespaces$,
@@ -180,7 +179,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     );
 
     // Auto-select first endpoint
-    this.kubeEndpoints$.pipe(first()).subscribe(endpoints => {
+    this.kubeEndpoints$.pipe(take(1)).subscribe(endpoints => {
       if (endpoints.length === 1) {
         this.details.controls.endpoint.setValue(endpoints[0].guid);
       }
@@ -194,7 +193,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     // Auto select endpoint if there is only one
-    this.kubeEndpoints$.pipe(first()).subscribe(ep => {
+    this.kubeEndpoints$.pipe(take(1)).subscribe(ep => {
       if (ep.length > 1) {
         this.details.controls.endpoint.setValue(ep[0].guid, { onlySelf: true });
         this.endpointChangedSignal.set(ep[0].guid);
@@ -257,8 +256,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
       chart: {
         name: this.route.snapshot.params.name,
         repo: this.route.snapshot.params.repo,
-        version: this.route.snapshot.params.version,
-      },
+        version: this.route.snapshot.params.version },
       monocularEndpoint: endpoint === stratosMonocularEndpointGuid ? null : endpoint,
       chartUrl: '' // Will be set after fetching chart info
     };

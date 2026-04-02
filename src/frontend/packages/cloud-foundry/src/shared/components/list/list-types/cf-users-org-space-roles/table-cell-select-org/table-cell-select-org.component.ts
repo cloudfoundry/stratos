@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { take, map } from 'rxjs/operators';
 
 import { UsersRolesSetOrg } from '../../../../../../../../cloud-foundry/src/actions/users-roles.actions';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
@@ -69,7 +69,7 @@ export class TableCellSelectOrgComponent extends TableCellCustom<APIResource<IOr
     if (!orgGuid) {
       return;
     }
-    this.organizations$.pipe(first()).subscribe(orgs => {
+    this.organizations$.pipe(take(1)).subscribe(orgs => {
       const org = orgs.find(o => o.metadata.guid === orgGuid);
       this.store.dispatch(new UsersRolesSetOrg(org.metadata.guid, org.entity.name));
     });

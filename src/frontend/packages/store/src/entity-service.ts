@@ -1,6 +1,6 @@
 import { Action, compose, Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
-import { filter, first, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { take, filter, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 import { GeneralEntityAppState } from './app-state';
 import type { IEntityCatalog } from './entity-catalog/entity-catalog.interface';
@@ -49,7 +49,7 @@ const dispatcherFactory = <T>(
       // Entity may be null or stale
       // Defensive: Ensure entityKey exists before using it
       if (catalogEntity.entityKey) {
-        store.select(selectEntity<T>(catalogEntity.entityKey, action.guid)).pipe(first()).subscribe(storeEntity => fetchHandler(storeEntity));
+        store.select(selectEntity<T>(catalogEntity.entityKey, action.guid)).pipe(take(1)).subscribe(storeEntity => fetchHandler(storeEntity));
       }
       fetchHandler(entity);
     } : fetchHandler;
@@ -147,7 +147,7 @@ export class EntityService<T = any> {
           actionDispatch(entity);
         }
       }),
-      first(),
+      take(1),
       switchMap(() => cleanEntityInfo$)
     );
   };

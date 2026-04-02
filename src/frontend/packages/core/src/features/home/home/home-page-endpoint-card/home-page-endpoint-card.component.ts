@@ -3,12 +3,11 @@ import { ChangeDetectionStrategy, AfterViewInit, Component, ComponentRef, EventE
 import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { filter, first, map, timeout } from 'rxjs/operators';
+import { take, filter, map, timeout } from 'rxjs/operators';
 
 import {
   EntityCatalogSchemas,
-  IStratosEndpointDefinition,
-} from '../../../../../../store/src/entity-catalog/entity-catalog.types';
+  IStratosEndpointDefinition } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { EndpointModel, entityCatalog } from '../../../../../../store/src/public-api';
 import { UserFavoriteManager } from '../../../../../../store/src/user-favorite-manager';
 import { EntityFavoriteStarComponent } from '../../../../core/entity-favorite-star/entity-favorite-star.component';
@@ -20,8 +19,7 @@ import { HomeShortcutsComponent } from '../home-shortcuts/home-shortcuts.compone
 import { UserFavoriteEndpoint } from './../../../../../../store/src/types/user-favorites.types';
 import { HomePageCardLayout, HomePageEndpointCard, LinkMetadata } from './../../home.types';
 import {
-  DefaultEndpointHomeComponent,
-} from './../default-endpoint-home-component/default-endpoint-home-component.component';
+  DefaultEndpointHomeComponent } from './../default-endpoint-home-component/default-endpoint-home-component.component';
 
 const MAX_FAVS_NORMAL = 15;
 const MAX_FAVS_COMPACT = 5;
@@ -33,8 +31,7 @@ const MAX_LINKS = 5;
 enum Status {
   OK = 0,
   Loading = 1,
-  Error = 2,
-}
+  Error = 2 }
 
 @Component({
   selector: 'app-home-page-endpoint-card',
@@ -255,7 +252,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
       this.sub = loadObs.pipe(
         timeout(60000),
         filter((v: boolean) => v === true),
-        first()
+        take(1)
       ).subscribe({
         next: () => {
           this._status.set(Status.OK);

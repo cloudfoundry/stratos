@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { filter, first, map, switchMap } from 'rxjs/operators';
+import { take, filter, map, switchMap } from 'rxjs/operators';
 
 import {
   UtilsService,
@@ -15,8 +15,7 @@ import {
   IListMultiFilterConfig,
   IMultiListAction,
   ListConfig,
-  ListViewTypes,
-} from '@stratosui/core';
+  ListViewTypes } from '@stratosui/core';
 import { APIResource, IFavoriteMetadata, ListView, UserFavorite } from '@stratosui/store';
 import { IApp } from '../../../../../cf-api.types';
 import { CFAppState } from '../../../../../cf-app-state';
@@ -25,8 +24,7 @@ import { CfOrgSpaceDataService, createCfOrgSpaceFilterConfig } from '../../../..
 import { CardAppComponent } from './card/card-app.component';
 import { CfAppsDataSource } from './cf-apps-data-source';
 import {
-  TableCellAppCfOrgSpaceHeaderComponent,
-} from './table-cell-app-cforgspace-header/table-cell-app-cforgspace-header.component';
+  TableCellAppCfOrgSpaceHeaderComponent } from './table-cell-app-cforgspace-header/table-cell-app-cforgspace-header.component';
 import { TableCellAppCfOrgSpaceComponent } from './table-cell-app-cforgspace/table-cell-app-cforgspace.component';
 import { TableCellAppInstancesComponent } from './table-cell-app-instances/table-cell-app-instances.component';
 import { TableCellAppNameComponent } from './table-cell-app-name/table-cell-app-name.component';
@@ -53,7 +51,7 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
     this.initialised$ = this.cfOrgSpaceService.isLoading$.pipe(
       filter(isLoading => !isLoading),
       switchMap(() => this.cfOrgSpaceService.cf.list$),
-      first(),
+      take(1),
       map(cfs => {
         const cfGuid = cfs.length === 1 ? cfs[0].guid : null;
         this.appsDataSource = new CfAppsDataSource(this.store, this, undefined, undefined, undefined, cfGuid);
@@ -79,8 +77,7 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
       }
     },
     {
-      columnId: 'status', headerCell: () => 'Status', cellFlex: '2', cellComponent: TableCellAppStatusComponent,
-    },
+      columnId: 'status', headerCell: () => 'Status', cellFlex: '2', cellComponent: TableCellAppStatusComponent },
     {
       columnId: 'instances', headerCell: () => 'Instances', cellComponent: TableCellAppInstancesComponent, cellFlex: '1', sort: {
         type: 'sort',
@@ -115,8 +112,7 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
     {
       columnId: 'cfOrgSpace',
       headerCellComponent: TableCellAppCfOrgSpaceHeaderComponent,
-      cellComponent: TableCellAppCfOrgSpaceComponent,
-    },
+      cellComponent: TableCellAppCfOrgSpaceComponent },
     {
       columnId: 'creation', headerCell: () => 'Creation Date',
       cellDefinition: {

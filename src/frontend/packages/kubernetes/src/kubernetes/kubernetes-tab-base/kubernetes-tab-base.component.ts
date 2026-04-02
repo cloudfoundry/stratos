@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import {Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { Observable } from 'rxjs';
-import { first, map, startWith } from 'rxjs/operators';
+import { take, map, startWith } from 'rxjs/operators';
 
 import { PageHeaderComponent } from '@stratosui/core';
 import { LoadingPageComponent } from '@stratosui/core';
@@ -103,7 +103,7 @@ export class KubernetesTabBaseComponent implements OnInit {
       startWith(true)
     );
     this.favorite$ = this.kubeEndpointService.endpoint$.pipe(
-      first(),
+      take(1),
       map((endpoint: any) => this.userFavoriteManager.getFavoriteEndpointFromEntity(endpoint.entity))
     );
     this.endpointIds$ = this.kubeEndpointService.endpoint$.pipe(

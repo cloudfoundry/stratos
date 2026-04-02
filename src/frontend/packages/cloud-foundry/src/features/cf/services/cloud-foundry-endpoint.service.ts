@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
-import { filter, first, map, publishReplay, refCount } from 'rxjs/operators';
+import { take, filter, map, publishReplay, refCount } from 'rxjs/operators';
 
 import {
   EntityService,
@@ -14,8 +14,7 @@ import {
   EntityInfo,
   EndpointModel,
   EndpointUser,
-  PaginatedAction,
-} from '@stratosui/store';
+  PaginatedAction } from '@stratosui/store';
 import { GetAllApplications } from '../../../actions/application.actions';
 import { GetAllRoutes } from '../../../actions/route.actions';
 import { GetSpaceRoutes } from '../../../actions/space.actions';
@@ -28,12 +27,10 @@ import {
   organizationEntityType,
   privateDomainsEntityType,
   quotaDefinitionEntityType,
-  spaceEntityType,
-} from '../../../cf-entity-types';
+  spaceEntityType } from '../../../cf-entity-types';
 import {
   createEntityRelationKey,
-  createEntityRelationPaginationKey,
-} from '../../../entity-relations/entity-relations.types';
+  createEntityRelationPaginationKey } from '../../../entity-relations/entity-relations.types';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { QParam, QParamJoiners } from '../../../shared/q-param';
 import { CfApplicationState } from '../../../store/types/application.types';
@@ -205,7 +202,7 @@ export class CloudFoundryEndpointService {
       map(p => p.entity.connectionStatus === 'connected')
     );
 
-    this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user), first(), publishReplay(1), refCount());
+    this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user), take(1), publishReplay(1), refCount());
   }
 
   public getAppsInOrgViaAllApps(org: APIResource<IOrganization>): Observable<APIResource<IApp>[]> {

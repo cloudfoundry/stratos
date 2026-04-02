@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { catchError, first, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
+import { take, catchError, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import { EntityDeleteCompleteAction } from '../actions/entity.delete.actions';
 import { ClearPaginationOfEntity } from '../actions/pagination.actions';
@@ -17,8 +17,7 @@ import {
   SaveUserFavoriteSuccessAction,
   ToggleUserFavoriteAction,
   UpdateUserFavoriteMetadataAction,
-  UpdateUserFavoriteMetadataSuccessAction,
-} from '../actions/user-favourites.actions';
+  UpdateUserFavoriteMetadataSuccessAction } from '../actions/user-favourites.actions';
 import { InternalAppState } from '../app-state';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { proxyAPIVersion } from '../jetstream';
@@ -128,7 +127,7 @@ export class UserFavoritesEffect {
       }
 
       return this.userFavoriteManager.getIsFavoriteObservable(action.favorite).pipe(
-        first(),
+        take(1),
         switchMap(isFav => {
           if (isFav) {
             return [new RemoveUserFavoriteAction(action.favorite)];

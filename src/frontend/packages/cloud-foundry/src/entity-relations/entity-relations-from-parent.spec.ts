@@ -2,7 +2,7 @@ import { inject, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { Store } from '@ngrx/store';
-import { first } from 'rxjs/operators';
+import { take,  } from 'rxjs/operators';
 
 import { RequestTypes } from '@stratosui/store';
 import { AppState } from '@stratosui/store';
@@ -62,7 +62,7 @@ describe('Entity Relations - populate from parent', () => {
     return new Promise<void>((done, fail) => {
       inject([Store], (iStore: Store<any>) => {
         const testAction = new GetAllOrganizationSpaces(pagKey, orgGuid, cfGuid, [], true);
-        populatePaginationFromParent(iStore, testAction).pipe(first())
+        populatePaginationFromParent(iStore, testAction).pipe(take(1))
           .subscribe(
             (action: GetAllOrganizationSpaces) => {
               // When no list exists in parent, the original action is returned
@@ -107,7 +107,7 @@ describe('Entity Relations - populate from parent', () => {
 
     return new Promise<void>((done, fail) => {
       inject([Store], (iStore: Store<AppState>) => {
-        populatePaginationFromParent(iStore, new GetAllOrganizationSpaces(pagKey, orgGuid, cfGuid, [], true)).pipe(first())
+        populatePaginationFromParent(iStore, new GetAllOrganizationSpaces(pagKey, orgGuid, cfGuid, [], true)).pipe(take(1))
           .subscribe((action: WrapperRequestActionSuccess) => {
             expect(action).toBeDefined();
             expect(action).not.toBeNull();

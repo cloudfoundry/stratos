@@ -4,10 +4,9 @@ import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } 
 import { ActivatedRoute } from '@angular/router';
 import { gitRepositoryUrlValidator, normalizeUrl } from '../../../../../core/src/shared/validators';
 import {
-  CreateEndpointHelperComponent,
-} from '@stratosui/core';
+  CreateEndpointHelperComponent } from '@stratosui/core';
 import { Observable, Subscription } from 'rxjs';
-import { filter, first, map, pairwise } from 'rxjs/operators';
+import { take, filter, map, pairwise } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
@@ -52,8 +51,7 @@ enum GitTypeKeys {
   GITHUB_COM = 'githubdotcom',
   GITHUB_ENTERPRISE = 'githubenterprize',
   GITLAB_COM = 'githubdotcom',
-  GITLAB_ENTERPRISE = 'githubenterprize',
-}
+  GITLAB_ENTERPRISE = 'githubenterprize' }
 
 interface GitRegistrationForm {
   selectedType: FormControl<string>;
@@ -133,16 +131,14 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
             description: [
               `Registering github.com allows you to connect with a Personal Access Token and access your public and private ${githubLabel} repositories.`,
               'Note: Stratos allows you to access github.com without registering this endpoint, but you are limited to accessing public repositories.'
-            ],
-          },
+            ] },
           [GitTypeKeys.GITHUB_ENTERPRISE]: {
             label: 'Github Enterprise',
             url: null,
             description: [
               `Register your own GitHub Enterprise server.`,
               'Registering an endpoint allows you to access public repositories. Connect with a Personal Access Token to additionally access your private repositories',
-            ],
-          }
+            ] }
         }
       },
       [GIT_ENDPOINT_SUB_TYPES.GITLAB]: {
@@ -156,8 +152,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
             description: [
               `Registering gitlab.com allows you to connect with a Personal Access Token and access your public and private ${gitlabLabel} repositories.`,
               'Note: Stratos allows you to access gitlab.com without registering this endpoint, but you are limited to accessing public repositories.'
-            ],
-          },
+            ] },
           [GitTypeKeys.GITLAB_ENTERPRISE]: {
             label: 'Gitlab Enterprise',
             url: null,
@@ -172,7 +167,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     };
 
     // Check the endpoints and turn off any options for endpoints that are already registered
-    this.endpointsService.endpoints$.pipe(first()).subscribe(eps => {
+    this.endpointsService.endpoints$.pipe(take(1)).subscribe(eps => {
       Object.values(this.gitTypes[this.epSubType].types).forEach(type => {
         type.exists = !type.url ? false : !!Object.values(eps).find(ep => type.url === getFullEndpointApiUrl(ep));
       });
@@ -192,8 +187,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
       nameField: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
       urlField: new FormControl('', { nonNullable: true, validators: [Validators.required, gitRepositoryUrlValidator] }),
       skipSSLField: new FormControl(false, { nonNullable: true, validators: [] }),
-      createSystemEndpointField: new FormControl(true, { nonNullable: true, validators: [] }),
-    });
+      createSystemEndpointField: new FormControl(true, { nonNullable: true, validators: [] }) });
     this.updateType();
 
     // Check for changes to the selected type

@@ -4,7 +4,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { GitCommit, gitEntityCatalog, GitRepo, GitSCMService, GitSCMType, SCMIcon } from '@stratosui/git';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, of } from 'rxjs';
-import { combineLatest, delay, distinct, filter, first, map, mergeMap, startWith, switchMap, tap } from 'rxjs/operators';
+import { take, combineLatest, delay, distinct, filter, map, mergeMap, startWith, switchMap, tap } from 'rxjs/operators';
 
 import { CFAppState } from '@stratosui/cloud-foundry';
 import {
@@ -18,8 +18,7 @@ import {
   TileGridComponent,
   TileGroupComponent,
   MbToHumanSizePipe,
-  UptimePipe,
-} from '@stratosui/core';
+  UptimePipe } from '@stratosui/core';
 import { ResetPagination, getFullEndpointApiUrl, ActionState, EntityInfo } from '@stratosui/store';
 import { AppMetadataTypes } from '../../../../../../actions/app-metadata.actions';
 import { UpdateExistingApplication } from '../../../../../../actions/application.actions';
@@ -104,7 +103,7 @@ export class BuildTabComponent implements OnInit {
   private confirmDialog = inject(ConfirmationDialogService);
   private cups = inject(CurrentUserPermissionsService);
 
-  public isBusyUpdating$!: Observable<{ updating: boolean, }>;
+  public isBusyUpdating$!: Observable<{ updating: boolean }>;
   public manageAppPermission = CfCurrentUserPermissions.APPLICATION_MANAGE;
 
   cardTwoFetching$!: Observable<boolean>;
@@ -261,17 +260,17 @@ export class BuildTabComponent implements OnInit {
     this.confirmDialog.open(appRestartConfirmation, () => {
 
       this.applicationService.application$.pipe(
-        first(),
+        take(1),
         mergeMap(appData => {
           this.applicationService.updateApplication({ state: 'STOPPED' }, [], appData.app.entity);
           return observableCombineLatest(
             observableOf(appData),
-            this.pollEntityService('stopping', 'STOPPED').pipe(first())
+            this.pollEntityService('stopping', 'STOPPED').pipe(take(1))
           );
         }),
         mergeMap(([appData, updateData]) => {
           this.applicationService.updateApplication({ state: 'STARTED' }, [], appData.app.entity);
-          return this.pollEntityService('starting', 'STARTED').pipe(first());
+          return this.pollEntityService('starting', 'STARTED').pipe(take(1));
         }),
       ).subscribe({
         error: this.dispatchAppStats,
@@ -288,12 +287,12 @@ export class BuildTabComponent implements OnInit {
     requiredAppState: string,
     onSuccess: () => void) {
     this.applicationService.application$.pipe(
-      first(),
+      take(1),
       tap(appData => {
         this.confirmDialog.open(confirmConfig, () => {
           onConfirm(appData);
           this.pollEntityService(updateKey, requiredAppState).pipe(
-            first(),
+            take(1),
           ).subscribe(onSuccess);
         });
       })

@@ -2,10 +2,9 @@ import { computed, Injectable, OnDestroy, signal, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
-import {
+import { take,
   distinctUntilChanged,
   filter,
-  first,
   map,
   publishReplay,
   refCount,
@@ -230,7 +229,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
           }
           return false;
         }),
-        first(),
+        take(1),
         map((endpoints: EndpointModel[]) => {
           return Object.values(endpoints).sort((a: EndpointModel, b: EndpointModel) => naturalCompare(a.name, b.name));
         }),
@@ -355,7 +354,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
     // Sync BehaviorSubjects with persisted store values so
     // dropdowns and list filtering are consistent from first render
     this.initialValues$.pipe(
-      first(),
+      take(1),
       map(this.initialValuesMap),
     ).subscribe(values => {
       if (values.cf) { this.selectSet(this.cf.select, values.cf); }
@@ -369,7 +368,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
     const defaultMap = (a: any) => a;
     const initialValuesMap = this.initialValuesMap || defaultMap;
     return initialValues$.pipe(
-      first(),
+      take(1),
       map(initialValuesMap) // Map needs to happen at the point the auto selectors are enabled
     );
   }
@@ -380,7 +379,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
       this.org.list$,
       // Get initial values only after we've given a prod... so first values emitted are the one's we want
       this.getInitialValues(),
-    ).pipe(first()).subscribe(([, initialValues]) => {
+    ).pipe(take(1)).subscribe(([, initialValues]) => {
       this.setupAutoSelectors(initialValues.cf, initialValues.org);
     });
   }

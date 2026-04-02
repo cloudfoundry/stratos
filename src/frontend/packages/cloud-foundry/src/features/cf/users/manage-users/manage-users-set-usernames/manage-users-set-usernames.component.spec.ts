@@ -29,7 +29,7 @@ describe('ManageUsersSetUsernamesComponent', () => {
     };
 
     // Set up initial state with CF roles initialized
-    // This prevents EmptyError from waitForCFPermissions() -> first() in the constructor
+    // This prevents EmptyError from waitForCFPermissions() -> take(1) in the constructor
     const initialState: Partial<CFAppState> = {
       currentUserRoles: {
         internal: {

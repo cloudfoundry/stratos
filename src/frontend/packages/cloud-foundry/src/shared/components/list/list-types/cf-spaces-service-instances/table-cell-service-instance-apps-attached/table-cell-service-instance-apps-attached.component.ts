@@ -1,7 +1,7 @@
 import { Component, Input, OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
-import { filter, first, map, switchMap } from 'rxjs/operators';
+import { take, filter, map, switchMap } from 'rxjs/operators';
 
 import { AppChipsComponent, AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
@@ -10,8 +10,7 @@ import { IServiceInstance } from '../../../../../../cf-api-svc.types';
 import {
   applicationEntityType,
   serviceBindingEntityType,
-  serviceInstancesEntityType,
-} from '../../../../../../cf-entity-types';
+  serviceInstancesEntityType } from '../../../../../../cf-entity-types';
 import { createEntityRelationKey } from '../../../../../../entity-relations/entity-relations.types';
 import { getCfServiceInstance } from '../../../../../../features/service-catalog/services-helper';
 
@@ -48,11 +47,11 @@ export class TableCellServiceInstanceAppsAttachedComponent
 
   ngOnInit() {
     this.boundApps$ = combineLatest([
-      this.config$.asObservable().pipe(first()),
+      this.config$.asObservable().pipe(take(1)),
       this.row$
     ]).pipe(
       filter(([config, row]) => !!config && !!row),
-      first(),
+      take(1),
       switchMap(([config, row]) => {
         // The row is an instance of SI... but we need to confirm that it has the SI --> binding --> app relation in place (it probably
         // won't).
@@ -78,8 +77,7 @@ export class TableCellServiceInstanceAppsAttachedComponent
                 link: `/applications/${binding.entity.cfGuid}/${binding.entity.app.metadata.guid}`,
                 params: {
                   breadcrumbs: config.breadcrumbs
-                },
-              }
+                } }
             };
           });
       })

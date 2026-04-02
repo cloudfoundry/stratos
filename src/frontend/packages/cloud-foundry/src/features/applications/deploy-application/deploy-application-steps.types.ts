@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
+import { take, filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { PermissionConfig, CurrentUserPermissionsService } from '@stratosui/core';
 import { GitSCM, GitSCMService, GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE } from '@stratosui/git';
@@ -169,7 +169,7 @@ export class ApplicationDeploySourceTypes {
       const fetchedFeatureFlags$ = cfEntityCatalog.featureFlag.store.getPaginationService(cfId).entities$.pipe(
         map(entities => !!entities),
         filter(hasEntities => hasEntities),
-        first(),
+        take(1),
         publishReplay(1),
         refCount(),
       );

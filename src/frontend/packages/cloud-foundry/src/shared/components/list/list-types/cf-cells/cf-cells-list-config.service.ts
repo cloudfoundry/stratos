@@ -2,7 +2,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { first, tap } from 'rxjs/operators';
+import { take, tap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
@@ -117,7 +117,7 @@ export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResu
 
     const cellHelper = new CfCellHelper(store, paginationMonitorFactory);
     this.init$ = cellHelper.createCellMetricAction(activeRouteCfCell.cfGuid).pipe(
-      first(),
+      take(1),
       tap(action => {
         this.dataSource = new CfCellsDataSource(store, this, action);
       })

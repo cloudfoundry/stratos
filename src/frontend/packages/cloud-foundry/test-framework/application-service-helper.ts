@@ -33,7 +33,7 @@ export class ApplicationServiceMock {
   private entityObsSubject = new BehaviorSubject({} as any);
 
   // Use BehaviorSubjects instead of observableOf() to prevent immediate completion
-  // This fixes issues with withLatestFrom() and first() operators in components
+  // This fixes issues with withLatestFrom() and take(1) operators in components
   private appSubject = new BehaviorSubject<ApplicationData>({
     cf: {
       guid: this.cfGuid

@@ -6,10 +6,9 @@ import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
-import {
+import { take,
   distinctUntilChanged,
   filter,
-  first,
   map,
   publishReplay,
   refCount,
@@ -138,7 +137,7 @@ export class SelectPlanStepComponent implements OnDestroy {
             selectedServicePlan,
             this.cSIHelperService.servicePlanVisibilities$,
             this.cSIHelperService.serviceBroker$).pipe(
-              first()
+              take(1)
             ).subscribe(cardStatus => this.selectedPlanAccessibilitySignal.set(cardStatus));
         })
       );

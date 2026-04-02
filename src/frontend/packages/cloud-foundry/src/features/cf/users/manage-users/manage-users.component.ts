@@ -3,7 +3,7 @@ import { Component, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, of } from 'rxjs';
-import { combineLatest, filter, first, map } from 'rxjs/operators';
+import { take, combineLatest, filter, map } from 'rxjs/operators';
 
 import { PageHeaderComponent, StepComponent, StepOnNextFunction, SteppersComponent } from '@stratosui/core';
 import { UsersRolesClear, UsersRolesExecuteChanges, UsersRolesSetUsers } from '../../../../actions/users-roles.actions';
@@ -70,14 +70,14 @@ export class UsersRolesComponent implements OnDestroy {
       if (userQParam) {
         this.initialUsers$ = this.cfUserService.getUser(activeRouteCfOrgSpace.cfGuid, userQParam).pipe(
           map(user => [user.entity]),
-          first()
+          take(1)
         );
       } else {
-        this.initialUsers$ = this.store.select(selectCfUsersRolesPicked).pipe(first());
+        this.initialUsers$ = this.store.select(selectCfUsersRolesPicked).pipe(take(1));
       }
 
       this.singleUser$ = this.initialUsers$.pipe(
-        first(),
+        take(1),
         filter(users => users && users.length > 0),
         map(users => users.length === 1 ? users[0] : null),
       );
@@ -85,7 +85,7 @@ export class UsersRolesComponent implements OnDestroy {
       // Ensure that when we arrive here directly the store is set up with all it needs
       this.store.select(selectCfUsersRoles).pipe(
         combineLatest(this.initialUsers$),
-        first()
+        take(1)
       ).subscribe(([usersRoles, users]) => {
         if (!usersRoles.cfGuid || !users) {
           this.store.dispatch(new UsersRolesSetUsers(activeRouteCfOrgSpace.cfGuid, users));

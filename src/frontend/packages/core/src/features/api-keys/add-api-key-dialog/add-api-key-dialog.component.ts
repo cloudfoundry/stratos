@@ -6,7 +6,7 @@ import { CustomFormFieldComponent } from '../../../shared/components/custom-form
 import { AppProgressBarComponent } from '../../../shared/components/progress-bar/app-progress-bar.component';
 import { entityCatalog, stratosEntityCatalog, NormalizedResponse, ApiKey, RequestInfoState } from '@stratosui/store';
 import { Subscription } from 'rxjs';
-import { filter, first, map, pairwise, tap } from 'rxjs/operators';
+import { take, filter, map, pairwise, tap } from 'rxjs/operators';
 
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { DialogErrorComponent } from '../../../shared/components/dialog-error/dialog-error.component';
@@ -70,7 +70,7 @@ export class AddApiKeyDialogComponent implements OnDestroy {
           this.dialogRef.close(response.entities[entityKey][response.result[0]]);
         }
       }),
-      first()
+      take(1)
     ).subscribe();
   }
 

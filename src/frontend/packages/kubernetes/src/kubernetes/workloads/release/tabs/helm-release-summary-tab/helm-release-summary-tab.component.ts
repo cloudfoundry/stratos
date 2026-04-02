@@ -9,7 +9,7 @@ import { ClearPaginationOfType } from '@stratosui/store';
 import { RouterNav } from '@stratosui/store';
 import { AppState } from '@stratosui/store';
 import { combineLatest, Observable } from 'rxjs';
-import { distinctUntilChanged, filter, first, map, publishReplay, refCount, startWith } from 'rxjs/operators';
+import { take, distinctUntilChanged, filter, map, publishReplay, refCount, startWith } from 'rxjs/operators';
 
 import {
   PageSubNavComponent,
@@ -29,8 +29,7 @@ import { WorkloadLiveReloadComponent } from '../../workload-live-reload/workload
 import { SnackBarService } from '@stratosui/core';
 import { endpointsEntityRequestDataSelector } from '@stratosui/store';
 import {
-  ResourceAlertPreviewComponent,
-} from '../../../../analysis-report-viewer/resource-alert-preview/resource-alert-preview.component';
+  ResourceAlertPreviewComponent } from '../../../../analysis-report-viewer/resource-alert-preview/resource-alert-preview.component';
 import { KubernetesAnalysisService } from '../../../../services/kubernetes.analysis.service';
 import { HelmReleaseChartData } from '../../../workload.types';
 import { workloadsEntityCatalog } from '../../../workloads-entity-catalog';
@@ -311,7 +310,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
     return this.store.select(endpointsEntityRequestDataSelector(this.helmReleaseHelper.endpointGuid)).pipe(
       filter((e: any) => !!e),
       map((e: any) => e.name),
-      first()
+      take(1)
     );
   }
 
@@ -340,8 +339,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
       ResourceAlertPreviewComponent,
       {
         resource,
-        alerts,
-      }
+        alerts }
     );
   }
 }

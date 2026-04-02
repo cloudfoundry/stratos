@@ -3,7 +3,7 @@ import { CanActivateFn, RouterStateSnapshot } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { RouterNav, InternalAppState } from '@stratosui/store';
 import { Observable } from 'rxjs';
-import { filter, first, map } from 'rxjs/operators';
+import { take, filter, map } from 'rxjs/operators';
 
 export function queryParamMap(): { [key: string]: string } {
   const paramMap: { [key: string]: string } = {};
@@ -55,7 +55,7 @@ export const authGuard: CanActivateFn = (_route, state): Observable<boolean> => 
       }
       return true;
     }),
-    first()
+    take(1)
   );
 };
 

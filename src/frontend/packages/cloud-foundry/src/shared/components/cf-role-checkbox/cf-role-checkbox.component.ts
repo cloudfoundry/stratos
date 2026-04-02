@@ -5,7 +5,7 @@ import { CustomCheckboxComponent } from '@stratosui/core';
 import { CustomTooltipDirective } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription } from 'rxjs';
-import { combineLatest as combineLatestOp, filter, first, map } from 'rxjs/operators';
+import { take, combineLatest as combineLatestOp, filter, map } from 'rxjs/operators';
 
 import { UsersRolesSetOrgRole, UsersRolesSetSpaceRole } from '../../../../../cloud-foundry/src/actions/users-roles.actions';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
@@ -16,15 +16,13 @@ import { CfRolesService } from '../../../features/cf/users/manage-users/cf-roles
 import {
   selectCfUsersIsRemove,
   selectCfUsersIsSetByUsername,
-  selectCfUsersRolesPicked,
-} from '../../../store/selectors/cf-users-roles.selector';
+  selectCfUsersRolesPicked } from '../../../store/selectors/cf-users-roles.selector';
 import {
   CfUser,
   IUserPermissionInOrg,
   IUserPermissionInSpace,
   OrgUserRoleNames,
-  SpaceUserRoleNames,
-} from '../../../store/types/cf-user.types';
+  SpaceUserRoleNames } from '../../../store/types/cf-user.types';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 
 
@@ -319,7 +317,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
   public roleUpdated(checked: boolean) {
     this.checked = checked;
     this.cfRolesService.newRoles$.pipe(
-      first()
+      take(1)
     ).subscribe(newRoles => {
       if (!checked) {
         this.tooltip = '';

@@ -3,13 +3,13 @@ import { ChangeDetectorRef, Component, ComponentRef, Input, OnDestroy, OnInit, V
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
-import {
+import { take,
   catchError,
   debounceTime,
   delay,
   distinctUntilChanged,
   filter,
-  first,
+  defaultIfEmpty,
   map,
   share,
   startWith,
@@ -173,14 +173,15 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
     // Set the starting state of the org table
     if (this.activeRouteCfOrgSpace.orgGuid) {
       this.cfRolesService.fetchOrg(this.activeRouteCfOrgSpace.cfGuid, this.activeRouteCfOrgSpace.orgGuid).pipe(
-        first()
+        take(1),
+        defaultIfEmpty(null)
       ).subscribe(org => {
-        this.store.dispatch(new UsersRolesSetOrg(this.activeRouteCfOrgSpace.orgGuid, org.entity.entity.name));
+        if (org) { this.store.dispatch(new UsersRolesSetOrg(this.activeRouteCfOrgSpace.orgGuid, org.entity.entity.name)); }
       });
     } else {
       this.orgGuidChangedSub = this.cfRolesService.fetchOrgs(this.activeRouteCfOrgSpace.cfGuid).pipe(
         filter(orgs => orgs && !!orgs.length),
-        first()
+        take(1)
       ).subscribe(orgs => {
         if (orgs[0]?.metadata?.guid && orgs[0]?.entity?.name) {
           this.store.dispatch(new UsersRolesSetOrg(orgs[0].metadata.guid, orgs[0].entity.name));
@@ -257,7 +258,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
     this.store.select(selectCfUsersRolesRoles).pipe(
       // Wait for the store to have the correct org
       filter(newRoles => newRoles && newRoles.orgGuid === orgGuid),
-      first()
+      take(1)
     ).subscribe({
       complete: () => {
         // The org has changed, completely recreate the roles table
@@ -271,7 +272,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
 
   onEnter = () => {
     if (!this.snackBarRef) {
-      this.usersWithWarning$.pipe(first()).subscribe((usersWithWarning => {
+      this.usersWithWarning$.pipe(take(1)).subscribe((usersWithWarning => {
         if (usersWithWarning && usersWithWarning.length) {
           this.snackBarRef = this.snackBar.open(`Not all roles are shown for user/s - ${usersWithWarning.join(', ')}. To avoid this please
           navigate to a specific organization or space`, 'Dismiss');
@@ -280,7 +281,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
     }
 
     // In order to show the removed roles correctly (as ticks) flip them from remove to add
-    this.store.select(selectCfUsersIsRemove).pipe(first()).subscribe(isRemove => {
+    this.store.select(selectCfUsersIsRemove).pipe(take(1)).subscribe(isRemove => {
       if (isRemove) {
         this.store.dispatch(new UsersRolesFlipSetRoles());
       }
@@ -296,7 +297,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
 
   onNext = () => {
     return combineLatest([
-      this.store.select(selectCfUsersIsRemove).pipe(first()),
+      this.store.select(selectCfUsersIsRemove).pipe(take(1)),
       this.cfRolesService.createRolesDiff(this.selectedOrgGuid)
     ]).pipe(
       map(([isRemove]) => {

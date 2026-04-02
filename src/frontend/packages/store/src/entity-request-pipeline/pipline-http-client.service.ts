@@ -2,7 +2,7 @@ import { HttpClient, HttpRequest, HttpResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { filter, first, map, mergeMap } from 'rxjs/operators';
+import { take, filter, map, mergeMap } from 'rxjs/operators';
 
 import { InternalAppState } from '../app-state';
 import { StratosCatalogEndpointEntity } from '../entity-catalog/entity-catalog-entity/entity-catalog-entity';
@@ -45,7 +45,7 @@ export class PipelineHttpClient {
         connectedEndpointsOfTypesSelector(endpointConfig.type);
 
       return this.store.select(selector).pipe(
-        first(),
+        take(1),
         mergeMap(endpoints => {
           const headers = hr.headers.set(PipelineHttpClient.EndpointHeader, Object.keys(endpoints));
           return this.httpClient.request<R>(hr.clone({ headers, url }));

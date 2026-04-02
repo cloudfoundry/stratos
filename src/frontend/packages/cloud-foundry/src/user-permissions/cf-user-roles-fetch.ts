@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Action, Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
-import { catchError, first, map, pairwise, share, skipWhile, switchMap, tap } from 'rxjs/operators';
+import { take, catchError, map, pairwise, share, skipWhile, switchMap, tap } from 'rxjs/operators';
 
 import {
   AppState,
@@ -15,8 +15,7 @@ import {
   connectedEndpointsOfTypesSelector,
   selectPaginationState,
   PaginationEntityState,
-  BasePaginatedAction,
-} from '@stratosui/store';
+  BasePaginatedAction } from '@stratosui/store';
 import {
   CfUserRelationTypes,
   GET_CURRENT_CF_USER_RELATIONS,
@@ -24,8 +23,7 @@ import {
   GET_CURRENT_CF_USER_RELATIONS_SUCCESS,
   GetCfUserRelations,
   GetCurrentCfUserRelations,
-  GetCurrentCfUserRelationsComplete,
-} from '../actions/permissions.actions';
+  GetCurrentCfUserRelationsComplete } from '../actions/permissions.actions';
 import { cfEntityCatalog } from '../cf-entity-catalog';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
 import { CFResponse } from '../store/types/cf-api.types';
@@ -38,7 +36,7 @@ const createEndpointArray = (
   if (!endpoints || !endpoints.length || typeof (endpoints[0]) === 'string') {
     const endpointIds = endpoints as string[];
     return store.select(connectedEndpointsOfTypesSelector(CF_ENDPOINT_TYPE)).pipe(
-      first(),
+      take(1),
       map(cfEndpoints => endpointIds.length === 0 ?
         Object.values(cfEndpoints) :
         Object.values(cfEndpoints).filter(cfEndpoint => endpointIds.find(endpointId => endpointId === cfEndpoint.guid))
@@ -108,7 +106,7 @@ function dispatchRoleRequests(
 
       // FINISH fetching cf roles for current user
       combineLatest(requests[endpoint.guid]).pipe(
-        first(),
+        take(1),
         tap(succeeds => {
           store.dispatch(new GetCfUserRelations(
             endpoint.guid,
@@ -187,7 +185,7 @@ export function fetchCfUserRole(store: Store<AppState>, action: GetCurrentCfUser
       store.dispatch(new GetCurrentCfUserRelationsComplete(action.relationType, action.endpointGuid, data.resources));
       return true;
     }),
-    first(),
+    take(1),
     catchError(err => of(false)),
     share()
   );
@@ -213,5 +211,5 @@ const createPaginationCompleteWatcher = (store: Store<AppState>, action: BasePag
       return oldFetching === true && newFetching === false;
     }),
     skipWhile(completed => !completed),
-    first(),
+    take(1),
   );

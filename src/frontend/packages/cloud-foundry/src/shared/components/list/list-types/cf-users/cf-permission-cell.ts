@@ -1,7 +1,7 @@
 import { Directive, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
-import { filter, first, map, switchMap } from 'rxjs/operators';
+import { take, filter, map, switchMap } from 'rxjs/operators';
 
 import { AppChip, ConfirmationDialogConfig, ConfirmationDialogService, TableCellCustom } from '@stratosui/core';
 import { APIResource, selectSessionData } from '@stratosui/store';
@@ -94,7 +94,7 @@ export abstract class CfPermissionCellDirective<T> extends TableCellCustom<APIRe
     );
     this.confirmDialog.open(confirmation, () => {
       this.store.select(selectSessionData()).pipe(
-        first()
+        take(1)
       ).subscribe(sessionData => {
         const cfSession = sessionData.endpoints.cf[cellPermission.cfGuid];
         const updateConnectedUser = !cfSession.user.admin && cellPermission.userGuid === cfSession.user.guid;

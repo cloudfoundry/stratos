@@ -28,11 +28,10 @@ import {
   Subscription,
 } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
-import {
+import { take,
   catchError,
   distinctUntilChanged,
   filter,
-  first,
   map,
   publishReplay,
   refCount,
@@ -461,7 +460,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   selectedRowToggle(row: T, multiMode: boolean = true) {
     this.getRowState(row).pipe(
-      first(),
+      take(1),
       withLatestFrom(this.page$)
     ).subscribe(([rowState, filteredRows]) => {
       if (rowState.disabled) {
@@ -496,7 +495,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       const currentSelection = new Map(this._selectedRows());
       return combineLatest(filterEntities.reduce((obs: Observable<RowState>[], row: T) => {
         obs.push(this.getRowState(row).pipe(
-          first(),
+          take(1),
           tap((rowState: RowState) => {
             if (rowState.disabled) {
               return;
@@ -518,7 +517,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     }));
 
     updatedAllRows$.pipe(
-      first()
+      take(1)
     ).subscribe(() => {
       const currentSelection = this._selectedRows();
       const isSelecting = currentSelection.size > 0;

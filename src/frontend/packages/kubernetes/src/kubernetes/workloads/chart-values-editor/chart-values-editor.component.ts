@@ -160,6 +160,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   private httpClient = inject(HttpClient);
   private branding = inject(StratosBrandingService);
   private confirmDialog = inject(ConfirmationDialogService);
+  private isDarkMode$ = toObservable(this.branding.isDarkMode);
 
   ngOnInit(): void {
     // Listen for window resize and resize the editor when this happens
@@ -301,7 +302,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
     });
 
     // Watch for theme changes - set light/dark theme in the monaco editor as the Stratos theme changes
-    this.themeSub = toObservable(this.branding.isDarkMode).subscribe((isDark: boolean) => {
+    this.themeSub = this.isDarkMode$.subscribe((isDark: boolean) => {
       const monaco = (window as any).monaco;
       const monacoTheme = isDark ? 'vs-dark' : 'vs';
       monaco.editor.setTheme(monacoTheme);

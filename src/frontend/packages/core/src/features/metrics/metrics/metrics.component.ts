@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { MetricsAPIAction, MetricsAPITargets, MetricsStratosAction, AppState } from '@stratosui/store';
 import { Observable } from 'rxjs';
-import { filter, first, map } from 'rxjs/operators';
+import { take, filter, map } from 'rxjs/operators';
 
 import { getIdFromRoute } from '../../../core/utils.service';
 import { CardStatusComponent } from '../../../shared/components/cards/card-status/card-status.component';
@@ -88,7 +88,7 @@ export class MetricsComponent {
     // Breadcrumbs
     this.breadcrumbs$ = this.metricsEndpoint$.pipe(
       map(() => ([{ breadcrumbs: [{ value: 'Endpoints', routerLink: `/endpoints` }] }])),
-      first()
+      take(1)
     );
 
     // Job details obtained from the Prometheus server

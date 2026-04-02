@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { BaseChartDirective } from 'ng2-charts';
 
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { distinctUntilChanged, filter, first, map, pairwise, publishReplay, refCount, switchMap } from 'rxjs/operators';
+import { take, distinctUntilChanged, filter, map, pairwise, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import {
   TailwindSnackBarService,
@@ -59,15 +59,13 @@ import {
   DetachAppAutoscalerPolicyAction,
   GetAppAutoscalerAppMetricAction,
   GetAppAutoscalerPolicyAction,
-  GetAppAutoscalerScalingHistoryAction,
-} from '../../store/app-autoscaler.actions';
+  GetAppAutoscalerScalingHistoryAction } from '../../store/app-autoscaler.actions';
 import {
   AppAutoscaleMetricChart,
   AppAutoscalerEvent,
   AppAutoscalerMetricData,
   AppAutoscalerPolicyLocal,
-  AppScalingTrigger,
-} from '../../store/app-autoscaler.types';
+  AppScalingTrigger } from '../../store/app-autoscaler.types';
 import { appAutoscalerAppMetricEntityType, autoscalerEntityFactory } from '../../store/autoscaler-entity-factory';
 import { CardAutoscalerDefaultComponent } from '../../shared/card-autoscaler-default/card-autoscaler-default.component';
 
@@ -236,7 +234,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     );
     this.appAutoscalerPolicy$ = this.appAutoscalerPolicyService.entityObs$.pipe(
       filter(({ entityRequestInfo }) => entityRequestInfo && !entityRequestInfo.fetching),
-      map(({ entity, }) => entity ? entity.entity : null),
+      map(({ entity }) => entity ? entity.entity : null),
       publishReplay(1),
       refCount()
     );
@@ -259,8 +257,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
             || entity.scaling_rules_map[name]?.lower?.[0]?.unit;
           return {
             name,
-            unit,
-          };
+            unit };
         });
       }),
     );
@@ -279,8 +276,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
         this.scalingHistoryAction.paginationKey,
         this.scalingHistoryAction,
         true
-      ),
-    }, true);
+      ) }, true);
     this.appAutoscalerScalingHistory$ = this.appAutoscalerScalingHistoryService.entities$.pipe(
       map(entities => entities.map(entity => entity.entity)),
       publishReplay(1),
@@ -324,7 +320,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
 
   loadLatestMetricsUponPolicy() {
     this.appAutoscalerPolicySafe$.pipe(
-      first(),
+      take(1),
     ).subscribe(appAutoscalerPolicy => {
       // Null safety: ensure policy exists before processing
       if (!appAutoscalerPolicy) {
@@ -406,7 +402,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     );
     this.confirmDialog.open(confirmation, () => {
       this.detachPolicy().pipe(
-        first(),
+        take(1),
       ).subscribe(actionState => {
         if (actionState.error) {
           this.appAutoscalerPolicySnackBarRef =

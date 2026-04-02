@@ -5,22 +5,20 @@ import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { EndpointOnlyAppState, RouterNav, selectDashboardState, selectSessionData, stratosEntityCatalog, endpointStatusSelector } from '@stratosui/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { delay, filter, first, map, switchMap, tap } from 'rxjs/operators';
+import { take, delay, filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
 import {
   getActionsFromExtensions,
   StratosActionMetadata,
-  StratosActionType,
-} from '../../../core/extension/extension-service';
+  StratosActionType } from '../../../core/extension/extension-service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { EndpointListHelper } from '../../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import {
-  EndpointsListConfigService,
-} from '../../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
+  EndpointsListConfigService } from '../../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
 import { ListComponent } from '../../../shared/components/list/list.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
@@ -37,8 +35,7 @@ import { EndpointRegisterModalComponent } from '../endpoint-register-modal/endpo
   styleUrls: ['./endpoints-page.component.scss'],
   providers: [{
     provide: ListConfig,
-    useClass: EndpointsListConfigService,
-  }, EndpointListHelper],
+    useClass: EndpointsListConfigService }, EndpointListHelper],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
@@ -100,7 +97,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
           }));
         }
       }),
-      first()
+      take(1)
     ).subscribe({
       error: (err) => console.error('Error checking persistence features:', err)
     });
@@ -121,7 +118,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     // Defensive: Add catchError to handle session data access issues
     this.canBackupRestore$ = this.store.select(selectSessionData()).pipe(
       filter(sessionData => !!sessionData),
-      first(),
+      take(1),
       map(sessionData => sessionData?.plugins?.backup || false),
       switchMap(enabled => enabled ? currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT) : of(false))
     );
@@ -225,7 +222,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     this.subs.push(
       this.store.select(selectDashboardState).pipe(
         filter(dashboard => !!dashboard),
-        first()
+        take(1)
       ).subscribe({
         next: (dashboard) => {
           if (dashboard.pollingEnabled) {

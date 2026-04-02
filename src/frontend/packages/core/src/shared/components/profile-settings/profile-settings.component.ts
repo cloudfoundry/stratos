@@ -4,7 +4,7 @@ import { CustomSlideToggleComponent } from '../custom-slide-toggle/custom-slide-
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
-import { filter, first, map } from 'rxjs/operators';
+import { take, filter, map } from 'rxjs/operators';
 
 import {
   AppState,
@@ -14,8 +14,7 @@ import {
   selectSessionData,
   SetGravatarEnabledAction,
   SetPollingEnabledAction,
-  SetSessionTimeoutAction,
-} from '@stratosui/store';
+  SetSessionTimeoutAction } from '@stratosui/store';
 import { StratosBrandingService, ThemeMode } from '@stratosui/theme';
 import { BytesToHumanSize } from '../../../core/byte-formatters.pipe';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
@@ -62,8 +61,7 @@ export class ProfileSettingsComponent {
     [ProfileSettingsTypes.SESSION_TIMEOUT]: true,
     [ProfileSettingsTypes.POLLING]: true,
     [ProfileSettingsTypes.THEME]: true,
-    [ProfileSettingsTypes.STORAGE]: true,
-  };
+    [ProfileSettingsTypes.STORAGE]: true };
 
   hasMultipleThemes = true;
 
@@ -137,7 +135,7 @@ export class ProfileSettingsComponent {
   }
 
   clearLocalStorage() {
-    this.sessionData$.pipe(first()).subscribe(sessionData => {
+    this.sessionData$.pipe(take(1)).subscribe(sessionData => {
       if (sessionData && sessionData.user) {
         LocalStorageService.clearLocalStorage(sessionData, this.confirmationService);
       }
@@ -151,7 +149,7 @@ export class ProfileSettingsComponent {
   }
 
   resetListPreferences() {
-    this.sessionData$.pipe(first()).subscribe(sessionData => {
+    this.sessionData$.pipe(take(1)).subscribe(sessionData => {
       if (sessionData?.user) {
         this.confirmAndReset('Reset list and pagination preferences?', () => {
           LocalStorageService.clearSections(sessionData, [
@@ -164,7 +162,7 @@ export class ProfileSettingsComponent {
   }
 
   resetDashboard() {
-    this.sessionData$.pipe(first()).subscribe(sessionData => {
+    this.sessionData$.pipe(take(1)).subscribe(sessionData => {
       if (sessionData?.user) {
         this.confirmAndReset('Reset dashboard preferences (sidebar, home layout)?', () => {
           LocalStorageService.clearSections(sessionData, [

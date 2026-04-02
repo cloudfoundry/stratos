@@ -4,7 +4,7 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { NEVER, Observable, Subject } from 'rxjs';
 import websocketConnect, { normalClosureMessage } from 'rxjs-websockets';
-import { catchError, first, map, switchMap, tap } from 'rxjs/operators';
+import { take, catchError, map, switchMap, tap } from 'rxjs/operators';
 import { CustomTooltipDirective, PageHeaderComponent, IHeaderBreadcrumb } from '@stratosui/core';
 import { SshViewerComponent } from '../../../../../core/src/shared/components/ssh-viewer/ssh-viewer.component';
 import { CFAppState } from '@stratosui/cloud-foundry';
@@ -100,7 +100,7 @@ export class SshApplicationComponent implements OnInit {
 
       this.breadcrumbs$ = this.applicationService.waitForAppEntity$.pipe(
         map(app => this.getBreadcrumbs(app.entity.entity)),
-        first()
+        take(1)
       );
     }
   }

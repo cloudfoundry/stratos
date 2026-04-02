@@ -6,7 +6,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { getPreviousRoutingState, IRouterNavPayload, RouterNav, AppState } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
-import { catchError, first, map, switchMap } from 'rxjs/operators';
+import { take, catchError, defaultIfEmpty, map, switchMap } from 'rxjs/operators';
 
 import { BASE_REDIRECT_QUERY } from '../stepper.types';
 import { SteppersService } from '../steppers.service';
@@ -64,7 +64,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   constructor() {
     const store = this.store;
 
-    const previousRoute$ = store.select(getPreviousRoutingState).pipe(first());
+    const previousRoute$ = store.select(getPreviousRoutingState).pipe(take(1));
     this.cancel$ = previousRoute$.pipe(
       map(previousState => {
         // If we have a previous state, and that previous state was not login (i.e. we've come from afresh), go to whatever the default
@@ -125,7 +125,8 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       }
       this.showNextButtonProgress = this.nextButtonProgress;
       this.nextSub = obs$.pipe(
-        first(),
+        take(1),
+        defaultIfEmpty({ success: false, message: 'No response from step', data: {}, redirect: false, redirectPayload: null, ignoreSuccess: false } as StepOnNextResult),
         catchError(err => {
           console.warn('Stepper failed: ', err);
           return observableOf({

@@ -4,7 +4,7 @@ import { TailwindSnackBarService } from '../../../../core/src/shared/services/ta
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
-import { catchError, first, flatMap, map, mergeMap, withLatestFrom } from 'rxjs/operators';
+import { take, catchError, flatMap, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { environment } from '../../../../core/src/environments/environment';
 import {
@@ -13,8 +13,7 @@ import {
   GetAllEndpointsSuccess,
   REGISTER_ENDPOINTS_SUCCESS,
   UNREGISTER_ENDPOINTS_SUCCESS,
-  UnregisterEndpoint,
-} from '../../../../store/src/actions/endpoint.actions';
+  UnregisterEndpoint } from '../../../../store/src/actions/endpoint.actions';
 import { ClearPaginationOfType, ResetPaginationOfType } from '../../../../store/src/actions/pagination.actions';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { isJetstreamError } from '../../../../store/src/jetstream';
@@ -23,16 +22,14 @@ import {
   EndpointModel,
   entityCatalog,
   NormalizedResponse,
-  WrapperRequestActionSuccess,
-} from '../../../../store/src/public-api';
+  WrapperRequestActionSuccess } from '../../../../store/src/public-api';
 import { ApiRequestTypes } from '../../../../store/src/reducers/api-request-reducer/request-helpers';
 import { endpointOfTypeSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { stratosEntityCatalog } from '../../../../store/src/stratos-entity-catalog';
 import {
   EntityRequestAction,
   StartRequestAction,
-  WrapperRequestActionFailed,
-} from '../../../../store/src/types/request.types';
+  WrapperRequestActionFailed } from '../../../../store/src/types/request.types';
 import { helmEntityCatalog } from '../helm-entity-catalog';
 import { HELM_ENDPOINT_TYPE, HELM_HUB_ENDPOINT_TYPE, HELM_REPO_ENDPOINT_TYPE } from '../helm-entity-factory';
 import { Chart } from '../monocular/shared/models/chart';
@@ -48,8 +45,7 @@ import {
   HELM_INSTALL,
   HELM_SYNCHRONISE,
   HelmInstall,
-  HelmSynchronise,
-} from './helm.actions';
+  HelmSynchronise } from './helm.actions';
 import { HelmVersion } from './helm.types';
 
 type MonocularChartsResponse = {
@@ -307,7 +303,7 @@ export class HelmEffects {
   endpointUnregister$ = createEffect(() => this.actions$.pipe(
     ofType<UnregisterEndpoint>(UNREGISTER_ENDPOINTS_SUCCESS),
     flatMap(action => stratosEntityCatalog.endpoint.store.getEntityMonitor(action.guid).entity$.pipe(
-      first(),
+      take(1),
       mergeMap(endpoint => {
         if (endpoint.cnsi_type !== HELM_ENDPOINT_TYPE) {
           return [];
@@ -353,7 +349,7 @@ export class HelmEffects {
     return 'Helm API request error';
   }
 
-  public static createHelmError(err: any): { status: string, message: string, } {
+  public static createHelmError(err: any): { status: string, message: string } {
     let unwrapped = err;
     if (err.error) {
       unwrapped = err.error;

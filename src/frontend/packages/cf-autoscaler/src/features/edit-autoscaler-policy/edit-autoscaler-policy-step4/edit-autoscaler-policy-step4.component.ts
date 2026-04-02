@@ -6,7 +6,7 @@ import { Store } from '@ngrx/store';
 import { format } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { of as observableOf } from 'rxjs';
-import { filter, first, map, pairwise } from 'rxjs/operators';
+import { take, filter, map, pairwise } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 
 import { ApplicationService } from '@stratosui/cloud-foundry';
@@ -16,14 +16,12 @@ import { AutoscalerConstants, PolicyAlert } from '../../../core/autoscaler-helpe
 import {
   dateTimeIsSameOrAfter,
   numberWithFractionOrExceedRange,
-  specificDateRangeOverlapping,
-} from '../../../core/autoscaler-helpers/autoscaler-validation';
+  specificDateRangeOverlapping } from '../../../core/autoscaler-helpers/autoscaler-validation';
 import { CreateAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyAction } from '../../../store/app-autoscaler.actions';
 import {
   AppAutoscalerInvalidPolicyError,
   AppAutoscalerPolicyLocal,
-  AppSpecificDate,
-} from '../../../store/app-autoscaler.types';
+  AppSpecificDate } from '../../../store/app-autoscaler.types';
 import { EditAutoscalerPolicyDirective } from '../edit-autoscaler-policy-base-step';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 import {
@@ -110,8 +108,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
     if (this.validateGlobalSetting()) {
       return observableOf({
         success: false,
-        message: `Could not ${this.createUpdateTest}: ${PolicyAlert.alertInvalidPolicyTriggerScheduleEmpty}`,
-      });
+        message: `Could not ${this.createUpdateTest}: ${PolicyAlert.alertInvalidPolicyTriggerScheduleEmpty}` });
     }
     this.action.policy = this.currentPolicy;
     this.store.dispatch(this.action);
@@ -125,11 +122,11 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
         redirect: !request.error,
         message: request.error ? `Could not ${this.createUpdateTest}${request.message ? `: ${request.message}` : ''}` : null
       })),
-      first(),
+      take(1),
     );
   };
 
-  private getStateResult(info: RequestInfoState): { error: boolean, message: string, } {
+  private getStateResult(info: RequestInfoState): { error: boolean, message: string } {
     if (this.isCreate) {
       return {
         error: info.error,
@@ -171,8 +168,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
       instance_max_count: Math.abs(Number(specificDate.instance_max_count)),
       initial_min_instance_count: specificDate.initial_min_instance_count ?? 0,
       start_date_time: specificDate.start_date_time,
-      end_date_time: specificDate.end_date_time,
-    });
+      end_date_time: specificDate.end_date_time });
     this.editSpecificDateForm.controls.instance_min_count.setValidators([Validators.required,
     validateRecurringSpecificMin(this.editSpecificDateForm, this.editMutualValidation)]);
     this.editSpecificDateForm.controls.instance_max_count.setValidators([Validators.required,
@@ -200,7 +196,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
   }
 
   validateSpecificDateInitialMin(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any, } => {
+    return (control: AbstractControl): { [key: string]: any } => {
       const invalid = this.editSpecificDateForm && numberWithFractionOrExceedRange(control.value,
         this.editSpecificDateForm.get('instance_min_count').value, this.editSpecificDateForm.get('instance_max_count').value + 1, false);
       return invalid ? { alertInvalidPolicyInitialMaximumRange: { value: control.value } } : null;
@@ -208,7 +204,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
   }
 
   validateSpecificDateStartDateTime(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any, } => {
+    return (control: AbstractControl): { [key: string]: any } => {
       if (!this.editSpecificDateForm) {
         return null;
       }
@@ -241,7 +237,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
   }
 
   validateSpecificDateEndDateTime(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any, } => {
+    return (control: AbstractControl): { [key: string]: any } => {
       if (!this.editSpecificDateForm) {
         return null;
       }
@@ -281,7 +277,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
 }
 
 export function validateRecurringSpecificMin(editForm: FormGroup<any>, editMutualValidation: { limit: boolean }): ValidatorFn {
-  return (control: AbstractControl): { [key: string]: any, } => {
+  return (control: AbstractControl): { [key: string]: any } => {
     const invalid = editForm &&
       numberWithFractionOrExceedRange(control.value, 1, editForm.get('instance_max_count').value - 1, true);
     const lastValid = editMutualValidation.limit;
@@ -297,7 +293,7 @@ export function validateRecurringSpecificMin(editForm: FormGroup<any>, editMutua
 }
 
 export function validateRecurringSpecificMax(editForm: FormGroup<any>, editMutualValidation: { limit: boolean }): ValidatorFn {
-  return (control: AbstractControl): { [key: string]: any, } => {
+  return (control: AbstractControl): { [key: string]: any } => {
     const invalid = editForm && numberWithFractionOrExceedRange(control.value,
       editForm.get('instance_min_count').value + 1, Number.MAX_VALUE, true);
     const lastValid = editMutualValidation.limit;

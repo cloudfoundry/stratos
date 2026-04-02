@@ -2,7 +2,7 @@
 
 import { Action, Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { take, map } from 'rxjs/operators';
 
 import { BaseEndpointAuth, urlValidationExpression } from '@stratosui/core';
 import {
@@ -338,7 +338,7 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
     },
     entitiesFetchHandler: (store: Store<GeneralEntityAppState>, actions: PaginatedAction[]) => () => {
       combineLatest(actions.map(action => safePopulatePaginationFromParent(store, action))).pipe(
-        first(),
+        take(1),
       ).subscribe(newActions => newActions?.forEach(newAction => {
         if (newAction) {
           store.dispatch(newAction);

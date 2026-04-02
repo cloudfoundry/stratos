@@ -3,7 +3,7 @@ import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { filter, first, map, pairwise, startWith, tap } from 'rxjs/operators';
+import { take, filter, map, pairwise, startWith, tap } from 'rxjs/operators';
 
 import { SnackBarService } from '../../../../core/src/shared/services/snackbar.service';
 import { ResetPaginationOfType } from '../../../../store/src/actions/pagination.actions';
@@ -139,7 +139,7 @@ export class KubernetesAnalysisService {
       pairwise(),
       filter(([oldE, newE]) => oldE.creating && !newE.creating),
       map(([, newE]) => newE),
-      first()
+      take(1)
     );
     obs$.subscribe(() => {
       const type = id.charAt(0).toUpperCase() + id.substring(1);

@@ -9,11 +9,10 @@ import {
   GitMeta,
   GitSCM,
   GitSCMService,
-  GitSCMType,
-} from '@stratosui/git';
+  GitSCMType } from '@stratosui/git';
 import { getUnixTime } from 'date-fns';
 import { Observable } from 'rxjs';
-import { combineLatest, filter, first, map } from 'rxjs/operators';
+import { take, combineLatest, filter, map } from 'rxjs/operators';
 
 import { IListAction } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { getCommitGuid } from '../../../../../../../git/src/store/git-entity-factory';
@@ -23,8 +22,7 @@ import {
   SetAppSourceDetails,
   SetDeployBranch,
   SetDeployCommit,
-  StoreCFSettings,
-} from '../../../../../actions/deploy-applications.actions';
+  StoreCFSettings } from '../../../../../actions/deploy-applications.actions';
 import { CFAppState } from '../../../../../cf-app-state';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 
@@ -60,8 +58,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
         name: this.scm.getLabel(),
         id: this.scm.getType(),
         group: 'gitscm',
-        endpointGuid: this.scm.endpointGuid,
-      }));
+        endpointGuid: this.scm.endpointGuid }));
       // Set branch
       this.store.dispatch(new SetDeployBranch(this.branchName));
       // Set Commit
@@ -73,12 +70,11 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
       }));
     },
     label: 'Deploy',
-    description: ``,
-  };
+    description: `` };
 
   private listActionCompare: IListAction<GitCommit> = {
     action: (compareToCommit) => {
-      this.getCompareURL(compareToCommit.sha).pipe(first()).subscribe(url => window.open(url, '_blank'));
+      this.getCompareURL(compareToCommit.sha).pipe(take(1)).subscribe(url => window.open(url, '_blank'));
     },
     label: 'Compare',
     description: '',
@@ -109,7 +105,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
   private setGuids() {
     this.applicationService.waitForAppEntity$.pipe(
       combineLatest(this.applicationService.appSpace$),
-      first(),
+      take(1),
     ).subscribe(([app, space]) => {
       this.cfGuid = app.entity.entity.cfGuid;
       this.spaceGuid = app.entity.entity.space_guid;
@@ -120,7 +116,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
 
   private setGithubDetails() {
     this.applicationService.applicationStratProject$.pipe(
-      first(),
+      take(1),
     ).subscribe(stratosProject => {
       this.projectName = stratosProject.deploySource.project;
       this.deployedCommitSha = stratosProject.deploySource.commit;
@@ -134,7 +130,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
 
       gitEntityCatalog.branch.store.getEntityService(undefined, undefined, this.scmMeta)
         .waitForEntity$.pipe(
-          first(),
+          take(1),
         ).subscribe(branch => {
           this.branchName = branch.entity.name;
           this.dataSource = new GithubCommitsDataSource(
@@ -148,7 +144,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
 
   private getCompareURL(sha: string): Observable<string> {
     return gitEntityCatalog.repo.store.getRepoInfo.getEntityService(this.scmMeta).waitForEntity$.pipe(
-      first(),
+      take(1),
       map(project => this.scm.getCompareCommitURL(project.entity.html_url, this.deployedCommitSha, sha))
     );
   }
@@ -157,7 +153,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
     const scmType = this.scm.getType();
     gitEntityCatalog.commit.store.getEntityMonitor(getCommitGuid(scmType, this.projectName, this.deployedCommitSha)).entity$.pipe(
       filter(deployedCommit => !!deployedCommit),
-      first(),
+      take(1),
     ).subscribe(deployedCommit => {
       this.deployedCommit = deployedCommit;
       this.deployedTime = getUnixTime(new Date(this.deployedCommit.commit.author.date));

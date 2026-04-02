@@ -1,5 +1,5 @@
 import {Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { first } from 'rxjs/operators';
+import { take,  } from 'rxjs/operators';
 
 import { Chart } from '../shared/models/chart';
 import { ChartsService } from '../shared/services/charts.service';
@@ -30,7 +30,7 @@ export class ChartIndexComponent implements OnInit {
   }
 
   loadCharts(): void {
-    this.chartsService.getCharts().pipe(first()).subscribe(charts => {
+    this.chartsService.getCharts().pipe(take(1)).subscribe(charts => {
       this.loading = false;
       this.charts = charts || [];
       this.totalChartsNumber = charts.length;

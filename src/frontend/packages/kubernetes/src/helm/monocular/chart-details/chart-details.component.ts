@@ -1,7 +1,7 @@
 
 import {Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
-import { finalize, first, switchMap, tap } from 'rxjs/operators';
+import { take, finalize, switchMap, tap } from 'rxjs/operators';
 
 import { EntitySummaryTitleComponent } from '@stratosui/core';
 
@@ -61,7 +61,7 @@ export class ChartDetailsComponent implements OnInit {
 
       if (!!chartName) {
         this.chartsService.getChart(repo, chartName).pipe(
-          first(),
+          take(1),
           switchMap(chart => {
             clearTimeout(this.loadingDelay);
             this.chart = chart;
@@ -70,7 +70,7 @@ export class ChartDetailsComponent implements OnInit {
               this.chartSubTitle = 'Artifact Hub - ' + this.chartSubTitle;
             }
             const version = params.version || this.chart.relationships.latestChartVersion.data.version;
-            return this.chartsService.getVersion(repo, chartName, version).pipe(first());
+            return this.chartsService.getVersion(repo, chartName, version).pipe(take(1));
           }),
           tap(chartVersion => {
             this.currentVersion = chartVersion;

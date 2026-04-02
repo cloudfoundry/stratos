@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { AbstractControl, ReactiveFormsModule, FormControl, FormGroup, Validators, FormBuilder } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { catchError, filter, first, map, mergeMap, pairwise, switchMap, tap } from 'rxjs/operators';
+import { take, catchError, filter, map, mergeMap, pairwise, switchMap, tap } from 'rxjs/operators';
 
 import { CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, ErrorStateMatcher, ShowOnDirtyErrorStateMatcher, StepOnNextFunction } from '@stratosui/core';
 import { RouterNav, ActionState, getDefaultRequestState, RequestInfoState, APIResource } from '@stratosui/store';
@@ -45,8 +45,7 @@ export class CreateApplicationStep3Component implements OnInit {
   constructor() {
     this.setDomainHost = new FormGroup({
       domain: new FormControl('', {validators: [Validators.required], nonNullable: true}),
-      host: new FormControl('', {validators: [Validators.required, Validators.maxLength(63)], nonNullable: true}),
-    });
+      host: new FormControl('', {validators: [Validators.required, Validators.maxLength(63)], nonNullable: true}) });
     // Disable host control initially - will be enabled when domain is selected
     this.setDomainHost.controls.host.disable();
   }
@@ -155,7 +154,7 @@ export class CreateApplicationStep3Component implements OnInit {
       pairwise(),
       filter(([oldS, newS]) => oldS.creating && !newS.creating),
       map(([, newS]) => newS),
-      first(),
+      take(1),
       tap(state => {
         if (state.error) {
           const fullErrorString = errorString + (state.message ? `: ${state.message}` : '');

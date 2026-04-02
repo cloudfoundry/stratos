@@ -2,7 +2,7 @@
 import { Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CardWrapperComponent } from '@stratosui/core';
 import { of } from 'rxjs';
-import { catchError, first } from 'rxjs/operators';
+import { take, catchError,  } from 'rxjs/operators';
 
 import { Chart } from '../../shared/models/chart';
 import { ChartVersion } from '../../shared/models/chart-version';
@@ -82,7 +82,7 @@ export class ChartDetailsInfoComponent implements OnInit {
 
   private getSchema(currentVersion: ChartVersion, chart: Chart) {
     this.chartsService.getChartSchema(currentVersion, chart).pipe(
-      first(),
+      take(1),
       catchError(() => of(null))
     ).subscribe(schema => {
       this.schema = schema;

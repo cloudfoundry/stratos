@@ -1,7 +1,7 @@
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
-import { filter, first, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
+import { take, filter, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 
 import {
   CurrentUserPermissionsService,
@@ -39,8 +39,7 @@ import {
   OrgUserRoleNames,
   SpaceUserRoleNames,
   UserRoleInOrg,
-  UserRoleInSpace,
-} from '../../store/types/cf-user.types';
+  UserRoleInSpace } from '../../store/types/cf-user.types';
 import { UserRoleLabels } from '../../store/types/users-roles.types';
 import { CfCurrentUserPermissions, CfPermissionTypes } from '../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfCell, ActiveRouteCfOrgSpace } from './cf-page.types';
@@ -217,15 +216,13 @@ export function getActiveRouteCfOrgSpace(activatedRoute: ActivatedRoute) {
   return ({
     cfGuid: getIdFromRoute(activatedRoute, 'endpointId'),
     orgGuid: getIdFromRoute(activatedRoute, 'orgId'),
-    spaceGuid: getIdFromRoute(activatedRoute, 'spaceId'),
-  });
+    spaceGuid: getIdFromRoute(activatedRoute, 'spaceId') });
 }
 
 export function getActiveRouteCfCell(activatedRoute: ActivatedRoute) {
   return ({
     cfGuid: getIdFromRoute(activatedRoute, 'endpointId'),
-    cellId: getIdFromRoute(activatedRoute, 'cellId'),
-  });
+    cellId: getIdFromRoute(activatedRoute, 'cellId') });
 }
 
 export const getActiveRouteCfOrgSpaceProvider = {
@@ -262,7 +259,7 @@ export function goToAppWall(store: Store<CFAppState>, cfGuid: string, orgGuid?: 
       const items = pathGet('clientPagination.filter.items', state);
       return items ? items.cf === cfGuid && items.org === orgGuid && items.space === spaceGuid : false;
     }),
-    first(),
+    take(1),
     tap(() => {
       store.dispatch(new RouterNav({ path: ['applications'] }));
     })
@@ -292,7 +289,7 @@ export function canUpdateOrgRoles(
 export function waitForCFPermissions(store: Store<AppState>, cfGuid: string): Observable<ICfRolesState> {
   return store.select<ICfRolesState>(getCurrentUserCFEndpointRolesState(cfGuid)).pipe(
     filter(cf => cf && cf.state.initialised),
-    first(),
+    take(1),
     publishReplay(1),
     refCount(),
   );
@@ -348,7 +345,7 @@ export function fetchTotalResults(
   ).pipe(
     map(([, pagination]) => pagination),
     filter(pagination => !!pagination && !!pagination.pageRequests && !!pagination.pageRequests[1] && !pagination.pageRequests[1].busy),
-    first(),
+    take(1),
     map(pagination => pagination.totalResults)
   );
 }

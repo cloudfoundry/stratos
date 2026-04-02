@@ -16,9 +16,9 @@ import {
 } from 'rxjs';
 import {
   catchError,
+  defaultIfEmpty,
   distinctUntilChanged,
   filter,
-  first,
   map,
   pairwise,
   publishReplay,
@@ -146,7 +146,8 @@ export class DeployApplicationStep2Component
       gitEntityCatalog.repo.store.getRepoInfo.getEntityService({
         projectName: this.repository,
         scm: this.scm,
-      }).waitForEntity$.pipe(first()).subscribe(repo => {
+      }).waitForEntity$.pipe(take(1), defaultIfEmpty(null)).subscribe(repo => {
+        if (!repo) { return; }
         this.store.dispatch(new SaveAppDetails({
           projectName: this.repository,
           branch: this.repositoryBranch,
@@ -181,7 +182,7 @@ export class DeployApplicationStep2Component
     this.sourceType$ = combineLatest(
       this.appDeploySourceTypes.getAutoSelectedType(this.route),
       this.store.select(selectSourceType),
-      this.appDeploySourceTypes.types$.pipe(first(), map(st => st[this.INITIAL_SOURCE_TYPE]))
+      this.appDeploySourceTypes.types$.pipe(take(1), map(st => st[this.INITIAL_SOURCE_TYPE]))
     ).pipe(
       map(([sourceFromParam, sourceFromStore, sourceDefault]) => sourceFromParam || sourceFromStore || sourceDefault),
       filter(sourceType => !!sourceType),
@@ -199,7 +200,7 @@ export class DeployApplicationStep2Component
 
 
     const setInitialSourceType$ = this.sourceType$.pipe(
-      first(),
+      take(1),
       tap(sourceType => {
         this.setSourceType(sourceType);
         this.sourceType = sourceType;
@@ -309,7 +310,7 @@ export class DeployApplicationStep2Component
               this.commitSubscription.unsubscribe();
             }
             this.commitSubscription = commitEntityService.waitForEntity$.pipe(
-              first(),
+              take(1),
               map(p => p.entity),
               tap(p => this.commitInfo = p),
             ).subscribe();

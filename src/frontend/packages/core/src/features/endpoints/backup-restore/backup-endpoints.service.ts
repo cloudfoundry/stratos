@@ -3,7 +3,7 @@ import { Injectable, signal, Injector, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { GeneralEntityAppState, BrowserStandardEncoder, EndpointModel, entityCatalog } from '@stratosui/store';
 import { Observable } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { take, map } from 'rxjs/operators';
 import { toObservable } from '@angular/core/rxjs-interop';
 
 import {
@@ -140,11 +140,11 @@ export class BackupEndpointsService {
     // return this.getSessionData().pipe(
     //   switchMap(ses => this.http.post(url, this.createBodyToSend(ses), { params })),
     //   map(res => new Blob([JSON.stringify(res)])),
-    //   first(),
+    //   take(1),
     // );
     return this.http.post(url, this.createBodyToSend(), { params }).pipe(
       map((res: any) => new Blob([JSON.stringify(res)])),
-      first(),
+      take(1),
     );
   }
 
@@ -177,7 +177,7 @@ export class BackupEndpointsService {
   //   return this.store.select(s => s.auth).pipe(
   //     filter(auth => !!(auth && auth.sessionData)),
   //     map((auth: AuthState) => auth.sessionData),
-  //     first()
+  //     take(1)
   //   );
   // }
 

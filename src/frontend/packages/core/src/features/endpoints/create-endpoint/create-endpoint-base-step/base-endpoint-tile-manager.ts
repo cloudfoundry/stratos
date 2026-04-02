@@ -1,12 +1,11 @@
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
-import { filter, first, map, switchMap } from 'rxjs/operators';
+import { take, filter, map, switchMap } from 'rxjs/operators';
 import {
   GeneralEntityAppState,
   IStratosEndpointDefinition,
   StratosCatalogEndpointEntity,
-  stratosEntityCatalog,
-} from '@stratosui/store';
+  stratosEntityCatalog } from '@stratosui/store';
 
 import { TileConfigManager } from '../../../../shared/components/tile/tile-selector.helpers';
 import { ITileConfig, ITileData } from '../../../../shared/components/tile/tile-selector.types';
@@ -92,7 +91,7 @@ export abstract class BaseEndpointTileManager {
     this.tileSelectorConfig$ = types$.pipe(
       // Add additional metadata to each endpoint type
       switchMap(endpointTypes => this.expandEndpointTypes(endpointTypes)),
-      first(),
+      take(1),
       map(expandedEndpointTypes => {
         // For each endpoint type...
         return expandedEndpointTypes
@@ -114,8 +113,7 @@ export abstract class BaseEndpointTileManager {
               {
                 type: endpoint.type,
                 parentType: endpoint.parentType,
-                component: endpoint.registrationComponent,
-              }
+                component: endpoint.registrationComponent }
             );
           });
       }),

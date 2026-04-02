@@ -2,14 +2,13 @@ import { CommonModule } from '@angular/common';
 import { AfterContentInit, Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
-import { distinctUntilChanged, filter, first, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
+import { take, distinctUntilChanged, filter, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import {
   AppActionMonitorComponent,
   AppMonitorComponentTypes,
   ITableColumn,
-  ITableCellRequestMonitorIconConfig,
-} from '@stratosui/core';
+  ITableCellRequestMonitorIconConfig } from '@stratosui/core';
 import { entityCatalog, APIResource } from '@stratosui/store';
 import { UsersRolesClearUpdateState } from '../../../../../actions/users-roles.actions';
 import { ChangeCfUserRole } from '../../../../../actions/users.actions';
@@ -18,11 +17,9 @@ import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../../../../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import {
-  TableCellConfirmOrgSpaceComponent,
-} from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-org-space/table-cell-confirm-org-space.component';
+  TableCellConfirmOrgSpaceComponent } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-org-space/table-cell-confirm-org-space.component';
 import {
-  TableCellConfirmRoleAddRemComponent,
-} from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
+  TableCellConfirmRoleAddRemComponent } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
 import { selectCfUsersRoles, selectCfUsersRolesChangedRoles } from '../../../../../store/selectors/cf-users-roles.selector';
 import { CfUser, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../store/types/cf-user.types';
@@ -85,9 +82,8 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
 
   private updateChanges = new Subject();
   private nameCache: {
-    user: { [guid: string]: string, },
-    role: { [guid: string]: string, },
-  } = {
+    user: { [guid: string]: string },
+    role: { [guid: string]: string } } = {
       user: {},
       role: {}
     };
@@ -117,7 +113,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
         const orgNames = changes.map((c) => c.orgName);
         return Array.from(new Set(orgNames)).map((orgName) => `'${orgName}'`).join(', ');
       }),
-      first()
+      take(1)
     );
   }
 
@@ -126,7 +122,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
     this.updateChanges.next(new Date().getTime());
     // Ensure that any entity we're going to show the state for is clear of any previous or unrelated errors
     this.store.select(selectCfUsersRoles).pipe(
-      first(),
+      take(1),
     ).subscribe(usersRoles => this.store.dispatch(new UsersRolesClearUpdateState(usersRoles.changedRoles)));
   };
 

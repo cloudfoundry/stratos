@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
-import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
+import { take, filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { endpointHasMetricsByAvailable } from '../../../../core/src/features/endpoints/endpoint-helpers';
 import {
@@ -55,7 +55,7 @@ export class CfCellHelper {
       )
     }).entities$.pipe(
       filter(entities => !!entities && !!entities.length),
-      first(),
+      take(1),
       map(entities => entities.find(entity => entity.data && entity.data.result.length) ? action : null),
       publishReplay(1),
       refCount()

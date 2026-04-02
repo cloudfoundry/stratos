@@ -4,7 +4,7 @@ import { CustomTooltipDirective, TailwindSnackBarService } from '@stratosui/core
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
-import { filter, first, map, pairwise, startWith, tap } from 'rxjs/operators';
+import { take, filter, map, pairwise, startWith, tap } from 'rxjs/operators';
 
 import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
@@ -86,7 +86,7 @@ export class CloudFoundryOrganizationSummaryComponent {
   deleteOrgWarn() {
     this.cfOrgService.org$.pipe(
       map(org => org.entity.entity.name),
-      first()
+      take(1)
     ).subscribe(name => {
       const confirmation = new ConfirmationDialogConfig(
         'Delete Organization',

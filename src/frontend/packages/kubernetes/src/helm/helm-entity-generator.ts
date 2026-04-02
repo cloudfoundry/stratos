@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
-import { catchError, filter, first, map } from 'rxjs/operators';
+import { take, catchError, filter, map } from 'rxjs/operators';
 
 import { urlValidationExpression } from '../../../core/src/core/utils.service';
 import { IListAction } from '../../../core/src/shared/components/list/list.component.types';
@@ -8,8 +8,7 @@ import { AppState } from '../../../store/src/app-state';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
-  StratosCatalogEntity,
-} from '../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
+  StratosCatalogEntity } from '../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { StratosEndpointExtensionDefinition } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { EndpointModel } from '../../../store/src/public-api';
 import { stratosEntityCatalog } from '../../../store/src/stratos-entity-catalog';
@@ -22,8 +21,7 @@ import {
   helmEntityFactory,
   helmVersionsEntityType,
   monocularChartsEntityType,
-  monocularChartVersionsEntityType,
-} from './helm-entity-factory';
+  monocularChartVersionsEntityType } from './helm-entity-factory';
 import { HelmHubRegistrationComponent } from './helm-hub-registration/helm-hub-registration.component';
 import {
   HelmChartActionBuilders,
@@ -31,8 +29,7 @@ import {
   HelmChartVersionsActionBuilders,
   helmChartVersionsActionBuilders,
   HelmVersionActionBuilders,
-  helmVersionActionBuilders,
-} from './store/helm.action-builders';
+  helmVersionActionBuilders } from './store/helm.action-builders';
 import { HelmVersion, MonocularChart, MonocularVersion } from './store/helm.types';
 
 
@@ -62,7 +59,7 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
             action: (item: EndpointModel) => {
               helmEntityCatalog.chart.api.synchronise(item).pipe(
                 catchError((): Observable<null> => of(null)), // Be super safe to ensure we pass the first filter
-                first()
+                take(1)
               ).subscribe((res: unknown) => {
                 if (res != null) {
                   stratosEntityCatalog.endpoint.api.getAll();
@@ -94,8 +91,7 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
           map(auth => auth.sessionData['plugin-config'].artifactHubDisabled === 'true' ? 0 : 1),
         )
       },
-    ],
-  };
+    ] };
 
   return [
     generateEndpointEntity(endpointDefinition),

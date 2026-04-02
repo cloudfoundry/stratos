@@ -2,7 +2,7 @@
 import { Component, ComponentRef, ViewChild, ViewContainerRef, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { first, map, tap } from 'rxjs/operators';
+import { take, map, tap } from 'rxjs/operators';
 
 import { StepOnNextFunction } from '@stratosui/core';
 import { GitCommit } from '@stratosui/git';
@@ -46,7 +46,7 @@ export class DeployApplicationStep21Component {
 
   onNext: StepOnNextFunction = () => {
     return this.selectedCommit$.pipe(
-      first(),
+      take(1),
       tap(commit => {
         this.store.dispatch(new SetDeployCommit(commit.sha));
       }),

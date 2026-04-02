@@ -6,7 +6,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { AppState, getPreviousRoutingState } from '@stratosui/store';
 import { Observable } from 'rxjs';
-import { distinctUntilChanged, first, map, share, switchMap, tap } from 'rxjs/operators';
+import { take, distinctUntilChanged, map, share, switchMap, tap } from 'rxjs/operators';
 
 import { GlobalEventService, IGlobalEvent } from '../../../shared/global-events.service';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
@@ -96,14 +96,14 @@ export class EventsPageComponent implements OnInit {
       }),
       share()
     );
-    this.back$ = this.store.select(getPreviousRoutingState).pipe(first()).pipe(
+    this.back$ = this.store.select(getPreviousRoutingState).pipe(take(1)).pipe(
       map((previousState: any) => previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : '/home'),
       map((returnUrl: string) => {
         // Override return url if we've come from the error page
         const overrideReturnUrl = this.activatedRoute.snapshot.queryParams[eventReturnUrlParam];
         return overrideReturnUrl || returnUrl;
       }),
-      first(),
+      take(1),
     );
   }
   updateReadState(event: IGlobalEvent, read: boolean) {
@@ -120,7 +120,7 @@ export class EventsPageComponent implements OnInit {
           [eventReturnUrlParam]: overrideReturnUrl || urlBack
         } : {};
       }),
-      first(),
+      take(1),
     );
   }
 }

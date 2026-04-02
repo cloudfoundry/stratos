@@ -16,7 +16,6 @@ import {
   combineLatest,
   distinctUntilChanged,
   filter,
-  first,
   map,
   publishReplay,
   refCount,
@@ -374,7 +373,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       }),
       filter(s => !s.creating && !s.fetching),
       combineLatest(this.store.select(selectCreateServiceInstance)),
-      first(),
+      take(1),
       switchMap(([request, state]) => {
 
         const handleEditServiceResult = this.handleUpdateServiceResult(request, state);

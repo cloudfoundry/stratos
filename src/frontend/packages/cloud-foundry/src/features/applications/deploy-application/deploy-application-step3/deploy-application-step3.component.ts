@@ -5,9 +5,8 @@ import {
   combineLatest as observableCombineLatest,
   Observable,
   of as observableOf,
-  Subscription,
-} from 'rxjs';
-import { filter, first, map, startWith } from 'rxjs/operators';
+  Subscription } from 'rxjs';
+import { take, filter, map, startWith } from 'rxjs/operators';
 
 import { safeUnsubscribe, LogViewerComponent, StepOnNextFunction, SnackBarService } from '@stratosui/core';
 import { RouterNav } from '@stratosui/store';
@@ -73,7 +72,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
 
     const appGuid$ = this.deployer.applicationGuid$.asObservable().pipe(
       filter((appGuid) => appGuid !== null),
-      first(),
+      take(1),
     );
 
     this.valid$ = appGuid$.pipe(
@@ -85,8 +84,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
 
       // Update the root app wall list
       cfEntityCatalog.application.api.getMultiple(undefined, CfAppsDataSource.paginationKey, {
-        includeRelations: CfAppsDataSource.includeRelations,
-      });
+        includeRelations: CfAppsDataSource.includeRelations });
 
       // Pre-fetch the app env vars
       cfEntityCatalog.appEnvVar.api.getMultiple(this.appGuid, this.deployer.cfGuid);
@@ -128,7 +126,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
   private setupCompletionNotification() {
     this.deployer.status$.asObservable().pipe(
       filter(status => !status.deploying),
-      first()
+      take(1)
     ).subscribe(status => {
       if (status.error) {
         this.snackBarService.show(status.errorMsg, 'Dismiss');

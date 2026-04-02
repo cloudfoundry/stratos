@@ -2,7 +2,7 @@ import { AbstractControl, ValidatorFn } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
-import { filter, first, map, tap } from 'rxjs/operators';
+import { take, filter, map, tap } from 'rxjs/operators';
 
 import { StepOnNextResult } from '@stratosui/core';
 import { getPaginationKey, APIResource } from '@stratosui/store';
@@ -34,13 +34,12 @@ export class AddEditSpaceStepBase {
       this.orgGuid,
       this.cfGuid,
       getPaginationKey(organizationEntityType, this.orgGuid), {
-      flatten: true,
-    }
+      flatten: true }
     ).entities$.pipe(
       filter(spaces => !!spaces),
       map(spaces => spaces.map(space => space.entity.name)),
       tap(spaceNames => this.allSpacesInOrg = spaceNames),
-      first(),
+      take(1),
     );
     this.fetchSpacesSubscription = this.allSpacesInOrg$.subscribe();
 
@@ -50,7 +49,7 @@ export class AddEditSpaceStepBase {
       createEntityRelationPaginationKey(organizationEntityType, this.orgGuid)
     ).entities$.pipe(
       filter(o => !!o),
-      first()
+      take(1)
     );
 
     this.hasSpaceQuotas$ = this.quotaDefinitions$.pipe(

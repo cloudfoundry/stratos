@@ -131,7 +131,7 @@ describe('RemoveUserComponent', () => {
   });
 
   // FIXME: This test has async subscription issues in the component constructor
-  // The component subscribes to observables with .first() which can throw EmptyError
+  // The component subscribes to observables with .take(1) which can throw EmptyError
   // asynchronously after the test completes. The root cause is that selectCfUsersRoles
   // store selector completes without emitting when the store state isn't fully initialized.
   // Skipping for now to prevent false positives in the test suite.

@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { firstValueFrom, from as observableFrom, Subject } from 'rxjs';
-import { filter, first, take } from 'rxjs/operators';
+import { filter, take } from 'rxjs/operators';
 import { CoreModule } from '../../../core/core.module';
 import { MDAppModule } from '../../../core/md.module';
 import { LogViewerComponent } from './log-viewer.component';
@@ -127,7 +127,7 @@ describe('LogViewerComponent', () => {
     const highThroughputPromise = firstValueFrom(
       component.logViewer.isHighThroughput$.pipe(
         filter(high => high === true),
-        first()
+        take(1)
       )
     );
 

@@ -1,5 +1,5 @@
 import { Observable, of } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { take, map } from 'rxjs/operators';
 
 import { HttpOptions } from '../../../../core/src/core/core.types';
 import { environment } from '../../../../core/src/environments/environment';
@@ -46,7 +46,7 @@ export abstract class BaseSCM {
           }
         };
       }),
-      first()
+      take(1)
     );
   }
 

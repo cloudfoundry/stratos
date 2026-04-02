@@ -4,7 +4,7 @@ import { CustomTooltipDirective } from '@stratosui/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
-import { filter, first, map, switchMap } from 'rxjs/operators';
+import { take, filter, map, switchMap } from 'rxjs/operators';
 
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
 import { BooleanIndicatorComponent } from '../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
@@ -86,7 +86,7 @@ export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent 
   setupQuotaDefinitionObservable() {
     const quotaGuid$ = this.quotaGuid ? of(this.quotaGuid) : this.space$.pipe(map(space => space.entity.space_quota_definition_guid));
     const entityInfo$ = quotaGuid$.pipe(
-      first(),
+      take(1),
       switchMap(quotaGuid => cfEntityCatalog.spaceQuota.store.getEntityService(quotaGuid, this.cfGuid, {}).entityObs$)
     );
 
@@ -125,8 +125,7 @@ export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent 
         breadcrumbs: [
           { value: endpoint.name, routerLink: `${baseCFUrl}/organizations` },
           { value: org.entity.name, routerLink: `${baseOrgUrl}/space-quota-definitions` },
-        ],
-      },
+        ] },
     ];
 
     if (space) {

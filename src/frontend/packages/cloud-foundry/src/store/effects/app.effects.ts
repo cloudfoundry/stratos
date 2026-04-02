@@ -1,7 +1,7 @@
 import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { first, map } from 'rxjs/operators';
+import { take, defaultIfEmpty, map } from 'rxjs/operators';
 
 import { endpointHasMetrics } from '../../../../core/src/features/endpoints/endpoint-helpers';
 import { EndpointOnlyAppState } from '../../../../store/src/app-state';
@@ -40,7 +40,7 @@ export class AppEffects {
       const updateAction: UpdateExistingApplication = action.apiAction as UpdateExistingApplication;
       if (!!updateAction.existingApplication && updateAction.newApplication.instances > updateAction.existingApplication.instances) {
         // First check that we have a metrics endpoint associated with this cf
-        endpointHasMetrics(updateAction.endpointGuid, this.store).pipe(first()).subscribe(hasMetrics => {
+        endpointHasMetrics(updateAction.endpointGuid, this.store).pipe(take(1), defaultIfEmpty(false)).subscribe(hasMetrics => {
           if (hasMetrics) {
             this.store.dispatch(createAppInstancesMetricAction(updateAction.guid, updateAction.endpointGuid));
           }

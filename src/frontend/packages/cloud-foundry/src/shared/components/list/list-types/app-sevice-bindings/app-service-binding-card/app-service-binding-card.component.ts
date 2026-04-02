@@ -3,11 +3,10 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TailwindDialogService } from '@stratosui/core';
 import { combineLatest as observableCombineLatest, Observable, of } from 'rxjs';
-import { filter, first, map, switchMap } from 'rxjs/operators';
+import { take, filter, map, switchMap } from 'rxjs/operators';
 
 import {
-  CurrentUserPermissionsService,
-} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
+  CurrentUserPermissionsService } from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { AppChip, AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { CardCell, IListRowCell } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { MetaCardComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
@@ -23,8 +22,7 @@ import {
   IService,
   IServiceBinding,
   IServiceInstance,
-  IUserProvidedServiceInstance,
-} from '../../../../../../cf-api-svc.types';
+  IUserProvidedServiceInstance } from '../../../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { serviceBindingEntityType } from '../../../../../../cf-entity-types';
@@ -33,8 +31,7 @@ import { isUserProvidedServiceInstance } from '../../../../../../features/cf/cf.
 import {
   getServiceName,
   getServicePlanName,
-  getServiceSummaryUrl,
-} from '../../../../../../features/service-catalog/services-helper';
+  getServiceSummaryUrl } from '../../../../../../features/service-catalog/services-helper';
 import { AppEnvVarsState } from '../../../../../../store/types/app-metadata.types';
 import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
@@ -44,8 +41,7 @@ import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.compo
 import {
   TableCellServiceBrokerComponent,
   TableCellServiceBrokerComponentConfig,
-  TableCellServiceBrokerComponentMode,
-} from '../../cf-services/table-cell-service-broker/table-cell-service-broker.component';
+  TableCellServiceBrokerComponentMode } from '../../cf-services/table-cell-service-broker/table-cell-service-broker.component';
 
 
 interface EnvVarData {
@@ -99,8 +95,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     mode: TableCellServiceBrokerComponentMode.NAME
   };
   brokerScopeConfig: TableCellServiceBrokerComponentConfig = {
-    mode: TableCellServiceBrokerComponentMode.SCOPE,
-  };
+    mode: TableCellServiceBrokerComponentMode.SCOPE };
 
   constructor() {
     super();
@@ -224,7 +219,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
       this.serviceInstance$,
       this.appService.appEnvVars.entities$)
       .pipe(
-        first(),
+        take(1),
         map(([serviceLabel, serviceInstance, allEnvVars]) => {
           const systemEnvJson = (allEnvVars as APIResource<AppEnvVarsState>[])?.[0]?.entity?.system_env_json;
           const serviceInstanceName = serviceInstance?.entity?.entity?.name;

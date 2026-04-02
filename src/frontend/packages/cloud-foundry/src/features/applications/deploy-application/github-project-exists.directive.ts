@@ -3,7 +3,7 @@ import { AbstractControl, NG_ASYNC_VALIDATORS, Validator } from '@angular/forms'
 import { Store } from '@ngrx/store';
 import { GitSCMService, GitSCMType } from '@stratosui/git';
 import { Observable, of as observableOf } from 'rxjs';
-import { debounceTime, filter, first, map, tap } from 'rxjs/operators';
+import { take, debounceTime, filter, map, tap } from 'rxjs/operators';
 
 import { CFAppState, CheckProjectExists, selectDeployAppState } from '@stratosui/cloud-foundry';
 
@@ -57,7 +57,7 @@ export class GithubProjectExistsDirective implements Validator {
         return observableOf({
           githubProjectDoesNotExist: true,
           githubProjectError: ''
-        }).pipe(first());
+        }).pipe(take(1));
       }
       // We should check for a '/' char
       return this.store.select(selectDeployAppState).pipe(
@@ -76,11 +76,11 @@ export class GithubProjectExistsDirective implements Validator {
             githubProjectDoesNotExist: !createAppState.projectExists.exists,
             githubProjectError: createAppState.projectExists.error ? createAppState.projectExists.data || '' : ''
           }),
-        first()
+        take(1)
       );
     } else {
       this.lastValue = c.value;
-      return observableOf(null).pipe(first());
+      return observableOf(null).pipe(take(1));
     }
   }
 

@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { first } from 'rxjs/operators';
+import { take,  } from 'rxjs/operators';
 
 import { SnackBarReturnComponent } from '../components/snackbar-return/snackbar-return.component';
 import { TailwindSnackBarService, TailwindSnackBarRef } from './tailwind-snackbar.service';
@@ -53,6 +53,6 @@ export class SnackBarService {
 
   private trackSnackBar(snackBar: TailwindSnackBarRef<any>) {
     this.snackBars.push(snackBar);
-    snackBar.afterDismissed().pipe(first()).subscribe(() => this.snackBars.shift());
+    snackBar.afterDismissed().pipe(take(1)).subscribe(() => this.snackBars.shift());
   }
 }

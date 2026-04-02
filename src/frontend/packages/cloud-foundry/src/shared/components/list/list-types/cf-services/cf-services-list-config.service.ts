@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
-import { filter, first, map } from 'rxjs/operators';
+import { take, filter, map } from 'rxjs/operators';
 
 import { IListConfig, IListMultiFilterConfig, ITableColumn, ITableText, ListViewTypes } from '@stratosui/core';
 import { APIResource, connectedEndpointsOfTypesSelector, ListView } from '@stratosui/store';
@@ -16,15 +16,12 @@ import { TableCellServiceActiveComponent } from './table-cell-service-active/tab
 import { TableCellServiceBindableComponent } from './table-cell-service-bindable/table-cell-service-bindable.component';
 import {
   TableCellServiceBrokerComponent,
-  TableCellServiceBrokerComponentMode,
-} from './table-cell-service-broker/table-cell-service-broker.component';
+  TableCellServiceBrokerComponentMode } from './table-cell-service-broker/table-cell-service-broker.component';
 import {
-  TableCellServiceCfBreadcrumbsComponent,
-} from './table-cell-service-cf-breadcrumbs/table-cell-service-cf-breadcrumbs.component';
+  TableCellServiceCfBreadcrumbsComponent } from './table-cell-service-cf-breadcrumbs/table-cell-service-cf-breadcrumbs.component';
 import { TableCellServiceProviderComponent } from './table-cell-service-provider/table-cell-service-provider.component';
 import {
-  TableCellServiceReferencesComponent,
-} from './table-cell-service-references/table-cell-service-references.component';
+  TableCellServiceReferencesComponent } from './table-cell-service-references/table-cell-service-references.component';
 import { TableCellServiceTagsComponent } from './table-cell-service-tags/table-cell-service-tags.component';
 
 @Injectable({
@@ -40,7 +37,7 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
     this.dataSource = new CfServicesDataSource(this.store, activeRouteCfOrgSpace.cfGuid, this);
     this.cf = {
       list$: this.store.select(connectedEndpointsOfTypesSelector(CF_ENDPOINT_TYPE)).pipe(
-        first(),
+        take(1),
         map(endpoints => Object.values(endpoints))
       ),
       loading$: observableOf(false),
@@ -51,7 +48,7 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
     ];
 
     this.init$ = haveMultiConnectedCfs(this.store).pipe(
-      first(),
+      take(1),
       map(multipleConnectedEndpoints => {
         if (!multipleConnectedEndpoints) {
           this.columns = this.columns.filter(column => column.columnId !== CfServicesListConfigService.cfColumnId);
@@ -78,8 +75,7 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
     maxedResults: {
       icon: 'store',
       canIgnoreMaxFirstLine: 'Fetching all services might take a long time',
-      cannotIgnoreMaxFirstLine: 'There are too many services to fetch',
-    }
+      cannotIgnoreMaxFirstLine: 'There are too many services to fetch' }
   };
 
   columns: ITableColumn<APIResource<any>>[] = [{
@@ -99,8 +95,7 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
     columnId: 'description',
     headerCell: () => 'Description',
     cellDefinition: {
-      getValue: (row: APIResource<any>) => row.entity.description,
-    },
+      getValue: (row: APIResource<any>) => row.entity.description },
     cellFlex: '3'
   }, {
     columnId: 'broker',

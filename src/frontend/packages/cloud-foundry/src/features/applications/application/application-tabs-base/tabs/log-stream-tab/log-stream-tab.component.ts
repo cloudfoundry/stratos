@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { format } from 'date-fns';
 import { EMPTY, NEVER, Observable, Subject, of, timer, throwError } from 'rxjs';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
-import { catchError, debounceTime, first, map, share, startWith, switchMap, tap, retry, retryWhen, delayWhen, take } from 'rxjs/operators';
+import { catchError, debounceTime, map, share, startWith, switchMap, tap, retry, retryWhen, delayWhen, take } from 'rxjs/operators';
 
 import { AnsiColorizer, LogViewerComponent } from '@stratosui/core';
 import { CFAppState } from '@stratosui/cloud-foundry';
@@ -188,7 +188,7 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
       );
 
       this.connectionStatus = socket$.pipe(
-        first(),
+        take(1),
         map(() => {
           this.connectionStatusSubject.next(1);
           this.connectionStatusSignal.set(1);

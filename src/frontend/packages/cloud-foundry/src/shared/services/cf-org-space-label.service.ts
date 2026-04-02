@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
-import { filter, first, map } from 'rxjs/operators';
+import { take, filter, map } from 'rxjs/operators';
 
 import {
   APIResource,
@@ -58,7 +58,7 @@ export class CfOrgSpaceLabelService {
       this.multipleConnectedEndpoints$
     ).pipe(
       filter(([cf, org, space]) => !!cf && !!org && !!space),
-      first(),
+      take(1),
       map(([cf, org, space, multipleConnectedEndpoints]) =>
         multipleConnectedEndpoints ? `${cf.name}/${org.entity.name}/${space.entity.name}` : `${org.entity.name}/${space.entity.name}`
       )

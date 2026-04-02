@@ -3,7 +3,7 @@ import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, combineLatest, EMPTY, Observable, of as observableOf, of } from 'rxjs';
-import { catchError, filter, first, map, mergeMap, pairwise, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { take, catchError, filter, map, mergeMap, pairwise, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 import {
   ResetPagination,
@@ -22,8 +22,7 @@ import { CFAppState } from '../../cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import {
-  ManageUsersSetUsernamesHelper,
-} from '../../features/cf/users/manage-users/manage-users-set-usernames/manage-users-set-usernames.component';
+  ManageUsersSetUsernamesHelper } from '../../features/cf/users/manage-users/manage-users-set-usernames/manage-users-set-usernames.component';
 import { CfUserService } from '../../shared/data-services/cf-user.service';
 import { fetchCfUserRole } from '../../user-permissions/cf-user-roles-fetch';
 import { selectCfUsersRoles } from '../selectors/cf-users-roles.selector';
@@ -213,7 +212,7 @@ export class UsersRolesEffects {
     });
     const allObservables = observables.length === 0 ? observableOf([true]) : observableCombineLatest(...observables);
     return allObservables.pipe(
-      first()
+      take(1)
     );
   }
 

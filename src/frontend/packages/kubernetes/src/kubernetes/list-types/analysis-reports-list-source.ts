@@ -4,7 +4,7 @@ import { safeUnsubscribe } from '@stratosui/core';
 import { ListDataSource } from '@stratosui/core';
 import { IListConfig } from '@stratosui/core';
 import { interval, Subscription } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { take, map } from 'rxjs/operators';
 
 import { AppState } from '../../../../store/src/public-api';
 import { isFetchingPage } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
@@ -50,7 +50,7 @@ export class AnalysisReportsDataSource extends ListDataSource<AnalysisReport> {
   }
   private poll(store: Store<AppState>, ngZone: NgZone) {
     kubeEntityCatalog.analysisReport.store.getPaginationMonitor(this.analysisAction.kubeGuid).pagination$.pipe(
-      first(),
+      take(1),
       map(isFetchingPage)
     ).subscribe(isFetchingPageRes => {
       if (!isFetchingPageRes) {

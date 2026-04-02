@@ -2,7 +2,7 @@ import { Injectable, computed, Injector, inject, runInInjectionContext } from '@
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
-import { filter, first, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
+import { filter, map, shareReplay, startWith, switchMap, take } from 'rxjs/operators';
 
 import {
   GetAllEndpoints,
@@ -332,7 +332,7 @@ export class KubernetesEndpointService {
     // Now we emit an empty array when entities are null, allowing the template to render
     return obs.entities$.pipe(
       map(p => p || []),
-      first()
+      take(1)
     );
   }
 }

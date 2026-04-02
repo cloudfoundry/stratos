@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, forwardRef, Input, signal , ChangeDetectionStrategy } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { filter, first } from 'rxjs/operators';
+import { take, filter,  } from 'rxjs/operators';
 
 import { BytesToHumanSize } from '../../../../../../../core/src/core/byte-formatters.pipe';
 import { getEventFiles } from '../../../../../../../core/src/core/browser-helper';
@@ -45,7 +45,7 @@ export class DeployApplicationFsComponent implements ControlValueAccessor {
     const utils = new DeployApplicationFsUtils();
     utils.handleFileInputSelection(files).pipe(
       filter(res => !!res),
-      first()
+      take(1)
     ).subscribe((res) => {
       this.propagateChange(res);
       this.sourceData.set(res);

@@ -31,7 +31,7 @@ describe('KubernetesPodStatusComponent', () => {
       expandedStatus: {}
     } as KubernetesPod;
     // Skip detectChanges — list infrastructure base class subscribes to
-    // uninitialized observables via first() without full data source setup
+    // uninitialized observables via take(1) without full data source setup
   });
 
   it('should create', () => {

@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { take,  } from 'rxjs/operators';
 
 import {
   CurrentUserPermissionsService,
@@ -45,7 +45,7 @@ export class RoutesTabComponent implements OnInit {
 
   ngOnInit() {
     this.appService.orgDomains$.pipe(
-      first()
+      take(1)
     ).subscribe();
   }
 

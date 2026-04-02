@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { AppState } from '@stratosui/store';
 import { combineLatest, Observable } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { take, map } from 'rxjs/operators';
 
 import { HomePageCardLayout } from '../../../../core/src/features/home/home.types';
 import { HomeCardShortcut } from '../../../../store/src/entity-catalog/entity-catalog.types';
@@ -89,7 +89,7 @@ export class KubernetesHomeCardComponent implements OnInit {
     this.nodeCount$ = nodes$.pipe(map(entities => entities.length));
     this.namespaceCount$ = namespaces$.pipe(map(entities => entities.length));
 
-    KubernetesEndpointService.hasKubeTerminalEnabled(this.store).pipe(first()).subscribe(hasKubeTerminal => {
+    KubernetesEndpointService.hasKubeTerminalEnabled(this.store).pipe(take(1)).subscribe(hasKubeTerminal => {
       if (hasKubeTerminal) {
         this.shortcuts.push(
           {
@@ -102,7 +102,7 @@ export class KubernetesHomeCardComponent implements OnInit {
       }
     });
 
-    KubernetesEndpointService.kubeDashboardConfigured(this.store, guid).pipe(first()).subscribe(hasKubeDashboard => {
+    KubernetesEndpointService.kubeDashboardConfigured(this.store, guid).pipe(take(1)).subscribe(hasKubeDashboard => {
       if (hasKubeDashboard) {
         this.shortcuts.push(
           {

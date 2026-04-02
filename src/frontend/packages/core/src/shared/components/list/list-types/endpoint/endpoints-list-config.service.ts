@@ -11,10 +11,9 @@ import {
   EntityMonitorFactory,
   PaginationMonitorFactory,
   stratosEntityCatalog,
-  UserFavoriteManager,
-} from '@stratosui/store';
+  UserFavoriteManager } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, of } from 'rxjs';
-import { debounceTime, filter, first, map } from 'rxjs/operators';
+import { take, debounceTime, filter, map } from 'rxjs/operators';
 import { SessionService } from '../../../../services/session.service';
 import { CurrentUserPermissionsService } from '../../../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../../../core/permissions/stratos-user-permissions.checker';
@@ -27,8 +26,7 @@ import {
   IListMultiFilterConfig,
   IListMultiFilterConfigItem,
   IMultiListAction,
-  ListViewTypes,
-} from '../../list.component.types';
+  ListViewTypes } from '../../list.component.types';
 import { BaseEndpointsDataSource } from './base-endpoints-data-source';
 import { EndpointCardComponent } from './endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from './endpoint-list.helpers';
@@ -136,7 +134,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
       currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT),
       currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ENDPOINT)
     ]).pipe(
-      first(),
+      take(1),
       map(([userEndpointsEnabled, userEndpointsNotDisabled, isAdmin, isEndpointAdmin]) => {
         return (userEndpointsEnabled && (isAdmin || isEndpointAdmin)) || (userEndpointsNotDisabled && isAdmin);
       })

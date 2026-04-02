@@ -12,11 +12,10 @@ import {
   SetClientPageSize,
   SetPage,
   PaginationClientFilter,
-  PaginationEntityState,
-} from '@stratosui/store';
+  PaginationEntityState } from '@stratosui/store';
 import { asyncScheduler, BehaviorSubject, Observable } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
-import { bufferTime, distinctUntilChanged, filter, first, map, observeOn, tap } from 'rxjs/operators';
+import { take, bufferTime, distinctUntilChanged, filter, map, observeOn, tap } from 'rxjs/operators';
 
 import { enterZone, leaveZone } from '../../../../leaveEnterAngularZone';
 import { IListMultiFilterConfig } from '../list.component.types';
@@ -39,7 +38,7 @@ function onPaginationEntityState(
   paginationEntityState$: Observable<PaginationEntityState>,
   func: (paginationEntityState: PaginationEntityState) => void) {
   paginationEntityState$.pipe(
-    first()
+    take(1)
   ).subscribe(func);
 }
 
@@ -153,8 +152,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
         const params = paginationEntityState.params as Record<string, any>;
         if (params['results-per-page'] !== pageSize) {
           this.store.dispatch(new AddParams(this.dataSource, this.dataSource.paginationKey, {
-            ['results-per-page']: pageSize,
-          }, this.dataSource.isLocal));
+            ['results-per-page']: pageSize }, this.dataSource.isLocal));
         }
       }
     });

@@ -15,7 +15,7 @@ import {
   AppState,
 } from '@stratosui/store';
 import { Observable, of } from 'rxjs';
-import { first, map, withLatestFrom } from 'rxjs/operators';
+import { take, map, withLatestFrom } from 'rxjs/operators';
 
 import { eventReturnUrlParam } from '../../event-page/events-page/events-page.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
@@ -78,7 +78,7 @@ export class ErrorPageComponent implements OnInit {
   constructor() {
     const store = this.store;
 
-    this.back$ = store.select(getPreviousRoutingState).pipe(first()).pipe(
+    this.back$ = store.select(getPreviousRoutingState).pipe(take(1)).pipe(
       map((previousState: any) => previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : '/home')
     );
 
@@ -90,7 +90,7 @@ export class ErrorPageComponent implements OnInit {
           [eventReturnUrlParam]: overrideReturnUrl || null
         } : {};
       }),
-      first()
+      take(1)
     );
   }
 }

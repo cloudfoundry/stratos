@@ -1,7 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
-import { combineLatest, filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
+import { take, combineLatest, filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { getIdFromRoute } from '../../../../core/src/core/utils.service';
 import { EntityService } from '../../../../store/src/entity-service';
@@ -12,8 +12,7 @@ import {
   IServiceExtra,
   IServiceInstance,
   IServicePlan,
-  IServicePlanVisibility,
-} from '../../cf-api-svc.types';
+  IServicePlanVisibility } from '../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { serviceBrokerEntityType, serviceInstancesEntityType, servicePlanVisibilityEntityType } from '../../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../entity-relations/entity-relations.types';
@@ -76,7 +75,7 @@ export class ServicesService {
       map(brokers => brokers.filter(b => b.metadata.guid === guid)),
       filter(s => s && s.length === 1),
       map(s => s[0]),
-      first()
+      take(1)
     );
 
   getServiceName = () => this.service$.pipe(
@@ -108,7 +107,7 @@ export class ServicesService {
   );
 
   getServiceTags = () => this.service$.pipe(
-    first(),
+    take(1),
     map(service =>
       service.entity.tags.map(t => ({
         value: t,
@@ -137,7 +136,7 @@ export class ServicesService {
       map(o => (o.length === 0 ? null : o[0]))
     );
     this.isSpaceScoped$ = this.serviceBroker$.pipe(
-      first(),
+      take(1),
       map(o => o ? o.entity.space_guid : null),
       switchMap(spaceGuid => {
         if (!spaceGuid) {
@@ -158,7 +157,7 @@ export class ServicesService {
           );
         }
       }),
-      first()
+      take(1)
     );
     this.serviceInstances$ = this.allServiceInstances$.pipe(
       map(instances => instances.filter(instance => instance.entity.service_guid === this.serviceGuid))

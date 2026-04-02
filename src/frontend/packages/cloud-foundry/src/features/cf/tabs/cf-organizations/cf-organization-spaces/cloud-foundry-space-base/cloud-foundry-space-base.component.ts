@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { first, map, tap } from 'rxjs/operators';
+import { take, map, tap } from 'rxjs/operators';
 
 import {
   getActionsFromExtensions,
@@ -137,7 +137,7 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
     );
     this.name$ = cfSpaceService.space$.pipe(
       map(space => space.entity.entity.name),
-      first()
+      take(1)
     );
 
     this.setUpBreadcrumbs(cfEndpointService, cfOrgService);
@@ -172,7 +172,7 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
         });
         this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.CloudFoundrySpace));
       }),
-      first()
+      take(1)
     ).subscribe();
   }
 
@@ -204,7 +204,7 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
           ]
         }
       ])),
-      first()
+      take(1)
     );
   }
 

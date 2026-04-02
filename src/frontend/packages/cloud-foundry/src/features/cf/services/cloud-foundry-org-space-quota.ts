@@ -1,5 +1,5 @@
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { filter, first, map, switchMap } from 'rxjs/operators';
+import { take, filter, map, switchMap } from 'rxjs/operators';
 
 import { truthyIncludingZero } from '../../../../../core/src/core/utils.service';
 import { determineCardStatus } from '../../../../../core/src/shared/components/cards/card-status/card-status.component';
@@ -50,7 +50,7 @@ export abstract class OrgSpaceQuotaHelper<T = IOrganization | ISpace> {
       this.orgOrSpace$,
       this.createAllAppsObs()
     ).pipe(
-      first(),
+      take(1),
       map(([orgOrSpace, apps]) => this.getOrgOrSpaceCardStatus(orgOrSpace, apps))
     );
   }

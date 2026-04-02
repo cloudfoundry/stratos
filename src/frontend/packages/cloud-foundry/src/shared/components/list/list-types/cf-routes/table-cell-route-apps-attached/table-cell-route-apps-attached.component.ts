@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { take, map } from 'rxjs/operators';
 import { AppChip, AppChipsComponent, TableCellCustom } from '@stratosui/core';
 import { APIResource } from '@stratosui/store';
 import { CfRoute, IApp } from '@stratosui/cloud-foundry';
@@ -36,7 +36,7 @@ export class TableCellRouteAppsAttachedComponent extends TableCellCustom<APIReso
 
   ngOnInit(): void {
     this.boundApps$ = combineLatest([
-      this.config$.asObservable().pipe(first()),
+      this.config$.asObservable().pipe(take(1)),
       this.row$
     ]).pipe(
       map(([config, route]) => {

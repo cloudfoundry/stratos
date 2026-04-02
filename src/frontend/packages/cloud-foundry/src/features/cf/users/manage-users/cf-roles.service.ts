@@ -1,11 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import {
+import { take,
   combineLatest as combineLatestOperators,
   distinctUntilChanged,
   filter,
-  first,
   map,
   publishReplay,
   refCount,
@@ -87,7 +86,7 @@ export class CfRolesService {
     orgGuid: string,
     spaceGuid: string): Observable<{ guid: string, canEdit: boolean, }> {
     return canUpdateOrgSpaceRoles(userPerms, cfGuid, orgGuid, spaceGuid).pipe(
-      first(),
+      take(1),
       map(canEdit => ({ guid, canEdit }))
     );
   }
@@ -173,7 +172,7 @@ export class CfRolesService {
         this.newRoles$,
         this.store.select(selectCfUsersRolesPicked),
       ),
-      first(),
+      take(1),
       map(([existingRoles, newRoles, pickedUsers]) => {
         const changes: CfRoleChange[] = [];
         // For each user, loop through the new roles and compare with any existing. If there's a diff, add it to a changes collection to be

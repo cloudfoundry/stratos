@@ -9,7 +9,6 @@ import {
   delay,
   distinctUntilChanged,
   filter,
-  first,
   map,
   shareReplay,
   switchMap,
@@ -528,7 +527,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     this.marketPlaceMode = true;
     return this.cfOrgSpaceService.cf.list$.pipe(
       filter(p => !!p),
-      first(),
+      take(1),
       tap(e => {
         if (!e || e.length === 0) {
           console.error('initialiseForMarketplaceMode: No Cloud Foundry endpoints available');

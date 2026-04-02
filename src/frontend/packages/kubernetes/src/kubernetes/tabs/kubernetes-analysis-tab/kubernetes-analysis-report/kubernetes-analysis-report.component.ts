@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { IHeaderBreadcrumbLink } from '@stratosui/core';
 import { Observable, of, Subject } from 'rxjs';
-import { catchError, first, map, startWith } from 'rxjs/operators';
+import { take, catchError, map, startWith } from 'rxjs/operators';
 
 import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
 import { KubernetesAnalysisService } from '../../../services/kubernetes.analysis.service';
@@ -89,7 +89,7 @@ export class KubernetesAnalysisReportComponent implements OnInit {
     );
 
     // When the report has loaded, update the name in the breadcrumbs
-    this.report$.pipe(first()).subscribe(report => {
+    this.report$.pipe(take(1)).subscribe(report => {
       this.breadcrumbsSignal.set([
         { value: 'Analysis', routerLink: getParentURL(this.route, 2) },
         { value: report.name },

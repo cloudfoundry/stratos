@@ -91,7 +91,7 @@ describe('UpgradeReleaseComponent', () => {
     fixture = TestBed.createComponent(UpgradeReleaseComponent);
     component = fixture.componentInstance;
     // Note: Not calling detectChanges() because the component's constructor subscribes to
-    // observables that require complex test data setup. The subscription calls first() which
+    // observables that require complex test data setup. The subscription calls take(1) which
     // throws EmptyError in test environment. For a basic creation test, we just verify the
     // component can be instantiated.
   });
