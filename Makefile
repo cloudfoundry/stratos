@@ -212,9 +212,16 @@ endef
 $(call register, clean, backend)
 
 define dev.backend
-	@if [ ! -f $($(_HIDE)BIN_DIR)/jetstream ]; then \
-		echo "Backend not built, building now..."; \
-		$(MAKE) build backend; \
+	@NEED_BUILD=false; \
+	if [ ! -f $($(_HIDE)BIN_DIR)/jetstream ]; then \
+		NEED_BUILD=true; \
+	elif ! file $($(_HIDE)BIN_DIR)/jetstream | grep -qi "$$(uname -s)"; then \
+		echo "Backend binary is not for this platform, rebuilding..."; \
+		NEED_BUILD=true; \
+	fi; \
+	if [ "$$NEED_BUILD" = true ]; then \
+		echo "Building backend for host platform..."; \
+		$(MAKE) build backend PLATFORM=$($(_HIDE)HOST_OS)/$($(_HIDE)HOST_ARCH); \
 	fi
 	cd src/jetstream && CONSOLE_PROXY_TLS_ADDRESS=:$(BACKEND_PORT) ../../$($(_HIDE)BIN_DIR)/jetstream
 endef
