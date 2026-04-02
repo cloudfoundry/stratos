@@ -49,10 +49,16 @@ describe('CFHomeCardComponent', () => {
         provideZonelessChangeDetection(),
         { provide: Store, useValue: mockStore },
         { provide: PaginationMonitorFactory, useValue: mockPmf },
-        { provide: ApplicationDeploySourceTypes, useValue: mockAppDeploySourceTypes },
         { provide: ChangeDetectorRef, useValue: mockCdr },
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA]
+    })
+    .overrideComponent(CFHomeCardComponent, {
+      set: {
+        providers: [
+          { provide: ApplicationDeploySourceTypes, useValue: mockAppDeploySourceTypes },
+        ],
+      },
     })
     .compileComponents();
   });
