@@ -380,7 +380,7 @@ export class KubeEntityCatalog {
       listColumns: [
         {
           header: 'Data Keys',
-          field: (row: KubernetesConfigMap) => `${Object.keys(row.data).length}`
+          field: (row: KubernetesConfigMap) => `${Object.keys(row.data || {}).length}`
         },
       ]
     });
@@ -400,7 +400,7 @@ export class KubeEntityCatalog {
         },
         {
           header: 'Data Keys',
-          field: (row: KubernetesConfigMap) => `${Object.keys(row.data).length}`
+          field: (row: KubernetesConfigMap) => `${Object.keys(row.data || {}).length}`
         },
       ],
     });

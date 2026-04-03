@@ -9,7 +9,7 @@ import {
   ViewChild,
   ViewContainerRef,
   inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { formatDistance } from 'date-fns';
 import { Observable, of } from 'rxjs';
 import { take, filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
@@ -70,7 +70,7 @@ selector: 'app-kubernetes-resource-viewer',
     AsyncPipe,
     DatePipe,
     TitleCasePipe,
-    RouterModule,
+    RouterLink,
     SidepanelPreviewComponent,
     MetadataItemComponent,
     JsonViewerComponent,
