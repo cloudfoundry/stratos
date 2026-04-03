@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, computed, inject, ChangeDetectionStrategy, Injector, runInInjectionContext } from '@angular/core';
+import { Component, Input, OnInit, computed, inject, ChangeDetectionStrategy, ChangeDetectorRef, Injector, runInInjectionContext } from '@angular/core';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
@@ -56,6 +56,7 @@ export class KubernetesHomeCardComponent implements OnInit {
 
   private store = inject(Store<AppState>);
   private injector = inject(Injector);
+  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
     const guid = this.endpoint.guid;
@@ -88,6 +89,7 @@ export class KubernetesHomeCardComponent implements OnInit {
     this.podCount$ = pods$.pipe(map(entities => entities.length));
     this.nodeCount$ = nodes$.pipe(map(entities => entities.length));
     this.namespaceCount$ = namespaces$.pipe(map(entities => entities.length));
+    this.cdr.markForCheck();
 
     KubernetesEndpointService.hasKubeTerminalEnabled(this.store).pipe(take(1)).subscribe(hasKubeTerminal => {
       if (hasKubeTerminal) {
