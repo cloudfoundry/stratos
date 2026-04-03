@@ -1,4 +1,4 @@
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, DatePipe, TitleCasePipe } from '@angular/common';
 import { Portal, TemplatePortal } from '@angular/cdk/portal';
 import {
   AfterViewInit,
@@ -9,12 +9,15 @@ import {
   ViewChild,
   ViewContainerRef,
   inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { formatDistance } from 'date-fns';
 import { Observable, of } from 'rxjs';
 import { take, filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../core/src/core/endpoints.service';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
+import { JsonViewerComponent } from '../../../../core/src/shared/components/json-viewer/json-viewer.component';
+import { MetadataItemComponent } from '../../../../core/src/shared/components/metadata-item/metadata-item.component';
 import { SidepanelPreviewComponent } from '../../../../core/src/shared/components/sidepanel-preview/sidepanel-preview.component';
 import { PreviewableComponent } from '../../../../core/src/shared/previewable-component';
 import { SnackBarService } from '../../../../core/src/shared/services/snackbar.service';
@@ -65,7 +68,12 @@ selector: 'app-kubernetes-resource-viewer',
   standalone: true,
   imports: [
     AsyncPipe,
-    SidepanelPreviewComponent
+    DatePipe,
+    TitleCasePipe,
+    RouterModule,
+    SidepanelPreviewComponent,
+    MetadataItemComponent,
+    JsonViewerComponent,
   ]
 })
 export class KubernetesResourceViewerComponent implements PreviewableComponent, OnDestroy, AfterViewInit {
