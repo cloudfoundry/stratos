@@ -60,15 +60,23 @@ func (c *CertKubeAuth) extractCerts(ec echo.Context) (*KubeCertificate, error) {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(bodyReader)
 	body := buf.String()
+
+	if len(body) == 0 {
+		return nil, errors.New("empty request body: certificate and key are required")
+	}
+
 	firstColon := strings.IndexByte(body, ':')
+	if firstColon < 0 {
+		return nil, fmt.Errorf("invalid certificate data format: expected base64cert:base64key")
+	}
 
 	cert, err := base64.StdEncoding.DecodeString(body[:firstColon])
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to decode certificate: %v", err)
 	}
 	certKey, err := base64.StdEncoding.DecodeString(body[firstColon+1:])
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to decode certificate key: %v", err)
 	}
 
 	kubeCertAuth.Certificate = string(cert)
