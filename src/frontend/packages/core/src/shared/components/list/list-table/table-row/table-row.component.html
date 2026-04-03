@@ -41,6 +41,7 @@
           role="cell">
           <app-table-cell
             [component]="column.cellComponent"
+            [cellDefinition]="column.cellDefinition"
             [func]="column.cellDefinition?.getValue"
             [row]="row"
             [config]="column.cellConfig && (typeof column.cellConfig === 'function' ? column.cellConfig(row) : column.cellConfig)"
