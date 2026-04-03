@@ -1,6 +1,6 @@
-<div class="info__card">
+<div class="flex">
   @if (analyzer.iconUrl) {
-    <div class="info__card-icon"><img [width]="analyzer.iconWidth" [src]="analyzer.iconUrl" /></div>
+    <div class="flex-none w-[140px] mr-2.5 text-center"><img class="max-w-[120px]" [width]="analyzer.iconWidth" [src]="analyzer.iconUrl" /></div>
   }
-  <div class="info__card-text" [innerHTML]="content$ | async" class="markdown-body"></div>
+  <div class="flex-1" [innerHTML]="content$ | async" class="markdown-body"></div>
 </div>

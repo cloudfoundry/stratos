@@ -1,34 +1,34 @@
 @if (containers$ | async; as containers) {
-  <div class="pod-containers">
-    @for (container of containers; track container) {
-      <div class="pod-containers__container">
-        <div class="pod-containers__container__icon">
+  <div class="flex flex-col pl-[54px]">
+    @for (container of containers; track container; let last = $last) {
+      <div class="flex flex-row h-[100px]">
+        <div class="pod-container-icon">
           @if (icon[container.isInit]; as iconDetail) {
             <span [class]="iconDetail.font"
-              [ngClass]="{'container-icon': iconDetail.icon === 'container'}" [matTooltip]="iconDetail.tooltip">
+              [ngClass]="{'pl-1': iconDetail.icon === 'container'}" [matTooltip]="iconDetail.tooltip">
             {{ iconDetail.icon }}</span>
           }
         </div>
-        <div class="pod-containers__container__details">
-          <div class="pod-containers__container__details--header">
-            <app-boolean-indicator [isTrue]="container.containerStatus.ready" type="yes-no" [subtle]="false"
+        <div class="flex flex-col min-w-[75%]" [class.border-b-2]="!last" [class.border-black/10]="!last">
+          <div class="flex flex-row text-[15px] font-medium mt-2.5">
+            <app-boolean-indicator class="w-7" [isTrue]="container.containerStatus.ready" type="yes-no" [subtle]="false"
               [showText]="false">
             </app-boolean-indicator>
             <span>
               {{container.container.name}}
             </span>
           </div>
-          <div class="pod-containers__container__details--content">
-            <div>
-              <span>
+          <div class="text-[13px] ml-7 pb-2.5">
+            <div class="flex flex-row">
+              <span class="min-w-[90px]">
                 Image:
               </span>
               <span>
                 {{container.container.image}}
               </span>
             </div>
-            <div>
-              <span>
+            <div class="flex flex-row">
+              <span class="min-w-[90px]">
                 State:
               </span>
               <span>
@@ -36,8 +36,8 @@
               </span>
             </div>
             @if (!container.isInit) {
-              <div>
-                <span>
+              <div class="flex flex-row">
+                <span class="min-w-[90px]">
                   Probes (L:R):
                 </span>
                 <span>

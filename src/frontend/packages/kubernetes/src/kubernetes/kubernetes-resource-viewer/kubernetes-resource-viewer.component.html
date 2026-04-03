@@ -1,11 +1,11 @@
-<app-sidepanel-preview [header]="headerContent" class="resource-preview" title="{{title}}" [favorite]="favorite">
+<app-sidepanel-preview [header]="headerContent" class="text-sm" title="{{title}}" [favorite]="favorite">
 
   @if (resource$ | async; as resource) {
     <div>
       <div class="resource-preview__side-by-side">
         <app-metadata-item label="API Version">{{ resource.apiVersion }}</app-metadata-item>
         <app-metadata-item label="Kind">{{ resource.kind | titlecase }}</app-metadata-item>
-        <div class="resource-preview__metrics">
+        <div class="flex items-center">
           @if (hasPodMetrics$ | async) {
             <a [routerLink]="podRouterLink$ | async">View Metrics</a>
           }
@@ -16,27 +16,27 @@
         <app-metadata-item label="Age">{{ resource.age }}</app-metadata-item>
       </div>
       @if (resource.labels) {
-        <app-metadata-item class="resource-preview__labels" label="Labels">
+        <app-metadata-item class="table" label="Labels">
           @for (label of resource.labels; track label) {
-            <div class="resource-preview__label">
-              <div class="resource-preview__label-name">{{ label.name }}</div>
-              <div class="resource-preview__label-value">{{ label.value }}</div>
+            <div class="table-row">
+              <div class="table-cell opacity-80 py-0.5 pr-5 pl-0.5">{{ label.name }}</div>
+              <div class="table-cell">{{ label.value }}</div>
             </div>
           }
         </app-metadata-item>
       }
       @if (resource.annotations) {
-        <app-metadata-item class="resource-preview__labels" label="Annotations">
+        <app-metadata-item class="table" label="Annotations">
           @for (label of resource.annotations; track label) {
-            <div class="resource-preview__label">
-              <div class="resource-preview__label-name">{{ label.name }}</div>
-              <div class="resource-preview__label-value">{{ label.value }}</div>
+            <div class="table-row">
+              <div class="table-cell opacity-80 py-0.5 pr-5 pl-0.5">{{ label.name }}</div>
+              <div class="table-cell">{{ label.value }}</div>
             </div>
           }
         </app-metadata-item>
       }
       @if (alerts) {
-        <app-metadata-item class="resource-preview__labels" label="Alerts">
+        <app-metadata-item class="table" label="Alerts">
           <app-resource-alert-view [showHeader]="false" [alerts]="alerts"></app-resource-alert-view>
         </app-metadata-item>
       }
