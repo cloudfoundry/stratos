@@ -11,18 +11,6 @@
       @apply flex justify-start;
     }
   }
-
-  &__label {
-    @apply flex-1 overflow-hidden text-left truncate whitespace-nowrap;
-  }
-
-  &__arrow {
-    @apply m-0 ml-2.5; // 10px = spacing[2.5]
-  }
-
-  &__not-allowed {
-    @apply opacity-50;
-  }
 }
 
 .menu {

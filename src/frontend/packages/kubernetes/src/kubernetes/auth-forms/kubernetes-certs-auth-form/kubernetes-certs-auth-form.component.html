@@ -1,8 +1,8 @@
-<div [formGroup]="formGroup" class="kube-certs-auth">
-  <div formGroupName="authValues" class="kube-certs-auth__form">
+<div [formGroup]="formGroup">
+  <div formGroupName="authValues" class="flex flex-col h-[250px] w-[450px]">
     <app-tab-group>
       <app-tab label="Certificate Files">
-        <div class="kube-certs-auth__form__file">
+        <div class="flex flex-col pt-4">
           <span>Specify Certificate file:</span>
           <app-file-input fileFormControlName="cert" placeholder="cert">
           </app-file-input>
@@ -14,10 +14,10 @@
         </div>
       </app-tab>
       <app-tab label="Certificate Content">
-        <div class="kube-certs-auth__form__content" spellcheck="false">
-          <span class="kube-certs-auth__label">Specify Certificate:</span>
+        <div class="kube-certs-auth__content" spellcheck="false">
+          <span class="text-sm">Specify Certificate:</span>
           <textarea formControlName="cert"></textarea>
-          <span class="kube-certs-auth__label">Specify Certificate key:</span>
+          <span class="text-sm">Specify Certificate key:</span>
           <textarea formControlName="certKey"></textarea>
         </div>
       </app-tab>

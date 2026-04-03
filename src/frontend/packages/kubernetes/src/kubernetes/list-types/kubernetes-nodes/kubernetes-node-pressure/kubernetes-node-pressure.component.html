@@ -1,7 +1,7 @@
 @if (errors.length) {
   @for (error of errors; track error) {
-    <div class="pressure">
-      <span class="material-symbols-outlined pressure__icon">info</span>
+    <div class="flex items-center">
+      <span class="material-symbols-outlined text-red-500 text-xl size-5 mr-1">info</span>
       {{ error }}
     </div>
   }

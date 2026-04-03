@@ -2,19 +2,19 @@
   @if (!!kubeService.spec?.ports.length) {
     <table>
       <tr>
-        <th>Name</th>
-        <th>Protocol</th>
-        <th>Port</th>
-        <th>Target Port</th>
-        <th>Node Port</th>
+        <th class="italic font-normal pr-4 text-left">Name</th>
+        <th class="italic font-normal pr-4 text-left">Protocol</th>
+        <th class="italic font-normal pr-4 text-left">Port</th>
+        <th class="italic font-normal pr-4 text-left">Target Port</th>
+        <th class="italic font-normal pr-4 text-left">Node Port</th>
       </tr>
       @for (port of kubeService.spec?.ports; track port) {
         <tr>
-          <td>{{port.name}}</td>
-          <td>{{port.protocol}}</td>
-          <td>{{port.port}}</td>
-          <td>{{port.targetPort}}</td>
-          <td>{{port.nodePort}}</td>
+          <td class="pr-4 text-left">{{port.name}}</td>
+          <td class="pr-4 text-left">{{port.protocol}}</td>
+          <td class="pr-4 text-left">{{port.port}}</td>
+          <td class="pr-4 text-left">{{port.targetPort}}</td>
+          <td class="pr-4 text-left">{{port.nodePort}}</td>
         </tr>
       }
     </table>

@@ -1,5 +1,5 @@
 <app-tile-grid fit="true">
-  <app-tile-group class="k8s-home-card__plain-tiles">
+  <app-tile-group class="ml-0 mr-4 mt-4">
     <app-tile>
       <app-card-number-metric mode="plain" link="/kubernetes/{{endpoint.guid}}/nodes" icon="apps" label="Nodes"
         labelSingular="Node" value="{{ nodeCount$ | async }}">
@@ -18,7 +18,7 @@
   </app-tile-group>
   <app-tile-group class="tile-group-1-cols">
     <app-tile>
-      <div class="k8s-home-card__shortcuts">
+      <div class="px-4">
         <app-home-shortcuts [shortcuts]="shortcuts"></app-home-shortcuts>
       </div>
     </app-tile>
