@@ -1,23 +1,10 @@
 @if (row; as kubeService) {
   @if (!!kubeService.spec?.ports.length) {
-    <table>
-      <tr>
-        <th class="italic font-normal pr-4 text-left">Name</th>
-        <th class="italic font-normal pr-4 text-left">Protocol</th>
-        <th class="italic font-normal pr-4 text-left">Port</th>
-        <th class="italic font-normal pr-4 text-left">Target Port</th>
-        <th class="italic font-normal pr-4 text-left">Node Port</th>
-      </tr>
-      @for (port of kubeService.spec?.ports; track port) {
-        <tr>
-          <td class="pr-4 text-left">{{port.name}}</td>
-          <td class="pr-4 text-left">{{port.protocol}}</td>
-          <td class="pr-4 text-left">{{port.port}}</td>
-          <td class="pr-4 text-left">{{port.targetPort}}</td>
-          <td class="pr-4 text-left">{{port.nodePort}}</td>
-        </tr>
+    <div class="text-sm leading-relaxed">
+      @for (port of kubeService.spec?.ports; track port; let last = $last) {
+        <div [class.mb-0.5]="!last">{{port.port}}/{{port.protocol}}@if (port.name) { ({{port.name}})}@if (port.targetPort && port.targetPort !== port.port) { → {{port.targetPort}}}@if (port.nodePort) { :{{port.nodePort}}}</div>
       }
-    </table>
+    </div>
   } @else {
     -
   }
