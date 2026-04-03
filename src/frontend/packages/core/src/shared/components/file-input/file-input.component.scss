@@ -11,8 +11,14 @@
     display: flex;
   }
   &__input {
-    cursor: pointer;
     flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: inherit;
+    font: inherit;
+    padding: 0;
+    min-width: 0;
   }
   &__none {
     opacity: 0.4;

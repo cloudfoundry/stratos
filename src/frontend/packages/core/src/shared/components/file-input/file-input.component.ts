@@ -23,6 +23,7 @@ export class FileInputComponent implements OnInit, OnDestroy {
   @ViewChild('inputFile', { static: true }) nativeInputFile!: ElementRef;
 
   @Input() accept!: string;
+  @Input() placeholder = '';
   @Output() onFileSelect: EventEmitter<File> = new EventEmitter();
   @Output() onFileData: EventEmitter<string> = new EventEmitter();
 
@@ -75,6 +76,26 @@ export class FileInputComponent implements OnInit, OnDestroy {
     this.nativeInputFile.nativeElement.click();
     $event.preventDefault();
     return false;
+  }
+
+  clearFile($event: Event) {
+    $event.preventDefault();
+    this.files = [];
+    this.name = '';
+    this.nativeInputFile.nativeElement.value = '';
+    if (this.formGroupControl) {
+      this.formGroupControl.control.controls[this.fileFormControlName].setValue('');
+    }
+    this.onFileData.emit('');
+  }
+
+  onPathInput($event: Event) {
+    const input = $event.target as HTMLInputElement;
+    this.name = input.value;
+    if (this.formGroupControl) {
+      this.formGroupControl.control.controls[this.fileFormControlName].setValue(input.value);
+    }
+    this.onFileData.emit(input.value);
   }
 
   handleFileData(file: File, done: (value: string | ArrayBuffer | null) => void) {
