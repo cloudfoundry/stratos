@@ -23,10 +23,10 @@ export class KubernetesConfigAuthFormComponent implements IEndpointAuthComponent
   @Input() formGroup: FormGroup<ConfigAuthForm>;
 
   public getValues(values: EndpointAuthValues): EndpointAuthValues {
-    return {};
+    return { kubeconfig: (values?.kubeconfig as string) ?? '' };
   }
 
   public getBody(): string {
-    return this.formGroup.value.kubeconfig ?? '';
+    return '';
   }
 }

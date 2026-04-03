@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"bytes"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/base64"
@@ -53,36 +52,26 @@ func (c *CertKubeAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec api.Tok
 
 func (c *CertKubeAuth) extractCerts(ec echo.Context) (*KubeCertificate, error) {
 
-	kubeCertAuth := &KubeCertificate{}
+	certB64 := strings.Join(strings.Fields(ec.FormValue("cert")), "")
+	certKeyB64 := strings.Join(strings.Fields(ec.FormValue("certKey")), "")
 
-	bodyReader := ec.Request().Body
-	defer bodyReader.Close()
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(bodyReader)
-	body := buf.String()
-
-	if len(body) == 0 {
-		return nil, errors.New("empty request body: certificate and key are required")
+	if len(certB64) == 0 || len(certKeyB64) == 0 {
+		return nil, errors.New("certificate and key are required")
 	}
 
-	firstColon := strings.IndexByte(body, ':')
-	if firstColon < 0 {
-		return nil, fmt.Errorf("invalid certificate data format: expected base64cert:base64key")
-	}
-
-	cert, err := base64.StdEncoding.DecodeString(body[:firstColon])
+	cert, err := base64.StdEncoding.DecodeString(certB64)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode certificate: %v", err)
 	}
-	certKey, err := base64.StdEncoding.DecodeString(body[firstColon+1:])
+	certKey, err := base64.StdEncoding.DecodeString(certKeyB64)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode certificate key: %v", err)
 	}
 
-	kubeCertAuth.Certificate = string(cert)
-	kubeCertAuth.CertificateKey = string(certKey)
-	return kubeCertAuth, nil
-
+	return &KubeCertificate{
+		Certificate:    string(cert),
+		CertificateKey: string(certKey),
+	}, nil
 }
 
 func (c *CertKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {

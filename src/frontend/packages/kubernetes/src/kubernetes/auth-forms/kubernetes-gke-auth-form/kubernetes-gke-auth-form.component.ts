@@ -23,10 +23,10 @@ export class KubernetesGKEAuthFormComponent implements IEndpointAuthComponent {
   @Input() formGroup: FormGroup<GKEAuthForm>;
 
   public getValues(values: EndpointAuthValues): EndpointAuthValues {
-    return {};
+    return { gkeconfig: (values?.gkeconfig as string) ?? '' };
   }
 
   public getBody(): string {
-    return this.formGroup.value.gkeconfig ?? '';
+    return '';
   }
 }

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"time"
 
@@ -67,16 +66,12 @@ func (c *OIDCKubeAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec api.Tok
 func (c *OIDCKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
 	log.Debug("FetchToken (OIDC)")
 
-	req := ec.Request()
-
-	// Need to extract the parameters from the request body
-	defer req.Body.Close()
-	body, err := io.ReadAll(req.Body)
-	if err != nil {
-		return nil, nil, err
+	body := ec.FormValue("kubeconfig")
+	if len(body) == 0 {
+		return nil, nil, fmt.Errorf("kubeconfig content is required")
 	}
 
-	kubeConfig, err := config.ParseKubeConfig(body)
+	kubeConfig, err := config.ParseKubeConfig([]byte(body))
 
 	kubeConfigUser, err := kubeConfig.GetUserForCluster(cnsiRecord.APIEndpoint.String())
 
