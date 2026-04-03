@@ -12,22 +12,13 @@ export function splitCurrentPage<T = any>(entities: (T | T[])[], pageSize: numbe
       index: 0
     };
   }
-  const index = getCurrentPageStartIndex(entities, pageSize, currentPage);
-  if (index === null || Array.isArray(entities[index])) {
-    return {
-      entities,
-      index
-    };
-  }
-  const pages = [...entities];
-  if (index + pageSize > pages.length) {
-    pageSize = pages.length - index;
-  }
-  const page = pages.splice(index, pageSize) as T[];
-  pages.splice(index, 0, page);
+  // Flatten any previously split pages to get a clean entity list
+  const flat = entities.flat(Infinity) as T[];
+  const start = (currentPage - 1) * pageSize;
+  const page = flat.slice(start, start + pageSize);
   return {
-    entities: pages,
-    index
+    entities: [page],
+    index: 0
   };
 }
 

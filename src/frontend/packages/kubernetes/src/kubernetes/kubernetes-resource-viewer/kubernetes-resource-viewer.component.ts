@@ -8,7 +8,7 @@ import {
   TemplateRef,
   ViewChild,
   ViewContainerRef,
-  inject, ChangeDetectionStrategy } from '@angular/core';
+  inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { formatDistance } from 'date-fns';
 import { Observable, of } from 'rxjs';
 import { take, filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
@@ -68,13 +68,15 @@ selector: 'app-kubernetes-resource-viewer',
     SidepanelPreviewComponent
   ]
 })
-export class KubernetesResourceViewerComponent implements PreviewableComponent, OnDestroy, AfterViewInit { private endpointsService = inject(EndpointsService);
+export class KubernetesResourceViewerComponent implements PreviewableComponent, OnDestroy, AfterViewInit {
+  private endpointsService = inject(EndpointsService);
   private kubeEndpointService = inject(KubernetesEndpointService);
   private userFavoriteManager = inject(UserFavoriteManager);
   private viewContainerRef = inject(ViewContainerRef);
   private confirmDialog = inject(ConfirmationDialogService);
   private sidePanelService = inject(SidePanelService);
   private snackBarService = inject(SnackBarService);
+  private cdr = inject(ChangeDetectorRef);
 
   public title: string;
   public resource$: Observable<KubernetesResourceViewerResource>;
@@ -216,6 +218,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
       })
     );
     this.createCustomComponent();
+    this.cdr.markForCheck();
   }
 
   private getVersionFromSelfLink(url: string): string | undefined {

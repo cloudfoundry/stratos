@@ -195,10 +195,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     const transformedEntities$ = this.attachTransformEntity(entities$, this.transformEntity);
     const setResultCount = (paginationEntity: PaginationEntityState, entities: any[]) => {
       const newLength = entities.length;
-      const ids = paginationEntity.ids as Record<number, string[]>;
-      if (
-        ids[paginationEntity.currentPage] &&
-        (paginationEntity.totalResults !== newLength || paginationEntity.clientPagination.totalResults !== newLength)) {
+      if (paginationEntity.totalResults !== newLength || paginationEntity.clientPagination.totalResults !== newLength) {
         this.store.dispatch(new SetResultCount(this, this.paginationKey, newLength));
       }
     };
