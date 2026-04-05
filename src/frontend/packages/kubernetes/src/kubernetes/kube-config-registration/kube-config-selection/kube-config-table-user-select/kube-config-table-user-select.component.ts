@@ -10,7 +10,7 @@ import { KubeConfigFileCluster } from '../../kube-config.types';
 @Component({
 selector: 'app-kube-config-table-user-select',
   templateUrl: './kube-config-table-user-select.component.html',
-  styleUrls: ['./kube-config-table-user-select.component.scss'],
+
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

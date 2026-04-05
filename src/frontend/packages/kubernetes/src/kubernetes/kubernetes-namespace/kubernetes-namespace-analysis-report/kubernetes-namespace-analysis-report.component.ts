@@ -16,7 +16,7 @@ import { AnalysisReport } from '../../store/kube.types';
 @Component({
 selector: 'app-kubernetes-namespace-analysis-report-tab',
   templateUrl: './kubernetes-namespace-analysis-report.component.html',
-  styleUrls: ['./kubernetes-namespace-analysis-report.component.scss'],
+
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

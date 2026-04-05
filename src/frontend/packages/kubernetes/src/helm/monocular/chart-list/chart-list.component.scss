@@ -1,46 +1,33 @@
-// Import your custom theme
-@use '../../theme.scss';
-// Import missing mixins
-@use '../mixins' as mixins;
-
 .chart-list {
-  flex: 1;
-  display: flex;
-  flex-flow: row wrap;
+  @apply flex-1 flex flex-row flex-wrap;
 
   &__empty {
-    align-self: center;
-    margin: auto;
-    opacity: 0.7;
+    @apply self-center mx-auto opacity-70;
   }
 
   app-chart-item {
-    padding-bottom: 1.5em;
-    width: 100%;
+    @apply pb-6 w-full;
 
-    @include mixins.mappy-bp(medium large) {
-      width: 50%;
-      padding-right: 1.5em;
+    @media (min-width: 840px) and (max-width: 1023px) {
+      @apply w-1/2 pr-6;
       &:nth-child(2n) {
-        padding-right: 0;
+        @apply pr-0;
       }
     }
 
-    @include mixins.mappy-bp(large xlarge) {
+    @media (min-width: 1024px) and (max-width: 1279px) {
       width: 33.3%;
-      padding-right: 1.5em;
+      @apply pr-6;
       &:nth-child(3n) {
-        padding-right: 0;
+        @apply pr-0;
       }
     }
 
-    @include mixins.mappy-bp(xlarge) {
-      width: 25%;
-      padding-right: 1.5em;
+    @media (min-width: 1280px) {
+      @apply w-1/4 pr-6;
       &:nth-child(4n) {
-        padding-right: 0;
+        @apply pr-0;
       }
     }
-
   }
 }

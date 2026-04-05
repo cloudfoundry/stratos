@@ -11,7 +11,7 @@ import { LoaderComponent } from '../../loader/loader.component';
 @Component({
   selector: 'app-chart-details-readme',
   templateUrl: './chart-details-readme.component.html',
-  styleUrls: ['./chart-details-readme.component.scss'],
+
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

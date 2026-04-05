@@ -20,7 +20,7 @@ type CertResponse = {
 @Component({
 selector: 'app-kube-config-table-cert',
   templateUrl: './kube-config-table-cert.component.html',
-  styleUrls: ['./kube-config-table-cert.component.scss'],
+
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

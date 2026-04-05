@@ -1,7 +1,3 @@
-@use '../helm-release-helpers';
-// Import missing mixins
-@use '../../../../../helm/monocular/mixins' as monocular-mixins;
-
 :host {
   display: flex;
   height: 100%;
@@ -13,5 +9,3 @@
     stroke-dashoffset: 1000;
   }
 }
-
-@include monocular-mixins.add-life-update-style

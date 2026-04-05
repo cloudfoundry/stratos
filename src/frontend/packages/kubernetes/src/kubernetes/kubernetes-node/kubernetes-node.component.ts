@@ -15,7 +15,7 @@ import { KubernetesService } from '../services/kubernetes.service';
 @Component({
   selector: 'app-kubernetes-node',
   templateUrl: './kubernetes-node.component.html',
-  styleUrls: ['./kubernetes-node.component.scss'],
+
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

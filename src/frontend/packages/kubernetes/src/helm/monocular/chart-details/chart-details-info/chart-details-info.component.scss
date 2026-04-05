@@ -1,28 +1,23 @@
 .chartInfo {
-
   h1 {
-    font-size: 16px;
+    @apply text-base;
   }
 
   app-panel {
-    box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.07);
-    border: 0 !important;
+    @apply shadow-sm border-0;
   }
 
-  &__source, &__related, &__home{
+  &__source, &__related, &__home {
     a {
-      word-break: break-all;
+      @apply break-all;
     }
   }
 
   &__link {
-    font-size: 14px;
+    @apply text-sm;
   }
 
   &__properties {
-    overflow: auto;
-    display: block;
-    margin-bottom: 2em;
-    max-width: 260px;
+    @apply overflow-auto block mb-8 max-w-[260px];
   }
 }

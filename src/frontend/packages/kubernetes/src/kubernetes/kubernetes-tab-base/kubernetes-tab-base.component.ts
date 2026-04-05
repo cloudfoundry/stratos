@@ -19,7 +19,7 @@ import { kubeEntityCatalog } from './../kubernetes-entity-generator';
 @Component({
   selector: 'app-kubernetes-tab-base',
   templateUrl: './kubernetes-tab-base.component.html',
-  styleUrls: ['./kubernetes-tab-base.component.scss'],
+
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

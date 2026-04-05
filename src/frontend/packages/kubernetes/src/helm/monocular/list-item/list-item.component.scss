@@ -1,65 +1,43 @@
-// Import your custom theme
-@use '../../theme.scss';
-
-// Vars
 $list-item-content-height: 200px;
-$list-item-content-min-height: 140px;
 
 .list-item {
-  border-radius: var(--border-radius);
-  overflow: hidden;
-  border: 1px solid var(--color-border);
-  transition: transform 0.2s ease;
-  background-color: var(--color-background-light);
+  @apply rounded-lg overflow-hidden border transition-transform duration-200;
+  border-color: theme('colors.gray.300');
+  @apply bg-gray-100;
 
   &:hover {
-    transform: scale(1.02);
+    @apply scale-[1.02];
   }
 
   &:active {
-    transform: scale(0.98);
+    @apply scale-[0.98];
   }
 
   &-content {
-    width: 100%;
+    @apply w-full flex flex-col;
     height: $list-item-content-height;
-    display: flex;
-    flex-direction: column;
-    color: var(--color-layout-text);
+    @apply text-gray-800;
   }
 
   &-logo {
-    width: 100%;
+    @apply w-full flex items-center justify-center bg-white;
     height: calc($list-item-content-height / 2 + 10px);
-    background-color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
 
   &-info {
-    position: relative;
-    flex: 1;
-    border-top: 1px solid var(--color-border);
-    padding: 0 1em;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    word-wrap: break-word;
-    text-align: center;
+    @apply relative flex-1 px-4 flex flex-col justify-center break-words text-center;
+    border-top: 1px solid theme('colors.gray.300');
   }
 
   &__auto-height {
-    height: auto;
+    @apply h-auto;
 
     .list-item-info {
-      padding: 10px 0;
+      @apply py-2.5 px-0;
     }
   }
 
   &-svg {
-    position: absolute;
-    right: 10px;
-    top: 10px;
+    @apply absolute right-2.5 top-2.5;
   }
 }

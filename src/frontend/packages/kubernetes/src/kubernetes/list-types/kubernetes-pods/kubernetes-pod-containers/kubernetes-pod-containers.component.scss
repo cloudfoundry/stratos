@@ -1,7 +1,6 @@
 /* Container icon — mat-icon sizing not expressible in Tailwind */
 .pod-container-icon {
-  display: flex;
-  align-items: center;
+  @apply flex items-center;
   height: 60px;
   width: 50px;
 

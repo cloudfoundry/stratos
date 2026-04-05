@@ -3,13 +3,13 @@
 </app-page-header>
 
 <p><app-product-name></app-product-name> can proxy and embed the Kubernetes Dashboard UI when configured. This requires:</p>
-<ol class="kubedash__list">
+<ol class="leading-6">
   <li>Kubernetes Dashboard Installation - An installation of the Dashboard in the Kubernetes cluster</li>
   <li>Service Account - A Service Account that can be used to access the Dashboard</li>
 </ol>
 
 @if (!(kubeDashboardStatus$ | async) || isUpdatingStatus) {
-  <div class="kubedash__loading">
+  <div class="flex my-2.5">
     <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-500"></div>
     <div>Retrieving Dashboard configuration ...</div>
   </div>
@@ -20,8 +20,8 @@
     @if (kubeDashboardStatus$ | async; as status) {
       <div>
         @if (status.service && status.serviceAccount) {
-          <div class="kubedash__ready">
-            <div class="kubedash__access">
+          <div class="flex my-5 [&>div]:flex-1">
+            <div class="flex">
               <app-boolean-indicator [showText]="false" [isTrue]="true" type="yes-no"></app-boolean-indicator>
               <div>Kubernetes Dashboard is installed and a Service Account exists - you can access the dashboard using the
               'View Dashboard' button on the Summary view for this cluster.</div>
@@ -34,11 +34,11 @@
             }
           </div>
         }
-        <app-card class="kubedash__card">
+        <app-card class="mb-5">
           <app-card-progress-overlay [busy]="dashboardUIBusy()" [label]="dashboardUIMsg"></app-card-progress-overlay>
           <div class="card-header">
             <div class="card-title">Kubernetes Dashboard Installation</div>
-            <div class="kubedash__card-icon">
+            <div class="absolute right-5 top-5">
               @if (status.service) {
                 <app-boolean-indicator [showText]="false" [isTrue]="true" type="yes-no">
                 </app-boolean-indicator>
@@ -51,17 +51,17 @@
           @if (!status.service) {
             <div class="card-content">
               <p>No installation found</p>
-              <h2 class="kubedash__option">Manually install the Kubernetes Dashboard</h2>
-              <div class="kubedash__option-block">
+              <h2 class="text-sm font-normal underline">Manually install the Kubernetes Dashboard</h2>
+              <div class="ml-5">
                 <p>Manually install the Kubernetes Dashboard into your cluster. Please refer to
-                  <a class="kubedash__card-link" target="_blank"
+                  <a class="text-inherit" target="_blank"
                   href="https://github.com/kubernetes/dashboard#getting-started">https://github.com/kubernetes/dashboard#getting-started</a>.
                 </p>
               </div>
-              <h2 class="kubedash__option">Install the Kubernetes Dashboard from <app-product-name></app-product-name></h2>
-              <div class="kubedash__option-block">
+              <h2 class="text-sm font-normal underline">Install the Kubernetes Dashboard from <app-product-name></app-product-name></h2>
+              <div class="ml-5">
                 <p><app-product-name></app-product-name> will download the Dashboard yaml from the Dashboard GitHub repository and install it for you.</p>
-                <div class="kubedash__buttons">
+                <div class="flex justify-end w-full">
                   <button (click)="installDashboard()" [disabled]="isBusy()" class="btn btn-primary">Install
                   Dashboard</button>
                 </div>
@@ -71,13 +71,13 @@
           @if (status.service) {
             <div class="card-content">
               <p>An installation of Kubernetes Dashboard was found:</p>
-              <div class="kubedash__metadata">
+              <div class="ml-5">
                 <app-metadata-item label="Version">{{ status.version }}</app-metadata-item>
                 <app-metadata-item label="Service Name">{{ status.service.name }}</app-metadata-item>
                 <app-metadata-item label="Namespace">{{ status.service.namespace }}</app-metadata-item>
               </div>
               @if (status.stratosInstalled) {
-                <div class="kubedash__buttons">
+                <div class="flex justify-end w-full">
                   <button (click)="deleteDashboard()" [disabled]="isBusy()" class="btn btn-primary">Delete
                   Dashboard</button>
                 </div>
@@ -85,11 +85,11 @@
             </div>
           }
         </app-card>
-        <app-card class="kubedash__card">
+        <app-card class="mb-5">
           <app-card-progress-overlay [busy]="serviceAccountBusy()" [label]="serviceAccountMsg"></app-card-progress-overlay>
           <div class="card-header">
             <div class="card-title">Service Account</div>
-            <div class="kubedash__card-icon">
+            <div class="absolute right-5 top-5">
               @if (status.serviceAccount) {
                 <app-boolean-indicator [showText]="false" [isTrue]="true" type="yes-no">
                 </app-boolean-indicator>
@@ -103,35 +103,35 @@
             <div class="card-content">
               @if ((isAzure$ | async)) {
                 <div>
-                  <p class="kubedash__warn">
+                  <p class="flex items-center">
                     <span class="material-symbols-outlined">warning</span>You are using the Azure deployed version of Kubernetes Dashboard.
                   </p>
                   <p>This version uses the Service Account 'kubernetes-dashboard' to access the Dashboard UI. You will need to
                     create a Cluster Role Binding as described
-                    <a class="kubedash__card-link" target="_blank"
+                    <a class="text-inherit" target="_blank"
                     href="https://docs.microsoft.com/en-us/azure/aks/kubernetes-dashboard">here</a> to give this account
                     permissions.
                   </p>
                   <p>You also need to add the following label to the Service Account in order for <app-product-name></app-product-name> to know the account is
                 configured:</p>
-                <div class="kubedash__label">stratos-role: kubernetes-dashboard-user</div>
+                <div class="font-mono text-xs">stratos-role: kubernetes-dashboard-user</div>
                 <p>You can add this label with the following command:</p>
-                <div class="kubedash__label">kubectl label serviceaccount -n kube-system kubernetes-dashboard
+                <div class="font-mono text-xs">kubectl label serviceaccount -n kube-system kubernetes-dashboard
                 stratos-role=kubernetes-dashboard-user</div>
               </div>
             }
             @if (!(isAzure$ | async)) {
               <div>
                 <p>Service Account not found - you can create one manually or <app-product-name></app-product-name> can do this for you.</p>
-                <h2 class="kubedash__option">Manually create a Service Account</h2>
-                <div class="kubedash__option-block">
+                <h2 class="text-sm font-normal underline">Manually create a Service Account</h2>
+                <div class="ml-5">
                   <p>Create a Service Account with the appropriate permissions that will be used by the Dashboard to
                   access your Kubernetes cluster.</p>
                   <p>Ensure that this token is labelled with the label:</p>
-                  <div class="kubedash__label">stratos-role: kubernetes-dashboard-user</div>
+                  <div class="font-mono text-xs">stratos-role: kubernetes-dashboard-user</div>
                 </div>
-                <h2 class="kubedash__option">Create a Service Account from <app-product-name></app-product-name></h2>
-                <div class="kubedash__option-block">
+                <h2 class="text-sm font-normal underline">Create a Service Account from <app-product-name></app-product-name></h2>
+                <div class="ml-5">
                   @if (!status.service) {
                     <div>
                       <p><app-product-name></app-product-name> can create a service account for accessing the Kubernetes Dashboard - please install the
@@ -143,10 +143,10 @@
                     <p><app-product-name></app-product-name> will create a service account with a cluster role binding to the cluster-admin role. This user
                     will
                   have full permissions over the cluster.</p>
-                  <p class="kubedash__warn">
+                  <p class="flex items-center">
                     <span class="material-symbols-outlined">warning</span>Please make sure you understand the risks involved
                   </p>
-                  <div class="kubedash__buttons">
+                  <div class="flex justify-end w-full">
                     <button (click)="createServiceAccount()" [disabled]="isBusy()" class="btn btn-primary">Create
                     Service Account</button>
                   </div>
@@ -160,10 +160,10 @@
     @if (status.serviceAccount) {
       <div class="card-content">
         <p>A Service Account was found:</p>
-        <div class="kubedash__metadata">
+        <div class="ml-5">
           <app-metadata-item label="Name">{{ status.serviceAccount.metadata.name }}</app-metadata-item>
           <app-metadata-item label="Namespace">{{ status.serviceAccount.metadata.namespace }}</app-metadata-item>
-          <div class="kubedash__buttons">
+          <div class="flex justify-end w-full">
             <button (click)="deleteServiceAccount()" [disabled]="isBusy()" class="btn btn-primary">Delete
             Service Account</button>
           </div>

@@ -12,7 +12,7 @@ import { MonocularChart } from '../../store/helm.types';
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-monocular-chart-card',
   templateUrl: './monocular-chart-card.component.html',
-  styleUrls: ['./monocular-chart-card.component.scss'],
+
   standalone: true,
   imports: [ChartItemComponent]
 })

@@ -40,7 +40,6 @@ import { ResourceAlert } from './../../../../services/analysis-report.types';
 @Component({
   selector: 'app-helm-release-summary-tab',
   templateUrl: './helm-release-summary-tab.component.html',
-  styleUrls: ['./helm-release-summary-tab.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

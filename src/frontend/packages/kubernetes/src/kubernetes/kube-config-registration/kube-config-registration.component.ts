@@ -9,7 +9,7 @@ import { KubeConfigImportComponent } from './kube-config-import/kube-config-impo
 changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kube-config-registration',
   templateUrl: './kube-config-registration.component.html',
-  styleUrls: ['./kube-config-registration.component.scss'],
+
   standalone: true,
   imports: [
     CommonModule,

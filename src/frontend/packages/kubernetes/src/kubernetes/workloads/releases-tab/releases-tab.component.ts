@@ -16,7 +16,7 @@ import { KubernetesNamespacesFilterService } from '../list-types/kube-namespaces
 @Component({
 selector: 'app-releases-tab',
   templateUrl: './releases-tab.component.html',
-  styleUrls: ['./releases-tab.component.scss'],
+
   providers: [
     {
       provide: ListConfig,

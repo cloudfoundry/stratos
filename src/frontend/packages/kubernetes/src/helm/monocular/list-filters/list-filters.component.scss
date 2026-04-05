@@ -1,25 +1,19 @@
-@use '../../theme.scss';
-
 .list-filters {
-  flex: 1;
-  height: 100%;
-  width: 100%;
+  @apply flex-1 h-full w-full;
 
   &_section {
-    margin-bottom: 40px;
+    @apply mb-10;
 
     &_title {
-      margin-bottom: 10px;
+      @apply mb-2.5;
     }
 
     &_link {
-      cursor: pointer;
-      font-size: 1.1em;
-      margin-bottom: 0.3em;
-      opacity: 0.5;
+      @apply cursor-pointer text-lg mb-1 opacity-50;
+
       &.active {
-        opacity: 1;
-        color: var(--color-primary);
+        @apply opacity-100;
+        @apply text-primary;
       }
     }
   }

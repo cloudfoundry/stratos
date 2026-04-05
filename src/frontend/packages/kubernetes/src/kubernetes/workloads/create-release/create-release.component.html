@@ -3,7 +3,7 @@
 </app-page-header>
 <app-steppers [cancel]="cancelUrl">
   <app-step [title]="'Kubernetes'" [valid]="validate$ | async">
-    <form [formGroup]="details" class="stepper-form helm-create-release">
+    <form [formGroup]="details" class="stepper-form flex-1">
       <b>Select the Kubernetes cluster to install to</b>
       <div class="form-group">
         <select class="select w-full" formControlName="endpoint" name="endpoint">

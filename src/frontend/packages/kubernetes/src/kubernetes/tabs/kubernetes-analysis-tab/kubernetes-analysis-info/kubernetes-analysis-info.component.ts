@@ -12,7 +12,6 @@ import { SidepanelPreviewComponent } from '@stratosui/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-analysis-info',
   templateUrl: './kubernetes-analysis-info.component.html',
-  styleUrls: ['./kubernetes-analysis-info.component.scss'],
   standalone: true,
   imports: [
     CommonModule,

@@ -32,7 +32,7 @@ class HelmReleaseHistoryDataSource implements ITableListDataSource<any> {
 @Component({
   selector: 'app-helm-release-history-tab',
   templateUrl: './helm-release-history-tab.component.html',
-  styleUrls: ['./helm-release-history-tab.component.scss'],
+
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

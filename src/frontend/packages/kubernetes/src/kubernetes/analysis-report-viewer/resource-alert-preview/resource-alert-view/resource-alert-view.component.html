@@ -3,12 +3,12 @@
     @for (group of alertInfo; track group) {
       <div>
         @if (showHeader) {
-          <div class="alert__group">{{group.name}}</div>
+          <div class="font-bold py-1">{{group.name}}</div>
         }
         @for (alert of group.alerts; track alert) {
           <div>
-            <div class="alert__info">
-              <div class="alert__icon">
+            <div class="flex items-center mx-5 my-1">
+              <div class="mr-2">
                 @switch (alert.level) {
                   @case (1) {
                     <span class="material-symbols-outlined text-info">info</span>

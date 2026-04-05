@@ -1,6 +1,6 @@
-<div class="name">
+<div class="flex items-center">
   @if (dataSource.getRowUniqueId(row) === dataSource.getRowUniqueId(dataSource.editRow)) {
-    <app-form-field class="cell-edit-variable"
+    <app-form-field class="flex-1"
       >
       <input appInput name="envVarValue" [value]="dataSource.editRow?.name"
         (input)="dataSource.editRowName = $event.target.value" />
@@ -8,5 +8,5 @@
   } @else {
     <span class="cell-value-variable">{{row.name}}</span>
   }
-  <app-table-cell-edit [row]="row" [dataSource]="dataSource" subtle="true"></app-table-cell-edit>
+  <app-table-cell-edit class="mb-[3px]" [row]="row" [dataSource]="dataSource" subtle="true"></app-table-cell-edit>
 </div>

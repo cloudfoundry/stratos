@@ -12,7 +12,7 @@
   <app-loader [loading]="loading">
     @if (chart && currentVersion) {
       <div class="chart-details__wrapper">
-        <app-entity-summary-title class="summary-title" [title]="chart.attributes.name" [subTitle]="chartSubTitle"
+        <app-entity-summary-title class="flex-[3] block" [title]="chart.attributes.name" [subTitle]="chartSubTitle"
           [subText]="chart.attributes.description" [imagePath]="iconUrl">
           <div class="chart-details__content">
             <article class="chart-details__content__docs">

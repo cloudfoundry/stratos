@@ -10,7 +10,7 @@
 }
 
 .caasp-version {
-  display: flex;
+  @apply flex;
 
   mat-icon {
     cursor: help;

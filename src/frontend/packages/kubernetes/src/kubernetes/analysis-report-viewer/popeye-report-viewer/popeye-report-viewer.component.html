@@ -1,52 +1,52 @@
 @if (processed) {
   <div>
-    <div class="report__report-header">
-      <div class="report__title">Report</div>
-      <div class="report__stat">
-        <div>Score</div>
-        <div class="report__score">{{processed.popeye.score }}</div>
+    <div class="flex items-center mb-2">
+      <div class="flex-1">Report</div>
+      <div class="flex flex-col px-3 py-1">
+        <div class="opacity-80">Score</div>
+        <div class="text-xl">{{processed.popeye.score }}</div>
       </div>
-      <div class="report__stat">
-        <div>Grade</div>
-        <div class="report__grade">{{processed.popeye.grade }}</div>
+      <div class="flex flex-col px-3 py-1">
+        <div class="opacity-80">Grade</div>
+        <div class="text-xl">{{processed.popeye.grade }}</div>
       </div>
     </div>
     @for (section of processed.popeye.sanitizers; track section) {
       <div>
         @if (!section.hide) {
           <div>
-            <div class="report__header">
-              <div class="report__title">{{ section.sanitizer }}</div>
-              <div class="report__stat">
-                <div>OK</div>
-                <div class="report__grade">{{section.tally.ok }}</div>
+            <div class="flex items-center">
+              <div class="flex-1">{{ section.sanitizer }}</div>
+              <div class="flex flex-col px-3 py-1">
+                <div class="opacity-80">OK</div>
+                <div class="text-xl">{{section.tally.ok }}</div>
               </div>
-              <div class="report__stat">
-                <div>Info</div>
-                <div class="report__grade">{{section.tally.info }}</div>
+              <div class="flex flex-col px-3 py-1">
+                <div class="opacity-80">Info</div>
+                <div class="text-xl">{{section.tally.info }}</div>
               </div>
-              <div class="report__stat">
-                <div>Warning</div>
-                <div class="report__grade">{{section.tally.warning }}</div>
+              <div class="flex flex-col px-3 py-1">
+                <div class="opacity-80">Warning</div>
+                <div class="text-xl">{{section.tally.warning }}</div>
               </div>
-              <div class="report__stat">
-                <div>Error</div>
-                <div class="report__grade">{{section.tally.error }}</div>
+              <div class="flex flex-col px-3 py-1">
+                <div class="opacity-80">Error</div>
+                <div class="text-xl">{{section.tally.error }}</div>
               </div>
-              <div class="report__stat">
-                <div>Score</div>
-                <div class="report__score">{{section.tally.score }}</div>
+              <div class="flex flex-col px-3 py-1">
+                <div class="opacity-80">Score</div>
+                <div class="text-xl">{{section.tally.score }}</div>
               </div>
             </div>
             <!-- Eack key in issues is a group of issues -->
-            <table width="100%" class="report__table" cellpadding="4">
+            <table width="100%" class="ml-5" cellpadding="4">
               @for (group of section.groups; track group) {
                 <tr>
-                  <td class="report__table-name" width="40%">{{ group.name }}</td>
+                  <td class="align-top" width="40%">{{ group.name }}</td>
                   <td>
                     @for (issue of group.issues; track issue) {
-                      <div class="report__issue">
-                        <div class="report__icon">
+                      <div class="flex items-center">
+                        <div class="pr-1">
                           @switch (issue.level) {
                             @case (0) {
                               <span class="material-symbols-outlined text-success">check_circle</span>

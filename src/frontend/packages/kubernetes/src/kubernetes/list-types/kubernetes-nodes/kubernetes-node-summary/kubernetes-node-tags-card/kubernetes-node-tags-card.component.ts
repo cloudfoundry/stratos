@@ -10,7 +10,7 @@ import { KubernetesNodeService } from '../../../../services/kubernetes-node.serv
 @Component({
   selector: 'app-kubernetes-node-tags-card',
   templateUrl: './kubernetes-node-tags-card.component.html',
-  styleUrls: ['./kubernetes-node-tags-card.component.scss'],
+
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

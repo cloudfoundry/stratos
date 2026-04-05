@@ -1,6 +1,5 @@
-/* Child component spacing — not expressible in Tailwind */
 .resource-preview__side-by-side {
-  display: flex;
+  @apply flex;
 
   app-metadata-item {
     margin-right: 40px;
@@ -8,8 +7,7 @@
 }
 
 .resource-preview__header {
-  display: flex;
-  justify-content: flex-end;
+  @apply flex justify-end;
 
   mat-icon {
     font-size: 20px;

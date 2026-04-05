@@ -10,7 +10,6 @@ import { KubernetesNodeSimpleMetricComponent } from '../kubernetes-node-simple-m
 @Component({
   selector: 'app-kubernetes-node-metric-stats-card',
   templateUrl: './kubernetes-node-metric-stats-card.component.html',
-  styleUrls: ['./kubernetes-node-metric-stats-card.component.scss'],
   standalone: true,
   imports: [
     AsyncPipe,

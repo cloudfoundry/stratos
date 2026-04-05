@@ -1,14 +1,1 @@
-
-@use '../../theme.scss';
-
-.chart-list {
-  width: 100%;
-  max-width: var(--layout-max-width);
-  margin: auto;
-  display: flex;
-  align-items: center;
-
-  app-chart-list {
-    flex: 1;
-  }
-}
+/* Styles moved to Tailwind classes in template */

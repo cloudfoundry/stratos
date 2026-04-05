@@ -19,7 +19,7 @@ import { HelmReleaseSocketService } from './helm-release-socket-service';
 @Component({
   selector: 'app-helm-release-tab-base',
   templateUrl: './helm-release-tab-base.component.html',
-  styleUrls: ['./helm-release-tab-base.component.scss'],
+
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

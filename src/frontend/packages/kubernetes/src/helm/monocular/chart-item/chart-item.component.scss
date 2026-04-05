@@ -1,63 +1,18 @@
-// Import your custom theme
-@use '../../theme.scss';
+.chart-item-info {
+  &__repo {
+    @apply text-cyan-500;
+    @apply text-xs px-1 py-0.5 rounded;
 
-// Vars
-$chart-item-content-height: 150px;
-$chart-item-logo-width: 80px;
-
-.chart-item {
-
-  &-logo {
-    max-height: 80%;
-    max-width: 80%;
-  }
-
-  &-info {
-
-    &__title {
-      margin: 0;
-      font-weight: 500;
-      font-size: 16px;
-      cursor: pointer;
-      margin-bottom: 4px;
-
-      a {
-        color: inherit;
-      }
+    &:hover {
+      @apply bg-white;
     }
 
-    p {
-      margin: 0;
+    &.repo-incubator {
+      @apply text-red-500;
     }
 
-    &__version {
-      font-size: 14px;
-    }
-
-    // Remove this when chips are ready:
-    // https://github.com/angular/material2/issues/120
-    &__repo {
-      color: var(--color-accent-500);
-      font-size: 0.8em;
-      padding: 2px 4px;
-      border-radius: 4px;
-
-      &:hover {
-        background: white;
-      }
-
-      &.repo-incubator {
-        color: var(--color-warning-500);
-      }
-
-      a {
-        color: inherit;
-      }
-    }
-
-    &__description {
-      margin: 1em;
+    a {
+      @apply text-inherit;
     }
   }
-
 }

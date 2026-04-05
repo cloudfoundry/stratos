@@ -1,9 +1,9 @@
 <div class="card editor-card">
   @if (initing || (loading$ | async)) {
-    <div class="editor-loading">
+    <div class="absolute inset-0 flex items-center justify-center z-[100]">
       <div>
-        <div class="editor-loading__msg">Loading ...</div>
-        <div class="progress-bar w-full h-1 bg-gray-200 rounded overflow-hidden editor-loading__progress-bar">
+        <div class="text-center">Loading ...</div>
+        <div class="progress-bar w-full h-1 bg-gray-200 rounded overflow-hidden mt-2.5 min-w-[120px]">
           <div class="progress-bar-fill h-full bg-primary-500 animate-pulse"></div>
         </div>
       </div>
@@ -22,13 +22,13 @@
         name="edit-mode-editor">YAML</button>
       </div>
     } @else {
-      <div class="editor-title">YAML Editor</div>
+      <div class="text-sm">YAML Editor</div>
     }
 
 
-    <div class="editor-spacer"></div>
+    <div class="flex-auto"></div>
 
-    <div class="editor-toolbar-buttons">
+    <div class="flex">
       <div class="relative" #menuContainer>
         <button class="btn btn-secondary" (click)="toggleMenu()" #menuTrigger>
           <span>Values</span>
@@ -54,7 +54,7 @@
       </div>
     </div>
 
-    <div class="editor-toolbar-buttons">
+    <div class="flex">
       @if (mode === 'editor') {
         <button class="btn btn-toggle"
           [class.btn-toggle-active]="lineNumbers"
@@ -76,12 +76,12 @@
   </div>
   <div [ngClass]="{'editor-hidden': mode !== 'form'}" class="editor-form">
     @if (yamlError) {
-      <div class="editor-yaml-error">
-        <div class="editor-yaml-error__msg">
+      <div class="absolute inset-0 flex items-center justify-center opacity-70 z-[100]">
+        <div class="flex flex-row">
           <div>
-            <span class="material-icons editor-yaml-error__icon text-warning-600">warning</span>
+            <span class="material-icons text-[32px] h-8 w-8 mr-3 text-warning-600">warning</span>
           </div>
-          <div class="editor-yaml-error__text">
+          <div class="leading-6">
             <div>Error - YAML is not valid</div>
             <div>Use the YAML editor to correct it so the values can be loaded into the form</div>
           </div>

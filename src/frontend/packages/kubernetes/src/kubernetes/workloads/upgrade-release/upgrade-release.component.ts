@@ -27,7 +27,6 @@ import { ReleaseUpgradeVersionsListConfig } from './release-version-list-config'
 @Component({
   selector: 'app-upgrade-release',
   templateUrl: './upgrade-release.component.html',
-  styleUrls: ['./upgrade-release.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

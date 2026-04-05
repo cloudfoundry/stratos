@@ -1,112 +1,82 @@
-@use '../../theme.scss';
-// Import missing mixins
-@use '../mixins' as mixins;
-
 $filters-width: 175px;
 
 .charts {
-  max-width: var(--layout-max-width);
-  margin: auto;
+  @apply max-w-screen-xl;
+  @apply mx-auto;
 
   &__header {
-
     &__title {
-      margin-top: 0;
+      @apply mt-0;
     }
 
     &__filters {
-      display: none;
-      font-size: 0.5em;
-
-      mat-icon {
-        margin-left: 10px;
-        top: 6px;
-        position: relative;
-      }
+      @apply hidden text-xs;
     }
   }
 
   &__gallery {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
+    @apply w-full flex flex-row;
 
     app-list-filters {
       width: $filters-width;
-      display: flex;
-      overflow: hidden;
+      @apply flex overflow-hidden;
     }
 
     &__content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      border-left: 1px solid var(--color-border);
+      @apply flex-1 flex flex-col;
+      border-left: 1px solid theme('colors.gray.300');
 
       app-chart-list {
-        flex: 1;
-        display: flex;
-        padding: 1.5em 0 0 1.5em;
+        @apply flex-1 flex pt-6 pl-6;
       }
 
       &__topbar {
-        display: flex;
-        height: 40px;
-        border-bottom: 1px solid var(--color-border);
-        align-items: center;
-        padding-left: 10px;
+        @apply flex h-10 items-center pl-2.5;
+        border-bottom: 1px solid theme('colors.gray.300');
 
         * {
-          fill: #9ca3af; // equivalent to light gray
+          fill: #9ca3af;
         }
 
         input {
-          width: 100%;
-          height: 100%;
-          border: 0;
-          font-size: 1.1em;
-          background: none;
-          outline: none;
-          margin-left: 5px;
-          color: var(--color-layout-base);
-          @include mixins.placeholder {
-            color: #9ca3af; // equivalent to light gray
+          @apply w-full h-full border-0 text-lg bg-transparent outline-none ml-1;
+          @apply text-gray-800;
+
+          &::placeholder {
+            color: #9ca3af;
           }
         }
       }
     }
   }
 
-  @include mixins.mappy-bp(max-width small) {
-
-    &__header__filters {
-      display: inline-block;
+  @media (max-width: 479px) {
+    .charts__header__filters {
+      @apply inline-block;
     }
 
-    &__gallery {
-      flex-direction: column;
+    .charts__gallery {
+      @apply flex-col;
 
       app-list-filters {
-        position: relative;
+        @apply relative w-auto h-0;
         left: -100%;
-        width: auto;
-        height: 0;
         transition: left .2s ease-out;
+
         &.open {
-          height: auto;
-          left: 0;
+          @apply h-auto left-0;
         }
       }
 
       &__content {
-        border: 0;
+        @apply border-0;
 
         &__topbar {
-          padding-left: 0;
+          @apply pl-0;
         }
 
         app-chart-list {
-          padding: 1.5em 0 0 0;
+          @apply pt-6 pl-0;
         }
       }
     }

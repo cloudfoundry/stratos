@@ -1,10 +1,10 @@
 @for (group of processed; track group) {
-  <div class="report__group">
-    <div class="report__group-name">{{ group._name }}</div>
+  <div class="mb-2.5">
+    <div class="font-bold py-1">{{ group._name }}</div>
     @for (check of group._checks; track check) {
-      <div class="report__checks">
-        <div class="report__check">
-          <div class="report__icon">
+      <div>
+        <div class="flex items-center flex-row ml-2.5">
+          <div class="mr-1">
             @switch (check.Grade) {
               @case (10) {
                 <span class="material-symbols-outlined text-success">check_circle</span>
@@ -23,10 +23,10 @@
               }
             }
           </div>
-          <div class="report__check-name">{{ check.Check.Name }}</div>
+          <div>{{ check.Check.Name }}</div>
         </div>
         @for (comment of check.Comments; track comment) {
-          <div class="report__comment">
+          <div class="list-item list-square ml-[58px]">
             <div>{{ comment.Summary }}</div>
           </div>
         }

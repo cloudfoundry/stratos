@@ -11,7 +11,7 @@ import { createMonocularProviders } from '../monocular/stratos-monocular-provide
 @Component({
   selector: 'app-monocular',
   templateUrl: './monocular.component.html',
-  styleUrls: ['./monocular.component.scss'],
+
   providers: [
     ...createMonocularProviders()
   ],

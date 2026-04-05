@@ -8,7 +8,7 @@ import { KubernetesNamespace } from '../../../store/kube.types';
 @Component({
   selector: 'app-kubernetes-namespace-link',
   templateUrl: './kubernetes-namespace-link.component.html',
-  styleUrls: ['./kubernetes-namespace-link.component.scss'],
+
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [RouterLink]

@@ -1,51 +1,41 @@
-@use '../../../theme.scss';
-
 .versions {
-
   h1 {
-    font-size: 16px;
-    margin-top: 0;
+    @apply text-base mt-0;
   }
-  .more-link {
-    cursor: pointer;
-    font-size: 14px;
-    margin-top: 0.5em;
 
-    &:hover {
-      text-decoration: underline;
-    }
+  .more-link {
+    @apply cursor-pointer text-sm mt-2 hover:underline;
   }
 }
 
 .version__cell {
-
   &.creation-date {
-    color: #6b7280; // equivalent to lighter gray
+    @apply text-gray-500;
   }
 
   &.number.selected {
-    font-weight: bold;
+    @apply font-bold;
   }
 }
 
 .version {
-  font-size: 14px;
+  @apply text-sm;
 
   &__table {
-    display: table;
-    width: 100%;
+    @apply table w-full;
   }
+
   &__row {
-    display: table-row;
+    @apply table-row;
   }
+
   &__cell {
-    display: table-cell;
-    font-size: 14px;
+    @apply table-cell text-sm;
   }
 }
 
 .app-version {
   h1 {
-    font-size: 16px;
+    @apply text-base;
   }
 }

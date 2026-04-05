@@ -1,49 +1,33 @@
-// Import your custom theme
-@use '../../theme.scss';
-// Import missing mixins
-@use '../mixins' as mixins;
-
 $header-height: 200px;
 $icon-height: 150px;
-.summary-title {
-  flex: 3;
-  display: block;
-}
+
 .chart-details {
-  display: flex;
-  flex-direction: column;
+  @apply flex flex-col;
 
   &__wrapper {
-    display: flex;
+    @apply flex;
   }
 
   &__header {
-    margin-top: -80px;
-    margin-bottom: 40px;
+    @apply -mt-20 mb-10;
 
     &__background {
       height: $header-height;
-      background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-700));
+      background: linear-gradient(135deg, var(--color-primary-500, #3371e3), var(--color-primary-700, #1d4ed8));
     }
 
     &__content {
-      padding: 0 2em;
-      max-width: var(--layout-max-width);
-      margin: auto;
+      @apply px-8 flex mx-auto;
+      @apply max-w-screen-xl;
       margin-top: calc(-1 * $icon-height / 2);
-      display: flex;
     }
 
     &__text {
-      flex: 1;
+      @apply flex-1;
 
       h1 {
         min-height: calc($icon-height / 2);
-        color: white;
-        margin: 0;
-        margin-top: -5px;
-        display: flex;
-        align-items: flex-end;
+        @apply text-white m-0 -mt-1 flex items-end;
       }
 
       p {
@@ -51,14 +35,14 @@ $icon-height: 150px;
       }
 
       &__repo {
-        color: var(--color-accent-500);
+        @apply text-cyan-500;
 
         &.repo-incubator {
-          color: var(--color-warning-500);
+          @apply text-red-500;
         }
 
         a {
-          color: inherit;
+          @apply text-inherit;
         }
       }
     }
@@ -66,60 +50,41 @@ $icon-height: 150px;
     &__icon {
       width: $icon-height;
       height: $icon-height;
-      background: white;
-      border: 2px solid var(--color-layout-base);
-      margin-right: 1em;
-      border-radius: var(--border-radius);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      @apply bg-white mr-4 flex items-center justify-center;
+      @apply border-2 border-gray-800 rounded-lg;
 
       img {
-        width: 70%;
-        max-height: 70%;
+        @apply w-[70%] max-h-[70%];
       }
     }
   }
 
   &__content {
-    width: 100%;
-    display: flex;
-    flex-direction: column-reverse;
-    padding: 0 2em 2em 2em;
-    word-break: break-word;
+    @apply w-full flex flex-col-reverse px-8 pb-8 break-words;
   }
 
-  @include mixins.mappy-bp(medium) {
-    display: block;
-    &__content {
-      flex-direction: row;
-      height: 100%;
-      
+  @media (min-width: 768px) {
+    @apply block;
+
+    .chart-details__content {
+      @apply flex-row h-full;
 
       &__info {
-        margin-right: 50px;
-        overflow: auto;
+        @apply mr-12 overflow-auto;
       }
 
       &__docs {
-        overflow: auto;
-        padding-right: 1em;
-        min-width: 0;
-        flex: 3;
+        @apply overflow-auto pr-4 min-w-0 flex-[3];
       }
     }
   }
 
-  @include mixins.mappy-bp(max-width small) {
+  @media (max-width: 479px) {
+    .chart-details__header__content {
+      @apply flex-col;
 
-    &__header {
-
-      &__content {
-        flex-direction: column;
-
-        h1 {
-          color: inherit;
-        }
+      h1 {
+        @apply text-inherit;
       }
     }
   }

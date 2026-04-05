@@ -9,7 +9,7 @@ import { ListComponent } from '../../../../../core/src/shared/components/list/li
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-nodes-tab',
   templateUrl: './kubernetes-nodes-tab.component.html',
-  styleUrls: ['./kubernetes-nodes-tab.component.scss'],
+
   standalone: true,
   imports: [
     ListComponent

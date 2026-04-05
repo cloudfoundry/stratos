@@ -11,7 +11,7 @@ import { KubernetesNodeTagsCardComponent } from './kubernetes-node-tags-card/kub
 @Component({
   selector: 'app-kubernetes-node-summary',
   templateUrl: './kubernetes-node-summary.component.html',
-  styleUrls: ['./kubernetes-node-summary.component.scss'],
+
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

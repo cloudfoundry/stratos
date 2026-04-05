@@ -17,7 +17,7 @@ import { KubernetesService } from '../services/kubernetes.service';
 @Component({
   selector: 'app-kubernetes',
   templateUrl: './kubernetes.component.html',
-  styleUrls: ['./kubernetes.component.scss'],
+
   providers: [
     {
       provide: ListConfig,

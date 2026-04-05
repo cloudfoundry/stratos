@@ -12,7 +12,7 @@ import { AnalysisReportRunnerComponent } from '../../analysis-report-viewer/anal
 @Component({
   selector: 'app-kubernetes-analysis-tab',
   templateUrl: './kubernetes-analysis-tab.component.html',
-  styleUrls: ['./kubernetes-analysis-tab.component.scss'],
+
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
