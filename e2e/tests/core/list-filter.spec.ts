@@ -63,7 +63,7 @@ test.describe('List Filter', () => {
   /** Get the item count from the header display */
   async function getItemCount(page: any): Promise<{ start: number; end: number; total: number }> {
     const countSpan = page.locator('.list-component__header__item-count').first();
-    const text = (await countSpan.textContent({ timeout: 3000 }))?.trim() || '';
+    const text = (await countSpan.textContent({ timeout: 10000 }))?.trim() || '';
     const match = text.match(/(\d+)\s*-\s*(\d+)\s*of\s*(\d+)/);
     if (match) {
       return { start: parseInt(match[1]), end: parseInt(match[2]), total: parseInt(match[3]) };

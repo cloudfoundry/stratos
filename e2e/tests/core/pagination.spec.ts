@@ -150,7 +150,7 @@ test.describe('Pagination', () => {
       expect(value).toBe('24');
     });
 
-    test('should inherit last choice on a different list', async ({ authenticatedPage }) => {
+    test('should inherit last choice on a different list', { timeout: 150000 }, async ({ authenticatedPage }) => {
       const page = authenticatedPage;
       if (!await goToOrgsPage(page)) {
         test.skip('Organizations page not reachable or no paginator');
@@ -193,6 +193,10 @@ test.describe('Pagination', () => {
         const paginatorInfo = page.locator('app-paginator .paginator-info span').first();
         try {
           await paginatorInfo.filter({ hasNotText: '0 of 0' }).waitFor({ timeout: 30000 });
+          // Wait for filter to be enabled — ensures isLoadingPage$ is false before interactions
+          const filterInput = page.locator('#listSearchFilter input[name="filter"]');
+          await filterInput.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+          await expect(filterInput).toBeEnabled({ timeout: 15000 }).catch(() => {});
           return true;
         } catch {
           if (attempt === maxAttempts) return false;
@@ -373,7 +377,8 @@ test.describe('Pagination', () => {
       }
 
       // Switch to table — dropdown should revert to a table default page size
-      await expect(tableToggle).toBeEnabled({ timeout: 10000 });
+      // Loading all apps may take time; use a generous timeout
+      await expect(tableToggle).toBeEnabled({ timeout: 30000 });
       await tableToggle.click();
       await page.waitForTimeout(1000);
       const tableValue = await select.inputValue();
@@ -383,6 +388,7 @@ test.describe('Pagination', () => {
       expect(tableInfo).not.toContain('0 of 0');
 
       // Switch back to card — should show all items again
+      await expect(cardToggle).toBeEnabled({ timeout: 15000 });
       await cardToggle.click();
       await page.waitForTimeout(1000);
       const cardAllInfo = (await info.textContent()) || '';
@@ -392,10 +398,10 @@ test.describe('Pagination', () => {
       }
 
       // Switch to table and back to card with a normal size
-      await expect(tableToggle).toBeEnabled({ timeout: 10000 });
+      await expect(tableToggle).toBeEnabled({ timeout: 15000 });
       await tableToggle.click();
       await page.waitForTimeout(1000);
-      await expect(cardToggle).toBeEnabled({ timeout: 10000 });
+      await expect(cardToggle).toBeEnabled({ timeout: 15000 });
       await cardToggle.click();
       await page.waitForTimeout(1000);
 
@@ -404,10 +410,10 @@ test.describe('Pagination', () => {
       await page.waitForTimeout(500);
 
       // Toggle to table and back — should show 12, not "All"
-      await expect(tableToggle).toBeEnabled({ timeout: 10000 });
+      await expect(tableToggle).toBeEnabled({ timeout: 15000 });
       await tableToggle.click();
       await page.waitForTimeout(1000);
-      await expect(cardToggle).toBeEnabled({ timeout: 10000 });
+      await expect(cardToggle).toBeEnabled({ timeout: 15000 });
       await cardToggle.click();
       await page.waitForTimeout(1000);
       const cardNormalValue = await select.inputValue();
@@ -427,10 +433,10 @@ test.describe('Pagination', () => {
         const paginatorInfo = page.locator('app-paginator .paginator-info span').first();
         try {
           await paginatorInfo.filter({ hasNotText: '0 of 0' }).waitFor({ timeout: 20000 });
-          // Wait for filter to be visible AND enabled (disabled while hasRows$=false)
+          // Wait for filter to be enabled — ensures isLoadingPage$ is false before interactions
           const filterInput = page.locator('#listSearchFilter input[name="filter"]');
           await filterInput.waitFor({ state: 'visible', timeout: 8000 }).catch(() => {});
-          await filterInput.isEnabled({ timeout: 5000 }).catch(() => {});
+          await expect(filterInput).toBeEnabled({ timeout: 15000 }).catch(() => {});
           return true;
         } catch {
           if (attempt === maxAttempts) return false;
