@@ -21,7 +21,7 @@ export class APIKeysListPage extends BasePage {
    * Get the add key button
    */
   getAddKeyButton(): Locator {
-    return this.page.locator('#stratos-api-key, button[aria-label="Add API Key"], button').filter({ hasText: /add.*key/i }).first();
+    return this.page.locator('#stratos-api-key');
   }
 
   /**

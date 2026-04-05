@@ -28,8 +28,12 @@ export default defineConfig({
   // Retry on CI only
   retries: process.env.CI ? 2 : 0,
 
-  // Opt out of parallel tests on CI
-  workers: process.env.CI ? 4 : undefined,
+  // Worker count: configurable via STRATOS_E2E_WORKERS env var.
+  // Each worker gets its own authenticated session to avoid session contention.
+  // Default: CI=4, local=half CPU cores (Playwright default)
+  workers: process.env.STRATOS_E2E_WORKERS
+    ? parseInt(process.env.STRATOS_E2E_WORKERS)
+    : (process.env.CI ? 4 : undefined),
 
   // Reporter configuration
   reporter: [
@@ -134,7 +138,7 @@ export default defineConfig({
   ...(process.env.STRATOS_E2E_BASE_URL ? {} : {
     webServer: [
       {
-        command: `cd src/jetstream && STRATOS_E2E=e2e:${BACKEND_PORT} CONSOLE_PROXY_TLS_ADDRESS=:${BACKEND_PORT} ../../dist/bin/jetstream`,
+        command: `cd src/jetstream && STRATOS_E2E=e2e:${BACKEND_PORT} CONSOLE_PROXY_TLS_ADDRESS=:${BACKEND_PORT} SESSION_STORE_EXPIRY=120 ../../dist/bin/jetstream`,
         url: `https://localhost:${BACKEND_PORT}/pp/v1/info`,
         reuseExistingServer: true,
         ignoreHTTPSErrors: true,

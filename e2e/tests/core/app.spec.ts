@@ -8,12 +8,11 @@ import { LoginPage } from '../../pages/login.page';
  * Basic application availability test
  */
 test.describe('App', () => {
-  test('should reach log in page', async ({ page }) => {
-    // Navigate to root
-    await page.goto('/');
+  test('should reach log in page', async ({ unauthenticatedPage }) => {
+    // Navigate to root — unauthenticated users should be redirected to login
+    await unauthenticatedPage.goto('/');
 
-    // Should redirect to login page
-    const loginPage = new LoginPage(page);
+    const loginPage = new LoginPage(unauthenticatedPage);
     expect(await loginPage.isLoginPage()).toBeTruthy();
   });
 });

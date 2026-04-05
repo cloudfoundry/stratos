@@ -1,17 +1,26 @@
-import { test as base, Page } from '@playwright/test';
+import { test as base, Page, BrowserContext } from '@playwright/test';
 import { SecretsHelper } from '../helpers/secrets-helpers';
 import { EndpointManagementHelper } from '../helpers/endpoint-management.helper';
 import { ConsoleUserType, RequestHelper } from '../helpers/request.helper';
 import { CFApiHelper } from '../helpers/cf-api.helper';
 import { ApplicationTestHelper, TestApp } from '../helpers/application-test.helper';
-import { detectAuthType, browserLogin, AuthType } from '../helpers/auth.helper';
+import { detectAuthType, browserLogin, apiLogin, AuthType } from '../helpers/auth.helper';
 import { ADMIN_STATE, USER_STATE } from '../auth.constants';
 
 /**
  * Test Fixtures
- * Provides reusable setup and teardown logic for E2E tests
- * Migrated from Protractor e2e.setup() pattern
+ *
+ * Worker-scoped sessions: each Playwright worker authenticates independently
+ * via API login, giving it its own backend session. This avoids session
+ * contention when multiple workers share a single session cookie.
+ *
+ * Configure worker count: STRATOS_E2E_WORKERS=N (default: half CPU cores)
  */
+
+type WorkerFixtures = {
+  workerAdminContext: BrowserContext;
+  workerUserContext: BrowserContext;
+};
 
 type TestFixtures = {
   secrets: ReturnType<typeof SecretsHelper.load>;
@@ -20,6 +29,7 @@ type TestFixtures = {
   authenticatedPage: Page;
   adminPage: Page;
   userPage: Page;
+  unauthenticatedPage: Page;
   noEndpointsAdminPage: Page;
   noEndpointsUserPage: Page;
   registeredEndpointsPage: Page;
@@ -32,10 +42,60 @@ type TestFixtures = {
 };
 
 /**
- * Extended test with custom fixtures
+ * Extended test with worker-scoped sessions and test-scoped fixtures.
  * Usage: import { test, expect } from '../fixtures/test-base';
  */
-export const test = base.extend<TestFixtures>({
+export const test = base.extend<TestFixtures, WorkerFixtures>({
+  /**
+   * Worker-scoped admin browser context.
+   * Each worker authenticates once via API login, creating its own session.
+   * All tests in this worker reuse this context (and its session cookie).
+   */
+  workerAdminContext: [async ({ browser }, use) => {
+    const secrets = SecretsHelper.load();
+    const baseURL = process.env.STRATOS_E2E_BASE_URL || 'https://localhost:5540';
+    const authType = await detectAuthType(baseURL);
+    const context = await browser.newContext({ ignoreHTTPSErrors: true, baseURL });
+
+    await apiLogin(context.request, baseURL, secrets.console.admin.username, secrets.console.admin.password, authType);
+
+    // Navigate once to ensure cookies are established
+    const page = await context.newPage();
+    await page.goto('/');
+    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+    await page.close();
+
+    await use(context);
+    await context.close();
+  }, { scope: 'worker' }],
+
+  /**
+   * Worker-scoped user browser context.
+   * Falls back to admin credentials if user is not configured.
+   */
+  workerUserContext: [async ({ browser }, use) => {
+    const secrets = SecretsHelper.load();
+    const baseURL = process.env.STRATOS_E2E_BASE_URL || 'https://localhost:5540';
+    const authType = await detectAuthType(baseURL);
+    const { username, password } = secrets.console.user;
+    const context = await browser.newContext({ ignoreHTTPSErrors: true, baseURL });
+
+    // Fall back to admin if user not configured
+    const loginUser = (!username || !password || password.includes('REPLACE'))
+      ? secrets.console.admin.username : username;
+    const loginPass = (!username || !password || password.includes('REPLACE'))
+      ? secrets.console.admin.password : password;
+
+    await apiLogin(context.request, baseURL, loginUser, loginPass, authType);
+
+    const page = await context.newPage();
+    await page.goto('/');
+    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+    await page.close();
+
+    await use(context);
+    await context.close();
+  }, { scope: 'worker' }],
   /**
    * Secrets fixture - provides access to secrets.yaml
    */
@@ -62,14 +122,15 @@ export const test = base.extend<TestFixtures>({
   },
 
   /**
-   * Authenticated page fixture - pre-authenticated as admin via storageState.
-   * The setup project saves admin cookies; the chromium project loads them.
-   * Just navigate to trigger the stored session.
+   * Authenticated page fixture - uses worker-scoped admin session.
+   * Each worker has its own session, eliminating contention.
    */
-  authenticatedPage: async ({ page }, use) => {
+  authenticatedPage: async ({ workerAdminContext }, use) => {
+    const page = await workerAdminContext.newPage();
     await page.goto('/');
     await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
     await use(page);
+    await page.close();
   },
 
   /**
@@ -80,42 +141,58 @@ export const test = base.extend<TestFixtures>({
   },
 
   /**
-   * User page fixture - uses saved user storageState
+   * Unauthenticated page fixture - fresh browser context with no session.
+   * Use for tests that need to verify the login page or unauthenticated behavior.
    */
-  userPage: async ({ browser }, use) => {
-    const context = await browser.newContext({ storageState: USER_STATE });
+  unauthenticatedPage: async ({ browser, baseURL }, use) => {
+    const context = await browser.newContext({
+      ignoreHTTPSErrors: true,
+      baseURL,
+      storageState: { cookies: [], origins: [] },
+    });
     const page = await context.newPage();
-    await page.goto('/');
-    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
     await use(page);
     await context.close();
   },
 
   /**
-   * No Endpoints Admin Page - Admin user (pre-authenticated via storageState)
+   * User page fixture - uses worker-scoped user session
    */
-  noEndpointsAdminPage: async ({ page }, use) => {
+  userPage: async ({ workerUserContext }, use) => {
+    const page = await workerUserContext.newPage();
     await page.goto('/');
     await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
     await use(page);
+    await page.close();
   },
 
   /**
-   * No Endpoints User Page - Regular user (pre-authenticated via storageState)
+   * No Endpoints Admin Page - Admin user with worker session
    */
-  noEndpointsUserPage: async ({ browser }, use) => {
-    const context = await browser.newContext({ storageState: USER_STATE });
-    const page = await context.newPage();
+  noEndpointsAdminPage: async ({ workerAdminContext }, use) => {
+    const page = await workerAdminContext.newPage();
     await page.goto('/');
     await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
     await use(page);
-    await context.close();
+    await page.close();
   },
 
   /**
-   * Registered Endpoints Page - Admin with default CF registered (pre-authenticated)
+   * No Endpoints User Page - Regular user with worker session
    */
-  registeredEndpointsPage: async ({ page, endpointManager }, use) => {
+  noEndpointsUserPage: async ({ workerUserContext }, use) => {
+    const page = await workerUserContext.newPage();
+    await page.goto('/');
+    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+    await use(page);
+    await page.close();
+  },
+
+  /**
+   * Registered Endpoints Page - Admin with worker session
+   */
+  registeredEndpointsPage: async ({ workerAdminContext }, use) => {
+    const page = await workerAdminContext.newPage();
     await page.goto('/');
     await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
 
@@ -131,6 +208,7 @@ export const test = base.extend<TestFixtures>({
     } catch { /* snackbar may not appear */ }
 
     await use(page);
+    await page.close();
   },
 
   /**
@@ -138,17 +216,24 @@ export const test = base.extend<TestFixtures>({
    * Pre-authenticated via storageState. Endpoint setup done in auth.setup.ts.
    * Uses page.request to get endpoint GUID (no extra browser launch).
    */
-  connectedEndpointsAdminPage: async ({ page, secrets }, use) => {
+  connectedEndpointsAdminPage: async ({ workerAdminContext, secrets }, use) => {
+    const page = await workerAdminContext.newPage();
     await page.goto('/');
     await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
 
-    // Get CF endpoint GUID using the page's existing session
+    // Get CF endpoint GUID using the worker's own session
     const response = await page.request.get('/api/v1/endpoints');
+    if (!response.ok()) {
+      throw new Error(`GET /api/v1/endpoints failed: ${response.status()} ${response.statusText()} — session may be invalid`);
+    }
     const endpointsList = await response.json();
+    if (!Array.isArray(endpointsList)) {
+      throw new Error(`GET /api/v1/endpoints returned ${typeof endpointsList} instead of array: ${JSON.stringify(endpointsList).slice(0, 200)}`);
+    }
     const cfEndpoint = endpointsList.find((ep: any) => ep.cnsi_type === 'cf');
 
     if (!cfEndpoint) {
-      throw new Error('No CF endpoint found');
+      throw new Error(`No CF endpoint found. Endpoints: ${JSON.stringify(endpointsList.map((e: any) => ({ name: e.name, type: e.cnsi_type }))).slice(0, 200)}`);
     }
 
     const cfConfig = secrets.cloudFoundry[0];
@@ -159,25 +244,32 @@ export const test = base.extend<TestFixtures>({
       orgGuid: cfConfig.testOrgGuid,
       spaceGuid: cfConfig.testSpaceGuid
     });
+
+    await page.close();
   },
 
   /**
    * Connected Endpoints User Page - Regular user with default CF connected.
    * Pre-authenticated via storageState. Uses page.request for GUID lookup.
    */
-  connectedEndpointsUserPage: async ({ browser, secrets }, use) => {
-    const context = await browser.newContext({ storageState: USER_STATE });
-    const page = await context.newPage();
+  connectedEndpointsUserPage: async ({ workerUserContext, secrets }, use) => {
+    const page = await workerUserContext.newPage();
     await page.goto('/');
     await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
 
-    // Get CF endpoint GUID using the page's existing session
+    // Get CF endpoint GUID using the worker's own session
     const response = await page.request.get('/api/v1/endpoints');
+    if (!response.ok()) {
+      throw new Error(`GET /api/v1/endpoints failed: ${response.status()} ${response.statusText()} — session may be invalid`);
+    }
     const endpointsList = await response.json();
+    if (!Array.isArray(endpointsList)) {
+      throw new Error(`GET /api/v1/endpoints returned ${typeof endpointsList} instead of array: ${JSON.stringify(endpointsList).slice(0, 200)}`);
+    }
     const cfEndpoint = endpointsList.find((ep: any) => ep.cnsi_type === 'cf');
 
     if (!cfEndpoint) {
-      throw new Error('No CF endpoint found');
+      throw new Error(`No CF endpoint found. Endpoints: ${JSON.stringify(endpointsList.map((e: any) => ({ name: e.name, type: e.cnsi_type }))).slice(0, 200)}`);
     }
 
     const cfConfig = secrets.cloudFoundry[0];
@@ -189,7 +281,7 @@ export const test = base.extend<TestFixtures>({
       spaceGuid: cfConfig.testSpaceGuid
     });
 
-    await context.close();
+    await page.close();
   },
 
   /**

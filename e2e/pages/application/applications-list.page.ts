@@ -148,6 +148,17 @@ export class ApplicationsPage extends BasePage {
   }
 
   /**
+   * Check if "no Cloud Foundry" message is displayed (when CF not connected)
+   */
+  async hasNoCloudFoundryMessage(): Promise<boolean> {
+    const cfMissing = this.page.locator('app-cf-endpoints-missing app-no-content-message');
+    const loadingMsg = this.page.locator('text=Loading applications...');
+    const hasMissing = await cfMissing.isVisible({ timeout: 3000 }).catch(() => false);
+    const hasLoading = await loadingMsg.isVisible({ timeout: 3000 }).catch(() => false);
+    return hasMissing || hasLoading;
+  }
+
+  /**
    * Clear all filters
    */
   async clearFilters(): Promise<void> {

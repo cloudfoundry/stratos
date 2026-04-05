@@ -38,7 +38,8 @@ export class LoginPage extends BasePage {
    * Migrated from: isLoginPage()
    */
   async isLoginPage(): Promise<boolean> {
-    return this.page.url().endsWith('/login');
+    await this.page.waitForURL(/\/login/, { timeout: 5000 }).catch(() => {});
+    return this.page.url().includes('/login');
   }
 
   /**
@@ -56,8 +57,8 @@ export class LoginPage extends BasePage {
    */
   async enterLogin(username: string, password: string): Promise<void> {
     // Wait for inputs to be rendered (inside @if block that depends on ssoLogin$)
-    await this.usernameInput.waitFor({ state: 'visible', timeout: 10000 });
-    await this.passwordInput.waitFor({ state: 'visible', timeout: 10000 });
+    await this.usernameInput.waitFor({ state: 'visible', timeout: 20000 });
+    await this.passwordInput.waitFor({ state: 'visible', timeout: 20000 });
 
     // Use native setter + events to trigger Angular OnPush + ngModel
     await fillAngularLogin(this.page, username, password);

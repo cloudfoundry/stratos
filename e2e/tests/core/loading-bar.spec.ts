@@ -19,14 +19,14 @@ test.describe('Loading Bar', () => {
       const page = authenticatedPage;
 
       // Navigate to a page that triggers data loading
-      const cfNav = page.locator('a').filter({ hasText: /Cloud Foundry/i }).first();
-      const visible = await cfNav.isVisible({ timeout: 10000 }).catch(() => false);
-      if (!visible) {
-        test.skip('Cloud Foundry nav not available');
+      const endpoints = await page.request.get('/api/v1/endpoints').then((r: any) => r.json()).catch(() => []);
+      const cfEndpoint = Array.isArray(endpoints) ? endpoints.find((ep: any) => ep.cnsi_type === 'cf') : null;
+      if (!cfEndpoint) {
+        test.skip('Cloud Foundry endpoint not available');
         return;
       }
-      await cfNav.click();
-      await page.waitForLoadState('networkidle');
+      await page.goto(`/cloud-foundry/${cfEndpoint.guid}/organizations`);
+      await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
 
       // Inject a test element to verify the CSS class exists and has animation
       const result = await page.evaluate(() => {
@@ -85,31 +85,21 @@ test.describe('Loading Bar', () => {
     test('loading bar appears during organizations page load', async ({ authenticatedPage }) => {
       const page = authenticatedPage;
 
-      // Navigate to Cloud Foundry
-      const cfNav = page.locator('a').filter({ hasText: /Cloud Foundry/i }).first();
-      const cfVisible = await cfNav.isVisible({ timeout: 10000 }).catch(() => false);
-      if (!cfVisible) {
-        test.skip('Cloud Foundry nav not available');
-        return;
-      }
-      await cfNav.click();
-      await page.waitForLoadState('networkidle');
-
-      // Navigate to Organizations — this triggers a data load with progress bar
-      const orgsNav = page.locator('a').filter({ hasText: /Organizations/i }).first();
-      const orgsVisible = await orgsNav.isVisible({ timeout: 10000 }).catch(() => false);
-      if (!orgsVisible) {
-        test.skip('Organizations nav not available');
+      // Navigate to Cloud Foundry orgs directly via URL
+      const endpoints = await page.request.get('/api/v1/endpoints').then((r: any) => r.json()).catch(() => []);
+      const cfEndpoint = Array.isArray(endpoints) ? endpoints.find((ep: any) => ep.cnsi_type === 'cf') : null;
+      if (!cfEndpoint) {
+        test.skip('Cloud Foundry endpoint not available');
         return;
       }
 
-      // Start watching for the progress bar BEFORE clicking
+      // Start watching for the progress bar BEFORE navigating
       const progressBarPromise = page.locator('.progress-bar-indeterminate').first()
         .waitFor({ state: 'attached', timeout: 5000 })
         .then(() => true)
         .catch(() => false);
 
-      await orgsNav.click();
+      await page.goto(`/cloud-foundry/${cfEndpoint.guid}/organizations`);
 
       const sawProgressBar = await progressBarPromise;
       // The progress bar may be too fast to catch, so we don't fail on this
@@ -117,8 +107,10 @@ test.describe('Loading Bar', () => {
       console.log(`Progress bar appeared during navigation: ${sawProgressBar}`);
 
       // After load completes, verify the progress bar is gone
-      await page.waitForLoadState('networkidle');
-      await page.waitForTimeout(2000);
+      await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
+      // Wait explicitly for progress bar to disappear (CF data may load after networkidle)
+      await page.locator('.progress-bar-indeterminate').first()
+        .waitFor({ state: 'hidden', timeout: 30000 }).catch(() => {});
 
       const progressBarStillVisible = await page.locator('.progress-bar-indeterminate')
         .first().isVisible({ timeout: 1000 }).catch(() => false);
