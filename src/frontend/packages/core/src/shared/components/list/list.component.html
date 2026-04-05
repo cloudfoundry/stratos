@@ -115,7 +115,7 @@
             [hidden]="!config.enableTextFilter || ((hasRows$ | async) === false && !filter) || (dataSource.isAdding$ | async) || (dataSource.maxedResults$ | async)">
             <div class="form-field list-component__header__right-filter">
               <div class="relative">
-                <input class="input pr-8" [ngModel]="filterString" #filter="ngModel"
+                <input type="text" class="input pr-8" [ngModel]="filterString" #filter="ngModel"
                   [disabled]="(filterColumns.length > 1 && filterSelected === undefined) || (dataSource.isLoadingPage$ | async)"
                   name="filter" placeholder="{{ filterSelected?.placeholder || config.text?.filter || 'Filter by Name'}}"
                   (keydown.escape)="clearFilterText(); $event.stopPropagation()">

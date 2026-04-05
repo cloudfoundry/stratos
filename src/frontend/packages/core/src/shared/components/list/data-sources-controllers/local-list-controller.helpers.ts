@@ -21,28 +21,3 @@ export function splitCurrentPage<T = any>(entities: (T | T[])[], pageSize: numbe
     index: 0
   };
 }
-
-export function getCurrentPageStartIndex<T = any>(entities: (T | T[])[], pageSize: number, requiredPage: number): number | null {
-  const data = {
-    index: null as number | null,
-    currentPage: 0,
-    splitPages: 0
-  };
-  for (let i = 0; i < entities.length; i++) {
-    const ent = entities[i];
-    if (Array.isArray(ent)) {
-      ++data.currentPage;
-      ++data.splitPages;
-    } else {
-      const index = (i - data.splitPages) + (data.splitPages * pageSize);
-      if (index % pageSize === 0) {
-        ++data.currentPage;
-      }
-    }
-    if (data.currentPage === requiredPage) {
-      data.index = i;
-      break;
-    }
-  }
-  return data.index;
-}
