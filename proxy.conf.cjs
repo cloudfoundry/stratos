@@ -13,7 +13,7 @@ const PROXY_CONFIG = {
     "secure": false,
     "changeOrigin": true,
   },
-  "/api/": {
+  "/api/v1": {
     "target": {
       "host": "127.0.0.1",
       "protocol": "https:",

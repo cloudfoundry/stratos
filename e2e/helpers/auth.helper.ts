@@ -78,7 +78,15 @@ async function browserLoginLocal(
 
   await fillAngularLogin(page, username, password);
   await page.locator('button[type="submit"]').click();
-  await page.waitForURL(/^(?!.*\/login)/, { timeout: 15000 });
+  await page.waitForURL(/^(?!.*\/login)/, { timeout: 15000 }).catch(async (e: Error) => {
+    // Firefox throws NS_BINDING_ABORTED when the redirect binding is aborted mid-flight.
+    // The redirect is still in progress — retry waitForURL to let it complete.
+    if (e.message?.includes('NS_BINDING_ABORTED')) {
+      await page.waitForURL(/^(?!.*\/login)/, { timeout: 10000 });
+      return;
+    }
+    throw e;
+  });
 }
 
 /**

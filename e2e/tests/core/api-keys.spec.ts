@@ -59,6 +59,12 @@ test.describe('API Keys', () => {
     test('new key does not exist', async () => {
       apiKeysPage = new APIKeysListPage(sharedPage);
 
+      // Wait for page to settle — either the list or the empty-state message must appear
+      await Promise.race([
+        apiKeysPage.list.locator.waitFor({ state: 'visible', timeout: 10000 }),
+        sharedPage.locator('app-no-content-message, .no-content-message').waitFor({ state: 'visible', timeout: 10000 }),
+      ]).catch(() => {});
+
       const isListDisplayed = await apiKeysPage.list.locator.isVisible().catch(() => false);
 
       if (isListDisplayed) {
