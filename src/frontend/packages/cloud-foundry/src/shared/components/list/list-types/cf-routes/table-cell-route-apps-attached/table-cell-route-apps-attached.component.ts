@@ -22,13 +22,13 @@ export class TableCellRouteAppsAttachedComponent extends TableCellCustom<APIReso
   config$ = new BehaviorSubject<any>(null);
   row$ = new BehaviorSubject<APIResource<CfRoute> | null>(null);
 
-  @Input('config')
+  @Input()
   set config(config: { breadcrumbs?: string }) {
     super.config = config;
     this.config$.next(config);
   }
 
-  @Input('row')
+  @Input()
   set row(route: APIResource<CfRoute>) {
     super.row = route;
     this.row$.next(route);

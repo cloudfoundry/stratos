@@ -579,7 +579,7 @@ export class EntityCatalog {
       if (endpoint.definition.userRolesReducer) {
         const endpointState = endpoint.definition.userRolesReducer(state.endpoints[endpoint.type], action);
         oneChanged = oneChanged || !!endpointState;
-        if (!!endpointState) {
+        if (endpointState) {
           state = {
             ...state,
             endpoints: {

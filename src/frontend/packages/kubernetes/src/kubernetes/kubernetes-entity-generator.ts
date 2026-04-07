@@ -604,7 +604,7 @@ export class KubeEntityCatalog {
   }
 
   private jobToCompletion(spec: { completions?: number; parallelism?: number }, status: { succeeded?: number; Succeeded?: number }): string {
-    if (!!spec.completions) {
+    if (spec.completions) {
       return status.succeeded + '/' + spec.completions;
     }
 

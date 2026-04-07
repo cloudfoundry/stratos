@@ -40,7 +40,7 @@ export class HelmReleaseCardComponent extends CardCell<HelmRelease> {
   public lastDeployed: string;
   public icon: string;
 
-  @Input('row')
+  @Input()
   set row(row: HelmRelease) {
     super.row = row;
     if (row) {

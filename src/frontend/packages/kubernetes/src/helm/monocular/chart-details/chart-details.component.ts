@@ -59,7 +59,7 @@ export class ChartDetailsComponent implements OnInit {
       const repo = params.repo;
       const chartName = params.chartName;
 
-      if (!!chartName) {
+      if (chartName) {
         this.chartsService.getChart(repo, chartName).pipe(
           take(1),
           switchMap(chart => {

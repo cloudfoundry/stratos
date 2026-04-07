@@ -27,7 +27,7 @@ export class TableCellServiceInstanceTagsComponent
 
   tags: AppChip<IServiceInstance | IUserProvidedServiceInstance>[] = [];
 
-  @Input('row')
+  @Input()
   override set row(row: APIResource<IServiceInstance> | APIResource<IUserProvidedServiceInstance>) {
     this.pRow = row;
     if (row && row.entity) {

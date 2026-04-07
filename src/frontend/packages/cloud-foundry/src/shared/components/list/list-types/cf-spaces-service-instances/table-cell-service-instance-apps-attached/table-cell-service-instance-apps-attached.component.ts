@@ -33,13 +33,13 @@ export class TableCellServiceInstanceAppsAttachedComponent
   config$ = new BehaviorSubject<any>(null);
   row$ = new BehaviorSubject<APIResource<IServiceInstance> | null>(null);
 
-  @Input('config')
+  @Input()
   set config(config: any) {
     super.config = config;
     this.config$.next(config);
   }
 
-  @Input('row')
+  @Input()
   set row(row: APIResource<IServiceInstance>) {
     super.row = row;
     this.row$.next(row);

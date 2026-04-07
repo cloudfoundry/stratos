@@ -31,7 +31,7 @@ export class TableCellEndpointNameComponent extends TableCellCustom<EndpointMode
 
   public endpoint$!: Observable<any>;
 
-  @Input('row')
+  @Input()
   set row(row: EndpointModel | RowWithEndpointId) {
     super.row = row;
     /* tslint:disable-next-line:no-string-literal */

@@ -96,13 +96,13 @@ export class TableCellFavoriteComponent<T, Y extends IFavoriteMetadata> extends
   public favorite!: UserFavorite<Y>;
   public canFavorite = false;
 
-  @Input('config')
+  @Input()
   set config(config: TableCellFavoriteComponentConfig<T, Y>) {
     super.config = config;
     this.createUserFavorite();
   }
 
-  @Input('row')
+  @Input()
   set row(row: T) {
     super.row = row;
     this.createUserFavorite();

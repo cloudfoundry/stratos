@@ -69,7 +69,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
 
 
-  @Input('row')
+  @Input()
   set row(row: APIResource<IServiceInstance>) {
     super.row = row;
     if (row && row.entity && row.metadata) {

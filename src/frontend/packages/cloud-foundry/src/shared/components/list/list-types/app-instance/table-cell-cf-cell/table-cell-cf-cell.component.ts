@@ -29,7 +29,7 @@ export class TableCellCfCellComponent extends TableCellCustom<ListAppInstance> i
   cellLink!: string;
   fetchMetricsSub!: Subscription;
 
-  @Input('config')
+  @Input()
   set config(config: {
     metricEntityService: EntityService<IMetrics<IMetricMatrixResult<IMetricCell>>>;
     cfGuid: string;

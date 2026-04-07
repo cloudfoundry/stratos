@@ -54,6 +54,19 @@ export default tseslint.config(
     },
   },
   {
+    files: ["**/*.spec.ts", "**/test-setup.ts"],
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          varsIgnorePattern: "^(describe|it|test|expect|beforeAll|afterAll|beforeEach|afterEach|vi)$",
+          args: "after-used",
+          ignoreRestSiblings: true,
+        },
+      ],
+    },
+  },
+  {
     files: ["**/*.html"],
     extends: [
       ...angular.configs.templateRecommended,

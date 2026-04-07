@@ -52,7 +52,7 @@
                               <label class="radio-label">
                                 <input type="radio" value="custom" (click)="resetEffectiveType('custom')" class="radio">
                                 <span class="radio-text">Custom</span>
-                                @if (editEffectiveType=='custom') {
+                                @if (editEffectiveType==='custom') {
                                   <div class="mt-2 grid grid-cols-2 gap-2">
                                     <div class="form-group">
                                       <input type="date" name="start_date" formControlName="start_date" required
@@ -81,7 +81,7 @@
                           </app-metadata-item>
                           <div class="form-group">
                             <label class="label">Repeat On</label>
-                            @if (editRepeatType=='week') {
+                            @if (editRepeatType==='week') {
                               <select multiple name="days_of_week"
                                 formControlName="days_of_week" required class="select" size="4">
                                 @for (day of weekdayOptions; track $index; let dayIndex = $index) {
@@ -91,7 +91,7 @@
                                 }
                               </select>
                             }
-                            @if (editRepeatType=='month') {
+                            @if (editRepeatType==='month') {
                               <select multiple name="days_of_month"
                                 formControlName="days_of_month" required class="select" size="4">
                                 @for (day of monthdayOptions; track $index; let dayIndex = $index) {
@@ -166,22 +166,22 @@
                           {{policyAlert.alertInvalidPolicyScheduleEndTimeBeforeStartTime}}
                         </div>
                       }
-                      @if (editRepeatType=='week' && editRecurringScheduleForm.get('days_of_week').hasError('required')) {
+                      @if (editRepeatType==='week' && editRecurringScheduleForm.get('days_of_week').hasError('required')) {
                         <div class="text-red-600 text-sm">
                           {{policyAlert.alertInvalidPolicyScheduleRepeatOn}}
                         </div>
                       }
-                      @if (editRepeatType=='week' && editRecurringScheduleForm.get('days_of_week').hasError('alertInvalidPolicyScheduleRecurringConflict')) {
+                      @if (editRepeatType==='week' && editRecurringScheduleForm.get('days_of_week').hasError('alertInvalidPolicyScheduleRecurringConflict')) {
                         <div class="text-red-600 text-sm">
                           days_of_week {{policyAlert.alertInvalidPolicyScheduleRecurringConflict}}
                         </div>
                       }
-                      @if (editRepeatType=='month' && editRecurringScheduleForm.get('days_of_month').hasError('required')) {
+                      @if (editRepeatType==='month' && editRecurringScheduleForm.get('days_of_month').hasError('required')) {
                         <div class="text-red-600 text-sm">
                           {{policyAlert.alertInvalidPolicyScheduleRepeatOn}}
                         </div>
                       }
-                      @if (editRepeatType=='month' && editRecurringScheduleForm.get('days_of_month').hasError('alertInvalidPolicyScheduleRecurringConflict')) {
+                      @if (editRepeatType==='month' && editRecurringScheduleForm.get('days_of_month').hasError('alertInvalidPolicyScheduleRecurringConflict')) {
                         <div class="text-red-600 text-sm">
                           days_of_month {{policyAlert.alertInvalidPolicyScheduleRecurringConflict}}
                         </div>

@@ -16,7 +16,7 @@ import { IHeaderBreadcrumbLink } from '../page-header/page-header.types';
 export class PageSubNavComponent implements AfterViewInit, OnDestroy {
   private tabNavService = inject(TabNavService);
 
-  @Input('breadcrumbs')
+  @Input()
   set breadcrumbs(crumbs: IHeaderBreadcrumbLink[]) {
     this.tabNavService.setSubNavBreadcrumbs(crumbs);
   }

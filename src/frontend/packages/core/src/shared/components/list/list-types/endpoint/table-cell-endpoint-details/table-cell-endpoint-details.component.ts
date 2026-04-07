@@ -26,7 +26,7 @@ export class TableCellEndpointDetailsComponent extends TableCellCustom<EndpointM
 
   cell: EndpointListDetailsComponent;
 
-  @Input('row')
+  @Input()
   set row(row: EndpointModel) {
     super.row = row;
     const e = entityCatalog.getEndpoint(row.cnsi_type, row.sub_type).definition;

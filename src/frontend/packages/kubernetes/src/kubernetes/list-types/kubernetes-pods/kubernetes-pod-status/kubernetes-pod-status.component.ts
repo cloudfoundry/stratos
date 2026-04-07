@@ -15,7 +15,7 @@ export class KubernetesPodStatusComponent extends TableCellCustom<KubernetesPod>
 
   public style = 'border-success';
 
-  @Input('row')
+  @Input()
   set row(row: KubernetesPod) {
     super.row = row;
     if (row) {

@@ -100,7 +100,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
   @ViewChild('copyToClipboard') copyToClipboard!: CopyToClipboardComponent;
 
-  @Input('row')
+  @Input()
   set row(row: EndpointModel) {
     super.row = row;
     if (!row) {
@@ -126,7 +126,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
   private _dataSource!: BaseEndpointsDataSource;
 
-  @Input('dataSource')
+  @Input()
   set dataSource(ds: BaseEndpointsDataSource) {
     super.dataSource = ds;
     this._dataSource = ds;

@@ -54,7 +54,7 @@ enum EditorMode {
 export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewInit {
 
   @Input() set config(config: ChartValuesConfig) {
-    if (!!config) {
+    if (config) {
       this.schemaUrl = config.schemaUrl;
       this.valuesUrl = config.valuesUrl;
       this.releaseValues = config.releaseValues;

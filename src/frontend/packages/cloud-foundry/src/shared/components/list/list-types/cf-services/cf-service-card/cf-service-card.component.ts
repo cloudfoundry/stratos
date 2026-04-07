@@ -74,7 +74,7 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
 
   @Input() disableCardClick = false;
 
-  @Input('row')
+  @Input()
   set row(row: APIResource<IService>) {
     super.row = row;
     if (row) {

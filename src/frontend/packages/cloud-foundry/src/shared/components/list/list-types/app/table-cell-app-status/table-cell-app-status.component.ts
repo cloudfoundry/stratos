@@ -22,7 +22,7 @@ export class TableCellAppStatusComponent extends TableCellCustom<APIResource<IAp
   private appStateService = inject(ApplicationStateService);
 
   applicationState!: ApplicationStateData;
-  @Input('config')
+  @Input()
   set config(value: { hideIcon: boolean, initialStateOnly: boolean, }) {
     super.config = value;
     value = value || {
