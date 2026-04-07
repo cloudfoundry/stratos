@@ -4,7 +4,7 @@
       <app-multiline-title>{{ row.name }}</app-multiline-title>
       <div class="flex self-end">
         @if (icon) {
-          <img class="h-12 w-12 object-contain" [src]="icon" (error)="loadImageError()">
+          <img class="h-12 w-12 object-contain" [src]="icon" [alt]="row.name + ' icon'" (error)="loadImageError()">
         } @else {
           <app-custom-icon class="text-5xl h-12 w-12" fontSet="stratos-icons">workloads</app-custom-icon>
         }

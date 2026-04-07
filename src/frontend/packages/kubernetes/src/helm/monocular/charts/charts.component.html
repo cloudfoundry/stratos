@@ -5,7 +5,7 @@
         <div class="charts__header__block">
           <h1 class="charts__header__title">
             Charts
-            <div class="charts__header__filters" (click)="filtersOpen = !filtersOpen">
+            <div class="charts__header__filters" tabindex="0" role="button" (click)="filtersOpen = !filtersOpen" (keydown.enter)="filtersOpen = !filtersOpen">
               @if (filtersOpen) {
                 <app-custom-icon svgIcon="close"></app-custom-icon>
               }

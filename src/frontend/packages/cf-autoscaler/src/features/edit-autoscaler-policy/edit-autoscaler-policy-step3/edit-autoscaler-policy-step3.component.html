@@ -38,7 +38,7 @@
                     }
                   </div>
                 }
-                @if (editIndex==index) {
+                @if (editIndex===index) {
                   <div class="space-y-6">
                     <form [formGroup]="editRecurringScheduleForm" validate class="space-y-6">
                       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -80,7 +80,7 @@
                             </div>
                           </app-metadata-item>
                           <div class="form-group">
-                            <label class="label">Repeat On</label>
+                            <label class="label" for="days_of_week">Repeat On</label>
                             @if (editRepeatType==='week') {
                               <select multiple name="days_of_week"
                                 formControlName="days_of_week" required class="select" size="4">
@@ -197,7 +197,7 @@
                     <span class="material-icons">edit</span>
                   </button>
                 }
-                @if (editIndex==index) {
+                @if (editIndex===index) {
                   <button id="autoscaler-policy-edit-done" (click)="finishRecurringSchedule()"
                     [disabled]="editRecurringScheduleForm.invalid" class="btn-icon text-green-600" title="Done">
                     <span class="material-icons">done</span>

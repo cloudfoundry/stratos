@@ -40,7 +40,7 @@
           <div class="flex flex-col">
             <h4 class="text-[15px] mt-0 mb-2">Helm Repositories</h4>
             @for (repo of repos.stratosRepos; track repo) {
-              <a class="cursor-pointer text-sm" (click)="filterCharts(repo)"
+              <a class="cursor-pointer text-sm" tabindex="0" (click)="filterCharts(repo)" (keydown.enter)="filterCharts(repo)"
               [class.font-bold]="repo === filteredRepo">{{repo}}</a>
             }
           </div>
@@ -49,7 +49,7 @@
           <div class="flex flex-col">
             <h4 class="text-[15px] my-2">Artifact Hub Repositories</h4>
             @for (repo of repos.artifactHubRepos; track repo) {
-              <a class="cursor-pointer text-sm" (click)="filterCharts(repo)"
+              <a class="cursor-pointer text-sm" tabindex="0" (click)="filterCharts(repo)" (keydown.enter)="filterCharts(repo)"
               [class.font-bold]="repo === filteredRepo">{{repo}}</a>
             }
           </div>

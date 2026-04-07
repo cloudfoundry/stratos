@@ -19,7 +19,7 @@
   </div>
   @if (showMoreLink()) {
     <div class="more-link">
-      <a (click)="setShowAllVersions()">show all...</a>
+      <a tabindex="0" (click)="setShowAllVersions()" (keydown.enter)="setShowAllVersions()">show all...</a>
     </div>
   }
 </div>

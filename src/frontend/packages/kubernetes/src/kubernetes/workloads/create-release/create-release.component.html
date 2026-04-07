@@ -38,7 +38,9 @@
               @for (namespace of namespaces$ | async; track namespace) {
                 <div
                   class="px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                  (click)="details.patchValue({releaseNamespace: namespace})">
+                  tabindex="0" role="button"
+                  (click)="details.patchValue({releaseNamespace: namespace})"
+                  (keydown.enter)="details.patchValue({releaseNamespace: namespace})">
                   {{namespace}}
                 </div>
               }

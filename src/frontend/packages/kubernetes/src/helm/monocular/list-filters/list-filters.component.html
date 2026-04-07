@@ -3,7 +3,7 @@
     <div class="list-filters_section">
       <h3 class="list-filters_section_title">{{ filter.title }}</h3>
       @for (item of filter.items; track item.value; let i = $index) {
-        <div class="list-filters_section_link" [class.active]="item.selected" (click)='filter.onSelect(i)'>
+        <div class="list-filters_section_link" [class.active]="item.selected" tabindex="0" role="button" (click)='filter.onSelect(i)' (keydown.enter)='filter.onSelect(i)'>
           {{ item.title }}
         </div>
       }
