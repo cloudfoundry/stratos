@@ -18,8 +18,16 @@
 #   make clean frontend         Remove frontend build only
 #   make clean backend          Remove backend binaries only
 #   make clean dist             Remove everything (including node_modules)
+#   make check                  Run all quality gates (lint + gate)
+#   make check e2e              Run Playwright E2E tests
 #   make stamp frontend         Generate build-info.ts with version metadata
 #   make dump version           Print resolved version variables
+#
+# Variables:
+#   FINAL=strip                 Strip prerelease from version (persisted)
+#   DRYRUN=yes                  Preview actions without executing
+#   VERSION=vX.Y.Z              Override version
+#   PLATFORM=os/arch            Override target platform
 #
 # Debug: make _HIDE= <target>  — exposes all internal variables
 #
@@ -31,6 +39,12 @@ include version.mk
 $(_HIDE)DIST_DIR    := dist
 $(_HIDE)RELEASE_DIR := $($(_HIDE)DIST_DIR)/release
 $(_HIDE)BIN_DIR     := $($(_HIDE)DIST_DIR)/bin
+
+# ── Cross-cutting variables ───────────────────────────────────
+# DRYRUN=yes   — preview actions without executing (any verb)
+# FINAL=strip  — strip prerelease from version, persist to package.json
+DRYRUN ?=
+FINAL  ?=
 
 # ── Platform detection ────────────────────────────────────────
 # Override with: make build PLATFORM=linux/amd64
@@ -128,19 +142,43 @@ ifeq ($($(_HIDE)WANT_CF),yes)
 endif
 
 $(_HIDE)WANT_CLEAN_DIST :=
+$(_HIDE)WANT_LINT       :=
+$(_HIDE)WANT_GATE       :=
+$(_HIDE)WANT_TESTS      :=
+$(_HIDE)WANT_COVERAGE   :=
 
 ifneq ($(filter dist,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_CLEAN_DIST := yes
 endif
+ifneq ($(filter lint,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_LINT := yes
+endif
+ifneq ($(filter gate,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_GATE := yes
+endif
+ifneq ($(filter tests,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_TESTS := yes
+endif
+ifneq ($(filter coverage,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_COVERAGE := yes
+endif
+# Default: all checks when none specified
+ifneq ($(filter check,$(MAKECMDGOALS)),)
+ifeq ($($(_HIDE)WANT_LINT)$($(_HIDE)WANT_GATE)$($(_HIDE)WANT_TESTS)$($(_HIDE)WANT_COVERAGE)$($(_HIDE)WANT_E2E),)
+  $(_HIDE)WANT_LINT     := yes
+  $(_HIDE)WANT_GATE     := yes
+endif
+endif
 
 # No-op targets so modifiers don't error
-.PHONY: frontend backend cf github dist version e2e actions
-frontend backend cf github dist version e2e actions:
+# Note: lint has its own standalone recipe — not listed here.
+.PHONY: frontend backend cf github dist version e2e actions gate tests coverage
+frontend backend cf github dist version e2e actions gate tests coverage:
 	@:
 
 # No-op targets for bump modifiers (consumed by BUMP_MOD filter).
-.PHONY: major minor patch rc alpha beta prerelease release
-major minor patch rc alpha beta prerelease release:
+.PHONY: major minor patch rc alpha beta prerelease
+major minor patch rc alpha beta prerelease:
 	@:
 
 # ── Load action registry ─────────────────────────────────────
@@ -235,6 +273,47 @@ define test.e2e
 endef
 $(call register, test, e2e)
 
+# ── Check (quality gates) ────────────────────────────────────
+# make check          — lint + gate (default)
+# make check lint     — ESLint + go vet only
+# make check gate     — lint + unit tests (= bun run gate-check)
+# make check tests    — unit tests only
+# make check coverage — unit tests with coverage
+# make check e2e      — Playwright E2E core tests
+
+define check.lint
+	@echo "Running lint checks..."
+	bun run lint
+	cd src/jetstream && go fmt ./... && go vet ./...
+endef
+$(call register, check, lint)
+
+define check.gate
+	@echo "Running gate checks (lint + unit tests)..."
+	bun run gate-check
+	cd src/jetstream && go test ./... -v -count=1
+endef
+$(call register, check, gate)
+
+define check.tests
+	@echo "Running unit tests..."
+	bun run test
+	cd src/jetstream && go test ./... -v -count=1
+endef
+$(call register, check, tests)
+
+define check.coverage
+	@echo "Running unit tests with coverage..."
+	bun run test -- --coverage
+endef
+$(call register, check, coverage)
+
+define check.e2e
+	@echo "Running Playwright E2E core tests..."
+	npx playwright test e2e/tests/core/ --project=chromium
+endef
+$(call register, check, e2e)
+
 # ── CF release ────────────────────────────────────────────────
 
 define release.cf
@@ -255,6 +334,23 @@ $(call register, release, github)
 # Verb wiring — declare each verb after all objects are registered.
 # ══════════════════════════════════════════════════════════════
 
+# ── FINAL=strip — finalize version, then re-exec without FINAL ──
+# Strips prerelease from package.json and re-invokes Make so all
+# version variables resolve fresh from the updated package.json.
+# Uses MAKEOVERRIDES filter to prevent FINAL from propagating.
+ifeq ($(FINAL),strip)
+.PHONY: $(_HIDE)finalize-and-reexec
+$(_HIDE)finalize-and-reexec:
+	@echo "Finalizing version (stripping prerelease)..."
+	@chmod +x build/version-bump.sh
+	@./build/version-bump.sh bump release
+	@echo "Re-running: $(MAKE) $(MAKECMDGOALS)"
+	@$(MAKE) FINAL= $(MAKECMDGOALS)
+$(filter-out frontend backend cf github dist version e2e actions lint gate tests coverage,$(MAKECMDGOALS)): $(_HIDE)finalize-and-reexec ; @:
+else ifneq ($(FINAL),)
+$(error Unknown FINAL value '$(FINAL)' — supported: strip)
+endif
+
 # ── Cross-cutting modifier allowances ────────────────────────
 # These modifiers affect build behavior through variables (e.g.,
 # cf forces PLATFORM=linux/amd64) rather than via a registered recipe.
@@ -264,6 +360,7 @@ $(call declare_verb, build)
 $(call declare_verb, test)
 $(call declare_verb, release)
 $(call declare_verb, stamp)
+$(call declare_verb, check)
 # Skip dev verb declaration when 'dev' is used as a bump modifier
 ifeq ($(filter bump,$(MAKECMDGOALS)),)
 $(call declare_verb, dev)
@@ -330,9 +427,14 @@ install:
 	bun install
 	@echo "Dependencies installed."
 
+# lint: standalone verb, but no-op when used as check modifier
+ifeq ($(filter check,$(MAKECMDGOALS)),)
 lint:
 	bun run lint
 	cd src/jetstream && go fmt ./... && go vet ./...
+else
+lint: ;@:
+endif
 
 security: gosec trivy vuln
 
@@ -352,20 +454,20 @@ vuln:
 # bump uses its own modifier set not shared with other verbs,
 # so it is wired manually rather than via register/declare_verb.
 
-$(_HIDE)BUMP_MOD := $(filter major minor patch dev alpha beta rc prerelease release,$(MAKECMDGOALS))
+$(_HIDE)BUMP_MOD := $(filter major minor patch dev alpha beta rc prerelease,$(MAKECMDGOALS))
 
 .PHONY: bump
 bump:
 	@set -- $($(_HIDE)BUMP_MOD); \
 	if [ $$# -eq 0 ]; then \
-		echo "Usage: make bump <major|minor|patch|dev|alpha|beta|rc|prerelease|release>" >&2; \
+		echo "Usage: make bump <major|minor|patch|dev|alpha|beta|rc|prerelease>" >&2; \
 		exit 1; \
 	elif [ $$# -gt 1 ]; then \
 		echo "Only one bump modifier allowed" >&2; \
 		exit 1; \
 	fi
 	@chmod +x build/version-bump.sh
-	@./build/version-bump.sh bump $($(_HIDE)BUMP_MOD)
+	@./build/version-bump.sh bump $($(_HIDE)BUMP_MOD) $(if $(filter yes,$(DRYRUN)),--dry-run)
 
 # ── Help ──────────────────────────────────────────────────────
 .PHONY: help
@@ -384,6 +486,14 @@ help:
 	@echo "  make test backend         Backend tests only"
 	@echo "  make test e2e             Run Playwright E2E tests"
 	@echo "  make lint                 Run linters"
+	@echo ""
+	@echo "Quality:"
+	@echo "  make check                Run all quality gates (lint + gate)"
+	@echo "  make check lint           Lint checks only"
+	@echo "  make check gate           Lint + unit tests (gate-check)"
+	@echo "  make check tests          Unit tests only"
+	@echo "  make check coverage       Unit tests with coverage"
+	@echo "  make check e2e            Playwright E2E core tests"
 	@echo ""
 	@echo "Release:"
 	@echo "  make release              Create CF zip + GitHub archives"
@@ -420,7 +530,16 @@ help:
 	@echo "  make bump beta            Set/increment beta prerelease (beta.N)"
 	@echo "  make bump rc              Set/increment rc prerelease (rc.N)"
 	@echo "  make bump prerelease      Set/increment prerelease (prerelease.N)"
-	@echo "  make bump release         Promote to release (strip prerelease)"
+	@echo ""
+	@echo "Variables:"
+	@echo "  FINAL=strip               Strip prerelease from version (persisted)"
+	@echo "  DRYRUN=yes                Preview actions without executing"
+	@echo "  VERSION=vX.Y.Z            Override version"
+	@echo "  PLATFORM=os/arch          Override target platform"
+	@echo ""
+	@echo "  Examples:"
+	@echo "    make release cf FINAL=strip       Finalize version + package"
+	@echo "    make bump dev DRYRUN=yes          Preview version bump"
 	@echo ""
 	@echo "Registry:"
 	@echo "  make dump actions         List all registered verb+modifier pairs"
