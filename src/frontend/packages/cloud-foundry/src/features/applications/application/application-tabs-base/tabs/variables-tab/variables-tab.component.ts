@@ -60,7 +60,7 @@ export class VariablesTabComponent implements OnInit {
 
   envVars$!: Observable<{
     names: string[],
-    values: {}
+    values: Record<string, unknown>
   }>;
 
   envVarsDataSource: ListDataSource<ListAppEnvVar, ListAppEnvVar>;
@@ -90,7 +90,7 @@ export class VariablesTabComponent implements OnInit {
       if (envVarType === 'cfGuid' || envVarType === stratosEndpointGuidKey) {
         return;
       }
-      const envVars = (allEnvVars[0].entity[envVarType]) ? allEnvVars[0].entity[envVarType] : {};
+      const envVars = (allEnvVars[0].entity[envVarType]) ? allEnvVars[0].entity[envVarType] : Record<string, unknown>;
       result.push({
         section: true,
         name: envVarType.replace('_json', ''),

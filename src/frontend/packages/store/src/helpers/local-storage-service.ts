@@ -196,7 +196,7 @@ export class LocalStorageService {
    */
   private static parseStorePartForLocalStorage<T = any>(storePart: T, type: LocalStorageSyncTypes): object {
     switch (type) {
-      case LocalStorageSyncTypes.PAGINATION:
+      case LocalStorageSyncTypes.PAGINATION: {
         const pagination: PaginationState = storePart as unknown as PaginationState;
         const paginationWithIndex = pagination as Record<string, any>;
         // Convert each pagination section that we care about into an object with only the properties we care about
@@ -225,6 +225,7 @@ export class LocalStorageService {
           return res;
         }, {} as Record<string, any>);
         return LocalStorageService.encrypt(abs);
+      }
     }
     return LocalStorageService.encrypt(storePart);
   }

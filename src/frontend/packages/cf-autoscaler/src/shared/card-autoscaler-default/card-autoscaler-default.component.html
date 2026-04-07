@@ -15,7 +15,7 @@
             {{ policy.instance_min_count }}
           </div>
         }
-        @if (!(appAutoscalerPolicy$ | async)) {
+        @if ((appAutoscalerPolicy$ | async) === false) {
           <div class="text-content-muted">-</div>
         }
       </app-metadata-item>
@@ -25,7 +25,7 @@
             {{ policy.instance_max_count }}
           </div>
         }
-        @if (!(appAutoscalerPolicy$ | async)) {
+        @if ((appAutoscalerPolicy$ | async) === false) {
           <div class="text-content-muted">-</div>
         }
       </app-metadata-item>

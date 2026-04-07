@@ -1,4 +1,4 @@
-@if (!(helper.clusters$ | async)) {
+@if ((helper.clusters$ | async) === false) {
   <div class="flex flex-1 items-center justify-center">
     <div class="text-center">
       <app-custom-icon class="text-[96px] h-24 w-24 opacity-70">insert_drive_file</app-custom-icon>

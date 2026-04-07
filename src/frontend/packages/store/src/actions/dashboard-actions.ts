@@ -77,7 +77,7 @@ export class SetThemeAction implements Action {
 
 export class SetDashboardStateValueAction implements Action {
   constructor(public prop: string, public value: any) {
-    if (!defaultDashboardState.hasOwnProperty(prop)) {
+    if (!Object.hasOwn(defaultDashboardState, prop)) {
       console.warn(`SetDashboardStateValueAction: Unknown property ${prop}`);
     }
   }

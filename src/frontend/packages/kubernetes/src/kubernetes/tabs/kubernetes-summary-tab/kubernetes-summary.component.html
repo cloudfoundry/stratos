@@ -55,7 +55,7 @@
                     <button class="btn btn-primary leading-normal m-0 min-w-0 p-0"
                     (click)="configureDashboard()">Configure</button>
                   }
-                  @if (!(kubeEndpointService.kubeDashboardStatus$ | async)) {
+                  @if ((kubeEndpointService.kubeDashboardStatus$ | async) === false) {
                     <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-500">
                     </div>
                   }

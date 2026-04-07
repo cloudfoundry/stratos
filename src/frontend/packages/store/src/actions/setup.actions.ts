@@ -18,7 +18,7 @@ export class SetupSaveConfig extends SetupConsoleGetScopes {
 }
 
 export class SetupSuccess implements Action {
-  constructor(public payload: {}) { }
+  constructor(public payload: Record<string, unknown>) { }
   type = SETUP_SUCCESS;
 }
 

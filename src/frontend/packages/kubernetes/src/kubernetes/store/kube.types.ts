@@ -15,8 +15,8 @@ export interface KubernetesCurrentNamespace {
 }
 
 export interface KubernetesInfo {
-  nodes: {};
-  pods: {};
+  nodes: Record<string, unknown>;
+  pods: Record<string, unknown>;
 }
 
 export const KubernetesDefaultState = {
@@ -550,7 +550,7 @@ export interface KubeStatus {
   status: string;
   message: string;
   reason: string;
-  details: {};
+  details: Record<string, unknown>;
   code: number;
 }
 

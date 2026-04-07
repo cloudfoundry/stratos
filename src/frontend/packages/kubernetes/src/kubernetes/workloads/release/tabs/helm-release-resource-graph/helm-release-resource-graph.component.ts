@@ -56,7 +56,7 @@ interface CustomHelmReleaseGraphNodeData extends HelmReleaseGraphNodeData {
   text: string;
   icon: any;
   alerts: [];
-  alertSummary: {};
+  alertSummary: Record<string, unknown>;
 }
 
 @Component({
@@ -145,7 +145,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
             text: colors.fg,
             icon,
             alerts: null,
-            alertSummary: {}
+            alertSummary: Record<string, unknown>
           } };
 
         // Does this node have any alerts?

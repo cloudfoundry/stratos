@@ -1,4 +1,4 @@
-@if (!(isBusy$ | async) || false) {
+@if ((isBusy$ | async) === false || false) {
   <app-page-sub-nav>
     <button class="btn btn-danger" name="delete" (click)="deleteRelease()" title="Delete">
       <span class="material-icons">delete</span>

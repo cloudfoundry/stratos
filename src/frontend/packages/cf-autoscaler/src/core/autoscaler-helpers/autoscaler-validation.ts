@@ -34,8 +34,8 @@ export function dateTimeIsSameOrAfter(startDateTime: string, endDateTime: string
 }
 
 export function recurringSchedulesInvalidRepeatOn(inputRecurringSchedules: AppRecurringSchedule) {
-  const weekdayCount = inputRecurringSchedules.hasOwnProperty('days_of_week') ? inputRecurringSchedules.days_of_week.length : 0;
-  const monthdayCount = inputRecurringSchedules.hasOwnProperty('days_of_month') ? inputRecurringSchedules.days_of_month.length : 0;
+  const weekdayCount = Object.hasOwn(inputRecurringSchedules, 'days_of_week') ? inputRecurringSchedules.days_of_week.length : 0;
+  const monthdayCount = Object.hasOwn(inputRecurringSchedules, 'days_of_month') ? inputRecurringSchedules.days_of_month.length : 0;
   return (weekdayCount > 0 && monthdayCount > 0) || (weekdayCount === 0 && monthdayCount === 0);
 }
 
@@ -46,7 +46,7 @@ export function recurringSchedulesOverlapping(
     return false;
   }
   const overlappingSchedule = inputRecurringSchedules.find((value, i) => {
-    if (index === i || !inputRecurringSchedules[i].hasOwnProperty(property) ||
+    if (index === i || !Object.hasOwn(inputRecurringSchedules[i], property) ||
       inputRecurringSchedules[i].start_date && newSchedule.start_date && !dateOverlaps(inputRecurringSchedules[i], newSchedule)) {
       return false;
     }

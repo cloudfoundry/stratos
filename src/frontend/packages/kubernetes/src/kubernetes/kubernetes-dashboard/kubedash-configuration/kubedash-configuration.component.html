@@ -8,7 +8,7 @@
   <li>Service Account - A Service Account that can be used to access the Dashboard</li>
 </ol>
 
-@if (!(kubeDashboardStatus$ | async) || isUpdatingStatus) {
+@if ((kubeDashboardStatus$ | async) === false || isUpdatingStatus) {
   <div class="flex my-2.5">
     <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-500"></div>
     <div>Retrieving Dashboard configuration ...</div>
@@ -120,7 +120,7 @@
                 stratos-role=kubernetes-dashboard-user</div>
               </div>
             }
-            @if (!(isAzure$ | async)) {
+            @if ((isAzure$ | async) === false) {
               <div>
                 <p>Service Account not found - you can create one manually or <app-product-name></app-product-name> can do this for you.</p>
                 <h2 class="text-sm font-normal underline">Manually create a Service Account</h2>

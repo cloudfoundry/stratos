@@ -16,7 +16,7 @@ export function requestDataReducerFactory(actions: IRequestArray): ActionReducer
     switch (action.type) {
       case InitCatalogEntitiesAction.ACTION_TYPE:
         return getDefaultStateFromEntityCatalog((action as InitCatalogEntitiesAction).entityKeys, {}, state);
-      case successAction:
+      case successAction: {
         const success = action as ISuccessRequestAction;
         if (!success.apiAction.updatingKey && success.requestType === 'delete') {
           const entityKey = entityCatalog.getEntity(success.apiAction).entityKey;
@@ -25,6 +25,7 @@ export function requestDataReducerFactory(actions: IRequestArray): ActionReducer
           return deepMergeState(state, success.response.entities);
         }
         return state;
+      }
       case RECURSIVE_ENTITY_SET_DELETED:
         return cleanStateFromFlatTree(state, action as SetTreeDeleted);
       default:

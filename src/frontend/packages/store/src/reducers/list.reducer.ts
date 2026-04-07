@@ -17,7 +17,7 @@ const defaultListsState = {} as ListsState;
 
 export function listReducer(state = defaultListsState, action: any): ListsState {
   switch (action.type) {
-    case ListStateActionTypes.SET:
+    case ListStateActionTypes.SET: {
       const setListState = action as SetListViewAction;
 
       return {
@@ -26,7 +26,8 @@ export function listReducer(state = defaultListsState, action: any): ListsState 
           view: setListState.view ? setListState.view.toString() : ''
         }
       };
-    case ListStateActionTypes.SET_VIEW:
+    }
+    case ListStateActionTypes.SET_VIEW: {
       const listView = (action as SetListViewAction).view;
       return mergeListState(
         state,
@@ -34,11 +35,13 @@ export function listReducer(state = defaultListsState, action: any): ListsState 
         'view',
         listView ? listView.toString() : ''
       );
-    case ListStateActionTypes.HYDRATE:
+    }
+    case ListStateActionTypes.HYDRATE: {
       const hydrate = action as HydrateListsStateAction;
       return {
         ...hydrate.listsState
       };
+    }
     default:
       return state;
   }

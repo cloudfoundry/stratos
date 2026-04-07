@@ -261,14 +261,16 @@ export class AnalysisEffects {
     }
 
     switch (report['format']) {
-      case 'popeye':
+      case 'popeye': {
         const helper = new PopeyeReportHelper(report);
         helper.map();
         break;
-      case 'kubescore':
+      }
+      case 'kubescore': {
         const kubeScoreHelper = new KubeScoreReportHelper(report);
         kubeScoreHelper.map();
         break;
+      }
       default:
         console.warn('Do not know how to handle this report type: ', report['format']);
         break;

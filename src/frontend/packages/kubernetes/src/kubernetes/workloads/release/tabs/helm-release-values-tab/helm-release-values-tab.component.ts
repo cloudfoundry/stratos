@@ -43,11 +43,12 @@ export class HelmReleaseValuesTabComponent {
         switch (vtype) {
           case 'user':
             return release.config || {};
-          case 'combined':
+          case 'combined': {
             const chart = release.chart.values || {};
             const user = release.config || {};
             const target = {};
             return this.mergeDeep(target, chart, user);
+          }
           default:
             return release.chart.values || {};
         }

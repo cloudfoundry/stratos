@@ -28,7 +28,7 @@ class JsonPointer {
 }
 
 export interface SchemaFormValidationError {
-  dataPath: {};
+  dataPath: Record<string, unknown>;
   message: string;
 }
 

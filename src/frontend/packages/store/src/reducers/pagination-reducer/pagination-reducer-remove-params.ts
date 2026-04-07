@@ -11,7 +11,7 @@ export function paginationRemoveParams(state: PaginationEntityState, action: Rem
   };
 
   action.params.forEach((key) => {
-    if (removeParamsState.params.hasOwnProperty(key)) {
+    if (Object.hasOwn(removeParamsState.params, key)) {
       delete removeParamsState.params[key];
     }
   });

@@ -39,7 +39,7 @@ export class SetCreateServiceInstanceServiceGuid implements Action {
 }
 
 export class SetCreateServiceInstanceApp implements Action {
-  constructor(public appGuid: string = null, public params: {}) {
+  constructor(public appGuid: string = null, public params: Record<string, unknown>) {
   }
   type = SET_SERVICE_INSTANCE_APP;
 }
