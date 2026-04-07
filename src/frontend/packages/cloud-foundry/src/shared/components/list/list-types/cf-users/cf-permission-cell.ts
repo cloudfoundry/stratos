@@ -1,4 +1,4 @@
-import { Directive, Input } from '@angular/core';
+import { Directive, inject, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { take, filter, map, switchMap } from 'rxjs/operators';
@@ -47,11 +47,11 @@ export abstract class CfPermissionCellDirective<T> extends TableCellCustom<APIRe
     filter(config => !!config)
   );
 
-  constructor(
-    public store: Store<CFAppState>,
-    private confirmDialog: ConfirmationDialogService,
-    public cfUserService: CfUserService
-  ) {
+  public store = inject<Store<CFAppState>>(Store);
+  private confirmDialog = inject(ConfirmationDialogService);
+  public cfUserService = inject(CfUserService);
+
+  constructor() {
     super();
   }
 

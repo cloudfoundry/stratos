@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 
@@ -84,10 +84,8 @@ export abstract class GithubCommitsListConfigServiceBase implements IListConfig<
 
   protected initialised = new BehaviorSubject<boolean>(false);
 
-  constructor(
-    protected store: Store<AppState>,
-    private datePipe: DatePipe,
-  ) { }
+  protected store = inject<Store<AppState>>(Store);
+  private datePipe = inject(DatePipe);
 
   public getColumns = (): ITableColumn<GitCommit>[] => this.columns;
   public getGlobalActions = (): IGlobalListAction<GitCommit>[] => [];

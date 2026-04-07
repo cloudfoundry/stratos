@@ -1,4 +1,4 @@
-import { Directive, OnInit } from '@angular/core';
+import { Directive, inject, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -12,11 +12,11 @@ export abstract class EditAutoscalerPolicyDirective implements OnInit {
   public appAutoscalerPolicy$!: Observable<AppAutoscalerPolicy>;
   protected isCreate = false;
 
-  constructor(
-    protected service: EditAutoscalerPolicyService,
-    route: ActivatedRoute
-  ) {
-    this.isCreate = route.snapshot.queryParams.create;
+  protected service = inject(EditAutoscalerPolicyService);
+  private route = inject(ActivatedRoute);
+
+  constructor() {
+    this.isCreate = this.route.snapshot.queryParams.create;
   }
 
   ngOnInit() {

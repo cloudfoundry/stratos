@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
@@ -199,11 +199,13 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
     return can;
   }
 
+  protected store = inject<Store<CFAppState>>(Store);
+  protected datePipe = inject(DatePipe);
+  protected currentUserPermissionsService = inject(CurrentUserPermissionsService);
+  private serviceActionHelperService = inject(ServiceActionHelperService);
+
+  // eslint-disable-next-line @angular-eslint/prefer-inject -- rootLocation is a plain string passed by subclasses, not injectable
   constructor(
-    protected store: Store<CFAppState>,
-    protected datePipe: DatePipe,
-    protected currentUserPermissionsService: CurrentUserPermissionsService,
-    private serviceActionHelperService: ServiceActionHelperService,
     private rootLocation: string
   ) {
   }

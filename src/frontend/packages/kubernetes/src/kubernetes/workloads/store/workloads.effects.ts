@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { ApplicationRef, Injectable } from '@angular/core';
+import { ApplicationRef, inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { environment } from '@stratosui/core';
@@ -37,13 +37,10 @@ import {
   providedIn: 'root'
 })
 export class WorkloadsEffects {
-
-  constructor(
-    private httpClient: HttpClient,
-    private actions$: Actions,
-    private store: Store<AppState>,
-    private appRef: ApplicationRef
-  ) { }
+  private httpClient = inject(HttpClient);
+  private actions$ = inject(Actions);
+  private store = inject<Store<AppState>>(Store);
+  private appRef = inject(ApplicationRef);
 
   proxyAPIVersion = environment.proxyAPIVersion;
 
