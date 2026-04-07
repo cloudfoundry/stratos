@@ -2,7 +2,7 @@ import { Injectable, computed, Injector, inject, runInInjectionContext } from '@
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
-import { filter, map, shareReplay, startWith, switchMap, take } from 'rxjs/operators';
+import { map, shareReplay, startWith, switchMap, take } from 'rxjs/operators';
 
 import {
   GetAllEndpoints,

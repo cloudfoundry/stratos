@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { ReactiveFormsModule, FormControl, FormGroup } from '@angular/forms';
 import { CustomFormFieldComponent } from '../../../../../shared/components/custom-form-field/custom-form-field.component';
 
 import { IAuthForm } from '@stratosui/store';

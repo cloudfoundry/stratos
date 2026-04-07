@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
-import { ReactiveFormsModule,FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { ReactiveFormsModule,FormGroup } from '@angular/forms';
 import { IAuthForm } from '@stratosui/store';
 
 import { ProductNameComponent } from '../../../../shared/components/product-name.ccomponent';

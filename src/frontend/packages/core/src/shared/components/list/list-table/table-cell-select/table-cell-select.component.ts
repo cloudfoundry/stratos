@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, Injector,
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 import { RowState } from '../../data-sources-controllers/list-data-source-types';
 import { TableCellCustom } from '../../list.types';

@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
-import { take, filter, map } from 'rxjs/operators';
+import { take, map } from 'rxjs/operators';
 
 import { IListConfig, IListMultiFilterConfig, ITableColumn, ITableText, ListViewTypes } from '@stratosui/core';
 import { APIResource, connectedEndpointsOfTypesSelector, ListView } from '@stratosui/store';

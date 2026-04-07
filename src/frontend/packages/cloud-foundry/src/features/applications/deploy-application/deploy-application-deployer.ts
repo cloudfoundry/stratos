@@ -1,7 +1,7 @@
 import { Injector, signal, WritableSignal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable, of as observableOf, Subject, Subscription } from 'rxjs';
+import { Observable, of as observableOf, Subject, Subscription } from 'rxjs';
 import websocketConnect from 'rxjs-websockets';
 import { take, catchError, combineLatest, filter, map, mergeMap, share, switchMap, tap } from 'rxjs/operators';
 

@@ -1,5 +1,4 @@
 import { Injectable, EventEmitter, Directive, Input, Output, inject } from '@angular/core';
-import { Observable } from 'rxjs';
 
 export type TailwindSortDirection = 'asc' | 'desc' | '';
 

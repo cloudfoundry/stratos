@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal, inject, ChangeDetectionStrategy } from '@angular/core';
-import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormControl, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import {
   InternalAppState,
@@ -11,7 +11,7 @@ import {
   SetupSaveConfig,
 } from '@stratosui/store';
 import { Observable } from 'rxjs';
-import { delay, filter, map, take, tap } from 'rxjs/operators';
+import { delay, filter, map, take } from 'rxjs/operators';
 
 import { APP_TITLE } from '../../../core/core.types';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';

@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { take, distinctUntilChanged, map } from 'rxjs/operators';
 
-import { arraysEqual, valueOrCommonFalsy, ITableColumn, IListConfig, ListConfig, ListViewTypes } from '@stratosui/core';
+import { valueOrCommonFalsy, ITableColumn, IListConfig, ListConfig, ListViewTypes } from '@stratosui/core';
 import { AddParams, APIResource, PaginatedAction } from '@stratosui/store';
 import { CfEvent } from '../../../../../cf-api.types';
 import { CFAppState } from '../../../../../cf-app-state';

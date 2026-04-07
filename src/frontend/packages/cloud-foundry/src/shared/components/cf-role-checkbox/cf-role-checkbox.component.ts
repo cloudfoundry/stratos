@@ -4,8 +4,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { CustomCheckboxComponent } from '@stratosui/core';
 import { CustomTooltipDirective } from '@stratosui/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, Subscription } from 'rxjs';
-import { take, combineLatest as combineLatestOp, filter, map } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
+import { take, combineLatest as combineLatestOp, filter } from 'rxjs/operators';
 
 import { UsersRolesSetOrgRole, UsersRolesSetSpaceRole } from '../../../../../cloud-foundry/src/actions/users-roles.actions';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';

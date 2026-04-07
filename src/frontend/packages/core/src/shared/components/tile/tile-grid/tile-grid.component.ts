@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation, HostBinding, Input  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewEncapsulation, HostBinding, Input  } from '@angular/core';
 
 @Component({
   selector: 'app-tile-grid',

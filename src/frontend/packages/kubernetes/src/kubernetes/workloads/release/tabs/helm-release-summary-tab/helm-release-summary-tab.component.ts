@@ -8,7 +8,7 @@ import { ConfirmationDialogConfig, ConfirmationDialogService, SidePanelService }
 import { ClearPaginationOfType } from '@stratosui/store';
 import { RouterNav } from '@stratosui/store';
 import { AppState } from '@stratosui/store';
-import { combineLatest, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { take, distinctUntilChanged, filter, map, publishReplay, refCount, startWith } from 'rxjs/operators';
 
 import {
@@ -125,7 +125,6 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   public analyzerService = inject(KubernetesAnalysisService);
   private previewPanel = inject(SidePanelService);
   private injector = inject(Injector);
-
 
 
   constructor() {

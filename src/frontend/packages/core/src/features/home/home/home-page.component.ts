@@ -16,7 +16,7 @@ import {
   SetDashboardStateValueAction,
   stratosEntityCatalog } from '@stratosui/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { take, debounceTime, defaultIfEmpty, filter, map, startWith, switchMap, tap } from 'rxjs/operators';
+import { take, debounceTime, defaultIfEmpty, filter, map, startWith, switchMap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../core/endpoints.service';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';

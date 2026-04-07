@@ -28,7 +28,7 @@ import { SafeImgPipe } from './safe-img.pipe';
 import { ShowHideButtonComponent } from './show-hide-button/show-hide-button.component';
 import { StatefulIconComponent } from './stateful-icon/stateful-icon.component';
 import { TruncatePipe } from './truncate.pipe';
-import { UserProfileService } from './user-profile.service';
+
 import { UserService } from './user.service';
 import { UtilsService } from './utils.service';
 import { WindowRef } from './window-ref/window-ref.service';

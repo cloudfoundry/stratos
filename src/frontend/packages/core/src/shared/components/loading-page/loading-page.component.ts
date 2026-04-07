@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { EntitySchema, EntityMonitor, EntityMonitorFactory } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
-import { filter, first, map } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 
 @Component({
 selector: 'app-loading-page',

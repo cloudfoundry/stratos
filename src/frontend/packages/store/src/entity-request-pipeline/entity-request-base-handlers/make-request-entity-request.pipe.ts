@@ -1,5 +1,5 @@
 import { HttpRequest } from '@angular/common/http';
-import { of, throwError } from 'rxjs';
+import { throwError } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
 import { StratosCatalogEndpointEntity } from '../../entity-catalog/entity-catalog-entity/entity-catalog-entity';
