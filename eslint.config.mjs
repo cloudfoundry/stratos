@@ -33,6 +33,7 @@ export default tseslint.config(
         {
           argsIgnorePattern: "^_",
           varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
           ignoreRestSiblings: true,
         },
       ],
@@ -68,8 +69,9 @@ export default tseslint.config(
       "@typescript-eslint/no-unused-vars": [
         "warn",
         {
-          varsIgnorePattern: "^(describe|it|test|expect|beforeAll|afterAll|beforeEach|afterEach|vi|fixture|component|provideZonelessChangeDetection|_)$",
+          varsIgnorePattern: "^(describe|it|test|expect|beforeAll|afterAll|beforeEach|afterEach|vi|fixture|component|provideZonelessChangeDetection|_\\w*)$",
           argsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
           ignoreRestSiblings: true,
         },
       ],
