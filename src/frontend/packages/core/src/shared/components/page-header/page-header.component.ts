@@ -1,4 +1,4 @@
-import { TemplatePortal } from '@angular/cdk/portal';
+import { Portal, TemplatePortal } from '@angular/cdk/portal';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild, inject } from '@angular/core';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
@@ -79,6 +79,16 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public isUserMenuOpen = false;
 
   @ViewChild('pageHeaderTmpl', { static: true }) pageHeaderTmpl!: TemplateRef<any>;
+
+  // Our own portal registered in ngAfterViewInit; used to verify ownership
+  // before clearing, and to avoid wiping another component's portal.
+  private myPortal: TemplatePortal<any> | null = null;
+  // Whatever portal was registered with TabNavService before us; restored on
+  // destroy. Handles nested page-headers (e.g. an inner component loaded
+  // inside a modal registers its own page-header over ours — when it's
+  // destroyed we rewind to our portal, when we're destroyed we rewind to the
+  // previous owner instead of leaving the outlet empty).
+  private previousPortal: Portal<any> | undefined;
 
   @Input() hideSideNavButton = false;
 
@@ -232,12 +242,25 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy() {
-    this.tabNavService.clear();
+    // Only rewind if we're still the active portal. If some other component
+    // has overwritten us (e.g. we registered first, a nested page-header
+    // registered second and is still alive), leave it alone.
+    if (this.myPortal && this.tabNavService.pageHeader() === this.myPortal) {
+      if (this.previousPortal) {
+        // Restore whoever owned the portal before us — typically an outer
+        // page-header that's still alive and waiting for us to hand back.
+        this.tabNavService.setPageHeader(this.previousPortal);
+      } else {
+        this.tabNavService.clear();
+      }
+    }
   }
 
   ngAfterViewInit() {
-    const portal = new TemplatePortal(this.pageHeaderTmpl, undefined, {});
-    this.tabNavService.setPageHeader(portal);
+    // Remember the current portal so we can hand it back in ngOnDestroy.
+    this.previousPortal = this.tabNavService.pageHeader();
+    this.myPortal = new TemplatePortal(this.pageHeaderTmpl, undefined, {});
+    this.tabNavService.setPageHeader(this.myPortal);
   }
 
   // Tailwind dropdown menu methods
