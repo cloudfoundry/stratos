@@ -3,8 +3,8 @@
     <!-- Left column: Cloud Foundry Information -->
     <div class="create-endpoint__info-column">
       <h1 class="create-endpoint__section-title" style="color: var(--content-text);">{{endpoint.definition.label}} Information</h1>
-      <app-form-field>
-        <input appInput id="name" name="name" formControlName="nameField" placeholder="Name"
+      <app-form-field class="block w-full">
+        <input appInput id="name" name="name" formControlName="nameField" placeholder="Name" class="w-full"
           [appUnique]="registerForm.value.createSystemEndpointField ? (customEndpoints | async)?.names : (existingPersonalEndpoints | async)?.names">
         @if (registerForm.controls.nameField.errors?.required) {
           <app-error>Name is required</app-error>
@@ -13,8 +13,8 @@
           <app-error>Name is not unique</app-error>
         }
       </app-form-field>
-      <app-form-field>
-        <input appInput id="url" name="url" formControlName="urlField" type="text" required placeholder="Endpoint Address"
+      <app-form-field class="block w-full">
+        <input appInput id="url" name="url" formControlName="urlField" type="text" required placeholder="Endpoint Address" class="w-full"
           [appUnique]="registerForm.value.createSystemEndpointField ? (customEndpoints | async)?.urls : (existingPersonalEndpoints | async)?.urls">
         @if (registerForm.controls.urlField.errors?.required) {
           <app-error>URL is required</app-error>
