@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { CustomFormFieldComponent, MatInputDirective } from '@stratosui/core';
+import { CustomFormFieldComponent } from '@stratosui/core';
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';

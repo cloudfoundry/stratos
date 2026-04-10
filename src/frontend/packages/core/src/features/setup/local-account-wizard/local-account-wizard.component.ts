@@ -99,7 +99,7 @@ export class LocalAccountWizardComponent implements OnInit {
       }),
       delay(2000),
       take(10),
-      filter(([uaa, auth]: [UAASetupState, AuthState]) => {
+      filter(([_uaa, auth]: [UAASetupState, AuthState]) => {
         const validUAASessionData = auth.sessionData && !auth.sessionData.uaaError;
         if (!validUAASessionData) {
           this.store.dispatch(new VerifySession());

@@ -3,8 +3,6 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { BehaviorSubject, of } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 import {
   EntityCatalogTestModule,

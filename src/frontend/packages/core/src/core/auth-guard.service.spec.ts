@@ -10,8 +10,8 @@ import { appReducers } from '@stratosui/store';
 import { InternalAppState } from '@stratosui/store';
 
 describe('authGuard', () => {
-  let store: Store<InternalAppState>;
-  let router: Router;
+  let _store: Store<InternalAppState>;
+  let _router: Router;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -21,8 +21,8 @@ describe('authGuard', () => {
         StoreModule.forRoot(appReducers),
       ]
     });
-    store = TestBed.inject(Store);
-    router = TestBed.inject(Router);
+    _store = TestBed.inject(Store);
+    _router = TestBed.inject(Router);
   });
 
   it('should be created', () => {

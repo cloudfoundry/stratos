@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { take,  } from 'rxjs/operators';
 
-import { SnackBarReturnComponent } from '../components/snackbar-return/snackbar-return.component';
 import { TailwindSnackBarService, TailwindSnackBarRef } from './tailwind-snackbar.service';
 
 /**

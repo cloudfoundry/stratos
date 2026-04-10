@@ -1,10 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { take, tap, timeout } from 'rxjs/operators';
+import { take, timeout } from 'rxjs/operators';
 import { firstValueFrom } from 'rxjs';
 import { PermissionConfig, CurrentUserPermissionsService, StratosScopeStrings } from '@stratosui/core';
-import { AppTestModule } from '@stratosui/core/test-framework';
 import { createBasicStoreModule, createEntityStoreState, TestStoreEntity, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import {
   AppState,
@@ -28,7 +27,6 @@ import { generateCFEntities } from '../../cf-entity-generator';
 import { featureFlagEntityType } from '../../cf-entity-types';
 import {
   CfCurrentUserPermissions,
-  cfCurrentUserPermissionsService,
   CfPermissionTypes,
   CfScopeStrings,
   CfUserPermissionsChecker,

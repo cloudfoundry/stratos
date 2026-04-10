@@ -13,9 +13,9 @@ describe('ActionOrchestrator', () => {
 
   it('should have base action builders', () => {
     const actionBuilders: OrchestratedActionBuilders = {
-      get: guid => getRequestAction(),
-      remove: guid => getRequestAction(),
-      update: guid => getRequestAction(),
+      get: _guid => getRequestAction(),
+      remove: _guid => getRequestAction(),
+      update: _guid => getRequestAction(),
       create: () => getRequestAction(),
       getMultiple: () => getPaginationAction(),
     };
@@ -30,7 +30,7 @@ describe('ActionOrchestrator', () => {
     }
     const actionBuilders: Test1OrchestratedActionBuilders = {
       customAction101: () => getPaginationAction(),
-      customAction202: guid => getRequestAction(),
+      customAction202: _guid => getRequestAction(),
     };
     const actionOrchestrator = new ActionOrchestrator('Custom', actionBuilders);
     hasActions(actionOrchestrator, ['customAction101', 'customAction202']);
@@ -38,13 +38,13 @@ describe('ActionOrchestrator', () => {
 
   it('should have custom and base actions builders', () => {
     const actionBuilders: OrchestratedActionBuilders = {
-      get: guid => getRequestAction(),
-      remove: guid => getRequestAction(),
-      update: guid => getRequestAction(),
+      get: _guid => getRequestAction(),
+      remove: _guid => getRequestAction(),
+      update: _guid => getRequestAction(),
       create: () => getRequestAction(),
       getMultiple: () => getPaginationAction(),
       customAction101: () => getPaginationAction(),
-      customAction202: guid => getRequestAction(),
+      customAction202: _guid => getRequestAction(),
     };
     const actionOrchestrator = new ActionOrchestrator('BasePlusCustom', actionBuilders);
     hasActions(actionOrchestrator, ['get', 'remove', 'update', 'create', 'getMultiple', 'customAction101', 'customAction202']);

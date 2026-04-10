@@ -104,7 +104,7 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   // Interaction lock: ignore external writeValue while user is actively selecting in multi-select
   private _interacting = false;
 
-  private _onChange = (value: any) => {};
+  private _onChange = (_value: any) => {};
   private _onTouched = () => {};
   private _subscriptions: Subscription[] = [];
 

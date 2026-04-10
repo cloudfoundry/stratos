@@ -95,7 +95,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     this.setActive(0);
 
     this.allSteps.forEach((step => {
-      this.hiddenSubs.push(step.onHidden.subscribe((hidden) => {
+      this.hiddenSubs.push(step.onHidden.subscribe((_hidden) => {
         this.filterSteps();
       }));
       // Listen for validation changes to trigger change detection
@@ -295,7 +295,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     return true;
   }
 
-  getIconLigature(step: StepComponent, index: number): string {
+  getIconLigature(_step: StepComponent, _index: number): string {
     return 'done';
   }
 

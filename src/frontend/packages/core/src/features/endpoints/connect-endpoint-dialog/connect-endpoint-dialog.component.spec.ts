@@ -5,7 +5,6 @@ import { Validators, FormControl } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import {
-  entityCatalog,
   StratosCatalogEndpointEntity,
   EntityCatalogTestModule,
   TEST_CATALOGUE_ENTITIES,

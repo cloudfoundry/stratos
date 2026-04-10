@@ -83,7 +83,7 @@ export class RestoreEndpointsService {
   }
 
   setFile(file: any): Promise<string> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const reader = new FileReader();
       reader.onload = () => {
         const res = reader.result as string;

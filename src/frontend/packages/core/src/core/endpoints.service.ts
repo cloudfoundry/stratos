@@ -16,7 +16,7 @@ import {
   EndpointModel,
   EndpointState } from '@stratosui/store';
 import { combineLatest as observableCombineLatest, Observable, of } from 'rxjs';
-import { catchError, filter, map, skipWhile, take, timeout, withLatestFrom } from 'rxjs/operators';
+import { catchError, filter, map, take, withLatestFrom } from 'rxjs/operators';
 
 import { endpointHasMetricsByAvailable } from '../features/endpoints/endpoint-helpers';
 import { SessionService } from '../shared/services/session.service';

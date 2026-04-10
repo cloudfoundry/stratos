@@ -1,4 +1,4 @@
-import {Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import {Component, OnInit, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AppState } from '@stratosui/store';
 import { endpointOfTypeSelector } from '@stratosui/store';

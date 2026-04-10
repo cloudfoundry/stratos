@@ -1,7 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { TailwindSnackBarService, TailwindSnackBarRef } from '@stratosui/core';
-import { Store } from '@ngrx/store';
 import { GitCommit, gitEntityCatalog, GitMeta, GitRepo, GitSCMService, GitSCMType, SCMIcon, GithubCommitAuthorComponent } from '@stratosui/git';
 import { Observable, Subscription } from 'rxjs';
 import { take,
@@ -19,7 +18,6 @@ import { ListConfig } from '../../../../../../../../core/src/shared/components/l
 import {
   NoContentMessageLine,
 } from '../../../../../../../../core/src/shared/components/no-content-message/no-content-message.component';
-import { CFAppState } from '../../../../../../cf-app-state';
 import {
   GithubCommitsListConfigServiceAppTab,
 } from '../../../../../../shared/components/list/list-types/github-commits/github-commits-list-config-app-tab.service';

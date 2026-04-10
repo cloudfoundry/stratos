@@ -1,17 +1,13 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 import { take,  } from 'rxjs/operators';
 
 import {
-  CurrentUserPermissionsService,
-  ConfirmationDialogService,
   ListComponent,
   ListConfig,
   NoContentMessageComponent,
 } from '@stratosui/core';
-import { CFAppState } from '../../../../../../../cf-app-state';
 import {
   CfAppRoutesListConfigService,
 } from '../../../../../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';

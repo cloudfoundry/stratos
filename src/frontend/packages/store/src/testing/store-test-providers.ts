@@ -39,7 +39,7 @@ export function getStoreTestProviders(...additionalProviders: Provider[]): Provi
  * Note: These use a simple mock function implementation to avoid importing test dependencies.
  */
 const createMockFn = () => {
-  const fn: any = (...args: any[]) => fn.mock.results[fn.mock.results.length - 1]?.value;
+  const fn: any = (..._args: any[]) => fn.mock.results[fn.mock.results.length - 1]?.value;
   fn.mock = { calls: [], results: [] };
   fn.mockReturnValue = (value: any) => { fn.mock.results.push({ value }); return fn; };
   fn.mockImplementation = (impl: any) => { fn.impl = impl; return fn; };

@@ -69,9 +69,9 @@ export class QuotaDefinitionBaseComponent {
   }
 
   protected getBreadcrumbs(
-    endpoint: EndpointModel,
-    org: APIResource<IOrganization>,
-    space: APIResource<ISpace>
+    _endpoint: EndpointModel,
+    _org: APIResource<IOrganization>,
+    _space: APIResource<ISpace>
   ): any {
     return null;
   }

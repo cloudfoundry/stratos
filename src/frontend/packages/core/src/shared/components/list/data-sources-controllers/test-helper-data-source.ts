@@ -1,5 +1,5 @@
 import { IListDataSource } from './list-data-source-types';
 
-const basicListDataSource = (type: any) => {
+const _basicListDataSource = (_type: any) => {
   return {} as IListDataSource<any>;
 };

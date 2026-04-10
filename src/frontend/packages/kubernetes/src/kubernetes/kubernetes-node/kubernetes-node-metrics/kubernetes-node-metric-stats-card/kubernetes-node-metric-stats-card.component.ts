@@ -1,5 +1,5 @@
 import { AsyncPipe, DecimalPipe } from '@angular/common';
-import {Component, Input, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import {Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 
 import { BytesToHumanSize } from '@stratosui/core';

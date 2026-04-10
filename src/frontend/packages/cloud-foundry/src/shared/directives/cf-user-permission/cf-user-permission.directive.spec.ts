@@ -5,7 +5,6 @@ import { provideRouter } from '@angular/router';
 import { provideMockStore } from '@ngrx/store/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CurrentUserPermissionsService } from '@stratosui/core';
 import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 
 import { CfUserPermissionDirective } from './cf-user-permission.directive';

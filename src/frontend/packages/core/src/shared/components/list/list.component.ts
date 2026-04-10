@@ -13,7 +13,6 @@ import { ChangeDetectionStrategy, AfterViewInit,
   OnChanges,
   OnDestroy,
   OnInit,
-  Optional,
   Output,
   SimpleChanges,
   TemplateRef,
@@ -82,7 +81,6 @@ import { ITableColumn } from './list-table/table.types';
 import {
   defaultPaginationPageSizeOptionsCards,
   defaultPaginationPageSizeOptionsTable,
-  PAGE_SIZE_ALL,
   isPageSizeSentinel,
   resolvePageSize,
   IGlobalListAction,
@@ -490,7 +488,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     observableCombineLatest([
       this.view$.pipe(take(1)),
       this.paginationController.pagination$.pipe(take(1))
-    ]).subscribe(([view, pagination]) => {
+    ]).subscribe(([_view, pagination]) => {
       this.initialPageEvent = new PageEvent();
       this.initialPageEvent.pageIndex = pagination.pageIndex - 1;
       this.initialPageEvent.pageSize = pagination.pageSize;
@@ -592,7 +590,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     this.paginationController.filter$.pipe(
       take(1),
       tap(() => {
-        Object.values(this.multiFilterManagers).forEach((filterManager: MultiFilterManager<T>, index: number) => {
+        Object.values(this.multiFilterManagers).forEach((filterManager: MultiFilterManager<T>, _index: number) => {
           // Pipe changes in the widgets to the store
           // Handle both BehaviorSubject and Signal wrappers
           const select$ = 'asObservable' in filterManager.multiFilterConfig.select
@@ -664,7 +662,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       this.view$
     )
       .pipe(
-        filter(([pagination, busy, viewType]) => viewType !== 'table'),
+        filter(([_pagination, _busy, viewType]) => viewType !== 'table'),
         map(([pagination, busy, viewType]) => ({ pageIndex: pagination.pageIndex, busy, viewType })),
         distinctUntilChanged((x, y) => x.pageIndex === y.pageIndex && x.busy === y.busy && x.viewType === y.viewType),
         pairwise(),

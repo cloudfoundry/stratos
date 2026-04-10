@@ -307,7 +307,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
         }
         return { success: true };
       })
-    ).pipe(catchError(err => {
+    ).pipe(catchError(_err => {
       return observableOf({ success: false });
     }));
   };

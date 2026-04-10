@@ -19,7 +19,6 @@ import {
   PaginationMonitorFactory
 } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { CurrentUserPermissionsService } from '@stratosui/core';
 import { CloudFoundryTestingModule, generateCFEntities } from '@test-framework/cf';
 import {ServiceActionHelperService,
   cfCurrentUserPermissionsService} from '@stratosui/cloud-foundry';

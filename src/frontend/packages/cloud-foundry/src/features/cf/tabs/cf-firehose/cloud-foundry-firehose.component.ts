@@ -52,7 +52,7 @@ export class CloudFoundryFirehoseComponent implements OnInit {
       map((message: string) => message)
     );
     this.messages.pipe(
-      catchError((e) => {
+      catchError((_e) => {
         return [] as any;
       }),
       share(),

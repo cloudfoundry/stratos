@@ -55,7 +55,7 @@ export class KubeConfigTableCertComponent extends TableCellCustom<KubeConfigFile
           // Success, no cert required
           (res: CertResponse) => this.update(res.Required),
           // Failed, check for specific cert required error
-          (e: HttpErrorResponse) => this.update(false)
+          (_e: HttpErrorResponse) => this.update(false)
         );
       }
     }

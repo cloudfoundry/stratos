@@ -66,11 +66,11 @@ export class AuthEffect {
         headers,
         withCredentials: true
       }).pipe(
-        map(data => {
+        map(_data => {
           this.appRef.tick();
           return new VerifySession();
         }),
-        catchError((err, caught) => {
+        catchError((err, _caught) => {
           this.appRef.tick();
           return [new LoginFailed(err)];
         }));
@@ -108,7 +108,7 @@ export class AuthEffect {
             ];
           }
         }),
-        catchError((err, caught) => {
+        catchError((err, _caught) => {
           let setupMode = false;
           let isUpgrading = false;
           const ssoOptions = err.headers.get(SSO_HEADER) as string;
@@ -165,7 +165,7 @@ export class AuthEffect {
             return [new LogoutSuccess(), new ResetAuth()];
           }
         }),
-        catchError((err, caught) => {
+        catchError((err, _caught) => {
           this.appRef.tick();
           return [new LogoutFailed(err)];
         }));

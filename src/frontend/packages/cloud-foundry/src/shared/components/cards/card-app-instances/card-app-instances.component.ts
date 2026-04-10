@@ -104,11 +104,11 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
     }
   }
 
-  scaleUp(current: number) {
+  scaleUp(_current: number) {
     this.setInstanceCount(this.currentCount + 1);
   }
 
-  scaleDown(current: number) {
+  scaleDown(_current: number) {
     this.setInstanceCount(this.currentCount - 1);
   }
 

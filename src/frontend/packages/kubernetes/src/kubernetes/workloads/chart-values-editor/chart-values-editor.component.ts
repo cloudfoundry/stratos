@@ -1,4 +1,4 @@
-import { AsyncPipe, CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import {AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -164,20 +164,20 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
 
   ngOnInit(): void {
     // Listen for window resize and resize the editor when this happens
-    this.resizeSub = fromEvent(window, 'resize').pipe(debounceTime(150)).subscribe((event: any) => this.resize());
+    this.resizeSub = fromEvent(window, 'resize').pipe(debounceTime(150)).subscribe((_event: any) => this.resize());
   }
 
   private init() {
     // Observabled for loading schema and values for the Chart
-    const schema$ = this.httpClient.get(this.schemaUrl).pipe(catchError((e: any) => of(null)));
+    const schema$ = this.httpClient.get(this.schemaUrl).pipe(catchError((_e: any) => of(null)));
     const values$: Observable<string> = this.httpClient.get(this.valuesUrl, { responseType: 'text' }).pipe(
-      catchError((e: any) => of(null))
+      catchError((_e: any) => of(null))
     );
 
     // We need the schame, value sand the monaco editor to be all loaded before we're ready
     this.loading$ = combineLatest(schema$, values$, toObservable(this.monacoLoaded)).pipe(
       filter(([schema, values, loaded]: [any, any, boolean]) => schema !== undefined && values !== undefined && loaded),
-      tap(([schema, values, loaded]: [any, any, boolean]) => {
+      tap(([schema, values, _loaded]: [any, any, boolean]) => {
         this.schema = schema;
         if (values !== null) {
           this.chartValuesYaml = values;
@@ -202,7 +202,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
         }
         this.updateModel();
       }),
-      map(([schema, values, loaded]: [any, any, boolean]) => !loaded),
+      map(([_schema, _values, loaded]: [any, any, boolean]) => !loaded),
       startWith(true)
     );
 
@@ -275,7 +275,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
         const data = mergeObjects(this.formData, json as Record<string, unknown>);
         this.initialFormData = data;
         this.formData = data;
-      } catch (e) {
+      } catch (_e) {
         // The yaml in the code editor is invalid, so we can't marshal it back to json for the from editor
         this.yamlError = true;
       }

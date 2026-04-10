@@ -28,7 +28,7 @@ describe('TableCellIconComponent', () => {
     component = fixture.componentInstance;
     component.row = true;
     component.config = {
-      getIcon: (row) => ({
+      getIcon: (_row) => ({
         icon: ''
       }),
     };

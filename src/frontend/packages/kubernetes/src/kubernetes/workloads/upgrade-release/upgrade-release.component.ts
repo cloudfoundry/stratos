@@ -3,7 +3,7 @@ import {Component, ViewChild, inject, ChangeDetectionStrategy } from '@angular/c
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
-import { filter, first, map, pairwise, take, tap } from 'rxjs/operators';
+import { filter, map, pairwise, take, tap } from 'rxjs/operators';
 
 import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
@@ -147,7 +147,7 @@ export class UpgradeReleaseComponent {
     this.showAdvancedOptions = !this.showAdvancedOptions;
   }
 
-  doUpgrade: StepOnNextFunction = (index: number, step: StepComponent) => {
+  doUpgrade: StepOnNextFunction = (index: number, _step: StepComponent) => {
     // If we are showing the advanced options, don't upgrade if we aer not on the last step
     if (this.showAdvancedOptions && index === 1) {
       return of({ success: true });

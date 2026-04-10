@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import {Component, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { take, filter, map } from 'rxjs/operators';

@@ -13,7 +13,7 @@ import { LogOutDialogComponent } from './log-out-dialog.component';
 describe('LogOutDialogComponent', () => {
   let component: LogOutDialogComponent;
   let fixture: ComponentFixture<LogOutDialogComponent>;
-  let element: HTMLElement;
+  let _element: HTMLElement;
   let router: Router;
 
   class TailwindDialogRefMock extends TailwindDialogRef {
@@ -50,7 +50,7 @@ describe('LogOutDialogComponent', () => {
     router = TestBed.inject(Router);
     component = fixture.componentInstance;
     fixture.detectChanges();
-    element = fixture.nativeElement;
+    _element = fixture.nativeElement;
   });
 
   it('should be created', () => {

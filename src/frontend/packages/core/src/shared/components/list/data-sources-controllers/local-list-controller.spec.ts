@@ -252,7 +252,7 @@ describe('LocalListController full data source pipeline', () => {
     // Simulate list-data-source.ts page$ pipeline (lines 217-223)
     const page$ = controller.page$.pipe(
       withLatestFrom(isLoadingPage$.pipe(startWith(false))),
-      filter(([page, isLoading]: [any[], boolean]) => !isLoading),
+      filter(([_page, isLoading]: [any[], boolean]) => !isLoading),
       map(([page]: [any[], boolean]) => page),
       publishReplay(1),
       refCount()
@@ -289,7 +289,7 @@ describe('LocalListController full data source pipeline', () => {
   });
 
   it('should block emission when isLoading is true then deliver when false', async () => {
-    const { BehaviorSubject, firstValueFrom, skip, startWith } = await import('rxjs');
+    const { BehaviorSubject, firstValueFrom, skip: _skip, startWith } = await import('rxjs');
     const { withLatestFrom, filter, map, publishReplay, refCount } = await import('rxjs/operators');
 
     const entities$ = new BehaviorSubject(testApps as any[]);
@@ -307,7 +307,7 @@ describe('LocalListController full data source pipeline', () => {
 
     const page$ = controller.page$.pipe(
       withLatestFrom(isLoadingPage$.pipe(startWith(false))),
-      filter(([page, isLoading]: [any[], boolean]) => !isLoading),
+      filter(([_page, isLoading]: [any[], boolean]) => !isLoading),
       map(([page]: [any[], boolean]) => page),
       publishReplay(1),
       refCount()

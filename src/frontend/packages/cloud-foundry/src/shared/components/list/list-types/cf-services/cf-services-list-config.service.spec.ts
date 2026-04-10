@@ -20,7 +20,6 @@ import {
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CloudFoundryTestingModule } from '@test-framework/cf';
 import { generateCFEntities } from '../../../../../cf-entity-generator';
-import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
 import { CfServicesListConfigService } from './cf-services-list-config.service';
 
 describe('CfServicesListConfigService', () => {

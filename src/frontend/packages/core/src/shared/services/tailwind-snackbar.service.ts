@@ -1,4 +1,4 @@
-import { Injectable, ComponentRef, ApplicationRef, Injector, EmbeddedViewRef, inject } from '@angular/core';
+import { Injectable, ApplicationRef, Injector, inject } from '@angular/core';
 import { Subject, Observable } from 'rxjs';
 
 export interface TailwindSnackBarConfig {

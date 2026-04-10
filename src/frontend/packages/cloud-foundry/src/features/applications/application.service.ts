@@ -11,7 +11,6 @@ import {
   EntityInfo,
   EntityService,
   getCurrentPageRequestInfo,
-  PaginatedAction,
   PaginationEntityState,
   PaginationObservables,
   rootUpdatingKey

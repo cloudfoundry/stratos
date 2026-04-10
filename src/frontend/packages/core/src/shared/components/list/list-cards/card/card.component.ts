@@ -1,4 +1,4 @@
-import { Component, ComponentRef, Input, Type, ViewChild, ViewContainerRef, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ComponentRef, Input, Type, ViewChild, ViewContainerRef, ChangeDetectionStrategy } from '@angular/core';
 import { MultiActionListEntity } from '@stratosui/store';
 
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';

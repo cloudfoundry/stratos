@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 
-import { CoreModule } from '../../../core/core.module';
 
 import { ConnectEndpointComponent } from '../connect-endpoint/connect-endpoint.component';
 import { CreateEndpointBaseStepComponent } from './create-endpoint-base-step/create-endpoint-base-step.component';

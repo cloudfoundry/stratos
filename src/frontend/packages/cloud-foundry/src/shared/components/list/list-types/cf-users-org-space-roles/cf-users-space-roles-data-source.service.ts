@@ -51,7 +51,7 @@ export class CfUsersSpaceRolesDataSourceService extends ListDataSource<APIResour
           type: 'filter',
           field: 'entity.name'
         },
-        (entities: APIResource[], paginationState: PaginationEntityState) => {
+        (entities: APIResource[], _paginationState: PaginationEntityState) => {
           return entities.filter(e => {
             const validSpace = !(spaceGuid && spaceGuid !== e.metadata.guid);
             return validSpace;

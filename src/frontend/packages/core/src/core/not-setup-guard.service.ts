@@ -16,7 +16,7 @@ export const notSetupGuard: CanActivateFn = (): Observable<boolean> => {
 
   const url = `/api/${proxyAPIVersion}/auth/verify`;
   return http.get(url).pipe(
-    map(v => {
+    map(_v => {
       // If the requests succeeds, then the user has a session, so everything must be setup already
       return false;
     }),

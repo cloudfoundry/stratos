@@ -56,7 +56,7 @@ export class CreateApplicationStep3Component implements OnInit {
 
   newAppData!: CreateNewApplicationState;
   onNext: StepOnNextFunction = () => {
-    const { cloudFoundryDetails, name } = this.newAppData;
+    const { cloudFoundryDetails, name: _name } = this.newAppData;
 
     const { cloudFoundry } = cloudFoundryDetails;
     return this.createApp().pipe(

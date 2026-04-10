@@ -3,7 +3,7 @@ import { ChangeDetectorRef, Component, OnDestroy, OnInit, signal, ChangeDetectio
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { defer, EMPTY, Observable, of as observableOf, Subject } from 'rxjs';
+import { defer, Observable, of as observableOf, Subject } from 'rxjs';
 import {
   catchError,
   delay,
@@ -324,7 +324,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
         }, 0);
       }),
       take(1),
-      map(o => true),
+      map(_o => true),
       catchError(error => {
         console.error('setupForAppServiceMode: Failed to fetch application details or space information', {
           appId,
@@ -443,7 +443,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
           );
         }),
         take(1),
-        map(o => true),
+        map(_o => true),
         catchError(error => {
           console.error('configureForEditServiceInstanceMode: Failed to configure edit mode', {
             serviceInstanceId,
@@ -535,7 +535,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
         }
         this.cfOrgSpaceService.cf.select.next(endpointId);
       }),
-      map(o => true),
+      map(_o => true),
       catchError(error => {
         console.error('initialiseForMarketplaceMode: Failed to initialize marketplace mode', {
           endpointId,

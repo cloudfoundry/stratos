@@ -38,7 +38,7 @@ export class UAASetupEffect {
           this.appRef.tick();
           return new SetupSuccess(data);
         }),
-        catchError((err, caught) => {
+        catchError((err, _caught) => {
           this.appRef.tick();
           return [new SetupFailed(`Failed to save configuration. ${this.fetchError(err)}`)];
         })
@@ -56,7 +56,7 @@ export class UAASetupEffect {
           this.appRef.tick();
           return new SetupSuccess(data);
         }),
-        catchError((err, caught) => {
+        catchError((err, _caught) => {
           this.appRef.tick();
           return [new SetupFailed(`Failed to setup Administrator scope. ${this.fetchError(err)}`)];
         })
@@ -72,7 +72,7 @@ export class UAASetupEffect {
       try {
         const body = JSON.parse(httpResponse.error);
         return body;
-      } catch (err) { }
+      } catch (_err) { }
     }
     return '';
   }

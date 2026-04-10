@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input, OnInit, inject } from '@angular/core';
 import { rootUpdatingKey, EntitySchema, EntityMonitorFactory } from '@stratosui/store';
-import { schema } from 'normalizr';
 import { never as observableNever, Observable, of as observableOf } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
@@ -59,7 +58,7 @@ export class AppActionMonitorComponent<T> implements OnInit {
    * Get the ID of the ROW
    */
   @Input()
-  public trackBy = ((index: number, item: T) => index.toString());
+  public trackBy = ((index: number, _item: T) => index.toString());
 
   @Input()
   public getCellConfig: (element: T) => ITableCellRequestMonitorIconConfig;

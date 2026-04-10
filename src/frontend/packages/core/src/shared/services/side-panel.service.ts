@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { ComponentRef, Injectable, ViewContainerRef, signal, computed, Signal, inject } from '@angular/core';
+import { ComponentRef, Injectable, ViewContainerRef, signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { filter, tap } from 'rxjs/operators';
 
@@ -123,7 +123,7 @@ export class SidePanelService {
   private setupRouterListener() {
     this.router.events.pipe(
       filter(() => !!this.container),
-      tap((e) => this.hide()))
+      tap((_e) => this.hide()))
       .subscribe();
   }
 }

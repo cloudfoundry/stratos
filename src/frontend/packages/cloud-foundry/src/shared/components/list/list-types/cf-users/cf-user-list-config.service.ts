@@ -96,7 +96,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
       this.router.navigate([this.createManagerUsersUrl()], { queryParams: { user: user.metadata.guid } });
     },
     label: 'Manage Roles',
-    createVisible: (row$: Observable<APIResource>) => this.createCanUpdateOrgSpaceRoles()
+    createVisible: (_row$: Observable<APIResource>) => this.createCanUpdateOrgSpaceRoles()
   };
 
   manageMultiUserAction: IMultiListAction<APIResource<CfUser>> = {
@@ -217,7 +217,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
             activeRouteCfOrgSpace.spaceGuid),
         )
       ),
-      tap(([cf, action]) => {
+      tap(([_cf, action]) => {
         this.dataSource = new CfUserDataSourceService(store, action, this, userHasRoles);
 
         // Only show the filter (show users with/without roles) if the list of users can actually contain users without roles
@@ -229,7 +229,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
         }
 
       }),
-      map(([cf, action]) => cf && cf.state.initialised)
+      map(([cf, _action]) => cf && cf.state.initialised)
     );
     this.manageMultiUserAction.visible$ = this.createCanUpdateOrgSpaceRoles();
   }

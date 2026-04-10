@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, Injector, Input, OnDestroy, Renderer2, Signal, signal, ViewChild, inject } from '@angular/core';
-import { toSignal, toObservable } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, Injector, Input, OnDestroy, Renderer2, signal, ViewChild, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { AppState } from '@stratosui/store';

@@ -120,7 +120,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
       // In case user has specified the query param manually
       this.initCfOrgSpaceService.push(this.store.select(selectCfDetails).pipe(
         filter(p => !p),
-        tap(p => {
+        tap(_p => {
           this.store.dispatch(new RouterNav({ path: ['applications', 'deploy'] }));
         })
       ).subscribe());

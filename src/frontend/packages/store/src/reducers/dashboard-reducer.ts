@@ -91,7 +91,7 @@ export function dashboardReducer(state: DashboardState = defaultDashboardState, 
       };
     }
     case SET_STRATOS_THEME: {
-      const setThemeAction = action as SetThemeAction;
+      const _setThemeAction = action as SetThemeAction;
       return {
         ...state,
         themeKey: null

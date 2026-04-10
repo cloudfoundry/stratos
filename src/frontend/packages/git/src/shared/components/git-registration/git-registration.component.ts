@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { gitRepositoryUrlValidator, normalizeUrl } from '../../../../../core/src/shared/validators';
+import { gitRepositoryUrlValidator } from '../../../../../core/src/shared/validators';
 import {
   CreateEndpointHelperComponent } from '@stratosui/core';
 import { Observable, Subscription } from 'rxjs';

@@ -62,7 +62,7 @@ export class CopyToClipboardComponent implements OnInit {
       this.copySuccessful = document.execCommand('copy');
       this.copySuccessWait = true;
       setTimeout(() => this.copySuccessWait = false, 2000);
-    } catch (err) {
+    } catch (_err) {
       console.warn('Failed to copy to clipboard');
     }
 

@@ -351,7 +351,7 @@ describe('Table CellConfig Integration - Column Definition Flow', () => {
     });
 
     it('should handle function that throws error gracefully in column definition', () => {
-      const errorFunction = (entity: TestEntity) => {
+      const errorFunction = (_entity: TestEntity) => {
         throw new Error('Config generation failed');
       };
 
@@ -391,7 +391,7 @@ describe('Table CellConfig Integration - Column Definition Flow', () => {
     });
 
     it('should preserve function type cellConfig exactly as provided', () => {
-      const originalFunction = (entity: TestEntity) => ({ test: true });
+      const originalFunction = (_entity: TestEntity) => ({ test: true });
 
       const column: ITableColumn<TestEntity> = {
         columnId: 'test',

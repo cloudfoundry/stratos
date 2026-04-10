@@ -38,7 +38,7 @@ export class CustomSlideToggleComponent implements ControlValueAccessor {
 
   @Output() change = new EventEmitter<MatSlideToggleChange>();
 
-  private _onChange = (value: any) => {};
+  private _onChange = (_value: any) => {};
   private _onTouched = () => {};
 
   toggle() {

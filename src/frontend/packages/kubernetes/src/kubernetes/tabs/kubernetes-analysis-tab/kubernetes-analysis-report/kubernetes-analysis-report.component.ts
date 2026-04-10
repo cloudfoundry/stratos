@@ -77,7 +77,7 @@ export class KubernetesAnalysisReportComponent implements OnInit {
         this.errorMsg.next('');
         return response;
       }),
-      catchError((e, c) => {
+      catchError((_e, _c) => {
         this.error();
         return of(false);
       })

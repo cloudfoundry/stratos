@@ -159,7 +159,7 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
     }
   }
 
-  onNext: StepOnNextFunction = (index: number, step: StepComponent): Observable<StepOnNextResult> => {
+  onNext: StepOnNextFunction = (_index: number, _step: StepComponent): Observable<StepOnNextResult> => {
     return this.endpoint$.pipe(
       filter((endpoint): endpoint is EndpointModel => !!endpoint),
       take(1),

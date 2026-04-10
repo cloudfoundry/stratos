@@ -5,7 +5,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { EndpointModel, appReducers, CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogFeatureModule } from '@stratosui/store';
+import { EndpointModel, appReducers } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name.component';
 

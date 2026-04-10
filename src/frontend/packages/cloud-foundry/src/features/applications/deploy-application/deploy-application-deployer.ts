@@ -217,7 +217,7 @@ export class DeployApplicationDeployer {
         const buffer = websocketConnect(streamUrl)
           .pipe(
             switchMap((get) => get(this.inputStream)),
-            catchError((e: any): any[] => {
+            catchError((_e: any): any[] => {
               return [];
             }),
             filter(l => !!l),

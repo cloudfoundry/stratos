@@ -6,7 +6,6 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { createEmptyStoreModule } from "@stratosui/store/testing";
 import { ActivatedRoute } from '@angular/router';
-import { of } from 'rxjs';
 
 import { ApplicationService } from '@stratosui/cloud-foundry';
 import { ApplicationServiceMock } from '@test-framework/cf';

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ScrollDispatcher } from '@angular/cdk/scrolling';
 import { ChangeDetectionStrategy, AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren, signal, inject } from '@angular/core';
-import { toSignal, toObservable } from '@angular/core/rxjs-interop';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import {
   IUserFavoritesGroups,
@@ -176,7 +176,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
     // Only show endpoints that have Home Card metadata
     this.endpoints$ = combineLatest([combinedShowMode$, connected$, userFavoriteManager.getAllFavorites()]).pipe(
-      map(([showMode, endpoints, [favGroups, favs]]) => {
+      map(([showMode, endpoints, [favGroups, _favs]]) => {
         if (this.showAllEndpoints !== showMode) {
           this.showAllEndpoints = showMode;
           // Persist the state

@@ -60,7 +60,7 @@ import {
     AppServiceBindingListConfigService
   ]
 })
-export class ApplicationDeleteComponent<T> {
+export class ApplicationDeleteComponent {
   private store = inject<Store<GeneralEntityAppState>>(Store);
   private applicationService = inject(ApplicationService);
   private paginationMonitorFactory = inject(PaginationMonitorFactory);

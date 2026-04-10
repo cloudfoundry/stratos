@@ -15,7 +15,7 @@ import {
   PaginationMonitorFactory
 } from '@stratosui/store';
 import { CreateOrganization } from '../../../../actions/organization.actions';
-import { IOrganization, IOrgQuotaDefinition } from '../../../../cf-api.types';
+import { IOrgQuotaDefinition } from '../../../../cf-api.types';
 import { CFAppState } from '../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { organizationEntityType } from '../../../../cf-entity-types';

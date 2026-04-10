@@ -11,7 +11,7 @@ import { StartEndDateComponent } from './start-end-date.component';
 describe('StartEndDateComponent', () => {
   let component: StartEndDateComponent;
   let fixture: ComponentFixture<StartEndDateComponent>;
-  let element: HTMLElement;
+  let _element: HTMLElement;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -32,7 +32,7 @@ describe('StartEndDateComponent', () => {
     fixture = TestBed.createComponent(StartEndDateComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-    element = fixture.nativeElement;
+    _element = fixture.nativeElement;
   });
 
   it('should create', () => {

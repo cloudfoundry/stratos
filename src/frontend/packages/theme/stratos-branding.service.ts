@@ -190,7 +190,7 @@ export class StratosBrandingService {
         this.setCompanyConfig(config);
         return;
       }
-    } catch (error) {
+    } catch (_error) {
       console.warn('Could not load company-config.json, trying environment-specific config');
     }
 
@@ -201,7 +201,7 @@ export class StratosBrandingService {
         this.setCompanyConfig(envConfig);
         return;
       }
-    } catch (error) {
+    } catch (_error) {
       console.warn('Could not load environment-specific config, using default');
     }
 
@@ -276,7 +276,7 @@ export class StratosBrandingService {
   private saveConfigToStorage(config: CompanyConfig) {
     try {
       localStorage.setItem(this.CONFIG_STORAGE_KEY, JSON.stringify(config));
-    } catch (error) {
+    } catch (_error) {
       console.warn('Could not save company config to localStorage');
     }
   }
@@ -496,7 +496,7 @@ export class StratosBrandingService {
         this._customBranding = parsed.branding || null;
         this._customLogin = parsed.login || null;
       }
-    } catch (error) {
+    } catch (_error) {
       // Silently fall back to defaults
     }
   }
@@ -508,7 +508,7 @@ export class StratosBrandingService {
         login: this._customLogin,
       };
       localStorage.setItem(this.BRANDING_STORAGE_KEY, JSON.stringify(data));
-    } catch (error) {
+    } catch (_error) {
       console.warn('Could not save branding to localStorage');
     }
   }
@@ -523,7 +523,7 @@ export class StratosBrandingService {
       if (saved && ['light', 'dark', 'system'].includes(saved)) {
         return saved as ThemeMode;
       }
-    } catch (error) {
+    } catch (_error) {
       console.warn('Could not load theme mode from localStorage');
     }
     return null;
@@ -532,7 +532,7 @@ export class StratosBrandingService {
   private saveThemeModeToStorage(mode: ThemeMode) {
     try {
       localStorage.setItem(this.THEME_MODE_KEY, mode);
-    } catch (error) {
+    } catch (_error) {
       console.warn('Could not save theme mode to localStorage');
     }
   }
@@ -553,7 +553,7 @@ export class StratosBrandingService {
         NON_USER_KEYS.forEach(key => localStorage.removeItem(key));
         localStorage.setItem(APP_VERSION_KEY, currentVersion);
       }
-    } catch (error) {
+    } catch (_error) {
       console.warn('Could not check app version in localStorage');
     }
   }

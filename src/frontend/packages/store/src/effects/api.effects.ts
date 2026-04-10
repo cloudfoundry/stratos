@@ -51,7 +51,7 @@ export class APIEffect {
   apiDeleteRequest$ = createEffect(() => this.actions$.pipe(
     ofType<WrapperRequestActionSuccess>(RequestTypes.SUCCESS),
     withLatestFrom(this.store),
-    mergeMap(([action, appState]: [WrapperRequestActionSuccess, InternalAppState]): any[] => {
+    mergeMap(([action, _appState]: [WrapperRequestActionSuccess, InternalAppState]): any[] => {
       if (action.requestType === 'delete') {
         const deleteAction = EntityDeleteCompleteAction.parse(action.apiAction);
         if (deleteAction) {

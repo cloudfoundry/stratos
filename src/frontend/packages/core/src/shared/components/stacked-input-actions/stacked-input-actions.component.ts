@@ -157,7 +157,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
       // Disable the 'add new' button
       this.disabled = !!states.find(state => state.result === StackedInputActionResult.PROCESSING);
       // Push state using signal update function
-      states.forEach((state, index) => this.components[state.key].stateInUpdate(state));
+      states.forEach((state, _index) => this.components[state.key].stateInUpdate(state));
     }));
   }
 

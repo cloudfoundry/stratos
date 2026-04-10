@@ -107,9 +107,9 @@ export abstract class CfPermissionCellDirective<T> extends TableCellCustom<APIRe
     return perm.name ? `${perm.name}: ${perm.string}` : perm.string;
   }
 
-  protected removePermission(cellPermission: ICellPermissionList<T>, updateConnectedUser: boolean) {
+  protected removePermission(_cellPermission: ICellPermissionList<T>, _updateConnectedUser: boolean) {
 
   }
 
-  protected canRemovePermission = (cfGuid: string, orgGuid: string, spaceGuid: string): Observable<boolean> => observableOf(false);
+  protected canRemovePermission = (_cfGuid: string, _orgGuid: string, _spaceGuid: string): Observable<boolean> => observableOf(false);
 }

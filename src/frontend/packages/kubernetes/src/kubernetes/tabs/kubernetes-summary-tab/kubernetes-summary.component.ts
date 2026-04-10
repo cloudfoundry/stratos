@@ -27,12 +27,6 @@ import {
 import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
 import { CaaspNodesData, KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 
-interface IValueLabels {
-  usedLabel?: string;
-  remainingLabel?: string;
-  unknownLabel?: string;
-  warningText?: string;
-}
 interface IEndpointDetails {
   imagePath: string;
   label: string;

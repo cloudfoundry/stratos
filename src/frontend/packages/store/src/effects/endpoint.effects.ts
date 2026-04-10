@@ -25,7 +25,6 @@ import { SendClearEventAction } from '../actions/internal-events.actions';
 import { ClearPaginationOfEntity } from '../actions/pagination.actions';
 import { GET_SYSTEM_INFO_SUCCESS, GetSystemSuccess } from '../actions/system.actions';
 import { DispatchOnlyAppState } from '../app-state';
-import { BrowserStandardEncoder } from '../browser-encoder';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { EndpointType } from '../extension-types';
 import { httpErrorResponseToSafeString } from '../jetstream';

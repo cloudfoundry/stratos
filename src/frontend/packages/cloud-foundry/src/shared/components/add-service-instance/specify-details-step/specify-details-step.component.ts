@@ -52,18 +52,6 @@ import { CreateServiceInstanceHelper } from '../create-service-instance-helper.s
 import { CsiGuidsService } from '../csi-guids.service';
 import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
 
-interface SelectExistingInstanceForm {
-  serviceInstance: string;
-}
-
-interface CreateNewInstanceForm {
-  name: string;
-  servicePlan: string;
-  spaceGuid: string;
-  params: object;
-  tags: string;
-}
-
 @Component({
   selector: 'app-specify-details-step',
   templateUrl: './specify-details-step.component.html',
@@ -172,7 +160,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
     this.serviceInstancesInit$ = this.serviceInstances$.pipe(
       filter(p => !!p),
-      map(o => false),
+      map(_o => false),
       startWith(false)
     );
     this.hasInstances$ = this.serviceInstances$.pipe(
@@ -409,7 +397,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
         this.serviceParamsValid,
         this.createNewInstanceForm.statusChanges
       ]).pipe(
-        map(([serviceParamsValid, b]) => this._validate.set(serviceParamsValid && this.createNewInstanceForm.valid))
+        map(([serviceParamsValid, _b]) => this._validate.set(serviceParamsValid && this.createNewInstanceForm.valid))
       ).subscribe()
     );
     // For existing service instance the step is valid if the form is (there's no service params)
@@ -494,7 +482,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
     this.store.dispatch(action);
     return checkUpdate$.pipe(
-      switchMap(o => create$),
+      switchMap(_o => create$),
       filter(a => !a.creating),
       switchMap(a => {
         const updating = a.updating ? a.updating[UpdateServiceInstance.updateServiceInstance] : null;

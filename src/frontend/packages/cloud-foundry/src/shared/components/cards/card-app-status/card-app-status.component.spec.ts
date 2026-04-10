@@ -8,8 +8,6 @@ import {
   ApplicationStateIconPipe,
   ApplicationStateComponent,
   CardStatusComponent,
-  CF_GUID,
-  APP_GUID
 } from '@stratosui/core';
 import { ApplicationServiceMock } from "@test-framework/application-service-helper";
 import { ApplicationService } from '@stratosui/cloud-foundry';

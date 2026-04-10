@@ -290,9 +290,9 @@ export class HelmEffects {
       const proxyAPIVersion = environment.proxyAPIVersion;
       const url = `/pp/${proxyAPIVersion}/chartrepos/${action.endpoint.guid}`;
       const req = this.httpClient.post(url, requestArgs);
-      req.subscribe((ok: unknown) => {
+      req.subscribe((_ok: unknown) => {
         this.snackBar.open('Helm Repository synchronization started', 'Dismiss', { duration: 3000 });
-      }, (err: unknown) => {
+      }, (_err: unknown) => {
         this.snackBar.open(`Failed to Synchronize Helm Repository '${action.endpoint.name}'`, 'Dismiss', { duration: 5000 });
       });
       return [];

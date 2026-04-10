@@ -32,7 +32,7 @@ export class ServiceInstancesDataSource extends ListDataSource<APIResource> {
       isLocal: true,
       transformEntities: [
         { type: 'filter', field: 'entity.name' },
-        (entities: APIResource[], paginationState: PaginationEntityState) => {
+        (entities: APIResource[], _paginationState: PaginationEntityState) => {
           return entities.filter(e => e.entity.service_guid === serviceGuid);
         }
       ],

@@ -40,7 +40,7 @@ export class ApplicationEnvVarsHelper {
     try {
       const res = stratosProjectString ? JSON.parse(stratosProjectString) as EnvVarStratosProject : null;
       return res;
-    } catch (err) {
+    } catch (_err) {
       // noop
     }
     return null;

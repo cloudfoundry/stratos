@@ -1,12 +1,9 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import {CFAppState,
+import {
   cfCurrentUserPermissionsService} from '@stratosui/cloud-foundry';
-import { CurrentUserPermissionsService } from '@stratosui/core';
 import {
   EntityCatalogTestModule,
   TEST_CATALOGUE_ENTITIES,
@@ -21,10 +18,8 @@ import {
   CloudFoundrySpaceServiceMock
 } from '@test-framework/cf';
 import { generateCFEntities } from '../../../../../cf-entity-generator';
-import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
 import { CloudFoundryOrganizationService } from '../../../../../features/cf/services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../features/cf/services/cloud-foundry-space.service';
-import { CfUserService } from '../../../../data-services/cf-user.service';
 import { CfOrgUsersListConfigService } from './cf-org-users-list-config.service';
 
 describe('CfOrgUsersListConfigService', () => {

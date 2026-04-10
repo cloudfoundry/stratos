@@ -9,7 +9,6 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import {
   
-  ListConfig
 } from '@stratosui/core';
 import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import {
@@ -23,7 +22,6 @@ import {
 } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
 import { generateCFEntities, generateTestCfEndpointServiceProvider, ActiveRouteCfOrgSpace } from '@test-framework/cf';
-import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { ConfirmationDialogService } from '@stratosui/core';

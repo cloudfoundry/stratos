@@ -3,8 +3,6 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { PageNotFoundComponentComponent } from './page-not-found-component.component';
-import { CoreModule } from '../core.module';
-import { SharedModule } from '../../shared/shared.module';
 
 describe('PageNotFoundComponentComponent', () => {
   let component: PageNotFoundComponentComponent;

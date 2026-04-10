@@ -59,7 +59,7 @@ export class TailwindIconRegistry {
     return this.addSvgIconSetLiteral(literal);
   }
 
-  registerFontClassAlias(alias: string, className: string = alias): this {
+  registerFontClassAlias(alias: string, _className: string = alias): this {
     // Store font class aliases for icon rendering
     return this;
   }
@@ -77,7 +77,7 @@ export class TailwindIconRegistry {
     return this;
   }
 
-  getSvgIconFromUrl(url: SafeResourceUrl): Observable<SVGElement> {
+  getSvgIconFromUrl(_url: SafeResourceUrl): Observable<SVGElement> {
     // In a full implementation, this would fetch the SVG from the URL
     return of(this._createSvgElement('<svg></svg>'));
   }

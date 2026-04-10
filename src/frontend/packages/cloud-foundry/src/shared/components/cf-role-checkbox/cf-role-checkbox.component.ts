@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnDestroy, OnInit, Output, computed, inject, signal , ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CustomCheckboxComponent } from '@stratosui/core';
 import { CustomTooltipDirective } from '@stratosui/core';
@@ -286,7 +286,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
 
     this.sub = this.cfRolesService.existingRoles$.pipe(
       combineLatestOp(this.cfRolesService.newRoles$, users$, canEditRole$, selectUsersIsSetByUsername$),
-      filter(([existingRoles, newRoles, users, canEditRole, isSetByUsername]) => !!users.length && !!newRoles.orgGuid)
+      filter(([_existingRoles, newRoles, users, _canEditRole, _isSetByUsername]) => !!users.length && !!newRoles.orgGuid)
     ).subscribe(([existingRoles, newRoles, users, canEditRole, isSetByUsername]) => {
       const { checked, tooltip } = CfRoleCheckboxComponent.getCheckedState(
         this.role, users, existingRoles, newRoles, this.orgGuid, this.spaceGuid);
@@ -318,7 +318,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
     this.checked = checked;
     this.cfRolesService.newRoles$.pipe(
       take(1)
-    ).subscribe(newRoles => {
+    ).subscribe(_newRoles => {
       if (!checked) {
         this.tooltip = '';
       }

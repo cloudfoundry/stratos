@@ -1,5 +1,4 @@
-import { computed, Injectable, OnDestroy, signal, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Injectable, OnDestroy, signal, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import { take,
@@ -392,7 +391,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
       distinctUntilChanged(),
       filter(cf => cfTapped || cf !== initialCf),
       withLatestFrom(this.org.list$),
-      tap(([selectedCF, orgs]) => {
+      tap(([_selectedCF, orgs]) => {
         cfTapped = true;
         if (
           !!orgs.length &&
@@ -415,7 +414,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
       distinctUntilChanged(),
       filter(org => orgTapped || org !== initialOrg),
       withLatestFrom(this.space.list$),
-      tap(([selectedOrg, spaces]) => {
+      tap(([_selectedOrg, spaces]) => {
         orgTapped = true;
         if (
           !!spaces.length &&

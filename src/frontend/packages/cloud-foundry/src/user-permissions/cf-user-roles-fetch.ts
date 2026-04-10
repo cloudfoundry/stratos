@@ -149,7 +149,7 @@ class PermissionFlattener extends BaseHttpClientFetcher<CFResponse> implements P
 
   public mergePages = (res: CFResponse[]): CFResponse => {
     const firstRes = res.shift();
-    const final = res.reduce((finalRes: CFResponse, currentRes: CFResponse) => {
+    const final = res.reduce((finalRes: CFResponse, _currentRes: CFResponse) => {
       finalRes.resources = [
         ...finalRes.resources,
       ];
@@ -186,7 +186,7 @@ export function fetchCfUserRole(store: Store<AppState>, action: GetCurrentCfUser
       return true;
     }),
     take(1),
-    catchError(err => of(false)),
+    catchError(_err => of(false)),
     share()
   );
 }

@@ -38,7 +38,7 @@ export class CustomCheckboxComponent implements ControlValueAccessor {
   @Output() change = new EventEmitter<MatCheckboxChange>();
   @Output() indeterminateChange = new EventEmitter<boolean>();
 
-  private _onChange = (value: any) => {};
+  private _onChange = (_value: any) => {};
   private _onTouched = () => {};
 
   toggle() {

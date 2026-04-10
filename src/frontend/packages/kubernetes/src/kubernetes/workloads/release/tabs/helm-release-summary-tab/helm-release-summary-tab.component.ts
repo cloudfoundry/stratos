@@ -9,7 +9,7 @@ import { ClearPaginationOfType } from '@stratosui/store';
 import { RouterNav } from '@stratosui/store';
 import { AppState } from '@stratosui/store';
 import { Observable } from 'rxjs';
-import { take, distinctUntilChanged, filter, map, publishReplay, refCount, startWith } from 'rxjs/operators';
+import { take, distinctUntilChanged, filter, map } from 'rxjs/operators';
 
 import {
   PageSubNavComponent,

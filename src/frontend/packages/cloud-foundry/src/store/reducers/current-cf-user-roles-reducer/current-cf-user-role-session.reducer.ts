@@ -1,4 +1,4 @@
-import { EndpointActionComplete, EndpointUser, INewlyConnectedEndpointInfo, SessionUser, VerifySession, VerifiedSession } from '@stratosui/store';
+import { EndpointActionComplete, EndpointUser, INewlyConnectedEndpointInfo, SessionUser, VerifiedSession } from '@stratosui/store';
 
 import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 import { CfScopeStrings } from '../../../user-permissions/cf-user-permissions.types';

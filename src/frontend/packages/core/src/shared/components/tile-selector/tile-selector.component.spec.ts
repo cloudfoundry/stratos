@@ -4,7 +4,6 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import { MDAppModule } from '../../../core/md.module';
 
 import { TileSelectorComponent } from './tile-selector.component';
-import { TileSelectorTileComponent } from './../tile-selector-tile/tile-selector-tile.component';
 
 describe('TileSelectorComponent', () => {
   let component: TileSelectorComponent;

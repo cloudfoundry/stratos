@@ -67,7 +67,7 @@ if (typeof window !== 'undefined') {
         }, 0);
       }
 
-      send(data: any): void {
+      send(_data: any): void {
         // No-op in test environment
       }
 

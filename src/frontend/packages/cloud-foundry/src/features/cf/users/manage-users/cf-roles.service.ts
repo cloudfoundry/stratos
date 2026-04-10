@@ -79,7 +79,7 @@ export class CfRolesService {
   /**
    * Create an observable with an org/space guids and whether it can be edited by the connected user
    */
-  static canEditOrgOrSpace<T>(
+  static canEditOrgOrSpace(
     userPerms: CurrentUserPermissionsService,
     guid: string,
     cfGuid: string,
@@ -94,7 +94,7 @@ export class CfRolesService {
   constructor() {
     this.existingRoles$ = this.store.select(selectCfUsersRolesPicked).pipe(
       combineLatestOperators(this.store.select(selectCfUsersRolesCf)),
-      filter(([users, cfGuid]) => !!cfGuid),
+      filter(([_users, cfGuid]) => !!cfGuid),
       switchMap(([users, cfGuid]) => this.populateRoles(cfGuid, users)),
       distinctUntilChanged(),
       publishReplay(1),

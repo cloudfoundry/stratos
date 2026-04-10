@@ -146,7 +146,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
     }
 
     this.links$ = combineLatest([this.favorites$, this.layout$]).pipe(
-      filter(([favs, layout]) => !!layout),
+      filter(([_favs, layout]) => !!layout),
       map(([favs, layout]) => {
         // Get the list of shortcuts for the endpoint for the given endpoint ID
         const shortcutsFn = this.definition?.homeCard?.shortcuts;

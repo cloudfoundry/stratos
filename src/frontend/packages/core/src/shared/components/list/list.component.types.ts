@@ -1,5 +1,5 @@
 import { Type, WritableSignal } from '@angular/core';
-import { ActionState, defaultClientPaginationPageSize, ListView } from '@stratosui/store';
+import { ActionState, ListView } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
 import { take, filter, map, startWith, switchMap } from 'rxjs/operators';
 

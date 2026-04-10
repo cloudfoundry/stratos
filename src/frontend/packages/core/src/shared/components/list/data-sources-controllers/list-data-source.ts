@@ -1,6 +1,6 @@
 import { DataSource } from '@angular/cdk/table';
 export type SortDirection = 'asc' | 'desc' | '';
-import { ApplicationRef, signal, Signal } from '@angular/core';
+import { ApplicationRef, signal } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
   entityCatalog,
@@ -216,7 +216,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     // to be lost due to stale replays during subscriber churn.
     this.page$ = this.isLocal ? page$ : page$.pipe(
       withLatestFrom(this.isLoadingPage$.pipe(startWith(false))),
-      filter(([page, isLoading]) => !isLoading),
+      filter(([_page, isLoading]) => !isLoading),
       map(([page]) => page),
       publishReplay(1),
       refCount()
@@ -572,15 +572,15 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     return this._connectObs;
   }
 
-  public getFilterFromParams(pag: PaginationEntityState) {
+  public getFilterFromParams(_pag: PaginationEntityState) {
     // If data source is not local then this method must be overridden
     return '';
   }
-  public setFilterParam(filterParam: string, pag: PaginationEntityState) {
+  public setFilterParam(_filterParam: string, _pag: PaginationEntityState) {
     // If data source is not local then this method must be overridden
   }
 
-  public setMultiFilter(changes: ListPaginationMultiFilterChange[], params: PaginationParam) {
+  public setMultiFilter(_changes: ListPaginationMultiFilterChange[], _params: PaginationParam) {
 
   }
 

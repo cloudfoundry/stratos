@@ -125,7 +125,7 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
       action,
     );
     this.appAutoscalerCredential$ = updateAppAutoscalerCredentialService.entityObs$.pipe(
-      filter(({ entity, entityRequestInfo }) => {
+      filter(({ entity: _entity, entityRequestInfo }) => {
         return entityRequestInfo && !entityRequestInfo.creating && !entityRequestInfo.deleting.busy;
       }),
       map(({ entity }) => entity ? entity.entity : null),

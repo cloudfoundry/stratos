@@ -39,7 +39,7 @@ export interface KubeResourceActionBuilders extends OrchestratedActionBuilders {
 export function createKubeResourceActionBuilder(entityType: string): KubeResourceActionBuilders {
   return {
     get: (resName: string, kubeGuid: string, { namespace }) => new GetKubernetesResource(entityType, resName, namespace, kubeGuid),
-    getMultiple: (kubeGuid: string, paginationKey?: string) => new GetKubernetesResources(entityType, kubeGuid),
+    getMultiple: (kubeGuid: string, _paginationKey?: string) => new GetKubernetesResources(entityType, kubeGuid),
     getInNamespace: (kubeGuid: string, namespace: string) => new GetKubernetesResourcesInNamespace(entityType, kubeGuid, namespace),
     getInWorkload: (kubeGuid: string, namespace: string, releaseTitle: string) =>
       new GetKubernetesResourcesInWorkload(entityType, kubeGuid, namespace, releaseTitle),

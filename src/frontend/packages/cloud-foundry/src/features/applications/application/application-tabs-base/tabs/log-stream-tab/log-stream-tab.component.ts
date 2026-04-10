@@ -3,9 +3,9 @@ import { Component, OnInit, ViewChild, OnDestroy, ChangeDetectionStrategy, Chang
 import { NgModel } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { format } from 'date-fns';
-import { EMPTY, NEVER, Observable, Subject, of, timer, throwError } from 'rxjs';
+import { EMPTY, NEVER, Observable, Subject, of, timer } from 'rxjs';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
-import { catchError, debounceTime, map, share, startWith, switchMap, tap, retry, retryWhen, delayWhen, take } from 'rxjs/operators';
+import { catchError, debounceTime, map, share, startWith, switchMap, tap, retryWhen, delayWhen, take } from 'rxjs/operators';
 
 import { AnsiColorizer, LogViewerComponent } from '@stratosui/core';
 import { CFAppState } from '@stratosui/cloud-foundry';

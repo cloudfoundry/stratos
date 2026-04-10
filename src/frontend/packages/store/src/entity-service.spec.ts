@@ -79,7 +79,7 @@ function createTestService(
   return new EntityService(store, entityMonitor, action, entityCatalog);
 }
 
-function getAllTheThings(store: Store<GeneralAppState>, guid: string, schemaKey: string) {
+function getAllTheThings(store: Store<GeneralAppState>, guid: string, _schemaKey: string) {
   const entities = {
     [entitySchema.key]: {
       [guid]: {
@@ -134,7 +134,7 @@ describe('EntityServiceService', () => {
       ]
     ]);
 
-    const action = createAction('123');
+    const _action = createAction('123');
     TestBed.configureTestingModule({
       providers: [
         EntityServiceFactory,
@@ -417,7 +417,7 @@ describe('EntityServiceService', () => {
         pairwise(),
         filter(([x, y]) => x.entityRequestInfo.deleting.busy && !y.entityRequestInfo.deleting.busy),
         take(1),
-        map(([x, y]) => y),
+        map(([_x, y]) => y),
       ),
     );
 

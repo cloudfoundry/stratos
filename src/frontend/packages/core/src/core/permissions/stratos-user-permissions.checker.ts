@@ -148,7 +148,7 @@ export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChe
 
   public getComplexCheck(
     permissionConfig: PermissionConfig[],
-    ...args: any[]
+    ..._args: any[]
   ): IPermissionCheckCombiner[] {
     const groupedChecks = this.groupConfigs(permissionConfig);
     const res = Object.keys(groupedChecks).map((permission: PermissionTypes) => {
@@ -163,7 +163,7 @@ export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChe
     // Checker must handle all configs
     return res.every(check => !!check) ? res : null;
   }
-  public getFallbackCheck(endpointGuid: string, endpointType: string): Observable<boolean> {
+  public getFallbackCheck(_endpointGuid: string, _endpointType: string): Observable<boolean> {
     return null;
   }
 

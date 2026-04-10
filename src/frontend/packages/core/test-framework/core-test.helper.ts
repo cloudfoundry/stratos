@@ -3,6 +3,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { NgModule, inject } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
+/* eslint-disable @typescript-eslint/no-unused-vars -- barrel re-exports for downstream test consumers */
 import { StoreModule } from '@ngrx/store';
 import { EntityCatalogHelper, EntityCatalogHelpers, appReducers } from '@stratosui/store';
 import {
@@ -14,6 +15,7 @@ import {
   StoreTestingModule,
   STORE_TEST_PROVIDERS
 } from '@stratosui/store/testing';
+/* eslint-enable @typescript-eslint/no-unused-vars */
 
 // Use relative imports to avoid circular dependency issues with barrel exports
 import { CurrentUserPermissionsService } from '../src/core/permissions/current-user-permissions.service';

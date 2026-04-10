@@ -36,7 +36,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
   envVarsDataSource: CfAppVariablesDataSource;
 
   private multiListActionDelete: IMultiListAction<ListAppEnvVar> = {
-    action: (items: ListAppEnvVar[]) => {
+    action: (_items: ListAppEnvVar[]) => {
       return this.dispatchDeleteAction(Array.from(this.envVarsDataSource.selectedRows().values()));
     },
     icon: 'delete',

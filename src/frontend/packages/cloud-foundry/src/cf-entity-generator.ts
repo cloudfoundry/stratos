@@ -461,8 +461,8 @@ function generateCFAppEnvVarEntity(endpointDefinition: StratosEndpointExtensionD
     paginationConfig: {
       getEntitiesFromResponse: (response) => response,
       getTotalPages: (responses: JetstreamResponse<CFResponse>) => Object.values(responses).length,
-      getTotalEntities: (responses: JetstreamResponse<CFResponse>) => 1,
-      getPaginationParameters: (page: number) => ({ page: '1' }),
+      getTotalEntities: (_responses: JetstreamResponse<CFResponse>) => 1,
+      getPaginationParameters: (_page: number) => ({ page: '1' }),
       canIgnoreMaxedState: () => of(false),
       maxedStateStartAt: () => of(null),
     },
@@ -1036,7 +1036,7 @@ function generateFeatureFlagEntity(endpointDefinition: StratosEndpointExtensionD
       getEntitiesFromResponse: (response) => {
         return response;
       },
-      getTotalPages: (responses: JetstreamResponse) => 1,
+      getTotalPages: (_responses: JetstreamResponse) => 1,
       getTotalEntities: (responses: JetstreamResponse) => responses.length,
       getPaginationParameters: (page: number) => ({ page: page + '' }),
       canIgnoreMaxedState: () => of(false),

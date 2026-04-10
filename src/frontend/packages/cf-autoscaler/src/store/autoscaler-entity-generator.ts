@@ -2,7 +2,6 @@ import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
-  IStratosEndpointDefinition,
   StratosEndpointExtensionDefinition,
   metricEntityType,
   APIResource,

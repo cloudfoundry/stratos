@@ -35,7 +35,7 @@ export class DeployAppEffects {
     filter(([, state]) => {
       return state.projectExists && state.projectExists.checking;
     }),
-    switchMap(([action, state]: [CheckProjectExists, any]) => {
+    switchMap(([action, _state]: [CheckProjectExists, any]) => {
       return action.scm.getRepository(this.httpClient, action.projectName).pipe(
         map(res => {
           this.appRef.tick();

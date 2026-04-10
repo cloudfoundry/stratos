@@ -24,7 +24,7 @@ class HelmReleaseHistoryDataSource implements ITableListDataSource<any> {
     return item.revision;
   }
 
-  getRowState(row: any): Observable<any> {
+  getRowState(_row: any): Observable<any> {
     return of({});
   }
 }

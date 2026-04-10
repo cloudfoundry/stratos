@@ -27,19 +27,6 @@ import { MapRoutesComponent } from '../map-routes/map-routes.component';
 const hostPattern = '^([\\w\\-\\.]*)$';
 const pathPattern = `^([\\w\\-\\/\\!\\#\\[\\]\\@\\&\\$\\'\\(\\)\\*\\+\\;\\=\\,]*)$`;
 
-interface DomainFormModel {
-  domain: APIResource<IDomain> | '';
-}
-
-interface HTTPRouteFormModel {
-  host: string;
-  path: string;
-}
-
-interface TCPRouteFormModel {
-  port: string;
-  useRandomPort: boolean;
-}
 @Component({
   selector: 'app-add-routes',
   templateUrl: './add-routes.component.html',
@@ -219,7 +206,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     } else {
       try {
         return this.isRouteSelected();
-      } catch (e) { /* intentionally empty */ }
+      } catch (_e) { /* intentionally empty */ }
 
       return false;
     }
@@ -274,7 +261,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     host: string,
     path: string,
     port: number,
-    isTCP: boolean): Observable<StepOnNextResult> {
+    _isTCP: boolean): Observable<StepOnNextResult> {
     if (path && path.length && path[0] !== '/') {
       path = '/' + path;
     }

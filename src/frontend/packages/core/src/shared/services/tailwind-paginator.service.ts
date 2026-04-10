@@ -1,4 +1,4 @@
-import { Injectable, EventEmitter, ChangeDetectorRef } from '@angular/core';
+import { Injectable, EventEmitter } from '@angular/core';
 
 export class TailwindPageEvent {
   pageIndex: number = 0;

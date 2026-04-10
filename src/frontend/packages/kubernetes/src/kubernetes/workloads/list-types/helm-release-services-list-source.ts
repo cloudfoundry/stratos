@@ -11,8 +11,8 @@ export class HelmReleaseServicesDataSource extends ListDataSource<KubeService> {
   constructor(
     store: Store<AppState>,
     listConfig: IListConfig<KubeService>,
-    endpointGuid: string,
-    releaseTitle: string
+    _endpointGuid: string,
+    _releaseTitle: string
   ) {
     const action = new GetHelmReleases() as any;
     super({

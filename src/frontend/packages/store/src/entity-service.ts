@@ -42,7 +42,7 @@ const dispatcherFactory = <T>(
     const entityFetchHandler: EntityFetchHandler<T> = catalogEntity.getEntityFetchHandler?.();
     const fetchHandler = entityFetchHandler ?
       entityFetchHandler(store, updatedAction) :
-      (entity: T) => store.dispatch(updatedAction);
+      (_entity: T) => store.dispatch(updatedAction);
 
     // Fetch handler requires the entity, this may be missing or stale to update if required
     return fetchEntity ? (entity: T) => {
@@ -184,7 +184,7 @@ export class EntityService<T = any> {
     } else {
       const {
         // TODO: Schema should be passed to the action builders #3846.
-        schemaKey,
+        schemaKey: _schemaKey,
         entityGuid,
         endpointGuid,
         actionMetadata = {},

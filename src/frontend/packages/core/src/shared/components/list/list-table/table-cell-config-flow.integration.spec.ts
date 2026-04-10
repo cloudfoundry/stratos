@@ -8,7 +8,6 @@ import { EMPTY, of as observableOf } from 'rxjs';
 import { createBasicStoreModule } from '@stratosui/store/testing';
 import { ListSort, IFavoriteMetadata, UserFavorite } from '@stratosui/store';
 import { IListPaginationController } from '../data-sources-controllers/list-pagination-controller';
-import { ListComponent } from '../list.component';
 import { ITableColumn } from './table.types';
 import { TableComponent } from './table.component';
 import { TableCellFavoriteComponent, createTableColumnFavorite } from './table-cell-favorite/table-cell-favorite.component';
@@ -47,7 +46,7 @@ describe('Table CellConfig Integration Flow', () => {
   }
 
   // Test data
-  const testEntities: TestEntity[] = [
+  const _testEntities: TestEntity[] = [
     { id: '1', name: 'Entity 1' },
     { id: '2', name: 'Entity 2' },
     { id: '3', name: 'Entity 3' }
@@ -267,9 +266,9 @@ describe('Table CellConfig Integration Flow', () => {
     });
 
     it('should evaluate cellConfig function for each entity', async () => {
-      let callCount = 0;
+      let _callCount = 0;
       const configFunction = (entity: TestEntity) => {
-        callCount++;
+        _callCount++;
         return {
           entityName: entity.name,
           computedAt: Date.now(),

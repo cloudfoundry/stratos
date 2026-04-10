@@ -73,34 +73,6 @@ function getPropertyType(value: unknown): string {
   return type;
 }
 
-function getUniqueKeys(a: Record<string, unknown>, b: Record<string, unknown>, c?: string[]): string[] {
-  const aKeys = Object.keys(a);
-  const bKeys = Object.keys(b);
-  const result = c || [];
-
-  let value: string;
-  let cIndex: number;
-  let aIndex: number;
-
-  for (let keyIndex = 0, keyLength = bKeys.length; keyIndex < keyLength; keyIndex++) {
-    value = bKeys[keyIndex];
-    aIndex = aKeys.indexOf(value);
-    cIndex = result.indexOf(value);
-
-    if (aIndex === -1) {
-      if (cIndex !== -1) {
-        // Value is optional, it doesn't exist in A but exists in B(n)
-        result.splice(cIndex, 1);
-      }
-    } else if (cIndex === -1) {
-      // Value is required, it exists in both B and A, and is not yet present in C
-      result.push(value);
-    }
-  }
-
-  return result;
-}
-
 function processArray(array: unknown[], output?: Record<string, unknown>, nested?: boolean): Record<string, unknown> {
   let format: string | null = null;
   let oneOf: boolean | undefined;

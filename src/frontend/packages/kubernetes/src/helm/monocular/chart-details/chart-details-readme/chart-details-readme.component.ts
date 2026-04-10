@@ -35,7 +35,7 @@ export class ChartDetailsReadmeComponent {
 
   constructor() {
     this.renderer.link = ({ href, title, text }) => `<a target="_blank" title="${title}" href="${href}">${text}</a>`;
-    this.renderer.code = ({ text, lang, escaped }: { text: string; lang?: string; escaped?: boolean }) => `<code>${text}</code>`;
+    this.renderer.code = ({ text, lang: _lang, escaped: _escaped }: { text: string; lang?: string; escaped?: boolean }) => `<code>${text}</code>`;
     this.loadingDelay = setTimeout(() => this.loading = true, 100);
   }
 

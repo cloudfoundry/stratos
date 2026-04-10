@@ -54,14 +54,14 @@ export class DeployApplicationFsComponent implements ControlValueAccessor {
 
   // ControlValueAccessor interface - allows us to act as a control in the form for validation purposes
 
-  writeValue(obj: any): void {
+  writeValue(_obj: any): void {
   }
   registerOnChange(fn: any): void {
     this.propagateChange = fn;
   }
-  registerOnTouched(fn: any): void {
+  registerOnTouched(_fn: any): void {
   }
-  setDisabledState?(isDisabled: boolean): void {
+  setDisabledState?(_isDisabled: boolean): void {
   }
 
 }

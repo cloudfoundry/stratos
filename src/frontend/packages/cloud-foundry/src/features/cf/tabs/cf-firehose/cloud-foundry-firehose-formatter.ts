@@ -63,7 +63,7 @@ export class CloudFoundryFirehoseFormatter {
         default:
           filtered = this.handleOtherEvent(jsonString);
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to filter jsonMessage from WebSocket: ' + jsonString);
       filtered = jsonString;
     }

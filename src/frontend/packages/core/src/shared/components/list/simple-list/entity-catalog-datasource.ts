@@ -37,10 +37,10 @@ export class CatalogEntityDrivenListDataSource<T extends EntityPipelineEntity> e
     listConfig.getColumns = () => {
       const linBuilders = tableConfig ? tableConfig.rowBuilders : [];
       return [
-        ...linBuilders.map((builder, i) => ({
+        ...linBuilders.map((builder, _i) => ({
           columnId: builder[0],
           cellDefinition: {
-            getLink: (e: any) => {
+            getLink: (_e: any) => {
               return null;
             },
             getValue: (e: any) => {

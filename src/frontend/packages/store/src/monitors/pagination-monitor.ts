@@ -250,7 +250,7 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
       pagination$,
       fetching$
     ).pipe(
-      filter(([pagination, fetching]) => !fetching),
+      filter(([_pagination, fetching]) => !fetching),
       map(([pagination]) => {
         return Object.values(pagination.pageRequests).reduce((entityKeys, pageRequest) => {
           const { entityConfig } = pageRequest;

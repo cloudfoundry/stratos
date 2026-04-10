@@ -4,7 +4,6 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { NgxGraphModule } from '@swimlane/ngx-graph';
 import { SidePanelService } from '@stratosui/core';
 
-import { TabNavService } from '../../../../../../../core/src/tab-nav.service';
 import { HelmReleaseProviders, KubernetesBaseTestModules, KubeBaseGuidMock } from '../../../../kubernetes.testing.module';
 import { KubernetesEndpointService } from '../../../../services/kubernetes-endpoint.service';
 import { KubernetesAnalysisService } from '../../../../services/kubernetes.analysis.service';

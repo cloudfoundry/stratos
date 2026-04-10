@@ -7,7 +7,6 @@ import { TabNavService } from '@stratosui/core';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { ApplicationStateService } from '@stratosui/shared';
 import { generateTestApplicationServiceProvider } from '@test-framework/application-service-helper';
-import { ApplicationService } from '../application.service';
 import { ApplicationEnvVarsHelper } from '../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { EditApplicationComponent } from './edit-application.component';
 

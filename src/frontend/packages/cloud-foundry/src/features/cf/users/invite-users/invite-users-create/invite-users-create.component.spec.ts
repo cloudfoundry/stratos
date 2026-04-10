@@ -28,7 +28,6 @@ import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CloudFoundryReducersModule } from '../../../../../store/cloud-foundry.reducers.module';
 import { UserInviteService } from '../../../user-invites/user-invite.service';
 import { InviteUsersCreateComponent } from './invite-users-create.component';
-import { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { organizationEntityType, spaceEntityType } from '../../../../../cf-entity-types';
 

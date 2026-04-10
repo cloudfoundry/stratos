@@ -27,7 +27,7 @@ describe('KubeConfigTableName', () => {
     fixture = TestBed.createComponent(KubeConfigTableNameComponent);
     component = fixture.componentInstance;
     component.dataSource = {
-      getRowUniqueId: (row) => ''
+      getRowUniqueId: (_row) => ''
     } as IListDataSource<KubeConfigFileCluster>;
     fixture.detectChanges();
   });

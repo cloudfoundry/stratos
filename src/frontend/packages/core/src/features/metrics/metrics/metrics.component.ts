@@ -12,20 +12,9 @@ import { MetadataItemComponent } from '../../../shared/components/metadata-item/
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { ProductNameComponent } from '../../../shared/components/product-name.ccomponent';
-import { EndpointIcon } from '../../endpoints/endpoint-helpers';
+
 import { mapMetricsData, MetricsEndpointInfo } from '../metrics.helpers';
 import { MetricsEndpointProvider, MetricsService } from '../services/metrics-service';
-
-interface EndpointMetadata {
-  type: string;
-  icon: EndpointIcon;
-}
-interface MetricsInfo {
-  entity: MetricsEndpointProvider;
-  metadata: {
-    [guid: string]: EndpointMetadata;
-  };
-}
 
 interface PrometheusJobDetail {
   name: string;

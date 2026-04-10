@@ -8,7 +8,7 @@ import { Store, StoreModule } from '@ngrx/store';
 
 import { appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { ApplicationService, CFAppState, generateCFEntities } from '@stratosui/cloud-foundry';
+import { ApplicationService, generateCFEntities } from '@stratosui/cloud-foundry';
 import { ApplicationServiceMock, generateActiveRouteCfOrgSpaceMock, ApplicationStateService, ApplicationEnvVarsHelper } from '@test-framework/cf';
 import { EventsTabComponent } from './events-tab.component';
 

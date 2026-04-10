@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { BreadcrumbsComponent } from './breadcrumbs.component';
-import { BREADCRUMB_URL_PARAM, IBreadcrumb } from './breadcrumbs.types';
+import { IBreadcrumb } from './breadcrumbs.types';
 
 describe('BreadcrumbsComponent', () => {
   let component: BreadcrumbsComponent;

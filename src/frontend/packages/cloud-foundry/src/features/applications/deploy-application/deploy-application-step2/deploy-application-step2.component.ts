@@ -282,7 +282,7 @@ export class DeployApplicationStep2Component
             branch => branch.name === branchName
           );
         }),
-        map(([branches, branchName]) => branches),
+        map(([branches, _branchName]) => branches),
         publishReplay(1),
         refCount()
       );
@@ -377,7 +377,7 @@ export class DeployApplicationStep2Component
     return observableTimer(500).pipe(
       take(1),
       switchMap(() => this.scm.getMatchingRepositories(this.httpClient, name)),
-      catchError(e => observableOf(null)),
+      catchError(_e => observableOf(null)),
       tap(suggestions => (this.cachedSuggestions as { [key: string]: any })[cacheName] = suggestions),
     );
   }

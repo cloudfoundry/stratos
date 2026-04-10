@@ -54,7 +54,7 @@ export class KubeConfigSelectionComponent {
     disconnect: () => { },
     trackBy: (index, row) => row.name,
     isTableLoading$: observableOf(false),
-    getRowState: (row: KubeConfigFileCluster, schemaKey: string): Observable<RowState> => {
+    getRowState: (row: KubeConfigFileCluster, _schemaKey: string): Observable<RowState> => {
       return row ? row._state.asObservable() : observableOf({});
     },
     selectAllIndeterminate: false,

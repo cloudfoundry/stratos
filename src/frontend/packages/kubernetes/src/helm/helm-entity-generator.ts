@@ -54,7 +54,7 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
         unConnectable: true,
         techPreview: false,
         authTypes: [],
-        endpointListActions: (store: Store<AppState>): IListAction<EndpointModel>[] => {
+        endpointListActions: (_store: Store<AppState>): IListAction<EndpointModel>[] => {
           return [{
             action: (item: EndpointModel) => {
               helmEntityCatalog.chart.api.synchronise(item).pipe(

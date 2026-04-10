@@ -268,7 +268,7 @@ export class BuildTabComponent implements OnInit {
             this.pollEntityService('stopping', 'STOPPED').pipe(take(1))
           );
         }),
-        mergeMap(([appData, updateData]) => {
+        mergeMap(([appData, _updateData]) => {
           this.applicationService.updateApplication({ state: 'STARTED' }, [], appData.app.entity);
           return this.pollEntityService('starting', 'STARTED').pipe(take(1));
         }),

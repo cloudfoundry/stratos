@@ -1,4 +1,4 @@
-import { inject, Injector, runInInjectionContext } from '@angular/core';
+import { Injector, runInInjectionContext } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { EntityCatalogEntityConfig } from '@stratosui/store';
 

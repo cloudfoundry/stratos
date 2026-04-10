@@ -281,7 +281,7 @@ export function safeStringToObj<T = object>(value: string): T {
       }
       return jsonObj;
     }
-  } catch (e) {
+  } catch (_e) {
     return null;
   }
   return null;
