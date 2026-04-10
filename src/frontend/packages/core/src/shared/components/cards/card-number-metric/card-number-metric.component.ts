@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
 import { RouterNav, AppState, StratosStatus } from '@stratosui/store';
-import { UtilsService } from '@stratosui/core';
+import { UtilsService } from '../../../../core/utils.service';
 import { CardStatusComponent, determineCardStatus } from '../card-status/card-status.component';
 
 enum AlertLevel {

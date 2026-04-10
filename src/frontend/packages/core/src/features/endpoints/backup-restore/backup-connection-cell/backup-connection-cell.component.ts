@@ -2,7 +2,7 @@ import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/cor
 
 import { CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../shared/components/custom-select/custom-select.component';
-import { CustomTooltipDirective } from '@stratosui/core';
+import { CustomTooltipDirective } from '../../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { FormsModule } from '@angular/forms';
 import { entityCatalog, EndpointModel, SystemSharedUserGuid } from '@stratosui/store';
 

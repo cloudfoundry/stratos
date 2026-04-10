@@ -2,12 +2,10 @@ import { Observable, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { getFullEndpointApiUrl, stratosEntityCatalog } from '@stratosui/store';
-import {
-  CurrentUserPermissionsService,
-  StratosCurrentUserPermissions,
-  UserProfileService,
-  SessionService
-} from '@stratosui/core';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
+import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
+import { UserProfileService } from '../../../core/user-profile.service';
+import { SessionService } from '../../../shared/services/session.service';
 
 type EndpointObservable = Observable<{
   names: string[],
