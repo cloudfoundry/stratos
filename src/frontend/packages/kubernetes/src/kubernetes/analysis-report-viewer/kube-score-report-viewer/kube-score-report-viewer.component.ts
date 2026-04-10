@@ -7,7 +7,6 @@ import { IReportViewer } from '../analysis-report-viewer.component';
 changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kube-score-report-viewer',
   templateUrl: './kube-score-report-viewer.component.html',
-  styleUrls: ['./kube-score-report-viewer.component.scss',],
   standalone: true
 })
 export class KubeScoreReportViewerComponent implements OnInit, IReportViewer {

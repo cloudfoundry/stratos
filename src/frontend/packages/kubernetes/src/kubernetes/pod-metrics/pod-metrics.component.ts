@@ -30,7 +30,6 @@ import { FetchKubernetesMetricsAction } from '../store/kubernetes.actions';
 @Component({
   selector: 'app-pod-metrics',
   templateUrl: './pod-metrics.component.html',
-  styleUrls: ['./pod-metrics.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

@@ -13,7 +13,6 @@ import { FetchKubernetesMetricsAction } from '../../../store/kubernetes.actions'
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-node-metrics-chart',
   templateUrl: './kubernetes-node-metrics-chart.component.html',
-  styleUrls: ['./kubernetes-node-metrics-chart.component.scss'],
   standalone: true,
   imports: [
     CustomCardComponent,

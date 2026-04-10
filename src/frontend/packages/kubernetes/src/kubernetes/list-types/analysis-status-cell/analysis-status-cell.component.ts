@@ -4,7 +4,6 @@ import { CustomTooltipDirective, ProgressSpinnerComponent, TableCellCustom } fro
 @Component({
   selector: 'app-analysis-status-cell',
   templateUrl: './analysis-status-cell.component.html',
-  styleUrls: ['./analysis-status-cell.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CustomTooltipDirective, ProgressSpinnerComponent]

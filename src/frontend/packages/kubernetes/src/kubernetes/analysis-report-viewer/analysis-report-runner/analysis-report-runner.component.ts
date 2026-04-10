@@ -12,7 +12,6 @@ import {
 @Component({
 selector: 'app-analysis-report-runner',
   templateUrl: './analysis-report-runner.component.html',
-  styleUrls: ['./analysis-report-runner.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

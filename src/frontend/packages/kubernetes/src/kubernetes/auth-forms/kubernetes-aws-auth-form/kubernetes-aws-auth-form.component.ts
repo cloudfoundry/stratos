@@ -15,7 +15,6 @@ interface AWSAuthForm {
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-aws-auth-form',
   templateUrl: './kubernetes-aws-auth-form.component.html',
-  styleUrls: ['./kubernetes-aws-auth-form.component.scss'],
   standalone: true,
   imports: [
     ReactiveFormsModule,

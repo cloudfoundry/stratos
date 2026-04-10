@@ -20,7 +20,6 @@ import { KubernetesNodeMetricStatsCardComponent } from './kubernetes-node-metric
 @Component({
   selector: 'app-kubernetes-node-metrics',
   templateUrl: './kubernetes-node-metrics.component.html',
-  styleUrls: ['./kubernetes-node-metrics.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

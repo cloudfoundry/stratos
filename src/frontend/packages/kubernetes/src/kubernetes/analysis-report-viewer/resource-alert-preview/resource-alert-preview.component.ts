@@ -7,7 +7,6 @@ import { SidepanelPreviewComponent } from '../../../../../core/src/shared/compon
 changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-resource-alert-preview',
   templateUrl: './resource-alert-preview.component.html',
-  styleUrls: ['./resource-alert-preview.component.scss'],
   standalone: true,
   imports: [
     SidepanelPreviewComponent

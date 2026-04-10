@@ -20,7 +20,6 @@ import { HomeShortcutsComponent } from '../../../../core/src/features/home/home/
 @Component({
   selector: 'app-k8s-home-card',
   templateUrl: './kubernetes-home-card.component.html',
-  styleUrls: ['./kubernetes-home-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

@@ -10,7 +10,6 @@ import { KubernetesNodeService } from '../../../../services/kubernetes-node.serv
 @Component({
   selector: 'app-kubernetes-node-summary-card',
   templateUrl: './kubernetes-node-summary-card.component.html',
-  styleUrls: ['./kubernetes-node-summary-card.component.scss'],
   imports: [
     AsyncPipe,
     DatePipe,

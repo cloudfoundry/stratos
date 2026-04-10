@@ -11,7 +11,6 @@ import { KubernetesNodeConditionComponent } from './kubernetes-node-condition/ku
 @Component({
   selector: 'app-kubernetes-node-condition-card',
   templateUrl: './kubernetes-node-condition-card.component.html',
-  styleUrls: ['./kubernetes-node-condition-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

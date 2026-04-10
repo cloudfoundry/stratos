@@ -8,7 +8,6 @@ import { KubeService } from '../../store/kube.types';
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-service-ports',
   templateUrl: './kubernetes-service-ports.component.html',
-  styleUrls: ['./kubernetes-service-ports.component.scss'],
   standalone: true,
   imports: []
 })

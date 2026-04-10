@@ -14,7 +14,6 @@ import { KubernetesServicePortsComponent } from '../../kubernetes-service-ports/
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kube-service-card',
   templateUrl: './kubernetes-service-card.component.html',
-  styleUrls: ['./kubernetes-service-card.component.scss'],
   standalone: true,
   imports: [
     MetaCardComponent,

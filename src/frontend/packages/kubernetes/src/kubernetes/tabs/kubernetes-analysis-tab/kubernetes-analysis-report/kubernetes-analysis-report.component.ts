@@ -17,7 +17,6 @@ import { AnalysisReportViewerComponent } from '../../../analysis-report-viewer/a
 @Component({
   selector: 'app-kubernetes-analysis-report',
   templateUrl: './kubernetes-analysis-report.component.html',
-  styleUrls: ['./kubernetes-analysis-report.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

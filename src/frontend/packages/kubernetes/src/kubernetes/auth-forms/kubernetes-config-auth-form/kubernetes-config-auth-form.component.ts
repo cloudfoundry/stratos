@@ -12,7 +12,6 @@ interface ConfigAuthForm {
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-config-auth-form',
   templateUrl: './kubernetes-config-auth-form.component.html',
-  styleUrls: ['./kubernetes-config-auth-form.component.scss'],
   standalone: true,
   imports: [
     ReactiveFormsModule,

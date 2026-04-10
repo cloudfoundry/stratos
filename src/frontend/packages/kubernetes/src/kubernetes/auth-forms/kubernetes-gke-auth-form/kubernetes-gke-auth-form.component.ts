@@ -12,7 +12,6 @@ interface GKEAuthForm {
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-gke-auth-form',
   templateUrl: './kubernetes-gke-auth-form.component.html',
-  styleUrls: ['./kubernetes-gke-auth-form.component.scss'],
   standalone: true,
   imports: [
     ReactiveFormsModule,

@@ -11,7 +11,6 @@ import { AnalysisReport } from '../../store/kube.types';
 @Component({
 selector: 'app-analysis-report-selector',
   templateUrl: './analysis-report-selector.component.html',
-  styleUrls: ['./analysis-report-selector.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

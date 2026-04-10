@@ -19,7 +19,6 @@ import { KubernetesService } from '../services/kubernetes.service';
 @Component({
   selector: 'app-kubernetes-dashboard',
   templateUrl: './kubernetes-dashboard.component.html',
-  styleUrls: ['./kubernetes-dashboard.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

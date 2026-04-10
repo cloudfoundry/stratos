@@ -8,7 +8,6 @@ import { catchError, map } from 'rxjs/operators';
 @Component({
   selector: 'app-analysis-info-card',
   templateUrl: './analysis-info-card.component.html',
-  styleUrls: ['./analysis-info-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

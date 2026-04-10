@@ -15,7 +15,6 @@ import { KubernetesService } from '../../services/kubernetes.service';
 @Component({
   selector: 'app-kubernetes-namespace-preview',
   templateUrl: './kubernetes-namespace-preview.component.html',
-  styleUrls: ['./kubernetes-namespace-preview.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [AsyncPipe, NgIf, RouterLink],

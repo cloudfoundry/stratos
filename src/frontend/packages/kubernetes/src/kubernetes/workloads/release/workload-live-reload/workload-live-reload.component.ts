@@ -6,7 +6,6 @@ import { HelmReleaseSocketService } from '../helm-release-tab-base/helm-release-
 @Component({
   selector: 'app-workload-live-reload',
   templateUrl: './workload-live-reload.component.html',
-  styleUrls: ['./workload-live-reload.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

@@ -5,7 +5,6 @@ import { formatCPUTime } from '../../../kubernetes-metrics.helpers';
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-node-simple-metric',
   templateUrl: './kubernetes-node-simple-metric.component.html',
-  styleUrls: ['./kubernetes-node-simple-metric.component.scss'],
   standalone: true
 })
 export class KubernetesNodeSimpleMetricComponent {

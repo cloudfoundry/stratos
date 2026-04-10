@@ -21,7 +21,6 @@ type MessageUpdater = (msg: string) => void;
 @Component({
   selector: 'app-kubedash-configuration',
   templateUrl: './kubedash-configuration.component.html',
-  styleUrls: ['./kubedash-configuration.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

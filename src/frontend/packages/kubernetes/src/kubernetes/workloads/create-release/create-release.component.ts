@@ -34,7 +34,6 @@ interface CreateReleaseForm {
 @Component({
   selector: 'app-create-release',
   templateUrl: './create-release.component.html',
-  styleUrls: ['./create-release.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
