@@ -9,19 +9,17 @@ export default defineConfig({
     name: 'store',
     globals: false, // Recommended for Angular 20 + Vitest 4 (avoid global namespace pollution)
     environment: 'happy-dom',
-    // Fork pool with single-fork mode for complete test isolation and Angular TestBed stability
+    // Fork pool with single worker + no isolation for Angular TestBed stability (vitest 4 syntax)
     pool: 'forks',
-    poolOptions: {
-      forks: {
-        singleFork: true, // Single process: ensures TestBed state reset between test files
-        isolate: false, // Isolate environments for complete cleanup
-      },
-    },
+    maxWorkers: 3, // Three parallel fork workers for speed; forks have independent memory
+    isolate: true, // Fresh VM context per test file — prevents state pollution between specs
     server: {
       deps: {
         inline: [
-          '@angular/compiler', // Required for Angular compilation in worker processes
-          '@analogjs/vitest-angular/setup-snapshots', // AnalogJS snapshot support
+          /^@angular\//,  // Force all Angular packages through vitest's transform pipeline
+          /^@ngrx\//,     // Same for NgRx — prevents split module instances of _not_found-chunk
+          /^@analogjs\//,
+          'ng2-charts',   // Angular-dependent library — must share Angular core instance
         ],
       },
     },
@@ -53,5 +51,8 @@ export default defineConfig({
       '@stratosui/kubernetes': join(__dirname, '../kubernetes/src/public-api.ts'),
       '@test-framework': join(__dirname, 'test-framework'),
     },
+  },
+  ssr: {
+    noExternal: ['@angular/**', '@analogjs/**', '@ngrx/**', 'ng2-charts']
   },
 });
