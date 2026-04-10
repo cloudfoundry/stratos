@@ -95,7 +95,10 @@
     "xml2js": "0.5.0",
     "postcss": "8.4.31",
     "request": "npm:@cypress/request@^3.0.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "hono": "^4.12.12",
+    "@hono/node-server": "^1.19.13",
+    "vite": "^6.4.2"
   },
   "dependencies": {
     "@angular/animations": "20.3.18",
