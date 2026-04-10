@@ -1,8 +1,0 @@
-<section class="chart-list">
-  @if (!charts || !charts.length) {
-    <h3 class="chart-list__empty">There are no charts</h3>
-  }
-  @for (chart of charts; track chart) {
-    <app-chart-item [chart]=chart [showDescription]=false></app-chart-item>
-  }
-</section>

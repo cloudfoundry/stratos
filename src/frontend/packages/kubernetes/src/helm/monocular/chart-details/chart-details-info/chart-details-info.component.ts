@@ -14,7 +14,6 @@ import { ChartDetailsVersionsComponent } from '../chart-details-versions/chart-d
 @Component({
   selector: 'app-chart-details-info',
   templateUrl: './chart-details-info.component.html',
-  styleUrls: ['./chart-details-info.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

@@ -10,7 +10,6 @@ import { ListItemComponent } from '../list-item/list-item.component';
 @Component({
   selector: 'app-chart-item',
   templateUrl: './chart-item.component.html',
-  styleUrls: ['./chart-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [RouterLink, ListItemComponent]

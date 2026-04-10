@@ -8,7 +8,6 @@ import { ChartsService } from '../../shared/services/charts.service';
 @Component({
   selector: 'app-chart-details-versions',
   templateUrl: './chart-details-versions.component.html',
-  styleUrls: ['./chart-details-versions.component.scss'],
   standalone: true
 })
 export class ChartDetailsVersionsComponent {

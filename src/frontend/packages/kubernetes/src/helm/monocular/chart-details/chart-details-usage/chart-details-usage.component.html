@@ -1,11 +1,11 @@
-<div class="chart-details-usage__install">
+<div class="flex justify-end my-9">
   @if (endpointsService.hasConnectedEndpointType('k8s') | async) {
     <button
-      class="btn btn-primary chart-details-usage__install-btn"
+      class="btn btn-primary"
     [routerLink]="installUrl">Install Chart</button>
   } @else {
     <div matTooltip="Add a Kubernetes endpoint to install charts">
-      <button disabled="true" class="btn btn-primary chart-details-usage__install-btn">Install Chart</button>
+      <button disabled="true" class="btn btn-primary">Install Chart</button>
     </div>
   }
 </div>

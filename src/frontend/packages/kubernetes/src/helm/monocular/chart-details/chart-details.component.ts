@@ -18,7 +18,6 @@ import { ChartDetailsReadmeComponent } from './chart-details-readme/chart-detail
 @Component({
   selector: 'app-chart-details',
   templateUrl: './chart-details.component.html',
-  styleUrls: ['./chart-details.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

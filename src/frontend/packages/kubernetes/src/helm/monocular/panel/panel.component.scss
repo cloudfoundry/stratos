@@ -1,19 +1,19 @@
 .panel {
   @apply p-8;
+}
 
-  &--container {
-    @apply w-4/5 mx-auto;
-  }
+.panel--container {
+  @apply w-4/5 mx-auto;
+}
 
-  &--background {
-    @apply bg-gray-50;
-  }
+.panel--background {
+  @apply bg-gray-50;
+}
 
-  &--border {
-    @apply rounded-lg border border-gray-300;
-  }
+.panel--border {
+  @apply rounded-lg border border-gray-300;
+}
 
-  &__title {
-    @apply mt-0;
-  }
+.panel__title {
+  @apply mt-0;
 }
