@@ -252,9 +252,13 @@ func (m *MetricsSpecification) createMetadata(metricEndpoint *url.URL, httpClien
 	}
 	m.addAuth(req, auth)
 	res, err := httpClient.Do(req)
+	if err != nil {
+		log.Errorf("Error performing http request: %v", err)
+		return "", api.LogHTTPError(res, err)
+	}
 	defer res.Body.Close()
-	if err != nil || res.StatusCode != http.StatusOK {
-		log.Errorf("Error performing http request - response: %v, error: %v", res, err)
+	if res.StatusCode != http.StatusOK {
+		log.Errorf("Error performing http request - response: %v", res)
 		return "", api.LogHTTPError(res, err)
 	}
 	body, err := ioutil.ReadAll(res.Body)
