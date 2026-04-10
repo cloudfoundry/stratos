@@ -6,7 +6,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Store, StoreModule } from '@ngrx/store';
 
-import { appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule } from '@stratosui/store';
+import { appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { ListConfig } from '@stratosui/core';
 import { generateActiveRouteCfOrgSpaceMock } from '@test-framework/cf';
@@ -58,6 +58,10 @@ describe('CloudFoundryEventsComponent', () => {
       ],
     })
       .compileComponents();
+
+    // Initialize EntityCatalogHelper so components using stratosEntityCatalog.<entity>.store work
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
   });
 
   beforeEach(() => {

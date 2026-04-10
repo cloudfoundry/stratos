@@ -5,7 +5,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { EndpointModel, appReducers } from '@stratosui/store';
+import { EndpointModel, appReducers, entityCatalog, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name.component';
 
@@ -14,6 +14,11 @@ describe('TableCellEndpointNameComponent', () => {
   let fixture: ComponentFixture<TableCellEndpointNameComponent>;
 
   beforeEach(() => {
+    // Register stratos entities so stratosEntityCatalog.endpoint is populated
+    // before the component's row setter calls .endpoint.store.getEntityMonitor()
+    (entityCatalog as any).clear();
+    generateStratosEntities().forEach(entity => entityCatalog.register(entity));
+
     TestBed.configureTestingModule({
       imports: [
         TableCellEndpointNameComponent,
@@ -33,6 +38,10 @@ describe('TableCellEndpointNameComponent', () => {
       ]
     });
     TestBed.compileComponents();
+
+    // Initialize EntityCatalogHelper so components using stratosEntityCatalog.<entity>.store work
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
   });
 
   beforeEach(() => {
