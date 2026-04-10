@@ -1,5 +1,5 @@
 
-import {Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import {Component, OnInit, inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
 import { take, finalize, switchMap, tap } from 'rxjs/operators';
 
@@ -43,6 +43,7 @@ export class ChartDetailsComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private chartsService = inject(ChartsService);
   private config = inject(ConfigService);
+  private cdr = inject(ChangeDetectorRef);
 
 
 
@@ -82,6 +83,7 @@ export class ChartDetailsComponent implements OnInit {
             clearTimeout(this.loadingDelay);
             this.loading = false;
             this.initing = false;
+            this.cdr.markForCheck();
           })
         ).subscribe();
       }
