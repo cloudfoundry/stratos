@@ -98,7 +98,7 @@
     "typescript": "^5.9.3",
     "hono": "^4.12.12",
     "@hono/node-server": "^1.19.13",
-    "vite": "^6.4.2",
+    "vite": "^7.3.2",
     "@angular/build": "^21.2.7"
   },
   "dependencies": {
@@ -116,7 +116,7 @@
     "@ngrx/router-store": "21.1.0",
     "@ngrx/store": "21.1.0",
     "@ngrx/store-devtools": "21.1.0",
-    "@swimlane/ngx-graph": "10.0.0",
+    "@swimlane/ngx-graph": "11.0.0",
     "chart.js": "^4.5.0",
     "core-js": "3.45.0",
     "date-fns": "^4.1.0",
@@ -130,7 +130,7 @@
     "marked": "16.1.2",
     "monaco-editor": "^0.52.2",
     "ng2-charts": "^8.0.0",
-    "ngrx-store-localstorage": "20.0.0",
+    "ngrx-store-localstorage": "20.1.0",
     "normalizr": "3.6.2",
     "reselect": "5.1.1",
     "rxjs": "7.8.2",
@@ -147,8 +147,8 @@
     "bun": ">=1.2.0"
   },
   "devDependencies": {
-    "@analogjs/vite-plugin-angular": "^2.4.0",
-    "@analogjs/vitest-angular": "^2.4.0",
+    "@analogjs/vite-plugin-angular": "^2.4.4",
+    "@analogjs/vitest-angular": "^2.4.4",
     "@angular-builders/custom-webpack": "^21.0.0",
     "@angular-devkit/architect": "0.2102.7",
     "@angular-devkit/build-angular": "21.2.7",
@@ -179,7 +179,7 @@
     "@types/webpack": "^5.28.5",
     "@typescript-eslint/eslint-plugin": "^8.57.2",
     "@typescript-eslint/parser": "^8.57.2",
-    "@vitest/coverage-v8": "3.1.1",
+    "@vitest/coverage-v8": "^4.1.4",
     "@vitest/ui": "3.1.1",
     "acorn": "8.15.0",
     "adm-zip": "0.5.16",
@@ -214,6 +214,6 @@
     "tslint": "5.20.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.58.0",
-    "vitest": "3.1.1"
+    "vitest": "^4.1.4"
   }
 }
