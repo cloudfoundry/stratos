@@ -11,5 +11,5 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation, HostBinding, Inp
 })
 export class TileGridComponent {
   @HostBinding('class.app-tile-grid-fit')
-  @Input() private fit = false;
+  @Input() public fit = false;
 }

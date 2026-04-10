@@ -12,7 +12,7 @@ export class TileComponent implements OnInit, AfterContentInit {
 
   @Input() size?: string;
 
-  @HostBinding('class.app-tile-1-3') private isOneThirdFixed = false;
+  @HostBinding('class.app-tile-1-3') public isOneThirdFixed = false;
 
   constructor() { }
 
