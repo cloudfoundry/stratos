@@ -31,7 +31,7 @@ export class TableCellComponent<T> implements OnInit {
 
   @Input() dataSource = null as IListDataSource<T>;
 
-  @Input() component!: Type<Record<string, unknown>>;
+  @Input() component!: Type<any>;
   @Input() cellDefinition!: ICellDefinition<T>;
   @Input() func!: () => string;
   @Input() set row(row: T | MultiActionListEntity) {

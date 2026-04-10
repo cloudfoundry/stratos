@@ -79,10 +79,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
   private createUpdateTest!: string;
 
   constructor() {
-    const service = inject(EditAutoscalerPolicyService);
-    const route = inject(ActivatedRoute);
-
-    super(service, route);
+    super();
     this.editSpecificDateForm = this.fb.group<EditSpecificDateForm>({
       instance_min_count: new FormControl<number>(0, { nonNullable: true }),
       instance_max_count: new FormControl<number>(0, { nonNullable: true }),

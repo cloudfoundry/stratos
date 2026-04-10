@@ -47,7 +47,7 @@ export class CfSpacePermissionCellComponent extends CfPermissionCellDirective<Sp
     const cfUserService = inject(CfUserService);
     const confirmDialog = inject(ConfirmationDialogService);
 
-    super(store, confirmDialog, cfUserService);
+    super();
     this.store = store;
 
 

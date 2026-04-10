@@ -90,7 +90,7 @@ export class VariablesTabComponent implements OnInit {
       if (envVarType === 'cfGuid' || envVarType === stratosEndpointGuidKey) {
         return;
       }
-      const envVars = (allEnvVars[0].entity[envVarType]) ? allEnvVars[0].entity[envVarType] : Record<string, unknown>;
+      const envVars = (allEnvVars[0].entity[envVarType]) ? allEnvVars[0].entity[envVarType] : {};
       result.push({
         section: true,
         name: envVarType.replace('_json', ''),

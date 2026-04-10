@@ -145,7 +145,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
             text: colors.fg,
             icon,
             alerts: null,
-            alertSummary: Record<string, unknown>
+            alertSummary: {}
           } };
 
         // Does this node have any alerts?

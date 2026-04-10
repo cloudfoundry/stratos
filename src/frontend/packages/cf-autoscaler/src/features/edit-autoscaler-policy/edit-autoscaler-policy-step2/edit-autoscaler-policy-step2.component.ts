@@ -76,10 +76,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   private subs: Subscription[] = [];
 
   constructor() {
-    const service = inject(EditAutoscalerPolicyService);
-    const route = inject(ActivatedRoute);
-
-    super(service, route);
+    super();
     this.editTriggerForm = this.fb.group<EditTriggerForm>({
       metric_type: this.fb.control('', { validators: [Validators.required, this.validateTriggerMetricType()], nonNullable: true }),
       operator: this.fb.control('', { validators: [this.validateTriggerOperator()], nonNullable: true }),

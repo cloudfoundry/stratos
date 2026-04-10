@@ -75,10 +75,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
   };
 
   constructor() {
-    const service = inject(EditAutoscalerPolicyService);
-    const route = inject(ActivatedRoute);
-
-    super(service, route);
+    super();
     this.editRecurringScheduleForm = this.fb.group<EditRecurringScheduleForm>({
       days_of_week: this.fb.control<number[]>([], { nonNullable: true }),
       days_of_month: this.fb.control<number[]>([], { nonNullable: true }),

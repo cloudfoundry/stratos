@@ -38,7 +38,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
     const store = inject<Store<CFAppState>>(Store);
     const datePipe = inject(DatePipe);
 
-    super(store, datePipe);
+    super();
     this.setGuids();
     this.setGithubDetails();
   }

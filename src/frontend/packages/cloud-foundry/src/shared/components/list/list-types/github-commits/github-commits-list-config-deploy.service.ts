@@ -20,7 +20,7 @@ export class GithubCommitsListConfigServiceDeploy extends GithubCommitsListConfi
     const datePipe = inject(DatePipe);
     const scmService = inject(GitSCMService);
 
-    super(store, datePipe);
+    super();
     this.text.title = 'Select a commit';
     this.columns.unshift({
       columnId: 'radio',

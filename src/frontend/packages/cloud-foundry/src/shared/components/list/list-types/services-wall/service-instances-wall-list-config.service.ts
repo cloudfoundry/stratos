@@ -66,10 +66,6 @@ export class ServiceInstancesWallListConfigService extends CfServiceInstancesLis
     const serviceActionHelperService = inject(ServiceActionHelperService);
 
     super(
-      store,
-      datePipe,
-      currentUserPermissionsService,
-      serviceActionHelperService,
       `/services`
     );
     const multiFilterConfigs = [
