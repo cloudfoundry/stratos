@@ -1,6 +1,8 @@
-<app-page-header>
-  <h1>Register Endpoint</h1>
-</app-page-header>
+@if (!hideHeader) {
+  <app-page-header>
+    <h1>Register Endpoint</h1>
+  </app-page-header>
+}
 
 @if (!component) {
   <app-steppers cancel="/endpoints">

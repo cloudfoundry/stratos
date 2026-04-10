@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterViewInit, Component, ComponentRef, NgZone, OnDestroy, OnInit, ViewChild, ViewContainerRef, inject } from '@angular/core';
+import { ChangeDetectionStrategy, AfterViewInit, Component, ComponentRef, NgZone, OnDestroy, OnInit, ViewChild, ViewContainerRef, inject, signal } from '@angular/core';
 import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -23,7 +23,6 @@ import { ListConfig } from '../../../shared/components/list/list.component.types
 import { ListComponent } from '../../../shared/components/list/list.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { EndpointsMissingComponent } from '../../../shared/components/endpoints-missing/endpoints-missing.component';
-import { UserPermissionDirective } from '../../../shared/user-permission.directive';
 import { SnackBarService } from '../../../shared/services/snackbar.service';
 import { SessionService } from '../../../shared/services/session.service';
 import { EndpointModalService } from '../endpoint-register-modal/endpoint-modal.service';
@@ -45,7 +44,6 @@ import { EndpointRegisterModalComponent } from '../endpoint-register-modal/endpo
     PageHeaderComponent,
     ListComponent,
     EndpointsMissingComponent,
-    UserPermissionDirective,
     EndpointRegisterModalComponent
   ]
 })
@@ -57,7 +55,12 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
   sessionService = inject(SessionService);
   private endpointModalService = inject(EndpointModalService);
 
-  public canRegisterEndpoint: Observable<StratosCurrentUserPermissions[]>;
+  // Signal-backed permission flag. The directive-based approach (*appUserPermission
+  // + async pipe) was sensitive to CD timing under zoneless Angular 21 — the
+  // button would disappear after a modal open/close cycle. A signal reads cleanly
+  // in the template with @if and always reflects the latest permission result,
+  // regardless of surrounding component state churn.
+  public canRegisterEndpoint = signal<boolean>(false);
   private healthCheckTimeout!: number;
 
   public canBackupRestore$: Observable<boolean>;
@@ -102,17 +105,23 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
       error: (err) => console.error('Error checking persistence features:', err)
     });
 
-    // Defensive: Add null guards for session service observables
-    this.canRegisterEndpoint = this.sessionService.userEndpointsEnabled().pipe(
+    // Resolve the set of permissions that would allow endpoint registration,
+    // run each through the permission service, and fold into a single boolean.
+    // Allowed when ANY of the permission checks passes — matching the previous
+    // directive-based behavior.
+    this.sessionService.userEndpointsEnabled().pipe(
       filter(enabled => enabled !== undefined && enabled !== null),
-      map(enabled => {
-        if (enabled){
-          return [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT, StratosCurrentUserPermissions.EDIT_ENDPOINT];
-        }else{
-          return [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT];
-        }
-      })
-    );
+      switchMap(enabled => {
+        const perms = enabled
+          ? [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT, StratosCurrentUserPermissions.EDIT_ENDPOINT]
+          : [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT];
+        return combineLatest(perms.map(p => currentUserPermissionsService.can(p)));
+      }),
+      map(results => results.some(Boolean))
+    ).subscribe({
+      next: can => this.canRegisterEndpoint.set(can),
+      error: (err) => console.error('Error resolving register-endpoint permission:', err)
+    });
 
     // Is the backup/restore plugin available on the backend?
     // Defensive: Add catchError to handle session data access issues
