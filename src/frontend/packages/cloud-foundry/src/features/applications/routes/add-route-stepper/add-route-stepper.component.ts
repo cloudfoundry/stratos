@@ -8,7 +8,6 @@ import { AddRoutesComponent } from '../add-routes/add-routes.component';
 @Component({
 selector: 'app-add-route-stepper',
   templateUrl: './add-route-stepper.component.html',
-  styleUrls: ['./add-route-stepper.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

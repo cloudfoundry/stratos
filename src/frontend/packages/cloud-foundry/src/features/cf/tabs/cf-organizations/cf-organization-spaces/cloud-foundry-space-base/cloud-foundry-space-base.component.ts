@@ -38,7 +38,6 @@ import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-spa
 @Component({
   selector: 'app-cloud-foundry-space-base',
   templateUrl: './cloud-foundry-space-base.component.html',
-  styleUrls: ['./cloud-foundry-space-base.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

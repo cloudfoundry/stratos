@@ -9,7 +9,6 @@ import { IServiceInstance } from '../../../../../../cf-api-svc.types';
 @Component({
   selector: 'app-table-cell-space-name',
   templateUrl: './table-cell-space-name.component.html',
-  styleUrls: ['./table-cell-space-name.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

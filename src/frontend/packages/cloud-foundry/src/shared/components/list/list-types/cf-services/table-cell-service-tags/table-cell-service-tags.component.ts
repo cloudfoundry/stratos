@@ -9,7 +9,6 @@ import { ServiceTag } from '../cf-service-card/cf-service-card.component';
 @Component({
   selector: 'app-table-cell-service-tags',
   templateUrl: './table-cell-service-tags.component.html',
-  styleUrls: ['./table-cell-service-tags.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

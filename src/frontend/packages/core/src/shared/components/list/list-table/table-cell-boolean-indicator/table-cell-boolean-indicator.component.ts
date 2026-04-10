@@ -13,7 +13,6 @@ export interface TableCellBooleanIndicatorComponentConfig<T> {
 @Component({
 selector: 'app-table-cell-boolean-indicator',
   templateUrl: './table-cell-boolean-indicator.component.html',
-  styleUrls: ['./table-cell-boolean-indicator.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

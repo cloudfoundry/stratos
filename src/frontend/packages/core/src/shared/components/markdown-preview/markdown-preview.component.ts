@@ -12,7 +12,6 @@ import { MarkdownContentObserverDirective } from './markdown-content-observer.di
 @Component({
   selector: 'app-markdown-preview',
   templateUrl: './markdown-preview.component.html',
-  styleUrls: ['./markdown-preview.component.scss'],
   standalone: true,
   imports: [
     SidepanelPreviewComponent,

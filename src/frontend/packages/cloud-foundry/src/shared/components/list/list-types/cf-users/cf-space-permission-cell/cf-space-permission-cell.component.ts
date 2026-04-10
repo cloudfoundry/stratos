@@ -27,7 +27,6 @@ import { CfPermissionCellDirective, ICellPermissionList } from '../cf-permission
 @Component({
   selector: 'app-cf-space-permission-cell',
   templateUrl: './cf-space-permission-cell.component.html',
-  styleUrls: ['./cf-space-permission-cell.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

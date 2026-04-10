@@ -13,7 +13,6 @@ import { BackupEndpointConnectionTypes, BackupEndpointTypes } from '../backup-re
 @Component({
   selector: 'app-backup-connection-cell',
   templateUrl: './backup-connection-cell.component.html',
-  styleUrls: ['./backup-connection-cell.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

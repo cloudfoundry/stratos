@@ -32,7 +32,6 @@ import { PollingIndicatorComponent } from '../../../../../../../core/src/shared/
 @Component({
   selector: 'app-cloud-foundry-organization-summary',
   templateUrl: './cloud-foundry-organization-summary.component.html',
-  styleUrls: ['./cloud-foundry-organization-summary.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

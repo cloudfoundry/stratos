@@ -25,7 +25,6 @@ export type StepOnNextFunction = (index: number, step: StepComponent) => Observa
 @Component({
   selector: 'app-step',
   templateUrl: './step.component.html',
-  styleUrls: ['./step.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true
 })

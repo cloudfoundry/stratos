@@ -22,7 +22,6 @@ export interface TableCellServiceBrokerComponentConfig {
 @Component({
   selector: 'app-table-cell-service-broker',
   templateUrl: './table-cell-service-broker.component.html',
-  styleUrls: ['./table-cell-service-broker.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

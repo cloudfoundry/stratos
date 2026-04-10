@@ -16,7 +16,6 @@ import { InviteUsersCreateComponent } from './invite-users-create/invite-users-c
 @Component({
   selector: 'app-invite-users',
   templateUrl: './invite-users.component.html',
-  styleUrls: ['./invite-users.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

@@ -7,7 +7,6 @@ import { FetchApplicationMetricsAction } from '../../../actions/cf-metrics.actio
 @Component({
   selector: 'app-application-instance-chart',
   templateUrl: './application-instance-chart.component.html',
-  styleUrls: ['./application-instance-chart.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

@@ -8,7 +8,6 @@ import { EventMetadataComponent } from '../event-metadata/event-metadata.compone
 @Component({
   selector: 'app-table-cell-event-detail',
   templateUrl: './table-cell-event-detail.component.html',
-  styleUrls: ['./table-cell-event-detail.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

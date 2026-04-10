@@ -8,7 +8,6 @@ import { CfRoleCheckboxComponent } from '../../../../cf-role-checkbox/cf-role-ch
 @Component({
   selector: 'app-table-cell-org-space-role',
   templateUrl: './table-cell-org-space-role.component.html',
-  styleUrls: ['./table-cell-org-space-role.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

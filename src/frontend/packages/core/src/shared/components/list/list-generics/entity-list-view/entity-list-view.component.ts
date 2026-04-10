@@ -9,7 +9,6 @@ import { ListViewComponent } from '../list-view/list-view.component';
 @Component({
   selector: 'app-entity-list-view',
   templateUrl: './entity-list-view.component.html',
-  styleUrls: ['./entity-list-view.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

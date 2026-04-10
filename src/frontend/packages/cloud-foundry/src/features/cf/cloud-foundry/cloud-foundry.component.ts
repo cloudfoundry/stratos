@@ -18,7 +18,6 @@ import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpo
 @Component({
   selector: 'app-cloud-foundry',
   templateUrl: './cloud-foundry.component.html',
-  styleUrls: ['./cloud-foundry.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

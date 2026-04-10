@@ -15,7 +15,6 @@ import { BUILD_INFO } from '../../../environments/build-info';
 @Component({
   selector: 'app-diagnostics-page',
   templateUrl: './diagnostics-page.component.html',
-  styleUrls: ['./diagnostics-page.component.scss'],
   standalone: true,
   imports: [
     CommonModule,

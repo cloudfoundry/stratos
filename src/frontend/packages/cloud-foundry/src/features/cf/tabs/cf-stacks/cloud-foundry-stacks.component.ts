@@ -6,7 +6,6 @@ import { CfStacksListConfigService } from '../../../../shared/components/list/li
 @Component({
   selector: 'app-cloud-foundry-stacks',
   templateUrl: './cloud-foundry-stacks.component.html',
-  styleUrls: ['./cloud-foundry-stacks.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

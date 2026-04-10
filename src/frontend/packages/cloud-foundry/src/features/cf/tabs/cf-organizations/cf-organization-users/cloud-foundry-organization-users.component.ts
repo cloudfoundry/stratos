@@ -27,7 +27,6 @@ import { CloudFoundryInviteUserLinkComponent } from '../cf-invite-user-link/clou
 @Component({
   selector: 'app-cloud-foundry-organization-users',
   templateUrl: './cloud-foundry-organization-users.component.html',
-  styleUrls: ['./cloud-foundry-organization-users.component.scss'],
   providers: [{
     provide: ListConfig,
     useClass: CfOrgUsersListConfigService

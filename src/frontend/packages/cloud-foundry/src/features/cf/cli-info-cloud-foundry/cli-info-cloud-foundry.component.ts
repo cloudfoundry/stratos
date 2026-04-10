@@ -32,7 +32,6 @@ import { CloudFoundrySpaceService } from '../services/cloud-foundry-space.servic
 @Component({
   selector: 'app-cli-info-cloud-foundry',
   templateUrl: './cli-info-cloud-foundry.component.html',
-  styleUrls: ['./cli-info-cloud-foundry.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

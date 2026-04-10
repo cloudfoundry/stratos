@@ -15,7 +15,6 @@ import { BUILD_INFO } from '../../../environments/build-info';
 @Component({
   selector: 'app-about-page',
   templateUrl: './about-page.component.html',
-  styleUrls: ['./about-page.component.scss'],
   standalone: true,
   imports: [
     CommonModule,

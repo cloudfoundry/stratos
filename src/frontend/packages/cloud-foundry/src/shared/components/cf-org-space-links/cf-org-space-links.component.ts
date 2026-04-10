@@ -7,7 +7,6 @@ import { CfOrgSpaceLabelService } from '../../services/cf-org-space-label.servic
 @Component({
   selector: 'app-cf-org-space-links',
   templateUrl: './cf-org-space-links.component.html',
-  styleUrls: ['./cf-org-space-links.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

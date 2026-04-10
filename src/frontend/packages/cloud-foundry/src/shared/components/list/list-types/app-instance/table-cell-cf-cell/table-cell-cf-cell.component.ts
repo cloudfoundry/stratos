@@ -14,7 +14,6 @@ import { ListAppInstance } from '../app-instance-types';
 @Component({
   selector: 'app-table-cell-cf-cell-usage',
   templateUrl: './table-cell-cf-cell.component.html',
-  styleUrls: ['./table-cell-cf-cell.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

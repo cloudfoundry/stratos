@@ -13,7 +13,6 @@ import {
 @Component({
   selector: 'app-autoscaler-scale-history-page',
   templateUrl: './autoscaler-scale-history-page.component.html',
-  styleUrls: ['./autoscaler-scale-history-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [{
     provide: ListConfig,

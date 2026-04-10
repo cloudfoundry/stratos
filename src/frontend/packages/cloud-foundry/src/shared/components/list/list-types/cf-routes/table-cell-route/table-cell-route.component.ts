@@ -7,7 +7,6 @@ import { ListCfRoute } from '../cf-routes-data-source-base';
 @Component({
   selector: 'app-table-cell-route',
   templateUrl: './table-cell-route.component.html',
-  styleUrls: ['./table-cell-route.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: []

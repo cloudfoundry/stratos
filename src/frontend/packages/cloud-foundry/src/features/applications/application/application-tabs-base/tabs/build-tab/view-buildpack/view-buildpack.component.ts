@@ -4,7 +4,6 @@ import { Component, OnInit, Input, OnChanges , ChangeDetectionStrategy } from '@
 @Component({
   selector: 'app-view-buildpack',
   templateUrl: './view-buildpack.component.html',
-  styleUrls: ['./view-buildpack.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: []

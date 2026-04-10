@@ -22,7 +22,6 @@ import { ServiceRecentInstancesCardComponent } from '../../../shared/components/
 @Component({
   selector: 'app-service-summary',
   templateUrl: './service-summary.component.html',
-  styleUrls: ['./service-summary.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

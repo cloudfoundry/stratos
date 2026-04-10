@@ -15,7 +15,6 @@ import { cfEntityCatalog } from '../../../cf-entity-catalog';
 @Component({
   selector: 'app-service-plan-public',
   templateUrl: './service-plan-public.component.html',
-  styleUrls: ['./service-plan-public.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

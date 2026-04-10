@@ -20,7 +20,6 @@ interface Config<T> {
 @Component({
 selector: 'app-table-cell-request-monitor-icon',
   templateUrl: './table-cell-request-monitor-icon.component.html',
-  styleUrls: ['./table-cell-request-monitor-icon.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

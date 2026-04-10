@@ -7,7 +7,6 @@ import { IService } from '../../../../../../cf-api-svc.types';
 @Component({
   selector: 'app-table-cell-service-active',
   templateUrl: './table-cell-service-active.component.html',
-  styleUrls: ['./table-cell-service-active.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

@@ -11,7 +11,6 @@ export interface TableCellIconComponentConfig<T> {
 @Component({
   selector: 'app-table-cell-icon',
   templateUrl: './table-cell-icon.component.html',
-  styleUrls: ['./table-cell-icon.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

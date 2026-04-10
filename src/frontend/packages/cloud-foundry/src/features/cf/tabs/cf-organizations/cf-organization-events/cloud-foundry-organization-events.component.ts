@@ -9,7 +9,6 @@ import { CloudFoundryEventsListComponent } from '../../../../../shared/component
 @Component({
   selector: 'app-cloud-foundry-organization-events',
   templateUrl: './cloud-foundry-organization-events.component.html',
-  styleUrls: ['./cloud-foundry-organization-events.component.scss'],
   providers: [{
     provide: ListConfig,
     useClass: CfOrganizationEventsConfigService,

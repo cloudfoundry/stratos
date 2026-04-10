@@ -17,7 +17,6 @@ import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 @Component({
   selector: 'app-cloud-foundry-cell-base',
   templateUrl: './cloud-foundry-cell-base.component.html',
-  styleUrls: ['./cloud-foundry-cell-base.component.scss'],
   providers: [
     getActiveRouteCfCellProvider,
     CloudFoundryCellService

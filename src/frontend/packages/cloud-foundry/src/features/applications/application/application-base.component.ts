@@ -22,7 +22,6 @@ export function getGuids(type?: string) {
 @Component({
   selector: 'app-application-base',
   templateUrl: './application-base.component.html',
-  styleUrls: ['./application-base.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

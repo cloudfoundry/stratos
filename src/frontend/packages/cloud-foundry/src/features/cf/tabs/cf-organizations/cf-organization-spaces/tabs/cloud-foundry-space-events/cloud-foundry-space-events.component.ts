@@ -7,7 +7,6 @@ import { CloudFoundryEventsListComponent } from '../../../../../../../shared/com
 @Component({
   selector: 'app-cloud-foundry-space-events',
   templateUrl: './cloud-foundry-space-events.component.html',
-  styleUrls: ['./cloud-foundry-space-events.component.scss'],
   providers: [{
     provide: ListConfig,
     useClass: CfSpaceEventsConfigService

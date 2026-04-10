@@ -5,7 +5,6 @@ import { Observable } from 'rxjs';
 @Component({
   selector: 'app-enumerate',
   templateUrl: './enumerate.component.html',
-  styleUrls: ['./enumerate.component.scss'],
   standalone: true,
   imports: [
     CommonModule,

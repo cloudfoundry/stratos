@@ -9,7 +9,6 @@ import { CustomIconComponent } from '../../../shared/components/custom-material/
 @Component({
   selector: 'app-eula-page',
   templateUrl: './eula-page.component.html',
-  styleUrls: ['./eula-page.component.scss'],
   standalone: true,
   imports: [
     CustomIconComponent,

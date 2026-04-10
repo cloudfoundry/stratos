@@ -20,7 +20,6 @@ import { CfPermissionCellDirective, ICellPermissionList } from '../cf-permission
 @Component({
   selector: 'app-org-user-permission-cell',
   templateUrl: './cf-org-permission-cell.component.html',
-  styleUrls: ['./cf-org-permission-cell.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

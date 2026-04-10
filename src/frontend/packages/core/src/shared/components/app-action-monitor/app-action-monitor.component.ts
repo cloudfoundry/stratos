@@ -19,7 +19,6 @@ import { TableComponent } from '../list/list-table/table.component';
 @Component({
   selector: 'app-action-monitor',
   templateUrl: './app-action-monitor.component.html',
-  styleUrls: ['./app-action-monitor.component.scss'],
   standalone: true,
   imports: [
     CommonModule,

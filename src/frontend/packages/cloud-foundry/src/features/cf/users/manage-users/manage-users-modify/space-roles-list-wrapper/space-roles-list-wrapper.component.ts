@@ -6,7 +6,6 @@ import { ActiveRouteCfOrgSpace } from '../../../../cf-page.types';
 @Component({
   selector: 'app-space-roles-list-wrapper',
   templateUrl: './space-roles-list-wrapper.component.html',
-  styleUrls: ['./space-roles-list-wrapper.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

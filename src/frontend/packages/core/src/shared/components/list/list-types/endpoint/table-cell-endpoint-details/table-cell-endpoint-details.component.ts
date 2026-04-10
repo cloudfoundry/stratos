@@ -7,7 +7,6 @@ import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-li
 @Component({
   selector: 'app-table-cell-endpoint-details',
   templateUrl: './table-cell-endpoint-details.component.html',
-  styleUrls: ['./table-cell-endpoint-details.component.scss'],
   standalone: true,
   imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush

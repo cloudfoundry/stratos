@@ -19,7 +19,7 @@ export const QUOTA_ORG_GUID = 'org';
 @Component({
   selector: 'app-quota-definition',
   templateUrl: './quota-definition.component.html',
-  styleUrls: ['../quota-definition-base/quota-definition-base.component.scss', './quota-definition.component.scss'],
+  styleUrls: ['../quota-definition-base/quota-definition-base.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
   ],

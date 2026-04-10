@@ -10,7 +10,6 @@ import { StratosTab, StratosTabType } from '@stratosui/core';
 @Component({
 selector: 'app-app-tab-extension',
   templateUrl: './app-tab-extension.component.html',
-  styleUrls: ['./app-tab-extension.component.scss'],
   standalone: false,
   changeDetection: ChangeDetectionStrategy.OnPush
 })

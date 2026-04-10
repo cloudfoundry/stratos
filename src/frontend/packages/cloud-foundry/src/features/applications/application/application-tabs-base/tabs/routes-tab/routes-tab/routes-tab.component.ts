@@ -17,7 +17,6 @@ import { ApplicationService } from '../../../../../application.service';
 @Component({
   selector: 'app-routes-tab',
   templateUrl: './routes-tab.component.html',
-  styleUrls: ['./routes-tab.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

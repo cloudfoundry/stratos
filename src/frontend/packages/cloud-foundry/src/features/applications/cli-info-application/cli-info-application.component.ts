@@ -12,7 +12,6 @@ import { CFAppCLIInfoContext, CliInfoComponent } from '../../../shared/component
 @Component({
   selector: 'app-cli-info-application',
   templateUrl: './cli-info-application.component.html',
-  styleUrls: ['./cli-info-application.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

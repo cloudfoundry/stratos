@@ -5,7 +5,6 @@ import { IFeatureFlag } from '@stratosui/cloud-foundry';
 @Component({
   selector: 'app-table-cell-feature-flag-state',
   templateUrl: './table-cell-feature-flag-state.component.html',
-  styleUrls: ['./table-cell-feature-flag-state.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

@@ -12,7 +12,6 @@ import {
 @Component({
   selector: 'app-commit-list-wrapper',
   templateUrl: './commit-list-wrapper.component.html',
-  styleUrls: ['./commit-list-wrapper.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

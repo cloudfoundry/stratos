@@ -9,7 +9,6 @@ import { AppDeleteServiceInstancesListConfigService } from './app-delete-instanc
 @Component({
   selector: 'app-delete-app-instances',
   templateUrl: './delete-app-instances.component.html',
-  styleUrls: ['./delete-app-instances.component.scss'],
   providers: [
     {
       provide: ListConfig,

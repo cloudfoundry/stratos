@@ -3,7 +3,6 @@ import { ChangeDetectionStrategy, Component, TemplateRef, ViewChild } from '@ang
 @Component({
   selector: 'app-meta-card-value',
   templateUrl: './meta-card-value.component.html',
-  styleUrls: ['./meta-card-value.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: []

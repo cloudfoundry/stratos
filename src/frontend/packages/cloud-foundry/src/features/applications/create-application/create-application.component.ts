@@ -17,7 +17,6 @@ import { CreateApplicationStep3Component } from './create-application-step3/crea
 @Component({
   selector: 'app-create-application',
   templateUrl: './create-application.component.html',
-  styleUrls: ['./create-application.component.scss'],
   providers: [CfOrgSpaceDataService],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,

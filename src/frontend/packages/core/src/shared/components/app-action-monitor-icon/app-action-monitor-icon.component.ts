@@ -121,7 +121,6 @@ export class ActionMonitorComponentState {
 @Component({
   selector: 'app-action-monitor-icon',
   templateUrl: './app-action-monitor-icon.component.html',
-  styleUrls: ['./app-action-monitor-icon.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

@@ -31,7 +31,6 @@ import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry
 @Component({
   selector: 'app-cloud-foundry-organization-base',
   templateUrl: './cloud-foundry-organization-base.component.html',
-  styleUrls: ['./cloud-foundry-organization-base.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider,
     CfUserService,

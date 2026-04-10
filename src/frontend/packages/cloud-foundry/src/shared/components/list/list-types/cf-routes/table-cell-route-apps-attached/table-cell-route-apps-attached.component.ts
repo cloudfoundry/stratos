@@ -9,7 +9,6 @@ import { CfRoute, IApp } from '@stratosui/cloud-foundry';
 @Component({
   selector: 'app-table-cell-route-apps-attached',
   templateUrl: './table-cell-route-apps-attached.component.html',
-  styleUrls: ['./table-cell-route-apps-attached.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

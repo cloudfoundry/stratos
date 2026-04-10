@@ -9,7 +9,6 @@ import {
 @Component({
   selector: 'app-cloud-foundry-space-service-instances',
   templateUrl: './cloud-foundry-space-service-instances.component.html',
-  styleUrls: ['./cloud-foundry-space-service-instances.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

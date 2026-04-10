@@ -22,7 +22,6 @@ import { ManageUsersSetUsernamesComponent } from './manage-users-set-usernames/m
 @Component({
   selector: 'app-manage-users',
   templateUrl: './manage-users.component.html',
-  styleUrls: ['./manage-users.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

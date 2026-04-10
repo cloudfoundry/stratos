@@ -9,7 +9,6 @@ import { TableCellCustom } from '../../list.types';
 @Component({
   selector: 'app-table-cell-select',
   templateUrl: './table-cell-select.component.html',
-  styleUrls: ['./table-cell-select.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

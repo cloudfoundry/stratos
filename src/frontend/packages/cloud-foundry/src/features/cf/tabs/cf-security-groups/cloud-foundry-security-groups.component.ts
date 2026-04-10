@@ -6,7 +6,6 @@ import { CfSecurityGroupsListConfigService } from '../../../../shared/components
 @Component({
   selector: 'app-cloud-foundry-security-groups',
   templateUrl: './cloud-foundry-security-groups.component.html',
-  styleUrls: ['./cloud-foundry-security-groups.component.scss'],
   providers: [
     {
       provide: ListConfig,

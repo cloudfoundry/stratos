@@ -27,7 +27,6 @@ import { CloudFoundryInviteUserLinkComponent } from '../../../../cf-organization
 @Component({
   selector: 'app-cloud-foundry-space-users',
   templateUrl: './cloud-foundry-space-users.component.html',
-  styleUrls: ['./cloud-foundry-space-users.component.scss'],
   providers: [{
     provide: ListConfig,
     useClass: CfSpaceUsersListConfigService

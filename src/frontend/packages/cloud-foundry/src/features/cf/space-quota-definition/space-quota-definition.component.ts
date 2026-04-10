@@ -30,7 +30,7 @@ export const QUOTA_SPACE_GUID = 'space';
 
 @Component({
   selector: 'app-space-quota-definition',
-  styleUrls: ['../quota-definition-base/quota-definition-base.component.scss', './space-quota-definition.component.scss'],
+  styleUrls: ['../quota-definition-base/quota-definition-base.component.scss'],
   templateUrl: './space-quota-definition.component.html',
   providers: [
     getActiveRouteCfOrgSpaceProvider

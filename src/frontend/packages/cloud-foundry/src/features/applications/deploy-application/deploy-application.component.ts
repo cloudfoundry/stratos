@@ -33,7 +33,6 @@ import { DeployApplicationStep3Component } from './deploy-application-step3/depl
 @Component({
   selector: 'app-deploy-application',
   templateUrl: './deploy-application.component.html',
-  styleUrls: ['./deploy-application.component.scss'],
   providers: [
     CfOrgSpaceDataService,
     ApplicationDeploySourceTypes,

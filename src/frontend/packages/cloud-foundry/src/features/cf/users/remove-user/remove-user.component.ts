@@ -29,7 +29,6 @@ import { UsersRolesConfirmComponent } from '../manage-users/manage-users-confirm
 @Component({
 selector: 'app-remove-user',
   templateUrl: './remove-user.component.html',
-  styleUrls: ['./remove-user.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider,
     CfUserService,

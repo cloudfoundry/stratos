@@ -10,7 +10,6 @@ import { TableCellAppCfOrgSpaceBase } from '../TableCellAppCfOrgSpaceBase';
 @Component({
   selector: 'app-table-cell-app-cforgspace',
   templateUrl: './table-cell-app-cforgspace.component.html',
-  styleUrls: ['./table-cell-app-cforgspace.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

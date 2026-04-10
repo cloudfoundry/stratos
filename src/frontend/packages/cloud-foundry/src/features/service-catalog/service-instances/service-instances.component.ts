@@ -10,7 +10,6 @@ import {
 @Component({
   selector: 'app-service-instances',
   templateUrl: './service-instances.component.html',
-  styleUrls: ['./service-instances.component.scss'],
   providers: [
     DatePipe,
     {

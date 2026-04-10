@@ -13,7 +13,6 @@ import { CreateEndpointConnectComponent } from './create-endpoint-connect/create
 @Component({
   selector: 'app-create-endpoint',
   templateUrl: './create-endpoint.component.html',
-  styleUrls: ['./create-endpoint.component.scss'],
   standalone: true,
   imports: [
     CommonModule,

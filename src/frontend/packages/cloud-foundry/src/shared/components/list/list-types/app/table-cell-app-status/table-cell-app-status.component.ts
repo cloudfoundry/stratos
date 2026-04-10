@@ -11,7 +11,6 @@ import { ApplicationStateData, ApplicationStateService } from '../../../../../se
 @Component({
   selector: 'app-table-cell-app-status',
   templateUrl: './table-cell-app-status.component.html',
-  styleUrls: ['./table-cell-app-status.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

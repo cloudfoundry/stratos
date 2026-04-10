@@ -11,7 +11,6 @@ import { CfOrgSpaceLinksComponent } from '../../../../../components/cf-org-space
 @Component({
   selector: 'app-table-cell-service-cf-breadcrumbs',
   templateUrl: './table-cell-service-cf-breadcrumbs.component.html',
-  styleUrls: ['./table-cell-service-cf-breadcrumbs.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

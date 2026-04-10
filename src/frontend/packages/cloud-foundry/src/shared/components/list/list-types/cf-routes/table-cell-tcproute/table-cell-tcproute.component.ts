@@ -8,7 +8,6 @@ import { ListCfRoute } from '../cf-routes-data-source-base';
 @Component({
   selector: 'app-table-cell-tcp-route',
   templateUrl: './table-cell-tcproute.component.html',
-  styleUrls: ['./table-cell-tcproute.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

@@ -17,7 +17,6 @@ import { getCfServiceInstance } from '../../../../../../features/service-catalog
 @Component({
   selector: 'app-table-cell-service-instance-apps-attached',
   templateUrl: './table-cell-service-instance-apps-attached.component.html',
-  styleUrls: ['./table-cell-service-instance-apps-attached.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

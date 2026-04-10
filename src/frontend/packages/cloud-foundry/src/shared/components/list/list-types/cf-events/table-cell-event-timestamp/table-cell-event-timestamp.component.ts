@@ -6,7 +6,6 @@ import { TableCellCustom } from '../../../../../../../../core/src/shared/compone
 @Component({
   selector: 'app-table-cell-event-timestamp',
   templateUrl: './table-cell-event-timestamp.component.html',
-  styleUrls: ['./table-cell-event-timestamp.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
