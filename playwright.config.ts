@@ -50,11 +50,11 @@ export default defineConfig({
     // Collect trace when retrying the failed test
     trace: 'on-first-retry',
 
-    // Screenshot on failure
-    screenshot: 'only-on-failure',
+    // Screenshot on failure (override via E2E_SCREENSHOTS env var)
+    screenshot: (process.env.E2E_SCREENSHOTS as any) || 'only-on-failure',
 
-    // Video on failure
-    video: 'retain-on-failure',
+    // Video on failure (override via E2E_VIDEO env var)
+    video: (process.env.E2E_VIDEO as any) || 'retain-on-failure',
 
     // Accept self-signed certificates (dev environment)
     ignoreHTTPSErrors: true,

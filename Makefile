@@ -46,6 +46,10 @@ $(_HIDE)BIN_DIR     := $($(_HIDE)DIST_DIR)/bin
 DRYRUN ?=
 FINAL  ?=
 
+# Literal comma — required because $(call) and $(subst) both use commas
+# as argument separators, so a literal cannot appear inline.
+$(_HIDE)COMMA := ,
+
 # ── Platform detection ────────────────────────────────────────
 # Override with: make build PLATFORM=linux/amd64
 PLATFORM ?=
@@ -265,11 +269,36 @@ define dev.backend
 endef
 $(call register, dev, backend)
 
+# ── E2E variables (consumed by test.e2e and check.e2e) ──
+# These are recipe-local, not cross-cutting. DRYRUN=yes is the
+# existing cross-cutting variable (wired to bump); the e2e recipes
+# also consume it, mapping to Playwright's --list.
+E2E_BROWSERS    ?=
+E2E_TRACE       ?=
+E2E_VIDEO       ?=
+E2E_SCREENSHOTS ?=
+
+# Helpers — translate the variables above into Playwright CLI flags.
+
+# Convert "a,b,c" → "--project=a --project=b --project=c"
+# Empty → "--project=chromium" (default)
+# "all" → ""                    (no filter; runs every project in playwright.config.ts)
+_e2e_browsers = $(if $(1),$(if $(filter all,$(1)),,$(addprefix --project=,$(subst $($(_HIDE)COMMA), ,$(1)))),--project=chromium)
+
+# Emit '--name value' iff value is non-empty
+_e2e_flag = $(if $(2),--$(1) $(2),)
+
+# Emit '--name' iff value == "yes"
+_e2e_toggle = $(if $(filter yes,$(2)),--$(1),)
+
 # ── E2E ───────────────────────────────────────────────────────
 
 define test.e2e
 	@echo "Running Playwright E2E tests..."
-	bun run e2e
+	@$(if $(E2E_VIDEO),E2E_VIDEO=$(E2E_VIDEO) )$(if $(E2E_SCREENSHOTS),E2E_SCREENSHOTS=$(E2E_SCREENSHOTS) )npx playwright test \
+		$(call _e2e_browsers,$(E2E_BROWSERS)) \
+		$(call _e2e_flag,trace,$(E2E_TRACE)) \
+		$(call _e2e_toggle,list,$(DRYRUN))
 endef
 $(call register, test, e2e)
 
@@ -310,7 +339,10 @@ $(call register, check, coverage)
 
 define check.e2e
 	@echo "Running Playwright E2E core tests..."
-	npx playwright test e2e/tests/core/ --project=chromium
+	@$(if $(E2E_VIDEO),E2E_VIDEO=$(E2E_VIDEO) )$(if $(E2E_SCREENSHOTS),E2E_SCREENSHOTS=$(E2E_SCREENSHOTS) )npx playwright test e2e/tests/core/ \
+		$(call _e2e_browsers,$(E2E_BROWSERS)) \
+		$(call _e2e_flag,trace,$(E2E_TRACE)) \
+		$(call _e2e_toggle,list,$(DRYRUN))
 endef
 $(call register, check, e2e)
 
