@@ -37,10 +37,14 @@ Usage: $0 <command> [--dry-run]
 Commands:
   bump <major|minor|patch>             Bump semver component (strips prerelease)
   bump <dev|alpha|beta|rc|prerelease>  Increment prerelease stage (creates .1 if new)
-  bump release                         Promote to release (strips prerelease)
   set <version>                        Set explicit version
   show                                 Show current version
   validate <version>                   Validate version format
+
+Note: To finalize a prerelease (strip the suffix) before packaging, use
+'make release cf FINAL=strip' from the Make layer. This script's internal
+'bump release' function exists only as an implementation detail of that
+FINAL=strip path and is no longer a user-facing command.
 
 Stages (lifecycle order):
   dev → alpha → beta → rc → prerelease → release
@@ -52,7 +56,6 @@ Examples:
   $0 bump dev               # v4.9.3-dev.41 → v4.9.3-dev.42+build.YYYYMMDD.SHA
   $0 bump alpha             # v4.9.3-dev.42 → v4.9.3-alpha.1+build.YYYYMMDD.SHA
   $0 bump rc                # v4.9.3-beta.1 → v4.9.3-rc.1+build.YYYYMMDD.SHA
-  $0 bump release           # v4.9.3-rc.2   → v4.9.3+build.YYYYMMDD.SHA
   $0 bump patch             # v4.9.3-rc.2   → v4.9.4+build.YYYYMMDD.SHA
   $0 set v5.0.0-rc.1        # Set explicit version
   $0 bump dev --dry-run     # Preview without writing
