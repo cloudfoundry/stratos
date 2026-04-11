@@ -47,7 +47,7 @@ Single source of truth for building, testing, and packaging Stratos.
 
 Run `make check gate` before any push — it mirrors what CI runs on each PR.
 `make check e2e` requires a running Stratos instance (local or deployed);
-point it at a specific deployment via the `STRATOS_E2E_BASE_URL` environment
+point it at a specific deployment via the `E2E_BASE_URL` environment
 variable (defaults to the local dev server at `https://localhost:5540`).
 
 ### Packaging and Release

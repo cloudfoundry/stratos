@@ -171,12 +171,12 @@ can be committed if the team wants shared encrypted secrets in the repo.
 **Environments** (`--env`) select which *file* to load — one file per
 deployment target (local Stratos, staging, production).
 
-**Profiles** (`STRATOS_E2E_PROFILE`) select which *section within a file*
+**Profiles** (`E2E_PROFILE`) select which *section within a file*
 to use — useful when a single secrets file has credentials for multiple
 CF endpoints.
 
 These compose: `--env staging` loads `secrets.staging.yaml`, and
-`STRATOS_E2E_PROFILE=us-east` selects the `us-east` profile within that
+`E2E_PROFILE=us-east` selects the `us-east` profile within that
 file.
 
 ## Environment Variables
@@ -185,9 +185,9 @@ file.
 Variable                  Purpose                              Default
 ────────────────────────  ───────────────────────────────────  ────────────────────────
 STRATOS_SECRETS           YAML content injected by run-e2e     (none)
-STRATOS_E2E_ENV           Environment name for file selection   (none)
-STRATOS_E2E_PROFILE       Profile name within secrets file      (none)
-STRATOS_E2E_BASE_URL      Override Stratos URL                  https://localhost:5440
+E2E_ENV           Environment name for file selection   (none)
+E2E_PROFILE       Profile name within secrets file      (none)
+E2E_BASE_URL      Override Stratos URL                  https://localhost:5440
 STRATOS_SECRETS_BACKEND   Default encryption backend            openssl
 SOPS_AGE_KEY_FILE         Path to age private key               ~/.config/sops/age/keys.txt
 ```
@@ -203,11 +203,11 @@ its own loader in the language of its test framework.
 The loader checks these sources in priority order:
 
 1. `STRATOS_SECRETS` env var (set by `scripts/secrets.sh run-e2e`)
-2. `secrets.<env>.yaml` file (when `STRATOS_E2E_ENV` is set)
+2. `secrets.<env>.yaml` file (when `E2E_ENV` is set)
 3. `secrets.yaml` file (default)
 
 First source found wins. Within the loaded content,
-`STRATOS_E2E_PROFILE` selects a named profile if present.
+`E2E_PROFILE` selects a named profile if present.
 
 ### Loader contract
 
@@ -230,7 +230,7 @@ return structure to match your project's secrets schema.
 # secrets-loader.sh — source this or call as a function
 
 secrets_load() {
-  local env="${STRATOS_E2E_ENV:-}"
+  local env="${E2E_ENV:-}"
   local content=""
 
   # Source 1: env var
@@ -249,7 +249,7 @@ secrets_load() {
 
   # Parse with yq (install: brew install yq)
   # Adapt these field paths to your schema
-  local profile="${STRATOS_E2E_PROFILE:-}"
+  local profile="${E2E_PROFILE:-}"
   local prefix=""
   if [[ -n "${profile}" ]]; then
     prefix=".profiles.${profile}"
@@ -273,7 +273,7 @@ import os
 import yaml
 
 def load_secrets():
-    env = os.environ.get("STRATOS_E2E_ENV", "")
+    env = os.environ.get("E2E_ENV", "")
     content = os.environ.get("STRATOS_SECRETS", "")
 
     if not content:
@@ -285,7 +285,7 @@ def load_secrets():
 
     raw = yaml.safe_load(content)
 
-    profile = os.environ.get("STRATOS_E2E_PROFILE", "")
+    profile = os.environ.get("E2E_PROFILE", "")
     if profile:
         if "profiles" not in raw or profile not in raw["profiles"]:
             available = list(raw.get("profiles", {}).keys())
@@ -316,7 +316,7 @@ use warnings;
 use YAML::XS qw(Load LoadFile);
 
 sub load_secrets {
-    my $env     = $ENV{STRATOS_E2E_ENV}     // '';
+    my $env     = $ENV{E2E_ENV}     // '';
     my $content = $ENV{STRATOS_SECRETS}      // '';
     my $raw;
 
@@ -328,7 +328,7 @@ sub load_secrets {
         $raw = LoadFile($file);
     }
 
-    my $profile = $ENV{STRATOS_E2E_PROFILE} // '';
+    my $profile = $ENV{E2E_PROFILE} // '';
     my $secrets;
 
     if ($profile) {
@@ -398,12 +398,12 @@ rm secrets.local.yaml   # optional: remove plaintext
 Problem                    Cause                              Fix
 ─────────────────────────  ─────────────────────────────────  ─────────────────────────────────────
 Secrets file not found     No secrets.yaml, no env var        Run secrets.sh decrypt or copy template
-Profile 'X' not found      STRATOS_E2E_PROFILE not in file    Check profiles: section in secrets file
+Profile 'X' not found      E2E_PROFILE not in file    Check profiles: section in secrets file
 bad decrypt (openssl)      Wrong passphrase                   Re-enter passphrase
 no identity matched (sops) Age key not in .sops.yaml          Add your public key to .sops.yaml
 age: no identity           Missing age key file               age-keygen -o ~/.config/sops/age/keys.txt
 Tests fail with auth       Wrong credentials                  Verify creds match target environment
-STRATOS_E2E_ENV ignored    No matching file on disk           Check secrets.<env>.yaml exists
+E2E_ENV ignored    No matching file on disk           Check secrets.<env>.yaml exists
 ```
 
 ## Adopting in Other Projects

@@ -7,8 +7,8 @@ import { test, expect } from '../../fixtures/test-base';
  * rows/cards, not just the count. Covers both table and card views.
  *
  * Run against adepttech:
- *   STRATOS_E2E_BASE_URL=https://console.run.adepttech.ca \
- *   STRATOS_E2E_PROFILE=adepttech npx playwright test list-filter
+ *   E2E_BASE_URL=https://console.run.adepttech.ca \
+ *   E2E_PROFILE=adepttech npx playwright test list-filter
  */
 
 test.describe('List Filter', () => {

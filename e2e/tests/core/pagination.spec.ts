@@ -8,8 +8,8 @@ import { test, expect } from '../../fixtures/test-base';
  * primary test surface.
  *
  * Run against adepttech:
- *   STRATOS_E2E_BASE_URL=https://console.run.adepttech.ca \
- *   STRATOS_E2E_PROFILE=adepttech npx playwright test pagination
+ *   E2E_BASE_URL=https://console.run.adepttech.ca \
+ *   E2E_PROFILE=adepttech npx playwright test pagination
  */
 
 test.describe('Pagination', () => {

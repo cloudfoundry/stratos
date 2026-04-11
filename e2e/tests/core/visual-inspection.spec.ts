@@ -4,7 +4,7 @@ import { test, expect } from '../../fixtures/test-base';
  * Visual inspection — screenshot key pages to verify no regressions.
  * Waits for data to fully render before capturing.
  *
- * Run: STRATOS_E2E_BASE_URL=https://console.run.adepttech.ca npx playwright test visual-inspection
+ * Run: E2E_BASE_URL=https://console.run.adepttech.ca npx playwright test visual-inspection
  */
 
 // Set a wide viewport so pages render fully

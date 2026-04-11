@@ -1,9 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
 
 // Default secrets profile — auto-detect from base URL, fall back to 'local'
-if (!process.env.STRATOS_E2E_PROFILE) {
-  const baseUrl = process.env.STRATOS_E2E_BASE_URL || '';
-  process.env.STRATOS_E2E_PROFILE = baseUrl.includes('adepttech') ? 'adepttech' : 'local';
+if (!process.env.E2E_PROFILE) {
+  const baseUrl = process.env.E2E_BASE_URL || '';
+  process.env.E2E_PROFILE = baseUrl.includes('adepttech') ? 'adepttech' : 'local';
 }
 
 // Test environment ports (separate from dev to avoid conflicts)
@@ -28,11 +28,11 @@ export default defineConfig({
   // Retry on CI only
   retries: process.env.CI ? 2 : 0,
 
-  // Worker count: configurable via STRATOS_E2E_WORKERS env var.
+  // Worker count: configurable via E2E_WORKERS env var.
   // Each worker gets its own authenticated session to avoid session contention.
   // Default: CI=4, local=half CPU cores (Playwright default)
-  workers: process.env.STRATOS_E2E_WORKERS
-    ? parseInt(process.env.STRATOS_E2E_WORKERS)
+  workers: process.env.E2E_WORKERS
+    ? parseInt(process.env.E2E_WORKERS)
     : (process.env.CI ? 4 : undefined),
 
   // Reporter configuration
@@ -45,7 +45,7 @@ export default defineConfig({
   // Shared settings for all the projects below
   use: {
     // Base URL for navigation
-    baseURL: process.env.STRATOS_E2E_BASE_URL || `https://localhost:${FRONTEND_PORT}`,
+    baseURL: process.env.E2E_BASE_URL || `https://localhost:${FRONTEND_PORT}`,
 
     // Collect trace when retrying the failed test
     trace: 'on-first-retry',
@@ -135,7 +135,7 @@ export default defineConfig({
   //   ps aux | grep 'e2e:5543'             # find a specific session
   //   pkill -f 'e2e:5543'                  # kill a specific session
   // Skip local servers when targeting a remote deployment
-  ...(process.env.STRATOS_E2E_BASE_URL ? {} : {
+  ...(process.env.E2E_BASE_URL ? {} : {
     webServer: [
       {
         command: `cd src/jetstream && STRATOS_E2E=e2e:${BACKEND_PORT} CONSOLE_PROXY_TLS_ADDRESS=:${BACKEND_PORT} SESSION_STORE_EXPIRY=120 ../../dist/bin/jetstream`,

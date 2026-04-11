@@ -20,7 +20,7 @@
 #   sops     — SOPS + age (requires sops and age installed)
 #
 # Environment variables:
-#   STRATOS_E2E_ENV       — Default --env value
+#   E2E_ENV       — Default --env value
 #   STRATOS_SECRETS_BACKEND — Default --backend value (openssl|sops)
 #   SOPS_AGE_KEY_FILE     — Path to age key file (for sops backend)
 #
@@ -35,7 +35,7 @@ set -euo pipefail
 ROOT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 
 # ── Defaults ──────────────────────────────────────────────────
-ENV_NAME="${STRATOS_E2E_ENV:-}"
+ENV_NAME="${E2E_ENV:-}"
 BACKEND="${STRATOS_SECRETS_BACKEND:-openssl}"
 COMMAND=""
 E2E_ARGS=()
@@ -253,7 +253,7 @@ do_run_e2e() {
 
   # Pass through --env as the profile selector
   if [[ -n "${ENV_NAME}" ]]; then
-    export STRATOS_E2E_PROFILE="${ENV_NAME}"
+    export E2E_PROFILE="${ENV_NAME}"
   fi
 
   echo "Running E2E tests..."

@@ -14,7 +14,7 @@ import { ADMIN_STATE, USER_STATE } from '../auth.constants';
  * via API login, giving it its own backend session. This avoids session
  * contention when multiple workers share a single session cookie.
  *
- * Configure worker count: STRATOS_E2E_WORKERS=N (default: half CPU cores)
+ * Configure worker count: E2E_WORKERS=N (default: half CPU cores)
  */
 
 type WorkerFixtures = {
@@ -53,7 +53,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
    */
   workerAdminContext: [async ({ browser }, use) => {
     const secrets = SecretsHelper.load();
-    const baseURL = process.env.STRATOS_E2E_BASE_URL || 'https://localhost:5540';
+    const baseURL = process.env.E2E_BASE_URL || 'https://localhost:5540';
     const authType = await detectAuthType(baseURL);
     const context = await browser.newContext({ ignoreHTTPSErrors: true, baseURL });
 
@@ -75,7 +75,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
    */
   workerUserContext: [async ({ browser }, use) => {
     const secrets = SecretsHelper.load();
-    const baseURL = process.env.STRATOS_E2E_BASE_URL || 'https://localhost:5540';
+    const baseURL = process.env.E2E_BASE_URL || 'https://localhost:5540';
     const authType = await detectAuthType(baseURL);
     const { username, password } = secrets.console.user;
     const context = await browser.newContext({ ignoreHTTPSErrors: true, baseURL });

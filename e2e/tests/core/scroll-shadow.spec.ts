@@ -8,8 +8,8 @@ import { test, expect } from '../../fixtures/test-base';
  * diagnostics for computed styles, dimensions, and visibility.
  *
  * Run against adepttech:
- *   STRATOS_E2E_BASE_URL=https://console.run.adepttech.ca \
- *   STRATOS_E2E_PROFILE=adepttech npx playwright test scroll-shadow
+ *   E2E_BASE_URL=https://console.run.adepttech.ca \
+ *   E2E_PROFILE=adepttech npx playwright test scroll-shadow
  */
 
 test.describe('Scroll Shadow', () => {
