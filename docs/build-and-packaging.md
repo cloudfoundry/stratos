@@ -50,6 +50,51 @@ Run `make check gate` before any push — it mirrors what CI runs on each PR.
 point it at a specific deployment via the `E2E_BASE_URL` environment
 variable (defaults to the local dev server at `https://localhost:5540`).
 
+#### E2E recipe variables
+
+`make check e2e` and `make test e2e` accept these recipe-level variables to
+control which browsers run and what artifacts get captured. All five compose
+freely — set any combination on one command line.
+
+| Variable | Purpose | Example |
+|----------|---------|---------|
+| `E2E_BROWSERS` | Pick which Playwright projects run. Comma-separated list (`chromium,firefox,webkit`), or `all` for every project in `playwright.config.ts`. Empty → `chromium` only (today's default). | `E2E_BROWSERS=firefox` |
+| `E2E_TRACE` | Force trace capture. Values: `on`, `off`, `retain-on-failure`, `on-first-retry`. Empty → uses `playwright.config.ts` default (`on-first-retry`). | `E2E_TRACE=on` |
+| `E2E_VIDEO` | Force video capture. Values: `on`, `off`, `retain-on-failure`, `on-first-retry`. Empty → uses `playwright.config.ts` default (`retain-on-failure`). | `E2E_VIDEO=on` |
+| `E2E_SCREENSHOTS` | Force screenshot capture. Values: `on`, `off`, `only-on-failure`. Empty → uses `playwright.config.ts` default (`only-on-failure`). | `E2E_SCREENSHOTS=on` |
+
+The cross-cutting `DRYRUN=yes` variable (also used by `bump`) lists tests
+that would run without executing them — useful for checking browser and
+filter combinations without spinning up a Stratos instance.
+
+**Common invocations:**
+
+```bash
+# Default — chromium only, config-default artifact handling
+make check e2e
+
+# Pick a single non-default browser
+make check e2e E2E_BROWSERS=firefox
+
+# Multiple browsers
+make check e2e E2E_BROWSERS=chromium,webkit
+
+# Every project in playwright.config.ts
+make check e2e E2E_BROWSERS=all
+
+# Capture full artifacts on every test (answers "are there images to look at?")
+make check e2e E2E_TRACE=on E2E_VIDEO=on E2E_SCREENSHOTS=on
+
+# Combine browser selection and artifact capture
+make check e2e E2E_BROWSERS=all E2E_TRACE=on E2E_VIDEO=on
+
+# List tests instead of executing (fast, no server spin-up)
+make check e2e DRYRUN=yes
+```
+
+Validation is delegated to Playwright — unknown browser names and unsupported
+artifact values produce clear errors from `playwright test` itself.
+
 ### Packaging and Release
 
 | Command | Prerequisites | What it does | Output |
@@ -143,7 +188,7 @@ the command shape.
 
 | Variable | What it does |
 |----------|-------------|
-| `DRYRUN=yes` | Preview actions without executing. Currently wired to `bump` (prints the new version without writing `package.json`). |
+| `DRYRUN=yes` | Preview actions without executing. Wired to `bump` (prints the new version without writing `package.json`) and to `check e2e` / `test e2e` (passes `--list` to Playwright, listing tests without running them). |
 | `FINAL=strip` | Strip prerelease suffix from the version (persisted to `package.json`), then re-invoke Make with the remaining goals. Useful as a one-shot finalize-then-package on the release verb. |
 | `VERSION=...` | Override the version from `package.json` for this invocation only (not persisted). |
 | `PLATFORM=...` | Override backend build platform (e.g. `darwin/arm64`, `linux/amd64`). |
