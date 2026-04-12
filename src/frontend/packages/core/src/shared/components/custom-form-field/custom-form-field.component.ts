@@ -10,7 +10,8 @@ import { CustomSelectComponent } from '../custom-select/custom-select.component'
   styleUrls: ['./custom-form-field.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: []
+  imports: [],
+  host: { class: 'block' }
 })
 export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit, OnDestroy {
   @Input() appearance: 'legacy' | 'standard' | 'fill' | 'outline' = 'standard';
@@ -153,6 +154,31 @@ export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit
   get hasPrefix(): boolean {
     // This will be set by parent component if prefix is provided
     return false; // Override in template with content projection check
+  }
+
+  /**
+   * Tailwind class string for the floating label. Encodes layout, size,
+   * and state-dependent color in one binding so the SCSS doesn't need any
+   * rules for the label anymore.
+   */
+  get labelClasses(): string {
+    const base = 'absolute left-0 top-1 pointer-events-none select-none origin-top-left';
+    const sizing = this.shouldFloatLabel
+      ? '-translate-y-[1.1em] text-xs font-medium'
+      : 'text-base leading-tight';
+    let color: string;
+    if (this.isInvalid) {
+      color = 'text-danger';
+    } else if (this.isValid) {
+      color = 'text-success';
+    } else if (this.focused) {
+      color = 'text-input-focus-border';
+    } else if (this.shouldFloatLabel) {
+      color = 'text-primary';
+    } else {
+      color = 'text-input-placeholder';
+    }
+    return `${base} ${sizing} ${color}`;
   }
 
   private updateErrorMessage(): void {

@@ -9,7 +9,6 @@ const UNLIMITED = -1;
 @Component({
   selector: 'app-unlimited-input',
   templateUrl: './unlimited-input.component.html',
-  styleUrls: ['./unlimited-input.component.scss'],
   viewProviders: [
     {
       provide: ControlContainer,
@@ -17,6 +16,7 @@ const UNLIMITED = -1;
     }
   ],
   standalone: true,
+  host: { class: 'block' },
   imports: [
     ReactiveFormsModule,
     AppInputDirective,

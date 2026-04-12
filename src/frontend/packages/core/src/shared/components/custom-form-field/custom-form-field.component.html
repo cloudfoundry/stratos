@@ -39,15 +39,10 @@
         @if (placeholder && !selectComponent) {
           <label
             [for]="inputId"
-               class="form-field-label absolute left-0 pointer-events-none select-none
-                      origin-top-left text-base leading-tight"
-            [class.floating]="shouldFloatLabel"
-            style="top: 0.25em; transform-origin: 0 0;"
+            [class]="labelClasses"
             [attr.aria-hidden]="true">
             @if (isRequired && !hideRequiredMarker) {
-              <span
-                class="text-red-500 dark:text-red-400 mr-0.5 font-medium"
-              aria-label="required">*</span>
+              <span class="text-danger mr-0.5 font-medium" aria-label="required">*</span>
             }
             {{ placeholder }}
           </label>
