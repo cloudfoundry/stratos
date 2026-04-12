@@ -63,7 +63,7 @@ export class EditSpaceQuotaStepComponent implements OnDestroy {
     this.spaceQuotaSubscription = this.spaceQuotaDefinition$.subscribe();
   }
 
-  validate = () => !!this.form && this.form.valid();
+  validate = () => !!this.form && this.form.valid() && this.form.formGroup.dirty;
 
   submit: StepOnNextFunction = () =>
     cfEntityCatalog.spaceQuota.api.update<ActionState>(this.spaceQuotaGuid, this.cfGuid, this.form.formGroup.getRawValue()).pipe(
