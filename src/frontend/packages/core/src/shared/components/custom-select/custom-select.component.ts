@@ -113,6 +113,10 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
     const optionsChangeSub = this.options.changes.subscribe(() => {
       this.checkAutoSelect();
       this.updateOptions();
+      setTimeout(() => {
+        this.updateDisplayValue();
+        this.cdr.markForCheck();
+      });
     });
     this._subscriptions.push(optionsChangeSub);
 
@@ -214,12 +218,14 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
     } else if (this.multiple && this.selectedValues.length > 1) {
       this.displayValue = `${this.selectedValues.length} selected`;
     } else {
-      // Single selection, or multi with exactly 1 selected — show the item name
+      // Single selection, or multi with exactly 1 selected — show the item name.
+      // When the matching option isn't found yet (async @for not rendered), show
+      // empty so the placeholder displays instead of flashing a raw value/GUID.
       if (this.options) {
         const selectedOption = this.options.find(opt => opt.value === this.selectedValues[0]);
-        this.displayValue = selectedOption ? selectedOption.displayText : this.selectedValues[0];
+        this.displayValue = selectedOption ? selectedOption.displayText : '';
       } else {
-        this.displayValue = this.selectedValues[0];
+        this.displayValue = '';
       }
     }
     this.cdr.markForCheck();
