@@ -1,8 +1,8 @@
 
 import { Component, Input, OnInit, inject } from '@angular/core';
 import { AbstractControl, ControlContainer, FormGroupDirective, ReactiveFormsModule, Validators } from '@angular/forms';
-import { CustomCheckboxComponent } from '../custom-checkbox/custom-checkbox.component';
-import { CustomFormFieldComponent } from '../custom-form-field/custom-form-field.component';
+import { CustomCheckboxComponent, MatCheckboxChange } from '../custom-checkbox/custom-checkbox.component';
+import { AppInputDirective, CustomFormFieldComponent } from '../custom-form-field/custom-form-field.component';
 
 const UNLIMITED = -1;
 
@@ -19,6 +19,7 @@ const UNLIMITED = -1;
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    AppInputDirective,
     CustomFormFieldComponent,
     CustomCheckboxComponent
 ]
@@ -34,12 +35,16 @@ export class UnlimitedInputComponent implements OnInit {
   @Input() suffix!: string;
   @Input() prefix!: string;
 
-  unlimited!: boolean;
+  unlimited = false;
   formControl!: AbstractControl;
   initialValue: any;
 
+  onCheckboxChange(event: MatCheckboxChange) {
+    this.unlimited = event.checked;
+    this.onChange();
+  }
+
   onChange() {
-    this.unlimited = !this.unlimited;
     if (this.unlimited) {
       this.initialValue = this.formControl.value;
       this.formControl.setValue('');

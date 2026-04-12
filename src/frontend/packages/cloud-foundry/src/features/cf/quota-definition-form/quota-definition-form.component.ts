@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
 import {
+  AppInputDirective,
   CustomCheckboxComponent,
   CustomFormFieldComponent,
   FocusDirective,
@@ -42,6 +43,7 @@ export interface QuotaFormValues {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
+    AppInputDirective,
     CustomFormFieldComponent,
     CustomCheckboxComponent,
     FocusDirective,

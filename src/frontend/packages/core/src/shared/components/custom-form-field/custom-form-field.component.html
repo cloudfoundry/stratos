@@ -1,4 +1,4 @@
-<div class="custom-form-field group relative w-full mb-2 inline-block text-left"
+<div class="custom-form-field group relative w-full mb-2 block text-left"
   [class.focused]="focused"
   [class.has-value]="hasValue"
   [class.invalid]="isInvalid"
@@ -18,7 +18,7 @@
   <div class="form-field-wrapper relative">
 
     <!-- Main form field flex container -->
-    <div class="form-field-flex inline-flex items-baseline box-border w-full relative transition-all duration-200">
+    <div class="form-field-flex flex items-baseline box-border w-full relative transition-all duration-200">
 
       <!-- Prefix (optional) -->
       @if (hasPrefix) {
@@ -40,17 +40,16 @@
           <label
             [for]="inputId"
                class="form-field-label absolute left-0 pointer-events-none select-none
-                      transition-all duration-300 ease-out origin-top-left
-                      text-base leading-tight"
+                      origin-top-left text-base leading-tight"
             [class.floating]="shouldFloatLabel"
             style="top: 0.25em; transform-origin: 0 0;"
             [attr.aria-hidden]="true">
-            {{ placeholder }}
             @if (isRequired && !hideRequiredMarker) {
               <span
-                class="text-red-500 dark:text-red-400 ml-0.5 font-medium"
+                class="text-red-500 dark:text-red-400 mr-0.5 font-medium"
               aria-label="required">*</span>
             }
+            {{ placeholder }}
           </label>
         }
       </div>

@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
-import { CustomFormFieldComponent, CustomCheckboxComponent, FocusDirective, UnlimitedInputComponent, safeUnsubscribe } from '@stratosui/core';
+import { AppInputDirective, CustomFormFieldComponent, CustomCheckboxComponent, FocusDirective, UnlimitedInputComponent, safeUnsubscribe } from '@stratosui/core';
 import { endpointEntityType } from '@stratosui/store';
 import { IQuotaDefinition } from '../../../cf-api.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
@@ -37,6 +37,7 @@ export interface SpaceQuotaFormValues {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
+    AppInputDirective,
     CustomCheckboxComponent,
     CustomFormFieldComponent,
     FocusDirective,

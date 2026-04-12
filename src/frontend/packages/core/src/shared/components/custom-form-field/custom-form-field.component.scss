@@ -85,7 +85,7 @@
 
   /* Floating state - smaller and positioned above */
   &.floating {
-    transform: translateY(-0.8em) scale(0.75);
+    transform: translateY(-1.1em);
     @apply text-xs font-medium;
     color: var(--color-primary);
   }

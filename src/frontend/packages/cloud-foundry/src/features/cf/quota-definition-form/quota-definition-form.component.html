@@ -1,6 +1,6 @@
 <form [formGroup]="formGroup" class="stepper-form">
   <app-form-field>
-    <input appInput formControlName="name" placeholder="Quota Name" required [appFocus]="true">
+    <input class="w-full placeholder:!text-transparent" appInput formControlName="name" placeholder="Quota Name" required [appFocus]="true">
     @if (formGroup.controls.name?.hasError('nameTaken')) {
       <app-error>
         A quota with this name already exists. Please enter a different one.
@@ -8,7 +8,7 @@
     }
   </app-form-field>
   <app-form-field>
-    <input type="number" appInput formControlName="memoryLimit"
+    <input class="w-full placeholder:!text-transparent" type="number" appInput formControlName="memoryLimit"
       placeholder="Total amount of memory an organization can have" required>
     <span matSuffix>MB</span>
   </app-form-field>
