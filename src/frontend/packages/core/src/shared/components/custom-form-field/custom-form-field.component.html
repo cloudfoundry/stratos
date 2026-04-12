@@ -74,8 +74,8 @@
           </svg>
         }
 
-        <!-- Success icon indicator -->
-        @if (isValid) {
+        <!-- Success icon indicator — only when there's an actual value -->
+        @if (isValid && hasValue) {
           <svg
             class="success-icon w-5 h-5 flex-shrink-0 transition-opacity duration-200"
             viewBox="0 0 20 20"

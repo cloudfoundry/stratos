@@ -10,7 +10,8 @@
       }
     </app-form-field>
     <app-form-field>
-      <app-select formControlName="quotaDefinition" class="form-control" placeholder="Quota Definition">
+      <app-select formControlName="quotaDefinition" class="form-control" placeholder="Quota Definition" [autoSelectSingleOption]="false">
+        <app-option [value]="null">None</app-option>
         @for (quota of quotaDefinitions$ | async; track quota) {
           <app-option [value]="quota.metadata.guid">{{ quota.entity.name }}</app-option>
         }

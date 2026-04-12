@@ -17,10 +17,12 @@
     (keydown.enter)="toggle()"
     (keydown.space)="toggle(); $event.preventDefault()">
     <span class="flex-1"
-      [ngClass]="(!displayValue || displayValue === '')
-        ? 'text-[var(--input-placeholder,#9ca3af)] dark:text-[var(--input-placeholder,#64748b)]'
-        : 'text-[var(--input-text)]'">
+      [class.select-trigger-placeholder]="!displayValue || displayValue === ''"
+      [class.select-trigger-value]="displayValue && displayValue !== ''">
       {{ displayValue && displayValue !== '' ? displayValue : (placeholder || 'Select...') }}
+      @if (required && (!displayValue || displayValue === '')) {
+        <span class="text-red-500 dark:text-red-400 ml-0.5 font-medium" aria-label="required">*</span>
+      }
     </span>
     <div class="flex items-center gap-1 ml-2">
       <div class="text-[var(--text-muted,#666)] flex items-center transition-transform duration-200"

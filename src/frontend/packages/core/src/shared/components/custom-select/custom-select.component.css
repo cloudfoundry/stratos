@@ -3,6 +3,16 @@
   display: block;
 }
 
+/* Placeholder text — matches form-field-label's var(--input-placeholder) */
+.select-trigger-placeholder {
+  color: var(--input-placeholder);
+}
+
+/* Selected value text */
+.select-trigger-value {
+  color: var(--input-text);
+}
+
 /* Disabled trigger override */
 .custom-select.disabled .select-trigger {
   background-color: var(--input-disabled-bg, #f3f4f6);

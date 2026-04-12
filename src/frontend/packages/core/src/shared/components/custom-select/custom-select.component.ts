@@ -193,14 +193,18 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
         this.selectedValues = this.selectedValues.filter((_, i) => i !== index);
       }
     } else {
-      this.selectedValues = [option.value];
+      if (option.value === null || option.value === undefined) {
+        this.selectedValues = [];
+      } else {
+        this.selectedValues = [option.value];
+      }
       this.isOpen = false;
     }
 
     this.updateDisplayValue();
     this.updateOptions();
 
-    const value = this.multiple ? this.selectedValues : this.selectedValues[0];
+    const value = this.multiple ? this.selectedValues : (this.selectedValues[0] ?? null);
     this._onChange(value);
 
     this.selectionChange.emit({
