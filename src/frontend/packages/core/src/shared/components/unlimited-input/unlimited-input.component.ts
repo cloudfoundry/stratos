@@ -39,15 +39,18 @@ export class UnlimitedInputComponent implements OnInit {
   initialValue: any;
 
   onChange() {
+    this.unlimited = !this.unlimited;
     if (this.unlimited) {
       this.initialValue = this.formControl.value;
       this.formControl.setValue('');
       this.formControl.disable();
     } else {
-      if (this.initialValue !== UNLIMITED) {
-        this.formControl.patchValue(this.initialValue);
-      }
       this.formControl.enable();
+      if (this.initialValue !== UNLIMITED && this.initialValue != null) {
+        this.formControl.patchValue(this.initialValue);
+      } else {
+        this.formControl.setValue('');
+      }
     }
   }
 

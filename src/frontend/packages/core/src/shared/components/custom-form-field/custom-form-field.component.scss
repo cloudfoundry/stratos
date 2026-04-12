@@ -22,6 +22,10 @@
    Base Form Field Structure
    ============================================================================ */
 
+:host {
+  display: block;
+}
+
 .custom-form-field {
   /* Base layout - uses Tailwind classes in HTML, minimal overrides here */
   background-color: transparent;
@@ -81,7 +85,7 @@
 
   /* Floating state - smaller and positioned above */
   &.floating {
-    transform: translateY(-1.34375em) scale(0.75);
+    transform: translateY(-0.8em) scale(0.75);
     @apply text-xs font-medium;
     color: var(--color-primary);
   }
@@ -566,7 +570,7 @@
 
     .form-field-label {
       @apply text-xs;
-      transform: translateY(-1.34375em) scale(0.75);
+      transform: translateY(-0.8em) scale(0.75);
     }
 
     .form-field-infix input,
