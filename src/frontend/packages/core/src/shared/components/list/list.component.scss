@@ -140,8 +140,7 @@
     }
 
     &__left {
-      flex: 1;
-      min-width: 0;
+      flex: 0 1 auto;
 
       &--text {
         padding: 0;
@@ -156,7 +155,7 @@
       &--multi-filters {
         display: flex;
         gap: 0.75rem;
-        flex-wrap: nowrap;
+        flex-wrap: wrap;
         align-items: center;
 
         @media (max-width: 767px) {
