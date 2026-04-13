@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
+import { AppInputDirective, CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { AfterContentInit, Component, Input, OnDestroy, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AbstractControl, ValidatorFn, Validators, ReactiveFormsModule, FormsModule, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
@@ -62,6 +62,7 @@ import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
+    AppInputDirective,
     CustomFormFieldComponent,
     MatLabelComponent,
     CustomSelectComponent,

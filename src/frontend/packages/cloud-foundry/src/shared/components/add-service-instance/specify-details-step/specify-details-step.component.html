@@ -15,8 +15,7 @@
     <form class="stepper-form"
       [formGroup]="createNewInstanceForm">
       <app-form-field>
-        <app-label>Name</app-label>
-        <input appInput class="form-control" formControlName="name" required>
+        <input class="w-full placeholder:!text-transparent" appInput formControlName="name" placeholder="Name" required>
         @if (createNewInstanceForm.controls.name?.hasError('nameTaken')) {
           <app-error>
             A service instance with this name already exists. Please enter a different one.
@@ -60,8 +59,8 @@
     <form class="stepper-form"
       [formGroup]="selectExistingInstanceForm">
       <app-form-field>
-        <app-label>Service Instance</app-label>
-        <app-select class="form-control" required formControlName="serviceInstance">
+        <app-select class="form-control" required placeholder="Service Instance" formControlName="serviceInstance" [autoSelectSingleOption]="false">
+          <app-option [value]="null">None</app-option>
           @for (sI of bindableServiceInstances$ | async; track sI) {
             <app-option [disabled]="!sI.metadata.guid"
             [value]="sI.metadata.guid">{{ sI.entity.name }}</app-option>

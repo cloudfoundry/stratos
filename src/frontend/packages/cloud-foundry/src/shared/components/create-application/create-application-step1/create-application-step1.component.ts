@@ -6,7 +6,7 @@ import { Store } from '@ngrx/store';
 import { asapScheduler, Observable, of } from 'rxjs';
 import { map, observeOn, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { CustomSelectComponent, CustomOptionComponent, FocusDirective, StepOnNextFunction } from '@stratosui/core';
+import { AppErrorComponent, CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, FocusDirective, StepOnNextFunction } from '@stratosui/core';
 import { SetCFDetails } from '../../../../actions/create-applications-page.actions';
 import { ISpace } from '../../../../cf-api.types';
 import { CFAppState } from '../../../../cf-app-state';
@@ -23,6 +23,8 @@ import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-servi
   imports: [
     CommonModule,
     FormsModule,
+    CustomFormFieldComponent,
+    AppErrorComponent,
     CustomSelectComponent,
     CustomOptionComponent,
     FocusDirective

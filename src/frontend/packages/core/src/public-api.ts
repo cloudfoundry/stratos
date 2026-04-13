@@ -83,7 +83,8 @@ export {
   MatInputDirective,
   AppInputDirective,
   MatSuffixDirective,
-  MatLabelComponent
+  MatLabelComponent,
+  AppErrorComponent
 } from './shared/components/custom-form-field/custom-form-field.component';
 
 // Custom Select Components

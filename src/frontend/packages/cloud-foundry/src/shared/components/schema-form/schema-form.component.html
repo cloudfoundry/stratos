@@ -23,7 +23,7 @@
     } @else {
       <form [formGroup]="jsonForm">
         <app-form-field class="schema-form__raw">
-          <textarea appInput placeholder="JSON" class="min-h-[60px] max-h-[150px] resize-y" formControlName="json"></textarea>
+          <textarea appInput placeholder="JSON" class="w-full placeholder:!text-transparent min-h-[60px] max-h-[150px] resize-y" formControlName="json"></textarea>
           @if (jsonForm.controls.json.hasError('notValidJson')) {
             <app-error>
               Not valid JSON. Please specify a valid JSON Object

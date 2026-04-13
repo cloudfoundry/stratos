@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
+import { AppInputDirective, CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 import { Component, Input, OnDestroy, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, Validators, FormControl, FormGroup } from '@angular/forms';
@@ -52,6 +52,7 @@ const { proxyAPIVersion, cfAPIVersion } = environment;
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
+    AppInputDirective,
     CustomFormFieldComponent,
     MatLabelComponent,
     CustomSelectComponent,
