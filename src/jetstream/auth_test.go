@@ -1136,3 +1136,107 @@ func TestVerifySessionExpired(t *testing.T) {
 	})
 
 }
+
+func TestRetrieveToken(t *testing.T) {
+	t.Parallel()
+
+	Convey("Test retrieve UAA token for current session", t, func() {
+
+		req := setupMockReq("GET", "", map[string]string{
+			"username": "admin",
+			"password": "changeme",
+		})
+		res, _, ctx, pp, db, mock := setupHTTPTest(req)
+		defer db.Close()
+
+		if e := pp.InitStratosAuthService(api.Remote); e != nil {
+			log.Fatalf("Could not initialise auth service: %v", e)
+		}
+
+		// Mirror TestVerifySession: stub a signed-session user_id and
+		// exp so the handler's session lookups succeed without a real
+		// login round-trip.
+		sessionValues := make(map[string]interface{})
+		sessionValues["user_id"] = mockUserGUID
+		sessionValues["exp"] = time.Now().Add(time.Hour).Unix()
+
+		if errSession := pp.setSessionValues(ctx, sessionValues); errSession != nil {
+			t.Error(errors.New("unable to mock/stub user in session object"))
+		}
+
+		mockTokenGUID := "mock-token-guid"
+		encryptedUAAToken, _ := crypto.EncryptToken(pp.Config.EncryptionKeyInBytes, mockUAAToken)
+
+		// The handler runs VerifySession before the token lookup;
+		// VerifySession reads from the tokens table too.
+		expectedTokensRow := testutils.GetEmptyTokenRows("disconnected", "user_guid", "linked_token").
+			AddRow(mockTokenGUID, encryptedUAAToken, encryptedUAAToken, mockTokenExpiry, "oauth", "", true)
+		mock.ExpectQuery(selectAnyFromTokens).
+			WithArgs(mockUserGUID).
+			WillReturnRows(expectedTokensRow)
+
+		// GetUAATokenRecord's FindAuthToken call
+		rs := testutils.GetEmptyTokenRows("disconnected", "user_guid", "linked_token").
+			AddRow(mockTokenGUID, encryptedUAAToken, encryptedUAAToken, mockTokenExpiry, "oauth", "", true)
+		mock.ExpectQuery(findUAATokenSQL).
+			WillReturnRows(rs)
+
+		if err := pp.retrieveToken(ctx); err != nil {
+			t.Error(err)
+		}
+
+		header := res.Header()
+		contentType := header.Get("Content-Type")
+
+		Convey("Should have expected contentType", func() {
+			So(contentType, ShouldContainSubstring, "application/json")
+		})
+
+		Convey("Should return an ok envelope with token data", func() {
+			So(res, ShouldNotBeNil)
+			body := strings.TrimSpace(res.Body.String())
+			So(body, ShouldContainSubstring, `"status":"ok"`)
+			So(body, ShouldContainSubstring, `"token_guid":"mock-token-guid"`)
+			So(body, ShouldContainSubstring, `"auth_token":"`+mockUAAToken+`"`)
+			So(body, ShouldContainSubstring, `"refresh_token":"`+mockUAAToken+`"`)
+		})
+	})
+}
+
+func TestRetrieveTokenNoSessionDate(t *testing.T) {
+	t.Parallel()
+
+	Convey("Test retrieveToken with missing session exp", t, func() {
+
+		req := setupMockReq("GET", "", map[string]string{
+			"username": "admin",
+			"password": "changeme",
+		})
+		res, _, ctx, pp, db, _ := setupHTTPTest(req)
+		defer db.Close()
+
+		if e := pp.InitStratosAuthService(api.Local); e != nil {
+			log.Fatalf("Could not initialise auth service: %v", e)
+		}
+
+		// Intentionally omit "exp" so the first session read fails.
+		sessionValues := make(map[string]interface{})
+		sessionValues["user_id"] = mockUserGUID
+
+		if errSession := pp.setSessionValues(ctx, sessionValues); errSession != nil {
+			t.Error(errors.New("unable to mock/stub user in session object"))
+		}
+
+		err := pp.retrieveToken(ctx)
+		Convey("Should not propagate the error (handler writes error envelope instead)", func() {
+			So(err, ShouldBeNil)
+		})
+
+		Convey("Should return an error envelope with no token data", func() {
+			So(res, ShouldNotBeNil)
+			body := strings.TrimSpace(res.Body.String())
+			So(body, ShouldContainSubstring, `"status":"error"`)
+			So(body, ShouldContainSubstring, `"data":null`)
+		})
+	})
+}

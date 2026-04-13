@@ -55,21 +55,33 @@ type vcsCmd struct {
 }
 
 func (vcs *vcsCmd) Create(skipSSL bool, dir string, repo string, branch string) error {
-	if len(vcs.accessToken) > 0 {
-		repoURL, err := url.Parse(repo)
-		if err != nil {
-			return fmt.Errorf("could not parse repo URL for authenticated clone: %w", err)
-		}
-		repoURL.User = url.UserPassword("x-access-token", vcs.accessToken)
-		repo = repoURL.String()
+	authenticatedRepo, err := vcs.repoWithToken(repo)
+	if err != nil {
+		return err
 	}
 
 	for _, cmd := range vcs.createCmd {
-		if err := vcs.run(".", cmd, "sslVerify", strconv.FormatBool(!skipSSL), "dir", dir, "repo", repo, "branch", branch); err != nil {
+		if err := vcs.run(".", cmd, "sslVerify", strconv.FormatBool(!skipSSL), "dir", dir, "repo", authenticatedRepo, "branch", branch); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+// repoWithToken rewrites a git repository URL to embed the configured access
+// token as basic-auth credentials. When no access token is set it returns the
+// URL unchanged. Extracted from Create() so the rewrite can be unit-tested
+// without shelling out to a real git binary.
+func (vcs *vcsCmd) repoWithToken(repo string) (string, error) {
+	if len(vcs.accessToken) == 0 {
+		return repo, nil
+	}
+	repoURL, err := url.Parse(repo)
+	if err != nil {
+		return "", fmt.Errorf("could not parse repo URL for authenticated clone: %w", err)
+	}
+	repoURL.User = url.UserPassword("x-access-token", vcs.accessToken)
+	return repoURL.String(), nil
 }
 
 func (vcs *vcsCmd) ResetBranchToCommit(dir string, commit string) error {
