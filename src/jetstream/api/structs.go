@@ -414,6 +414,7 @@ type PortalConfig struct {
 	LogLevel                           string   `configName:"LOG_LEVEL"`
 	UIListMaxSize                      int64    `configName:"UI_LIST_MAX_SIZE"`
 	UIListAllowLoadMaxed               bool     `configName:"UI_LIST_ALLOW_LOAD_MAXED"`
+	AutoRefreshCNSITokens              bool     `configName:"AUTOREFRESH_CNSI_TOKENS"`
 	CFAdminIdentifier                  string
 	CloudFoundryInfo                   *CFInfo
 	HTTPS                              bool

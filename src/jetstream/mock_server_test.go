@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/sha1"
 	"database/sql"
 	"database/sql/driver"
@@ -181,6 +182,8 @@ func setupPortalProxy(db *sql.DB) *portalProxy {
 
 	store := factory.NewDefaultStoreFactory(db)
 	pp.SetStoreFactory(store)
+
+	pp.SetRefreshRoutineContext(context.WithCancel(context.Background()))
 
 	return pp
 }

@@ -1,9 +1,14 @@
 package main
 
 import (
+	"bytes"
+	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"strings"
 	"testing"
 	"time"
 
@@ -249,6 +254,159 @@ func TestGetCFv2InfoWithInvalidEndpoint(t *testing.T) {
 	if _, _, err := endpointPlugin.Info(ep, true, ""); err == nil {
 		t.Error("getCFv2Info should not return a valid response when the endpoint is invalid.")
 	}
+}
+
+func TestRegisterEndpointStartsRefreshRoutine(t *testing.T) {
+	t.Parallel()
+
+	Convey("Request to register endpoint", t, func() {
+		// mock StratosAuthService
+		ctrl := gomock.NewController(t)
+		mockStratosAuth := mock_api.NewMockStratosAuth(ctrl)
+		defer ctrl.Finish()
+
+		// setup mock DB, PortalProxy and mock StratosAuthService
+		pp, db, mock := setupPortalProxyWithAuthService(mockStratosAuth)
+		defer db.Close()
+
+		pp.Config.AutoRefreshCNSITokens = true
+
+		// mock individual APIEndpoints
+		mockV2Info := setupMockEndpointServer(t)
+		defer mockV2Info.Close()
+
+		mockUAAResponseModifiedExpiry := mockUAAResponse
+
+		splits := strings.Split(mockUAAResponse.AccessToken, ".")
+
+		decoded, _ := base64.RawStdEncoding.DecodeString(splits[1])
+
+		u := new(api.JWTUserTokenInfo)
+		json.Unmarshal(decoded, &u)
+
+		u.TokenExpiry = time.Now().Add(time.Minute * 5).Unix()
+
+		encode, _ := json.Marshal(u)
+
+		splits[1] = base64.RawStdEncoding.EncodeToString(encode)
+
+		mockUAAResponseModifiedExpiry.AccessToken = strings.Join(splits, ".")
+
+		mockUAA := setupMockServer(t,
+			msRoute("/oauth/token"),
+			msMethod("POST"),
+			msStatus(http.StatusOK),
+			msBody(jsonMust(mockUAAResponseModifiedExpiry)))
+
+		// mock different users
+		mockAdmin := setupMockUser(mockAdminGUID, true, []string{})
+
+		pp.GetConfig().UserEndpointsEnabled = config.UserEndpointsConfigEnum.Enabled
+
+		// setup
+		adminEndpoint := setupMockEndpointRegisterRequest(t, mockAdmin.ConnectedUser, mockV2Info, "CF Cluster 1", true, true)
+
+		if errSession := pp.setSessionValues(adminEndpoint.EchoContext, mockAdmin.SessionValues); errSession != nil {
+			t.Error(errors.New("unable to mock/stub user in session object"))
+		}
+
+		Convey("registering a new endpoint and logging in leads to a refresh routine being started", func() {
+			// mock executions
+			mockStratosAuth.
+				EXPECT().
+				GetUser(gomock.Eq(mockAdmin.ConnectedUser.GUID)).
+				Return(mockAdmin.ConnectedUser, nil)
+
+			mock.
+				ExpectQuery(selectFromCNSIs).
+				WillReturnRows(
+					sqlmock.NewRows(
+						[]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation", "client_id", "client_secret", "sso_allowed", "sub_type", "meta_data", "creator", "ca_cert"},
+					),
+				)
+			mock.
+				ExpectExec(insertIntoCNSIs).
+				WillReturnResult(sqlmock.NewResult(1, 1))
+
+			fetchInfo := getCFPlugin(pp, "cf").Info
+			err := pp.RegisterEndpoint(adminEndpoint.EchoContext, fetchInfo)
+
+			So(err, ShouldBeNil)
+
+			first := adminEndpoint.QueryArgs[:4]
+			newRow := append(first, mockUAA.URL)
+			last := adminEndpoint.QueryArgs[5:]
+			newRow = append(newRow, last...)
+
+			mock.
+				ExpectQuery(selectAnyFromCNSIs).
+				WillReturnRows(
+					sqlmock.NewRows(
+						[]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation", "client_id", "client_secret", "sso_allowed", "sub_type", "meta_data", "creator", "ca_cert"},
+					).AddRow(newRow...),
+				)
+
+			mock.
+				ExpectQuery(selectAnyFromCNSIs).
+				WillReturnRows(
+					sqlmock.NewRows(
+						[]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation", "client_id", "client_secret", "sso_allowed", "sub_type", "meta_data", "creator", "ca_cert"},
+					).AddRow(newRow...),
+				)
+
+			mock.
+				ExpectQuery(selectAnyFromTokens).
+				WithArgs(newRow[0], mockAdmin.ConnectedUser.GUID).
+				WillReturnRows(sqlmock.NewRows([]string{"count(*)"}).AddRow(0))
+
+			mock.
+				ExpectExec(insertIntoTokens).
+				WillReturnResult(sqlmock.NewResult(1, 1))
+
+			mock.
+				ExpectQuery(selectAnyFromCNSIs).
+				WillReturnRows(
+					sqlmock.NewRows(
+						[]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation", "client_id", "client_secret", "sso_allowed", "sub_type", "meta_data", "creator", "ca_cert"},
+					).AddRow(newRow...),
+				)
+
+			mock.
+				ExpectQuery(selectAnyFromCNSIs).
+				WillReturnRows(
+					sqlmock.NewRows(
+						[]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation", "client_id", "client_secret", "sso_allowed", "sub_type", "meta_data", "creator", "ca_cert"},
+					).AddRow(newRow...),
+				)
+
+			mockStratosAuth.
+				EXPECT().
+				GetUser(gomock.Eq(mockAdmin.ConnectedUser.GUID)).
+				Return(mockAdmin.ConnectedUser, nil)
+
+			// value are irrelevant, since we mock the reponse from the uaa regardless but the login won't work without them
+			formDataForApiLogin := url.Values{}
+			formDataForApiLogin.Set("username", "test")
+			formDataForApiLogin.Set("password", "test")
+			newReq, _ := http.NewRequest(http.MethodPost, "localhost:9999/some/fake/url", bytes.NewBufferString(formDataForApiLogin.Encode()))
+			newReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+			newContext := adminEndpoint.EchoContext.Echo().NewContext(newReq, adminEndpoint.EchoContext.Response())
+			_, err = pp.DoLoginToCNSI(newContext, adminEndpoint.InsertArgs[0].(string), true)
+
+			// Asynchronosly wait 5 seconds, then cancel the refresh routines
+			go func() {
+				time.Sleep(time.Second * 5)
+				pp.refreshRoutines.cancel()
+			}()
+
+			// Wait until all refresh routines have terminated (portalProxy does the same on graceful shutdown)
+			pp.refreshRoutines.wg.Wait()
+
+			So(err, ShouldBeNil)
+			So(mock.ExpectationsWereMet(), ShouldBeNil)
+		})
+	})
 }
 
 func TestRegisterWithUserEndpointsEnabled(t *testing.T) {

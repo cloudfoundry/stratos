@@ -313,6 +313,31 @@ func TestFindUAATokens(t *testing.T) {
 	})
 
 }
+
+func TestListAllEnabledConnectedCNSITokens(t *testing.T) {
+	Convey("ListAllEnabledConnectedCNSITokens Tests", t, func() {
+		db, mock, repository := initialiseRepo(t)
+
+		Convey("should return only cnsi tokens that are connected and enabled", func() {
+			rs := sqlmock.NewRows([]string{"cnsi_guid", "token_guid", "auth_token", "refresh_token", "token_expiry", "user_guid"}).
+				AddRow(mockCNSIGuid, mockTokenGUID, mockCNSIToken, mockCNSIToken, mockTokenExpiry, mockUserGuid)
+
+			mock.ExpectQuery(listAllEnabledConnectedCNSITokens).WillReturnRows(rs)
+
+			tokens, err := repository.ListAllEnabledConnectedCNSITokens(mockEncryptionKey)
+			log.Print("listAllEnabledConnectedCNSITokens returned ", err)
+
+			So(err, ShouldBeNil)
+			So(len(tokens), ShouldEqual, 1)
+			So(mock.ExpectationsWereMet(), ShouldBeNil)
+		})
+
+		Reset(func() {
+			db.Close()
+		})
+	})
+}
+
 func TestFindCNSITokens(t *testing.T) {
 
 	Convey("FindAuthToken Tests", t, func() {
