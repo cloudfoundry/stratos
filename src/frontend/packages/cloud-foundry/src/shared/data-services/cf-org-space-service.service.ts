@@ -34,6 +34,7 @@ import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { cfEntityFactory } from '../../cf-entity-factory';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { QParam, QParamJoiners } from '../q-param';
+import { CfOrgSpaceDebug, createCfOrgSpaceDebug } from './cf-org-space-debug';
 
 export function spreadPaginationParams(params: PaginationParam): PaginationParam {
   return {
@@ -148,6 +149,10 @@ export class CfOrgSpaceDataService implements OnDestroy {
   public space!: CfOrgSpaceItem<ISpace>;
   public isLoading$: Observable<boolean>;
 
+  // FWT-917: per-instance debug channel. Dev-build-only; prod is a no-op.
+  // See cf-org-space-debug.ts and FWT-917 for event-kind vocabulary.
+  private debug: CfOrgSpaceDebug = createCfOrgSpaceDebug();
+
   public paginationAction = this.createOrgPaginationAction();
 
   /**
@@ -172,6 +177,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
   public initialValuesMap!: (param: any) => InitialValues;
 
   constructor() {
+    this.debug.log('service:construct');
     this.createCf();
     this.createOrg();
     this.createSpace();
@@ -187,7 +193,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   private getAllOrgsObservable() {
-    return getPaginationObservables<APIResource<IOrganization>>({
+    const obs = getPaginationObservables<APIResource<IOrganization>>({
       store: this.store,
       action: this.paginationAction,
       paginationMonitor: this.paginationMonitorFactory.create(
@@ -196,6 +202,20 @@ export class CfOrgSpaceDataService implements OnDestroy {
         this.paginationAction.flattenPagination
       )
     }, this.paginationAction.flattenPagination);
+
+    // FWT-917: non-invasive diagnostic tap. The tap sits on a forked
+    // entities$ so subscribers to the service see it; pagination$ is
+    // unchanged. Critical for diagnosing H2/H5 (pagination race).
+    return {
+      ...obs,
+      entities$: obs.entities$.pipe(
+        tap(entities => this.debug.log('allOrgs:entities-emit', {
+          count: entities?.length ?? null,
+          isNull: entities == null,
+          isEmptyArray: Array.isArray(entities) && entities.length === 0,
+        })),
+      ),
+    };
   }
 
   // Signal-based selection state with BehaviorSubject wrapper for backward compatibility
@@ -213,7 +233,10 @@ export class CfOrgSpaceDataService implements OnDestroy {
 
     // Create BehaviorSubject wrapper that updates signal
     const cfBehaviorSubject = new BehaviorSubject<string | null>(null);
-    cfBehaviorSubject.subscribe(value => this.cfSelectSignal.set(value));
+    cfBehaviorSubject.subscribe(value => {
+      this.cfSelectSignal.set(value);
+      this.debug.log('cf:select-change', { to: value });
+    });
 
     this.cf = {
       list$: list$.pipe(
@@ -232,6 +255,10 @@ export class CfOrgSpaceDataService implements OnDestroy {
         map((endpoints: EndpointModel[]) => {
           return Object.values(endpoints).sort((a: EndpointModel, b: EndpointModel) => naturalCompare(a.name, b.name));
         }),
+        tap(endpoints => this.debug.log('cf:list-emit', {
+          count: endpoints.length,
+          guids: endpoints.map(e => e.guid),
+        })),
       ),
       loading$: list$.pipe(
         map(cfs => !cfs)
@@ -244,19 +271,25 @@ export class CfOrgSpaceDataService implements OnDestroy {
     const orgList$ = combineLatest(
       this.cf.select.asObservable(),
       this.allOrgs.entities$
-    ).pipe(map(([selectedCF, entities]) => {
-      if (selectedCF && entities) {
-        return entities
-          .map(org => org.entity)
-          .filter(org => org.cfGuid === selectedCF)
-          .sort((a, b) => naturalCompare(a.name, b.name));
-      }
-      return [];
-    }));
+    ).pipe(
+      map(([selectedCF, entities]) => {
+        if (selectedCF && entities) {
+          return entities
+            .map(org => org.entity)
+            .filter(org => org.cfGuid === selectedCF)
+            .sort((a, b) => naturalCompare(a.name, b.name));
+        }
+        return [];
+      }),
+      tap(orgs => this.debug.log('org:list-emit', { resultCount: orgs.length })),
+    );
 
     // Create BehaviorSubject wrapper that updates signal
     const orgBehaviorSubject = new BehaviorSubject<string | null>(null);
-    orgBehaviorSubject.subscribe(value => this.orgSelectSignal.set(value));
+    orgBehaviorSubject.subscribe(value => {
+      this.orgSelectSignal.set(value);
+      this.debug.log('org:select-change', { to: value });
+    });
 
     this.org = {
       list$: orgList$,
@@ -300,12 +333,16 @@ export class CfOrgSpaceDataService implements OnDestroy {
           }
         }
         return allSpaces.sort((a, b) => naturalCompare(a.name, b.name));
-      })
+      }),
+      tap(spaces => this.debug.log('space:list-emit', { resultCount: spaces.length })),
     );
 
     // Create BehaviorSubject wrapper that updates signal
     const spaceBehaviorSubject = new BehaviorSubject<string | null>(null);
-    spaceBehaviorSubject.subscribe(value => this.spaceSelectSignal.set(value));
+    spaceBehaviorSubject.subscribe(value => {
+      this.spaceSelectSignal.set(value);
+      this.debug.log('space:select-change', { to: value });
+    });
 
     this.space = {
       list$: spaceList$,
@@ -356,6 +393,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
       take(1),
       map(this.initialValuesMap),
     ).subscribe(values => {
+      this.debug.log('initialValues:resolved', values);
       if (values.cf) { this.selectSet(this.cf.select, values.cf); }
       if (values.org) { this.selectSet(this.org.select, values.org); }
       if (values.space) { this.selectSet(this.space.select, values.space); }
@@ -384,20 +422,33 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   private setupAutoSelectors(initialCf: string, initialOrg: string) {
+    this.debug.log('autoSelector:setup', { initialCf, initialOrg });
+
     // Clear or automatically select org + space given cf
     let cfTapped = false;
     const orgResetSub = this.cf.select.asObservable().pipe(
       startWith(initialCf),
       distinctUntilChanged(),
+      // FWT-917 H3 diagnostic: log every candidate BEFORE the filter so we
+      // can see when the filter swallows a happy-path emission (cf ===
+      // initialCf on first arrival, cfTapped still false → willFire false).
+      tap(cf => this.debug.log('autoSelector:cf-pre-filter', {
+        cf, initialCf, cfTapped,
+        willFire: cfTapped || cf !== initialCf,
+      })),
       filter(cf => cfTapped || cf !== initialCf),
       withLatestFrom(this.org.list$),
       tap(([_selectedCF, orgs]) => {
         cfTapped = true;
-        if (
-          !!orgs.length &&
+        const willAutoPick = !!orgs.length &&
           ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && orgs.length === 1) ||
-            (this.selectMode === CfOrgSpaceSelectMode.ANY))
-        ) {
+            (this.selectMode === CfOrgSpaceSelectMode.ANY));
+        this.debug.log('autoSelector:cf-cascade-fire', {
+          orgCount: orgs.length,
+          willAutoPick,
+          picked: willAutoPick ? orgs[0].guid : null,
+        });
+        if (willAutoPick) {
           this.selectSet(this.org.select, orgs[0].guid);
         } else {
           this.selectSet(this.org.select, undefined);
@@ -412,15 +463,23 @@ export class CfOrgSpaceDataService implements OnDestroy {
     const spaceResetSub = this.org.select.asObservable().pipe(
       startWith(initialOrg),
       distinctUntilChanged(),
+      tap(org => this.debug.log('autoSelector:org-pre-filter', {
+        org, initialOrg, orgTapped,
+        willFire: orgTapped || org !== initialOrg,
+      })),
       filter(org => orgTapped || org !== initialOrg),
       withLatestFrom(this.space.list$),
       tap(([_selectedOrg, spaces]) => {
         orgTapped = true;
-        if (
-          !!spaces.length &&
+        const willAutoPick = !!spaces.length &&
           ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && spaces.length === 1) ||
-            (this.selectMode === CfOrgSpaceSelectMode.ANY))
-        ) {
+            (this.selectMode === CfOrgSpaceSelectMode.ANY));
+        this.debug.log('autoSelector:org-cascade-fire', {
+          spaceCount: spaces.length,
+          willAutoPick,
+          picked: willAutoPick ? spaces[0].guid : null,
+        });
+        if (willAutoPick) {
           this.selectSet(this.space.select, spaces[0].guid);
         } else {
           this.selectSet(this.space.select, undefined);
