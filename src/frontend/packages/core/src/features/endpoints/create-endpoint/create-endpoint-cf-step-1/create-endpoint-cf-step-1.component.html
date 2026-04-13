@@ -4,7 +4,7 @@
     <div class="create-endpoint__info-column">
       <h1 class="create-endpoint__section-title" style="color: var(--content-text);">{{endpoint.definition.label}} Information</h1>
       <app-form-field class="block w-full">
-        <input appInput id="name" name="name" formControlName="nameField" placeholder="Name" class="w-full placeholder:!text-transparent"
+        <input appInput id="name" name="name" formControlName="nameField" placeholder="Name" class="w-full placeholder:!text-transparent focus:outline-none"
           [appUnique]="registerForm.value.createSystemEndpointField ? (customEndpoints | async)?.names : (existingPersonalEndpoints | async)?.names">
         @if (registerForm.controls.nameField.errors?.required) {
           <app-error>Name is required</app-error>
@@ -14,7 +14,7 @@
         }
       </app-form-field>
       <app-form-field class="block w-full">
-        <input appInput id="url" name="url" formControlName="urlField" type="text" required placeholder="Endpoint Address" class="w-full placeholder:!text-transparent"
+        <input appInput id="url" name="url" formControlName="urlField" type="text" required placeholder="Endpoint Address" class="w-full placeholder:!text-transparent focus:outline-none"
           [appUnique]="registerForm.value.createSystemEndpointField ? (customEndpoints | async)?.urls : (existingPersonalEndpoints | async)?.urls">
         @if (registerForm.controls.urlField.errors?.required) {
           <app-error>URL is required</app-error>
@@ -61,10 +61,10 @@
       <p style="color: var(--content-text);">Note that these are not administrator credentials and only need to be specified if your endpoint uses
       non-standard configuration.</p>
       <app-form-field>
-        <input class="w-full placeholder:!text-transparent" appInput id="client_id" name="client_id" formControlName="clientIDField" placeholder="Client ID">
+        <input class="w-full placeholder:!text-transparent focus:outline-none" appInput id="client_id" name="client_id" formControlName="clientIDField" placeholder="Client ID">
       </app-form-field>
       <app-form-field>
-        <input class="w-full placeholder:!text-transparent" appInput id="client_secret" name="client_secret" formControlName="clientSecretField"
+        <input class="w-full placeholder:!text-transparent focus:outline-none" appInput id="client_secret" name="client_secret" formControlName="clientSecretField"
           placeholder="Client Secret" [type]="!show ? 'password' : 'text'">
         <button class="btn btn-icon" type="button" matSuffix (click)="show = !show" [attr.aria-label]="'Hide Secret'"
           [attr.aria-pressed]="!show">

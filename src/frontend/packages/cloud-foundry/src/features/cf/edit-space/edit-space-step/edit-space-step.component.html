@@ -1,7 +1,7 @@
 <div class="edit-space">
   <form [formGroup]="editSpaceForm" class="stepper-form">
     <app-form-field>
-      <input class="w-full placeholder:!text-transparent" appInput formControlName="spaceName" placeholder="Space Name" [appFocus]="true">
+      <input class="w-full placeholder:!text-transparent focus:outline-none" appInput formControlName="spaceName" placeholder="Space Name" [appFocus]="true">
       @if (editSpaceForm.get('spaceName')?.hasError('spaceNameTaken')) {
         <app-error>
           A space with this name already exists. Please enter a different one.

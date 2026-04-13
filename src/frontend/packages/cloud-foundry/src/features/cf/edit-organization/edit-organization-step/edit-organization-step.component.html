@@ -1,7 +1,7 @@
 <div class="edit-org">
   <form [formGroup]="editOrgName" class="stepper-form">
     <app-form-field>
-      <input class="w-full placeholder:!text-transparent" appInput formControlName="orgName" placeholder="Organization Name" required [appFocus]="true">
+      <input class="w-full placeholder:!text-transparent focus:outline-none" appInput formControlName="orgName" placeholder="Organization Name" required [appFocus]="true">
       @if (orgName.hasError('nameTaken')) {
         <app-error>
           An organization with this name already exists. Please enter a different one.

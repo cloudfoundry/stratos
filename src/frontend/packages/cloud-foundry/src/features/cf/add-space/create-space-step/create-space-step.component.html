@@ -2,7 +2,7 @@
   <div>Specify the name of the new space</div>
   <form [formGroup]="createSpaceForm" class="stepper-form">
     <app-form-field>
-      <input class="w-full placeholder:!text-transparent" appInput formControlName="spaceName" placeholder="Space Name" required [appFocus]="true">
+      <input class="w-full placeholder:!text-transparent focus:outline-none" appInput formControlName="spaceName" placeholder="Space Name" required [appFocus]="true">
       @if (spaceName.hasError('spaceNameTaken')) {
         <app-error>
           A space with this name already exists. Please enter a different one.

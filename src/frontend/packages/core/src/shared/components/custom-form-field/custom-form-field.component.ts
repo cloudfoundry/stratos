@@ -164,7 +164,7 @@ export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit
   get labelClasses(): string {
     const base = 'absolute left-0 top-1 pointer-events-none select-none origin-top-left';
     const sizing = this.shouldFloatLabel
-      ? '-translate-y-[1.1em] text-xs font-medium'
+      ? '-translate-y-[1.8em] text-xs font-medium'
       : 'text-base leading-tight';
     let color: string;
     if (this.isInvalid) {

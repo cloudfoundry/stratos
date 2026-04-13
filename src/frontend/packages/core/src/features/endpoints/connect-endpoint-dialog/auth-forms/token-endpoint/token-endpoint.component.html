@@ -6,7 +6,7 @@
   }
   <div formGroupName="authValues" class="token__form">
     <app-form-field>
-      <input class="w-full placeholder:!text-transparent" appInput placeholder="{{config.title || 'Token'}}" type="password" formControlName="token"
+      <input class="w-full placeholder:!text-transparent focus:outline-none" appInput placeholder="{{config.title || 'Token'}}" type="password" formControlName="token"
         [type]="!showToken ? 'password' : 'text'" autocomplete="off">
       <button class="btn btn-icon" matSuffix (click)="showToken = !showToken" [attr.aria-label]="'Hide Token'"
         [attr.aria-pressed]="!showToken" type="button">
