@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
-import { CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, FocusDirective, StepOnNextFunction } from '@stratosui/core';
+import { AppInputDirective, CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, FocusDirective, StepOnNextFunction } from '@stratosui/core';
 import {
   APIResource,
   endpointEntityType,
@@ -38,6 +38,7 @@ interface CreateOrganizationForm {
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    AppInputDirective,
     CustomFormFieldComponent,
     CustomSelectComponent,
     CustomOptionComponent,
@@ -49,6 +50,11 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
   private paginationMonitorFactory = inject(PaginationMonitorFactory);
   private fb = inject(FormBuilder);
 
+  /** See QuotaDefinitionFormComponent — mirror form validity into a signal
+   *  so the parent AddOrganizationComponent (OnPush, off the ngTemplateOutlet
+   *  chain) re-evaluates [valid]="step1.validate()" automatically. */
+  private validSignal = signal(false);
+  private formStatusSub?: Subscription;
 
   orgSubscription!: Subscription;
   submitSubscription!: Subscription;
@@ -74,6 +80,10 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
       orgName: new FormControl('', { nonNullable: true, validators: [Validators.required, this.nameTakenValidator()] }),
       quotaDefinition: new FormControl<string | null>(null),
     });
+    this.validSignal.set(this.addOrg.valid);
+    this.formStatusSub = this.addOrg.statusChanges.subscribe(
+      () => this.validSignal.set(this.addOrg.valid)
+    );
     const action = CloudFoundryEndpointService.createGetAllOrganizations(this.cfGuid);
     this.orgs$ = getPaginationObservables<APIResource>(
       {
@@ -116,7 +126,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
 
   validateNameTaken = (value: string = null) => this.allOrgs ? this.allOrgs.indexOf(value || this.orgName.value) === -1 : true;
 
-  validate = () => !!this.addOrg && this.addOrg.valid;
+  validate = () => this.validSignal();
 
   submit: StepOnNextFunction = () => {
     this.store.dispatch(new CreateOrganization(this.cfGuid, {
@@ -136,5 +146,6 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.orgSubscription.unsubscribe();
+    this.formStatusSub?.unsubscribe();
   }
 }

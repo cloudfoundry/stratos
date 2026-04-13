@@ -19,7 +19,8 @@ export class AddEditSpaceStepBase {
   cfGuid: string;
   allSpacesInOrg!: string[];
   allSpacesInOrg$: Observable<string[]>;
-  validate!: (spaceName: string) => boolean;
+  /** Name uniqueness check; subclasses implement. Used by spaceNameTakenValidator. */
+  isNameUnique!: (spaceName: string) => boolean;
   quotaDefinitions$: Observable<APIResource<ISpaceQuotaDefinition>[]>;
   hasSpaceQuotas$: Observable<boolean>;
 
@@ -63,7 +64,7 @@ export class AddEditSpaceStepBase {
 
   spaceNameTakenValidator = (): ValidatorFn => {
     return (formField: AbstractControl): { [key: string]: any } => {
-      const nameValid = this.validate(formField.value);
+      const nameValid = this.isNameUnique(formField.value);
       return !nameValid ? { spaceNameTaken: { value: formField.value } } : null;
     };
   }

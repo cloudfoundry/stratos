@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -7,6 +7,7 @@ import { Observable, of, Subscription } from 'rxjs';
 import { filter, map, pairwise, switchMap, take, tap } from 'rxjs/operators';
 
 import {
+  AppInputDirective,
   CustomFormFieldComponent,
   CustomSelectComponent,
   CustomOptionComponent,
@@ -38,6 +39,7 @@ interface EditSpaceForm {
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
+    AppInputDirective,
     CustomFormFieldComponent,
     CustomSelectComponent,
     CustomOptionComponent,
@@ -45,9 +47,12 @@ interface EditSpaceForm {
     FocusDirective
   ]
 })
-export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDestroy {
+export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnInit, OnDestroy {
   private cfSpaceService = inject(CloudFoundrySpaceService);
 
+  /** See QuotaDefinitionFormComponent for rationale. */
+  private validSignal = signal(false);
+  private formStatusSub?: Subscription;
 
   originalName: any;
   spaceSubscription!: Subscription;
@@ -88,7 +93,8 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
     this.spaceSubscription = this.space$.subscribe();
   }
 
-  validate = (spaceName: string = null) => {
+  /** Name uniqueness check used by the base class's spaceNameTakenValidator. */
+  isNameUnique = (spaceName: string = null): boolean => {
     if (this.allSpacesInOrg) {
       return this.allSpacesInOrg
         .filter(o => o !== this.originalName)
@@ -96,6 +102,18 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
     }
     return true;
   };
+
+  /** Form-level validity gate for the Update button. Reads the signal. */
+  validate = () => this.validSignal();
+
+  ngOnInit() {
+    // Mirror editSpaceForm.valid && dirty into a signal so the parent
+    // EditSpaceComponent re-evaluates [valid] automatically.
+    this.validSignal.set(this.editSpaceForm.valid && this.editSpaceForm.dirty);
+    this.formStatusSub = this.editSpaceForm.statusChanges.subscribe(
+      () => this.validSignal.set(this.editSpaceForm.valid && this.editSpaceForm.dirty)
+    );
+  }
 
   submit: StepOnNextFunction = () => {
     const spaceQuotaGuid = this.editSpaceForm.value.quotaDefinition;
@@ -155,5 +173,6 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
   ngOnDestroy() {
     this.destroy();
     this.spaceSubscription.unsubscribe();
+    this.formStatusSub?.unsubscribe();
   }
 }
