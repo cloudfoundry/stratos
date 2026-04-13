@@ -1,6 +1,6 @@
 {
   "name": "stratos",
-  "version": "v5.0.0-dev.5",
+  "version": "v5.0.0-dev.6+build.20260413.212fbae271",
   "type": "module",
   "description": "Stratos Console",
   "main": "index.js",
@@ -14,7 +14,7 @@
     "preinstall": "node build/ensure-devkit.cjs",
     "postinstall": "node build/post-setup.cjs",
     "pretest": "node build/check-versions.cjs",
-    "bootstrap": "echo '\u26a0\ufe0f  Bootstrap is no longer required! Just run: bun install'",
+    "bootstrap": "echo '⚠️  Bootstrap is no longer required! Just run: bun install'",
     "build-backend": "./build/bk-build.sh",
     "full-build-dev": "bun run build-dev; bun run build-backend",
     "fetch-backend-deps": "./build/bk-fetch-deps.sh",
