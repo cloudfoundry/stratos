@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
@@ -47,7 +47,16 @@ export interface SpaceQuotaFormValues {
 export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
   private activatedRoute = inject(ActivatedRoute);
 
+  /**
+   * Signal that reflects formGroup.valid. Reading this in a template
+   * binding (via form.valid()) registers the consuming component as a
+   * dependent, so Angular auto-marks it dirty when the signal changes,
+   * regardless of OnPush / ngTemplateOutlet boundaries.
+   */
+  private validSignal = signal(false);
+
   quotasSubscription!: Subscription;
+  private formStatusSub?: Subscription;
   cfGuid: string;
   orgGuid: string;
   allQuotas!: string[];
@@ -78,6 +87,16 @@ export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.setupForm();
     this.fetchQuotasDefinitions();
+    // Mirror formGroup.valid into a signal. The template binding
+    // [valid]="step1.validate()" calls this.valid(), which reads the
+    // signal; any change to the signal causes Angular to mark the
+    // consuming component dirty automatically — no need for tick() or
+    // manual markForCheck — and it works across ngTemplateOutlet /
+    // OnPush boundaries.
+    this.validSignal.set(this.formGroup.valid);
+    this.formStatusSub = this.formGroup.statusChanges.subscribe(
+      () => this.validSignal.set(this.formGroup.valid)
+    );
   }
 
   setupForm() {
@@ -138,9 +157,12 @@ export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
     return true;
   }
 
-  valid = () => !!this.formGroup && this.formGroup.valid;
+  // Read the signal so the template binding that calls this method
+  // registers as a dependent and auto-refreshes when status changes.
+  valid = () => this.validSignal();
 
   ngOnDestroy() {
     safeUnsubscribe(this.quotasSubscription);
+    this.formStatusSub?.unsubscribe();
   }
 }
