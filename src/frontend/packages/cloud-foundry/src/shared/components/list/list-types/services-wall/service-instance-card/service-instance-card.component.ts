@@ -22,6 +22,9 @@ import {
 import { getServiceName, getServicePlanName, getServiceSummaryUrl } from '../../../../../../features/service-catalog/services-helper';
 import { ServiceInstanceLastOpComponent } from '../../../../service-instance-last-op/service-instance-last-op.component';
 import {
+  ServiceInstanceLastServiceBindingComponent,
+} from '../../../../service-instance-last-service-binding/service-instance-last-service-binding.component';
+import {
   CurrentUserPermissionsService,
   ClickStopPropagationDirective,
   AppChip,
@@ -59,6 +62,7 @@ import {
     CfOrgSpaceLinksComponent,
     TableCellServiceBrokerComponent,
     ServiceInstanceLastOpComponent,
+    ServiceInstanceLastServiceBindingComponent,
     AppChipsComponent,
     ClickStopPropagationDirective,
   ]

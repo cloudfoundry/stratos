@@ -128,10 +128,18 @@ export class CsiModeService {
       this.cancelUrl = `/applications/${cfId}/${id}/services`;
     }
 
-    // Started stepper from the root service instance list
+    // Started stepper from the root service instance list. In this top-down
+    // flow the user is creating the instance before knowing which app to bind
+    // to, and many brokers provision service instances asynchronously — the
+    // inline "bind to app" step would fail for async services before the
+    // instance is ready. Hide the bind step; the user can bind later once the
+    // instance shows as running in the services wall.
     if (!cfId) {
       this.mode = CreateServiceInstanceMode.SERVICES_WALL_MODE;
-      this.viewDetail = defaultViewDetail;
+      this.viewDetail = {
+        ...defaultViewDetail,
+        showBindApp: false,
+      };
     }
 
     // Started stepper from a space's service instance list

@@ -35,6 +35,9 @@ import {
   TableCellServiceInstanceTagsComponent,
 } from '../cf-spaces-service-instances/table-cell-service-instance-tags/table-cell-service-instance-tags.component';
 import {
+  TableCellLastServiceBindingComponent,
+} from '../cf-spaces-service-instances/table-cell-last-service-binding/table-cell-last-service-binding.component';
+import {
   TableCellServiceLastOpComponent,
 } from '../cf-spaces-service-instances/table-cell-service-last-op/table-cell-service-last-op.component';
 import { TableCellServiceComponent } from '../cf-spaces-service-instances/table-cell-service/table-cell-service.component';
@@ -91,6 +94,12 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
       columnId: 'lastOp',
       headerCell: () => 'Last Operation',
       cellComponent: TableCellServiceLastOpComponent,
+      cellFlex: '2'
+    },
+    {
+      columnId: 'lastServiceBinding',
+      headerCell: () => 'Last Service Binding',
+      cellComponent: TableCellLastServiceBindingComponent,
       cellFlex: '2'
     },
     {
