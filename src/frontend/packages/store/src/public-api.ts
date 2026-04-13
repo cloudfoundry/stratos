@@ -9,7 +9,7 @@ export { LocalStorageService, LocalStorageSyncTypes } from './helpers/local-stor
 // Used by store testing module
 export { getDefaultRequestState } from './reducers/api-request-reducer/types';
 export { getDefaultPaginationEntityState } from './reducers/pagination-reducer/pagination-reducer-reset-pagination';
-export type { SessionDataEndpoint } from './types/auth.types';
+export type { AuthTokenEnvelope, SessionDataEndpoint, TokenData } from './types/auth.types';
 export { getDefaultRolesRequestState } from './types/current-user-roles.types';
 export type { BaseEntityValues } from './types/entity.types';
 export type {

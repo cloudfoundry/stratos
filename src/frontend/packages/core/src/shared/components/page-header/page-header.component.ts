@@ -1,5 +1,6 @@
 import { Portal, TemplatePortal } from '@angular/cdk/portal';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, ChangeDetectorRef, AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild, inject } from '@angular/core';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -14,10 +15,12 @@ import {
   AppState,
   selectIsMobile,
   UserProfileInfo,
+  AuthTokenEnvelope,
 } from '@stratosui/store';
 import { getTime } from 'date-fns';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, firstValueFrom, Observable, shareReplay } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
+import { SnackBarService } from '../../services/snackbar.service';
 
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
@@ -62,6 +65,8 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   private endpointsService = inject(EndpointsService);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
   private cdr = inject(ChangeDetectorRef);
+  private http = inject(HttpClient);
+  private snackBarService = inject(SnackBarService);
 
   public canAPIKeys$: Observable<boolean>;
   public breadcrumbDefinitions: IHeaderBreadcrumbLink[] = null;
@@ -77,6 +82,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   // Menu state for Tailwind dropdowns
   public isHistoryMenuOpen = false;
   public isUserMenuOpen = false;
+  public isTokenMenuOpen = false;
 
   @ViewChild('pageHeaderTmpl', { static: true }) pageHeaderTmpl!: TemplateRef<any>;
 
@@ -158,6 +164,9 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public user$: Observable<UserProfileInfo>;
   public allowGravatar$: Observable<boolean>;
   public canLogout$: Observable<boolean>;
+  public authToken$!: Observable<string>;
+  public refreshToken$!: Observable<string>;
+  public tokenExpiry$!: Observable<Date | null>;
 
   public actionsKey: string;
 
@@ -238,7 +247,38 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     this.canLogout$ = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.CAN_NOT_LOGOUT).pipe(
       map(noLogout => !noLogout)
     );
+  }
 
+  // Fetch fresh token envelope — called every time the token menu opens so
+  // the user can't grab a stale/expired token from a cached observable. The
+  // three derived observables share one HTTP call via shareReplay(1).
+  private refreshTokenObservables() {
+    const env$ = this.http
+      .get<AuthTokenEnvelope>(`/api/${environment.proxyAPIVersion}/auth/token`)
+      .pipe(shareReplay(1));
+
+    this.authToken$ = env$.pipe(map(res => res.data?.auth_token ?? ''));
+    this.refreshToken$ = env$.pipe(map(res => res.data?.refresh_token ?? ''));
+    this.tokenExpiry$ = env$.pipe(
+      map(res => res.data ? new Date(res.data.token_expiry * 1000) : null)
+    );
+  }
+
+  // Copy a token value to the clipboard without ever rendering it in the DOM.
+  // The token$ observable is resolved at click time and piped straight into
+  // the browser clipboard API — no hidden <div>{{ token }}</div> buffer.
+  async copyToken(token$: Observable<string>, label: string) {
+    try {
+      const value = await firstValueFrom(token$);
+      if (!value) {
+        this.snackBarService.show(`No ${label} available`, 'Close');
+        return;
+      }
+      await navigator.clipboard.writeText(value);
+      this.snackBarService.show(`${label} copied to clipboard`, 'Close');
+    } catch {
+      this.snackBarService.show(`Failed to copy ${label}`, 'Close');
+    }
   }
 
   ngOnDestroy() {
@@ -267,14 +307,25 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   toggleHistoryMenu() {
     this.isHistoryMenuOpen = !this.isHistoryMenuOpen;
     if (this.isHistoryMenuOpen) {
-      this.isUserMenuOpen = false; // Close user menu when opening history
+      this.isUserMenuOpen = false;
+      this.isTokenMenuOpen = false;
     }
   }
 
   toggleUserMenu() {
     this.isUserMenuOpen = !this.isUserMenuOpen;
     if (this.isUserMenuOpen) {
-      this.isHistoryMenuOpen = false; // Close history menu when opening user menu
+      this.isHistoryMenuOpen = false;
+      this.isTokenMenuOpen = false;
+    }
+  }
+
+  toggleTokenMenu() {
+    this.isTokenMenuOpen = !this.isTokenMenuOpen;
+    if (this.isTokenMenuOpen) {
+      this.isHistoryMenuOpen = false;
+      this.isUserMenuOpen = false;
+      this.refreshTokenObservables();
     }
   }
 
@@ -284,6 +335,10 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
 
   closeHistoryMenu() {
     this.isHistoryMenuOpen = false;
+  }
+
+  closeTokenMenu() {
+    this.isTokenMenuOpen = false;
   }
 
 }

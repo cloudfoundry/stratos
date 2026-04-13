@@ -928,6 +928,9 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	// Verify Session
 	api.GET("/v1/auth/verify", p.verifySession)
 
+	// Retrieve UAA token for the current session (for operator tooling, e.g. cf CLI curl commands)
+	api.GET("/v1/auth/token", p.retrieveToken)
+
 	// Always serve the backend API from /pp
 	pp := e.Group("/pp")
 
