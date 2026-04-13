@@ -35,7 +35,7 @@ export class ApplicationDeploySourceTypes {
       name: 'GitHub',
       id: DEPLOY_TYPES_IDS.GITHUB,
       group: 'gitscm',
-      helpText: 'Please select the GitHub project and branch you would like to deploy from.',
+      helpText: 'Please select the GitHub project and branch you would like to deploy from. If the repository is private or hosted on a GitHub Enterprise instance, include an access token (and, for GHE, the enterprise URL).',
       graphic: {
         // TODO: Move cf assets to CF package (#3769)
         location: '/core/assets/endpoint-icons/github-logo.png',

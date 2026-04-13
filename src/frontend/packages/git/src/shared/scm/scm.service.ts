@@ -16,10 +16,10 @@ export class GitSCMService {
   private gitHubURL = inject(GITHUB_API_URL);
 
 
-  public getSCM(type: GitSCMType, endpointGuid: string): GitSCM {
+  public getSCM(type: GitSCMType, endpointGuid: string, accessToken?: string): GitSCM {
     switch (type) {
       case 'github':
-        return new GitHubSCM(this.gitHubURL, endpointGuid);
+        return new GitHubSCM(this.gitHubURL, endpointGuid, accessToken);
       case 'gitlab':
         return new GitLabSCM(endpointGuid);
     }

@@ -19,9 +19,24 @@
                     <div class="github-project-details">
                       <div>
                         <div class="form-field">
+                          <input type="text" class="input" [(ngModel)]="githubEnterpriseUrl"
+                            placeholder="GitHub Enterprise URL (optional)" name="githubEnterpriseUrl"
+                            [disabled]="isRedeploy">
+                          @if (isInvalidGithubEnterpriseUrl) {
+                            <div class="text-red-500 text-sm mt-1">
+                              GitHub Enterprise deployment URL is not valid
+                            </div>
+                          }
+                        </div>
+                        <div class="form-field">
+                          <input type="password" class="input" [(ngModel)]="accessToken"
+                            placeholder="GitHub Access Token (optional)" name="githubAccessToken"
+                            autocomplete="off" spellcheck="false" [disabled]="isRedeploy">
+                        </div>
+                        <div class="form-field">
                           <input type="text" class="input" [disabled]="isRedeploy" [(ngModel)]="repository"
                             placeholder="Project" name="projectName"
-                            [appGithubProjectExists]="sourceType.id + ',' + sourceType.endpointGuid" required
+                            [appGithubProjectExists]="sourceType.id + ',' + sourceType.endpointGuid + ',' + (accessToken || '')" required
                             list="repo-suggestions">
                           <!-- Repository suggestions datalist -->
                           <datalist id="repo-suggestions">

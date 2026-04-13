@@ -4,7 +4,17 @@ import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild, Chang
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { GitBranch, GitCommit, gitEntityCatalog, GitRepo, GitSCM, GitSCMService, GitSCMType } from '@stratosui/git';
+import {
+  BaseSCM,
+  GitBranch,
+  GitCommit,
+  gitEntityCatalog,
+  GitHubSCM,
+  GitRepo,
+  GitSCM,
+  GitSCMService,
+  GitSCMType,
+} from '@stratosui/git';
 import {
   combineLatest,
   combineLatest as observableCombineLatest,
@@ -117,6 +127,12 @@ export class DeployApplicationStep2Component
   // We don't have any repositories to suggest initially - need user to start typing
   suggestedRepos$!: Observable<GitSuggestedRepo[]>;
 
+  // GitHub Enterprise / private repo support
+  isInvalidGithubEnterpriseUrl = false;
+  githubEnterpriseUrl: string;
+  accessToken: string;
+  // --------------
+
   // Git URL
   gitUrl!: string;
   gitUrlBranchName!: string;
@@ -152,6 +168,7 @@ export class DeployApplicationStep2Component
           projectName: this.repository,
           branch: this.repositoryBranch,
           url: repo.entity.clone_url,
+          accessToken: this.accessToken,
           commit: this.isRedeploy ? this.commitInfo.sha : undefined,
           endpointGuid: this.sourceType.endpointGuid,
         }, null));
@@ -356,12 +373,46 @@ export class DeployApplicationStep2Component
     this.subscriptions.push(setProjectName.subscribe());
 
     this.suggestedRepos$ = this.sourceSelectionForm.valueChanges.pipe(
+      tap(form => {
+        this.applyGithubEnterpriseAndToken(form?.githubEnterpriseUrl, form?.githubAccessToken);
+      }),
       map(form => form.projectName),
       startWith(''),
       pairwise(),
       filter(([oldName, newName]) => oldName !== newName),
       switchMap(([, newName]) => this.updateSuggestedRepositories(newName))
     );
+  }
+
+  // Forwards the two optional inputs (GHE base URL, GitHub PAT) into the
+  // active GitHubSCM instance so that subsequent repo/branch/commit API calls
+  // target the right host with the right Authorization header. Silent no-op
+  // when the active SCM is not GitHub (e.g. GitLab selected).
+  private applyGithubEnterpriseAndToken(enterpriseUrl: string | undefined, token: string | undefined) {
+    if (!this.scm) {
+      return;
+    }
+    const isValidUrl = (input: string) => {
+      try {
+        return Boolean(new URL(input));
+      } catch {
+        return false;
+      }
+    };
+
+    this.isInvalidGithubEnterpriseUrl = !!enterpriseUrl && !isValidUrl(enterpriseUrl);
+
+    if (enterpriseUrl && !this.isInvalidGithubEnterpriseUrl) {
+      (this.scm as unknown as BaseSCM).setPublicApi(enterpriseUrl);
+    }
+
+    if (this.scm.getType() === 'github') {
+      if (token) {
+        (this.scm as GitHubSCM).setAccessToken(token);
+      } else {
+        (this.scm as GitHubSCM).clearAccessToken();
+      }
+    }
   }
 
   updateSuggestedRepositories(name: string): Observable<GitSuggestedRepo[]> {
