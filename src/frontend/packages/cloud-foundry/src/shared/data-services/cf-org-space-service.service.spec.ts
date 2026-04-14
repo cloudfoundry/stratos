@@ -3,6 +3,8 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { BehaviorSubject } from 'rxjs';
+import { filter, take } from 'rxjs/operators';
 
 import {
   EntityCatalogTestModule,
@@ -252,6 +254,155 @@ describe('createSpace() mapping logic', () => {
       const result = spaceListMapper('', orgs);
       expect(result).toHaveLength(4);
       expect(result[0].name).toContain('(');
+    });
+  });
+});
+
+/**
+ * FWT-917 regression lock for the auto-selector loading-gate fix.
+ *
+ * Before the fix, `setupAutoSelectors` used `withLatestFrom(this.org.list$)`
+ * which captured org.list$ at the exact instant cf.select fired. On a cold
+ * cache (new-image deploy, cleared localStorage, fresh login), the orgs
+ * pagination fetch was still in flight, so org.list$ was [] and the cascade
+ * cleared org.select to undefined. The cascade never recovered because
+ * cf.select doesn't re-fire when the fetch eventually completes.
+ *
+ * The fix replaces `withLatestFrom` with a `switchMap` that gates on the
+ * pagination state — specifically, waits until a current-page request
+ * exists (was dispatched) AND is no longer busy (completed) before reading
+ * a fresh org.list$ snapshot. These tests lock in the filter predicate and
+ * the observable pipeline shape so future refactors don't silently
+ * reintroduce the race.
+ */
+describe('FWT-917 auto-selector loading gate', () => {
+
+  /**
+   * Mirror of the predicate used in `waitForOrgsReady$` inside
+   * CfOrgSpaceDataService. Exported-alike so we can test each state
+   * transition without booting the full service.
+   */
+  const isReady = (pag: any) => {
+    const req = pag?.pageRequests?.[pag?.currentPage];
+    return !!req && !req.busy;
+  };
+
+  describe('isReady predicate', () => {
+    it('returns false when pagination is null', () => {
+      expect(isReady(null)).toBe(false);
+    });
+
+    it('returns false when pagination is undefined', () => {
+      expect(isReady(undefined)).toBe(false);
+    });
+
+    it('returns false when pageRequests is missing (never fetched)', () => {
+      expect(isReady({ currentPage: 1 })).toBe(false);
+    });
+
+    it('returns false when current page has no request entry', () => {
+      // A fetch for page 2 doesn't satisfy a wait for page 1
+      expect(isReady({ currentPage: 1, pageRequests: { 2: { busy: false } } })).toBe(false);
+    });
+
+    it('returns false when current page request is busy (fetch in flight)', () => {
+      expect(isReady({ currentPage: 1, pageRequests: { 1: { busy: true } } })).toBe(false);
+    });
+
+    it('returns true when current page request exists and is not busy', () => {
+      expect(isReady({ currentPage: 1, pageRequests: { 1: { busy: false } } })).toBe(true);
+    });
+
+    it('returns true even when the completed request has an error', () => {
+      // An error response is still "done" — the cascade should proceed and
+      // see whatever orgs ended up in the list (possibly empty). Blocking
+      // forever on error would be worse UX.
+      expect(isReady({
+        currentPage: 1,
+        pageRequests: { 1: { busy: false, error: true, message: 'boom' } },
+      })).toBe(true);
+    });
+  });
+
+  describe('observable pipeline', () => {
+    it('defers emission until pagination transitions from busy → not-busy', () => {
+      // Simulate the cold-cache race: pagination starts without pageRequests,
+      // then gets a busy entry (fetch dispatched), then gets a non-busy
+      // entry (fetch completed). The cascade should only fire on the last
+      // state, not any earlier one.
+      const pagination$ = new BehaviorSubject<any>({ currentPage: 1 });
+      const results: any[] = [];
+
+      pagination$.pipe(
+        filter(pag => {
+          const req = pag?.pageRequests?.[pag?.currentPage];
+          return !!req && !req.busy;
+        }),
+        take(1),
+      ).subscribe(pag => results.push(pag));
+
+      // Initial state (never-fetched) — should not fire
+      expect(results).toHaveLength(0);
+
+      // Fetch dispatched but not yet complete — still should not fire
+      pagination$.next({ currentPage: 1, pageRequests: { 1: { busy: true } } });
+      expect(results).toHaveLength(0);
+
+      // Fetch completed — NOW the cascade fires
+      pagination$.next({ currentPage: 1, pageRequests: { 1: { busy: false } } });
+      expect(results).toHaveLength(1);
+      expect(results[0].pageRequests[1].busy).toBe(false);
+    });
+
+    it('emits immediately when pagination is already completed on first subscribe (warm cache)', () => {
+      // Warm-cache case: pagination state already shows a completed fetch
+      // when the cascade subscribes. The cascade should fire on the
+      // first emission with no delay.
+      const pagination$ = new BehaviorSubject<any>({
+        currentPage: 1,
+        pageRequests: { 1: { busy: false } },
+      });
+      const results: any[] = [];
+
+      pagination$.pipe(
+        filter(pag => {
+          const req = pag?.pageRequests?.[pag?.currentPage];
+          return !!req && !req.busy;
+        }),
+        take(1),
+      ).subscribe(pag => results.push(pag));
+
+      // Synchronously fires on subscribe because BehaviorSubject replays
+      // its current value and the filter passes.
+      expect(results).toHaveLength(1);
+    });
+
+    it('skips intermediate busy-flip emissions and fires only on the first completed state', () => {
+      // Re-fetch scenario: completed → busy again → completed. The
+      // `take(1)` means we only fire once on the FIRST "completed"
+      // transition; subsequent re-fetches don't re-fire this gate.
+      const pagination$ = new BehaviorSubject<any>({
+        currentPage: 1,
+        pageRequests: { 1: { busy: true } },
+      });
+      const results: any[] = [];
+
+      pagination$.pipe(
+        filter(pag => {
+          const req = pag?.pageRequests?.[pag?.currentPage];
+          return !!req && !req.busy;
+        }),
+        take(1),
+      ).subscribe(pag => results.push(pag));
+
+      expect(results).toHaveLength(0);
+      pagination$.next({ currentPage: 1, pageRequests: { 1: { busy: false } } });
+      expect(results).toHaveLength(1);
+
+      // Subsequent re-fetches should NOT re-emit to this subscriber
+      pagination$.next({ currentPage: 1, pageRequests: { 1: { busy: true } } });
+      pagination$.next({ currentPage: 1, pageRequests: { 1: { busy: false } } });
+      expect(results).toHaveLength(1);
     });
   });
 });

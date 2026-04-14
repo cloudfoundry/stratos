@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy, signal, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, defer, Observable, of, Subscription } from 'rxjs';
 import { take,
   distinctUntilChanged,
   filter,
@@ -8,8 +8,8 @@ import { take,
   publishReplay,
   refCount,
   startWith,
+  switchMap,
   tap,
-  withLatestFrom,
 } from 'rxjs/operators';
 
 import { ListPaginationMultiFilterChange, naturalCompare, safeUnsubscribe, valueOrCommonFalsy } from '@stratosui/core';
@@ -437,7 +437,19 @@ export class CfOrgSpaceDataService implements OnDestroy {
         willFire: cfTapped || cf !== initialCf,
       })),
       filter(cf => cfTapped || cf !== initialCf),
-      withLatestFrom(this.org.list$),
+      // FWT-917 H2 fix: previously `withLatestFrom(this.org.list$)` grabbed
+      // org.list$ at the exact instant cf.select fired, which on a cold
+      // cache returned [] because the orgs paginated fetch was still in
+      // flight. The cascade then cleared org.select to undefined, which
+      // never recovered because cf.select doesn't re-fire when the fetch
+      // completes. Now we wait for the pagination state to show a
+      // completed (non-busy, attempted-at-least-once) request, then read
+      // a fresh org.list$ snapshot with real data.
+      switchMap(selectedCF => this.waitForOrgsReady$.pipe(
+        tap(() => this.debug.log('autoSelector:cf-cascade-ready', { selectedCF })),
+        switchMap(() => this.org.list$.pipe(take(1))),
+        map(orgs => [selectedCF, orgs] as const),
+      )),
       tap(([_selectedCF, orgs]) => {
         cfTapped = true;
         const willAutoPick = !!orgs.length &&
@@ -468,7 +480,15 @@ export class CfOrgSpaceDataService implements OnDestroy {
         willFire: orgTapped || org !== initialOrg,
       })),
       filter(org => orgTapped || org !== initialOrg),
-      withLatestFrom(this.space.list$),
+      // FWT-917 H2 fix: same pattern as the cf cascade. Spaces come back
+      // embedded in the orgs pagination (via includeRelations), so the
+      // same "wait for orgs fetch to complete" gate applies — the space
+      // list is only meaningful once the orgs fetch has finished.
+      switchMap(selectedOrg => this.waitForOrgsReady$.pipe(
+        tap(() => this.debug.log('autoSelector:org-cascade-ready', { selectedOrg })),
+        switchMap(() => this.space.list$.pipe(take(1))),
+        map(spaces => [selectedOrg, spaces] as const),
+      )),
       tap(([_selectedOrg, spaces]) => {
         orgTapped = true;
         const willAutoPick = !!spaces.length &&
@@ -488,6 +508,32 @@ export class CfOrgSpaceDataService implements OnDestroy {
     ).subscribe();
     this.subs.push(spaceResetSub);
   }
+
+  /**
+   * FWT-917: Emits once the orgs paginated fetch has transitioned into a
+   * "completed" state — i.e. the current pageRequest entry exists (so the
+   * fetch was actually attempted) AND is not currently busy. This is the
+   * gate the auto-selector cascades wait on before reading org/space lists,
+   * so they see real data instead of an empty array from a still-in-flight
+   * initial load.
+   *
+   * Subscribes to `allOrgs.entities$` as a side-effect to guarantee the
+   * fetch is triggered (a no-op join if the fetch is already in flight or
+   * completed). Without this trigger, the cascade could deadlock if no
+   * other consumer has subscribed yet.
+   */
+  private waitForOrgsReady$ = defer(() => {
+    // Trigger the underlying fetch by subscribing to entities$ — fire-and-
+    // forget because we only care about the side effect.
+    this.allOrgs.entities$.pipe(take(1)).subscribe();
+    return this.allOrgs.pagination$.pipe(
+      filter(pag => {
+        const req = pag?.pageRequests?.[pag?.currentPage];
+        return !!req && !req.busy;
+      }),
+      take(1),
+    );
+  });
 
   private selectSet(select: BehaviorSubject<string>, newValue: string) {
     if (select.getValue() !== newValue) {
