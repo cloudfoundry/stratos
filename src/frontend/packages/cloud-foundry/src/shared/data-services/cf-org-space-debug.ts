@@ -83,3 +83,25 @@ export function createCfOrgSpaceDebug(): CfOrgSpaceDebug {
   g.__cfOsDebug.instances.push(debug);
   return debug;
 }
+
+// Singleton used by callers that don't have their own CfOrgSpaceDebug
+// instance — e.g. CfOrgSpaceLabelService (no DI graph), the
+// getActiveRouteCfOrgSpace factory function (plain function), and any
+// other route/breadcrumb wiring point that needs to land events in the
+// same `window.__cfOsDebug` timeline as the per-component picker logs.
+//
+// In production the singleton is created via createCfOrgSpaceDebug
+// which short-circuits to a no-op. The shared instance has a stable
+// instance id of -1 so it's distinguishable from per-component services
+// in snapshots (which start at 1 and count up).
+let sharedDebug: CfOrgSpaceDebug | null = null;
+
+export function cfOsDebugLog(kind: string, data: unknown = null): void {
+  if (environment.production) {
+    return;
+  }
+  if (!sharedDebug) {
+    sharedDebug = createCfOrgSpaceDebug();
+  }
+  sharedDebug.log(kind, data);
+}

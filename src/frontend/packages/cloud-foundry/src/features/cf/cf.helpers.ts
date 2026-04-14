@@ -28,6 +28,7 @@ import { CFFeatureFlagTypes, IApp, ISpace } from '../../cf-api.types';
 import { CFAppState } from '../../cf-app-state';
 import { cfEntityFactory } from '../../cf-entity-factory';
 import { getCFEntityKey } from '../../cf-entity-helpers';
+import { cfOsDebugLog } from '../../shared/data-services/cf-org-space-debug';
 import { applicationEntityType } from '../../cf-entity-types';
 import { CFEntityConfig } from '../../cf-types';
 import { ListCfRoute } from '../../shared/components/list/list-types/cf-routes/cf-routes-data-source-base';
@@ -213,10 +214,21 @@ function hasRole(user: CfUser, guid: string, roleType: string): boolean {
 }
 
 export function getActiveRouteCfOrgSpace(activatedRoute: ActivatedRoute) {
-  return ({
+  const result = {
     cfGuid: getIdFromRoute(activatedRoute, 'endpointId'),
     orgGuid: getIdFromRoute(activatedRoute, 'orgId'),
-    spaceGuid: getIdFromRoute(activatedRoute, 'spaceId') });
+    spaceGuid: getIdFromRoute(activatedRoute, 'spaceId'),
+  };
+  // FWT-917 diagnostic: this factory is the entry point for every quota
+  // wizard, edit-org/space, and most CF-detail screens. If cfGuid/orgGuid/
+  // spaceGuid come back empty here, every downstream label/breadcrumb on
+  // that screen will be blank — that's the fingerprint for the route-wiring
+  // variant of H1 ("no cross-route handoff").
+  cfOsDebugLog('activeRoute:resolved', {
+    url: activatedRoute.snapshot?.url?.map(s => s.path).join('/') ?? null,
+    ...result,
+  });
+  return result;
 }
 
 export function getActiveRouteCfCell(activatedRoute: ActivatedRoute) {

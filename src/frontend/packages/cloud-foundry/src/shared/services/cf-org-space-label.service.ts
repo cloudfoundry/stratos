@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
-import { take, filter, map } from 'rxjs/operators';
+import { take, filter, map, tap } from 'rxjs/operators';
 
 import {
   APIResource,
@@ -15,6 +15,7 @@ import { CFAppState } from '../../cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../cf-entity-types';
 import { haveMultiConnectedCfs } from '../../features/cf/cf.helpers';
 import { selectCfEntity } from '../../store/selectors/api.selectors';
+import { cfOsDebugLog } from '../data-services/cf-org-space-debug';
 
 export class CfOrgSpaceLabelService {
 
@@ -34,14 +35,32 @@ export class CfOrgSpaceLabelService {
     private cfGuid?: string,
     private orgGuid?: string,
     private spaceGuid?: string) {
+    // FWT-917 diagnostic: log the GUIDs the caller passed in. If any are
+    // missing here, every breadcrumb / link rendered by this service will
+    // be empty regardless of store state — that's the H1 fingerprint for
+    // the breadcrumb path.
+    cfOsDebugLog('labelService:construct', { cfGuid, orgGuid, spaceGuid });
+
     this.multipleConnectedEndpoints$ = haveMultiConnectedCfs(this.store);
     // FIXME: hide STRATOS_ENDPOINT_TYPE from extensions - STRAT-154
     const endpointEntityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointEntityType);
 
-    this.cf$ = this.store.select<EndpointModel>(selectEntity(endpointEntityKey, this.cfGuid));
+    this.cf$ = this.store.select<EndpointModel>(selectEntity(endpointEntityKey, this.cfGuid)).pipe(
+      tap(cf => cfOsDebugLog('labelService:cf-emit', {
+        guid: this.cfGuid, found: !!cf, name: cf?.name ?? null,
+      })),
+    );
 
-    this.org$ = this.store.select<APIResource<IOrganization>>(selectCfEntity(organizationEntityType, this.orgGuid));
-    this.space$ = this.store.select<APIResource<ISpace>>(selectCfEntity(spaceEntityType, this.spaceGuid));
+    this.org$ = this.store.select<APIResource<IOrganization>>(selectCfEntity(organizationEntityType, this.orgGuid)).pipe(
+      tap(org => cfOsDebugLog('labelService:org-emit', {
+        guid: this.orgGuid, found: !!org, name: org?.entity?.name ?? null,
+      })),
+    );
+    this.space$ = this.store.select<APIResource<ISpace>>(selectCfEntity(spaceEntityType, this.spaceGuid)).pipe(
+      tap(space => cfOsDebugLog('labelService:space-emit', {
+        guid: this.spaceGuid, found: !!space, name: space?.entity?.name ?? null,
+      })),
+    );
   }
 
   getLabel(): Observable<string> {

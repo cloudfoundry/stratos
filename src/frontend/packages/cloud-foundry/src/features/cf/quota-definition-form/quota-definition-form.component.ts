@@ -16,6 +16,7 @@ import { endpointEntityType } from '@stratosui/store';
 import { IQuotaDefinition } from '../../../cf-api.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { createEntityRelationPaginationKey } from '../../../entity-relations/entity-relations.types';
+import { cfOsDebugLog } from '../../../shared/data-services/cf-org-space-debug';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 
@@ -83,9 +84,24 @@ export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
     const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
 
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
+    // FWT-917 diagnostic: confirm the form received a usable cfGuid via
+    // the route. If empty, the create/edit POST will hit the wrong CF or
+    // 404, and the form's "name already taken" validator can't run.
+    cfOsDebugLog('quotaForm:construct', {
+      cfGuid: this.cfGuid,
+      hasQuota: !!this.quota,
+    });
   }
 
   ngOnInit() {
+    // FWT-917 diagnostic: log the @Input quota on init (for edit flows).
+    // If hasQuota is false on an edit screen, the parent step component
+    // failed to thread the entity into the form.
+    cfOsDebugLog('quotaForm:init', {
+      cfGuid: this.cfGuid,
+      hasQuota: !!this.quota,
+      quotaName: this.quota?.name ?? null,
+    });
     this.setupForm();
     this.fetchQuotasDefinitions();
     // Mirror formGroup.valid into a signal. The template binding
