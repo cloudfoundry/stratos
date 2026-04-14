@@ -50,8 +50,9 @@
 
   <!-- Full-width sections below grid -->
   <div [ngClass]="{'create-endpoint__shown': showCACertField}" class="create-endpoint__advanced" spellcheck=false>
-    <span class="create-endpoint__cacert-title" style="color: var(--content-text);">Specify CA Certificate:</span>
-    <textarea rows="10" class="create-endpoint__cacert input" appInput formControlName="caCertField" name="caCertField"></textarea>
+    <span class="create-endpoint__cacert-title text-sm mb-2 block" style="color: var(--content-text);">Specify CA Certificate:</span>
+    <textarea rows="10" appInput formControlName="caCertField" name="caCertField"
+      class="w-full focus:outline-none min-h-[240px] resize-y font-mono text-sm border border-content-border rounded-md p-3 bg-content-bg focus:border-primary focus:ring-1 focus:ring-primary"></textarea>
   </div>
 
   <div [ngClass]="{'hide': !showAdvancedFields, 'show': showAdvancedFields}" class="create-endpoint__section">
