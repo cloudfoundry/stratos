@@ -120,6 +120,13 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   private destroyed$ = new Subject<void>();
   // Loading state for applications - used to track async app fetching
   private _appsLoading = signal<boolean>(false);
+  // toObservable() must run inside an injection context (constructor /
+  // field initializer / runInInjectionContext) — Angular 21 enforces this
+  // strictly. Calling toObservable() from onNext (an event handler) throws
+  // NG0203. Lift the conversion up here where field initializers execute
+  // during construction and have the injection context available, then
+  // reuse this single observable from onNext.
+  private appsLoading$ = toObservable(this._appsLoading);
 
   public cfGuid$: Observable<string>;
   public spaceGuid$ = this.cfDetails$.pipe(
@@ -250,7 +257,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
       return observableOf({ success: false });
     }
 
-    return toObservable(this._appsLoading).pipe(
+    return this.appsLoading$.pipe(
       filter(loading => !loading),
       delay(1),
       map(() => ({ success: true })),
