@@ -6,7 +6,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { getPreviousRoutingState, IRouterNavPayload, RouterNav, AppState } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
-import { take, catchError, defaultIfEmpty, map, switchMap } from 'rxjs/operators';
+import { take, catchError, defaultIfEmpty, finalize, map, switchMap } from 'rxjs/operators';
 
 import { BASE_REDIRECT_QUERY } from '../stepper.types';
 import { SteppersService } from '../steppers.service';
@@ -119,10 +119,35 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     if (this.currentIndex < this.steps.length) {
       const step = this.steps[this.currentIndex];
       step.busy = true;
-      const obs$ = step.onNext(this.currentIndex, step);
-      if (!(obs$ instanceof Observable)) {
+
+      // Defensive: step.onNext may throw synchronously (runtime error before
+      // it returns an observable). Without a try/catch, the throw escapes
+      // goNext, step.busy stays true, and the Next/Finish button is stuck
+      // as a spinner forever. Catch, surface via snackbar, reset busy.
+      let obs$: Observable<StepOnNextResult> | unknown;
+      try {
+        obs$ = step.onNext(this.currentIndex, step);
+      } catch (err) {
+        console.error('Stepper onNext threw synchronously:', err);
+        step.busy = false;
+        this.showNextButtonProgress = false;
+        this.snackBarRef = this.snackBar.open(
+          `An error occurred: ${(err as Error)?.message || err || 'Unknown error'}`,
+          'Dismiss',
+          { panelClass: 'stepper-snack-bar' }
+        );
         return;
       }
+
+      // Defensive: if onNext returns a non-Observable (legacy synchronous
+      // success pattern, or a Promise which we don't handle), reset busy
+      // before the early return. Previously this path left step.busy stuck
+      // at true even though navigation was effectively complete/no-op.
+      if (!(obs$ instanceof Observable)) {
+        step.busy = false;
+        return;
+      }
+
       this.showNextButtonProgress = this.nextButtonProgress;
       this.nextSub = obs$.pipe(
         take(1),
@@ -154,6 +179,15 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
             this.snackBarRef = this.snackBar.open(message, 'Dismiss', { panelClass: 'stepper-snack-bar' });
           }
           return observableOf(undefined);
+        }),
+        // Defensive: guarantee busy state is cleared on ANY teardown path —
+        // completion, error escaping catchError, or unsubscribe (e.g. if
+        // the user clicks Cancel or navigates away mid-flight while the
+        // observable is in flight). Without finalize, the spinner could
+        // remain visible after the user abandoned the step.
+        finalize(() => {
+          step.busy = false;
+          this.showNextButtonProgress = false;
         })
       ).subscribe();
     }
