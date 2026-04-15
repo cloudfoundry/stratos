@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, of } from 'rxjs';
-import { first, map, switchMap } from 'rxjs/operators';
+import { map, switchMap, take } from 'rxjs/operators';
 
 import { FileInputComponent } from '../../../../../core/src/shared/components/file-input/file-input.component';
 import { CustomIconComponent } from '../../../../../core/src/shared/components/custom-material/custom-material.component';
@@ -54,7 +54,7 @@ export class KubeConfigSelectionComponent {
     disconnect: () => { },
     trackBy: (index, row) => row.name,
     isTableLoading$: observableOf(false),
-    getRowState: (row: KubeConfigFileCluster, schemaKey: string): Observable<RowState> => {
+    getRowState: (row: KubeConfigFileCluster, _schemaKey: string): Observable<RowState> => {
       return row ? row._state.asObservable() : observableOf({});
     },
     selectAllIndeterminate: false,
@@ -65,7 +65,7 @@ export class KubeConfigSelectionComponent {
       this.dataSource.selectAllIndeterminate = false; // either all off or all on, cannot be indeterminate
 
       this.helper.clusters$.pipe(
-        first(),
+        take(1),
         switchMap(clusters => combineLatest(clusters.map(cluster => {
           if (!cluster._invalid) {
             cluster._selected = this.dataSource.selectAllChecked;
@@ -73,7 +73,7 @@ export class KubeConfigSelectionComponent {
           }
           return of(cluster);
         }))),
-        first(),
+        take(1),
       ).subscribe(clusters => {
         this.checkCanGoNext(clusters);
       });
@@ -155,7 +155,7 @@ export class KubeConfigSelectionComponent {
 
   // Save data for the next step to know the list of clusters to import
   onNext = () => this.helper.clusters$.pipe(
-    first(),
+    take(1),
     map(clusters => ({
       success: true,
       data: clusters
@@ -164,7 +164,7 @@ export class KubeConfigSelectionComponent {
 
   clustersParse(cluster: string) {
     this.snackbarService.hide();
-    this.helper.parse(cluster).pipe(first()).subscribe(errorString => {
+    this.helper.parse(cluster).pipe(take(1)).subscribe(errorString => {
       if (errorString) {
         this.snackbarService.show(`Failed to load Kube Config: ${errorString}`, 'Close');
       }
@@ -176,13 +176,13 @@ export class KubeConfigSelectionComponent {
       return;
     }
     // Handle back from review step (ensure newly registered endpoints are taken into account)
-    this.helper.updateAll().pipe(first()).subscribe(() => { });
+    this.helper.updateAll().pipe(take(1)).subscribe(() => { });
   };
 
   // Row changed event - update the next button and selection state
   clustersChanged() {
     this.helper.clusters$.pipe(
-      first()
+      take(1)
     ).subscribe(clusters => {
       this.checkCanGoNext(clusters);
 

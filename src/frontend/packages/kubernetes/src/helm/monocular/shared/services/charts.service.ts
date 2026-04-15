@@ -8,7 +8,6 @@ import { getMonocularEndpoint, stratosMonocularEndpointGuid } from '../../strato
 import { Chart } from '../models/chart';
 import { ChartVersion } from '../models/chart-version';
 import { RepoAttributes } from '../models/repo';
-import { ConfigService } from './config.service';
 
 
 
@@ -143,7 +142,7 @@ export class ChartsService {
   }
 
   // Get the URL for obtaining a Chart's schema
-  getChartSchemaURL(chartVersion: ChartVersion, name: string, repo: RepoAttributes): string | null {
+  getChartSchemaURL(chartVersion: ChartVersion, _name: string, _repo: RepoAttributes): string | null {
     // We have the schema URL, so we can fetch that directly
     return chartVersion.attributes.schema ? `${this.hostname}${chartVersion.attributes.schema}` : null;
   }

@@ -1,7 +1,7 @@
 import { defaultClientPaginationPageSize, LocalPaginationHelpers, PaginationEntityState } from '@stratosui/store';
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
-import { distinctUntilChanged, map, shareReplay, switchMap, tap } from 'rxjs/operators';
+import { distinctUntilChanged, map, shareReplay, tap } from 'rxjs/operators';
 
 import { DataFunction } from './list-data-source';
 import { splitCurrentPage } from './local-list-controller.helpers';
@@ -44,13 +44,14 @@ export class LocalListController<T = any> {
     cleanPage$: Observable<T[]>,
     cleanPagination$: Observable<PaginationEntityState>,
     dataFunctions?: DataFunction<any>[]) {
-    const fullPageObs$ = combineLatest(
+    return combineLatest([
       cleanPagination$,
       cleanPage$
-    ).pipe(
+    ]).pipe(
       map(([paginationEntity, entities]) => {
-        // `entities` can become out of sync with `paginationEntity.ids`. If either are empty just return empty,
-        // otherwise this leads to churn and result count flip flopping
+        if (LocalPaginationHelpers.isPaginationMaxed(paginationEntity)) {
+          return { paginationEntity, entities: [] };
+        }
         if (!entities || !entities.length || Object.keys(paginationEntity.ids).length === 0) {
           return { paginationEntity, entities: [] };
         }
@@ -63,13 +64,6 @@ export class LocalListController<T = any> {
         this.setResultCount(paginationEntity, entities);
       }),
       map(({ entities }) => entities)
-    );
-    return cleanPagination$.pipe(
-      map(pagination => LocalPaginationHelpers.isPaginationMaxed(pagination)),
-      distinctUntilChanged(),
-      switchMap(maxed => {
-        return maxed ? observableOf([]) : fullPageObs$;
-      })
     );
 
   }

@@ -227,12 +227,12 @@ export class HelmReleaseHelperService {
   }
 
   // tslint:disable-next-line:ban-types
-  private isContainerReady(state: ContainerStateCollection = {}): Boolean {
+  private isContainerReady(state: ContainerStateCollection = {}): boolean {
     if (state.running) {
       return true;
-    } else if (!!state.waiting) {
+    } else if (state.waiting) {
       return false;
-    } else if (!!state.terminated) {
+    } else if (state.terminated) {
       // Assume a failed state is not ready (covers completed init states), discard success state
       return state.terminated.exitCode === 0 ? null : false;
     }

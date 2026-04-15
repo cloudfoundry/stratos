@@ -80,7 +80,7 @@ function mergeParamsSections(
 function mergePaginationSections(
   currentPagination: PaginationEntityState,
   seedPagination: PaginationEntityState,
-  defaultState: PaginationEntityState
+  _defaultState: PaginationEntityState
 ) {
   const seedClientPagination = spreadClientPagination(seedPagination?.clientPagination);
   const currentClientPagination = spreadClientPagination(currentPagination?.clientPagination);

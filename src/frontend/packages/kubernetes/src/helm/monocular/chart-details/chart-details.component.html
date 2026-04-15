@@ -11,16 +11,16 @@
   }
   <app-loader [loading]="loading">
     @if (chart && currentVersion) {
-      <div class="chart-details__wrapper">
-        <app-entity-summary-title class="summary-title" [title]="chart.attributes.name" [subTitle]="chartSubTitle"
+      <div class="flex">
+        <app-entity-summary-title class="flex-[3] block" [title]="chart.attributes.name" [subTitle]="chartSubTitle"
           [subText]="chart.attributes.description" [imagePath]="iconUrl">
-          <div class="chart-details__content">
-            <article class="chart-details__content__docs">
+          <div class="w-full flex flex-col-reverse px-8 pb-8 break-words md:flex-row md:h-full">
+            <article class="md:overflow-auto md:pr-4 md:min-w-0 md:flex-[3]">
               <app-chart-details-readme [currentVersion]="currentVersion"></app-chart-details-readme>
             </article>
           </div>
         </app-entity-summary-title>
-        <aside class="chart-details__content__info">
+        <aside class="md:mr-12 md:overflow-auto">
           <app-chart-details-info [chart]="chart" [currentVersion]="currentVersion"></app-chart-details-info>
         </aside>
       </div>

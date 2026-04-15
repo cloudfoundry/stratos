@@ -64,18 +64,13 @@ func (c *GKEKubeAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec api.Toke
 func (c *GKEKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
 	log.Debug("FetchToken (GKE)")
 
-	// We should already have the refresh token in the body sent to us
-	req := ec.Request()
-
-	// Need to extract the parameters from the request body
-	defer req.Body.Close()
-	body, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		return nil, nil, err
+	body := ec.FormValue("gkeconfig")
+	if len(body) == 0 {
+		return nil, nil, errors.New("GKE configuration is required")
 	}
 
 	gkeInfo := &GKEConfig{}
-	err = json.Unmarshal(body, &gkeInfo)
+	err := json.Unmarshal([]byte(body), &gkeInfo)
 	if err != nil {
 		return nil, nil, err
 	}

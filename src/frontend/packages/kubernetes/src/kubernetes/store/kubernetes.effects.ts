@@ -6,7 +6,7 @@ import { ClearPaginationOfEntity, ClearPaginationOfType } from '@stratosui/store
 import { ApiRequestTypes } from '@stratosui/store';
 import { connectedEndpointsOfTypesSelector } from '@stratosui/store';
 import { of } from 'rxjs';
-import { catchError, first, flatMap, map, mergeMap, switchMap } from 'rxjs/operators';
+import { take, catchError, flatMap, map, mergeMap, switchMap } from 'rxjs/operators';
 
 import { environment } from '../../../../core/src/environments/environment';
 import { isJetstreamError } from '../../../../store/src/jetstream';
@@ -15,8 +15,7 @@ import { StartRequestAction, WrapperRequestActionFailed } from '../../../../stor
 import {
   KUBERNETES_ENDPOINT_TYPE,
   kubernetesDashboardEntityType,
-  kubernetesPodsEntityType,
-} from '../kubernetes-entity-factory';
+  kubernetesPodsEntityType } from '../kubernetes-entity-factory';
 import { KubernetesPodExpandedStatusHelper } from '../services/kubernetes-expanded-state';
 import {
   DELETE_KUBE_RESOURCE,
@@ -24,8 +23,7 @@ import {
   GET_KUBE_RESOURCES,
   GET_KUBE_RESOURCES_IN_NAMESPACE,
   GetKubernetesResources,
-  GetKubernetesResourcesInNamespace,
-} from './kube-resource.actions';
+  GetKubernetesResourcesInNamespace } from './kube-resource.actions';
 import {
   BasicKubeAPIResource,
   IKubeResourceEntityDefinition,
@@ -35,8 +33,7 @@ import {
   KubernetesNode,
   KubernetesPod,
   KubernetesStatefulSet,
-  KubeService,
-} from './kube.types';
+  KubeService } from './kube.types';
 import {
   CREATE_NAMESPACE,
   CreateKubernetesNamespace,
@@ -67,8 +64,7 @@ import {
   GetKubernetesServicesInNamespace,
   GetKubernetesStatefulSets,
   KubeAction,
-  KubePaginationAction,
-} from './kubernetes.actions';
+  KubePaginationAction } from './kubernetes.actions';
 
 export interface KubeDashboardContainer {
   name: string;
@@ -254,9 +250,7 @@ export class KubernetesEffects {
         kind: 'Namespace',
         apiVersion: 'v1',
         metadata: {
-          name: action.namespaceName,
-        },
-      }
+          name: action.namespaceName } }
     )
     )
   ));
@@ -365,7 +359,7 @@ export class KubernetesEffects {
     const getKubeIds = action.kubeGuid ?
       of([action.kubeGuid]) :
       this.store.select(connectedEndpointsOfTypesSelector(KUBERNETES_ENDPOINT_TYPE)).pipe(
-        first(),
+        take(1),
         map(endpoints => Object.values(endpoints).map((endpoint: any) => endpoint.guid))
       );
     let pKubeIds: string[] = [];
@@ -446,8 +440,7 @@ export class KubernetesEffects {
             url: error.url || url,
             eventCode: status,
             message,
-            error,
-          })
+            error })
         ];
       })
     );
@@ -565,7 +558,7 @@ export class KubernetesEffects {
     return 'Kubernetes API request error';
   }
 
-  private createKubeError(err: any): { status: string, message: string, } {
+  private createKubeError(err: any): { status: string, message: string } {
     const jetstreamError = isJetstreamError(err);
     if (jetstreamError) {
       // Wrapped error

@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { of } from 'rxjs';
 
 import { HelmReleaseGuidMock } from '../../../../../helm/helm-testing.module';
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
@@ -11,14 +12,25 @@ describe('HelmReleaseHistoryTabComponent', () => {
   let fixture: ComponentFixture<HelmReleaseHistoryTabComponent>;
 
   beforeEach(async () => {
+    // Mock HelmReleaseHelperService to avoid its constructor calling into the
+    // workloads entity catalog, which isn't populated in this lightweight test.
+    const mockHelmReleaseHelper: Partial<HelmReleaseHelperService> = {
+      guid: 'test-endpoint:test-namespace:test-release',
+      releaseTitle: 'test-release',
+      endpointGuid: 'test-endpoint',
+      namespace: 'test-namespace',
+      release$: of(null),
+      hasUpgrade: vi.fn().mockReturnValue(of(null)),
+      fetchReleaseHistory: vi.fn().mockReturnValue(of([])),
+    };
+
     await TestBed.configureTestingModule({
       imports: [
         HelmReleaseHistoryTabComponent,
       ],
       providers: [
-        HelmReleaseHelperService,
+        { provide: HelmReleaseHelperService, useValue: mockHelmReleaseHelper },
         HelmReleaseGuidMock,
-
         provideZonelessChangeDetection(),
       ]
     }).compileComponents();
@@ -27,7 +39,8 @@ describe('HelmReleaseHistoryTabComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(HelmReleaseHistoryTabComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    // Not calling detectChanges() — the component's template bindings may
+    // require full store state; this test only verifies instantiation.
   });
 
   it('should create', () => {

@@ -7,7 +7,6 @@ import { APP_GUID, CF_GUID } from '@stratosui/core';
 @Component({
   selector: 'app-autoscaler-base',
   templateUrl: './autoscaler-base.component.html',
-  styleUrls: ['./autoscaler-base.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     ApplicationService,

@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
+import { AppInputDirective, CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
-import { Component, Input, OnDestroy, computed, signal, ChangeDetectionStrategy, inject } from '@angular/core';
-import { ReactiveFormsModule, FormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { Component, Input, OnDestroy, signal, ChangeDetectionStrategy, inject } from '@angular/core';
+import { ReactiveFormsModule, FormsModule, Validators, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
 
@@ -23,19 +23,17 @@ import { StatefulIconComponent, safeUnsubscribe, urlValidationExpression, enviro
 import { AppNameUniqueDirective } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
 import { Store } from '@ngrx/store';
 import { combineLatest as obsCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
-import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
+import { take, combineLatest, filter, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 import { APIResource } from '@stratosui/store';
 
 import { IUserProvidedServiceInstanceData } from '../../../../actions/user-provided-service.actions';
 import { CFAppState } from '../../../../cf-app-state';
 import {
   serviceBindingEntityType,
-  userProvidedServiceInstanceEntityType,
-} from '../../../../cf-entity-types';
+  userProvidedServiceInstanceEntityType } from '../../../../cf-entity-types';
 import { createEntityRelationKey } from '../../../../entity-relations/entity-relations.types';
 import {
-  selectCreateServiceInstance,
-} from '../../../../store/selectors/create-service-instance.selectors';
+  selectCreateServiceInstance } from '../../../../store/selectors/create-service-instance.selectors';
 import { IUserProvidedServiceInstance } from '../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { AppNameUniqueChecking } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
@@ -54,6 +52,7 @@ const { proxyAPIVersion, cfAPIVersion } = environment;
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
+    AppInputDirective,
     CustomFormFieldComponent,
     MatLabelComponent,
     CustomSelectComponent,
@@ -81,11 +80,9 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       syslog_drain_url: new FormControl('', { validators: [Validators.pattern(urlValidationExpression)], nonNullable: true }),
       credentials: new FormControl('', { validators: isValidJsonValidator(), nonNullable: true }),
       route_service_url: new FormControl('', { validators: [Validators.pattern(urlValidationExpression)], nonNullable: true }),
-      tags: new FormControl<any[]>([], { nonNullable: true }),
-    });
+      tags: new FormControl<any[]>([], { nonNullable: true }) });
     this.bindExistingInstance = new FormGroup<BindExistingInstanceForm>({
-      serviceInstances: new FormControl('', { validators: [Validators.required], nonNullable: true }),
-    });
+      serviceInstances: new FormControl('', { validators: [Validators.required], nonNullable: true }) });
     this.initUpdate(serviceInstanceId, endpointId);
     this.setupValidate();
   }
@@ -94,7 +91,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   public allServiceInstanceNames!: string[];
   public subs: Subscription[] = [];
   public isUpdate: boolean;
-  public tags: { label: string, }[] = [];
+  public tags: { label: string }[] = [];
   public validate = signal(false);
   private subscriptions: Subscription[] = [];
 
@@ -194,7 +191,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   private serviceInstancesForApplication() {
     return this.store.select(selectCreateServiceInstance).pipe(
       filter(p => !!p && !!p.spaceGuid && !!p.cfGuid),
-      first(),
+      take(1),
       switchMap(p => this.upsService.getUserProvidedServices(
         p.cfGuid,
         p.spaceGuid,
@@ -222,7 +219,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
     if (this.isUpdate) {
       this.createEditServiceInstance.disable();
       this.upsService.getUserProvidedService(endpointId, serviceInstanceId).pipe(
-        first(),
+        take(1),
         map(entityInfo => entityInfo.entity)
       ).subscribe(entity => {
         this.createEditServiceInstance.enable();
@@ -326,8 +323,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
           }
           return {
             success: true,
-            redirect: true,
-          };
+            redirect: true };
         }
         return {
           success: false,

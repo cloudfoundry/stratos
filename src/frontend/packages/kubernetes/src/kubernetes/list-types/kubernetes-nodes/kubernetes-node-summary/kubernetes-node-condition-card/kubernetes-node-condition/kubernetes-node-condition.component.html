@@ -1,12 +1,12 @@
 @if (hasCondition$ | async) {
-  <div class="kube-node-condition" [ngStyle]="{'padding-top': paddingTop}">
-    <div class="kube-node-condition__title">
+  <div class="flex flex-row items-center justify-between mr-5 pt-5" [ngStyle]="{'padding-top': paddingTop}">
+    <div class="flex items-center justify-center">
       <span [class]="icons[condition][1]">{{ icons[condition][0] }}</span>
       <div>
-        <span class="kube-node-condition__title__span">{{ titles[condition] }}</span>
+        <span class="ml-2.5">{{ titles[condition] }}</span>
       </div>
     </div>
-    <app-boolean-indicator class="kube-node-condition__indicator" [subtle]="subtle" [inverse]="inverse"
+    <app-boolean-indicator class="min-w-[50px]" [subtle]="subtle" [inverse]="inverse"
     [isTrue]="condition$ | async" [type]="type"></app-boolean-indicator>
   </div>
 }

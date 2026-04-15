@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { take, map } from 'rxjs/operators';
 
 import { PageHeaderComponent } from '../../../../../../../../core/src/shared/components/page-header/page-header.component';
 import { LoadingPageComponent } from '../../../../../../../../core/src/shared/components/loading-page/loading-page.component';
@@ -17,7 +17,6 @@ import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 @Component({
   selector: 'app-cloud-foundry-cell-base',
   templateUrl: './cloud-foundry-cell-base.component.html',
-  styleUrls: ['./cloud-foundry-cell-base.component.scss'],
   providers: [
     getActiveRouteCfCellProvider,
     CloudFoundryCellService
@@ -82,7 +81,7 @@ export class CloudFoundryCellBaseComponent {
           ]
         }
       ])),
-      first()
+      take(1)
     );
 
     this.tabLinks.find(link => link.link === CloudFoundryCellBaseComponent.AppsLinks).hidden$ =

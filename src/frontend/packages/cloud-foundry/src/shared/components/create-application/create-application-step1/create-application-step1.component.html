@@ -1,29 +1,28 @@
 <b>{{ stepperText }}</b>
 <form #cfForm="ngForm" class="create-app-step-1 stepper-form">
   @if (!isMarketplaceMode) {
-    <div class="mb-4">
-      <label class="block text-sm font-medium mb-1" for="cf">Cloud Foundry *</label>
-      <app-select id="cf" #cfSelect="ngModel" [disabled]="(cfOrgSpaceService.cf.loading$ | async)"
+    <app-form-field>
+      <app-select id="cf" #cfSelect="ngModel" placeholder="Cloud Foundry" [autoSelectSingleOption]="false"
+        [disabled]="(cfOrgSpaceService.cf.loading$ | async) || isRedeploy"
         [ngModel]="cfOrgSpaceService.cf.select.getValue()"
-        (selectionChange)="cfOrgSpaceService.cf.select.next($event.value)" required name="cf" [disabled]="isRedeploy"
-        [appFocus]="(cfOrgSpaceService.cf.loading$ | async) === false"
-        class="block w-full border-b border-gray-300 dark:border-gray-600 pb-2">
+        (selectionChange)="onCfChange($event.value)" required name="cf"
+        [appFocus]="(cfOrgSpaceService.cf.loading$ | async) === false">
+        <app-option [value]="null">None</app-option>
         @for (cf of cfOrgSpaceService.cf.list$ | async; track cf) {
           <app-option [value]="cf.guid" [label]="cf.name">
             <span>{{ cf.name }}</span>
           </app-option>
         }
       </app-select>
-    </div>
+    </app-form-field>
   }
-  <div class="mb-4">
-    <label class="block text-sm font-medium mb-1" for="org">Organization *</label>
-    <app-select id="org" #orgSelect="ngModel"
+  <app-form-field>
+    <app-select id="org" #orgSelect="ngModel" placeholder="Organization" [autoSelectSingleOption]="false"
       [disabled]="!cfOrgSpaceService.cf.select.getValue() || (cfOrgSpaceService.org.loading$ | async) || isRedeploy"
       [ngModel]="cfOrgSpaceService.org.select.getValue()"
-      (selectionChange)="cfOrgSpaceService.org.select.next($event.value)" required name="org"
-      [appFocus]="isMarketplaceMode && !(!cfOrgSpaceService.cf.select.getValue() || (cfOrgSpaceService.org.loading$ | async) || isRedeploy)"
-      class="block w-full border-b border-gray-300 dark:border-gray-600 pb-2">
+      (selectionChange)="onOrgChange($event.value)" required name="org"
+      [appFocus]="isMarketplaceMode && !(!cfOrgSpaceService.cf.select.getValue() || (cfOrgSpaceService.org.loading$ | async) || isRedeploy)">
+      <app-option [value]="null">None</app-option>
       @for (org of cfOrgSpaceService.org.list$ | async; track org) {
         <app-option [value]="org.guid" [label]="org.name">
           <span>{{ org.name }}</span>
@@ -31,18 +30,15 @@
       }
     </app-select>
     @if ((hasOrgs$ | async) === false) {
-      <p class="text-sm text-red-600 dark:text-red-400 mt-1">
-        There are no organizations in this Cloud Foundry
-      </p>
+      <app-error>There are no organizations in this Cloud Foundry</app-error>
     }
-  </div>
-  <div class="mb-4">
-    <label class="block text-sm font-medium mb-1" for="space">Space *</label>
-    <app-select id="space" #spaceSelect="ngModel"
+  </app-form-field>
+  <app-form-field>
+    <app-select id="space" #spaceSelect="ngModel" placeholder="Space" [autoSelectSingleOption]="false"
       [disabled]="!cfOrgSpaceService.org.select.getValue() || (cfOrgSpaceService.space.loading$ | async) || isRedeploy"
       [ngModel]="cfOrgSpaceService.space.select.getValue()"
-      (selectionChange)="cfOrgSpaceService.space.select.next($event.value)" required name="space"
-      class="block w-full border-b border-gray-300 dark:border-gray-600 pb-2">
+      (selectionChange)="onSpaceChange($event.value)" required name="space">
+      <app-option [value]="null">None</app-option>
       @for (space of spaces$ | async; track space) {
         <app-option [value]="space.guid" [label]="space.name">
           <span>{{ space.name }}</span>
@@ -50,10 +46,8 @@
       }
     </app-select>
     @if ((hasSpaces$ | async) === false) {
-      <p class="text-sm text-red-600 dark:text-red-400 mt-1">
-        There are no spaces in this organization
-      </p>
+      <app-error>There are no spaces in this organization</app-error>
     }
-  </div>
+  </app-form-field>
   <p class="text-sm text-content-muted">Don't see your organization or space? Please make sure you have the relevant permissions.</p>
 </form>

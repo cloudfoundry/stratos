@@ -12,7 +12,7 @@ import { HELM_ENDPOINT_TYPE } from '../helm-entity-factory';
 @Component({
   selector: 'app-monocular-tab-base',
   templateUrl: './monocular-tab-base.component.html',
-  styleUrls: ['./monocular-tab-base.component.scss'],
+
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

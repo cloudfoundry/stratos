@@ -23,7 +23,9 @@
     } @else {
       <form [formGroup]="jsonForm">
         <app-form-field class="schema-form__raw">
-          <textarea appInput placeholder="JSON" class="min-h-[60px] max-h-[150px] resize-y" formControlName="json"></textarea>
+          <textarea appInput placeholder="JSON" rows="10"
+            class="w-full placeholder:!text-transparent focus:outline-none min-h-[240px] resize-y font-mono text-sm border border-content-border rounded-md p-3 bg-content-bg focus:border-primary focus:ring-1 focus:ring-primary"
+            formControlName="json"></textarea>
           @if (jsonForm.controls.json.hasError('notValidJson')) {
             <app-error>
               Not valid JSON. Please specify a valid JSON Object
@@ -36,7 +38,9 @@
 } @else {
   <form [formGroup]="jsonForm">
     <app-form-field class="schema-form__raw">
-      <textarea appInput placeholder="JSON" class="min-h-[60px] max-h-[150px] resize-y" formControlName="json"></textarea>
+      <textarea appInput placeholder="JSON" rows="10"
+        class="w-full placeholder:!text-transparent focus:outline-none min-h-[240px] resize-y font-mono text-sm border border-content-border rounded-md p-3 bg-content-bg focus:border-primary focus:ring-1 focus:ring-primary"
+        formControlName="json"></textarea>
       @if (jsonForm.controls.json.hasError('notValidJson')) {
         <app-error>
           Not valid JSON. Please specify a valid JSON Object

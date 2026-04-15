@@ -1,5 +1,7 @@
 import { Page, Locator } from '@playwright/test';
 import { BasePage } from '../base.page';
+import { ListComponent } from '../../components';
+import { SideNavigation } from '../side-nav.page';
 
 /**
  * Endpoint Metadata Interface
@@ -29,6 +31,11 @@ export class EndpointsPage extends BasePage {
   private readonly tableRows: Locator;
   private readonly cardElements: Locator;
 
+  public readonly list: ListComponent;
+  public readonly sideNav: SideNavigation;
+  public readonly header: { hasIconButton: (icon: string) => Promise<boolean> };
+  public readonly cards: EndpointsPage;  // Self-reference for card access methods
+
   constructor(page: Page) {
     super(page);
 
@@ -39,6 +46,32 @@ export class EndpointsPage extends BasePage {
     this.listComponent = page.locator('app-list');
     this.tableRows = page.locator('app-table tbody tr');
     this.cardElements = page.locator('app-card');
+
+    this.list = new ListComponent(page);
+    this.sideNav = new SideNavigation(page);
+    this.cards = this;
+    this.header = {
+      hasIconButton: async (icon: string) => {
+        const btn = page.locator(`app-page-header button[aria-label="${icon}"], app-page-header button mat-icon`).filter({ hasText: icon });
+        return await btn.isVisible().catch(() => false);
+      }
+    };
+  }
+
+  /**
+   * Check if currently on the endpoints page
+   */
+  async isActivePage(): Promise<boolean> {
+    await this.page.waitForURL(/\/endpoints/, { timeout: 5000 }).catch(() => {});
+    return this.page.url().includes('/endpoints');
+  }
+
+  /**
+   * Wait for endpoints page to be loaded
+   */
+  async waitForPage(): Promise<void> {
+    await this.page.waitForURL(/\/endpoints/, { timeout: 10000 }).catch(() => {});
+    await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
   }
 
   /**

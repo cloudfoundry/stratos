@@ -23,7 +23,6 @@ import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 @Component({
   selector: 'app-service-broker-card',
   templateUrl: './service-broker-card.component.html',
-  styleUrls: ['./service-broker-card.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

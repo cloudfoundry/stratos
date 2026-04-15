@@ -30,7 +30,6 @@ import { FetchKubernetesMetricsAction } from '../store/kubernetes.actions';
 @Component({
   selector: 'app-pod-metrics',
   templateUrl: './pod-metrics.component.html',
-  styleUrls: ['./pod-metrics.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
@@ -151,7 +150,7 @@ export class PodMetricsComponent {
 
         // check if this is being invoked from the node path
         const nodeName = getIdFromRoute(this.activatedRoute, 'nodeName');
-        if (!!nodeName) {
+        if (nodeName) {
           return [{
             breadcrumbs: [
               { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}/nodes` },
@@ -160,7 +159,7 @@ export class PodMetricsComponent {
           }];
         }
         // check if this is being invoked from the namespace path
-        if (!!this.namespaceName) {
+        if (this.namespaceName) {
           return [{
             breadcrumbs: [
               { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}/namespaces` },
@@ -170,7 +169,7 @@ export class PodMetricsComponent {
         }
         // Finally, check if this is being invoked from the helm-release path
         const releaseName = getIdFromRoute(this.activatedRoute, 'releaseName');
-        if (!!releaseName) {
+        if (releaseName) {
           return [{
             breadcrumbs: [
               { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}/apps` },

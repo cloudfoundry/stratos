@@ -3,7 +3,6 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { UsageGaugeComponent } from './usage-gauge.component';
-import { PercentagePipe } from '../../pipes/percentage.pipe';
 import { CoreModule } from '../../../core/core.module';
 import { UtilsService } from '../../../core/utils.service';
 

@@ -1,9 +1,9 @@
 import { Injector, signal, WritableSignal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable, of as observableOf, Subject, Subscription } from 'rxjs';
+import { Observable, of as observableOf, Subject, Subscription } from 'rxjs';
 import websocketConnect from 'rxjs-websockets';
-import { catchError, combineLatest, filter, first, map, mergeMap, share, switchMap, tap } from 'rxjs/operators';
+import { take, catchError, combineLatest, filter, map, mergeMap, share, switchMap, tap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
@@ -14,8 +14,7 @@ import {
   DeployApplicationSource,
   DeployApplicationState,
   OverrideAppDetails,
-  SocketEventTypes,
-} from '../../../../../cloud-foundry/src/store/types/deploy-application.types';
+  SocketEventTypes } from '../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { environment } from '../../../../../core/src/environments/environment.prod';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { FileScannerInfo } from './deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
@@ -23,9 +22,15 @@ import { DEPLOY_TYPES_IDS } from './deploy-application-steps.types';
 
 // Helper function to create a signal wrapper compatible with BehaviorSubject API
 // The wrapper provides BehaviorSubject-like API (.next, .getValue, .asObservable)
-// while being backed by a Signal for fine-grained reactivity
+// while being backed by a Signal for fine-grained reactivity.
+//
+// `equal: () => false` makes every set() emit, restoring BehaviorSubject's
+// "always notify" semantics. The deployer code mutates state objects in place
+// (e.g. fileTransferStatus.filesSent++) and re-emits the same reference;
+// without this, the default Object.is dedupe silently drops every update
+// after the first and the upload progress UI freezes.
 function createSignalWrapper<T>(initialValue: T, injector: Injector) {
-  const _signal = signal<T>(initialValue);
+  const _signal = signal<T>(initialValue, { equal: () => false });
   // Create the observable once during initialization, outside of any reactive context
   // This prevents NG0602 errors when asObservable() is called from reactive contexts
   const _observable = toObservable(_signal, { injector });
@@ -41,8 +46,7 @@ function createSignalWrapper<T>(initialValue: T, injector: Injector) {
       // BehaviorSubject compatibility methods
       next: (value: T) => _signal.set(value),
       getValue: () => _signal(),
-      asObservable: () => _observable,
-    }
+      asObservable: () => _observable }
   );
   return wrapper as WritableSignal<T> & {
     next: (value: T) => void;
@@ -76,6 +80,7 @@ interface GitSCMSourceInfo extends DeploySource {
   commit: string;
   scm: string;
   endpointGuid: string;
+  accessToken?: string;
 }
 
 // Structure used to provide metadata about the Git Url source
@@ -200,7 +205,7 @@ export class DeployApplicationDeployer {
         const spaceSubscription = this.store.select(selectCfEntity(spaceEntityType, appDetails.cloudFoundryDetails.space));
         return observableOf(appDetails).pipe(combineLatest(orgSubscription, spaceSubscription));
       }),
-      first(),
+      take(1),
       tap(([appDetail, org, space]) => {
         this.cfGuid = appDetail.cloudFoundryDetails.cloudFoundry;
         this.orgGuid = appDetail.cloudFoundryDetails.org;
@@ -219,7 +224,7 @@ export class DeployApplicationDeployer {
         const buffer = websocketConnect(streamUrl)
           .pipe(
             switchMap((get) => get(this.inputStream)),
-            catchError((e: any): any[] => {
+            catchError((_e: any): any[] => {
               return [];
             }),
             filter(l => !!l),
@@ -296,7 +301,8 @@ export class DeployApplicationDeployer {
       commit: appSource.gitDetails.commit,
       url: appSource.gitDetails.url,
       scm: appSource.type.id,
-      endpointGuid: appSource.gitDetails.endpointGuid
+      endpointGuid: appSource.gitDetails.endpointGuid,
+      accessToken: appSource.gitDetails.accessToken,
     };
 
     const msg = {

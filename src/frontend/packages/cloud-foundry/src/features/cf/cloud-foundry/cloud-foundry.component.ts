@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { take, map } from 'rxjs/operators';
 
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
@@ -18,7 +18,6 @@ import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpo
 @Component({
   selector: 'app-cloud-foundry',
   templateUrl: './cloud-foundry.component.html',
-  styleUrls: ['./cloud-foundry.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
@@ -52,7 +51,7 @@ export class CloudFoundryComponent {
         }
         return connectedEndpoints.length;
       }),
-      first()
+      take(1)
     );
   }
 }

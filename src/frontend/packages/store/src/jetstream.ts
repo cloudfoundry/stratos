@@ -68,11 +68,9 @@ export function hasJetStreamError(pages: Partial<JetStreamErrorResponse>[]): Jet
 }
 
 export function isJetstreamError(err: any): JetStreamErrorResponse {
-  return !!(
-    err &&
+  return err &&
     err.error &&
     err.error.status &&
     err.error.statusCode &&
-    'errorResponse' in err
-  ) ? err as JetStreamErrorResponse : null;
+    'errorResponse' in err ? err as JetStreamErrorResponse : null;
 }

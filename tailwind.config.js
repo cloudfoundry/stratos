@@ -167,6 +167,16 @@ module.exports = {
           bg: 'var(--login-bg)',
           card: 'var(--login-card-bg)',
         },
+
+        // Form input semantic tokens
+        'input': {
+          bg: 'var(--input-bg)',
+          text: 'var(--input-text)',
+          border: 'var(--input-border)',
+          placeholder: 'var(--input-placeholder)',
+          'focus-border': 'var(--input-focus-border)',
+          'disabled-bg': 'var(--input-disabled-bg)',
+        },
       },
 
       // ========================================
@@ -521,7 +531,7 @@ module.exports = {
     },
   },
   plugins: [
-    require('@tailwindcss/forms'),
+    require('@tailwindcss/forms')({ strategy: 'class' }),
     require('@tailwindcss/typography'),
   ],
 }

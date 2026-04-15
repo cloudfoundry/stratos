@@ -8,7 +8,7 @@ import {
   ConfirmationDialogService
 } from '@stratosui/core';
 import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
-import { EntityCatalogHelper, EntityCatalogHelpers, EntityMonitorFactory, PaginationMonitorFactory, EntityServiceFactory, APIResource } from '@stratosui/store';
+import { EntityCatalogHelper, EntityCatalogHelpers, PaginationMonitorFactory, APIResource } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS, createBasicStoreModule } from '@stratosui/store/testing';
 import { ApplicationServiceMock, CloudFoundryTestingModule, CF_BASE_TEST_PROVIDERS } from "@test-framework/cf";
 import { IServiceInstance } from '../../../../../../cf-api-svc.types';

@@ -4,7 +4,7 @@ import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { GitSCMService, GitSCMType } from '@stratosui/git';
 import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
-import { filter, first, map, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
+import { take, filter, map, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import {
   EndpointsService,
@@ -103,7 +103,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
           space
         );
       }),
-      first()
+      take(1)
     );
 
     const appDoesNotHaveEnvVars$ = this.applicationService.appSpace$.pipe(

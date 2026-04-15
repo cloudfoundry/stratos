@@ -1,7 +1,7 @@
 import { Injectable, NgZone, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
-import { filter, first, map, startWith, take, tap } from 'rxjs/operators';
+import { filter, map, startWith, take, tap } from 'rxjs/operators';
 
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { AppState } from '../../../../../../store/src/app-state';

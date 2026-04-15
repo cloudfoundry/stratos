@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ComponentRef, OnDestroy, OnInit, ViewChild, ViewContainerRef, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ComponentRef, Input, OnDestroy, OnInit, ViewChild, ViewContainerRef, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { entityCatalog } from '@stratosui/store';
 
@@ -13,7 +13,6 @@ import { CreateEndpointConnectComponent } from './create-endpoint-connect/create
 @Component({
   selector: 'app-create-endpoint',
   templateUrl: './create-endpoint.component.html',
-  styleUrls: ['./create-endpoint.component.scss'],
   standalone: true,
   imports: [
     CommonModule,
@@ -26,6 +25,13 @@ import { CreateEndpointConnectComponent } from './create-endpoint-connect/create
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CreateEndpointComponent implements OnInit, OnDestroy {
+
+  // When rendered inside the endpoint register modal, hide the nested
+  // <app-page-header>. Two nested page-headers clobber the TabNavService
+  // pageHeader signal — the inner one's ngOnDestroy on modal close clears
+  // the signal and the outer (endpoints-page) header disappears until a
+  // hard reload.
+  @Input() hideHeader = false;
 
   showConnectStep: boolean;
 

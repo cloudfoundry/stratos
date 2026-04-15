@@ -5,7 +5,6 @@ import { formatCPUTime } from '../../../kubernetes-metrics.helpers';
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-node-simple-metric',
   templateUrl: './kubernetes-node-simple-metric.component.html',
-  styleUrls: ['./kubernetes-node-simple-metric.component.scss'],
   standalone: true
 })
 export class KubernetesNodeSimpleMetricComponent {
@@ -23,9 +22,10 @@ export class KubernetesNodeSimpleMetricComponent {
     switch (this.unit) {
       case 'secs':
         return formatCPUTime(this.value);
-      default:
+      default: {
         const unit = this.unit || '';
         return `${this.value} ${unit}`;
+      }
     }
   }
 }

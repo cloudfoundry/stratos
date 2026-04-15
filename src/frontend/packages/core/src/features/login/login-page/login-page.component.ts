@@ -296,7 +296,7 @@ export class LoginPageComponent implements OnInit {
 
       // Success! Clear attempts since we successfully redirected
       this.clearRedirectAttempts();
-    } catch (error) {
+    } catch (_error) {
       // Hard redirect as fallback
       const queryString = Object.keys(queryParams).length > 0
         ? '?' + Object.entries(queryParams).map(([k, v]) => `${k}=${encodeURIComponent(v as string)}`).join('&')

@@ -1,7 +1,8 @@
-import { Compiler, Injector } from '@angular/core';
+
+
 import { Action, Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { take, map } from 'rxjs/operators';
 
 import { BaseEndpointAuth, urlValidationExpression } from '@stratosui/core';
 import {
@@ -265,12 +266,7 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
     logoUrl: '/core/assets/endpoint-icons/cloudfoundry.png',
     authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.SSO],
     homeCard: {
-      component: (compiler: Compiler, injector: Injector) => import('./features/home/cfhome-card/cfhome-card.module').then(m => {
-        return compiler.compileModuleAndAllComponentsAsync(m.CFHomeCardModule).then(cm => {
-          const mod = cm.ngModuleFactory.create(injector);
-          return mod.instance.createHomeCard(mod.componentFactoryResolver);
-        });
-      }),
+      component: () => import('./features/home/cfhome-card/cfhome-card.component').then(m => m.CFHomeCardComponent),
       shortcuts: cfShortcuts,
       fullView: false,
       columnSpan: 2,
@@ -342,7 +338,7 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
     },
     entitiesFetchHandler: (store: Store<GeneralEntityAppState>, actions: PaginatedAction[]) => () => {
       combineLatest(actions.map(action => safePopulatePaginationFromParent(store, action))).pipe(
-        first(),
+        take(1),
       ).subscribe(newActions => newActions?.forEach(newAction => {
         if (newAction) {
           store.dispatch(newAction);
@@ -465,8 +461,8 @@ function generateCFAppEnvVarEntity(endpointDefinition: StratosEndpointExtensionD
     paginationConfig: {
       getEntitiesFromResponse: (response) => response,
       getTotalPages: (responses: JetstreamResponse<CFResponse>) => Object.values(responses).length,
-      getTotalEntities: (responses: JetstreamResponse<CFResponse>) => 1,
-      getPaginationParameters: (page: number) => ({ page: '1' }),
+      getTotalEntities: (_responses: JetstreamResponse<CFResponse>) => 1,
+      getPaginationParameters: (_page: number) => ({ page: '1' }),
       canIgnoreMaxedState: () => of(false),
       maxedStateStartAt: () => of(null),
     },
@@ -1040,7 +1036,7 @@ function generateFeatureFlagEntity(endpointDefinition: StratosEndpointExtensionD
       getEntitiesFromResponse: (response) => {
         return response;
       },
-      getTotalPages: (responses: JetstreamResponse) => 1,
+      getTotalPages: (_responses: JetstreamResponse) => 1,
       getTotalEntities: (responses: JetstreamResponse) => responses.length,
       getPaginationParameters: (page: number) => ({ page: page + '' }),
       canIgnoreMaxedState: () => of(false),

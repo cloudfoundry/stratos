@@ -1,22 +1,20 @@
 /* ============================================================================
    Custom Form Field Component - Tailwind-based Material Replacement
 
-   Phase 4: Complex Form Components
+   Most styling is in the template as Tailwind utilities. This file keeps
+   only the rules that can't be expressed purely in template classes:
+   - Parent-state-driven styling of the wrapper divs (prefix/suffix/
+     underline/ripple) that have to react to focused/valid/invalid
+     classes on the host .custom-form-field element
+   - Appearance variants (fill, outline, legacy)
+   - Responsive / print / reduced-motion / high-contrast overrides
 
-   Features:
-   - Full Tailwind CSS styling with theme CSS variable integration
-   - Dark/light mode support using CSS variables
-   - Floating label behavior with smooth animations
-   - Form validation error states with visual feedback
-   - Prefix/suffix support
-   - WCAG 2.1 AA accessibility compliance
-   - Keyboard navigation and screen reader support
-   - Smooth animations with reduced-motion support
-   - Four appearance variants: standard, fill, outline, legacy
+   Dead rules that targeted projected <input>/<textarea>/<select> content
+   have been removed — Angular ViewEncapsulation rewrites them with
+   _ngcontent attributes that never match the projected elements, so they
+   had no effect. Consumer templates now apply Tailwind classes directly
+   to their own inputs (w-full, placeholder:!text-transparent, etc.).
    ============================================================================ */
-
-// @tailwind components;
-// @tailwind utilities;
 
 /* ============================================================================
    Base Form Field Structure
@@ -28,91 +26,7 @@
 
   &.disabled {
     @apply opacity-60 cursor-not-allowed pointer-events-none;
-
-    .form-field-infix input,
-    .form-field-infix textarea,
-    .form-field-infix select {
-      background-color: var(--input-disabled-bg);
-      color: var(--text-muted);
-    }
   }
-}
-
-/* ============================================================================
-   Input Infix and Base Input Styling
-   ============================================================================ */
-
-.form-field-infix input,
-.form-field-infix textarea,
-.form-field-infix select {
-  @apply border-0 bg-transparent p-0 m-0 w-full max-w-full;
-  @apply align-bottom text-inherit box-content outline-none;
-  @apply transition-colors duration-200;
-  font: inherit;
-
-  /* Use theme CSS variables for colors */
-  background-color: var(--input-bg);
-  color: var(--input-text);
-
-  /* Hide placeholder by default (floating label shows instead) */
-  &::placeholder {
-    @apply text-transparent transition-colors duration-200;
-  }
-
-  /* Show placeholder when focused */
-  &:focus::placeholder {
-    color: var(--input-placeholder);
-  }
-
-  /* Disabled state */
-  &:disabled {
-    @apply cursor-not-allowed opacity-60;
-    background-color: var(--input-disabled-bg);
-  }
-}
-
-/* ============================================================================
-   Floating Label Styling
-   ============================================================================ */
-
-.form-field-label {
-  /* Position and transition handled by Tailwind classes in HTML */
-  color: var(--input-placeholder);
-
-  /* Floating state - smaller and positioned above */
-  &.floating {
-    transform: translateY(-1.34375em) scale(0.75);
-    @apply text-xs font-medium;
-    color: var(--color-primary);
-  }
-
-  /* Dark mode adjustments */
-  .dark-theme & {
-    color: var(--input-placeholder);
-
-    &.floating {
-      color: var(--color-primary);
-    }
-  }
-}
-
-/* Focus state label color */
-.custom-form-field.focused .form-field-label.floating {
-  color: var(--input-focus-border);
-}
-
-/* Error state label color */
-.custom-form-field.invalid .form-field-label {
-  color: var(--color-danger);
-
-  &.floating {
-    color: var(--color-danger);
-  }
-}
-
-/* Success state label color */
-.custom-form-field.valid .form-field-label.floating {
-  color: var(--color-success);
 }
 
 /* ============================================================================
@@ -165,18 +79,10 @@
 
 .error-icon {
   color: var(--color-danger);
-
-  .dark-theme & {
-    color: var(--color-danger);
-  }
 }
 
 .success-icon {
   color: var(--color-success);
-
-  .dark-theme & {
-    color: var(--color-success);
-  }
 }
 
 /* ============================================================================
@@ -196,10 +102,6 @@
 
   .custom-form-field.valid & {
     background-color: var(--color-success);
-  }
-
-  .dark-theme & {
-    background-color: var(--input-border);
   }
 }
 
@@ -230,10 +132,6 @@
 
 .form-field-error {
   color: var(--color-danger);
-
-  .dark-theme & {
-    color: var(--color-danger);
-  }
 }
 
 .form-field-hint {
@@ -248,14 +146,8 @@
    Form Field Container Base Styles
    ============================================================================ */
 
-.form-field-wrapper {
-  background-color: transparent;
-}
-
-.form-field-flex {
-  background-color: transparent;
-}
-
+.form-field-wrapper,
+.form-field-flex,
 .form-field-infix {
   background-color: transparent;
 }
@@ -329,21 +221,12 @@
     border-color: var(--input-border);
     @apply opacity-60;
   }
-
-  /* Dark mode outline adjustments */
-  .dark-theme & .form-field-flex {
-    border-color: var(--input-border);
-  }
 }
 
 /* Legacy Appearance */
 .appearance-legacy {
   .form-field-infix {
     padding: 0.4375em 0 !important;
-  }
-
-  .form-field-label {
-    top: 0.4375em !important;
   }
 }
 
@@ -389,17 +272,8 @@
    Accessibility Enhancements
    ============================================================================ */
 
-/* Focus visible for keyboard navigation */
-.form-field-infix input:focus-visible,
-.form-field-infix textarea:focus-visible,
-.form-field-infix select:focus-visible {
-  @apply outline-none ring-2 ring-offset-2 rounded;
-  --tw-ring-color: var(--input-focus-border);
-}
-
 /* High contrast mode support */
 @media (prefers-contrast: high) {
-  .form-field-label,
   .form-field-hint,
   .form-field-error {
     @apply font-semibold;
@@ -420,17 +294,13 @@
 
 /* Reduced motion support (WCAG AAA) */
 @media (prefers-reduced-motion: reduce) {
-  .form-field-label,
   .form-field-ripple,
   .form-field-flex,
   .form-field-prefix,
   .form-field-suffix,
   .form-field-underline,
   .error-icon,
-  .success-icon,
-  .form-field-infix input,
-  .form-field-infix textarea,
-  .form-field-infix select {
+  .success-icon {
     @apply transition-none;
     animation: none !important;
   }
@@ -444,33 +314,6 @@
       opacity: 1;
       transform: translateY(0);
     }
-  }
-}
-
-/* ============================================================================
-   Dark Theme Specific Enhancements
-   ============================================================================ */
-
-.dark-theme {
-  /* Enhanced focus states for dark mode */
-  .custom-form-field.focused .form-field-infix input,
-  .custom-form-field.focused .form-field-infix textarea,
-  .custom-form-field.focused .form-field-infix select {
-    background-color: color-mix(in srgb, var(--input-bg) 90%, var(--input-focus-border) 10%);
-  }
-
-  /* Enhanced error states for dark mode */
-  .custom-form-field.invalid .form-field-infix input,
-  .custom-form-field.invalid .form-field-infix textarea,
-  .custom-form-field.invalid .form-field-infix select {
-    background-color: color-mix(in srgb, var(--input-bg) 95%, var(--color-danger) 5%);
-  }
-
-  /* Enhanced success states for dark mode */
-  .custom-form-field.valid .form-field-infix input,
-  .custom-form-field.valid .form-field-infix textarea,
-  .custom-form-field.valid .form-field-infix select {
-    background-color: color-mix(in srgb, var(--input-bg) 95%, var(--color-success) 5%);
   }
 }
 
@@ -498,25 +341,12 @@
     min-width: auto !important;
     background-color: transparent !important;
 
-    /* Ensure inputs still respect theme variables in compact mode */
-    input,
-    textarea,
-    select {
-      background-color: var(--input-bg);
-      color: var(--input-text);
-      border-color: var(--input-border);
-    }
-
     app-select {
       display: block;
       background-color: var(--input-bg) !important;
       border: none !important;
       border-radius: 0.375rem;
     }
-  }
-
-  .form-field-label {
-    @apply hidden;
   }
 
   .form-field-subscript-wrapper {
@@ -535,10 +365,6 @@
 @media (max-width: 640px) {
   .form-field-infix {
     min-width: 120px !important;
-  }
-
-  .form-field-label {
-    @apply text-sm;
   }
 
   .form-field-hint,
@@ -562,17 +388,6 @@
     .error-icon,
     .success-icon {
       @apply hidden;
-    }
-
-    .form-field-label {
-      @apply text-xs;
-      transform: translateY(-1.34375em) scale(0.75);
-    }
-
-    .form-field-infix input,
-    .form-field-infix textarea,
-    .form-field-infix select {
-      border-bottom: 1px solid #000;
     }
   }
 }

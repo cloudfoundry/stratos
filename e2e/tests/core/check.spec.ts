@@ -11,8 +11,8 @@ import { SSOLoginPage } from '../../pages/sso-login.page';
  */
 test.describe('Check Availability of System', () => {
 
-  test('should reach log in page', async ({ page }) => {
-    const loginPage = new LoginPage(page);
+  test('should reach log in page', async ({ unauthenticatedPage }) => {
+    const loginPage = new LoginPage(unauthenticatedPage);
     await loginPage.navigateTo();
 
     // Verify we're on the login page
@@ -22,12 +22,12 @@ test.describe('Check Availability of System', () => {
     await expect(loginPage.loginButton()).toBeVisible();
   });
 
-  test('should be able to login', async ({ page, secrets }) => {
-    const loginPage = new LoginPage(page);
+  test('should be able to login', async ({ unauthenticatedPage, secrets }) => {
+    const loginPage = new LoginPage(unauthenticatedPage);
     await loginPage.navigateTo();
 
     // Detect login type: SSO has a submit button but no username input
-    const hasUsernameInput = await page.locator('input[name="username"]').isVisible({ timeout: 2000 }).catch(() => false);
+    const hasUsernameInput = await unauthenticatedPage.locator('input[name="username"]').isVisible({ timeout: 2000 }).catch(() => false);
 
     if (hasUsernameInput) {
       // Local login flow
@@ -39,7 +39,7 @@ test.describe('Check Availability of System', () => {
       await loginPage.clickLogin();
     } else {
       // SSO login flow
-      const ssoPage = new SSOLoginPage(page);
+      const ssoPage = new SSOLoginPage(unauthenticatedPage);
       await ssoPage.login(
         secrets.console.admin.username,
         secrets.console.admin.password

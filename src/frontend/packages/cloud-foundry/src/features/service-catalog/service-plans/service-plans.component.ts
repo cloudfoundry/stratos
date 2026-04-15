@@ -7,7 +7,6 @@ import { ServicePlansListConfigService } from '../../../shared/components/list/l
 @Component({
   selector: 'app-service-plans',
   templateUrl: './service-plans.component.html',
-  styleUrls: ['./service-plans.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
-import { filter, first, tap } from 'rxjs/operators';
+import { take, filter, tap } from 'rxjs/operators';
 
 import { PageHeaderComponent, StepComponent, SteppersComponent } from '@stratosui/core';
 import { CFAppState } from '@stratosui/cloud-foundry';
@@ -17,7 +17,6 @@ import { CreateApplicationStep3Component } from './create-application-step3/crea
 @Component({
   selector: 'app-create-application',
   templateUrl: './create-application.component.html',
-  styleUrls: ['./create-application.component.scss'],
   providers: [CfOrgSpaceDataService],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
@@ -44,7 +43,7 @@ export class CreateApplicationComponent implements OnInit, OnDestroy {
     // FIXME: This has been broken for a while (setting cf will clear org + space after org and space has been set)
     // With new tools (set initial/enable auto) this should be easier to fix
     const appWallPaginationState = this.store.select(selectCfPaginationState(applicationEntityType, CfAppsDataSource.paginationKey));
-    this.paginationStateSub = appWallPaginationState.pipe(filter(pag => !!pag), first(), tap(pag => {
+    this.paginationStateSub = appWallPaginationState.pipe(filter(pag => !!pag), take(1), tap(pag => {
       const { cf, org, space } = pag.clientPagination.filter.items;
       if (cf) {
         this.cfOrgSpaceService.cf.select.next(cf);

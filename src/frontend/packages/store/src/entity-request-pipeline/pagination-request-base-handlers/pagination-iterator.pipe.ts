@@ -1,7 +1,7 @@
 import { HttpRequest } from '@angular/common/http';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of, range } from 'rxjs';
-import { first, map, mergeMap, reduce, switchMap } from 'rxjs/operators';
+import { take, map, mergeMap, reduce, switchMap } from 'rxjs/operators';
 
 import { UpdatePaginationMaxedState } from '../../actions/pagination.actions';
 import { AppState } from '../../app-state';
@@ -134,7 +134,7 @@ export class PaginationPageIterator<R = any, E = any> {
           this.getValidNumber(totalPages),
           this.getValidNumber(totalResults)
         ).pipe(
-          first(),
+          take(1),
           map(([initialRequestResponse, othersResponse]) => [initialRequestResponse, ...othersResponse]),
           map(responsePages => this.reducePages(responsePages)),
         );

@@ -6,7 +6,7 @@ import { KubeConfigFileCluster } from '../../kube-config.types';
 @Component({
 selector: 'app-kube-config-table-select',
   templateUrl: './kube-config-table-select.component.html',
-  styleUrls: ['./kube-config-table-select.component.scss'],
+
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

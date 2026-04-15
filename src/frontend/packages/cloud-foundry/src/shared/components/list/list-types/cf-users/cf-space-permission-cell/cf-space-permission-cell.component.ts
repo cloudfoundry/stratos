@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { filter, first, map, switchMap } from 'rxjs/operators';
+import { take, filter, map, switchMap } from 'rxjs/operators';
 
 import { AppChipsComponent, arrayHelper, ConfirmationDialogService, CurrentUserPermissionsService } from '@stratosui/core';
 import { APIResource, entityCatalog } from '@stratosui/store';
@@ -27,7 +27,6 @@ import { CfPermissionCellDirective, ICellPermissionList } from '../cf-permission
 @Component({
   selector: 'app-cf-space-permission-cell',
   templateUrl: './cf-space-permission-cell.component.html',
-  styleUrls: ['./cf-space-permission-cell.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
@@ -47,7 +46,7 @@ export class CfSpacePermissionCellComponent extends CfPermissionCellDirective<Sp
     const cfUserService = inject(CfUserService);
     const confirmDialog = inject(ConfirmationDialogService);
 
-    super(store, confirmDialog, cfUserService);
+    super();
     this.store = store;
 
 
@@ -89,10 +88,10 @@ export class CfSpacePermissionCellComponent extends CfPermissionCellDirective<Sp
     const orgGuids = permissionList.map(permission => permission.orgGuid).filter((value, index, self) => self.indexOf(value) === index);
     // Find names of all orgs
     const orgNames$ = orgGuids.length ? combineLatest(
-      orgGuids.map(orgGuid => this.store.select<APIResource<IOrganization>>(selectCfEntity(organizationEntityType, orgGuid)).pipe(first()))
+      orgGuids.map(orgGuid => this.store.select<APIResource<IOrganization>>(selectCfEntity(organizationEntityType, orgGuid)).pipe(take(1)))
     ).pipe(
       filter(org => !!org),
-      first(),
+      take(1),
       map((orgs: APIResource<IOrganization>[]) => {
         const orgNames: { [orgGuid: string]: string } = {};
         orgs.forEach(org => {

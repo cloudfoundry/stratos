@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterContentInit, ChangeDetectionStrategy, Component, OnDestroy, computed, effect, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { AfterContentInit, ChangeDetectionStrategy, Component, OnDestroy, effect, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, Subject } from 'rxjs';
@@ -132,7 +131,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
       this.services$,
       this.stepperForm.controls.service.statusChanges
     ]).pipe(
-      map(([services, change]) => services.filter(a => a?.metadata?.guid === this.stepperForm.controls.service.value)[0]),
+      map(([services, _change]) => services.filter(a => a?.metadata?.guid === this.stepperForm.controls.service.value)[0]),
       filter(p => !!p),
       takeUntil(this.destroyed$)
     );

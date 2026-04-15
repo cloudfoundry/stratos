@@ -36,7 +36,7 @@ export class SystemEffects {
             new GetSystemSuccess(info, action.login, associatedAction),
             new WrapperRequestActionSuccess({ entities: {}, result: [] }, action)
           ];
-        }), catchError((e) => {
+        }), catchError((_e) => {
           this.appRef.tick();
           return [
             { type: action.actions[2] },

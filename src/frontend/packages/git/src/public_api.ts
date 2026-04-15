@@ -10,6 +10,8 @@ export * from './shared/git-shared.module';
 export * from './store/git.public-types';
 export * from './shared/scm/scm.service';
 export * from './shared/scm/scm';
+export { BaseSCM } from './shared/scm/scm-base';
+export { GitHubSCM } from './shared/scm/github-scm';
 export * from './shared/github.helpers';
 export * from './store/git-entity-factory';
 export * from './store/git-entity-generator';

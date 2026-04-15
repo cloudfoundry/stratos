@@ -20,7 +20,6 @@ import { map, startWith } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../../../core/endpoints.service';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
-import { coreEndpointListDetailsComponents } from '../../../../../../features/endpoints/endpoint-helpers';
 import { createMetaCardMenuItemSeparator } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
 import { BaseEndpointsDataSource } from '../base-endpoints-data-source';
@@ -100,7 +99,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
   @ViewChild('copyToClipboard') copyToClipboard!: CopyToClipboardComponent;
 
-  @Input('row')
+  @Input()
   set row(row: EndpointModel) {
     super.row = row;
     if (!row) {
@@ -126,7 +125,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
   private _dataSource!: BaseEndpointsDataSource;
 
-  @Input('dataSource')
+  @Input()
   set dataSource(ds: BaseEndpointsDataSource) {
     super.dataSource = ds;
     this._dataSource = ds;

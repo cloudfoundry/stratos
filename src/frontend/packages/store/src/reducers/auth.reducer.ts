@@ -50,13 +50,15 @@ export function authReducer(state: AuthState = defaultState, action: any): AuthS
       return { ...state, loggingIn: true, loggedIn: false, error: false };
     case LOGIN_SUCCESS:
       return { ...state, loggingIn: false, loggedIn: true, error: false, errorResponse: undefined };
-    case LOGIN_FAILED:
+    case LOGIN_FAILED: {
       const loginFailed = action as LoginFailed;
       return { ...state, error: true, errorResponse: loginFailed.error, loggingIn: false, loggedIn: false };
-    case LOGOUT_FAILED:
+    }
+    case LOGOUT_FAILED: {
       const logoutFailed = action as LogoutFailed;
       console.error(logoutFailed.error);
       return { ...state, loggingIn: false, loggedIn: true, error: true, errorResponse: logoutFailed.error };
+    }
     case VERIFY_SESSION:
       return { ...state, error: false, errorResponse: undefined, verifying: true };
     case SESSION_VERIFIED:
@@ -85,12 +87,13 @@ export function authReducer(state: AuthState = defaultState, action: any): AuthS
         },
         verifying: false
       };
-    case RouterActions.GO:
+    case RouterActions.GO: {
       const goToState: RouterNav = action;
       return {
         ...state,
         redirect: goToState.redirect || state.redirect
       };
+    }
     case RESET_AUTH:
       return defaultState;
     case GET_SYSTEM_INFO_SUCCESS:

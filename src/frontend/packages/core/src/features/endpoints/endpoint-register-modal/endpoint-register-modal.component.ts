@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ComponentRef, EventEmitter, Injector, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ComponentRef, EventEmitter, HostListener, Injector, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, inject } from '@angular/core';
 import { ActivatedRoute, ActivatedRouteSnapshot, Params } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
@@ -47,10 +47,6 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
     );
     super(types, store);
     this.store = store;
-
-    
-    // Add escape key listener
-    document.addEventListener('keydown', this.handleEscapeKey.bind(this));
   }
 
   ngOnInit() {
@@ -58,17 +54,18 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
   }
 
   ngOnDestroy() {
-    document.removeEventListener('keydown', this.handleEscapeKey.bind(this));
-    
     if (this.componentRef) {
       this.componentRef.destroy();
     }
   }
 
-  private handleEscapeKey(event: KeyboardEvent) {
-    if (event.key === 'Escape') {
-      this.closeModal();
-    }
+  // Close the modal on Escape. Using HostListener (not raw addEventListener)
+  // keeps the event inside Angular's handler pipeline so change detection
+  // fires under zoneless mode — needed so the parent's *appUserPermission
+  // directive re-evaluates after showRegisterModal flips to false.
+  @HostListener('document:keydown.escape')
+  public onEscape() {
+    this.closeModal();
   }
 
   onTileSelected(tile: ITileConfig<ICreateEndpointTilesData>) {
@@ -141,6 +138,11 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
         this.componentRef = this.endpointFormContainer.createComponent(
           endpoint.definition.registrationComponent, { index: 0, injector: componentInjector }
         );
+        // Suppress any nested <app-page-header> — we're inside the modal which
+        // has its own header. Two nested page-headers clobber the TabNavService
+        // pageHeader signal on modal close. Safe no-op if the component doesn't
+        // declare a hideHeader input.
+        (this.componentRef.instance as any).hideHeader = true;
 
         console.log('Registration component created successfully:', this.componentRef);
 
@@ -197,6 +199,10 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
         this.componentRef = this.endpointFormContainer.createComponent(
           module.CreateEndpointComponent, { index: 0, injector: componentInjector }
         );
+        // Hide the inner <app-page-header> — we're inside the modal which
+        // has its own header. Without this the nested header clobbers the
+        // outer endpoints-page header via TabNavService.
+        (this.componentRef.instance as any).hideHeader = true;
         console.log('Create-endpoint component loaded:', this.componentRef);
         
         this.hookIntoComponentSuccess();

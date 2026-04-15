@@ -238,7 +238,7 @@ describe('Selectors in Zoneless Mode', () => {
  * Additional examples for testing with signals in different scenarios
  */
 describe('Advanced Signal Selector Patterns', () => {
-  let store: MockStore;
+  let _store: MockStore;
 
   const mockEndpoint: EndpointModel = {
     guid: 'endpoint-1',
@@ -270,7 +270,7 @@ describe('Advanced Signal Selector Patterns', () => {
         provideMockStore({ initialState }),
       ]
     });
-    store = TestBed.inject(MockStore);
+    _store = TestBed.inject(MockStore);
   });
 
   describe('Multiple Signals', () => {

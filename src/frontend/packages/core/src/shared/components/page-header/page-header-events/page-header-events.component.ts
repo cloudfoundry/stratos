@@ -5,7 +5,7 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AppState } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { first, map, publishReplay, refCount, share } from 'rxjs/operators';
+import { take, map, publishReplay, refCount, share } from 'rxjs/operators';
 
 import { endpointEventKey, GlobalEventService, IGlobalEvent } from '../../../global-events.service';
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
@@ -52,7 +52,7 @@ export class PageHeaderEventsComponent implements OnInit {
 
   public markEventsAsRead() {
     this.events$.pipe(
-      first(),
+      take(1),
     ).subscribe((events: IGlobalEvent[]) => {
       if (events && !!events.length) {
         events.forEach(event => this.eventService.updateEventReadState(event, true));

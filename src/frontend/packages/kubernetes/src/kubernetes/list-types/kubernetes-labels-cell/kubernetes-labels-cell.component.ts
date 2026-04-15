@@ -8,7 +8,7 @@ import { KubeAPIResource } from '../../store/kube.types';
 @Component({
   selector: 'app-kubernetes-labels-cell',
   templateUrl: './kubernetes-labels-cell.component.html',
-  styleUrls: ['./kubernetes-labels-cell.component.scss'],
+
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [AppChipsComponent]

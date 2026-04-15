@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 import { FileInputComponent } from '../../../../../core/src/shared/components/file-input/file-input.component';
 import { CustomTabGroupComponent, CustomTabComponent } from '../../../../../core/src/shared/components/custom-tabs/custom-tabs.component';
@@ -28,25 +28,21 @@ export class KubernetesCertsAuthFormComponent implements IEndpointAuthComponent 
 
 
   public getValues(values: EndpointAuthValues): EndpointAuthValues {
-    return {};
+    let certValue = (values?.cert as string) ?? '';
+    let certKeyValue = (values?.certKey as string) ?? '';
+
+    // Base64-encode PEM content; leave already-encoded values as-is
+    if (certValue.startsWith('-----BEGIN')) {
+      certValue = btoa(certValue);
+    }
+    if (certKeyValue.startsWith('-----BEGIN')) {
+      certKeyValue = btoa(certKeyValue);
+    }
+
+    return { cert: certValue, certKey: certKeyValue };
   }
 
   public getBody(): string {
-    /** Body content is in the following encoding:
-     * base64encoded:base64encoded
-     */
-
-    let certBase64 = this.formGroup.value.cert ?? '';
-    let certKeyBase64 = this.formGroup.value.certKey ?? '';
-
-    // May already be base64 encoded
-    if (certBase64.indexOf('-----BEGIN') === 0) {
-      certBase64 = btoa(this.formGroup.value.cert ?? '');
-    }
-
-    if (certKeyBase64.indexOf('-----BEGIN') === 0) {
-      certKeyBase64 = btoa(this.formGroup.value.certKey ?? '');
-    }
-    return `${certBase64}:${certKeyBase64}`;
+    return '';
   }
 }

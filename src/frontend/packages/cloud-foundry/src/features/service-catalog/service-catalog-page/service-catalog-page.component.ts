@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -14,7 +14,6 @@ import { getActiveRouteCfOrgSpaceProvider } from '../../cf/cf.helpers';
 @Component({
   selector: 'app-service-catalog-page',
   templateUrl: './service-catalog-page.component.html',
-  styleUrls: ['./service-catalog-page.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider,
     {

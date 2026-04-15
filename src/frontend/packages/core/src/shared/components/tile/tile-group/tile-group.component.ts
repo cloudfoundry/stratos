@@ -21,14 +21,14 @@ import { TileComponent } from '../tile/tile.component';
 })
 export class TileGroupComponent implements AfterContentInit, OnDestroy {
 
-  @HostBinding('class.tile-group-gutters') private hasGutters = true;
+  @HostBinding('class.tile-group-gutters') public hasGutters = true;
 
-  @HostBinding('class.tile-group-6-cols') private isSixColumn = false;
-  @HostBinding('class.tile-group-5-cols') private isFiveColumn = false;
-  @HostBinding('class.tile-group-4-cols') private isFourColumn = false;
-  @HostBinding('class.tile-group-3-cols') private isThreeColumn = false;
-  @HostBinding('class.tile-group-2-cols') private isTwoColumn = false;
-  @HostBinding('class.tile-group-1-cols') private isOneColumn = false;
+  @HostBinding('class.tile-group-6-cols') public isSixColumn = false;
+  @HostBinding('class.tile-group-5-cols') public isFiveColumn = false;
+  @HostBinding('class.tile-group-4-cols') public isFourColumn = false;
+  @HostBinding('class.tile-group-3-cols') public isThreeColumn = false;
+  @HostBinding('class.tile-group-2-cols') public isTwoColumn = false;
+  @HostBinding('class.tile-group-1-cols') public isOneColumn = false;
 
   @ContentChildren(TileComponent) tiles!: QueryList<TileComponent>;
 

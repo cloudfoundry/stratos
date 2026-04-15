@@ -6,7 +6,7 @@ import { Store } from '@ngrx/store';
 import { TailwindSnackBarService, TailwindSnackBarRef } from '@stratosui/core';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { delay, filter, first, map, pairwise, publishReplay, refCount, tap } from 'rxjs/operators';
+import { take, delay, filter, map, pairwise, publishReplay, refCount, tap } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
 import { safeUnsubscribe } from '../../../../core/src/core/utils.service';
@@ -21,8 +21,7 @@ import { ActionState } from '../../../../store/src/reducers/api-request-reducer/
 import { selectDeletionInfo } from '../../../../store/src/selectors/api.selectors';
 import {
   DeleteAppAutoscalerCredentialAction,
-  UpdateAppAutoscalerCredentialAction,
-} from '../../store/app-autoscaler.actions';
+  UpdateAppAutoscalerCredentialAction } from '../../store/app-autoscaler.actions';
 import { AppAutoscalerCredential } from '../../store/app-autoscaler.types';
 
 interface AutoscalerCredentialForm {
@@ -77,8 +76,7 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
     this.editCredentialForm = this.fb.group<AutoscalerCredentialForm>({
       actype: this.fb.nonNullable.control({ value: true, disabled: false }),
       acusername: this.fb.nonNullable.control({ value: '', disabled: true }, Validators.required),
-      acpassword: this.fb.nonNullable.control({ value: '', disabled: true }, Validators.required),
-    });
+      acpassword: this.fb.nonNullable.control({ value: '', disabled: true }, Validators.required) });
   }
 
   ngOnInit() {
@@ -119,8 +117,7 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
     } else {
       const credential: AppAutoscalerCredential = {
         username: this.editCredentialForm.controls.acusername.value,
-        password: this.editCredentialForm.controls.acpassword.value,
-      };
+        password: this.editCredentialForm.controls.acpassword.value };
       action = new UpdateAppAutoscalerCredentialAction(this.applicationService.appGuid, this.applicationService.cfGuid, credential);
     }
     const updateAppAutoscalerCredentialService: EntityService = this.entityServiceFactory.create(
@@ -128,7 +125,7 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
       action,
     );
     this.appAutoscalerCredential$ = updateAppAutoscalerCredentialService.entityObs$.pipe(
-      filter(({ entity, entityRequestInfo }) => {
+      filter(({ entity: _entity, entityRequestInfo }) => {
         return entityRequestInfo && !entityRequestInfo.creating && !entityRequestInfo.deleting.busy;
       }),
       map(({ entity }) => entity ? entity.entity : null),
@@ -150,7 +147,7 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
       pairwise(),
       filter(([oldV, newV]) => oldV.busy && !newV.busy),
       map(([, newV]) => newV),
-      first(),
+      take(1),
     ).subscribe(actionState => {
       this.creating.next(false);
       if (actionState.error) {
@@ -174,7 +171,7 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
     );
     this.confirmDialog.open(confirmation, () => {
       this.deleteCredential().pipe(
-        first(),
+        take(1),
       ).subscribe(actionState => {
         if (actionState.error) {
           if (this.appAutoscalerCredentialSnackBarRef) {

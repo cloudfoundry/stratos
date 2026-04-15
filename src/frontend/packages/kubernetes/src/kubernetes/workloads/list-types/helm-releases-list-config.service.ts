@@ -15,7 +15,7 @@ import {
   IListAction,
 } from '@stratosui/core';
 import { AppState } from '@stratosui/store';
-import { filter, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import { ListView } from '../../../../../store/src/actions/list.actions';
 import { defaultHelmKubeListPageSize } from '../../list-types/kube-helm-list-types';

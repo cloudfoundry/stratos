@@ -1,7 +1,7 @@
 import { Component, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { filter, first, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
+import { take, filter, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 
 import { ListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
@@ -10,8 +10,7 @@ import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { UsersRolesSetUsers } from '../../../../../actions/users-roles.actions';
 import { CFAppState } from '../../../../../cf-app-state';
 import {
-  CfSelectUsersListConfigService,
-} from '../../../../../shared/components/list/list-types/cf-select-users/cf-select-users-list-config.service';
+  CfSelectUsersListConfigService } from '../../../../../shared/components/list/list-types/cf-select-users/cf-select-users-list-config.service';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
 import { CfUser } from '../../../../../store/types/cf-user.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
@@ -48,8 +47,7 @@ import { ListComponent } from '../../../../../../../core/src/shared/components/l
       },
       deps: [Store, ActiveRouteCfOrgSpace, CfUserService, PaginationMonitorFactory, EntityMonitorFactory]
     }
-  ],
-})
+  ] })
 export class UsersRolesSelectComponent {
   private store = inject<Store<CFAppState>>(Store);
   private listConfig = inject<ListConfig<APIResource<CfUser>>>(ListConfig);
@@ -65,7 +63,7 @@ export class UsersRolesSelectComponent {
 
     this.selectedUsers$ = listConfig.getInitialised().pipe(
       filter(initialised => initialised),
-      first(),
+      take(1),
       switchMap(() => listConfig.getDataSource().selectedRows$),
       map(users => {
         const arrayUsers = Array.from<APIResource<CfUser>>(users.values()).map(row => row.entity);
@@ -79,7 +77,7 @@ export class UsersRolesSelectComponent {
 
   onNext = () => {
     return this.selectedUsers$.pipe(
-      first(),
+      take(1),
       tap(users => {
         this.store.dispatch(new UsersRolesSetUsers(this.activeRouteCfOrgSpace.cfGuid, users));
       }),

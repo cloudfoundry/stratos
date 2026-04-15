@@ -1,54 +1,54 @@
-<div class="chartInfo">
+<div>
 
   @if (currentVersion) {
     <app-chart-details-usage [chart]=chart [currentVersion]=currentVersion.attributes.version>
     </app-chart-details-usage>
   }
 
-  <app-card class="chartInfo__properties">
-    <div class="chartInfo__versions">
+  <app-card class="overflow-auto block mb-8 max-w-[260px]">
+    <div>
       <app-chart-details-versions [versions]=versions [currentVersion]=currentVersion></app-chart-details-versions>
     </div>
     @if (chart.attributes.home) {
-      <div class="chartInfo__home">
-        <h1>Home</h1>
+      <div>
+        <h1 class="text-base">Home</h1>
         <div>
-          <a class="chartInfo__link" href="{{ chart.attributes.home }}" target="_blank">{{chart.attributes.home}}</a>
+          <a class="text-sm break-all" href="{{ chart.attributes.home }}" target="_blank">{{chart.attributes.home}}</a>
         </div>
       </div>
     }
     @if (maintainers.length) {
-      <div class="chartInfo__maintainers">
-        <h1>Maintainers</h1>
+      <div>
+        <h1 class="text-base">Maintainers</h1>
         @for (maintainer of maintainers; track maintainer) {
           <div>
-            <a href="{{ maintainerUrl(maintainer) }}" class="chartInfo__link" target="_blank">{{ maintainer.name }}</a>
+            <a href="{{ maintainerUrl(maintainer) }}" class="text-sm" target="_blank">{{ maintainer.name }}</a>
           </div>
         }
       </div>
     }
     @if (sources.length) {
-      <div class="chartInfo__related">
-        <h1>Related</h1>
+      <div>
+        <h1 class="text-base">Related</h1>
         @for (source of sources; track source) {
           <div>
-            <a href="{{ source }}" class="chartInfo__link" target="_blank">{{ source }}</a>
+            <a href="{{ source }}" class="text-sm break-all" target="_blank">{{ source }}</a>
           </div>
         }
       </div>
     }
     @if (schema) {
-      <div class="chartInfo__related">
-        <h1>Schema</h1>
-        <div class="chartInfo__link">This chart contains a values schema</div>
+      <div>
+        <h1 class="text-base">Schema</h1>
+        <div class="text-sm">This chart contains a values schema</div>
       </div>
     }
     @if (currentVersion) {
-      <div class="chartInfo__related">
-        <h1>Chart</h1>
+      <div>
+        <h1 class="text-base">Chart</h1>
         @for (url of currentVersion.attributes.urls; track url) {
           <div>
-            <a href="{{ url }}" class="chartInfo__link" target="_blank">{{ url }}</a>
+            <a href="{{ url }}" class="text-sm break-all" target="_blank">{{ url }}</a>
           </div>
         }
       </div>

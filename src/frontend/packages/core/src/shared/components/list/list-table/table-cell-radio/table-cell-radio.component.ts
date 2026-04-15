@@ -6,7 +6,6 @@ import { TableCellCustom } from '../../list.types';
 @Component({
   selector: 'app-table-cell-radio',
   templateUrl: './table-cell-radio.component.html',
-  styleUrls: ['./table-cell-radio.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

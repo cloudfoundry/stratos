@@ -13,7 +13,6 @@ import { ApplicationService } from '../../application.service';
 @Component({
   selector: 'app-map-routes',
   templateUrl: './map-routes.component.html',
-  styleUrls: ['./map-routes.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

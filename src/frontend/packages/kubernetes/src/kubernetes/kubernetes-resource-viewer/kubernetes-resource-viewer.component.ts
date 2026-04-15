@@ -1,4 +1,4 @@
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, DatePipe, TitleCasePipe } from '@angular/common';
 import { Portal, TemplatePortal } from '@angular/cdk/portal';
 import {
   AfterViewInit,
@@ -8,13 +8,16 @@ import {
   TemplateRef,
   ViewChild,
   ViewContainerRef,
-  inject, ChangeDetectionStrategy } from '@angular/core';
+  inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { formatDistance } from 'date-fns';
 import { Observable, of } from 'rxjs';
-import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
+import { take, filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../core/src/core/endpoints.service';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
+import { JsonViewerComponent } from '../../../../core/src/shared/components/json-viewer/json-viewer.component';
+import { MetadataItemComponent } from '../../../../core/src/shared/components/metadata-item/metadata-item.component';
 import { SidepanelPreviewComponent } from '../../../../core/src/shared/components/sidepanel-preview/sidepanel-preview.component';
 import { PreviewableComponent } from '../../../../core/src/shared/previewable-component';
 import { SnackBarService } from '../../../../core/src/shared/services/snackbar.service';
@@ -51,8 +54,8 @@ interface KubernetesResourceViewerResource {
   jsonView: KubeAPIResource;
   age: string;
   creationTimestamp: string;
-  labels: { name: string, value: string, }[];
-  annotations: { name: string, value: string, }[];
+  labels: { name: string, value: string }[];
+  annotations: { name: string, value: string }[];
   kind: string;
   apiVersion: string;
 }
@@ -65,16 +68,23 @@ selector: 'app-kubernetes-resource-viewer',
   standalone: true,
   imports: [
     AsyncPipe,
-    SidepanelPreviewComponent
+    DatePipe,
+    TitleCasePipe,
+    RouterLink,
+    SidepanelPreviewComponent,
+    MetadataItemComponent,
+    JsonViewerComponent,
   ]
 })
-export class KubernetesResourceViewerComponent implements PreviewableComponent, OnDestroy, AfterViewInit {  private endpointsService = inject(EndpointsService);
+export class KubernetesResourceViewerComponent implements PreviewableComponent, OnDestroy, AfterViewInit {
+  private endpointsService = inject(EndpointsService);
   private kubeEndpointService = inject(KubernetesEndpointService);
   private userFavoriteManager = inject(UserFavoriteManager);
   private viewContainerRef = inject(ViewContainerRef);
   private confirmDialog = inject(ConfirmationDialogService);
   private sidePanelService = inject(SidePanelService);
   private snackBarService = inject(SnackBarService);
+  private cdr = inject(ChangeDetectorRef);
 
   public title: string;
   public resource$: Observable<KubernetesResourceViewerResource>;
@@ -198,7 +208,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
     this.hasPodMetrics$ = props.resourceKind === 'pod' ?
       this.resource$.pipe(
         switchMap(resource => this.endpointsService.hasMetrics(this.getEndpointId(resource.raw))),
-        first(),
+        take(1),
       ) :
       of(false);
 
@@ -216,6 +226,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
       })
     );
     this.createCustomComponent();
+    this.cdr.markForCheck();
   }
 
   private getVersionFromSelfLink(url: string): string | undefined {
@@ -273,7 +284,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
           this.data.resource.metadata.namespace
         ).pipe(
           entityDeleted(),
-          first()
+          take(1)
         ).subscribe((result: DeleteActionState) => {
           const msg = result.error ? `Could not delete resource: ${result.message}` : `Deleted resource '${this.data.resource.metadata.name}'`;
           this.snackBarService.show(msg);

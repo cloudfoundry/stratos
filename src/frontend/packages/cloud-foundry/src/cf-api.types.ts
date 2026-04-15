@@ -328,7 +328,7 @@ export interface IAppSummary {
   buildpack?: any;
   detected_buildpack: string;
   detected_buildpack_guid: string;
-  environment_json: {};
+  environment_json: Record<string, unknown>;
   memory: number;
   instances: number;
   disk_quota: number;

@@ -1,12 +1,12 @@
-<app-meta-card class="release-card" [routerLink]="row.guid">
+<app-meta-card class="cursor-pointer focus:outline-none" [routerLink]="row.guid">
   <app-meta-card-title>
-    <div class="release-title">
+    <div class="flex flex-row justify-between w-full">
       <app-multiline-title>{{ row.name }}</app-multiline-title>
-      <div class="release-title--icon">
+      <div class="flex self-end">
         @if (icon) {
-          <img [src]="icon" (error)="loadImageError()">
+          <img class="h-12 w-12 object-contain" [src]="icon" [alt]="row.name + ' icon'" (error)="loadImageError()">
         } @else {
-          <app-custom-icon fontSet="stratos-icons">workloads</app-custom-icon>
+          <app-custom-icon class="text-5xl h-12 w-12" fontSet="stratos-icons">workloads</app-custom-icon>
         }
       </div>
     </div>

@@ -61,7 +61,10 @@ git checkout master
 git pull origin master
 git status
 
-# Run full test suite
+# Run the full quality gate (lint + unit tests)
+make check gate
+
+# Or run the full test matrix
 make test
 
 # Check for security issues
@@ -72,28 +75,47 @@ go list -m -u all
 ### Version Management
 
 - [ ] Version bumped in `package.json`
-- [ ] Version bumped in `src/jetstream/VERSION`
+- [ ] Version bumped in `src/jetstream/VERSION` (handled automatically by `make bump`)
 - [ ] Versions are consistent
-- [ ] Version follows semantic versioning
+- [ ] Version follows SemVer 2.0.0 (prerelease lifecycle + build metadata)
+
+See [build-and-packaging.md#version-management](build-and-packaging.md#version-management)
+for the full command reference and lifecycle stages.
 
 **Update Versions:**
 ```bash
 # Check current version
 ./build/version-bump.sh show
 
-# Bump version (choose one)
-./build/version-bump.sh bump major    # 4.9.3 → 5.0.0
-./build/version-bump.sh bump minor    # 4.9.3 → 4.10.0
-./build/version-bump.sh bump patch    # 4.9.3 → 4.9.4
+# Bump semver (strips any prerelease)
+make bump major     # 4.9.3-rc.2 → 5.0.0
+make bump minor     # 4.9.3      → 4.10.0
+make bump patch     # 4.9.3      → 4.9.4
 
-# Or set specific version
+# Advance through the prerelease lifecycle:
+make bump dev       # dev.N   (daily/CI builds)
+make bump alpha     # alpha.N (internal milestones)
+make bump beta      # beta.N  (external beta)
+make bump rc        # rc.N    (release candidates)
+make bump prerelease # prerelease.N (generic stage)
+
+# Preview without writing
+make bump dev DRYRUN=yes
+
+# Finalize a prerelease (strip suffix) as part of packaging
+make release cf FINAL=strip
+
+# Or set an explicit version
 ./build/version-bump.sh set v5.0.0
 
-# Commit version bump
+# Commit version bump (both files are updated automatically)
 git add package.json src/jetstream/VERSION
 git commit -m "chore: bump version to v5.0.0"
 git push origin master
 ```
+
+Every `make bump` automatically appends `+build.YYYYMMDD.SHORT-SHA` build
+metadata so each artifact is traceable back to its source commit.
 
 ### Documentation
 
@@ -149,8 +171,8 @@ See [MIGRATION.md](MIGRATION.md) for upgrade instructions.
 
 **Process:**
 ```bash
-# 1. Final version check
-./build/version-bump.sh set v5.0.0
+# 1. Finalize version and build the CF release package (FINAL=strip removes the prerelease suffix from package.json before packaging)
+make release cf FINAL=strip
 
 # 2. Update changelog
 vim CHANGELOG.md
@@ -188,8 +210,8 @@ git push origin v5.0.0
 
 **Process:**
 ```bash
-# 1. Set RC version
-./build/version-bump.sh set v5.0.0-rc.1
+# 1. Set RC version (creates v{core}-rc.1 from current base)
+make bump rc                  # Assumes the semver core is already at v5.0.0
 
 # 2. Create RC tag
 git tag -a v5.0.0-rc.1 -m "Release candidate 1 for v5.0.0
@@ -216,8 +238,8 @@ tar xzf stratos-v5.0.0-rc.1-linux-amd64.tar.gz
 cd stratos-v5.0.0-rc.1-linux-amd64
 ./bin/jetstream version
 
-# If issues found, create rc.2
-./build/version-bump.sh set v5.0.0-rc.2
+# If issues found, increment to rc.2
+make bump rc
 git tag -a v5.0.0-rc.2 -m "Release candidate 2"
 git push origin v5.0.0-rc.2
 ```
@@ -243,7 +265,7 @@ git checkout master
 git merge hotfix/5.0.1
 
 # 4. Bump patch version
-./build/version-bump.sh bump patch
+make bump patch
 
 # 5. Create hotfix tag
 git tag -a v5.0.1 -m "Hotfix release v5.0.1
@@ -819,8 +841,10 @@ gh pr list --label "release"
 # Generate release notes
 ./scripts/generate-changelog.sh v4.9.3..v5.0.0
 
-# Update all version files
+# Update all version files (package.json + src/jetstream/VERSION)
 ./build/version-bump.sh set v5.0.0
+# Or use a make bump verb for lifecycle stages:
+make bump major   # or: minor, patch, dev, alpha, beta, rc, prerelease
 ```
 
 ---

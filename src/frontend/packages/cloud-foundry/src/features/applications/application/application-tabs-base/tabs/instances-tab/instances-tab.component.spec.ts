@@ -87,7 +87,7 @@ describe('InstancesTabComponent', () => {
     if (fixture) {
       try {
         fixture.destroy();
-      } catch (e) {
+      } catch (_e) {
         // Ignore cleanup errors - component creation was successful
       }
     }

@@ -5,7 +5,7 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { CustomTooltipDirective, CurrentUserPermissionsService, PageHeaderComponent, IHeaderBreadcrumb, PageSubNavComponent, BooleanIndicatorComponent, LoadingPageComponent, CardNumberMetricComponent, TileGridComponent, TileGroupComponent, TileComponent } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
-import { filter, first, map, switchMap } from 'rxjs/operators';
+import { take, filter, map, switchMap } from 'rxjs/operators';
 import { AppState, APIResource, EndpointModel } from '@stratosui/store';
 import { IOrganization, IOrgQuotaDefinition, ISpace } from '../../../cf-api.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
@@ -19,7 +19,7 @@ export const QUOTA_ORG_GUID = 'org';
 @Component({
   selector: 'app-quota-definition',
   templateUrl: './quota-definition.component.html',
-  styleUrls: ['../quota-definition-base/quota-definition-base.component.scss', './quota-definition.component.scss'],
+  styleUrls: ['../quota-definition-base/quota-definition-base.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
   ],
@@ -76,7 +76,7 @@ export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
   setupQuotaDefinitionObservable() {
     const quotaGuid$ = this.quotaGuid ? of(this.quotaGuid) : this.org$.pipe(map(org => org.entity.quota_definition_guid));
     const entityInfo$ = quotaGuid$.pipe(
-      first(),
+      take(1),
       switchMap(quotaGuid => cfEntityCatalog.quotaDefinition.store.getEntityService(quotaGuid, this.cfGuid, {}).entityObs$)
     );
 

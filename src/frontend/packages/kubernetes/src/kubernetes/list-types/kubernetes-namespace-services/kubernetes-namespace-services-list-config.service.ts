@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { IListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
@@ -15,13 +15,13 @@ import { KubernetesNamespaceServicesDataSource } from './kubernetes-namespace-se
 export class KubernetesNamespaceServicesListConfig extends BaseKubernetesServicesListConfig implements IListConfig<KubeService> {
   dataSource: KubernetesNamespaceServicesDataSource;
 
-  constructor(
-    store: Store<AppState>,
-    kubeId: BaseKubeGuid,
-    kubeNamespaceService: KubernetesNamespaceService
-  ) {
+  private store = inject<Store<AppState>>(Store);
+  private kubeId = inject(BaseKubeGuid);
+  private kubeNamespaceService = inject(KubernetesNamespaceService);
+
+  constructor() {
     super();
-    this.dataSource = new KubernetesNamespaceServicesDataSource(store, kubeId, this, kubeNamespaceService.namespaceName);
+    this.dataSource = new KubernetesNamespaceServicesDataSource(this.store, this.kubeId, this, this.kubeNamespaceService.namespaceName);
   }
   getDataSource = () => this.dataSource;
 }

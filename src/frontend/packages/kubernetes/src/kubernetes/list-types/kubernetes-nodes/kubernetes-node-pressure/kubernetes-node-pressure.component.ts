@@ -7,7 +7,6 @@ import { ConditionType, ConditionTypeLabels, KubernetesNode } from '../../../sto
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-node-pressure',
   templateUrl: './kubernetes-node-pressure.component.html',
-  styleUrls: ['./kubernetes-node-pressure.component.scss'],
   standalone: true
 })
 export class KubernetesNodePressureComponent extends TableCellCustom<KubernetesNode> implements OnInit {

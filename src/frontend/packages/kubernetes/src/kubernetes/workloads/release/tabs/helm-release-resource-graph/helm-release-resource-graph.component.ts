@@ -7,7 +7,7 @@ import { CustomTooltipDirective } from '../../../../../../../core/src/shared/com
 import { Edge, NgxGraphModule } from '@swimlane/ngx-graph';
 import { SidePanelService } from '@stratosui/core';
 import { combineLatest, Observable, Subject, Subscription } from 'rxjs';
-import { distinctUntilChanged, filter, first, map, publishReplay, refCount, startWith } from 'rxjs/operators';
+import { take, distinctUntilChanged, filter, map, publishReplay, refCount, startWith } from 'rxjs/operators';
 
 import { PageSubNavComponent } from '../../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
 import { AnalysisReportRunnerComponent } from '../../../../analysis-report-viewer/analysis-report-runner/analysis-report-runner.component';
@@ -15,8 +15,7 @@ import { AnalysisReportSelectorComponent } from '../../../../analysis-report-vie
 import { WorkloadLiveReloadComponent } from '../../workload-live-reload/workload-live-reload.component';
 
 import {
-  KubernetesResourceViewerComponent,
-} from '../../../../kubernetes-resource-viewer/kubernetes-resource-viewer.component';
+  KubernetesResourceViewerComponent } from '../../../../kubernetes-resource-viewer/kubernetes-resource-viewer.component';
 import { ResourceAlert, ResourceAlertLevel } from '../../../../services/analysis-report.types';
 import { KubernetesAnalysisService } from '../../../../services/kubernetes.analysis.service';
 import {
@@ -24,8 +23,7 @@ import {
   HelmReleaseGraphNode,
   HelmReleaseGraphNodeData,
   HelmReleaseResource,
-  HelmReleaseResources,
-} from '../../../workload.types';
+  HelmReleaseResources } from '../../../workload.types';
 import { getIcon } from '../../icon-helper';
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
 
@@ -58,7 +56,7 @@ interface CustomHelmReleaseGraphNodeData extends HelmReleaseGraphNodeData {
   text: string;
   icon: any;
   alerts: [];
-  alertSummary: {};
+  alertSummary: Record<string, unknown>;
 }
 
 @Component({
@@ -148,8 +146,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
             icon,
             alerts: null,
             alertSummary: {}
-          },
-        };
+          } };
 
         // Does this node have any alerts?
         this.applyAlertToNode(newNode, report);
@@ -219,7 +216,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
 
   // Open side panel when node is clicked
   public onNodeClick(node: CustomHelmReleaseGraphNode) {
-    this.analysisReportUpdated$.pipe(first()).subscribe((analysis: any) => {
+    this.analysisReportUpdated$.pipe(take(1)).subscribe((analysis: any) => {
       this.previewPanel.show(
         KubernetesResourceViewerComponent,
         {
@@ -277,7 +274,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
       map((r: HelmReleaseResources) => Object.values(r.data).find((res: any) =>
         res.metadata.name === node.label && res.kind === node.data.kind
       )),
-      first(),
+      take(1),
     );
   }
 

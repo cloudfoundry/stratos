@@ -3,7 +3,7 @@ import { Component, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest as obsCombineLatest, Observable, of as observableOf } from 'rxjs';
-import { combineLatest, filter, first, map, startWith } from 'rxjs/operators';
+import { take, combineLatest, filter, map, startWith } from 'rxjs/operators';
 
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { PageHeaderComponent } from '../../../../../../core/src/shared/components/page-header/page-header.component';
@@ -15,8 +15,7 @@ import {
   UsersRolesClear,
   UsersRolesExecuteChanges,
   UsersRolesSetChanges,
-  UsersRolesSetUsers,
-} from '../../../../actions/users-roles.actions';
+  UsersRolesSetUsers } from '../../../../actions/users-roles.actions';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { selectCfUsersRoles } from '../../../../store/selectors/cf-users-roles.selector';
 import { CfUser, IUserPermissionInOrg, IUserPermissionInSpace, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../store/types/cf-user.types';
@@ -30,7 +29,6 @@ import { UsersRolesConfirmComponent } from '../manage-users/manage-users-confirm
 @Component({
 selector: 'app-remove-user',
   templateUrl: './remove-user.component.html',
-  styleUrls: ['./remove-user.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider,
     CfUserService,
@@ -78,7 +76,7 @@ export class RemoveUserComponent implements OnDestroy {
       this.singleUser$ = this.cfUserService.getUser(activeRouteCfOrgSpace.cfGuid, userQParam)
         .pipe(
           map(user => user.entity),
-          first()
+          take(1)
         );
     } else {
       console.error('User param not defined');
@@ -87,7 +85,7 @@ export class RemoveUserComponent implements OnDestroy {
 
     const cfGuid$ = this.store.select(selectCfUsersRoles).pipe(
       combineLatest(this.singleUser$),
-      first()
+      take(1)
     );
     // Ensure that when we arrive here directly the store is set up with all it needs
     cfGuid$.subscribe(([usersRoles, user]) => {
@@ -104,14 +102,14 @@ export class RemoveUserComponent implements OnDestroy {
 
     this.cfRolesService.existingRoles$.pipe(
       combineLatest(this.singleUser$),
-      first(),
+      take(1),
     ).subscribe(([existingRoles, user]) => {
       const orgs = existingRoles[user.guid];
       const changes = this.getRolesChanges(user, orgs);
 
       obsCombineLatest(...this.getChangesObservables(changes)).pipe(
         map(([...canChanges]) => canChanges),
-        first()
+        take(1)
       ).subscribe((canChanges) => {
         const allowedChanges = canChanges.filter((c) => c.can).map(c => c.change);
         this.store.dispatch(new UsersRolesSetChanges(allowedChanges));
@@ -168,8 +166,7 @@ export class RemoveUserComponent implements OnDestroy {
             orgGuid: org.orgGuid,
             orgName: org.name,
             add: false,
-            role: role as OrgUserRoleNames,
-          });
+            role: role as OrgUserRoleNames });
         }
       }
     }
@@ -196,8 +193,7 @@ export class RemoveUserComponent implements OnDestroy {
             spaceGuid,
             spaceName: space.name,
             add: false,
-            role: role as SpaceUserRoleNames,
-          });
+            role: role as SpaceUserRoleNames });
         }
       }
     }

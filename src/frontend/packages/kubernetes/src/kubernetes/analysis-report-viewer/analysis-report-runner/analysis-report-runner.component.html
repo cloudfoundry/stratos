@@ -1,9 +1,9 @@
 @if (canShow$ | async) {
   @if (analyzers$ | async; as analyzers) {
-    <div class="report-runner">
+    <div class="flex items-center justify-center">
       <div class="relative inline-block">
         @if (analyzers.length > 0) {
-          <button class="btn btn-ghost report-runner__run"
+          <button class="btn btn-ghost pr-0"
             (click)="menuOpen = !menuOpen"
             >
             <span>Analyze</span>
@@ -20,7 +20,7 @@
                   {{ analyzer.name }}
                 </button>
               }
-              <div class="border-t border-neutral-200 dark:border-neutral-700 my-1 report-runner__divider"></div>
+              <div class="border-t border-neutral-200 dark:border-neutral-700 my-1"></div>
               <button (click)="showAnalyzersInfo(); menuOpen = false"
                 class="block w-full text-left px-4 py-2 text-sm text-neutral-900 dark:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-700">
                 Analyzer Info

@@ -8,7 +8,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 
-import { PaginationMonitorFactory, EntityCatalogModule, appReducers } from '@stratosui/store';
+import { PaginationMonitorFactory, EntityCatalogModule, appReducers, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCFEntities } from '@stratosui/cloud-foundry';
 import { RunningInstancesComponent } from './running-instances.component';
 
@@ -30,12 +31,17 @@ describe('RunningInstancesComponent', () => {
         EffectsModule.forRoot([]),
       ],
       providers: [
+        ...STORE_TEST_PROVIDERS,
         PaginationMonitorFactory,
         provideRouter([]),
         provideHttpClient(),
         provideZonelessChangeDetection(),
       ]
     }).compileComponents();
+
+    // Initialize EntityCatalogHelper so components using stratosEntityCatalog.<entity>.store work
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
 
     fixture = TestBed.createComponent(RunningInstancesComponent);
     component = fixture.componentInstance;

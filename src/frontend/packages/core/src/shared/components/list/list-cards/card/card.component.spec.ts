@@ -6,7 +6,7 @@ import { MDAppModule } from '@stratosui/core';
 import { EntityInfo } from '@stratosui/store';
 import { createBasicStoreModule } from '@test-framework/core-test.helper';
 import { CoreTestingModule } from '@test-framework/core-test.modules';
-import { CardComponent, listCards } from './card.component';
+import { CardComponent } from './card.component';
 
 describe('CardComponent', () => {
   let component: CardComponent<EntityInfo>;

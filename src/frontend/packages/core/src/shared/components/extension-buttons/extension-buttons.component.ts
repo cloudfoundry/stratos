@@ -16,7 +16,6 @@ import {
 @Component({
   selector: 'app-extension-buttons',
   templateUrl: './extension-buttons.component.html',
-  styleUrls: ['./extension-buttons.component.scss'],
   standalone: true,
   imports: [
     CommonModule,

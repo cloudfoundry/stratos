@@ -210,7 +210,7 @@ export class AutoscalerEffects {
         .delete(`${commonPrefix}/apps/${action.guid}/policy`, {
           headers: this.addHeaders(action.endpointGuid)
         }).pipe(
-          mergeMap(response => {
+          mergeMap(_response => {
             const entity = entityCatalog.getEntity(action);
             const mappedData = {
               entities: { [entity.entityKey]: {} },
@@ -275,7 +275,7 @@ export class AutoscalerEffects {
         .delete(`${commonPrefix}/apps/${action.guid}/credential`, {
           headers: this.addHeaders(action.endpointGuid)
         }).pipe(
-          mergeMap(response => {
+          mergeMap(_response => {
             const entity = entityCatalog.getEntity(action);
             const mappedData = {
               entities: { [entity.entityKey]: {} },

@@ -77,17 +77,18 @@ func GetColumnNames(databaseName string, exclude ...string) []string {
 
 // DatabaseConfig represents the connection configuration parameters
 type DatabaseConfig struct {
-	DatabaseProvider        string `configName:"DATABASE_PROVIDER"`
-	Username                string `configName:"DB_USER"`
-	Password                string `configName:"DB_PASSWORD"`
-	Database                string `configName:"DB_DATABASE_NAME"`
-	Host                    string `configName:"DB_HOST"`
-	Port                    int    `configName:"DB_PORT"`
-	SSLMode                 string `configName:"DB_SSL_MODE"`
-	ConnectionTimeoutInSecs int    `configName:"DB_CONNECT_TIMEOUT_IN_SECS"`
-	SSLCertificate          string `configName:"DB_CERT"`
-	SSLKey                  string `configName:"DB_CERT_KEY"`
-	SSLRootCertificate      string `configName:"DB_ROOT_CERT"`
+	DatabaseProvider        string            `configName:"DATABASE_PROVIDER"`
+	Username                string            `configName:"DB_USER"`
+	Password                string            `configName:"DB_PASSWORD"`
+	Database                string            `configName:"DB_DATABASE_NAME"`
+	Host                    string            `configName:"DB_HOST"`
+	Port                    int               `configName:"DB_PORT"`
+	SSLMode                 string            `configName:"DB_SSL_MODE"`
+	ConnectionTimeoutInSecs int               `configName:"DB_CONNECT_TIMEOUT_IN_SECS"`
+	SSLCertificate          string            `configName:"DB_CERT"`
+	SSLKey                  string            `configName:"DB_CERT_KEY"`
+	SSLRootCertificate      string            `configName:"DB_ROOT_CERT"`
+	QueryParams             map[string]string `configName:"DB_QUERY_PARAMS"`
 }
 
 // SSLValidationMode is the PostgreSQL driver SSL validation modes

@@ -8,7 +8,6 @@ import {
 @Component({
   selector: 'app-cloud-foundry-space-apps',
   templateUrl: './cloud-foundry-space-apps.component.html',
-  styleUrls: ['./cloud-foundry-space-apps.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

@@ -1,19 +1,21 @@
 import { CommonModule } from '@angular/common';
-import { Component, Injector, Input, OnDestroy, signal, ChangeDetectionStrategy, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, Injector, Input, OnDestroy, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
+  BehaviorSubject,
   combineLatest as observableCombineLatest,
   Observable,
   of as observableOf,
-  Subscription,
-} from 'rxjs';
-import { filter, first, map, startWith } from 'rxjs/operators';
+  Subscription } from 'rxjs';
+import { take, filter, map, switchMap } from 'rxjs/operators';
 
 import { safeUnsubscribe, LogViewerComponent, StepOnNextFunction, SnackBarService } from '@stratosui/core';
 import { RouterNav } from '@stratosui/store';
 import { CFAppState } from '@stratosui/cloud-foundry';
 import { DeleteDeployAppSection } from '../../../../actions/deploy-applications.actions';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
+import { spaceEntityType } from '../../../../cf-entity-types';
+import { createEntityRelationPaginationKey } from '../../../../entity-relations/entity-relations.types';
 import { CfAppsDataSource } from '../../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { DeployApplicationDeployer } from '../deploy-application-deployer';
@@ -21,9 +23,12 @@ import { DeployApplicationDeployer } from '../deploy-application-deployer';
 @Component({
   selector: 'app-deploy-application-step3',
   templateUrl: './deploy-application-step3.component.html',
-  styleUrls: ['./deploy-application-step3.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    class: 'flex flex-col relative',
+    style: 'height: 47vh; width: 100%;'
+  },
   imports: [
     CommonModule,
     LogViewerComponent,
@@ -34,83 +39,144 @@ export class DeployApplicationStep3Component implements OnDestroy {
   private snackBarService = inject(SnackBarService);
   cfOrgSpaceService = inject(CfOrgSpaceDataService);
   private injector = inject(Injector);
+  private cdr = inject(ChangeDetectorRef);
 
 
   @Input() appGuid!: string;
 
-  // Validation observable
-  valid$: Observable<boolean>;
+  // Stable BehaviorSubjects back the public Observable fields. The field
+  // references (valid$/closeable$/showOverlay$) are created once and never
+  // reassigned — only the values pushed through the subjects change.
+  // Reassigning these fields after the parent template's async pipe has
+  // already subscribed would leave the pipe stranded on a completed
+  // observableOf(false), which under OnPush + zoneless change detection
+  // is never re-evaluated.
+  private validSubject = new BehaviorSubject<boolean>(false);
+  private closeableSubject = new BehaviorSubject<boolean>(false);
+  private showOverlaySubject = new BehaviorSubject<boolean>(false);
+  // Locks Previous while a deploy is actively in flight. Flips back to
+  // false on terminal states (success or error) so the user can go back
+  // and fix inputs when the deploy fails.
+  private disablePreviousSubject = new BehaviorSubject<boolean>(true);
 
-  showOverlay$!: Observable<boolean>;
+  readonly valid$: Observable<boolean> = this.validSubject.asObservable();
+  readonly closeable$: Observable<boolean> = this.closeableSubject.asObservable();
+  readonly showOverlay$: Observable<boolean> = this.showOverlaySubject.asObservable();
+  readonly disablePrevious$: Observable<boolean> = this.disablePreviousSubject.asObservable();
 
   error = signal<boolean>(false);
-  // Observable for when the deploy modal can be closed
-  closeable$: Observable<boolean>;
 
   public deployer!: DeployApplicationDeployer;
 
-  private deploySub!: Subscription;
-  private errorSub!: Subscription;
-  private validSub!: Subscription;
-  private busySub!: Subscription;
+  private subscriptions: Subscription[] = [];
 
   public busy = false;
 
-  constructor() {
-    this.valid$ = observableOf(false);
-    this.closeable$ = observableOf(false);
-  }
-
   private initDeployer() {
-    this.deploySub = this.deployer.status$.asObservable().pipe(
-      filter(status => status.deploying),
-    ).subscribe();
+    const status$ = this.deployer.status$.asObservable();
 
-    // Observables
-    this.errorSub = this.deployer.status$.asObservable().pipe(
-      filter((status) => status.error)
-    ).subscribe(status => this.snackBarService.show(status.errorMsg, 'Dismiss'));
+    // The template reads plain fields (deployer.streamTitle, deployer.deploying)
+    // which are mutated directly by the deployer's websocket handlers, not
+    // through observables. Under OnPush + zoneless CD, those mutations don't
+    // trigger a re-render on their own. Subscribe to status$ (which IS emitted
+    // via the signal wrapper every time updateStatus() is called) and force a
+    // view check so the title bar and spinner reflect the current state.
+    this.subscriptions.push(
+      status$.subscribe(() => this.cdr.markForCheck())
+    );
+
+    this.subscriptions.push(
+      status$.pipe(filter(status => status.deploying)).subscribe()
+    );
+
+    this.subscriptions.push(
+      status$.pipe(filter(status => status.error))
+        .subscribe(status => this.snackBarService.show(status.errorMsg, 'Dismiss'))
+    );
 
     const appGuid$ = this.deployer.applicationGuid$.asObservable().pipe(
       filter((appGuid) => appGuid !== null),
-      first(),
+      take(1),
     );
 
-    this.valid$ = appGuid$.pipe(
-      map(guid => !!guid),
+    this.subscriptions.push(
+      appGuid$.subscribe(guid => {
+        this.validSubject.next(!!guid);
+        this.appGuid = guid;
+
+        // Update the root app wall list
+        cfEntityCatalog.application.api.getMultiple(undefined, CfAppsDataSource.paginationKey, {
+          includeRelations: CfAppsDataSource.includeRelations });
+
+        // Pre-fetch the app env vars
+        cfEntityCatalog.appEnvVar.api.getMultiple(this.appGuid, this.deployer.cfGuid);
+      })
     );
 
-    this.validSub = appGuid$.subscribe(guid => {
-      this.appGuid = guid;
+    this.subscriptions.push(
+      observableCombineLatest(this.validSubject, status$).pipe(
+        map(([validated, status]) => validated || status.error)
+      ).subscribe(v => this.closeableSubject.next(v))
+    );
 
-      // Update the root app wall list
-      cfEntityCatalog.application.api.getMultiple(undefined, CfAppsDataSource.paginationKey, {
-        includeRelations: CfAppsDataSource.includeRelations,
-      });
+    this.subscriptions.push(
+      status$.subscribe(status => {
+        this.busy = status.deploying;
+        // Mirror busy state to disablePrevious so that when a deploy ends
+        // (error or success) the Previous button unlocks and the user
+        // isn't trapped on the step.
+        this.disablePreviousSubject.next(status.deploying);
+      })
+    );
 
-      // Pre-fetch the app env vars
-      cfEntityCatalog.appEnvVar.api.getMultiple(this.appGuid, this.deployer.cfGuid);
-    });
+    this.subscriptions.push(
+      status$.pipe(
+        map(status => !status.deploying || status.deploying && !this.deployer.streamTitle)
+      ).subscribe(v => this.showOverlaySubject.next(v))
+    );
 
-    this.closeable$ = observableCombineLatest(
-      this.valid$.pipe(startWith(false)),
-      this.deployer.status$.asObservable()).pipe(
-        map(([validated, status]) => {
-          return validated || status.error;
-        })
-      );
-
-    this.busySub = this.deployer.status$.asObservable().subscribe(status => this.busy = status.deploying);
-
-    this.showOverlay$ = this.deployer.status$.asObservable().pipe(
-      map(status => {
-        return !status.deploying || status.deploying && !this.deployer.streamTitle;
+    // Resolve the app GUID without depending on APP_GUID_NOTIFY. That
+    // backend event (cfapppush/deploy.go:205-208) is useless either way:
+    // absent on first-time deploy (the cfV2Actor wrapper in push_actor.go
+    // that used to send it was dropped when CF CLI internals were migrated
+    // from v2action to v7action and no v7 equivalent was written) and
+    // redundant on redeploy (it just echoes the value the client passed in
+    // the URL). Even the Stratos "Redeploy" button path currently ends up
+    // as a first-time deploy from the server's perspective because
+    // DeployApplicationDeployer.isRedeploy is never assigned from the
+    // parent component — the &app=X URL parameter is never set.
+    //
+    // CF v3 push is update-or-create by name, so looking up by name after
+    // push success resolves the correct GUID in both scenarios.
+    this.subscriptions.push(
+      status$.pipe(
+        filter(status => !status.deploying && !status.error),
+        filter(() => !!this.deployer.appData?.Name && !this.appGuid),
+        take(1),
+        switchMap(() => {
+          const appName = this.deployer.appData.Name;
+          const cfGuid = this.deployer.cfGuid;
+          const spaceGuid = this.deployer.spaceGuid;
+          const paginationKey = createEntityRelationPaginationKey(spaceEntityType, spaceGuid);
+          return cfEntityCatalog.application.store.getAllInSpace
+            .getPaginationService(spaceGuid, cfGuid, paginationKey)
+            .entities$.pipe(
+              filter(apps => Array.isArray(apps) && apps.length > 0),
+              map(apps => apps.find(a => a.entity?.name === appName)),
+              filter(app => !!app),
+              map(app => app.metadata.guid),
+              take(1),
+            );
+        }),
+      ).subscribe(guid => {
+        this.deployer.applicationGuid$.next(guid);
       })
     );
   }
 
   private destroyDeployer() {
-    safeUnsubscribe(this.deploySub, this.errorSub, this.validSub, this.busySub);
+    safeUnsubscribe(...this.subscriptions);
+    this.subscriptions = [];
   }
 
   ngOnDestroy() {
@@ -128,7 +194,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
   private setupCompletionNotification() {
     this.deployer.status$.asObservable().pipe(
       filter(status => !status.deploying),
-      first()
+      take(1)
     ).subscribe(status => {
       if (status.error) {
         this.snackBarService.show(status.errorMsg, 'Dismiss');
@@ -156,6 +222,11 @@ export class DeployApplicationStep3Component implements OnDestroy {
       this.deployer.deploy();
     }
     this.busy = true;
+    // Under OnPush + zoneless CD, assigning this.deployer to a plain field
+    // does not trigger a view update. Force one so the template (which
+    // reads deployer.streamTitle and renders the log-viewer under an @if
+    // deployer check) actually picks up the new reference.
+    this.cdr.markForCheck();
   };
 
   onNext: StepOnNextFunction = () => {

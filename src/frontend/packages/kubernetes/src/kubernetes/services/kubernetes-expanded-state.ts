@@ -50,7 +50,7 @@ export class KubernetesPodExpandedStatusHelper {
     let readyContainers = 0;
 
     let reason = pod.status.phase ? pod.status.phase.toString() : '';
-    if (!!pod.status.reason) {
+    if (pod.status.reason) {
       reason = pod.status.reason;
     }
 
@@ -64,7 +64,7 @@ export class KubernetesPodExpandedStatusHelper {
 
       if (!!state.terminated && state.terminated.exitCode === 0) {
 
-      } else if (!!state.terminated) {
+      } else if (state.terminated) {
         if (state.terminated.reason.length === 0) {
           if (state.terminated.signal !== 0) {
             reason = `${KubernetesPodExpandedStatusTypes.INIT}:Signal:${state.terminated.signal}`;
@@ -92,9 +92,9 @@ export class KubernetesPodExpandedStatusHelper {
         const container = containerStatuses[i];
         const state = container.state || {};
         restarts += container.restartCount;
-        if (!!state.waiting) {
+        if (state.waiting) {
           reason = state.waiting.reason;
-        } else if (!!state.terminated) {
+        } else if (state.terminated) {
           reason = state.terminated.reason;
           if (!!state.terminated.signal && state.terminated.signal !== 0) {
             reason = `Signal:${state.terminated.signal}`;
@@ -115,7 +115,7 @@ export class KubernetesPodExpandedStatusHelper {
 
     if (!!pod.deletionTimestamp && pod.status.reason === KubernetesNodeConstants.NodeUnreachablePodReason) {
       reason = KubernetesPodExpandedStatusTypes.UNKNOWN;
-    } else if (!!pod.deletionTimestamp) {
+    } else if (pod.deletionTimestamp) {
       reason = KubernetesPodExpandedStatusTypes.TERMINATING;
     }
 

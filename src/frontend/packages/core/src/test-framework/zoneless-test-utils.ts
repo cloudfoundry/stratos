@@ -1,5 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ApplicationRef } from '@angular/core';
+import { ComponentFixture } from '@angular/core/testing';
 
 /**
  * Zoneless Testing Utilities

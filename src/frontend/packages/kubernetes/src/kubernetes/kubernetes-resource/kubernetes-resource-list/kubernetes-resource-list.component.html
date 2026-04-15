@@ -3,13 +3,13 @@
     <div class="sub-nav-menu-button">
       <div class="relative inline-block">
         <button class="btn btn-ghost sub-nav-menu-button__btn"
-          [class.sub-nav-menu-button__not-allowed]="!isNamespacedView"
+          [class.opacity-50]="!isNamespacedView"
           (click)="menuOpen = !menuOpen">
           @if (selectedNamespace) {
             <span class="stratos-icons sub-nav-menu-button__icon">namespace</span>
           }
-          <span class="sub-nav-menu-button__label">{{ selectedNamespace || 'All namespaces'}}</span>
-          <span class="material-symbols-outlined sub-nav-menu-button__arrow">arrow_drop_down</span>
+          <span class="flex-1 overflow-hidden text-left truncate whitespace-nowrap">{{ selectedNamespace || 'All namespaces'}}</span>
+          <span class="material-symbols-outlined m-0 ml-2.5">arrow_drop_down</span>
         </button>
         @if (menuOpen) {
           <div

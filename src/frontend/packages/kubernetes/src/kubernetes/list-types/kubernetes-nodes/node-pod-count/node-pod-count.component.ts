@@ -10,7 +10,6 @@ import { KubernetesNode } from '../../../store/kube.types';
 @Component({
   selector: 'app-node-pod-count',
   templateUrl: './node-pod-count.component.html',
-  styleUrls: ['./node-pod-count.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [AsyncPipe]

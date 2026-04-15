@@ -36,7 +36,7 @@
         }
         @if (policy.enabled) {
           <app-tile class="autoscaler-tab__latest-metrics">
-            @if (policy.scaling_rules.length == 0) {
+            @if (policy.scaling_rules.length === 0) {
               <app-card-app-usage></app-card-app-usage>
             }
             @if (policy.scaling_rules.length > 0) {
@@ -119,7 +119,7 @@
                         </tbody>
                       </table>
                     </div>
-                    @if (policy && policy.scaling_rules_form && policy.scaling_rules_form.length == 0) {
+                    @if (policy && policy.scaling_rules_form && policy.scaling_rules_form.length === 0) {
                       <div class="autoscaler-tab-table-no-record text-center py-8 text-gray-500 dark:text-gray-400"
                         >No scaling rules.
                       </div>
@@ -187,7 +187,7 @@
                         </tbody>
                       </table>
                     </div>
-                    @if (policy && policy.schedules && policy.schedules.specific_date && policy.schedules.specific_date.length == 0) {
+                    @if (policy && policy.schedules && policy.schedules.specific_date && policy.schedules.specific_date.length === 0) {
                       <div class="autoscaler-tab-table-no-record text-center py-8 text-gray-500 dark:text-gray-400"
                         >
                       No specific date schedule.</div>
@@ -252,7 +252,7 @@
                         </tbody>
                       </table>
                     </div>
-                    @if (policy && policy.schedules && policy.schedules.specific_date && policy.schedules.recurring_schedule.length == 0) {
+                    @if (policy && policy.schedules && policy.schedules.specific_date && policy.schedules.recurring_schedule.length === 0) {
                       <div class="autoscaler-tab-table-no-record text-center py-8 text-gray-500 dark:text-gray-400"
                         >
                       No recurring schedule.</div>
@@ -267,7 +267,7 @@
     }
     @if (showAutoscalerHistory$ | async) {
       <app-tile-group class="autoscaler-tile-events">
-        @if (!(appAutoscalerPolicy$ | async)) {
+        @if ((appAutoscalerPolicy$ | async) === false) {
           <span class="autoscaler-tile-events__no-policy">
             {{noPolicyMessageFirstLine}}. {{noPolicyMessageSecondLine.text}}
           </span>
@@ -319,7 +319,7 @@
                       </tbody>
                     </table>
                   </div>
-                  @if (scalingHistory.length == 0) {
+                  @if (scalingHistory.length === 0) {
                     <div class="autoscaler-tab-table-no-record text-center py-8 text-gray-500 dark:text-gray-400"
                       >
                     No events.</div>
@@ -328,7 +328,7 @@
               </app-card-content>
               <app-card-actions class="autoscaler-tab__actions">
                 <app-polling-indicator (poll)="fetchScalingHistory()"
-                  [manualPoll]="!(appAutoscalerScalingHistoryService.isFetchingEntity$ | async)"
+                  [manualPoll]="(appAutoscalerScalingHistoryService.isFetchingEntity$ | async) === false"
                   [isPolling]="(appAutoscalerScalingHistoryService.isFetchingEntity$ | async)">
                 </app-polling-indicator>
                 <button (click)="scaleHistoryPage()" class="btn btn-icon" aria-label="Open scale history">

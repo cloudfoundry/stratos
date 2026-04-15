@@ -1,65 +1,35 @@
-// Import your custom theme
-@use '../../theme.scss';
-
-// Vars
-$list-item-content-height: 200px;
-$list-item-content-min-height: 140px;
-
 .list-item {
-  border-radius: var(--border-radius);
-  overflow: hidden;
-  border: 1px solid var(--color-border);
-  transition: transform 0.2s ease;
-  background-color: var(--color-background-light);
+  @apply rounded-lg overflow-hidden border border-gray-300 bg-gray-100 transition-transform duration-200;
+}
 
-  &:hover {
-    transform: scale(1.02);
-  }
+.list-item:hover {
+  @apply scale-[1.02];
+}
 
-  &:active {
-    transform: scale(0.98);
-  }
+.list-item:active {
+  @apply scale-[0.98];
+}
 
-  &-content {
-    width: 100%;
-    height: $list-item-content-height;
-    display: flex;
-    flex-direction: column;
-    color: var(--color-layout-text);
-  }
+.list-item-content {
+  @apply w-full flex flex-col text-gray-800 h-[200px];
+}
 
-  &-logo {
-    width: 100%;
-    height: calc($list-item-content-height / 2 + 10px);
-    background-color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+.list-item-logo {
+  @apply w-full flex items-center justify-center bg-white h-[110px];
+}
 
-  &-info {
-    position: relative;
-    flex: 1;
-    border-top: 1px solid var(--color-border);
-    padding: 0 1em;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    word-wrap: break-word;
-    text-align: center;
-  }
+.list-item-info {
+  @apply relative flex-1 px-4 flex flex-col justify-center break-words text-center border-t border-gray-300;
+}
 
-  &__auto-height {
-    height: auto;
+.list-item__auto-height {
+  @apply h-auto;
+}
 
-    .list-item-info {
-      padding: 10px 0;
-    }
-  }
+.list-item__auto-height .list-item-info {
+  @apply py-2.5 px-0;
+}
 
-  &-svg {
-    position: absolute;
-    right: 10px;
-    top: 10px;
-  }
+.list-item-svg {
+  @apply absolute right-2.5 top-2.5;
 }

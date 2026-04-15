@@ -1,4 +1,5 @@
 import { DatePipe } from '@angular/common';
+import { provideHttpClient } from '@angular/common/http';
 import { CUSTOM_ELEMENTS_SCHEMA, importProvidersFrom } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
@@ -35,6 +36,7 @@ describe('AutoscalerMetricPageComponent', () => {
         TabNavService,
         CurrentUserPermissionsService,
         provideZonelessChangeDetection(),
+        provideHttpClient(),
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA]
     })

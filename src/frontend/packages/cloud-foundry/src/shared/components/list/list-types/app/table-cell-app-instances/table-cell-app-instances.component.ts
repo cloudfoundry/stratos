@@ -6,7 +6,6 @@ import { RunningInstancesComponent } from '../../../../running-instances/running
 @Component({
   selector: 'app-table-cell-app-instances',
   templateUrl: './table-cell-app-instances.component.html',
-  styleUrls: ['./table-cell-app-instances.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

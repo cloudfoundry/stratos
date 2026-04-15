@@ -1,6 +1,5 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { filter } from 'rxjs/operators';
 
 import { ITableColumn } from '../../../../core/src/shared/components/list/list-table/table.types';
 import {

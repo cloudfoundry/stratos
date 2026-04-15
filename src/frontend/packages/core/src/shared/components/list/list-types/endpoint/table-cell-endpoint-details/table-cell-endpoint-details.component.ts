@@ -7,7 +7,6 @@ import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-li
 @Component({
   selector: 'app-table-cell-endpoint-details',
   templateUrl: './table-cell-endpoint-details.component.html',
-  styleUrls: ['./table-cell-endpoint-details.component.scss'],
   standalone: true,
   imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -26,7 +25,7 @@ export class TableCellEndpointDetailsComponent extends TableCellCustom<EndpointM
 
   cell: EndpointListDetailsComponent;
 
-  @Input('row')
+  @Input()
   set row(row: EndpointModel) {
     super.row = row;
     const e = entityCatalog.getEndpoint(row.cnsi_type, row.sub_type).definition;

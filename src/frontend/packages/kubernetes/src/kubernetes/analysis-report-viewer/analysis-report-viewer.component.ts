@@ -11,7 +11,7 @@ export interface IReportViewer {
 @Component({
 selector: 'app-analysis-report-viewer',
   templateUrl: './analysis-report-viewer.component.html',
-  styleUrls: ['./analysis-report-viewer.component.scss'],
+
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -26,7 +26,7 @@ export class AnalysisReportViewerComponent implements OnDestroy {
 
   private id!: string;
 
-  @Input('report')
+  @Input()
   set report(report: AnalysisReport) {
     if (report === null || report.id === this.id) {
       return;

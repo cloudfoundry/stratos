@@ -125,7 +125,7 @@ export class ChangeCfUserRole extends CFStartAction implements EntityRequestActi
   options: HttpRequest<any>;
   updatingKey: string;
 
-  static generateUpdatingKey<T>(permissionType: OrgUserRoleNames | SpaceUserRoleNames, userGuid: string) {
+  static generateUpdatingKey(permissionType: OrgUserRoleNames | SpaceUserRoleNames, userGuid: string) {
     return `${permissionType}/${userGuid}`;
   }
 

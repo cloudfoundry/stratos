@@ -8,7 +8,7 @@ import {
   EndpointModel,
 } from '@stratosui/store';
 import { Observable } from 'rxjs';
-import { filter, first, map } from 'rxjs/operators';
+import { filter, map, take } from 'rxjs/operators';
 
 import { EndpointListDetailsComponent } from '../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 
@@ -28,7 +28,7 @@ export const coreEndpointListDetailsComponents: Type<EndpointListDetailsComponen
 
 export function endpointHasMetrics(endpointGuid: string, store: Store<EndpointOnlyAppState>): Observable<boolean> {
   return store.select(endpointEntitiesSelector).pipe(
-    first(),
+    take(1),
     map(state => !!state[endpointGuid].metadata && !!state[endpointGuid].metadata.metrics)
   );
 }
@@ -38,7 +38,7 @@ export function endpointHasMetricsByAvailable(store: Store<AppState>, endpointId
   return store.select(endpointsEntityRequestDataSelector(endpointId)).pipe(
     filter(endpoint => !!endpoint),
     map(endpoint => endpoint.metricsAvailable),
-    first()
+    take(1)
   );
 }
 

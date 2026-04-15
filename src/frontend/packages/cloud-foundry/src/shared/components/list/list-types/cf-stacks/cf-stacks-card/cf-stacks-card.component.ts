@@ -15,7 +15,6 @@ import { APIResource } from '@stratosui/store';
 @Component({
   selector: 'app-cf-stacks-card',
   templateUrl: './cf-stacks-card.component.html',
-  styleUrls: ['./cf-stacks-card.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

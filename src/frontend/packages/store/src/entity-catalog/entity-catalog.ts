@@ -62,7 +62,7 @@ export class EntityCatalog {
     const entityTypes = Array.from(this.entities.keys());
 
     const entitiesByEndpoint = new Map<string, string[]>();
-    this.entities.forEach((entity, key) => {
+    this.entities.forEach((entity, _key) => {
       const endpointType = entity.definition.endpoint?.type || 'unknown';
       if (!entitiesByEndpoint.has(endpointType)) {
         entitiesByEndpoint.set(endpointType, []);
@@ -108,7 +108,7 @@ export class EntityCatalog {
     // Group entities by endpoint type for better diagnostics
     const entitiesByEndpoint = new Map<string, string[]>();
 
-    this.entities.forEach((entity, key) => {
+    this.entities.forEach((entity, _key) => {
       const endpointType = entity.definition.endpoint?.type;
       if (endpointType && endpointType !== STRATOS_ENDPOINT_TYPE && !endpointTypeSet.has(endpointType)) {
         if (!entitiesByEndpoint.has(endpointType)) {
@@ -579,7 +579,7 @@ export class EntityCatalog {
       if (endpoint.definition.userRolesReducer) {
         const endpointState = endpoint.definition.userRolesReducer(state.endpoints[endpoint.type], action);
         oneChanged = oneChanged || !!endpointState;
-        if (!!endpointState) {
+        if (endpointState) {
           state = {
             ...state,
             endpoints: {

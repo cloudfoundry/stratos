@@ -1,4 +1,4 @@
-import { inject, Inject, Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { AppState } from '../../app-state';

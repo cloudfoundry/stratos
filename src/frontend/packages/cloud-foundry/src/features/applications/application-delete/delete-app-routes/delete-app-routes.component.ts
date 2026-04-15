@@ -11,7 +11,6 @@ import { AppDeleteRoutesListConfigService } from './app-delete-routes-list-confi
 @Component({
   selector: 'app-delete-app-routes',
   templateUrl: './delete-app-routes.component.html',
-  styleUrls: ['./delete-app-routes.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

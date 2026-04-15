@@ -60,7 +60,7 @@ export class VariablesTabComponent implements OnInit {
 
   envVars$!: Observable<{
     names: string[],
-    values: {}
+    values: Record<string, unknown>
   }>;
 
   envVarsDataSource: ListDataSource<ListAppEnvVar, ListAppEnvVar>;

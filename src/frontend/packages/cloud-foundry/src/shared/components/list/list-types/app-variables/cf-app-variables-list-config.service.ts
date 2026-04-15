@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { of as observableOf, Subject } from 'rxjs';
-import { filter, first, map, switchMap } from 'rxjs/operators';
+import { take, filter, map, switchMap } from 'rxjs/operators';
 
 import {
   ConfirmationDialogConfig,
@@ -12,8 +12,7 @@ import {
   IListConfig,
   IMultiListAction,
   ITableColumn,
-  ListViewTypes,
-} from '@stratosui/core';
+  ListViewTypes } from '@stratosui/core';
 import { entityCatalog } from '@stratosui/store';
 import { TableCellEditComponent } from '../../../../../../../core/src/shared/components/list/list-table/table-cell-edit/table-cell-edit.component';
 import { UpdateExistingApplication } from '../../../../../actions/application.actions';
@@ -37,7 +36,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
   envVarsDataSource: CfAppVariablesDataSource;
 
   private multiListActionDelete: IMultiListAction<ListAppEnvVar> = {
-    action: (items: ListAppEnvVar[]) => {
+    action: (_items: ListAppEnvVar[]) => {
       return this.dispatchDeleteAction(Array.from(this.envVarsDataSource.selectedRows().values()));
     },
     icon: 'delete',
@@ -111,7 +110,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
       }
     );
     return trigger$.pipe(
-      first(),
+      take(1),
       switchMap(() => entityReq$)
     );
   }

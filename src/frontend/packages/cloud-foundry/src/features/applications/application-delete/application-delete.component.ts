@@ -2,7 +2,7 @@ import { AsyncPipe, DatePipe } from '@angular/common';
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, ReplaySubject } from 'rxjs';
-import { filter, first, map, pairwise, shareReplay, startWith, switchMap, tap } from 'rxjs/operators';
+import { take, filter, map, pairwise, shareReplay, startWith, switchMap, tap } from 'rxjs/operators';
 
 import {
   AppMonitorComponentTypes,
@@ -10,8 +10,7 @@ import {
   LoadingPageComponent,
   PageHeaderComponent,
   StepComponent,
-  SteppersComponent,
-} from '@stratosui/core';
+  SteppersComponent } from '@stratosui/core';
 import {
   RouterNav,
   GeneralEntityAppState,
@@ -20,8 +19,7 @@ import {
   PaginationMonitor,
   PaginationMonitorFactory,
   RequestInfoState,
-  APIResource,
-} from '@stratosui/store';
+  APIResource } from '@stratosui/store';
 import {
   applicationEntityType,
   routeEntityType,
@@ -41,8 +39,7 @@ import {
   TableCellTCPRouteComponent,
   isServiceInstance,
   isUserProvidedServiceInstance,
-  ApplicationService,
-} from '@stratosui/cloud-foundry';
+  ApplicationService } from '@stratosui/cloud-foundry';
 
 
 @Component({
@@ -63,7 +60,7 @@ import {
     AppServiceBindingListConfigService
   ]
 })
-export class ApplicationDeleteComponent<T> {
+export class ApplicationDeleteComponent {
   private store = inject<Store<GeneralEntityAppState>>(Store);
   private applicationService = inject(ApplicationService);
   private paginationMonitorFactory = inject(PaginationMonitorFactory);
@@ -126,8 +123,7 @@ export class ApplicationDeleteComponent<T> {
       cellDefinition: {
         getValue: row => row.entity.name,
         getLink: row => `/applications/${row.metadata.guid}`,
-        newTab: true,
-      },
+        newTab: true },
       cellFlex: '1 0'
     },
     {
@@ -197,11 +193,11 @@ export class ApplicationDeleteComponent<T> {
     // Wait until we've finished fetching the application, fetch the related entities and monitor there progress.
     this.fetchingApplicationData$ = this.finishedFetchingApplication().pipe(
       filter(finished => finished),
-      first(),
+      take(1),
       tap(fetch),
       switchMap(() => this.fetchingRelated$),
       filter(fetching => !fetching),
-      first(),
+      take(1),
       shareReplay(1),
       startWith(true)
     );

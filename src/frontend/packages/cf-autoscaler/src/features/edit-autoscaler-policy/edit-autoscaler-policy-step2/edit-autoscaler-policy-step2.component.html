@@ -13,7 +13,7 @@
                 </h3>
               </div>
               <div class="card-content p-4">
-                @if (editIndex!=index) {
+                @if (editIndex !== index) {
                   <div class="text-content-text">
                     If average {{rule.metric_type}} {{rule.operator}} {{rule.threshold}}
                     {{getMetricUnit(rule.metric_type, rule.unit)}}
@@ -21,7 +21,7 @@
                     {{rule.cool_down_secs}} seconds.
                   </div>
                 }
-                @if (editIndex==index) {
+                @if (editIndex === index) {
                   <div class="space-y-4">
                     <form [formGroup]="editTriggerForm" validate class="flex flex-wrap items-center gap-2 text-sm">
                       <span>If average</span>
@@ -55,7 +55,7 @@
                         <input type="number" name="threshold" formControlName="threshold" required
                           placeholder="Threshold" class="input-sm">
                       </div>
-                      @if (getMetricUnit(editMetricType) == '') {
+                      @if (getMetricUnit(editMetricType) === '') {
                         <div class="form-group min-w-0 flex-shrink-0">
                           <input type="text" name="unit" formControlName="unit" placeholder="Unit" class="input-sm">
                         </div>
@@ -65,7 +65,7 @@
                         <input type="number" name="breach_duration_secs" formControlName="breach_duration_secs"
                           placeholder="Breach Duration" class="input-sm">
                       </div>
-                      <span>seconds, then {{editScaleType=='upper'?'add':'remove'}}</span>
+                      <span>seconds, then {{editScaleType==='upper'?'add':'remove'}}</span>
                       <div class="form-group min-w-0 flex-shrink-0">
                         <input type="number" name="adjustment" formControlName="adjustment" required
                           placeholder="Adjustment" class="input-sm">
@@ -109,12 +109,12 @@
                       }
                       @if (editTriggerForm.get('threshold').hasError('alertInvalidPolicyTriggerThresholdRange')) {
                         <div class="text-red-600 text-sm">
-                          @if (editScaleType=='upper') {
+                          @if (editScaleType==='upper') {
                             <span>
                               {{policyAlert.alertInvalidPolicyTriggerUpperThresholdRange}}
                             </span>
                           }
-                          @if (editScaleType!='upper') {
+                          @if (editScaleType!=='upper') {
                             <span>
                               {{policyAlert.alertInvalidPolicyTriggerLowerThresholdRange}}
                             </span>
@@ -133,12 +133,12 @@
                       }
                       @if (editTriggerForm.get('adjustment').hasError('alertInvalidPolicyTriggerStepRange')) {
                         <div class="text-red-600 text-sm">
-                          @if (editAdjustmentType=='value') {
+                          @if (editAdjustmentType==='value') {
                             <span>
                               {{policyAlert.alertInvalidPolicyTriggerStepRange}}
                             </span>
                           }
-                          @if (editAdjustmentType!='value') {
+                          @if (editAdjustmentType!=='value') {
                             <span>
                               {{policyAlert.alertInvalidPolicyTriggerStepPercentageRange}}
                             </span>
@@ -155,13 +155,13 @@
                 }
               </div>
               <div class="card-actions flex justify-end space-x-2 p-4 border-t">
-                @if (editIndex!=index) {
+                @if (editIndex !== index) {
                   <button id="autoscaler-policy-edit-edit" (click)="editTrigger(index)"
-                    [disabled]="editIndex!=-1" class="btn-icon" title="Edit">
+                    [disabled]="editIndex !== -1" class="btn-icon" title="Edit">
                     <span class="material-icons">edit</span>
                   </button>
                 }
-                @if (editIndex==index) {
+                @if (editIndex === index) {
                   <button id="autoscaler-policy-edit-done" (click)="finishTrigger()"
                     [disabled]="editTriggerForm.invalid" class="btn-icon text-green-600" title="Done">
                     <span class="material-icons">done</span>
@@ -177,7 +177,7 @@
         </app-tile-group>
       }
     </app-tile-grid>
-    <button id="autoscaler-policy-edit-add" (click)="addTrigger()" [disabled]="editIndex!=-1"
+    <button id="autoscaler-policy-edit-add" (click)="addTrigger()" [disabled]="editIndex !== -1"
     class="btn btn-primary mt-4">Add</button>
   </div>
 }

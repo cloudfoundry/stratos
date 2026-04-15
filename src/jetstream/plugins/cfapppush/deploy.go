@@ -454,11 +454,12 @@ func (cfAppPush *CFAppPush) getGitSCMSource(clientWebSocket *websocket.Conn, tem
 
 	log.Debugf("GitSCM SCM: %s, Source: %s, branch %s, url: %s", info.SCM, info.Project, info.Branch, loggerURL)
 	cloneDetails := CloneDetails{
-		Url:       cloneURL,
-		LoggerUrl: loggerURL,
-		Branch:    info.Branch,
-		Commit:    info.CommitHash,
-		SkipSSL:   skipSSL,
+		Url:         cloneURL,
+		LoggerUrl:   loggerURL,
+		Branch:      info.Branch,
+		Commit:      info.CommitHash,
+		SkipSSL:     skipSSL,
+		AccessToken: info.AccessToken,
 	}
 	info.CommitHash, err = cloneRepository(cloneDetails, clientWebSocket, tempDir)
 	if err != nil {
@@ -624,6 +625,9 @@ func cloneRepository(cloneDetails CloneDetails, clientWebSocket *websocket.Conn,
 	}
 
 	vcsGit := GetVCS()
+	if len(cloneDetails.AccessToken) > 0 {
+		vcsGit = GetVCS(withAccessToken(cloneDetails.AccessToken))
+	}
 
 	err := vcsGit.Create(cloneDetails.SkipSSL, tempDir, cloneDetails.Url, cloneDetails.Branch)
 	if err != nil {

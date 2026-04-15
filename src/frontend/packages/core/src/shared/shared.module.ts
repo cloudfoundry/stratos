@@ -47,10 +47,8 @@ import { EntityListViewComponent } from './components/list/list-generics/entity-
 import { ListHostDirective } from './components/list/list-generics/helpers/list-host.directive';
 import { ListViewComponent } from './components/list/list-generics/list-view/list-view.component';
 import {
-  TableCellRequestMonitorIconComponent,
-} from './components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
+  } from './components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
 import {
-  TableCellSidePanelComponent,
 } from './components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
 import { TableCellStatusDirective } from './components/list/list-table/table-cell-status.directive';
 import { listTableComponents } from './components/list/list-table/table-components';

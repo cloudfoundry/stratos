@@ -1,10 +1,10 @@
-import { Component, Input, OnInit, computed, inject, ChangeDetectionStrategy, Injector, runInInjectionContext } from '@angular/core';
+import { Component, Input, OnInit, computed, inject, ChangeDetectionStrategy, ChangeDetectorRef, Injector, runInInjectionContext } from '@angular/core';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { AppState } from '@stratosui/store';
-import { combineLatest, Observable } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { take, map } from 'rxjs/operators';
 
 import { HomePageCardLayout } from '../../../../core/src/features/home/home.types';
 import { HomeCardShortcut } from '../../../../store/src/entity-catalog/entity-catalog.types';
@@ -20,7 +20,6 @@ import { HomeShortcutsComponent } from '../../../../core/src/features/home/home/
 @Component({
   selector: 'app-k8s-home-card',
   templateUrl: './kubernetes-home-card.component.html',
-  styleUrls: ['./kubernetes-home-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
@@ -56,6 +55,7 @@ export class KubernetesHomeCardComponent implements OnInit {
 
   private store = inject(Store<AppState>);
   private injector = inject(Injector);
+  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
     const guid = this.endpoint.guid;
@@ -88,8 +88,9 @@ export class KubernetesHomeCardComponent implements OnInit {
     this.podCount$ = pods$.pipe(map(entities => entities.length));
     this.nodeCount$ = nodes$.pipe(map(entities => entities.length));
     this.namespaceCount$ = namespaces$.pipe(map(entities => entities.length));
+    this.cdr.markForCheck();
 
-    KubernetesEndpointService.hasKubeTerminalEnabled(this.store).pipe(first()).subscribe(hasKubeTerminal => {
+    KubernetesEndpointService.hasKubeTerminalEnabled(this.store).pipe(take(1)).subscribe(hasKubeTerminal => {
       if (hasKubeTerminal) {
         this.shortcuts.push(
           {
@@ -102,7 +103,7 @@ export class KubernetesHomeCardComponent implements OnInit {
       }
     });
 
-    KubernetesEndpointService.kubeDashboardConfigured(this.store, guid).pipe(first()).subscribe(hasKubeDashboard => {
+    KubernetesEndpointService.kubeDashboardConfigured(this.store, guid).pipe(take(1)).subscribe(hasKubeDashboard => {
       if (hasKubeDashboard) {
         this.shortcuts.push(
           {

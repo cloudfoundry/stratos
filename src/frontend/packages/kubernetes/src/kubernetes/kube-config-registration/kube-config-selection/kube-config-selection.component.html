@@ -1,8 +1,8 @@
-@if (!(helper.clusters$ | async)) {
-  <div class="kube-config-select__panel">
-    <div class="kube-config-select__upload">
-      <app-custom-icon class="kube-config-select__icon">insert_drive_file</app-custom-icon>
-      <h1 class="kube-config-select__title">Select a Kube Config file to import clusters</h1>
+@if ((helper.clusters$ | async) === false) {
+  <div class="flex flex-1 items-center justify-center">
+    <div class="text-center">
+      <app-custom-icon class="text-[96px] h-24 w-24 opacity-70">insert_drive_file</app-custom-icon>
+      <h1 class="text-2xl text-center">Select a Kube Config file to import clusters</h1>
       <div class="kube-config-auth__form">
         <app-file-input placeholder="kubeconfig" (onFileData)="clustersParse($event)"
           buttonLabel="Select Kube Config file">
@@ -11,7 +11,7 @@
     </div>
   </div>
 } @else {
-  <div class="kube-config-select__table">
+  <div class="flex-1">
     <app-table [dataSource]="dataSource" [columns]="columns" minRowHeight="57px"></app-table>
   </div>
 }

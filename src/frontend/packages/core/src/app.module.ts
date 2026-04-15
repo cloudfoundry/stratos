@@ -333,7 +333,7 @@ export class AppModule {
     // Configure navigation behavior - hide CF-specific menu items when no CF endpoints are connected
     customizationService.set({
       ...customizationService.get(),
-      alwaysShowNavForEndpointTypes: (epType) => false
+      alwaysShowNavForEndpointTypes: (_epType) => false
     });
   }
 

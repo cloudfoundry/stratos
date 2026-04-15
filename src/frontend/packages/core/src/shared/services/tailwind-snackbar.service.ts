@@ -1,4 +1,4 @@
-import { Injectable, ComponentRef, ApplicationRef, Injector, EmbeddedViewRef, inject } from '@angular/core';
+import { Injectable, ApplicationRef, Injector, inject } from '@angular/core';
 import { Subject, Observable } from 'rxjs';
 
 export interface TailwindSnackBarConfig {
@@ -68,8 +68,14 @@ export class TailwindSnackBarService {
     document.body.appendChild(snackbarElement);
     this.snackbars.push(snackbarElement);
 
-    // Auto dismiss
-    const duration = config?.duration || 4000;
+    // Auto dismiss. Use ?? instead of || so that an explicit `duration: 0`
+    // from the caller means "do not auto-dismiss" (the standard convention)
+    // rather than being treated as falsy and falling back to the 4s default.
+    // Previously, callers that wanted a persistent error snackbar (e.g. the
+    // stepper's "Dismiss" action) had their explicit `duration: 0` silently
+    // overridden, causing the error to pop up and disappear before the user
+    // could read it.
+    const duration = config?.duration ?? 4000;
     if (duration > 0) {
       setTimeout(() => {
         snackbarRef.dismiss();

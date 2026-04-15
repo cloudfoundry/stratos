@@ -8,7 +8,7 @@ import { KubeAPIResource, PodLabel } from '../../../store/kube.types';
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-pod-tags',
   templateUrl: './kubernetes-pod-tags.component.html',
-  styleUrls: ['./kubernetes-pod-tags.component.scss'],
+
   standalone: true,
   imports: [AppChipsComponent]
 })

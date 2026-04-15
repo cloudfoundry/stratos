@@ -12,7 +12,7 @@ import { HELM_ENDPOINT_TYPE, HELM_HUB_ENDPOINT_TYPE } from '../helm-entity-facto
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-helm-hub-registration',
   templateUrl: './helm-hub-registration.component.html',
-  styleUrls: ['./helm-hub-registration.component.scss'],
+
   standalone: true,
   imports: [
     SteppersComponent,

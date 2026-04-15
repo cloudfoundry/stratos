@@ -34,6 +34,67 @@ Single source of truth for building, testing, and packaging Stratos.
 | `make test backend` | Backend tests only (Go) |
 | `make test e2e` | Playwright E2E tests against deployed instance |
 
+### Quality Gates
+
+| Command | What it does |
+|---------|-------------|
+| `make check` | Lint + gate (default — ESLint + go fmt/vet + Vitest) |
+| `make check lint` | Lint checks (ESLint + `go fmt` + `go vet`). Note: `go fmt` may modify files. |
+| `make check gate` | Full pre-push quality gate — mirrors what CI runs on each PR (ESLint + Vitest frontend tests + Go unit tests). Run this before every push. |
+| `make check tests` | Unit tests only |
+| `make check coverage` | Frontend unit tests with coverage (Vitest). No Go coverage. |
+| `make check e2e` | Playwright E2E core tests |
+
+Run `make check gate` before any push — it mirrors what CI runs on each PR.
+`make check e2e` requires a running Stratos instance (local or deployed);
+point it at a specific deployment via the `E2E_BASE_URL` environment
+variable (defaults to the local dev server at `https://localhost:5540`).
+
+#### E2E recipe variables
+
+`make check e2e` and `make test e2e` accept these recipe-level variables to
+control which browsers run and what artifacts get captured. All five compose
+freely — set any combination on one command line.
+
+| Variable | Purpose | Example |
+|----------|---------|---------|
+| `E2E_BROWSERS` | Pick which Playwright projects run. Comma-separated list (`chromium,firefox,webkit`), or `all` for every project in `playwright.config.ts`. Empty → `chromium` only (today's default). | `E2E_BROWSERS=firefox` |
+| `E2E_TRACE` | Force trace capture. Values: `on`, `off`, `retain-on-failure`, `on-first-retry`. Empty → uses `playwright.config.ts` default (`on-first-retry`). | `E2E_TRACE=on` |
+| `E2E_VIDEO` | Force video capture. Values: `on`, `off`, `retain-on-failure`, `on-first-retry`. Empty → uses `playwright.config.ts` default (`retain-on-failure`). | `E2E_VIDEO=on` |
+| `E2E_SCREENSHOTS` | Force screenshot capture. Values: `on`, `off`, `only-on-failure`. Empty → uses `playwright.config.ts` default (`only-on-failure`). | `E2E_SCREENSHOTS=on` |
+
+The cross-cutting `DRYRUN=yes` variable (also used by `bump`) lists tests
+that would run without executing them — useful for checking browser and
+filter combinations without spinning up a Stratos instance.
+
+**Common invocations:**
+
+```bash
+# Default — chromium only, config-default artifact handling
+make check e2e
+
+# Pick a single non-default browser
+make check e2e E2E_BROWSERS=firefox
+
+# Multiple browsers
+make check e2e E2E_BROWSERS=chromium,webkit
+
+# Every project in playwright.config.ts
+make check e2e E2E_BROWSERS=all
+
+# Capture full artifacts on every test (answers "are there images to look at?")
+make check e2e E2E_TRACE=on E2E_VIDEO=on E2E_SCREENSHOTS=on
+
+# Combine browser selection and artifact capture
+make check e2e E2E_BROWSERS=all E2E_TRACE=on E2E_VIDEO=on
+
+# List tests instead of executing (fast, no server spin-up)
+make check e2e DRYRUN=yes
+```
+
+Validation is delegated to Playwright — unknown browser names and unsupported
+artifact values produce clear errors from `playwright test` itself.
+
 ### Packaging and Release
 
 | Command | Prerequisites | What it does | Output |
@@ -64,19 +125,53 @@ Single source of truth for building, testing, and packaging Stratos.
 
 ### Version Management
 
+Stratos follows [SemVer 2.0.0](https://semver.org/) with a full prerelease
+lifecycle and automatic build metadata on every bump.
+
+**Lifecycle stages** (labels only — no auto-promotion; each stage is selected
+explicitly):
+
+```
+dev → alpha → beta → rc → prerelease → release
+```
+
+**Semver bumps** (strip any prerelease, then increment the component):
+
 | Command | Example input | Result |
 |---------|--------------|--------|
 | `make bump patch` | `v4.9.3-dev.38` | `v4.9.4` |
 | `make bump minor` | `v4.9.3-dev.38` | `v4.10.0` |
 | `make bump major` | `v4.9.3-dev.38` | `v5.0.0` |
+
+**Prerelease bumps** (operate on the current semver core — create `.1` if the
+stage is new, otherwise increment the counter):
+
+| Command | Example input | Result |
+|---------|--------------|--------|
 | `make bump dev` | `v4.9.3` | `v4.9.3-dev.1` |
 | `make bump dev` | `v4.9.3-dev.38` | `v4.9.3-dev.39` |
-| `make bump rc` | `v4.9.3-dev.38` | `v4.9.3-rc.1` |
+| `make bump alpha` | `v4.9.3-dev.38` | `v4.9.3-alpha.1` |
+| `make bump beta` | `v4.9.3-alpha.2` | `v4.9.3-beta.1` |
+| `make bump rc` | `v4.9.3-beta.1` | `v4.9.3-rc.1` |
 | `make bump rc` | `v4.9.3-rc.1` | `v4.9.3-rc.2` |
+| `make bump prerelease` | `v4.9.3-rc.2` | `v4.9.3-prerelease.1` |
 
-`bump major/minor/patch` strips any prerelease and bumps the component.
-`bump dev` and `bump rc` operate on the current base version without touching the semver core.
-For an explicit version string, use `build/version-bump.sh set vX.Y.Z-pre` directly.
+To strip the prerelease suffix and finalize a release, use `FINAL=strip` on
+the release verb — see [Finalizing a release](#finalizing-a-release) below.
+
+**Automatic build metadata.** Every `make bump` appends
+`+build.YYYYMMDD.SHORT-SHA` per SemVer 2.0.0, e.g.
+`v4.9.3-dev.42+build.20260410.79d3982a`. Build metadata is ignored by version
+precedence rules but provides traceability from binary to source.
+
+**Explicit set.** For an arbitrary version string, call the script directly:
+
+```bash
+./build/version-bump.sh set v5.0.0-rc.1
+```
+
+**Preview a bump** without writing files: use `DRYRUN=yes` (see
+[Cross-cutting variables](#cross-cutting-variables) below).
 
 ### Metadata and Diagnostics
 
@@ -85,6 +180,44 @@ For an explicit version string, use `build/version-bump.sh set vX.Y.Z-pre` direc
 | `make stamp frontend` | Generate `build-info.ts` with version and git metadata |
 | `make dump version` | Print resolved semver, VCS metadata, and Go ldflags |
 | `make dump actions` | List all registered verb+modifier pairs |
+
+### Cross-cutting variables
+
+These variables compose with any verb and affect behavior without changing
+the command shape.
+
+| Variable | What it does |
+|----------|-------------|
+| `DRYRUN=yes` | Preview actions without executing. Wired to `bump` (prints the new version without writing `package.json`) and to `check e2e` / `test e2e` (passes `--list` to Playwright, listing tests without running them). |
+| `FINAL=strip` | Strip prerelease suffix from the version (persisted to `package.json`), then re-invoke Make with the remaining goals. Useful as a one-shot finalize-then-package on the release verb. |
+| `VERSION=...` | Override the version from `package.json` for this invocation only (not persisted). |
+| `PLATFORM=...` | Override backend build platform (e.g. `darwin/arm64`, `linux/amd64`). |
+
+#### Finalizing a release
+
+`FINAL=strip` on the `release` verb first strips the prerelease suffix from
+`package.json` (via `version-bump.sh bump release`) and then re-executes the
+original make goals. The typical finalize-and-package flow:
+
+```bash
+# Current: v5.0.0-rc.2+build...
+make release cf FINAL=strip
+# → Strips prerelease: v5.0.0
+# → Re-invokes: make release cf
+# → Produces: dist/stratos-cf-v5.0.0.zip
+```
+
+`FINAL=strip` errors out if the current version is already a release (no
+prerelease to strip). The only supported value is `strip`; any other value
+errors out.
+
+#### Preview a bump
+
+```bash
+make bump dev DRYRUN=yes
+# Prints: v4.9.3-dev.43+build.20260410.79d3982a
+# package.json is not modified.
+```
 
 ### Common Workflows
 
@@ -99,10 +232,14 @@ dist/install/run.sh
 **CF deployment:**
 
 ```bash
-# Build and package in one command (cf modifier forces linux/amd64):
+# Bump dev version for a unique artifact name, then build + package:
+make bump dev
 make build release cf
 
-# Or with explicit version override:
+# Finalize a prerelease and package in one shot:
+make build release cf FINAL=strip
+
+# Explicit version override (not persisted to package.json):
 make VERSION=v5.0.0 build release cf
 
 # Deploy (via site.mk or manually):

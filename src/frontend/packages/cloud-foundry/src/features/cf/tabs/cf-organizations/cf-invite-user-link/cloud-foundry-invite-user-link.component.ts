@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { take, map } from 'rxjs/operators';
 
 import { CardWrapperComponent, CardContentComponent } from '../../../../../../../core/src/shared/components/cards';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
@@ -48,7 +48,7 @@ export class CloudFoundryInviteUserLinkComponent implements OnInit {
 
   createInviteUserDetails(cfGuid: string, orgGuid: string, spaceGuid?: string): Observable<UserInviteStepperLink> {
     return this.userInviteService.canShowInviteUser(cfGuid, orgGuid, spaceGuid).pipe(
-      first(),
+      take(1),
       map(canInvite => canInvite ? {
         url: createCfOrgSpaceSteppersUrl(cfGuid, '/users/invite', orgGuid, spaceGuid),
         text: `You can invite users to this ${spaceGuid ? 'space' : 'organization'} via email.`

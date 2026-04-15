@@ -8,7 +8,6 @@ import { cfEntityCatalog } from '../../../cf-entity-catalog';
 @Component({
   selector: 'app-running-instances',
   templateUrl: './running-instances.component.html',
-  styleUrls: ['./running-instances.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

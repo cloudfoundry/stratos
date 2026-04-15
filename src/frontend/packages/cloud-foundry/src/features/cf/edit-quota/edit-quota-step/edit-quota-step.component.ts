@@ -3,7 +3,7 @@ import { Component, OnDestroy, ViewChild, ChangeDetectionStrategy, inject } from
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
-import { filter, first, map, pairwise, tap } from 'rxjs/operators';
+import { take, filter, map, pairwise, tap } from 'rxjs/operators';
 
 import { safeUnsubscribe, StepOnNextFunction } from '@stratosui/core';
 import { AppState, ActionState, APIResource } from '@stratosui/store';
@@ -52,7 +52,7 @@ export class EditQuotaStepComponent implements OnDestroy {
 
   fetchQuotaDefinition() {
     this.quotaDefinition$ = cfEntityCatalog.quotaDefinition.store.getEntityService(this.quotaGuid, this.cfGuid, {}).waitForEntity$.pipe(
-      first(),
+      take(1),
       map(data => data.entity),
       tap((resource) => this.quota = resource.entity)
     );
@@ -60,7 +60,7 @@ export class EditQuotaStepComponent implements OnDestroy {
     this.quotaSubscription = this.quotaDefinition$.subscribe();
   }
 
-  validate = () => this.form && this.form.valid();
+  validate = () => !!this.form && this.form.valid() && this.form.formGroup.dirty;
 
   submit: StepOnNextFunction = () =>
     cfEntityCatalog.quotaDefinition.api.update<ActionState>(this.quotaGuid, this.cfGuid, this.form.formGroup.getRawValue()).pipe(

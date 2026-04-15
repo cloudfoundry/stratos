@@ -1,17 +1,13 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { take,  } from 'rxjs/operators';
 
 import {
-  CurrentUserPermissionsService,
-  ConfirmationDialogService,
   ListComponent,
   ListConfig,
   NoContentMessageComponent,
 } from '@stratosui/core';
-import { CFAppState } from '../../../../../../../cf-app-state';
 import {
   CfAppRoutesListConfigService,
 } from '../../../../../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
@@ -21,7 +17,6 @@ import { ApplicationService } from '../../../../../application.service';
 @Component({
   selector: 'app-routes-tab',
   templateUrl: './routes-tab.component.html',
-  styleUrls: ['./routes-tab.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
@@ -45,7 +40,7 @@ export class RoutesTabComponent implements OnInit {
 
   ngOnInit() {
     this.appService.orgDomains$.pipe(
-      first()
+      take(1)
     ).subscribe();
   }
 

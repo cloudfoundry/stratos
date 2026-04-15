@@ -4,7 +4,17 @@ import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild, Chang
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { GitBranch, GitCommit, gitEntityCatalog, GitRepo, GitSCM, GitSCMService, GitSCMType } from '@stratosui/git';
+import {
+  BaseSCM,
+  GitBranch,
+  GitCommit,
+  gitEntityCatalog,
+  GitHubSCM,
+  GitRepo,
+  GitSCM,
+  GitSCMService,
+  GitSCMType,
+} from '@stratosui/git';
 import {
   combineLatest,
   combineLatest as observableCombineLatest,
@@ -16,9 +26,9 @@ import {
 } from 'rxjs';
 import {
   catchError,
+  defaultIfEmpty,
   distinctUntilChanged,
   filter,
-  first,
   map,
   pairwise,
   publishReplay,
@@ -117,6 +127,12 @@ export class DeployApplicationStep2Component
   // We don't have any repositories to suggest initially - need user to start typing
   suggestedRepos$!: Observable<GitSuggestedRepo[]>;
 
+  // GitHub Enterprise / private repo support
+  isInvalidGithubEnterpriseUrl = false;
+  githubEnterpriseUrl: string;
+  accessToken: string;
+  // --------------
+
   // Git URL
   gitUrl!: string;
   gitUrlBranchName!: string;
@@ -146,11 +162,13 @@ export class DeployApplicationStep2Component
       gitEntityCatalog.repo.store.getRepoInfo.getEntityService({
         projectName: this.repository,
         scm: this.scm,
-      }).waitForEntity$.pipe(first()).subscribe(repo => {
+      }).waitForEntity$.pipe(take(1), defaultIfEmpty(null)).subscribe(repo => {
+        if (!repo) { return; }
         this.store.dispatch(new SaveAppDetails({
           projectName: this.repository,
           branch: this.repositoryBranch,
           url: repo.entity.clone_url,
+          accessToken: this.accessToken,
           commit: this.isRedeploy ? this.commitInfo.sha : undefined,
           endpointGuid: this.sourceType.endpointGuid,
         }, null));
@@ -181,7 +199,7 @@ export class DeployApplicationStep2Component
     this.sourceType$ = combineLatest(
       this.appDeploySourceTypes.getAutoSelectedType(this.route),
       this.store.select(selectSourceType),
-      this.appDeploySourceTypes.types$.pipe(first(), map(st => st[this.INITIAL_SOURCE_TYPE]))
+      this.appDeploySourceTypes.types$.pipe(take(1), map(st => st[this.INITIAL_SOURCE_TYPE]))
     ).pipe(
       map(([sourceFromParam, sourceFromStore, sourceDefault]) => sourceFromParam || sourceFromStore || sourceDefault),
       filter(sourceType => !!sourceType),
@@ -199,7 +217,7 @@ export class DeployApplicationStep2Component
 
 
     const setInitialSourceType$ = this.sourceType$.pipe(
-      first(),
+      take(1),
       tap(sourceType => {
         this.setSourceType(sourceType);
         this.sourceType = sourceType;
@@ -281,7 +299,7 @@ export class DeployApplicationStep2Component
             branch => branch.name === branchName
           );
         }),
-        map(([branches, branchName]) => branches),
+        map(([branches, _branchName]) => branches),
         publishReplay(1),
         refCount()
       );
@@ -309,7 +327,7 @@ export class DeployApplicationStep2Component
               this.commitSubscription.unsubscribe();
             }
             this.commitSubscription = commitEntityService.waitForEntity$.pipe(
-              first(),
+              take(1),
               map(p => p.entity),
               tap(p => this.commitInfo = p),
             ).subscribe();
@@ -355,12 +373,46 @@ export class DeployApplicationStep2Component
     this.subscriptions.push(setProjectName.subscribe());
 
     this.suggestedRepos$ = this.sourceSelectionForm.valueChanges.pipe(
+      tap(form => {
+        this.applyGithubEnterpriseAndToken(form?.githubEnterpriseUrl, form?.githubAccessToken);
+      }),
       map(form => form.projectName),
       startWith(''),
       pairwise(),
       filter(([oldName, newName]) => oldName !== newName),
       switchMap(([, newName]) => this.updateSuggestedRepositories(newName))
     );
+  }
+
+  // Forwards the two optional inputs (GHE base URL, GitHub PAT) into the
+  // active GitHubSCM instance so that subsequent repo/branch/commit API calls
+  // target the right host with the right Authorization header. Silent no-op
+  // when the active SCM is not GitHub (e.g. GitLab selected).
+  private applyGithubEnterpriseAndToken(enterpriseUrl: string | undefined, token: string | undefined) {
+    if (!this.scm) {
+      return;
+    }
+    const isValidUrl = (input: string) => {
+      try {
+        return Boolean(new URL(input));
+      } catch {
+        return false;
+      }
+    };
+
+    this.isInvalidGithubEnterpriseUrl = !!enterpriseUrl && !isValidUrl(enterpriseUrl);
+
+    if (enterpriseUrl && !this.isInvalidGithubEnterpriseUrl) {
+      (this.scm as unknown as BaseSCM).setPublicApi(enterpriseUrl);
+    }
+
+    if (this.scm.getType() === 'github') {
+      if (token) {
+        (this.scm as GitHubSCM).setAccessToken(token);
+      } else {
+        (this.scm as GitHubSCM).clearAccessToken();
+      }
+    }
   }
 
   updateSuggestedRepositories(name: string): Observable<GitSuggestedRepo[]> {
@@ -376,7 +428,7 @@ export class DeployApplicationStep2Component
     return observableTimer(500).pipe(
       take(1),
       switchMap(() => this.scm.getMatchingRepositories(this.httpClient, name)),
-      catchError(e => observableOf(null)),
+      catchError(_e => observableOf(null)),
       tap(suggestions => (this.cachedSuggestions as { [key: string]: any })[cacheName] = suggestions),
     );
   }

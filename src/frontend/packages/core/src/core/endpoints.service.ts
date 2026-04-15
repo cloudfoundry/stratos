@@ -14,10 +14,9 @@ import {
   RouterNav,
   EndpointHealthCheck,
   EndpointModel,
-  EndpointState,
-} from '@stratosui/store';
+  EndpointState } from '@stratosui/store';
 import { combineLatest as observableCombineLatest, Observable, of } from 'rxjs';
-import { catchError, filter, first, map, skipWhile, switchMap, take, tap, timeout, withLatestFrom } from 'rxjs/operators';
+import { catchError, filter, map, take, withLatestFrom } from 'rxjs/operators';
 
 import { endpointHasMetricsByAvailable } from '../features/endpoints/endpoint-helpers';
 import { SessionService } from '../shared/services/session.service';
@@ -203,7 +202,7 @@ export class EndpointsService {
 
   public checkAllEndpoints() {
     this.endpoints$.pipe(
-      first(),
+      take(1),
       catchError((error): Observable<IRequestEntityTypeState<EndpointModel>> => {
         console.error('Error checking all endpoints:', error);
         return of({} as IRequestEntityTypeState<EndpointModel>);
@@ -334,7 +333,7 @@ export const endpointsGuard: CanActivateFn = (
 
       return false;
     }),
-    first(), // Complete the observable after first emission to prevent router navigation hang
+    take(1), // Complete the observable after first emission to prevent router navigation hang
     catchError(error => {
       console.error('Error in endpoints guard:', error);
       return of(true); // Allow navigation on error to prevent blocking

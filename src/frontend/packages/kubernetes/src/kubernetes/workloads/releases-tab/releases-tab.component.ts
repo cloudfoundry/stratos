@@ -1,4 +1,4 @@
-import {Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import {Component, OnInit, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AppState } from '@stratosui/store';
 import { endpointOfTypeSelector } from '@stratosui/store';
@@ -16,7 +16,7 @@ import { KubernetesNamespacesFilterService } from '../list-types/kube-namespaces
 @Component({
 selector: 'app-releases-tab',
   templateUrl: './releases-tab.component.html',
-  styleUrls: ['./releases-tab.component.scss'],
+
   providers: [
     {
       provide: ListConfig,

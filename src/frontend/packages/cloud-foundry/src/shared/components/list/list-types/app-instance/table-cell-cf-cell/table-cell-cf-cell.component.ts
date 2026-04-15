@@ -14,7 +14,6 @@ import { ListAppInstance } from '../app-instance-types';
 @Component({
   selector: 'app-table-cell-cf-cell-usage',
   templateUrl: './table-cell-cf-cell.component.html',
-  styleUrls: ['./table-cell-cf-cell.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
@@ -29,7 +28,7 @@ export class TableCellCfCellComponent extends TableCellCustom<ListAppInstance> i
   cellLink!: string;
   fetchMetricsSub!: Subscription;
 
-  @Input('config')
+  @Input()
   set config(config: {
     metricEntityService: EntityService<IMetrics<IMetricMatrixResult<IMetricCell>>>;
     cfGuid: string;

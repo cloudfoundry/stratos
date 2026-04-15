@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
-import { CustomTooltipDirective } from '@stratosui/core';
+import { CustomTooltipDirective } from '../../../../custom-tooltip/custom-tooltip.directive';
 import { RouterModule } from '@angular/router';
 import { entityCatalog, EndpointModel, stratosEntityCatalog } from '@stratosui/store';
 import { Observable } from 'rxjs';
@@ -31,7 +31,7 @@ export class TableCellEndpointNameComponent extends TableCellCustom<EndpointMode
 
   public endpoint$!: Observable<any>;
 
-  @Input('row')
+  @Input()
   set row(row: EndpointModel | RowWithEndpointId) {
     super.row = row;
     /* tslint:disable-next-line:no-string-literal */

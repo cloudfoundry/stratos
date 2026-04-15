@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input, signal  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, Input, signal  } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { MetricsStratosAction, AppState, EndpointModel } from '@stratosui/store';
@@ -38,10 +38,10 @@ export class MetricsEndpointDetailsComponent extends EndpointListDetailsComponen
   public guid = this._guid.asReadonly();
   public guid$: Observable<string>;
 
-  constructor(
-    public store: Store<AppState>,
-    private metricsService: MetricsService
-  ) {
+  public store = inject<Store<AppState>>(Store);
+  private metricsService = inject(MetricsService);
+
+  constructor() {
     super();
 
     const endpoints$ = this.metricsService.metricsEndpoints$.pipe(

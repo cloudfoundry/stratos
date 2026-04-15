@@ -13,7 +13,7 @@ export class MarkdownContentObserverDirective implements OnDestroy {
 
   constructor() {
     this.observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation, index) => {
+      mutations.forEach((mutation, _index) => {
         if (mutation.type === 'childList') {
           this.ngZone.runOutsideAngular(() => {
             this.innerHtmlRendered.emit();

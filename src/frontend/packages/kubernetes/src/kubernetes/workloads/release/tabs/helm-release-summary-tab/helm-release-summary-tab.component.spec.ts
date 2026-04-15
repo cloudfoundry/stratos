@@ -6,15 +6,9 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { SidePanelService, TabNavService } from '@stratosui/core';
 import {
   CATALOGUE_ENTITIES,
-  entityCatalog,
-  EntityCatalogFeatureModule,
-  TestEntityCatalog,
 } from '@stratosui/store';
-import { generateStratosEntities } from '@stratosui/store';
-import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 
 import { generateHelmEntities } from '../../../../../helm/helm-entity-generator';
-import { kubeEntityCatalog } from '../../../../kubernetes-entity-generator';
 import { KubernetesBaseTestModules, KubeBaseGuidMock } from '../../../../kubernetes.testing.module';
 import { KubernetesAnalysisService } from '../../../../services/kubernetes.analysis.service';
 import { KubernetesEndpointService } from '../../../../services/kubernetes-endpoint.service';

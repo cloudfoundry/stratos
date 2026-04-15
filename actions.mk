@@ -23,9 +23,13 @@ $(_HIDE)FLAG_e2e         := $($(_HIDE)WANT_E2E)
 $(_HIDE)FLAG_dist        := $($(_HIDE)WANT_CLEAN_DIST)
 $(_HIDE)FLAG_version     := $($(_HIDE)WANT_VERSION)
 $(_HIDE)FLAG_actions     := $($(_HIDE)WANT_ACTIONS)
+$(_HIDE)FLAG_lint        := $($(_HIDE)WANT_LINT)
+$(_HIDE)FLAG_gate        := $($(_HIDE)WANT_GATE)
+$(_HIDE)FLAG_tests       := $($(_HIDE)WANT_TESTS)
+$(_HIDE)FLAG_coverage    := $($(_HIDE)WANT_COVERAGE)
 
 # Known modifiers — the set checked during validation in declare_verb
-$(_HIDE)KNOWN_MODS := frontend backend cf github e2e dist version actions
+$(_HIDE)KNOWN_MODS := frontend backend cf github e2e dist version actions lint gate tests coverage
 
 # Known verbs — populated by declare_verb, checked for collisions
 $(_HIDE)KNOWN_VERBS :=

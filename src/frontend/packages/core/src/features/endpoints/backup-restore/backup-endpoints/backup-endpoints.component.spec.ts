@@ -68,7 +68,7 @@ describe('BackupEndpointsComponent', () => {
 
     // Mock the getPaginationService to return a working observable with test endpoint data
     // This prevents the EmptyError that occurs when the component's constructor
-    // subscribes to an empty observable with first()
+    // subscribes to an empty observable with take(1)
     vi.spyOn(stratosEntityCatalog.endpoint.store.getAll, 'getPaginationService').mockReturnValue({
       entities$: of([testSCFEndpoint]),
       fetchingEntities$: of(false),

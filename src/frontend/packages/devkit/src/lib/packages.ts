@@ -99,7 +99,7 @@ export class Packages {
     if (fs.existsSync(pkgFile)) {
       try {
         pkg = JSON.parse(fs.readFileSync(pkgFile, 'utf8').toString());
-      } catch (e) { }
+      } catch (_e) { }
     }
     return pkg;
   }
@@ -299,7 +299,7 @@ export class Packages {
   }
 
   // Get any theming metadata - this allows a package to theme its own components using the theme
-  private getThemingConfig(pkg: PackageJson, packagePath: string): ThemingMetadata {
+  private getThemingConfig(pkg: PackageJson, _packagePath: string): ThemingMetadata {
     if (pkg.stratos && pkg.stratos.theming) {
       const refParts = pkg.stratos.theming.split('#');
       if (refParts.length === 2) {

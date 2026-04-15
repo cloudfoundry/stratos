@@ -8,7 +8,6 @@ import { IReportViewer } from '../analysis-report-viewer.component';
 changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-popeye-report-viewer',
   templateUrl: './popeye-report-viewer.component.html',
-  styleUrls: ['./popeye-report-viewer.component.scss'],
   standalone: true,
   imports: []
 })

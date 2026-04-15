@@ -2,7 +2,7 @@ class ObjectHelper {
     public getPath(object: any, path: string[]): any {
         try {
             return path.reduce((o, i) => o[i], object);
-        } catch (err) {
+        } catch (_err) {
             return null;
         }
     }

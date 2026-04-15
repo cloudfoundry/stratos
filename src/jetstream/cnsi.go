@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
@@ -699,6 +700,63 @@ func (p *portalProxy) updateTokenAuth(userGUID string, t api.TokenRecord) error 
 	return nil
 }
 
+func (p *portalProxy) startCNSITokenRefreshRoutines() error {
+	log.Debug("startCNSITokenRefreshRoutines")
+
+	tokenRepo, err := p.GetStoreFactory().TokenStore()
+	if err != nil {
+		log.Errorf(dbReferenceError, err)
+		return fmt.Errorf(dbReferenceError, err)
+	}
+
+	tokens, err := tokenRepo.ListAllEnabledConnectedCNSITokens(p.Config.EncryptionKeyInBytes)
+	if err != nil {
+		msg := "unable to list enabled and connected cnsi tokens: %v"
+		log.Errorf(msg, err)
+		return fmt.Errorf(msg, err)
+	}
+
+	for _, token := range tokens {
+		p.refreshRoutines.wg.Add(1)
+		go p.refreshToken(token)
+	}
+
+	return nil
+}
+
+func (p *portalProxy) refreshToken(token api.BackupTokenRecord) {
+	log.Debug("refreshToken")
+	defer p.refreshRoutines.wg.Done()
+	for {
+		endpoint, err := p.GetCNSIRecord(token.EndpointGUID)
+		if err != nil {
+			// Check if the endpoint doesn't exist anymore, if so shut down routine
+			// Depends on the implementation of EndpointRepository interface from api/cnsis.go,
+			// but all current implementations pass through to repository/cnsis/pgsql_cnsis.go line 308 eventually
+			if err.Error() == "No match for that Endpoint" {
+				log.Infof("endpoint '%v' no longer exists, shutting down token refresher routine", token.EndpointGUID)
+				return
+			}
+			// If any other error occurred, log it and retry
+			log.Errorf("could not get retrieve endpoint record to refresh cnsi token '%v': %v", token.TokenRecord.TokenGUID, err)
+			continue
+		}
+		expiry := time.Unix(token.TokenRecord.TokenExpiry, 0)
+		select {
+		case <-time.After(time.Until(expiry)):
+		case <-p.refreshRoutines.context.Done():
+			return
+		}
+
+		updatedTokenRecord, err := p.RefreshOAuthToken(endpoint.SkipSSLValidation, token.EndpointGUID, token.UserGUID, endpoint.ClientId, endpoint.ClientSecret, endpoint.TokenEndpoint)
+		if err != nil {
+			log.Errorf("could not refresh cnsi token '%v': %v", token.TokenRecord.TokenGUID, err)
+			continue
+		}
+		token.TokenRecord = updatedTokenRecord
+	}
+}
+
 func (p *portalProxy) setCNSITokenRecord(cnsiGUID string, userGUID string, t api.TokenRecord) error {
 	log.Debug("setCNSITokenRecord")
 	tokenRepo, err := p.GetStoreFactory().TokenStore()
@@ -712,6 +770,11 @@ func (p *portalProxy) setCNSITokenRecord(cnsiGUID string, userGUID string, t api
 		msg := "unable to save a CNSI Token: %v"
 		log.Errorf(msg, err)
 		return fmt.Errorf(msg, err)
+	}
+
+	if p.Config.AutoRefreshCNSITokens {
+		p.refreshRoutines.wg.Add(1)
+		go p.refreshToken(api.BackupTokenRecord{TokenRecord: t, UserGUID: userGUID, EndpointGUID: cnsiGUID})
 	}
 
 	return nil

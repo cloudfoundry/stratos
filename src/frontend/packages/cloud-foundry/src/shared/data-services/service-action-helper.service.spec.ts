@@ -3,7 +3,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { Store, StoreModule } from '@ngrx/store';
+import { StoreModule } from '@ngrx/store';
 
 import { ConfirmationDialogService } from '@stratosui/core';
 import { appReducers } from '@stratosui/store';

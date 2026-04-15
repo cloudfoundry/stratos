@@ -8,7 +8,6 @@ import { FeatureFlagDescriptions } from '../cf-feature-flags-data-source';
 @Component({
   selector: 'app-table-cell-feature-flag-description',
   templateUrl: './table-cell-feature-flag-description.component.html',
-  styleUrls: ['./table-cell-feature-flag-description.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: []

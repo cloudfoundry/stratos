@@ -3,14 +3,12 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { of } from 'rxjs';
 
 import { TabNavService } from '@stratosui/core';
 import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS, createBasicStoreModule } from '@stratosui/store/testing';
 import { generateCFEntities } from '../../../cf-entity-generator';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
-import { CloudFoundryOrganizationService } from '../services/cloud-foundry-organization.service';
 import { EditOrganizationComponent } from "./edit-organization.component";
 
 describe('EditOrganizationComponent', () => {

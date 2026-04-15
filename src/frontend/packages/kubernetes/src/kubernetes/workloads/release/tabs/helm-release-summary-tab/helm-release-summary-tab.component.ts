@@ -8,8 +8,8 @@ import { ConfirmationDialogConfig, ConfirmationDialogService, SidePanelService }
 import { ClearPaginationOfType } from '@stratosui/store';
 import { RouterNav } from '@stratosui/store';
 import { AppState } from '@stratosui/store';
-import { combineLatest, Observable } from 'rxjs';
-import { distinctUntilChanged, filter, first, map, publishReplay, refCount, startWith } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { take, distinctUntilChanged, filter, map } from 'rxjs/operators';
 
 import {
   PageSubNavComponent,
@@ -29,8 +29,7 @@ import { WorkloadLiveReloadComponent } from '../../workload-live-reload/workload
 import { SnackBarService } from '@stratosui/core';
 import { endpointsEntityRequestDataSelector } from '@stratosui/store';
 import {
-  ResourceAlertPreviewComponent,
-} from '../../../../analysis-report-viewer/resource-alert-preview/resource-alert-preview.component';
+  ResourceAlertPreviewComponent } from '../../../../analysis-report-viewer/resource-alert-preview/resource-alert-preview.component';
 import { KubernetesAnalysisService } from '../../../../services/kubernetes.analysis.service';
 import { HelmReleaseChartData } from '../../../workload.types';
 import { workloadsEntityCatalog } from '../../../workloads-entity-catalog';
@@ -41,7 +40,6 @@ import { ResourceAlert } from './../../../../services/analysis-report.types';
 @Component({
   selector: 'app-helm-release-summary-tab',
   templateUrl: './helm-release-summary-tab.component.html',
-  styleUrls: ['./helm-release-summary-tab.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
@@ -127,7 +125,6 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   public analyzerService = inject(KubernetesAnalysisService);
   private previewPanel = inject(SidePanelService);
   private injector = inject(Injector);
-
 
 
   constructor() {
@@ -311,7 +308,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
     return this.store.select(endpointsEntityRequestDataSelector(this.helmReleaseHelper.endpointGuid)).pipe(
       filter((e: any) => !!e),
       map((e: any) => e.name),
-      first()
+      take(1)
     );
   }
 
@@ -340,8 +337,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
       ResourceAlertPreviewComponent,
       {
         resource,
-        alerts,
-      }
+        alerts }
     );
   }
 }

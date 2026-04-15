@@ -20,7 +20,7 @@ type CertResponse = {
 @Component({
 selector: 'app-kube-config-table-cert',
   templateUrl: './kube-config-table-cert.component.html',
-  styleUrls: ['./kube-config-table-cert.component.scss'],
+
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
@@ -55,7 +55,7 @@ export class KubeConfigTableCertComponent extends TableCellCustom<KubeConfigFile
           // Success, no cert required
           (res: CertResponse) => this.update(res.Required),
           // Failed, check for specific cert required error
-          (e: HttpErrorResponse) => this.update(false)
+          (_e: HttpErrorResponse) => this.update(false)
         );
       }
     }

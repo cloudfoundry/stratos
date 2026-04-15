@@ -19,7 +19,6 @@ import { KubernetesService } from '../services/kubernetes.service';
 @Component({
   selector: 'app-kubernetes-dashboard',
   templateUrl: './kubernetes-dashboard.component.html',
-  styleUrls: ['./kubernetes-dashboard.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
@@ -120,7 +119,7 @@ export class KubernetesDashboardTabComponent implements OnInit {
   checkPageLoad() {
     let hasLoaded = false;
     const errMsg = this.getStratosError();
-    if (!!errMsg) {
+    if (errMsg) {
       hasLoaded = true;
       this.errorMsg.set({
         firstLine: errMsg,
@@ -130,7 +129,7 @@ export class KubernetesDashboardTabComponent implements OnInit {
     }
 
     const kdToolbar = this.getKubeDashToolbar();
-    if (!!kdToolbar) {
+    if (kdToolbar) {
       hasLoaded = true;
     }
     if (this.getKubeDashLogin()) {
@@ -184,7 +183,7 @@ export class KubernetesDashboardTabComponent implements OnInit {
 
     const height = this.expanded ? '48px' : '0px';
     const kdToolbar = this.getKubeDashToolbar();
-    if (!!kdToolbar) {
+    if (kdToolbar) {
       this.renderer.setStyle(kdToolbar, 'height', height);
       this.renderer.setStyle(kdToolbar, 'minHeight', height);
     }

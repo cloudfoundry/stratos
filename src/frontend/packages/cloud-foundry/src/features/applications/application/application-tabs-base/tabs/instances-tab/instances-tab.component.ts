@@ -16,7 +16,6 @@ import { ApplicationMonitorService } from '../../../../application-monitor.servi
 @Component({
   selector: 'app-instances-tab',
   templateUrl: './instances-tab.component.html',
-  styleUrls: ['./instances-tab.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

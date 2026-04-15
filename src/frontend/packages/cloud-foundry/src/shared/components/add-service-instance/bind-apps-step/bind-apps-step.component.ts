@@ -48,7 +48,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   stepperForm!: FormGroup<BindAppsForm>;
   guideText = 'Specify the application to bind (Optional)';
   selectedServicePlan!: APIResource<IServicePlan>;
-  bindingParams: object = {};
+  bindingParams: Record<string, unknown> = {};
   schemaFormConfig!: SchemaFormConfig;
 
   // Lifecycle management for subscriptions

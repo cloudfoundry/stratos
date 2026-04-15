@@ -1,5 +1,5 @@
 .sub-nav-menu-button {
-  @apply border border-gray-600 rounded ml-5 w-[200px];
+  @apply rounded ml-5 w-[200px];
 
   &__btn {
     @apply w-full;
@@ -10,18 +10,6 @@
     .btn-wrapper {
       @apply flex justify-start;
     }
-  }
-
-  &__label {
-    @apply flex-1 overflow-hidden text-left truncate whitespace-nowrap;
-  }
-
-  &__arrow {
-    @apply m-0 ml-2.5; // 10px = spacing[2.5]
-  }
-
-  &__not-allowed {
-    @apply opacity-50;
   }
 }
 

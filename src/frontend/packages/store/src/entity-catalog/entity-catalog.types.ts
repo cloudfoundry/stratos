@@ -1,4 +1,4 @@
-import type { Compiler, ComponentFactory, Injector } from '@angular/core';
+import type { Type } from '@angular/core';
 import type { Store } from '@ngrx/store';
 import type { Observable } from 'rxjs';
 
@@ -71,7 +71,7 @@ export interface HomeCardShortcut {
 
 // Metadata for Home Card
 export interface HomeCardMetadata {
-  component?: (compiler: Compiler, injector: Injector) => Promise<ComponentFactory<HomePageEndpointCard>>;
+  component?: () => Promise<Type<HomePageEndpointCard>>;
   shortcuts?: (endpointID: string) => HomeCardShortcut[];
   fullView?: boolean;
   columnSpan?: number;

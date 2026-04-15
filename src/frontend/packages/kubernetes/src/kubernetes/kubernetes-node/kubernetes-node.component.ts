@@ -2,7 +2,7 @@ import { AsyncPipe } from '@angular/common';
 import {Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { Observable } from 'rxjs';
-import { first, map, tap } from 'rxjs/operators';
+import { map, take, tap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../core/src/core/endpoints.service';
 import { PageHeaderComponent } from '../../../../core/src/shared/components/page-header/page-header.component';
@@ -15,7 +15,7 @@ import { KubernetesService } from '../services/kubernetes.service';
 @Component({
   selector: 'app-kubernetes-node',
   templateUrl: './kubernetes-node.component.html',
-  styleUrls: ['./kubernetes-node.component.scss'],
+
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
@@ -58,7 +58,7 @@ export class KubernetesNodeComponent {
 
 
     this.endpointsService.hasMetrics(this.kubeEndpointService.kubeGuid).pipe(
-      first(),
+      take(1),
       tap(haveMetrics => {
         if (!haveMetrics) {
           // Remove metrics tab

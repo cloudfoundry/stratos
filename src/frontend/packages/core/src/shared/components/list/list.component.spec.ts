@@ -1,17 +1,14 @@
-import { ChangeDetectorRef, CUSTOM_ELEMENTS_SCHEMA, NgZone, provideZonelessChangeDetection } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { Store } from '@ngrx/store';
 import { BehaviorSubject, of as observableOf } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { APIResource, EndpointModel, GeneralAppState, ListView, PaginationEntityState } from '@stratosui/store';
+import { EndpointModel, ListView } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { BaseTestModules } from '@test-framework/core-test.helper';
 
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
-import { getFilterFunction } from './data-sources-controllers/local-filtering-sorting';
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
 import { EndpointCardComponent } from './list-types/endpoint/endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from './list-types/endpoint/endpoint-list.helpers';

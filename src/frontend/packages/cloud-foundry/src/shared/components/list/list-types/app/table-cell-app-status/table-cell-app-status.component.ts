@@ -11,7 +11,6 @@ import { ApplicationStateData, ApplicationStateService } from '../../../../../se
 @Component({
   selector: 'app-table-cell-app-status',
   templateUrl: './table-cell-app-status.component.html',
-  styleUrls: ['./table-cell-app-status.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
@@ -22,7 +21,7 @@ export class TableCellAppStatusComponent extends TableCellCustom<APIResource<IAp
   private appStateService = inject(ApplicationStateService);
 
   applicationState!: ApplicationStateData;
-  @Input('config')
+  @Input()
   set config(value: { hideIcon: boolean, initialStateOnly: boolean, }) {
     super.config = value;
     value = value || {

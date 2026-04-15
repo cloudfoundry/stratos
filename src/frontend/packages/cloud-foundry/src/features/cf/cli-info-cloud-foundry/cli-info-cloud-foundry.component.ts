@@ -4,7 +4,7 @@ import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/cor
 import { CustomTooltipDirective } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { take, map } from 'rxjs/operators';
 
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
@@ -32,7 +32,6 @@ import { CloudFoundrySpaceService } from '../services/cloud-foundry-space.servic
 @Component({
   selector: 'app-cli-info-cloud-foundry',
   templateUrl: './cli-info-cloud-foundry.component.html',
-  styleUrls: ['./cli-info-cloud-foundry.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
@@ -94,7 +93,7 @@ export class CliInfoCloudFoundryComponent implements OnInit {
   ngOnInit() {
     this.setupRouteObservable(this.getDefaultBackLink());
     // Will auto unsubscribe as we are using 'first'
-    this.route$.pipe(first()).subscribe(route => {
+    this.route$.pipe(take(1)).subscribe(route => {
       this.previousUrl = route.url;
       this.previousQueryParams = route.queryParams;
     });
@@ -145,7 +144,7 @@ export class CliInfoCloudFoundryComponent implements OnInit {
           username: cf.entity.user ? cf.entity.user.name : ''
         };
       }),
-      first()
+      take(1)
     );
   }
 
@@ -170,7 +169,7 @@ export class CliInfoCloudFoundryComponent implements OnInit {
         }
         return [{ breadcrumbs }];
       }),
-      first()
+      take(1)
     );
   }
 

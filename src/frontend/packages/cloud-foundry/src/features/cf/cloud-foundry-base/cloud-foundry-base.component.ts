@@ -9,7 +9,6 @@ import { UserInviteConfigureService, UserInviteService } from '../user-invites/u
 @Component({
   selector: 'app-cloud-foundry-base',
   templateUrl: './cloud-foundry-base.component.html',
-  styleUrls: ['./cloud-foundry-base.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

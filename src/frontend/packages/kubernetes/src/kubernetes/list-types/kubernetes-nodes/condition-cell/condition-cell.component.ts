@@ -7,7 +7,7 @@ import { KubernetesNode } from '../../../store/kube.types';
 @Component({
   selector: 'app-condition-cell',
   templateUrl: './condition-cell.component.html',
-  styleUrls: ['./condition-cell.component.scss'],
+
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [BooleanIndicatorComponent]

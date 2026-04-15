@@ -1,6 +1,15 @@
-import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, ContentChildren, QueryList, AfterContentInit, ViewChild, TemplateRef  } from '@angular/core';
-import { CommonModule } from '@angular/common';
-
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  ContentChildren,
+  QueryList,
+  AfterContentInit,
+  ViewChild,
+  TemplateRef,
+} from "@angular/core";
 
 export interface MatTabChangeEvent {
   index: number;
@@ -8,15 +17,15 @@ export interface MatTabChangeEvent {
 }
 
 @Component({
-  selector: 'app-tab',
-  template: '<ng-template><ng-content></ng-content></ng-template>',
+  selector: "app-tab",
+  template: "<ng-template><ng-content></ng-content></ng-template>",
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomTabComponent {
-  @Input() label = '';
+  @Input() label = "";
   @Input() disabled = false;
-  @Input() textLabel = '';
+  @Input() textLabel = "";
 
   @ViewChild(TemplateRef, { static: true }) content!: TemplateRef<any>;
 
@@ -24,17 +33,17 @@ export class CustomTabComponent {
 }
 
 @Component({
-  selector: 'app-tab-group',
-  templateUrl: './custom-tabs.component.html',
-  styleUrls: ['./custom-tabs.component.scss'],
+  selector: "app-tab-group",
+  templateUrl: "./custom-tabs.component.html",
+  styleUrls: ["./custom-tabs.component.scss"],
   standalone: true,
-  imports: [CommonModule],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  imports: [],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomTabGroupComponent implements AfterContentInit {
   @Input() selectedIndex = 0;
-  @Input() backgroundColor = 'primary';
-  @Input() color = 'primary';
+  @Input() backgroundColor = "primary";
+  @Input() color = "primary";
 
   @Output() selectedIndexChange = new EventEmitter<number>();
   @Output() selectedTabChange = new EventEmitter<MatTabChangeEvent>();
@@ -59,7 +68,7 @@ export class CustomTabGroupComponent implements AfterContentInit {
     this.selectedIndexChange.emit(index);
     this.selectedTabChange.emit({
       index: index,
-      tab: newTab
+      tab: newTab,
     });
   }
 
@@ -68,6 +77,6 @@ export class CustomTabGroupComponent implements AfterContentInit {
   }
 
   getActiveTab() {
-    return this.getTabsArray().find(tab => tab.isActive);
+    return this.getTabsArray().find((tab) => tab.isActive);
   }
 }

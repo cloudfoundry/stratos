@@ -1,6 +1,6 @@
 import { DataSource } from '@angular/cdk/table';
 export type SortDirection = 'asc' | 'desc' | '';
-import { ApplicationRef, signal, Signal } from '@angular/core';
+import { ApplicationRef, signal } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
   entityCatalog,
@@ -28,11 +28,10 @@ import {
   Subscription,
 } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
-import {
+import { take,
   catchError,
   distinctUntilChanged,
   filter,
-  first,
   map,
   publishReplay,
   refCount,
@@ -196,10 +195,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     const transformedEntities$ = this.attachTransformEntity(entities$, this.transformEntity);
     const setResultCount = (paginationEntity: PaginationEntityState, entities: any[]) => {
       const newLength = entities.length;
-      const ids = paginationEntity.ids as Record<number, string[]>;
-      if (
-        ids[paginationEntity.currentPage] &&
-        (paginationEntity.totalResults !== newLength || paginationEntity.clientPagination.totalResults !== newLength)) {
+      if (paginationEntity.totalResults !== newLength || paginationEntity.clientPagination.totalResults !== newLength) {
         this.store.dispatch(new SetResultCount(this, this.paginationKey, newLength));
       }
     };
@@ -220,7 +216,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     // to be lost due to stale replays during subscriber churn.
     this.page$ = this.isLocal ? page$ : page$.pipe(
       withLatestFrom(this.isLoadingPage$.pipe(startWith(false))),
-      filter(([page, isLoading]) => !isLoading),
+      filter(([_page, isLoading]) => !isLoading),
       map(([page]) => page),
       publishReplay(1),
       refCount()
@@ -461,7 +457,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   selectedRowToggle(row: T, multiMode: boolean = true) {
     this.getRowState(row).pipe(
-      first(),
+      take(1),
       withLatestFrom(this.page$)
     ).subscribe(([rowState, filteredRows]) => {
       if (rowState.disabled) {
@@ -496,7 +492,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       const currentSelection = new Map(this._selectedRows());
       return combineLatest(filterEntities.reduce((obs: Observable<RowState>[], row: T) => {
         obs.push(this.getRowState(row).pipe(
-          first(),
+          take(1),
           tap((rowState: RowState) => {
             if (rowState.disabled) {
               return;
@@ -518,7 +514,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     }));
 
     updatedAllRows$.pipe(
-      first()
+      take(1)
     ).subscribe(() => {
       const currentSelection = this._selectedRows();
       const isSelecting = currentSelection.size > 0;
@@ -576,15 +572,15 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     return this._connectObs;
   }
 
-  public getFilterFromParams(pag: PaginationEntityState) {
+  public getFilterFromParams(_pag: PaginationEntityState) {
     // If data source is not local then this method must be overridden
     return '';
   }
-  public setFilterParam(filterParam: string, pag: PaginationEntityState) {
+  public setFilterParam(_filterParam: string, _pag: PaginationEntityState) {
     // If data source is not local then this method must be overridden
   }
 
-  public setMultiFilter(changes: ListPaginationMultiFilterChange[], params: PaginationParam) {
+  public setMultiFilter(_changes: ListPaginationMultiFilterChange[], _params: PaginationParam) {
 
   }
 

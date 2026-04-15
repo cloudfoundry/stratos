@@ -1,15 +1,14 @@
 
-import { Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { AbstractControl, ControlContainer, FormGroupDirective, ReactiveFormsModule, Validators } from '@angular/forms';
-import { CustomCheckboxComponent } from '../custom-checkbox/custom-checkbox.component';
-import { CustomFormFieldComponent } from '../custom-form-field/custom-form-field.component';
+import { CustomCheckboxComponent, MatCheckboxChange } from '../custom-checkbox/custom-checkbox.component';
+import { AppInputDirective, CustomFormFieldComponent } from '../custom-form-field/custom-form-field.component';
 
 const UNLIMITED = -1;
 
 @Component({
   selector: 'app-unlimited-input',
   templateUrl: './unlimited-input.component.html',
-  styleUrls: ['./unlimited-input.component.scss'],
   viewProviders: [
     {
       provide: ControlContainer,
@@ -17,8 +16,10 @@ const UNLIMITED = -1;
     }
   ],
   standalone: true,
+  host: { class: 'block' },
   imports: [
     ReactiveFormsModule,
+    AppInputDirective,
     CustomFormFieldComponent,
     CustomCheckboxComponent
 ]
@@ -34,9 +35,14 @@ export class UnlimitedInputComponent implements OnInit {
   @Input() suffix!: string;
   @Input() prefix!: string;
 
-  unlimited!: boolean;
+  unlimited = false;
   formControl!: AbstractControl;
   initialValue: any;
+
+  onCheckboxChange(event: MatCheckboxChange) {
+    this.unlimited = event.checked;
+    this.onChange();
+  }
 
   onChange() {
     if (this.unlimited) {
@@ -44,10 +50,12 @@ export class UnlimitedInputComponent implements OnInit {
       this.formControl.setValue('');
       this.formControl.disable();
     } else {
-      if (this.initialValue !== UNLIMITED) {
-        this.formControl.patchValue(this.initialValue);
-      }
       this.formControl.enable();
+      if (this.initialValue !== UNLIMITED && this.initialValue != null) {
+        this.formControl.patchValue(this.initialValue);
+      } else {
+        this.formControl.setValue('');
+      }
     }
   }
 

@@ -12,7 +12,6 @@ import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 @Component({
   selector: 'app-cloud-foundry-users',
   templateUrl: './cloud-foundry-users.component.html',
-  styleUrls: ['./cloud-foundry-users.component.scss'],
   providers: [{
     provide: ListConfig,
     useFactory: (

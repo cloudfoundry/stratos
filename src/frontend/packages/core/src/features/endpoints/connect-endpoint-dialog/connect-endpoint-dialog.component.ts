@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, OnDestroy, signal, Injector, inject
 import { AppProgressBarComponent } from '../../../shared/components/progress-bar/app-progress-bar.component';
 import { MAT_DIALOG_DATA, TailwindDialogRef } from '../../../shared/services/tailwind-dialog.service';
 import { Observable, Subscription } from 'rxjs';
-import { delay, first, startWith } from 'rxjs/operators';
+import { take, defaultIfEmpty, delay, startWith } from 'rxjs/operators';
 import { toObservable } from '@angular/core/rxjs-interop';
 
 import { EndpointsService } from '../../../core/endpoints.service';
@@ -74,6 +74,6 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   }
 
   public connect() {
-    this.connectService.submit().pipe(first()).subscribe();
+    this.connectService.submit().pipe(take(1), defaultIfEmpty(null)).subscribe();
   }
 }

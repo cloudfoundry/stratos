@@ -7,7 +7,7 @@ import { test, expect } from '../../fixtures/test-base';
  * 3. Profile settings shows light/dark/system buttons
  * 4. Login page displays branding from config
  *
- * Run: STRATOS_E2E_BASE_URL=https://console.run.adepttech.ca npx playwright test tests/core/branding.spec.ts
+ * Run: E2E_BASE_URL=https://console.run.adepttech.ca npx playwright test tests/core/branding.spec.ts
  */
 
 test.use({ viewport: { width: 1440, height: 900 } });

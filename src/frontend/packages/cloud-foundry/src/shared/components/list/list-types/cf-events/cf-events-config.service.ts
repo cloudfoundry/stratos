@@ -1,8 +1,8 @@
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { distinctUntilChanged, first, map } from 'rxjs/operators';
+import { take, distinctUntilChanged, map } from 'rxjs/operators';
 
-import { arraysEqual, valueOrCommonFalsy, ITableColumn, IListConfig, ListConfig, ListViewTypes } from '@stratosui/core';
+import { ITableColumn, IListConfig, ListConfig, ListViewTypes } from '@stratosui/core';
 import { AddParams, APIResource, PaginatedAction } from '@stratosui/store';
 import { CfEvent } from '../../../../../cf-api.types';
 import { CFAppState } from '../../../../../cf-app-state';
@@ -80,7 +80,7 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
 
   setActeeFilter(actee: string): void {
     this.getEventFilters().pipe(
-      first()
+      take(1)
     ).subscribe(currentFilters => {
       this.setEventFilters({
         actee,
@@ -103,8 +103,7 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
 
   getEventFilters(): Observable<{
     type: string[],
-    actee: string,
-  }> {
+    actee: string }> {
     return this.getDataSource().pagination$.pipe(
       distinctUntilChanged(),
       map(pag => QParam.fromStrings(pag.params.q as string[])),

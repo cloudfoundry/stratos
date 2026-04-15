@@ -9,8 +9,8 @@ import { test, expect } from '../../fixtures/test-base';
  * provides a visual indicator that more content exists below the fold.
  *
  * Run against adepttech:
- *   STRATOS_E2E_BASE_URL=https://console.run.adepttech.ca \
- *   STRATOS_E2E_PROFILE=adepttech npx playwright test dashboard-scroll-shadow
+ *   E2E_BASE_URL=https://console.run.adepttech.ca \
+ *   E2E_PROFILE=adepttech npx playwright test dashboard-scroll-shadow
  */
 
 /** Selector for the #content scroll container in dashboard-base */

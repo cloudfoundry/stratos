@@ -46,10 +46,7 @@ export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDire
   private editLimitValid = true;
 
   constructor() {
-    const service = inject(EditAutoscalerPolicyService);
-    const route = inject(ActivatedRoute);
-
-    super(service, route);
+    super();
     this.editLimitForm = this.fb.group<EditLimitForm>({
       instance_min_count: this.fb.nonNullable.control(0, [Validators.required, this.validateGlobalLimitMin()]),
       instance_max_count: this.fb.nonNullable.control(0, [Validators.required, this.validateGlobalLimitMax()]),

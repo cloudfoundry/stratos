@@ -11,7 +11,7 @@ import { createMonocularProviders } from '../monocular/stratos-monocular-provide
 @Component({
   selector: 'app-monocular',
   templateUrl: './monocular.component.html',
-  styleUrls: ['./monocular.component.scss'],
+
   providers: [
     ...createMonocularProviders()
   ],
@@ -40,7 +40,7 @@ export class MonocularChartViewComponent implements OnInit {
     const parts = this.route.snapshot.params;
     this.title = parts.chartName;
 
-    if (!!parts.version) {
+    if (parts.version) {
       breadcrumbs.push(
         { value: this.title, routerLink: this.chartService.getChartSummaryRoute(parts.repo, parts.chartName, null, this.route) }
       );

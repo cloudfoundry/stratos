@@ -1,24 +1,19 @@
-@use '../../theme.scss';
-
 .panel {
-  padding: 2em;
+  @apply p-8;
+}
 
-  &--container {
-    width: 80%;
-    margin-left: auto;
-    margin-right: auto;
-  }
+.panel--container {
+  @apply w-4/5 mx-auto;
+}
 
-  &--background {
-    background-color: var(--color-layout-light);
-  }
+.panel--background {
+  @apply bg-gray-50;
+}
 
-  &--border {
-    border-radius: var(--border-radius);
-    border: 1px solid #e1e5e9; // slightly darker than layout-light
-  }
+.panel--border {
+  @apply rounded-lg border border-gray-300;
+}
 
-  &__title {
-    margin-top: 0;
-  }
+.panel__title {
+  @apply mt-0;
 }

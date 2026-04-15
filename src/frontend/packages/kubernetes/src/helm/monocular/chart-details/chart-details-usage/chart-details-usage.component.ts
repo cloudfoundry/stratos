@@ -12,7 +12,6 @@ import { getMonocularEndpoint } from '../../stratos-monocular.helper';
 @Component({
   selector: 'app-chart-details-usage',
   templateUrl: './chart-details-usage.component.html',
-  styleUrls: ['./chart-details-usage.component.scss'],
   viewProviders: [MatIconRegistry],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,

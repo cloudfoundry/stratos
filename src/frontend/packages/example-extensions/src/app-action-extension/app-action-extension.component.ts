@@ -10,7 +10,6 @@ import { StratosAction, StratosActionType } from '@stratosui/core';
 @Component({
 selector: 'app-app-action-extension',
   templateUrl: './app-action-extension.component.html',
-  styleUrls: ['./app-action-extension.component.scss'],
   standalone: false
 })
 export class AppActionExtensionComponent implements OnInit {

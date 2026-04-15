@@ -2,7 +2,7 @@
 import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { take, defaultIfEmpty } from 'rxjs/operators';
 import { entityCatalog, FavoriteIconData, IFavoriteMetadata, UserFavorite, UserFavoriteManager } from '@stratosui/store';
 
 import { EntityFavoriteStarComponent } from '../../../../core/entity-favorite-star/entity-favorite-star.component';
@@ -60,7 +60,7 @@ export class FavoritesMetaCardComponent {
     const entityDef = entityCatalog.getEntity(this.favorite.endpointType, this.favorite.entityType);
     const isValidObs = (entityDef.builders.entityBuilder && entityDef.builders.entityBuilder.getIsValid) ?
     entityDef.builders.entityBuilder.getIsValid(this.favorite) : of(true);
-    isValidObs.pipe(first()).subscribe(isValid => {
+    isValidObs.pipe(take(1), defaultIfEmpty(false)).subscribe(isValid => {
       this.valid = isValid;
       if (!isValid) {
         const confirmation = new ConfirmationDialogConfig(

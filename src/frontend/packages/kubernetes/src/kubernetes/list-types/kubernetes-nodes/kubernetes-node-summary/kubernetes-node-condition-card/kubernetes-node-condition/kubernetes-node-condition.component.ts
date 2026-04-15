@@ -10,7 +10,6 @@ import { ConditionType, ConditionTypeLabels, KubernetesCondition } from '../../.
 @Component({
   selector: 'app-kubernetes-node-condition',
   templateUrl: './kubernetes-node-condition.component.html',
-  styleUrls: ['./kubernetes-node-condition.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [AsyncPipe, NgStyle, BooleanIndicatorComponent]

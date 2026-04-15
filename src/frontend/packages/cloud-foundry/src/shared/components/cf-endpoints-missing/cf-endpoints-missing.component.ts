@@ -1,7 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 
-import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import {
   EndpointMissingMessageParts,
   EndpointsMissingComponent,

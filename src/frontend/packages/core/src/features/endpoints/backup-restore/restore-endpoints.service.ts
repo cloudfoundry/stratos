@@ -2,8 +2,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, signal, computed, Injector, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { selectSessionData, GeneralEntityAppState, BrowserStandardEncoder, SessionData } from '@stratosui/store';
-import { combineLatest, Observable } from 'rxjs';
-import { filter, map, switchMap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 
 interface BackupContent {
@@ -83,7 +83,7 @@ export class RestoreEndpointsService {
   }
 
   setFile(file: any): Promise<string> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const reader = new FileReader();
       reader.onload = () => {
         const res = reader.result as string;

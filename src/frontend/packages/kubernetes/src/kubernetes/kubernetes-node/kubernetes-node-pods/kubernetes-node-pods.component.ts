@@ -10,7 +10,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-node-pods',
   templateUrl: './kubernetes-node-pods.component.html',
-  styleUrls: ['./kubernetes-node-pods.component.scss'],
+
   providers: [{
     provide: ListConfig,
     useClass: KubernetesNodePodsListConfigService,

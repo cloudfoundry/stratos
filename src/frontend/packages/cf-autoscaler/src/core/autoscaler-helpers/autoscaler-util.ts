@@ -181,7 +181,7 @@ export function buildLegendData(trigger: AppScalingTrigger): AppAutoscalerMetric
     latestUl = buildUpperLegendData(legendData, trigger.upper, noLowerRule);
   }
   if (trigger.lower && trigger.lower.length > 0) {
-    latestUl = buildLowerLegendData(legendData, trigger.lower, latestUl);
+    buildLowerLegendData(legendData, trigger.lower, latestUl);
   }
   return legendData;
 }

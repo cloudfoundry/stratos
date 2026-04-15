@@ -139,18 +139,18 @@ type BackupTokenRecord struct {
 
 // TokenRecord repsrents and endpoint or uaa token
 type TokenRecord struct {
-	TokenGUID      string
-	AuthToken      string
-	RefreshToken   string
-	TokenExpiry    int64
-	Disconnected   bool
-	AuthType       string
-	Metadata       string
-	SystemShared   bool
-	LinkedGUID     string // Indicates the GUID of the token that this token is linked to (if any)
-	Certificate    string
-	CertificateKey string
-	Enabled        bool
+	TokenGUID      string `json:"token_guid"`
+	AuthToken      string `json:"auth_token"`
+	RefreshToken   string `json:"refresh_token"`
+	TokenExpiry    int64  `json:"token_expiry"`
+	Disconnected   bool   `json:"disconnected"`
+	AuthType       string `json:"auth_type"`
+	Metadata       string `json:"metadata"`
+	SystemShared   bool   `json:"system_shared"`
+	LinkedGUID     string `json:"linked_guid"` // Indicates the GUID of the token that this token is linked to (if any)
+	Certificate    string `json:"certificate"`
+	CertificateKey string `json:"certificate_key"`
+	Enabled        bool   `json:"enabled"`
 }
 
 type CFInfo struct {
@@ -414,6 +414,7 @@ type PortalConfig struct {
 	LogLevel                           string   `configName:"LOG_LEVEL"`
 	UIListMaxSize                      int64    `configName:"UI_LIST_MAX_SIZE"`
 	UIListAllowLoadMaxed               bool     `configName:"UI_LIST_ALLOW_LOAD_MAXED"`
+	AutoRefreshCNSITokens              bool     `configName:"AUTOREFRESH_CNSI_TOKENS"`
 	CFAdminIdentifier                  string
 	CloudFoundryInfo                   *CFInfo
 	HTTPS                              bool

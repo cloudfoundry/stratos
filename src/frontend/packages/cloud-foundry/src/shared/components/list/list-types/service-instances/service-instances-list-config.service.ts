@@ -38,10 +38,6 @@ export class ServiceInstancesListConfigService extends CfServiceInstancesListCon
     const serviceActionHelperService = inject(ServiceActionHelperService);
 
     super(
-      store,
-      datePipe,
-      currentUserPermissionsService,
-      serviceActionHelperService,
       `/marketplace/${servicesService.cfGuid}/${servicesService.serviceGuid}/instances`
     );
     // Remove 'Service' column

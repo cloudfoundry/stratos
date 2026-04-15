@@ -3,7 +3,7 @@ import { AbstractControl, NG_ASYNC_VALIDATORS, Validator } from '@angular/forms'
 import { Store } from '@ngrx/store';
 import { GitSCMService, GitSCMType } from '@stratosui/git';
 import { Observable, of as observableOf } from 'rxjs';
-import { debounceTime, filter, first, map, tap } from 'rxjs/operators';
+import { take, debounceTime, filter, map, tap } from 'rxjs/operators';
 
 import { CFAppState, CheckProjectExists, selectDeployAppState } from '@stratosui/cloud-foundry';
 
@@ -41,12 +41,12 @@ export class GithubProjectExistsDirective implements Validator {
     return this.lastValue.length && this.lastValue.indexOf(name) === 0;
   }
 
-  private getTypeAndEndpoint(): [GitSCMType, string] {
+  private getTypeAndEndpointWithAuth(): [GitSCMType, string, string] {
     const res = this.appGithubProjectExists.split(',');
-    if (res.length === 2) {
-      return [res[0] as GitSCMType, res[1]];
+    if (res.length === 3) {
+      return [res[0] as GitSCMType, res[1], res[2]];
     }
-    console.warn('appGithubProjectExists value should be `<scm type>,<endpoint guid>');
+    console.warn('appGithubProjectExists value should be `<scm type>,<endpoint guid>,<access token>`');
     return null;
   }
 
@@ -57,14 +57,14 @@ export class GithubProjectExistsDirective implements Validator {
         return observableOf({
           githubProjectDoesNotExist: true,
           githubProjectError: ''
-        }).pipe(first());
+        }).pipe(take(1));
       }
       // We should check for a '/' char
       return this.store.select(selectDeployAppState).pipe(
         debounceTime(250),
         tap(createAppState => {
           if (createAppState.projectExists && createAppState.projectExists.name !== c.value) {
-            this.store.dispatch(new CheckProjectExists(this.scmService.getSCM(...this.getTypeAndEndpoint()), c.value));
+            this.store.dispatch(new CheckProjectExists(this.scmService.getSCM(...this.getTypeAndEndpointWithAuth()), c.value));
           }
         }),
         filter(createAppState =>
@@ -76,11 +76,11 @@ export class GithubProjectExistsDirective implements Validator {
             githubProjectDoesNotExist: !createAppState.projectExists.exists,
             githubProjectError: createAppState.projectExists.error ? createAppState.projectExists.data || '' : ''
           }),
-        first()
+        take(1)
       );
     } else {
       this.lastValue = c.value;
-      return observableOf(null).pipe(first());
+      return observableOf(null).pipe(take(1));
     }
   }
 

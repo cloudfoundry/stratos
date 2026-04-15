@@ -75,7 +75,7 @@ describe('UnlimitedInputComponent', () => {
 
   it('should disable input if checkbox checked', () => {
     const input: HTMLInputElement = element.querySelector('input[type=number]');
-    const checkbox: HTMLInputElement = element.querySelector('input[type=checkbox]');
+    const _checkbox: HTMLInputElement = element.querySelector('input[type=checkbox]');
 
     // Toggle the unlimited flag and call onChange
     component.unlimited = true;
@@ -87,7 +87,7 @@ describe('UnlimitedInputComponent', () => {
 
   it('should clear input when checkbox is checked', () => {
     const input: HTMLInputElement = element.querySelector('input[type=number]');
-    const checkbox: HTMLInputElement = element.querySelector('input[type=checkbox]');
+    const _checkbox: HTMLInputElement = element.querySelector('input[type=checkbox]');
     component.formControl.setValue(2);
     fixture.detectChanges();
     expect(input.value).toEqual('2');
@@ -101,7 +101,7 @@ describe('UnlimitedInputComponent', () => {
 
   it('should preserve the previous value when checking and unchecking', () => {
     const input: HTMLInputElement = element.querySelector('input[type=number]');
-    const checkbox: HTMLInputElement = element.querySelector('input[type=checkbox]');
+    const _checkbox: HTMLInputElement = element.querySelector('input[type=checkbox]');
     component.formControl.setValue(2);
     fixture.detectChanges();
     expect(input.value).toEqual('2');

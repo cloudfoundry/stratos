@@ -15,7 +15,6 @@ function isUserProvidedServiceInstance(
 @Component({
   selector: 'app-table-cell-service-instance-tags',
   templateUrl: './table-cell-service-instance-tags.component.html',
-  styleUrls: ['./table-cell-service-instance-tags.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
@@ -27,7 +26,7 @@ export class TableCellServiceInstanceTagsComponent
 
   tags: AppChip<IServiceInstance | IUserProvidedServiceInstance>[] = [];
 
-  @Input('row')
+  @Input()
   override set row(row: APIResource<IServiceInstance> | APIResource<IUserProvidedServiceInstance>) {
     this.pRow = row;
     if (row && row.entity) {

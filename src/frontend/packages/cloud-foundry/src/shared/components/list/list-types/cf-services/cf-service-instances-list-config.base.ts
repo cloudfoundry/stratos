@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
@@ -34,6 +34,9 @@ import {
 import {
   TableCellServiceInstanceTagsComponent,
 } from '../cf-spaces-service-instances/table-cell-service-instance-tags/table-cell-service-instance-tags.component';
+import {
+  TableCellLastServiceBindingComponent,
+} from '../cf-spaces-service-instances/table-cell-last-service-binding/table-cell-last-service-binding.component';
 import {
   TableCellServiceLastOpComponent,
 } from '../cf-spaces-service-instances/table-cell-service-last-op/table-cell-service-last-op.component';
@@ -91,6 +94,12 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
       columnId: 'lastOp',
       headerCell: () => 'Last Operation',
       cellComponent: TableCellServiceLastOpComponent,
+      cellFlex: '2'
+    },
+    {
+      columnId: 'lastServiceBinding',
+      headerCell: () => 'Last Service Binding',
+      cellComponent: TableCellLastServiceBindingComponent,
       cellFlex: '2'
     },
     {
@@ -199,11 +208,13 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
     return can;
   }
 
+  protected store = inject<Store<CFAppState>>(Store);
+  protected datePipe = inject(DatePipe);
+  protected currentUserPermissionsService = inject(CurrentUserPermissionsService);
+  private serviceActionHelperService = inject(ServiceActionHelperService);
+
+  // eslint-disable-next-line @angular-eslint/prefer-inject -- rootLocation is a plain string passed by subclasses, not injectable
   constructor(
-    protected store: Store<CFAppState>,
-    protected datePipe: DatePipe,
-    protected currentUserPermissionsService: CurrentUserPermissionsService,
-    private serviceActionHelperService: ServiceActionHelperService,
     private rootLocation: string
   ) {
   }

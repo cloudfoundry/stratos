@@ -4,7 +4,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { UntypedFormBuilder } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
-import { distinctUntilChanged, filter, first, map, pairwise, startWith, withLatestFrom } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, pairwise, startWith, take, withLatestFrom } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
@@ -205,7 +205,7 @@ export class KubeConfigImportComponent implements OnDestroy {
 
       this.subs.push(connect.actionState.asObservable().pipe(
         filter((status: IActionMonitorComponentState) => status.completed),
-        first()
+        take(1)
       ).subscribe((status: IActionMonitorComponentState) => {
         if (status.error) {
           connect.state.next({ message: status.message, error: true });
@@ -323,7 +323,7 @@ export class KubeConfigImportComponent implements OnDestroy {
       this.busy.next(true);
       this.data$.pipe(
         filter((data => data && data.length > 0)),
-        first()
+        take(1)
       ).subscribe(imports => {
         // Go through the imports and dispatch the actions to perform them in sequence
         this.processAction([...imports]);

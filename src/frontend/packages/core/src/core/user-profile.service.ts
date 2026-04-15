@@ -10,10 +10,9 @@ import {
   getDefaultActionState,
   UserProfileInfo,
   UserProfileInfoEmail,
-  UserProfileInfoUpdates,
-} from '@stratosui/store';
+  UserProfileInfoUpdates } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
+import { take, defaultIfEmpty, filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 
 @Injectable({
@@ -38,12 +37,12 @@ export class UserProfileService {
       filter((auth: AuthState) => !!(auth && auth.sessionData)),
       map((auth: AuthState) => auth.sessionData),
       filter((sessionData: SessionData) => !!sessionData.user),
-      first(),
+      take(1),
       map(data => data.user.guid)
     );
 
     this.entityService = this.userGuid$.pipe(
-      first(),
+      take(1),
       map(userGuid => stratosEntityCatalog.userProfile.store.getEntityService(userGuid)),
       publishReplay(1),
       refCount()
@@ -67,7 +66,9 @@ export class UserProfileService {
 
   fetchUserProfile() {
     // Once we have the user's guid, fetch their profile
-    this.userGuid$.pipe(first()).subscribe(userGuid => stratosEntityCatalog.userProfile.api.get(userGuid));
+    this.userGuid$.pipe(take(1), defaultIfEmpty(null)).subscribe(userGuid => {
+      if (userGuid) { stratosEntityCatalog.userProfile.api.get(userGuid); }
+    });
   }
 
   getPrimaryEmailAddress(profile: UserProfileInfo): string {
@@ -111,8 +112,7 @@ export class UserProfileService {
   private updateProfileInfo(profile: UserProfileInfo, profileChanges: UserProfileInfoUpdates): Observable<ActionState> {
     const updatedProfile = {
       ...profile,
-      name: { ...profile.name },
-    };
+      name: { ...profile.name } };
     if (profileChanges.givenName !== undefined) {
       updatedProfile.name.givenName = profileChanges.givenName;
     }

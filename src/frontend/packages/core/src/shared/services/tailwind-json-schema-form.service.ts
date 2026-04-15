@@ -78,7 +78,7 @@ export class TailwindJsonSchemaFormService {
     return schema && typeof schema === 'object';
   }
 
-  validateData(data: any, schema: any): boolean {
+  validateData(_data: any, _schema: any): boolean {
     return true; // Basic validation - should be enhanced
   }
 }

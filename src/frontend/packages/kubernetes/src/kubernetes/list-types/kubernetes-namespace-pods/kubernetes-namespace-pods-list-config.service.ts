@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { AppState } from '../../../../../store/src/public-api';
@@ -14,13 +14,13 @@ export class KubernetesNamespacePodsListConfigService extends BaseKubernetesPods
 
   showNamespaceLink = false;
 
-  constructor(
-    store: Store<AppState>,
-    kubeId: BaseKubeGuid,
-    public kubeNamespaceService: KubernetesNamespaceService,
-  ) {
+  private store = inject<Store<AppState>>(Store);
+  private kubeId = inject(BaseKubeGuid);
+  public kubeNamespaceService = inject(KubernetesNamespaceService);
+
+  constructor() {
     super([BaseKubernetesPodsListConfigService.namespaceColumnId]);
-    this.podsDataSource = new KubernetesNamespacePodsDataSource(store, kubeId, this, kubeNamespaceService);
+    this.podsDataSource = new KubernetesNamespacePodsDataSource(this.store, this.kubeId, this, this.kubeNamespaceService);
   }
 
   private podsDataSource: KubernetesNamespacePodsDataSource;

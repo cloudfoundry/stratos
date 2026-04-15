@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject, ChangeDetectionStrategy, OnChanges } from '@angular/core';
 import { Validators, ReactiveFormsModule, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 
 
@@ -16,7 +16,7 @@ export interface TailwindJsonSchemaFormConfig {
     ReactiveFormsModule
 ]
 })
-export class TailwindJsonSchemaFormComponent implements OnInit {
+export class TailwindJsonSchemaFormComponent implements OnInit, OnChanges {
   private fb = inject(FormBuilder);
 
   @Input() schema: any;

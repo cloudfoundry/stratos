@@ -2,7 +2,7 @@ import { Injectable, signal, WritableSignal, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import * as yaml from 'js-yaml';
 import { combineLatest, Observable, of } from 'rxjs';
-import { filter, first, map, tap } from 'rxjs/operators';
+import { filter, map, take, tap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../core/src/core/endpoints.service';
 import { createGuid } from '../../../../core/src/core/utils.service';
@@ -146,7 +146,7 @@ export class KubeConfigHelper {
       this.endpointsService.endpoints$,
       this._clusters.asObservable() // Might be called before we've loaded clusters, so used the non-filtered one
     ]).pipe(
-      first(),
+      take(1),
       map(([eps, clusters]) => this.validate(Object.values(eps), cluster, clusters))
     );
   }

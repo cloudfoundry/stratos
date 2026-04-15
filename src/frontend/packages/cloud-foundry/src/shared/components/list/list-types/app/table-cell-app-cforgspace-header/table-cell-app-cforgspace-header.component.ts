@@ -8,7 +8,6 @@ import { TableCellAppCfOrgSpaceBase } from '../TableCellAppCfOrgSpaceBase';
 @Component({
   selector: 'app-table-cell-app-cforgspace-header',
   templateUrl: './table-cell-app-cforgspace-header.component.html',
-  styleUrls: ['./table-cell-app-cforgspace-header.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

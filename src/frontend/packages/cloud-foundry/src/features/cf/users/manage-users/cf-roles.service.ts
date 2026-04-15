@@ -1,11 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import {
+import { take,
   combineLatest as combineLatestOperators,
   distinctUntilChanged,
   filter,
-  first,
   map,
   publishReplay,
   refCount,
@@ -80,14 +79,14 @@ export class CfRolesService {
   /**
    * Create an observable with an org/space guids and whether it can be edited by the connected user
    */
-  static canEditOrgOrSpace<T>(
+  static canEditOrgOrSpace(
     userPerms: CurrentUserPermissionsService,
     guid: string,
     cfGuid: string,
     orgGuid: string,
     spaceGuid: string): Observable<{ guid: string, canEdit: boolean, }> {
     return canUpdateOrgSpaceRoles(userPerms, cfGuid, orgGuid, spaceGuid).pipe(
-      first(),
+      take(1),
       map(canEdit => ({ guid, canEdit }))
     );
   }
@@ -95,7 +94,7 @@ export class CfRolesService {
   constructor() {
     this.existingRoles$ = this.store.select(selectCfUsersRolesPicked).pipe(
       combineLatestOperators(this.store.select(selectCfUsersRolesCf)),
-      filter(([users, cfGuid]) => !!cfGuid),
+      filter(([_users, cfGuid]) => !!cfGuid),
       switchMap(([users, cfGuid]) => this.populateRoles(cfGuid, users)),
       distinctUntilChanged(),
       publishReplay(1),
@@ -173,7 +172,7 @@ export class CfRolesService {
         this.newRoles$,
         this.store.select(selectCfUsersRolesPicked),
       ),
-      first(),
+      take(1),
       map(([existingRoles, newRoles, pickedUsers]) => {
         const changes: CfRoleChange[] = [];
         // For each user, loop through the new roles and compare with any existing. If there's a diff, add it to a changes collection to be

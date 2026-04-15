@@ -4,7 +4,6 @@ import { provideRouter } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CurrentUserPermissionsService } from '@stratosui/core';
 import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import {

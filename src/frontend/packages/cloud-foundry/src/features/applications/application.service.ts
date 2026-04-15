@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { combineLatest, filter, first, map, pairwise, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
+import { take, combineLatest, filter, map, pairwise, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
 import { APP_GUID, CF_GUID } from '@stratosui/core';
 import {
@@ -11,7 +11,6 @@ import {
   EntityInfo,
   EntityService,
   getCurrentPageRequestInfo,
-  PaginatedAction,
   PaginationEntityState,
   PaginationObservables,
   rootUpdatingKey
@@ -35,8 +34,7 @@ import { ApplicationStateData, ApplicationStateService } from '../../shared/serv
 import { AppStat } from '../../store/types/app-metadata.types';
 import {
   ApplicationEnvVarsHelper,
-  EnvVarStratosProject,
-} from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+  EnvVarStratosProject } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { getRoute, isTCPRoute } from './routes/routes.helper';
 
 export function createGetApplicationAction(guid: string, endpointGuid: string) {
@@ -147,7 +145,7 @@ export class ApplicationService {
       filter(entityInfo => !!(entityInfo.entity && entityInfo.entity.entity && entityInfo.entity.entity.cfGuid)),
       map(entityInfo => entityInfo.entity.entity));
     this.appSpace$ = moreWaiting$.pipe(
-      first(),
+      take(1),
       switchMap(app => {
         return cfEntityCatalog.space.store.getWithOrganization.getEntityService(
           app.space_guid,
@@ -160,7 +158,7 @@ export class ApplicationService {
       refCount()
     );
     this.appOrg$ = moreWaiting$.pipe(
-      first(),
+      take(1),
       switchMap(() => this.appSpace$),
       map(space => space.entity.organization),
       filter(org => !!org)
@@ -204,8 +202,7 @@ export class ApplicationService {
           fetching: entityRequestInfo.fetching,
           app: entity,
           stack: entity.entity.stack,
-          cf: endpoints[entity.entity.cfGuid],
-        };
+          cf: endpoints[entity.entity.cfGuid] };
       }), publishReplay(1), refCount());
 
     this.applicationState$ = this.waitForAppEntity$.pipe(
@@ -272,7 +269,7 @@ export class ApplicationService {
     );
   }
 
-  isEntityComplete(value: any, requestInfo: { fetching: boolean, }): boolean {
+  isEntityComplete(value: any, requestInfo: { fetching: boolean }): boolean {
     if (requestInfo) {
       return !requestInfo.fetching;
     } else {
@@ -297,7 +294,7 @@ export class ApplicationService {
       pairwise(),
       filter(([oldS, newS]) => oldS.busy && !newS.busy),
       map(([, newS]) => newS),
-      first()
+      take(1)
     );
   }
 }

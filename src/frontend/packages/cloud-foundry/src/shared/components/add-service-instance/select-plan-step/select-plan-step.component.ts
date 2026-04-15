@@ -3,13 +3,11 @@ import { ChangeDetectionStrategy, Component, OnDestroy, signal, ViewChild, ViewC
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
-import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
-import {
+import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
+import { take,
   distinctUntilChanged,
   filter,
-  first,
   map,
   publishReplay,
   refCount,
@@ -138,7 +136,7 @@ export class SelectPlanStepComponent implements OnDestroy {
             selectedServicePlan,
             this.cSIHelperService.servicePlanVisibilities$,
             this.cSIHelperService.serviceBroker$).pipe(
-              first()
+              take(1)
             ).subscribe(cardStatus => this.selectedPlanAccessibilitySignal.set(cardStatus));
         })
       );

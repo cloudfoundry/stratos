@@ -20,7 +20,7 @@ export class CustomTooltipDirective implements OnDestroy {
   private hideTimeout: any;
 
   @HostListener('mouseenter', ['$event'])
-  onMouseEnter(event: MouseEvent) {
+  onMouseEnter(_event: MouseEvent) {
     if (!this.disabled && this.tooltipText && this.tooltipText.trim()) {
       this.clearTimeouts();
       this.showTimeout = setTimeout(() => {
@@ -30,7 +30,7 @@ export class CustomTooltipDirective implements OnDestroy {
   }
 
   @HostListener('mouseleave', ['$event'])
-  onMouseLeave(event: MouseEvent) {
+  onMouseLeave(_event: MouseEvent) {
     this.clearTimeouts();
     this.hideTimeout = setTimeout(() => {
       this.hideTooltip();

@@ -38,7 +38,7 @@ describe('TableCellSelectComponent', () => {
     component.rowState = observableOf({});
     component.dataSource = {
       selectedRows: () => new Map(),
-      getRowUniqueId: (row: any) => ''
+      getRowUniqueId: (_row: any) => ''
     } as unknown as IListDataSource<any>;
     fixture.detectChanges();
   });

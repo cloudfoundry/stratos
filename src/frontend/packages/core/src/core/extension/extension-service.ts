@@ -136,7 +136,7 @@ export class ExtensionService {
 
   // Declare extensions - this is a trick to ensure the Angular Build Optimiser does not
   // optimize out any extension components
-  public static declare(components: any[]): ModuleWithProviders<ExtEmptyModule> {
+  public static declare(_components: any[]): ModuleWithProviders<ExtEmptyModule> {
     return {
       ngModule: ExtEmptyModule
     };

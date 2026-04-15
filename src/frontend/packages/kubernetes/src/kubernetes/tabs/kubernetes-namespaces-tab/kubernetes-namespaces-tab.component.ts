@@ -11,7 +11,7 @@ import { ListComponent } from '../../../../../core/src/shared/components/list/li
 @Component({
   selector: 'app-kubernetes-namespaces-tab',
   templateUrl: './kubernetes-namespaces-tab.component.html',
-  styleUrls: ['./kubernetes-namespaces-tab.component.scss'],
+
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

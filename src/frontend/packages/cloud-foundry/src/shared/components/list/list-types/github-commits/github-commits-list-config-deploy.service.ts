@@ -2,14 +2,13 @@ import { DatePipe } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { GithubCommitsDataSource, GithubCommitsListConfigServiceBase, GitSCMService, GitSCMType } from '@stratosui/git';
-import { filter, first, map } from 'rxjs/operators';
+import { take, filter, map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { selectApplicationSource } from '../../../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
 import { DeployApplicationSource } from '../../../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import {
-  TableCellRadioComponent,
-} from '../../../../../../../core/src/shared/components/list/list-table/table-cell-radio/table-cell-radio.component';
+  TableCellRadioComponent } from '../../../../../../../core/src/shared/components/list/list-table/table-cell-radio/table-cell-radio.component';
 
 
 @Injectable({
@@ -21,7 +20,7 @@ export class GithubCommitsListConfigServiceDeploy extends GithubCommitsListConfi
     const datePipe = inject(DatePipe);
     const scmService = inject(GitSCMService);
 
-    super(store, datePipe);
+    super();
     this.text.title = 'Select a commit';
     this.columns.unshift({
       columnId: 'radio',
@@ -35,22 +34,23 @@ export class GithubCommitsListConfigServiceDeploy extends GithubCommitsListConfi
       map((appSource: DeployApplicationSource) => {
         return (appSource.type.id === 'github' || appSource.type.id === 'gitlab') ? {
           scm: appSource.type.id as GitSCMType,
+          accessToken: appSource.gitDetails.accessToken,
           projectName: appSource.gitDetails.projectName,
           sha: appSource.gitDetails.branch.name,
           endpointGuid: appSource.gitDetails.endpointGuid
         } : null;
       }),
       filter(fetchDetails => !!fetchDetails && !!fetchDetails.projectName && !!fetchDetails.sha),
-      first()
+      take(1)
     ).subscribe(fetchDetails => {
-      const scm = scmService.getSCM(fetchDetails.scm, fetchDetails.endpointGuid);
+      const scm = scmService.getSCM(fetchDetails.scm, fetchDetails.endpointGuid, fetchDetails.accessToken);
       this.dataSource = new GithubCommitsDataSource(this.store, this, scm, fetchDetails.projectName, fetchDetails.sha);
       this.initialised.next(true);
 
       // Auto-select first commit - wait for page to load, select first item if present
       setTimeout(() => {
         this.dataSource.page$.pipe(
-          first()
+          take(1)
         ).subscribe(rs => {
           if (rs && rs.length > 0) {
             this.dataSource.selectedRowToggle(rs[0], false);

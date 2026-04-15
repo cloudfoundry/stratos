@@ -26,7 +26,17 @@ export default tseslint.config(
       "@angular-eslint/component-selector": "off",
 
       // Warn — migration-period rules to fix over time
-      "@typescript-eslint/no-unused-vars": "warn",
+      // Ignore underscore-prefixed params (intentionally unused) and common
+      // single-letter callback/catch params that are positional placeholders.
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+          ignoreRestSiblings: true,
+        },
+      ],
       "@typescript-eslint/no-unsafe-declaration-merging": "warn",
       "@typescript-eslint/no-wrapper-object-types": "warn",
       "@typescript-eslint/no-empty-object-type": "warn",
@@ -51,6 +61,20 @@ export default tseslint.config(
       "no-irregular-whitespace": "warn",
       "no-duplicate-case": "warn",
       "@typescript-eslint/no-unsafe-function-type": "warn",
+    },
+  },
+  {
+    files: ["**/*.spec.ts", "**/test-setup.ts"],
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          varsIgnorePattern: "^(describe|it|test|expect|beforeAll|afterAll|beforeEach|afterEach|vi|fixture|component|provideZonelessChangeDetection|_\\w*)$",
+          argsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+          ignoreRestSiblings: true,
+        },
+      ],
     },
   },
   {

@@ -1,4 +1,4 @@
-@if (!(initialValue$ | async)) {
+@if ((initialValue$ | async) === null) {
   <app-progress-spinner diameter="20" mode="indeterminate">
   </app-progress-spinner>
 } @else {

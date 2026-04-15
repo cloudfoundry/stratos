@@ -10,7 +10,6 @@ import { ServicePlanPriceComponent } from '../../../../service-plan-price/servic
 @Component({
   selector: 'app-table-cell-service-plan-price',
   templateUrl: './table-cell-service-plan-price.component.html',
-  styleUrls: ['./table-cell-service-plan-price.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

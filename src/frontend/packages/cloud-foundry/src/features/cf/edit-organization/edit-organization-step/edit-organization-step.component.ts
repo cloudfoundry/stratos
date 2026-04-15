@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, pairwise, take, tap } from 'rxjs/operators';
 
-import { CustomFormFieldComponent, safeUnsubscribe, FocusDirective, StepOnNextFunction, CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
+import { AppInputDirective, CustomFormFieldComponent, safeUnsubscribe, FocusDirective, StepOnNextFunction, CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { endpointEntityType, PaginationMonitorFactory, ActionState, getPaginationObservables, APIResource } from '@stratosui/store';
 import { IOrganization, IOrgQuotaDefinition } from '../../../../cf-api.types';
 import { CFAppState } from '../../../../cf-app-state';
@@ -45,6 +45,7 @@ interface EditOrganizationForm {
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    AppInputDirective,
     CustomFormFieldComponent,
     CustomSelectComponent,
     CustomOptionComponent,
@@ -57,6 +58,9 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
   private cfOrgService = inject(CloudFoundryOrganizationService);
   private fb = inject(FormBuilder);
 
+  /** See QuotaDefinitionFormComponent for rationale. */
+  private validSignal = signal(false);
+  private formStatusSub?: Subscription;
 
   fetchOrgsSub!: Subscription;
   allOrgsInEndpoint: string[];
@@ -106,12 +110,20 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
 
   nameTakenValidator = (): ValidatorFn => {
     return (formField: AbstractControl): { [key: string]: any } => {
-      const nameValid = this.validate(formField.value);
+      const nameValid = this.isNameUnique(formField.value);
       return !nameValid ? { nameTaken: { value: formField.value } } : null;
     };
   }
 
   ngOnInit() {
+    // Mirror editOrgName.valid && dirty into a signal so the parent
+    // page component re-evaluates [valid] automatically. Dirty check
+    // keeps the Update button disabled until the user actually edits.
+    this.validSignal.set(this.editOrgName.valid && this.editOrgName.dirty);
+    this.formStatusSub = this.editOrgName.statusChanges.subscribe(
+      () => this.validSignal.set(this.editOrgName.valid && this.editOrgName.dirty)
+    );
+
     const action = CloudFoundryEndpointService.createGetAllOrganizations(this.cfGuid);
     this.allOrgsInEndpoint$ = getPaginationObservables<APIResource>(
       {
@@ -139,7 +151,8 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
     );
   }
 
-  validate = (value: string = null): boolean => {
+  /** Name uniqueness check used by the reactive form validator. */
+  isNameUnique = (value: string = null): boolean => {
     if (this.allOrgsInEndpoint) {
       return this.allOrgsInEndpoint
         .filter((o: string) => o !== this.originalName)
@@ -147,6 +160,9 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
     }
     return true;
   }
+
+  /** Form-level validity gate for the Update button. Reads the signal. */
+  validate = () => this.validSignal();
 
   submit: StepOnNextFunction = () => {
     return cfEntityCatalog.org.api.update<ActionState>(this.orgGuid, this.cfGuid, {
@@ -167,5 +183,6 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     safeUnsubscribe(this.fetchOrgsSub, this.orgSubscription);
+    this.formStatusSub?.unsubscribe();
   }
 }

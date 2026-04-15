@@ -127,7 +127,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     this.drawer = drawer;
     if (!this.closeSub && drawer && drawer.closedStart) {
       // We need this for mobile to ensure the state is synced when the dashboard is closed by clicking on the backdrop.
-      this.closeSub = drawer.closedStart.pipe(withLatestFrom(this.dashboardState$)).subscribe(([change, state]: [any, DashboardState]) => {
+      this.closeSub = drawer.closedStart.pipe(withLatestFrom(this.dashboardState$)).subscribe(([_change, state]: [any, DashboardState]) => {
         if (state.isMobile) {
           this.store.dispatch(new CloseSideNav());
         }

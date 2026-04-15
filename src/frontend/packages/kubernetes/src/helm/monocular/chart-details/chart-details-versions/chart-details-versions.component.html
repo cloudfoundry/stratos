@@ -1,9 +1,9 @@
-<div class="versions">
-  <h1>Chart Versions</h1>
-  <div class="version__table">
+<div>
+  <h1 class="text-base mt-0">Chart Versions</h1>
+  <div class="table w-full">
     @for (version of shownVersions(); track version) {
-      <div class="version__row">
-        <div class='version__cell number' [class.selected]="isSelected(version)">
+      <div class="table-row">
+        <div class="table-cell text-sm" [class.font-bold]="isSelected(version)">
           <a [href]="goToVersionUrl(version)" [routerLink]="goToVersionUrl(version)">
             @if (version.attributes.version.length>15) {
               <span>{{ version.attributes.version | slice:0:16 }}...</span>
@@ -13,21 +13,21 @@
             }
           </a>
         </div>
-        <div class='version__cell creation-date'>{{ version.attributes.created | date: 'MMM d, y' }}</div>
+        <div class="table-cell text-sm text-gray-500">{{ version.attributes.created | date: 'MMM d, y' }}</div>
       </div>
     }
   </div>
   @if (showMoreLink()) {
-    <div class="more-link">
-      <a (click)="setShowAllVersions()">show all...</a>
+    <div class="cursor-pointer text-sm mt-2 hover:underline">
+      <a tabindex="0" (click)="setShowAllVersions()" (keydown.enter)="setShowAllVersions()">show all...</a>
     </div>
   }
 </div>
 @if (currentVersion && currentVersion.attributes.app_version) {
-  <div class="app-version">
-    <h1>Application Version</h1>
-    <div class="version">
-      <span class="number">{{ currentVersion.attributes.app_version }}</span>
+  <div>
+    <h1 class="text-base">Application Version</h1>
+    <div class="text-sm">
+      <span>{{ currentVersion.attributes.app_version }}</span>
     </div>
   </div>
 }

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation, HostBinding, Input  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewEncapsulation, HostBinding, Input  } from '@angular/core';
 
 @Component({
   selector: 'app-tile-grid',
@@ -11,5 +11,5 @@ import { ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation, HostBind
 })
 export class TileGridComponent {
   @HostBinding('class.app-tile-grid-fit')
-  @Input() private fit = false;
+  @Input() public fit = false;
 }

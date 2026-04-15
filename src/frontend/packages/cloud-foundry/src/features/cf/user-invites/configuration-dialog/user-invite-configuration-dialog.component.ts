@@ -14,7 +14,7 @@ import { DialogErrorComponent } from '@stratosui/core';
 // Temporary injection token to replace MAT_DIALOG_DATA
 export const DIALOG_DATA = new InjectionToken<any>('DialogData');
 import { Observable, Subscription } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { take,  } from 'rxjs/operators';
 
 import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { UserInviteConfigureService } from '../user-invite.service';
@@ -79,7 +79,7 @@ export class UserInviteConfigurationDialogComponent {
       this.endpointForm.value.clientID ?? '',
       this.endpointForm.value.clientSecret ?? '')
       .pipe(
-        first()
+        take(1)
       ).subscribe((v: any) => {
         if (v.error) {
           this.snackBar.open(v.errorMessage, 'Close');

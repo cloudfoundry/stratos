@@ -7,7 +7,6 @@ import { ServicesService } from '../services.service';
 @Component({
   selector: 'app-service-base',
   templateUrl: './service-base.component.html',
-  styleUrls: ['./service-base.component.scss'],
   providers: [ServicesService],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,

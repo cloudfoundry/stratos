@@ -9,7 +9,6 @@ import {
   generateStratosEntities,
   EntityCatalogHelper,
   EntityCatalogHelpers,
-  getDefaultPaginationEntityState
 } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { TailwindDialogService } from '../../../shared/services/tailwind-dialog.service';

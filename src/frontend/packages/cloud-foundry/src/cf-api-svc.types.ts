@@ -22,6 +22,9 @@ export interface IServiceBinding {
   app?: APIResource<IApp>;
   service_instance_url: string;
   service_instance?: APIResource<IServiceInstance> | APIResource<IUserProvidedServiceInstance>;
+  // Async service brokers return last_operation on bindings so clients can
+  // track in-progress binds/unbinds. Not present on synchronous brokers.
+  last_operation?: ILastOperation;
   guid?: string;
   cfGuid?: string;
 }

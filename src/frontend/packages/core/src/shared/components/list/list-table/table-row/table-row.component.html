@@ -14,7 +14,7 @@
   <!-- Main Row -->
   <div role="row" class="table-row"
     [ngClass]="{'in-expanded-row': !!inExpandedRow, 'has-expanded-row': expandComponent, 'has-error-row': errorMessage$ | async, 'table-row-wrapper__highlighted': isHighlighted$ | async}">
-    <div class="flex items-center table-row__inner"
+    <div class="flex items-start table-row__inner"
       [ngStyle]="{'min-height': minRowHeight || defaultMinRowHeight }">
 
       <!-- Expander Cell (if expandable) -->
@@ -41,6 +41,7 @@
           role="cell">
           <app-table-cell
             [component]="column.cellComponent"
+            [cellDefinition]="column.cellDefinition"
             [func]="column.cellDefinition?.getValue"
             [row]="row"
             [config]="column.cellConfig && (typeof column.cellConfig === 'function' ? column.cellConfig(row) : column.cellConfig)"

@@ -45,31 +45,35 @@ export function dashboardReducer(state: DashboardState = defaultDashboardState, 
       return { ...state, isMobile: true, isMobileNavOpen: false };
     case DISABLE_SIDE_NAV_MOBILE_MODE:
       return { ...state, isMobile: false, isMobileNavOpen: false };
-    case TIMEOUT_SESSION:
+    case TIMEOUT_SESSION: {
       const timeoutSessionAction = action as SetSessionTimeoutAction;
       return {
         ...state,
         timeoutSession: timeoutSessionAction.timeoutSession
       };
-    case ENABLE_POLLING:
+    }
+    case ENABLE_POLLING: {
       const pollingAction = action as SetPollingEnabledAction;
       return {
         ...state,
         pollingEnabled: pollingAction.enablePolling
       };
-    case GRAVATAR_ENABLED:
+    }
+    case GRAVATAR_ENABLED: {
       const gravatarAction = action as SetGravatarEnabledAction;
       return {
         ...state,
         gravatarEnabled: gravatarAction.enableGravatar
       };
-    case HOME_CARD_LAYOUT:
+    }
+    case HOME_CARD_LAYOUT: {
       const layoutAction = action as SetHomeCardLayoutAction;
       return {
         ...state,
         homeLayout: layoutAction.id
       };
-    case SET_DASHBOARD_STATE_VALUE:
+    }
+    case SET_DASHBOARD_STATE_VALUE: {
       const setValueAction = action as SetDashboardStateValueAction;
       if ((state as any)[setValueAction.prop] === setValueAction.value) {
         return state;
@@ -78,18 +82,21 @@ export function dashboardReducer(state: DashboardState = defaultDashboardState, 
         ...state,
         [setValueAction.prop]: setValueAction.value
       };
-    case HYDRATE_DASHBOARD_STATE:
+    }
+    case HYDRATE_DASHBOARD_STATE: {
       const hydrateDashboardStateAction = action as HydrateDashboardStateAction;
       return {
         ...state,
         ...hydrateDashboardStateAction.dashboardState
       };
-    case SET_STRATOS_THEME:
-      const setThemeAction = action as SetThemeAction;
+    }
+    case SET_STRATOS_THEME: {
+      const _setThemeAction = action as SetThemeAction;
       return {
         ...state,
         themeKey: null
       };
+    }
     default:
       return state;
   }

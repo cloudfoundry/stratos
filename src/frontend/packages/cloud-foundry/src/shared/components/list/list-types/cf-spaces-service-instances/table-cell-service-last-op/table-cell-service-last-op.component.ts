@@ -10,7 +10,6 @@ import { ServiceInstanceLastOpComponent } from '../../../../service-instance-las
 @Component({
   selector: 'app-table-cell-service-last-op',
   templateUrl: './table-cell-service-last-op.component.html',
-  styleUrls: ['./table-cell-service-last-op.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

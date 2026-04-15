@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { take,  } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
@@ -81,7 +81,7 @@ export class CfUsersSpaceRolesListConfigService implements IListConfig<APIResour
 
   constructor(cfGuid: string, spaceGuid: string, userPerms: CurrentUserPermissionsService) {
     this.store.select(selectCfUsersRolesRoles).pipe(
-      first()
+      take(1)
     ).subscribe(newRoles => {
       this.dataSource = new CfUsersSpaceRolesDataSourceService(cfGuid, newRoles.orgGuid, spaceGuid, this.store, userPerms, this);
       this.initialised$.next(true);

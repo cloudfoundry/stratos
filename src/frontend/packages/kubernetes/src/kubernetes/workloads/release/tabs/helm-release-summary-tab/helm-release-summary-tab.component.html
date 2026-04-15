@@ -1,4 +1,4 @@
-@if (!(isBusy$ | async) || false) {
+@if ((isBusy$ | async) === false || false) {
   <app-page-sub-nav>
     <button class="btn btn-danger" name="delete" (click)="deleteRelease()" title="Delete">
       <span class="material-icons">delete</span>
@@ -25,7 +25,7 @@
   @if (helmReleaseHelper.release$ | async; as release) {
     <div>
       @if (hasUpgrade$ | async; as upgrade) {
-        <div class="chart-upgrade">
+        <div class="float-right rounded-lg text-xs mr-2.5 px-2 py-0.5">
           Upgrade available: {{ upgrade }}
         </div>
       }
@@ -33,26 +33,26 @@
         [subText]="release.chart.metadata.description" [subTitle]="release.chart.metadata.name"
         [fallBackIcon]="'workloads'" [fallBackIconFont]="'stratos-icons'">
         <div class="summary">
-          <div class="chart-details">
-            <app-metadata-item class="chart-details__item" label="Chart Version">{{ release.chart.metadata.version }}
+          <div class="flex flex-row flex-wrap px-2.5 pb-2.5">
+            <app-metadata-item class="mr-10" label="Chart Version">{{ release.chart.metadata.version }}
             </app-metadata-item>
-            <app-metadata-item class="chart-details__item" label="Application Version">
+            <app-metadata-item class="mr-10" label="Application Version">
               {{ release.chart.metadata.appVersion || '-' }}
             </app-metadata-item>
-            <app-metadata-item class="chart-details__item" label="Cluster">
+            <app-metadata-item class="mr-10" label="Cluster">
               <a [routerLink]="createClusterLink()">{{ getClusterName() | async }}</a>
             </app-metadata-item>
-            <app-metadata-item class="chart-details__item" label="Namespace">
+            <app-metadata-item class="mr-10" label="Namespace">
               <a [routerLink]="createNamespaceLink(release.namespace)">{{ release.namespace }}</a>
             </app-metadata-item>
-            <app-metadata-item class="chart-details__item" label="Release Version">{{ release.version }}
+            <app-metadata-item class="mr-10" label="Release Version">{{ release.version }}
             </app-metadata-item>
-            <app-metadata-item class="chart-details__item" label="Status">{{ release.status | titlecase }}
+            <app-metadata-item class="mr-10" label="Status">{{ release.status | titlecase }}
             </app-metadata-item>
-            <app-metadata-item class="chart-details__item" label="First Deployed">
+            <app-metadata-item class="mr-10" label="First Deployed">
               {{ release.info.first_deployed | date:'medium' }}
             </app-metadata-item>
-            <app-metadata-item class="chart-details__item" label="Last Deployed">
+            <app-metadata-item class="mr-10" label="Last Deployed">
               {{ release.info.last_deployed | date:'medium' }}
             </app-metadata-item>
           </div>
@@ -60,8 +60,8 @@
       </app-entity-summary-title>
     </div>
     @if (hasResources$ | async) {
-      <div class="resources">
-        <app-metadata-item class="chart-details__item" label="Pods and Containers"></app-metadata-item>
+      <div class="px-2.5">
+        <app-metadata-item class="mr-10" label="Pods and Containers"></app-metadata-item>
         <app-tile-grid>
           @if (chartData$ | async; as chartData) {
             <app-tile-group>
@@ -80,11 +80,11 @@
             </app-tile-group>
           }
         </app-tile-grid>
-        <app-metadata-item class="chart-details__item" label="All Resources"></app-metadata-item>
+        <app-metadata-item class="mr-10" label="All Resources"></app-metadata-item>
         @if (hasAllResources$ | async) {
           <div>
             @if (resources$ | async; as resources) {
-              <div class="grid">
+              <div class="grid grid-cols-1 gap-2.5 min-h-0 min-w-0 sm:gap-5 sm:grid-cols-2 lg:grid-cols-3 min-[1350px]:grid-cols-4 2xl:grid-cols-5">
                 @for (res of resources; track res) {
                   <app-card-number-metric label="{{ res.label }}" icon="{{ res.icon.name }}"
                     [alerts]="res.alerts" (showAlerts)="showAlerts($event, res)"
@@ -95,10 +95,10 @@
             }
           </div>
         } @else {
-          <div class="resources__loading">
-            <div class="resources__loading__content">
+          <div class="flex justify-center">
+            <div class="mt-12">
               Updating Resource Information
-              <div class="progress-bar w-full h-1 bg-gray-200 rounded overflow-hidden">
+              <div class="progress-bar w-full h-1 bg-gray-200 rounded overflow-hidden mt-4">
                 <div class="progress-bar-fill h-full bg-primary-500 animate-pulse"></div>
               </div>
             </div>
@@ -106,10 +106,10 @@
         }
       </div>
     } @else {
-      <div class="resources__loading">
-        <div class="resources__loading__content">
+      <div class="flex justify-center">
+        <div class="mt-12">
           Loading resources
-          <div class="progress-bar w-full h-1 bg-gray-200 rounded overflow-hidden">
+          <div class="progress-bar w-full h-1 bg-gray-200 rounded overflow-hidden mt-4">
             <div class="progress-bar-fill h-full bg-primary-500 animate-pulse"></div>
           </div>
         </div>

@@ -135,7 +135,7 @@ func findDatabaseConfig(vcapServices map[string][]VCAPService, db *DatabaseConfi
 				return false
 			}
 
-			db.Username, db.Password, db.Host, db.Port, db.Database, err = findDatabaseConfigurationFromURI(uri, defaultDBProviderPort(service))
+			db.Username, db.Password, db.Host, db.Port, db.Database, db.QueryParams, err = findDatabaseConfigurationFromURI(uri, defaultDBProviderPort(service))
 
 			if err != nil {
 				log.Warnf("Failed to find Cloud Foundry service config from `%v` (failed to parse)", DB_URI)
@@ -197,12 +197,12 @@ func stringInSlice(a string, list []string) bool {
 	return false
 }
 
-func findDatabaseConfigurationFromURI(uri string, defaultPort int) (string, string, string, int, string, error) {
-	re := regexp.MustCompile(`(?P<provider>.+)://(?P<username>[^:]+)(?::(?P<password>.+))?@(?P<host>[^:]+)(?::(?P<port>.+))?\/(?P<dbname>.+)`)
+func findDatabaseConfigurationFromURI(uri string, defaultPort int) (string, string, string, int, string, map[string]string, error) {
+	re := regexp.MustCompile(`(?P<provider>.+)://(?P<username>[^:]+)(?::(?P<password>.+))?@(?P<host>[^:]+)(?::(?P<port>.+))?\/(?P<dbname>[^?]+)(?:\?(?P<queryparams>.*))*`)
 	n1 := re.SubexpNames()
 	matches := re.FindAllStringSubmatch(uri, -1)
 	if len(matches) < 1 {
-		return "", "", "", 0, "", errors.New("failed to parse database URI")
+		return "", "", "", 0, "", map[string]string{}, errors.New("failed to parse database URI")
 	}
 
 	r2 := matches[0]
@@ -222,9 +222,15 @@ func findDatabaseConfigurationFromURI(uri string, defaultPort int) (string, stri
 		port = defaultPort
 	}
 	dbname := md["dbname"]
+	queryparamsraw := md["queryparams"]
+	queryparams := make(map[string]string)
+	for _, keyvalue := range strings.Split(queryparamsraw, "&") {
+		if key, value, valid := strings.Cut(keyvalue, "="); valid {
+			queryparams[key] = value
+		}
+	}
 
-	return username, password, host, port, dbname, nil
-
+	return username, password, host, port, dbname, queryparams, nil
 }
 
 func defaultDBProviderPort(service VCAPService) int {

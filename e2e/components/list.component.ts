@@ -42,7 +42,7 @@ export class ListTableComponent {
   }
 
   getCell(row: number, column: number): Locator {
-    return this.getRows().nth(row).locator('.app-table__cell, td').nth(column);
+    return this.getRows().nth(row).locator('.table-row-cell, td').nth(column);
   }
 
   async waitForCellText(row: number, column: number, text: string): Promise<void> {
@@ -51,19 +51,22 @@ export class ListTableComponent {
   }
 
   async findRowByCellContent(content: string): Promise<Locator> {
-    const cell = this.table.locator('.app-table__cell, td').filter({ hasText: content }).first();
+    const cell = this.table.locator('.table-row-cell, td').filter({ hasText: content }).first();
     await cell.waitFor({ state: 'visible', timeout: 10000 });
-    return cell.locator('xpath=ancestor::tr | ancestor::app-table-row');
+    return cell.locator('xpath=ancestor::app-table-row | ancestor::tr');
   }
 
   async getTableData(): Promise<TableData[]> {
-    const headers = await this.table.locator('.app-table__header-cell, th').allTextContents();
+    // Read headers from app-table-cell inside each header cell to avoid sort icon text
+    const headerCells = await this.table.locator('.app-table__header-cell app-table-cell, th').all();
+    const headers = await Promise.all(headerCells.map(h => h.textContent().then(t => (t || '').trim())));
+
     const rows = await this.getRows().all();
 
     const tableData: TableData[] = [];
 
     for (const row of rows) {
-      const cells = await row.locator('.app-table__cell, td').allTextContents();
+      const cells = await row.locator('.table-row-cell, td').allTextContents();
       const rowData: TableData = {};
 
       cells.forEach((cellValue, index) => {
@@ -119,12 +122,19 @@ export class ListTableComponent {
   }
 
   async openRowActionMenuByRow(row: Locator): Promise<MenuComponent> {
-    const actionButton = row.locator('app-table-cell-actions button, button[aria-label="Actions"]');
+    // Target the overflow menu button (more_vert btn-icon), not inline action buttons
+    const actionButton = row.locator('app-table-cell-actions button.btn-icon, button[aria-label="Actions"]').first();
     await actionButton.click();
 
-    const menu = new MenuComponent(this.page);
-    await menu.waitUntilShown();
-    return menu;
+    // Wait for either Angular Material menu or the custom table-cell-actions dropdown
+    const matMenu = this.page.locator('.mat-menu-content, .mat-mdc-menu-content');
+    const customMenu = row.locator('.table-cell-actions-menu--open');
+    await Promise.any([
+      matMenu.waitFor({ state: 'visible', timeout: 5000 }),
+      customMenu.waitFor({ state: 'visible', timeout: 5000 }),
+    ]).catch(() => {});
+
+    return new MenuComponent(this.page);
   }
 
   async toggleSort(headerTitle: string): Promise<void> {

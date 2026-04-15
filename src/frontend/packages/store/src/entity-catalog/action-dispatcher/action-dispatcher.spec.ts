@@ -55,7 +55,7 @@ describe('ActionDispatcher', () => {
     const customGetMultipleAction = { type: 'custom MultipleAction', entityType, endpointType, paginationKey: testPaginationKey };
 
     const builders: OrchestratedActionBuilders = {
-      get: (guid: string, endpointGuid: string, extraArgs?: any) => ({
+      get: (guid: string, endpointGuid: string, _extraArgs?: any) => ({
         ...getAction,
         guid,
         endpointGuid,
@@ -81,12 +81,12 @@ describe('ActionDispatcher', () => {
       ...EntityCatalogEntityStoreHelpers.createCoreStore(
         actionOrchestrator,
         entityType,
-        (schema: string) => null,
+        (_schema: string) => null,
       ),
       ...EntityCatalogEntityStoreHelpers.getPaginationStore(
         actionBuilders,
         entityType,
-        (schema: string) => null,
+        (_schema: string) => null,
       ),
     };
     const entityActionDispatcher = EntityCatalogEntityStoreHelpers.getActionDispatchers(
@@ -95,17 +95,17 @@ describe('ActionDispatcher', () => {
     );
 
     const store = {
-      dispatch: (action: Action) => { },
-      select: (...args: any[]) => of(null),
+      dispatch: (_action: Action) => { },
+      select: (..._args: any[]) => of(null),
     } as Store<AppState<any>>;
 
     EntityCatalogHelpers.SetEntityCatalogHelper({
       store,
       esf: {
-        create: (guid, action) => of(null),
+        create: (_guid, _action) => of(null),
       } as unknown as EntityServiceFactory,
       pmf: {
-        create: (pk, ec, isLocal) => ({
+        create: (_pk, _ec, _isLocal) => ({
           currentPageState$: {}
         }),
       } as unknown as PaginationMonitorFactory,

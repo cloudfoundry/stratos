@@ -96,7 +96,7 @@ if (typeof window !== 'undefined') {
 // Mock WebSocket to prevent connection attempts during tests
 // This suppresses Vite HMR connection errors that appear in stderr
 if (typeof window !== 'undefined' && typeof WebSocket !== 'undefined') {
-  const OriginalWebSocket = WebSocket;
+  const _OriginalWebSocket = WebSocket;
   // Create a mock WebSocket that doesn't actually connect
   class MockWebSocket {
     static CONNECTING = 0;
@@ -115,7 +115,7 @@ if (typeof window !== 'undefined' && typeof WebSocket !== 'undefined') {
     onerror: any = null;
     onmessage: any = null;
 
-    constructor(url: string | URL, protocols?: string | string[]) {
+    constructor(_url: string | URL, _protocols?: string | string[]) {
       // Don't actually connect, just create a closed socket
       this.readyState = MockWebSocket.CLOSED;
       // Immediately trigger close event to simulate failed connection
@@ -126,23 +126,23 @@ if (typeof window !== 'undefined' && typeof WebSocket !== 'undefined') {
       }, 0);
     }
 
-    send(data: any): void {
+    send(_data: any): void {
       // No-op
     }
 
-    close(code?: number, reason?: string): void {
+    close(_code?: number, _reason?: string): void {
       this.readyState = MockWebSocket.CLOSED;
     }
 
-    addEventListener(type: string, listener: any): void {
+    addEventListener(_type: string, _listener: any): void {
       // No-op
     }
 
-    removeEventListener(type: string, listener: any): void {
+    removeEventListener(_type: string, _listener: any): void {
       // No-op
     }
 
-    dispatchEvent(event: Event): boolean {
+    dispatchEvent(_event: Event): boolean {
       return false;
     }
   }

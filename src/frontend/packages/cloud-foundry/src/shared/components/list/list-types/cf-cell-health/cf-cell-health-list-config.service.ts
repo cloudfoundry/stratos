@@ -3,7 +3,7 @@ import { DatePipe } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { first, tap } from 'rxjs/operators';
+import { take, tap } from 'rxjs/operators';
 
 import {
   BooleanIndicatorType,
@@ -60,7 +60,7 @@ export class CfCellHealthListConfigService extends BaseCfListConfig<CfCellHealth
     super();
 
     this.init$ = this.createMetricsAction(cloudFoundryCellService.cfGuid, cloudFoundryCellService.cellId).pipe(
-      first(),
+      take(1),
       tap(action => {
         this.dataSource = new CfCellHealthDataSource(this.store, this as BaseCfListConfig<CfCellHealthEntry>, action);
       })

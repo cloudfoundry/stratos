@@ -1,20 +1,19 @@
 <app-list-item class="chart-item" [detailUrl]="goToDetailUrl()" height="auto"
   [artifactHubAndHelmRepoTypes$]="artifactHubAndHelmRepoTypes$" [chart]="chart">
-  <img class="list-item-logo chart-item-logo" alt="{{ chart.attributes.name }}'s logo" src="{{ iconUrl }}" />
-  <div class="list-item-info chart-item-info">
-    <h2 class="chart-item-info__title">
-      <a [href]="goToDetailUrl()"
+  <img class="list-item-logo max-h-[80%] max-w-[80%]" alt="{{ chart.attributes.name }}'s logo" src="{{ iconUrl }}" />
+  <div class="list-item-info">
+    <h2 class="m-0 mb-1 font-medium text-base cursor-pointer">
+      <a class="text-inherit" [href]="goToDetailUrl()"
       [routerLink]="goToDetailUrl()">{{ chart.attributes.repo.name }}/{{ chart.attributes.name }}</a>
     </h2>
-    <p>
+    <p class="m-0">
       @if (showVersion && chart.relationships.latestChartVersion.data.app_version) {
-        <span class="chart-item-info__version"
-          >
+        <span class="text-sm">
         {{ chart.relationships.latestChartVersion.data.app_version }}</span>
       }
     </p>
     @if (showDescription) {
-      <div class="chart-item-info__description">
+      <div class="m-4">
         {{ chart.attributes.description }}
       </div>
     }

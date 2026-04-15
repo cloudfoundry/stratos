@@ -4,7 +4,6 @@ import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
 changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-resource-alert-view',
   templateUrl: './resource-alert-view.component.html',
-  styleUrls: ['./resource-alert-view.component.scss'],
   standalone: true
 })
 export class ResourceAlertViewComponent {

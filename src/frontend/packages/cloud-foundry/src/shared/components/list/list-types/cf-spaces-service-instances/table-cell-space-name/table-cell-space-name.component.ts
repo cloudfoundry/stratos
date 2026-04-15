@@ -9,7 +9,6 @@ import { IServiceInstance } from '../../../../../../cf-api-svc.types';
 @Component({
   selector: 'app-table-cell-space-name',
   templateUrl: './table-cell-space-name.component.html',
-  styleUrls: ['./table-cell-space-name.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
@@ -18,7 +17,7 @@ import { IServiceInstance } from '../../../../../../cf-api-svc.types';
 })
 export class TableCellSpaceNameComponent extends TableCellCustom<APIResource<IServiceInstance>> implements OnInit {
 
-  breadcrumbs!: {};
+  breadcrumbs!: Record<string, unknown>;
   spaceUrl!: string[];
   spaceName!: Observable<string>;
 

@@ -6,7 +6,7 @@ import { Store } from '@ngrx/store';
 import { asapScheduler, Observable, of } from 'rxjs';
 import { map, observeOn, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { CustomSelectComponent, CustomOptionComponent, FocusDirective, StepOnNextFunction } from '@stratosui/core';
+import { AppErrorComponent, CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, FocusDirective, StepOnNextFunction } from '@stratosui/core';
 import { SetCFDetails } from '../../../../actions/create-applications-page.actions';
 import { ISpace } from '../../../../cf-api.types';
 import { CFAppState } from '../../../../cf-app-state';
@@ -23,6 +23,8 @@ import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-servi
   imports: [
     CommonModule,
     FormsModule,
+    CustomFormFieldComponent,
+    AppErrorComponent,
     CustomSelectComponent,
     CustomOptionComponent,
     FocusDirective
@@ -50,6 +52,66 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
 
   @Input()
   stepperText = 'Select a Cloud Foundry instance, organization and space for the app.';
+
+  /**
+   * Cascade clears: selecting "None" on CF should also clear the Org
+   * and Space selections. The service has an internal cascade, but it
+   * races with org.list$ updates and sometimes leaves the downstream
+   * selection stale, so we handle it explicitly here.
+   *
+   * When the user selects None we also mark the cleared controls as
+   * pristine so the "required" error state does not immediately paint
+   * red; the fields return to their "nothing chosen yet" state and the
+   * Next button stays disabled until the user makes new selections.
+   */
+  /**
+   * Mark a child control pristine AND force it to re-emit statusChanges
+   * so the form-field wrapper re-evaluates isInvalid (which is gated on
+   * `dirty`). markAsPristine alone does not emit statusChanges.
+   */
+  private resetControlPristine(name: string) {
+    const control = this.cfForm?.control?.get(name);
+    if (control) {
+      control.markAsPristine();
+      control.markAsUntouched();
+      control.updateValueAndValidity();
+    }
+  }
+
+  onCfChange(value: any) {
+    this.cfOrgSpaceService.cf.select.next(value);
+    if (value == null) {
+      this.cfOrgSpaceService.org.select.next(undefined);
+      this.cfOrgSpaceService.space.select.next(undefined);
+      // Treat None as "back to start" — clear all the dirty/touched
+      // marks on every field so the required-error decoration disappears.
+      setTimeout(() => {
+        this.resetControlPristine('cf');
+        this.resetControlPristine('org');
+        this.resetControlPristine('space');
+      });
+    }
+  }
+
+  onOrgChange(value: any) {
+    this.cfOrgSpaceService.org.select.next(value);
+    if (value == null) {
+      this.cfOrgSpaceService.space.select.next(undefined);
+      // Mark just the cleared fields pristine; the CF field is still
+      // the user's real choice so leave its dirty state alone.
+      setTimeout(() => {
+        this.resetControlPristine('org');
+        this.resetControlPristine('space');
+      });
+    }
+  }
+
+  onSpaceChange(value: any) {
+    this.cfOrgSpaceService.space.select.next(value);
+    if (value == null) {
+      setTimeout(() => this.resetControlPristine('space'));
+    }
+  }
 
   onNext: StepOnNextFunction = () => {
     this.store.dispatch(new SetCFDetails({

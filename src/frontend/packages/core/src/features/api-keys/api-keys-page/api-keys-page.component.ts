@@ -4,7 +4,7 @@ import { CustomTooltipDirective } from '../../../shared/components/custom-toolti
 import { TailwindDialogService } from '../../../shared/services/tailwind-dialog.service';
 import { stratosEntityCatalog } from '@stratosui/store';
 import { Observable, Subject } from 'rxjs';
-import { first, map, startWith } from 'rxjs/operators';
+import { take, defaultIfEmpty, map, startWith } from 'rxjs/operators';
 
 import { ApiKeyListConfigService } from '../../../shared/components/list/list-types/apiKeys/apiKey-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
@@ -53,8 +53,8 @@ export class ApiKeysPageComponent {
   }
 
   addApiKey() {
-    this.showDialog().pipe(first()).subscribe(key => {
-      this.keyDetails.next(key);
+    this.showDialog().pipe(take(1), defaultIfEmpty(null)).subscribe(key => {
+      if (key) { this.keyDetails.next(key); }
     });
   }
 

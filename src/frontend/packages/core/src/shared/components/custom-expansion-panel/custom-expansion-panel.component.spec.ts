@@ -303,7 +303,7 @@ describe('CustomExpansionPanelComponent', () => {
 
   describe('Accessibility Features', () => {
     it('should be keyboard accessible - toggle on Enter key', () => {
-      const initialState = component.expanded;
+      const _initialState = component.expanded;
       const header = compiled.query(By.css('.expansion-header'));
 
       const event = new KeyboardEvent('keydown', { key: 'Enter' });

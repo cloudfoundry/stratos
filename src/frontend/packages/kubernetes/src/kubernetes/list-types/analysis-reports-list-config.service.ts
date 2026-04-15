@@ -112,7 +112,7 @@ export class AnalysisReportsListConfig implements IListConfig<AnalysisReport> {
     label: 'Delete',
     icon: 'delete',
     description: ``,
-    createEnabled: (row$: Observable<AnalysisReport>) => of(true)
+    createEnabled: (_row$: Observable<AnalysisReport>) => of(true)
   };
 
   private singleActions = [

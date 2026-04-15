@@ -5,7 +5,7 @@ import { RouterModule } from '@angular/router';
 import { CustomTooltipDirective, TailwindSnackBarService } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
-import { filter, first, map, pairwise, startWith, tap } from 'rxjs/operators';
+import { take, filter, map, pairwise, startWith, tap } from 'rxjs/operators';
 
 import { ConfirmationDialogConfig, ConfirmationDialogService } from '@stratosui/core';
 import { RouterNav, AppState, entityCatalog, selectDeletionInfo } from '@stratosui/store';
@@ -31,7 +31,6 @@ import { PollingIndicatorComponent } from '../../../../../../../../../core/src/s
 @Component({
   selector: 'app-cloud-foundry-space-summary',
   templateUrl: './cloud-foundry-space-summary.component.html',
-  styleUrls: ['./cloud-foundry-space-summary.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
@@ -79,13 +78,13 @@ export class CloudFoundrySpaceSummaryComponent {
     );
     this.name$ = cfSpaceService.space$.pipe(
       map(space => space.entity.entity.name),
-      first()
+      take(1)
     );
   }
 
   deleteSpaceWarn = () => {
     this.name$.pipe(
-      first()
+      take(1)
     ).subscribe(name => {
       const confirmation = new ConfirmationDialogConfig(
         'Delete Space',

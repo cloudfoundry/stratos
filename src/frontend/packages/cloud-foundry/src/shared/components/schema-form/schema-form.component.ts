@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule, FormControl, FormGroup } from '@angul
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import {
+  AppInputDirective,
   CustomFormFieldComponent,
   ErrorStateMatcher,
   ShowOnDirtyErrorStateMatcher,
@@ -28,7 +29,7 @@ class JsonPointer {
 }
 
 export interface SchemaFormValidationError {
-  dataPath: {};
+  dataPath: Record<string, unknown>;
   message: string;
 }
 
@@ -46,6 +47,7 @@ export class SchemaFormConfig {
   imports: [
     FormsModule,
     ReactiveFormsModule,
+    AppInputDirective,
     CustomFormFieldComponent,
     TailwindJsonSchemaFormModule
 ],

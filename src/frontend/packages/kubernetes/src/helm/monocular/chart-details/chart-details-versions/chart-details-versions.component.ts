@@ -1,4 +1,4 @@
-import {Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
+import {Component, Input, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { ChartAttributes } from '../../shared/models/chart';
@@ -8,7 +8,6 @@ import { ChartsService } from '../../shared/services/charts.service';
 @Component({
   selector: 'app-chart-details-versions',
   templateUrl: './chart-details-versions.component.html',
-  styleUrls: ['./chart-details-versions.component.scss'],
   standalone: true
 })
 export class ChartDetailsVersionsComponent {

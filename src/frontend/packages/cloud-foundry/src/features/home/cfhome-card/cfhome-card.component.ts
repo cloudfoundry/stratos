@@ -2,7 +2,7 @@ import { AsyncPipe, CommonModule } from '@angular/common';
 import { Component, Input, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { filter, first, map, pairwise, tap } from 'rxjs/operators';
+import { take, filter, map, pairwise, tap } from 'rxjs/operators';
 
 import { BASE_REDIRECT_QUERY } from '@stratosui/core';
 import { RouterNav, PaginationMonitorFactory, EndpointModel, ActionState, APIResource } from '@stratosui/store';
@@ -12,12 +12,10 @@ import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import {
   ApplicationDeploySourceTypes,
   AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM,
-  AUTO_SELECT_DEPLOY_TYPE_URL_PARAM,
-} from '../../applications/deploy-application/deploy-application-steps.types';
+  AUTO_SELECT_DEPLOY_TYPE_URL_PARAM } from '../../applications/deploy-application/deploy-application-steps.types';
 import {
   AUTO_SELECT_CF_URL_PARAM,
-  IAppTileData,
-} from '../../applications/new-application-base-step/new-application-base-step.component';
+  IAppTileData } from '../../applications/new-application-base-step/new-application-base-step.component';
 import { ActiveRouteCfOrgSpace } from '../../cf/cf-page.types';
 import { goToAppWall } from '../../cf/cf.helpers';
 import { appDataSort, CloudFoundryEndpointService } from '../../cf/services/cloud-foundry-endpoint.service';
@@ -37,9 +35,9 @@ import { TileSelectorComponent } from '@stratosui/core';
   providers: [
     {
       provide: ActiveRouteCfOrgSpace,
-      useValue: null,
-    },
-    CloudFoundryEndpointService
+      useValue: null },
+    CloudFoundryEndpointService,
+    ApplicationDeploySourceTypes,
   ],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -160,7 +158,7 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
 
     // When the apps are loaded, fetch the app stats
     this.hasNoApps$ = appsPagObs.entities$.pipe(
-      first(),
+      take(1),
       map(apps => {
         this.recentApps = apps;
         this.appStatsToLoad = this.restrictApps(apps);
@@ -172,15 +170,15 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
 
     const appStatLoaded$ = this.appStatsLoaded.asObservable().pipe(
       filter(loaded => loaded),
-      first() // Complete after first true emission
+      take(1) // Complete after first true emission
     );
 
     return combineLatest([
-      this.routeCount$.pipe(first()),
-      this.appCount$.pipe(first()),
-      this.orgCount$.pipe(first()),
+      this.routeCount$.pipe(take(1)),
+      this.appCount$.pipe(take(1)),
+      this.orgCount$.pipe(take(1)),
       appsPagObs.entities$.pipe(
-        first(),
+        take(1),
         tap(apps => {
           this.recentApps = apps;
           this.appStatsToLoad = this.restrictApps(apps);
@@ -190,7 +188,7 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
       ),
       appStatLoaded$
     ]).pipe(
-      first(),
+      take(1),
       map(() => true)
     );
   }
@@ -230,7 +228,7 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
           map(a => a as ActionState),
           pairwise(),
           filter(([oldR, newR]) => oldR.busy && !newR.busy),
-          first()
+          take(1)
         ).subscribe(() => {
           this.fetchAppStats();
         });

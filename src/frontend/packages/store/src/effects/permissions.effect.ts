@@ -29,7 +29,7 @@ export class PermissionsEffects {
 
    getCurrentUsersPermissions$ = createEffect(() => this.actions$.pipe(
     ofType<GetCurrentUsersRelations>(GET_CURRENT_USER_RELATIONS),
-    switchMap(action => {
+    switchMap(_action => {
       const allRequestsCompleted = entityCatalog.getAllBaseEndpointTypes().reduce((res, endpointType) => {
         if (endpointType.definition.userRolesFetch) {
           res.push(endpointType.definition.userRolesFetch([], this.store, this.httpClient));

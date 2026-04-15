@@ -1,7 +1,7 @@
 import { intervalToDuration } from 'date-fns';
 
 
-export function formatCPUTime(value: string | number, debug = false): string {
+export function formatCPUTime(value: string | number, _debug = false): string {
 
   const cpuTimeFormat: Record<string, number> = {
     day: 86400,

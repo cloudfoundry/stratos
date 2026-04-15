@@ -44,7 +44,7 @@ export class UserProfileEffect {
             }, action)
           ];
         }),
-        catchError((e: any) => {
+        catchError((_e: any) => {
           this.appRef.tick();
           return [
             new WrapperRequestActionFailed('Could not get User Profile Info', action),
@@ -65,7 +65,7 @@ export class UserProfileEffect {
       }
 
       return this.httpClient.put(`/pp/${proxyAPIVersion}/users/${userGuid}`, action.profile, { headers }).pipe(
-        mergeMap((info: UserProfileInfo) => {
+        mergeMap((_info: UserProfileInfo) => {
           this.appRef.tick();
           return [
             new WrapperRequestActionSuccess({
@@ -74,7 +74,7 @@ export class UserProfileEffect {
             }, action),
           ];
         }),
-        catchError((e: any) => {
+        catchError((_e: any) => {
           this.appRef.tick();
           return [
             new WrapperRequestActionFailed('Could not update User Profile Info', action),
@@ -92,7 +92,7 @@ export class UserProfileEffect {
         'x-stratos-password-new': action.passwordChanges.password
       };
       return this.httpClient.put(`/pp/${proxyAPIVersion}/users/${userGuid}/password`, action.passwordChanges, { headers }).pipe(
-        switchMap((info: UserProfileInfo) => {
+        switchMap((_info: UserProfileInfo) => {
           this.appRef.tick();
           return [
             new WrapperRequestActionSuccess({
@@ -101,7 +101,7 @@ export class UserProfileEffect {
             }, action)
           ];
         }),
-        catchError((e: any) => {
+        catchError((_e: any) => {
           this.appRef.tick();
           return [
             new WrapperRequestActionFailed('Could not update User Password', action),

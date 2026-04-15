@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { filter, first, map } from 'rxjs/operators';
+import { take, filter, map } from 'rxjs/operators';
 
 import { IHeaderBreadcrumb, PageHeaderComponent } from '@stratosui/core';
 import { EndpointModel, EntityService, getFullEndpointApiUrl, stratosEntityCatalog } from '@stratosui/store';
@@ -12,7 +12,6 @@ import { CFAppCLIInfoContext, CliInfoComponent } from '../../../shared/component
 @Component({
   selector: 'app-cli-info-application',
   templateUrl: './cli-info-application.component.html',
-  styleUrls: ['./cli-info-application.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
@@ -63,7 +62,7 @@ export class CliInfoApplicationComponent implements OnInit {
           username: ep.entity.user ? ep.entity.user.name : ''
         };
       }),
-      first()
+      take(1)
     );
   }
 

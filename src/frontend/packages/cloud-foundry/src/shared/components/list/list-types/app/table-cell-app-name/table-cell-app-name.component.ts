@@ -12,7 +12,6 @@ import { CFAppState } from '../../../../../../cf-app-state';
 @Component({
   selector: 'app-table-cell-app-name',
   templateUrl: './table-cell-app-name.component.html',
-  styleUrls: ['./table-cell-app-name.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

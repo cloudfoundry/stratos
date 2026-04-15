@@ -170,7 +170,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
       this.results$,
       this.metricsMonitor.isFetchingEntity$.pipe(startWith(true))
     ).pipe(
-      debounce(([results, fetching]) => {
+      debounce(([_results, fetching]) => {
         return !fetching ? timer(800) : timer(0);
       }),
       map(([results, fetching]) => results && fetching),

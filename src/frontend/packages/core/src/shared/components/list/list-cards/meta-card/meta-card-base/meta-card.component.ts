@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ContentChild, ContentChildren, Input, OnDestroy, QueryList, HostListener, inject } from '@angular/core';
 import { combineLatest, Observable, of as observableOf, of, Subscription } from 'rxjs';
-import { first, map, tap } from 'rxjs/operators';
+import { take, map, tap } from 'rxjs/operators';
 
 import {
   EntityMonitorFactory,
@@ -97,7 +97,7 @@ export class MetaCardComponent implements OnDestroy {
       this.isDeleting$ = entityMonitor.isDeletingEntity$;
       if (!this.favorite) {
         this.entityMonitorSub = entityMonitor.entity$.pipe(
-          first(),
+          take(1),
           tap(entity => this.favorite = this.userFavoriteManager.getFavorite(
             entity,
             entityConfig.schema.entityType,
@@ -108,7 +108,7 @@ export class MetaCardComponent implements OnDestroy {
     }
   }
 
-  @Input('actionMenu')
+  @Input()
   set actionMenu(actionMenu: MenuItem[]) {
     if (actionMenu) {
       this.pActionMenu = actionMenu.map(menuItem => {

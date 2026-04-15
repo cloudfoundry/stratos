@@ -26,7 +26,7 @@ import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 //   return storeLogger()(reducer);
 // }
 
-export const appReducers: ActionReducerMap<{}> = {
+export const appReducers: ActionReducerMap<Record<string, unknown>> = {
   auth: authReducer,
   uaaSetup: uaaSetupReducer,
   endpoints: endpointsReducer,

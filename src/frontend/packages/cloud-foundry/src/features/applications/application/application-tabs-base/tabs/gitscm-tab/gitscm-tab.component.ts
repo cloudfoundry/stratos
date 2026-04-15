@@ -1,13 +1,11 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { TailwindSnackBarService, TailwindSnackBarRef } from '@stratosui/core';
-import { Store } from '@ngrx/store';
 import { GitCommit, gitEntityCatalog, GitMeta, GitRepo, GitSCMService, GitSCMType, SCMIcon, GithubCommitAuthorComponent } from '@stratosui/git';
 import { Observable, Subscription } from 'rxjs';
-import {
+import { take,
   distinctUntilChanged,
   filter,
-  first,
   map,
   publishReplay,
   refCount,
@@ -20,7 +18,6 @@ import { ListConfig } from '../../../../../../../../core/src/shared/components/l
 import {
   NoContentMessageLine,
 } from '../../../../../../../../core/src/shared/components/no-content-message/no-content-message.component';
-import { CFAppState } from '../../../../../../cf-app-state';
 import {
   GithubCommitsListConfigServiceAppTab,
 } from '../../../../../../shared/components/list/list-types/github-commits/github-commits-list-config-app-tab.service';
@@ -106,12 +103,12 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     const coreInfo$: Observable<[EnvVarStratosProject, GitMeta]> = this.appService.applicationStratProject$.pipe(
-      first(),
+      take(1),
       map(stProject => [stProject, this.createBaseGitMeta(stProject)])
     );
 
     this.icon$ = this.appService.applicationStratProject$.pipe(
-      first(),
+      take(1),
       map((stProject: EnvVarStratosProject) => {
         const meta: GitMeta = this.createBaseGitMeta(stProject);
         return meta.scm.getIcon();
@@ -119,7 +116,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
     );
 
     this.hasRepo$ = this.appService.applicationStratProject$.pipe(
-      first(),
+      take(1),
       switchMap((stProject: EnvVarStratosProject) => {
         const gitRepInfoMeta: GitMeta = this.createBaseGitMeta(stProject);
         return gitEntityCatalog.repo.store.getRepoInfo.getEntityService(gitRepInfoMeta).entityObs$;

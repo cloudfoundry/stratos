@@ -8,14 +8,13 @@ import { KubernetesPod } from '../../../store/kube.types';
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-pod-status',
   templateUrl: './kubernetes-pod-status.component.html',
-  styleUrls: ['./kubernetes-pod-status.component.scss'],
   standalone: true
 })
 export class KubernetesPodStatusComponent extends TableCellCustom<KubernetesPod> {
 
   public style = 'border-success';
 
-  @Input('row')
+  @Input()
   set row(row: KubernetesPod) {
     super.row = row;
     if (row) {

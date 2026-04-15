@@ -6,7 +6,6 @@ import { CfCellAppsListConfigService } from '../../../../../../shared/components
 @Component({
   selector: 'app-cloud-foundry-cell-apps',
   templateUrl: './cloud-foundry-cell-apps.component.html',
-  styleUrls: ['./cloud-foundry-cell-apps.component.scss'],
   providers: [
     {
       provide: ListConfig,

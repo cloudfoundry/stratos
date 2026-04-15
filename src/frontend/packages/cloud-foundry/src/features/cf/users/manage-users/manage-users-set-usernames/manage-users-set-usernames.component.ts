@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
-import { first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
+import { take, defaultIfEmpty, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
 import {
   CustomFormFieldComponent,
@@ -88,13 +88,13 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
     const ffRemovePermConfig = new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.unset_roles_by_username);
     this.canAdd$ = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
       switchMap(() => userPerms.can(ffSetPermConfig, activeRouteCfOrgSpace.cfGuid)),
-      first(),
+      take(1),
       publishReplay(1),
       refCount()
     );
     this.canRemove$ = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
       switchMap(() => userPerms.can(ffRemovePermConfig, activeRouteCfOrgSpace.cfGuid)),
-      first(),
+      take(1),
       publishReplay(1),
       refCount()
     );
@@ -102,12 +102,12 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
     const canAddRemove = combineLatest([this.canAdd$, this.canRemove$]);
 
     // Set starting value of add/remove radio button
-    canAddRemove.pipe(first()).subscribe(([canAdd]) => this.setIsRemove({ source: null, value: !canAdd }));
+    canAddRemove.pipe(take(1), defaultIfEmpty([false, false] as [boolean, boolean])).subscribe(([canAdd]) => this.setIsRemove({ source: null, value: !canAdd }));
 
     // Block content until we know the add/remove state
     this.blocked$ = canAddRemove.pipe(
       map(() => false),
-      first(),
+      take(1),
       startWith(true),
       publishReplay(1),
       refCount(),

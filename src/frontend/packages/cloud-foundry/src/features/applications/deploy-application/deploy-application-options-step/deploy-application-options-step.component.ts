@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
-import { AbstractControl, ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
-import { filter, first, map, share, startWith, switchMap } from 'rxjs/operators';
+import { take, filter, map, share, startWith, switchMap } from 'rxjs/operators';
 
 import { StepOnNextFunction } from '@stratosui/core';
 import { APIResource } from '@stratosui/store';
@@ -14,14 +14,12 @@ import { CFAppState } from '../../../../cf-app-state';
 import {
   selectCfDetails,
   selectDeployAppState,
-  selectSourceType,
-} from '../../../../store/selectors/deploy-application.selector';
+  selectSourceType } from '../../../../store/selectors/deploy-application.selector';
 import { OverrideAppDetails, SourceType } from '../../../../store/types/deploy-application.types';
 import { IDomain } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import {
-  ApplicationEnvVarsHelper,
-} from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+  ApplicationEnvVarsHelper } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
 
 interface DeployOptionsForm {
@@ -196,7 +194,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
       combineLatest(this.domains$, cfDetails$).pipe(
         switchMap(([, cfDetails]) => this.appEnvVarsService.createEnvVarsObs(this.appGuid, cfDetails.cloudFoundry).entities$),
         map(applicationEnvVars => this.appEnvVarsService.FetchStratosProject(applicationEnvVars[0].entity)),
-        first()
+        take(1)
       ).subscribe(envVars => this.objToForm(envVars.deployOverrides));
     }
 

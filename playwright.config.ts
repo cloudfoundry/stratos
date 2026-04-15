@@ -1,9 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
 
 // Default secrets profile — auto-detect from base URL, fall back to 'local'
-if (!process.env.STRATOS_E2E_PROFILE) {
-  const baseUrl = process.env.STRATOS_E2E_BASE_URL || '';
-  process.env.STRATOS_E2E_PROFILE = baseUrl.includes('adepttech') ? 'adepttech' : 'local';
+if (!process.env.E2E_PROFILE) {
+  const baseUrl = process.env.E2E_BASE_URL || '';
+  process.env.E2E_PROFILE = baseUrl.includes('adepttech') ? 'adepttech' : 'local';
 }
 
 // Test environment ports (separate from dev to avoid conflicts)
@@ -28,8 +28,12 @@ export default defineConfig({
   // Retry on CI only
   retries: process.env.CI ? 2 : 0,
 
-  // Opt out of parallel tests on CI
-  workers: process.env.CI ? 4 : undefined,
+  // Worker count: configurable via E2E_WORKERS env var.
+  // Each worker gets its own authenticated session to avoid session contention.
+  // Default: CI=4, local=half CPU cores (Playwright default)
+  workers: process.env.E2E_WORKERS
+    ? parseInt(process.env.E2E_WORKERS)
+    : (process.env.CI ? 4 : undefined),
 
   // Reporter configuration
   reporter: [
@@ -41,16 +45,16 @@ export default defineConfig({
   // Shared settings for all the projects below
   use: {
     // Base URL for navigation
-    baseURL: process.env.STRATOS_E2E_BASE_URL || `https://localhost:${FRONTEND_PORT}`,
+    baseURL: process.env.E2E_BASE_URL || `https://localhost:${FRONTEND_PORT}`,
 
     // Collect trace when retrying the failed test
     trace: 'on-first-retry',
 
-    // Screenshot on failure
-    screenshot: 'only-on-failure',
+    // Screenshot on failure (override via E2E_SCREENSHOTS env var)
+    screenshot: (process.env.E2E_SCREENSHOTS as any) || 'only-on-failure',
 
-    // Video on failure
-    video: 'retain-on-failure',
+    // Video on failure (override via E2E_VIDEO env var)
+    video: (process.env.E2E_VIDEO as any) || 'retain-on-failure',
 
     // Accept self-signed certificates (dev environment)
     ignoreHTTPSErrors: true,
@@ -131,10 +135,10 @@ export default defineConfig({
   //   ps aux | grep 'e2e:5543'             # find a specific session
   //   pkill -f 'e2e:5543'                  # kill a specific session
   // Skip local servers when targeting a remote deployment
-  ...(process.env.STRATOS_E2E_BASE_URL ? {} : {
+  ...(process.env.E2E_BASE_URL ? {} : {
     webServer: [
       {
-        command: `cd src/jetstream && STRATOS_E2E=e2e:${BACKEND_PORT} CONSOLE_PROXY_TLS_ADDRESS=:${BACKEND_PORT} ../../dist/bin/jetstream`,
+        command: `cd src/jetstream && STRATOS_E2E=e2e:${BACKEND_PORT} CONSOLE_PROXY_TLS_ADDRESS=:${BACKEND_PORT} SESSION_STORE_EXPIRY=120 ../../dist/bin/jetstream`,
         url: `https://localhost:${BACKEND_PORT}/pp/v1/info`,
         reuseExistingServer: true,
         ignoreHTTPSErrors: true,

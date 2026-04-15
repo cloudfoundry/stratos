@@ -33,7 +33,7 @@ export class CreateAppPageEffects {
     ofType<IsNewAppNameFree>(CHECK_NAME),
     withLatestFrom(this.store.select(selectNewAppCFDetails)),
     switchMap(([action, cfDetails]: [IsNewAppNameFree, NewAppCFDetails]) => {
-      const { cloudFoundry, org, space } = cfDetails;
+      const { cloudFoundry, org: _org, space } = cfDetails;
       return this.http.get<{ [guid: string]: { total_results: number } }>(`/pp/${this.proxyAPIVersion}/proxy/${this.cfAPIVersion}/apps`, {
         params: {
           q: `name:${action.name};space_guid:${space}`

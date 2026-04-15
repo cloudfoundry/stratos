@@ -1,7 +1,7 @@
 <ng-template #listRepoButton>
   @if (!hide) {
-    <div class="list-header">
-      <button class="btn btn-ghost" (click)="collapsed = !collapsed">
+    <div class="flex items-end my-1">
+      <button class="btn btn-ghost mr-2.5" (click)="collapsed = !collapsed">
         <span class="material-symbols-outlined">filter_list</span>
         @if (collapsed) {
           <span class="material-symbols-outlined">chevron_right</span>
@@ -26,31 +26,31 @@
   }
 </ng-template>
 
-<div class="charts">
+<div class="flex flex-row max-h-full">
   @if (!hide && repos$ | async; as repos) {
-    <div class="charts__repos"
+    <div class="flex flex-col max-h-full overflow-auto"
       [ngClass]="{'charts__repos--collapse': collapsed, 'charts__repos--expand': !collapsed}">
-      <h3>Filter By Repository</h3>
+      <h3 class="text-base my-1.5">Filter By Repository</h3>
       <app-form-field>
         <input appInput placeholder="Filter by Repository" name="searchReposValue" [(ngModel)]="searchReposValue"
           (ngModelChange)="searchReposChange($event)">
       </app-form-field>
-      <div class="charts__repos__lists">
+      <div class="max-h-full overflow-auto pr-2.5">
         @if (repos.stratosRepos.length) {
-          <div class="charts__repos__stratos">
-            <h4>Helm Repositories</h4>
+          <div class="flex flex-col">
+            <h4 class="text-[15px] mt-0 mb-2">Helm Repositories</h4>
             @for (repo of repos.stratosRepos; track repo) {
-              <a (click)="filterCharts(repo)"
-              [ngClass]="{'charts__repos__selected': repo === filteredRepo}">{{repo}}</a>
+              <a class="cursor-pointer text-sm" tabindex="0" (click)="filterCharts(repo)" (keydown.enter)="filterCharts(repo)"
+              [class.font-bold]="repo === filteredRepo">{{repo}}</a>
             }
           </div>
         }
         @if (repos.artifactHubRepos.length) {
-          <div class="charts__repos__artifact">
-            <h4>Artifact Hub Repositories</h4>
+          <div class="flex flex-col">
+            <h4 class="text-[15px] my-2">Artifact Hub Repositories</h4>
             @for (repo of repos.artifactHubRepos; track repo) {
-              <a (click)="filterCharts(repo)"
-              [ngClass]="{'charts__repos__selected': repo === filteredRepo}">{{repo}}</a>
+              <a class="cursor-pointer text-sm" tabindex="0" (click)="filterCharts(repo)" (keydown.enter)="filterCharts(repo)"
+              [class.font-bold]="repo === filteredRepo">{{repo}}</a>
             }
           </div>
         }

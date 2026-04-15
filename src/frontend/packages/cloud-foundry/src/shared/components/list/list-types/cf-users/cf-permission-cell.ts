@@ -1,7 +1,7 @@
-import { Directive, Input } from '@angular/core';
+import { Directive, inject, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
-import { filter, first, map, switchMap } from 'rxjs/operators';
+import { take, filter, map, switchMap } from 'rxjs/operators';
 
 import { AppChip, ConfirmationDialogConfig, ConfirmationDialogService, TableCellCustom } from '@stratosui/core';
 import { APIResource, selectSessionData } from '@stratosui/store';
@@ -24,7 +24,7 @@ export interface ICellPermissionList<T> extends IUserRole<T> {
 export abstract class CfPermissionCellDirective<T> extends TableCellCustom<APIResource<CfUser>> {
   userEntity: BehaviorSubject<CfUser> = new BehaviorSubject(null);
 
-  @Input('row')
+  @Input()
   set row(row: APIResource<CfUser>) {
     super.row = row;
     this.rowSubject.next(row);
@@ -47,11 +47,11 @@ export abstract class CfPermissionCellDirective<T> extends TableCellCustom<APIRe
     filter(config => !!config)
   );
 
-  constructor(
-    public store: Store<CFAppState>,
-    private confirmDialog: ConfirmationDialogService,
-    public cfUserService: CfUserService
-  ) {
+  public store = inject<Store<CFAppState>>(Store);
+  private confirmDialog = inject(ConfirmationDialogService);
+  public cfUserService = inject(CfUserService);
+
+  constructor() {
     super();
   }
 
@@ -94,7 +94,7 @@ export abstract class CfPermissionCellDirective<T> extends TableCellCustom<APIRe
     );
     this.confirmDialog.open(confirmation, () => {
       this.store.select(selectSessionData()).pipe(
-        first()
+        take(1)
       ).subscribe(sessionData => {
         const cfSession = sessionData.endpoints.cf[cellPermission.cfGuid];
         const updateConnectedUser = !cfSession.user.admin && cellPermission.userGuid === cfSession.user.guid;
@@ -107,9 +107,9 @@ export abstract class CfPermissionCellDirective<T> extends TableCellCustom<APIRe
     return perm.name ? `${perm.name}: ${perm.string}` : perm.string;
   }
 
-  protected removePermission(cellPermission: ICellPermissionList<T>, updateConnectedUser: boolean) {
+  protected removePermission(_cellPermission: ICellPermissionList<T>, _updateConnectedUser: boolean) {
 
   }
 
-  protected canRemovePermission = (cfGuid: string, orgGuid: string, spaceGuid: string): Observable<boolean> => observableOf(false);
+  protected canRemovePermission = (_cfGuid: string, _orgGuid: string, _spaceGuid: string): Observable<boolean> => observableOf(false);
 }

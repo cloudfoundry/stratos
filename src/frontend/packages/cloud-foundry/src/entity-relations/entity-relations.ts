@@ -231,7 +231,7 @@ function handleRelation(config: HandleRelationsConfig): ValidateEntityResult[] {
  * Iterate through required parent-child relationships and check if they exist
  */
 function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
-  const { cfGuid, entities, parentRelation, allEntities, allPagination, newEntities, action } = config;
+  const { cfGuid, entities, parentRelation, allEntities, allPagination, newEntities, action: _action } = config;
 
   if (!entities) {
     return [];
@@ -540,7 +540,7 @@ export function populatePaginationFromParent(store: Store<GeneralEntityAppState>
       store.select(selectEntity<any>(parentEntityKey, parentGuid)),
       store.select(getAPIRequestDataState),
     ),
-    map(([entityInfo, entity, allEntities]: [RequestInfoState, any, GeneralEntityAppState]) => {
+    map(([_entityInfo, entity, allEntities]: [RequestInfoState, any, GeneralEntityAppState]) => {
       if (!entity) {
         return action; // Return action instead of undefined
       }

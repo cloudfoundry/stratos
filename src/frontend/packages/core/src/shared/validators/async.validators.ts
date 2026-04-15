@@ -29,7 +29,7 @@ export function createUniquenessValidator<T = any>(
       return of(null);
     }
 
-    const value = config.caseSensitive
+    const _value = config.caseSensitive
       ? control.value.trim()
       : control.value.trim().toLowerCase();
 

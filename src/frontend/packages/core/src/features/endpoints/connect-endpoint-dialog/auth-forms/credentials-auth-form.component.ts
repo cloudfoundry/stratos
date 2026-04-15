@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 
-import { ReactiveFormsModule, FormGroup, FormControl, FormBuilder } from '@angular/forms';
-import { CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
+import { ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
+import { AppInputDirective, CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
 import { IAuthForm } from '@stratosui/store';
 
 import { ShowHideButtonComponent } from '../../../../core/show-hide-button/show-hide-button.component';
@@ -18,6 +18,7 @@ interface CredentialsAuthForm {
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    AppInputDirective,
     CustomFormFieldComponent,
     ShowHideButtonComponent
 ],

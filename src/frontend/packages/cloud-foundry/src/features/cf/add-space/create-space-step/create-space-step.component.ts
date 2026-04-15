@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { CustomFormFieldComponent } from '@stratosui/core';
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AppInputDirective, CustomFormFieldComponent } from '@stratosui/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
 import { ActivatedRoute } from '@angular/router';
@@ -31,6 +31,7 @@ interface CreateSpaceForm {
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    AppInputDirective,
     CustomFormFieldComponent,
     CustomSelectComponent,
     CustomOptionComponent,
@@ -40,6 +41,9 @@ interface CreateSpaceForm {
 export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
 
+  /** See QuotaDefinitionFormComponent for rationale. */
+  private validSignal = signal(false);
+  private formStatusSub?: Subscription;
 
   cfUrl!: string;
   createSpaceForm!: FormGroup<CreateSpaceForm>;
@@ -73,6 +77,10 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
       spaceName: new FormControl('', { nonNullable: true, validators: [Validators.required, this.spaceNameTakenValidator()] }),
       quotaDefinition: new FormControl<number | string | null>(null),
     });
+    this.validSignal.set(this.createSpaceForm.valid);
+    this.formStatusSub = this.createSpaceForm.statusChanges.subscribe(
+      () => this.validSignal.set(this.createSpaceForm.valid)
+    );
 
     this.quotaSubscription = this.quotaDefinitions$.subscribe((quotas => {
       if (quotas.length > 0) {
@@ -83,16 +91,11 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
     }));
   }
 
-  validateNameTaken = (spaceName: string = null) => {
+  isNameUnique = (spaceName: string = null) => {
     return this.allSpacesInOrg ? this.allSpacesInOrg.indexOf(spaceName || this.spaceName.value) === -1 : true;
   };
 
-  validate = () => !!this.createSpaceForm && this.createSpaceForm.valid;
-
-  spaceNameTakenValidator = (): ValidatorFn => {
-    return (formField: AbstractControl): { [key: string]: any, } =>
-      !this.validateNameTaken(formField.value) ? { spaceNameTaken: { value: formField.value } } : null;
-  };
+  validate = () => this.validSignal();
 
   submit: StepOnNextFunction = () => {
     const id = `${this.orgGuid}-${this.spaceName.value}`;
@@ -114,6 +117,7 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
 
   ngOnDestroy() {
     this.quotaSubscription.unsubscribe();
+    this.formStatusSub?.unsubscribe();
     this.destroy();
   }
 }

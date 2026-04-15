@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CardWrapperComponent } from '@stratosui/core';
+import { CardWrapperComponent } from '../../../shared/components/cards/card/card.component';
 import { Store } from '@ngrx/store';
 import { Logout, AppState } from '@stratosui/store';
 import { Observable } from 'rxjs';

@@ -3,7 +3,6 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
 @Component({
   selector: 'app-show-hide-button',
   templateUrl: './show-hide-button.component.html',
-  styleUrls: ['./show-hide-button.component.scss'],
   standalone: true,
   imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush

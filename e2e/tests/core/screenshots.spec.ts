@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 const label = process.env.STRATOS_SCREENSHOT_LABEL
-  || new URL(process.env.STRATOS_E2E_BASE_URL || 'https://localhost').hostname.split('.')[0];
+  || new URL(process.env.E2E_BASE_URL || 'https://localhost').hostname.split('.')[0];
 
 const SCREENSHOT_DIR = path.resolve('e2e-screenshots');
 

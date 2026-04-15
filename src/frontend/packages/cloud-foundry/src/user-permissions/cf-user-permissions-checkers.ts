@@ -183,7 +183,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
   private getEndpointScopesCheck(permission: CfScopeStrings, endpointGuid?: string): Observable<boolean> {
     const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
     return endpointGuids$.pipe(
-      switchMap(guids => combineLatest(guids.map(guid => this.check(CfPermissionTypes.ENDPOINT_SCOPE, permission, endpointGuid)))),
+      switchMap(guids => combineLatest(guids.map(_guid => this.check(CfPermissionTypes.ENDPOINT_SCOPE, permission, endpointGuid)))),
       map(checks => checks.some(check => check)),
       distinctUntilChanged()
     );
@@ -323,7 +323,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
     );
   }
 
-  private checkAllOfType(endpointGuid: string, type: CfPermissionTypes, permission: CfPermissionStrings, orgGuid?: string): Observable<boolean> {
+  private checkAllOfType(endpointGuid: string, type: CfPermissionTypes, permission: CfPermissionStrings, _orgGuid?: string): Observable<boolean> {
     return this.getCfEndpointState(endpointGuid).pipe(
       map(state => {
         if (!state || !(state as any)[type]) {

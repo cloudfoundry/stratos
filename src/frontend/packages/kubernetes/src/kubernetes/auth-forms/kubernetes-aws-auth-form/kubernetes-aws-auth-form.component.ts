@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 import { IAuthForm } from '../../../../../store/src/extension-types';
 import { ShowHideButtonComponent } from '../../../../../core/src/core/show-hide-button/show-hide-button.component';
@@ -15,7 +15,6 @@ interface AWSAuthForm {
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-aws-auth-form',
   templateUrl: './kubernetes-aws-auth-form.component.html',
-  styleUrls: ['./kubernetes-aws-auth-form.component.scss'],
   standalone: true,
   imports: [
     ReactiveFormsModule,

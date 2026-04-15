@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
-import { filter, first, map, pairwise, tap } from 'rxjs/operators';
+import { take, filter, map, pairwise, tap } from 'rxjs/operators';
 
 import {
   ClearPaginationOfType,
@@ -13,8 +13,7 @@ import {
 } from '@stratosui/store';
 import {
   getUserProvidedServiceInstanceRelations,
-  IUserProvidedServiceInstanceData,
-} from '../../actions/user-provided-service.actions';
+  IUserProvidedServiceInstanceData } from '../../actions/user-provided-service.actions';
 import { IUserProvidedServiceInstance } from '../../cf-api-svc.types';
 import { CFAppState } from '../../cf-app-state';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
@@ -86,7 +85,7 @@ export class CloudFoundryUserProvidedServicesService {
       pairwise(),
       filter(([oldV, newV]) => oldV.creating && !newV.creating),
       map(([, newV]) => newV),
-      first(),
+      take(1),
       tap(v => {
         if (!v.error) {
           // Problem - Lists with multiple actions aren't updated following the creation of an entity based on secondary action

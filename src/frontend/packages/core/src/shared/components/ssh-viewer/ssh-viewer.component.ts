@@ -57,7 +57,7 @@ export class SshViewerComponent implements OnInit, OnDestroy {
 
     this.resizeSubscription = this.resizer.resizeEvent$
       .pipe(takeUntil(this.destroy$))
-      .subscribe(r => {
+      .subscribe(_r => {
         if (this.xtermFitAddon) {
           this.resize();
         }
@@ -158,7 +158,7 @@ export class SshViewerComponent implements OnInit, OnDestroy {
             this.errorMessage = eMsg;
           }
         },
-        (err) => {
+        (_err) => {
           this.disconnect();
         },
         () => {

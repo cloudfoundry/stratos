@@ -75,7 +75,7 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
 
   public metricType!: string;
 
-  @Input('row')
+  @Input()
   set row(row: APIResource<AppScalingTrigger>) {
     super.row = row;
     if (row) {

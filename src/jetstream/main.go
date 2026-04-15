@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/sha1"
 	"database/sql"
 	"encoding/gob"
@@ -285,6 +286,8 @@ func main() {
 
 	log.Info("Initialization complete.")
 
+	ctx, cancel := context.WithCancel(context.Background())
+	portalProxy.SetRefreshRoutineContext(ctx, cancel)
 	c := make(chan os.Signal, 2)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
@@ -292,6 +295,9 @@ func main() {
 		// Print a newline - if you pressed CTRL+C, the alighment will be slightly out, so start a new line first
 		fmt.Println()
 		log.Info("Attempting to shut down gracefully...")
+
+		// Cancel portal proxy context
+		cancel()
 
 		// Database connection pool
 		log.Info(`... Closing database connection pool`)
@@ -313,6 +319,8 @@ func main() {
 				pCleanup.Destroy()
 			}
 		}
+		// wait for any goroutines to shut down
+		portalProxy.refreshRoutines.wg.Wait()
 
 		log.Info("Graceful shut down complete")
 		os.Exit(1)
@@ -807,6 +815,12 @@ func start(config api.PortalConfig, p *portalProxy, needSetupMiddleware bool, is
 		go stopEchoWhenUpgraded(e, p.Env())
 	}
 
+	if p.Config.AutoRefreshCNSITokens {
+		if err := p.startCNSITokenRefreshRoutines(); err != nil {
+			return err
+		}
+	}
+
 	var engineErr error
 	address := config.TLSAddress
 	if config.HTTPS {
@@ -913,6 +927,9 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 
 	// Verify Session
 	api.GET("/v1/auth/verify", p.verifySession)
+
+	// Retrieve UAA token for the current session (for operator tooling, e.g. cf CLI curl commands)
+	api.GET("/v1/auth/token", p.retrieveToken)
 
 	// Always serve the backend API from /pp
 	pp := e.Group("/pp")
@@ -1196,4 +1213,10 @@ func (portalProxy *portalProxy) SetStoreFactory(f api.StoreFactory) api.StoreFac
 	old := portalProxy.StoreFactory
 	portalProxy.StoreFactory = f
 	return old
+}
+
+// SetContext sets the context
+func (portalProxy *portalProxy) SetRefreshRoutineContext(ctx context.Context, cancel context.CancelFunc) {
+	portalProxy.refreshRoutines.context = ctx
+	portalProxy.refreshRoutines.cancel = cancel
 }

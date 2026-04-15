@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
+import { AppInputDirective, CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { AfterContentInit, Component, Input, OnDestroy, signal, ChangeDetectionStrategy, inject } from '@angular/core';
-import { AbstractControl, ValidatorFn, Validators, ReactiveFormsModule, FormsModule, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { AbstractControl, ValidatorFn, Validators, ReactiveFormsModule, FormsModule, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 
@@ -16,7 +16,6 @@ import {
   combineLatest,
   distinctUntilChanged,
   filter,
-  first,
   map,
   publishReplay,
   refCount,
@@ -53,18 +52,6 @@ import { CreateServiceInstanceHelper } from '../create-service-instance-helper.s
 import { CsiGuidsService } from '../csi-guids.service';
 import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
 
-interface SelectExistingInstanceForm {
-  serviceInstance: string;
-}
-
-interface CreateNewInstanceForm {
-  name: string;
-  servicePlan: string;
-  spaceGuid: string;
-  params: object;
-  tags: string;
-}
-
 @Component({
   selector: 'app-specify-details-step',
   templateUrl: './specify-details-step.component.html',
@@ -75,6 +62,7 @@ interface CreateNewInstanceForm {
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
+    AppInputDirective,
     CustomFormFieldComponent,
     MatLabelComponent,
     CustomSelectComponent,
@@ -173,7 +161,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
     this.serviceInstancesInit$ = this.serviceInstances$.pipe(
       filter(p => !!p),
-      map(o => false),
+      map(_o => false),
       startWith(false)
     );
     this.hasInstances$ = this.serviceInstances$.pipe(
@@ -374,7 +362,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       }),
       filter(s => !s.creating && !s.fetching),
       combineLatest(this.store.select(selectCreateServiceInstance)),
-      first(),
+      take(1),
       switchMap(([request, state]) => {
 
         const handleEditServiceResult = this.handleUpdateServiceResult(request, state);
@@ -410,7 +398,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
         this.serviceParamsValid,
         this.createNewInstanceForm.statusChanges
       ]).pipe(
-        map(([serviceParamsValid, b]) => this._validate.set(serviceParamsValid && this.createNewInstanceForm.valid))
+        map(([serviceParamsValid, _b]) => this._validate.set(serviceParamsValid && this.createNewInstanceForm.valid))
       ).subscribe()
     );
     // For existing service instance the step is valid if the form is (there's no service params)
@@ -495,7 +483,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
     this.store.dispatch(action);
     return checkUpdate$.pipe(
-      switchMap(o => create$),
+      switchMap(_o => create$),
       filter(a => !a.creating),
       switchMap(a => {
         const updating = a.updating ? a.updating[UpdateServiceInstance.updateServiceInstance] : null;

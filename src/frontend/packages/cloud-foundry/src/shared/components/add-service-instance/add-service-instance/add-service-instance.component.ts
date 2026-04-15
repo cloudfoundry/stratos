@@ -3,13 +3,12 @@ import { ChangeDetectorRef, Component, OnDestroy, OnInit, signal, ChangeDetectio
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { defer, EMPTY, Observable, of as observableOf, Subject } from 'rxjs';
+import { defer, Observable, of as observableOf, Subject } from 'rxjs';
 import {
   catchError,
   delay,
   distinctUntilChanged,
   filter,
-  first,
   map,
   shareReplay,
   switchMap,
@@ -121,6 +120,13 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   private destroyed$ = new Subject<void>();
   // Loading state for applications - used to track async app fetching
   private _appsLoading = signal<boolean>(false);
+  // toObservable() must run inside an injection context (constructor /
+  // field initializer / runInInjectionContext) — Angular 21 enforces this
+  // strictly. Calling toObservable() from onNext (an event handler) throws
+  // NG0203. Lift the conversion up here where field initializers execute
+  // during construction and have the injection context available, then
+  // reuse this single observable from onNext.
+  private appsLoading$ = toObservable(this._appsLoading);
 
   public cfGuid$: Observable<string>;
   public spaceGuid$ = this.cfDetails$.pipe(
@@ -251,7 +257,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
       return observableOf({ success: false });
     }
 
-    return toObservable(this._appsLoading).pipe(
+    return this.appsLoading$.pipe(
       filter(loading => !loading),
       delay(1),
       map(() => ({ success: true })),
@@ -325,7 +331,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
         }, 0);
       }),
       take(1),
-      map(o => true),
+      map(_o => true),
       catchError(error => {
         console.error('setupForAppServiceMode: Failed to fetch application details or space information', {
           appId,
@@ -444,7 +450,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
           );
         }),
         take(1),
-        map(o => true),
+        map(_o => true),
         catchError(error => {
           console.error('configureForEditServiceInstanceMode: Failed to configure edit mode', {
             serviceInstanceId,
@@ -528,7 +534,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     this.marketPlaceMode = true;
     return this.cfOrgSpaceService.cf.list$.pipe(
       filter(p => !!p),
-      first(),
+      take(1),
       tap(e => {
         if (!e || e.length === 0) {
           console.error('initialiseForMarketplaceMode: No Cloud Foundry endpoints available');
@@ -536,7 +542,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
         }
         this.cfOrgSpaceService.cf.select.next(endpointId);
       }),
-      map(o => true),
+      map(_o => true),
       catchError(error => {
         console.error('initialiseForMarketplaceMode: Failed to initialize marketplace mode', {
           endpointId,

@@ -35,7 +35,7 @@ func (c *KubeTokenAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec api.To
 
 func (c *KubeTokenAuth) FetchToken(cnsiRecord api.CNSIRecord, ec echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
 	log.Debug("FetchToken (KubeTokenAuth)")
-	token := ec.FormValue("token")
+	token := strings.Join(strings.Fields(ec.FormValue("token")), "")
 	tokenRecord := NewKubeTokenAuthTokenRecord(c.portalProxy, token)
 	return tokenRecord, &cnsiRecord, nil
 }

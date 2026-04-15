@@ -4,7 +4,7 @@
       <form [formGroup]="editEndpoint" class="stepper-form">
         <h1 class="edit-endpoint__section-title text-base font-medium mb-4" style="color: var(--content-text);">{{definition.label}} Information</h1>
         <app-form-field>
-          <input appInput id="name" name="name" formControlName="name" required placeholder="Name"
+          <input class="w-full placeholder:!text-transparent focus:outline-none" appInput id="name" name="name" formControlName="name" required placeholder="Name"
             [appUnique]="(existingEndpoinNames$ | async)">
           @if (name.errors && name.errors.required) {
             <app-error>Name is required</app-error>
@@ -14,7 +14,7 @@
           }
         </app-form-field>
         <app-form-field novalidate>
-          <input appInput id="url" name="url" type="url" formControlName="url" rrequired placeholder="Endpoint Address">
+          <input class="w-full placeholder:!text-transparent focus:outline-none" appInput id="url" name="url" type="url" formControlName="url" rrequired placeholder="Endpoint Address">
         </app-form-field>
         <app-checkbox appInput id="skipSSL" name="skipSSL" formControlName="skipSSL">Skip SSL validation for the endpoint
         </app-checkbox>
@@ -29,13 +29,13 @@
             <app-checkbox appInput id="setClientInfo" name="setClientInfo" formControlName="setClientInfo">Update Client ID and Client Secret
             </app-checkbox>
             <app-form-field>
-              <input appInput id="client_id" name="client_id" formControlName="clientID" placeholder="Client ID" required>
+              <input class="w-full placeholder:!text-transparent focus:outline-none" appInput id="client_id" name="client_id" formControlName="clientID" placeholder="Client ID" required>
               @if (clientID.errors && clientID.errors.required) {
                 <app-error>Client ID is required</app-error>
               }
             </app-form-field>
             <app-form-field>
-              <input appInput id="client_secret" name="client_secret" formControlName="clientSecret"
+              <input class="w-full placeholder:!text-transparent focus:outline-none" appInput id="client_secret" name="client_secret" formControlName="clientSecret"
                 placeholder="Client Secret" [type]="!show ? 'password' : 'text'">
               <button class="btn btn-icon" type="button" matSuffix (click)="show = !show" [attr.aria-label]="'Hide Secret'"
                 [attr.aria-pressed]="!show">

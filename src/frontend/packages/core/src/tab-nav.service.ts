@@ -1,5 +1,5 @@
 import { Portal } from '@angular/cdk/portal';
-import { Injectable, signal, Signal, computed, inject } from '@angular/core';
+import { Injectable, signal, Signal, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { combineLatest, Observable } from 'rxjs';
@@ -76,7 +76,7 @@ export class TabNavService {
       ),
       this.tabNavs$
     ]).pipe(
-      map(([event, tabs]) => this.getCurrentTabHeader(tabs)),
+      map(([_event, tabs]) => this.getCurrentTabHeader(tabs)),
     );
   }
 

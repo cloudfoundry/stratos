@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { filter, first, map, pairwise } from 'rxjs/operators';
+import { take, filter, map, pairwise } from 'rxjs/operators';
 
 import { ConfirmationDialogConfig, ConfirmationDialogService } from '@stratosui/core';
 import { RouterNav, RouterQueryParams, EntityCatalogEntityConfig, EntityService, ActionState, APIResource } from '@stratosui/store';
@@ -112,7 +112,7 @@ export class ServiceActionHelperService {
       pairwise(),
       filter(([oldV, newV]) => oldV.busy && !newV.busy),
       map(([, newV]) => newV),
-      first()
+      take(1)
     );
   }
 

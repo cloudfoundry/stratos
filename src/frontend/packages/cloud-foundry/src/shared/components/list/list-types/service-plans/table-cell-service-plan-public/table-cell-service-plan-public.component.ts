@@ -8,7 +8,6 @@ import { ServicePlanPublicComponent } from '../../../../service-plan-public/serv
 @Component({
   selector: 'app-table-cell-service-plan-public',
   templateUrl: './table-cell-service-plan-public.component.html',
-  styleUrls: ['./table-cell-service-plan-public.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

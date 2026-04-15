@@ -17,7 +17,7 @@ func CheckIfMigrationExists(db *sql.Tx, migration string, args ...interface{}) (
 	var exists bool
 
 	err := db.QueryRow(query_psql, migration).Scan(&exists)
-	if err != nil && err != sql.ErrNoRows { // Might not be PSQL try MySQL 
+	if err != nil && err != sql.ErrNoRows { // Might not be PSQL try MySQL
 		err = db.QueryRow(query_mysql, migration).Scan(&exists)
 	}
 	if err != nil && err != sql.ErrNoRows {

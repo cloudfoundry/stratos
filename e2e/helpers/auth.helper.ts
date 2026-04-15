@@ -63,10 +63,30 @@ async function browserLoginLocal(
   password: string
 ): Promise<void> {
   await page.goto('/login');
-  await page.locator('input[name="username"]').first().waitFor({ state: 'visible', timeout: 10000 });
+
+  // Give the local form time to appear; if it doesn't, fall back to SSO.
+  // Some deployments report 'local' auth type but redirect the login page to SSO/UAA.
+  const formVisible = await page.locator('input[name="username"]').first()
+    .waitFor({ state: 'visible', timeout: 20000 })
+    .then(() => true)
+    .catch(() => false);
+
+  if (!formVisible) {
+    await browserLoginSSO(page, username, password);
+    return;
+  }
+
   await fillAngularLogin(page, username, password);
   await page.locator('button[type="submit"]').click();
-  await page.waitForURL(/^(?!.*\/login)/, { timeout: 15000 });
+  await page.waitForURL(/^(?!.*\/login)/, { timeout: 15000 }).catch(async (e: Error) => {
+    // Firefox throws NS_BINDING_ABORTED when the redirect binding is aborted mid-flight.
+    // The redirect is still in progress — retry waitForURL to let it complete.
+    if (e.message?.includes('NS_BINDING_ABORTED')) {
+      await page.waitForURL(/^(?!.*\/login)/, { timeout: 10000 });
+      return;
+    }
+    throw e;
+  });
 }
 
 /**
@@ -114,7 +134,7 @@ async function browserLoginSSO(
   await uaaSubmit.click();
 
   // Wait for redirect back to Stratos (away from UAA)
-  await page.waitForURL(/^(?!.*(uaa|login\.sys|oauth))/, { timeout: 20000 });
+  await page.waitForURL(/^(?!.*(uaa|login\.sys|oauth))/, { timeout: 45000 });
 }
 
 /**

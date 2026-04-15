@@ -104,7 +104,7 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   // Interaction lock: ignore external writeValue while user is actively selecting in multi-select
   private _interacting = false;
 
-  private _onChange = (value: any) => {};
+  private _onChange = (_value: any) => {};
   private _onTouched = () => {};
   private _subscriptions: Subscription[] = [];
 
@@ -113,6 +113,10 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
     const optionsChangeSub = this.options.changes.subscribe(() => {
       this.checkAutoSelect();
       this.updateOptions();
+      setTimeout(() => {
+        this.updateDisplayValue();
+        this.cdr.markForCheck();
+      });
     });
     this._subscriptions.push(optionsChangeSub);
 
@@ -189,14 +193,18 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
         this.selectedValues = this.selectedValues.filter((_, i) => i !== index);
       }
     } else {
-      this.selectedValues = [option.value];
+      if (option.value === null || option.value === undefined) {
+        this.selectedValues = [];
+      } else {
+        this.selectedValues = [option.value];
+      }
       this.isOpen = false;
     }
 
     this.updateDisplayValue();
     this.updateOptions();
 
-    const value = this.multiple ? this.selectedValues : this.selectedValues[0];
+    const value = this.multiple ? this.selectedValues : (this.selectedValues[0] ?? null);
     this._onChange(value);
 
     this.selectionChange.emit({
@@ -214,12 +222,14 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
     } else if (this.multiple && this.selectedValues.length > 1) {
       this.displayValue = `${this.selectedValues.length} selected`;
     } else {
-      // Single selection, or multi with exactly 1 selected — show the item name
+      // Single selection, or multi with exactly 1 selected — show the item name.
+      // When the matching option isn't found yet (async @for not rendered), show
+      // empty so the placeholder displays instead of flashing a raw value/GUID.
       if (this.options) {
         const selectedOption = this.options.find(opt => opt.value === this.selectedValues[0]);
-        this.displayValue = selectedOption ? selectedOption.displayText : this.selectedValues[0];
+        this.displayValue = selectedOption ? selectedOption.displayText : '';
       } else {
-        this.displayValue = this.selectedValues[0];
+        this.displayValue = '';
       }
     }
     this.cdr.markForCheck();

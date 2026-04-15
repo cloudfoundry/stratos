@@ -2,7 +2,7 @@ import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Observable, of as observableOf } from 'rxjs';
-import { first, map, startWith } from 'rxjs/operators';
+import { take, map, startWith } from 'rxjs/operators';
 
 import {
   EndpointsService,
@@ -61,7 +61,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
     const userFavoriteManager = inject(UserFavoriteManager);
 
     this.favorite$ = endpointsService.endpoints$.pipe(
-      first(),
+      take(1),
       map(endpoints => endpoints[this.cfEndpointService.cfGuid]),
       map(endpoint => userFavoriteManager.getFavoriteEndpointFromEntity(endpoint))
     );

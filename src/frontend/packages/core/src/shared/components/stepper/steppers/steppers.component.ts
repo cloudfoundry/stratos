@@ -6,7 +6,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { getPreviousRoutingState, IRouterNavPayload, RouterNav, AppState } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
-import { catchError, first, map, switchMap } from 'rxjs/operators';
+import { take, catchError, defaultIfEmpty, finalize, map, switchMap } from 'rxjs/operators';
 
 import { BASE_REDIRECT_QUERY } from '../stepper.types';
 import { SteppersService } from '../steppers.service';
@@ -64,7 +64,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   constructor() {
     const store = this.store;
 
-    const previousRoute$ = store.select(getPreviousRoutingState).pipe(first());
+    const previousRoute$ = store.select(getPreviousRoutingState).pipe(take(1));
     this.cancel$ = previousRoute$.pipe(
       map(previousState => {
         // If we have a previous state, and that previous state was not login (i.e. we've come from afresh), go to whatever the default
@@ -95,11 +95,23 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     this.setActive(0);
 
     this.allSteps.forEach((step => {
-      this.hiddenSubs.push(step.onHidden.subscribe((hidden) => {
+      this.hiddenSubs.push(step.onHidden.subscribe((_hidden) => {
         this.filterSteps();
       }));
-      // Listen for validation changes to trigger change detection
+      // Listen for validation/canClose/disablePrevious changes to trigger
+      // change detection. Under OnPush + zoneless CD, setting an @Input on
+      // a child step (e.g. via an async pipe in the grandparent template)
+      // only marks that child dirty — it does not re-run the stepper's own
+      // template bindings that read from `this.steps[i].canClose` etc.
+      // Without these markForCheck calls the Previous/Close button
+      // disabled state stays frozen at the initial bind state.
       this.hiddenSubs.push(step.onValidChange.subscribe(() => {
+        this.cdr.markForCheck();
+      }));
+      this.hiddenSubs.push(step.onCanCloseChange.subscribe(() => {
+        this.cdr.markForCheck();
+      }));
+      this.hiddenSubs.push(step.onDisablePreviousChange.subscribe(() => {
         this.cdr.markForCheck();
       }));
     }));
@@ -119,13 +131,42 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     if (this.currentIndex < this.steps.length) {
       const step = this.steps[this.currentIndex];
       step.busy = true;
-      const obs$ = step.onNext(this.currentIndex, step);
-      if (!(obs$ instanceof Observable)) {
+
+      // Defensive: step.onNext may throw synchronously (runtime error before
+      // it returns an observable). Without a try/catch, the throw escapes
+      // goNext, step.busy stays true, and the Next/Finish button is stuck
+      // as a spinner forever. Catch, surface via snackbar, reset busy.
+      let obs$: Observable<StepOnNextResult> | unknown;
+      try {
+        obs$ = step.onNext(this.currentIndex, step);
+      } catch (err) {
+        console.error('Stepper onNext threw synchronously:', err);
+        step.busy = false;
+        this.showNextButtonProgress = false;
+        this.snackBarRef = this.snackBar.open(
+          `An error occurred: ${(err as Error)?.message || err || 'Unknown error'}`,
+          'Dismiss',
+          // duration: 0 means "stay open until user clicks Dismiss" (no
+          // auto-dismiss). Matches reference console481 behavior; the
+          // default 4s auto-dismiss hid errors before users could read them.
+          { panelClass: 'stepper-snack-bar', duration: 0 }
+        );
         return;
       }
+
+      // Defensive: if onNext returns a non-Observable (legacy synchronous
+      // success pattern, or a Promise which we don't handle), reset busy
+      // before the early return. Previously this path left step.busy stuck
+      // at true even though navigation was effectively complete/no-op.
+      if (!(obs$ instanceof Observable)) {
+        step.busy = false;
+        return;
+      }
+
       this.showNextButtonProgress = this.nextButtonProgress;
       this.nextSub = obs$.pipe(
-        first(),
+        take(1),
+        defaultIfEmpty({ success: false, message: 'No response from step', data: {}, redirect: false, redirectPayload: null, ignoreSuccess: false } as StepOnNextResult),
         catchError(err => {
           console.warn('Stepper failed: ', err);
           return observableOf({
@@ -150,9 +191,23 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
               this.setActive(this.currentIndex + 1);
             }
           } else if (!success && message) {
-            this.snackBarRef = this.snackBar.open(message, 'Dismiss', { panelClass: 'stepper-snack-bar' });
+            this.snackBarRef = this.snackBar.open(
+              message,
+              'Dismiss',
+              // duration: 0 — stay open until user clicks Dismiss.
+              { panelClass: 'stepper-snack-bar', duration: 0 }
+            );
           }
           return observableOf(undefined);
+        }),
+        // Defensive: guarantee busy state is cleared on ANY teardown path —
+        // completion, error escaping catchError, or unsubscribe (e.g. if
+        // the user clicks Cancel or navigates away mid-flight while the
+        // observable is in flight). Without finalize, the spinner could
+        // remain visible after the user abandoned the step.
+        finalize(() => {
+          step.busy = false;
+          this.showNextButtonProgress = false;
         })
       ).subscribe();
     }
@@ -294,7 +349,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     return true;
   }
 
-  getIconLigature(step: StepComponent, index: number): string {
+  getIconLigature(_step: StepComponent, _index: number): string {
     return 'done';
   }
 

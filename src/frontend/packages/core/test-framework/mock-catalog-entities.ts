@@ -12,7 +12,6 @@ import {
   StratosEndpointExtensionDefinition,
   IStratosEntityDefinition,
   IStratosEndpointDefinition,
-  EntityCatalogEntityConfig,
   EntityCatalogSchemas,
   endpointEntityType,
   EntitySchema,

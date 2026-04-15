@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import {Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import {Component, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { filter, first, map } from 'rxjs/operators';
+import { take, filter, map } from 'rxjs/operators';
 
 import { ListComponent } from '../../../../core/src/shared/components/list/list.component';
 import { EndpointListHelper } from '../../../../core/src/shared/components/list/list-types/endpoint/endpoint-list.helpers';
@@ -11,19 +11,17 @@ import { PageHeaderComponent } from '../../../../core/src/shared/components/page
 import { RouterNav } from '../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../store/src/public-api';
 import {
-  KubernetesEndpointsListConfigService,
-} from '../list-types/kubernetes-endpoints/kubernetes-endpoints-list-config.service';
+  KubernetesEndpointsListConfigService } from '../list-types/kubernetes-endpoints/kubernetes-endpoints-list-config.service';
 import { KubernetesService } from '../services/kubernetes.service';
 
 @Component({
   selector: 'app-kubernetes',
   templateUrl: './kubernetes.component.html',
-  styleUrls: ['./kubernetes.component.scss'],
+
   providers: [
     {
       provide: ListConfig,
-      useClass: KubernetesEndpointsListConfigService,
-    },
+      useClass: KubernetesEndpointsListConfigService },
     EndpointListHelper,
     KubernetesService
   ],
@@ -57,7 +55,7 @@ export class KubernetesComponent {
         return connectedEndpoints.length;
       }),
       filter(connectedEndpointsCount => connectedEndpointsCount > 1),
-      first()
+      take(1)
     );
 
   }

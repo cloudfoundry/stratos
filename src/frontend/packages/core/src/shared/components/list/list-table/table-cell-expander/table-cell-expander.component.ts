@@ -53,8 +53,8 @@ export class TableCellExpanderComponent<T = any> extends TableCellCustom<T, Cell
   public rowId = TableRowExpandedService.allExpanderState;
   private updateRowId() {
     if (this.config) {
-      const config: TableCellExpanderConfig = this.config(this.row);
-      this.rowId = config.rowId;
+      const config: TableCellExpanderConfig = typeof this.config === 'function' ? this.config(this.row) : this.config;
+      this.rowId = config?.rowId;
       this.expanded = this.expandedService.expanded[this.rowId];
       // Mark for check to ensure template expressions re-evaluate in zoneless mode
       this.cdr.markForCheck();

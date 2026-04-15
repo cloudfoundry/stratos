@@ -1,4 +1,4 @@
-import { inject, Signal, computed } from '@angular/core';
+import { inject, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';

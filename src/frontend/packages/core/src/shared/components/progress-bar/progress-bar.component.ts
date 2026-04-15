@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit, OnChanges, SimpleChanges  } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**

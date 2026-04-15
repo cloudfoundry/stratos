@@ -1,7 +1,7 @@
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { take, map } from 'rxjs/operators';
 
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
 import { AppState } from '../../../../../store/src/app-state';
@@ -60,7 +60,7 @@ export class QuotaDefinitionBaseComponent {
     const space$ = this.space$ ? this.space$ : of(null);
     this.breadcrumbs$ = combineLatest(endpoints$, org$, space$).pipe(
       map(([endpoints, org, space]) => this.getBreadcrumbs(endpoints[this.cfGuid], org, space)),
-      first()
+      take(1)
     );
   }
 
@@ -69,9 +69,9 @@ export class QuotaDefinitionBaseComponent {
   }
 
   protected getBreadcrumbs(
-    endpoint: EndpointModel,
-    org: APIResource<IOrganization>,
-    space: APIResource<ISpace>
+    _endpoint: EndpointModel,
+    _org: APIResource<IOrganization>,
+    _space: APIResource<ISpace>
   ): any {
     return null;
   }

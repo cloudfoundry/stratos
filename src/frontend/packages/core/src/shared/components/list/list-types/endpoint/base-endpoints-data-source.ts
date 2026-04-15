@@ -11,7 +11,7 @@ import {
   EntityMonitorFactory,
   endpointEntitiesSelector,
 } from '@stratosui/store';
-import { Observable, Subscription } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map, pairwise, tap, withLatestFrom } from 'rxjs/operators';
 
 import { DataFunction, DataFunctionDefinition, ListDataSource } from '../../data-sources-controllers/list-data-source';

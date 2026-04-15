@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { take, map } from 'rxjs/operators';
 import { AppChip, AppChipsComponent, TableCellCustom } from '@stratosui/core';
 import { APIResource } from '@stratosui/store';
 import { CfRoute, IApp } from '@stratosui/cloud-foundry';
@@ -9,7 +9,6 @@ import { CfRoute, IApp } from '@stratosui/cloud-foundry';
 @Component({
   selector: 'app-table-cell-route-apps-attached',
   templateUrl: './table-cell-route-apps-attached.component.html',
-  styleUrls: ['./table-cell-route-apps-attached.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
@@ -22,13 +21,13 @@ export class TableCellRouteAppsAttachedComponent extends TableCellCustom<APIReso
   config$ = new BehaviorSubject<any>(null);
   row$ = new BehaviorSubject<APIResource<CfRoute> | null>(null);
 
-  @Input('config')
+  @Input()
   set config(config: { breadcrumbs?: string }) {
     super.config = config;
     this.config$.next(config);
   }
 
-  @Input('row')
+  @Input()
   set row(route: APIResource<CfRoute>) {
     super.row = route;
     this.row$.next(route);
@@ -36,7 +35,7 @@ export class TableCellRouteAppsAttachedComponent extends TableCellCustom<APIReso
 
   ngOnInit(): void {
     this.boundApps$ = combineLatest([
-      this.config$.asObservable().pipe(first()),
+      this.config$.asObservable().pipe(take(1)),
       this.row$
     ]).pipe(
       map(([config, route]) => {

@@ -56,7 +56,7 @@ export class CustomButtonToggleGroupComponent implements ControlValueAccessor, A
 
   selectedValues: any[] = [];
 
-  private _onChange = (value: any) => {};
+  private _onChange = (_value: any) => {};
   private _onTouched = () => {};
 
   ngAfterContentInit() {

@@ -3,20 +3,18 @@ import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, of, Subscription } from 'rxjs';
-import { filter, first, map, tap } from 'rxjs/operators';
+import { take, filter, map, tap } from 'rxjs/operators';
 import { AsyncPipe } from '@angular/common';
 
 import {
   DeleteDeployAppSection,
-  StoreCFSettings,
-} from '../../../actions/deploy-applications.actions';
+  StoreCFSettings } from '../../../actions/deploy-applications.actions';
 import { CFAppState } from '@stratosui/cloud-foundry';
 import { getCFEntityKey } from '../../../cf-entity-helpers';
 import { applicationEntityType } from '@stratosui/cloud-foundry';
 import {
   selectApplicationSource,
-  selectCfDetails,
-} from '../../../store/selectors/deploy-application.selector';
+  selectCfDetails } from '../../../store/selectors/deploy-application.selector';
 import { DeployApplicationSource, SourceType } from '../../../store/types/deploy-application.types';
 import { RouterNav, selectPaginationState } from '@stratosui/store';
 import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
@@ -35,7 +33,6 @@ import { DeployApplicationStep3Component } from './deploy-application-step3/depl
 @Component({
   selector: 'app-deploy-application',
   templateUrl: './deploy-application.component.html',
-  styleUrls: ['./deploy-application.component.scss'],
   providers: [
     CfOrgSpaceDataService,
     ApplicationDeploySourceTypes,
@@ -122,7 +119,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
       // In case user has specified the query param manually
       this.initCfOrgSpaceService.push(this.store.select(selectCfDetails).pipe(
         filter(p => !p),
-        tap(p => {
+        tap(_p => {
           this.store.dispatch(new RouterNav({ path: ['applications', 'deploy'] }));
         })
       ).subscribe());
@@ -152,7 +149,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
       return of('Redeploy');
     }
     return this.selectedSourceType$.pipe(
-      first(),
+      take(1),
       map(selectedSourceType => `Deploy ${selectedSourceType ? 'from ' + selectedSourceType.name : ''}`)
     );
   };

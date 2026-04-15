@@ -79,7 +79,7 @@ export class GithubFlattenerPaginationConfig<T> implements PaginationFlattener<T
     };
     return [requestOption];
   };
-  clearResults = (res: GithubPaginationResponse<T>, allResults: number) => {
+  clearResults = (_res: GithubPaginationResponse<T>, _allResults: number) => {
     throw new Error('Not Implemented');
   };
 }
@@ -154,7 +154,7 @@ export class GithubFlattenerForArrayPaginationConfig<T>
     };
     return [requestOption];
   };
-  clearResults = (res: HttpResponse<GithubPaginationArrayResponse<T>>, allResults: number) => {
+  clearResults = (_res: HttpResponse<GithubPaginationArrayResponse<T>>, _allResults: number) => {
     throw new Error('Not Implemented');
   };
 }

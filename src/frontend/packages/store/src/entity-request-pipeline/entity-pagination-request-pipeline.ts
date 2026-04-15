@@ -1,7 +1,7 @@
 import { HttpRequest } from '@angular/common/http';
 import { Action, Store } from '@ngrx/store';
 import { isObservable, Observable, of } from 'rxjs';
-import { first, map, switchMap } from 'rxjs/operators';
+import { take, map, switchMap } from 'rxjs/operators';
 
 import { AppState, InternalAppState } from '../app-state';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
@@ -125,7 +125,7 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
   // const debug = (val, location) => console.warn(`${entity.endpointType}:${entity.entityKey}:${location}: `, val);
 
   return getRequestObjectObservable(request).pipe(
-    first(),
+    take(1),
     switchMap(requestObject => {
       const pageIterator = flattenerConfig ?
         new PaginationPageIterator(

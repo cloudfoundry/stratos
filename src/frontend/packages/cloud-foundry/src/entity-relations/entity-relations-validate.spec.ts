@@ -242,7 +242,7 @@ describe('Entity Relations - validate -', () => {
       inject([Store], (iStore: Store<InternalAppState>) => {
         const dispatchSpy = vi.spyOn(iStore, 'dispatch').mockImplementation();
 
-        const res = validateEntityRelations({
+        const _res = validateEntityRelations({
           cfGuid,
           action: getOrgAction,
           allEntities,

@@ -5,10 +5,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { UtilsService } from '@stratosui/core';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { ApplicationServiceMock, generateCfBaseTestModulesNoShared, ApplicationStateService } from "@test-framework/cf";
-import { ApplicationMonitorService } from '../../../../features/applications/application-monitor.service';
+import { ApplicationServiceMock, generateCfBaseTestModulesNoShared } from "@test-framework/cf";
 import { ApplicationService } from '../../../../features/applications/application.service';
 import { CardAppUsageComponent } from "./card-app-usage.component";
 

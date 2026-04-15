@@ -56,7 +56,7 @@ describe('CloudFoundryCellsComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryCellsComponent);
     component = fixture.componentInstance;
-    // Skip detectChanges — constructor subscribes to cell metrics via first()
+    // Skip detectChanges — constructor subscribes to cell metrics via take(1)
     // which throws EmptyError without full store/pagination setup
   });
 

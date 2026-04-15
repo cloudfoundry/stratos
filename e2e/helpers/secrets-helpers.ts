@@ -9,11 +9,11 @@ import * as path from 'path';
  *
  * Secret sources (checked in order):
  *   1. STRATOS_SECRETS env var — YAML content injected by scripts/secrets.sh run-e2e
- *   2. secrets.<env>.yaml file — when STRATOS_E2E_ENV is set
+ *   2. secrets.<env>.yaml file — when E2E_ENV is set
  *   3. secrets.yaml file — default fallback
  *
  * Profile selection:
- *   STRATOS_E2E_PROFILE selects a named profile within the secrets file.
+ *   E2E_PROFILE selects a named profile within the secrets file.
  */
 export class SecretsHelper {
   private static SECRETS_FILE = 'secrets.yaml';
@@ -59,13 +59,13 @@ export class SecretsHelper {
   }
 
   /**
-   * Auto-detect secrets profile by matching STRATOS_E2E_BASE_URL hostname
+   * Auto-detect secrets profile by matching E2E_BASE_URL hostname
    * against profile names. E.g., base URL containing "adepttech" matches
    * the "adepttech" profile.
    */
   private static detectProfileFromUrl(profiles: Record<string, any> | undefined): string | undefined {
     if (!profiles) return undefined;
-    const baseUrl = process.env.STRATOS_E2E_BASE_URL;
+    const baseUrl = process.env.E2E_BASE_URL;
     if (!baseUrl) return undefined;
     const hostname = new URL(baseUrl).hostname.toLowerCase();
     for (const name of Object.keys(profiles)) {
@@ -87,7 +87,7 @@ export class SecretsHelper {
    * Resolve the secrets file path, checking env-specific file first.
    */
   private static resolveSecretsPath(): string {
-    const env = process.env.STRATOS_E2E_ENV;
+    const env = process.env.E2E_ENV;
     if (env) {
       const envPath = path.join(process.cwd(), `secrets.${env}.yaml`);
       if (fs.existsSync(envPath)) {
@@ -99,7 +99,7 @@ export class SecretsHelper {
 
   /**
    * Load secrets from env var, env-specific file, or default file.
-   * Supports profiles via STRATOS_E2E_PROFILE environment variable.
+   * Supports profiles via E2E_PROFILE environment variable.
    * When set, loads from the named profile under the top-level 'profiles' key.
    * Falls back to top-level keys for backwards compatibility.
    */
@@ -122,7 +122,7 @@ export class SecretsHelper {
           `Secrets file not found at ${secretsPath}.\n` +
           `Provide secrets via:\n` +
           `  - STRATOS_SECRETS env var (from scripts/secrets.sh run-e2e)\n` +
-          `  - secrets.<env>.yaml file (with STRATOS_E2E_ENV=<env>)\n` +
+          `  - secrets.<env>.yaml file (with E2E_ENV=<env>)\n` +
           `  - secrets.yaml file\n` +
           `See e2e/secrets.yaml.template for reference.`
         );
@@ -135,7 +135,7 @@ export class SecretsHelper {
     }
 
     // Auto-detect profile from base URL if not explicitly set
-    const profile = process.env.STRATOS_E2E_PROFILE
+    const profile = process.env.E2E_PROFILE
       || this.detectProfileFromUrl(raw.profiles);
 
     let secrets: any;

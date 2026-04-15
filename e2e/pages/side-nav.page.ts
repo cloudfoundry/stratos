@@ -60,6 +60,6 @@ export class SideNavigation extends BasePage {
    * @param menuItem The menu item to locate
    */
   getMenuItem(menuItem: SideNavMenuItem): Locator {
-    return this.sideNav.locator('.side-nav__item').filter({ hasText: menuItem });
+    return this.sideNav.locator('.nav-item').filter({ hasText: menuItem });
   }
 }

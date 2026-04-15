@@ -11,7 +11,6 @@ import { HelmReleaseHelperService } from '../helm-release-helper.service';
 @Component({
   selector: 'app-helm-release-notes-tab',
   templateUrl: './helm-release-notes-tab.component.html',
-  styleUrls: ['./helm-release-notes-tab.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

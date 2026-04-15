@@ -3,7 +3,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { format, formatDistance } from 'date-fns';
 import { Observable, of } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { take,  } from 'rxjs/operators';
 
 import { ListDataSource } from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import {
@@ -139,7 +139,7 @@ export class ReleaseUpgradeVersionsListConfig implements IListConfig<MonocularVe
 
     // Auto-select first non-development version
     setTimeout(() => {
-      this.versionsDataSource.page$.pipe(first()).subscribe(rs => {
+      this.versionsDataSource.page$.pipe(take(1)).subscribe(rs => {
         if (rs && rs.length > 0) {
           this.versionsDataSource.selectedRowToggle(this.getFirstNonDevelopmentVersion(rs), false);
         }

@@ -1,13 +1,9 @@
 
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
 
 import { APP_GUID, CF_GUID } from '@stratosui/core';
-import { CFAppState } from '../../../cf-app-state';
-import { ApplicationStateService } from '../../../shared/services/application-state.service';
 import { ApplicationService } from '../application.service';
-import { ApplicationEnvVarsHelper } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
 
 export function applicationServiceFactory() {
   return new ApplicationService();
@@ -26,7 +22,6 @@ export function getGuids(type?: string) {
 @Component({
   selector: 'app-application-base',
   templateUrl: './application-base.component.html',
-  styleUrls: ['./application-base.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

@@ -179,7 +179,7 @@ export class ApplicationStateService {
     this.mapActions(this.stateMetadata);
   }
 
-  actionIsAvailable(applicationState: string, action: string) {
+  actionIsAvailable(_applicationState: string, _action: string) {
 
   }
 

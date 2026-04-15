@@ -13,7 +13,6 @@ import { ChangeDetectionStrategy, AfterViewInit,
   OnChanges,
   OnDestroy,
   OnInit,
-  Optional,
   Output,
   SimpleChanges,
   TemplateRef,
@@ -54,11 +53,10 @@ import {
   of as observableOf,
   Subscription,
 } from 'rxjs';
-import {
+import { take,
   debounceTime,
   distinctUntilChanged,
   filter,
-  first,
   map,
   pairwise,
   publishReplay,
@@ -83,7 +81,6 @@ import { ITableColumn } from './list-table/table.types';
 import {
   defaultPaginationPageSizeOptionsCards,
   defaultPaginationPageSizeOptionsTable,
-  PAGE_SIZE_ALL,
   isPageSizeSentinel,
   resolvePageSize,
   IGlobalListAction,
@@ -300,7 +297,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       if (this.config.getInitialised) {
         this.initialised$ = this.config.getInitialised().pipe(
           filter(initialised => initialised),
-          first(),
+          take(1),
           tap(() => this.initialise()),
           publishReplay(1), refCount()
         );
@@ -343,7 +340,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     this.entitySelectConfig = this.dataSource.entitySelectConfig;
 
     this.dataSource.pagination$.pipe(
-      first(),
+      take(1),
     ).subscribe(pag => {
       this.entitySelectValue.set(pag.forcedLocalPage);
       this.entitySelectValueSubject.next(pag.forcedLocalPage);
@@ -380,7 +377,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     );
 
     // If this is the first time the user has used this list then set the view to the default
-    this.view$.pipe(first()).subscribe(listView => {
+    this.view$.pipe(take(1)).subscribe(listView => {
       if (!listView) {
         this.updateListView(this.getDefaultListView(this.config));
       }
@@ -489,9 +486,9 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     // Set initial page size: session memory > config default > store value > first option.
     // Wait for both view$ (sets options) and pagination$ (gives current state).
     observableCombineLatest([
-      this.view$.pipe(first()),
-      this.paginationController.pagination$.pipe(first())
-    ]).subscribe(([view, pagination]) => {
+      this.view$.pipe(take(1)),
+      this.paginationController.pagination$.pipe(take(1))
+    ]).subscribe(([_view, pagination]) => {
       this.initialPageEvent = new PageEvent();
       this.initialPageEvent.pageIndex = pagination.pageIndex - 1;
       this.initialPageEvent.pageSize = pagination.pageSize;
@@ -568,7 +565,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
           // If we're the first drop down filter and there are other drop downs... select the first one
           if (index === 0 && this.multiFilterManagers.length > 1) {
             filterManager.filterItems$.pipe(
-              first()
+              take(1)
             ).subscribe(list => {
               if (list && list.length === 1) {
                 filterManager.selectItem(list[0].value);
@@ -591,9 +588,9 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     // - If the first multi filter has one value it's not shown, ensure it's automatically selected to ensure other filters are correct
     this.multiFilterWidgetObservables = new Array<Subscription>();
     this.paginationController.filter$.pipe(
-      first(),
+      take(1),
       tap(() => {
-        Object.values(this.multiFilterManagers).forEach((filterManager: MultiFilterManager<T>, index: number) => {
+        Object.values(this.multiFilterManagers).forEach((filterManager: MultiFilterManager<T>, _index: number) => {
           // Pipe changes in the widgets to the store
           // Handle both BehaviorSubject and Signal wrappers
           const select$ = 'asObservable' in filterManager.multiFilterConfig.select
@@ -665,7 +662,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       this.view$
     )
       .pipe(
-        filter(([pagination, busy, viewType]) => viewType !== 'table'),
+        filter(([_pagination, _busy, viewType]) => viewType !== 'table'),
         map(([pagination, busy, viewType]) => ({ pageIndex: pagination.pageIndex, busy, viewType })),
         distinctUntilChanged((x, y) => x.pageIndex === y.pageIndex && x.busy === y.busy && x.viewType === y.viewType),
         pairwise(),

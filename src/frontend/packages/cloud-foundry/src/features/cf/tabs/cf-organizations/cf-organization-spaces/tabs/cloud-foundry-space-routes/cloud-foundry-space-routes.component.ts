@@ -6,7 +6,6 @@ import { CfSpaceRoutesListConfigService } from '../../../../../../../shared/comp
 @Component({
   selector: 'app-cloud-foundry-space-routes',
   templateUrl: './cloud-foundry-space-routes.component.html',
-  styleUrls: ['./cloud-foundry-space-routes.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

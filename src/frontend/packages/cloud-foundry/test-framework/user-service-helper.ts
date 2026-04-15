@@ -1,4 +1,4 @@
-import { HttpBackend, HttpClient } from '@angular/common/http';
+import { HttpBackend } from '@angular/common/http';
 import { HttpTestingController } from '@angular/common/http/testing';
 
 import { CfUserService } from '../src/shared/data-services/cf-user.service';

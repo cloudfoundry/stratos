@@ -28,9 +28,9 @@ class TestDialogWithDataComponent {
 
 describe('TailwindDialogService', () => {
   let service: TailwindDialogService;
-  let appRef: ApplicationRef;
-  let injector: Injector;
-  let environmentInjector: EnvironmentInjector;
+  let _appRef: ApplicationRef;
+  let _injector: Injector;
+  let _environmentInjector: EnvironmentInjector;
 
   beforeEach(() => {
     TestBed.configureTestingModule({

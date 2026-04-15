@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { ReactiveFormsModule, Validators, FormControl, FormGroup } from '@angular/forms';
 import { MatCheckboxChange } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { Store } from '@ngrx/store';
 import { stratosEntityCatalog, GeneralEntityAppState, httpErrorResponseToSafeString } from '@stratosui/store';
 import { Observable, of, Subject } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { take, defaultIfEmpty, map } from 'rxjs/operators';
 
 import { getEventFiles } from '../../../../core/browser-helper';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
@@ -109,7 +109,10 @@ export class RestoreEndpointsComponent {
       return of(false);
     };
 
-    const restoreBackup = () => this.service.restoreBackup().pipe(first()).subscribe(restoreSuccess, backupFailure);
+    const restoreBackup = () => this.service.restoreBackup().pipe(take(1), defaultIfEmpty(null)).subscribe(
+      res => res !== null ? restoreSuccess() : backupFailure('Restore service returned no response'),
+      backupFailure
+    );
 
     this.confirmDialog.openWithCancel(confirmation, restoreBackup, userCancelledDialog);
 

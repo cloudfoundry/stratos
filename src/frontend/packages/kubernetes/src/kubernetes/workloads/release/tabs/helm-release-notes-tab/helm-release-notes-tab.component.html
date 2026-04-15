@@ -1,5 +1,5 @@
 @if (notes$ | async; as notes) {
-  <div class="helm-release-notes">
+  <div class="block font-mono text-sm whitespace-pre-wrap">
     <div [innerHtml]="notes"></div>
   </div>
 } @else {

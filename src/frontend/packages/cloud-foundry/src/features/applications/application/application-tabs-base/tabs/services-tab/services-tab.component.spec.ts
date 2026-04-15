@@ -7,10 +7,9 @@ import { provideRouter } from '@angular/router';
 import { Store, StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CurrentUserPermissionsService } from '@stratosui/core';
 import { appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import {ApplicationService, CFAppState, generateCFEntities, ServiceActionHelperService,
+import {ApplicationService, generateCFEntities, ServiceActionHelperService,
   cfCurrentUserPermissionsService} from '@stratosui/cloud-foundry';
 import { ApplicationServiceMock, generateActiveRouteCfOrgSpaceMock, ApplicationStateService, ApplicationEnvVarsHelper } from '@test-framework/cf';
 import { ServicesTabComponent } from './services-tab.component';

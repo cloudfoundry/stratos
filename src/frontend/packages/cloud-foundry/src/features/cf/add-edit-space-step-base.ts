@@ -2,7 +2,7 @@ import { AbstractControl, ValidatorFn } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
-import { filter, first, map, tap } from 'rxjs/operators';
+import { take, filter, map, tap } from 'rxjs/operators';
 
 import { StepOnNextResult } from '@stratosui/core';
 import { getPaginationKey, APIResource } from '@stratosui/store';
@@ -19,7 +19,8 @@ export class AddEditSpaceStepBase {
   cfGuid: string;
   allSpacesInOrg!: string[];
   allSpacesInOrg$: Observable<string[]>;
-  validate!: (spaceName: string) => boolean;
+  /** Name uniqueness check; subclasses implement. Used by spaceNameTakenValidator. */
+  isNameUnique!: (spaceName: string) => boolean;
   quotaDefinitions$: Observable<APIResource<ISpaceQuotaDefinition>[]>;
   hasSpaceQuotas$: Observable<boolean>;
 
@@ -34,13 +35,12 @@ export class AddEditSpaceStepBase {
       this.orgGuid,
       this.cfGuid,
       getPaginationKey(organizationEntityType, this.orgGuid), {
-      flatten: true,
-    }
+      flatten: true }
     ).entities$.pipe(
       filter(spaces => !!spaces),
       map(spaces => spaces.map(space => space.entity.name)),
       tap(spaceNames => this.allSpacesInOrg = spaceNames),
-      first(),
+      take(1),
     );
     this.fetchSpacesSubscription = this.allSpacesInOrg$.subscribe();
 
@@ -50,7 +50,7 @@ export class AddEditSpaceStepBase {
       createEntityRelationPaginationKey(organizationEntityType, this.orgGuid)
     ).entities$.pipe(
       filter(o => !!o),
-      first()
+      take(1)
     );
 
     this.hasSpaceQuotas$ = this.quotaDefinitions$.pipe(
@@ -64,7 +64,7 @@ export class AddEditSpaceStepBase {
 
   spaceNameTakenValidator = (): ValidatorFn => {
     return (formField: AbstractControl): { [key: string]: any } => {
-      const nameValid = this.validate(formField.value);
+      const nameValid = this.isNameUnique(formField.value);
       return !nameValid ? { spaceNameTaken: { value: formField.value } } : null;
     };
   }

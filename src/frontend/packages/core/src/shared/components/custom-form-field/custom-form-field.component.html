@@ -1,4 +1,4 @@
-<div class="custom-form-field group relative w-full mb-4 inline-block text-left"
+<div class="custom-form-field group relative w-full mb-2 block text-left"
   [class.focused]="focused"
   [class.has-value]="hasValue"
   [class.invalid]="isInvalid"
@@ -15,11 +15,10 @@
   [class.float-label-always]="floatLabel === 'always'"
   [class.float-label-auto]="floatLabel === 'auto'">
 
-  <div class="form-field-wrapper relative"
-    style="padding-bottom: 1.34375em;">
+  <div class="form-field-wrapper relative">
 
     <!-- Main form field flex container -->
-    <div class="form-field-flex inline-flex items-baseline box-border w-full relative transition-all duration-200">
+    <div class="form-field-flex flex items-baseline box-border w-full relative transition-all duration-200">
 
       <!-- Prefix (optional) -->
       @if (hasPrefix) {
@@ -31,28 +30,21 @@
 
       <!-- Input infix with floating label -->
       <div class="form-field-infix block relative flex-auto min-w-0"
-        style="padding: 0.75em 0; min-width: 180px;">
+        style="padding: 0.25em 0; min-width: 180px;">
 
         <!-- Input content -->
         <ng-content select="input, textarea, select, app-select"></ng-content>
 
-        <!-- Floating Label -->
-        <!-- Don't render label for app-select when floatLabel is 'never' - let app-select show its own placeholder -->
-        @if (placeholder && !(selectComponent && floatLabel === 'never')) {
+        <!-- Floating Label — suppressed for app-select; the select renders its own muted placeholder -->
+        @if (placeholder && !selectComponent) {
           <label
             [for]="inputId"
-               class="form-field-label absolute left-0 pointer-events-none select-none
-                      transition-all duration-300 ease-out origin-top-left
-                      text-base leading-tight"
-            [class.floating]="shouldFloatLabel"
-            style="top: 0.75em; transform-origin: 0 0;"
+            [class]="labelClasses"
             [attr.aria-hidden]="true">
-            {{ placeholder }}
             @if (isRequired && !hideRequiredMarker) {
-              <span
-                class="text-red-500 dark:text-red-400 ml-0.5 font-medium"
-              aria-label="required">*</span>
+              <span class="text-danger mr-0.5 font-medium" aria-label="required">*</span>
             }
+            {{ placeholder }}
           </label>
         }
       </div>
@@ -75,8 +67,8 @@
           </svg>
         }
 
-        <!-- Success icon indicator -->
-        @if (isValid) {
+        <!-- Success icon indicator — only when there's an actual value -->
+        @if (isValid && hasValue) {
           <svg
             class="success-icon w-5 h-5 flex-shrink-0 transition-opacity duration-200"
             viewBox="0 0 20 20"
@@ -93,17 +85,14 @@
 
     <!-- Underline (for standard and legacy appearances) -->
     @if (appearance === 'standard' || appearance === 'legacy') {
-      <div class="form-field-underline absolute w-full h-px transition-colors duration-200"
-        style="bottom: 1.34375em;"
-        >
+      <div class="form-field-underline relative w-full h-px transition-colors duration-200">
       <span class="form-field-ripple absolute bottom-0 left-0 w-full h-0.5
                    transform scale-x-0 origin-center transition-transform duration-300 ease-out"></span>
       </div>
     }
 
-    <!-- Subscript wrapper for hints and errors -->
-    <div class="form-field-subscript-wrapper absolute box-border w-full overflow-hidden"
-      style="top: calc(100% - 1.34375em); padding-top: 0.5em;">
+    <!-- Subscript wrapper for hints and errors — takes space only when content present -->
+    <div class="form-field-subscript-wrapper box-border w-full overflow-hidden pt-1">
 
       <!-- Error Messages -->
       @if (isInvalid && errorMessage) {

@@ -1,6 +1,6 @@
 import { Action, compose, Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
-import { filter, first, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { take, filter, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 import { GeneralEntityAppState } from './app-state';
 import type { IEntityCatalog } from './entity-catalog/entity-catalog.interface';
@@ -42,14 +42,14 @@ const dispatcherFactory = <T>(
     const entityFetchHandler: EntityFetchHandler<T> = catalogEntity.getEntityFetchHandler?.();
     const fetchHandler = entityFetchHandler ?
       entityFetchHandler(store, updatedAction) :
-      (entity: T) => store.dispatch(updatedAction);
+      (_entity: T) => store.dispatch(updatedAction);
 
     // Fetch handler requires the entity, this may be missing or stale to update if required
     return fetchEntity ? (entity: T) => {
       // Entity may be null or stale
       // Defensive: Ensure entityKey exists before using it
       if (catalogEntity.entityKey) {
-        store.select(selectEntity<T>(catalogEntity.entityKey, action.guid)).pipe(first()).subscribe(storeEntity => fetchHandler(storeEntity));
+        store.select(selectEntity<T>(catalogEntity.entityKey, action.guid)).pipe(take(1)).subscribe(storeEntity => fetchHandler(storeEntity));
       }
       fetchHandler(entity);
     } : fetchHandler;
@@ -147,7 +147,7 @@ export class EntityService<T = any> {
           actionDispatch(entity);
         }
       }),
-      first(),
+      take(1),
       switchMap(() => cleanEntityInfo$)
     );
   };
@@ -184,7 +184,7 @@ export class EntityService<T = any> {
     } else {
       const {
         // TODO: Schema should be passed to the action builders #3846.
-        schemaKey,
+        schemaKey: _schemaKey,
         entityGuid,
         endpointGuid,
         actionMetadata = {},

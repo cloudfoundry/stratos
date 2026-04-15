@@ -6,7 +6,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class EventTabActorIconPipe implements PipeTransform {
 
-  transform(actor: string, args?: any): any {
+  transform(actor: string, _args?: any): any {
     switch (actor) {
       case 'user':
         return 'person';

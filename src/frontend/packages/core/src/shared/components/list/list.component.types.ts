@@ -1,7 +1,7 @@
 import { Type, WritableSignal } from '@angular/core';
-import { ActionState, defaultClientPaginationPageSize, ListView } from '@stratosui/store';
+import { ActionState, ListView } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
-import { filter, first, map, startWith, switchMap } from 'rxjs/operators';
+import { take, filter, map, startWith, switchMap } from 'rxjs/operators';
 
 import { ITimeRange } from '../../services/metrics-range-selector.types';
 import { ListDataSource } from './data-sources-controllers/list-data-source';
@@ -261,7 +261,7 @@ export class MultiFilterManager<T> {
 
     // Also select the first option if configured
     if (multiFilterConfig.autoSelectFirst) {
-      this.filterItems$.pipe(first()).subscribe(options => {
+      this.filterItems$.pipe(take(1)).subscribe(options => {
         if (options && options.length > 0) {
           this.selectItem(options[0].value);
         }
@@ -307,7 +307,7 @@ export class MultiFilterManager<T> {
       // When restoring a persisted value, options may not have loaded yet.
       // Wait for a non-empty list before validating (unless clearing).
       filter(items => isClearing || items.length > 0),
-      first(),
+      take(1),
     ).subscribe(items => {
       // Ensure we actually have the item. Could be from storage and invalid
       if (isClearing || items.find(i => i.value === itemValue)) {

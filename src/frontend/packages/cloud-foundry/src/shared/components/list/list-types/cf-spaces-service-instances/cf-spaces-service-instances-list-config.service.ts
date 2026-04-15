@@ -34,10 +34,6 @@ export class CfSpacesServiceInstancesListConfigService extends CfServiceInstance
     const serviceActionHelperService = inject(ServiceActionHelperService);
 
     super(
-      store,
-      datePipe,
-      currentUserPermissionsService,
-      serviceActionHelperService,
       `/cloud-foundry/${cfSpaceService.cfGuid}/organizations/${cfSpaceService.orgGuid}/spaces/${cfSpaceService.spaceGuid}/service-instances`
     );
     this.dataSource = new CfSpacesServiceInstancesDataSource(cfSpaceService.cfGuid, cfSpaceService.spaceGuid, this.store, this);

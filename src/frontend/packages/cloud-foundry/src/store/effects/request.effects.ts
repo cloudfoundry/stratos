@@ -2,7 +2,7 @@ import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { EMPTY } from 'rxjs';
-import { catchError, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
+import { take, catchError, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { SET_PAGE_BUSY } from '../../../../store/src/actions/pagination.actions';
 import { rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
@@ -12,8 +12,7 @@ import { ICFAction, UpdateCfAction } from '../../../../store/src/types/request.t
 import {
   CfValidateEntitiesComplete,
   CfValidateEntitiesStart,
-  EntitiesPipelineActionTypes,
-} from '../../actions/relations-actions';
+  EntitiesPipelineActionTypes } from '../../actions/relations-actions';
 import { CFAppState } from '../../cf-app-state';
 import { validateEntityRelations } from '../../entity-relations/entity-relations';
 
@@ -52,12 +51,11 @@ export class CfValidateEffects {
 
       return this.store.select(getAPIRequestDataState).pipe(
         withLatestFrom(this.store.select(getPaginationState)),
-        first(),
+        take(1),
         map(([allEntities, allPagination]) => {
           return apiAction.skipValidation ? {
             started: false,
-            completed: Promise.resolve(null),
-          } : validateEntityRelations({
+            completed: Promise.resolve(null) } : validateEntityRelations({
             cfGuid: validateAction.action.endpointGuid,
             store: this.store,
             allEntities,
@@ -122,8 +120,7 @@ export class CfValidateEffects {
       });
     } else {
       const newAction: ICFAction = {
-        ...(apiAction as ICFAction),
-      };
+        ...(apiAction as ICFAction) };
       if (busy) {
         newAction.updatingKey = rootUpdatingKey;
       }

@@ -20,7 +20,6 @@ import { CfPermissionCellDirective, ICellPermissionList } from '../cf-permission
 @Component({
   selector: 'app-org-user-permission-cell',
   templateUrl: './cf-org-permission-cell.component.html',
-  styleUrls: ['./cf-org-permission-cell.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
@@ -38,7 +37,7 @@ export class CfOrgPermissionCellComponent extends CfPermissionCellDirective<OrgU
     const cfUserService = inject(CfUserService);
     const confirmDialog = inject(ConfirmationDialogService);
 
-    super(store, confirmDialog, cfUserService);
+    super();
     this.store = store;
 
     this.chipsConfig$ = combineLatest([
@@ -99,7 +98,7 @@ export class CfOrgPermissionCellComponent extends CfPermissionCellDirective<OrgU
     ));
   }
 
-  public canRemovePermission = (cfGuid: string, orgGuid: string, spaceGuid: string) =>
+  public canRemovePermission = (cfGuid: string, orgGuid: string, _spaceGuid: string) =>
     this.userPerms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid);
 
 }

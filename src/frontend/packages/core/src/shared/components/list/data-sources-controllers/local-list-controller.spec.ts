@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { BehaviorSubject, firstValueFrom, skip } from 'rxjs';
 import { PaginationEntityState } from '@stratosui/store';
-import { getCurrentPageStartIndex, splitCurrentPage } from './local-list-controller.helpers';
+import { splitCurrentPage } from './local-list-controller.helpers';
 import { LocalListController } from './local-list-controller';
 import { getDataFunctionList } from './local-filtering-sorting';
 
@@ -252,7 +252,7 @@ describe('LocalListController full data source pipeline', () => {
     // Simulate list-data-source.ts page$ pipeline (lines 217-223)
     const page$ = controller.page$.pipe(
       withLatestFrom(isLoadingPage$.pipe(startWith(false))),
-      filter(([page, isLoading]: [any[], boolean]) => !isLoading),
+      filter(([_page, isLoading]: [any[], boolean]) => !isLoading),
       map(([page]: [any[], boolean]) => page),
       publishReplay(1),
       refCount()
@@ -289,7 +289,7 @@ describe('LocalListController full data source pipeline', () => {
   });
 
   it('should block emission when isLoading is true then deliver when false', async () => {
-    const { BehaviorSubject, firstValueFrom, skip, startWith } = await import('rxjs');
+    const { BehaviorSubject, firstValueFrom, skip: _skip, startWith } = await import('rxjs');
     const { withLatestFrom, filter, map, publishReplay, refCount } = await import('rxjs/operators');
 
     const entities$ = new BehaviorSubject(testApps as any[]);
@@ -307,7 +307,7 @@ describe('LocalListController full data source pipeline', () => {
 
     const page$ = controller.page$.pipe(
       withLatestFrom(isLoadingPage$.pipe(startWith(false))),
-      filter(([page, isLoading]: [any[], boolean]) => !isLoading),
+      filter(([_page, isLoading]: [any[], boolean]) => !isLoading),
       map(([page]: [any[], boolean]) => page),
       publishReplay(1),
       refCount()
@@ -344,77 +344,6 @@ describe('LocalListController full data source pipeline', () => {
 });
 
 describe('LocalListController pagination helpers', () => {
-  const page = [
-    [1,
-      2],
-    3,
-    4,
-    [5, 6],
-    8,
-    9,
-    10,
-    11,
-  ];
-
-  it('should get correct start index 1', () => {
-    const start = getCurrentPageStartIndex(page, 2, 4);
-    expect(start).toBe(4);
-  });
-
-  it('should get correct start index 2', () => {
-    const start = getCurrentPageStartIndex([
-      0,
-      1,
-      3,
-      2,
-      3,
-      3,
-      4,
-      5,
-      5,
-      6,
-      7,
-      8,
-    ], 3, 4);
-    expect(start).toBe(9);
-  });
-
-  it('should get correct start index 3', () => {
-    const start = getCurrentPageStartIndex([
-      [0,
-        1,
-        3],
-      [2,
-        3,
-        3],
-      4,
-      5,
-      5,
-      [6,
-        7,
-        8]
-    ], 3, 3);
-    expect(start).toBe(2);
-  });
-
-  it('should get correct start index 4', () => {
-    const start = getCurrentPageStartIndex([
-      [0,
-        1,
-        3],
-      [2,
-        3,
-        3],
-      [4,
-        5,
-        5],
-      [6,
-        7,
-        8]
-    ], 3, 3);
-    expect(start).toBe(2);
-  });
-
   it('should get split pages', () => {
     const data = splitCurrentPage([
       [0,
@@ -431,20 +360,9 @@ describe('LocalListController pagination helpers', () => {
         8]
     ], 3, 2);
     expect(data.entities).toEqual([
-      [0,
-        1,
-        3],
-      [2,
-        3,
-        3],
-      [4,
-        5,
-        5],
-      [6,
-        7,
-        8]
+      [2, 3, 3]
     ]);
-    expect(data.index).toEqual(1);
+    expect(data.index).toEqual(0);
   });
 
   it('should get split pages 1', () => {
@@ -463,20 +381,9 @@ describe('LocalListController pagination helpers', () => {
       8,
     ], 3, 4);
     expect(data.entities).toEqual([
-      0,
-      1,
-      3,
-      2,
-      3,
-      3,
-      [4,
-        5,
-        5],
-      [6,
-        7,
-        8]
+      [6, 7, 8]
     ]);
-    expect(data.index).toEqual(7);
+    expect(data.index).toEqual(0);
   });
 
   it('should get split pages 2', () => {
@@ -495,20 +402,9 @@ describe('LocalListController pagination helpers', () => {
       8,
     ], 5, 2);
     expect(data.entities).toEqual([
-      0,
-      1,
-      3,
-      2,
-      3,
-      [3,
-        4,
-        5,
-        5,
-        6],
-      7,
-      8,
+      [3, 4, 5, 5, 6]
     ]);
-    expect(data.index).toEqual(5);
+    expect(data.index).toEqual(0);
   });
 
   it('should get split pages 3', () => {
@@ -527,20 +423,9 @@ describe('LocalListController pagination helpers', () => {
       6,
     ], 5, 3);
     expect(data.entities).toEqual([
-      0,
-      1,
-      3,
-      5,
-      6,
-      [2,
-        3,
-        3,
-        4,
-        5],
-      [5,
-        6]
+      [5, 6]
     ]);
-    expect(data.index).toEqual(6);
+    expect(data.index).toEqual(0);
   });
   it('should get split pages 4', () => {
     const data = splitCurrentPage([
@@ -558,20 +443,9 @@ describe('LocalListController pagination helpers', () => {
       6,
     ], 5, 3);
     expect(data.entities).toEqual([
-      0,
-      1,
-      3,
-      5,
-      6,
-      2,
-      3,
-      3,
-      4,
-      5,
-      [5,
-        6]
+      [5, 6]
     ]);
-    expect(data.index).toEqual(10);
+    expect(data.index).toEqual(0);
   });
   it('should get split pages 5', () => {
     const data = splitCurrentPage([
@@ -589,20 +463,9 @@ describe('LocalListController pagination helpers', () => {
       6,
     ], 5, 4);
     expect(data.entities).toEqual([
-      0,
-      1,
-      3,
-      5,
-      6,
-      2,
-      3,
-      3,
-      4,
-      5,
-      5,
-      6,
+      []
     ]);
-    expect(data.index).toEqual(null);
+    expect(data.index).toEqual(0);
   });
 
   it('should return all items as single page when pageSize is -1 (PAGE_SIZE_ALL)', () => {

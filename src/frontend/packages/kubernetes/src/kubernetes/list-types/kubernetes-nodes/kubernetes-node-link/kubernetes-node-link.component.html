@@ -1,6 +1,6 @@
-<div class="node-link">
+<div class="flex flex-row items-center">
   <a [routerLink]="nodeLink">{{row.metadata.name}}</a>
   @if (icon) {
-    <span class="material-symbols-outlined {{icon.class}} node-link__help" [matTooltip]="icon.message">{{icon.icon}}</span>
+    <span class="material-symbols-outlined {{icon.class}} cursor-help" [matTooltip]="icon.message">{{icon.icon}}</span>
   }
 </div>

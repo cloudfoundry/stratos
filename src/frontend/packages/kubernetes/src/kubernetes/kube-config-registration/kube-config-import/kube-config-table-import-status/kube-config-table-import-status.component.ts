@@ -13,7 +13,7 @@ import { KubeConfigFileCluster } from '../../kube-config.types';
 changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kube-config-table-import-status',
   templateUrl: './kube-config-table-import-status.component.html',
-  styleUrls: ['./kube-config-table-import-status.component.scss'],
+
   standalone: true,
   imports: [
     AppActionMonitorIconComponent

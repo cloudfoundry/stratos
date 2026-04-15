@@ -8,7 +8,6 @@ import { IQuotaDefinition } from '../../../../../../cf-api.types';
 @Component({
   selector: 'app-table-cell-quota',
   templateUrl: './table-cell-quota.component.html',
-  styleUrls: ['./table-cell-quota.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

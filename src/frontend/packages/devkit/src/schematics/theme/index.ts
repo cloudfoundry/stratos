@@ -54,7 +54,7 @@ function addThemeToWorkspaceFile(
 }
 
 export default function (options: ThemeOptionsSchema): Rule {
-  return async (host: Tree, context: SchematicContext) => {
+  return async (host: Tree, _context: SchematicContext) => {
     if (!options.name) {
       throw new SchematicsException(`Invalid options, "name" is required.`);
     }

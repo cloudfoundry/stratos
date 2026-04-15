@@ -1,7 +1,7 @@
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
-import { combineLatest, filter, first, map, share, switchMap } from 'rxjs/operators';
+import { take, combineLatest, filter, map, share, switchMap } from 'rxjs/operators';
 
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getIdFromRoute, safeStringToObj } from '../../../../core/src/core/utils.service';
@@ -16,8 +16,7 @@ import {
   IServiceInstance,
   IServicePlan,
   IServicePlanExtra,
-  IServicePlanVisibility,
-} from '../../cf-api-svc.types';
+  IServicePlanVisibility } from '../../cf-api-svc.types';
 import { CFAppState } from '../../cf-app-state';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { organizationEntityType, servicePlanEntityType, spaceEntityType } from '../../cf-entity-types';
@@ -97,7 +96,7 @@ export const getServiceName = (serviceEntity: APIResource<IService>): string => 
   let extraInfo: IServiceExtra = null;
   try {
     extraInfo = serviceEntity.entity.extra ? JSON.parse(serviceEntity.entity.extra) : null;
-  } catch (e) { /* intentionally empty */ }
+  } catch (_e) { /* intentionally empty */ }
   return extraInfo && extraInfo.displayName ? extraInfo.displayName : serviceEntity.entity.label;
 };
 
@@ -119,12 +118,12 @@ export const getServicePlans = (
         const paginationKey = createEntityRelationPaginationKey(servicePlanEntityType, guid);
         return cfEntityCatalog.servicePlan.store.getAllForServiceInstance.getPaginationService(
           guid, cfGuid, paginationKey
-        ).entities$.pipe(share(), first());
+        ).entities$.pipe(share(), take(1));
       }
     }));
 };
 
-export const getServicePlanName = (plan: { name: string, extraTyped?: IServicePlanExtra, }): string =>
+export const getServicePlanName = (plan: { name: string, extraTyped?: IServicePlanExtra }): string =>
   plan.extraTyped && plan.extraTyped.displayName ? plan.extraTyped.displayName : plan.name;
 
 export const getServicePlanAccessibility = (
@@ -159,7 +158,7 @@ export const getServicePlanAccessibilityCardStatus = (
         return StratosStatus.ERROR;
       }
     }),
-    first()
+    take(1)
   );
 };
 
@@ -193,7 +192,7 @@ export const getServiceBrokerName = (
 ): Observable<string> => cfEntityCatalog.serviceBroker.store.getEntityService(serviceBrokerGuid, cfGuid, {}).waitForEntity$.pipe(
   filter(res => !!res),
   map(a => a.entity.entity.name),
-  first()
+  take(1)
 );
 
 export const getCfServiceInstance = (

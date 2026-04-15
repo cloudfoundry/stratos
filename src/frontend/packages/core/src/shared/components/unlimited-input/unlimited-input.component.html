@@ -1,10 +1,14 @@
-<div class="unlimited-input">
-  <app-form-field>
-    <input type="number" [id]="name" appInput [formControlName]="name" [placeholder]="placeholder" [required]="required"
-      min="0">
-    @if (suffix) {
-      <span matSuffix>{{suffix}}</span>
-    }
-  </app-form-field>
-  <app-checkbox [checked]="unlimited" (change)="onChange()">Unlimited</app-checkbox>
+<div class="unlimited-input flex items-start gap-2">
+  <div class="flex-1">
+    <app-form-field>
+      <input class="w-full placeholder:!text-transparent focus:outline-none" type="number" [id]="name" appInput [formControlName]="name" [placeholder]="placeholder" [required]="required && !unlimited"
+        min="0">
+      @if (suffix) {
+        <span matSuffix>{{suffix}}</span>
+      }
+    </app-form-field>
+  </div>
+  <div class="pt-1">
+    <app-checkbox [checked]="unlimited" (change)="onCheckboxChange($event)">Unlimited</app-checkbox>
+  </div>
 </div>

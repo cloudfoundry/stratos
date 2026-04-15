@@ -81,7 +81,7 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
             activeRouteCfOrgSpace.spaceGuid)
         )
       ),
-      tap(([cf, action]) => this.createDataSource(action)),
+      tap(([_cf, action]) => this.createDataSource(action)),
       map(([cf]) => cf && cf.state.initialised),
       publishReplay(1),
       refCount()

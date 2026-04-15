@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ScrollDispatcher } from '@angular/cdk/scrolling';
 import { ChangeDetectionStrategy, AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren, signal, inject } from '@angular/core';
-import { toSignal, toObservable } from '@angular/core/rxjs-interop';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import {
   IUserFavoritesGroups,
@@ -14,10 +14,9 @@ import {
   selectDashboardState,
   SetHomeCardLayoutAction,
   SetDashboardStateValueAction,
-  stratosEntityCatalog,
-} from '@stratosui/store';
+  stratosEntityCatalog } from '@stratosui/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { debounceTime, filter, first, map, startWith, switchMap, tap } from 'rxjs/operators';
+import { take, debounceTime, defaultIfEmpty, filter, map, startWith, switchMap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../core/endpoints.service';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
@@ -130,7 +129,8 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
           }));
         }
       }),
-      first()
+      take(1),
+      defaultIfEmpty(undefined)
     ).subscribe();
 
     this.layouts$ = of(this.layouts);
@@ -140,7 +140,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     // This ensures CF data fetches have the endpoint context they need
     this.allEndpointIds$ = this.endpointsService.haveRegistered$.pipe(
       filter(haveRegistered => haveRegistered),
-      first(),
+      take(1),
       switchMap(() => this.endpointsService.connectedEndpoints$),
       map(endpoints => Object.values(endpoints).map(endpoint => endpoint.guid))
     );
@@ -166,7 +166,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     // Stored value in local storage
     const showPersistedSetting$ = this.store.select(selectDashboardState).pipe(
       map(dashboardState => dashboardState.homeShowAllEndpoints),
-      first()
+      take(1)
     );
 
     // Show Value - current setting then user setting then default from backend
@@ -176,7 +176,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
     // Only show endpoints that have Home Card metadata
     this.endpoints$ = combineLatest([combinedShowMode$, connected$, userFavoriteManager.getAllFavorites()]).pipe(
-      map(([showMode, endpoints, [favGroups, favs]]) => {
+      map(([showMode, endpoints, [favGroups, _favs]]) => {
         if (this.showAllEndpoints !== showMode) {
           this.showAllEndpoints = showMode;
           // Persist the state
@@ -200,7 +200,8 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
     this.store.select(selectDashboardState).pipe(
       map(dashboardState => dashboardState.homeLayout || 0),
-      first()
+      take(1),
+      defaultIfEmpty(0)
     ).subscribe(id => {
       const selected = this.layouts.find(hpcl => hpcl && hpcl.id === id) || this.layouts[0];
       this.onChangeLayout(selected);
@@ -341,7 +342,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
     // If the layout is automatic, then adjust based on number of things to show
     const lay$ = layout.id === 0 ? this.automaticLayout() : of(layout);
-    lay$.pipe(first()).subscribe(lo => {
+    lay$.pipe(take(1)).subscribe(lo => {
       this._layout.set(lo);
 
       // Update the grid columns based on the layout

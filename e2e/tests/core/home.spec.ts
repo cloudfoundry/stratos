@@ -10,12 +10,12 @@ import { HomePage } from '../../pages/home.page';
 test.describe('Home', () => {
   test('should reach home page', async ({ connectedEndpointsUserPage }) => {
     // Page is already connected with endpoints as user
-    const homePage = new HomePage(connectedEndpointsUserPage);
+    const homePage = new HomePage(connectedEndpointsUserPage.page);
 
     // Navigate to home page
     await homePage.navigateTo();
 
     // Verify we're on the home page
-    expect(await homePage.isActivePage()).toBeTruthy();
+    expect(await homePage.isDashboardPage()).toBeTruthy();
   });
 });

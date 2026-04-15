@@ -2,7 +2,6 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CurrentUserPermissionsService } from '@stratosui/core';
 import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import {
   EntityCatalogTestModule,
@@ -15,7 +14,6 @@ import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/t
 import { generateTestCfEndpointServiceProvider } from '@test-framework/cloud-foundry-endpoint-service.helper';
 
 import { generateCFEntities } from '../../../../cf-entity-generator';
-import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { CfRolesService } from './cf-roles.service';
 
 describe('CfRolesService', () => {

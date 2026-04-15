@@ -74,8 +74,8 @@ export const gitBranchActionBuilders: GitBranchActionBuilders = {
     meta: GitMeta
   ) => new FetchBranchForProject(meta.scm, meta.scm.endpointGuid, meta.projectName, guid, meta.branchName),
   getMultiple: (
-    endpointGuid: string = null,
-    paginationKey: string = null,
+    _endpointGuid: string = null,
+    _paginationKey: string = null,
     meta?: GitMeta
   ) => new FetchBranchesForProject(meta.scm, meta.scm.endpointGuid, meta.projectName)
 };

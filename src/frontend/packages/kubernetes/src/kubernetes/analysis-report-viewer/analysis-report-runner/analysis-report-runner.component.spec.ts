@@ -46,7 +46,7 @@ describe('AnalysisReportRunnerComponent', () => {
     fixture = TestBed.createComponent(AnalysisReportRunnerComponent);
     component = fixture.componentInstance;
     // Skip detectChanges — KubernetesAnalysisService subscribes to store
-    // selectors via first() which throws EmptyError without full store setup
+    // selectors via take(1) which throws EmptyError without full store setup
   });
 
   it('should create', () => {

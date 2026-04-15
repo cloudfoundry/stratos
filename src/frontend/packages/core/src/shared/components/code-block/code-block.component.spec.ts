@@ -7,7 +7,6 @@ import { createBasicStoreModule } from "@test-framework/core-test.helper";
 
 import { CoreTestingModule } from "@test-framework/core-test.modules";
 import { CoreModule } from '../../../core/core.module';
-import { CopyToClipboardComponent } from '../copy-to-clipboard/copy-to-clipboard.component';
 import { CodeBlockComponent } from './code-block.component';
 
 describe('CodeBlockComponent', () => {

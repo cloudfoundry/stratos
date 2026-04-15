@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { filter, first } from 'rxjs/operators';
+import { take, filter,  } from 'rxjs/operators';
 import { EntityServiceFactory, EntityInfo } from '@stratosui/store';
 import { autoscalerTransformArrayToMap } from '../../core/autoscaler-helpers/autoscaler-transform-policy';
 import { GetAppAutoscalerPolicyAction } from '../../store/app-autoscaler.actions';
@@ -34,7 +34,7 @@ export class EditAutoscalerPolicyService {
       filter(({ entity, entityRequestInfo }) =>
         entityRequestInfo &&
         (entityRequestInfo.error || (!entityRequestInfo.fetching && !!entity))),
-      first(),
+      take(1),
     ).subscribe((({ entity }) => {
       if (entity && entity.entity) {
         this.setState(entity.entity);

@@ -1,5 +1,5 @@
 import { Observable, of } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { take, map } from 'rxjs/operators';
 
 import { HttpOptions } from '../../../../core/src/core/core.types';
 import { environment } from '../../../../core/src/environments/environment';
@@ -21,32 +21,36 @@ export abstract class BaseSCM {
 
   constructor(public publicApiUrl: string) { }
 
+  public setPublicApi(url: string) {
+    this.publicApiUrl = url;
+  }
+
   public getPublicApi(): string {
     return this.publicApiUrl;
   }
 
-  public getAPI(): Observable<GitApiRequest> {
+  public getAPI(options: HttpOptions = new HttpOptions()): Observable<GitApiRequest> {
     return this.getEndpoint(this.endpointGuid).pipe(
       map(endpoint => {
         if (!endpoint) {
           // No endpoint, use the default or overwritten public api associated with this type
           return {
             url: this.getPublicApi(),
-            requestArgs: {}
+            requestArgs: options
           };
         }
         // We have an endpoint so always proxy via backend
         return {
           url: `${commonPrefix}/${endpoint.guid}`,
           requestArgs: {
-            ... new HttpOptions(),
+            ...options,
             headers: {
               'x-cap-no-token': `${!endpoint.user}`
             }
           }
         };
       }),
-      first()
+      take(1)
     );
   }
 

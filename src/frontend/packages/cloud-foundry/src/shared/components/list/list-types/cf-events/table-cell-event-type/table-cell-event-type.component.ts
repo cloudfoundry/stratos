@@ -6,7 +6,6 @@ import { TableCellCustom } from '../../../../../../../../core/src/shared/compone
 @Component({
   selector: 'app-table-cell-event-type',
   templateUrl: './table-cell-event-type.component.html',
-  styleUrls: ['./table-cell-event-type.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: []

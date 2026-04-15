@@ -8,24 +8,19 @@ import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
-import { InfoCardComponent } from '../../../shared/components/info-card/info-card.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { StratosTitleComponent } from '../../../shared/components/stratos-title/stratos-title.component';
-import { ProductNameComponent } from '../../../shared/components/product-name.ccomponent';
 import { BUILD_INFO } from '../../../environments/build-info';
 
 @Component({
   selector: 'app-about-page',
   templateUrl: './about-page.component.html',
-  styleUrls: ['./about-page.component.scss'],
   standalone: true,
   imports: [
     CommonModule,
     RouterModule,
-    InfoCardComponent,
     PageHeaderComponent,
     StratosTitleComponent,
-    ProductNameComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })

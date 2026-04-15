@@ -1,4 +1,3 @@
-import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, of, BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -6,10 +5,9 @@ import { APP_GUID, CF_GUID } from '@stratosui/core';
 import { EntityService, RequestInfoState, APIResource, EntityInfo } from '@stratosui/store';
 import { ApplicationService } from '@stratosui/cloud-foundry';
 import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../src/cf-api.types';
-import { CFAppState } from '../src/cf-app-state';
 import { ApplicationData } from '../src/features/applications/application.service';
-import { ApplicationEnvVarsHelper, EnvVarStratosProject } from '../src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { ApplicationStateData, ApplicationStateService } from '../src/shared/services/application-state.service';
+import { EnvVarStratosProject } from '../src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { ApplicationStateData } from '../src/shared/services/application-state.service';
 import { AppStat } from '../src/store/types/app-metadata.types';
 
 function createEntity<T>(entity: T): APIResource<T> {
@@ -33,7 +31,7 @@ export class ApplicationServiceMock {
   private entityObsSubject = new BehaviorSubject({} as any);
 
   // Use BehaviorSubjects instead of observableOf() to prevent immediate completion
-  // This fixes issues with withLatestFrom() and first() operators in components
+  // This fixes issues with withLatestFrom() and take(1) operators in components
   private appSubject = new BehaviorSubject<ApplicationData>({
     cf: {
       guid: this.cfGuid

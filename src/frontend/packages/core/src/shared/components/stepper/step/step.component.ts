@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, TemplateRef, ViewChild } from '@angular/core';
 import { IRouterNavPayload } from '@stratosui/store';
 import { Observable, of as observableOf } from 'rxjs';
 
@@ -25,7 +25,6 @@ export type StepOnNextFunction = (index: number, step: StepComponent) => Observa
 @Component({
   selector: 'app-step',
   templateUrl: './step.component.html',
-  styleUrls: ['./step.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true
 })
@@ -69,8 +68,25 @@ export class StepComponent {
 
   @Output() onValidChange = new EventEmitter<boolean>();
 
+  // Setter-backed inputs that emit change events so the parent stepper
+  // component can re-run change detection. Under OnPush + zoneless change
+  // detection, setting an @Input() on a child component only marks that
+  // child dirty — it does NOT propagate to a grandparent view that reads
+  // the input value via a content-child query (as the stepper does in
+  // its own template via `this.steps[i].canClose` and `disablePrevious`).
+  // Without the emitters the stepper's own template bindings never get
+  // re-evaluated and the Previous/Close buttons stay stuck in the state
+  // they were in at the initial view bind.
+  private _canClose = true;
   @Input()
-  canClose = true;
+  set canClose(v: boolean) {
+    if (this._canClose !== v) {
+      this._canClose = v;
+      this.onCanCloseChange.emit(v);
+    }
+  }
+  get canClose(): boolean { return this._canClose; }
+  @Output() onCanCloseChange = new EventEmitter<boolean>();
 
   @Input()
   hideCloseButton = false;
@@ -87,8 +103,16 @@ export class StepComponent {
   @Input()
   cancelButtonText = 'Cancel';
 
+  private _disablePrevious = false;
   @Input()
-  disablePrevious = false;
+  set disablePrevious(v: boolean) {
+    if (this._disablePrevious !== v) {
+      this._disablePrevious = v;
+      this.onDisablePreviousChange.emit(v);
+    }
+  }
+  get disablePrevious(): boolean { return this._disablePrevious; }
+  @Output() onDisablePreviousChange = new EventEmitter<boolean>();
 
   @Input()
   blocked = false;

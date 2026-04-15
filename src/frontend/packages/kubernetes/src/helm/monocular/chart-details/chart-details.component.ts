@@ -1,7 +1,7 @@
 
-import {Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import {Component, OnInit, inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
-import { finalize, first, switchMap, tap } from 'rxjs/operators';
+import { take, finalize, switchMap, tap } from 'rxjs/operators';
 
 import { EntitySummaryTitleComponent } from '@stratosui/core';
 
@@ -18,7 +18,6 @@ import { ChartDetailsReadmeComponent } from './chart-details-readme/chart-detail
 @Component({
   selector: 'app-chart-details',
   templateUrl: './chart-details.component.html',
-  styleUrls: ['./chart-details.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
@@ -43,6 +42,7 @@ export class ChartDetailsComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private chartsService = inject(ChartsService);
   private config = inject(ConfigService);
+  private cdr = inject(ChangeDetectorRef);
 
 
 
@@ -59,9 +59,9 @@ export class ChartDetailsComponent implements OnInit {
       const repo = params.repo;
       const chartName = params.chartName;
 
-      if (!!chartName) {
+      if (chartName) {
         this.chartsService.getChart(repo, chartName).pipe(
-          first(),
+          take(1),
           switchMap(chart => {
             clearTimeout(this.loadingDelay);
             this.chart = chart;
@@ -70,7 +70,7 @@ export class ChartDetailsComponent implements OnInit {
               this.chartSubTitle = 'Artifact Hub - ' + this.chartSubTitle;
             }
             const version = params.version || this.chart.relationships.latestChartVersion.data.version;
-            return this.chartsService.getVersion(repo, chartName, version).pipe(first());
+            return this.chartsService.getVersion(repo, chartName, version).pipe(take(1));
           }),
           tap(chartVersion => {
             this.currentVersion = chartVersion;
@@ -82,6 +82,7 @@ export class ChartDetailsComponent implements OnInit {
             clearTimeout(this.loadingDelay);
             this.loading = false;
             this.initing = false;
+            this.cdr.markForCheck();
           })
         ).subscribe();
       }

@@ -1,4 +1,4 @@
-import { Component, Input, ContentChild, ElementRef, AfterContentInit, Directive, ChangeDetectorRef, OnDestroy, AfterViewInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, ContentChild, ElementRef, AfterContentInit, Directive, ChangeDetectorRef, OnDestroy, AfterViewInit, inject, ChangeDetectionStrategy, forwardRef } from '@angular/core';
 import { FormControl, NgControl } from '@angular/forms';
 
 import { Subject, takeUntil } from 'rxjs';
@@ -10,16 +10,17 @@ import { CustomSelectComponent } from '../custom-select/custom-select.component'
   styleUrls: ['./custom-form-field.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: []
+  imports: [],
+  host: { class: 'block' }
 })
 export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit, OnDestroy {
   @Input() appearance: 'legacy' | 'standard' | 'fill' | 'outline' = 'standard';
   @Input() color: 'primary' | 'accent' | 'warn' = 'primary';
-  @Input() floatLabel: 'always' | 'never' | 'auto' = 'auto';
+  @Input() floatLabel: 'always' | 'never' | 'auto' = 'always';
   @Input() hideRequiredMarker = false;
   @Input() hintLabel = '';
 
-  @ContentChild('input', { read: ElementRef, static: false }) inputElement!: ElementRef;
+  @ContentChild(forwardRef(() => AppInputDirective), { read: ElementRef, static: false }) inputElement!: ElementRef;
   @ContentChild(CustomSelectComponent, { static: false }) selectComponent!: CustomSelectComponent;
   @ContentChild(NgControl, { static: false }) ngControl!: NgControl;
 
@@ -62,7 +63,7 @@ export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit
     else if (this.inputElement) {
       const input = this.inputElement.nativeElement;
       this.placeholder = input.placeholder || '';
-      this.isRequired = input.hasAttribute('required');
+      this.isRequired = input.required;
       this.inputId = input.id || `form-field-${Math.random().toString(36).substr(2, 9)}`;
 
       // Set input id if not present for label association
@@ -115,6 +116,10 @@ export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit
     // Perform initial error check and ARIA update after view is fully initialized
     // This ensures all DOM elements and form controls are ready
     if (this.isInitialized) {
+      // Re-read required state now that bindings from projected content have been applied
+      if (this.inputElement) {
+        this.isRequired = this.inputElement.nativeElement.required;
+      }
       this.updateErrorMessage();
       this.updateAriaAttributes();
       this.cdr.detectChanges();
@@ -133,12 +138,12 @@ export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit
 
   get isInvalid(): boolean {
     if (!this.ngControl) return false;
-    return !!(this.ngControl.invalid && (this.ngControl.dirty || this.ngControl.touched));
+    return !!(this.ngControl.invalid && this.ngControl.dirty);
   }
 
   get isValid(): boolean {
     if (!this.ngControl) return false;
-    return !!(this.ngControl.valid && (this.ngControl.dirty || this.ngControl.touched));
+    return !!(this.ngControl.valid && this.ngControl.dirty);
   }
 
   get isDisabled(): boolean {
@@ -149,6 +154,31 @@ export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit
   get hasPrefix(): boolean {
     // This will be set by parent component if prefix is provided
     return false; // Override in template with content projection check
+  }
+
+  /**
+   * Tailwind class string for the floating label. Encodes layout, size,
+   * and state-dependent color in one binding so the SCSS doesn't need any
+   * rules for the label anymore.
+   */
+  get labelClasses(): string {
+    const base = 'absolute left-0 top-1 pointer-events-none select-none origin-top-left';
+    const sizing = this.shouldFloatLabel
+      ? '-translate-y-[1.8em] text-xs font-medium'
+      : 'text-base leading-tight';
+    let color: string;
+    if (this.isInvalid) {
+      color = 'text-danger';
+    } else if (this.isValid) {
+      color = 'text-success';
+    } else if (this.focused) {
+      color = 'text-input-focus-border';
+    } else if (this.shouldFloatLabel) {
+      color = 'text-primary';
+    } else {
+      color = 'text-input-placeholder';
+    }
+    return `${base} ${sizing} ${color}`;
   }
 
   private updateErrorMessage(): void {

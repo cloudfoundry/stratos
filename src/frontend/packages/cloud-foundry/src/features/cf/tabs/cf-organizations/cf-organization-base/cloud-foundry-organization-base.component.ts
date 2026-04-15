@@ -2,15 +2,14 @@ import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
-import { filter, first, map } from 'rxjs/operators';
+import { take, filter, map } from 'rxjs/operators';
 
 import {
   getActionsFromExtensions,
   getTabsFromExtensions,
   StratosActionMetadata,
   StratosActionType,
-  StratosTabType,
-} from '../../../../../../../core/src/core/extension/extension-service';
+  StratosTabType } from '../../../../../../../core/src/core/extension/extension-service';
 import { environment } from '../../../../../../../core/src/environments/environment.prod';
 import { IPageSideNavTab } from '../../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
 import { IHeaderBreadcrumb } from '../../../../../../../core/src/shared/components/page-header/page-header.types';
@@ -24,8 +23,7 @@ import { organizationEntityType } from '../../../../../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
 import {
-  CloudFoundryUserProvidedServicesService,
-} from '../../../../../shared/services/cloud-foundry-user-provided-services.service';
+  CloudFoundryUserProvidedServicesService } from '../../../../../shared/services/cloud-foundry-user-provided-services.service';
 import { getActiveRouteCfOrgSpaceProvider } from '../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
@@ -33,7 +31,6 @@ import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry
 @Component({
   selector: 'app-cloud-foundry-organization-base',
   templateUrl: './cloud-foundry-organization-base.component.html',
-  styleUrls: ['./cloud-foundry-organization-base.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider,
     CfUserService,
@@ -110,13 +107,13 @@ export class CloudFoundryOrganizationBaseComponent {
 
     this.schema = cfEntityFactory(organizationEntityType);
     this.favorite$ = cfOrgService.org$.pipe(
-      first(),
+      take(1),
       map(org => userFavoriteManager.getFavorite<IFavoriteMetadata>(org.entity, organizationEntityType, CF_ENDPOINT_TYPE))
     );
     this.name$ = cfOrgService.org$.pipe(
       map(org => org.entity.entity.name),
       filter(name => !!name),
-      first()
+      take(1)
     );
     this.breadcrumbs$ = this.getBreadcrumbs();
 
@@ -136,7 +133,7 @@ export class CloudFoundryOrganizationBaseComponent {
           ]
         }
       ])),
-      first()
+      take(1)
     );
   }
 }

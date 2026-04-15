@@ -1,14 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterViewInit, Compiler, Component, ComponentRef, EventEmitter, Injector, Input, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, signal, inject } from '@angular/core';
+import { ChangeDetectionStrategy, AfterViewInit, Component, ComponentRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, signal, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { filter, first, map, timeout } from 'rxjs/operators';
+import { take, filter, map, timeout } from 'rxjs/operators';
 
 import {
   EntityCatalogSchemas,
-  IStratosEndpointDefinition,
-} from '../../../../../../store/src/entity-catalog/entity-catalog.types';
+  IStratosEndpointDefinition } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { EndpointModel, entityCatalog } from '../../../../../../store/src/public-api';
 import { UserFavoriteManager } from '../../../../../../store/src/user-favorite-manager';
 import { EntityFavoriteStarComponent } from '../../../../core/entity-favorite-star/entity-favorite-star.component';
@@ -20,8 +19,7 @@ import { HomeShortcutsComponent } from '../home-shortcuts/home-shortcuts.compone
 import { UserFavoriteEndpoint } from './../../../../../../store/src/types/user-favorites.types';
 import { HomePageCardLayout, HomePageEndpointCard, LinkMetadata } from './../../home.types';
 import {
-  DefaultEndpointHomeComponent,
-} from './../default-endpoint-home-component/default-endpoint-home-component.component';
+  DefaultEndpointHomeComponent } from './../default-endpoint-home-component/default-endpoint-home-component.component';
 
 const MAX_FAVS_NORMAL = 15;
 const MAX_FAVS_COMPACT = 5;
@@ -33,8 +31,7 @@ const MAX_LINKS = 5;
 enum Status {
   OK = 0,
   Loading = 1,
-  Error = 2,
-}
+  Error = 2 }
 
 @Component({
   selector: 'app-home-page-endpoint-card',
@@ -54,8 +51,8 @@ enum Status {
 export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterViewInit {
   private userFavoriteManager = inject(UserFavoriteManager);
   private sidePanelService = inject(SidePanelService);
-  private compiler = inject(Compiler);
-  private injector = inject(Injector);
+
+
 
 
   @ViewChild('customCard', { read: ViewContainerRef, static: true }) customCard!: ViewContainerRef;
@@ -149,7 +146,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
     }
 
     this.links$ = combineLatest([this.favorites$, this.layout$]).pipe(
-      filter(([favs, layout]) => !!layout),
+      filter(([_favs, layout]) => !!layout),
       map(([favs, layout]) => {
         // Get the list of shortcuts for the endpoint for the given endpoint ID
         const shortcutsFn = this.definition?.homeCard?.shortcuts;
@@ -229,7 +226,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
     if (!endpointEntity) {
       component = DefaultEndpointHomeComponent;
     } else {
-      component = await endpointEntity.definition.homeCard.component(this.compiler, this.injector);
+      component = await endpointEntity.definition.homeCard.component();
     }
 
     this.ref = this.customCard.createComponent(component);
@@ -255,7 +252,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
       this.sub = loadObs.pipe(
         timeout(60000),
         filter((v: boolean) => v === true),
-        first()
+        take(1)
       ).subscribe({
         next: () => {
           this._status.set(Status.OK);

@@ -7,8 +7,8 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 
 import { ApplicationServiceMock, generateCfStoreModules, ApplicationStateService, ApplicationEnvVarsHelper, populateStoreWithTestEndpoint } from '@test-framework/cf';
-import {ApplicationService, CFAppState, IApp, IOrganization, ISpace, CfCurrentUserPermissions} from '@stratosui/cloud-foundry';
-import { APIResource, EntityInfo, RequestInfoState, EndpointModel, endpointEntitiesSelector, UserFavoriteManager } from '@stratosui/store';
+import {ApplicationService, CFAppState} from '@stratosui/cloud-foundry';
+import { EndpointModel, endpointEntitiesSelector, UserFavoriteManager } from '@stratosui/store';
 import {
   EndpointsService,
   CurrentUserPermissionsService

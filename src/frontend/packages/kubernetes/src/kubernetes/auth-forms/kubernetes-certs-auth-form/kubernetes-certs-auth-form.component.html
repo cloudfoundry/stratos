@@ -1,8 +1,8 @@
-<div [formGroup]="formGroup" class="kube-certs-auth">
-  <div formGroupName="authValues" class="kube-certs-auth__form">
+<div [formGroup]="formGroup">
+  <div formGroupName="authValues" class="flex flex-col h-[250px] w-[450px]">
     <app-tab-group>
       <app-tab label="Certificate Files">
-        <div class="kube-certs-auth__form__file">
+        <div class="flex flex-col pt-4">
           <span>Specify Certificate file:</span>
           <app-file-input fileFormControlName="cert" placeholder="cert">
           </app-file-input>
@@ -14,11 +14,13 @@
         </div>
       </app-tab>
       <app-tab label="Certificate Content">
-        <div class="kube-certs-auth__form__content" spellcheck="false">
-          <span class="kube-certs-auth__label">Specify Certificate:</span>
-          <textarea formControlName="cert"></textarea>
-          <span class="kube-certs-auth__label">Specify Certificate key:</span>
-          <textarea formControlName="certKey"></textarea>
+        <div class="kube-certs-auth__content flex flex-col gap-3" spellcheck="false">
+          <span class="text-sm">Specify Certificate:</span>
+          <textarea rows="8" formControlName="cert"
+            class="w-full focus:outline-none min-h-[200px] resize-y font-mono text-sm border border-content-border rounded-md p-3 bg-content-bg focus:border-primary focus:ring-1 focus:ring-primary"></textarea>
+          <span class="text-sm">Specify Certificate key:</span>
+          <textarea rows="8" formControlName="certKey"
+            class="w-full focus:outline-none min-h-[200px] resize-y font-mono text-sm border border-content-border rounded-md p-3 bg-content-bg focus:border-primary focus:ring-1 focus:ring-primary"></textarea>
         </div>
       </app-tab>
     </app-tab-group>

@@ -136,7 +136,7 @@ export class TailwindDialogService {
     const dialogContainer = this.createDialogContainer(componentRef, config);
 
     // Set the remove callback
-    (dialogRef as any).removeCallback = (result?: R) => this.removeDialog(dialogContainer, componentRef);
+    (dialogRef as any).removeCallback = (_result?: R) => this.removeDialog(dialogContainer, componentRef);
 
     // Attach component to application
     this.appRef.attachView(componentRef.hostView);

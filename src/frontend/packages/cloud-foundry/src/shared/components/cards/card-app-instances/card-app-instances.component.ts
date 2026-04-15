@@ -2,7 +2,7 @@ import { Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild, 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { combineLatest, Observable, Subscription } from 'rxjs';
-import { first, map, switchMap } from 'rxjs/operators';
+import { take, map, switchMap } from 'rxjs/operators';
 
 import {
   AppInputDirective,
@@ -104,11 +104,11 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
     }
   }
 
-  scaleUp(current: number) {
+  scaleUp(_current: number) {
     this.setInstanceCount(this.currentCount + 1);
   }
 
-  scaleDown(current: number) {
+  scaleDown(_current: number) {
     this.setInstanceCount(this.currentCount - 1);
   }
 
@@ -134,7 +134,7 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
       this.confirmDialog.open(appInstanceScaleToZeroConfirmation, doUpdate);
     } else {
       doUpdate().pipe(
-        first(),
+        take(1),
       ).subscribe(actionState => {
         if (actionState.error) {
           this.snackBarRef = this.snackBar.open(`Failed to update instance count: ${actionState.message}`, 'Dismiss');

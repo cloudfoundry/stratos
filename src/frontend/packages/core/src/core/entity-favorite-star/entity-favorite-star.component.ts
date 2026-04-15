@@ -3,7 +3,7 @@ import { Component, inject, Input, ChangeDetectionStrategy } from '@angular/core
 import { CustomTooltipDirective } from '../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { UserFavoriteManager, IFavoriteMetadata, UserFavorite } from '@stratosui/store';
 import { Observable } from 'rxjs';
-import { first, tap } from 'rxjs/operators';
+import { take, tap } from 'rxjs/operators';
 
 import { ConfirmationDialogConfig } from '../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../shared/components/confirmation-dialog.service';
@@ -51,7 +51,7 @@ export class EntityFavoriteStarComponent {
     event.stopPropagation();
     if (this.confirmRemoval) {
       this.isFavorite$.pipe(
-        first(),
+        take(1),
         tap(is => {
           if (is) {
             this.confirmDialog.open(this.confirmationDialogConfig, this.pToggleFavorite);
@@ -65,7 +65,7 @@ export class EntityFavoriteStarComponent {
     }
   }
 
-  private pToggleFavorite = (res?: any) => {
+  private pToggleFavorite = (_res?: any) => {
     this.userFavoriteManager.toggleFavorite(this.pFavourite);
   }
 }

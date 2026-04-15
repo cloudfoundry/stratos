@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { CustomTooltipDirective } from '@stratosui/core';
+import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { RouterModule } from '@angular/router';
 
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
@@ -9,7 +9,6 @@ import { CustomIconComponent } from '../../../shared/components/custom-material/
 @Component({
   selector: 'app-eula-page',
   templateUrl: './eula-page.component.html',
-  styleUrls: ['./eula-page.component.scss'],
   standalone: true,
   imports: [
     CustomIconComponent,

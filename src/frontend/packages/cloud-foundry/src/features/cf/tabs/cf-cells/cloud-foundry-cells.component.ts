@@ -15,7 +15,6 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
 @Component({
   selector: 'app-cloud-foundry-cells',
   templateUrl: './cloud-foundry-cells.component.html',
-  styleUrls: ['./cloud-foundry-cells.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

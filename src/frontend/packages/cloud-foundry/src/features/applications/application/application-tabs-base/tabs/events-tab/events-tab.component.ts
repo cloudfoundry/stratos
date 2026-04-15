@@ -9,7 +9,6 @@ import {
 @Component({
   selector: 'app-events-tab',
   templateUrl: './events-tab.component.html',
-  styleUrls: ['./events-tab.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [{

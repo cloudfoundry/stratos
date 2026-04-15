@@ -6,7 +6,7 @@ import { RouterModule } from '@angular/router';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '../../../shared/services/tailwind-error-state-matcher';
 import { UserProfileInfo, UserProfileInfoUpdates } from '@stratosui/store';
 import { Subscription } from 'rxjs';
-import { delay, first, map, take, tap } from 'rxjs/operators';
+import { defaultIfEmpty, delay, map, take, tap } from 'rxjs/operators';
 
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
@@ -65,8 +65,7 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
       emailAddress: new FormControl('', { nonNullable: true }),
       currentPassword: new FormControl('', { nonNullable: true }),
       newPassword: new FormControl('', { nonNullable: true }),
-      confirmPassword: new FormControl('', { nonNullable: true }),
-    });
+      confirmPassword: new FormControl('', { nonNullable: true }) });
 
     this.needsPasswordForEmailChange = false;
   }
@@ -86,7 +85,8 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
   public passwordRequired = false;
 
   ngOnInit() {
-    this.userProfileService.userProfile$.pipe(first()).subscribe(profile => {
+    this.userProfileService.userProfile$.pipe(take(1), defaultIfEmpty(null)).subscribe(profile => {
+      if (!profile) { return; }
       // UAA needs the user's password for email changes. Local user does not
       // Both need it for password change
       this.needsPasswordForEmailChange = (profile.origin === 'uaa');
@@ -98,8 +98,7 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
         emailAddress: this.userProfileService.getPrimaryEmailAddress(profile),
         currentPassword: '',
         newPassword: '',
-        confirmPassword: '',
-      });
+        confirmPassword: '' });
     });
     this.onChanges();
   }
@@ -132,7 +131,7 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
   }
 
   confirmPasswordValidator(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any, } => {
+    return (control: AbstractControl): { [key: string]: any } => {
       const same = control.value === this.editProfileForm.value.newPassword;
       return same ? null : { passwordMatch: { value: control.value } };
     };

@@ -6,7 +6,7 @@ import { SafeResourceUrl } from '@angular/platform-browser';
 import { Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { interval, Observable, Subscription } from 'rxjs';
-import { first, map, startWith } from 'rxjs/operators';
+import { take, map, startWith } from 'rxjs/operators';
 
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
 import {
@@ -27,12 +27,6 @@ import {
 import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
 import { CaaspNodesData, KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 
-interface IValueLabels {
-  usedLabel?: string;
-  remainingLabel?: string;
-  unknownLabel?: string;
-  warningText?: string;
-}
 interface IEndpointDetails {
   imagePath: string;
   label: string;
@@ -228,7 +222,7 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
   }
 
   private updateList(action: PaginatedAction, pagination$: Observable<PaginationEntityState>) {
-    pagination$.pipe(first()).subscribe(pag => {
+    pagination$.pipe(take(1)).subscribe(pag => {
       if (!getCurrentPageRequestInfo(pag, { busy: true, error: false, message: '' }).busy) {
         this.store.dispatch(action);
       }

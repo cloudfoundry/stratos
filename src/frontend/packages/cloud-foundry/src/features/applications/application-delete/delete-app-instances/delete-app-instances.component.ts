@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnDestroy, Output, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, Output, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 
 import { ListComponent, ListConfig } from '@stratosui/core';
@@ -9,7 +9,6 @@ import { AppDeleteServiceInstancesListConfigService } from './app-delete-instanc
 @Component({
   selector: 'app-delete-app-instances',
   templateUrl: './delete-app-instances.component.html',
-  styleUrls: ['./delete-app-instances.component.scss'],
   providers: [
     {
       provide: ListConfig,

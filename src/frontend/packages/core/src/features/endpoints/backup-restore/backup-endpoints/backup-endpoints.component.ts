@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnDestroy, Injector, inject } from '@angular/core';
-import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
+import { ReactiveFormsModule, Validators, FormControl, FormGroup, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { format } from 'date-fns';
 import { httpErrorResponseToSafeString, entityCatalog, stratosEntityCatalog, EndpointModel } from '@stratosui/store';
 import { Observable, of, Subject, Subscription } from 'rxjs';
-import { filter, first, map } from 'rxjs/operators';
+import { take, defaultIfEmpty, filter, map } from 'rxjs/operators';
 import { toObservable } from '@angular/core/rxjs-interop';
 
 import { safeUnsubscribe } from '../../../../core/utils.service';
@@ -70,8 +70,7 @@ export class BackupEndpointsComponent implements OnDestroy {
       headerCell: () => 'Type',
       cellDefinition: {
         getValue: this.getEndpointTypeString
-      },
-    },
+      } },
     {
       columnId: 'endpoint',
       headerCell: () => 'Backup',
@@ -83,8 +82,7 @@ export class BackupEndpointsComponent implements OnDestroy {
     {
       columnId: 'connect',
       headerCell: () => 'Connection Details',
-      cellComponent: BackupConnectionCellComponent,
-    },
+      cellComponent: BackupConnectionCellComponent },
   ];
   endpointDataSource!: ITableListDataSource<EndpointModel>;
   disableSelectAll$!: Observable<boolean>;
@@ -121,7 +119,7 @@ export class BackupEndpointsComponent implements OnDestroy {
       map(endpoints => endpoints.sort((a, b) => a.name.localeCompare(b.name)))
     );
 
-    endpoints$.pipe(first()).subscribe(entities => this.service.initialize(entities));
+    endpoints$.pipe(take(1), defaultIfEmpty([] as EndpointModel[])).subscribe(entities => this.service.initialize(entities));
 
     this.endpointDataSource = {
       isTableLoading$: endpointObs.fetchingEntities$,
@@ -148,8 +146,7 @@ export class BackupEndpointsComponent implements OnDestroy {
         password2: new FormControl('', {
           validators: [Validators.required],
           nonNullable: true
-        }),
-      },
+        }) },
       { validators: this.passwordMatchValidator }
     );
 
@@ -187,8 +184,7 @@ export class BackupEndpointsComponent implements OnDestroy {
 
       result.next({
         success: true,
-        redirect: true,
-      });
+        redirect: true });
     };
 
     const backupFailure = (err: any) => {
@@ -200,7 +196,10 @@ export class BackupEndpointsComponent implements OnDestroy {
       return of(false);
     };
 
-    const createBackup = () => this.service.createBackup().pipe(first()).subscribe(backupSuccess, backupFailure);
+    const createBackup = () => this.service.createBackup().pipe(take(1), defaultIfEmpty(null)).subscribe(
+      res => res !== null ? backupSuccess(res) : backupFailure('Backup service returned no response'),
+      backupFailure
+    );
 
     if (this.service.hasConnectionDetails()) {
       this.confirmDialog.openWithCancel(confirmation, createBackup, userCancelledDialog);

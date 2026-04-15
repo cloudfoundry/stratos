@@ -1,37 +1,46 @@
-import { CommonModule } from '@angular/common';
-import { Component, Input, OnDestroy, OnInit, Output, computed, inject, signal , ChangeDetectionStrategy } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { CustomCheckboxComponent } from '@stratosui/core';
-import { CustomTooltipDirective } from '@stratosui/core';
-import { Store } from '@ngrx/store';
-import { combineLatest, Observable, Subscription } from 'rxjs';
-import { combineLatest as combineLatestOp, filter, first, map } from 'rxjs/operators';
+import {
+  Component,
+  Input,
+  OnDestroy,
+  OnInit,
+  computed,
+  inject,
+  ChangeDetectionStrategy,
+} from "@angular/core";
+import { toSignal } from "@angular/core/rxjs-interop";
+import { CustomCheckboxComponent } from "@stratosui/core";
+import { CustomTooltipDirective } from "@stratosui/core";
+import { Store } from "@ngrx/store";
+import { Subscription } from "rxjs";
+import { take, combineLatest as combineLatestOp, filter } from "rxjs/operators";
 
-import { UsersRolesSetOrgRole, UsersRolesSetSpaceRole } from '../../../../../cloud-foundry/src/actions/users-roles.actions';
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { CfUserRolesSelected } from '../../../../../cloud-foundry/src/store/types/users-roles.types';
-import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
-import { canUpdateOrgSpaceRoles } from '../../../features/cf/cf.helpers';
-import { CfRolesService } from '../../../features/cf/users/manage-users/cf-roles.service';
+import {
+  UsersRolesSetOrgRole,
+  UsersRolesSetSpaceRole,
+} from "../../../../../cloud-foundry/src/actions/users-roles.actions";
+import { CFAppState } from "../../../../../cloud-foundry/src/cf-app-state";
+import { CfUserRolesSelected } from "../../../../../cloud-foundry/src/store/types/users-roles.types";
+import { CurrentUserPermissionsService } from "../../../../../core/src/core/permissions/current-user-permissions.service";
+import { canUpdateOrgSpaceRoles } from "../../../features/cf/cf.helpers";
+import { CfRolesService } from "../../../features/cf/users/manage-users/cf-roles.service";
 import {
   selectCfUsersIsRemove,
   selectCfUsersIsSetByUsername,
   selectCfUsersRolesPicked,
-} from '../../../store/selectors/cf-users-roles.selector';
+} from "../../../store/selectors/cf-users-roles.selector";
 import {
   CfUser,
   IUserPermissionInOrg,
   IUserPermissionInSpace,
   OrgUserRoleNames,
   SpaceUserRoleNames,
-} from '../../../store/types/cf-user.types';
-import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
-
+} from "../../../store/types/cf-user.types";
+import { CfCurrentUserPermissions } from "../../../user-permissions/cf-user-permissions-checkers";
 
 enum CfRoleCheckboxMode {
   DEFAULT,
   ADD,
-  REMOVE
+  REMOVE,
 }
 
 /**
@@ -42,16 +51,11 @@ enum CfRoleCheckboxMode {
  * @export
  */
 @Component({
-  selector: 'app-cf-role-checkbox',
-  templateUrl: './cf-role-checkbox.component.html',
-  styleUrls: ['./cf-role-checkbox.component.scss'],
+  selector: "app-cf-role-checkbox",
+  templateUrl: "./cf-role-checkbox.component.html",
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    CommonModule,
-    CustomCheckboxComponent,
-    CustomTooltipDirective
-  ]
+  imports: [CustomCheckboxComponent, CustomTooltipDirective],
 })
 export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
   private store = inject(Store<CFAppState>);
@@ -70,36 +74,47 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
   // Convert mode$ to signal-based computed
   private isSetByUsernameSignal = toSignal(
     this.store.select(selectCfUsersIsSetByUsername),
-    { initialValue: false }
+    { initialValue: false },
   );
-  private isRemoveSignal = toSignal(
-    this.store.select(selectCfUsersIsRemove),
-    { initialValue: false }
-  );
+  private isRemoveSignal = toSignal(this.store.select(selectCfUsersIsRemove), {
+    initialValue: false,
+  });
 
   mode = computed(() => {
     if (!this.isSetByUsernameSignal()) {
       return CfRoleCheckboxMode.DEFAULT;
     }
-    return this.isRemoveSignal() ? CfRoleCheckboxMode.REMOVE : CfRoleCheckboxMode.ADD;
+    return this.isRemoveSignal()
+      ? CfRoleCheckboxMode.REMOVE
+      : CfRoleCheckboxMode.ADD;
   });
 
   modes = CfRoleCheckboxMode;
 
   checked = false;
-  tooltip = '';
+  tooltip = "";
   sub!: Subscription;
   isOrgRole = false;
   disabled = false;
 
-  private static hasExistingRole(role: string, roles: CfUserRolesSelected, userGuid: string, orgGuid: string, spaceGuid: string): boolean {
+  private static hasExistingRole(
+    role: string,
+    roles: CfUserRolesSelected,
+    userGuid: string,
+    orgGuid: string,
+    spaceGuid: string,
+  ): boolean {
     if (roles && roles[userGuid] && roles[userGuid][orgGuid]) {
       return !!this.hasRole(role, roles[userGuid][orgGuid], spaceGuid);
     }
     return false;
   }
 
-  private static hasRole(role: string, orgRoles: IUserPermissionInOrg, spaceGuid: string): boolean {
+  private static hasRole(
+    role: string,
+    orgRoles: IUserPermissionInOrg,
+    spaceGuid: string,
+  ): boolean {
     if (!orgRoles) {
       return undefined;
     }
@@ -123,11 +138,12 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
     existingRoles: CfUserRolesSelected,
     newRoles: IUserPermissionInOrg,
     orgGuid: string,
-    spaceGuid?: string): {
-      checked: boolean;
-      tooltip: string;
-    } {
-    let tooltip = '';
+    spaceGuid?: string,
+  ): {
+    checked: boolean;
+    tooltip: string;
+  } {
+    let tooltip = "";
     // Has the user set any state for this role? If so this overrides all other settings
     let checked = CfRoleCheckboxComponent.hasRole(role, newRoles, spaceGuid);
     if (checked !== undefined) {
@@ -137,16 +153,30 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
 
     // Is only one user selected? If so just display true/false given their existing roles
     if (users.length === 1) {
-      checked = CfRoleCheckboxComponent.hasExistingRole(role, existingRoles, users[0].guid, orgGuid, spaceGuid);
+      checked = CfRoleCheckboxComponent.hasExistingRole(
+        role,
+        existingRoles,
+        users[0].guid,
+        orgGuid,
+        spaceGuid,
+      );
       return { checked, tooltip };
     }
 
     // Do all selected users have this role (true) or only some (null)
     let oneWithout = false;
-    tooltip = '';
+    tooltip = "";
     // Loop through users, determine who hasn't got the role and if there are any that don't
     for (const user of users) {
-      if (CfRoleCheckboxComponent.hasExistingRole(role, existingRoles, user.guid, orgGuid, spaceGuid)) {
+      if (
+        CfRoleCheckboxComponent.hasExistingRole(
+          role,
+          existingRoles,
+          user.guid,
+          orgGuid,
+          spaceGuid,
+        )
+      ) {
         tooltip += `${user.username}, `;
       } else {
         oneWithout = true;
@@ -163,7 +193,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
     if (!oneWithout) {
       // All have role, no need to show the list of users
       checked = true;
-      tooltip = '';
+      tooltip = "";
     } else {
       // At least one does not have role, tertiary state
       checked = null;
@@ -179,20 +209,41 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
     newRoles: IUserPermissionInOrg,
     orgGuid: string,
     spaces: { [guid: string]: IUserPermissionInSpace },
-    checkedSpaces: Set<string>
+    checkedSpaces: Set<string>,
   ): boolean {
     const spaceGuids = Object.keys(spaces || {});
     for (const spaceGuid of spaceGuids) {
       if (checkedSpaces.has(spaceGuid)) {
         continue;
       }
-      const manager =
-        CfRoleCheckboxComponent.getCheckedState(SpaceUserRoleNames.MANAGER, users, existingRoles, newRoles, orgGuid, spaceGuid);
-      const developer =
-        CfRoleCheckboxComponent.getCheckedState(SpaceUserRoleNames.DEVELOPER, users, existingRoles, newRoles, orgGuid, spaceGuid);
-      const auditor =
-        CfRoleCheckboxComponent.getCheckedState(SpaceUserRoleNames.AUDITOR, users, existingRoles, newRoles, orgGuid, spaceGuid);
-      const hasSpaceRole = manager.checked !== false || developer.checked !== false || auditor.checked !== false;
+      const manager = CfRoleCheckboxComponent.getCheckedState(
+        SpaceUserRoleNames.MANAGER,
+        users,
+        existingRoles,
+        newRoles,
+        orgGuid,
+        spaceGuid,
+      );
+      const developer = CfRoleCheckboxComponent.getCheckedState(
+        SpaceUserRoleNames.DEVELOPER,
+        users,
+        existingRoles,
+        newRoles,
+        orgGuid,
+        spaceGuid,
+      );
+      const auditor = CfRoleCheckboxComponent.getCheckedState(
+        SpaceUserRoleNames.AUDITOR,
+        users,
+        existingRoles,
+        newRoles,
+        orgGuid,
+        spaceGuid,
+      );
+      const hasSpaceRole =
+        manager.checked !== false ||
+        developer.checked !== false ||
+        auditor.checked !== false;
       if (hasSpaceRole) {
         return true;
       }
@@ -204,23 +255,55 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
     users: CfUser[],
     existingRoles: CfUserRolesSelected,
     newRoles: IUserPermissionInOrg,
-    orgGuid: string): boolean {
+    orgGuid: string,
+  ): boolean {
     if (!newRoles) {
       return false;
     }
 
     // Check all org roles, if any existing or new is set then return true
-    const manager = CfRoleCheckboxComponent.getCheckedState(OrgUserRoleNames.MANAGER, users, existingRoles, newRoles, orgGuid);
-    const billing = CfRoleCheckboxComponent.getCheckedState(OrgUserRoleNames.BILLING_MANAGERS, users, existingRoles, newRoles, orgGuid);
-    const auditor = CfRoleCheckboxComponent.getCheckedState(OrgUserRoleNames.AUDITOR, users, existingRoles, newRoles, orgGuid);
-    if (manager.checked !== false || billing.checked !== false || auditor.checked !== false) {
+    const manager = CfRoleCheckboxComponent.getCheckedState(
+      OrgUserRoleNames.MANAGER,
+      users,
+      existingRoles,
+      newRoles,
+      orgGuid,
+    );
+    const billing = CfRoleCheckboxComponent.getCheckedState(
+      OrgUserRoleNames.BILLING_MANAGERS,
+      users,
+      existingRoles,
+      newRoles,
+      orgGuid,
+    );
+    const auditor = CfRoleCheckboxComponent.getCheckedState(
+      OrgUserRoleNames.AUDITOR,
+      users,
+      existingRoles,
+      newRoles,
+      orgGuid,
+    );
+    if (
+      manager.checked !== false ||
+      billing.checked !== false ||
+      auditor.checked !== false
+    ) {
       return true;
     }
 
     // Check all space roles
     // .. first check new space roles
     const checkedSpaces = new Set<string>();
-    if (CfRoleCheckboxComponent.hasSpaceRole(users, existingRoles, newRoles, orgGuid, newRoles.spaces, checkedSpaces)) {
+    if (
+      CfRoleCheckboxComponent.hasSpaceRole(
+        users,
+        existingRoles,
+        newRoles,
+        orgGuid,
+        newRoles.spaces,
+        checkedSpaces,
+      )
+    ) {
       return true;
     }
 
@@ -232,7 +315,16 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
       if (!org) {
         continue;
       }
-      if (CfRoleCheckboxComponent.hasSpaceRole(users, existingRoles, newRoles, orgGuid, org.spaces, checkedSpaces)) {
+      if (
+        CfRoleCheckboxComponent.hasSpaceRole(
+          users,
+          existingRoles,
+          newRoles,
+          orgGuid,
+          org.spaces,
+          checkedSpaces,
+        )
+      ) {
         return true;
       }
     }
@@ -253,7 +345,8 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
     newRoles: IUserPermissionInOrg,
     orgGuid: string,
     checked: boolean,
-    isSetByUsername: boolean): boolean {
+    isSetByUsername: boolean,
+  ): boolean {
     if (isOrgRole && role === OrgUserRoleNames.USER) {
       // If this is in username mode never disable the user checkbox
       if (isSetByUsername) {
@@ -267,7 +360,12 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
       }
 
       // Check all org and space roles, are there any set? If so we should disable the org user checkbox
-      return CfRoleCheckboxComponent.hasOrgSpaceRole(users, existingRoles, newRoles, orgGuid);
+      return CfRoleCheckboxComponent.hasOrgSpaceRole(
+        users,
+        existingRoles,
+        newRoles,
+        orgGuid,
+      );
     }
     return false;
   }
@@ -277,35 +375,61 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
     const users$ = this.store.select(selectCfUsersRolesPicked);
     // If setting an org role user must be admin or org manager.
     // If setting a space role user must be admin, org manager or space manager
-    const canEditRole$ = this.isOrgRole ?
-      this.userPerms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfGuid, this.orgGuid) :
-      canUpdateOrgSpaceRoles(
-        this.userPerms,
-        this.cfGuid,
-        this.orgGuid,
-        this.spaceGuid);
-    const selectUsersIsSetByUsername$ = this.store.select(selectCfUsersIsSetByUsername);
-
-    this.sub = this.cfRolesService.existingRoles$.pipe(
-      combineLatestOp(this.cfRolesService.newRoles$, users$, canEditRole$, selectUsersIsSetByUsername$),
-      filter(([existingRoles, newRoles, users, canEditRole, isSetByUsername]) => !!users.length && !!newRoles.orgGuid)
-    ).subscribe(([existingRoles, newRoles, users, canEditRole, isSetByUsername]) => {
-      const { checked, tooltip } = CfRoleCheckboxComponent.getCheckedState(
-        this.role, users, existingRoles, newRoles, this.orgGuid, this.spaceGuid);
-      this.checked = checked;
-      this.tooltip = tooltip;
-      this.disabled = !canEditRole ||
-        CfRoleCheckboxComponent.isDisabled(
-          this.isOrgRole,
-          this.role,
-          users,
-          existingRoles,
-          newRoles,
+    const canEditRole$ = this.isOrgRole
+      ? this.userPerms.can(
+          CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES,
+          this.cfGuid,
           this.orgGuid,
-          checked,
-          isSetByUsername
+        )
+      : canUpdateOrgSpaceRoles(
+          this.userPerms,
+          this.cfGuid,
+          this.orgGuid,
+          this.spaceGuid,
         );
-    });
+    const selectUsersIsSetByUsername$ = this.store.select(
+      selectCfUsersIsSetByUsername,
+    );
+
+    this.sub = this.cfRolesService.existingRoles$
+      .pipe(
+        combineLatestOp(
+          this.cfRolesService.newRoles$,
+          users$,
+          canEditRole$,
+          selectUsersIsSetByUsername$,
+        ),
+        filter(
+          ([_existingRoles, newRoles, users, _canEditRole, _isSetByUsername]) =>
+            !!users.length && !!newRoles.orgGuid,
+        ),
+      )
+      .subscribe(
+        ([existingRoles, newRoles, users, canEditRole, isSetByUsername]) => {
+          const { checked, tooltip } = CfRoleCheckboxComponent.getCheckedState(
+            this.role,
+            users,
+            existingRoles,
+            newRoles,
+            this.orgGuid,
+            this.spaceGuid,
+          );
+          this.checked = checked;
+          this.tooltip = tooltip;
+          this.disabled =
+            !canEditRole ||
+            CfRoleCheckboxComponent.isDisabled(
+              this.isOrgRole,
+              this.role,
+              users,
+              existingRoles,
+              newRoles,
+              this.orgGuid,
+              checked,
+              isSetByUsername,
+            );
+        },
+      );
 
     // Note: mode$ has been converted to a computed signal (see class properties above)
   }
@@ -318,18 +442,31 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
 
   public roleUpdated(checked: boolean) {
     this.checked = checked;
-    this.cfRolesService.newRoles$.pipe(
-      first()
-    ).subscribe(newRoles => {
+    this.cfRolesService.newRoles$.pipe(take(1)).subscribe((_newRoles) => {
       if (!checked) {
-        this.tooltip = '';
+        this.tooltip = "";
       }
       if (this.isOrgRole) {
-        this.store.dispatch(new UsersRolesSetOrgRole(this.orgGuid, this.orgName, this.role, checked));
+        this.store.dispatch(
+          new UsersRolesSetOrgRole(
+            this.orgGuid,
+            this.orgName,
+            this.role,
+            checked,
+          ),
+        );
       } else {
-        this.store.dispatch(new UsersRolesSetSpaceRole(this.orgGuid, this.orgName, this.spaceGuid, this.spaceName, this.role, checked));
+        this.store.dispatch(
+          new UsersRolesSetSpaceRole(
+            this.orgGuid,
+            this.orgName,
+            this.spaceGuid,
+            this.spaceName,
+            this.role,
+            checked,
+          ),
+        );
       }
     });
   }
-
 }

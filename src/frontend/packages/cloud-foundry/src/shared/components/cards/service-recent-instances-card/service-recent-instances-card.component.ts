@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { take, map } from 'rxjs/operators';
 
 import {
   StatefulIconComponent,
@@ -20,7 +20,6 @@ const RECENT_ITEMS_COUNT = 10;
 @Component({
   selector: 'app-service-recent-instances-card',
   templateUrl: './service-recent-instances-card.component.html',
-  styleUrls: ['./service-recent-instances-card.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
@@ -41,7 +40,7 @@ export class ServiceRecentInstancesCardComponent implements OnInit {
 
   ngOnInit() {
     this.serviceInstances$ = this.servicesService.serviceInstances$.pipe(
-      first(),
+      take(1),
       map(serviceInstances => serviceInstances.sort((a, b) => a.metadata.updated_at <= b.metadata.updated_at ? 1 : -1)),
       map(serviceInstances => serviceInstances.slice(0, RECENT_ITEMS_COUNT))
     );

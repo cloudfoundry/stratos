@@ -9,7 +9,7 @@ import {
 } from '../../../../../cloud-foundry/src/shared/components/list/list-types/base-cf/base-cf-list-config';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
 import { IGlobalListAction, IListAction, IListMultiFilterConfig, IMultiListAction, ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
-import { ListDataSource } from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
+
 import { MetricsRangeSelectorService } from '../../../../../core/src/shared/services/metrics-range-selector.service';
 import { ITimeRange } from '../../../../../core/src/shared/services/metrics-range-selector.types';
 import { ListView } from '../../../../../store/src/actions/list.actions';

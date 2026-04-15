@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
+import { AppInputDirective, CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 import {
@@ -12,10 +12,9 @@ import {
   IStratosEndpointDefinition,
   stratosEntityCatalog,
   entityCatalog,
-  ActionState,
-} from '@stratosui/store';
+  ActionState } from '@stratosui/store';
 import { Observable, Subscription } from 'rxjs';
-import { filter, first, map, pairwise, switchMap } from 'rxjs/operators';
+import { take, filter, map, pairwise, switchMap } from 'rxjs/operators';
 
 import { StepOnNextFunction, StepComponent, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
 import { getSSOClientRedirectURI } from '../../endpoint-helpers';
@@ -48,6 +47,7 @@ interface EditEndpointForm {
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    AppInputDirective,
     CustomFormFieldComponent,
     CustomCheckboxComponent,
     CustomIconComponent,
@@ -85,8 +85,7 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
       clientID: new FormControl('', { nonNullable: true }),
       clientSecret: new FormControl('', { nonNullable: true }),
       allowSSO: new FormControl(false, { nonNullable: true }),
-      caCert: new FormControl('', { nonNullable: true }),
-    });
+      caCert: new FormControl('', { nonNullable: true }) });
 
     this.clientRedirectURI = getSSOClientRedirectURI();
 
@@ -118,7 +117,7 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
     // Fill the form in with the endpoint data
     this.endpoint$.pipe(
       filter(ep => !!ep),
-      first()
+      take(1)
     ).subscribe(endpoint => {
       this.setAdvancedFields(endpoint);
       this.lastSkipSSLValue = endpoint.skip_ssl_validation;
@@ -132,8 +131,7 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
         clientID: endpoint.client_id,
         clientSecret: '',
         allowSSO: endpoint.sso_allowed,
-        caCert: endpoint.caCert || '',
-      });
+        caCert: endpoint.caCert || '' });
       this.editEndpoint.controls.url.disable();
       this.updateControls();
     });
@@ -162,10 +160,10 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
     }
   }
 
-  onNext: StepOnNextFunction = (index: number, step: StepComponent): Observable<StepOnNextResult> => {
+  onNext: StepOnNextFunction = (_index: number, _step: StepComponent): Observable<StepOnNextResult> => {
     return this.endpoint$.pipe(
       filter((endpoint): endpoint is EndpointModel => !!endpoint),
-      first(),
+      take(1),
       switchMap(endpoint => {
         const caCert = this.showCACertField ? this.editEndpoint.value.caCert : undefined;
         const skipSSL = this.showCACertField ? false : this.editEndpoint.value.skipSSL ?? false;
@@ -180,8 +178,7 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
           clientID: this.editEndpoint.value.clientID ?? '',
           clientSecret: this.editEndpoint.value.clientSecret ?? '',
           allowSSO: this.editEndpoint.value.allowSSO ?? false,
-          caCert,
-        }
+          caCert }
         ) as Observable<ActionState>).pipe(
           pairwise(),
           filter(([oldV, newV]) => oldV.busy && !newV.busy),
