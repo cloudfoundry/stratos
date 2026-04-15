@@ -22,9 +22,15 @@ import { DEPLOY_TYPES_IDS } from './deploy-application-steps.types';
 
 // Helper function to create a signal wrapper compatible with BehaviorSubject API
 // The wrapper provides BehaviorSubject-like API (.next, .getValue, .asObservable)
-// while being backed by a Signal for fine-grained reactivity
+// while being backed by a Signal for fine-grained reactivity.
+//
+// `equal: () => false` makes every set() emit, restoring BehaviorSubject's
+// "always notify" semantics. The deployer code mutates state objects in place
+// (e.g. fileTransferStatus.filesSent++) and re-emits the same reference;
+// without this, the default Object.is dedupe silently drops every update
+// after the first and the upload progress UI freezes.
 function createSignalWrapper<T>(initialValue: T, injector: Injector) {
-  const _signal = signal<T>(initialValue);
+  const _signal = signal<T>(initialValue, { equal: () => false });
   // Create the observable once during initialization, outside of any reactive context
   // This prevents NG0602 errors when asObservable() is called from reactive contexts
   const _observable = toObservable(_signal, { injector });
