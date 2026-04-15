@@ -98,8 +98,20 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       this.hiddenSubs.push(step.onHidden.subscribe((_hidden) => {
         this.filterSteps();
       }));
-      // Listen for validation changes to trigger change detection
+      // Listen for validation/canClose/disablePrevious changes to trigger
+      // change detection. Under OnPush + zoneless CD, setting an @Input on
+      // a child step (e.g. via an async pipe in the grandparent template)
+      // only marks that child dirty — it does not re-run the stepper's own
+      // template bindings that read from `this.steps[i].canClose` etc.
+      // Without these markForCheck calls the Previous/Close button
+      // disabled state stays frozen at the initial bind state.
       this.hiddenSubs.push(step.onValidChange.subscribe(() => {
+        this.cdr.markForCheck();
+      }));
+      this.hiddenSubs.push(step.onCanCloseChange.subscribe(() => {
+        this.cdr.markForCheck();
+      }));
+      this.hiddenSubs.push(step.onDisablePreviousChange.subscribe(() => {
         this.cdr.markForCheck();
       }));
     }));

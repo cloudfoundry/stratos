@@ -1,8 +1,7 @@
 
 import { Component, ComponentRef, ViewChild, ViewContainerRef, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { take, map, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
 
 import { StepOnNextFunction } from '@stratosui/core';
 import { GitCommit } from '@stratosui/git';
@@ -21,15 +20,30 @@ import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wr
 export class DeployApplicationStep21Component {
   private store = inject<Store<CFAppState>>(Store);
 
+  // Stable BehaviorSubjects back the public Observable fields. The wrapper
+  // component is recreated on every onEnter, so the underlying stream
+  // changes each time — but we keep the field references stable and
+  // forward values into these subjects. This preserves any subscription
+  // the parent template's async pipe may have already taken against
+  // `validate`, which under OnPush + zoneless CD is not guaranteed to be
+  // re-read after the parent has first bound it.
+  private selectedCommitSubject = new BehaviorSubject<GitCommit | null>(null);
+  private validateSubject = new BehaviorSubject<boolean>(false);
 
-  validate!: Observable<boolean>;
-  selectedCommit$!: Observable<GitCommit>;
+  readonly selectedCommit$: Observable<GitCommit | null> = this.selectedCommitSubject.asObservable();
+  readonly validate: Observable<boolean> = this.validateSubject.asObservable();
 
   @ViewChild('target', { read: ViewContainerRef, static: true })
   target!: ViewContainerRef;
   wrapperRef!: ComponentRef<CommitListWrapperComponent>;
 
+  private wrapperSub?: Subscription;
+
   onLeave = () => {
+    this.wrapperSub?.unsubscribe();
+    this.wrapperSub = undefined;
+    this.selectedCommitSubject.next(null);
+    this.validateSubject.next(false);
     this.wrapperRef.destroy();
     this.target.clear();
   };
@@ -38,19 +52,18 @@ export class DeployApplicationStep21Component {
     // Wrap the list component in another component. This means it's recreated every time to include changes in the github repo
     this.wrapperRef = this.target.createComponent(CommitListWrapperComponent);
     const wrapper = this.wrapperRef.instance as CommitListWrapperComponent;
-    this.selectedCommit$ = wrapper.selectedCommit$;
-    this.validate = this.selectedCommit$.pipe(
-      map(selectedCommit => !!selectedCommit)
-    );
+    this.wrapperSub?.unsubscribe();
+    this.wrapperSub = wrapper.selectedCommit$.subscribe(commit => {
+      this.selectedCommitSubject.next(commit ?? null);
+      this.validateSubject.next(!!commit);
+    });
   };
 
   onNext: StepOnNextFunction = () => {
-    return this.selectedCommit$.pipe(
-      take(1),
-      tap(commit => {
-        this.store.dispatch(new SetDeployCommit(commit.sha));
-      }),
-      map(() => ({ success: true }))
-    );
+    const commit = this.selectedCommitSubject.getValue();
+    if (commit) {
+      this.store.dispatch(new SetDeployCommit(commit.sha));
+    }
+    return observableOf({ success: true });
   };
 }
