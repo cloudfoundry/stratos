@@ -38,7 +38,8 @@ import { DetachAppsComponent } from './detach-apps/detach-apps.component';
     StepComponent,
     DetachAppsComponent,
     AppActionMonitorComponent
-  ]
+  ],
+  providers: [DatePipe]
 })
 export class DetachServiceInstanceComponent {
   private store = inject<Store<CFAppState>>(Store);

@@ -56,6 +56,7 @@ import {
     LoadingPageComponent,
   ],
   providers: [
+    DatePipe,
     CfAppRoutesListConfigService,
     AppServiceBindingListConfigService
   ]
