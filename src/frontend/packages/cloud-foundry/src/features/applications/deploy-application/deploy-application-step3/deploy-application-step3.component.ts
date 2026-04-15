@@ -207,6 +207,14 @@ export class DeployApplicationStep3Component implements OnDestroy {
   }
 
   onEnter = (fsDeployer: DeployApplicationDeployer) => {
+    // Re-entry after Previous: tear down the prior deployer's subscriptions
+    // and websocket so its stale status$ cannot replay the earlier error
+    // snackbar on top of the fresh attempt.
+    this.destroyDeployer();
+    if (this.deployer && this.deployer !== fsDeployer) {
+      this.deployer.close();
+    }
+
     // If we were passed data, then we came from the File System step
     if (fsDeployer) {
       this.deployer = fsDeployer;
