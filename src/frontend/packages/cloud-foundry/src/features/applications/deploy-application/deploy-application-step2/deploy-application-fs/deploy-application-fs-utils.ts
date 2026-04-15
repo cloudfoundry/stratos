@@ -1,6 +1,4 @@
-import { signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable } from 'rxjs';
+import { Observable, ReplaySubject } from 'rxjs';
 
 import { DeployApplicationFSScanner, FileScannerInfo } from './deploy-application-fs-scanner';
 
@@ -13,10 +11,17 @@ export class DeployApplicationFsUtils {
 
   constructor() { }
 
-  // File list from a file input form field
+  // File list from a file input form field.
+  //
+  // Produces a single-value Observable that emits once the scanner has
+  // summarized the selection. Uses ReplaySubject(1) rather than
+  // signal + toObservable because this utility is a plain class invoked
+  // from an event handler — there is no injection context available,
+  // and `toObservable()` requires one. The old `toObservable()` path
+  // threw NG0203 synchronously at every file/folder pick after the
+  // Angular 20 migration, silently aborting the upload flow.
   handleFileInputSelection(items: any): Observable<FileScannerInfo> {
-    // Use signal with initialValue to avoid undefined type issues
-    const scannerSignal = signal<DeployApplicationFSScanner | undefined>(undefined);
+    const subject = new ReplaySubject<FileScannerInfo>(1);
     let scanner = new DeployApplicationFSScanner(CF_DEFAULT_IGNORES);
     let cfIgnoreFile: any;
     let manifestFile: any = false;
@@ -26,7 +31,9 @@ export class DeployApplicationFsUtils {
       if (scanner.isArchiveFile(items[0].name)) {
         scanner.addFile(items[0]);
         scanner.summarize();
-        scannerSignal.set(scanner);
+        subject.next(scanner);
+        subject.complete();
+        return subject.asObservable();
       }
     } else {
       // See if we can find the .cfignore file and/or the manifest file
@@ -49,10 +56,9 @@ export class DeployApplicationFsUtils {
     }
 
     // If we found the Cloud Foundry ignore file, read the ignores file
-    let readIgnoresFile = Promise.resolve('');
-    if (cfIgnoreFile) {
-      readIgnoresFile = scanner.readFileContents(cfIgnoreFile);
-    }
+    const readIgnoresFile: Promise<string> = cfIgnoreFile
+      ? scanner.readFileContents(cfIgnoreFile)
+      : Promise.resolve('');
 
     readIgnoresFile.then((ignores) => {
       scanner = new DeployApplicationFSScanner(CF_DEFAULT_IGNORES + ignores, rootFolderName);
@@ -62,11 +68,11 @@ export class DeployApplicationFsUtils {
         scanner.addFile(items.item(index));
       }
       scanner.summarize();
-      scannerSignal.set(scanner);
-    });
+      subject.next(scanner);
+      subject.complete();
+    }).catch(err => subject.error(err));
 
-    // Convert signal to Observable for backward compatibility
-    return toObservable(scannerSignal);
+    return subject.asObservable();
   }
 
 }
