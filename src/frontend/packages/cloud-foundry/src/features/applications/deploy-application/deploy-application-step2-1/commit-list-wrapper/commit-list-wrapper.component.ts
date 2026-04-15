@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { GitCommit } from '@stratosui/git';
 import { Observable } from 'rxjs';
@@ -18,6 +19,7 @@ import {
     ListComponent
   ],
   providers: [
+    DatePipe,
     {
       provide: ListConfig,
       useFactory: () => new GithubCommitsListConfigServiceDeploy(),

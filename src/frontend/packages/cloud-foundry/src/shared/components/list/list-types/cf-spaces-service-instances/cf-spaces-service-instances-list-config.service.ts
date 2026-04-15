@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
@@ -29,7 +28,6 @@ export class CfSpacesServiceInstancesListConfigService extends CfServiceInstance
   constructor() {
     const store = inject<Store<CFAppState>>(Store);
     const cfSpaceService = inject(CloudFoundrySpaceService);
-    const datePipe = inject(DatePipe);
     const currentUserPermissionsService = inject(CurrentUserPermissionsService);
     const serviceActionHelperService = inject(ServiceActionHelperService);
 
