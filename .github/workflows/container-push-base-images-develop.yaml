@@ -1,9 +1,12 @@
 name: container-push-base-images-develop
 
+# Disabled push trigger pending decision on workflow ownership: it pushes to
+# ghcr.io/anynines/ but lives on cloudfoundry/stratos and uses secrets
+# (GH_PACKAGES_USER / GH_PACKAGES_TOKEN) that have never been configured here,
+# so every develop push has failed since the workflow was added. Kept
+# workflow_dispatch so it can still be triggered manually if/when the
+# secrets are configured.
 on:
-  push:
-    branches:
-      - develop
   workflow_dispatch:
 
 jobs:
