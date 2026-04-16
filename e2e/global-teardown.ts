@@ -1,4 +1,4 @@
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 
 const BACKEND_PORT = process.env.BACKEND_PORT || '5543';
 
@@ -13,11 +13,15 @@ const BACKEND_PORT = process.env.BACKEND_PORT || '5543';
  * A single pkill pattern matches both.
  */
 async function globalTeardown() {
+  if (!/^\d{2,5}$/.test(BACKEND_PORT)) {
+    return;
+  }
+
   const pattern = `e2e:${BACKEND_PORT}`;
   try {
-    const pids = execSync(`pgrep -f '${pattern}'`, { encoding: 'utf8' }).trim();
+    const pids = execFileSync('pgrep', ['-f', pattern], { encoding: 'utf8' }).trim();
     if (pids) {
-      execSync(`pkill -f '${pattern}'`);
+      execFileSync('pkill', ['-f', pattern]);
       console.log(`  Stopped e2e test servers (session ${BACKEND_PORT}).`);
     }
   } catch {
