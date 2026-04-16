@@ -188,7 +188,7 @@
     "baseline-browser-mapping": "^2.10.8",
     "browserstack-local": "1.5.8",
     "codecov": "3.8.2",
-    "copy-webpack-plugin": "13.0.1",
+    "copy-webpack-plugin": "14.0.0",
     "delete": "1.1.0",
     "eslint": "9",
     "fs-extra": "11.3.1",
