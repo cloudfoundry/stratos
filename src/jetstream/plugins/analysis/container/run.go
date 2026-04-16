@@ -99,7 +99,7 @@ func (a *Analyzer) doRun(ec echo.Context) error {
 				return fmt.Errorf("invalid multipart filename: %v", err)
 			}
 			if err = ioutil.WriteFile(fullpath, fileBytes, os.ModePerm); err != nil {
-				log.Error("Could not write data for: %s", filename)
+				log.Errorf("Could not write data for: %s", filename)
 				return fmt.Errorf("Could not write file data for: %s", filename)
 			}
 			if filename == "kubeconfig" {
@@ -135,7 +135,7 @@ func (a *Analyzer) doRun(ec echo.Context) error {
 
 	if err != nil {
 		job.Status = "error"
-		log.Error("Error running analyzer: %s", err)
+		log.Errorf("Error running analyzer: %s", err)
 	}
 
 	return ec.JSON(http.StatusOK, job)
