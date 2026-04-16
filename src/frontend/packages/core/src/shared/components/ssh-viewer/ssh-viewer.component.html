@@ -6,7 +6,7 @@
           {{ errorMessage || 'Error occurred establishing SSH connection' }}
         </div>
       }
-      @if (!errorMessage && !isConnected && !isConnecting) {
+      @if (!errorMessage && !isConnected && !attemptingConnection) {
         <div class="ssh-viewer__disconnected">
           Disconnected
         </div>
@@ -20,7 +20,7 @@
       </div>
     </div>
   }
-  @if (isConnecting) {
+  @if (attemptingConnection) {
     <app-progress-bar mode="indeterminate"></app-progress-bar>
   }
   <div class="ssh-terminal" #container [ngClass]="{'ssh-terminal-disconnected': !isConnected}">
