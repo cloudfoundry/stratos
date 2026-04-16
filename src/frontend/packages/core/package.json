@@ -13,7 +13,7 @@
     "@angular/forms": "20.3.18",
     "@angular/platform-browser": "20.3.18",
     "@angular/platform-browser-dynamic": "20.3.18",
-    "@angular/platform-server": "20.3.18",
+    "@angular/platform-server": "20.3.19",
     "@angular/router": "20.3.18",
     "@ngrx/effects": "20.0.0",
     "@ngrx/router-store": "20.0.0",
