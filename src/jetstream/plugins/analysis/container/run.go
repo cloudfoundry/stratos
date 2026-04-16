@@ -83,9 +83,21 @@ func (a *Analyzer) doRun(ec echo.Context) error {
 			if err = json.Unmarshal(fileBytes, &params); err != nil {
 				return fmt.Errorf("Can not parse parameters: %v", err)
 			}
+			// Validate attacker-controlled fields at the HTTP boundary before
+			// any value flows into shell scripts or exec.Command (FWT-923).
+			if err = validateNamespace(params.Namespace); err != nil {
+				return fmt.Errorf("invalid job parameter: %v", err)
+			}
 			job.Config = &params
 		default:
-			fullpath := filepath.Join(folder, filename)
+			// Reject multipart parts whose Content-ID header attempts path
+			// traversal (e.g. "../../etc/cron.d/evil"). Default Go
+			// filepath.Join does not reject `..` in the second argument —
+			// validateContentID does, and returns a path confined to folder.
+			fullpath, err := validateContentID(filename, folder)
+			if err != nil {
+				return fmt.Errorf("invalid multipart filename: %v", err)
+			}
 			if err = ioutil.WriteFile(fullpath, fileBytes, os.ModePerm); err != nil {
 				log.Error("Could not write data for: %s", filename)
 				return fmt.Errorf("Could not write file data for: %s", filename)
