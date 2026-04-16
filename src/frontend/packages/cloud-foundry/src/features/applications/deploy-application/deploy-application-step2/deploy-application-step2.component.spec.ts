@@ -4,6 +4,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { Subject, of } from 'rxjs';
 
 import { getGitHubAPIURL, GITHUB_API_URL, GitSCMService, GitHubSCM } from '@stratosui/git';
 import {
@@ -134,6 +135,38 @@ describe('DeployApplicationStep2Component', () => {
 
       expect(scmSpy.setAccessToken).not.toHaveBeenCalled();
       expect(scmSpy.clearAccessToken).not.toHaveBeenCalled();
+    });
+
+    it('wires applyGithubEnterpriseAndToken to the sourceSelectionForm valueChanges stream', () => {
+      // Mock the NgForm ViewChild with a Subject so we can emit form values
+      // without standing up the full template-driven reactive form. Also mock
+      // setupForGit's other upstream collaborators just enough to reach the
+      // suggestedRepos$ assignment where the tap callback is registered.
+      const valueChanges = new Subject<Record<string, string | undefined>>();
+      (component as unknown as { sourceSelectionForm: { valueChanges: Subject<unknown> } }).sourceSelectionForm = {
+        valueChanges,
+      };
+      // updateSuggestedRepositories is called inside switchMap; stub it to
+      // return an empty result so the pipe completes without network work.
+      vi.spyOn(
+        component as unknown as { updateSuggestedRepositories: (n: string) => unknown },
+        'updateSuggestedRepositories',
+      ).mockReturnValue(of([]));
+
+      // Invoke setupForGit so the valueChanges subscription gets wired up.
+      (component as unknown as { setupForGit(): void }).setupForGit();
+      // Subscribe to keep the pipe hot; the tap callback only fires on
+      // subscribed observables.
+      component.suggestedRepos$.subscribe();
+
+      valueChanges.next({
+        githubEnterpriseUrl: 'https://github.example.com/api/v3',
+        githubAccessToken: 'pat-from-form',
+        projectName: 'org/repo',
+      });
+
+      expect(scmSpy.setPublicApi).toHaveBeenCalledWith('https://github.example.com/api/v3');
+      expect(scmSpy.setAccessToken).toHaveBeenCalledWith('pat-from-form');
     });
   });
 });
