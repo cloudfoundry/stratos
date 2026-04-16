@@ -108,3 +108,105 @@ func TestGetVCS_WithAccessTokenOption(t *testing.T) {
 		t.Error("expected createCmd to be populated from prototype, got empty slice")
 	}
 }
+
+// CVE-2017-1000117 class hardening (FWT-922):
+//
+// git invocations are built by strings.Fields-splitting a template and then
+// substituting {repo}, {branch}, {commit} into the resulting argv slots. No
+// shell is involved, but a single argv element that begins with "-" or "--"
+// is interpreted by git as an option rather than a positional. A "--"
+// separator before positional values forces git to treat everything after as
+// positional regardless of content, closing the whole option-smuggle class.
+//
+// These tests pin the template shape so a future refactor can't silently
+// re-open the vector. They assert the textual contract, not the observable
+// behavior of forking git — that is out of scope for a unit test.
+
+func TestCreateCmdTemplateIncludesArgumentSeparator(t *testing.T) {
+	if len(vcsGit.createCmd) != 1 {
+		t.Fatalf("expected exactly one createCmd template, got %d", len(vcsGit.createCmd))
+	}
+	tmpl := vcsGit.createCmd[0]
+	if !strings.Contains(tmpl, " -- {repo}") {
+		t.Errorf("expected createCmd template to place '--' immediately before {repo} to force positional parsing, got %q", tmpl)
+	}
+}
+
+func TestResetToCommitCmdTemplateIncludesArgumentSeparator(t *testing.T) {
+	if len(vcsGit.resetToCommitCmd) != 1 {
+		t.Fatalf("expected exactly one resetToCommitCmd template, got %d", len(vcsGit.resetToCommitCmd))
+	}
+	tmpl := vcsGit.resetToCommitCmd[0]
+	if !strings.Contains(tmpl, "-- {commit}") {
+		t.Errorf("expected resetToCommitCmd template to place '--' immediately before {commit} to force positional parsing, got %q", tmpl)
+	}
+}
+
+func TestCreateCmdArgv_UserControlledRepoStaysPositional(t *testing.T) {
+	// Simulate the argv assembly that run1 performs: strings.Fields on the
+	// template, then per-slot placeholder substitution. This mirrors lines
+	// 129-132 of vcs.go. A crafted repo value of --upload-pack=evil must not
+	// collide with git options thanks to the "--" separator.
+	template := vcsGit.createCmd[0]
+	args := strings.Fields(template)
+
+	substitutions := map[string]string{
+		"sslVerify": "true",
+		"branch":    "main",
+		"repo":      "--upload-pack=evil",
+		"dir":       "/tmp/workdir",
+	}
+	for i, a := range args {
+		args[i] = expand(substitutions, a)
+	}
+
+	sepIdx := -1
+	repoIdx := -1
+	for i, a := range args {
+		if a == "--" && sepIdx == -1 {
+			sepIdx = i
+		}
+		if a == "--upload-pack=evil" {
+			repoIdx = i
+		}
+	}
+	if sepIdx == -1 {
+		t.Fatalf("expected a literal '--' argv element in the assembled argv, got %v", args)
+	}
+	if repoIdx == -1 {
+		t.Fatalf("expected the crafted repo value to appear as its own argv element, got %v", args)
+	}
+	if repoIdx <= sepIdx {
+		t.Errorf("expected '--upload-pack=evil' to appear AFTER the '--' separator so git treats it as a positional URL; separator at %d, repo at %d, argv=%v", sepIdx, repoIdx, args)
+	}
+}
+
+func TestResetToCommitCmdArgv_UserControlledCommitStaysPositional(t *testing.T) {
+	template := vcsGit.resetToCommitCmd[0]
+	args := strings.Fields(template)
+
+	substitutions := map[string]string{"commit": "-exec=evil"}
+	for i, a := range args {
+		args[i] = expand(substitutions, a)
+	}
+
+	sepIdx := -1
+	commitIdx := -1
+	for i, a := range args {
+		if a == "--" && sepIdx == -1 {
+			sepIdx = i
+		}
+		if a == "-exec=evil" {
+			commitIdx = i
+		}
+	}
+	if sepIdx == -1 {
+		t.Fatalf("expected a literal '--' argv element in the assembled argv, got %v", args)
+	}
+	if commitIdx == -1 {
+		t.Fatalf("expected the crafted commit value to appear as its own argv element, got %v", args)
+	}
+	if commitIdx <= sepIdx {
+		t.Errorf("expected '-exec=evil' to appear AFTER the '--' separator so git treats it as a positional commit; separator at %d, commit at %d, argv=%v", sepIdx, commitIdx, args)
+	}
+}
