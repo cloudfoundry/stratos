@@ -57,7 +57,12 @@ export class LogViewerComponent implements OnInit, OnDestroy {
 
   @Input() status!: Observable<number>;
 
-  @Input() logStream: Observable<any>;
+  private logStreamSubject = new BehaviorSubject<Observable<any>>(NEVER);
+
+  @Input()
+  set logStream(stream: Observable<any>) {
+    this.logStreamSubject.next(stream || NEVER);
+  }
 
   @ViewChild('container', { static: true }) container!: ElementRef;
 
@@ -91,9 +96,12 @@ export class LogViewerComponent implements OnInit, OnDestroy {
     const contentElement = this.content.nativeElement;
     const containerElement = this.container.nativeElement;
 
-    const stoppableLogStream$ = this.stopped$.pipe(
+    const stoppableLogStream$ = observableCombineLatest([
+      this.stopped$,
+      this.logStreamSubject.asObservable()
+    ]).pipe(
       switchMap(
-        stopped => (stopped ? NEVER : this.logStream)
+        ([stopped, stream]) => (stopped ? NEVER : stream)
       ),
       share()
     );

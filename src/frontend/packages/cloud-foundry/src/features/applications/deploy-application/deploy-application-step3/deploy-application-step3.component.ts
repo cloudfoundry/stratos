@@ -215,6 +215,15 @@ export class DeployApplicationStep3Component implements OnDestroy {
       this.deployer.close();
     }
 
+    // Reset UI state so buttons reflect "deploy not yet started" rather
+    // than carrying over the prior attempt's terminal state (e.g. "Go to
+    // App Summary" staying active from a previous successful push).
+    this.validSubject.next(false);
+    this.closeableSubject.next(false);
+    this.showOverlaySubject.next(false);
+    this.disablePreviousSubject.next(true);
+    this.error.set(false);
+
     // If we were passed data, then we came from the File System step
     if (fsDeployer) {
       this.deployer = fsDeployer;
