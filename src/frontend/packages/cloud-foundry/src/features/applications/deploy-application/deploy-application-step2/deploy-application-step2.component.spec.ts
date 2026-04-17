@@ -5,6 +5,8 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Subject, of } from 'rxjs';
+import { StoreModule } from '@ngrx/store';
+import { deployAppReducer } from '../../../../store/reducers/deploy-app.reducer';
 
 import { getGitHubAPIURL, GITHUB_API_URL, GitSCMService, GitHubSCM } from '@stratosui/git';
 import {
@@ -28,6 +30,7 @@ describe('DeployApplicationStep2Component', () => {
       imports: [
         DeployApplicationStep2Component,
         createBasicStoreModule(),
+        StoreModule.forFeature('deployApplication', deployAppReducer),
         EntityCatalogTestModule,
       ],
       providers: [
