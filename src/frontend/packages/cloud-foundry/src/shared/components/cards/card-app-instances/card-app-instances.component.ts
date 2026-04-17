@@ -1,6 +1,7 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { take, map, switchMap } from 'rxjs/operators';
 
@@ -32,6 +33,7 @@ const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig('Set Ins
   imports: [
     CommonModule,
     FormsModule,
+    RouterLink,
     AppInputDirective,
     CustomFormFieldComponent,
     CardStatusComponent,

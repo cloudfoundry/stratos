@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
@@ -18,6 +19,7 @@ import { MetadataItemComponent } from '../../../../../../core/src/shared/compone
   standalone: true,
   imports: [
     CommonModule,
+    RouterLink,
     UptimePipe,
     MetadataItemComponent
   ]

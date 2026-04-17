@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { of } from 'rxjs';
 import { Store } from '@ngrx/store';
@@ -54,6 +55,7 @@ describe('InstancesTabComponent', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideZonelessChangeDetection(),
+        provideRouter([]),
         { provide: Store, useValue: mockStore },
         { provide: PaginationMonitorFactory, useValue: mockPmf },
         { provide: ApplicationService, useClass: ApplicationServiceMock },
