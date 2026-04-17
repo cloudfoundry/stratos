@@ -36,6 +36,7 @@ import { take,
   publishReplay,
   refCount,
   startWith,
+  shareReplay,
   switchMap,
   tap,
   withLatestFrom,
@@ -192,7 +193,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     });
 
     const dataFunctions: DataFunction<any>[] = getDataFunctionList(transformEntities);
-    const transformedEntities$ = this.attachTransformEntity(entities$, this.transformEntity);
+    const transformedEntities$ = this.attachTransformEntity(entities$, this.transformEntity).pipe(
+      shareReplay({ bufferSize: 1, refCount: true })
+    );
     const setResultCount = (paginationEntity: PaginationEntityState, entities: any[]) => {
       const newLength = entities.length;
       if (paginationEntity.totalResults !== newLength || paginationEntity.clientPagination.totalResults !== newLength) {

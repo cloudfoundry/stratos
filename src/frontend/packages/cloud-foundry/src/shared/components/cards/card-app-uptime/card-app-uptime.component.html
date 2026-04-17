@@ -1,5 +1,5 @@
 @if (appData$ | async; as appData) {
-  <div class="card-app-uptime custom-card">
+  <div class="card-app-uptime block p-4 rounded bg-[var(--card-bg)] text-[color:var(--content-text)] border border-[color:var(--card-border)] shadow-none h-full">
     @if (appService.applicationRunning$ | async) {
       <div class="card-app-uptime__contents">
         <div class="card-app-uptime__main">
@@ -18,7 +18,7 @@
         }
       </div>
     } @else {
-      <div class="custom-card">
+      <div class="block p-4 rounded bg-[var(--card-bg)] text-[color:var(--content-text)] border border-[color:var(--card-border)] shadow-none h-full">
         <div class="card-content">
           <div class="card-header">
             <h2 class="card-title">Application is not running</h2>

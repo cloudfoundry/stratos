@@ -2,7 +2,7 @@
 key (see edit env var) -->
 <div tabindex="-1" (keydown)="$event.stopPropagation()">
   <div #target>
-    @if (func && !component) {
+    @if (func && !component && !cellDefinition) {
       <div>
         {{func(row)}}
       </div>

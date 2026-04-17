@@ -26,65 +26,36 @@ export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, Ap
         action,
         schema: cfEntityFactory(appStatsEntityType),
         getRowUniqueId: (row: AppStats) => {
-          // AppStats is an object with keys as instance IDs
-          const keys = Object.keys(row || {});
-          return keys.length > 0 ? keys[0] : 'unknown';
+          // At runtime this is called with ListAppInstance (post-transform) for trackBy/selection.
+          // Fall back to guid parsing when called with a raw AppStat from the store.
+          const index = (row as any).index;
+          if (index !== undefined) {
+            return String(index);
+          }
+          const guid: string = (row as any).guid || '';
+          return guid.split('-').pop() || 'unknown';
         },
         paginationKey,
         transformEntities: [{ type: 'filter', field: 'value.state' }],
-        transformEntity: map((instancesData: any): ListAppInstance[] => {
-          if (!instancesData) {
+        transformEntity: map((stats: AppStats[]): ListAppInstance[] => {
+          // At runtime each element is an AppStat (store normalizes AppStats → individual AppStat entries)
+          const instances = stats as unknown as AppStat[];
+          if (!instances?.length) {
             return [];
           }
-
-          // Extract from array if needed
-          const data = Array.isArray(instancesData) ? instancesData[0] : instancesData;
-
-          if (!data || typeof data !== 'object') {
-            return [];
-          }
-
-          // Check if this is a single AppStat instance or a collection (AppStats)
-          // A single instance has 'state', 'stats', 'guid' properties
-          // A collection has numeric string keys like "0", "1", "2"
-          const isSingleInstance = 'state' in data && 'guid' in data;
-
-          const res: ListAppInstance[] = [];
-
-          if (isSingleInstance) {
-            // Handle single AppStat instance - extract index from guid
-            // guid format: "app-guid-instanceIndex" (e.g., "1c654b6c-f3bd-472e-ba23-7a0788cfa074-0")
-            const instance = data as AppStat;
-            const guidParts = instance.guid ? instance.guid.split('-') : [];
-            const indexStr = guidParts.length > 0 ? guidParts[guidParts.length - 1] : '0';
-            const indexNum = parseInt(indexStr, 10);
-
-            if (!isNaN(indexNum)) {
-              res.push({
-                index: indexNum,
-                usage: this.calcUsage(instance),
-                value: instance
-              });
-            }
-          } else {
-            // Handle AppStats collection (object with numeric keys)
-            const instances = data as AppStats;
-            Object.keys(instances).forEach((key: string) => {
-              const instance: AppStat = instances[key];
-              if (instance && typeof instance === 'object') {
-                const indexNum = parseInt(key, 10);
-                if (!isNaN(indexNum)) {
-                  res.push({
-                    index: indexNum,
-                    usage: this.calcUsage(instance),
-                    value: instance
-                  });
-                }
+          // Each AppStat has guid = "{appGuid}-{instanceIndex}"; parse the index from the tail.
+          // The Map deduplicates if the same index appears twice, preferring entries with full stats.
+          const byIndex = new Map<number, ListAppInstance>();
+          for (const stat of instances) {
+            const index = parseInt(stat.guid?.split('-').pop() ?? '', 10);
+            if (!isNaN(index)) {
+              const entry = { index, usage: this.calcUsage(stat), value: stat };
+              if (!byIndex.has(index) || entry.usage.hasStats) {
+                byIndex.set(index, entry);
               }
-            });
+            }
           }
-
-          return res;
+          return Array.from(byIndex.values());
         }),
         isLocal: true,
         listConfig
