@@ -49,6 +49,8 @@ export class EndpointDataService {
       ),
     ).pipe(
       timeout(60_000),
+      // finalize runs on completion, error, AND timeout — shim.write intentionally
+      // fires in all cases so sticky signals are written even on partial failure.
       finalize(() => {
         this._isLoading.set(false);
         this._lastFetched.set(new Date());
