@@ -1,8 +1,10 @@
 import { AsyncPipe, CommonModule } from '@angular/common';
-import { Component, Input, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy, ChangeDetectorRef, inject, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { take, filter, map, pairwise, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { take, filter, map, pairwise } from 'rxjs/operators';
+import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
+import { EndpointDataService } from '../../../services/endpoint-data/endpoint-data.service';
 
 import { BASE_REDIRECT_QUERY } from '@stratosui/core';
 import { RouterNav, PaginationMonitorFactory, EndpointModel, ActionState, APIResource } from '@stratosui/store';
@@ -52,10 +54,13 @@ import { TileSelectorComponent } from '@stratosui/core';
     TileSelectorComponent
   ]
 })
-export class CFHomeCardComponent implements HomePageEndpointCard {
+export class CFHomeCardComponent implements HomePageEndpointCard, OnDestroy {
   private store = inject<Store<CFAppState>>(Store);
   private pmf = inject(PaginationMonitorFactory);
   private cdr = inject(ChangeDetectorRef);
+  private registry = inject(EndpointDataRegistry);
+
+  endpointDataService: EndpointDataService | null = null;
 
 
   pLayout!: HomePageCardLayout;
@@ -80,10 +85,6 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
   recentAppsRows = 10;
 
   appLink: () => void;
-
-  appCount$!: Observable<number>;
-  orgCount$!: Observable<number>;
-  routeCount$!: Observable<number>;
 
   hasNoApps$!: Observable<boolean>;
 
@@ -141,16 +142,8 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
   // Card is instructed to load its view by the container, when it is visible
   load(): Observable<boolean> {
     this.cardLoaded = true;
-    this.routeCount$ = CloudFoundryEndpointService.fetchRouteCount(this.store, this.pmf, this.guid).pipe(
-      tap(() => this.cdr.markForCheck())
-    );
-    this.appCount$ = CloudFoundryEndpointService.fetchAppCount(this.store, this.pmf, this.guid).pipe(
-      tap(() => this.cdr.markForCheck())
-    );
-    this.orgCount$ = CloudFoundryEndpointService.fetchOrgCount(this.store, this.pmf, this.guid).pipe(
-      tap(() => this.cdr.markForCheck())
-    );
-    this.cdr.markForCheck(); // Trigger change detection for cardLoaded = true
+    this.endpointDataService = this.registry.acquire(this.guid);
+    this.cdr.markForCheck();
 
     this.appLink = () => goToAppWall(this.store, this.guid);
 
@@ -168,29 +161,24 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
       })
     );
 
-    const appStatLoaded$ = this.appStatsLoaded.asObservable().pipe(
-      filter(loaded => loaded),
-      take(1) // Complete after first true emission
-    );
+    // If data was already fetched (sticky cache hit), complete immediately
+    if (this.endpointDataService.lastFetched() !== null) {
+      return of(true);
+    }
 
-    return combineLatest([
-      this.routeCount$.pipe(take(1)),
-      this.appCount$.pipe(take(1)),
-      this.orgCount$.pipe(take(1)),
-      appsPagObs.entities$.pipe(
-        take(1),
-        tap(apps => {
-          this.recentApps = apps;
-          this.appStatsToLoad = this.restrictApps(apps);
-          // Initiate app stats fetching (recursive method handles batching)
-          this.fetchAppStats();
-        })
-      ),
-      appStatLoaded$
-    ]).pipe(
-      take(1),
-      map(() => true)
-    );
+    return new Observable<boolean>(subscriber => {
+      const sub = this.endpointDataService!.loaded$.pipe(take(1)).subscribe({
+        next: () => { subscriber.next(true); subscriber.complete(); },
+        error: () => { subscriber.next(true); subscriber.complete(); },
+      });
+      return () => sub.unsubscribe();
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.endpointDataService) {
+      this.registry.release(this.guid);
+    }
   }
 
   public updateLayout() {
