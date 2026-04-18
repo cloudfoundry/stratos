@@ -26,6 +26,8 @@ export class EndpointDataRegistry implements OnDestroy {
     ).subscribe();
   }
 
+  // Must be called before the first acquire() — rebuilding the subscription
+  // mid-flight orphans in-progress load() observables on the old subscription.
   configure(maxConcurrentCards: number): void {
     this.maxConcurrentCards = maxConcurrentCards;
     this.queueSub.unsubscribe();
@@ -40,6 +42,8 @@ export class EndpointDataRegistry implements OnDestroy {
       existing.refCount++;
       return existing.service;
     }
+    // EndpointDataService is a plain class (not @Injectable) — DI bypassed by design.
+    // If it gains injected deps, they must be added to this constructor call.
     const service = new EndpointDataService(this.http, this.shim, guid);
     this.instances.set(guid, { service, refCount: 1 });
     this.cardQueue$.next(service);
