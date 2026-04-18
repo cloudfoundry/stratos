@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { GithubCommitsDataSource, GithubCommitsListConfigServiceBase, GitSCMService, GitSCMType } from '@stratosui/git';
@@ -17,7 +16,6 @@ import {
 export class GithubCommitsListConfigServiceDeploy extends GithubCommitsListConfigServiceBase {
   constructor() {
     const store = inject<Store<CFAppState>>(Store);
-    const datePipe = inject(DatePipe);
     const scmService = inject(GitSCMService);
 
     super();

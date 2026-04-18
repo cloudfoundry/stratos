@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import {
@@ -28,6 +29,7 @@ describe('CardAppStatusComponent', () => {
       ],
       providers: [
         provideZonelessChangeDetection(),
+        provideRouter([]),
       ]
     })
     .overrideProvider(ApplicationService, { useValue: new ApplicationServiceMock() })

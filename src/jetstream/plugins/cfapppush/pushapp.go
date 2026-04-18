@@ -10,26 +10,26 @@ import (
 	"strconv"
 	"strings"
 
-	"code.cloudfoundry.org/cli/actor/sharedaction"
-	"code.cloudfoundry.org/cli/actor/v7action"
-	"code.cloudfoundry.org/cli/actor/v7pushaction"
-	"code.cloudfoundry.org/cli/api/cloudcontroller/ccversion"
-	"code.cloudfoundry.org/cli/cf/commandregistry"
-	"code.cloudfoundry.org/cli/command"
+	"code.cloudfoundry.org/cli/v8/actor/sharedaction"
+	"code.cloudfoundry.org/cli/v8/actor/v7action"
+	"code.cloudfoundry.org/cli/v8/actor/v7pushaction"
+	"code.cloudfoundry.org/cli/v8/api/cloudcontroller/ccversion"
+	"code.cloudfoundry.org/cli/v8/cf/commandregistry"
+	"code.cloudfoundry.org/cli/v8/command"
 	"code.cloudfoundry.org/clock"
 
-	"code.cloudfoundry.org/cli/util/configv3"
-	"code.cloudfoundry.org/cli/util/manifestparser"
-	"code.cloudfoundry.org/cli/util/progressbar"
-	"code.cloudfoundry.org/cli/util/ui"
+	"code.cloudfoundry.org/cli/v8/util/configv3"
+	"code.cloudfoundry.org/cli/v8/util/manifestparser"
+	"code.cloudfoundry.org/cli/v8/util/progressbar"
+	"code.cloudfoundry.org/cli/v8/util/ui"
 	"github.com/gorilla/websocket"
 
-	"code.cloudfoundry.org/cli/cf/flags"
+	"code.cloudfoundry.org/cli/v8/cf/flags"
 
-	"code.cloudfoundry.org/cli/command/flag"
-	"code.cloudfoundry.org/cli/command/translatableerror"
-	v7 "code.cloudfoundry.org/cli/command/v7"
-	"code.cloudfoundry.org/cli/command/v7/shared"
+	"code.cloudfoundry.org/cli/v8/command/flag"
+	"code.cloudfoundry.org/cli/v8/command/translatableerror"
+	v7 "code.cloudfoundry.org/cli/v8/command/v7"
+	"code.cloudfoundry.org/cli/v8/command/v7/shared"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
@@ -286,7 +286,7 @@ func (c *CFPushApp) Run(msgSender DeployAppMessageSender, clientWebsocket *webso
 
 	// Set to a null progress bar
 	c.pushCommand.ProgressBar = &cfPushProgressBar{}
-	c.pushCommand.DiffDisplayer = shared.NewManifestDiffDisplayer(commandUI)
+	c.pushCommand.DiffDisplayer = &shared.ManifestDiffDisplayer{UI: commandUI}
 
 	// Perform the push
 	args := make([]string, 0)

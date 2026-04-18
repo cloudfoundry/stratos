@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
@@ -61,7 +60,6 @@ export class ServiceInstancesWallListConfigService extends CfServiceInstancesLis
 
   constructor() {
     const store = inject(Store<CFAppState>);
-    const datePipe = inject(DatePipe);
     const currentUserPermissionsService = inject(CurrentUserPermissionsService);
     const serviceActionHelperService = inject(ServiceActionHelperService);
 

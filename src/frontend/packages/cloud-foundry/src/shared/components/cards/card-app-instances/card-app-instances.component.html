@@ -1,22 +1,37 @@
-<div class="card-app-instances custom-card">
+<div class="card-app-instances block p-4 rounded bg-[var(--card-bg)] text-[color:var(--content-text)] border border-[color:var(--card-border)] shadow-none h-full">
   <app-card-status [status$]="status$"></app-card-status>
-  <div class="card-header">
-    <h2 class="card-title">Instances</h2>
-  </div>
-  <div class="card-content card-app-instances__compact">
-    @if (!isEditing) {
-      <div class="card-app-instances__large">
-        <app-running-instances [instances]="(appService.application$ | async)?.app.entity?.instances"
-          [cfGuid]="appService.cfGuid" [appGuid]="this.appService.appGuid">
-        </app-running-instances>
+  @if (!showActions) {
+    <a class="block no-underline cursor-pointer" [routerLink]="['../instances']" title="Go to Instances tab">
+      <div class="card-header">
+        <h2 class="card-title">Instances</h2>
       </div>
-    }
-    <form [hidden]="!isEditing" class="card-app-instances__form">
-      <app-form-field>
-        <input #instanceField appInput type="number" name="instances" [(ngModel)]="editValue" value="{{ editCount }}">
-      </app-form-field>
-    </form>
-  </div>
+      <div class="card-content card-app-instances__compact">
+        <div class="card-app-instances__large">
+          <app-running-instances [instances]="(appService.application$ | async)?.app.entity?.instances"
+            [cfGuid]="appService.cfGuid" [appGuid]="this.appService.appGuid">
+          </app-running-instances>
+        </div>
+      </div>
+    </a>
+  } @else {
+    <div class="card-header">
+      <h2 class="card-title">Instances</h2>
+    </div>
+    <div class="card-content card-app-instances__compact">
+      @if (!isEditing) {
+        <div class="card-app-instances__large">
+          <app-running-instances [instances]="(appService.application$ | async)?.app.entity?.instances"
+            [cfGuid]="appService.cfGuid" [appGuid]="this.appService.appGuid">
+          </app-running-instances>
+        </div>
+      }
+      <form [hidden]="!isEditing" class="card-app-instances__form">
+        <app-form-field>
+          <input #instanceField appInput type="number" name="instances" [(ngModel)]="editValue" value="{{ editCount }}">
+        </app-form-field>
+      </form>
+    </div>
+  }
   @if (canEditApp$ | async) {
     @if (showActions && (appService.applicationRunning$ | async) && !isEditing) {
       <div

@@ -3,8 +3,8 @@ package cfapppush
 import (
 	"time"
 
-	"code.cloudfoundry.org/cli/api/cloudcontroller"
-	"code.cloudfoundry.org/cli/command"
+	"code.cloudfoundry.org/cli/v8/api/cloudcontroller"
+	"code.cloudfoundry.org/cli/v8/command"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )

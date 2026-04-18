@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
@@ -36,7 +35,6 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
 
   constructor() {
     const store = inject<Store<CFAppState>>(Store);
-    const datePipe = inject(DatePipe);
 
     super();
     this.setGuids();

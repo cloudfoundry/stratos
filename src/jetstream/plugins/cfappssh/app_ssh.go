@@ -89,16 +89,26 @@ func (cfAppSsh *CFAppSSH) appSSH(c echo.Context) error {
 		host = cfInfo.AppSSHEndpoint
 	}
 
-	// Build the Username
-	// cf:APP-GUID/APP-INSTANCE-INDEX@SSH-ENDPOINT
-	username := fmt.Sprintf("cf:%s/%s@%s", appGUID, appInstance, host)
-
 	// Need to get SSH Code
 	// Refresh token first - makes sure it will be valid when we make the request to get the code
 	refreshedTokenRec, err := p.RefreshOAuthToken(cnsiRecord.SkipSSLValidation, cnsiRecord.GUID, userGUID, cnsiRecord.ClientId, cnsiRecord.ClientSecret, cnsiRecord.TokenEndpoint)
 	if err != nil {
 		return sendSSHError("Couldn't get refresh token for CNSI with GUID %s", cnsiRecord.GUID)
 	}
+
+	// CF SSH proxy requires the process GUID, not the app GUID. When an app is first
+	// created they are identical, but they diverge if the process is ever recreated
+	// (e.g. via cf scale with a disk change). Fetch the actual web process GUID so
+	// SSH works regardless of how long the app has been running.
+	processGUID, err := getWebProcessGUID(apiEndpoint.String(), appGUID, refreshedTokenRec.AuthToken, cnsiRecord.SkipSSLValidation)
+	if err != nil {
+		log.Warnf("Could not get web process GUID for app %s, falling back to app GUID: %s", appGUID, err)
+		processGUID = appGUID
+	}
+
+	// Build the Username
+	// cf:PROCESS-GUID/APP-INSTANCE-INDEX@SSH-ENDPOINT
+	username := fmt.Sprintf("cf:%s/%s@%s", processGUID, appInstance, host)
 
 	code, err := getSSHCode(cnsiRecord.TokenEndpoint, cfInfo.AppSSHOauthCLient, refreshedTokenRec.AuthToken, cnsiRecord.SkipSSLValidation)
 	if err != nil {
@@ -253,6 +263,52 @@ func pumpStdout(ws *websocket.Conn, r io.Reader, done chan struct{}) {
 			break
 		}
 	}
+}
+
+type v3ProcessesResponse struct {
+	Resources []struct {
+		GUID string `json:"guid"`
+		Type string `json:"type"`
+	} `json:"resources"`
+}
+
+func getWebProcessGUID(apiEndpoint, appGUID, token string, skipSSLValidation bool) (string, error) {
+	processURL := fmt.Sprintf("%s/v3/apps/%s/processes?types=web", apiEndpoint, appGUID)
+	req, err := http.NewRequest("GET", processURL, nil)
+	if err != nil {
+		return "", err
+	}
+	req.Header.Add("Authorization", "Bearer "+token)
+
+	client := &http.Client{
+		Timeout: 30 * time.Second,
+		Transport: &http.Transport{
+			TLSClientConfig:     &tls.Config{InsecureSkipVerify: skipSSLValidation},
+			Proxy:               http.ProxyFromEnvironment,
+			TLSHandshakeTimeout: 10 * time.Second,
+		},
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("failed to get processes: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("processes API returned status %d", resp.StatusCode)
+	}
+
+	var result v3ProcessesResponse
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return "", fmt.Errorf("failed to parse processes response: %v", err)
+	}
+
+	if len(result.Resources) == 0 {
+		return "", fmt.Errorf("no web process found for app %s", appGUID)
+	}
+
+	return result.Resources[0].GUID, nil
 }
 
 // ErrPreventRedirect - Error to indicate a redirect - used to make a redirect that we want to prevent later

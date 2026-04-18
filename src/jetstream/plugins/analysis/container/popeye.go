@@ -32,6 +32,15 @@ func runPopeye(job *AnalysisJob) error {
 
 	log.Infof("Running popeye job: %s", job.Path)
 
+	// Namespace is validated at the HTTP boundary in run.go (FWT-923). The
+	// guard here is defense-in-depth so a future caller that bypasses the
+	// multipart handler still can't smuggle an argv option into popeye.
+	if err := validateNamespace(job.Config.Namespace); err != nil {
+		log.Warnf("popeye rejected invalid namespace: %v", err)
+		job.Status = "error"
+		return err
+	}
+
 	args := []string{"--kubeconfig", job.KubeConfigPath, "-o", "json", "--insecure-skip-tls-verify"}
 	if len(job.Config.Namespace) > 0 {
 		args = append(args, "-n")
