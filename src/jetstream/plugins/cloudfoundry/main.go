@@ -24,6 +24,9 @@ func init() {
 type CloudFoundrySpecification struct {
 	portalProxy  api.PortalProxy
 	endpointType string
+	// testProxy overrides portalProxy for unit tests of native handlers.
+	// Production code always leaves this nil.
+	testProxy nativeCFProxy
 }
 
 const (
