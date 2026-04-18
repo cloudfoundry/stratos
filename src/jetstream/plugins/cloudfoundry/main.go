@@ -197,6 +197,9 @@ func (c *CloudFoundrySpecification) AddSessionGroupRoutes(echoGroup *echo.Group)
 
 	// Application Stream
 	echoGroup.GET("/:cnsiGuid/apps/:appGuid/appFirehose", c.appFirehose)
+
+	// Native Stratos routes — v3-backed, Stratos-shaped DTOs
+	c.addNativeRoutes(echoGroup)
 }
 
 func (c *CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation bool, caCert string) (api.CNSIRecord, interface{}, error) {
