@@ -1,8 +1,10 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
-import { take, filter, map } from 'rxjs/operators';
+import { take, map } from 'rxjs/operators';
+import { OrgDataService } from '../../../../../services/endpoint-data/org-data.service';
 
 import {
   getActionsFromExtensions,
@@ -47,9 +49,11 @@ import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry
     LoadingPageComponent
   ]
 })
-export class CloudFoundryOrganizationBaseComponent {
+export class CloudFoundryOrganizationBaseComponent implements OnInit {
   cfEndpointService = inject(CloudFoundryEndpointService);
   cfOrgService = inject(CloudFoundryOrganizationService);
+  private http = inject(HttpClient);
+  orgDataService: OrgDataService | null = null;
 
 
   tabLinks: IPageSideNavTab[] = [
@@ -90,6 +94,7 @@ export class CloudFoundryOrganizationBaseComponent {
   ];
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
 
+  /** @deprecated Use orgDataService.org()?.name — kept for backward compatibility with favorite$ */
   public name$: Observable<string>;
 
   // Used to hide tab that is not yet implemented when in production
@@ -112,13 +117,19 @@ export class CloudFoundryOrganizationBaseComponent {
     );
     this.name$ = cfOrgService.org$.pipe(
       map(org => org.entity.entity.name),
-      filter(name => !!name),
       take(1)
     );
     this.breadcrumbs$ = this.getBreadcrumbs();
 
     // Add any tabs from extensions
     this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.CloudFoundryOrg));
+  }
+
+  ngOnInit(): void {
+    const cnsiGuid = this.cfOrgService.cfGuid;
+    const orgGuid = this.cfOrgService.orgGuid;
+    this.orgDataService = new OrgDataService(this.http, cnsiGuid, orgGuid);
+    this.orgDataService.load().subscribe({ error: () => {} });
   }
 
   private getBreadcrumbs() {
