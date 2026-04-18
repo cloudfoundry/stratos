@@ -2,10 +2,12 @@
 package cloudfoundry
 
 import (
-	"encoding/json"
-	"fmt"
+	"context"
 	"net/http"
+	"time"
 
+	"github.com/fivetwenty-io/capi/v3/pkg/capi"
+	"github.com/fivetwenty-io/capi/v3/pkg/cfclient"
 	"github.com/labstack/echo/v4"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -35,106 +37,22 @@ func (c *CloudFoundrySpecification) nativeProxy() nativeCFProxy {
 	return c.portalProxy
 }
 
-// ---- CF v3 response shapes (internal only) ----
-
-type cfv3Pagination struct {
-	TotalResults int `json:"total_results"`
-}
-
-type cfv3Metadata struct {
-	Labels      map[string]string `json:"labels"`
-	Annotations map[string]string `json:"annotations"`
-}
-
-type cfv3OrgResource struct {
-	GUID      string       `json:"guid"`
-	Name      string       `json:"name"`
-	CreatedAt string       `json:"created_at"`
-	UpdatedAt string       `json:"updated_at"`
-	Metadata  cfv3Metadata `json:"metadata"`
-}
-
-type cfv3OrgsResponse struct {
-	Pagination cfv3Pagination    `json:"pagination"`
-	Resources  []cfv3OrgResource `json:"resources"`
-}
-
-type cfv3Relationship struct {
-	Data struct {
-		GUID string `json:"guid"`
-	} `json:"data"`
-}
-
-type cfv3AppResource struct {
-	GUID          string `json:"guid"`
-	Name          string `json:"name"`
-	State         string `json:"state"`
-	CreatedAt     string `json:"created_at"`
-	UpdatedAt     string `json:"updated_at"`
-	Relationships struct {
-		Space cfv3Relationship `json:"space"`
-	} `json:"relationships"`
-}
-
-type cfv3AppsResponse struct {
-	Pagination cfv3Pagination    `json:"pagination"`
-	Resources  []cfv3AppResource `json:"resources"`
-}
-
-type cfv3RoutesResponse struct {
-	Pagination cfv3Pagination `json:"pagination"`
-}
-
-type cfv3SpaceResource struct {
-	GUID          string `json:"guid"`
-	Name          string `json:"name"`
-	CreatedAt     string `json:"created_at"`
-	UpdatedAt     string `json:"updated_at"`
-	Relationships struct {
-		Organization cfv3Relationship `json:"organization"`
-	} `json:"relationships"`
-}
-
-type cfv3SpacesResponse struct {
-	Pagination cfv3Pagination      `json:"pagination"`
-	Resources  []cfv3SpaceResource `json:"resources"`
-}
-
-// ---- shared HTTP helper ----
-
-// cfV3Get performs a GET to the CF v3 API for the given endpoint and returns the parsed JSON body.
-func cfV3Get(proxy nativeCFProxy, cnsiGUID, userGUID, path string, out interface{}) error {
+// newCapiClient creates a capi client authenticated with Jetstream's stored token.
+// Uses cfclient.NewWithToken so no UAA discovery occurs — the token is passed directly.
+func newCapiClient(ctx context.Context, proxy nativeCFProxy, cnsiGUID, userGUID string) (capi.Client, error) {
 	cnsiRecord, err := proxy.GetCNSIRecord(cnsiGUID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadGateway, "endpoint not found")
+		return nil, echo.NewHTTPError(http.StatusBadGateway, "endpoint not found")
 	}
 	tokenRecord, ok := proxy.GetCNSITokenRecord(cnsiGUID, userGUID)
 	if !ok {
-		return echo.NewHTTPError(http.StatusForbidden, "no token for endpoint")
+		return nil, echo.NewHTTPError(http.StatusForbidden, "no token for endpoint")
 	}
-
-	apiURL := fmt.Sprintf("%s%s", cnsiRecord.APIEndpoint.String(), path)
-	req, err := http.NewRequest(http.MethodGet, apiURL, nil)
+	client, err := cfclient.NewWithToken(ctx, cnsiRecord.APIEndpoint.String(), tokenRecord.AuthToken)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return nil, echo.NewHTTPError(http.StatusBadGateway, err.Error())
 	}
-	req.Header.Set("Authorization", "Bearer "+tokenRecord.AuthToken)
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return echo.NewHTTPError(resp.StatusCode, fmt.Sprintf("CF API returned %d", resp.StatusCode))
-	}
-
-	if err := json.NewDecoder(resp.Body).Decode(out); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to decode CF response")
-	}
-	return nil
+	return client, nil
 }
 
 // normaliseStringMap ensures nil maps are returned as empty maps (not null in JSON).
@@ -143,6 +61,29 @@ func normaliseStringMap(m map[string]string) map[string]string {
 		return map[string]string{}
 	}
 	return m
+}
+
+// metaLabels/metaAnnotations safely extract labels/annotations from a *capi.Metadata (may be nil).
+func metaLabels(m *capi.Metadata) map[string]string {
+	if m == nil {
+		return map[string]string{}
+	}
+	return normaliseStringMap(m.Labels)
+}
+
+func metaAnnotations(m *capi.Metadata) map[string]string {
+	if m == nil {
+		return map[string]string{}
+	}
+	return normaliseStringMap(m.Annotations)
+}
+
+// relationshipGUID safely extracts a GUID from a capi.Relationship whose Data pointer may be nil.
+func relationshipGUID(rel capi.Relationship) string {
+	if rel.Data == nil {
+		return ""
+	}
+	return rel.Data.GUID
 }
 
 // ---- handlers ----
@@ -154,9 +95,15 @@ func (c *CloudFoundrySpecification) getNativeOrgs(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
 	}
 
-	var raw cfv3OrgsResponse
-	if err := cfV3Get(c.nativeProxy(), cnsiGUID, userGUID, "/v3/organizations?per_page=5000", &raw); err != nil {
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
 		return err
+	}
+
+	params := capi.NewQueryParams().WithPerPage(5000)
+	raw, err := cfClient.Organizations().List(ctx.Request().Context(), params)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
 	}
 
 	orgs := make([]StOrg, 0, len(raw.Resources))
@@ -165,10 +112,10 @@ func (c *CloudFoundrySpecification) getNativeOrgs(ctx echo.Context) error {
 			GUID:        r.GUID,
 			Name:        r.Name,
 			Status:      "active",
-			Labels:      normaliseStringMap(r.Metadata.Labels),
-			Annotations: normaliseStringMap(r.Metadata.Annotations),
-			CreatedAt:   r.CreatedAt,
-			UpdatedAt:   r.UpdatedAt,
+			Labels:      metaLabels(r.Metadata),
+			Annotations: metaAnnotations(r.Metadata),
+			CreatedAt:   r.CreatedAt.Format(time.RFC3339),
+			UpdatedAt:   r.UpdatedAt.Format(time.RFC3339),
 		})
 	}
 
@@ -186,9 +133,15 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
 	}
 
-	var raw cfv3AppsResponse
-	if err := cfV3Get(c.nativeProxy(), cnsiGUID, userGUID, "/v3/apps?per_page=5000", &raw); err != nil {
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
 		return err
+	}
+
+	params := capi.NewQueryParams().WithPerPage(5000)
+	raw, err := cfClient.Apps().List(ctx.Request().Context(), params)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
 	}
 
 	apps := make([]StApp, 0, len(raw.Resources))
@@ -197,9 +150,9 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 			GUID:      r.GUID,
 			Name:      r.Name,
 			State:     r.State,
-			SpaceGUID: r.Relationships.Space.Data.GUID,
-			CreatedAt: r.CreatedAt,
-			UpdatedAt: r.UpdatedAt,
+			SpaceGUID: relationshipGUID(r.Relationships.Space),
+			CreatedAt: r.CreatedAt.Format(time.RFC3339),
+			UpdatedAt: r.UpdatedAt.Format(time.RFC3339),
 		})
 	}
 
@@ -217,9 +170,16 @@ func (c *CloudFoundrySpecification) getNativeRouteCount(ctx echo.Context) error 
 		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
 	}
 
-	var raw cfv3RoutesResponse
-	if err := cfV3Get(c.nativeProxy(), cnsiGUID, userGUID, "/v3/routes?per_page=1", &raw); err != nil {
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
 		return err
+	}
+
+	// Request per_page=1 — we only need the total count, not all resources.
+	params := capi.NewQueryParams().WithPerPage(1)
+	raw, err := cfClient.Routes().List(ctx.Request().Context(), params)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
 	}
 
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
@@ -236,20 +196,25 @@ func (c *CloudFoundrySpecification) getNativeOrgDetail(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
 	}
 
-	var raw cfv3OrgResource
-	if err := cfV3Get(c.nativeProxy(), cnsiGUID, userGUID, "/v3/organizations/"+orgGUID, &raw); err != nil {
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
 		return err
+	}
+
+	r, err := cfClient.Organizations().Get(ctx.Request().Context(), orgGUID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
 	}
 
 	detail := StOrgDetail{
 		StOrg: StOrg{
-			GUID:        raw.GUID,
-			Name:        raw.Name,
+			GUID:        r.GUID,
+			Name:        r.Name,
 			Status:      "active",
-			Labels:      normaliseStringMap(raw.Metadata.Labels),
-			Annotations: normaliseStringMap(raw.Metadata.Annotations),
-			CreatedAt:   raw.CreatedAt,
-			UpdatedAt:   raw.UpdatedAt,
+			Labels:      metaLabels(r.Metadata),
+			Annotations: metaAnnotations(r.Metadata),
+			CreatedAt:   r.CreatedAt.Format(time.RFC3339),
+			UpdatedAt:   r.UpdatedAt.Format(time.RFC3339),
 		},
 		Spaces: []StSpace{},
 	}
@@ -266,10 +231,15 @@ func (c *CloudFoundrySpecification) getNativeOrgSpaces(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
 	}
 
-	path := fmt.Sprintf("/v3/spaces?organization_guids=%s&per_page=5000", orgGUID)
-	var raw cfv3SpacesResponse
-	if err := cfV3Get(c.nativeProxy(), cnsiGUID, userGUID, path, &raw); err != nil {
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
 		return err
+	}
+
+	params := capi.NewQueryParams().WithPerPage(5000).WithFilter("organization_guids", orgGUID)
+	raw, err := cfClient.Spaces().List(ctx.Request().Context(), params)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
 	}
 
 	spaces := make([]StSpace, 0, len(raw.Resources))
@@ -277,9 +247,9 @@ func (c *CloudFoundrySpecification) getNativeOrgSpaces(ctx echo.Context) error {
 		spaces = append(spaces, StSpace{
 			GUID:      r.GUID,
 			Name:      r.Name,
-			OrgGUID:   r.Relationships.Organization.Data.GUID,
-			CreatedAt: r.CreatedAt,
-			UpdatedAt: r.UpdatedAt,
+			OrgGUID:   relationshipGUID(r.Relationships.Organization),
+			CreatedAt: r.CreatedAt.Format(time.RFC3339),
+			UpdatedAt: r.UpdatedAt.Format(time.RFC3339),
 		})
 	}
 
