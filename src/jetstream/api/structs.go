@@ -262,8 +262,10 @@ type Info struct {
 		ListMaxSize               int64  `json:"listMaxSize,omitempty"`
 		ListAllowLoadMaxed        bool   `json:"listAllowLoadMaxed,omitempty"`
 		APIKeysEnabled            string `json:"APIKeysEnabled"`
-		HomeViewShowFavoritesOnly bool   `json:"homeViewShowFavoritesOnly"`
-		UserEndpointsEnabled      string `json:"userEndpointsEnabled"`
+		HomeViewShowFavoritesOnly  bool   `json:"homeViewShowFavoritesOnly"`
+		UserEndpointsEnabled       string `json:"userEndpointsEnabled"`
+		EndpointCardConcurrency    int    `json:"endpointCardConcurrency"`
+		EndpointRequestConcurrency int    `json:"endpointRequestConcurrency"`
 	} `json:"config"`
 }
 
@@ -430,6 +432,8 @@ type PortalConfig struct {
 	CanMigrateDatabaseSchema           bool
 	APIKeysEnabled                     api.APIKeysConfigValue       `configName:"API_KEYS_ENABLED"`
 	HomeViewShowFavoritesOnly          bool                         `configName:"HOME_VIEW_SHOW_FAVORITES_ONLY"`
+	EndpointCardConcurrency            int                          `configName:"ENDPOINT_CARD_CONCURRENCY"`
+	EndpointRequestConcurrency         int                          `configName:"ENDPOINT_REQUEST_CONCURRENCY"`
 	UserEndpointsEnabled               api.UserEndpointsConfigValue `configName:"USER_ENDPOINTS_ENABLED"`
 	// CanMigrateDatabaseSchema indicates if we can safely perform migrations
 	// This depends on the deployment mechanism and the database config
