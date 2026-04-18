@@ -21,16 +21,18 @@ describe('EndpointDataShim', () => {
     shim = TestBed.inject(EndpointDataShim);
   });
 
-  it('does not throw when write() is called with data', () => {
+  it('does not throw and does not dispatch when write() is called with data', () => {
     const data: StEndpointData = {
       orgs: [{ guid: 'org-1', name: 'Org One', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '' }],
       apps: [],
       routeCount: 5,
     };
     expect(() => shim.write('cnsi-guid-1', data)).not.toThrow();
+    expect(dispatchSpy).not.toHaveBeenCalled();
   });
 
-  it('does not throw when called with empty data', () => {
+  it('does not throw and does not dispatch when called with empty data', () => {
     expect(() => shim.write('cnsi-guid-1', { orgs: [], apps: [], routeCount: 0 })).not.toThrow();
+    expect(dispatchSpy).not.toHaveBeenCalled();
   });
 });
