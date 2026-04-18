@@ -24,6 +24,7 @@ import { NoContentMessageComponent } from '../../../shared/components/no-content
 import { EndpointsMissingComponent } from '../../../shared/components/endpoints-missing/endpoints-missing.component';
 import { HomePageCardLayout } from './../home.types';
 import { HomePageEndpointCardComponent } from './home-page-endpoint-card/home-page-endpoint-card.component';
+import { EndpointDataRegistry } from '../../../../../cloud-foundry/src/services/endpoint-data/endpoint-data.registry';
 
 const noConnectedMsg = {
   firstLine: 'There are no connected endpoints',
@@ -60,6 +61,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   private store = inject<Store<AppState>>(Store);
   userFavoriteManager = inject(UserFavoriteManager);
   private scrollDispatcher = inject(ScrollDispatcher);
+  private registry = inject(EndpointDataRegistry);
 
   public allEndpointIds$: Observable<string[]>;
   public haveRegistered$: Observable<boolean>;
@@ -98,7 +100,6 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
   notLoadedCardIndices: number[] = [];
   cardsToLoad: HomePageEndpointCardComponent[] = [];
-  isLoadingACard = false;
 
   private viewMonitorSub!: Subscription;
   private cardChangesSub!: Subscription;
@@ -209,6 +210,17 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    // Wire EndpointDataRegistry concurrency from backend config
+    this.store.select(s => (s as any).auth).pipe(
+      filter(auth => !!auth?.sessionData?.config),
+      map(auth => auth.sessionData.config),
+      take(1),
+    ).subscribe(config => {
+      if (config.endpointCardConcurrency > 0) {
+        this.registry.configure(config.endpointCardConcurrency);
+      }
+    });
+
     const scroll$ = this.scrollDispatcher.scrolled().pipe(
       map((e: any) => {
         const el = e.elementRef.nativeElement;
@@ -222,8 +234,8 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     this.viewMonitorSub = combineLatest([scroll$, this.check$]).pipe(
       debounceTime(150) // Reduce debounce time for better responsiveness
     ).subscribe(([scrollTop]) => {
-      // Skip if already processing or no cards to check
-      if (this.isLoadingACard || this.notLoadedCardIndices.length === 0) {
+      // Skip if no cards to check
+      if (this.notLoadedCardIndices.length === 0) {
         return;
       }
 
@@ -271,15 +283,12 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   processCardsToLoad() {
-    // Guard against redundant calls
-    if (this.isLoadingACard || this.cardsToLoad.length === 0) {
-      return;
-    }
-
-    const nextCardToLoad = this.cardsToLoad.shift();
-    if (nextCardToLoad) {
-      this.isLoadingACard = true;
-      nextCardToLoad.load();
+    // No mutex — EndpointDataRegistry controls concurrency via mergeMap(N).
+    while (this.cardsToLoad.length > 0) {
+      const card = this.cardsToLoad.shift();
+      if (card) {
+        card.load();
+      }
     }
   }
 
@@ -310,12 +319,6 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   // This is called after a card has loaded - we call the scroll handler again
   // to check if there are more cards that are visible and thus can be loaded
   cardLoaded() {
-    this.isLoadingACard = false;
-
-    // First try to process any cards already in the queue
-    this.processCardsToLoad();
-
-    // Only trigger a new check if we have remaining unloaded cards and no cards in the queue
     if (this.notLoadedCardIndices.length > 0 && this.cardsToLoad.length === 0) {
       this.checkCardsInView();
     }
