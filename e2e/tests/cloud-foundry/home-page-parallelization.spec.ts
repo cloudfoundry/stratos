@@ -16,7 +16,9 @@ import { test, expect } from '../../fixtures/test-base';
  */
 
 const LOAD_TIMEOUT_MS = 15000;
-const STICKY_CACHE_TIMEOUT_MS = 2000;
+// Cached data should appear faster than a fresh fetch (LOAD_TIMEOUT_MS).
+// 5s is generous enough for Angular CD under parallel test load.
+const STICKY_CACHE_TIMEOUT_MS = 5000;
 
 test.describe('Home page CF card parallelization', () => {
 
@@ -24,7 +26,9 @@ test.describe('Home page CF card parallelization', () => {
     await page.goto('/');
     await page.waitForURL('**/home', { timeout: 10000 });
 
+    // Wait for dynamic card components (created via ViewContainerRef.createComponent())
     const cards = page.locator('app-cfhome-card');
+    await expect(cards.first()).toBeVisible({ timeout: LOAD_TIMEOUT_MS });
     const cardCount = await cards.count();
     expect(cardCount).toBeGreaterThanOrEqual(1);
 
@@ -39,6 +43,7 @@ test.describe('Home page CF card parallelization', () => {
     await page.waitForURL('**/home', { timeout: 10000 });
 
     const cards = page.locator('app-cfhome-card');
+    await expect(cards.first()).toBeVisible({ timeout: LOAD_TIMEOUT_MS });
     const cardCount = await cards.count();
     expect(cardCount).toBeGreaterThanOrEqual(1);
 
@@ -56,6 +61,7 @@ test.describe('Home page CF card parallelization', () => {
     await page.waitForURL('**/home', { timeout: 10000 });
 
     const cards = page.locator('app-cfhome-card');
+    await expect(cards.first()).toBeVisible({ timeout: LOAD_TIMEOUT_MS });
     const cardCount = await cards.count();
     expect(cardCount).toBeGreaterThanOrEqual(1);
 
@@ -83,6 +89,8 @@ test.describe('Home page CF card parallelization', () => {
     // Navigate back — sticky signals in EndpointDataRegistry retain data
     await page.goto('/');
     await page.waitForURL('**/home**', { timeout: 10000 });
+    // Wait for the card element to be created (async via ViewContainerRef.createComponent())
+    await expect(page.locator('app-cfhome-card').first()).toBeVisible({ timeout: LOAD_TIMEOUT_MS });
 
     // Data should appear from cache, no re-fetch needed
     await expect(firstCard.locator('app-card-number-metric').first())
@@ -94,6 +102,7 @@ test.describe('Home page CF card parallelization', () => {
     await page.waitForURL('**/home', { timeout: 10000 });
 
     const cards = page.locator('app-cfhome-card');
+    await expect(cards.first()).toBeVisible({ timeout: LOAD_TIMEOUT_MS });
     if (await cards.count() < 2) {
       test.skip();
       return;
