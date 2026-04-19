@@ -20,6 +20,7 @@ type StApp struct {
 	Name      string `json:"name"`
 	State     string `json:"state"`
 	SpaceGUID string `json:"spaceGuid"`
+	Instances int    `json:"instances"`
 	CreatedAt string `json:"createdAt"`
 	UpdatedAt string `json:"updatedAt"`
 }

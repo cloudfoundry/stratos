@@ -171,8 +171,26 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 		return err
 	}
 
+	// Fetch apps and web processes concurrently — total time = max(apps, processes).
+	// The process goroutine writes instancesByApp; procDone signals it is safe to read.
+	instancesByApp := make(map[string]int)
+	procDone := make(chan struct{})
+	go func() {
+		defer close(procDone)
+		procParams := capi.NewQueryParams().WithPerPage(5000).WithFilter("types", "web")
+		procRaw, err := cfClient.Processes().List(ctx.Request().Context(), procParams)
+		if err == nil {
+			for _, p := range procRaw.Resources {
+				if p.Relationships.App != nil {
+					instancesByApp[relationshipGUID(*p.Relationships.App)] = p.Instances
+				}
+			}
+		}
+	}()
+
 	params := capi.NewQueryParams().WithPerPage(5000)
 	raw, err := cfClient.Apps().List(ctx.Request().Context(), params)
+	<-procDone // wait for process data before reading instancesByApp
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
 	}
@@ -184,6 +202,7 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 			Name:      r.Name,
 			State:     r.State,
 			SpaceGUID: relationshipGUID(r.Relationships.Space),
+			Instances: instancesByApp[r.GUID],
 			CreatedAt: r.CreatedAt.Format(time.RFC3339),
 			UpdatedAt: r.UpdatedAt.Format(time.RFC3339),
 		})
