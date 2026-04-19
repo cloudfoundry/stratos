@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { signal, Signal } from '@angular/core';
-import { EMPTY, merge, Observable, Subject } from 'rxjs';
+import { EMPTY, merge, Observable, ReplaySubject } from 'rxjs';
 import { catchError, finalize, tap, timeout } from 'rxjs/operators';
 import { EndpointDataShim } from './endpoint-data.shim';
 import { StApp, StEndpointData, StError, StOrg, StSpace } from './stratos-types';
@@ -36,8 +36,11 @@ export class EndpointDataService {
   readonly lastFetched: Signal<Date | null> = this._lastFetched.asReadonly();
   readonly detailsLastFetched: Signal<Date | null> = this._detailsLastFetched.asReadonly();
 
-  readonly loaded$ = new Subject<void>();
-  readonly detailsLoaded$ = new Subject<void>();
+  // ReplaySubject(1) — late subscribers (e.g. the home card's async pipe
+  // subscribing after the HTTP has already completed) immediately receive the
+  // last emission so they don't hang forever on a stream that already fired.
+  readonly loaded$ = new ReplaySubject<void>(1);
+  readonly detailsLoaded$ = new ReplaySubject<void>(1);
 
   constructor(
     private readonly http: HttpClient,
