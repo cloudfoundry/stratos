@@ -13,7 +13,7 @@ import {
   StratosCatalogEndpointEntity
 } from '@stratosui/store';
 import { Observable } from 'rxjs';
-import { filter, map, pairwise, startWith } from 'rxjs/operators';
+import { filter, map, pairwise, startWith, take } from 'rxjs/operators';
 
 import { getIdFromRoute } from '../../../../core/utils.service';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
@@ -160,6 +160,20 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
         };
         if (!result.error) {
           this.snackBarService.show(`Successfully registered '${this.registerForm.value.nameField ?? ''}'`);
+          // Warn if another endpoint is already registered with the same URL.
+          // Multiple registrations are permitted (different users/operators may each need their own),
+          // but the user should know about existing registrations.
+          stratosEntityCatalog.endpoint.store.getAll.getPaginationService().entities$.pipe(
+            take(1),
+            map(endpoints => endpoints.filter(e =>
+              e.entity?.api_endpoint?.value === url && e.metadata?.guid !== result.message
+            ))
+          ).subscribe(dupes => {
+            if (dupes.length > 0) {
+              const names = dupes.map(e => e.entity.name).join(', ');
+              this.snackBarService.show(`Note: '${url}' is also registered as: ${names}`);
+            }
+          });
         }
         const success = !result.error;
         return {
