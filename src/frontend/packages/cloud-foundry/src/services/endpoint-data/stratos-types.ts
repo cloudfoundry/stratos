@@ -49,7 +49,7 @@ export interface StEndpointData {
 
 // Jetstream response shapes
 export interface StOrgsResponse {
-  resources: StOrg[];
+  resources: StOrgDetail[];
   totalResults: number;
 }
 

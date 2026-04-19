@@ -23,7 +23,7 @@ describe('EndpointDataShim', () => {
 
   it('does not throw and does not dispatch when write() is called with data', () => {
     const data: StEndpointData = {
-      orgs: [{ guid: 'org-1', name: 'Org One', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '' }],
+      orgs: [{ guid: 'org-1', name: 'Org One', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '', spaces: [] }],
       apps: [],
       routeCount: 5,
     };

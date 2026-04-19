@@ -49,7 +49,7 @@ describe('EndpointDataService', () => {
   });
 
   it('updates orgs signal when orgs fetch completes', async () => {
-    const mockOrgs = [{ guid: 'org-1', name: 'Org One', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '' }];
+    const mockOrgs = [{ guid: 'org-1', name: 'Org One', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '', spaces: [] }];
     service.load().subscribe();
     httpMock.expectOne('/pp/v1/cf/orgs/test-cnsi-guid').flush({ resources: mockOrgs, totalResults: 1 });
     httpMock.expectOne('/pp/v1/cf/apps/test-cnsi-guid').flush({ resources: [], totalResults: 0 });
@@ -63,7 +63,7 @@ describe('EndpointDataService', () => {
   });
 
   it('retains loaded data and adds error when one sub-request fails', async () => {
-    const mockOrgs = [{ guid: 'org-1', name: 'Org One', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '' }];
+    const mockOrgs = [{ guid: 'org-1', name: 'Org One', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '', spaces: [] }];
     service.load().subscribe({ error: () => {} });
     httpMock.expectOne('/pp/v1/cf/orgs/test-cnsi-guid').flush({ resources: mockOrgs, totalResults: 1 });
     httpMock.expectOne('/pp/v1/cf/apps/test-cnsi-guid').error(new ErrorEvent('Network error'));
@@ -77,7 +77,7 @@ describe('EndpointDataService', () => {
   });
 
   it('retains previously loaded data across a second load that fails', async () => {
-    const mockOrgs = [{ guid: 'org-1', name: 'Org One', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '' }];
+    const mockOrgs = [{ guid: 'org-1', name: 'Org One', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '', spaces: [] }];
     service.load().subscribe();
     httpMock.expectOne('/pp/v1/cf/orgs/test-cnsi-guid').flush({ resources: mockOrgs, totalResults: 1 });
     httpMock.expectOne('/pp/v1/cf/apps/test-cnsi-guid').flush({ resources: [], totalResults: 0 });

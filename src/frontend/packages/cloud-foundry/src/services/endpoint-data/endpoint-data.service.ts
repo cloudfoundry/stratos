@@ -3,17 +3,17 @@ import { computed, signal, Signal } from '@angular/core';
 import { EMPTY, merge, Observable, Subject } from 'rxjs';
 import { catchError, finalize, tap, timeout } from 'rxjs/operators';
 import { EndpointDataShim } from './endpoint-data.shim';
-import { StApp, StEndpointData, StError, StOrg } from './stratos-types';
+import { StApp, StEndpointData, StError, StOrgDetail } from './stratos-types';
 
 export class EndpointDataService {
-  private readonly _orgs = signal<StOrg[]>([]);
+  private readonly _orgs = signal<StOrgDetail[]>([]);
   private readonly _apps = signal<StApp[]>([]);
   private readonly _routeCount = signal<number>(0);
   private readonly _isLoading = signal<boolean>(false);
   private readonly _errors = signal<StError[]>([]);
   private readonly _lastFetched = signal<Date | null>(null);
 
-  readonly orgs: Signal<StOrg[]> = this._orgs.asReadonly();
+  readonly orgs: Signal<StOrgDetail[]> = this._orgs.asReadonly();
   readonly apps: Signal<StApp[]> = this._apps.asReadonly();
   readonly routeCount: Signal<number> = this._routeCount.asReadonly();
   readonly orgCount = computed(() => this._orgs().length);
@@ -35,7 +35,7 @@ export class EndpointDataService {
     this._errors.set([]);
 
     return merge(
-      this.http.get<{ resources: StOrg[]; totalResults: number }>(`/pp/v1/cf/orgs/${this.guid}`).pipe(
+      this.http.get<{ resources: StOrgDetail[]; totalResults: number }>(`/pp/v1/cf/orgs/${this.guid}`).pipe(
         tap(resp => this._orgs.set(resp.resources)),
         catchError(err => { this.addError('orgs', err); return EMPTY; }),
       ),
