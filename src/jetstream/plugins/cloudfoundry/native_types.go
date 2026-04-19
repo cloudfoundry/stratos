@@ -38,8 +38,8 @@ type StOrgDetail struct {
 }
 
 type StOrgsResponse struct {
-	Resources    []StOrg `json:"resources"`
-	TotalResults int     `json:"totalResults"`
+	Resources    []StOrgDetail `json:"resources"`
+	TotalResults int           `json:"totalResults"`
 }
 
 type StAppsResponse struct {

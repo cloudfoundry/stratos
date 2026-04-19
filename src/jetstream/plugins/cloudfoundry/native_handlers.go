@@ -4,6 +4,7 @@ package cloudfoundry
 import (
 	"context"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
@@ -106,16 +107,48 @@ func (c *CloudFoundrySpecification) getNativeOrgs(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
 	}
 
-	orgs := make([]StOrg, 0, len(raw.Resources))
+	// Collect org GUIDs for bulk space fetch (one CF API call instead of N)
+	orgGUIDs := make([]string, 0, len(raw.Resources))
 	for _, r := range raw.Resources {
-		orgs = append(orgs, StOrg{
-			GUID:        r.GUID,
-			Name:        r.Name,
-			Status:      "active",
-			Labels:      metaLabels(r.Metadata),
-			Annotations: metaAnnotations(r.Metadata),
-			CreatedAt:   r.CreatedAt.Format(time.RFC3339),
-			UpdatedAt:   r.UpdatedAt.Format(time.RFC3339),
+		orgGUIDs = append(orgGUIDs, r.GUID)
+	}
+
+	// Build org GUID → spaces index
+	spacesByOrg := make(map[string][]StSpace)
+	if len(orgGUIDs) > 0 {
+		spaceParams := capi.NewQueryParams().WithPerPage(5000).WithFilter("organization_guids", strings.Join(orgGUIDs, ","))
+		spaceRaw, err := cfClient.Spaces().List(ctx.Request().Context(), spaceParams)
+		if err == nil {
+			for _, s := range spaceRaw.Resources {
+				orgGUID := relationshipGUID(s.Relationships.Organization)
+				spacesByOrg[orgGUID] = append(spacesByOrg[orgGUID], StSpace{
+					GUID:      s.GUID,
+					Name:      s.Name,
+					OrgGUID:   orgGUID,
+					CreatedAt: s.CreatedAt.Format(time.RFC3339),
+					UpdatedAt: s.UpdatedAt.Format(time.RFC3339),
+				})
+			}
+		}
+	}
+
+	orgs := make([]StOrgDetail, 0, len(raw.Resources))
+	for _, r := range raw.Resources {
+		spaces := spacesByOrg[r.GUID]
+		if spaces == nil {
+			spaces = []StSpace{}
+		}
+		orgs = append(orgs, StOrgDetail{
+			StOrg: StOrg{
+				GUID:        r.GUID,
+				Name:        r.Name,
+				Status:      "active",
+				Labels:      metaLabels(r.Metadata),
+				Annotations: metaAnnotations(r.Metadata),
+				CreatedAt:   r.CreatedAt.Format(time.RFC3339),
+				UpdatedAt:   r.UpdatedAt.Format(time.RFC3339),
+			},
+			Spaces: spaces,
 		})
 	}
 
