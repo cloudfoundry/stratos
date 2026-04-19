@@ -8,6 +8,7 @@ import "github.com/labstack/echo/v4"
 func (c *CloudFoundrySpecification) addNativeRoutes(echoGroup *echo.Group) {
 	echoGroup.GET("/cf/orgs/:cnsiGuid", c.getNativeOrgs)
 	echoGroup.GET("/cf/apps/:cnsiGuid", c.getNativeApps)
+	echoGroup.GET("/cf/spaces/:cnsiGuid", c.getNativeSpaces)
 	echoGroup.GET("/cf/routes/:cnsiGuid", c.getNativeRouteCount)
 	echoGroup.GET("/cf/org/:cnsiGuid/:orgGuid", c.getNativeOrgDetail)
 	echoGroup.GET("/cf/org/:cnsiGuid/:orgGuid/spaces", c.getNativeOrgSpaces)

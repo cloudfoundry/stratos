@@ -36,15 +36,18 @@ export class EndpointDataService {
     this._isLoading.set(true);
     this._errors.set([]);
 
+    // Home card fast path: orgs return=counts (just totalResults), apps
+    // return=recent (top 10 by updated_at + totalResults), routes totalResults.
+    // Detailed full-list fetches happen lazily via loadDetails() on demand.
     return merge(
-      this.http.get<{ resources: StOrg[]; totalResults: number }>(`/pp/v1/cf/orgs/${this.guid}`).pipe(
+      this.http.get<{ resources: StOrg[]; totalResults: number }>(`/pp/v1/cf/orgs/${this.guid}?return=counts`).pipe(
         tap(resp => {
           this._orgs.set(resp.resources);
           this._orgCount.set(resp.totalResults);
         }),
         catchError(err => { this.addError('orgs', err); return EMPTY; }),
       ),
-      this.http.get<{ resources: StApp[]; totalResults: number }>(`/pp/v1/cf/apps/${this.guid}`).pipe(
+      this.http.get<{ resources: StApp[]; totalResults: number }>(`/pp/v1/cf/apps/${this.guid}?return=recent`).pipe(
         tap(resp => {
           this._apps.set(resp.resources);
           this._appCount.set(resp.totalResults);
