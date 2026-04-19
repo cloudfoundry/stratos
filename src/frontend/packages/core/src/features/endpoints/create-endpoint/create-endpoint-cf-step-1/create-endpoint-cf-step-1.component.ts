@@ -8,10 +8,13 @@ import { CustomIconComponent } from '../../../../shared/components/custom-materi
 import { ActivatedRoute } from '@angular/router';
 import {
   ActionState,
+  AppState,
+  endpointEntitiesSelector,
   stratosEntityCatalog,
   entityCatalog,
   StratosCatalogEndpointEntity
 } from '@stratosui/store';
+import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map, pairwise, startWith, take } from 'rxjs/operators';
 
@@ -59,6 +62,7 @@ interface CreateEndpointForm {
 export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponent implements IStepperStep, AfterContentInit {
   private fb = inject(FormBuilder);
   private snackBarService = inject(SnackBarService);
+  private store = inject<Store<AppState>>(Store);
 
 
   registerForm: FormGroup<CreateEndpointForm>;
@@ -163,14 +167,15 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
           // Warn if another endpoint is already registered with the same URL.
           // Multiple registrations are permitted (different users/operators may each need their own),
           // but the user should know about existing registrations.
-          stratosEntityCatalog.endpoint.store.getAll.getPaginationService().entities$.pipe(
+          const urlHost = new URL(url).host;
+          this.store.select(endpointEntitiesSelector).pipe(
             take(1),
-            map(endpoints => endpoints.filter(e =>
-              e.entity?.api_endpoint?.value === url && e.metadata?.guid !== result.message
+            map(entities => Object.values(entities).filter(e =>
+              e.api_endpoint?.Host === urlHost && e.guid !== result.message
             ))
           ).subscribe(dupes => {
             if (dupes.length > 0) {
-              const names = dupes.map(e => e.entity.name).join(', ');
+              const names = dupes.map(e => e.name).join(', ');
               this.snackBarService.show(`Note: '${url}' is also registered as: ${names}`);
             }
           });

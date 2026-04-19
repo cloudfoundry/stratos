@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
-import { EndpointModel, getFullEndpointApiUrl, stratosEntityCatalog } from '@stratosui/store';
+import { ChangeDetectionStrategy, Component, inject, Input  } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { AppState, EndpointModel, endpointEntitiesSelector, getFullEndpointApiUrl, stratosEntityCatalog } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
@@ -22,6 +23,7 @@ import { RowWithEndpointId } from '../table-cell-endpoint-name/table-cell-endpoi
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TableCellEndpointAddressComponent extends TableCellCustom<EndpointModel | RowWithEndpointId>  {
+  private store = inject<Store<AppState>>(Store);
   public endpointAddress$!: Observable<string>;
   public isDuplicate$!: Observable<boolean>;
 
@@ -36,8 +38,8 @@ export class TableCellEndpointAddressComponent extends TableCellCustom<EndpointM
     );
     this.isDuplicate$ = this.endpointAddress$.pipe(
       switchMap(address =>
-        stratosEntityCatalog.endpoint.store.getAll.getPaginationService().entities$.pipe(
-          map(endpoints => endpoints.filter(e => getFullEndpointApiUrl(e.entity) === address).length > 1)
+        this.store.select(endpointEntitiesSelector).pipe(
+          map(entities => Object.values(entities).filter(e => getFullEndpointApiUrl(e) === address).length > 1)
         )
       )
     );

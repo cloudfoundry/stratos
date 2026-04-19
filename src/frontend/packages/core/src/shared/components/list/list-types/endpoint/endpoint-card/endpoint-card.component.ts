@@ -6,7 +6,7 @@ import { Store } from '@ngrx/store';
 import {
   getFullEndpointApiUrl,
   entityCatalog,
-  stratosEntityCatalog,
+  endpointEntitiesSelector,
   MenuItem,
   StratosStatus,
   StratosCatalogEndpointEntity,
@@ -17,7 +17,7 @@ import {
   AppState,
 } from '@stratosui/store';
 import { combineLatest, Observable, of, ReplaySubject, Subscription } from 'rxjs';
-import { map, startWith, switchMap } from 'rxjs/operators';
+import { map, startWith } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../../../core/endpoints.service';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
@@ -110,8 +110,8 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     }
     this.endpointCatalogEntity = entityCatalog.getEndpoint(row.cnsi_type, row.sub_type);
     this.address = getFullEndpointApiUrl(row);
-    this.isDuplicate$ = stratosEntityCatalog.endpoint.store.getAll.getPaginationService().entities$.pipe(
-      switchMap(endpoints => of(endpoints.filter(e => getFullEndpointApiUrl(e.entity) === this.address).length > 1))
+    this.isDuplicate$ = this.store.select(endpointEntitiesSelector).pipe(
+      map(entities => Object.values(entities).filter(e => getFullEndpointApiUrl(e) === this.address).length > 1)
     );
     this.rowObs.next(row);
     if (this.endpointCatalogEntity?.definition) {
