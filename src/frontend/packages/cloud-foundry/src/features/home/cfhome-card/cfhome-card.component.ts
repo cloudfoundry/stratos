@@ -117,7 +117,7 @@ export class CFHomeCardComponent implements HomePageEndpointCard, OnDestroy {
     // parallel native-route fetch finishes. Both allApps$ and hasNoApps$ share it.
     const afterLoad$ = this.afterLoad();
     this.allApps$ = afterLoad$.pipe(
-      map(() => this.endpointDataService!.apps().map(app => this.stAppToApiResource(app))),
+      map(() => this.endpointDataService!.recentApps().map(app => this.stAppToApiResource(app))),
       startWith([] as APIResource<IApp>[]),
     );
     this.hasNoApps$ = afterLoad$.pipe(

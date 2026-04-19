@@ -45,7 +45,9 @@ export interface StEndpointData {
   orgs: StOrg[];
   orgCount: number;
   apps: StApp[];
+  recentApps: StApp[];
   appCount: number;
+  spaces: StSpace[];
   routeCount: number;
 }
 

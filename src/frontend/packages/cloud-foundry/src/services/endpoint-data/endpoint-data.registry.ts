@@ -1,7 +1,7 @@
 import { inject, Injectable, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Subject, Subscription } from 'rxjs';
-import { mergeMap } from 'rxjs/operators';
+import { mergeMap, concatMap, tap } from 'rxjs/operators';
 import { EndpointDataService } from './endpoint-data.service';
 import { EndpointDataShim } from './endpoint-data.shim';
 
@@ -17,12 +17,18 @@ export class EndpointDataRegistry implements OnDestroy {
 
   private readonly instances = new Map<string, RegistryEntry>();
   private readonly cardQueue$ = new Subject<EndpointDataService>();
+  private readonly detailsQueue$ = new Subject<EndpointDataService>();
   private queueSub: Subscription;
+  private detailsSub: Subscription;
   private maxConcurrentCards = 2;
 
   constructor() {
-    this.queueSub = this.cardQueue$.pipe(
-      mergeMap(svc => svc.load(), this.maxConcurrentCards),
+    this.queueSub = this.buildCardQueue();
+    // Details fetches run one-at-a-time after their card's load() completes.
+    // Serial (concatMap) so the big full-list requests don't pile up and drown
+    // out other card fast-path traffic.
+    this.detailsSub = this.detailsQueue$.pipe(
+      concatMap(svc => svc.loadDetails()),
     ).subscribe();
   }
 
@@ -31,9 +37,7 @@ export class EndpointDataRegistry implements OnDestroy {
   configure(maxConcurrentCards: number): void {
     this.maxConcurrentCards = maxConcurrentCards;
     this.queueSub.unsubscribe();
-    this.queueSub = this.cardQueue$.pipe(
-      mergeMap(svc => svc.load(), this.maxConcurrentCards),
-    ).subscribe();
+    this.queueSub = this.buildCardQueue();
   }
 
   acquire(guid: string): EndpointDataService {
@@ -59,6 +63,19 @@ export class EndpointDataRegistry implements OnDestroy {
 
   ngOnDestroy(): void {
     this.queueSub.unsubscribe();
+    this.detailsSub.unsubscribe();
     this.cardQueue$.complete();
+    this.detailsQueue$.complete();
+  }
+
+  private buildCardQueue(): Subscription {
+    return this.cardQueue$.pipe(
+      // Run card fast-path loads with bounded concurrency. Chain into the
+      // details queue so each endpoint's full-data fetch happens after its
+      // counts land.
+      mergeMap(svc => svc.load().pipe(
+        tap(() => this.detailsQueue$.next(svc)),
+      ), this.maxConcurrentCards),
+    ).subscribe();
   }
 }
