@@ -16,6 +16,7 @@ export interface StApp {
   state: string;
   orgGuid: string;
   spaceGuid: string;
+  instances: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -41,7 +42,7 @@ export interface StError {
 }
 
 export interface StEndpointData {
-  orgs: StOrg[];
+  orgs: StOrgDetail[];
   apps: StApp[];
   routeCount: number;
 }
