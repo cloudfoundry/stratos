@@ -60,10 +60,13 @@ type V3Info struct {
 	} `json:"links"`
 }
 
-// CFEndpointMetadata stores capability flags detected at registration time
+// CFEndpointMetadata stores capability flags detected at registration time.
+// Assumed=true means both probes failed at registration; values are defaults
+// and will be confirmed when the user first connects.
 type CFEndpointMetadata struct {
 	SupportsV2 bool `json:"supportsV2"`
 	SupportsV3 bool `json:"supportsV3"`
+	Assumed    bool `json:"assumed"`
 }
 
 type EndpointInfo struct {

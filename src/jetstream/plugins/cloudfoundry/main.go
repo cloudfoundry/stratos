@@ -95,7 +95,67 @@ func (c *CloudFoundrySpecification) Connect(ec echo.Context, cnsiRecord api.CNSI
 		cfAdmin = strings.Contains(strings.Join(userTokenInfo.Scope, ""), c.portalProxy.GetConfig().CFAdminIdentifier)
 	}
 
+	// If capability metadata was assumed at registration time, re-probe now that
+	// the endpoint is confirmed reachable and write confirmed values to the DB.
+	c.confirmCapabilityMetadata(cnsiRecord)
+
 	return tokenRecord, cfAdmin, nil
+}
+
+// confirmCapabilityMetadata re-probes /v2/info and /v3/info if the stored
+// metadata was assumed (both probes failed at registration). Writes confirmed
+// values back to the DB so subsequent info requests see real capability flags.
+func (c *CloudFoundrySpecification) confirmCapabilityMetadata(cnsiRecord api.CNSIRecord) {
+	var existing api.CFEndpointMetadata
+	if err := json.Unmarshal([]byte(cnsiRecord.Metadata), &existing); err != nil || !existing.Assumed {
+		return
+	}
+
+	apiEndpoint := cnsiRecord.APIEndpoint.String()
+	h := c.portalProxy.GetHttpClient(cnsiRecord.SkipSSLValidation, cnsiRecord.CACert)
+	confirmed := api.CFEndpointMetadata{}
+
+	uri, err := url.Parse(apiEndpoint)
+	if err != nil {
+		return
+	}
+
+	v2Uri := *uri
+	v2Uri.Path = "v2/info"
+	if res, err := h.Get(v2Uri.String()); err == nil {
+		defer res.Body.Close()
+		if res.StatusCode == 200 {
+			var v2 api.V2Info
+			if json.NewDecoder(res.Body).Decode(&v2) == nil && v2.AuthorizationEndpoint != "" {
+				confirmed.SupportsV2 = true
+			}
+		}
+	}
+
+	v3Uri := *uri
+	v3Uri.Path = "v3/info"
+	if res, err := h.Get(v3Uri.String()); err == nil {
+		defer res.Body.Close()
+		if res.StatusCode == 200 {
+			var v3 api.V3Info
+			if json.NewDecoder(res.Body).Decode(&v3) == nil && v3.Links.Self.Href != "" {
+				confirmed.SupportsV3 = true
+			}
+		}
+	}
+
+	if !confirmed.SupportsV2 && !confirmed.SupportsV3 {
+		// Still unreachable — leave Assumed=true for the next connect attempt
+		return
+	}
+
+	if metaBytes, err := json.Marshal(confirmed); err == nil {
+		if err := c.portalProxy.UpdateEndpointMetadata(cnsiRecord.GUID, string(metaBytes)); err != nil {
+			log.Warnf("CF: could not update capability metadata for %s: %v", cnsiRecord.GUID, err)
+		} else {
+			log.Infof("CF: confirmed capability metadata for %s: v2=%v v3=%v", cnsiRecord.GUID, confirmed.SupportsV2, confirmed.SupportsV3)
+		}
+	}
 }
 
 func (c *CloudFoundrySpecification) Init() error {
@@ -271,9 +331,11 @@ func (c *CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation b
 	}
 
 	if !metadata.SupportsV2 && !metadata.SupportsV3 {
-		// Assume v2 as a conservative fallback (e.g. SSL error during probe)
+		// Probes failed (SSL error, timeout, etc.) — assume v2 conservatively.
+		// Assumed=true signals Connect() to re-probe once the endpoint is reachable.
 		log.Warnf("CF:Info: could not determine API version for %s — assuming v2", apiEndpoint)
 		metadata.SupportsV2 = true
+		metadata.Assumed = true
 	}
 
 	if metaBytes, err := json.Marshal(metadata); err == nil {
