@@ -168,17 +168,21 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
           // Multiple registrations are permitted (different users/operators may each need their own),
           // but the user should know about existing registrations.
           const urlHost = new URL(url).host;
-          this.store.select(endpointEntitiesSelector).pipe(
-            take(1),
-            map(entities => Object.values(entities).filter(e =>
-              e.api_endpoint?.Host === urlHost && e.guid !== result.message
-            ))
-          ).subscribe(dupes => {
-            if (dupes.length > 0) {
-              const names = dupes.map(e => e.name).join(', ');
-              this.snackBarService.show(`Note: '${url}' is also registered as: ${names}`);
-            }
-          });
+          // Delay past the endpoints-page subscription that calls snackBarService.hide()
+          // when endpoint connectivity state updates after registration completes.
+          setTimeout(() => {
+            this.store.select(endpointEntitiesSelector).pipe(
+              take(1),
+              map(entities => Object.values(entities).filter(e =>
+                e.api_endpoint?.Host === urlHost && e.guid !== result.message
+              ))
+            ).subscribe(dupes => {
+              if (dupes.length > 0) {
+                const names = dupes.map(e => e.name).join(', ');
+                this.snackBarService.show(`Note: '${url}' is also registered as: ${names}`, 'Dismiss');
+              }
+            });
+          }, 1500);
         }
         const success = !result.error;
         return {
