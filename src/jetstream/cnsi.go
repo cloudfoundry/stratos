@@ -14,8 +14,7 @@ import (
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 
-	"crypto/sha1"
-	"encoding/base64"
+	"github.com/google/uuid"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/api/config"
@@ -136,58 +135,9 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 		isAdmin = currentCreator.Admin
 	}
 
-	if p.GetConfig().UserEndpointsEnabled == config.UserEndpointsConfigEnum.Disabled {
-		// check if we've already got this endpoint in the DB
-		ok := p.adminCNSIRecordExists(apiEndpoint)
-		if ok {
-			// a record with the same api endpoint was found
-			return api.CNSIRecord{}, api.NewHTTPShadowError(
-				http.StatusBadRequest,
-				"Can not register same endpoint multiple times",
-				"Can not register same endpoint multiple times",
-			)
-		}
-	} else {
-		// get all endpoints determined by the APIEndpoint
-		duplicateEndpoints, err := p.listCNSIByAPIEndpoint(apiEndpoint)
-		if err != nil {
-			return api.CNSIRecord{}, api.NewHTTPShadowError(
-				http.StatusBadRequest,
-				"Failed to check other endpoints",
-				"Failed to check other endpoints: %v",
-				err)
-		}
-		// check if we've already got this APIEndpoint in this DB
-		for _, duplicate := range duplicateEndpoints {
-			// cant create same system endpoint
-			if len(duplicate.Creator) == 0 && isAdmin && createSystemEndpoint {
-				return api.CNSIRecord{}, api.NewHTTPShadowError(
-					http.StatusBadRequest,
-					"Can not register same system endpoint multiple times",
-					"Can not register same system endpoint multiple times",
-				)
-			}
-
-			// cant create same user endpoint
-			if duplicate.Creator == userId {
-				return api.CNSIRecord{}, api.NewHTTPShadowError(
-					http.StatusBadRequest,
-					"Can not register same endpoint multiple times",
-					"Can not register same endpoint multiple times",
-				)
-			}
-		}
-	}
-
-	h := sha1.New()
-	// see why its generated this way in Issue #4753 / #3031
-	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled && (!isAdmin || (isAdmin && !createSystemEndpoint)) {
-		// Make the new guid unique per api url AND user id
-		h.Write([]byte(apiEndpointURL.String() + userId))
-	} else {
-		h.Write([]byte(apiEndpointURL.String()))
-	}
-	guid := base64.RawURLEncoding.EncodeToString(h.Sum(nil))
+	// Multiple registrations of the same URL are permitted — each gets a unique GUID.
+	// A follow-on ticket (FWT-TBD) adds UX warning when a duplicate URL is detected.
+	guid := uuid.New().String()
 
 	newCNSI, _, err := fetchInfo(apiEndpoint, skipSSLValidation, caCert)
 	if err != nil {
