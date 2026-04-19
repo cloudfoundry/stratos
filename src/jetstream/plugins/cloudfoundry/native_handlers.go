@@ -4,7 +4,6 @@ package cloudfoundry
 import (
 	"context"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
@@ -101,54 +100,24 @@ func (c *CloudFoundrySpecification) getNativeOrgs(ctx echo.Context) error {
 		return err
 	}
 
-	params := capi.NewQueryParams().WithPerPage(5000)
+	// Request per_page=1 — home card only needs the count. Detailed org data is
+	// fetched separately (org detail handler) when the user navigates into one.
+	params := capi.NewQueryParams().WithPerPage(1)
 	raw, err := cfClient.Organizations().List(ctx.Request().Context(), params)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
 	}
 
-	// Collect org GUIDs for bulk space fetch (one CF API call instead of N)
-	orgGUIDs := make([]string, 0, len(raw.Resources))
+	orgs := make([]StOrg, 0, len(raw.Resources))
 	for _, r := range raw.Resources {
-		orgGUIDs = append(orgGUIDs, r.GUID)
-	}
-
-	// Build org GUID → spaces index
-	spacesByOrg := make(map[string][]StSpace)
-	if len(orgGUIDs) > 0 {
-		spaceParams := capi.NewQueryParams().WithPerPage(5000).WithFilter("organization_guids", strings.Join(orgGUIDs, ","))
-		spaceRaw, err := cfClient.Spaces().List(ctx.Request().Context(), spaceParams)
-		if err == nil {
-			for _, s := range spaceRaw.Resources {
-				orgGUID := relationshipGUID(s.Relationships.Organization)
-				spacesByOrg[orgGUID] = append(spacesByOrg[orgGUID], StSpace{
-					GUID:      s.GUID,
-					Name:      s.Name,
-					OrgGUID:   orgGUID,
-					CreatedAt: s.CreatedAt.Format(time.RFC3339),
-					UpdatedAt: s.UpdatedAt.Format(time.RFC3339),
-				})
-			}
-		}
-	}
-
-	orgs := make([]StOrgDetail, 0, len(raw.Resources))
-	for _, r := range raw.Resources {
-		spaces := spacesByOrg[r.GUID]
-		if spaces == nil {
-			spaces = []StSpace{}
-		}
-		orgs = append(orgs, StOrgDetail{
-			StOrg: StOrg{
-				GUID:        r.GUID,
-				Name:        r.Name,
-				Status:      "active",
-				Labels:      metaLabels(r.Metadata),
-				Annotations: metaAnnotations(r.Metadata),
-				CreatedAt:   r.CreatedAt.Format(time.RFC3339),
-				UpdatedAt:   r.UpdatedAt.Format(time.RFC3339),
-			},
-			Spaces: spaces,
+		orgs = append(orgs, StOrg{
+			GUID:        r.GUID,
+			Name:        r.Name,
+			Status:      "active",
+			Labels:      metaLabels(r.Metadata),
+			Annotations: metaAnnotations(r.Metadata),
+			CreatedAt:   r.CreatedAt.Format(time.RFC3339),
+			UpdatedAt:   r.UpdatedAt.Format(time.RFC3339),
 		})
 	}
 
@@ -171,26 +140,11 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 		return err
 	}
 
-	// Fetch apps and web processes concurrently — total time = max(apps, processes).
-	// The process goroutine writes instancesByApp; procDone signals it is safe to read.
-	instancesByApp := make(map[string]int)
-	procDone := make(chan struct{})
-	go func() {
-		defer close(procDone)
-		procParams := capi.NewQueryParams().WithPerPage(5000).WithFilter("types", "web")
-		procRaw, err := cfClient.Processes().List(ctx.Request().Context(), procParams)
-		if err == nil {
-			for _, p := range procRaw.Resources {
-				if p.Relationships.App != nil {
-					instancesByApp[relationshipGUID(*p.Relationships.App)] = p.Instances
-				}
-			}
-		}
-	}()
-
-	params := capi.NewQueryParams().WithPerPage(5000)
+	// Request per_page=10 with most-recent-first ordering — home card shows up to
+	// 10 recent apps and the total count. Full app list is fetched separately
+	// when the user navigates to the app wall.
+	params := capi.NewQueryParams().WithPerPage(10).WithOrderBy("-updated_at")
 	raw, err := cfClient.Apps().List(ctx.Request().Context(), params)
-	<-procDone // wait for process data before reading instancesByApp
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
 	}
@@ -202,7 +156,6 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 			Name:      r.Name,
 			State:     r.State,
 			SpaceGUID: relationshipGUID(r.Relationships.Space),
-			Instances: instancesByApp[r.GUID],
 			CreatedAt: r.CreatedAt.Format(time.RFC3339),
 			UpdatedAt: r.UpdatedAt.Format(time.RFC3339),
 		})

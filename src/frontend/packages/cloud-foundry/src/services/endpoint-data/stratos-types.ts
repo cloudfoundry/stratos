@@ -42,14 +42,16 @@ export interface StError {
 }
 
 export interface StEndpointData {
-  orgs: StOrgDetail[];
+  orgs: StOrg[];
+  orgCount: number;
   apps: StApp[];
+  appCount: number;
   routeCount: number;
 }
 
 // Jetstream response shapes
 export interface StOrgsResponse {
-  resources: StOrgDetail[];
+  resources: StOrg[];
   totalResults: number;
 }
 

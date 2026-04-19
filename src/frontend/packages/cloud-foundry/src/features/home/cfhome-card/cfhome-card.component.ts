@@ -121,7 +121,7 @@ export class CFHomeCardComponent implements HomePageEndpointCard, OnDestroy {
       startWith([] as APIResource<IApp>[]),
     );
     this.hasNoApps$ = afterLoad$.pipe(
-      map(() => this.endpointDataService!.apps().length === 0),
+      map(() => this.endpointDataService!.appCount() === 0),
     );
 
     if (this.endpointDataService.lastFetched() !== null) {
