@@ -222,46 +222,63 @@ func (c *CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation b
 	log.Debugf("CF:Info: SkipSSL %t Cert '%s'", skipSSLValidation, caCert)
 	h := c.portalProxy.GetHttpClient(skipSSLValidation, caCert)
 
+	// Probe root endpoint to confirm reachability
 	res, err := h.Get(uri.String())
 	if err != nil {
 		return newCNSI, nil, err
 	}
-
 	if res.StatusCode != 200 {
 		buf := &bytes.Buffer{}
 		io.Copy(buf, res.Body)
-		defer res.Body.Close()
-
+		res.Body.Close()
 		return newCNSI, nil, fmt.Errorf("%s endpoint returned %d\n%s", uri.String(), res.StatusCode, buf)
 	}
-
 	dec := json.NewDecoder(res.Body)
 	if err = dec.Decode(&apiRootResponse); err != nil {
 		return newCNSI, nil, err
 	}
 
-	uri.Path = "v2/info"
+	metadata := api.CFEndpointMetadata{}
 
-	res, err = h.Get(uri.String())
-	if err != nil {
-		return newCNSI, nil, err
-	}
-
-	if res.StatusCode != 200 {
-		buf := &bytes.Buffer{}
-		io.Copy(buf, res.Body)
+	// Probe /v2/info — soft failure; v3-only CFs will 404 here
+	v2Uri := *uri
+	v2Uri.Path = "v2/info"
+	if res, err := h.Get(v2Uri.String()); err == nil {
 		defer res.Body.Close()
-
-		return newCNSI, nil, fmt.Errorf("%s endpoint returned %d\n%s", uri.String(), res.StatusCode, buf)
+		if res.StatusCode == 200 {
+			var v2 api.V2Info
+			if json.NewDecoder(res.Body).Decode(&v2) == nil && v2.AuthorizationEndpoint != "" {
+				metadata.SupportsV2 = true
+				v2InfoResponse = v2
+				newCNSI.TokenEndpoint = v2.TokenEndpoint
+				newCNSI.AuthorizationEndpoint = v2.AuthorizationEndpoint
+				newCNSI.DopplerLoggingEndpoint = v2.DopplerLoggingEndpoint
+			}
+		}
 	}
 
-	dec = json.NewDecoder(res.Body)
-	if err = dec.Decode(&v2InfoResponse); err != nil {
-		return newCNSI, nil, err
+	// Probe /v3/info — soft failure; v2-only CFs will 404 here
+	v3Uri := *uri
+	v3Uri.Path = "v3/info"
+	if res, err := h.Get(v3Uri.String()); err == nil {
+		defer res.Body.Close()
+		if res.StatusCode == 200 {
+			var v3 api.V3Info
+			if json.NewDecoder(res.Body).Decode(&v3) == nil && v3.Links.Self.Href != "" {
+				metadata.SupportsV3 = true
+			}
+		}
 	}
-	newCNSI.TokenEndpoint = v2InfoResponse.TokenEndpoint
-	newCNSI.AuthorizationEndpoint = v2InfoResponse.AuthorizationEndpoint
-	newCNSI.DopplerLoggingEndpoint = v2InfoResponse.DopplerLoggingEndpoint
+
+	if !metadata.SupportsV2 && !metadata.SupportsV3 {
+		// Assume v2 as a conservative fallback (e.g. SSL error during probe)
+		log.Warnf("CF:Info: could not determine API version for %s — assuming v2", apiEndpoint)
+		metadata.SupportsV2 = true
+	}
+
+	if metaBytes, err := json.Marshal(metadata); err == nil {
+		newCNSI.Metadata = string(metaBytes)
+	}
 
 	endpointInfo.ApiRoot = apiRootResponse
 	endpointInfo.V2Info = v2InfoResponse

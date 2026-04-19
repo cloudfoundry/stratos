@@ -49,6 +49,23 @@ type V2Info struct {
 	MinRecommendedCLIVersion string `json:"min_recommended_cli_version"`
 }
 
+// V3Info is the response for the Cloud Foundry /v3/info API
+type V3Info struct {
+	Build string `json:"build"`
+	Name  string `json:"name"`
+	Links struct {
+		Self struct {
+			Href string `json:"href"`
+		} `json:"self"`
+	} `json:"links"`
+}
+
+// CFEndpointMetadata stores capability flags detected at registration time
+type CFEndpointMetadata struct {
+	SupportsV2 bool `json:"supportsV2"`
+	SupportsV3 bool `json:"supportsV3"`
+}
+
 type EndpointInfo struct {
 	ApiRoot ApiRoot
 	V2Info  V2Info
