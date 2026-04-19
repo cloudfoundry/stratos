@@ -103,10 +103,8 @@ test.describe('Home page CF card parallelization', () => {
 
     const cards = page.locator('app-cfhome-card');
     await expect(cards.first()).toBeVisible({ timeout: LOAD_TIMEOUT_MS });
-    if (await cards.count() < 2) {
-      test.skip();
-      return;
-    }
+    // Temporarily removed: skip-if-count<2 guard, to allow testing with the same
+    // endpoint registered twice (simulating multiple endpoints locally).
 
     // Wait for both cards to load
     await expect(cards.nth(0).locator('app-card-number-metric').first())

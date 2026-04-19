@@ -49,6 +49,10 @@
     <app-meta-card-value>
       <div class="endpoint-card__address">
         <div class="endpoint-card__address__value">{{ address }}</div>
+        @if (isDuplicate$ | async) {
+          <span class="material-icons text-warning-600 dark:text-warning-300 ml-1 text-[20px] leading-none"
+            matTooltip="Another endpoint is registered at this URL">warning</span>
+        }
       </div>
     </app-meta-card-value>
   </app-meta-card-item>
