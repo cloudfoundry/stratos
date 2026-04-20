@@ -16,7 +16,7 @@ import {
   IMultiListAction,
   ListConfig,
   ListViewTypes } from '@stratosui/core';
-import { APIResource, IFavoriteMetadata, ListView, UserFavorite } from '@stratosui/store';
+import { APIResource, EndpointModel, IFavoriteMetadata, ListView, UserFavorite } from '@stratosui/store';
 import { IApp } from '../../../../../cf-api.types';
 import { CFAppState } from '../../../../../cf-app-state';
 import { applicationEntityType } from '../../../../../cf-entity-types';
@@ -53,7 +53,7 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
       switchMap(() => this.cfOrgSpaceService.cf.list$),
       take(1),
       map(cfs => {
-        const cfGuid = cfs.length === 1 ? cfs[0].guid : null;
+        const cfGuid = CfAppConfigService.pickInitialCfGuid(cfs);
         this.appsDataSource = new CfAppsDataSource(this.store, this, undefined, undefined, undefined, cfGuid);
         this.cfOrgSpaceService.setInitialValuesFromAction(this.appsDataSource.action, 'cf', 'org', 'space');
         return true;
@@ -157,4 +157,20 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
   getDataSource = (): CfAppsDataSource => this.appsDataSource;
   getMultiFiltersConfigs = (): IListMultiFilterConfig[] => this.multiFilterConfigs;
   getInitialised = (): Observable<boolean> => this.initialised$;
+
+  // CfAppsDataSource → GetAllApplications requires a specific endpointGuid
+  // to fire a backend fetch. When multiple CFs are connected, `cfGuid = null`
+  // means no fetch happens and the app wall renders empty. Pick the first
+  // connected CF as the initial filter so at least one endpoint's apps load;
+  // the user switches between them via the CF filter dropdown. Pre-FWT-934
+  // this also doubled as a collision workaround (same-URL CFs stomped each
+  // other's entity-dict entries) — that part is now handled by composite
+  // keys; this function exists purely as the fetch trigger for the multi-CF
+  // app wall.
+  static pickInitialCfGuid(cfs: EndpointModel[]): string | null {
+    if (cfs.length === 0) {
+      return null;
+    }
+    return cfs[0].guid;
+  }
 }

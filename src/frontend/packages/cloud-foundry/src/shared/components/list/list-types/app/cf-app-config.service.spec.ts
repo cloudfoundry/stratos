@@ -36,3 +36,22 @@ describe('CfAppConfigService', () => {
     expect(service).toBeTruthy();
   });
 });
+
+describe('CfAppConfigService.pickInitialCfGuid', () => {
+  const cf = (guid: string) => ({ guid, name: guid } as unknown as { guid: string; name: string });
+
+  it('returns null when no CFs are connected', () => {
+    expect(CfAppConfigService.pickInitialCfGuid([])).toBeNull();
+  });
+
+  it('returns the sole guid when exactly one CF is connected', () => {
+    expect(CfAppConfigService.pickInitialCfGuid([cf('a') as never])).toBe('a');
+  });
+
+  it('returns the first guid when multiple CFs are connected', () => {
+    // GetAllApplications requires a specific endpointGuid to trigger a fetch;
+    // picking the first gives the app wall a fetch trigger so apps render.
+    // Users switch between endpoints via the CF filter dropdown.
+    expect(CfAppConfigService.pickInitialCfGuid([cf('a') as never, cf('b') as never])).toBe('a');
+  });
+});
