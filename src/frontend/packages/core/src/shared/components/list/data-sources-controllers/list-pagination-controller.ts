@@ -91,7 +91,13 @@ export class ListPaginationController<T> implements IListPaginationController<T>
         ));
       }
 
-      if (paginationEntityState.maxedState.isMaxedMode && !paginationEntityState.maxedState.ignoreMaxed) {
+      // Also fire setMultiFilter on cf scope change, not just in maxed mode:
+      // client-side filter-by-endpointGuid returns zero when duplicate-URL CF
+      // registrations collide on entity keys. Data sources re-scope upstream.
+      const maxed = paginationEntityState.maxedState.isMaxedMode
+        && !paginationEntityState.maxedState.ignoreMaxed;
+      const hasCfChange = Object.prototype.hasOwnProperty.call(cleanChanges, 'cf');
+      if (maxed || hasCfChange) {
         this.dataSource.setMultiFilter(changes, paginationEntityState.params);
       }
 

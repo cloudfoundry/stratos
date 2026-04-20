@@ -16,7 +16,7 @@ import {
   IMultiListAction,
   ListConfig,
   ListViewTypes } from '@stratosui/core';
-import { APIResource, IFavoriteMetadata, ListView, UserFavorite } from '@stratosui/store';
+import { APIResource, EndpointModel, IFavoriteMetadata, ListView, UserFavorite, getFullEndpointApiUrl } from '@stratosui/store';
 import { IApp } from '../../../../../cf-api.types';
 import { CFAppState } from '../../../../../cf-app-state';
 import { applicationEntityType } from '../../../../../cf-entity-types';
@@ -53,7 +53,7 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
       switchMap(() => this.cfOrgSpaceService.cf.list$),
       take(1),
       map(cfs => {
-        const cfGuid = cfs.length === 1 ? cfs[0].guid : null;
+        const cfGuid = CfAppConfigService.pickInitialCfGuid(cfs);
         this.appsDataSource = new CfAppsDataSource(this.store, this, undefined, undefined, undefined, cfGuid);
         this.cfOrgSpaceService.setInitialValuesFromAction(this.appsDataSource.action, 'cf', 'org', 'space');
         return true;
@@ -157,4 +157,23 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
   getDataSource = (): CfAppsDataSource => this.appsDataSource;
   getMultiFiltersConfigs = (): IListMultiFilterConfig[] => this.multiFilterConfigs;
   getInitialised = (): Observable<boolean> => this.initialised$;
+
+  // When multiple CFs are registered at the same URL (e.g. operator + user
+  // views, or testing with different auth contexts), the entity cache keys
+  // apps by guid alone so the two connections' snapshots collide — last
+  // dispatch wins cfGuid. Aggregating them in an "All" view is meaningless:
+  // the two connections represent different permission snapshots of the same
+  // backend. Scope the initial filter to the first connected CF so the view
+  // is coherent; the user can switch via the CF filter dropdown.
+  static pickInitialCfGuid(cfs: EndpointModel[]): string | null {
+    if (cfs.length === 1) {
+      return cfs[0].guid;
+    }
+    const urls = cfs.map(cf => getFullEndpointApiUrl(cf));
+    const hasDuplicateUrl = new Set(urls).size < urls.length;
+    if (hasDuplicateUrl) {
+      return cfs[0].guid;
+    }
+    return null;
+  }
 }
