@@ -74,7 +74,10 @@ export class EndpointDataRegistry implements OnDestroy {
       // details queue so each endpoint's full-data fetch happens after its
       // counts land.
       mergeMap(svc => svc.load().pipe(
-        tap(() => this.detailsQueue$.next(svc)),
+        // load() uses merge() over 3 HTTP calls and emits once per inner
+        // completion, so we can't tap on next() — that would enqueue details
+        // 3 times per card. Fire on complete() only.
+        tap({ complete: () => this.detailsQueue$.next(svc) }),
       ), this.maxConcurrentCards),
     ).subscribe();
   }
