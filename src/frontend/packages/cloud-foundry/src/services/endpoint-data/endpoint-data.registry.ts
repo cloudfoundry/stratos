@@ -2,6 +2,7 @@ import { inject, Injectable, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Subject, Subscription } from 'rxjs';
 import { mergeMap, concatMap, tap } from 'rxjs/operators';
+import { StratosDiagnostics } from '../diagnostics/stratos-diagnostics.service';
 import { EndpointDataService } from './endpoint-data.service';
 import { EndpointDataShim } from './endpoint-data.shim';
 
@@ -14,6 +15,7 @@ interface RegistryEntry {
 export class EndpointDataRegistry implements OnDestroy {
   private readonly http = inject(HttpClient);
   private readonly shim = inject(EndpointDataShim);
+  private readonly diagnostics = inject(StratosDiagnostics);
 
   private readonly instances = new Map<string, RegistryEntry>();
   private readonly cardQueue$ = new Subject<EndpointDataService>();
@@ -48,7 +50,7 @@ export class EndpointDataRegistry implements OnDestroy {
     }
     // EndpointDataService is a plain class (not @Injectable) — DI bypassed by design.
     // If it gains injected deps, they must be added to this constructor call.
-    const service = new EndpointDataService(this.http, this.shim, guid);
+    const service = new EndpointDataService(this.http, this.shim, guid, this.diagnostics);
     this.instances.set(guid, { service, refCount: 1 });
     this.cardQueue$.next(service);
     return service;

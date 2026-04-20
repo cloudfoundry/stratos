@@ -3,6 +3,7 @@ import { HttpClient, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { StratosDiagnostics } from '../diagnostics/stratos-diagnostics.service';
 import { EndpointDataService } from './endpoint-data.service';
 import { EndpointDataShim } from './endpoint-data.shim';
 
@@ -17,6 +18,7 @@ describe('EndpointDataService', () => {
   let httpMock: HttpTestingController;
   let shimSpy: { write: ReturnType<typeof vi.fn> };
   let service: EndpointDataService;
+  let diagnostics: StratosDiagnostics;
 
   beforeEach(() => {
     shimSpy = { write: vi.fn() };
@@ -29,10 +31,13 @@ describe('EndpointDataService', () => {
       ],
     });
     httpMock = TestBed.inject(HttpTestingController);
+    diagnostics = TestBed.inject(StratosDiagnostics);
+    diagnostics.reset();
     service = new EndpointDataService(
       TestBed.inject(HttpClient),
       shimSpy as unknown as EndpointDataShim,
       'test-cnsi-guid',
+      diagnostics,
     );
   });
 
@@ -154,5 +159,30 @@ describe('EndpointDataService', () => {
         spaces: withCnsi(mockSpaces),
       }),
     );
+  });
+
+  it('emits service-call-count + cache-miss on first load, cache-hit on warm second load', async () => {
+    // First load — cold, should be cache-miss
+    service.load().subscribe();
+    httpMock.expectOne(ORGS_URL).flush({ resources: [], totalResults: 0 });
+    httpMock.expectOne(APPS_URL).flush({ resources: [{ guid: 'a1', name: 'A', state: 'STARTED', orgGuid: '', spaceGuid: '', instances: 1, createdAt: '', updatedAt: '' }], totalResults: 1 });
+    httpMock.expectOne(ROUTES_URL).flush({ totalResults: 0 });
+    await Promise.resolve();
+
+    // Second load — warm (lastFetched non-null, recentApps non-empty) — should be cache-hit
+    service.load().subscribe();
+    httpMock.expectOne(ORGS_URL).flush({ resources: [], totalResults: 0 });
+    httpMock.expectOne(APPS_URL).flush({ resources: [], totalResults: 0 });
+    httpMock.expectOne(ROUTES_URL).flush({ totalResults: 0 });
+    await Promise.resolve();
+    await diagnostics.waitForFlush();
+
+    const snap = diagnostics.snapshot();
+    const callCount = snap.counters['service-call-count']?.find(c => c.dimensions.method === 'load');
+    expect(callCount?.count).toBe(2);
+    const miss = snap.counters['cache-miss']?.find(c => c.dimensions.method === 'load');
+    const hit = snap.counters['cache-hit']?.find(c => c.dimensions.method === 'load');
+    expect(miss?.count).toBe(1);
+    expect(hit?.count).toBe(1);
   });
 });

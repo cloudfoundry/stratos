@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { signal, Signal } from '@angular/core';
 import { EMPTY, merge, Observable, ReplaySubject } from 'rxjs';
 import { catchError, finalize, tap, timeout } from 'rxjs/operators';
+import { StratosDiagnostics } from '../diagnostics/stratos-diagnostics.service';
 import { EndpointDataShim } from './endpoint-data.shim';
 import { StApp, StEndpointData, StError, StOrg, StSpace } from './stratos-types';
 
@@ -46,12 +47,22 @@ export class EndpointDataService {
     private readonly http: HttpClient,
     private readonly shim: EndpointDataShim,
     readonly guid: string,
+    private readonly diagnostics?: StratosDiagnostics,
   ) {}
 
   // load() populates counts + the 10 most-recent apps via fast per_page=1/10
   // backend calls. Fires loadDetails() in the background on completion so
   // the full orgs/apps/spaces arrays are populated for detail views.
   load(): Observable<void> {
+    this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'load' });
+    // Cache hit when we already have counts populated — the home card is
+    // driven entirely by recentApps + counts, so a warm signal means no
+    // network work is needed.
+    if (this._lastFetched() !== null && this._recentApps().length > 0) {
+      this.diagnostics?.emitCounter('cache-hit', { service: 'EndpointDataService', method: 'load' });
+    } else {
+      this.diagnostics?.emitCounter('cache-miss', { service: 'EndpointDataService', method: 'load' });
+    }
     this._isLoading.set(true);
     this._errors.set([]);
 
@@ -88,6 +99,12 @@ export class EndpointDataService {
   // loadDetails() fetches the full orgs/apps/spaces lists (paginated
   // server-side) for detail views and NGRX populate.
   loadDetails(): Observable<void> {
+    this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'loadDetails' });
+    if (this._detailsLastFetched() !== null && this._orgs().length > 0) {
+      this.diagnostics?.emitCounter('cache-hit', { service: 'EndpointDataService', method: 'loadDetails' });
+    } else {
+      this.diagnostics?.emitCounter('cache-miss', { service: 'EndpointDataService', method: 'loadDetails' });
+    }
     this._isLoadingDetails.set(true);
 
     return merge(
