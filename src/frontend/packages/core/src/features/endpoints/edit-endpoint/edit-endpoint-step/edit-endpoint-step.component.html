@@ -18,7 +18,7 @@
         </app-form-field>
         <app-checkbox appInput id="skipSSL" name="skipSSL" formControlName="skipSSL">Skip SSL validation for the endpoint
         </app-checkbox>
-        <app-checkbox appInput id="useCACert" checked="showCACertField" (change)="toggleCACertField()">Use a CA Certificate for the endpoint</app-checkbox>
+        <app-checkbox appInput id="useCACert" [checked]="showCACertField" (change)="toggleCACertField()">Use a CA Certificate for the endpoint</app-checkbox>
         <div [ngClass]="{'edit-endpoint__shown': showCACertField}" class="edit-endpoint__advanced" spellcheck=false>
           <span class="edit-endpoint__cacert-title text-sm font-medium" style="color: var(--content-text);">Specify CA Certificate:</span>
           <textarea rows="10" class="edit-endpoint__cacert input font-mono text-sm" style="background-color: var(--input-bg); border-color: var(--input-border); color: var(--input-text);" appInput formControlName="caCert" name="caCert"></textarea>
