@@ -111,4 +111,20 @@ describe('EndpointDataShim', () => {
     expect(keys).toContain('applicationWall');
     expect(keys).toContain('spaces-bulk-cnsi-1');
   });
+
+  it('emits entity-size-sample per dispatched entity via StratosDiagnostics', async () => {
+    const { StratosDiagnostics } = await import('../diagnostics/stratos-diagnostics.service');
+    const diagnostics = TestBed.inject(StratosDiagnostics);
+    diagnostics.reset();
+    shim.write('cnsi-1', { ...empty(), orgs: [org], orgCount: 1, apps: [app], appCount: 1, spaces: [space] });
+    await diagnostics.waitForFlush();
+    const samples = diagnostics.snapshot().samples['entity-size-sample'] ?? [];
+    const orgSamples = samples.filter(s => s.dimensions.entityType === 'organization' && s.dimensions.cnsiGuid === 'cnsi-1');
+    const appSamples = samples.filter(s => s.dimensions.entityType === 'application' && s.dimensions.cnsiGuid === 'cnsi-1');
+    const spaceSamples = samples.filter(s => s.dimensions.entityType === 'space' && s.dimensions.cnsiGuid === 'cnsi-1');
+    expect(orgSamples).toHaveLength(1);
+    expect(appSamples).toHaveLength(1);
+    expect(spaceSamples).toHaveLength(1);
+    expect(orgSamples[0].value).toBeGreaterThan(0);
+  });
 });

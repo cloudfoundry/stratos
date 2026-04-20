@@ -17,6 +17,7 @@ import {
 } from '../../cf-entity-types';
 import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../entity-relations/entity-relations.types';
 import { cfEntityId } from '../../cf-entity-ref';
+import { StratosDiagnostics } from '../diagnostics/stratos-diagnostics.service';
 import { StApp, StEndpointData, StOrg, StSpace } from './stratos-types';
 
 const APP_WALL_PAGINATION_KEY = 'applicationWall';
@@ -42,6 +43,7 @@ const APP_RELATIONS = [
 @Injectable({ providedIn: 'root' })
 export class EndpointDataShim {
   private readonly store = inject(Store);
+  private readonly diagnostics = inject(StratosDiagnostics);
 
   write(cnsiGuid: string, data: StEndpointData): void {
     // No empty-array guard: "really empty" (e.g. CF with zero orgs, or all rows
@@ -70,8 +72,10 @@ export class EndpointDataShim {
     const result: string[] = [];
     for (const org of orgs) {
       const id = cfEntityId({ cnsiGuid, entityGuid: org.guid });
-      entities[id] = this.toOrgResource(org, cnsiGuid);
+      const resource = this.toOrgResource(org, cnsiGuid);
+      entities[id] = resource;
       result.push(id);
+      this.emitSize('organization', cnsiGuid, resource);
     }
     const response: NormalizedResponse = {
       entities: { [ORG_ENTITY_KEY]: entities },
@@ -89,8 +93,10 @@ export class EndpointDataShim {
     const result: string[] = [];
     for (const app of apps) {
       const id = cfEntityId({ cnsiGuid, entityGuid: app.guid });
-      entities[id] = this.toAppResource(app, cnsiGuid);
+      const resource = this.toAppResource(app, cnsiGuid);
+      entities[id] = resource;
       result.push(id);
+      this.emitSize('application', cnsiGuid, resource);
     }
     const response: NormalizedResponse = {
       entities: { [APP_ENTITY_KEY]: entities },
@@ -109,14 +115,21 @@ export class EndpointDataShim {
     const result: string[] = [];
     for (const space of spaces) {
       const id = cfEntityId({ cnsiGuid, entityGuid: space.guid });
-      entities[id] = this.toSpaceResource(space, cnsiGuid);
+      const resource = this.toSpaceResource(space, cnsiGuid);
+      entities[id] = resource;
       result.push(id);
+      this.emitSize('space', cnsiGuid, resource);
     }
     const response: NormalizedResponse = {
       entities: { [SPACE_ENTITY_KEY]: entities },
       result,
     };
     this.store.dispatch(new WrapperRequestActionSuccess(response, action, 'fetch', spaces.length, 1));
+  }
+
+  private emitSize(entityType: string, cnsiGuid: string, resource: APIResource<unknown>): void {
+    const bytes = JSON.stringify(resource).length;
+    this.diagnostics.emitSample('entity-size-sample', { entityType, cnsiGuid }, bytes);
   }
 
   private toOrgResource(org: StOrg, cnsiGuid: string): APIResource<IOrganization> {
