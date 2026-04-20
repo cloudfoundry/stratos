@@ -50,6 +50,7 @@ type MockEndpointRequest struct {
 	HTTPTestServer *httptest.Server
 	EchoContext    echo.Context
 	EndpointName   string
+	GUID           string
 	InsertArgs     []driver.Value
 	QueryArgs      []driver.Value
 }
@@ -293,10 +294,16 @@ func setupMockEndpointRegisterRequest(t *testing.T, user *api.ConnectedUser, moc
 		h.Write([]byte(mockV2Info.URL + user.GUID))
 		uaaUserGUID = user.GUID
 	}
-	insertArgs := []driver.Value{base64.RawURLEncoding.EncodeToString(h.Sum(nil)), endpointName, "cf", mockV2Info.URL, mockAuthEndpoint, mockTokenEndpoint, mockDopplerEndpoint, true, mockClientId, sqlmock.AnyArg(), false, "", "", uaaUserGUID, ""}
-	queryArgs := []driver.Value{base64.RawURLEncoding.EncodeToString(h.Sum(nil)), endpointName, "cf", mockV2Info.URL, mockAuthEndpoint, mockTokenEndpoint, mockDopplerEndpoint, true, mockClientId, cipherClientSecret, false, "", "", uaaUserGUID, ""}
+	legacyGUID := base64.RawURLEncoding.EncodeToString(h.Sum(nil))
+	// Production now generates a random UUID per registration (9a0207f16d); SHA1 GUID is no
+	// longer emitted, so we can't predict the exact GUID string — use AnyArg. The meta_data
+	// column (position 12) carries the capability-detection JSON (supportsV2/V3/assumed
+	// triple from e238c315b0); its precise value depends on what the CF plugin probes during
+	// registration, so we match it with AnyArg too.
+	insertArgs := []driver.Value{sqlmock.AnyArg(), endpointName, "cf", mockV2Info.URL, mockAuthEndpoint, mockTokenEndpoint, mockDopplerEndpoint, true, mockClientId, sqlmock.AnyArg(), false, "", sqlmock.AnyArg(), uaaUserGUID, ""}
+	queryArgs := []driver.Value{legacyGUID, endpointName, "cf", mockV2Info.URL, mockAuthEndpoint, mockTokenEndpoint, mockDopplerEndpoint, true, mockClientId, cipherClientSecret, false, "", "", uaaUserGUID, ""}
 
-	return MockEndpointRequest{mockV2Info, ctx, endpointName, insertArgs, queryArgs}
+	return MockEndpointRequest{mockV2Info, ctx, endpointName, legacyGUID, insertArgs, queryArgs}
 }
 
 func msRoute(route string) mockServerFunc {
@@ -334,6 +341,13 @@ func setupMockEndpointServer(t *testing.T) *httptest.Server {
 
 		} else if r.URL.Path == "/v2/info" {
 			responseBody, err = json.Marshal(mockV2InfoResponse)
+
+		} else if r.URL.Path == "/v3/info" {
+			// CF plugin (e238c315b0) now probes /v3/info during capability detection.
+			// Return 404 silently so supportsV3 resolves to false in the tests that use
+			// this mock — they only care about v2-era registration behavior.
+			w.WriteHeader(http.StatusNotFound)
+			return
 
 		} else {
 			t.Errorf("No API Setup path / or /v1/info, got path '%s'", r.URL.Path)
