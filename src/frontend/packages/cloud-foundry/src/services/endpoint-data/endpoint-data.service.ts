@@ -62,7 +62,7 @@ export class EndpointDataService {
       ),
       this.http.get<{ resources: StApp[]; totalResults: number }>(`/pp/v1/cf/apps/${this.guid}?return=recent`).pipe(
         tap(resp => {
-          this._recentApps.set(resp.resources);
+          this._recentApps.set(resp.resources.map(app => ({ ...app, cnsiGuid: this.guid })));
           this._appCount.set(resp.totalResults);
         }),
         catchError(err => { this.addError('apps', err); return EMPTY; }),
@@ -93,20 +93,20 @@ export class EndpointDataService {
     return merge(
       this.http.get<{ resources: StOrg[]; totalResults: number }>(`/pp/v1/cf/orgs/${this.guid}`).pipe(
         tap(resp => {
-          this._orgs.set(resp.resources);
+          this._orgs.set(resp.resources.map(org => ({ ...org, cnsiGuid: this.guid })));
           this._orgCount.set(resp.totalResults);
         }),
         catchError(err => { this.addError('orgs-full', err); return EMPTY; }),
       ),
       this.http.get<{ resources: StApp[]; totalResults: number }>(`/pp/v1/cf/apps/${this.guid}`).pipe(
         tap(resp => {
-          this._apps.set(resp.resources);
+          this._apps.set(resp.resources.map(app => ({ ...app, cnsiGuid: this.guid })));
           this._appCount.set(resp.totalResults);
         }),
         catchError(err => { this.addError('apps-full', err); return EMPTY; }),
       ),
       this.http.get<{ resources: StSpace[]; totalResults: number }>(`/pp/v1/cf/spaces/${this.guid}`).pipe(
-        tap(resp => this._spaces.set(resp.resources)),
+        tap(resp => this._spaces.set(resp.resources.map(space => ({ ...space, cnsiGuid: this.guid })))),
         catchError(err => { this.addError('spaces-full', err); return EMPTY; }),
       ),
     ).pipe(

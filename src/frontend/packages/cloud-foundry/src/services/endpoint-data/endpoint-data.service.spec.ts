@@ -73,7 +73,7 @@ describe('EndpointDataService', () => {
     expect(service.orgCount()).toBe(56);
     expect(service.appCount()).toBe(123);
     expect(service.routeCount()).toBe(47);
-    expect(service.recentApps()).toEqual(mockRecentApps);
+    expect(service.recentApps()).toEqual(mockRecentApps.map(a => ({ ...a, cnsiGuid: 'test-cnsi-guid' })));
     // load() does not populate the full arrays — that's loadDetails()'s job.
     expect(service.orgs()).toEqual([]);
     expect(service.apps()).toEqual([]);
@@ -121,6 +121,9 @@ describe('EndpointDataService', () => {
   });
 
   it('loadDetails() populates full orgs, apps, spaces and fires shim.write', async () => {
+    // HTTP responses from Jetstream don't carry cnsiGuid today — the service
+    // injects it per-resource (Stratos contract direction, FWT-934) so every
+    // entity carries cnsiGuid as a first-class field downstream.
     const mockOrgs = [{ guid: 'org-1', name: 'Org One', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '' }];
     const mockApps = [
       { guid: 'app-1', name: 'App One', state: 'STARTED', orgGuid: '', spaceGuid: 'sp-1', instances: 1, createdAt: '', updatedAt: '' },
@@ -129,15 +132,16 @@ describe('EndpointDataService', () => {
     const mockSpaces = [
       { guid: 'sp-1', name: 'Space One', orgGuid: 'org-1', createdAt: '', updatedAt: '' },
     ];
+    const withCnsi = <T>(arr: T[]) => arr.map(item => ({ ...item, cnsiGuid: 'test-cnsi-guid' }));
     service.loadDetails().subscribe();
     expect(service.isLoadingDetails()).toBeTruthy();
     httpMock.expectOne(ORGS_FULL_URL).flush({ resources: mockOrgs, totalResults: 1 });
     httpMock.expectOne(APPS_FULL_URL).flush({ resources: mockApps, totalResults: 2 });
     httpMock.expectOne(SPACES_FULL_URL).flush({ resources: mockSpaces, totalResults: 1 });
     await Promise.resolve();
-    expect(service.orgs()).toEqual(mockOrgs);
-    expect(service.apps()).toEqual(mockApps);
-    expect(service.spaces()).toEqual(mockSpaces);
+    expect(service.orgs()).toEqual(withCnsi(mockOrgs));
+    expect(service.apps()).toEqual(withCnsi(mockApps));
+    expect(service.spaces()).toEqual(withCnsi(mockSpaces));
     expect(service.orgCount()).toBe(1);
     expect(service.appCount()).toBe(2);
     expect(service.isLoadingDetails()).toBeFalsy();
@@ -145,9 +149,9 @@ describe('EndpointDataService', () => {
     expect(shimSpy.write).toHaveBeenCalledWith(
       'test-cnsi-guid',
       expect.objectContaining({
-        orgs: mockOrgs, orgCount: 1,
-        apps: mockApps, appCount: 2,
-        spaces: mockSpaces,
+        orgs: withCnsi(mockOrgs), orgCount: 1,
+        apps: withCnsi(mockApps), appCount: 2,
+        spaces: withCnsi(mockSpaces),
       }),
     );
   });

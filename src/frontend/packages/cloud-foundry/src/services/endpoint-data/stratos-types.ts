@@ -8,6 +8,7 @@ export interface StOrg {
   annotations: Record<string, string>;
   createdAt: string;
   updatedAt: string;
+  cnsiGuid: string;
 }
 
 export interface StApp {
@@ -19,6 +20,7 @@ export interface StApp {
   instances: number;
   createdAt: string;
   updatedAt: string;
+  cnsiGuid: string;
 }
 
 export interface StSpace {
@@ -27,6 +29,7 @@ export interface StSpace {
   orgGuid: string;
   createdAt: string;
   updatedAt: string;
+  cnsiGuid: string;
 }
 
 export interface StOrgDetail extends StOrg {

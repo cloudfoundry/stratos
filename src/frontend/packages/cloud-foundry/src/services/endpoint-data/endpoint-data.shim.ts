@@ -16,6 +16,7 @@ import {
   spaceEntityType,
 } from '../../cf-entity-types';
 import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../entity-relations/entity-relations.types';
+import { cfEntityId } from '../../cf-entity-ref';
 import { StApp, StEndpointData, StOrg, StSpace } from './stratos-types';
 
 const APP_WALL_PAGINATION_KEY = 'applicationWall';
@@ -48,14 +49,14 @@ export class EndpointDataShim {
     // pagination state. The service only calls this from loadDetails().finalize,
     // so arrays reflect the real state of the full-list fetch at that moment.
     //
-    // Apps are intentionally NOT dispatched here. The app wall uses a single
-    // shared pagination key ('applicationWall') and aggregates entities across
-    // all connected CF endpoints. Our per-endpoint dispatch collides on that
-    // shared slot — second endpoint's dispatch overwrites the first's entities,
-    // breaking multi-endpoint semantics. App wall's existing multi-endpoint
-    // fetch path handles aggregation correctly; leaving it alone keeps that
-    // working while still giving the orgs + spaces cache-hit wins.
+    // FWT-934: entity dictionary keys are now cnsiGuid:guid composite, so
+    // multi-endpoint dispatches no longer collide. Apps are dispatched through
+    // the shim as well — the shared 'applicationWall' pagination key still
+    // aggregates across endpoints, but entities live under distinct composite
+    // keys so the cross-endpoint collision bug `24014431d7` worked around is
+    // gone.
     this.dispatchOrgs(cnsiGuid, data.orgs);
+    this.dispatchApps(cnsiGuid, data.apps);
     this.dispatchSpaces(cnsiGuid, data.spaces);
   }
 
@@ -68,8 +69,9 @@ export class EndpointDataShim {
     const entities: Record<string, APIResource<IOrganization>> = {};
     const result: string[] = [];
     for (const org of orgs) {
-      entities[org.guid] = this.toOrgResource(org, cnsiGuid);
-      result.push(org.guid);
+      const id = cfEntityId({ cnsiGuid, entityGuid: org.guid });
+      entities[id] = this.toOrgResource(org, cnsiGuid);
+      result.push(id);
     }
     const response: NormalizedResponse = {
       entities: { [ORG_ENTITY_KEY]: entities },
@@ -86,8 +88,9 @@ export class EndpointDataShim {
     const entities: Record<string, APIResource<IApp>> = {};
     const result: string[] = [];
     for (const app of apps) {
-      entities[app.guid] = this.toAppResource(app, cnsiGuid);
-      result.push(app.guid);
+      const id = cfEntityId({ cnsiGuid, entityGuid: app.guid });
+      entities[id] = this.toAppResource(app, cnsiGuid);
+      result.push(id);
     }
     const response: NormalizedResponse = {
       entities: { [APP_ENTITY_KEY]: entities },
@@ -105,8 +108,9 @@ export class EndpointDataShim {
     const entities: Record<string, APIResource<ISpace>> = {};
     const result: string[] = [];
     for (const space of spaces) {
-      entities[space.guid] = this.toSpaceResource(space, cnsiGuid);
-      result.push(space.guid);
+      const id = cfEntityId({ cnsiGuid, entityGuid: space.guid });
+      entities[id] = this.toSpaceResource(space, cnsiGuid);
+      result.push(id);
     }
     const response: NormalizedResponse = {
       entities: { [SPACE_ENTITY_KEY]: entities },

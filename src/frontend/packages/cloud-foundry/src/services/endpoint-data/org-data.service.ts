@@ -28,13 +28,17 @@ export class OrgDataService {
 
     return merge(
       this.http.get<StOrgDetail>(`/pp/v1/cf/org/${this.cnsiGuid}/${this.orgGuid}`).pipe(
-        tap(org => this._org.set(org)),
+        tap(org => this._org.set({
+          ...org,
+          cnsiGuid: this.cnsiGuid,
+          spaces: (org.spaces ?? []).map(space => ({ ...space, cnsiGuid: this.cnsiGuid })),
+        })),
         catchError(err => { this.addError('org', err); return EMPTY; }),
       ),
       this.http.get<{ resources: StSpace[]; totalResults: number }>(
         `/pp/v1/cf/org/${this.cnsiGuid}/${this.orgGuid}/spaces`,
       ).pipe(
-        tap(resp => this._spaces.set(resp.resources)),
+        tap(resp => this._spaces.set(resp.resources.map(space => ({ ...space, cnsiGuid: this.cnsiGuid })))),
         catchError(err => { this.addError('spaces', err); return EMPTY; }),
       ),
     ).pipe(
