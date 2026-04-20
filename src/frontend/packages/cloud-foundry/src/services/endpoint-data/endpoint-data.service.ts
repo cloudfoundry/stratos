@@ -76,7 +76,10 @@ export class EndpointDataService {
       finalize(() => {
         this._isLoading.set(false);
         this._lastFetched.set(new Date());
-        this.shim.write(this.guid, this.currentData());
+        // Shim write-through is intentionally NOT called here. Counts + recent
+        // apps populate service signals for the home card directly; the NGRX
+        // pagination store only needs the full lists, which loadDetails()
+        // dispatches via shim.write() in its own finalize().
         this.loaded$.next();
       }),
     ) as Observable<void>;

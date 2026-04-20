@@ -111,21 +111,13 @@ describe('EndpointDataService', () => {
     expect(service.orgCount()).toBe(56);
   });
 
-  it('calls shim.write() with currentData() when load completes', async () => {
+  it('does NOT call shim.write() from load() — only loadDetails() dispatches to the store', async () => {
     service.load().subscribe();
     httpMock.expectOne(ORGS_URL).flush({ resources: [], totalResults: 0 });
     httpMock.expectOne(APPS_URL).flush({ resources: [], totalResults: 0 });
     httpMock.expectOne(ROUTES_URL).flush({ totalResults: 0 });
     await Promise.resolve();
-    expect(shimSpy.write).toHaveBeenCalledWith(
-      'test-cnsi-guid',
-      expect.objectContaining({
-        orgs: [], orgCount: 0,
-        apps: [], recentApps: [], appCount: 0,
-        spaces: [],
-        routeCount: 0,
-      }),
-    );
+    expect(shimSpy.write).not.toHaveBeenCalled();
   });
 
   it('loadDetails() populates full orgs, apps, spaces and fires shim.write', async () => {
