@@ -190,7 +190,6 @@ func TestRegisterCFClusterButCantSaveCNSIRecord(t *testing.T) {
 	}
 }
 func TestListCNSIs(t *testing.T) {
-	t.Skip("TODO: fix this test")
 	t.Parallel()
 
 	req := setupMockReq("GET", "", nil)
