@@ -140,3 +140,22 @@ export { TableCellAppInstancesComponent } from './shared/components/list/list-ty
 export { TableCellAppStatusComponent } from './shared/components/list/list-types/app/table-cell-app-status/table-cell-app-status.component';
 export { TableCellRouteComponent } from './shared/components/list/list-types/cf-routes/table-cell-route/table-cell-route.component';
 export { TableCellTCPRouteComponent } from './shared/components/list/list-types/cf-routes/table-cell-tcproute/table-cell-tcproute.component';
+
+// FWT-934 entity-key namespacing + diagnostics channel
+export { cfEntityId, parseCfEntityId, isComposite } from './cf-entity-ref';
+export type { CFEntityRef, CFEntityId } from './cf-entity-ref';
+export { selectCFEntity, selectCFEntities } from './selectors/cf-entity.selectors';
+export { StratosDiagnostics } from './services/diagnostics/stratos-diagnostics.service';
+export { BareGuidLookupGuard } from './services/diagnostics/bare-guid-lookup-guard';
+export { cfApiInterceptor } from './interceptors/cf-api-interceptor';
+export {
+  DIAGNOSTIC_CODE_FAMILIES,
+  isDiagnosticCode,
+} from './services/diagnostics/diagnostics.types';
+export type {
+  DiagnosticCode,
+  DiagnosticCounter,
+  DiagnosticSample,
+  DiagnosticsQueryOptions,
+  DiagnosticsSnapshotEnvelope,
+} from './services/diagnostics/diagnostics.types';
