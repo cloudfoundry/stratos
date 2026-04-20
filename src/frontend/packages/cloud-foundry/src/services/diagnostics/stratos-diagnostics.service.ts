@@ -33,8 +33,23 @@ export class StratosDiagnostics {
   );
 
   constructor() {
-    if (isDevMode()) {
-      const w = globalThis as unknown as { stratosDiagnostics?: unknown };
+    // Bind to window in dev mode always, and in prod builds when the caller
+    // opts in via localStorage flag. FWT-934 adepttech is our test environment;
+    // `localStorage.setItem('stratos.diagnostics', 'on')` from a browser DevTools
+    // console turns this on without needing a dev-build. Pre-prod-launch we'll
+    // tighten this gate or remove the prod-build path entirely.
+    const w = globalThis as unknown as {
+      stratosDiagnostics?: unknown;
+      localStorage?: { getItem: (k: string) => string | null };
+    };
+    const optedIn = (() => {
+      try {
+        return w.localStorage?.getItem('stratos.diagnostics') === 'on';
+      } catch {
+        return false;
+      }
+    })();
+    if (isDevMode() || optedIn) {
       w.stratosDiagnostics = {
         snapshot: () => this.snapshot(),
         reset: () => this.reset(),

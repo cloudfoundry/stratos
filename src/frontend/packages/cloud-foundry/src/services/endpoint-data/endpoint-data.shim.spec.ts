@@ -67,9 +67,9 @@ describe('EndpointDataShim', () => {
     dispatchSpy = vi.spyOn(store, 'dispatch').mockImplementation(() => undefined) as unknown as ReturnType<typeof vi.fn>;
   });
 
-  it('dispatches 3 actions (orgs + apps + spaces) even when all arrays are empty (clears stale state)', () => {
+  it('dispatches 2 actions (orgs + spaces) even when all arrays are empty (clears stale state)', () => {
     shim.write('cnsi-1', empty());
-    expect(dispatchSpy).toHaveBeenCalledTimes(3);
+    expect(dispatchSpy).toHaveBeenCalledTimes(2);
     const orgDispatch = dispatchSpy.mock.calls[0][0];
     expect(orgDispatch.response.result).toEqual([]);
     expect(orgDispatch.totalResults).toBe(0);
@@ -87,14 +87,14 @@ describe('EndpointDataShim', () => {
     expect(action.totalPages).toBe(1);
   });
 
-  it('dispatches apps through the shim under composite keys (workaround retired)', () => {
+  it('does NOT dispatch apps — the app wall manages its own multi-endpoint aggregation', () => {
+    // Composite keys (FWT-934) fix the entity-dictionary collision that made
+    // the 24014431d7 workaround necessary, but the shared 'applicationWall'
+    // pagination key is still last-write-wins across per-CF dispatches. The
+    // app wall's native fetch path is the right owner of that page.
     shim.write('cnsi-1', { ...empty(), apps: [app], appCount: 1 });
-    const appDispatch = dispatchSpy.mock.calls.find(c => c[0].apiAction?.paginationKey === 'applicationWall');
-    expect(appDispatch).toBeDefined();
-    const action = appDispatch![0];
-    expect(action.response.entities.cfApplication['cnsi-1:app-1']).toBeDefined();
-    expect(action.response.entities.cfApplication['cnsi-1:app-1'].entity.name).toBe('App One');
-    expect(action.response.result).toEqual(['cnsi-1:app-1']);
+    const appDispatches = dispatchSpy.mock.calls.filter(c => c[0].apiAction?.paginationKey === 'applicationWall');
+    expect(appDispatches).toHaveLength(0);
   });
 
   it('dispatches a spaces WrapperRequestActionSuccess with composite keys under synthetic pagination key', () => {
@@ -103,13 +103,13 @@ describe('EndpointDataShim', () => {
     expect(action.response.entities.cfSpace['cnsi-1:space-1'].entity.organization_guid).toBe('org-1');
   });
 
-  it('always dispatches orgs + apps + spaces regardless of data presence', () => {
+  it('always dispatches orgs + spaces (no apps) regardless of data presence', () => {
     shim.write('cnsi-1', { ...empty(), orgs: [org], orgCount: 1, apps: [app], appCount: 1, spaces: [space] });
-    expect(dispatchSpy).toHaveBeenCalledTimes(3);
+    expect(dispatchSpy).toHaveBeenCalledTimes(2);
     const keys = dispatchSpy.mock.calls.map(c => c[0].apiAction?.paginationKey);
     expect(keys).toContain('endpoint-cnsi-1');
-    expect(keys).toContain('applicationWall');
     expect(keys).toContain('spaces-bulk-cnsi-1');
+    expect(keys).not.toContain('applicationWall');
   });
 
   it('emits entity-size-sample per dispatched entity via StratosDiagnostics', async () => {
@@ -120,10 +120,8 @@ describe('EndpointDataShim', () => {
     await diagnostics.waitForFlush();
     const samples = diagnostics.snapshot().samples['entity-size-sample'] ?? [];
     const orgSamples = samples.filter(s => s.dimensions.entityType === 'organization' && s.dimensions.cnsiGuid === 'cnsi-1');
-    const appSamples = samples.filter(s => s.dimensions.entityType === 'application' && s.dimensions.cnsiGuid === 'cnsi-1');
     const spaceSamples = samples.filter(s => s.dimensions.entityType === 'space' && s.dimensions.cnsiGuid === 'cnsi-1');
     expect(orgSamples).toHaveLength(1);
-    expect(appSamples).toHaveLength(1);
     expect(spaceSamples).toHaveLength(1);
     expect(orgSamples[0].value).toBeGreaterThan(0);
   });

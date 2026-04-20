@@ -1,30 +1,27 @@
 import { Injectable, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { select, Store } from '@ngrx/store';
+import { take } from 'rxjs/operators';
 import { endpointEntityType } from '@stratosui/store';
 import { APIResource, NormalizedResponse } from '../../../../store/src/types/api.types';
 import { WrapperRequestActionSuccess } from '../../../../store/src/types/request.types';
-import { IApp, IOrganization, ISpace } from '../../cf-api.types';
+import { IOrganization, ISpace } from '../../cf-api.types';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { getCFEntityKey } from '../../cf-entity-helpers';
 import {
-  applicationEntityType,
   domainEntityType,
   organizationEntityType,
   privateDomainsEntityType,
   quotaDefinitionEntityType,
-  routeEntityType,
   spaceEntityType,
 } from '../../cf-entity-types';
 import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../entity-relations/entity-relations.types';
 import { cfEntityId } from '../../cf-entity-ref';
 import { StratosDiagnostics } from '../diagnostics/stratos-diagnostics.service';
-import { StApp, StEndpointData, StOrg, StSpace } from './stratos-types';
+import { StEndpointData, StOrg, StSpace } from './stratos-types';
 
-const APP_WALL_PAGINATION_KEY = 'applicationWall';
 const SPACES_BULK_PAGINATION_PREFIX = 'spaces-bulk';
 
 const ORG_ENTITY_KEY = getCFEntityKey(organizationEntityType);
-const APP_ENTITY_KEY = getCFEntityKey(applicationEntityType);
 const SPACE_ENTITY_KEY = getCFEntityKey(spaceEntityType);
 
 const ORG_RELATIONS = [
@@ -32,12 +29,6 @@ const ORG_RELATIONS = [
   createEntityRelationKey(organizationEntityType, domainEntityType),
   createEntityRelationKey(organizationEntityType, quotaDefinitionEntityType),
   createEntityRelationKey(organizationEntityType, privateDomainsEntityType),
-];
-
-const APP_RELATIONS = [
-  createEntityRelationKey(applicationEntityType, spaceEntityType),
-  createEntityRelationKey(spaceEntityType, organizationEntityType),
-  createEntityRelationKey(applicationEntityType, routeEntityType),
 ];
 
 @Injectable({ providedIn: 'root' })
@@ -51,14 +42,15 @@ export class EndpointDataShim {
     // pagination state. The service only calls this from loadDetails().finalize,
     // so arrays reflect the real state of the full-list fetch at that moment.
     //
-    // FWT-934: entity dictionary keys are now cnsiGuid:guid composite, so
-    // multi-endpoint dispatches no longer collide. Apps are dispatched through
-    // the shim as well — the shared 'applicationWall' pagination key still
-    // aggregates across endpoints, but entities live under distinct composite
-    // keys so the cross-endpoint collision bug `24014431d7` worked around is
-    // gone.
+    // Apps are intentionally NOT dispatched here. The app wall uses a single
+    // shared pagination key ('applicationWall') that aggregates across all
+    // connected CF endpoints. Per-endpoint shim dispatch would overwrite the
+    // shared slot last-write-wins (totalResults + page IDs) even though FWT-934
+    // composite keys protect the entity dictionary. App-wall's existing
+    // multi-endpoint fetch path handles aggregation correctly — leave it alone.
+    // The orgs + spaces shim dispatches use per-cnsi pagination keys, so they
+    // don't share the overwrite hazard.
     this.dispatchOrgs(cnsiGuid, data.orgs);
-    this.dispatchApps(cnsiGuid, data.apps);
     this.dispatchSpaces(cnsiGuid, data.spaces);
   }
 
@@ -77,32 +69,12 @@ export class EndpointDataShim {
       result.push(id);
       this.emitSize('organization', cnsiGuid, resource);
     }
+    this.detectCollisions('organization', ORG_ENTITY_KEY, cnsiGuid, result);
     const response: NormalizedResponse = {
       entities: { [ORG_ENTITY_KEY]: entities },
       result,
     };
     this.store.dispatch(new WrapperRequestActionSuccess(response, action, 'fetch', orgs.length, 1));
-  }
-
-  private dispatchApps(cnsiGuid: string, apps: StApp[]): void {
-    const action = cfEntityCatalog.application.actions.getMultiple(cnsiGuid, APP_WALL_PAGINATION_KEY, {
-      includeRelations: APP_RELATIONS,
-      populateMissing: false,
-    });
-    const entities: Record<string, APIResource<IApp>> = {};
-    const result: string[] = [];
-    for (const app of apps) {
-      const id = cfEntityId({ cnsiGuid, entityGuid: app.guid });
-      const resource = this.toAppResource(app, cnsiGuid);
-      entities[id] = resource;
-      result.push(id);
-      this.emitSize('application', cnsiGuid, resource);
-    }
-    const response: NormalizedResponse = {
-      entities: { [APP_ENTITY_KEY]: entities },
-      result,
-    };
-    this.store.dispatch(new WrapperRequestActionSuccess(response, action, 'fetch', apps.length, 1));
   }
 
   private dispatchSpaces(cnsiGuid: string, spaces: StSpace[]): void {
@@ -120,6 +92,7 @@ export class EndpointDataShim {
       result.push(id);
       this.emitSize('space', cnsiGuid, resource);
     }
+    this.detectCollisions('space', SPACE_ENTITY_KEY, cnsiGuid, result);
     const response: NormalizedResponse = {
       entities: { [SPACE_ENTITY_KEY]: entities },
       result,
@@ -130,6 +103,36 @@ export class EndpointDataShim {
   private emitSize(entityType: string, cnsiGuid: string, resource: APIResource<unknown>): void {
     const bytes = JSON.stringify(resource).length;
     this.diagnostics.emitSample('entity-size-sample', { entityType, cnsiGuid }, bytes);
+  }
+
+  // Counts entity-key-collision-avoided events: for each composite ID we're
+  // about to dispatch, check whether the current store already holds another
+  // composite with the same bare-guid suffix. Each such pair is a collision
+  // that would have silently overwritten data under the pre-FWT-934 bare-guid
+  // key scheme. The counter is the effectiveness metric for the namespacing
+  // fix; rate > 0 proves duplicate-URL scenarios are happening in practice.
+  private detectCollisions(entityType: string, entityKey: string, cnsiGuid: string, newIds: string[]): void {
+    let currentDict: Record<string, unknown> = {};
+    this.store
+      .pipe(
+        select((state: { request?: Record<string, Record<string, unknown>> }) => state?.request?.[entityKey] ?? {}),
+        take(1),
+      )
+      .subscribe(dict => {
+        currentDict = dict;
+      });
+    for (const newId of newIds) {
+      const colonIdx = newId.indexOf(':');
+      if (colonIdx < 0) continue;
+      const bare = newId.slice(colonIdx + 1);
+      const suffix = `:${bare}`;
+      for (const existingId of Object.keys(currentDict)) {
+        if (existingId !== newId && existingId.endsWith(suffix)) {
+          this.diagnostics.emitCounter('entity-key-collision-avoided', { entityType, cnsiGuid });
+          break;
+        }
+      }
+    }
   }
 
   private toOrgResource(org: StOrg, cnsiGuid: string): APIResource<IOrganization> {
@@ -144,25 +147,6 @@ export class EndpointDataShim {
         name: org.name,
         status: org.status,
         guid: org.guid,
-        cfGuid: cnsiGuid,
-      },
-    };
-  }
-
-  private toAppResource(app: StApp, cnsiGuid: string): APIResource<IApp> {
-    return {
-      metadata: {
-        guid: app.guid,
-        created_at: app.createdAt || '',
-        updated_at: app.updatedAt || '',
-        url: `/v2/apps/${app.guid}`,
-      },
-      entity: {
-        name: app.name,
-        state: app.state,
-        space_guid: app.spaceGuid,
-        instances: app.instances,
-        guid: app.guid,
         cfGuid: cnsiGuid,
       },
     };
