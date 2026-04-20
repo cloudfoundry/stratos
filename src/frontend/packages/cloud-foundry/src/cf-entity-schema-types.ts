@@ -17,7 +17,7 @@ import {
   stackEntityType,
 } from './cf-entity-types';
 import { CF_ENDPOINT_TYPE } from './cf-types';
-import { getAPIResourceGuid } from './store/selectors/api.selectors';
+import { getCFCompositeEntityId } from './store/selectors/api.selectors';
 
 
 export class CFEntitySchema extends EntitySchema {
@@ -44,7 +44,7 @@ export class CFOrgEntitySchema extends CFEntitySchema {
     definition?: Schema,
     relationKey?: string
   ) {
-    super(organizationEntityType, definition, { idAttribute: getAPIResourceGuid }, relationKey, [
+    super(organizationEntityType, definition, { idAttribute: getCFCompositeEntityId }, relationKey, [
       domainEntityType,
       quotaDefinitionEntityType,
       privateDomainsEntityType
@@ -57,7 +57,7 @@ export class CFServiceBindingEntitySchema extends CFEntitySchema {
     definition?: Schema,
     relationKey?: string
   ) {
-    super(serviceBindingEntityType, definition, { idAttribute: getAPIResourceGuid }, relationKey, [
+    super(serviceBindingEntityType, definition, { idAttribute: getCFCompositeEntityId }, relationKey, [
       applicationEntityType,
       serviceInstancesEntityType,
       serviceEntityType
@@ -70,7 +70,7 @@ export class CFServiceInstanceEntitySchema extends CFEntitySchema {
     definition?: Schema,
     relationKey?: string
   ) {
-    super(serviceInstancesEntityType, definition, { idAttribute: getAPIResourceGuid }, relationKey, [
+    super(serviceInstancesEntityType, definition, { idAttribute: getCFCompositeEntityId }, relationKey, [
       servicePlanEntityType,
       // Service bindings
       applicationEntityType,
@@ -83,7 +83,7 @@ export class CFServiceInstanceEntitySchema extends CFEntitySchema {
 export class CFUserEntitySchema extends CFEntitySchema {
   constructor(
     definition: Schema = {},
-    options: schema.EntityOptions = { idAttribute: getAPIResourceGuid },
+    options: schema.EntityOptions = { idAttribute: getCFCompositeEntityId },
     relationKey?: string
   ) {
     super(cfUserEntityType, definition, options, relationKey, [
@@ -98,7 +98,7 @@ export class CFRouteEntitySchema extends CFEntitySchema {
     definition?: Schema,
     relationKey?: string
   ) {
-    super(routeEntityType, definition, { idAttribute: getAPIResourceGuid }, relationKey, [
+    super(routeEntityType, definition, { idAttribute: getCFCompositeEntityId }, relationKey, [
       domainEntityType,
       applicationEntityType,
       spaceEntityType
@@ -111,7 +111,7 @@ export class CFApplicationEntitySchema extends CFEntitySchema {
     definition: Schema = {},
     relationKey?: string
   ) {
-    super(applicationEntityType, definition, { idAttribute: getAPIResourceGuid }, relationKey, [
+    super(applicationEntityType, definition, { idAttribute: getCFCompositeEntityId }, relationKey, [
       stackEntityType,
       spaceEntityType,
       routeEntityType,
@@ -126,7 +126,7 @@ export class CFSpaceEntitySchema extends CFEntitySchema {
     definition?: Schema,
     relationKey?: string
   ) {
-    super(spaceEntityType, definition, { idAttribute: getAPIResourceGuid }, relationKey, [
+    super(spaceEntityType, definition, { idAttribute: getCFCompositeEntityId }, relationKey, [
       domainEntityType,
       // Service instance related
       serviceEntityType,
