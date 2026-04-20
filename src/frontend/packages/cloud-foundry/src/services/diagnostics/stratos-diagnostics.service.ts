@@ -20,6 +20,7 @@ function dimensionsKey(d: Record<string, string | number>): string {
 
 @Injectable({ providedIn: 'root' })
 export class StratosDiagnostics {
+  private static readonly SAMPLE_CAP_PER_FAMILY = 10000;
   private readonly pending: PendingEmit[] = [];
   private readonly _counters = signal<Record<string, Map<string, DiagnosticCounter>>>({});
   private readonly _samples = signal<Record<string, DiagnosticSample[]>>({});
@@ -116,6 +117,11 @@ export class StratosDiagnostics {
       } else {
         const arr = samplesDraft[emit.code] ?? [];
         arr.push({ code: emit.code, at: emit.at, dimensions: emit.dimensions, value: emit.value });
+        if (arr.length > StratosDiagnostics.SAMPLE_CAP_PER_FAMILY) {
+          const dropped = arr.length - StratosDiagnostics.SAMPLE_CAP_PER_FAMILY;
+          arr.splice(0, dropped);
+          this.recordOverflowLocked(countersDraft, emit.code, dropped, emit.at);
+        }
         samplesDraft[emit.code] = arr;
       }
     }
@@ -127,6 +133,30 @@ export class StratosDiagnostics {
     this.flushPromise = null;
     this.flushResolve = null;
     if (resolve) resolve();
+  }
+
+  private recordOverflowLocked(
+    countersDraft: Record<string, Map<string, DiagnosticCounter>>,
+    code: DiagnosticCode,
+    dropped: number,
+    at: number,
+  ): void {
+    const map = countersDraft['buffer-overflow'] ?? new Map<string, DiagnosticCounter>();
+    const key = `code=${code}`;
+    const existing = map.get(key);
+    if (existing) {
+      existing.count += dropped;
+      existing.lastAt = at;
+    } else {
+      map.set(key, {
+        code: 'buffer-overflow',
+        dimensions: { code },
+        count: dropped,
+        firstAt: at,
+        lastAt: at,
+      });
+    }
+    countersDraft['buffer-overflow'] = map;
   }
 
   private buildEnvelope(

@@ -61,4 +61,15 @@ describe('StratosDiagnostics', () => {
     const snap: DiagnosticsSnapshotEnvelope = svc.state();
     expect(snap.counters['service-call-count']?.[0]?.count).toBe(1);
   });
+
+  it('caps samples per family at 10000 and emits buffer-overflow counter for drops', async () => {
+    for (let i = 0; i < 10050; i++) {
+      svc.emitSample('entity-size-sample', { entityType: 'organization', cnsiGuid: 'cf-1' }, i);
+    }
+    await svc.waitForFlush();
+    const snap = svc.snapshot();
+    expect(snap.samples['entity-size-sample']).toHaveLength(10000);
+    const overflow = snap.counters['buffer-overflow']?.find(c => c.dimensions.code === 'entity-size-sample');
+    expect(overflow?.count).toBe(50);
+  });
 });
