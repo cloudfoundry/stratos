@@ -455,6 +455,10 @@ type PortalConfig struct {
 	EndpointCardConcurrency            int                          `configName:"ENDPOINT_CARD_CONCURRENCY"`
 	EndpointRequestConcurrency         int                          `configName:"ENDPOINT_REQUEST_CONCURRENCY"`
 	UserEndpointsEnabled               api.UserEndpointsConfigValue `configName:"USER_ENDPOINTS_ENABLED"`
+	// DiagnosticsEnabled gates the admin-only /pp/v1/admin/diagnostics endpoint.
+	// Off by default in production; opt-in per deployment (dev, staging) via the
+	// DIAGNOSTICS_ENABLED env var. FWT-934.
+	DiagnosticsEnabled                 bool                         `configName:"DIAGNOSTICS_ENABLED"`
 	// CanMigrateDatabaseSchema indicates if we can safely perform migrations
 	// This depends on the deployment mechanism and the database config
 	// e.g. if running in Cloud Foundry with a shared DB, then only the 0-index application instance
