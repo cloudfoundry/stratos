@@ -1,4 +1,4 @@
-import { Injectable, Signal, computed, signal } from '@angular/core';
+import { Injectable, Signal, computed, isDevMode, signal } from '@angular/core';
 import {
   DiagnosticCode,
   DiagnosticCounter,
@@ -31,6 +31,19 @@ export class StratosDiagnostics {
   readonly state: Signal<DiagnosticsSnapshotEnvelope> = computed(() =>
     this.buildEnvelope(this._counters(), this._samples()),
   );
+
+  constructor() {
+    if (isDevMode()) {
+      const w = globalThis as unknown as { stratosDiagnostics?: unknown };
+      w.stratosDiagnostics = {
+        snapshot: () => this.snapshot(),
+        reset: () => this.reset(),
+        query: (opts: DiagnosticsQueryOptions) => this.query(opts),
+        waitForFlush: () => this.waitForFlush(),
+        state: this.state,
+      };
+    }
+  }
 
   emitCounter(code: DiagnosticCode, dimensions: Record<string, string | number>): void {
     this.pending.push({ kind: 'counter', code, dimensions, at: Date.now() });

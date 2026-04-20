@@ -72,4 +72,19 @@ describe('StratosDiagnostics', () => {
     const overflow = snap.counters['buffer-overflow']?.find(c => c.dimensions.code === 'entity-size-sample');
     expect(overflow?.count).toBe(50);
   });
+
+  it('binds itself to window.stratosDiagnostics in dev mode', () => {
+    const w = globalThis as unknown as { stratosDiagnostics?: unknown };
+    expect(w.stratosDiagnostics).toBeDefined();
+    const api = w.stratosDiagnostics as {
+      snapshot: () => unknown;
+      reset: () => void;
+      query: (o: object) => unknown;
+      waitForFlush: () => Promise<void>;
+    };
+    expect(typeof api.snapshot).toBe('function');
+    expect(typeof api.reset).toBe('function');
+    expect(typeof api.query).toBe('function');
+    expect(typeof api.waitForFlush).toBe('function');
+  });
 });
