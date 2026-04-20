@@ -118,13 +118,9 @@ export const createCfOrSpaceMultipleFilterFn = (
       preResetUpdate();
     }
 
+    // Changes of org or space will reset pagination and start a new request. Changes of only cf require a punt
     if (cfGuidChanged && !orgChanged && !spaceChanged) {
       store.dispatch(new ResetPagination(action, action.paginationKey));
-      // Re-dispatch to re-run the upstream request against the new cfGuid.
-      // ResetPagination alone doesn't fire the pagination monitor, so with
-      // colliding entity keys (duplicate-URL CF registrations) the UI would
-      // keep rendering the old endpoint's cached entities.
-      store.dispatch(action);
     } else if (orgChanged || spaceChanged) {
       const newParams = spreadPaginationParams(params);
       newParams.q = qChanges.map(qChange => qChange.toString());

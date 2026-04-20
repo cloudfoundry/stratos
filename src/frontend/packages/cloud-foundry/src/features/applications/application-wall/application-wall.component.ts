@@ -7,7 +7,6 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { ListComponent, ListConfig, NoContentMessageComponent, PageHeaderComponent } from '@stratosui/core';
-import { EndpointModel, getFullEndpointApiUrl } from '@stratosui/store';
 import { CFAppState } from '../../../cf-app-state';
 import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { CfAppConfigService } from '../../../shared/components/list/list-types/app/cf-app-config.service';
@@ -64,11 +63,6 @@ export class ApplicationWallComponent implements OnDestroy {
 
   public haveConnectedCf$!: Observable<boolean>;
 
-  // Emits a count of endpoints that share a URL with another connected CF,
-  // or null when all connected CFs have distinct URLs. Drives the duplicate-URL
-  // banner that explains why the list is auto-scoped to one CF's view.
-  public duplicateEndpointCount$!: Observable<number | null>;
-
   constructor() {
     const cloudFoundryService = this.cloudFoundryService;
     const activatedRoute = inject(ActivatedRoute);
@@ -88,27 +82,6 @@ export class ApplicationWallComponent implements OnDestroy {
     this.haveConnectedCf$ = cloudFoundryService.connectedCFEndpoints$.pipe(
       map(endpoints => !!endpoints && endpoints.length > 0)
     );
-
-    this.duplicateEndpointCount$ = cloudFoundryService.connectedCFEndpoints$.pipe(
-      map((endpoints: EndpointModel[]) => ApplicationWallComponent.countDuplicateUrlEndpoints(endpoints)),
-    );
-  }
-
-  // Returns the number of endpoints that share a URL with at least one other
-  // connected CF, or null when all URLs are distinct. An endpoint is in a
-  // "duplicate group" if its URL appears 2+ times among connected CFs.
-  static countDuplicateUrlEndpoints(endpoints: EndpointModel[]): number | null {
-    if (!endpoints || endpoints.length < 2) { return null; }
-    const urlCounts = new Map<string, number>();
-    for (const ep of endpoints) {
-      const url = getFullEndpointApiUrl(ep);
-      urlCounts.set(url, (urlCounts.get(url) ?? 0) + 1);
-    }
-    let dupCount = 0;
-    for (const count of urlCounts.values()) {
-      if (count > 1) { dupCount += count; }
-    }
-    return dupCount > 0 ? dupCount : null;
   }
 
   ngOnDestroy(): void {

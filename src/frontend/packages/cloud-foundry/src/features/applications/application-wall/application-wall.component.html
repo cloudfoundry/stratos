@@ -36,16 +36,6 @@
 }
 
 @if ((cloudFoundryService.hasRegisteredCFEndpoints$ | async) && (cloudFoundryService.hasConnectedCFEndpoints$ | async)) {
-  @if (duplicateEndpointCount$ | async; as dupCount) {
-    <div class="mx-4 mt-3 mb-2 px-3 py-2 rounded border flex items-start gap-2 text-sm"
-         style="background-color: var(--info-bg); border-color: var(--info-border); color: var(--info-text);">
-      <span class="material-icons text-base leading-5">info</span>
-      <span>
-        {{ dupCount }} Cloud Foundry endpoints share a URL. Applications are scoped to one connection's view —
-        use the Cloud Foundry filter to switch between them.
-      </span>
-    </div>
-  }
   <app-list class="app-wall" [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter"
     (initialised)="cfOrgSpaceService.enableAutoSelectors()"
     >

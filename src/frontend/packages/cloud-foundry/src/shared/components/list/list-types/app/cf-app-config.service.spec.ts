@@ -36,27 +36,3 @@ describe('CfAppConfigService', () => {
     expect(service).toBeTruthy();
   });
 });
-
-describe('CfAppConfigService.pickInitialCfGuid', () => {
-  const cf = (guid: string, url: string) => ({
-    guid,
-    name: guid,
-    cnsi_type: 'cf',
-    connectionStatus: 'connected',
-    api_endpoint: { Scheme: 'https', Host: new URL(url).host, Path: '' },
-  } as any);
-
-  it('returns the sole guid when exactly one CF is connected', () => {
-    expect(CfAppConfigService.pickInitialCfGuid([cf('a', 'https://cf-a.example.com')])).toBe('a');
-  });
-
-  it('returns null for multiple CFs with distinct URLs (All view is meaningful)', () => {
-    const cfs = [cf('a', 'https://cf-a.example.com'), cf('b', 'https://cf-b.example.com')];
-    expect(CfAppConfigService.pickInitialCfGuid(cfs)).toBeNull();
-  });
-
-  it('returns the first guid when multiple CFs share a URL (auto-scope to one permission view)', () => {
-    const cfs = [cf('a', 'https://cf.example.com'), cf('b', 'https://cf.example.com')];
-    expect(CfAppConfigService.pickInitialCfGuid(cfs)).toBe('a');
-  });
-});
