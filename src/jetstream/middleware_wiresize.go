@@ -30,10 +30,14 @@ type WireSizeMetrics struct {
 // key / value / structural bytes so post-deploy measurement can tell whether
 // wire-transfer cost is dominated by repeated key names (cheap to remove via
 // format tricks) or by payload values (cheap to remove via tier narrowing).
-// Non-JSON responses pass through unmeasured.
+// Non-JSON responses pass through unmeasured. WebSocket upgrade requests are
+// skipped entirely — hijacking a buffered writer breaks the upgrade.
 func (p *portalProxy) wireSizeMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		if !p.GetConfig().DiagnosticsEnabled {
+			return next(c)
+		}
+		if c.Request().Header.Get("Upgrade") == "websocket" {
 			return next(c)
 		}
 
@@ -55,39 +59,66 @@ func (p *portalProxy) wireSizeMiddleware(next echo.HandlerFunc) echo.HandlerFunc
 		}
 
 		ct := c.Response().Header().Get(echo.HeaderContentType)
-		if !strings.Contains(ct, "application/json") {
-			_, err := origWriter.Write(bw.buf.Bytes())
-			return err
+		if strings.Contains(ct, "application/json") {
+			m := countJSONBytes(bw.buf.Bytes())
+			c.Response().Header().Set("X-Stratos-Wire-Sizes", fmt.Sprintf(
+				"raw_total=%d; keys=%d; values=%d; structural=%d; resources=%d",
+				m.RawTotal, m.Keys, m.Values, m.Structural, m.Resources,
+			))
 		}
 
-		m := countJSONBytes(bw.buf.Bytes())
-		c.Response().Header().Set("X-Stratos-Wire-Sizes", fmt.Sprintf(
-			"raw_total=%d; keys=%d; values=%d; structural=%d; resources=%d",
-			m.RawTotal, m.Keys, m.Values, m.Structural, m.Resources,
-		))
-
+		bw.flushStatus()
 		_, err := origWriter.Write(bw.buf.Bytes())
 		return err
 	}
 }
 
 // bufferingResponseWriter captures response bytes into an in-memory buffer
-// instead of forwarding them to the underlying writer. The wire-size
-// middleware uses this to measure the response before flushing. If the buffer
-// would exceed its limit, the writer flushes what it has to the underlying
-// writer and switches to pass-through mode for the remainder.
+// so the wire-size middleware can measure the response and set an additional
+// header before the underlying writer sees the status line. Overrides both
+// Write() and WriteHeader(): WriteHeader records the code without forwarding,
+// so later Header().Set() calls still have effect; Write() buffers bytes.
+// If the buffer would exceed its limit the writer flushes status + buffer to
+// the underlying writer and switches to pass-through mode for the remainder.
 type bufferingResponseWriter struct {
 	http.ResponseWriter
-	buf        *bytes.Buffer
-	limit      int
-	overflowed bool
+	buf            *bytes.Buffer
+	limit          int
+	overflowed     bool
+	statusCode     int
+	statusCaptured bool
+	statusFlushed  bool
+}
+
+func (w *bufferingResponseWriter) WriteHeader(code int) {
+	if w.statusCaptured {
+		return
+	}
+	w.statusCode = code
+	w.statusCaptured = true
+}
+
+// flushStatus writes the captured status line to the underlying writer if
+// it hasn't been flushed yet. Idempotent.
+func (w *bufferingResponseWriter) flushStatus() {
+	if w.statusFlushed {
+		return
+	}
+	status := w.statusCode
+	if status == 0 {
+		status = http.StatusOK
+	}
+	w.ResponseWriter.WriteHeader(status)
+	w.statusFlushed = true
 }
 
 func (w *bufferingResponseWriter) Write(p []byte) (int, error) {
 	if w.overflowed {
+		w.flushStatus()
 		return w.ResponseWriter.Write(p)
 	}
 	if w.buf.Len()+len(p) > w.limit {
+		w.flushStatus()
 		if w.buf.Len() > 0 {
 			if _, err := w.ResponseWriter.Write(w.buf.Bytes()); err != nil {
 				return 0, err

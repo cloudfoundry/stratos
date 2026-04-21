@@ -1,8 +1,128 @@
 package main
 
 import (
+	"net/http"
+	"net/http/httptest"
+	"strings"
 	"testing"
+
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/labstack/echo/v4"
 )
+
+// fakeProxy satisfies the *portalProxy shape wireSizeMiddleware needs —
+// only GetConfig() is exercised. Keeps the test self-contained so it can
+// run without the full DI graph.
+type fakeProxyForWireSize struct {
+	*portalProxy
+	diagEnabled bool
+}
+
+func newTestPortalProxy(diagEnabled bool) *portalProxy {
+	cfg := &api.PortalConfig{DiagnosticsEnabled: diagEnabled}
+	return &portalProxy{Config: *cfg}
+}
+
+// runThroughMiddleware invokes wireSizeMiddleware in an Echo chain against a
+// handler that writes the given JSON body with the given content-type and
+// status. Returns the ResponseRecorder so the caller can assert on headers,
+// status, and body.
+func runThroughMiddleware(t *testing.T, p *portalProxy, contentType string, status int, body []byte) *httptest.ResponseRecorder {
+	t.Helper()
+	e := echo.New()
+	e.Use(p.wireSizeMiddleware)
+	e.GET("/test", func(c echo.Context) error {
+		c.Response().Header().Set(echo.HeaderContentType, contentType)
+		c.Response().WriteHeader(status)
+		_, err := c.Response().Write(body)
+		return err
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+	return rec
+}
+
+func TestWireSizeMiddleware_EmitsHeaderForJSONResponse(t *testing.T) {
+	p := newTestPortalProxy(true)
+	body := []byte(`{"resources":[{"guid":"a"}],"pagination":{"totalResults":1}}`)
+	rec := runThroughMiddleware(t, p, "application/json", http.StatusOK, body)
+
+	if rec.Code != http.StatusOK {
+		t.Errorf("status = %d, want 200", rec.Code)
+	}
+	if string(rec.Body.Bytes()) != string(body) {
+		t.Errorf("body mismatch: got %q, want %q", rec.Body.String(), string(body))
+	}
+	h := rec.Header().Get("X-Stratos-Wire-Sizes")
+	if h == "" {
+		t.Fatal("X-Stratos-Wire-Sizes header missing — regression of the WriteHeader-too-early bug")
+	}
+	for _, want := range []string{"raw_total=", "keys=", "values=", "structural=", "resources=1"} {
+		if !strings.Contains(h, want) {
+			t.Errorf("X-Stratos-Wire-Sizes missing %q: got %q", want, h)
+		}
+	}
+}
+
+func TestWireSizeMiddleware_SkippedWhenDiagnosticsDisabled(t *testing.T) {
+	p := newTestPortalProxy(false)
+	body := []byte(`{"resources":[]}`)
+	rec := runThroughMiddleware(t, p, "application/json", http.StatusOK, body)
+
+	if rec.Header().Get("X-Stratos-Wire-Sizes") != "" {
+		t.Error("X-Stratos-Wire-Sizes should be absent when DIAGNOSTICS_ENABLED=false")
+	}
+	if rec.Body.String() != string(body) {
+		t.Error("body should pass through unchanged when middleware skipped")
+	}
+}
+
+func TestWireSizeMiddleware_NonJSONPassesThroughWithoutHeader(t *testing.T) {
+	p := newTestPortalProxy(true)
+	body := []byte(`plain text response`)
+	rec := runThroughMiddleware(t, p, "text/plain", http.StatusOK, body)
+
+	if rec.Header().Get("X-Stratos-Wire-Sizes") != "" {
+		t.Error("X-Stratos-Wire-Sizes should be absent for non-JSON responses")
+	}
+	if rec.Body.String() != string(body) {
+		t.Errorf("body mismatch: got %q, want %q", rec.Body.String(), string(body))
+	}
+}
+
+func TestWireSizeMiddleware_PreservesHandlerStatus(t *testing.T) {
+	p := newTestPortalProxy(true)
+	body := []byte(`{"errors":[{"code":"X"}]}`)
+	rec := runThroughMiddleware(t, p, "application/json", http.StatusBadGateway, body)
+
+	if rec.Code != http.StatusBadGateway {
+		t.Errorf("status = %d, want 502 (WriteHeader code must be preserved through buffering)", rec.Code)
+	}
+	if rec.Header().Get("X-Stratos-Wire-Sizes") == "" {
+		t.Error("header should still be emitted for non-2xx JSON responses")
+	}
+}
+
+func TestWireSizeMiddleware_SkipsWebSocketUpgrade(t *testing.T) {
+	p := newTestPortalProxy(true)
+	e := echo.New()
+	e.Use(p.wireSizeMiddleware)
+	e.GET("/ws", func(c echo.Context) error {
+		// Simulate a WebSocket-upgrade-adjacent handler: it doesn't write a body
+		// here, but the middleware must not wrap the writer so hijack works.
+		if _, ok := c.Response().Writer.(*bufferingResponseWriter); ok {
+			t.Error("wireSize middleware should not wrap the writer on WebSocket upgrade")
+		}
+		return c.NoContent(http.StatusSwitchingProtocols)
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/ws", nil)
+	req.Header.Set("Upgrade", "websocket")
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+}
 
 func TestCountJSONBytes_FlatObject(t *testing.T) {
 	body := []byte(`{"name":"foo"}`)
