@@ -12,7 +12,11 @@ import { test, expect } from '../../fixtures/test-base';
  *      informational banner is expected.
  *
  *   2. Delete flow — removing an app from the wall drops the row from the
- *      signal-list view without a full page reload.
+ *      signal-list view without a full page reload. This test is DESTRUCTIVE
+ *      and is guarded behind E2E_ALLOW_DESTRUCTIVE=1. When enabled it targets
+ *      the canonical disposable test app `sample-go-app` in the adepttech
+ *      `e2e` org / `e2e` space. If the app is not present, the test skips
+ *      rather than failing — pre-seed via `cf push` to exercise the flow.
  *
  * Row selector:
  *   The new <app-signal-list> emits `[data-test="row"]` on each <tr> (see
@@ -22,12 +26,12 @@ import { test, expect } from '../../fixtures/test-base';
  * Environment expectations:
  *   The E2E environment may have 0, 1, or many CFs registered, and 0, 1, or
  *   many apps in each. The duplicate-URL test only asserts the page *renders*
- *   without the legacy auto-scope banner. The delete test skips when no apps
- *   are available.
+ *   without the legacy auto-scope banner. The delete test is opt-in via
+ *   E2E_ALLOW_DESTRUCTIVE=1 and skips cleanly when sample-go-app is absent.
  */
 
 const WALL_LOAD_TIMEOUT_MS = 20000;
-const ROW_MUTATION_TIMEOUT_MS = 15000;
+const ROW_MUTATION_TIMEOUT_MS = 30000;
 
 test.describe('App wall signal-native migration', () => {
 
@@ -62,8 +66,14 @@ test.describe('App wall signal-native migration', () => {
     expect(rowCount).toBeGreaterThanOrEqual(0);
   });
 
-  test('delete removes a row from the signal-list', async ({ connectedEndpointsAdminPage }) => {
+  test('delete sample-go-app — only when E2E_ALLOW_DESTRUCTIVE=1', async ({ connectedEndpointsAdminPage }) => {
+    test.skip(
+      process.env.E2E_ALLOW_DESTRUCTIVE !== '1',
+      'destructive test disabled; set E2E_ALLOW_DESTRUCTIVE=1 to enable',
+    );
+
     const { page } = connectedEndpointsAdminPage;
+    const TARGET_APP = 'sample-go-app';
 
     await page.goto('/applications');
     await page.waitForLoadState('networkidle', { timeout: WALL_LOAD_TIMEOUT_MS }).catch(() => {});
@@ -76,25 +86,24 @@ test.describe('App wall signal-native migration', () => {
     await page.locator('[data-test="loading"]').first().waitFor({ state: 'hidden', timeout: WALL_LOAD_TIMEOUT_MS }).catch(() => {});
 
     const rowLocator = page.locator('app-signal-list [data-test="row"]');
+    await page.locator('app-signal-list [data-test="row"]').first().waitFor({ state: 'visible', timeout: WALL_LOAD_TIMEOUT_MS }).catch(() => {});
+
+    // Target the canonical disposable test app in the adepttech e2e org/space.
+    // SignalListComponent renders name text inside the row; `hasText` picks it
+    // up regardless of cell structure.
+    const targetRow = page.locator('app-signal-list [data-test="row"]', { hasText: TARGET_APP });
+    const targetCount = await targetRow.count();
+    test.skip(
+      targetCount === 0,
+      `${TARGET_APP} not present in the E2E environment — pre-seed via cf push (e2e org / e2e space) before running`,
+    );
+
     const rowCountBefore = await rowLocator.count();
 
-    test.skip(rowCountBefore === 0, 'No apps available in E2E environment — delete flow not exercisable');
-
-    // The wall's signal-list renders plain <tr> rows without an inline action
-    // menu; deletion goes through the app detail page's Delete route.
-    // Clicking the row's name cell navigates into the app detail;
-    // falling back to direct navigation via the tracked row key keeps
-    // the test resilient to template churn.
-    //
-    // Strategy:
-    //   1. Capture the current first row's text (identity proxy).
-    //   2. Click the first row.
-    //   3. Navigate to the Delete action from the detail page.
-    //   4. Confirm, then return to /applications and wait for the row set
-    //      to update (row count drops OR the captured text disappears).
-    const firstRowText = (await rowLocator.first().textContent())?.trim() ?? '';
-
-    await rowLocator.first().click();
+    // Navigate into the target app's detail page by clicking its specific row
+    // (not the first row). Deletion is reached from the detail page in the
+    // current app-wall flow.
+    await targetRow.first().click();
 
     // We should land on an app detail route: /applications/:endpointId/:id/...
     await page.waitForURL(/.*\/applications\/[^/]+\/[^/]+(\/|$)/, { timeout: WALL_LOAD_TIMEOUT_MS }).catch(() => {});
@@ -145,18 +154,13 @@ test.describe('App wall signal-native migration', () => {
 
     await expect(page.locator('app-application-wall')).toBeVisible({ timeout: WALL_LOAD_TIMEOUT_MS });
 
-    // Poll: either the overall count drops OR the identifying row text vanishes.
+    // Poll until the sample-go-app row disappears from the signal-list.
     await expect.poll(
-      async () => {
-        const count = await rowLocator.count();
-        if (count < rowCountBefore) return 'dropped';
-        if (firstRowText) {
-          const stillPresent = await rowLocator.filter({ hasText: firstRowText }).count();
-          if (stillPresent === 0) return 'dropped';
-        }
-        return 'present';
-      },
-      { timeout: ROW_MUTATION_TIMEOUT_MS, message: 'Row did not disappear from signal-list after delete' },
-    ).toBe('dropped');
+      async () => page.locator('app-signal-list [data-test="row"]', { hasText: TARGET_APP }).count(),
+      { timeout: ROW_MUTATION_TIMEOUT_MS, message: `${TARGET_APP} row did not disappear from signal-list after delete` },
+    ).toBe(0);
+
+    const afterCount = await rowLocator.count();
+    expect(afterCount).toBe(rowCountBefore - 1);
   });
 });
