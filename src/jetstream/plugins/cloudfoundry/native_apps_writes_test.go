@@ -374,8 +374,8 @@ func TestPatchApp_PartialFailure_ReturnsMetaErrors(t *testing.T) {
 	assert.GreaterOrEqual(t, scaleCalls, 1)
 
 	var resp struct {
-		GUID  string `json:"guid"`
-		Meta  *struct {
+		GUID string `json:"guid"`
+		Meta *struct {
 			Errors []struct {
 				Scope    string   `json:"scope"`
 				Code     string   `json:"code"`

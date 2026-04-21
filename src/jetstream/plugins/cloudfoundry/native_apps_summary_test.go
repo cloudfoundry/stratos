@@ -402,10 +402,10 @@ func TestGetNativeAppsSummary_PopulatesMemoryDiskInstancesFromProcesses(t *testi
 
 func TestIsDerivedSortField(t *testing.T) {
 	cases := []struct {
-		in            string
-		derived       bool
-		field         string
-		desc          bool
+		in      string
+		derived bool
+		field   string
+		desc    bool
 	}{
 		{"", false, "", false},
 		{"name", false, "name", false},
