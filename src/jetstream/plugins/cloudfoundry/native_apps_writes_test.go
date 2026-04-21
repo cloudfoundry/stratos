@@ -394,3 +394,132 @@ func TestPatchApp_PartialFailure_ReturnsMetaErrors(t *testing.T) {
 	assert.Contains(t, e0.Affected, "memory")
 	assert.Contains(t, e0.Title, "UnprocessableEntity")
 }
+
+// TestDeleteAppInstance_CallsCapiInstanceDelete verifies the handler looks up
+// the web process for the app, then issues a DELETE to
+// /v3/processes/{procGuid}/instances/{index}. The capi library exposes the
+// process-scoped termination path (not the /v3/apps/{guid}/processes/web/...
+// convenience path) and returns nil on 204 No Content; the handler surfaces
+// that as 204 to the Stratos caller.
+func TestDeleteAppInstance_CallsCapiInstanceDelete(t *testing.T) {
+	processLists := 0
+	terminateCalls := 0
+	capiServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/v3":
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{"links":{}}`))
+		case r.URL.Path == "/v3/processes" && r.Method == http.MethodGet:
+			processLists++
+			assert.Equal(t, "app-1", r.URL.Query().Get("app_guids"))
+			assert.Equal(t, "web", r.URL.Query().Get("types"))
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{"pagination":{"total_results":1,"total_pages":1},"resources":[{"guid":"proc-web","type":"web"}]}`))
+		case r.URL.Path == "/v3/processes/proc-web/instances/2" && r.Method == http.MethodDelete:
+			terminateCalls++
+			w.WriteHeader(http.StatusNoContent)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer capiServer.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(capiServer.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodDelete, "/pp/v1/cf/apps/cnsi-1/app-1/instances/2", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/instances/:index")
+	c.SetParamNames("cnsiGuid", "appGuid", "index")
+	c.SetParamValues("cnsi-1", "app-1", "2")
+
+	require.NoError(t, plugin.deleteAppInstance(c))
+	assert.Equal(t, http.StatusNoContent, rec.Code)
+	assert.Equal(t, 1, processLists)
+	assert.Equal(t, 1, terminateCalls)
+}
+
+// TestDeleteAppInstance_PropagatesCapiError verifies that when the upstream
+// CAPI call returns a non-2xx envelope (e.g. an invalid instance index) the
+// handler classifies it via handleCapiError and surfaces the CF error body.
+func TestDeleteAppInstance_PropagatesCapiError(t *testing.T) {
+	capiServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/v3":
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{"links":{}}`))
+		case r.URL.Path == "/v3/processes" && r.Method == http.MethodGet:
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{"pagination":{"total_results":1,"total_pages":1},"resources":[{"guid":"proc-web","type":"web"}]}`))
+		case r.URL.Path == "/v3/processes/proc-web/instances/99" && r.Method == http.MethodDelete:
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte(`{"errors":[{"code":10010,"title":"CF-ResourceNotFound","detail":"Instance not found"}]}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer capiServer.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(capiServer.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodDelete, "/pp/v1/cf/apps/cnsi-1/app-1/instances/99", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/instances/:index")
+	c.SetParamNames("cnsiGuid", "appGuid", "index")
+	c.SetParamValues("cnsi-1", "app-1", "99")
+
+	require.NoError(t, plugin.deleteAppInstance(c))
+	assert.Equal(t, http.StatusNotFound, rec.Code)
+	assert.Contains(t, rec.Body.String(), "ResourceNotFound")
+}
+
+// TestDeleteAppInstance_RejectsNonIntegerIndex ensures a non-numeric index is
+// rejected with 400 before any upstream call is attempted. The capi library
+// expects an int, so we parse up-front.
+func TestDeleteAppInstance_RejectsNonIntegerIndex(t *testing.T) {
+	capiCalls := 0
+	capiServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		capiCalls++
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer capiServer.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(capiServer.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodDelete, "/pp/v1/cf/apps/cnsi-1/app-1/instances/not-a-number", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/instances/:index")
+	c.SetParamNames("cnsiGuid", "appGuid", "index")
+	c.SetParamValues("cnsi-1", "app-1", "not-a-number")
+
+	err := plugin.deleteAppInstance(c)
+	require.Error(t, err)
+	httpErr, ok := err.(*echo.HTTPError)
+	require.True(t, ok, "expected *echo.HTTPError, got %T", err)
+	assert.Equal(t, http.StatusBadRequest, httpErr.Code)
+	assert.Equal(t, 0, capiCalls, "no upstream call should be made for a bad index")
+}

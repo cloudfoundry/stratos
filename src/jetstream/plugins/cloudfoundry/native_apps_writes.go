@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/labstack/echo/v4"
@@ -92,6 +93,53 @@ func (c *CloudFoundrySpecification) appAction(ctx echo.Context) error {
 
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
 	ctx.Response().WriteHeader(http.StatusAccepted)
+	return nil
+}
+
+// deleteAppInstance handles DELETE /pp/v1/cf/apps/{cnsiGuid}/{appGuid}/instances/{index}
+// — the Stratos-shape wrapper around CF v3 instance termination.
+//
+// The capi library exposes termination at the process-scoped path
+// (DELETE /v3/processes/{procGuid}/instances/{index}), not the app-scoped
+// convenience path. So the handler resolves the web-process GUID first (same
+// helper used by patchApp's scale path), then calls Processes().TerminateInstance.
+// CF returns 204 No Content on success and the capi wrapper returns nil; we
+// mirror that status to the caller. Errors are routed through handleCapiError
+// to preserve the CF error envelope classification.
+func (cf *CloudFoundrySpecification) deleteAppInstance(c echo.Context) error {
+	cnsiGUID := c.Param("cnsiGuid")
+	appGUID := c.Param("appGuid")
+	indexRaw := c.Param("index")
+	if cnsiGUID == "" || appGUID == "" || indexRaw == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid, appGuid, and index are required")
+	}
+	index, parseErr := strconv.Atoi(indexRaw)
+	if parseErr != nil || index < 0 {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid index %q", indexRaw))
+	}
+
+	userGUID, err := cf.getUserGUID(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(c.Request().Context(), cf.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	procGUID, lookupErr := lookupWebProcessGUID(ctx, cfClient, appGUID)
+	if lookupErr != nil {
+		return handleCapiError(c, lookupErr)
+	}
+
+	if termErr := cfClient.Processes().TerminateInstance(ctx, procGUID, index); termErr != nil {
+		return handleCapiError(c, termErr)
+	}
+
+	c.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+	c.Response().WriteHeader(http.StatusNoContent)
 	return nil
 }
 
