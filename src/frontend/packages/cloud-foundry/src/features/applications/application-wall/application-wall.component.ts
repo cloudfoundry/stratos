@@ -1,21 +1,25 @@
 import { animate, query, style, transition, trigger } from '@angular/animations';
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, firstValueFrom } from 'rxjs';
+import { filter, map, take } from 'rxjs/operators';
 
-import { ListComponent, ListConfig, NoContentMessageComponent, PageHeaderComponent } from '@stratosui/core';
+import {
+  PageHeaderComponent,
+  SignalListComponent,
+  SignalListConfig,
+} from '@stratosui/core';
 import { EndpointModel, getFullEndpointApiUrl } from '@stratosui/store';
 import { CFAppState } from '../../../cf-app-state';
 import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
-import { CfAppConfigService } from '../../../shared/components/list/list-types/app/cf-app-config.service';
-import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
+import { CfAppsSignalConfigService } from '../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { CfUserPermissionDirective } from '../../../shared/directives/cf-user-permission/cf-user-permission.directive';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { goToAppWall } from '../../cf/cf.helpers';
+import type { StApp } from '../../../services/endpoint-data/stratos-types';
 
 @Component({
   selector: 'app-application-wall',
@@ -27,9 +31,8 @@ import { goToAppWall } from '../../cf/cf.helpers';
     CommonModule,
     RouterModule,
     PageHeaderComponent,
-    ListComponent,
+    SignalListComponent,
     CfEndpointsMissingComponent,
-    NoContentMessageComponent,
     CfUserPermissionDirective
   ],
   animations: [
@@ -46,17 +49,12 @@ import { goToAppWall } from '../../cf/cf.helpers';
   ],
   providers: [
     DatePipe,
-    {
-      provide: ListConfig,
-      useClass: CfAppConfigService
-    },
-    CfOrgSpaceDataService
   ]
 })
-export class ApplicationWallComponent implements OnDestroy {
+export class ApplicationWallComponent implements OnInit {
   cloudFoundryService = inject(CloudFoundryService);
   private store = inject<Store<CFAppState>>(Store);
-  cfOrgSpaceService = inject(CfOrgSpaceDataService);
+  private appsConfig = inject(CfAppsSignalConfigService);
 
   public cfIds$!: Observable<string[]>;
 
@@ -72,6 +70,12 @@ export class ApplicationWallComponent implements OnDestroy {
   // the shared-URL fact itself is still useful context.
   public duplicateEndpointCount$!: Observable<number | null>;
 
+  // Config for <app-signal-list>. Populated in ngOnInit after the signal
+  // config service is initialized with the connected CF GUIDs.
+  public listConfig?: SignalListConfig<StApp>;
+
+  private redirected = false;
+
   constructor() {
     const cloudFoundryService = this.cloudFoundryService;
     const activatedRoute = inject(ActivatedRoute);
@@ -80,6 +84,7 @@ export class ApplicationWallComponent implements OnDestroy {
     const { endpointId } = activatedRoute.snapshot.params;
     if (endpointId) {
       goToAppWall(this.store, endpointId);
+      this.redirected = true;
       return;
     }
 
@@ -97,6 +102,42 @@ export class ApplicationWallComponent implements OnDestroy {
     );
   }
 
+  async ngOnInit(): Promise<void> {
+    if (this.redirected) {
+      return;
+    }
+    // Resolve connected CF guids once, then initialize the signal config.
+    const connected = await firstValueFrom(
+      this.cloudFoundryService.connectedCFEndpoints$.pipe(
+        filter(endpoints => !!endpoints),
+        take(1),
+      ),
+    );
+    const cnsiGuids = (connected ?? []).map(ep => ep.guid);
+    this.appsConfig.initialize(cnsiGuids);
+    this.listConfig = {
+      pagedItems: this.appsConfig.view.pagedItems,
+      totalFilteredResults: this.appsConfig.view.totalFilteredResults,
+      totalPages: this.appsConfig.view.totalPages,
+      pageIndex: this.appsConfig.pageIndex,
+      pageSize: this.appsConfig.pageSize,
+      isAnyLoading: this.appsConfig.orchestrator.isAnyLoading,
+      errorsByCnsi: this.appsConfig.orchestrator.errorsByCnsi,
+      columns: [
+        { header: 'Name', render: (app: StApp) => app.name },
+        { header: 'State', render: (app: StApp) => app.state ?? '' },
+        { header: 'Instances', render: (app: StApp) => String(app.instances ?? 0) },
+        { header: 'Memory', render: (app: StApp) => app.memory != null ? `${app.memory} MB` : '—' },
+        { header: 'Disk', render: (app: StApp) => app.diskQuota != null ? `${app.diskQuota} MB` : '—' },
+        { header: 'Created', render: (app: StApp) => app.createdAt ?? '' },
+      ],
+      getRowKey: (app: StApp) => `${app.cnsiGuid}:${app.guid}`,
+    };
+    if (cnsiGuids.length > 0) {
+      void this.appsConfig.loadAll();
+    }
+  }
+
   // Returns the number of endpoints that share a URL with at least one other
   // connected CF, or null when all URLs are distinct. An endpoint is in a
   // "duplicate group" if its URL appears 2+ times among connected CFs.
@@ -112,8 +153,5 @@ export class ApplicationWallComponent implements OnDestroy {
       if (count > 1) { dupCount += count; }
     }
     return dupCount > 0 ? dupCount : null;
-  }
-
-  ngOnDestroy(): void {
   }
 }

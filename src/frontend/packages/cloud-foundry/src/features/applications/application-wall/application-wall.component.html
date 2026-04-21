@@ -12,18 +12,6 @@
 </app-page-header>
 <app-cf-endpoints-missing #appEndpointsMissing></app-cf-endpoints-missing>
 
-<ng-template #noEntriesForCurrentFilter>
-  <app-no-content-message [icon]="'apps'" [firstLine]="'There are no applications for the current filter'" [secondLine]="{
-  text: ''
-}"></app-no-content-message>
-</ng-template>
-
-<ng-template #noEntries>
-  <app-no-content-message [icon]="'apps'" [firstLine]="'There are no applications'" [secondLine]="{
-  text: ''
-}"></app-no-content-message>
-</ng-template>
-
 <!-- Show loading indicator -->
 @if ((cloudFoundryService.hasRegisteredCFEndpoints$ | async) === false || (cloudFoundryService.hasConnectedCFEndpoints$ | async) === false) {
   <div
@@ -46,8 +34,9 @@
       </span>
     </div>
   }
-  <app-list class="app-wall" [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter"
-    (initialised)="cfOrgSpaceService.enableAutoSelectors()"
-    >
-  </app-list>
+  @if (listConfig) {
+    <div class="p-4">
+      <app-signal-list [config]="listConfig"></app-signal-list>
+    </div>
+  }
 }
