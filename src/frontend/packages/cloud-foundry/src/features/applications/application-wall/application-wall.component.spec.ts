@@ -3,6 +3,7 @@ import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@an
 import { provideHttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { provideRouter } from '@angular/router';
+import { of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { TabNavService } from '@stratosui/core';
@@ -11,6 +12,7 @@ import { generateCfBaseTestModulesNoShared } from '@test-framework/cloud-foundry
 
 import { ApplicationWallComponent } from './application-wall.component';
 import { CfAppsSignalConfigService } from '../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
+import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 
 function makeStubSignalConfigService() {
   const pageIndex = signal(0);
@@ -47,6 +49,25 @@ describe('ApplicationWallComponent', () => {
 
   beforeEach(async () => {
     stubSignalConfig = makeStubSignalConfigService();
+    // Stub CloudFoundryService so its observables emit and complete
+    // synchronously. The real service pulls from a PaginationMonitor that
+    // never emits in isolation, which makes ngOnInit's
+    // firstValueFrom(connectedCFEndpoints$) hang / throw EmptyError.
+    const endpoints: any[] = [
+      {
+        guid: 'cnsi-1',
+        name: 'CF 1',
+        cnsi_type: 'cf',
+        connectionStatus: 'connected',
+        api_endpoint: { Scheme: 'https', Host: 'cf-1.example.com', Path: '' },
+      },
+    ];
+    const stubCloudFoundryService = {
+      cFEndpoints$: of(endpoints),
+      connectedCFEndpoints$: of(endpoints),
+      hasConnectedCFEndpoints$: of(true),
+      hasRegisteredCFEndpoints$: of(true),
+    };
     await TestBed.configureTestingModule({
       imports: [
         ApplicationWallComponent,
@@ -68,6 +89,7 @@ describe('ApplicationWallComponent', () => {
           }
         },
         { provide: CfAppsSignalConfigService, useValue: stubSignalConfig },
+        { provide: CloudFoundryService, useValue: stubCloudFoundryService },
       ]
     }).compileComponents();
 
@@ -81,10 +103,13 @@ describe('ApplicationWallComponent', () => {
   });
 
   it('initializes the signal config service with connected CF guids on ngOnInit', async () => {
+    // fixture.detectChanges() in beforeEach already ran ngOnInit once via
+    // the Angular lifecycle. Reset the mock so the explicit call below is
+    // what the assertions observe.
+    stubSignalConfig.initialize.mockClear();
     await component.ngOnInit();
     expect(stubSignalConfig.initialize).toHaveBeenCalledTimes(1);
-    // The STORE_TEST_PROVIDERS ship an empty endpoint set by default, so the
-    // guid list resolves to []. We just want to confirm the wiring fires.
+    // We just want to confirm the wiring fires and passes an array of guids.
     expect(Array.isArray(stubSignalConfig.initialize.mock.calls[0][0])).toBe(true);
   });
 
