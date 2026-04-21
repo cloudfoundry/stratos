@@ -1,8 +1,8 @@
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, ReplaySubject } from 'rxjs';
-import { take, filter, map, pairwise, shareReplay, startWith, switchMap, tap } from 'rxjs/operators';
+import { combineLatest, defer, from, Observable, of, ReplaySubject } from 'rxjs';
+import { take, catchError, filter, map, pairwise, shareReplay, startWith, switchMap, tap } from 'rxjs/operators';
 
 import {
   AppMonitorComponentTypes,
@@ -18,7 +18,6 @@ import {
   EntityMonitor,
   PaginationMonitor,
   PaginationMonitorFactory,
-  RequestInfoState,
   APIResource } from '@stratosui/store';
 import {
   applicationEntityType,
@@ -40,6 +39,8 @@ import {
   isServiceInstance,
   isUserProvidedServiceInstance,
   ApplicationService } from '@stratosui/cloud-foundry';
+
+import { CfAppsSignalConfigService } from '../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
 
 
 @Component({
@@ -66,6 +67,7 @@ export class ApplicationDeleteComponent {
   private applicationService = inject(ApplicationService);
   private paginationMonitorFactory = inject(PaginationMonitorFactory);
   private datePipe = inject(DatePipe);
+  private apps = inject(CfAppsSignalConfigService);
 
   relatedEntities$: Observable<{ instances: APIResource<IServiceBinding>[], routes: APIResource<IRoute>[]; }>;
   public deleteStarted = false;
@@ -295,30 +297,30 @@ export class ApplicationDeleteComponent {
    */
   public startDelete = () => {
     if (this.deleteStarted) {
-      return this.redirectToAppWall();
+      this.redirectToAppWall();
+      return of({ success: true });
     }
     this.deleteStarted = true;
-    return cfEntityCatalog.application.api.remove<RequestInfoState>(this.applicationService.appGuid, this.applicationService.cfGuid).pipe(
-      filter(request => !request.deleting.busy && (request.deleting.deleted || request.deleting.error)),
-      map((request) => ({ success: request.deleting.deleted })),
-      tap(({ success }) => {
-        if (success) {
-          if (this.selectedRoutes && this.selectedRoutes.length) {
-            this.selectedRoutes.forEach(route => {
-              cfEntityCatalog.route.api.delete(route.metadata.guid, this.applicationService.cfGuid, this.applicationService.appGuid);
-            });
-          }
-          if (this.selectedServiceInstances && this.selectedServiceInstances.length) {
-            this.selectedServiceInstances.forEach(instance => {
-              if (isUserProvidedServiceInstance(instance.entity.service_instance.entity)) {
-                cfEntityCatalog.userProvidedService.api.remove(instance.entity.service_instance_guid, this.applicationService.cfGuid);
-              } else {
-                cfEntityCatalog.serviceInstance.api.remove(instance.entity.service_instance_guid, this.applicationService.cfGuid);
-              }
-            });
-          }
+    const { appGuid, cfGuid } = this.applicationService;
+    return defer(() => from(this.apps.deleteApp(cfGuid, appGuid))).pipe(
+      tap(() => {
+        if (this.selectedRoutes && this.selectedRoutes.length) {
+          this.selectedRoutes.forEach(route => {
+            cfEntityCatalog.route.api.delete(route.metadata.guid, cfGuid, appGuid);
+          });
         }
-      })
+        if (this.selectedServiceInstances && this.selectedServiceInstances.length) {
+          this.selectedServiceInstances.forEach(instance => {
+            if (isUserProvidedServiceInstance(instance.entity.service_instance.entity)) {
+              cfEntityCatalog.userProvidedService.api.remove(instance.entity.service_instance_guid, cfGuid);
+            } else {
+              cfEntityCatalog.serviceInstance.api.remove(instance.entity.service_instance_guid, cfGuid);
+            }
+          });
+        }
+      }),
+      map(() => ({ success: true })),
+      catchError(() => of({ success: false }))
     );
   };
 }
