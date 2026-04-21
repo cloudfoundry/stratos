@@ -937,25 +937,29 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	pp.Use(p.setSecureCacheContentMiddleware)
 
 	// WU 0 — Track 2 wire-transfer optimization. Gzip compresses JSON API
-	// responses (~3-5x on typical tabular payloads). Skipper bypasses
-	// WebSocket upgrades so log-stream / firehose / cfapppush-deploy /
-	// cfappssh aren't disturbed. MinLength=1024 skips compression for small
-	// polling responses where the CPU cost would outweigh the byte savings.
+	// responses (~3-5x on typical tabular payloads). Skipper bypasses:
+	//   - WebSocket upgrades (log-stream / firehose / cfapppush / cfappssh)
+	//   - CF passthrough routes (/pp/v1/proxy/...) — historical issue #2925
+	//     showed gzip on passthrough responses corrupted Content-Type for
+	//     Firefox. Keep gzip scoped to Stratos-shape native endpoints only.
+	// MinLength=1024 skips compression for small polling responses where the
+	// CPU cost would outweigh the byte savings.
 	pp.Use(middleware.GzipWithConfig(middleware.GzipConfig{
-		Skipper: func(c echo.Context) bool {
-			return c.Request().Header.Get("Upgrade") == "websocket"
-		},
+		Skipper:   ppMiddlewareSkipper,
 		Level:     6,
 		MinLength: 1024,
 	}))
 
 	// WU 0 — wire-size instrumentation. Emits X-Stratos-Wire-Sizes on JSON
 	// responses (when DIAGNOSTICS_ENABLED) with raw bytes split into
-	// keys / values / structural plus the resources array length. Feeds
-	// empirical measurement for whether further format optimization
-	// (MessagePack, columnar tiers) would help beyond gzip. Must come AFTER
-	// Gzip so it buffers the uncompressed body before gzip compresses the
-	// outbound bytes.
+	// keys / values / structural plus the resources array length and handler
+	// duration_ms. Feeds empirical measurement for whether further format
+	// optimization (MessagePack, columnar tiers) would help beyond gzip.
+	// Must come AFTER Gzip so it buffers the uncompressed body before gzip
+	// compresses the outbound bytes. Shares the same skipper as gzip —
+	// passthrough responses aren't Stratos-shape so aren't the target of
+	// this instrumentation, and skipping also avoids the extra memory
+	// allocation per passthrough request.
 	pp.Use(p.wireSizeMiddleware)
 
 	// Add middleware to block requests if unconfigured

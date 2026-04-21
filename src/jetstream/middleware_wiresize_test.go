@@ -105,6 +105,33 @@ func TestWireSizeMiddleware_PreservesHandlerStatus(t *testing.T) {
 	}
 }
 
+func TestWireSizeMiddleware_SkipsPassthroughPaths(t *testing.T) {
+	// Regression guard for issue #2925. The gzip middleware on /pp was
+	// historically causing Content-Type corruption on CF passthrough
+	// responses. Skipper must bypass /pp/v1/proxy/... so neither gzip nor
+	// wire-size buffer those responses.
+	p := newTestPortalProxy(true)
+	e := echo.New()
+	e.Use(p.wireSizeMiddleware)
+	e.GET("/pp/v1/proxy/v2/info", func(c echo.Context) error {
+		if _, ok := c.Response().Writer.(*bufferingResponseWriter); ok {
+			t.Error("wireSize middleware must not wrap writer on /pp/v1/proxy/ paths")
+		}
+		c.Response().Header().Set(echo.HeaderContentType, "application/json")
+		c.Response().WriteHeader(http.StatusOK)
+		_, err := c.Response().Write([]byte(`{"some":"passthrough response"}`))
+		return err
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/proxy/v2/info", nil)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+
+	if rec.Header().Get("X-Stratos-Wire-Sizes") != "" {
+		t.Error("X-Stratos-Wire-Sizes must be absent on passthrough paths")
+	}
+}
+
 func TestWireSizeMiddleware_SkipsWebSocketUpgrade(t *testing.T) {
 	p := newTestPortalProxy(true)
 	e := echo.New()

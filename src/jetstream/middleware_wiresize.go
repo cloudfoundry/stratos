@@ -16,6 +16,24 @@ import (
 // pathological memory use on e.g. bulk export endpoints.
 const wireSizeMaxBufferBytes = 10 * 1024 * 1024
 
+// ppMiddlewareSkipper is the shared bypass condition for the gzip + wire-size
+// middlewares on the /pp group. Skips:
+//   - WebSocket upgrades (log-stream / firehose / cfapppush / cfappssh
+//     require raw writer; buffering or compressing breaks the upgrade)
+//   - CF passthrough paths (/pp/v1/proxy/...) — issue #2925 historical bug
+//     where gzip corrupted passthrough Content-Type for Firefox. Also the
+//     biggest response-size case; skipping removes the memory-pressure
+//     concern of buffering before flushing.
+func ppMiddlewareSkipper(c echo.Context) bool {
+	if c.Request().Header.Get("Upgrade") == "websocket" {
+		return true
+	}
+	if strings.HasPrefix(c.Request().URL.Path, "/pp/v1/proxy/") {
+		return true
+	}
+	return false
+}
+
 // WireSizeMetrics is the byte breakdown of a JSON response body. Keys, values,
 // and structural should sum to raw total for well-formed JSON.
 type WireSizeMetrics struct {
@@ -38,7 +56,7 @@ func (p *portalProxy) wireSizeMiddleware(next echo.HandlerFunc) echo.HandlerFunc
 		if !p.GetConfig().DiagnosticsEnabled {
 			return next(c)
 		}
-		if c.Request().Header.Get("Upgrade") == "websocket" {
+		if ppMiddlewareSkipper(c) {
 			return next(c)
 		}
 
