@@ -16,6 +16,8 @@ func (c *CloudFoundrySpecification) addNativeRoutes(echoGroup *echo.Group) {
 	echoGroup.GET("/cf/spaces/:cnsiGuid", c.getNativeSpaces)
 	echoGroup.GET("/cf/routes/:cnsiGuid", c.getNativeRouteCount)
 	echoGroup.DELETE("/cf/routes/:cnsiGuid/:routeGuid/apps/:appGuid", c.unmapRouteFromApp)
+	echoGroup.POST("/cf/service_bindings/:cnsiGuid", c.createServiceBinding)
+	echoGroup.DELETE("/cf/service_bindings/:cnsiGuid/:bindingGuid", c.deleteServiceBinding)
 	echoGroup.GET("/cf/org/:cnsiGuid/:orgGuid", c.getNativeOrgDetail)
 	echoGroup.GET("/cf/org/:cnsiGuid/:orgGuid/spaces", c.getNativeOrgSpaces)
 }
