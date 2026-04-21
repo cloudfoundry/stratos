@@ -489,6 +489,99 @@ func TestDeleteAppInstance_PropagatesCapiError(t *testing.T) {
 	assert.Contains(t, rec.Body.String(), "ResourceNotFound")
 }
 
+// TestAssignRouteToApp_PostsDestination verifies the handler issues a
+// POST to /v3/routes/{routeGuid}/destinations with the app guid wrapped in
+// the CAPI v3 destinations envelope. CF returns 200 OK with the updated
+// destinations list; the Stratos-shape handler mirrors that status.
+func TestAssignRouteToApp_PostsDestination(t *testing.T) {
+	destinationsHit := 0
+	var receivedBody struct {
+		Destinations []struct {
+			App struct {
+				GUID string `json:"guid"`
+			} `json:"app"`
+		} `json:"destinations"`
+	}
+	capiServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/v3":
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{"links":{}}`))
+		case r.URL.Path == "/v3/routes/route-1/destinations" && r.Method == http.MethodPost:
+			destinationsHit++
+			_ = json.NewDecoder(r.Body).Decode(&receivedBody)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{"destinations":[{"guid":"dest-1","app":{"guid":"app-1"}}],"links":{}}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer capiServer.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(capiServer.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPut, "/pp/v1/cf/apps/cnsi-1/app-1/routes/route-1", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/routes/:routeGuid")
+	c.SetParamNames("cnsiGuid", "appGuid", "routeGuid")
+	c.SetParamValues("cnsi-1", "app-1", "route-1")
+
+	require.NoError(t, plugin.assignRouteToApp(c))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, 1, destinationsHit)
+	require.Len(t, receivedBody.Destinations, 1)
+	assert.Equal(t, "app-1", receivedBody.Destinations[0].App.GUID)
+}
+
+// TestAssignRouteToApp_PropagatesCapiError verifies that a CAPI 422 envelope
+// (e.g. the app is in a different space than the route) is preserved via
+// handleCapiError with the CF error body surfaced to the caller.
+func TestAssignRouteToApp_PropagatesCapiError(t *testing.T) {
+	capiServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/v3":
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{"links":{}}`))
+		case r.URL.Path == "/v3/routes/route-1/destinations" && r.Method == http.MethodPost:
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			w.Write([]byte(`{"errors":[{"code":10008,"title":"CF-UnprocessableEntity","detail":"app and route are in different spaces"}]}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer capiServer.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(capiServer.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPut, "/pp/v1/cf/apps/cnsi-1/app-1/routes/route-1", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/routes/:routeGuid")
+	c.SetParamNames("cnsiGuid", "appGuid", "routeGuid")
+	c.SetParamValues("cnsi-1", "app-1", "route-1")
+
+	require.NoError(t, plugin.assignRouteToApp(c))
+	assert.Equal(t, http.StatusUnprocessableEntity, rec.Code)
+	assert.Contains(t, rec.Body.String(), "UnprocessableEntity")
+}
+
 // TestDeleteAppInstance_RejectsNonIntegerIndex ensures a non-numeric index is
 // rejected with 400 before any upstream call is attempted. The capi library
 // expects an int, so we parse up-front.

@@ -307,6 +307,45 @@ func (cf *CloudFoundrySpecification) patchApp(c echo.Context) error {
 	return c.JSON(http.StatusOK, resp)
 }
 
+// assignRouteToApp handles PUT /pp/v1/cf/apps/{cnsiGuid}/{appGuid}/routes/{routeGuid}
+// — the Stratos-shape write wrapper around CF v3's "destinations" semantics.
+//
+// CAPI v3 models route-to-app assignment as an additive destination on the
+// route: POST /v3/routes/{routeGuid}/destinations with
+// {"destinations":[{"app":{"guid":"<appGuid>"}}]}. The capi library exposes
+// this as Routes().InsertDestinations which returns the updated destinations
+// list on 200 OK. We mirror that status to the Stratos caller and route any
+// CAPI error envelope through handleCapiError to preserve classification.
+func (cf *CloudFoundrySpecification) assignRouteToApp(c echo.Context) error {
+	cnsiGUID := c.Param("cnsiGuid")
+	appGUID := c.Param("appGuid")
+	routeGUID := c.Param("routeGuid")
+	if cnsiGUID == "" || appGUID == "" || routeGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid, appGuid, and routeGuid are required")
+	}
+
+	userGUID, err := cf.getUserGUID(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(c.Request().Context(), cf.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	destinations := []capi.RouteDestination{
+		{App: capi.RouteDestinationApp{GUID: appGUID}},
+	}
+	if _, insertErr := cfClient.Routes().InsertDestinations(c.Request().Context(), routeGUID, destinations); insertErr != nil {
+		return handleCapiError(c, insertErr)
+	}
+
+	c.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+	c.Response().WriteHeader(http.StatusOK)
+	return nil
+}
+
 // lookupWebProcessGUID resolves the GUID of the web process for an app by
 // querying /v3/processes with the app_guids + types filters. Returns the first
 // matching process GUID; errors if the app has no web process.
