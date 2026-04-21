@@ -246,6 +246,8 @@ func (c *CloudFoundrySpecification) getNativeOrgs(ctx echo.Context) error {
 // getNativeApps dispatches on ?return=
 //   - counts: per_page=1, totalResults only
 //   - recent: per_page=10, order_by=-updated_at (top 10 most recently pushed)
+//   - summary: Stratos-shape paged response with paging/sort/filter params
+//     (WU 3 — see native_apps_summary.go for handler)
 //   - (none): full list, paginated
 func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
@@ -285,6 +287,9 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 			apps = append(apps, toStApp(r))
 		}
 		return ctx.JSON(http.StatusOK, StAppsResponse{Resources: apps, TotalResults: raw.Pagination.TotalResults})
+
+	case "summary":
+		return c.getNativeAppsSummary(ctx, cfClient)
 	}
 
 	resources, totalResults, err := listAllApps(ctx.Request().Context(), cfClient)
