@@ -79,14 +79,86 @@ func parseSummaryQueryParams(ctx echo.Context) *capi.QueryParams {
 	return params
 }
 
+// processDerivedFields are the StApp fields sourced from /v3/processes/web —
+// surfaced as unavailable together when the processes fetch fails.
+var processDerivedFields = []string{"memory", "diskQuota", "instances"}
+
+// fetchWebProcessesForApps issues one /v3/processes call filtered to the
+// given app GUIDs and type=web, collecting results across all pages. Returns
+// a map keyed by app GUID so per-app composition is a cheap lookup. Returns
+// an error on any CAPI failure; the caller converts this into an envelope-
+// level _meta.errors entry rather than failing the whole response.
+func fetchWebProcessesForApps(ctx echo.Context, cfClient capi.Client, appGUIDs []string) (map[string]capi.Process, error) {
+	if len(appGUIDs) == 0 {
+		return map[string]capi.Process{}, nil
+	}
+
+	processes := make(map[string]capi.Process, len(appGUIDs))
+	for page := 1; ; page++ {
+		params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
+		params.Page = page
+		params.Filters["app_guids"] = appGUIDs
+		params.Filters["types"] = []string{"web"}
+
+		raw, err := cfClient.Processes().List(ctx.Request().Context(), params)
+		if err != nil {
+			return nil, err
+		}
+		for _, p := range raw.Resources {
+			if p.Relationships != nil && p.Relationships.App != nil {
+				processes[relationshipGUID(*p.Relationships.App)] = p
+			}
+		}
+		if raw.Pagination.Next == nil || page >= raw.Pagination.TotalPages {
+			break
+		}
+	}
+	return processes, nil
+}
+
+// toStAppSummary builds a summary-tier StApp. When a web Process is provided,
+// memory / disk / instances are populated from it. When nil (processes fetch
+// failed or this app has no web process), those fields are absent and the
+// row's _meta.unavailable records the gap.
+func toStAppSummary(app capi.App, process *capi.Process) StApp {
+	s := toStApp(app)
+	if process != nil {
+		mem := process.MemoryInMB
+		disk := process.DiskInMB
+		s.Memory = &mem
+		s.DiskQuota = &disk
+		s.Instances = process.Instances
+		return s
+	}
+	s.Meta = &StratosMeta{Unavailable: append([]string(nil), processDerivedFields...)}
+	return s
+}
+
+// envelopeMetaWithProcessError builds a StratosMeta that records a processes-
+// fetch failure at the envelope level. Consumers pair this with per-row
+// _meta.unavailable entries to see which rows are affected.
+func envelopeMetaWithProcessError(err error, affectedGUIDs []string) *StratosMeta {
+	return &StratosMeta{
+		Errors: []StratosError{{
+			Scope:         "envelope",
+			Code:          "PROCESSES_FETCH_FAILED",
+			Title:         "Processes fetch failed",
+			Detail:        err.Error(),
+			Affected:      append([]string(nil), processDerivedFields...),
+			AffectedGuids: append([]string(nil), affectedGUIDs...),
+		}},
+	}
+}
+
 // getNativeAppsSummary handles ?return=summary for the /pp/v1/cf/apps/{cnsi}
 // endpoint — the Stratos-shape paged app-wall response.
 //
-// WU 3a scope: paging, sort, and filter passthrough to CAPI V3, returning a
-// StratosPagedResponse[StApp] envelope with proper pagination links. Uses
-// the existing toStApp mapper so memory / diskQuota / orgGuid are not yet
-// populated — those come in WU 3b (processes composition) and WU 3c (space
-// → org resolution). Derived-field sort fallback lands in WU 3d.
+// WU 3a + 3b scope: paging, sort, filter passthrough; composition with
+// /v3/processes to populate memory / diskQuota / instances per row. When
+// the processes fetch fails, rows are still returned with Name / State /
+// etc., per-row _meta.unavailable listing the affected fields, and an
+// envelope-level _meta.errors entry explaining the root cause. orgGuid
+// composition lands in WU 3c; derived-field sort fallback in WU 3d.
 func (c *CloudFoundrySpecification) getNativeAppsSummary(ctx echo.Context, cfClient capi.Client) error {
 	params := parseSummaryQueryParams(ctx)
 
@@ -95,14 +167,31 @@ func (c *CloudFoundrySpecification) getNativeAppsSummary(ctx echo.Context, cfCli
 		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
 	}
 
+	appGUIDs := make([]string, 0, len(raw.Resources))
+	for _, r := range raw.Resources {
+		appGUIDs = append(appGUIDs, r.GUID)
+	}
+
+	processes, procErr := fetchWebProcessesForApps(ctx, cfClient, appGUIDs)
+
 	resources := make([]StApp, 0, len(raw.Resources))
 	for _, r := range raw.Resources {
-		resources = append(resources, toStApp(r))
+		var p *capi.Process
+		if procErr == nil {
+			if proc, ok := processes[r.GUID]; ok {
+				p = &proc
+			}
+		}
+		resources = append(resources, toStAppSummary(r, p))
 	}
 
 	response := StratosPagedResponse[StApp]{
 		Resources:  resources,
 		Pagination: BuildPaginationMeta(ctx, params.Page, params.PerPage, raw.Pagination.TotalResults),
+	}
+
+	if procErr != nil {
+		response.Meta = envelopeMetaWithProcessError(procErr, appGUIDs)
 	}
 
 	return ctx.JSON(http.StatusOK, response)

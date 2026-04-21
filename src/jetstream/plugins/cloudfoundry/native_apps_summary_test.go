@@ -261,6 +261,217 @@ func TestGetNativeAppsSummary_EmptyResultSet(t *testing.T) {
 	assert.Nil(t, resp.Pagination.Previous)
 }
 
+// --- WU 3b: /v3/processes composition ---
+
+func TestGetNativeAppsSummary_PopulatesMemoryDiskInstancesFromProcesses(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			w.Write([]byte(`{"links":{}}`))
+		case "/v3/apps":
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 2, "total_pages": 1},
+				"resources": []map[string]interface{}{
+					{
+						"guid": "app-1", "name": "App One", "state": "STARTED",
+						"relationships": map[string]interface{}{
+							"space": map[string]interface{}{"data": map[string]interface{}{"guid": "space-1"}},
+						},
+						"created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z",
+					},
+					{
+						"guid": "app-2", "name": "App Two", "state": "STOPPED",
+						"relationships": map[string]interface{}{
+							"space": map[string]interface{}{"data": map[string]interface{}{"guid": "space-2"}},
+						},
+						"created_at": "2024-01-03T00:00:00Z", "updated_at": "2024-01-04T00:00:00Z",
+					},
+				},
+			})
+		case "/v3/processes":
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 2, "total_pages": 1},
+				"resources": []map[string]interface{}{
+					{
+						"guid": "proc-1", "type": "web",
+						"instances": 3, "memory_in_mb": 512, "disk_in_mb": 1024,
+						"relationships": map[string]interface{}{
+							"app": map[string]interface{}{"data": map[string]interface{}{"guid": "app-1"}},
+						},
+					},
+					{
+						"guid": "proc-2", "type": "web",
+						"instances": 1, "memory_in_mb": 256, "disk_in_mb": 512,
+						"relationships": map[string]interface{}{
+							"app": map[string]interface{}{"data": map[string]interface{}{"guid": "app-2"}},
+						},
+					},
+				},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer ts.Close()
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/test-cnsi?return=summary", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid")
+	ctx.SetParamValues("test-cnsi")
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "test-cnsi", APIEndpoint: mustParseURL(ts.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	require.NoError(t, plugin.getNativeApps(ctx))
+
+	var resp StratosPagedResponse[StApp]
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+	require.Len(t, resp.Resources, 2)
+
+	// app-1: memory 512, disk 1024, instances 3
+	assert.Equal(t, "app-1", resp.Resources[0].GUID)
+	require.NotNil(t, resp.Resources[0].Memory, "Memory should be populated")
+	assert.Equal(t, 512, *resp.Resources[0].Memory)
+	require.NotNil(t, resp.Resources[0].DiskQuota)
+	assert.Equal(t, 1024, *resp.Resources[0].DiskQuota)
+	assert.Equal(t, 3, resp.Resources[0].Instances)
+	assert.Nil(t, resp.Resources[0].Meta, "no _meta on success")
+
+	// app-2: memory 256, disk 512, instances 1
+	assert.Equal(t, "app-2", resp.Resources[1].GUID)
+	require.NotNil(t, resp.Resources[1].Memory)
+	assert.Equal(t, 256, *resp.Resources[1].Memory)
+	assert.Equal(t, 1, resp.Resources[1].Instances)
+
+	// Envelope has no error meta when everything succeeds
+	assert.Nil(t, resp.Meta)
+}
+
+func TestGetNativeAppsSummary_ProcessesFetchFailureSurfacesTristate(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			w.Write([]byte(`{"links":{}}`))
+		case "/v3/apps":
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 1, "total_pages": 1},
+				"resources": []map[string]interface{}{
+					{
+						"guid": "app-1", "name": "App One", "state": "STARTED",
+						"relationships": map[string]interface{}{
+							"space": map[string]interface{}{"data": map[string]interface{}{"guid": "space-1"}},
+						},
+						"created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z",
+					},
+				},
+			})
+		case "/v3/processes":
+			// Simulate CAPI failure on processes fetch
+			http.Error(w, `{"errors":[{"title":"Unavailable"}]}`, http.StatusServiceUnavailable)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer ts.Close()
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/test-cnsi?return=summary", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid")
+	ctx.SetParamValues("test-cnsi")
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "test-cnsi", APIEndpoint: mustParseURL(ts.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	require.NoError(t, plugin.getNativeApps(ctx))
+	// HTTP 200 — the payload is valid, it describes partial failure
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	var resp StratosPagedResponse[StApp]
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+	require.Len(t, resp.Resources, 1)
+
+	// Row still present with app-level fields; process-derived absent
+	assert.Equal(t, "app-1", resp.Resources[0].GUID)
+	assert.Equal(t, "STARTED", resp.Resources[0].State)
+	assert.Nil(t, resp.Resources[0].Memory, "Memory absent when processes fetch fails")
+	assert.Nil(t, resp.Resources[0].DiskQuota, "DiskQuota absent when processes fetch fails")
+	require.NotNil(t, resp.Resources[0].Meta, "row should carry _meta.unavailable")
+	assert.ElementsMatch(t, []string{"memory", "diskQuota", "instances"}, resp.Resources[0].Meta.Unavailable)
+
+	// Envelope has the envelope-level error
+	require.NotNil(t, resp.Meta)
+	require.Len(t, resp.Meta.Errors, 1)
+	err := resp.Meta.Errors[0]
+	assert.Equal(t, "envelope", err.Scope)
+	assert.Equal(t, "PROCESSES_FETCH_FAILED", err.Code)
+	assert.ElementsMatch(t, []string{"memory", "diskQuota", "instances"}, err.Affected)
+	assert.ElementsMatch(t, []string{"app-1"}, err.AffectedGuids)
+}
+
+func TestGetNativeAppsSummary_EmptyAppListSkipsProcessesCall(t *testing.T) {
+	processesCalled := false
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			w.Write([]byte(`{"links":{}}`))
+		case "/v3/apps":
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 0, "total_pages": 0},
+				"resources":  []map[string]interface{}{},
+			})
+		case "/v3/processes":
+			processesCalled = true
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 0, "total_pages": 0},
+				"resources":  []map[string]interface{}{},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer ts.Close()
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/test-cnsi?return=summary", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid")
+	ctx.SetParamValues("test-cnsi")
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "test-cnsi", APIEndpoint: mustParseURL(ts.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	require.NoError(t, plugin.getNativeApps(ctx))
+	assert.False(t, processesCalled, "empty app list should skip processes call")
+
+	var resp StratosPagedResponse[StApp]
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+	assert.Empty(t, resp.Resources)
+	assert.Nil(t, resp.Meta, "no error meta when everything succeeded trivially")
+}
+
 func TestGetNativeApps_LegacyReturnCountsUnchanged(t *testing.T) {
 	// Backwards-compat guard: counts tier response shape must stay
 	// StAppsResponse (not StratosPagedResponse) for FWT-934 home-page card.

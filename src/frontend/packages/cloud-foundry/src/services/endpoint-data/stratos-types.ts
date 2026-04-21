@@ -26,6 +26,22 @@ export interface StApp {
   createdAt: string;
   updatedAt: string;
   cnsiGuid: string;
+  _meta?: StratosMeta;
+}
+
+export interface StratosMeta {
+  unavailable?: string[];
+  errors?: StratosError[];
+}
+
+export interface StratosError {
+  scope?: 'envelope' | 'row';
+  code: string;
+  title: string;
+  detail?: string;
+  guid?: string;
+  affected?: string[];
+  affectedGuids?: string[];
 }
 
 export interface StSpace {

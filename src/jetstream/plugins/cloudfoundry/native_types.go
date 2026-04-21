@@ -16,16 +16,17 @@ type StOrg struct {
 }
 
 type StApp struct {
-	GUID      string  `json:"guid"`
-	Name      string  `json:"name"`
-	State     string  `json:"state"`
-	SpaceGUID string  `json:"spaceGuid"`
-	OrgGUID   *string `json:"orgGuid,omitempty"`
-	Instances int     `json:"instances"`
-	Memory    *int    `json:"memory,omitempty"`
-	DiskQuota *int    `json:"diskQuota,omitempty"`
-	CreatedAt string  `json:"createdAt"`
-	UpdatedAt string  `json:"updatedAt"`
+	GUID      string       `json:"guid"`
+	Name      string       `json:"name"`
+	State     string       `json:"state"`
+	SpaceGUID string       `json:"spaceGuid"`
+	OrgGUID   *string      `json:"orgGuid,omitempty"`
+	Instances int          `json:"instances"`
+	Memory    *int         `json:"memory,omitempty"`
+	DiskQuota *int         `json:"diskQuota,omitempty"`
+	CreatedAt string       `json:"createdAt"`
+	UpdatedAt string       `json:"updatedAt"`
+	Meta      *StratosMeta `json:"_meta,omitempty"`
 }
 
 type StSpace struct {
