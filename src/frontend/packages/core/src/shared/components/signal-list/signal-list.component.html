@@ -1,0 +1,36 @@
+<div class="flex flex-col gap-2">
+  <div *ngIf="config.isAnyLoading()" data-test="loading" class="text-sm text-gray-500">Loading…</div>
+  <div *ngIf="config.errorsByCnsi().size > 0" data-test="errors" class="text-sm text-red-600">
+    <span *ngFor="let entry of config.errorsByCnsi() | keyvalue">
+      {{ entry.key }}: failed
+    </span>
+  </div>
+  <table class="min-w-full border-collapse">
+    <thead class="bg-gray-50">
+      <tr>
+        <th *ngFor="let col of config.columns" class="text-left p-2 font-medium">{{ col.header }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let row of config.pagedItems(); trackBy: trackByRow" data-test="row" class="border-t">
+        <td *ngFor="let col of config.columns" class="p-2">{{ col.render(row) }}</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="flex items-center justify-between text-sm">
+    <span>{{ config.totalFilteredResults() }} result(s)</span>
+    <div class="flex gap-2">
+      <button
+        type="button"
+        class="px-2 py-1 border rounded disabled:opacity-50"
+        [disabled]="config.pageIndex() === 0"
+        (click)="config.pageIndex.set(config.pageIndex() - 1)">Prev</button>
+      <span>{{ config.pageIndex() + 1 }} / {{ config.totalPages() }}</span>
+      <button
+        type="button"
+        class="px-2 py-1 border rounded disabled:opacity-50"
+        [disabled]="config.pageIndex() + 1 >= config.totalPages()"
+        (click)="config.pageIndex.set(config.pageIndex() + 1)">Next</button>
+    </div>
+  </div>
+</div>
