@@ -15,7 +15,6 @@ export { ApplicationEnvVarsHelper } from './features/applications/application/ap
 export { CfOrgSpaceDataService, createCfOrgSpaceFilterConfig, CfOrgSpaceItem } from './shared/data-services/cf-org-space-service.service';
 export { ServiceActionHelperService } from './shared/data-services/service-action-helper.service';
 export { CloudFoundryService } from './shared/data-services/cloud-foundry.service';
-export { CfAppConfigService } from './shared/components/list/list-types/app/cf-app-config.service';
 export { CfOrgSpaceLabelService } from './shared/services/cf-org-space-label.service';
 
 // Utility Functions
