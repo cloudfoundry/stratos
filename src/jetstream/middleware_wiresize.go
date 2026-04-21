@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -41,6 +42,8 @@ func (p *portalProxy) wireSizeMiddleware(next echo.HandlerFunc) echo.HandlerFunc
 			return next(c)
 		}
 
+		start := time.Now()
+
 		origWriter := c.Response().Writer
 		bw := &bufferingResponseWriter{
 			ResponseWriter: origWriter,
@@ -61,9 +64,10 @@ func (p *portalProxy) wireSizeMiddleware(next echo.HandlerFunc) echo.HandlerFunc
 		ct := c.Response().Header().Get(echo.HeaderContentType)
 		if strings.Contains(ct, "application/json") {
 			m := countJSONBytes(bw.buf.Bytes())
+			durationMs := time.Since(start).Milliseconds()
 			c.Response().Header().Set("X-Stratos-Wire-Sizes", fmt.Sprintf(
-				"raw_total=%d; keys=%d; values=%d; structural=%d; resources=%d",
-				m.RawTotal, m.Keys, m.Values, m.Structural, m.Resources,
+				"raw_total=%d; keys=%d; values=%d; structural=%d; resources=%d; duration_ms=%d",
+				m.RawTotal, m.Keys, m.Values, m.Structural, m.Resources, durationMs,
 			))
 		}
 

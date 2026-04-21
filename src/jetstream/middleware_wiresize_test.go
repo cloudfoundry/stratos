@@ -59,7 +59,7 @@ func TestWireSizeMiddleware_EmitsHeaderForJSONResponse(t *testing.T) {
 	if h == "" {
 		t.Fatal("X-Stratos-Wire-Sizes header missing — regression of the WriteHeader-too-early bug")
 	}
-	for _, want := range []string{"raw_total=", "keys=", "values=", "structural=", "resources=1"} {
+	for _, want := range []string{"raw_total=", "keys=", "values=", "structural=", "resources=1", "duration_ms="} {
 		if !strings.Contains(h, want) {
 			t.Errorf("X-Stratos-Wire-Sizes missing %q: got %q", want, h)
 		}
