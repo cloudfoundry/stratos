@@ -21,7 +21,7 @@ export interface StratosPagedResponseLike<T> {
 export abstract class CnsiEntitySource<T> {
   protected abstract readonly entityName: string;
 
-  private readonly _items = signal<T[]>([]);
+  protected readonly _items = signal<T[]>([]);
   private readonly _loading = signal(false);
   private readonly _error = signal<unknown | null>(null);
   private readonly _done = signal(false);
@@ -86,5 +86,9 @@ export abstract class CnsiEntitySource<T> {
 
   async refresh(): Promise<void> {
     await this.load();
+  }
+
+  protected patchItems(fn: (items: T[]) => T[]): void {
+    this._items.update(fn);
   }
 }
