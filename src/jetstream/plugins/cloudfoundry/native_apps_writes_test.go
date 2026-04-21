@@ -2,8 +2,10 @@
 package cloudfoundry
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -267,4 +269,128 @@ func TestAppAction_PropagatesCapiError(t *testing.T) {
 	require.NoError(t, plugin.appAction(c))
 	assert.Equal(t, http.StatusUnprocessableEntity, rec.Code)
 	assert.Contains(t, rec.Body.String(), "UnprocessableEntity")
+}
+
+// patchAppHelper wires a mock CF v3 server + plugin + echo.Context for the
+// PATCH-handler tests. It returns the recorder so callers can assert status +
+// body, and exposes the plugin so tests invoke the handler directly.
+func patchAppHelper(t *testing.T, handler http.HandlerFunc, body string) (*httptest.ResponseRecorder, error) {
+	t.Helper()
+	capiServer := httptest.NewServer(handler)
+	t.Cleanup(capiServer.Close)
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(capiServer.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPatch, "/pp/v1/cf/apps/cnsi-1/app-1", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid")
+	c.SetParamNames("cnsiGuid", "appGuid")
+	c.SetParamValues("cnsi-1", "app-1")
+
+	return rec, plugin.patchApp(c)
+}
+
+// TestPatchApp_NameOnly_UpdatesAppName verifies that a body with only the name
+// field issues exactly one PATCH /v3/apps/{guid} to the upstream CF API and
+// returns 200 with the app guid and no _meta.errors envelope.
+func TestPatchApp_NameOnly_UpdatesAppName(t *testing.T) {
+	appUpdates := 0
+	var receivedBody map[string]interface{}
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/v3" {
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{"links":{}}`))
+			return
+		}
+		if r.URL.Path == "/v3/apps/app-1" && r.Method == http.MethodPatch {
+			appUpdates++
+			_ = json.NewDecoder(r.Body).Decode(&receivedBody)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{"guid":"app-1","name":"new-name"}`))
+			return
+		}
+		http.NotFound(w, r)
+	})
+
+	rec, err := patchAppHelper(t, handler, `{"name":"new-name"}`)
+	require.NoError(t, err)
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, 1, appUpdates)
+	assert.Equal(t, "new-name", receivedBody["name"])
+
+	var resp map[string]interface{}
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	assert.Equal(t, "app-1", resp["guid"])
+	_, hasMeta := resp["_meta"]
+	assert.False(t, hasMeta, "name-only success should not include _meta.errors envelope")
+}
+
+// TestPatchApp_PartialFailure_ReturnsMetaErrors verifies that when one sub-call
+// (process scale) fails after a successful name update, the handler returns
+// HTTP 200 with a _meta.errors envelope describing the failed operation, and
+// still reports the app guid for the successful fields.
+func TestPatchApp_PartialFailure_ReturnsMetaErrors(t *testing.T) {
+	appUpdates := 0
+	processLists := 0
+	scaleCalls := 0
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/v3":
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{"links":{}}`))
+		case r.URL.Path == "/v3/apps/app-1" && r.Method == http.MethodPatch:
+			appUpdates++
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{"guid":"app-1","name":"ok"}`))
+		case r.URL.Path == "/v3/processes" && r.Method == http.MethodGet:
+			processLists++
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{"pagination":{"total_results":1,"total_pages":1},"resources":[{"guid":"proc-web","type":"web"}]}`))
+		case r.URL.Path == "/v3/processes/proc-web/actions/scale" && r.Method == http.MethodPost:
+			scaleCalls++
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			w.Write([]byte(`{"errors":[{"code":10008,"title":"CF-UnprocessableEntity","detail":"memory exceeds quota"}]}`))
+		default:
+			http.NotFound(w, r)
+		}
+	})
+
+	rec, err := patchAppHelper(t, handler, `{"name":"ok","memory":99999}`)
+	require.NoError(t, err)
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, 1, appUpdates)
+	assert.GreaterOrEqual(t, scaleCalls, 1)
+
+	var resp struct {
+		GUID  string `json:"guid"`
+		Meta  *struct {
+			Errors []struct {
+				Scope    string   `json:"scope"`
+				Code     string   `json:"code"`
+				Title    string   `json:"title"`
+				Detail   string   `json:"detail"`
+				Affected []string `json:"affected"`
+			} `json:"errors"`
+		} `json:"_meta"`
+	}
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	assert.Equal(t, "app-1", resp.GUID)
+	require.NotNil(t, resp.Meta, "expected _meta envelope after scale failure")
+	require.NotEmpty(t, resp.Meta.Errors, "expected at least one error entry")
+	e0 := resp.Meta.Errors[0]
+	assert.Equal(t, "envelope", e0.Scope)
+	assert.Contains(t, e0.Affected, "memory")
+	assert.Contains(t, e0.Title, "UnprocessableEntity")
 }
