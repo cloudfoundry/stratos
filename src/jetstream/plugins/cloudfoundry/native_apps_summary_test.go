@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -397,7 +398,216 @@ func TestGetNativeAppsSummary_PopulatesMemoryDiskInstancesFromProcesses(t *testi
 	assert.Nil(t, resp.Meta)
 }
 
-// --- WU 3c: space → org resolution ---
+// --- WU 3d: derived-field sort fallback ---
+
+func TestIsDerivedSortField(t *testing.T) {
+	cases := []struct {
+		in            string
+		derived       bool
+		field         string
+		desc          bool
+	}{
+		{"", false, "", false},
+		{"name", false, "name", false},
+		{"-name", false, "name", true},
+		{"memory", true, "memory", false},
+		{"-memory", true, "memory", true},
+		{"diskQuota", true, "diskQuota", false},
+		{"-diskQuota", true, "diskQuota", true},
+		{"instances", true, "instances", false},
+		{"-instances", true, "instances", true},
+		{"created_at", false, "created_at", false},
+		{"-created_at", false, "created_at", true},
+	}
+	for _, c := range cases {
+		d, f, desc := isDerivedSortField(c.in)
+		assert.Equal(t, c.derived, d, "input=%q: derived", c.in)
+		assert.Equal(t, c.field, f, "input=%q: field", c.in)
+		assert.Equal(t, c.desc, desc, "input=%q: desc", c.in)
+	}
+}
+
+func TestSortStAppsByDerivedField_MemoryAscending(t *testing.T) {
+	mk := func(mem int) StApp { v := mem; return StApp{GUID: "app-" + strconv.Itoa(mem), Memory: &v} }
+	apps := []StApp{mk(512), mk(128), mk(1024), mk(256)}
+	sortStAppsByDerivedField(apps, "memory", false)
+	var got []int
+	for _, a := range apps {
+		got = append(got, *a.Memory)
+	}
+	assert.Equal(t, []int{128, 256, 512, 1024}, got)
+}
+
+func TestSortStAppsByDerivedField_MemoryDescending(t *testing.T) {
+	mk := func(mem int) StApp { v := mem; return StApp{GUID: "app-" + strconv.Itoa(mem), Memory: &v} }
+	apps := []StApp{mk(512), mk(128), mk(1024), mk(256)}
+	sortStAppsByDerivedField(apps, "memory", true)
+	var got []int
+	for _, a := range apps {
+		got = append(got, *a.Memory)
+	}
+	assert.Equal(t, []int{1024, 512, 256, 128}, got)
+}
+
+func TestSortStAppsByDerivedField_NilsSortToEndRegardlessOfDirection(t *testing.T) {
+	mk := func(mem *int, guid string) StApp { return StApp{GUID: guid, Memory: mem} }
+	val := func(v int) *int { return &v }
+
+	for _, desc := range []bool{false, true} {
+		apps := []StApp{mk(val(512), "a"), mk(nil, "b"), mk(val(128), "c"), mk(nil, "d")}
+		sortStAppsByDerivedField(apps, "memory", desc)
+		// Last two should be the nil-valued rows (order of nils not asserted, but they're at the end)
+		assert.Nil(t, apps[2].Memory, "nil-valued row at index 2 (desc=%v)", desc)
+		assert.Nil(t, apps[3].Memory, "nil-valued row at index 3 (desc=%v)", desc)
+		assert.NotNil(t, apps[0].Memory)
+		assert.NotNil(t, apps[1].Memory)
+	}
+}
+
+func TestSortStAppsByDerivedField_Instances(t *testing.T) {
+	apps := []StApp{
+		{GUID: "a", Instances: 3},
+		{GUID: "b", Instances: 1},
+		{GUID: "c", Instances: 5},
+	}
+	sortStAppsByDerivedField(apps, "instances", false)
+	assert.Equal(t, []int{1, 3, 5}, []int{apps[0].Instances, apps[1].Instances, apps[2].Instances})
+}
+
+func TestGetNativeAppsSummary_DerivedSortFetchesAllAndPaginatesInMemory(t *testing.T) {
+	// Serve 5 apps across 2 CAPI pages; /v3/processes supplies distinct memory
+	// per app so memory sort produces a predictable global order.
+	appsByPage := map[string][]map[string]interface{}{
+		"1": {
+			{
+				"guid": "app-a", "name": "A", "state": "STARTED",
+				"relationships": map[string]interface{}{
+					"space": map[string]interface{}{"data": map[string]interface{}{"guid": "space-1"}},
+				},
+				"created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z",
+			},
+			{
+				"guid": "app-b", "name": "B", "state": "STARTED",
+				"relationships": map[string]interface{}{
+					"space": map[string]interface{}{"data": map[string]interface{}{"guid": "space-1"}},
+				},
+				"created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z",
+			},
+			{
+				"guid": "app-c", "name": "C", "state": "STARTED",
+				"relationships": map[string]interface{}{
+					"space": map[string]interface{}{"data": map[string]interface{}{"guid": "space-1"}},
+				},
+				"created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z",
+			},
+		},
+		"2": {
+			{
+				"guid": "app-d", "name": "D", "state": "STARTED",
+				"relationships": map[string]interface{}{
+					"space": map[string]interface{}{"data": map[string]interface{}{"guid": "space-1"}},
+				},
+				"created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z",
+			},
+			{
+				"guid": "app-e", "name": "E", "state": "STARTED",
+				"relationships": map[string]interface{}{
+					"space": map[string]interface{}{"data": map[string]interface{}{"guid": "space-1"}},
+				},
+				"created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z",
+			},
+		},
+	}
+	memByGuid := map[string]int{"app-a": 512, "app-b": 128, "app-c": 1024, "app-d": 256, "app-e": 768}
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			w.Write([]byte(`{"links":{}}`))
+		case "/v3/apps":
+			page := r.URL.Query().Get("page")
+			if page == "" {
+				page = "1"
+			}
+			apps, ok := appsByPage[page]
+			if !ok {
+				apps = []map[string]interface{}{}
+			}
+			nextLink := map[string]interface{}{"href": "next"}
+			pagination := map[string]interface{}{"total_results": 5, "total_pages": 2}
+			if page == "1" {
+				pagination["next"] = nextLink
+			}
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": pagination,
+				"resources":  apps,
+			})
+		case "/v3/processes":
+			procs := []map[string]interface{}{}
+			for g, mem := range memByGuid {
+				procs = append(procs, map[string]interface{}{
+					"guid": "proc-" + g, "type": "web",
+					"instances": 1, "memory_in_mb": mem, "disk_in_mb": 1024,
+					"relationships": map[string]interface{}{
+						"app": map[string]interface{}{"data": map[string]interface{}{"guid": g}},
+					},
+				})
+			}
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": len(procs), "total_pages": 1},
+				"resources":  procs,
+			})
+		case "/v3/spaces":
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 1, "total_pages": 1},
+				"resources": []map[string]interface{}{
+					{
+						"guid": "space-1", "name": "Space One",
+						"relationships": map[string]interface{}{
+							"organization": map[string]interface{}{"data": map[string]interface{}{"guid": "org-1"}},
+						},
+						"created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z",
+					},
+				},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer ts.Close()
+
+	// Request page 1 with per_page=2, sorted by memory ascending
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/test-cnsi?return=summary&order_by=memory&direction=asc&page=1&per_page=2", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid")
+	ctx.SetParamValues("test-cnsi")
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "test-cnsi", APIEndpoint: mustParseURL(ts.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	require.NoError(t, plugin.getNativeApps(ctx))
+
+	var resp StratosPagedResponse[StApp]
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+	require.Len(t, resp.Resources, 2)
+
+	// Globally sorted ascending by memory: 128, 256, 512, 768, 1024
+	// Page 1 of per_page=2 → 128 (app-b), 256 (app-d)
+	assert.Equal(t, "app-b", resp.Resources[0].GUID, "page 1 item 0: memory 128")
+	assert.Equal(t, 128, *resp.Resources[0].Memory)
+	assert.Equal(t, "app-d", resp.Resources[1].GUID, "page 1 item 1: memory 256")
+	assert.Equal(t, 256, *resp.Resources[1].Memory)
+	assert.Equal(t, 5, resp.Pagination.TotalResults, "total count reflects full set, not page")
+	assert.Equal(t, 3, resp.Pagination.TotalPages, "5 items at per_page=2 = 3 pages")
+}
 
 func TestGetNativeAppsSummary_SpacesFetchFailureSurfacesOrgGuidTristate(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
