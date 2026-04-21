@@ -15,9 +15,14 @@ export interface StApp {
   guid: string;
   name: string;
   state: string;
-  orgGuid: string;
+  // orgGuid, memory, diskQuota are tristate-bearing: optional reflects the
+  // "value does not exist" state (absent when handler couldn't compose them,
+  // listed in _meta.unavailable). See Track 2 page 1 plan Groups 3/4.
+  orgGuid?: string;
   spaceGuid: string;
   instances: number;
+  memory?: number;
+  diskQuota?: number;
   createdAt: string;
   updatedAt: string;
   cnsiGuid: string;
