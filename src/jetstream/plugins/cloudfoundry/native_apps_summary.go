@@ -83,6 +83,10 @@ func parseSummaryQueryParams(ctx echo.Context) *capi.QueryParams {
 // surfaced as unavailable together when the processes fetch fails.
 var processDerivedFields = []string{"memory", "diskQuota", "instances"}
 
+// spaceDerivedFields are the StApp fields sourced from a space→org resolution
+// — surfaced as unavailable together when the spaces fetch fails.
+var spaceDerivedFields = []string{"orgGuid"}
+
 // fetchWebProcessesForApps issues one /v3/processes call filtered to the
 // given app GUIDs and type=web, collecting results across all pages. Returns
 // a map keyed by app GUID so per-app composition is a cheap lookup. Returns
@@ -116,49 +120,121 @@ func fetchWebProcessesForApps(ctx echo.Context, cfClient capi.Client, appGUIDs [
 	return processes, nil
 }
 
-// toStAppSummary builds a summary-tier StApp. When a web Process is provided,
-// memory / disk / instances are populated from it. When nil (processes fetch
-// failed or this app has no web process), those fields are absent and the
-// row's _meta.unavailable records the gap.
-func toStAppSummary(app capi.App, process *capi.Process) StApp {
+// fetchSpacesByGUIDs issues one /v3/spaces?guids=... call paginated across
+// all pages, returning a map space_guid → Space. The caller uses this to
+// resolve each app's space GUID to an org GUID via the space's relationship
+// envelope. Returns an error on any CAPI failure; caller converts into an
+// envelope-level _meta.errors entry rather than failing the whole response.
+func fetchSpacesByGUIDs(ctx echo.Context, cfClient capi.Client, spaceGUIDs []string) (map[string]capi.Space, error) {
+	if len(spaceGUIDs) == 0 {
+		return map[string]capi.Space{}, nil
+	}
+	spaces := make(map[string]capi.Space, len(spaceGUIDs))
+	for page := 1; ; page++ {
+		params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
+		params.Page = page
+		params.Filters["guids"] = spaceGUIDs
+
+		raw, err := cfClient.Spaces().List(ctx.Request().Context(), params)
+		if err != nil {
+			return nil, err
+		}
+		for _, s := range raw.Resources {
+			spaces[s.GUID] = s
+		}
+		if raw.Pagination.Next == nil || page >= raw.Pagination.TotalPages {
+			break
+		}
+	}
+	return spaces, nil
+}
+
+// composeStAppSummary builds a summary-tier StApp from its source app, its
+// web Process (may be nil), and its Space (may be nil for unresolved).
+// Missing sub-resources surface as row-level _meta.unavailable entries
+// listing the specific fields those sources would have populated.
+func composeStAppSummary(app capi.App, process *capi.Process, space *capi.Space) StApp {
 	s := toStApp(app)
+
+	var unavailable []string
+
 	if process != nil {
 		mem := process.MemoryInMB
 		disk := process.DiskInMB
 		s.Memory = &mem
 		s.DiskQuota = &disk
 		s.Instances = process.Instances
-		return s
+	} else {
+		unavailable = append(unavailable, processDerivedFields...)
 	}
-	s.Meta = &StratosMeta{Unavailable: append([]string(nil), processDerivedFields...)}
+
+	if space != nil {
+		orgGuid := relationshipGUID(space.Relationships.Organization)
+		if orgGuid != "" {
+			s.OrgGUID = &orgGuid
+		} else {
+			unavailable = append(unavailable, "orgGuid")
+		}
+	} else {
+		unavailable = append(unavailable, spaceDerivedFields...)
+	}
+
+	if len(unavailable) > 0 {
+		s.Meta = &StratosMeta{Unavailable: unavailable}
+	}
 	return s
 }
 
-// envelopeMetaWithProcessError builds a StratosMeta that records a processes-
-// fetch failure at the envelope level. Consumers pair this with per-row
-// _meta.unavailable entries to see which rows are affected.
-func envelopeMetaWithProcessError(err error, affectedGUIDs []string) *StratosMeta {
-	return &StratosMeta{
-		Errors: []StratosError{{
+// toStAppSummary is retained as a two-argument convenience for the tests +
+// the subset of callers that don't need org resolution. Delegates to
+// composeStAppSummary with space=nil so orgGuid is always unavailable in
+// this path.
+func toStAppSummary(app capi.App, process *capi.Process) StApp {
+	return composeStAppSummary(app, process, nil)
+}
+
+// envelopeMetaForCompositionErrors builds the envelope-level _meta.errors
+// entries for any composition sub-fetch that failed. Returns nil (so the
+// envelope's _meta stays absent) when no errors occurred. Supports
+// additively stacking errors — each failed sub-fetch gets its own envelope
+// error with its own Affected + AffectedGuids lists.
+func envelopeMetaForCompositionErrors(procErr, spaceErr error, affectedGUIDs []string) *StratosMeta {
+	var errors []StratosError
+	if procErr != nil {
+		errors = append(errors, StratosError{
 			Scope:         "envelope",
 			Code:          "PROCESSES_FETCH_FAILED",
 			Title:         "Processes fetch failed",
-			Detail:        err.Error(),
+			Detail:        procErr.Error(),
 			Affected:      append([]string(nil), processDerivedFields...),
 			AffectedGuids: append([]string(nil), affectedGUIDs...),
-		}},
+		})
 	}
+	if spaceErr != nil {
+		errors = append(errors, StratosError{
+			Scope:         "envelope",
+			Code:          "SPACES_FETCH_FAILED",
+			Title:         "Spaces fetch failed",
+			Detail:        spaceErr.Error(),
+			Affected:      append([]string(nil), spaceDerivedFields...),
+			AffectedGuids: append([]string(nil), affectedGUIDs...),
+		})
+	}
+	if len(errors) == 0 {
+		return nil
+	}
+	return &StratosMeta{Errors: errors}
 }
 
 // getNativeAppsSummary handles ?return=summary for the /pp/v1/cf/apps/{cnsi}
 // endpoint — the Stratos-shape paged app-wall response.
 //
-// WU 3a + 3b scope: paging, sort, filter passthrough; composition with
-// /v3/processes to populate memory / diskQuota / instances per row. When
-// the processes fetch fails, rows are still returned with Name / State /
-// etc., per-row _meta.unavailable listing the affected fields, and an
-// envelope-level _meta.errors entry explaining the root cause. orgGuid
-// composition lands in WU 3c; derived-field sort fallback in WU 3d.
+// WU 3a + 3b + 3c scope: paging, sort, filter passthrough; composition with
+// /v3/processes (memory / diskQuota / instances) and /v3/spaces (orgGuid
+// via space→organization relationship). When a sub-fetch fails the handler
+// still returns HTTP 200 with the app-level fields intact — per-row
+// _meta.unavailable lists the affected fields, and envelope _meta.errors
+// explains the root cause. Derived-field sort fallback lands in WU 3d.
 func (c *CloudFoundrySpecification) getNativeAppsSummary(ctx echo.Context, cfClient capi.Client) error {
 	params := parseSummaryQueryParams(ctx)
 
@@ -168,11 +244,20 @@ func (c *CloudFoundrySpecification) getNativeAppsSummary(ctx echo.Context, cfCli
 	}
 
 	appGUIDs := make([]string, 0, len(raw.Resources))
+	uniqueSpaceGUIDs := make(map[string]struct{}, len(raw.Resources))
 	for _, r := range raw.Resources {
 		appGUIDs = append(appGUIDs, r.GUID)
+		if sg := relationshipGUID(r.Relationships.Space); sg != "" {
+			uniqueSpaceGUIDs[sg] = struct{}{}
+		}
+	}
+	spaceGUIDs := make([]string, 0, len(uniqueSpaceGUIDs))
+	for sg := range uniqueSpaceGUIDs {
+		spaceGUIDs = append(spaceGUIDs, sg)
 	}
 
 	processes, procErr := fetchWebProcessesForApps(ctx, cfClient, appGUIDs)
+	spaces, spaceErr := fetchSpacesByGUIDs(ctx, cfClient, spaceGUIDs)
 
 	resources := make([]StApp, 0, len(raw.Resources))
 	for _, r := range raw.Resources {
@@ -182,16 +267,19 @@ func (c *CloudFoundrySpecification) getNativeAppsSummary(ctx echo.Context, cfCli
 				p = &proc
 			}
 		}
-		resources = append(resources, toStAppSummary(r, p))
+		var s *capi.Space
+		if spaceErr == nil {
+			if sp, ok := spaces[relationshipGUID(r.Relationships.Space)]; ok {
+				s = &sp
+			}
+		}
+		resources = append(resources, composeStAppSummary(r, p, s))
 	}
 
 	response := StratosPagedResponse[StApp]{
 		Resources:  resources,
 		Pagination: BuildPaginationMeta(ctx, params.Page, params.PerPage, raw.Pagination.TotalResults),
-	}
-
-	if procErr != nil {
-		response.Meta = envelopeMetaWithProcessError(procErr, appGUIDs)
+		Meta:       envelopeMetaForCompositionErrors(procErr, spaceErr, appGUIDs),
 	}
 
 	return ctx.JSON(http.StatusOK, response)

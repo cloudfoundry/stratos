@@ -133,6 +133,24 @@ func TestGetNativeAppsSummary_ReturnsStratosPagedEnvelope(t *testing.T) {
 					},
 				},
 			})
+		case "/v3/processes":
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 0, "total_pages": 0},
+				"resources":  []map[string]interface{}{},
+			})
+		case "/v3/spaces":
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 1, "total_pages": 1},
+				"resources": []map[string]interface{}{
+					{
+						"guid": "space-1", "name": "Space One",
+						"relationships": map[string]interface{}{
+							"organization": map[string]interface{}{"data": map[string]interface{}{"guid": "org-1"}},
+						},
+						"created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z",
+					},
+				},
+			})
 		default:
 			http.NotFound(w, r)
 		}
@@ -309,6 +327,26 @@ func TestGetNativeAppsSummary_PopulatesMemoryDiskInstancesFromProcesses(t *testi
 					},
 				},
 			})
+		case "/v3/spaces":
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 2, "total_pages": 1},
+				"resources": []map[string]interface{}{
+					{
+						"guid": "space-1", "name": "Space One",
+						"relationships": map[string]interface{}{
+							"organization": map[string]interface{}{"data": map[string]interface{}{"guid": "org-1"}},
+						},
+						"created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z",
+					},
+					{
+						"guid": "space-2", "name": "Space Two",
+						"relationships": map[string]interface{}{
+							"organization": map[string]interface{}{"data": map[string]interface{}{"guid": "org-2"}},
+						},
+						"created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z",
+					},
+				},
+			})
 		default:
 			http.NotFound(w, r)
 		}
@@ -336,23 +374,174 @@ func TestGetNativeAppsSummary_PopulatesMemoryDiskInstancesFromProcesses(t *testi
 	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
 	require.Len(t, resp.Resources, 2)
 
-	// app-1: memory 512, disk 1024, instances 3
+	// app-1: memory 512, disk 1024, instances 3, orgGuid from space-1 → org-1
 	assert.Equal(t, "app-1", resp.Resources[0].GUID)
 	require.NotNil(t, resp.Resources[0].Memory, "Memory should be populated")
 	assert.Equal(t, 512, *resp.Resources[0].Memory)
 	require.NotNil(t, resp.Resources[0].DiskQuota)
 	assert.Equal(t, 1024, *resp.Resources[0].DiskQuota)
 	assert.Equal(t, 3, resp.Resources[0].Instances)
+	require.NotNil(t, resp.Resources[0].OrgGUID, "OrgGUID should be populated via space→org")
+	assert.Equal(t, "org-1", *resp.Resources[0].OrgGUID)
 	assert.Nil(t, resp.Resources[0].Meta, "no _meta on success")
 
-	// app-2: memory 256, disk 512, instances 1
+	// app-2: memory 256, disk 512, instances 1, orgGuid from space-2 → org-2
 	assert.Equal(t, "app-2", resp.Resources[1].GUID)
 	require.NotNil(t, resp.Resources[1].Memory)
 	assert.Equal(t, 256, *resp.Resources[1].Memory)
 	assert.Equal(t, 1, resp.Resources[1].Instances)
+	require.NotNil(t, resp.Resources[1].OrgGUID)
+	assert.Equal(t, "org-2", *resp.Resources[1].OrgGUID)
 
 	// Envelope has no error meta when everything succeeds
 	assert.Nil(t, resp.Meta)
+}
+
+// --- WU 3c: space → org resolution ---
+
+func TestGetNativeAppsSummary_SpacesFetchFailureSurfacesOrgGuidTristate(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			w.Write([]byte(`{"links":{}}`))
+		case "/v3/apps":
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 1, "total_pages": 1},
+				"resources": []map[string]interface{}{
+					{
+						"guid": "app-1", "name": "App One", "state": "STARTED",
+						"relationships": map[string]interface{}{
+							"space": map[string]interface{}{"data": map[string]interface{}{"guid": "space-1"}},
+						},
+						"created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z",
+					},
+				},
+			})
+		case "/v3/processes":
+			// Processes succeeds so the test isolates the spaces failure
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 1, "total_pages": 1},
+				"resources": []map[string]interface{}{
+					{
+						"guid": "proc-1", "type": "web",
+						"instances": 2, "memory_in_mb": 256, "disk_in_mb": 512,
+						"relationships": map[string]interface{}{
+							"app": map[string]interface{}{"data": map[string]interface{}{"guid": "app-1"}},
+						},
+					},
+				},
+			})
+		case "/v3/spaces":
+			http.Error(w, `{"errors":[{"title":"Unavailable"}]}`, http.StatusServiceUnavailable)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer ts.Close()
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/test-cnsi?return=summary", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid")
+	ctx.SetParamValues("test-cnsi")
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "test-cnsi", APIEndpoint: mustParseURL(ts.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	require.NoError(t, plugin.getNativeApps(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	var resp StratosPagedResponse[StApp]
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+	require.Len(t, resp.Resources, 1)
+
+	// Row still has app-level + process-derived fields
+	assert.Equal(t, "app-1", resp.Resources[0].GUID)
+	require.NotNil(t, resp.Resources[0].Memory, "Memory still set (processes succeeded)")
+	assert.Equal(t, 256, *resp.Resources[0].Memory)
+	// orgGuid absent because spaces fetch failed
+	assert.Nil(t, resp.Resources[0].OrgGUID)
+	require.NotNil(t, resp.Resources[0].Meta)
+	assert.ElementsMatch(t, []string{"orgGuid"}, resp.Resources[0].Meta.Unavailable)
+
+	// Envelope has the SPACES_FETCH_FAILED error
+	require.NotNil(t, resp.Meta)
+	require.Len(t, resp.Meta.Errors, 1)
+	assert.Equal(t, "SPACES_FETCH_FAILED", resp.Meta.Errors[0].Code)
+	assert.Equal(t, "envelope", resp.Meta.Errors[0].Scope)
+	assert.ElementsMatch(t, []string{"orgGuid"}, resp.Meta.Errors[0].Affected)
+}
+
+func TestGetNativeAppsSummary_BothCompositionFetchesFailMultiError(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			w.Write([]byte(`{"links":{}}`))
+		case "/v3/apps":
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 1, "total_pages": 1},
+				"resources": []map[string]interface{}{
+					{
+						"guid": "app-1", "name": "App One", "state": "STARTED",
+						"relationships": map[string]interface{}{
+							"space": map[string]interface{}{"data": map[string]interface{}{"guid": "space-1"}},
+						},
+						"created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z",
+					},
+				},
+			})
+		case "/v3/processes":
+			http.Error(w, `{"errors":[{"title":"Unavailable"}]}`, http.StatusServiceUnavailable)
+		case "/v3/spaces":
+			http.Error(w, `{"errors":[{"title":"Unavailable"}]}`, http.StatusServiceUnavailable)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer ts.Close()
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/test-cnsi?return=summary", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid")
+	ctx.SetParamValues("test-cnsi")
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "test-cnsi", APIEndpoint: mustParseURL(ts.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	require.NoError(t, plugin.getNativeApps(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	var resp StratosPagedResponse[StApp]
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+	require.Len(t, resp.Resources, 1)
+
+	// Row has neither process-derived nor org-derived fields; app-level survives
+	assert.Equal(t, "app-1", resp.Resources[0].GUID)
+	assert.Nil(t, resp.Resources[0].Memory)
+	assert.Nil(t, resp.Resources[0].OrgGUID)
+	require.NotNil(t, resp.Resources[0].Meta)
+	assert.ElementsMatch(t, []string{"memory", "diskQuota", "instances", "orgGuid"}, resp.Resources[0].Meta.Unavailable)
+
+	// Envelope has two distinct errors — multi-error by design
+	require.NotNil(t, resp.Meta)
+	require.Len(t, resp.Meta.Errors, 2)
+	codes := []string{resp.Meta.Errors[0].Code, resp.Meta.Errors[1].Code}
+	assert.ElementsMatch(t, []string{"PROCESSES_FETCH_FAILED", "SPACES_FETCH_FAILED"}, codes)
 }
 
 func TestGetNativeAppsSummary_ProcessesFetchFailureSurfacesTristate(t *testing.T) {
@@ -377,6 +566,20 @@ func TestGetNativeAppsSummary_ProcessesFetchFailureSurfacesTristate(t *testing.T
 		case "/v3/processes":
 			// Simulate CAPI failure on processes fetch
 			http.Error(w, `{"errors":[{"title":"Unavailable"}]}`, http.StatusServiceUnavailable)
+		case "/v3/spaces":
+			// Spaces succeeds so the test isolates the processes failure
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 1, "total_pages": 1},
+				"resources": []map[string]interface{}{
+					{
+						"guid": "space-1", "name": "Space One",
+						"relationships": map[string]interface{}{
+							"organization": map[string]interface{}{"data": map[string]interface{}{"guid": "org-1"}},
+						},
+						"created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z",
+					},
+				},
+			})
 		default:
 			http.NotFound(w, r)
 		}
