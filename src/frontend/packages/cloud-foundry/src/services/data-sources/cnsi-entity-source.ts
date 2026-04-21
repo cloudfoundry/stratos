@@ -35,6 +35,8 @@ export abstract class CnsiEntitySource<T> {
   readonly fetchedPages: Signal<number> = this._fetchedPages.asReadonly();
   readonly totalResults: Signal<number> = this._totalResults.asReadonly();
 
+  private _inFlight: Promise<void> | null = null;
+
   constructor(
     readonly cnsiGuid: string,
     protected readonly http: HttpClient,
@@ -46,7 +48,16 @@ export abstract class CnsiEntitySource<T> {
   }
 
   async load(): Promise<void> {
-    if (this._loading()) return;
+    if (this._inFlight) return this._inFlight;
+    this._inFlight = this._doLoad();
+    try {
+      await this._inFlight;
+    } finally {
+      this._inFlight = null;
+    }
+  }
+
+  private async _doLoad(): Promise<void> {
     this._loading.set(true);
     this._error.set(null);
     this._items.set([]);

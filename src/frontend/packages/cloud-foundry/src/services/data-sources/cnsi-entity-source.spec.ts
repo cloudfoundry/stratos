@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { HttpClient } from '@angular/common/http';
-import { of, throwError } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { CnsiEntitySource } from './cnsi-entity-source';
 
 class TestItem { constructor(public guid: string) {} }
@@ -74,5 +74,44 @@ describe('CnsiEntitySource', () => {
     expect(src.items().map(i => i.guid)).toEqual(['a']);
     expect(src.fetchedPages()).toBe(1);
     expect(http.get).toHaveBeenCalledTimes(2);
+  });
+
+  it('concurrent load() calls share the same in-flight promise — HTTP fires once, both awaits wait for completion', async () => {
+    let resolveFirst: ((v: unknown) => void) | null = null;
+    const firstCall = new Promise(resolve => { resolveFirst = resolve; });
+    const resp = {
+      resources: [new TestItem('a')],
+      pagination: { totalResults: 1, totalPages: 1, next: null, previous: null, first: { href: '...' }, last: { href: '...' } }
+    };
+    let callCount = 0;
+    const http = {
+      get: vi.fn(() => {
+        callCount++;
+        return callCount === 1
+          ? // first call: wait on firstCall before emitting
+            new Observable(sub => { firstCall.then(() => { sub.next(resp); sub.complete(); }); })
+          : of(resp);
+      }),
+    } as unknown as HttpClient;
+    const src = new TestSource('cnsi-1', http);
+
+    const p1 = src.load();
+    const p2 = src.load();
+    // When p2 resolves, loading must be complete — not returned early while
+    // the first load is still in flight. Assert state is stable AT p2's
+    // resolution point by checking loading === false in the .then.
+    let p2LoadingAtResolve: boolean | null = null;
+    let p2ItemsAtResolve: string[] | null = null;
+    const p2Checked = p2.then(() => {
+      p2LoadingAtResolve = src.loading();
+      p2ItemsAtResolve = src.items().map(i => i.guid);
+    });
+    resolveFirst!(null);
+    await Promise.all([p1, p2Checked]);
+
+    expect(callCount).toBe(1);
+    expect(src.items().map(i => i.guid)).toEqual(['a']);
+    expect(p2LoadingAtResolve).toBe(false);
+    expect(p2ItemsAtResolve).toEqual(['a']);
   });
 });
