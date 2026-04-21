@@ -91,3 +91,180 @@ func TestDeleteNativeApp_PropagatesCapiError(t *testing.T) {
 	assert.Equal(t, http.StatusNotFound, rec.Code)
 	assert.Contains(t, rec.Body.String(), "ResourceNotFound")
 }
+
+// TestAppAction_ForwardsSimpleLifecycleVerbs parameterizes the three simple
+// POST verbs (start/stop/restart) that map 1:1 to /v3/apps/{guid}/actions/{v}.
+// Each subtest asserts the mock server saw the right method+path and the
+// handler returned 202. Restage is covered separately because it issues two
+// upstream calls (packages list + builds create) rather than a single action.
+func TestAppAction_ForwardsSimpleLifecycleVerbs(t *testing.T) {
+	cases := []struct {
+		action       string
+		expectedPath string
+	}{
+		{"start", "/v3/apps/app-1/actions/start"},
+		{"stop", "/v3/apps/app-1/actions/stop"},
+		{"restart", "/v3/apps/app-1/actions/restart"},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.action, func(t *testing.T) {
+			capiCalls := 0
+			capiServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path == "/v3" {
+					w.Header().Set("Content-Type", "application/json")
+					w.Write([]byte(`{"links":{}}`))
+					return
+				}
+				capiCalls++
+				assert.Equal(t, http.MethodPost, r.Method)
+				assert.Equal(t, tc.expectedPath, r.URL.Path)
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusAccepted)
+				w.Write([]byte(`{"guid":"app-1","state":"STARTED"}`))
+			}))
+			defer capiServer.Close()
+
+			plugin := &CloudFoundrySpecification{
+				testProxy: &mockNativeCFProxy{
+					userID:      "user-1",
+					cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(capiServer.URL)},
+					tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+				},
+			}
+
+			e := echo.New()
+			req := httptest.NewRequest(http.MethodPost, "/pp/v1/cf/apps/cnsi-1/app-1/actions/"+tc.action, nil)
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/actions/:action")
+			c.SetParamNames("cnsiGuid", "appGuid", "action")
+			c.SetParamValues("cnsi-1", "app-1", tc.action)
+
+			require.NoError(t, plugin.appAction(c))
+			assert.Equal(t, http.StatusAccepted, rec.Code)
+			assert.Equal(t, 1, capiCalls)
+		})
+	}
+}
+
+// TestAppAction_RestageForwardsPackagesAndBuilds verifies the restage verb,
+// which in CF API v3 is implemented as: list /v3/packages (filtered by
+// app_guid, newest first) then POST /v3/builds. The handler should return 202
+// when both upstream calls succeed.
+func TestAppAction_RestageForwardsPackagesAndBuilds(t *testing.T) {
+	packagesHit := 0
+	buildsHit := 0
+	capiServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/v3":
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{"links":{}}`))
+		case r.URL.Path == "/v3/packages" && r.Method == http.MethodGet:
+			packagesHit++
+			assert.Equal(t, "app-1", r.URL.Query().Get("app_guids"))
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{"pagination":{"total_results":1,"total_pages":1},"resources":[{"guid":"pkg-1","state":"READY"}]}`))
+		case r.URL.Path == "/v3/builds" && r.Method == http.MethodPost:
+			buildsHit++
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusCreated)
+			w.Write([]byte(`{"guid":"build-1","state":"STAGING"}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer capiServer.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(capiServer.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/pp/v1/cf/apps/cnsi-1/app-1/actions/restage", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/actions/:action")
+	c.SetParamNames("cnsiGuid", "appGuid", "action")
+	c.SetParamValues("cnsi-1", "app-1", "restage")
+
+	require.NoError(t, plugin.appAction(c))
+	assert.Equal(t, http.StatusAccepted, rec.Code)
+	assert.Equal(t, 1, packagesHit)
+	assert.Equal(t, 1, buildsHit)
+}
+
+// TestAppAction_RejectsUnknownVerb confirms that a verb outside the allowlist
+// is rejected with HTTP 400 before any upstream call is attempted.
+func TestAppAction_RejectsUnknownVerb(t *testing.T) {
+	capiCalls := 0
+	capiServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		capiCalls++
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer capiServer.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(capiServer.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/pp/v1/cf/apps/cnsi-1/app-1/actions/frobnicate", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/actions/:action")
+	c.SetParamNames("cnsiGuid", "appGuid", "action")
+	c.SetParamValues("cnsi-1", "app-1", "frobnicate")
+
+	err := plugin.appAction(c)
+	require.Error(t, err)
+	httpErr, ok := err.(*echo.HTTPError)
+	require.True(t, ok, "expected *echo.HTTPError, got %T", err)
+	assert.Equal(t, http.StatusBadRequest, httpErr.Code)
+	assert.Equal(t, 0, capiCalls, "no upstream call should be made for an unknown verb")
+}
+
+// TestAppAction_PropagatesCapiError confirms non-2xx upstream responses are
+// classified and their CF error body is surfaced to the caller — mirroring
+// the delete-handler's error-propagation contract via the shared helper.
+func TestAppAction_PropagatesCapiError(t *testing.T) {
+	capiServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/v3" {
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{"links":{}}`))
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		w.Write([]byte(`{"errors":[{"code":10008,"title":"CF-UnprocessableEntity","detail":"App is already started"}]}`))
+	}))
+	defer capiServer.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(capiServer.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/pp/v1/cf/apps/cnsi-1/app-1/actions/start", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/actions/:action")
+	c.SetParamNames("cnsiGuid", "appGuid", "action")
+	c.SetParamValues("cnsi-1", "app-1", "start")
+
+	require.NoError(t, plugin.appAction(c))
+	assert.Equal(t, http.StatusUnprocessableEntity, rec.Code)
+	assert.Contains(t, rec.Body.String(), "UnprocessableEntity")
+}
