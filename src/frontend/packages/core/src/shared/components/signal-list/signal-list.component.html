@@ -55,7 +55,7 @@
   }
 
   <!-- Body: empty state or table -->
-  <div class="flex-1 overflow-auto">
+  <div class="relative flex-1 overflow-auto">
     @if (config.totalFilteredResults() === 0) {
       <div data-test="empty" class="flex flex-col items-center justify-center h-full gap-3 text-content-muted">
         <span class="material-icons text-6xl opacity-30">apps</span>
@@ -80,6 +80,11 @@
           }
         </tbody>
       </table>
+      <!-- Bottom scroll-fade indicator: signals "more below" when there's overflow.
+           Sticky-bottom so it floats above the last rows of the scroll container. -->
+      <div data-test="scroll-fade"
+           aria-hidden="true"
+           class="pointer-events-none sticky bottom-0 h-8 -mt-8 bg-gradient-to-t from-content-bg via-content-bg/70 to-transparent"></div>
     }
   </div>
 
