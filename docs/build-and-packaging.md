@@ -517,3 +517,9 @@ The resolved values are logged at startup:
 INFO STRATOS_CF_PER_PAGE=1000 (overrides default 500)
 INFO STRATOS_CF_MAX_PARALLEL_PAGES=8 (overrides default 5)
 ```
+
+To confirm what's currently set on a deployed instance:
+
+```bash
+cf env console | grep -E 'STRATOS_CF_PER_PAGE|STRATOS_CF_MAX_PARALLEL_PAGES'
+```
