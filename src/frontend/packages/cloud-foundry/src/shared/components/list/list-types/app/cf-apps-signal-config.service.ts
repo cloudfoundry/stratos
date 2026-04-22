@@ -1,6 +1,7 @@
 import { Injectable, Signal, WritableSignal, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
+import type { EndpointModel } from '@stratosui/store';
 import { CnsiAppsSource } from '../../../../../services/data-sources/cnsi-apps-source';
 import { MergeOrchestrator } from '../../../../../services/data-sources/merge-orchestrator';
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
@@ -29,7 +30,7 @@ export class CfAppsSignalConfigService {
   // Bridge connected-CF endpoints (an rxjs Observable) into a signal so
   // computed() can read it. CloudFoundryService is optional purely because
   // tests exist that don't provide it; in the real app it's always present.
-  private readonly connectedEndpoints: Signal<readonly { guid: string; name: string }[]>;
+  private readonly connectedEndpoints: Signal<EndpointModel[]>;
 
   // Computed option lists for the toolbar dropdowns.
   readonly cnsiOptions:  Signal<SignalListDropdownOption[]>;
@@ -39,8 +40,8 @@ export class CfAppsSignalConfigService {
   constructor(private readonly http: HttpClient) {
     const cfService = inject(CloudFoundryService, { optional: true });
     this.connectedEndpoints = cfService
-      ? toSignal(cfService.connectedCFEndpoints$, { initialValue: [] as readonly { guid: string; name: string }[] })
-      : signal<readonly { guid: string; name: string }[]>([]).asReadonly();
+      ? toSignal(cfService.connectedCFEndpoints$, { initialValue: [] as EndpointModel[] })
+      : signal<EndpointModel[]>([]).asReadonly();
 
     // CF options come from the connected endpoints list directly.
     this.cnsiOptions = computed(() => {
