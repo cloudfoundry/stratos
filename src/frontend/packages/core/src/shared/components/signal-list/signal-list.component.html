@@ -60,9 +60,11 @@
   <!-- Body: loading / empty state / table -->
   <div class="relative flex-1 overflow-auto">
     @if (config.isAnyLoading() && config.totalFilteredResults() === 0) {
-      <div data-test="loading" class="flex flex-col items-center justify-center h-full gap-3 text-content-muted">
-        <div class="spinner spinner-primary"></div>
-        <span class="text-base">{{ config.loadingMessage ?? 'Loading…' }}</span>
+      <div data-test="loading" class="flex items-center justify-center p-8 h-full">
+        <div class="flex items-center space-x-3 text-content-muted">
+          <div class="spinner spinner-primary"></div>
+          <span>{{ config.loadingMessage ?? 'Loading…' }}</span>
+        </div>
       </div>
     } @else if (config.totalFilteredResults() === 0) {
       <div data-test="empty" class="flex flex-col items-center justify-center h-full gap-3 text-content-muted">
