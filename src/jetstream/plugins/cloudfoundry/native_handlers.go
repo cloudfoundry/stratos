@@ -423,7 +423,21 @@ func (c *CloudFoundrySpecification) getNativeSpaces(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, StSpacesResponse{Resources: spaces, TotalResults: raw.Pagination.TotalResults})
 	}
 
-	resources, totalResults, err := listAllSpaces(ctx.Request().Context(), cfClient, nil)
+	// Fetch the org guid set first, then use it as a filter on the spaces
+	// drain. Empirically on adepttech, org-filtered /v3/spaces responds in
+	// ~5s consistently across cold and warm CAPI cache states, while the
+	// unfiltered variant spikes to ~27s on cold cache. The filter makes the
+	// worst-case predictable without hurting warm-case performance.
+	orgs, _, err := listAllOrgs(ctx.Request().Context(), cfClient)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
+	}
+	orgGUIDs := make([]string, 0, len(orgs))
+	for _, o := range orgs {
+		orgGUIDs = append(orgGUIDs, o.GUID)
+	}
+
+	resources, totalResults, err := listAllSpaces(ctx.Request().Context(), cfClient, orgGUIDs)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
 	}
