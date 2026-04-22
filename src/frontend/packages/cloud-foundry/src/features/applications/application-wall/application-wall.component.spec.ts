@@ -115,9 +115,10 @@ describe('ApplicationWallComponent', () => {
 
   it('builds a SignalListConfig after ngOnInit', async () => {
     await component.ngOnInit();
-    expect(component.listConfig).toBeDefined();
-    expect(component.listConfig!.columns.length).toBeGreaterThan(0);
-    expect(component.listConfig!.getRowKey({
+    const cfg = component.listConfig();
+    expect(cfg).toBeDefined();
+    expect(cfg!.columns.length).toBeGreaterThan(0);
+    expect(cfg!.getRowKey({
       cnsiGuid: 'cnsi-1',
       guid: 'app-1',
       name: 'test',

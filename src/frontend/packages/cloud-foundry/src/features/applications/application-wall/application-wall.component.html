@@ -34,9 +34,9 @@
       </span>
     </div>
   }
-  @if (listConfig) {
+  @if (listConfig(); as cfg) {
     <div class="p-4">
-      <app-signal-list [config]="listConfig"></app-signal-list>
+      <app-signal-list [config]="cfg"></app-signal-list>
     </div>
   }
 }

@@ -1,6 +1,6 @@
 import { animate, query, style, transition, trigger } from '@angular/animations';
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject, signal, WritableSignal } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, firstValueFrom } from 'rxjs';
@@ -71,8 +71,9 @@ export class ApplicationWallComponent implements OnInit {
   public duplicateEndpointCount$!: Observable<number | null>;
 
   // Config for <app-signal-list>. Populated in ngOnInit after the signal
-  // config service is initialized with the connected CF GUIDs.
-  public listConfig?: SignalListConfig<StApp>;
+  // config service is initialized with the connected CF GUIDs. Using a
+  // WritableSignal so assignment triggers change detection under OnPush.
+  public listConfig: WritableSignal<SignalListConfig<StApp> | undefined> = signal(undefined);
 
   private redirected = false;
 
@@ -115,7 +116,7 @@ export class ApplicationWallComponent implements OnInit {
     );
     const cnsiGuids = (connected ?? []).map(ep => ep.guid);
     this.appsConfig.initialize(cnsiGuids);
-    this.listConfig = {
+    this.listConfig.set({
       pagedItems: this.appsConfig.view.pagedItems,
       totalFilteredResults: this.appsConfig.view.totalFilteredResults,
       totalPages: this.appsConfig.view.totalPages,
@@ -132,7 +133,7 @@ export class ApplicationWallComponent implements OnInit {
         { header: 'Created', render: (app: StApp) => app.createdAt ?? '' },
       ],
       getRowKey: (app: StApp) => `${app.cnsiGuid}:${app.guid}`,
-    };
+    });
     if (cnsiGuids.length > 0) {
       void this.appsConfig.loadAll();
     }
