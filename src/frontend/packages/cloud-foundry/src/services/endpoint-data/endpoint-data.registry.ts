@@ -22,7 +22,7 @@ export class EndpointDataRegistry implements OnDestroy {
   private readonly detailsQueue$ = new Subject<EndpointDataService>();
   private queueSub: Subscription;
   private detailsSub: Subscription;
-  private maxConcurrentCards = 2;
+  private maxConcurrentCards = 3;
 
   constructor() {
     this.queueSub = this.buildCardQueue();
