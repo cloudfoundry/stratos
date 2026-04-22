@@ -91,8 +91,10 @@ func relationshipGUID(rel capi.Relationship) string {
 // fullPagePerRequest is the page size used when draining every page of a CF
 // list endpoint. The loop below walks Pagination.TotalPages so per_page is
 // just an optimization hint; foundations smaller than this finish in one
-// round trip.
-const fullPagePerRequest = 5000
+// round trip. 5000 caused adepttech /v3/spaces to take ~27s per request —
+// just under the 30s CAPI client timeout — so reduced to 500 for safety
+// margin. Round trips scale linearly but each is well bounded.
+const fullPagePerRequest = 500
 
 // listAllOrgs loops every page of /v3/organizations and returns the full set
 // plus the total count from the first response.
