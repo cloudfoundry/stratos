@@ -11,7 +11,7 @@
             [disabled]="dd.disabled ? dd.disabled() : false"
             (change)="onDropdownChange(dd, $any($event.target).value)"
             class="px-2 py-1 border border-content-border rounded bg-content-bg text-content-text disabled:opacity-40 disabled:cursor-not-allowed">
-            @for (opt of dd.options(); track opt.label) {
+            @for (opt of dd.options(); track opt.value ?? opt.label) {
               <option [value]="opt.value ?? ''" [selected]="(opt.value ?? '') === (dd.selected() ?? '')">{{ opt.label }}</option>
             }
           </select>

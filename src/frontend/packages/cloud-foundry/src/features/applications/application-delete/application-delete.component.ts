@@ -155,6 +155,12 @@ export class ApplicationDeleteComponent {
   public selectedServiceInstances!: APIResource<IServiceBinding>[];
   public fetchingRelated$!: Observable<boolean>;
   public selectedApplication$!: Observable<APIResource<IApp>[]>;
+  // Single-name observable derived from the entity monitor, used by the
+  // confirmation template so the user can verify which app they're about
+  // to delete. The table below (`app-action-monitor`) is ngrx-backed and
+  // may lag or fail to populate during the signal-native migration; this
+  // paragraph-level name is a simpler, more reliable belt-and-braces.
+  public appName$!: Observable<string>;
   public selectedRoutes$ = new ReplaySubject<APIResource<IRoute>[]>(1);
   public selectedServiceInstances$ = new ReplaySubject<APIResource<IServiceBinding>[]>(1);
   public selectedUserServiceInstances$ = new ReplaySubject<APIResource<IServiceBinding>[]>(1);
@@ -213,6 +219,11 @@ export class ApplicationDeleteComponent {
     this.selectedApplication$ = this.appMonitor.entity$.pipe(
       filter(app => !!app),
       map(app => [app])
+    );
+    this.appName$ = this.appMonitor.entity$.pipe(
+      filter(app => !!app),
+      map(app => app.entity?.name ?? ''),
+      startWith(''),
     );
   }
 
@@ -318,6 +329,14 @@ export class ApplicationDeleteComponent {
             }
           });
         }
+        // On successful delete: kick off a refresh so the app-wall lands on
+        // a fresh fetch (not a stale cache), then redirect. Fire-and-forget;
+        // the promise may still be in-flight when the app-wall's ngOnInit
+        // runs — that's fine, the signal-list component shows a loading
+        // state until fetches complete. Previous behaviour required a
+        // second click through the deleteStarted branch at the top.
+        void this.apps.refresh().catch((): void => undefined);
+        this.redirectToAppWall();
       }),
       map(() => ({ success: true })),
       catchError(() => of({ success: false }))
