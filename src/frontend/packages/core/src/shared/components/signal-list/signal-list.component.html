@@ -89,13 +89,18 @@
           }
         </tbody>
       </table>
-      <!-- Bottom scroll-fade indicator: signals "more below" when there's overflow.
-           Sticky-bottom so it floats above the last rows of the scroll container. -->
-      <div data-test="scroll-fade"
-           aria-hidden="true"
-           class="pointer-events-none sticky bottom-0 h-8 -mt-8 bg-gradient-to-t from-content-bg via-content-bg/70 to-transparent"></div>
     }
   </div>
+
+  <!-- Scroll fade: sibling of body so it never moves with the data. Takes 0
+       flex space (h-10 cancels -mt-10) and overlays the bottom 2.5rem of the
+       scroll area. Dark fade on white bg, light fade on dark bg — always
+       contrasts. -->
+  @if (config.totalFilteredResults() > 0) {
+    <div data-test="scroll-fade"
+         aria-hidden="true"
+         class="pointer-events-none h-10 -mt-10 bg-gradient-to-t from-black/30 via-black/10 to-transparent dark:from-white/25 dark:via-white/10"></div>
+  }
 
   <!-- Pagination bar -->
   <div class="flex items-center justify-between gap-3 px-4 py-2 border-t border-content-border bg-content-bg text-sm flex-wrap">
