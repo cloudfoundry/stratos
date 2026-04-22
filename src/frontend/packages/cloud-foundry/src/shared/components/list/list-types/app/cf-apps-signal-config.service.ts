@@ -20,6 +20,13 @@ export class CfAppsSignalConfigService {
   readonly sort: WritableSignal<SortSpec<StApp>> = signal({ field: 'name', direction: 'asc' });
   readonly pageSize: WritableSignal<number> = signal(20);
   readonly pageIndex: WritableSignal<number> = signal(0);
+  // Map of sort-field key → value-extractor function, for columns whose
+  // sort value is derived from multiple entity properties (e.g., the
+  // CF/Org/Space column that renders cnsi + org + space together). The
+  // component populates this via registerSortExtractor() after building
+  // its column config; ViewPipeline reads it through the signal passed
+  // into its constructor.
+  private readonly _sortExtractors: WritableSignal<Map<string, (row: StApp) => unknown>> = signal(new Map());
 
   // Toolbar filter inputs. `null` for dropdowns = "All" (no constraint);
   // empty string for nameFilter = no name constraint.
@@ -147,6 +154,7 @@ export class CfAppsSignalConfigService {
       this.sort,
       this.pageSize,
       this.pageIndex,
+      this._sortExtractors.asReadonly(),
     );
     // Fire-and-forget org/space name resolution. Populates the lookup maps
     // that orgOptions/spaceOptions read for their labels. Failures per CF
@@ -188,6 +196,18 @@ export class CfAppsSignalConfigService {
 
   async refresh(): Promise<void> {
     await this.orchestrator.refresh();
+  }
+
+  // Register a value-extractor for a column whose sort value can't be read
+  // as a direct property of StApp (e.g., the CF/Org/Space column which
+  // composes cnsi + org + space names). Call this after building the list
+  // config; ViewPipeline re-reads extractors on every sort change.
+  registerSortExtractor(fieldKey: string, extractor: (row: StApp) => unknown): void {
+    this._sortExtractors.update(curr => {
+      const next = new Map(curr);
+      next.set(fieldKey, extractor);
+      return next;
+    });
   }
 
   async deleteApp(cnsiGuid: string, appGuid: string): Promise<void> {

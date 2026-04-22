@@ -24,15 +24,25 @@ export class ViewPipeline<T> {
     private readonly sort: Signal<SortSpec<T>>,
     private readonly pageSize: Signal<number>,
     private readonly pageIndex: Signal<number>,
+    // Optional lookup: sort-field key → value-extractor function. When the
+    // sort spec's `field` matches a key here, the extractor is used to
+    // derive the comparison value (e.g., a column rendered from multiple
+    // entity properties). Falls back to `row[field]` when no extractor is
+    // registered. Signal so extractors can be rebuilt reactively if column
+    // definitions change.
+    private readonly keyExtractors?: Signal<Map<string, (row: T) => unknown>>,
   ) {
     this.filteredItems = computed(() => this.items().filter(this.filter()));
     this.sortedItems = computed(() => {
       const spec = this.sort();
       const sign = spec.direction === 'asc' ? 1 : -1;
-      const field = spec.field as keyof T;
+      const extractor = this.keyExtractors?.().get(spec.field);
+      const getValue: (row: T) => unknown = extractor
+        ? extractor
+        : (row: T) => (row as Record<string, unknown>)[spec.field];
       return [...this.filteredItems()].sort((a, b) => {
-        const av = a[field];
-        const bv = b[field];
+        const av = getValue(a);
+        const bv = getValue(b);
         if (av == null && bv == null) return 0;
         if (av == null) return 1;
         if (bv == null) return -1;

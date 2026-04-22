@@ -194,7 +194,7 @@ export class ApplicationWallComponent implements OnInit {
           widthHint: '7rem',
         },
         {
-          header: 'CF/Org/Space',
+          header: 'CF/Org/Space', key: 'cfOrgSpace', sortField: renderCfOrgSpace,
           render: renderCfOrgSpace,
           widthHint: '18rem',
         },
@@ -214,6 +214,9 @@ export class ApplicationWallComponent implements OnInit {
       viewMode: this.appsConfig.viewMode,
       sort: this.appsConfig.sort,
     });
+    // Register sort extractors for columns whose sort key is composed from
+    // multiple entity fields (rather than a direct property on StApp).
+    this.appsConfig.registerSortExtractor('cfOrgSpace', renderCfOrgSpace);
     if (cnsiGuids.length > 0) {
       void this.appsConfig.loadAll();
     }
