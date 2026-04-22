@@ -51,26 +51,14 @@
     }
 
     @if (config.viewMode) {
-      <div data-test="view-toggle" class="inline-flex border border-content-border rounded overflow-hidden">
-        <button
-          type="button"
-          (click)="setViewMode('table')"
-          title="Table view"
-          class="px-2 py-1 text-content-text hover:bg-gray-100 dark:hover:bg-gray-700"
-          [class.bg-gray-200]="config.viewMode!() === 'table'"
-          [class.dark:bg-gray-700]="config.viewMode!() === 'table'">
-          <span class="material-icons text-base leading-5">view_list</span>
-        </button>
-        <button
-          type="button"
-          (click)="setViewMode('card')"
-          title="Card view"
-          class="px-2 py-1 text-content-text hover:bg-gray-100 dark:hover:bg-gray-700 border-l border-content-border"
-          [class.bg-gray-200]="config.viewMode!() === 'card'"
-          [class.dark:bg-gray-700]="config.viewMode!() === 'card'">
-          <span class="material-icons text-base leading-5">apps</span>
-        </button>
-      </div>
+      <button
+        data-test="view-toggle"
+        type="button"
+        (click)="setViewMode(config.viewMode!() === 'table' ? 'card' : 'table')"
+        [title]="config.viewMode!() === 'table' ? 'Card view' : 'Table view'"
+        class="px-2 py-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700">
+        <span class="material-icons text-base leading-5">{{ config.viewMode!() === 'table' ? 'grid_on' : 'list' }}</span>
+      </button>
     }
 
     @if (config.onRefresh) {
@@ -160,11 +148,11 @@
                     class="inline-flex items-center gap-1 hover:text-content-muted">
                     <span>{{ col.header }}</span>
                     @if (sortDirectionFor(col) === 'asc') {
-                      <span class="material-icons text-sm leading-4">arrow_upward</span>
+                      <span class="material-icons text-base opacity-60">sort</span>
                     } @else if (sortDirectionFor(col) === 'desc') {
-                      <span class="material-icons text-sm leading-4">arrow_downward</span>
+                      <span class="material-icons text-base opacity-60 rotate-180">sort</span>
                     } @else {
-                      <span class="material-icons text-sm leading-4 opacity-20">unfold_more</span>
+                      <span class="material-icons text-base opacity-40">sort</span>
                     }
                   </button>
                 } @else {
@@ -206,7 +194,7 @@
   @if (hasOverflow() && config.totalFilteredResults() > 0) {
     <div data-test="scroll-fade"
          aria-hidden="true"
-         class="pointer-events-none h-10 -mt-10 bg-gradient-to-t from-black/30 via-black/10 to-transparent dark:from-white/25 dark:via-white/10"></div>
+         class="pointer-events-none relative z-20 h-10 -mt-10 bg-gradient-to-t from-black/30 via-black/10 to-transparent dark:from-white/25 dark:via-white/10"></div>
   }
 
   <!-- Pagination bar -->
