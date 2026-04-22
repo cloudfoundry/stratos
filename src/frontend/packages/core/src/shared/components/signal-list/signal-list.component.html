@@ -1,34 +1,51 @@
-<div class="flex flex-col gap-2">
-  <div *ngIf="config.isAnyLoading()" data-test="loading" class="text-sm text-gray-500">Loading…</div>
-  <div *ngIf="config.errorsByCnsi().size > 0" data-test="errors" class="text-sm text-red-600">
-    <span *ngFor="let entry of config.errorsByCnsi() | keyvalue">
-      {{ entry.key }}: failed
-    </span>
+<div class="flex flex-col h-[calc(100vh-11rem)] border border-content-border rounded bg-content-bg">
+  <!-- Loading / error banners -->
+  @if (config.isAnyLoading()) {
+    <div data-test="loading" class="px-4 py-2 text-sm text-content-muted border-b border-content-border">Loading…</div>
+  }
+  @if (config.errorsByCnsi().size > 0) {
+    <div data-test="errors" class="px-4 py-2 text-sm text-danger-shade-700 bg-danger-shade-50 border-b border-content-border">
+      @for (entry of config.errorsByCnsi() | keyvalue; track entry.key) {
+        <div>{{ entry.key }}: failed to load</div>
+      }
+    </div>
+  }
+
+  <!-- Scrollable table region -->
+  <div class="flex-1 overflow-auto">
+    <table class="min-w-full border-collapse">
+      <thead class="sticky top-0 bg-gray-100 dark:bg-gray-800 z-10 border-b border-content-border">
+        <tr>
+          @for (col of config.columns; track col.header) {
+            <th class="text-left px-3 py-2 font-semibold text-sm text-content-text">{{ col.header }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of config.pagedItems(); track trackByRow($index, row)) {
+          <tr data-test="row" class="border-b border-content-border hover:bg-gray-50 dark:hover:bg-gray-900">
+            @for (col of config.columns; track col.header) {
+              <td class="px-3 py-2 text-sm text-content-text">{{ col.render(row) }}</td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
   </div>
-  <table class="min-w-full border-collapse">
-    <thead class="bg-gray-50">
-      <tr>
-        <th *ngFor="let col of config.columns" class="text-left p-2 font-medium">{{ col.header }}</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let row of config.pagedItems(); trackBy: trackByRow" data-test="row" class="border-t">
-        <td *ngFor="let col of config.columns" class="p-2">{{ col.render(row) }}</td>
-      </tr>
-    </tbody>
-  </table>
-  <div class="flex items-center justify-between text-sm">
-    <span>{{ config.totalFilteredResults() }} result(s)</span>
-    <div class="flex gap-2">
+
+  <!-- Sticky pagination bar -->
+  <div class="flex items-center justify-between px-4 py-2 border-t border-content-border bg-content-bg text-sm">
+    <span class="text-content-muted">{{ config.totalFilteredResults() }} result(s)</span>
+    <div class="flex items-center gap-2">
       <button
         type="button"
-        class="px-2 py-1 border rounded disabled:opacity-50"
+        class="px-3 py-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
         [disabled]="config.pageIndex() === 0"
         (click)="config.pageIndex.set(config.pageIndex() - 1)">Prev</button>
-      <span>{{ config.pageIndex() + 1 }} / {{ config.totalPages() }}</span>
+      <span class="text-content-muted">{{ config.pageIndex() + 1 }} / {{ config.totalPages() }}</span>
       <button
         type="button"
-        class="px-2 py-1 border rounded disabled:opacity-50"
+        class="px-3 py-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
         [disabled]="config.pageIndex() + 1 >= config.totalPages()"
         (click)="config.pageIndex.set(config.pageIndex() + 1)">Next</button>
     </div>
