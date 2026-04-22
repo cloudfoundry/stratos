@@ -57,7 +57,7 @@
   }
 
   <!-- Body: loading / empty state / table -->
-  <div class="relative flex-1 overflow-auto">
+  <div #scrollBody class="relative flex-1 overflow-auto">
     @if (config.isAnyLoading() && config.totalFilteredResults() === 0) {
       <div data-test="loading" class="flex items-center justify-center p-8 h-full">
         <div class="flex items-center space-x-3 text-content-muted">
@@ -95,8 +95,8 @@
   <!-- Scroll fade: sibling of body so it never moves with the data. Takes 0
        flex space (h-10 cancels -mt-10) and overlays the bottom 2.5rem of the
        scroll area. Dark fade on white bg, light fade on dark bg — always
-       contrasts. -->
-  @if (config.totalFilteredResults() > 0) {
+       contrasts. Only shown when content actually overflows. -->
+  @if (hasOverflow() && config.totalFilteredResults() > 0) {
     <div data-test="scroll-fade"
          aria-hidden="true"
          class="pointer-events-none h-10 -mt-10 bg-gradient-to-t from-black/30 via-black/10 to-transparent dark:from-white/25 dark:via-white/10"></div>

@@ -1,4 +1,4 @@
-import { Component, Input, Signal, WritableSignal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Signal, WritableSignal, ChangeDetectionStrategy, ElementRef, ViewChild, signal, afterRender, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export interface SignalListColumn<T> {
@@ -47,7 +47,42 @@ export interface SignalListConfig<T> {
 export class SignalListComponent<T> {
   @Input({ required: true }) config!: SignalListConfig<T>;
 
+  @ViewChild('scrollBody', { static: false }) scrollBody?: ElementRef<HTMLElement>;
+
   protected readonly Math = Math;
+
+  // True when the scroll body's content exceeds its viewport height.
+  // Used to gate the bottom scroll-fade indicator so it's only shown
+  // when scrolling would actually reveal more rows.
+  readonly hasOverflow = signal(false);
+
+  constructor() {
+    const destroyRef = inject(DestroyRef);
+    let ro: ResizeObserver | undefined;
+
+    afterRender(() => {
+      const el = this.scrollBody?.nativeElement;
+      if (!el) {
+        this.hasOverflow.set(false);
+        return;
+      }
+      this.hasOverflow.set(el.scrollHeight > el.clientHeight + 1);
+
+      // Attach a ResizeObserver the first time we see the element so
+      // viewport resizes (no data change) also re-measure. afterRender
+      // handles data-driven reflow; the observer handles pure layout.
+      if (!ro && typeof ResizeObserver !== 'undefined') {
+        ro = new ResizeObserver(() => {
+          const node = this.scrollBody?.nativeElement;
+          if (!node) return;
+          this.hasOverflow.set(node.scrollHeight > node.clientHeight + 1);
+        });
+        ro.observe(el);
+      }
+    });
+
+    destroyRef.onDestroy(() => ro?.disconnect());
+  }
 
   trackByRow = (_: number, row: T) => this.config.getRowKey(row);
 
