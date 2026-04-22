@@ -11,6 +11,7 @@ import {
   SignalListComponent,
   SignalListConfig,
   SignalListDropdown,
+  SignalListPillColor,
 } from '@stratosui/core';
 import { EndpointModel, getFullEndpointApiUrl } from '@stratosui/store';
 import { CFAppState } from '../../../cf-app-state';
@@ -143,12 +144,40 @@ export class ApplicationWallComponent implements OnInit {
       isAnyLoading: this.appsConfig.orchestrator.isAnyLoading,
       errorsByCnsi: this.appsConfig.orchestrator.errorsByCnsi,
       columns: [
-        { header: 'Name',      key: 'name',       sortField: 'name',      render: (app: StApp) => app.name },
-        { header: 'State',     key: 'state',      sortField: 'state',     render: (app: StApp) => app.state ?? '' },
-        { header: 'Instances', key: 'instances',  sortField: 'instances', render: (app: StApp) => String(app.instances ?? 0) },
-        { header: 'Memory',    key: 'memory',     sortField: 'memory',    render: (app: StApp) => app.memory != null ? `${app.memory} MB` : '—' },
-        { header: 'Disk',      key: 'diskQuota',  sortField: 'diskQuota', render: (app: StApp) => app.diskQuota != null ? `${app.diskQuota} MB` : '—' },
-        { header: 'Created',   key: 'createdAt',  sortField: 'createdAt', render: (app: StApp) => app.createdAt ?? '' },
+        {
+          header: 'Name', key: 'name', sortField: 'name',
+          kind: 'link',
+          link: (app: StApp) => ['/applications', app.cnsiGuid, app.guid],
+          render: (app: StApp) => app.name,
+        },
+        {
+          header: 'State', key: 'state', sortField: 'state',
+          kind: 'pill',
+          pillColor: (app: StApp): SignalListPillColor => {
+            const s = (app.state ?? '').toUpperCase();
+            if (s === 'STARTED') return 'success';
+            if (s === 'STOPPED') return 'neutral';
+            if (s === 'CRASHED' || s === 'FAILED') return 'danger';
+            return 'neutral';
+          },
+          render: (app: StApp) => app.state ?? '',
+        },
+        {
+          header: 'Instances', key: 'instances', sortField: 'instances',
+          render: (app: StApp) => String(app.instances ?? 0),
+        },
+        {
+          header: 'Memory', key: 'memory', sortField: 'memory',
+          render: (app: StApp) => ApplicationWallComponent.formatMb(app.memory),
+        },
+        {
+          header: 'Disk', key: 'diskQuota', sortField: 'diskQuota',
+          render: (app: StApp) => ApplicationWallComponent.formatMb(app.diskQuota),
+        },
+        {
+          header: 'Created', key: 'createdAt', sortField: 'createdAt',
+          render: (app: StApp) => ApplicationWallComponent.formatDate(app.createdAt),
+        },
       ],
       getRowKey: (app: StApp) => `${app.cnsiGuid}:${app.guid}`,
       emptyMessage: 'There are no applications',
@@ -162,6 +191,25 @@ export class ApplicationWallComponent implements OnInit {
     if (cnsiGuids.length > 0) {
       void this.appsConfig.loadAll();
     }
+  }
+
+  static formatMb(mb: number | null | undefined): string {
+    if (mb == null || typeof mb !== 'number' || Number.isNaN(mb)) return '—';
+    if (mb === -1) return '∞';
+    if (mb < 1024) return `${mb} MB`;
+    const gb = mb / 1024;
+    if (gb < 1024) return `${gb.toFixed(1)} GB`;
+    return `${(gb / 1024).toFixed(2)} TB`;
+  }
+
+  static formatDate(iso: string | null | undefined): string {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso;
+    return d.toLocaleString(undefined, {
+      year: 'numeric', month: 'short', day: 'numeric',
+      hour: 'numeric', minute: '2-digit',
+    });
   }
 
   // Returns the number of endpoints that share a URL with at least one other

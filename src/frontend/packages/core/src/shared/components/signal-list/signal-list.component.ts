@@ -1,5 +1,8 @@
 import { Component, Input, Signal, WritableSignal, ChangeDetectionStrategy, ElementRef, ViewChild, signal, afterRender, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+
+export type SignalListPillColor = 'success' | 'warning' | 'danger' | 'neutral';
 
 export interface SignalListColumn<T> {
   header: string;
@@ -10,6 +13,13 @@ export interface SignalListColumn<T> {
   // Stable identifier for this column; used as the sort.field value
   // when the column is sortable. Defaults to the header text.
   key?: string;
+  // Presentation hint. Default is 'text'.
+  kind?: 'text' | 'link' | 'pill';
+  // Required when kind === 'link'. Returns the router-link target array,
+  // or null to render as plain text.
+  link?: (row: T) => readonly (string | number)[] | null;
+  // Optional for kind === 'pill'. Returns a color family. Default: neutral.
+  pillColor?: (row: T) => SignalListPillColor;
 }
 
 export interface SignalListSort {
@@ -60,7 +70,7 @@ export interface SignalListConfig<T> {
 @Component({
   selector: 'app-signal-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './signal-list.component.html',
   host: { class: 'block h-full min-h-0' },
@@ -106,6 +116,19 @@ export class SignalListComponent<T> {
   }
 
   trackByRow = (_: number, row: T) => this.config.getRowKey(row);
+
+  pillClasses(color: SignalListPillColor): string {
+    switch (color) {
+      case 'success': return 'inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200';
+      case 'warning': return 'inline-block px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200';
+      case 'danger':  return 'inline-block px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200';
+      default:        return 'inline-block px-2 py-0.5 rounded text-xs font-medium bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
+    }
+  }
+
+  colorFor(col: SignalListColumn<T>, row: T): SignalListPillColor {
+    return col.pillColor ? col.pillColor(row) : 'neutral';
+  }
 
   pageSizeOptions(): readonly number[] {
     return this.config.pageSizeOptions ?? [5, 20, 50, 80];

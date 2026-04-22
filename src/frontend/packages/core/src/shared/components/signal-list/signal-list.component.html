@@ -122,11 +122,25 @@
                class="border border-content-border rounded bg-content-bg p-3 hover:shadow-md transition-shadow">
             @for (col of config.columns; track col.header; let first = $first) {
               @if (first) {
-                <div class="font-semibold text-base text-content-text truncate mb-2">{{ col.render(row) }}</div>
+                <div class="font-semibold text-base text-content-text truncate mb-2">
+                  @if (col.kind === 'link' && col.link && col.link(row); as target) {
+                    <a [routerLink]="target" class="text-accent hover:underline">{{ col.render(row) }}</a>
+                  } @else {
+                    {{ col.render(row) }}
+                  }
+                </div>
               } @else {
-                <div class="flex justify-between gap-2 text-sm">
+                <div class="flex justify-between items-center gap-2 text-sm py-0.5">
                   <span class="text-content-muted">{{ col.header }}</span>
-                  <span class="text-content-text text-right truncate">{{ col.render(row) }}</span>
+                  <span class="text-content-text text-right truncate">
+                    @if (col.kind === 'link' && col.link && col.link(row); as target) {
+                      <a [routerLink]="target" class="text-accent hover:underline">{{ col.render(row) }}</a>
+                    } @else if (col.kind === 'pill') {
+                      <span [class]="pillClasses(colorFor(col, row))">{{ col.render(row) }}</span>
+                    } @else {
+                      {{ col.render(row) }}
+                    }
+                  </span>
                 </div>
               }
             }
@@ -164,7 +178,19 @@
           @for (row of config.pagedItems(); track trackByRow($index, row)) {
             <tr data-test="row" class="border-b border-content-border hover:bg-gray-50 dark:hover:bg-gray-900">
               @for (col of config.columns; track col.header) {
-                <td class="px-3 py-2 text-sm text-content-text">{{ col.render(row) }}</td>
+                <td class="px-3 py-2 text-sm text-content-text">
+                  @if (col.kind === 'link' && col.link) {
+                    @if (col.link(row); as target) {
+                      <a [routerLink]="target" class="text-accent hover:underline">{{ col.render(row) }}</a>
+                    } @else {
+                      {{ col.render(row) }}
+                    }
+                  } @else if (col.kind === 'pill') {
+                    <span [class]="pillClasses(colorFor(col, row))">{{ col.render(row) }}</span>
+                  } @else {
+                    {{ col.render(row) }}
+                  }
+                </td>
               }
             </tr>
           }
