@@ -22,7 +22,11 @@ export class EndpointDataRegistry implements OnDestroy {
   private readonly detailsQueue$ = new Subject<EndpointDataService>();
   private queueSub: Subscription;
   private detailsSub: Subscription;
-  private maxConcurrentCards = 3;
+  // Must match the backend default in src/jetstream/info.go (s.Configuration.
+  // EndpointCardConcurrency defaults to 2). If these drift, the first call to
+  // configure() from auth.sessionData.config rebuilds the card queue and
+  // cancels any in-flight load()s — the race that leaves slow CFs at 0 counts.
+  private maxConcurrentCards = 2;
 
   constructor() {
     this.queueSub = this.buildCardQueue();
