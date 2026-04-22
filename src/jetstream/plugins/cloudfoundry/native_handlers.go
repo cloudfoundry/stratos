@@ -305,7 +305,9 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, StAppsResponse{Resources: apps, TotalResults: totalResults})
 }
 
-// getNativeSpaces returns every space in the foundation, paginated.
+// getNativeSpaces dispatches on ?return=
+//   - counts: per_page=1, totalResults only (fast path — no list drain)
+//   - (none): full list, paginated
 func (c *CloudFoundrySpecification) getNativeSpaces(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	userGUID, err := c.getUserGUID(ctx)
@@ -318,6 +320,21 @@ func (c *CloudFoundrySpecification) getNativeSpaces(ctx echo.Context) error {
 		return err
 	}
 
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+
+	if ctx.QueryParam("return") == "counts" {
+		params := capi.NewQueryParams().WithPerPage(1)
+		raw, err := cfClient.Spaces().List(ctx.Request().Context(), params)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadGateway, err.Error())
+		}
+		spaces := make([]StSpace, 0, len(raw.Resources))
+		for _, r := range raw.Resources {
+			spaces = append(spaces, toStSpace(r))
+		}
+		return ctx.JSON(http.StatusOK, StSpacesResponse{Resources: spaces, TotalResults: raw.Pagination.TotalResults})
+	}
+
 	resources, totalResults, err := listAllSpaces(ctx.Request().Context(), cfClient, nil)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
@@ -327,7 +344,6 @@ func (c *CloudFoundrySpecification) getNativeSpaces(ctx echo.Context) error {
 		spaces = append(spaces, toStSpace(r))
 	}
 
-	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
 	return ctx.JSON(http.StatusOK, StSpacesResponse{Resources: spaces, TotalResults: totalResults})
 }
 
