@@ -143,12 +143,12 @@ export class ApplicationWallComponent implements OnInit {
       isAnyLoading: this.appsConfig.orchestrator.isAnyLoading,
       errorsByCnsi: this.appsConfig.orchestrator.errorsByCnsi,
       columns: [
-        { header: 'Name', render: (app: StApp) => app.name },
-        { header: 'State', render: (app: StApp) => app.state ?? '' },
-        { header: 'Instances', render: (app: StApp) => String(app.instances ?? 0) },
-        { header: 'Memory', render: (app: StApp) => app.memory != null ? `${app.memory} MB` : '—' },
-        { header: 'Disk', render: (app: StApp) => app.diskQuota != null ? `${app.diskQuota} MB` : '—' },
-        { header: 'Created', render: (app: StApp) => app.createdAt ?? '' },
+        { header: 'Name',      key: 'name',       sortField: 'name',      render: (app: StApp) => app.name },
+        { header: 'State',     key: 'state',      sortField: 'state',     render: (app: StApp) => app.state ?? '' },
+        { header: 'Instances', key: 'instances',  sortField: 'instances', render: (app: StApp) => String(app.instances ?? 0) },
+        { header: 'Memory',    key: 'memory',     sortField: 'memory',    render: (app: StApp) => app.memory != null ? `${app.memory} MB` : '—' },
+        { header: 'Disk',      key: 'diskQuota',  sortField: 'diskQuota', render: (app: StApp) => app.diskQuota != null ? `${app.diskQuota} MB` : '—' },
+        { header: 'Created',   key: 'createdAt',  sortField: 'createdAt', render: (app: StApp) => app.createdAt ?? '' },
       ],
       getRowKey: (app: StApp) => `${app.cnsiGuid}:${app.guid}`,
       emptyMessage: 'There are no applications',
@@ -157,6 +157,7 @@ export class ApplicationWallComponent implements OnInit {
       filterDropdowns: dropdowns,
       onRefresh: () => this.appsConfig.refresh(),
       viewMode: this.appsConfig.viewMode,
+      sort: this.appsConfig.sort,
     });
     if (cnsiGuids.length > 0) {
       void this.appsConfig.loadAll();

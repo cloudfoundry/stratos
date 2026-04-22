@@ -30,6 +30,26 @@
         class="px-3 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text" />
     }
 
+    @if (config.viewMode && config.viewMode!() === 'card' && config.sort && sortableColumns().length > 0) {
+      <div data-test="sort-controls" class="flex items-center gap-1 text-sm text-content-muted">
+        <span>Sort:</span>
+        <select
+          (change)="onSortFieldChange($any($event.target).value)"
+          class="px-2 py-1 border border-content-border rounded bg-content-bg text-content-text">
+          @for (col of sortableColumns(); track col.header) {
+            <option [value]="columnKey(col)" [selected]="config.sort!().field === columnKey(col)">{{ col.header }}</option>
+          }
+        </select>
+        <button
+          type="button"
+          (click)="toggleSortDirection()"
+          [title]="config.sort!().direction === 'asc' ? 'Ascending' : 'Descending'"
+          class="px-2 py-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700">
+          <span class="material-icons text-base leading-5">{{ config.sort!().direction === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>
+        </button>
+      </div>
+    }
+
     @if (config.viewMode) {
       <div data-test="view-toggle" class="inline-flex border border-content-border rounded overflow-hidden">
         <button
@@ -118,7 +138,25 @@
         <thead class="sticky top-0 bg-gray-100 dark:bg-gray-800 z-10 border-b border-content-border">
           <tr>
             @for (col of config.columns; track col.header) {
-              <th class="text-left px-3 py-2 font-semibold text-sm text-content-text">{{ col.header }}</th>
+              <th class="text-left px-3 py-2 font-semibold text-sm text-content-text">
+                @if (isSortable(col)) {
+                  <button
+                    type="button"
+                    (click)="onHeaderSort(col)"
+                    class="inline-flex items-center gap-1 hover:text-content-muted">
+                    <span>{{ col.header }}</span>
+                    @if (sortDirectionFor(col) === 'asc') {
+                      <span class="material-icons text-sm leading-4">arrow_upward</span>
+                    } @else if (sortDirectionFor(col) === 'desc') {
+                      <span class="material-icons text-sm leading-4">arrow_downward</span>
+                    } @else {
+                      <span class="material-icons text-sm leading-4 opacity-20">unfold_more</span>
+                    }
+                  </button>
+                } @else {
+                  {{ col.header }}
+                }
+              </th>
             }
           </tr>
         </thead>

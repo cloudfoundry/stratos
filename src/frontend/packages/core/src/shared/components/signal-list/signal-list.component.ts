@@ -4,6 +4,17 @@ import { CommonModule } from '@angular/common';
 export interface SignalListColumn<T> {
   header: string;
   render: (row: T) => string;
+  // When set, this column is sortable. String = property name on T;
+  // function = comparator key (e.g. computed values, lower-cased name).
+  sortField?: keyof T | ((row: T) => unknown);
+  // Stable identifier for this column; used as the sort.field value
+  // when the column is sortable. Defaults to the header text.
+  key?: string;
+}
+
+export interface SignalListSort {
+  readonly field: string;
+  readonly direction: 'asc' | 'desc';
 }
 
 export interface SignalListDropdownOption {
@@ -40,6 +51,10 @@ export interface SignalListConfig<T> {
   // and the body renders either a table or a card grid. When absent,
   // the list is table-only.
   readonly viewMode?: WritableSignal<SignalListViewMode>;
+  // Optional — when provided, sortable column headers and the
+  // card-mode sort dropdown are wired to this signal. Columns are
+  // sortable iff they declare a sortField.
+  readonly sort?: WritableSignal<SignalListSort>;
 }
 
 @Component({
@@ -114,6 +129,56 @@ export class SignalListComponent<T> {
 
   setViewMode(mode: SignalListViewMode): void {
     this.config.viewMode?.set(mode);
+  }
+
+  // Sort support ---------------------------------------------------------
+
+  columnKey(col: SignalListColumn<T>): string {
+    return col.key ?? col.header;
+  }
+
+  isSortable(col: SignalListColumn<T>): boolean {
+    return !!this.config.sort && col.sortField != null;
+  }
+
+  isSortedBy(col: SignalListColumn<T>): boolean {
+    return !!this.config.sort && this.config.sort()!.field === this.columnKey(col);
+  }
+
+  sortDirectionFor(col: SignalListColumn<T>): 'asc' | 'desc' | null {
+    if (!this.isSortedBy(col)) return null;
+    return this.config.sort!().direction;
+  }
+
+  onHeaderSort(col: SignalListColumn<T>): void {
+    if (!this.isSortable(col) || !this.config.sort) return;
+    const key = this.columnKey(col);
+    const current = this.config.sort();
+    const nextDirection: 'asc' | 'desc' =
+      current.field === key && current.direction === 'asc' ? 'desc' : 'asc';
+    this.config.sort.set({ field: key, direction: nextDirection });
+    this.config.pageIndex.set(0);
+  }
+
+  sortableColumns(): SignalListColumn<T>[] {
+    return this.config.columns.filter(c => c.sortField != null);
+  }
+
+  onSortFieldChange(field: string): void {
+    if (!this.config.sort) return;
+    const current = this.config.sort();
+    this.config.sort.set({ field, direction: current.direction });
+    this.config.pageIndex.set(0);
+  }
+
+  toggleSortDirection(): void {
+    if (!this.config.sort) return;
+    const current = this.config.sort();
+    this.config.sort.set({
+      field: current.field,
+      direction: current.direction === 'asc' ? 'desc' : 'asc',
+    });
+    this.config.pageIndex.set(0);
   }
 
   onDropdownChange(dropdown: SignalListDropdown, value: string): void {

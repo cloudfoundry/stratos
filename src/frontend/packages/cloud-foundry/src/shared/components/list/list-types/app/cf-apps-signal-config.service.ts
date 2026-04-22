@@ -16,7 +16,7 @@ export class CfAppsSignalConfigService {
 
   // User-controlled filter / sort / pagination state.
   readonly filter: WritableSignal<(app: StApp) => boolean> = signal(() => true);
-  readonly sort: WritableSignal<SortSpec<StApp>> = signal({ field: 'name' as keyof StApp, direction: 'asc' });
+  readonly sort: WritableSignal<SortSpec<StApp>> = signal({ field: 'name', direction: 'asc' });
   readonly pageSize: WritableSignal<number> = signal(20);
   readonly pageIndex: WritableSignal<number> = signal(0);
 
