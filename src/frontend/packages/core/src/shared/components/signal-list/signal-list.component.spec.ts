@@ -36,10 +36,23 @@ describe('SignalListComponent', () => {
     expect(rows[1].textContent).toContain('two');
   });
 
-  it('renders a loading indicator when isAnyLoading is true', () => {
+  it('renders the subtle refresh indicator when items present and isAnyLoading is true', () => {
     const fixture = TestBed.createComponent(Host);
     fixture.componentInstance.config = { ...fixture.componentInstance.config, isAnyLoading: signal(true).asReadonly() };
     fixture.detectChanges();
+    // Items present + loading: show subtle refresh banner (not the big full-screen indicator)
+    expect(fixture.nativeElement.querySelector('[data-test="refresh-loading"]')).not.toBeNull();
+  });
+
+  it('renders the full loading indicator when no items and isAnyLoading is true', () => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      totalFilteredResults: signal(0).asReadonly(),
+      isAnyLoading: signal(true).asReadonly(),
+    };
+    fixture.detectChanges();
+    // Empty + loading: show prominent centered spinner
     expect(fixture.nativeElement.querySelector('[data-test="loading"]')).not.toBeNull();
   });
 

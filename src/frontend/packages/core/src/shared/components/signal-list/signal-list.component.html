@@ -42,9 +42,12 @@
     }
   </div>
 
-  <!-- Loading / error banners -->
-  @if (config.isAnyLoading()) {
-    <div data-test="loading" class="px-4 py-1 text-sm text-content-muted border-b border-content-border">Loading…</div>
+  <!-- Refresh-in-progress indicator (subtle, shown only when data is already present) -->
+  @if (config.isAnyLoading() && config.totalFilteredResults() > 0) {
+    <div data-test="refresh-loading" class="px-4 py-1 text-sm text-content-muted border-b border-content-border flex items-center gap-2">
+      <div class="spinner spinner-primary h-3 w-3"></div>
+      <span>Refreshing…</span>
+    </div>
   }
   @if (config.errorsByCnsi().size > 0) {
     <div data-test="errors" class="px-4 py-1 text-sm text-danger-shade-700 bg-danger-shade-50 border-b border-content-border">
@@ -54,9 +57,14 @@
     </div>
   }
 
-  <!-- Body: empty state or table -->
+  <!-- Body: loading / empty state / table -->
   <div class="relative flex-1 overflow-auto">
-    @if (config.totalFilteredResults() === 0) {
+    @if (config.isAnyLoading() && config.totalFilteredResults() === 0) {
+      <div data-test="loading" class="flex flex-col items-center justify-center h-full gap-3 text-content-muted">
+        <div class="spinner spinner-primary"></div>
+        <span class="text-base">{{ config.loadingMessage ?? 'Loading…' }}</span>
+      </div>
+    } @else if (config.totalFilteredResults() === 0) {
       <div data-test="empty" class="flex flex-col items-center justify-center h-full gap-3 text-content-muted">
         <span class="material-icons text-6xl opacity-30">apps</span>
         <span class="text-base">{{ config.emptyMessage ?? 'There are no items' }}</span>

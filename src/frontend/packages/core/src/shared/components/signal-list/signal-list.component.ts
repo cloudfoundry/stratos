@@ -30,6 +30,7 @@ export interface SignalListConfig<T> {
   readonly columns: SignalListColumn<T>[];
   readonly getRowKey: (row: T) => string;
   readonly emptyMessage?: string;
+  readonly loadingMessage?: string;
   readonly nameFilter?: WritableSignal<string>;
   readonly filterDropdowns?: SignalListDropdown[];
   readonly onRefresh?: () => void | Promise<void>;

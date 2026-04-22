@@ -151,6 +151,8 @@ export class ApplicationWallComponent implements OnInit {
         { header: 'Created', render: (app: StApp) => app.createdAt ?? '' },
       ],
       getRowKey: (app: StApp) => `${app.cnsiGuid}:${app.guid}`,
+      emptyMessage: 'There are no applications',
+      loadingMessage: 'Loading applications…',
       nameFilter: this.appsConfig.nameFilter,
       filterDropdowns: dropdowns,
       onRefresh: () => this.appsConfig.refresh(),
