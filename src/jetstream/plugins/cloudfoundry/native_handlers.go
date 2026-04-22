@@ -9,6 +9,7 @@ import (
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/fivetwenty-io/capi/v3/pkg/cfclient"
 	"github.com/labstack/echo/v4"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
@@ -89,84 +90,148 @@ func relationshipGUID(rel capi.Relationship) string {
 // ---- handlers ----
 
 // fullPagePerRequest is the page size used when draining every page of a CF
-// list endpoint. The loop below walks Pagination.TotalPages so per_page is
-// just an optimization hint; foundations smaller than this finish in one
-// round trip. 5000 caused adepttech /v3/spaces to take ~27s per request —
-// just under the 30s CAPI client timeout — so reduced to 500 for safety
-// margin. Round trips scale linearly but each is well bounded.
+// list endpoint. Kept at 500 so each request completes well under the 30s CAPI
+// client timeout (adepttech /v3/spaces at per_page=5000 clocked ~27s/request).
+// Round trips scale linearly, which is what the maxParallelPages fan-out
+// below offsets.
 const fullPagePerRequest = 500
 
-// listAllOrgs loops every page of /v3/organizations and returns the full set
-// plus the total count from the first response.
+// maxParallelPages bounds the concurrency of the page-2..N fetch after the
+// first page returns TotalPages. A single CF spaces call with 2508 records
+// becomes 6 pages; fanning out 5-at-a-time means ~one round trip worth of
+// wall time instead of six.
+const maxParallelPages = 5
+
+// listAllOrgs drains /v3/organizations and returns the full set plus the total
+// count. Fetches page 1 synchronously (to learn totalPages) then pages 2..N
+// in parallel with bounded concurrency.
 func listAllOrgs(ctx context.Context, cfClient capi.Client) ([]capi.Organization, int, error) {
-	var all []capi.Organization
-	totalResults := 0
-	for page := 1; ; page++ {
-		params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
-		params.Page = page
-		raw, err := cfClient.Organizations().List(ctx, params)
-		if err != nil {
-			return nil, 0, err
-		}
-		if page == 1 {
-			totalResults = raw.Pagination.TotalResults
-			all = make([]capi.Organization, 0, totalResults)
-		}
-		all = append(all, raw.Resources...)
-		if raw.Pagination.Next == nil || page >= raw.Pagination.TotalPages {
-			break
-		}
+	firstParams := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
+	firstParams.Page = 1
+	first, err := cfClient.Organizations().List(ctx, firstParams)
+	if err != nil {
+		return nil, 0, err
+	}
+	totalResults := first.Pagination.TotalResults
+	totalPages := first.Pagination.TotalPages
+	all := make([]capi.Organization, 0, totalResults)
+	all = append(all, first.Resources...)
+	if totalPages <= 1 {
+		return all, totalResults, nil
+	}
+
+	pageResources := make([][]capi.Organization, totalPages+1)
+	g, gctx := errgroup.WithContext(ctx)
+	g.SetLimit(maxParallelPages)
+	for page := 2; page <= totalPages; page++ {
+		p := page
+		g.Go(func() error {
+			params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
+			params.Page = p
+			raw, err := cfClient.Organizations().List(gctx, params)
+			if err != nil {
+				return err
+			}
+			pageResources[p] = raw.Resources
+			return nil
+		})
+	}
+	if err := g.Wait(); err != nil {
+		return nil, 0, err
+	}
+	for p := 2; p <= totalPages; p++ {
+		all = append(all, pageResources[p]...)
 	}
 	return all, totalResults, nil
 }
 
-// listAllApps loops every page of /v3/apps and returns the full set plus
-// the total count.
+// listAllApps drains /v3/apps and returns the full set plus the total count.
+// Page 1 synchronous; pages 2..N parallel with bounded concurrency.
 func listAllApps(ctx context.Context, cfClient capi.Client) ([]capi.App, int, error) {
-	var all []capi.App
-	totalResults := 0
-	for page := 1; ; page++ {
-		params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
-		params.Page = page
-		raw, err := cfClient.Apps().List(ctx, params)
-		if err != nil {
-			return nil, 0, err
-		}
-		if page == 1 {
-			totalResults = raw.Pagination.TotalResults
-			all = make([]capi.App, 0, totalResults)
-		}
-		all = append(all, raw.Resources...)
-		if raw.Pagination.Next == nil || page >= raw.Pagination.TotalPages {
-			break
-		}
+	firstParams := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
+	firstParams.Page = 1
+	first, err := cfClient.Apps().List(ctx, firstParams)
+	if err != nil {
+		return nil, 0, err
+	}
+	totalResults := first.Pagination.TotalResults
+	totalPages := first.Pagination.TotalPages
+	all := make([]capi.App, 0, totalResults)
+	all = append(all, first.Resources...)
+	if totalPages <= 1 {
+		return all, totalResults, nil
+	}
+
+	pageResources := make([][]capi.App, totalPages+1)
+	g, gctx := errgroup.WithContext(ctx)
+	g.SetLimit(maxParallelPages)
+	for page := 2; page <= totalPages; page++ {
+		p := page
+		g.Go(func() error {
+			params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
+			params.Page = p
+			raw, err := cfClient.Apps().List(gctx, params)
+			if err != nil {
+				return err
+			}
+			pageResources[p] = raw.Resources
+			return nil
+		})
+	}
+	if err := g.Wait(); err != nil {
+		return nil, 0, err
+	}
+	for p := 2; p <= totalPages; p++ {
+		all = append(all, pageResources[p]...)
 	}
 	return all, totalResults, nil
 }
 
-// listAllSpaces loops every page of /v3/spaces and returns the full set plus
-// the total count. Optional orgGUIDFilter narrows to spaces in the given orgs.
+// listAllSpaces drains /v3/spaces and returns the full set plus the total
+// count. Optional orgGUIDFilter narrows to spaces in the given orgs. Page 1
+// synchronous; pages 2..N parallel with bounded concurrency.
 func listAllSpaces(ctx context.Context, cfClient capi.Client, orgGUIDFilter []string) ([]capi.Space, int, error) {
-	var all []capi.Space
-	totalResults := 0
-	for page := 1; ; page++ {
-		params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
-		if len(orgGUIDFilter) > 0 {
-			params = params.WithFilter("organization_guids", orgGUIDFilter...)
-		}
-		params.Page = page
-		raw, err := cfClient.Spaces().List(ctx, params)
-		if err != nil {
-			return nil, 0, err
-		}
-		if page == 1 {
-			totalResults = raw.Pagination.TotalResults
-			all = make([]capi.Space, 0, totalResults)
-		}
-		all = append(all, raw.Resources...)
-		if raw.Pagination.Next == nil || page >= raw.Pagination.TotalPages {
-			break
-		}
+	firstParams := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
+	if len(orgGUIDFilter) > 0 {
+		firstParams = firstParams.WithFilter("organization_guids", orgGUIDFilter...)
+	}
+	firstParams.Page = 1
+	first, err := cfClient.Spaces().List(ctx, firstParams)
+	if err != nil {
+		return nil, 0, err
+	}
+	totalResults := first.Pagination.TotalResults
+	totalPages := first.Pagination.TotalPages
+	all := make([]capi.Space, 0, totalResults)
+	all = append(all, first.Resources...)
+	if totalPages <= 1 {
+		return all, totalResults, nil
+	}
+
+	pageResources := make([][]capi.Space, totalPages+1)
+	g, gctx := errgroup.WithContext(ctx)
+	g.SetLimit(maxParallelPages)
+	for page := 2; page <= totalPages; page++ {
+		p := page
+		g.Go(func() error {
+			params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
+			if len(orgGUIDFilter) > 0 {
+				params = params.WithFilter("organization_guids", orgGUIDFilter...)
+			}
+			params.Page = p
+			raw, err := cfClient.Spaces().List(gctx, params)
+			if err != nil {
+				return err
+			}
+			pageResources[p] = raw.Resources
+			return nil
+		})
+	}
+	if err := g.Wait(); err != nil {
+		return nil, 0, err
+	}
+	for p := 2; p <= totalPages; p++ {
+		all = append(all, pageResources[p]...)
 	}
 	return all, totalResults, nil
 }
