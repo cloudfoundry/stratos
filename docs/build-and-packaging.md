@@ -469,3 +469,51 @@ For CF deployments, set it in the manifest or via `cf set-env`:
 ```bash
 cf set-env console ENCRYPTION_KEY "$(openssl rand -hex 32)"
 ```
+
+## Runtime tuning — CAPI pagination
+
+The native CF v3 list endpoints (`/pp/v1/cf/orgs/{cnsi}`, `/pp/v1/cf/apps/{cnsi}`,
+`/pp/v1/cf/spaces/{cnsi}`) drain every page of the CAPI list API to return the
+full set. Two environment variables tune how jetstream paginates against CAPI,
+in case your foundation's CAPI performance differs from the defaults.
+
+### `STRATOS_CF_PER_PAGE`
+
+- **Default:** `500`
+- **Effect:** page size (`per_page=<n>`) used when fetching every page of a
+  CAPI list endpoint.
+- **Why override:** Larger values reduce round-trip count; smaller values
+  complete each request faster. On adepttech, `/v3/spaces?per_page=5000`
+  clocked ~27s/request (just under the 30s CAPI client timeout);
+  `per_page=500` completes in ~6s. A faster foundation may tolerate larger
+  pages; a slower one may need smaller.
+
+### `STRATOS_CF_MAX_PARALLEL_PAGES`
+
+- **Default:** `5`
+- **Effect:** maximum concurrent CAPI page requests issued by the drain-all
+  helpers. Page 1 is fetched synchronously to learn `total_pages`; pages 2..N
+  are then fetched with this fan-out bound.
+- **Why override:** Raise for faster total drain when CAPI tolerates more
+  concurrent requests; lower if concurrent pressure stresses CAPI or the
+  gorouter connection pool.
+
+### Applying changes
+
+Both variables are read at jetstream startup. To change them at a CF deployment:
+
+```bash
+cf set-env console STRATOS_CF_PER_PAGE 1000
+cf set-env console STRATOS_CF_MAX_PARALLEL_PAGES 8
+cf restage console
+```
+
+Note: `cf restart` preserves the environment variable set loaded when the
+droplet was built and will NOT pick up `cf set-env` changes. Use `cf restage`.
+
+The resolved values are logged at startup:
+
+```
+INFO STRATOS_CF_PER_PAGE=1000 (overrides default 500)
+INFO STRATOS_CF_MAX_PARALLEL_PAGES=8 (overrides default 5)
+```
