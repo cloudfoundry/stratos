@@ -4,7 +4,11 @@ package cloudfoundry
 import (
 	"context"
 	"net/http"
+	"os"
+	"strconv"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/fivetwenty-io/capi/v3/pkg/cfclient"
@@ -90,17 +94,36 @@ func relationshipGUID(rel capi.Relationship) string {
 // ---- handlers ----
 
 // fullPagePerRequest is the page size used when draining every page of a CF
-// list endpoint. Kept at 500 so each request completes well under the 30s CAPI
-// client timeout (adepttech /v3/spaces at per_page=5000 clocked ~27s/request).
-// Round trips scale linearly, which is what the maxParallelPages fan-out
-// below offsets.
-const fullPagePerRequest = 500
+// list endpoint. Default 500 so each request completes well under the 30s
+// CAPI client timeout (adepttech /v3/spaces at per_page=5000 clocked
+// ~27s/request). Override via env var STRATOS_CF_PER_PAGE for environments
+// with different CAPI performance characteristics.
+var fullPagePerRequest = envIntWithDefault("STRATOS_CF_PER_PAGE", 500)
 
 // maxParallelPages bounds the concurrency of the page-2..N fetch after the
-// first page returns TotalPages. A single CF spaces call with 2508 records
-// becomes 6 pages; fanning out 5-at-a-time means ~one round trip worth of
-// wall time instead of six.
-const maxParallelPages = 5
+// first page returns TotalPages. Default 5. Override via env var
+// STRATOS_CF_MAX_PARALLEL_PAGES if the CAPI tolerates more/fewer concurrent
+// requests.
+var maxParallelPages = envIntWithDefault("STRATOS_CF_MAX_PARALLEL_PAGES", 5)
+
+// envIntWithDefault reads a positive integer from the named env var, falling
+// back to the supplied default on unset, non-numeric, or non-positive values.
+// Logs the resolved value at info level so operators can confirm what's in
+// effect after cf set-env + restage.
+func envIntWithDefault(name string, def int) int {
+	raw := os.Getenv(name)
+	if raw == "" {
+		log.Infof("%s unset, using default %d", name, def)
+		return def
+	}
+	n, err := strconv.Atoi(raw)
+	if err != nil || n <= 0 {
+		log.Warnf("%s=%q is not a positive integer, using default %d", name, raw, def)
+		return def
+	}
+	log.Infof("%s=%d (overrides default %d)", name, n, def)
+	return n
+}
 
 // listAllOrgs drains /v3/organizations and returns the full set plus the total
 // count. Fetches page 1 synchronously (to learn totalPages) then pages 2..N
