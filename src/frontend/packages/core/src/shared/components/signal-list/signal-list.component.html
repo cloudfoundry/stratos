@@ -1,4 +1,4 @@
-<div class="flex flex-col h-[calc(100vh-11rem)] border border-content-border rounded bg-content-bg">
+<div class="flex flex-col h-full min-h-0 border border-content-border rounded bg-content-bg">
 
   <!-- Toolbar -->
   <div class="flex items-center gap-3 px-4 py-2 border-b border-content-border flex-wrap">
@@ -8,12 +8,11 @@
         <label class="flex items-center gap-2 text-sm text-content-muted" [attr.data-test]="'dropdown-' + dd.label">
           <span>{{ dd.label }}:</span>
           <select
-            [value]="dd.selected() ?? ''"
             [disabled]="dd.disabled ? dd.disabled() : false"
             (change)="onDropdownChange(dd, $any($event.target).value)"
             class="px-2 py-1 border border-content-border rounded bg-content-bg text-content-text disabled:opacity-40 disabled:cursor-not-allowed">
             @for (opt of dd.options(); track opt.label) {
-              <option [value]="opt.value ?? ''">{{ opt.label }}</option>
+              <option [value]="opt.value ?? ''" [selected]="(opt.value ?? '') === (dd.selected() ?? '')">{{ opt.label }}</option>
             }
           </select>
         </label>
@@ -105,11 +104,10 @@
     <div class="flex items-center gap-2 text-content-muted">
       <span>Items per page:</span>
       <select
-        [value]="config.pageSize()"
         (change)="onPageSizeChange($any($event.target).value)"
         class="px-2 py-1 border border-content-border rounded bg-content-bg text-content-text">
         @for (opt of pageSizeOptions(); track opt) {
-          <option [value]="opt">{{ opt }}</option>
+          <option [value]="opt" [selected]="opt === config.pageSize()">{{ opt }}</option>
         }
       </select>
     </div>

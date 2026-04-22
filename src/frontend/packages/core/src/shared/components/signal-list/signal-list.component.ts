@@ -42,6 +42,7 @@ export interface SignalListConfig<T> {
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './signal-list.component.html',
+  host: { class: 'block h-full min-h-0' },
 })
 export class SignalListComponent<T> {
   @Input({ required: true }) config!: SignalListConfig<T>;
