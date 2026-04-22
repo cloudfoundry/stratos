@@ -30,6 +30,29 @@
         class="px-3 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text" />
     }
 
+    @if (config.viewMode) {
+      <div data-test="view-toggle" class="inline-flex border border-content-border rounded overflow-hidden">
+        <button
+          type="button"
+          (click)="setViewMode('table')"
+          title="Table view"
+          class="px-2 py-1 text-content-text hover:bg-gray-100 dark:hover:bg-gray-700"
+          [class.bg-gray-200]="config.viewMode!() === 'table'"
+          [class.dark:bg-gray-700]="config.viewMode!() === 'table'">
+          <span class="material-icons text-base leading-5">view_list</span>
+        </button>
+        <button
+          type="button"
+          (click)="setViewMode('card')"
+          title="Card view"
+          class="px-2 py-1 text-content-text hover:bg-gray-100 dark:hover:bg-gray-700 border-l border-content-border"
+          [class.bg-gray-200]="config.viewMode!() === 'card'"
+          [class.dark:bg-gray-700]="config.viewMode!() === 'card'">
+          <span class="material-icons text-base leading-5">apps</span>
+        </button>
+      </div>
+    }
+
     @if (config.onRefresh) {
       <button
         type="button"
@@ -69,6 +92,26 @@
       <div data-test="empty" class="flex flex-col items-center justify-center h-full gap-3 text-content-muted">
         <span class="material-icons text-6xl opacity-30">apps</span>
         <span class="text-base">{{ config.emptyMessage ?? 'There are no items' }}</span>
+      </div>
+    } @else if (config.viewMode && config.viewMode!() === 'card') {
+      <div data-test="card-grid"
+           class="grid gap-3 p-3"
+           style="grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));">
+        @for (row of config.pagedItems(); track trackByRow($index, row)) {
+          <div data-test="card"
+               class="border border-content-border rounded bg-content-bg p-3 hover:shadow-md transition-shadow">
+            @for (col of config.columns; track col.header; let first = $first) {
+              @if (first) {
+                <div class="font-semibold text-base text-content-text truncate mb-2">{{ col.render(row) }}</div>
+              } @else {
+                <div class="flex justify-between gap-2 text-sm">
+                  <span class="text-content-muted">{{ col.header }}</span>
+                  <span class="text-content-text text-right truncate">{{ col.render(row) }}</span>
+                </div>
+              }
+            }
+          </div>
+        }
       </div>
     } @else {
       <table class="min-w-full border-collapse">

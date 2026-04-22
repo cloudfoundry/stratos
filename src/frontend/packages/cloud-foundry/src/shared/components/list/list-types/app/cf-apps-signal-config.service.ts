@@ -7,7 +7,7 @@ import { MergeOrchestrator } from '../../../../../services/data-sources/merge-or
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
 import type { StApp } from '../../../../../services/endpoint-data/stratos-types';
 import { CloudFoundryService } from '../../../../data-services/cloud-foundry.service';
-import type { SignalListDropdownOption } from '@stratosui/core';
+import type { SignalListDropdownOption, SignalListViewMode } from '@stratosui/core';
 
 @Injectable({ providedIn: 'root' })
 export class CfAppsSignalConfigService {
@@ -26,6 +26,9 @@ export class CfAppsSignalConfigService {
   readonly selectedOrg:   WritableSignal<string | null> = signal(null);
   readonly selectedSpace: WritableSignal<string | null> = signal(null);
   readonly nameFilter:    WritableSignal<string>        = signal('');
+
+  // View mode (table / card). Default mirrors the legacy Stratos app wall.
+  readonly viewMode: WritableSignal<SignalListViewMode> = signal('table');
 
   // Bridge connected-CF endpoints (an rxjs Observable) into a signal so
   // computed() can read it. CloudFoundryService is optional purely because

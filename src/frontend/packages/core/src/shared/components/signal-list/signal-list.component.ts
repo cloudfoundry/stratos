@@ -18,6 +18,8 @@ export interface SignalListDropdown {
   disabled?: Signal<boolean>;
 }
 
+export type SignalListViewMode = 'table' | 'card';
+
 export interface SignalListConfig<T> {
   readonly pagedItems: Signal<T[]>;
   readonly totalFilteredResults: Signal<number>;
@@ -34,6 +36,10 @@ export interface SignalListConfig<T> {
   readonly nameFilter?: WritableSignal<string>;
   readonly filterDropdowns?: SignalListDropdown[];
   readonly onRefresh?: () => void | Promise<void>;
+  // Optional — when provided, the toolbar shows a table/card view toggle
+  // and the body renders either a table or a card grid. When absent,
+  // the list is table-only.
+  readonly viewMode?: WritableSignal<SignalListViewMode>;
 }
 
 @Component({
@@ -104,6 +110,10 @@ export class SignalListComponent<T> {
     if (!Number.isFinite(n) || n <= 0) return;
     this.config.pageSize.set(n);
     this.config.pageIndex.set(0);
+  }
+
+  setViewMode(mode: SignalListViewMode): void {
+    this.config.viewMode?.set(mode);
   }
 
   onDropdownChange(dropdown: SignalListDropdown, value: string): void {

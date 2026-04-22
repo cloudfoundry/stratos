@@ -156,6 +156,7 @@ export class ApplicationWallComponent implements OnInit {
       nameFilter: this.appsConfig.nameFilter,
       filterDropdowns: dropdowns,
       onRefresh: () => this.appsConfig.refresh(),
+      viewMode: this.appsConfig.viewMode,
     });
     if (cnsiGuids.length > 0) {
       void this.appsConfig.loadAll();
