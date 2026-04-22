@@ -1,4 +1,4 @@
-import { Component, Input, Signal, WritableSignal, ChangeDetectionStrategy, ElementRef, ViewChild, signal, afterRender, DestroyRef, inject } from '@angular/core';
+import { Component, Input, Signal, WritableSignal, ChangeDetectionStrategy, ElementRef, ViewChild, signal, DestroyRef, inject, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
@@ -75,7 +75,7 @@ export interface SignalListConfig<T> {
   templateUrl: './signal-list.component.html',
   host: { class: 'block h-full min-h-0' },
 })
-export class SignalListComponent<T> {
+export class SignalListComponent<T> implements AfterViewInit {
   @Input({ required: true }) config!: SignalListConfig<T>;
 
   @ViewChild('scrollBody', { static: false }) scrollBody?: ElementRef<HTMLElement>;
@@ -87,32 +87,44 @@ export class SignalListComponent<T> {
   // when scrolling would actually reveal more rows.
   readonly hasOverflow = signal(false);
 
+  private resizeObserver?: ResizeObserver;
+  private mutationObserver?: MutationObserver;
+
   constructor() {
     const destroyRef = inject(DestroyRef);
-    let ro: ResizeObserver | undefined;
-
-    afterRender(() => {
-      const el = this.scrollBody?.nativeElement;
-      if (!el) {
-        this.hasOverflow.set(false);
-        return;
-      }
-      this.hasOverflow.set(el.scrollHeight > el.clientHeight + 1);
-
-      // Attach a ResizeObserver the first time we see the element so
-      // viewport resizes (no data change) also re-measure. afterRender
-      // handles data-driven reflow; the observer handles pure layout.
-      if (!ro && typeof ResizeObserver !== 'undefined') {
-        ro = new ResizeObserver(() => {
-          const node = this.scrollBody?.nativeElement;
-          if (!node) return;
-          this.hasOverflow.set(node.scrollHeight > node.clientHeight + 1);
-        });
-        ro.observe(el);
-      }
+    destroyRef.onDestroy(() => {
+      this.resizeObserver?.disconnect();
+      this.mutationObserver?.disconnect();
     });
+  }
 
-    destroyRef.onDestroy(() => ro?.disconnect());
+  ngAfterViewInit(): void {
+    const el = this.scrollBody?.nativeElement;
+    if (!el) return;
+    this.measureOverflow();
+
+    // Viewport changes (window resize, container resize) shift clientHeight.
+    if (typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(() => this.measureOverflow());
+      this.resizeObserver.observe(el);
+    }
+
+    // Data changes add/remove DOM nodes in the scroll body, shifting
+    // scrollHeight without triggering ResizeObserver on the body itself.
+    // A MutationObserver catches those.
+    if (typeof MutationObserver !== 'undefined') {
+      this.mutationObserver = new MutationObserver(() => this.measureOverflow());
+      this.mutationObserver.observe(el, { childList: true, subtree: true });
+    }
+  }
+
+  private measureOverflow(): void {
+    const el = this.scrollBody?.nativeElement;
+    if (!el) {
+      this.hasOverflow.set(false);
+      return;
+    }
+    this.hasOverflow.set(el.scrollHeight > el.clientHeight + 1);
   }
 
   trackByRow = (_: number, row: T) => this.config.getRowKey(row);
