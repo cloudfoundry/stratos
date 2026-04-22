@@ -34,9 +34,19 @@ export class EndpointDataRegistry implements OnDestroy {
     ).subscribe();
   }
 
-  // Must be called before the first acquire() — rebuilding the subscription
-  // mid-flight orphans in-progress load() observables on the old subscription.
+  // Rebuilding the subscription mid-flight orphans in-progress load()
+  // observables on the old subscription — cancelling their HTTP merges and
+  // leaving the corresponding endpoint card with 0 counts.
+  //
+  // Safety guard: when the backend config matches the current value we
+  // skip the rebuild entirely. This is the common case (backend default
+  // matches our default of 3), and it avoids the classic race where
+  // ngAfterViewInit enqueues cards BEFORE the auth.sessionData.config
+  // selector emits — which on a hard refresh (store rehydrating) happens
+  // reliably and kills the slowest card's load (the CF with the most
+  // orgs).
   configure(maxConcurrentCards: number): void {
+    if (this.maxConcurrentCards === maxConcurrentCards) return;
     this.maxConcurrentCards = maxConcurrentCards;
     this.queueSub.unsubscribe();
     this.queueSub = this.buildCardQueue();
