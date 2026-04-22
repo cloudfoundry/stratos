@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { Component, signal } from '@angular/core';
 import { SignalListComponent } from './signal-list.component';
-import type { SignalListConfig } from './signal-list.component';
+import type { SignalListConfig, SignalListDropdown, SignalListDropdownOption } from './signal-list.component';
 
 @Component({
   standalone: true,
@@ -63,5 +63,49 @@ describe('SignalListComponent', () => {
     component.onPageSizeChange('20');
     expect(fixture.componentInstance.pageSize()).toBe(20);
     expect(fixture.componentInstance.pageIndex()).toBe(0);
+  });
+
+  it('renders a filter dropdown per config.filterDropdowns entry', () => {
+    const fixture = TestBed.createComponent(Host);
+    const selected = signal<string | null>(null);
+    const options = signal<SignalListDropdownOption[]>([
+      { label: 'All', value: null },
+      { label: 'CF-1', value: 'cf-1' },
+      { label: 'CF-2', value: 'cf-2' },
+    ]);
+    const dropdown: SignalListDropdown = {
+      label: 'Cloud Foundry',
+      options: options.asReadonly(),
+      selected,
+    };
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      filterDropdowns: [dropdown],
+    };
+    fixture.detectChanges();
+    const ddEl = fixture.nativeElement.querySelector('[data-test="dropdown-Cloud Foundry"]');
+    expect(ddEl).not.toBeNull();
+    const opts = ddEl.querySelectorAll('option');
+    expect(opts.length).toBe(3);
+    expect(opts[0].textContent).toContain('All');
+    expect(opts[1].textContent).toContain('CF-1');
+  });
+
+  it('onDropdownChange updates selected and resets pageIndex', () => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.pageIndex.set(4);
+    fixture.detectChanges();
+    const component = fixture.debugElement.children[0].componentInstance as SignalListComponent<{ name: string }>;
+    const selected = signal<string | null>(null);
+    const dropdown: SignalListDropdown = {
+      label: 'CF',
+      options: signal([]).asReadonly(),
+      selected,
+    };
+    component.onDropdownChange(dropdown, 'cf-1');
+    expect(selected()).toBe('cf-1');
+    expect(fixture.componentInstance.pageIndex()).toBe(0);
+    component.onDropdownChange(dropdown, '');
+    expect(selected()).toBeNull();
   });
 });

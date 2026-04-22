@@ -2,7 +2,24 @@
 
   <!-- Toolbar -->
   <div class="flex items-center gap-3 px-4 py-2 border-b border-content-border flex-wrap">
-    <!-- Filter placeholder (unwired for now — visual parity with legacy) -->
+
+    @if (config.filterDropdowns) {
+      @for (dd of config.filterDropdowns; track dd.label) {
+        <label class="flex items-center gap-2 text-sm text-content-muted" [attr.data-test]="'dropdown-' + dd.label">
+          <span>{{ dd.label }}:</span>
+          <select
+            [value]="dd.selected() ?? ''"
+            [disabled]="dd.disabled ? dd.disabled() : false"
+            (change)="onDropdownChange(dd, $any($event.target).value)"
+            class="px-2 py-1 border border-content-border rounded bg-content-bg text-content-text disabled:opacity-40 disabled:cursor-not-allowed">
+            @for (opt of dd.options(); track opt.label) {
+              <option [value]="opt.value ?? ''">{{ opt.label }}</option>
+            }
+          </select>
+        </label>
+      }
+    }
+
     <div class="flex-1"></div>
 
     @if (config.nameFilter) {

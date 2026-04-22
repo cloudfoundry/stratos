@@ -28,6 +28,7 @@ function makeStubSignalConfigService() {
     isAnyLoading: signal(false).asReadonly(),
     errorsByCnsi: signal(new Map<string, unknown>()).asReadonly(),
   };
+  const allOption = { label: 'All', value: null };
   return {
     initialize: vi.fn(),
     loadAll: vi.fn().mockResolvedValue(undefined),
@@ -39,6 +40,13 @@ function makeStubSignalConfigService() {
     pageIndex,
     view,
     orchestrator,
+    selectedCnsi: signal<string | null>(null),
+    selectedOrg: signal<string | null>(null),
+    selectedSpace: signal<string | null>(null),
+    nameFilter: signal(''),
+    cnsiOptions: signal([allOption]).asReadonly(),
+    orgOptions: signal([allOption]).asReadonly(),
+    spaceOptions: signal([allOption]).asReadonly(),
   };
 }
 
@@ -128,6 +136,18 @@ describe('ApplicationWallComponent', () => {
       createdAt: '',
       updatedAt: '',
     } as any)).toBe('cnsi-1:app-1');
+  });
+
+  it('wires filterDropdowns and nameFilter into listConfig', async () => {
+    await component.ngOnInit();
+    const cfg = component.listConfig();
+    expect(cfg).toBeDefined();
+    expect(cfg!.nameFilter).toBe(stubSignalConfig.nameFilter);
+    expect(cfg!.filterDropdowns).toBeDefined();
+    expect(cfg!.filterDropdowns!.map(d => d.label)).toEqual(['Cloud Foundry', 'Organization', 'Space']);
+    expect(cfg!.filterDropdowns![0].selected).toBe(stubSignalConfig.selectedCnsi);
+    expect(cfg!.filterDropdowns![1].selected).toBe(stubSignalConfig.selectedOrg);
+    expect(cfg!.filterDropdowns![2].selected).toBe(stubSignalConfig.selectedSpace);
   });
 });
 

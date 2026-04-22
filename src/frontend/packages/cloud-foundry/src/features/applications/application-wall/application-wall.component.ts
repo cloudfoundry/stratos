@@ -10,6 +10,7 @@ import {
   PageHeaderComponent,
   SignalListComponent,
   SignalListConfig,
+  SignalListDropdown,
 } from '@stratosui/core';
 import { EndpointModel, getFullEndpointApiUrl } from '@stratosui/store';
 import { CFAppState } from '../../../cf-app-state';
@@ -116,6 +117,23 @@ export class ApplicationWallComponent implements OnInit {
     );
     const cnsiGuids = (connected ?? []).map(ep => ep.guid);
     this.appsConfig.initialize(cnsiGuids);
+    const dropdowns: SignalListDropdown[] = [
+      {
+        label: 'Cloud Foundry',
+        options: this.appsConfig.cnsiOptions,
+        selected: this.appsConfig.selectedCnsi,
+      },
+      {
+        label: 'Organization',
+        options: this.appsConfig.orgOptions,
+        selected: this.appsConfig.selectedOrg,
+      },
+      {
+        label: 'Space',
+        options: this.appsConfig.spaceOptions,
+        selected: this.appsConfig.selectedSpace,
+      },
+    ];
     this.listConfig.set({
       pagedItems: this.appsConfig.view.pagedItems,
       totalFilteredResults: this.appsConfig.view.totalFilteredResults,
@@ -133,6 +151,9 @@ export class ApplicationWallComponent implements OnInit {
         { header: 'Created', render: (app: StApp) => app.createdAt ?? '' },
       ],
       getRowKey: (app: StApp) => `${app.cnsiGuid}:${app.guid}`,
+      nameFilter: this.appsConfig.nameFilter,
+      filterDropdowns: dropdowns,
+      onRefresh: () => this.appsConfig.refresh(),
     });
     if (cnsiGuids.length > 0) {
       void this.appsConfig.loadAll();

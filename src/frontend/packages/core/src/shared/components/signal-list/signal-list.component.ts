@@ -6,6 +6,18 @@ export interface SignalListColumn<T> {
   render: (row: T) => string;
 }
 
+export interface SignalListDropdownOption {
+  label: string;
+  value: string | null;
+}
+
+export interface SignalListDropdown {
+  label: string;
+  options: Signal<SignalListDropdownOption[]>;
+  selected: WritableSignal<string | null>;
+  disabled?: Signal<boolean>;
+}
+
 export interface SignalListConfig<T> {
   readonly pagedItems: Signal<T[]>;
   readonly totalFilteredResults: Signal<number>;
@@ -19,6 +31,7 @@ export interface SignalListConfig<T> {
   readonly getRowKey: (row: T) => string;
   readonly emptyMessage?: string;
   readonly nameFilter?: WritableSignal<string>;
+  readonly filterDropdowns?: SignalListDropdown[];
   readonly onRefresh?: () => void | Promise<void>;
 }
 
@@ -53,6 +66,15 @@ export class SignalListComponent<T> {
     const n = parseInt(value, 10);
     if (!Number.isFinite(n) || n <= 0) return;
     this.config.pageSize.set(n);
+    this.config.pageIndex.set(0);
+  }
+
+  onDropdownChange(dropdown: SignalListDropdown, value: string): void {
+    // The <select> value is a string, but our model uses `null` for the
+    // "All" option. The option with value=null renders as an empty string
+    // attribute, so treat empty string as the null selection.
+    dropdown.selected.set(value === '' ? null : value);
+    // Reset to first page so filtered results don't land on an empty page.
     this.config.pageIndex.set(0);
   }
 }
