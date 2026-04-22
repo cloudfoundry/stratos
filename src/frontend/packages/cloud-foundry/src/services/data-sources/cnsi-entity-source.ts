@@ -68,7 +68,12 @@ export abstract class CnsiEntitySource<T> {
       let page = 1;
       while (!this._done()) {
         const resp = await firstValueFrom(this.http.get<StratosPagedResponseLike<T>>(this.urlFor(page)));
-        this._items.update(curr => curr.concat(resp.resources));
+        // Stamp cnsiGuid on each resource — the backend's Stratos-shape DTOs
+        // don't carry it (the source route already identifies the endpoint),
+        // but downstream filters/joins need it once items from multiple
+        // sources are merged in MergeOrchestrator.
+        const stamped = resp.resources.map(r => ({ ...r, cnsiGuid: this.cnsiGuid }) as unknown as T);
+        this._items.update(curr => curr.concat(stamped));
         this._totalResults.set(resp.pagination.totalResults);
         this._fetchedPages.set(page);
         if (resp.pagination.next == null) {

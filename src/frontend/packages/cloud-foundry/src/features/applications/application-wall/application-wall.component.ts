@@ -135,6 +135,26 @@ export class ApplicationWallComponent implements OnInit {
         selected: this.appsConfig.selectedSpace,
       },
     ];
+    const stateColor = (app: StApp): SignalListPillColor => {
+      const s = (app.state ?? '').toUpperCase();
+      if (s === 'STARTED') return 'success';
+      if (s === 'CRASHED' || s === 'FAILED') return 'danger';
+      return 'neutral';
+    };
+    const stateLabel = (app: StApp): string => {
+      const s = (app.state ?? '').toUpperCase();
+      if (s === 'STARTED') return 'Deployed - Online';
+      if (s === 'STOPPED') return 'Stopped';
+      if (s === 'CRASHED') return 'Crashed';
+      if (s === 'FAILED') return 'Failed';
+      return app.state ?? '';
+    };
+    const renderCfOrgSpace = (app: StApp): string => {
+      const cf = this.appsConfig.endpointNames().get(app.cnsiGuid) ?? app.cnsiGuid;
+      const orgName = app.orgGuid ? (this.appsConfig.orgNames().get(app.orgGuid) ?? app.orgGuid) : '—';
+      const spaceName = app.spaceGuid ? (this.appsConfig.spaceNames().get(app.spaceGuid) ?? app.spaceGuid) : '—';
+      return `${cf} / ${orgName} / ${spaceName}`;
+    };
     this.listConfig.set({
       pagedItems: this.appsConfig.view.pagedItems,
       totalFilteredResults: this.appsConfig.view.totalFilteredResults,
@@ -149,34 +169,39 @@ export class ApplicationWallComponent implements OnInit {
           kind: 'link',
           link: (app: StApp) => ['/applications', app.cnsiGuid, app.guid],
           render: (app: StApp) => app.name,
+          widthHint: '16rem',
         },
         {
-          header: 'State', key: 'state', sortField: 'state',
-          kind: 'pill',
-          pillColor: (app: StApp): SignalListPillColor => {
-            const s = (app.state ?? '').toUpperCase();
-            if (s === 'STARTED') return 'success';
-            if (s === 'STOPPED') return 'neutral';
-            if (s === 'CRASHED' || s === 'FAILED') return 'danger';
-            return 'neutral';
-          },
-          render: (app: StApp) => app.state ?? '',
+          header: 'Status', key: 'state', sortField: 'state',
+          kind: 'dot',
+          pillColor: stateColor,
+          render: stateLabel,
+          widthHint: '12rem',
         },
         {
           header: 'Instances', key: 'instances', sortField: 'instances',
           render: (app: StApp) => String(app.instances ?? 0),
+          widthHint: '6rem',
         },
         {
           header: 'Memory', key: 'memory', sortField: 'memory',
           render: (app: StApp) => ApplicationWallComponent.formatMb(app.memory),
+          widthHint: '7rem',
         },
         {
           header: 'Disk', key: 'diskQuota', sortField: 'diskQuota',
           render: (app: StApp) => ApplicationWallComponent.formatMb(app.diskQuota),
+          widthHint: '7rem',
+        },
+        {
+          header: 'CF/Org/Space',
+          render: renderCfOrgSpace,
+          widthHint: '18rem',
         },
         {
           header: 'Created', key: 'createdAt', sortField: 'createdAt',
           render: (app: StApp) => ApplicationWallComponent.formatDate(app.createdAt),
+          widthHint: '12rem',
         },
       ],
       getRowKey: (app: StApp) => `${app.cnsiGuid}:${app.guid}`,
@@ -185,6 +210,7 @@ export class ApplicationWallComponent implements OnInit {
       nameFilter: this.appsConfig.nameFilter,
       filterDropdowns: dropdowns,
       onRefresh: () => this.appsConfig.refresh(),
+      cardAccentColor: stateColor,
       viewMode: this.appsConfig.viewMode,
       sort: this.appsConfig.sort,
     });

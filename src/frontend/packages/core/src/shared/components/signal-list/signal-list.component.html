@@ -45,7 +45,7 @@
           (click)="toggleSortDirection()"
           [title]="config.sort!().direction === 'asc' ? 'Ascending' : 'Descending'"
           class="px-2 py-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700">
-          <span class="material-icons text-base leading-5" [class.rotate-180]="config.sort!().direction === 'desc'">sort</span>
+          <span class="material-icons text-base leading-5" [class.rotate-180]="config.sort!().direction === 'asc'">sort</span>
         </button>
       </div>
     }
@@ -107,40 +107,56 @@
            style="grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));">
         @for (row of config.pagedItems(); track trackByRow($index, row)) {
           <div data-test="card"
-               class="border border-content-border rounded bg-content-bg p-3 hover:shadow-md transition-shadow">
-            @for (col of config.columns; track col.header; let first = $first) {
-              @if (first) {
-                <div class="font-semibold text-base text-content-text truncate mb-2">
-                  @if (col.kind === 'link' && col.link && col.link(row); as target) {
-                    <a [routerLink]="target" class="text-accent hover:underline">{{ col.render(row) }}</a>
-                  } @else {
-                    {{ col.render(row) }}
-                  }
-                </div>
-              } @else {
-                <div class="flex justify-between items-center gap-2 text-sm py-0.5">
-                  <span class="text-content-muted">{{ col.header }}</span>
-                  <span class="text-content-text text-right truncate">
+               class="border border-content-border rounded bg-content-bg hover:shadow-md transition-shadow overflow-hidden">
+            @if (config.cardAccentColor) {
+              <div data-test="card-accent"
+                   [class]="'h-1.5 ' + accentBarClass(cardAccentFor(row))"></div>
+            }
+            <div class="p-3">
+              @for (col of config.columns; track col.header; let first = $first) {
+                @if (first) {
+                  <div class="font-semibold text-base text-content-text truncate mb-2" [attr.title]="col.render(row)">
                     @if (col.kind === 'link' && col.link && col.link(row); as target) {
                       <a [routerLink]="target" class="text-accent hover:underline">{{ col.render(row) }}</a>
-                    } @else if (col.kind === 'pill') {
-                      <span [class]="pillClasses(colorFor(col, row))">{{ col.render(row) }}</span>
                     } @else {
                       {{ col.render(row) }}
                     }
-                  </span>
-                </div>
+                  </div>
+                } @else {
+                  <div class="flex justify-between items-center gap-2 text-sm py-0.5">
+                    <span class="text-content-muted">{{ col.header }}</span>
+                    <span class="text-content-text text-right truncate" [attr.title]="col.render(row)">
+                      @if (col.kind === 'link' && col.link && col.link(row); as target) {
+                        <a [routerLink]="target" class="text-accent hover:underline">{{ col.render(row) }}</a>
+                      } @else if (col.kind === 'pill') {
+                        <span [class]="pillClasses(colorFor(col, row))">{{ col.render(row) }}</span>
+                      } @else if (col.kind === 'dot') {
+                        <span class="inline-flex items-center gap-2">
+                          <span [class]="dotClasses(colorFor(col, row))"></span>
+                          <span>{{ col.render(row) }}</span>
+                        </span>
+                      } @else {
+                        {{ col.render(row) }}
+                      }
+                    </span>
+                  </div>
+                }
               }
-            }
+            </div>
           </div>
         }
       </div>
     } @else {
-      <table class="min-w-full border-collapse">
+      <table class="min-w-full border-collapse" style="table-layout: fixed;">
+        <colgroup>
+          @for (col of config.columns; track col.header) {
+            <col [style.width]="col.widthHint ?? null">
+          }
+        </colgroup>
         <thead class="sticky top-0 bg-gray-100 dark:bg-gray-800 z-10 border-b border-content-border">
           <tr>
             @for (col of config.columns; track col.header) {
-              <th class="text-left px-3 py-2 font-semibold text-sm text-content-text">
+              <th class="text-left px-3 py-2 font-semibold text-sm text-content-text whitespace-nowrap">
                 @if (isSortable(col)) {
                   <button
                     type="button"
@@ -148,9 +164,9 @@
                     class="inline-flex items-center gap-1 hover:text-content-muted">
                     <span>{{ col.header }}</span>
                     @if (sortDirectionFor(col) === 'asc') {
-                      <span class="material-icons text-base opacity-60">sort</span>
-                    } @else if (sortDirectionFor(col) === 'desc') {
                       <span class="material-icons text-base opacity-60 rotate-180">sort</span>
+                    } @else if (sortDirectionFor(col) === 'desc') {
+                      <span class="material-icons text-base opacity-60">sort</span>
                     } @else {
                       <span class="material-icons text-base opacity-40">sort</span>
                     }
@@ -166,7 +182,7 @@
           @for (row of config.pagedItems(); track trackByRow($index, row)) {
             <tr data-test="row" class="border-b border-content-border hover:bg-gray-50 dark:hover:bg-gray-900">
               @for (col of config.columns; track col.header) {
-                <td class="px-3 py-2 text-sm text-content-text">
+                <td class="px-3 py-2 text-sm text-content-text truncate" [attr.title]="col.render(row)">
                   @if (col.kind === 'link' && col.link) {
                     @if (col.link(row); as target) {
                       <a [routerLink]="target" class="text-accent hover:underline">{{ col.render(row) }}</a>
@@ -175,6 +191,11 @@
                     }
                   } @else if (col.kind === 'pill') {
                     <span [class]="pillClasses(colorFor(col, row))">{{ col.render(row) }}</span>
+                  } @else if (col.kind === 'dot') {
+                    <span class="inline-flex items-center gap-2">
+                      <span [class]="dotClasses(colorFor(col, row))"></span>
+                      <span class="truncate">{{ col.render(row) }}</span>
+                    </span>
                   } @else {
                     {{ col.render(row) }}
                   }

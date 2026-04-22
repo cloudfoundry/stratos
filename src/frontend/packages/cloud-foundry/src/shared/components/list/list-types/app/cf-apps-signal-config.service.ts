@@ -1,11 +1,12 @@
 import { Injectable, Signal, WritableSignal, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import type { EndpointModel } from '@stratosui/store';
 import { CnsiAppsSource } from '../../../../../services/data-sources/cnsi-apps-source';
 import { MergeOrchestrator } from '../../../../../services/data-sources/merge-orchestrator';
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
-import type { StApp } from '../../../../../services/endpoint-data/stratos-types';
+import type { StApp, StOrgsResponse, StSpacesResponse } from '../../../../../services/endpoint-data/stratos-types';
 import { CloudFoundryService } from '../../../../data-services/cloud-foundry.service';
 import type { SignalListDropdownOption, SignalListViewMode } from '@stratosui/core';
 
@@ -35,6 +36,18 @@ export class CfAppsSignalConfigService {
   // tests exist that don't provide it; in the real app it's always present.
   private readonly connectedEndpoints: Signal<EndpointModel[]>;
 
+  // guid → name lookups for orgs and spaces. Populated from the per-CF
+  // /pp/v1/cf/orgs and /pp/v1/cf/spaces fetches fired from initialize().
+  // Merged across all connected CFs because guids are globally unique.
+  // Used by the org/space dropdowns to render names instead of guids,
+  // and by the app-wall CF/Org/Space column.
+  private readonly _orgNames = signal<Map<string, string>>(new Map());
+  private readonly _spaceNames = signal<Map<string, string>>(new Map());
+  readonly orgNames: Signal<Map<string, string>> = this._orgNames.asReadonly();
+  readonly spaceNames: Signal<Map<string, string>> = this._spaceNames.asReadonly();
+  // endpoint guid → endpoint name, derived from the connected endpoints list.
+  readonly endpointNames: Signal<Map<string, string>>;
+
   // Computed option lists for the toolbar dropdowns.
   readonly cnsiOptions:  Signal<SignalListDropdownOption[]>;
   readonly orgOptions:   Signal<SignalListDropdownOption[]>;
@@ -55,20 +68,34 @@ export class CfAppsSignalConfigService {
       return opts;
     });
 
-    // Org options come from the currently loaded app list. This is an
-    // acceptable approximation — it surfaces orgs that *have* apps in the
-    // current view, but misses empty orgs. See plan for trade-off.
+    // Endpoint guid → name, for rendering cnsi references as names
+    // (e.g., in the app-wall CF/Org/Space column).
+    this.endpointNames = computed(() => {
+      const m = new Map<string, string>();
+      for (const ep of this.connectedEndpoints() ?? []) {
+        if (ep.name) m.set(ep.guid, ep.name);
+      }
+      return m;
+    });
+
+    // Org options come from the currently loaded app list, labelled from
+    // the orgNames map populated by initialize(). Shows orgs that *have*
+    // apps in the current CF scope; empty orgs are not surfaced here. Falls
+    // back to guid only if the name fetch hasn't landed yet — which, in
+    // normal use, resolves within a couple of seconds.
     this.orgOptions = computed(() => {
       const cnsi = this.selectedCnsi();
+      const names = this._orgNames();
       const seen = new Map<string, string>();
       const items = this.orchestrator?.allItems() ?? [];
       for (const app of items) {
         if (cnsi && app.cnsiGuid !== cnsi) continue;
         if (!app.orgGuid) continue;
-        if (!seen.has(app.orgGuid)) seen.set(app.orgGuid, app.orgGuid);
+        if (!seen.has(app.orgGuid)) seen.set(app.orgGuid, names.get(app.orgGuid) ?? app.orgGuid);
       }
       const opts: SignalListDropdownOption[] = [{ label: 'All', value: null }];
-      for (const [guid, label] of seen) opts.push({ label, value: guid });
+      const sorted = Array.from(seen.entries()).sort(([, a], [, b]) => a.localeCompare(b));
+      for (const [guid, label] of sorted) opts.push({ label, value: guid });
       return opts;
     });
 
@@ -76,16 +103,18 @@ export class CfAppsSignalConfigService {
     this.spaceOptions = computed(() => {
       const cnsi = this.selectedCnsi();
       const org = this.selectedOrg();
+      const names = this._spaceNames();
       const seen = new Map<string, string>();
       const items = this.orchestrator?.allItems() ?? [];
       for (const app of items) {
         if (cnsi && app.cnsiGuid !== cnsi) continue;
         if (org && app.orgGuid !== org) continue;
         if (!app.spaceGuid) continue;
-        if (!seen.has(app.spaceGuid)) seen.set(app.spaceGuid, app.spaceGuid);
+        if (!seen.has(app.spaceGuid)) seen.set(app.spaceGuid, names.get(app.spaceGuid) ?? app.spaceGuid);
       }
       const opts: SignalListDropdownOption[] = [{ label: 'All', value: null }];
-      for (const [guid, label] of seen) opts.push({ label, value: guid });
+      const sorted = Array.from(seen.entries()).sort(([, a], [, b]) => a.localeCompare(b));
+      for (const [guid, label] of sorted) opts.push({ label, value: guid });
       return opts;
     });
 
@@ -119,6 +148,38 @@ export class CfAppsSignalConfigService {
       this.pageSize,
       this.pageIndex,
     );
+    // Fire-and-forget org/space name resolution. Populates the lookup maps
+    // that orgOptions/spaceOptions read for their labels. Failures per CF
+    // are swallowed — if an endpoint is unreachable the dropdown falls back
+    // to guid for that CF's items, which is preferable to blocking the
+    // whole app-wall on a slow or broken CF.
+    void this.loadNames(cnsiGuids);
+  }
+
+  private async loadNames(cnsiGuids: readonly string[]): Promise<void> {
+    const fetchOrgs = (guid: string): Promise<StOrgsResponse | null> =>
+      firstValueFrom(this.http.get<StOrgsResponse>(`/pp/v1/cf/orgs/${guid}`)).catch((): StOrgsResponse | null => null);
+    const fetchSpaces = (guid: string): Promise<StSpacesResponse | null> =>
+      firstValueFrom(this.http.get<StSpacesResponse>(`/pp/v1/cf/spaces/${guid}`)).catch((): StSpacesResponse | null => null);
+
+    const [orgResults, spaceResults] = await Promise.all([
+      Promise.all(cnsiGuids.map(fetchOrgs)),
+      Promise.all(cnsiGuids.map(fetchSpaces)),
+    ]);
+
+    const orgMap = new Map<string, string>();
+    for (const resp of orgResults) {
+      if (!resp) continue;
+      for (const org of resp.resources) orgMap.set(org.guid, org.name);
+    }
+    this._orgNames.set(orgMap);
+
+    const spaceMap = new Map<string, string>();
+    for (const resp of spaceResults) {
+      if (!resp) continue;
+      for (const space of resp.resources) spaceMap.set(space.guid, space.name);
+    }
+    this._spaceNames.set(spaceMap);
   }
 
   async loadAll(): Promise<void> {

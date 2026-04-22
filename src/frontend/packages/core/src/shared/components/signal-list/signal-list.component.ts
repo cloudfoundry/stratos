@@ -14,12 +14,16 @@ export interface SignalListColumn<T> {
   // when the column is sortable. Defaults to the header text.
   key?: string;
   // Presentation hint. Default is 'text'.
-  kind?: 'text' | 'link' | 'pill';
+  kind?: 'text' | 'link' | 'pill' | 'dot';
   // Required when kind === 'link'. Returns the router-link target array,
   // or null to render as plain text.
   link?: (row: T) => readonly (string | number)[] | null;
-  // Optional for kind === 'pill'. Returns a color family. Default: neutral.
+  // Optional for kind === 'pill' or 'dot'. Returns a color family. Default: neutral.
   pillColor?: (row: T) => SignalListPillColor;
+  // Optional CSS width value (e.g. '12rem', '20%'). When set, applied via a
+  // <col> in the table's <colgroup>. Unset columns share remaining width
+  // equally under the fixed table layout.
+  widthHint?: string;
 }
 
 export interface SignalListSort {
@@ -57,6 +61,11 @@ export interface SignalListConfig<T> {
   readonly nameFilter?: WritableSignal<string>;
   readonly filterDropdowns?: SignalListDropdown[];
   readonly onRefresh?: () => void | Promise<void>;
+  // Optional — when provided, each card in card view renders a colored
+  // strip at the top reflecting the row's state. Common use: map app.state
+  // to a success/danger/neutral color so a quick glance over a wall of
+  // cards surfaces problems.
+  readonly cardAccentColor?: (row: T) => SignalListPillColor;
   // Optional — when provided, the toolbar shows a table/card view toggle
   // and the body renders either a table or a card grid. When absent,
   // the list is table-only.
@@ -148,8 +157,35 @@ export class SignalListComponent<T> implements AfterViewInit {
     }
   }
 
+  // Small colored circle rendered to the LEFT of the text for `kind: 'dot'`
+  // columns. Used for status rendering that matches the legacy Stratos
+  // app-wall ("● Deployed - Online", "● Incomplete", etc.).
+  dotClasses(color: SignalListPillColor): string {
+    switch (color) {
+      case 'success': return 'inline-block h-2.5 w-2.5 rounded-full bg-green-500';
+      case 'warning': return 'inline-block h-2.5 w-2.5 rounded-full bg-yellow-500';
+      case 'danger':  return 'inline-block h-2.5 w-2.5 rounded-full bg-red-500';
+      default:        return 'inline-block h-2.5 w-2.5 rounded-full bg-gray-400';
+    }
+  }
+
+  // Color class for the accent strip at the TOP of a card in card view.
+  // Returns a Tailwind bg-* class matching the pill palette.
+  accentBarClass(color: SignalListPillColor): string {
+    switch (color) {
+      case 'success': return 'bg-green-500';
+      case 'warning': return 'bg-yellow-500';
+      case 'danger':  return 'bg-red-500';
+      default:        return 'bg-gray-400';
+    }
+  }
+
   colorFor(col: SignalListColumn<T>, row: T): SignalListPillColor {
     return col.pillColor ? col.pillColor(row) : 'neutral';
+  }
+
+  cardAccentFor(row: T): SignalListPillColor {
+    return this.config.cardAccentColor ? this.config.cardAccentColor(row) : 'neutral';
   }
 
   pageSizeOptions(): readonly number[] {
