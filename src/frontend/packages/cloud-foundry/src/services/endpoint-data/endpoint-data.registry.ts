@@ -28,6 +28,11 @@ export class EndpointDataRegistry implements OnDestroy {
   // cancels any in-flight load()s — the race that leaves slow CFs at 0 counts.
   private maxConcurrentCards = 2;
 
+  private _acquireCalls = 0;
+  private _enqueues = 0;
+  private _acquireExistingHits = 0;
+  private _configureCalls = 0;
+
   constructor() {
     this.queueSub = this.buildCardQueue();
     // Details fetches run one-at-a-time after their card's load() completes.
@@ -36,6 +41,31 @@ export class EndpointDataRegistry implements OnDestroy {
     this.detailsSub = this.detailsQueue$.pipe(
       concatMap(svc => svc.loadDetails()),
     ).subscribe();
+
+    if (typeof window !== 'undefined') {
+      (window as any).__stratosDiag = {
+        snapshot: () => this.getSnapshot(),
+        registry: this,
+      };
+    }
+  }
+
+  getSnapshot() {
+    return {
+      maxConcurrentCards: this.maxConcurrentCards,
+      acquireCalls: this._acquireCalls,
+      enqueues: this._enqueues,
+      acquireExistingHits: this._acquireExistingHits,
+      configureCalls: this._configureCalls,
+      instances: Array.from(this.instances.entries()).map(([guid, entry]) => ({
+        guid,
+        refCount: entry.refCount,
+        lastFetched: entry.service.lastFetched()?.toISOString() ?? null,
+        appCount: entry.service.appCount(),
+        orgCount: entry.service.orgCount(),
+        routeCount: entry.service.routeCount(),
+      })),
+    };
   }
 
   // Rebuilding the subscription mid-flight orphans in-progress load()
@@ -50,6 +80,7 @@ export class EndpointDataRegistry implements OnDestroy {
   // reliably and kills the slowest card's load (the CF with the most
   // orgs).
   configure(maxConcurrentCards: number): void {
+    this._configureCalls++;
     if (this.maxConcurrentCards === maxConcurrentCards) return;
     this.maxConcurrentCards = maxConcurrentCards;
     this.queueSub.unsubscribe();
@@ -57,8 +88,10 @@ export class EndpointDataRegistry implements OnDestroy {
   }
 
   acquire(guid: string): EndpointDataService {
+    this._acquireCalls++;
     const existing = this.instances.get(guid);
     if (existing) {
+      this._acquireExistingHits++;
       existing.refCount++;
       return existing.service;
     }
@@ -66,6 +99,7 @@ export class EndpointDataRegistry implements OnDestroy {
     // If it gains injected deps, they must be added to this constructor call.
     const service = new EndpointDataService(this.http, this.shim, guid, this.diagnostics);
     this.instances.set(guid, { service, refCount: 1 });
+    this._enqueues++;
     this.cardQueue$.next(service);
     return service;
   }

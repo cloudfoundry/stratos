@@ -100,6 +100,11 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
   notLoadedCardIndices: number[] = [];
   cardsToLoad: HomePageEndpointCardComponent[] = [];
+  // Tracks which CNSI guids have already been dispatched to card.load().
+  // Prevents duplicate wrapper.load() → cfhome.load() invocations when
+  // QueryList.changes fires repeatedly. Registry.acquire() is also
+  // idempotent on duplicate guid, but this set avoids the redundant chain.
+  private dispatchedGuids = new Set<string>();
 
   private viewMonitorSub!: Subscription;
   private cardChangesSub!: Subscription;
@@ -308,12 +313,25 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     }
   }
 
-  setCardsToLoad(cards: ElementRef[]) {
+  setCardsToLoad(_cards: ElementRef[]) {
+    // Viewport gating reliably stranded below-fold cards because no scroll
+    // event fires on first render, so the gate never re-checks. Dispatch
+    // every card directly — the registry's mergeMap(maxConcurrentCards)
+    // enforces bounded concurrency, and dispatchedGuids prevents duplicate
+    // wrapper.load() calls when QueryList.changes re-emits.
     this.notLoadedCardIndices = [];
-    for (let i = 0; i < cards.length; i++) {
-      this.notLoadedCardIndices.push(i);
+    const cardsArr = this.endpointCards?.toArray() ?? [];
+    let dispatched = 0;
+    for (const card of cardsArr) {
+      const guid = (card as any)?.endpoint?.guid;
+      if (!guid || this.dispatchedGuids.has(guid)) { continue; }
+      this.dispatchedGuids.add(guid);
+      this.cardsToLoad.push(card);
+      dispatched++;
     }
-    setTimeout(() => this.checkCardsInView(), 1);
+    if (dispatched > 0) {
+      this.processCardsToLoad();
+    }
   }
 
   // This is called after a card has loaded - we call the scroll handler again

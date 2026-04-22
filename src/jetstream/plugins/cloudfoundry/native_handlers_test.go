@@ -38,6 +38,10 @@ func (m *mockNativeCFProxy) GetSessionStringValue(_ echo.Context, key string) (s
 	return "", nil
 }
 
+func (m *mockNativeCFProxy) RefreshOAuthToken(_ bool, _, _, _, _, _ string) (api.TokenRecord, error) {
+	return m.tokenRecord, nil
+}
+
 // mustParseURL parses a URL and panics on error — for test setup only.
 func mustParseURL(raw string) *url.URL {
 	u, err := url.Parse(raw)

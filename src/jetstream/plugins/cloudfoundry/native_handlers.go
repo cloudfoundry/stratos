@@ -26,6 +26,7 @@ type nativeCFProxy interface {
 	GetCNSIRecord(guid string) (api.CNSIRecord, error)
 	GetCNSITokenRecord(cnsiGUID string, userGUID string) (api.TokenRecord, bool)
 	GetSessionStringValue(ctx echo.Context, key string) (string, error)
+	RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (api.TokenRecord, error)
 }
 
 // getUserGUID extracts the logged-in user GUID from the session.
@@ -44,6 +45,12 @@ func (c *CloudFoundrySpecification) nativeProxy() nativeCFProxy {
 
 // newCapiClient creates a capi client authenticated with Jetstream's stored token.
 // Uses cfclient.NewWithToken so no UAA discovery occurs — the token is passed directly.
+//
+// Proactively refreshes the stored token if it has expired before handing it
+// to capi. Without this check, cfclient sends a dead token and CF returns
+// CF-InvalidAuthToken (502 to the caller) — the legacy proxy path
+// (oauth_requests.go OAuthHandlerFunc) handles this via both proactive expiry
+// and reactive 401, but native handlers bypass that wrapper entirely.
 func newCapiClient(ctx context.Context, proxy nativeCFProxy, cnsiGUID, userGUID string) (capi.Client, error) {
 	cnsiRecord, err := proxy.GetCNSIRecord(cnsiGUID)
 	if err != nil {
@@ -52,6 +59,21 @@ func newCapiClient(ctx context.Context, proxy nativeCFProxy, cnsiGUID, userGUID 
 	tokenRecord, ok := proxy.GetCNSITokenRecord(cnsiGUID, userGUID)
 	if !ok {
 		return nil, echo.NewHTTPError(http.StatusForbidden, "no token for endpoint")
+	}
+	if tokenRecord.TokenExpiry > 0 && time.Unix(tokenRecord.TokenExpiry, 0).Before(time.Now()) {
+		log.Infof("[diag refresh] newCapiClient proactive refresh cnsi=%s user=%s expiry=%d (age=%s)",
+			cnsiGUID, userGUID, tokenRecord.TokenExpiry, time.Since(time.Unix(tokenRecord.TokenExpiry, 0)))
+		refreshed, refreshErr := proxy.RefreshOAuthToken(
+			cnsiRecord.SkipSSLValidation,
+			cnsiGUID, userGUID,
+			cnsiRecord.ClientId, cnsiRecord.ClientSecret, cnsiRecord.TokenEndpoint,
+		)
+		if refreshErr != nil {
+			log.Warnf("[diag refresh] CF token refresh FAILED for cnsi=%s user=%s: %v", cnsiGUID, userGUID, refreshErr)
+			return nil, echo.NewHTTPError(http.StatusBadGateway, "token refresh failed: "+refreshErr.Error())
+		}
+		log.Infof("[diag refresh] OK cnsi=%s user=%s new_expiry=%d", cnsiGUID, userGUID, refreshed.TokenExpiry)
+		tokenRecord = refreshed
 	}
 	client, err := cfclient.NewWithToken(ctx, cnsiRecord.APIEndpoint.String(), tokenRecord.AuthToken)
 	if err != nil {
