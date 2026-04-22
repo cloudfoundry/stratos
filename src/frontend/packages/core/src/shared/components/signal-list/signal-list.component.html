@@ -45,7 +45,7 @@
           (click)="toggleSortDirection()"
           [title]="config.sort!().direction === 'asc' ? 'Ascending' : 'Descending'"
           class="px-2 py-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700">
-          <span class="material-icons text-base leading-5">{{ config.sort!().direction === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>
+          <span class="material-icons text-base leading-5" [class.rotate-180]="config.sort!().direction === 'desc'">sort</span>
         </button>
       </div>
     }

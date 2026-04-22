@@ -36,6 +36,13 @@ export class ViewPipeline<T> {
         if (av == null && bv == null) return 0;
         if (av == null) return 1;
         if (bv == null) return -1;
+        // Prefer numeric comparison when both sides are numbers — prevents
+        // accidental string coercion when, e.g., a number column gets a
+        // stringified value from a legacy backend path. Fall back to the
+        // generic `<` / `>` operators for string / date / other types.
+        if (typeof av === 'number' && typeof bv === 'number') {
+          return (av - bv) * sign;
+        }
         return av < bv ? -1 * sign : av > bv ? 1 * sign : 0;
       });
     });

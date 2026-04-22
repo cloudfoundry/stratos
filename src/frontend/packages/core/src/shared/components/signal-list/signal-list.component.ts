@@ -82,19 +82,23 @@ export class SignalListComponent<T> implements AfterViewInit {
 
   protected readonly Math = Math;
 
-  // True when the scroll body's content exceeds its viewport height.
-  // Used to gate the bottom scroll-fade indicator so it's only shown
-  // when scrolling would actually reveal more rows.
+  // True when there is MORE content below the current scroll position —
+  // i.e. the body overflows AND the user hasn't scrolled to the bottom
+  // yet. Used to gate the bottom scroll-fade indicator so it shows only
+  // when scrolling would actually reveal more rows. Hides when the user
+  // has reached the bottom of the list.
   readonly hasOverflow = signal(false);
 
   private resizeObserver?: ResizeObserver;
   private mutationObserver?: MutationObserver;
+  private onScroll = () => this.measureOverflow();
 
   constructor() {
     const destroyRef = inject(DestroyRef);
     destroyRef.onDestroy(() => {
       this.resizeObserver?.disconnect();
       this.mutationObserver?.disconnect();
+      this.scrollBody?.nativeElement.removeEventListener('scroll', this.onScroll);
     });
   }
 
@@ -116,6 +120,10 @@ export class SignalListComponent<T> implements AfterViewInit {
       this.mutationObserver = new MutationObserver(() => this.measureOverflow());
       this.mutationObserver.observe(el, { childList: true, subtree: true });
     }
+
+    // Scroll position also matters: the fade should disappear when the
+    // user reaches the bottom of the list.
+    el.addEventListener('scroll', this.onScroll, { passive: true });
   }
 
   private measureOverflow(): void {
@@ -124,7 +132,9 @@ export class SignalListComponent<T> implements AfterViewInit {
       this.hasOverflow.set(false);
       return;
     }
-    this.hasOverflow.set(el.scrollHeight > el.clientHeight + 1);
+    const overflowing = el.scrollHeight > el.clientHeight + 1;
+    const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
+    this.hasOverflow.set(overflowing && !atBottom);
   }
 
   trackByRow = (_: number, row: T) => this.config.getRowKey(row);
