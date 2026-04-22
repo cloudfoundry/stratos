@@ -12,10 +12,14 @@ export interface SignalListConfig<T> {
   readonly totalPages: Signal<number>;
   readonly pageIndex: WritableSignal<number>;
   readonly pageSize: WritableSignal<number>;
+  readonly pageSizeOptions?: readonly number[];
   readonly isAnyLoading: Signal<boolean>;
   readonly errorsByCnsi: Signal<Map<string, unknown>>;
   readonly columns: SignalListColumn<T>[];
   readonly getRowKey: (row: T) => string;
+  readonly emptyMessage?: string;
+  readonly nameFilter?: WritableSignal<string>;
+  readonly onRefresh?: () => void | Promise<void>;
 }
 
 @Component({
@@ -28,5 +32,27 @@ export interface SignalListConfig<T> {
 export class SignalListComponent<T> {
   @Input({ required: true }) config!: SignalListConfig<T>;
 
+  protected readonly Math = Math;
+
   trackByRow = (_: number, row: T) => this.config.getRowKey(row);
+
+  pageSizeOptions(): readonly number[] {
+    return this.config.pageSizeOptions ?? [5, 20, 50, 80];
+  }
+
+  rangeText(): string {
+    const total = this.config.totalFilteredResults();
+    if (total === 0) return '0 of 0';
+    const size = this.config.pageSize();
+    const start = this.config.pageIndex() * size + 1;
+    const end = Math.min(start + size - 1, total);
+    return `${start} – ${end} of ${total}`;
+  }
+
+  onPageSizeChange(value: string): void {
+    const n = parseInt(value, 10);
+    if (!Number.isFinite(n) || n <= 0) return;
+    this.config.pageSize.set(n);
+    this.config.pageIndex.set(0);
+  }
 }

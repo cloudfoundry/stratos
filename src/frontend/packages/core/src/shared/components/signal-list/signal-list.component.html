@@ -1,53 +1,124 @@
 <div class="flex flex-col h-[calc(100vh-11rem)] border border-content-border rounded bg-content-bg">
+
+  <!-- Toolbar -->
+  <div class="flex items-center gap-3 px-4 py-2 border-b border-content-border flex-wrap">
+    <!-- Filter placeholder (unwired for now — visual parity with legacy) -->
+    <div class="flex-1"></div>
+
+    @if (config.nameFilter) {
+      <input
+        type="text"
+        placeholder="Filter by Name"
+        [value]="config.nameFilter()"
+        (input)="config.nameFilter!.set($any($event.target).value)"
+        class="px-3 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text" />
+    }
+
+    @if (config.onRefresh) {
+      <button
+        type="button"
+        (click)="config.onRefresh!()"
+        title="Refresh"
+        class="px-2 py-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700">
+        <span class="material-icons text-base leading-5">refresh</span>
+      </button>
+    }
+  </div>
+
   <!-- Loading / error banners -->
   @if (config.isAnyLoading()) {
-    <div data-test="loading" class="px-4 py-2 text-sm text-content-muted border-b border-content-border">Loading…</div>
+    <div data-test="loading" class="px-4 py-1 text-sm text-content-muted border-b border-content-border">Loading…</div>
   }
   @if (config.errorsByCnsi().size > 0) {
-    <div data-test="errors" class="px-4 py-2 text-sm text-danger-shade-700 bg-danger-shade-50 border-b border-content-border">
+    <div data-test="errors" class="px-4 py-1 text-sm text-danger-shade-700 bg-danger-shade-50 border-b border-content-border">
       @for (entry of config.errorsByCnsi() | keyvalue; track entry.key) {
         <div>{{ entry.key }}: failed to load</div>
       }
     </div>
   }
 
-  <!-- Scrollable table region -->
+  <!-- Body: empty state or table -->
   <div class="flex-1 overflow-auto">
-    <table class="min-w-full border-collapse">
-      <thead class="sticky top-0 bg-gray-100 dark:bg-gray-800 z-10 border-b border-content-border">
-        <tr>
-          @for (col of config.columns; track col.header) {
-            <th class="text-left px-3 py-2 font-semibold text-sm text-content-text">{{ col.header }}</th>
-          }
-        </tr>
-      </thead>
-      <tbody>
-        @for (row of config.pagedItems(); track trackByRow($index, row)) {
-          <tr data-test="row" class="border-b border-content-border hover:bg-gray-50 dark:hover:bg-gray-900">
+    @if (config.totalFilteredResults() === 0) {
+      <div data-test="empty" class="flex flex-col items-center justify-center h-full gap-3 text-content-muted">
+        <span class="material-icons text-6xl opacity-30">apps</span>
+        <span class="text-base">{{ config.emptyMessage ?? 'There are no items' }}</span>
+      </div>
+    } @else {
+      <table class="min-w-full border-collapse">
+        <thead class="sticky top-0 bg-gray-100 dark:bg-gray-800 z-10 border-b border-content-border">
+          <tr>
             @for (col of config.columns; track col.header) {
-              <td class="px-3 py-2 text-sm text-content-text">{{ col.render(row) }}</td>
+              <th class="text-left px-3 py-2 font-semibold text-sm text-content-text">{{ col.header }}</th>
             }
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (row of config.pagedItems(); track trackByRow($index, row)) {
+            <tr data-test="row" class="border-b border-content-border hover:bg-gray-50 dark:hover:bg-gray-900">
+              @for (col of config.columns; track col.header) {
+                <td class="px-3 py-2 text-sm text-content-text">{{ col.render(row) }}</td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
   </div>
 
-  <!-- Sticky pagination bar -->
-  <div class="flex items-center justify-between px-4 py-2 border-t border-content-border bg-content-bg text-sm">
-    <span class="text-content-muted">{{ config.totalFilteredResults() }} result(s)</span>
-    <div class="flex items-center gap-2">
+  <!-- Pagination bar -->
+  <div class="flex items-center justify-between gap-3 px-4 py-2 border-t border-content-border bg-content-bg text-sm flex-wrap">
+
+    <!-- Items per page -->
+    <div class="flex items-center gap-2 text-content-muted">
+      <span>Items per page:</span>
+      <select
+        [value]="config.pageSize()"
+        (change)="onPageSizeChange($any($event.target).value)"
+        class="px-2 py-1 border border-content-border rounded bg-content-bg text-content-text">
+        @for (opt of pageSizeOptions(); track opt) {
+          <option [value]="opt">{{ opt }}</option>
+        }
+      </select>
+    </div>
+
+    <!-- Range counter -->
+    <span class="text-content-muted">{{ rangeText() }}</span>
+
+    <!-- First / prev / next / last -->
+    <div class="flex items-center gap-1">
       <button
         type="button"
-        class="px-3 py-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+        class="p-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
         [disabled]="config.pageIndex() === 0"
-        (click)="config.pageIndex.set(config.pageIndex() - 1)">Prev</button>
-      <span class="text-content-muted">{{ config.pageIndex() + 1 }} / {{ config.totalPages() }}</span>
+        (click)="config.pageIndex.set(0)"
+        title="First page">
+        <span class="material-icons text-base leading-5">first_page</span>
+      </button>
       <button
         type="button"
-        class="px-3 py-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
-        [disabled]="config.pageIndex() + 1 >= config.totalPages()"
-        (click)="config.pageIndex.set(config.pageIndex() + 1)">Next</button>
+        class="p-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+        [disabled]="config.pageIndex() === 0"
+        (click)="config.pageIndex.set(config.pageIndex() - 1)"
+        title="Previous page">
+        <span class="material-icons text-base leading-5">chevron_left</span>
+      </button>
+      <button
+        type="button"
+        class="p-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+        [disabled]="config.pageIndex() + 1 >= Math.max(1, config.totalPages())"
+        (click)="config.pageIndex.set(config.pageIndex() + 1)"
+        title="Next page">
+        <span class="material-icons text-base leading-5">chevron_right</span>
+      </button>
+      <button
+        type="button"
+        class="p-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+        [disabled]="config.pageIndex() + 1 >= Math.max(1, config.totalPages())"
+        (click)="config.pageIndex.set(Math.max(0, config.totalPages() - 1))"
+        title="Last page">
+        <span class="material-icons text-base leading-5">last_page</span>
+      </button>
     </div>
   </div>
 </div>
