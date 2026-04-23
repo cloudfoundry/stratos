@@ -152,6 +152,59 @@ describe('CfAppsSignalConfigService', () => {
     expect(svc.selectedCnsi()).toBe('cf-1');
   });
 
+  it('lists orgs from the per-CF catalog even when they contain zero loaded apps', async () => {
+    // Regression (dev.58 smoke test): the user filtered apps by org=e2e,
+    // deleted the only app in e2e, and returned to the app-wall. orgOptions
+    // was derived from the loaded apps list, so e2e dropped out of the
+    // dropdown, the stale-selection effect cleared selectedOrg to null, and
+    // the filter defaulted back to All. Fix: orgOptions now reads from the
+    // per-CF /pp/v1/cf/orgs catalog so the org is listed as long as it
+    // exists in the CF — the resulting empty app list is the visual cue.
+    const httpMock = {
+      get: vi.fn((url: string) => {
+        if (url === '/pp/v1/cf/orgs/cnsi-1') {
+          return of({
+            resources: [
+              { guid: 'org-1', name: 'system', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '', cnsiGuid: 'cnsi-1' },
+              { guid: 'org-e2e', name: 'e2e', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '', cnsiGuid: 'cnsi-1' },
+            ],
+          });
+        }
+        if (url === '/pp/v1/cf/spaces/cnsi-1') {
+          return of({
+            resources: [
+              { guid: 'space-e2e', name: 'e2e', orgGuid: 'org-e2e', createdAt: '', updatedAt: '', cnsiGuid: 'cnsi-1' },
+              { guid: 'space-sys', name: 'system', orgGuid: 'org-1', createdAt: '', updatedAt: '', cnsiGuid: 'cnsi-1' },
+            ],
+          });
+        }
+        return of({
+          resources: [],
+          pagination: { totalResults: 0, totalPages: 1, next: null, previous: null, first: { href: '' }, last: { href: '' } },
+        });
+      }),
+    } as unknown as HttpClient;
+    const cf = makeStubCfService([{ guid: 'cnsi-1', name: 'Primary CF' }]);
+    const svc = makeSvc(httpMock, cf);
+    svc.initialize(['cnsi-1']);
+    await svc.loadAll();
+    await Promise.resolve();
+    await Promise.resolve();
+    TestBed.tick();
+
+    const orgLabels = svc.orgOptions().map(o => o.label);
+    expect(orgLabels).toContain('system');
+    expect(orgLabels).toContain('e2e');
+
+    // Setting the selection to a zero-app org must survive the stale-
+    // selection effect.
+    svc.selectedCnsi.set('cnsi-1');
+    svc.selectedOrg.set('org-e2e');
+    TestBed.tick();
+    expect(svc.selectedOrg()).toBe('org-e2e');
+    expect(svc.spaceOptions().map(o => o.label)).toContain('e2e');
+  });
+
   it('preserves a valid selection across navigation (re-initialize)', async () => {
     // Regression: the singleton service's _hasLoadedOnce was latching true
     // forever after the first load. On re-navigation, a fresh initialize()
