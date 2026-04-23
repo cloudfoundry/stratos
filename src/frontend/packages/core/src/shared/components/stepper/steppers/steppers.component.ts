@@ -120,6 +120,12 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   private filterSteps() {
     this.steps = this.allSteps.filter((step => !step.hidden));
+    // Under zoneless CD, reassigning this.steps doesn't mark the view
+    // dirty. Without markForCheck the template keeps rendering the step
+    // list as it was at ngAfterContentInit, so steps whose [hidden]
+    // later flips to false (e.g. Routes once fetch resolves) never
+    // appear in the stepper bar.
+    this.cdr.markForCheck();
   }
 
   goNext(): void {
