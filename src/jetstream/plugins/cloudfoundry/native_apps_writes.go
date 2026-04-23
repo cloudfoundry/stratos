@@ -138,8 +138,17 @@ func (c *CloudFoundrySpecification) appAction(ctx echo.Context) error {
 	if actionErr != nil {
 		return handleCapiError(ctx, actionErr)
 	}
-	if job == nil || job.GUID == "" {
-		return echo.NewHTTPError(http.StatusBadGateway, fmt.Sprintf("app %s: no job id returned from CF", action))
+	// Sync-complete path: older CF (< ~3.200) returns 200 + App body
+	// with no Location header, so the fork returns (nil, nil). The
+	// action is already done — return a terminal COMPLETE envelope.
+	if job == nil {
+		ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+		return ctx.JSON(http.StatusOK, map[string]interface{}{
+			"state": stratosjobs.JobStateComplete,
+		})
+	}
+	if job.GUID == "" {
+		return echo.NewHTTPError(http.StatusBadGateway, fmt.Sprintf("app %s: malformed job id from CF", action))
 	}
 
 	if c.asyncTracker == nil || c.asyncTranslator == nil {
@@ -218,8 +227,16 @@ func (c *CloudFoundrySpecification) scaleApp(ctx echo.Context) error {
 	if scaleErr != nil {
 		return handleCapiError(ctx, scaleErr)
 	}
-	if job == nil || job.GUID == "" {
-		return echo.NewHTTPError(http.StatusBadGateway, "scale: no job id returned from CF")
+	// Sync-complete path: older CF returns 200 + Process body with no
+	// Location header, so the fork returns (nil, nil).
+	if job == nil {
+		ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+		return ctx.JSON(http.StatusOK, map[string]interface{}{
+			"state": stratosjobs.JobStateComplete,
+		})
+	}
+	if job.GUID == "" {
+		return echo.NewHTTPError(http.StatusBadGateway, "scale: malformed job id from CF")
 	}
 
 	if c.asyncTracker == nil || c.asyncTranslator == nil {
