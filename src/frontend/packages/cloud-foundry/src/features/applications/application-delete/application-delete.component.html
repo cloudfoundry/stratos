@@ -11,21 +11,29 @@
     <app-step title="Routes" [hidden]="!routesLoaded() || appRoutes().length === 0">
       <div class="app-delete__monitors">
         <p>Please select any attached application routes you would like to delete.</p>
-        <app-routes-picker
-          class="app-delete__step-table"
-          [routes]="appRoutes()"
-          (selectedChange)="setSelectedRoutes($event)">
-        </app-routes-picker>
+        <div class="mt-3 rounded border border-content-border p-4">
+          <h2 class="text-xl font-semibold text-content-text m-0">{{ (appName$ | async) || 'Application' }}</h2>
+          <h3 class="text-sm font-medium text-content-muted mt-2 mb-1 uppercase tracking-wide">Routes</h3>
+          <app-routes-picker
+            class="app-delete__step-table"
+            [routes]="appRoutes()"
+            (selectedChange)="setSelectedRoutes($event)">
+          </app-routes-picker>
+        </div>
       </div>
     </app-step>
     <app-step title="Service Instances" [hidden]="!bindingsLoaded() || appBindings().length === 0">
       <div class="app-delete__monitors">
         <p>Please select any attached application service instances you would like to unbind.</p>
-        <app-service-bindings-picker
-          class="app-delete__step-table"
-          [bindings]="appBindings()"
-          (selectedChange)="setSelectedServiceBindings($event)">
-        </app-service-bindings-picker>
+        <div class="mt-3 rounded border border-content-border p-4">
+          <h2 class="text-xl font-semibold text-content-text m-0">{{ (appName$ | async) || 'Application' }}</h2>
+          <h3 class="text-sm font-medium text-content-muted mt-2 mb-1 uppercase tracking-wide">Service Instances</h3>
+          <app-service-bindings-picker
+            class="app-delete__step-table"
+            [bindings]="appBindings()"
+            (selectedChange)="setSelectedServiceBindings($event)">
+          </app-service-bindings-picker>
+        </div>
       </div>
     </app-step>
     <app-step title="Confirm" class="app-delete__monitors" [canClose]="!deleteStarted"
@@ -37,28 +45,30 @@
             >
           and related entities</span>
         }:</p>
-        <h3>{{ (appName$ | async) || 'Application' }}</h3>
-        @if (selectedRoutes && selectedRoutes.length) {
-          <h3>Routes</h3>
-          <ul class="app-delete__monitors">
-            @for (route of selectedRoutes; track route.guid) {
-              <li data-test="confirm-route">{{ route.url }}</li>
-            }
-          </ul>
-        }
-        @if (selectedServiceBindings && selectedServiceBindings.length) {
-          <h3>Services</h3>
-          <ul class="app-delete__monitors">
-            @for (binding of selectedServiceBindings; track binding.guid) {
-              <li data-test="confirm-binding">
-                {{ binding.serviceInstanceName }}
-                @if (binding.serviceInstanceType) {
-                  <span class="text-content-muted"> ({{ binding.serviceInstanceType }})</span>
-                }
-              </li>
-            }
-          </ul>
-        }
+        <div class="mt-3 rounded border border-content-border p-4">
+          <h2 class="text-xl font-semibold text-content-text m-0">{{ (appName$ | async) || 'Application' }}</h2>
+          @if (selectedRoutes && selectedRoutes.length) {
+            <h3 class="text-sm font-medium text-content-muted mt-3 mb-1 uppercase tracking-wide">Routes</h3>
+            <ul class="list-disc list-inside m-0">
+              @for (route of selectedRoutes; track route.guid) {
+                <li data-test="confirm-route">{{ route.url }}</li>
+              }
+            </ul>
+          }
+          @if (selectedServiceBindings && selectedServiceBindings.length) {
+            <h3 class="text-sm font-medium text-content-muted mt-3 mb-1 uppercase tracking-wide">Service Instances</h3>
+            <ul class="list-disc list-inside m-0">
+              @for (binding of selectedServiceBindings; track binding.guid) {
+                <li data-test="confirm-binding">
+                  {{ binding.serviceInstanceName }}
+                  @if (binding.serviceInstanceType) {
+                    <span class="text-content-muted"> ({{ binding.serviceInstanceType }})</span>
+                  }
+                </li>
+              }
+            </ul>
+          }
+        </div>
       </div>
     </app-step>
   </app-steppers>
