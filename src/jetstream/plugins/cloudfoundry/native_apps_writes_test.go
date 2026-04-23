@@ -15,9 +15,10 @@ import (
 )
 
 // TestDeleteNativeApp_Forwards_v3_Apps_Delete verifies the handler issues a
-// DELETE to /v3/apps/{guid} against the target CF foundation and surfaces a
-// successful async-delete response as 202 Accepted to the Stratos-shape
-// caller (matching what CF v3 returns natively).
+// DELETE to /v3/apps/{guid} against the target CF foundation. Without the
+// stratosjobs wiring (asyncTracker/asyncTranslator left nil on the test
+// plugin), the handler falls back to bare-202 behavior — the async-job
+// contract paths are covered by the fast-path / handoff tests below.
 func TestDeleteNativeApp_Forwards_v3_Apps_Delete(t *testing.T) {
 	capiCalls := 0
 	capiServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

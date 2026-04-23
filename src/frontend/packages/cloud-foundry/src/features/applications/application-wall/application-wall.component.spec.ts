@@ -34,6 +34,7 @@ function makeStubSignalConfigService() {
     loadAll: vi.fn().mockResolvedValue(undefined),
     refresh: vi.fn().mockResolvedValue(undefined),
     deleteApp: vi.fn().mockResolvedValue(undefined),
+    registerSortExtractor: vi.fn(),
     filter: filterSig,
     sort: sortSig,
     pageSize,

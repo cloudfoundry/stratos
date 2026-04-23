@@ -1,12 +1,18 @@
 import { firstValueFrom } from 'rxjs';
 import { CnsiEntitySource } from './cnsi-entity-source';
 import type { StApp } from '../endpoint-data/stratos-types';
+import { writeWithJob } from '../async-jobs/write-with-job';
 
 export class CnsiAppsSource extends CnsiEntitySource<StApp> {
   protected readonly entityName = 'apps';
 
   async delete(appGuid: string): Promise<void> {
-    await firstValueFrom(this.http.delete(`/pp/v1/cf/apps/${this.cnsiGuid}/${appGuid}`));
+    // Route through writeWithJob so the Promise only resolves once CF's
+    // async delete job is terminal (COMPLETE or, via thrown error, FAILED).
+    // Callers that refresh the orchestrator immediately see a consistent
+    // post-delete state instead of racing the CF v3 job.
+    const call = this.http.delete(`/pp/v1/cf/apps/${this.cnsiGuid}/${appGuid}`, { observe: 'response' });
+    await writeWithJob(this.http, call);
     this.patchItems(items => items.filter(a => (a as { guid?: string }).guid !== appGuid));
   }
 

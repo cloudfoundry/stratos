@@ -1,13 +1,16 @@
 import { describe, it, expect, vi } from 'vitest';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { of } from 'rxjs';
 import { CnsiAppsSource } from './cnsi-apps-source';
 import type { StApp } from '../endpoint-data/stratos-types';
 
+// delete goes through writeWithJob which uses { observe: 'response' },
+// so the mock needs to return an HttpResponse-shaped body. Default: an
+// empty-body 200 which writeWithJob treats as sync-fast COMPLETE.
 function makeHttp(getResp: unknown, deleteResp: unknown = null): HttpClient {
   return {
     get: vi.fn(() => of(getResp)),
-    delete: vi.fn(() => of(deleteResp)),
+    delete: vi.fn(() => of(new HttpResponse({ status: 200, body: deleteResp }))),
   } as unknown as HttpClient;
 }
 
@@ -33,7 +36,7 @@ describe('CnsiAppsSource', () => {
     const src = new CnsiAppsSource('cnsi-1', http);
     await src.load();
     await src.delete('a');
-    expect(http.delete).toHaveBeenCalledWith('/pp/v1/cf/apps/cnsi-1/a');
+    expect(http.delete).toHaveBeenCalledWith('/pp/v1/cf/apps/cnsi-1/a', { observe: 'response' });
     expect(src.items().map(i => (i as { guid?: string }).guid)).toEqual(['b']);
   });
 

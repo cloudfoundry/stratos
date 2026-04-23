@@ -11,6 +11,7 @@ import (
 	"errors"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
@@ -27,6 +28,14 @@ type CloudFoundrySpecification struct {
 	// testProxy overrides portalProxy for unit tests of native handlers.
 	// Production code always leaves this nil.
 	testProxy nativeCFProxy
+
+	// asyncTracker + asyncTranslator wire this plugin into the stratosjobs
+	// contract. Populated at Init() by looking up the stratosjobs plugin
+	// through the portal proxy. Nil during plugin boot and in tests that
+	// don't install them — deleteNativeApp falls back to pre-contract
+	// behavior (bare 202) when either is nil.
+	asyncTracker    stratosjobs.Tracker
+	asyncTranslator stratosjobs.JobTranslator
 }
 
 const (
@@ -161,6 +170,21 @@ func (c *CloudFoundrySpecification) confirmCapabilityMetadata(cnsiRecord api.CNS
 func (c *CloudFoundrySpecification) Init() error {
 	// Add login hook to automatically register and connect to the Cloud Foundry when the user logs in
 	c.portalProxy.AddLoginHook(0, c.cfLoginHook)
+
+	// Wire into the stratosjobs contract. Plugin load order isn't
+	// guaranteed — if stratosjobs didn't register yet we log + skip, and
+	// deleteNativeApp falls back to bare 202.
+	if plug := c.portalProxy.GetPlugin(stratosjobs.PluginName); plug != nil {
+		if jobsPlugin, ok := plug.(*stratosjobs.StratosJobs); ok {
+			c.asyncTracker = jobsPlugin.Tracker()
+			c.asyncTranslator = NewCFJobTranslator(c)
+		} else {
+			log.Warnf("CF plugin: %q found but has unexpected type %T; async-job contract disabled for CF writes", stratosjobs.PluginName, plug)
+		}
+	} else {
+		log.Warnf("CF plugin: stratosjobs plugin not registered; async-job contract disabled for CF writes")
+	}
+
 	return nil
 }
 

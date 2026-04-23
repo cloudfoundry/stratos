@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/labstack/echo/v4"
 )
@@ -25,10 +26,12 @@ var allowedAppActions = map[string]bool{
 // deleteNativeApp handles DELETE /pp/v1/cf/apps/{cnsiGuid}/{appGuid} —
 // the Stratos-shape write wrapper around CF v3 /v3/apps/{guid}.
 //
-// The capi client's Apps().Delete returns nil on 2xx (CF returns 202 Accepted
-// for async delete; the capi wrapper discards the Location header) and a
-// classified sentinel error on non-2xx. We map the success case to 202 and
-// classify the error via handleCapiError on failure.
+// CF v3 returns 202 Accepted with a Location header pointing at
+// /v3/jobs/{guid}. We hand that job to the stratosjobs fast-path wrapper:
+// if the job resolves inside the fast-path window we return 200 with a
+// terminal StratosJob body; otherwise we register the job in the tracker
+// and return 202 with {id, state, startedAt} so the frontend can poll
+// /pp/v1/stratos/jobs/{id}.
 func (c *CloudFoundrySpecification) deleteNativeApp(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	appGUID := ctx.Param("appGuid")
@@ -41,18 +44,55 @@ func (c *CloudFoundrySpecification) deleteNativeApp(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
 	}
 
-	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	reqCtx := ctx.Request().Context()
+	cfClient, err := newCapiClient(reqCtx, c.nativeProxy(), cnsiGUID, userGUID)
 	if err != nil {
 		return err
 	}
 
-	if deleteErr := cfClient.Apps().Delete(ctx.Request().Context(), appGUID); deleteErr != nil {
+	job, deleteErr := cfClient.Apps().Delete(reqCtx, appGUID)
+	if deleteErr != nil {
 		return handleCapiError(ctx, deleteErr)
 	}
+	if job == nil || job.GUID == "" {
+		// Shouldn't happen with the corrected capi.AppsClient.Delete, but
+		// guard so a bad capi version can't silently strand the UI.
+		return echo.NewHTTPError(http.StatusBadGateway, "app delete: no job id returned from CF")
+	}
+
+	// If async-jobs wiring is unavailable (plugin registered out of order,
+	// or test-harness missing it) fall back to the pre-contract behavior:
+	// return 202 without tracking. Frontend's 404-on-poll rule handles the
+	// resulting "unknown" status gracefully.
+	if c.asyncTracker == nil || c.asyncTranslator == nil {
+		ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+		ctx.Response().WriteHeader(http.StatusAccepted)
+		return nil
+	}
+
+	ref := CFJobRef{CnsiGUID: cnsiGUID, UserGUID: userGUID, JobGUID: job.GUID}
+	res := stratosjobs.RunFastPath(reqCtx, c.asyncTracker, c.asyncTranslator, ref, stratosjobs.FastPathOptions{
+		Kind: "cf.app.delete",
+	})
 
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
-	ctx.Response().WriteHeader(http.StatusAccepted)
-	return nil
+	if res.Resolved {
+		// Terminal within window. 200 on COMPLETE, 502 on FAILED (the CF job
+		// failed server-side — 502 signals "upstream refused"; body carries
+		// the CF error envelope).
+		if res.State == stratosjobs.JobStateFailed {
+			return ctx.JSON(http.StatusBadGateway, map[string]interface{}{
+				"state":  res.State,
+				"errors": res.Errors,
+			})
+		}
+		return ctx.JSON(http.StatusOK, map[string]interface{}{
+			"state":  res.State,
+			"result": res.Result,
+		})
+	}
+	// Handoff path — tracker registered; frontend polls.
+	return ctx.JSON(http.StatusAccepted, res.HandoffJob)
 }
 
 // appAction handles POST /pp/v1/cf/apps/{cnsiGuid}/{appGuid}/actions/{action}

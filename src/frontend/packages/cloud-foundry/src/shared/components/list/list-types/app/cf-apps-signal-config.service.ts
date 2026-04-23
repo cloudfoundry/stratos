@@ -8,6 +8,7 @@ import { MergeOrchestrator } from '../../../../../services/data-sources/merge-or
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
 import type { StApp, StOrgsResponse, StSpacesResponse } from '../../../../../services/endpoint-data/stratos-types';
 import { CloudFoundryService } from '../../../../data-services/cloud-foundry.service';
+import { writeWithJob } from '../../../../../services/async-jobs/write-with-job';
 import type { SignalListDropdownOption, SignalListViewMode } from '@stratosui/core';
 
 @Injectable({ providedIn: 'root' })
@@ -214,21 +215,21 @@ export class CfAppsSignalConfigService {
   }
 
   async deleteApp(cnsiGuid: string, appGuid: string): Promise<void> {
-    // If the user lands on the delete dialog without first visiting the
-    // app-wall in this session, the orchestrator hasn't been built yet.
-    // Fall back to a direct DELETE so the write still fires — the wall
-    // will refetch from scratch the next time it's opened. Also
-    // safeguards against HMR replacing the root service between visits.
+    // Orchestrator-undefined fallback (cold bookmark / HMR): no source to
+    // update, but we still need to issue the delete and wait for CF's
+    // async job to terminate before the caller refreshes.
     if (!this.orchestrator) {
-      await firstValueFrom(this.http.delete(`/pp/v1/cf/apps/${cnsiGuid}/${appGuid}`));
+      const call = this.http.delete(`/pp/v1/cf/apps/${cnsiGuid}/${appGuid}`, { observe: 'response' });
+      await writeWithJob(this.http, call);
       return;
     }
     const src = this.orchestrator.sourceFor(cnsiGuid) as CnsiAppsSource | undefined;
     if (!src) {
-      // Known cnsi but no source wired — same fallback as above.
-      await firstValueFrom(this.http.delete(`/pp/v1/cf/apps/${cnsiGuid}/${appGuid}`));
+      const call = this.http.delete(`/pp/v1/cf/apps/${cnsiGuid}/${appGuid}`, { observe: 'response' });
+      await writeWithJob(this.http, call);
       return;
     }
+    // Source-aware path: waits for terminal state and updates local cache.
     await src.delete(appGuid);
   }
 }

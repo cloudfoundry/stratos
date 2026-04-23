@@ -39,6 +39,7 @@ require (
 	github.com/fivetwenty-io/capi/v3 v3.216.3
 	github.com/go-sql-driver/mysql v1.9.2
 	github.com/golang/mock v1.6.0
+	github.com/google/uuid v1.6.0
 	github.com/gorilla/context v1.1.2
 	github.com/gorilla/securecookie v1.1.2
 	github.com/gorilla/sessions v1.4.0
@@ -56,6 +57,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/swaggo/echo-swagger v1.4.1
 	golang.org/x/crypto v0.49.0
+	golang.org/x/sync v0.20.0
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/client-go v0.35.3
@@ -139,7 +141,6 @@ require (
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/go-querystring v1.2.0 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/gosuri/uitable v0.0.4 // indirect
@@ -231,7 +232,6 @@ require (
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/net v0.52.0 // indirect
 	golang.org/x/oauth2 v0.34.0 // indirect
-	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.42.0 // indirect
 	golang.org/x/term v0.41.0 // indirect
 	golang.org/x/text v0.35.0 // indirect
@@ -266,3 +266,12 @@ require (
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.0 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
+
+// Temporary fork reference — stratos needs a patched AppsClient.Delete
+// that returns (*Job, error) so consumers can poll CF v3's async job.
+// The /v3 path suffix plus the v3.216.4-fix-apps-delete.1 tag lets Go's
+// module resolver accept the fork as a v3 replacement; Go falls back to
+// the fork's go.mod declaration (which still says fivetwenty-io/capi/v3)
+// during resolution. Retire this once the fix lands upstream in
+// fivetwenty-io/capi and a tagged release is cut.
+replace github.com/fivetwenty-io/capi/v3 => github.com/norman-abramovitz/fw-capi/v3 v3.216.4-fix-apps-delete.1
