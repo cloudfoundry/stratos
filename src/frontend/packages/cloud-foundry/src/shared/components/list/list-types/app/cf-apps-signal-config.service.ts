@@ -6,7 +6,7 @@ import type { EndpointModel } from '@stratosui/store';
 import { CnsiAppsSource } from '../../../../../services/data-sources/cnsi-apps-source';
 import { MergeOrchestrator } from '../../../../../services/data-sources/merge-orchestrator';
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
-import type { StApp, StOrgsResponse, StSpacesResponse } from '../../../../../services/endpoint-data/stratos-types';
+import type { StApp, StAppRoutesResponse, StAppServiceBindingsResponse, StOrgsResponse, StRoute, StServiceBinding, StSpacesResponse } from '../../../../../services/endpoint-data/stratos-types';
 import { CloudFoundryService } from '../../../../data-services/cloud-foundry.service';
 import { writeWithJob } from '../../../../../services/async-jobs/write-with-job';
 import type { SignalListDropdownOption, SignalListViewMode } from '@stratosui/core';
@@ -248,6 +248,58 @@ export class CfAppsSignalConfigService {
       next.set(fieldKey, extractor);
       return next;
     });
+  }
+
+  // Fetches every route currently mapped to an app, via the Stratos-native
+  // backend. Used by the signal-native delete stepper route picker.
+  //
+  // One HTTP request; the backend drains pagination server-side. Returns
+  // an empty array on 404 / error rather than throwing, so the picker can
+  // render "no routes" cleanly — a missing routes endpoint shouldn't block
+  // the user from deleting the app itself. Callers that need to distinguish
+  // "zero routes" from "fetch failed" should add explicit error handling
+  // at the call site.
+  async fetchAppRoutes(cnsiGuid: string, appGuid: string): Promise<StRoute[]> {
+    const resp = await firstValueFrom(
+      this.http.get<StAppRoutesResponse>(`/pp/v1/cf/apps/${cnsiGuid}/${appGuid}/routes`),
+    ).catch((): StAppRoutesResponse | null => null);
+    return resp?.resources ?? [];
+  }
+
+  // Fetches every app-type service credential binding attached to an app,
+  // joined with the referenced service-instance names and types. Used by
+  // the signal-native delete stepper service bindings picker.
+  //
+  // Returns an empty array on 404 / error rather than throwing — a broken
+  // service-binding list shouldn't block the user from deleting the app.
+  async fetchAppServiceBindings(cnsiGuid: string, appGuid: string): Promise<StServiceBinding[]> {
+    const resp = await firstValueFrom(
+      this.http.get<StAppServiceBindingsResponse>(`/pp/v1/cf/apps/${cnsiGuid}/${appGuid}/service_bindings`),
+    ).catch((): StAppServiceBindingsResponse | null => null);
+    return resp?.resources ?? [];
+  }
+
+  // Deletes a service credential binding through the async-job contract.
+  // Managed bindings produce a 202 + polls; user-provided bindings resolve
+  // synchronously via the backend's 200+COMPLETE synthesis. writeWithJob
+  // handles both shapes uniformly.
+  async deleteServiceBinding(cnsiGuid: string, bindingGuid: string): Promise<void> {
+    const call = this.http.delete(`/pp/v1/cf/service_bindings/${cnsiGuid}/${bindingGuid}`, { observe: 'response' });
+    await writeWithJob(this.http, call);
+  }
+
+  // Deletes a CF route through the async-job contract. CF v3 returns 202 +
+  // Location header for route deletes; writeWithJob handles the resolve /
+  // poll / terminal-state dance so callers just await a promise.
+  //
+  // Used by the signal-native delete stepper when the user opts to delete
+  // attached routes alongside the app. Throws StratosJobError on FAILED
+  // terminal state — callers should either surface the error or swallow it
+  // (the route may fail to delete because the app delete already cascaded
+  // through CF's reference checks).
+  async deleteRoute(cnsiGuid: string, routeGuid: string): Promise<void> {
+    const call = this.http.delete(`/pp/v1/cf/routes/${cnsiGuid}/${routeGuid}`, { observe: 'response' });
+    await writeWithJob(this.http, call);
   }
 
   async deleteApp(cnsiGuid: string, appGuid: string): Promise<void> {

@@ -90,6 +90,49 @@ export interface StRoutesResponse {
   totalResults: number;
 }
 
+// Mirror of the backend StRoute DTO (native_types.go). `url` is the
+// CF-rendered full URL so the UI can display it directly; no need to
+// re-compose from host + domain + port. `port` is undefined for HTTP
+// routes, set for TCP.
+export interface StRoute {
+  guid: string;
+  url: string;
+  host: string;
+  path: string;
+  port?: number;
+  domainGuid: string;
+  spaceGuid: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StAppRoutesResponse {
+  resources: StRoute[];
+  totalResults: number;
+}
+
+// Mirror of backend StServiceBinding (native_types.go). Populated by the
+// two-step join in /pp/v1/cf/apps/{cnsi}/{app}/service_bindings —
+// `serviceInstanceName` and `serviceInstanceType` come from a batch fetch of
+// /v3/service_instances; they fall back to the binding's own name when the
+// name-lookup fails.
+export interface StServiceBinding {
+  guid: string;
+  name: string;
+  bindingType: string; // "app" or "key"
+  appGuid?: string;
+  serviceInstanceGuid: string;
+  serviceInstanceName: string;
+  serviceInstanceType: string; // "managed" | "user-provided"
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StAppServiceBindingsResponse {
+  resources: StServiceBinding[];
+  totalResults: number;
+}
+
 export interface StOrgDetailResponse extends StOrgDetail {}
 
 export interface StSpacesResponse {

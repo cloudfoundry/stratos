@@ -6,6 +6,8 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 )
 
 // unmapRouteFromApp handles DELETE /pp/v1/cf/routes/{cnsiGuid}/{routeGuid}/apps/{appGuid}
@@ -66,4 +68,67 @@ func (cf *CloudFoundrySpecification) unmapRouteFromApp(c echo.Context) error {
 	c.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
 	c.Response().WriteHeader(http.StatusNoContent)
 	return nil
+}
+
+// deleteNativeRoute handles DELETE /pp/v1/cf/routes/{cnsiGuid}/{routeGuid} —
+// the Stratos-shape wrapper around CF v3 /v3/routes/{guid}. Returns the
+// full route to the trash, not just the app mapping; use unmapRouteFromApp
+// to remove an app destination while keeping the route itself.
+//
+// CF v3 returns 202 + a job reference; we hand it to the stratosjobs
+// fast-path wrapper identically to deleteNativeApp: 200 on fast resolve,
+// 202 with {id, state, startedAt} when the job outlives the window.
+// Falls back to bare 202 if the async-job contract isn't wired (plugin
+// ordering / tests).
+func (cf *CloudFoundrySpecification) deleteNativeRoute(c echo.Context) error {
+	cnsiGUID := c.Param("cnsiGuid")
+	routeGUID := c.Param("routeGuid")
+	if cnsiGUID == "" || routeGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid and routeGuid are required")
+	}
+
+	userGUID, err := cf.getUserGUID(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	reqCtx := c.Request().Context()
+	cfClient, err := newCapiClient(reqCtx, cf.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	job, deleteErr := cfClient.Routes().Delete(reqCtx, routeGUID)
+	if deleteErr != nil {
+		return handleCapiError(c, deleteErr)
+	}
+	if job == nil || job.GUID == "" {
+		return echo.NewHTTPError(http.StatusBadGateway, "route delete: no job id returned from CF")
+	}
+
+	if cf.asyncTracker == nil || cf.asyncTranslator == nil {
+		c.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+		c.Response().WriteHeader(http.StatusAccepted)
+		return nil
+	}
+
+	ref := CFJobRef{CnsiGUID: cnsiGUID, UserGUID: userGUID, JobGUID: job.GUID}
+	res := stratosjobs.RunFastPath(reqCtx, cf.asyncTracker, cf.asyncTranslator, ref, stratosjobs.FastPathOptions{
+		Kind: "cf.route.delete",
+	})
+
+	c.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+	if res.Resolved {
+		if res.State == stratosjobs.JobStateFailed {
+			return c.JSON(http.StatusBadGateway, map[string]interface{}{
+				"state":  res.State,
+				"errors": res.Errors,
+			})
+		}
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"state":  res.State,
+			"result": res.Result,
+		})
+	}
+	return c.JSON(http.StatusAccepted, res.HandoffJob)
 }

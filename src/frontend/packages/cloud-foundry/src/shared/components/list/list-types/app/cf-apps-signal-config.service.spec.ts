@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { HttpClient } from '@angular/common/http';
-import { of } from 'rxjs';
+import { HttpClient, HttpResponse } from '@angular/common/http';
+import { of, throwError } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 import { CfAppsSignalConfigService } from './cf-apps-signal-config.service';
 import { CloudFoundryService } from '../../../../data-services/cloud-foundry.service';
@@ -150,6 +150,93 @@ describe('CfAppsSignalConfigService', () => {
     await svc.loadAll();
     TestBed.tick();
     expect(svc.selectedCnsi()).toBe('cf-1');
+  });
+
+  it('fetchAppRoutes hits the native routes endpoint and returns the resources array', async () => {
+    const expectedUrl = '/pp/v1/cf/apps/cnsi-1/app-1/routes';
+    const httpMock = {
+      get: vi.fn((url: string) => {
+        if (url === expectedUrl) {
+          return of({
+            resources: [
+              { guid: 'r-1', url: 'a.example.com', host: 'a', path: '', domainGuid: 'd', spaceGuid: 's', createdAt: '', updatedAt: '' },
+              { guid: 'r-2', url: 'b.example.com', host: 'b', path: '', domainGuid: 'd', spaceGuid: 's', createdAt: '', updatedAt: '' },
+            ],
+            totalResults: 2,
+          });
+        }
+        return of({ resources: [], pagination: {} });
+      }),
+    } as unknown as HttpClient;
+    const svc = makeSvc(httpMock);
+    const routes = await svc.fetchAppRoutes('cnsi-1', 'app-1');
+    expect(routes.length).toBe(2);
+    expect(routes[0].guid).toBe('r-1');
+    expect(httpMock.get).toHaveBeenCalledWith(expectedUrl);
+  });
+
+  it('fetchAppServiceBindings hits the native service_bindings endpoint', async () => {
+    const expectedUrl = '/pp/v1/cf/apps/cnsi-1/app-1/service_bindings';
+    const httpMock = {
+      get: vi.fn((url: string) => {
+        if (url === expectedUrl) {
+          return of({
+            resources: [
+              { guid: 'b-1', name: 'x', bindingType: 'app', serviceInstanceGuid: 'si-1', serviceInstanceName: 'db', serviceInstanceType: 'managed', createdAt: '', updatedAt: '' },
+            ],
+            totalResults: 1,
+          });
+        }
+        return of({ resources: [], pagination: {} });
+      }),
+    } as unknown as HttpClient;
+    const svc = makeSvc(httpMock);
+    const bindings = await svc.fetchAppServiceBindings('cnsi-1', 'app-1');
+    expect(bindings.length).toBe(1);
+    expect(bindings[0].serviceInstanceName).toBe('db');
+    expect(httpMock.get).toHaveBeenCalledWith(expectedUrl);
+  });
+
+  it('fetchAppServiceBindings returns [] when the endpoint errors', async () => {
+    const httpMock = {
+      get: vi.fn(() => throwError(() => new Error('boom'))),
+    } as unknown as HttpClient;
+    const svc = makeSvc(httpMock);
+    const bindings = await svc.fetchAppServiceBindings('cnsi-1', 'app-1');
+    expect(bindings).toEqual([]);
+  });
+
+  it('deleteServiceBinding routes through writeWithJob against /pp/v1/cf/service_bindings/{cnsi}/{binding}', async () => {
+    const httpMock = {
+      delete: vi.fn(() => of(new HttpResponse<unknown>({
+        status: 200,
+        body: { result: { operation: 'service_credential_binding.delete' }, state: 'COMPLETE' },
+      }))),
+    } as unknown as HttpClient;
+    const svc = makeSvc(httpMock);
+    await svc.deleteServiceBinding('cnsi-1', 'binding-1');
+    expect(httpMock.delete).toHaveBeenCalledWith('/pp/v1/cf/service_bindings/cnsi-1/binding-1', expect.objectContaining({ observe: 'response' }));
+  });
+
+  it('deleteRoute routes through writeWithJob against /pp/v1/cf/routes/{cnsi}/{route}', async () => {
+    const httpMock = {
+      delete: vi.fn(() => of(new HttpResponse<unknown>({
+        status: 200,
+        body: { result: { jobGuid: 'j-1', operation: 'route.delete' }, state: 'COMPLETE' },
+      }))),
+    } as unknown as HttpClient;
+    const svc = makeSvc(httpMock);
+    await svc.deleteRoute('cnsi-1', 'route-1');
+    expect(httpMock.delete).toHaveBeenCalledWith('/pp/v1/cf/routes/cnsi-1/route-1', expect.objectContaining({ observe: 'response' }));
+  });
+
+  it('fetchAppRoutes returns [] when the endpoint fails rather than throwing', async () => {
+    const httpMock = {
+      get: vi.fn(() => throwError(() => new Error('boom'))),
+    } as unknown as HttpClient;
+    const svc = makeSvc(httpMock);
+    const routes = await svc.fetchAppRoutes('cnsi-1', 'app-1');
+    expect(routes).toEqual([]);
   });
 
   it('cnsiOptions picks up connected CF endpoints from CloudFoundryService', () => {

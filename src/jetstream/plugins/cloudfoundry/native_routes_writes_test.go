@@ -12,6 +12,87 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// TestDeleteNativeRoute_BareFallbackWhenAsyncUnwired verifies the handler
+// issues a DELETE to /v3/routes/{guid} and, without stratosjobs wiring
+// present, falls back to bare-202 behavior (same safety net as
+// deleteNativeApp). The async-job contract itself is exercised by the
+// CFJobTranslator tests; this test pins the capi->CF transport + the
+// fallback path.
+func TestDeleteNativeRoute_BareFallbackWhenAsyncUnwired(t *testing.T) {
+	capiCalls := 0
+	capiServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/v3" {
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{"links":{}}`))
+			return
+		}
+		capiCalls++
+		assert.Equal(t, http.MethodDelete, r.Method)
+		assert.Equal(t, "/v3/routes/route-1", r.URL.Path)
+		w.Header().Set("Location", "/v3/jobs/delete-job-1")
+		w.WriteHeader(http.StatusAccepted)
+	}))
+	defer capiServer.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(capiServer.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodDelete, "/pp/v1/cf/routes/cnsi-1/route-1", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/routes/:cnsiGuid/:routeGuid")
+	c.SetParamNames("cnsiGuid", "routeGuid")
+	c.SetParamValues("cnsi-1", "route-1")
+
+	require.NoError(t, plugin.deleteNativeRoute(c))
+	assert.Equal(t, http.StatusAccepted, rec.Code)
+	assert.Equal(t, 1, capiCalls)
+}
+
+// TestDeleteNativeRoute_PropagatesCapiError verifies a non-2xx CF error
+// flows through handleCapiError (upstream status mirrored to the caller,
+// CF error envelope preserved in the body).
+func TestDeleteNativeRoute_PropagatesCapiError(t *testing.T) {
+	capiServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/v3" {
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{"links":{}}`))
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte(`{"errors":[{"code":10010,"title":"CF-ResourceNotFound","detail":"Route not found"}]}`))
+	}))
+	defer capiServer.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(capiServer.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodDelete, "/pp/v1/cf/routes/cnsi-1/missing", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/routes/:cnsiGuid/:routeGuid")
+	c.SetParamNames("cnsiGuid", "routeGuid")
+	c.SetParamValues("cnsi-1", "missing")
+
+	require.NoError(t, plugin.deleteNativeRoute(c))
+	assert.Equal(t, http.StatusNotFound, rec.Code)
+	assert.Contains(t, rec.Body.String(), "ResourceNotFound")
+}
+
+
 // TestUnmapRouteFromApp_FindsDestinationAndDeletes verifies the handler
 // issues a GET to /v3/routes/{routeGuid}/destinations, finds the destination
 // whose app.guid matches the appGuid path parameter, and then issues a
