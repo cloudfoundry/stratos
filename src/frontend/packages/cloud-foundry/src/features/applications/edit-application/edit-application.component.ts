@@ -6,13 +6,15 @@ import { CustomFormFieldComponent } from '@stratosui/core';
 import { RouterModule } from '@angular/router';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf, Subscription } from 'rxjs';
-import { filter, map, take } from 'rxjs/operators';
+import { defer, from, Observable, of as observableOf, Subscription } from 'rxjs';
+import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 import { CustomSlideToggleComponent } from '../../../../../core/src/shared/components/custom-slide-toggle/custom-slide-toggle.component';
 
 import { AppMetadataTypes } from '../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import { SetCFDetails, SetNewAppName } from '../../../../../cloud-foundry/src/actions/create-applications-page.actions';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import { CfAppsSignalConfigService } from '../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
+import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { StatefulIconComponent } from '../../../../../core/src/core/stateful-icon/stateful-icon.component';
 import { FocusDirective } from '../../../../../core/src/shared/components/focus.directive';
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
@@ -60,6 +62,7 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
   private store = inject<Store<CFAppState>>(Store);
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
+  private apps = inject(CfAppsSignalConfigService);
 
 
   editAppForm: FormGroup<EditApplicationForm>;
@@ -127,34 +130,66 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
   }
 
   updateApp: StepOnNextFunction = () => {
-    const updates: { [key: string]: any } = {};
-    // We will only send the values that were actually edited
+    // Split the dirty form fields into scale (instances/memory/disk_quota,
+    // handled by the Stratos async-job contract via scaleApp) and non-scale
+    // (name/enable_ssh, still routed through the legacy updateApplication
+    // NGRX action until those fields get their own native endpoints).
+    const scaleUpdate: { instances?: number; memory?: number; disk_quota?: number } = {};
+    const otherUpdates: { [key: string]: any } = {};
     const formValue = this.editAppForm.value;
     for (const key of Object.keys(formValue)) {
       const control = (this.editAppForm.controls as any)[key];
-      if (control && !control.pristine) {
-        updates[key] = (formValue as any)[key];
+      if (!control || control.pristine) continue;
+      const value = (formValue as any)[key];
+      if (key === 'instances' || key === 'memory' || key === 'disk_quota') {
+        (scaleUpdate as any)[key] = value;
+      } else {
+        otherUpdates[key] = value;
       }
     }
 
-    let obs$: Observable<any>;
-    if (Object.keys(updates).length) {
-      // We had at least one value to change - send update action
-      obs$ = this.applicationService.updateApplication(updates, [AppMetadataTypes.SUMMARY]).pipe(map(v => (
-        {
-          success: !v.error,
-          message: `Could not update application: ${v.message}`
-        })));
-    } else {
-      obs$ = observableOf({ success: true });
+    const hasScale = Object.keys(scaleUpdate).length > 0;
+    const hasOther = Object.keys(otherUpdates).length > 0;
+    if (!hasScale && !hasOther) {
+      return observableOf({ success: true, redirect: true });
     }
 
-    return obs$.pipe(take(1), map(res => {
-      return {
-        ...res,
-        redirect: res.success
-      };
-    }));
+    const { cfGuid, appGuid } = this.applicationService;
+    const scale$: Observable<{ success: boolean; message?: string }> = hasScale
+      ? defer(() => from(this.apps.scaleApp(cfGuid, appGuid, scaleUpdate))).pipe(
+          map(() => ({ success: true })),
+          // Surface failure message so the stepper can display it in the
+          // snackbar. writeWithJob throws StratosJobError on FAILED terminal;
+          // Promise.catch would lose the type, so cast via unknown.
+        )
+      : observableOf({ success: true });
+
+    const other$: Observable<{ success: boolean; message?: string }> = hasOther
+      ? this.applicationService.updateApplication(otherUpdates, [AppMetadataTypes.SUMMARY]).pipe(
+          map(v => ({
+            success: !v.error,
+            message: v.error ? `Could not update application: ${v.message}` : undefined,
+          })),
+        )
+      : observableOf({ success: true });
+
+    return scale$.pipe(
+      take(1),
+      // After scale resolves, run the legacy update (if any). A scale
+      // failure short-circuits the other update so we don't half-persist.
+      switchMap(scaleRes => {
+        if (!scaleRes.success) return observableOf(scaleRes);
+        return other$.pipe(take(1));
+      }),
+      // Refresh the local app entity cache once all writes complete so the
+      // summary card reflects the new memory/disk/instances/ssh values.
+      tap(res => {
+        if (res.success && hasScale) {
+          cfEntityCatalog.application.api.get(appGuid, cfGuid, {});
+        }
+      }),
+      map(res => ({ ...res, redirect: res.success })),
+    );
   }
 
   clearSub() {

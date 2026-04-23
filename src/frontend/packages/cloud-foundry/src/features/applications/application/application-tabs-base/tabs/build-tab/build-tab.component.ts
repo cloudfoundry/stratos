@@ -28,6 +28,7 @@ import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-
 import { CfUserPermissionDirective } from '../../../../../../shared/directives/cf-user-permission/cf-user-permission.directive';
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
 import { ApplicationData, ApplicationService } from '../../../../application.service';
+import { CfAppsSignalConfigService } from '../../../../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
 import { DEPLOY_TYPES_IDS } from '../../../../deploy-application/deploy-application-steps.types';
 import { ApplicationPollComponent } from '../../application-poll/application-poll.component';
 import { CardAppStatusComponent } from '../../../../../../shared/components/cards/card-app-status/card-app-status.component';
@@ -102,6 +103,7 @@ export class BuildTabComponent implements OnInit {
   private router = inject(Router);
   private confirmDialog = inject(ConfirmationDialogService);
   private cups = inject(CurrentUserPermissionsService);
+  private apps = inject(CfAppsSignalConfigService);
 
   public isBusyUpdating$!: Observable<{ updating: boolean }>;
   public manageAppPermission = CfCurrentUserPermissions.APPLICATION_MANAGE;
@@ -258,89 +260,67 @@ export class BuildTabComponent implements OnInit {
 
   restartApplication() {
     this.confirmDialog.open(appRestartConfirmation, () => {
-
-      this.applicationService.application$.pipe(
-        take(1),
-        mergeMap(appData => {
-          this.applicationService.updateApplication({ state: 'STOPPED' }, [], appData.app.entity);
-          return observableCombineLatest(
-            observableOf(appData),
-            this.pollEntityService('stopping', 'STOPPED').pipe(take(1))
-          );
-        }),
-        mergeMap(([appData, _updateData]) => {
-          this.applicationService.updateApplication({ state: 'STARTED' }, [], appData.app.entity);
-          return this.pollEntityService('starting', 'STARTED').pipe(take(1));
-        }),
-      ).subscribe({
-        error: this.dispatchAppStats,
-        complete: this.dispatchAppStats
-      });
-
+      this.runLifecycleAction(() => this.apps.restartApp(
+        this.applicationService.cfGuid,
+        this.applicationService.appGuid,
+      ));
     });
   }
 
-  private confirmAndPollForState(
-    confirmConfig: ConfirmationDialogConfig,
-    onConfirm: (appData: ApplicationData) => void,
-    updateKey: string,
-    requiredAppState: string,
-    onSuccess: () => void) {
-    this.applicationService.application$.pipe(
-      take(1),
-      tap(appData => {
-        this.confirmDialog.open(confirmConfig, () => {
-          onConfirm(appData);
-          this.pollEntityService(updateKey, requiredAppState).pipe(
-            take(1),
-          ).subscribe(onSuccess);
-        });
+  // Lifecycle actions (start/stop/restart/restage) now flow through the
+  // Stratos async-job contract via CfAppsSignalConfigService: writeWithJob
+  // hits POST /pp/v1/cf/apps/{cnsi}/{app}/actions/{action} and awaits the
+  // CF-side job to terminal state. On resolve we refetch the app entity
+  // and stats so the summary reflects the new state.
+  //
+  // Previously the toolbar dispatched UpdateExistingApplication through
+  // NGRX, which PUT'd to the legacy /pp/v1/proxy/v2/apps/{guid} endpoint
+  // with {state: "STARTED"|"STOPPED"} and relied on pollEntityService to
+  // observe the state flip. That v2 proxy path is retired on the write
+  // side as part of the V3 migration.
+  private runLifecycleAction(action: () => Promise<void>, onAfter?: () => void): void {
+    const { cfGuid, appGuid } = this.applicationService;
+    void action()
+      .then(() => {
+        cfEntityCatalog.application.api.get(appGuid, cfGuid, {});
+        this.dispatchAppStats();
+        onAfter?.();
       })
-    ).subscribe();
-  }
-
-  private updateApp(confirmConfig: ConfirmationDialogConfig, updateKey: string, requiredAppState: string, onSuccess: () => void) {
-    this.confirmAndPollForState(
-      confirmConfig,
-      appData => this.applicationService.updateApplication({ state: requiredAppState }, [AppMetadataTypes.STATS], appData.app.entity),
-      updateKey,
-      requiredAppState,
-      onSuccess
-    );
+      .catch((err: unknown) => {
+        console.warn('Lifecycle action failed:', err);
+        this.dispatchAppStats();
+      });
   }
 
   stopApplication() {
-    this.updateApp(appStopConfirmation, 'stopping', 'STOPPED', () => {
-      // On app reaching the 'STOPPED' state clear the app's stats pagination section
-      const { cfGuid, appGuid } = this.applicationService;
-      const getAppStatsAction = cfEntityCatalog.appStats.actions.getMultiple(appGuid, cfGuid);
-      this.store.dispatch(new ResetPagination(getAppStatsAction, getAppStatsAction.paginationKey));
+    this.confirmDialog.open(appStopConfirmation, () => {
+      this.runLifecycleAction(
+        () => this.apps.stopApp(this.applicationService.cfGuid, this.applicationService.appGuid),
+        () => {
+          // On app reaching STOPPED, clear the stats pagination section
+          // so a re-start comes up with fresh instance rows.
+          const { cfGuid, appGuid } = this.applicationService;
+          const getAppStatsAction = cfEntityCatalog.appStats.actions.getMultiple(appGuid, cfGuid);
+          this.store.dispatch(new ResetPagination(getAppStatsAction, getAppStatsAction.paginationKey));
+        },
+      );
+    });
+  }
+
+  startApplication() {
+    this.confirmDialog.open(appStartConfirmation, () => {
+      this.runLifecycleAction(
+        () => this.apps.startApp(this.applicationService.cfGuid, this.applicationService.appGuid),
+      );
     });
   }
 
   restageApplication() {
-    const { cfGuid, appGuid } = this.applicationService;
-    this.confirmAndPollForState(
-      appRestageConfirmation,
-      () => cfEntityCatalog.application.api.restage(appGuid, cfGuid),
-      'starting',
-      'STARTED',
-      () => { }
-    );
-  }
-
-  pollEntityService(state: any, stateString: string): Observable<any> {
-    return this.applicationService.entityService
-      .poll(1000, state).pipe(
-        delay(1),
-        filter(({ resource }) => {
-          return resource.entity.state === stateString;
-        }),
+    this.confirmDialog.open(appRestageConfirmation, () => {
+      this.runLifecycleAction(
+        () => this.apps.restageApp(this.applicationService.cfGuid, this.applicationService.appGuid),
       );
-  }
-
-  startApplication() {
-    this.updateApp(appStartConfirmation, 'starting', 'STARTED', () => { });
+    });
   }
 
   redirectToDeletePage() {
