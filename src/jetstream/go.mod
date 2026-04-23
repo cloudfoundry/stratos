@@ -274,4 +274,4 @@ require (
 // the fork's go.mod declaration (which still says fivetwenty-io/capi/v3)
 // during resolution. Retire this once the fix lands upstream in
 // fivetwenty-io/capi and a tagged release is cut.
-replace github.com/fivetwenty-io/capi/v3 => github.com/norman-abramovitz/fw-capi/v3 v3.216.4-fix-apps-delete.2
+replace github.com/fivetwenty-io/capi/v3 => github.com/norman-abramovitz/fw-capi/v3 v3.216.4-fix-apps-delete.3

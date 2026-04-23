@@ -344,6 +344,58 @@ export class CfAppsSignalConfigService {
     await writeWithJob(this.http, call);
   }
 
+  // Lifecycle actions. The CF v3 /v3/apps/{guid}/actions/{action} endpoints
+  // are synchronous at the HTTP layer (they return the updated app, or a
+  // Build for restage). The Stratos-native backend wraps the response in
+  // the async-job terminal envelope ({state: COMPLETE, result}) so the
+  // 200 path resolves immediately through writeWithJob — giving every
+  // write callsite a uniform client shape regardless of whether CF itself
+  // was sync or async. Thrown StratosJobError surfaces CF errors; callers
+  // should catch and surface via snackbar.
+  async startApp(cnsiGuid: string, appGuid: string): Promise<void> {
+    await this.appAction(cnsiGuid, appGuid, 'start');
+  }
+  async stopApp(cnsiGuid: string, appGuid: string): Promise<void> {
+    await this.appAction(cnsiGuid, appGuid, 'stop');
+  }
+  async restartApp(cnsiGuid: string, appGuid: string): Promise<void> {
+    await this.appAction(cnsiGuid, appGuid, 'restart');
+  }
+  async restageApp(cnsiGuid: string, appGuid: string): Promise<void> {
+    await this.appAction(cnsiGuid, appGuid, 'restage');
+  }
+
+  private async appAction(
+    cnsiGuid: string,
+    appGuid: string,
+    action: 'start' | 'stop' | 'restart' | 'restage',
+  ): Promise<void> {
+    const call = this.http.post(
+      `/pp/v1/cf/apps/${cnsiGuid}/${appGuid}/actions/${action}`,
+      null,
+      { observe: 'response' },
+    );
+    await writeWithJob(this.http, call);
+  }
+
+  // Scales the web process of an app through the async-job contract.
+  // Backend hits POST /v3/processes/{guid}/actions/scale which CF v3
+  // returns 202 + Location → /v3/jobs/{jobGuid}; writeWithJob resolves
+  // via fast-path 200 or handoff polling. Payload takes any subset of
+  // {instances, memory, disk_quota}; all three in MB where applicable.
+  async scaleApp(
+    cnsiGuid: string,
+    appGuid: string,
+    payload: { instances?: number; memory?: number; disk_quota?: number },
+  ): Promise<void> {
+    const call = this.http.post(
+      `/pp/v1/cf/apps/${cnsiGuid}/${appGuid}/scale`,
+      payload,
+      { observe: 'response' },
+    );
+    await writeWithJob(this.http, call);
+  }
+
   async deleteApp(cnsiGuid: string, appGuid: string): Promise<void> {
     // Orchestrator-undefined fallback (cold bookmark / HMR): no source to
     // update, but we still need to issue the delete and wait for CF's

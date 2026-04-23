@@ -96,8 +96,14 @@ func (c *CloudFoundrySpecification) deleteNativeApp(ctx echo.Context) error {
 }
 
 // appAction handles POST /pp/v1/cf/apps/{cnsiGuid}/{appGuid}/actions/{action}
-// for action in {start, stop, restart, restage}. On success returns 202; on
-// capi error delegates to handleCapiError for status + body preservation.
+// for action in {start, stop, restart, restage}.
+//
+// All four CF v3 /v3/apps/{guid}/actions/{action} endpoints are async: CF
+// responds 202 Accepted + Location → /v3/jobs/{jobGuid}. The fork's
+// AppsClient returns that Job directly. We hand the job GUID to the
+// stratosjobs fast-path wrapper — same pattern as deleteNativeApp — so
+// the UI sees either 200 with terminal state (fast-path resolve) or
+// 202 + {id, state, startedAt} handoff for client polling.
 func (c *CloudFoundrySpecification) appAction(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	appGUID := ctx.Param("appGuid")
@@ -111,29 +117,136 @@ func (c *CloudFoundrySpecification) appAction(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
 	}
 
-	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	reqCtx := ctx.Request().Context()
+	cfClient, err := newCapiClient(reqCtx, c.nativeProxy(), cnsiGUID, userGUID)
 	if err != nil {
 		return err
 	}
 
-	reqCtx := ctx.Request().Context()
+	var job *capi.Job
+	var actionErr error
 	switch action {
 	case "start":
-		_, err = cfClient.Apps().Start(reqCtx, appGUID)
+		job, actionErr = cfClient.Apps().Start(reqCtx, appGUID)
 	case "stop":
-		_, err = cfClient.Apps().Stop(reqCtx, appGUID)
+		job, actionErr = cfClient.Apps().Stop(reqCtx, appGUID)
 	case "restart":
-		_, err = cfClient.Apps().Restart(reqCtx, appGUID)
+		job, actionErr = cfClient.Apps().Restart(reqCtx, appGUID)
 	case "restage":
-		_, err = cfClient.Apps().Restage(reqCtx, appGUID)
+		job, actionErr = cfClient.Apps().Restage(reqCtx, appGUID)
 	}
-	if err != nil {
-		return handleCapiError(ctx, err)
+	if actionErr != nil {
+		return handleCapiError(ctx, actionErr)
+	}
+	if job == nil || job.GUID == "" {
+		return echo.NewHTTPError(http.StatusBadGateway, fmt.Sprintf("app %s: no job id returned from CF", action))
 	}
 
+	if c.asyncTracker == nil || c.asyncTranslator == nil {
+		ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+		ctx.Response().WriteHeader(http.StatusAccepted)
+		return nil
+	}
+
+	ref := CFJobRef{CnsiGUID: cnsiGUID, UserGUID: userGUID, JobGUID: job.GUID}
+	res := stratosjobs.RunFastPath(reqCtx, c.asyncTracker, c.asyncTranslator, ref, stratosjobs.FastPathOptions{
+		Kind: "cf.app." + action,
+	})
+
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
-	ctx.Response().WriteHeader(http.StatusAccepted)
-	return nil
+	if res.Resolved {
+		if res.State == stratosjobs.JobStateFailed {
+			return ctx.JSON(http.StatusBadGateway, map[string]interface{}{
+				"state":  res.State,
+				"errors": res.Errors,
+			})
+		}
+		return ctx.JSON(http.StatusOK, map[string]interface{}{
+			"state":  res.State,
+			"result": res.Result,
+		})
+	}
+	return ctx.JSON(http.StatusAccepted, res.HandoffJob)
+}
+
+// scaleApp handles POST /pp/v1/cf/apps/{cnsiGuid}/{appGuid}/scale — a
+// dedicated async-job-contract endpoint for scaling the web process.
+// Keeps patchApp focused on name/ssh/env composite updates; scale gets
+// the same uniform writeWithJob shape as delete/start/stop/restart.
+//
+// Request body: {instances?, memory?, disk_quota?}. Any subset is
+// accepted and forwarded to CF as a single /v3/processes/{guid}/actions/scale
+// call on the resolved web process. CF returns 202 + job; we hand to
+// RunFastPath.
+func (c *CloudFoundrySpecification) scaleApp(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	appGUID := ctx.Param("appGuid")
+	if cnsiGUID == "" || appGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid and appGuid are required")
+	}
+
+	var body patchAppBody
+	if err := ctx.Bind(&body); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid body: %v", err))
+	}
+	if body.Memory == nil && body.DiskQuota == nil && body.Instances == nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "at least one of memory, disk_quota, instances is required")
+	}
+
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	reqCtx := ctx.Request().Context()
+	cfClient, err := newCapiClient(reqCtx, c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	procGUID, lookupErr := lookupWebProcessGUID(reqCtx, cfClient, appGUID)
+	if lookupErr != nil {
+		return handleCapiError(ctx, lookupErr)
+	}
+
+	scaleReq := &capi.ProcessScaleRequest{
+		Instances:  body.Instances,
+		MemoryInMB: body.Memory,
+		DiskInMB:   body.DiskQuota,
+	}
+	job, scaleErr := cfClient.Processes().Scale(reqCtx, procGUID, scaleReq)
+	if scaleErr != nil {
+		return handleCapiError(ctx, scaleErr)
+	}
+	if job == nil || job.GUID == "" {
+		return echo.NewHTTPError(http.StatusBadGateway, "scale: no job id returned from CF")
+	}
+
+	if c.asyncTracker == nil || c.asyncTranslator == nil {
+		ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+		ctx.Response().WriteHeader(http.StatusAccepted)
+		return nil
+	}
+
+	ref := CFJobRef{CnsiGUID: cnsiGUID, UserGUID: userGUID, JobGUID: job.GUID}
+	res := stratosjobs.RunFastPath(reqCtx, c.asyncTracker, c.asyncTranslator, ref, stratosjobs.FastPathOptions{
+		Kind: "cf.app.scale",
+	})
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+	if res.Resolved {
+		if res.State == stratosjobs.JobStateFailed {
+			return ctx.JSON(http.StatusBadGateway, map[string]interface{}{
+				"state":  res.State,
+				"errors": res.Errors,
+			})
+		}
+		return ctx.JSON(http.StatusOK, map[string]interface{}{
+			"state":  res.State,
+			"result": res.Result,
+		})
+	}
+	return ctx.JSON(http.StatusAccepted, res.HandoffJob)
 }
 
 // deleteAppInstance handles DELETE /pp/v1/cf/apps/{cnsiGuid}/{appGuid}/instances/{index}
