@@ -173,6 +173,13 @@ export class CfAppsSignalConfigService {
   }
 
   initialize(cnsiGuids: readonly string[]): void {
+    // Reset hasLoadedOnce so the stale-selection effect is gated off while
+    // the new orchestrator reloads. Without this, returning from a detail
+    // page (e.g. after deleting an app) would see orgOptions momentarily
+    // empty, decide the user's still-valid selection is stale, and clear
+    // it — losing the filter across navigation. The effect re-fires once
+    // loadAll() completes and options are real.
+    this._hasLoadedOnce.set(false);
     const sources = cnsiGuids.map(guid => new CnsiAppsSource(guid, this.http));
     this.orchestrator = new MergeOrchestrator<StApp>(sources);
     this.view = new ViewPipeline<StApp>(

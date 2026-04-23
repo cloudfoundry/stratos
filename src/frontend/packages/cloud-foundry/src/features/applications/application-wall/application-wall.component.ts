@@ -150,9 +150,14 @@ export class ApplicationWallComponent implements OnInit {
       return app.state ?? '';
     };
     const renderCfOrgSpace = (app: StApp): string => {
-      const cf = this.appsConfig.endpointNames().get(app.cnsiGuid) ?? app.cnsiGuid;
-      const orgName = app.orgGuid ? (this.appsConfig.orgNames().get(app.orgGuid) ?? app.orgGuid) : '—';
-      const spaceName = app.spaceGuid ? (this.appsConfig.spaceNames().get(app.spaceGuid) ?? app.spaceGuid) : '—';
+      // Show name when resolved; '—' placeholder when still loading or the
+      // name-lookup 504'd. Never surface raw GUIDs in this column —
+      // user-facing cells read names, and briefly flashing GUIDs before the
+      // name map lands (or leaving them there when /pp/v1/cf/spaces times
+      // out) is worse UX than an em-dash. GUIDs remain in the URL + tooltip.
+      const cf = this.appsConfig.endpointNames().get(app.cnsiGuid) ?? '—';
+      const orgName = app.orgGuid ? (this.appsConfig.orgNames().get(app.orgGuid) ?? '—') : '—';
+      const spaceName = app.spaceGuid ? (this.appsConfig.spaceNames().get(app.spaceGuid) ?? '—') : '—';
       return `${cf} / ${orgName} / ${spaceName}`;
     };
     this.listConfig.set({

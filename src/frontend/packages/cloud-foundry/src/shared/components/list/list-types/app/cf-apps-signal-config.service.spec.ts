@@ -152,6 +152,34 @@ describe('CfAppsSignalConfigService', () => {
     expect(svc.selectedCnsi()).toBe('cf-1');
   });
 
+  it('preserves a valid selection across navigation (re-initialize)', async () => {
+    // Regression: the singleton service's _hasLoadedOnce was latching true
+    // forever after the first load. On re-navigation, a fresh initialize()
+    // produced a momentarily-empty orchestrator, the post-load effect ran
+    // immediately against empty option lists, and it cleared the user's
+    // still-valid selection to null — losing the filter across routes.
+    //
+    // Fix: initialize() resets _hasLoadedOnce to false so the effect is
+    // gated off until loadAll() completes and options reflect real data.
+    const http = makeHttp();
+    const cf = makeStubCfService([{ guid: 'cf-1', name: 'Primary CF' }]);
+    const svc = makeSvc(http, cf);
+    svc.initialize(['cf-1']);
+    svc.selectedCnsi.set('cf-1');
+    await svc.loadAll();
+    TestBed.tick();
+    expect(svc.selectedCnsi()).toBe('cf-1');
+
+    // Simulate returning to the app-wall — ngOnInit calls initialize()
+    // again with the same CF guids. Selection should survive the reload.
+    svc.initialize(['cf-1']);
+    TestBed.tick();
+    expect(svc.selectedCnsi()).toBe('cf-1');
+    await svc.loadAll();
+    TestBed.tick();
+    expect(svc.selectedCnsi()).toBe('cf-1');
+  });
+
   it('fetchAppRoutes hits the native routes endpoint and returns the resources array', async () => {
     const expectedUrl = '/pp/v1/cf/apps/cnsi-1/app-1/routes';
     const httpMock = {

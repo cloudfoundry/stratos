@@ -49,7 +49,7 @@ func (c *CloudFoundrySpecification) getAppServiceBindings(ctx echo.Context) erro
 		params := capi.NewQueryParams().
 			WithPerPage(fullPagePerRequest).
 			WithFilter("app_guids", appGUID).
-			WithFilter("types", "app")
+			WithFilter("type", "app")
 		params.Page = page
 		raw, listErr := cfClient.ServiceCredentialBindings().List(reqCtx, params)
 		if listErr != nil {

@@ -113,7 +113,11 @@ func TestGetAppServiceBindings_JoinsNamesFromServiceInstances(t *testing.T) {
 	assert.Equal(t, 1, bindingsHits)
 	assert.Equal(t, 1, instancesHits)
 	assert.Contains(t, bindingsQuery, "app_guids=app-1")
-	assert.Contains(t, bindingsQuery, "types=app")
+	// CF v3 accepts the singular `type` filter on /v3/service_credential_bindings,
+	// not `types`. Regression guard: a plural typo here silently produces a
+	// 400 "Unknown query parameter(s): 'types'" and the picker stays empty.
+	assert.Contains(t, bindingsQuery, "type=app")
+	assert.NotContains(t, bindingsQuery, "types=app")
 	assert.Contains(t, instancesQuery, "guids=")
 
 	var resp StAppServiceBindingsResponse
