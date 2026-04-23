@@ -3,30 +3,31 @@
     <h1>Delete application</h1>
   </app-page-header>
   <app-steppers [cancel]="cancelUrl">
-    @if (routesLoaded() && appRoutes().length > 0) {
-      <app-step title="Routes">
-        <div class="app-delete__monitors">
-          <p>Please select any attached application routes you would like to delete.</p>
-          <app-routes-picker
-            class="app-delete__step-table"
-            [routes]="appRoutes()"
-            (selectedChange)="setSelectedRoutes($event)">
-          </app-routes-picker>
-        </div>
-      </app-step>
-    }
-    @if (bindingsLoaded() && appBindings().length > 0) {
-      <app-step title="Service Instances">
-        <div class="app-delete__monitors">
-          <p>Please select any attached application service instances you would like to unbind.</p>
-          <app-service-bindings-picker
-            class="app-delete__step-table"
-            [bindings]="appBindings()"
-            (selectedChange)="setSelectedServiceBindings($event)">
-          </app-service-bindings-picker>
-        </div>
-      </app-step>
-    }
+    <!-- Steps are always rendered so the stepper captures them at
+         AfterContentInit (its @ContentChildren is a one-shot snapshot
+         and doesn't listen for dynamic additions). We toggle [hidden]
+         on each step — the stepper subscribes to onHidden changes and
+         re-filters its visible step list reactively. -->
+    <app-step title="Routes" [hidden]="!routesLoaded() || appRoutes().length === 0">
+      <div class="app-delete__monitors">
+        <p>Please select any attached application routes you would like to delete.</p>
+        <app-routes-picker
+          class="app-delete__step-table"
+          [routes]="appRoutes()"
+          (selectedChange)="setSelectedRoutes($event)">
+        </app-routes-picker>
+      </div>
+    </app-step>
+    <app-step title="Service Instances" [hidden]="!bindingsLoaded() || appBindings().length === 0">
+      <div class="app-delete__monitors">
+        <p>Please select any attached application service instances you would like to unbind.</p>
+        <app-service-bindings-picker
+          class="app-delete__step-table"
+          [bindings]="appBindings()"
+          (selectedChange)="setSelectedServiceBindings($event)">
+        </app-service-bindings-picker>
+      </div>
+    </app-step>
     <app-step title="Confirm" class="app-delete__monitors" [canClose]="!deleteStarted"
       [disablePrevious]="deleteStarted" [destructiveStep]="!deleteStarted" [onNext]="startDelete"
       [finishButtonText]="deleteStarted ? 'Close' : 'Delete'">

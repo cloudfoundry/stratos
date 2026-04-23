@@ -139,8 +139,16 @@ export class CfAppsSignalConfigService {
     // the selection), the dropdown can't render the stale value as selected
     // and would silently show "All" while still filtering — producing the
     // "display says All, list says 0 apps" desync.
+    //
+    // Skip clearing org/space when the selected CF's apps source failed
+    // (e.g. /pp/v1/cf/apps/{cnsi} 504'd on a slow CAPI). Its orgOptions is
+    // empty because no apps loaded, not because the org is genuinely empty
+    // — clearing would lose a valid selection the user will want back as
+    // soon as the refresh succeeds. cnsiOptions itself is always authoritative
+    // (derived from the connected endpoints list, not the orchestrator).
     effect(() => {
       if (!this._hasLoadedOnce()) return;
+      const errorsByCnsi = this.orchestrator?.errorsByCnsi();
       const cnsiValues = new Set(this.cnsiOptions().map(o => o.value));
       const orgValues = new Set(this.orgOptions().map(o => o.value));
       const spaceValues = new Set(this.spaceOptions().map(o => o.value));
@@ -148,8 +156,11 @@ export class CfAppsSignalConfigService {
       const org = this.selectedOrg();
       const space = this.selectedSpace();
       if (cnsi != null && !cnsiValues.has(cnsi)) this.selectedCnsi.set(null);
-      if (org != null && !orgValues.has(org)) this.selectedOrg.set(null);
-      if (space != null && !spaceValues.has(space)) this.selectedSpace.set(null);
+      const selectedCfFailed = cnsi != null && errorsByCnsi?.has(cnsi);
+      if (!selectedCfFailed) {
+        if (org != null && !orgValues.has(org)) this.selectedOrg.set(null);
+        if (space != null && !spaceValues.has(space)) this.selectedSpace.set(null);
+      }
     });
 
     // Re-derive the filter predicate whenever any of the four toolbar
