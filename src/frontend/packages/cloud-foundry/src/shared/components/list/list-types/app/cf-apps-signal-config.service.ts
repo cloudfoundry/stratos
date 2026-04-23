@@ -61,6 +61,12 @@ export class CfAppsSignalConfigService {
   readonly orgOptions:   Signal<SignalListDropdownOption[]>;
   readonly spaceOptions: Signal<SignalListDropdownOption[]>;
 
+  // Flipped to true once the orchestrator has completed at least one load
+  // cycle. Gates the stale-selection clearer below: while apps are still
+  // loading the first time, orgOptions/spaceOptions are legitimately empty
+  // and don't yet reflect "this selection is gone".
+  private readonly _hasLoadedOnce: WritableSignal<boolean> = signal(false);
+
   constructor(private readonly http: HttpClient) {
     const cfService = inject(CloudFoundryService, { optional: true });
     this.connectedEndpoints = cfService
@@ -124,6 +130,26 @@ export class CfAppsSignalConfigService {
       const sorted = Array.from(seen.entries()).sort(([, a], [, b]) => a.localeCompare(b));
       for (const [guid, label] of sorted) opts.push({ label, value: guid });
       return opts;
+    });
+
+    // After the first orchestrator load, clear any selected cnsi/org/space
+    // whose value is no longer in the computed options list. This keeps the
+    // toolbar display in sync with the filter predicate: once the user
+    // deletes the last app in an org (or disconnects the only CF matching
+    // the selection), the dropdown can't render the stale value as selected
+    // and would silently show "All" while still filtering — producing the
+    // "display says All, list says 0 apps" desync.
+    effect(() => {
+      if (!this._hasLoadedOnce()) return;
+      const cnsiValues = new Set(this.cnsiOptions().map(o => o.value));
+      const orgValues = new Set(this.orgOptions().map(o => o.value));
+      const spaceValues = new Set(this.spaceOptions().map(o => o.value));
+      const cnsi = this.selectedCnsi();
+      const org = this.selectedOrg();
+      const space = this.selectedSpace();
+      if (cnsi != null && !cnsiValues.has(cnsi)) this.selectedCnsi.set(null);
+      if (org != null && !orgValues.has(org)) this.selectedOrg.set(null);
+      if (space != null && !spaceValues.has(space)) this.selectedSpace.set(null);
     });
 
     // Re-derive the filter predicate whenever any of the four toolbar
@@ -193,6 +219,15 @@ export class CfAppsSignalConfigService {
 
   async loadAll(): Promise<void> {
     await this.orchestrator.load();
+    this._hasLoadedOnce.set(true);
+  }
+
+  clearFilters(): void {
+    this.selectedCnsi.set(null);
+    this.selectedOrg.set(null);
+    this.selectedSpace.set(null);
+    this.nameFilter.set('');
+    this.pageIndex.set(0);
   }
 
   async refresh(): Promise<void> {
@@ -200,6 +235,7 @@ export class CfAppsSignalConfigService {
     // calls initialize() will fetch from scratch anyway.
     if (!this.orchestrator) return;
     await this.orchestrator.refresh();
+    this._hasLoadedOnce.set(true);
   }
 
   // Register a value-extractor for a column whose sort value can't be read

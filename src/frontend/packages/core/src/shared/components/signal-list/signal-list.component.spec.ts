@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { Component, signal } from '@angular/core';
 import { SignalListComponent } from './signal-list.component';
@@ -102,6 +102,61 @@ describe('SignalListComponent', () => {
     expect(opts.length).toBe(3);
     expect(opts[0].textContent).toContain('All');
     expect(opts[1].textContent).toContain('CF-1');
+  });
+
+  it('renders a Clear button when config.onClear is provided', () => {
+    const fixture = TestBed.createComponent(Host);
+    const nameFilter = signal('');
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      nameFilter,
+      onClear: () => { /* no-op */ },
+    };
+    fixture.detectChanges();
+    const btn = fixture.nativeElement.querySelector('[data-test="clear-filters"]');
+    expect(btn).not.toBeNull();
+    // Disabled when no filter is active.
+    expect(btn.disabled).toBe(true);
+    // Setting nameFilter to a non-empty string activates the button.
+    nameFilter.set('foo');
+    fixture.detectChanges();
+    expect(btn.disabled).toBe(false);
+  });
+
+  it('clicking the Clear button invokes config.onClear', () => {
+    const fixture = TestBed.createComponent(Host);
+    const onClear = vi.fn();
+    const nameFilter = signal('foo');
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      nameFilter,
+      onClear,
+    };
+    fixture.detectChanges();
+    const btn = fixture.nativeElement.querySelector('[data-test="clear-filters"]');
+    btn.click();
+    expect(onClear).toHaveBeenCalledOnce();
+  });
+
+  it('Clear button is enabled when a dropdown has a non-null selection', () => {
+    const fixture = TestBed.createComponent(Host);
+    const selected = signal<string | null>('cf-1');
+    const dropdown: SignalListDropdown = {
+      label: 'CF',
+      options: signal([]).asReadonly(),
+      selected,
+    };
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      filterDropdowns: [dropdown],
+      onClear: () => { /* no-op */ },
+    };
+    fixture.detectChanges();
+    const btn = fixture.nativeElement.querySelector('[data-test="clear-filters"]');
+    expect(btn.disabled).toBe(false);
+    selected.set(null);
+    fixture.detectChanges();
+    expect(btn.disabled).toBe(true);
   });
 
   it('onDropdownChange updates selected and resets pageIndex', () => {

@@ -30,6 +30,18 @@
         class="px-3 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text" />
     }
 
+    @if (config.onClear) {
+      <button
+        data-test="clear-filters"
+        type="button"
+        (click)="config.onClear!()"
+        [disabled]="!hasActiveFilter()"
+        title="Clear filters"
+        class="px-2 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
+        Clear
+      </button>
+    }
+
     @if (config.viewMode && config.viewMode!() === 'card' && config.sort && sortableColumns().length > 0) {
       <div data-test="sort-controls" class="flex items-center gap-1 text-sm text-content-muted">
         <span>Sort:</span>

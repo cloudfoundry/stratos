@@ -210,6 +210,7 @@ export class ApplicationWallComponent implements OnInit {
       nameFilter: this.appsConfig.nameFilter,
       filterDropdowns: dropdowns,
       onRefresh: () => this.appsConfig.refresh(),
+      onClear: () => this.appsConfig.clearFilters(),
       cardAccentColor: stateColor,
       viewMode: this.appsConfig.viewMode,
       sort: this.appsConfig.sort,

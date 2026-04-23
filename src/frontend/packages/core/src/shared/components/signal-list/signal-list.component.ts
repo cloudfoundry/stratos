@@ -61,6 +61,11 @@ export interface SignalListConfig<T> {
   readonly nameFilter?: WritableSignal<string>;
   readonly filterDropdowns?: SignalListDropdown[];
   readonly onRefresh?: () => void | Promise<void>;
+  // Optional — when provided, the toolbar renders a "Clear" button that
+  // invokes this callback. The button is disabled when no filter is active
+  // (all dropdowns at their "All" value and nameFilter empty), so it surfaces
+  // only when clicking it would actually change the view.
+  readonly onClear?: () => void;
   // Optional — when provided, each card in card view renders a colored
   // strip at the top reflecting the row's state. Common use: map app.state
   // to a success/danger/neutral color so a quick glance over a wall of
@@ -260,6 +265,14 @@ export class SignalListComponent<T> implements AfterViewInit {
       direction: current.direction === 'asc' ? 'desc' : 'asc',
     });
     this.config.pageIndex.set(0);
+  }
+
+  hasActiveFilter(): boolean {
+    for (const dd of this.config.filterDropdowns ?? []) {
+      if (dd.selected() != null) return true;
+    }
+    if (this.config.nameFilter && this.config.nameFilter().length > 0) return true;
+    return false;
   }
 
   onDropdownChange(dropdown: SignalListDropdown, value: string): void {

@@ -97,6 +97,61 @@ describe('CfAppsSignalConfigService', () => {
     expect(svc.spaceOptions()[0]).toEqual({ label: 'All', value: null });
   });
 
+  it('clearFilters resets all four filter signals and pageIndex', () => {
+    const http = makeHttp();
+    const svc = makeSvc(http);
+    svc.selectedCnsi.set('cf-1');
+    svc.selectedOrg.set('org-1');
+    svc.selectedSpace.set('space-1');
+    svc.nameFilter.set('foo');
+    svc.pageIndex.set(4);
+    svc.clearFilters();
+    expect(svc.selectedCnsi()).toBeNull();
+    expect(svc.selectedOrg()).toBeNull();
+    expect(svc.selectedSpace()).toBeNull();
+    expect(svc.nameFilter()).toBe('');
+    expect(svc.pageIndex()).toBe(0);
+  });
+
+  it('does not clear stale selections before the first orchestrator load completes', () => {
+    const http = makeHttp();
+    const cf = makeStubCfService([{ guid: 'cf-1', name: 'Primary CF' }]);
+    const svc = makeSvc(http, cf);
+    // Set a selection whose value is NOT in cnsiOptions yet. The guard
+    // should keep the stale selection until loadAll finishes, so we can
+    // preserve filters across route re-entry before data loads.
+    svc.selectedCnsi.set('cf-gone');
+    TestBed.tick();
+    expect(svc.selectedCnsi()).toBe('cf-gone');
+  });
+
+  it('clears a stale selection once the orchestrator has loaded and the value is gone', async () => {
+    const http = makeHttp();
+    const cf = makeStubCfService([{ guid: 'cf-1', name: 'Primary CF' }]);
+    const svc = makeSvc(http, cf);
+    svc.initialize(['cf-1']);
+    svc.selectedCnsi.set('cf-gone');
+    TestBed.tick();
+    expect(svc.selectedCnsi()).toBe('cf-gone');
+    await svc.loadAll();
+    TestBed.tick();
+    // cf-gone isn't in cnsiOptions (which has cf-1 + "All"), so the
+    // post-load effect clears it to null.
+    expect(svc.selectedCnsi()).toBeNull();
+  });
+
+  it('preserves a valid selection across the first orchestrator load', async () => {
+    const http = makeHttp();
+    const cf = makeStubCfService([{ guid: 'cf-1', name: 'Primary CF' }]);
+    const svc = makeSvc(http, cf);
+    svc.initialize(['cf-1']);
+    svc.selectedCnsi.set('cf-1');
+    TestBed.tick();
+    await svc.loadAll();
+    TestBed.tick();
+    expect(svc.selectedCnsi()).toBe('cf-1');
+  });
+
   it('cnsiOptions picks up connected CF endpoints from CloudFoundryService', () => {
     const http = makeHttp();
     const cf = makeStubCfService([
