@@ -7,7 +7,7 @@ import {
   EndpointType,
   ActionState,
 } from '@stratosui/store';
-import { combineLatest, Observable, of, Subject, Subscription } from 'rxjs';
+import { combineLatest, Observable, of, Subject, Subscription, timer } from 'rxjs';
 import { delay, distinctUntilChanged, filter, map, pairwise, startWith, switchMap, tap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../core/endpoints.service';
@@ -105,9 +105,17 @@ export class ConnectEndpointService {
       pairwise(),
       switchMap(([oldBusy, newBusy]) => {
         if (oldBusy === true && newBusy === false) {
-          return busy$.pipe(
-            delay(this.connectDelay),
-            startWith(true)
+          // The inner observable covers the UI after the connect request
+          // resolves. Use a timer instead of re-subscribing to busy$ so a
+          // failed connect (which never emits a fresh busy=false on the
+          // monitor) still flips connecting$ back to false after the
+          // delay — the previous "busy$.pipe(delay, startWith(true))"
+          // form relied on busy$ emitting inside the window, which
+          // doesn't happen on the error branch and left both Cancel and
+          // Connect disabled indefinitely.
+          return timer(this.connectDelay).pipe(
+            map(() => false),
+            startWith(true),
           );
         }
         return of(newBusy);

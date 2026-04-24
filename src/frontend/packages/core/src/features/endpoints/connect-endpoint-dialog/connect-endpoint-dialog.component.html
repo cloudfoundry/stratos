@@ -21,8 +21,7 @@
     [show]="(connectService.connectingError$ | async) && (connectService.isBusy$ | async) === false">
   </app-dialog-error>
   <div class="dialog-actions connection-dialog__actions">
-    <button (click)="dialogRef.close()" class="btn btn-warn"
-    [disabled]="(connectService.isBusy$ | async)">Cancel</button>
+    <button (click)="dialogRef.close()" class="btn btn-warn">Cancel</button>
     <button (click)="connect()" [disabled]="(connectService.isBusy$ | async) || !valid" class="btn btn-primary">Connect</button>
   </div>
 </div>
