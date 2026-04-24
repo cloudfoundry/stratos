@@ -37,7 +37,7 @@
 <div class="endpoints-content flex flex-col flex-1 min-h-0">
   @if (isInitialised$ | async) {
     @if ((endpointsService.haveRegistered$ | async)) {
-      <app-list class="flex-1"></app-list>
+      <app-endpoints-signal-list class="flex-1"></app-endpoints-signal-list>
     } @else {
       @if (!customizations.noEndpointsComponent) {
         <app-endpoints-missing
