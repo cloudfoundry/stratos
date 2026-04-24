@@ -13,6 +13,7 @@ func (c *CloudFoundrySpecification) addNativeRoutes(echoGroup *echo.Group) {
 	echoGroup.PATCH("/cf/apps/:cnsiGuid/:appGuid", c.patchApp)
 	echoGroup.POST("/cf/apps/:cnsiGuid/:appGuid/actions/:action", c.appAction)
 	echoGroup.POST("/cf/apps/:cnsiGuid/:appGuid/scale", c.scaleApp)
+	echoGroup.GET("/cf/app-stats/:cnsiGuid/:appGuid", c.getAppStats)
 	echoGroup.PUT("/cf/apps/:cnsiGuid/:appGuid/routes/:routeGuid", c.assignRouteToApp)
 	echoGroup.GET("/cf/spaces/:cnsiGuid", c.getNativeSpaces)
 	echoGroup.GET("/cf/routes/:cnsiGuid", c.getNativeRouteCount)

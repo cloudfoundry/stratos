@@ -1,4 +1,4 @@
-import { Injectable, Signal, WritableSignal, computed, effect, inject, signal } from '@angular/core';
+import { DestroyRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
@@ -45,6 +45,22 @@ export class CfAppsSignalConfigService {
   // config is built. Missing keys fall back to the app's `name` field
   // so the filter still does SOMETHING sensible if the caller mis-wires.
   private readonly _filterExtractors: WritableSignal<Map<string, (row: StApp) => string>> = signal(new Map());
+
+  // Per-instance stats summary, keyed by rowKey (${cnsiGuid}:${appGuid}).
+  // Populated lazily for apps currently on the page by refreshStatsForKeys;
+  // the app-wall Instances column reads this signal to render "running /
+  // desired" instead of the plain desired count. Apps not yet fetched
+  // render as "— / desired" (dash reuses the em-dash convention used for
+  // unresolved CF/Org/Space lookups). A short polling interval keeps
+  // starting/crashed instances visually fresh without flooding the
+  // backend.
+  private readonly _appStats: WritableSignal<Map<string, { running: number; total: number }>> =
+    signal(new Map());
+  readonly appStats: Signal<Map<string, { running: number; total: number }>> =
+    computed(() => this._appStats());
+  private statsTimer?: ReturnType<typeof setInterval>;
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly injector = inject(Injector);
 
   // View mode (table / card). Default mirrors the legacy Stratos app wall.
   readonly viewMode: WritableSignal<SignalListViewMode> = signal('table');
@@ -320,6 +336,79 @@ export class CfAppsSignalConfigService {
       const next = new Map(curr);
       next.set(fieldKey, extractor);
       return next;
+    });
+  }
+
+  // Fetch per-instance stats for the given (cnsiGuid, appGuid) pairs in
+  // parallel and merge them into the appStats signal. Designed to be
+  // called with the keys of rows currently visible on the page — NOT
+  // every known app — to keep round-trips bounded even on large walls.
+  // Failures are swallowed per-app (the entry is cleared for that key)
+  // so one bad endpoint doesn't block the rest of the page.
+  private refreshStatsForKeys(rowKeys: readonly string[]): void {
+    if (!rowKeys.length) return;
+    for (const key of rowKeys) {
+      const sep = key.indexOf(':');
+      if (sep <= 0) continue;
+      const cnsiGuid = key.slice(0, sep);
+      const appGuid = key.slice(sep + 1);
+      this.http
+        .get<{ instances?: Array<{ state?: string }> }>(
+          `/pp/v1/cf/app-stats/${cnsiGuid}/${appGuid}`,
+        )
+        .subscribe({
+          next: (resp) => {
+            const list = Array.isArray(resp?.instances) ? resp.instances : [];
+            const running = list.filter((i) => (i?.state ?? '').toUpperCase() === 'RUNNING').length;
+            const total = list.length;
+            this._appStats.update((curr) => {
+              const next = new Map(curr);
+              next.set(key, { running, total });
+              return next;
+            });
+          },
+          error: () => {
+            // Leave any previously cached value in place — a transient
+            // 502/504 shouldn't clear the number the user was just looking
+            // at. If we've never seen this key, it stays absent and the
+            // column falls back to the "—" placeholder.
+          },
+        });
+    }
+  }
+
+  // Kick off an initial stats fetch for the currently visible page, plus
+  // an interval-based refresh. Safe to call more than once — the timer
+  // is reset each time. Call from the app-wall once the view pipeline is
+  // initialized; registerDestroy stops the timer on teardown.
+  //
+  // Page / sort / filter changes happen more often than the poll tick,
+  // so we ALSO re-fetch reactively whenever pagedItems changes — the
+  // user navigating to page 2 sees stats fill in within a few hundred
+  // ms rather than waiting up to intervalMs.
+  startStatsPolling(intervalMs: number = 30000): void {
+    if (this.statsTimer) {
+      clearInterval(this.statsTimer);
+    }
+    const runOnce = () => {
+      const keys = this.view.pagedItems().map((a) => `${a.cnsiGuid}:${a.guid}`);
+      this.refreshStatsForKeys(keys);
+    };
+    runOnce();
+    this.statsTimer = setInterval(runOnce, intervalMs);
+    // effect() requires an injection context; startStatsPolling is called
+    // from the component's ngOnInit which isn't one. Wrap it explicitly.
+    runInInjectionContext(this.injector, () => {
+      effect(() => {
+        const keys = this.view.pagedItems().map((a) => `${a.cnsiGuid}:${a.guid}`);
+        this.refreshStatsForKeys(keys);
+      });
+    });
+    this.destroyRef.onDestroy(() => {
+      if (this.statsTimer) {
+        clearInterval(this.statsTimer);
+        this.statsTimer = undefined;
+      }
     });
   }
 

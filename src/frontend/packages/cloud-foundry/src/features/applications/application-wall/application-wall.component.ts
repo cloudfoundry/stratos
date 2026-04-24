@@ -250,7 +250,13 @@ export class ApplicationWallComponent implements OnInit {
         },
         {
           header: 'Instances', key: 'instances', sortField: 'instances',
-          render: (app: StApp) => String(app.instances ?? 0),
+          render: (app: StApp) => {
+            const desired = app.instances ?? 0;
+            const rowKey = `${app.cnsiGuid}:${app.guid}`;
+            const s = this.appsConfig.appStats().get(rowKey);
+            if (!s) return `— / ${desired}`;
+            return `${s.running} / ${desired}`;
+          },
           widthHint: '6rem',
         },
         {
@@ -317,6 +323,11 @@ export class ApplicationWallComponent implements OnInit {
     if (cnsiGuids.length > 0) {
       void this.appsConfig.loadAll();
     }
+    // Drive the Instances column's running / desired display. The timer
+    // ticks every 30s so STARTING / CRASHED instances drift toward their
+    // terminal state without user input; it ALSO re-fetches whenever
+    // pagedItems changes so navigating pages fills the column quickly.
+    this.appsConfig.startStatsPolling();
   }
 
   static formatMb(mb: number | null | undefined): string {
