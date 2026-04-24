@@ -87,13 +87,16 @@ export interface StAppsResponse {
 }
 
 export interface StRoutesResponse {
+  resources?: StRoute[];
   totalResults: number;
 }
 
 // Mirror of the backend StRoute DTO (native_types.go). `url` is the
 // CF-rendered full URL so the UI can display it directly; no need to
 // re-compose from host + domain + port. `port` is undefined for HTTP
-// routes, set for TCP.
+// routes, set for TCP. `appGuids` is populated by the backend via a
+// /v3/routes/{guid}/destinations fan-out; omit when the list was fetched
+// via the counts path.
 export interface StRoute {
   guid: string;
   url: string;
@@ -102,6 +105,8 @@ export interface StRoute {
   port?: number;
   domainGuid: string;
   spaceGuid: string;
+  cnsiGuid: string;
+  appGuids?: string[];
   createdAt: string;
   updatedAt: string;
 }

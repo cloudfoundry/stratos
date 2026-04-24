@@ -58,8 +58,8 @@ import {
   CloudFoundrySpaceEventsComponent,
 } from './tabs/cf-organizations/cf-organization-spaces/tabs/cloud-foundry-space-events/cloud-foundry-space-events.component';
 import {
-  CloudFoundrySpaceRoutesComponent,
-} from './tabs/cf-organizations/cf-organization-spaces/tabs/cloud-foundry-space-routes/cloud-foundry-space-routes.component';
+  CloudFoundrySpaceRoutesSignalComponent,
+} from './tabs/cf-organizations/cf-organization-spaces/tabs/cloud-foundry-space-routes/cloud-foundry-space-routes-signal.component';
 import {
   CloudFoundrySpaceServiceInstancesComponent,
 } from './tabs/cf-organizations/cf-organization-spaces/tabs/cloud-foundry-space-service-instances/cloud-foundry-space-service-instances.component';
@@ -374,7 +374,7 @@ export const CLOUD_FOUNDRY_SECTION_ROUTES: Routes = [{
                 },
                 {
                   path: 'routes',
-                  component: CloudFoundrySpaceRoutesComponent
+                  component: CloudFoundrySpaceRoutesSignalComponent
                 },
                 {
                   path: 'users',

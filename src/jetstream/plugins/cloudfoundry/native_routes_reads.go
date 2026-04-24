@@ -60,7 +60,7 @@ func (c *CloudFoundrySpecification) getAppRoutes(ctx echo.Context) error {
 
 	out := make([]StRoute, 0, len(resources))
 	for _, r := range resources {
-		out = append(out, toStRoute(r))
+		out = append(out, toStRoute(r, cnsiGUID))
 	}
 
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
@@ -70,8 +70,11 @@ func (c *CloudFoundrySpecification) getAppRoutes(ctx echo.Context) error {
 	})
 }
 
-// toStRoute maps a capi.Route onto a Stratos-shape StRoute DTO.
-func toStRoute(r capi.Route) StRoute {
+// toStRoute maps a capi.Route onto a Stratos-shape StRoute DTO. cnsiGUID is
+// stamped into the row so the frontend can key favorites + delete calls by
+// (cnsi, route) without threading the endpoint through every closure — same
+// convention as StApp/StOrg/StSpace.
+func toStRoute(r capi.Route, cnsiGUID string) StRoute {
 	return StRoute{
 		GUID:       r.GUID,
 		URL:        r.URL,
@@ -80,6 +83,7 @@ func toStRoute(r capi.Route) StRoute {
 		Port:       r.Port,
 		DomainGUID: relationshipGUID(r.Relationships.Domain),
 		SpaceGUID:  relationshipGUID(r.Relationships.Space),
+		CnsiGUID:   cnsiGUID,
 		CreatedAt:  r.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		UpdatedAt:  r.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}

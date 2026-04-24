@@ -472,6 +472,105 @@ func (c *CloudFoundrySpecification) getNativeSpaces(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, StSpacesResponse{Resources: spaces, TotalResults: totalResults})
 }
 
+// listAllRoutes drains /v3/routes and returns the full set plus the total
+// count. Page 1 synchronous; pages 2..N parallel with bounded concurrency.
+// Mirrors listAllOrgs/listAllSpaces/listAllApps.
+func listAllRoutes(ctx context.Context, cfClient capi.Client) ([]capi.Route, int, error) {
+	firstParams := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
+	firstParams.Page = 1
+	first, err := cfClient.Routes().List(ctx, firstParams)
+	if err != nil {
+		return nil, 0, err
+	}
+	totalResults := first.Pagination.TotalResults
+	totalPages := first.Pagination.TotalPages
+	all := make([]capi.Route, 0, totalResults)
+	all = append(all, first.Resources...)
+	if totalPages <= 1 {
+		return all, totalResults, nil
+	}
+
+	pageResources := make([][]capi.Route, totalPages+1)
+	g, gctx := errgroup.WithContext(ctx)
+	g.SetLimit(maxParallelPages)
+	for page := 2; page <= totalPages; page++ {
+		p := page
+		g.Go(func() error {
+			params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
+			params.Page = p
+			raw, err := cfClient.Routes().List(gctx, params)
+			if err != nil {
+				return err
+			}
+			pageResources[p] = raw.Resources
+			return nil
+		})
+	}
+	if err := g.Wait(); err != nil {
+		return nil, 0, err
+	}
+	for p := 2; p <= totalPages; p++ {
+		all = append(all, pageResources[p]...)
+	}
+	return all, totalResults, nil
+}
+
+// populateRouteDestinations fills routes[i].AppGUIDs from CF v3's
+// /v3/routes/{guid}/destinations endpoint, one request per route, with
+// bounded parallelism (maxParallelPages).
+//
+// CF v3 doesn't return destinations inline on the list endpoint, so the
+// Route cell can't show mapped apps without this extra fan-out. For a space
+// with N routes this costs N CAPI calls; bounded concurrency keeps the worst
+// case predictable on large spaces without overwhelming CAPI.
+//
+// Errors on any one destinations call are logged and the route's AppGUIDs
+// stays nil — the UI will render the route without app segments rather than
+// failing the whole list. Treat partial data as acceptable; the page still
+// renders.
+func populateRouteDestinations(ctx context.Context, cfClient capi.Client, routes []StRoute) {
+	if len(routes) == 0 {
+		return
+	}
+	g, gctx := errgroup.WithContext(ctx)
+	g.SetLimit(maxParallelPages)
+	for i := range routes {
+		idx := i
+		guid := routes[idx].GUID
+		g.Go(func() error {
+			dests, derr := cfClient.Routes().ListDestinations(gctx, guid)
+			if derr != nil {
+				log.Warnf("routes: ListDestinations(%s) failed: %v", guid, derr)
+				return nil
+			}
+			if dests == nil || len(dests.Destinations) == 0 {
+				return nil
+			}
+			appGUIDs := make([]string, 0, len(dests.Destinations))
+			for _, d := range dests.Destinations {
+				if d.App.GUID != "" {
+					appGUIDs = append(appGUIDs, d.App.GUID)
+				}
+			}
+			routes[idx].AppGUIDs = appGUIDs
+			return nil
+		})
+	}
+	_ = g.Wait()
+}
+
+// getNativeRouteCount dispatches on ?return=
+//   - counts (default legacy path): per_page=1, totalResults only. Kept as
+//     the default because home-page card count + endpoint-data route count
+//     only need the total; paying to drain every route + every destination
+//     would balloon the home-page load.
+//   - (none or any other value): full list, paginated, with each route's
+//     mapped apps resolved via ListDestinations. Used by the
+//     CloudFoundrySpaceRoutesSignalComponent.
+//
+// The query-param dispatch mirrors getNativeOrgs/getNativeApps/getNativeSpaces.
+// "counts" retains the original wire format on the same URL so endpoint-data
+// consumers don't need to change URLs.
 func (c *CloudFoundrySpecification) getNativeRouteCount(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	userGUID, err := c.getUserGUID(ctx)
@@ -484,16 +583,32 @@ func (c *CloudFoundrySpecification) getNativeRouteCount(ctx echo.Context) error 
 		return err
 	}
 
-	// Request per_page=1 — we only need the total count, not all resources.
-	params := capi.NewQueryParams().WithPerPage(1)
-	raw, err := cfClient.Routes().List(ctx.Request().Context(), params)
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+
+	if ctx.QueryParam("return") == "counts" {
+		// Request per_page=1 — we only need the total count, not all resources.
+		params := capi.NewQueryParams().WithPerPage(1)
+		raw, err := cfClient.Routes().List(ctx.Request().Context(), params)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadGateway, err.Error())
+		}
+		return ctx.JSON(http.StatusOK, StRoutesResponse{
+			TotalResults: raw.Pagination.TotalResults,
+		})
+	}
+
+	resources, totalResults, err := listAllRoutes(ctx.Request().Context(), cfClient)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
 	}
-
-	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+	routes := make([]StRoute, 0, len(resources))
+	for _, r := range resources {
+		routes = append(routes, toStRoute(r, cnsiGUID))
+	}
+	populateRouteDestinations(ctx.Request().Context(), cfClient, routes)
 	return ctx.JSON(http.StatusOK, StRoutesResponse{
-		TotalResults: raw.Pagination.TotalResults,
+		Resources:    routes,
+		TotalResults: totalResults,
 	})
 }
 

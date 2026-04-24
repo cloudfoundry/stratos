@@ -53,7 +53,8 @@ type StAppsResponse struct {
 }
 
 type StRoutesResponse struct {
-	TotalResults int `json:"totalResults"`
+	Resources    []StRoute `json:"resources,omitempty"`
+	TotalResults int       `json:"totalResults"`
 }
 
 // StRoute is the Stratos-shaped DTO for a CF route. Used by the delete-app
@@ -65,15 +66,17 @@ type StRoutesResponse struct {
 // "tcp.example.com:4040") — the frontend can render it directly without
 // re-composing from host + domain + port.
 type StRoute struct {
-	GUID       string `json:"guid"`
-	URL        string `json:"url"`
-	Host       string `json:"host"`
-	Path       string `json:"path"`
-	Port       *int   `json:"port,omitempty"`
-	DomainGUID string `json:"domainGuid"`
-	SpaceGUID  string `json:"spaceGuid"`
-	CreatedAt  string `json:"createdAt"`
-	UpdatedAt  string `json:"updatedAt"`
+	GUID       string   `json:"guid"`
+	URL        string   `json:"url"`
+	Host       string   `json:"host"`
+	Path       string   `json:"path"`
+	Port       *int     `json:"port,omitempty"`
+	DomainGUID string   `json:"domainGuid"`
+	SpaceGUID  string   `json:"spaceGuid"`
+	CnsiGUID   string   `json:"cnsiGuid"`
+	AppGUIDs   []string `json:"appGuids,omitempty"`
+	CreatedAt  string   `json:"createdAt"`
+	UpdatedAt  string   `json:"updatedAt"`
 }
 
 type StAppRoutesResponse struct {
