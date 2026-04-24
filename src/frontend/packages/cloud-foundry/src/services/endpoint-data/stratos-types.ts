@@ -144,3 +144,30 @@ export interface StSpacesResponse {
   resources: StSpace[];
   totalResults: number;
 }
+
+// Mirror of the backend StServiceOffering DTO
+// (native_service_offerings_reads.go). One row per CF service offering — the
+// catalog entry advertised by a broker, NOT an instantiated service. Drives
+// the marketplace list page.
+//
+// `public` corresponds to CF v3's `available` boolean (legacy Stratos UI
+// labelled it "Public"). `brokerName` is populated by the backend via a
+// batch fetch of /v3/service_brokers; falls back to '' on broker-list error.
+// `tags` is normalised to a non-null array on the backend so consumers can
+// `.join(',')` without a null guard.
+export interface StServiceOffering {
+  guid: string;
+  name: string;
+  description: string;
+  brokerName: string;
+  tags: string[];
+  public: boolean;
+  cnsiGuid: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StServiceOfferingsResponse {
+  resources: StServiceOffering[];
+  totalResults: number;
+}

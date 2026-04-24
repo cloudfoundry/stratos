@@ -114,3 +114,30 @@ type StSpacesResponse struct {
 	Resources    []StSpace `json:"resources"`
 	TotalResults int       `json:"totalResults"`
 }
+
+// StServiceOffering is the Stratos-shaped DTO for a CF service offering — i.e.
+// a catalog entry advertised by a service broker, NOT an instantiated service.
+// Drives the marketplace list page.
+//
+// Public is sourced from CF's `available` field — the legacy term used in the
+// 481 Stratos UI was "Public" (the offering is visible/usable across the
+// foundation). BrokerName is populated by a second-pass batch fetch of
+// /v3/service_brokers filtered on the collected broker GUIDs (mirrors the
+// service-bindings join). Tags retain the broker-provided list verbatim;
+// the UI joins them as comma-separated text.
+type StServiceOffering struct {
+	GUID        string   `json:"guid"`
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	BrokerName  string   `json:"brokerName"`
+	Tags        []string `json:"tags"`
+	Public      bool     `json:"public"`
+	CnsiGUID    string   `json:"cnsiGuid"`
+	CreatedAt   string   `json:"createdAt"`
+	UpdatedAt   string   `json:"updatedAt"`
+}
+
+type StServiceOfferingsResponse struct {
+	Resources    []StServiceOffering `json:"resources"`
+	TotalResults int                 `json:"totalResults"`
+}
