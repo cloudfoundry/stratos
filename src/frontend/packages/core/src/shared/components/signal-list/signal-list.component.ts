@@ -51,12 +51,22 @@ export interface SignalListConfig<T> {
   readonly totalPages: Signal<number>;
   readonly pageIndex: WritableSignal<number>;
   readonly pageSize: WritableSignal<number>;
-  readonly pageSizeOptions?: readonly number[];
+  // Page-size options presented to the user. Accepts either a single array
+  // (applies to both view modes) or a per-mode record so tables can default
+  // to tighter rows (10/25/50/100) while card grids favor larger pages
+  // (6/12/24/48/96). When the user toggles viewMode, the page size snaps
+  // to the first option for the new mode to avoid showing a value that
+  // isn't in the dropdown.
+  readonly pageSizeOptions?: readonly number[] | { table: readonly number[]; card: readonly number[] };
   readonly isAnyLoading: Signal<boolean>;
   readonly errorsByCnsi: Signal<Map<string, unknown>>;
   readonly columns: SignalListColumn<T>[];
   readonly getRowKey: (row: T) => string;
   readonly emptyMessage?: string;
+  // Shown instead of emptyMessage when totalFilteredResults === 0 AND a
+  // filter is active (any dropdown selected or nameFilter non-empty). Lets
+  // the UI distinguish "no apps here" from "your filters match nothing".
+  readonly emptyFilterMessage?: string;
   readonly loadingMessage?: string;
   readonly nameFilter?: WritableSignal<string>;
   readonly filterDropdowns?: SignalListDropdown[];
@@ -194,7 +204,13 @@ export class SignalListComponent<T> implements AfterViewInit {
   }
 
   pageSizeOptions(): readonly number[] {
-    return this.config.pageSizeOptions ?? [5, 20, 50, 80];
+    const opts = this.config.pageSizeOptions;
+    if (!opts) return [5, 20, 50, 80];
+    if ('table' in opts && 'card' in opts) {
+      const mode = this.config.viewMode ? this.config.viewMode() : 'table';
+      return mode === 'card' ? opts.card : opts.table;
+    }
+    return opts;
   }
 
   rangeText(): string {
@@ -215,6 +231,17 @@ export class SignalListComponent<T> implements AfterViewInit {
 
   setViewMode(mode: SignalListViewMode): void {
     this.config.viewMode?.set(mode);
+    // Snap pageSize to a valid option for the new mode when per-mode
+    // options are configured. Otherwise the dropdown would display blank
+    // and the "X of Y" range would reflect a size not in the picker.
+    const opts = this.config.pageSizeOptions;
+    if (opts && 'table' in opts && 'card' in opts) {
+      const next = mode === 'card' ? opts.card : opts.table;
+      if (next.length && !next.includes(this.config.pageSize())) {
+        this.config.pageSize.set(next[0]);
+        this.config.pageIndex.set(0);
+      }
+    }
   }
 
   // Sort support ---------------------------------------------------------

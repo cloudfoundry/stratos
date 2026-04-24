@@ -36,9 +36,9 @@
         type="button"
         (click)="config.onClear!()"
         [disabled]="!hasActiveFilter()"
-        title="Clear filters"
+        title="Clear filters and sort"
         class="px-2 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
-        Clear
+        <span class="material-icons text-base leading-5">highlight_off</span>
       </button>
     }
 
@@ -109,10 +109,17 @@
         </div>
       </div>
     } @else if (config.totalFilteredResults() === 0) {
-      <div data-test="empty" class="flex flex-col items-center justify-center h-full gap-3 text-content-muted">
-        <span class="material-icons text-6xl opacity-30">apps</span>
-        <span class="text-base">{{ config.emptyMessage ?? 'There are no items' }}</span>
-      </div>
+      @if (hasActiveFilter()) {
+        <div data-test="empty-filtered" class="flex flex-col items-center justify-center h-full gap-3 text-content-muted">
+          <span class="material-icons text-6xl opacity-30">filter_list_off</span>
+          <span class="text-base">{{ config.emptyFilterMessage ?? 'No items match the current filters' }}</span>
+        </div>
+      } @else {
+        <div data-test="empty" class="flex flex-col items-center justify-center h-full gap-3 text-content-muted">
+          <span class="material-icons text-6xl opacity-30">apps</span>
+          <span class="text-base">{{ config.emptyMessage ?? 'There are no items' }}</span>
+        </div>
+      }
     } @else if (config.viewMode && config.viewMode!() === 'card') {
       <div data-test="card-grid"
            class="grid gap-3 p-3"

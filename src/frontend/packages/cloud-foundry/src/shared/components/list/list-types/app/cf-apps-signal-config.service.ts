@@ -19,7 +19,7 @@ export class CfAppsSignalConfigService {
   // User-controlled filter / sort / pagination state.
   readonly filter: WritableSignal<(app: StApp) => boolean> = signal(() => true);
   readonly sort: WritableSignal<SortSpec<StApp>> = signal({ field: 'name', direction: 'asc' });
-  readonly pageSize: WritableSignal<number> = signal(20);
+  readonly pageSize: WritableSignal<number> = signal(25);
   readonly pageIndex: WritableSignal<number> = signal(0);
   // Map of sort-field key → value-extractor function, for columns whose
   // sort value is derived from multiple entity properties (e.g., the
@@ -269,6 +269,7 @@ export class CfAppsSignalConfigService {
     this.selectedOrg.set(null);
     this.selectedSpace.set(null);
     this.nameFilter.set('');
+    this.sort.set({ field: 'name', direction: 'asc' });
     this.pageIndex.set(0);
   }
 

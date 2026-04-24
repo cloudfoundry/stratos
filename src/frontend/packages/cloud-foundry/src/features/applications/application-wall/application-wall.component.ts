@@ -211,7 +211,12 @@ export class ApplicationWallComponent implements OnInit {
       ],
       getRowKey: (app: StApp) => `${app.cnsiGuid}:${app.guid}`,
       emptyMessage: 'There are no applications',
+      emptyFilterMessage: 'No applications match the current filters',
       loadingMessage: 'Loading applications…',
+      pageSizeOptions: {
+        table: [10, 25, 50, 100],
+        card: [6, 12, 24, 48, 96],
+      },
       nameFilter: this.appsConfig.nameFilter,
       filterDropdowns: dropdowns,
       onRefresh: () => this.appsConfig.refresh(),
