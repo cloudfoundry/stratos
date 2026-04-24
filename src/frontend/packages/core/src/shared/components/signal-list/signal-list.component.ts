@@ -13,6 +13,16 @@ export interface SignalListCompoundSegment {
   readonly link?: readonly (string | number)[];
 }
 
+// Binding for a `kind: 'favorite'` column. The consumer owns persistence
+// (typically via UserFavoriteManager); SignalListComponent just reads
+// membership in the signal and calls toggle on click. Keys are row keys
+// per config.getRowKey so the component doesn't need a bespoke favorite
+// id scheme.
+export interface SignalListFavoriteBinding<T> {
+  readonly keys: Signal<ReadonlySet<string>>;
+  readonly toggle: (row: T) => void;
+}
+
 export interface SignalListColumn<T> {
   header: string;
   render: (row: T) => string;
@@ -23,7 +33,7 @@ export interface SignalListColumn<T> {
   // when the column is sortable. Defaults to the header text.
   key?: string;
   // Presentation hint. Default is 'text'.
-  kind?: 'text' | 'link' | 'pill' | 'dot' | 'compound';
+  kind?: 'text' | 'link' | 'pill' | 'dot' | 'compound' | 'favorite';
   // Required when kind === 'link'. Returns the router-link target array,
   // or null to render as plain text.
   link?: (row: T) => readonly (string | number)[] | null;
@@ -37,6 +47,11 @@ export interface SignalListColumn<T> {
   // service's filter/sort extractors can delegate to it for parity with
   // the visual.
   compound?: (row: T) => readonly SignalListCompoundSegment[];
+  // Required when kind === 'favorite'. See SignalListFavoriteBinding.
+  // In table view the column renders as its own narrow cell; in card
+  // view the star attaches to the Name line so the card doesn't grow
+  // an extra row just for the favorite icon.
+  favorite?: SignalListFavoriteBinding<T>;
   // Optional CSS width value (e.g. '12rem', '20%'). When set, applied via a
   // <col> in the table's <colgroup>. Unset columns share remaining width
   // equally under the fixed table layout.
@@ -323,6 +338,22 @@ export class SignalListComponent<T> implements AfterViewInit {
 
   showFilterFieldSelector(): boolean {
     return !!this.config.filterField && this.filterableColumns().length >= 2;
+  }
+
+  // Returns the first column configured as kind === 'favorite'; the
+  // card-body uses this to attach the star to the Name row so the
+  // favorite column doesn't render as a label:value detail line.
+  favoriteColumn(): SignalListColumn<T> | null {
+    return this.config.columns.find(c => c.kind === 'favorite' && !!c.favorite) ?? null;
+  }
+
+  isFavorite(col: SignalListColumn<T>, row: T): boolean {
+    return !!col.favorite && col.favorite.keys().has(this.config.getRowKey(row));
+  }
+
+  onToggleFavorite(col: SignalListColumn<T>, row: T, ev: Event): void {
+    ev.stopPropagation();
+    col.favorite?.toggle(row);
   }
 
   onFilterFieldChange(field: string): void {

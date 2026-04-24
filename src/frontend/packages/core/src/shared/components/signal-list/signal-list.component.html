@@ -145,13 +145,29 @@
             <div class="p-3">
               @for (col of config.columns; track col.header; let first = $first) {
                 @if (first) {
-                  <div class="font-semibold text-base text-content-text truncate mb-2" [attr.title]="col.render(row)">
-                    @if (col.kind === 'link' && col.link && col.link(row); as target) {
-                      <a [routerLink]="target" class="text-accent hover:underline">{{ col.render(row) }}</a>
-                    } @else {
-                      {{ col.render(row) }}
+                  <div class="font-semibold text-base text-content-text mb-2 flex items-center justify-between gap-2">
+                    <span class="truncate min-w-0" [attr.title]="col.render(row)">
+                      @if (col.kind === 'link' && col.link && col.link(row); as target) {
+                        <a [routerLink]="target" class="text-accent hover:underline">{{ col.render(row) }}</a>
+                      } @else {
+                        {{ col.render(row) }}
+                      }
+                    </span>
+                    @if (favoriteColumn(); as fc) {
+                      <button
+                        data-test="favorite-star"
+                        type="button"
+                        (click)="onToggleFavorite(fc, row, $event)"
+                        [title]="isFavorite(fc, row) ? 'Remove from favorites' : 'Add to favorites'"
+                        class="inline-flex items-center justify-center p-0.5 text-content-muted hover:text-accent shrink-0">
+                        <span class="material-icons text-xl leading-none" [class.text-accent]="isFavorite(fc, row)">
+                          {{ isFavorite(fc, row) ? 'star' : 'star_border' }}
+                        </span>
+                      </button>
                     }
                   </div>
+                } @else if (col.kind === 'favorite') {
+                  <!-- Suppressed: star is attached to the Name row above -->
                 } @else if (col.kind === 'compound' && col.compound) {
                   <div class="flex items-start justify-between gap-2 text-sm py-0.5">
                     <span class="text-content-muted shrink-0">{{ col.header }}</span>
@@ -249,6 +265,17 @@
                         }
                       }
                     </div>
+                  } @else if (col.kind === 'favorite' && col.favorite) {
+                    <button
+                      data-test="favorite-star"
+                      type="button"
+                      (click)="onToggleFavorite(col, row, $event)"
+                      [title]="isFavorite(col, row) ? 'Remove from favorites' : 'Add to favorites'"
+                      class="inline-flex items-center justify-center p-0.5 text-content-muted hover:text-accent">
+                      <span class="material-icons text-xl leading-none" [class.text-accent]="isFavorite(col, row)">
+                        {{ isFavorite(col, row) ? 'star' : 'star_border' }}
+                      </span>
+                    </button>
                   } @else {
                     {{ col.render(row) }}
                   }

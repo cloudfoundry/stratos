@@ -1,9 +1,10 @@
 import { animate, query, style, transition, trigger } from '@angular/animations';
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, OnInit, ChangeDetectionStrategy, inject, signal, WritableSignal } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, Signal, inject, signal, WritableSignal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, firstValueFrom } from 'rxjs';
+import { Observable, combineLatest, firstValueFrom } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
 
 import {
@@ -14,8 +15,14 @@ import {
   SignalListDropdown,
   SignalListPillColor,
 } from '@stratosui/core';
-import { EndpointModel, getFullEndpointApiUrl } from '@stratosui/store';
+import {
+  EndpointModel,
+  UserFavorite,
+  UserFavoriteManager,
+  getFullEndpointApiUrl,
+} from '@stratosui/store';
 import { CFAppState } from '../../../cf-app-state';
+import { applicationEntityType } from '../../../cf-entity-types';
 import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { CfAppsSignalConfigService } from '../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
@@ -58,6 +65,38 @@ export class ApplicationWallComponent implements OnInit {
   cloudFoundryService = inject(CloudFoundryService);
   private store = inject<Store<CFAppState>>(Store);
   private appsConfig = inject(CfAppsSignalConfigService);
+  private userFavoriteManager = inject(UserFavoriteManager);
+
+  // Row keys ({cnsiGuid}:{appGuid}) for apps the user has favorited.
+  // Derived from UserFavoriteManager's combined (groups, entities) stream
+  // and exposed as a Signal so SignalListColumn.favorite can subscribe to
+  // it directly. Recomputes when a favorite is added/removed anywhere,
+  // which re-renders the affected star cells under OnPush.
+  private readonly favoriteAppRowKeys: Signal<ReadonlySet<string>> = toSignal(
+    this.userFavoriteManager.getAllFavorites().pipe(
+      map(([groups, entities]) => {
+        const out = new Set<string>();
+        if (!groups || !entities) return out;
+        for (const epFavGuid in groups) {
+          const g = groups[epFavGuid];
+          if (!g?.entitiesIds) continue;
+          for (const favId of g.entitiesIds) {
+            const fav = entities[favId];
+            if (fav && fav.entityType === applicationEntityType && fav.endpointType === 'cf') {
+              out.add(`${fav.endpointId}:${fav.entityId}`);
+            }
+          }
+        }
+        return out;
+      }),
+    ),
+    { initialValue: new Set<string>() },
+  );
+
+  private toggleAppFavorite(app: StApp): void {
+    const fav = new UserFavorite(app.cnsiGuid, 'cf', applicationEntityType, app.guid);
+    this.userFavoriteManager.toggleFavorite(fav);
+  }
 
   public cfIds$!: Observable<string[]>;
 
@@ -235,6 +274,16 @@ export class ApplicationWallComponent implements OnInit {
           header: 'Created', key: 'createdAt', sortField: 'createdAt',
           render: (app: StApp) => ApplicationWallComponent.formatDate(app.createdAt),
           widthHint: '12rem',
+        },
+        {
+          header: '', key: 'favorite',
+          kind: 'favorite',
+          favorite: {
+            keys: this.favoriteAppRowKeys,
+            toggle: (app: StApp) => this.toggleAppFavorite(app),
+          },
+          render: () => '',
+          widthHint: '3rem',
         },
       ],
       getRowKey: (app: StApp) => `${app.cnsiGuid}:${app.guid}`,
