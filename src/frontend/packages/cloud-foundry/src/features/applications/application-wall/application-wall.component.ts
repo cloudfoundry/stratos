@@ -8,12 +8,16 @@ import { Observable, combineLatest, firstValueFrom } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
 
 import {
+  ConfirmationDialogConfig,
+  ConfirmationDialogService,
   PageHeaderComponent,
   SignalListComponent,
   SignalListCompoundSegment,
   SignalListConfig,
   SignalListDropdown,
   SignalListPillColor,
+  SignalListRowAction,
+  TailwindSnackBarService,
 } from '@stratosui/core';
 import {
   EndpointModel,
@@ -66,6 +70,8 @@ export class ApplicationWallComponent implements OnInit {
   private store = inject<Store<CFAppState>>(Store);
   private appsConfig = inject(CfAppsSignalConfigService);
   private userFavoriteManager = inject(UserFavoriteManager);
+  private confirmDialog = inject(ConfirmationDialogService);
+  private snackBar = inject(TailwindSnackBarService);
 
   // Row keys ({cnsiGuid}:{appGuid}) for apps the user has favorited.
   // Derived from UserFavoriteManager's combined (groups, entities) stream
@@ -97,6 +103,65 @@ export class ApplicationWallComponent implements OnInit {
     const fav = new UserFavorite(app.cnsiGuid, 'cf', applicationEntityType, app.guid);
     this.userFavoriteManager.toggleFavorite(fav);
   }
+
+  // Builds the per-row kebab-menu action list. Start/Stop mutually
+  // exclude on the app's current state so the menu only offers the
+  // operation that applies. Restart / Restage stay visible in all
+  // states but are disabled when the app isn't STARTED — keeping them
+  // visible makes the menu shape stable as a single app transitions.
+  // Delete always appears, styled as a destructive action, and routes
+  // through a confirmation dialog before actually calling deleteApp.
+  private buildAppActions = (app: StApp): readonly SignalListRowAction<StApp>[] => {
+    const state = (app.state ?? '').toUpperCase();
+    const isStarted = state === 'STARTED';
+    const isStopped = state === 'STOPPED';
+    const runAction = async (label: string, op: () => Promise<void>) => {
+      try {
+        await op();
+        await this.appsConfig.refresh();
+      } catch (err: any) {
+        this.snackBar.open(`${label} failed: ${err?.message ?? err}`, 'Dismiss');
+      }
+    };
+    const actions: SignalListRowAction<StApp>[] = [];
+    if (isStarted) {
+      actions.push({
+        label: 'Stop', icon: 'stop',
+        invoke: () => runAction('Stop', () => this.appsConfig.stopApp(app.cnsiGuid, app.guid)),
+      });
+    }
+    if (isStopped) {
+      actions.push({
+        label: 'Start', icon: 'play_arrow',
+        invoke: () => runAction('Start', () => this.appsConfig.startApp(app.cnsiGuid, app.guid)),
+      });
+    }
+    actions.push({
+      label: 'Restart', icon: 'refresh',
+      disabled: !isStarted,
+      invoke: () => runAction('Restart', () => this.appsConfig.restartApp(app.cnsiGuid, app.guid)),
+    });
+    actions.push({
+      label: 'Restage', icon: 'cached',
+      disabled: !isStarted,
+      invoke: () => runAction('Restage', () => this.appsConfig.restageApp(app.cnsiGuid, app.guid)),
+    });
+    actions.push({
+      label: 'Delete', icon: 'delete', danger: true,
+      invoke: () => {
+        const confirm = new ConfirmationDialogConfig(
+          'Delete Application',
+          `Are you sure you want to delete "${app.name}"? This cannot be undone.`,
+          'Delete',
+          true,
+        );
+        this.confirmDialog.open(confirm, async () => {
+          await runAction('Delete', () => this.appsConfig.deleteApp(app.cnsiGuid, app.guid));
+        });
+      },
+    });
+    return actions;
+  };
 
   public cfIds$!: Observable<string[]>;
 
@@ -288,6 +353,13 @@ export class ApplicationWallComponent implements OnInit {
             keys: this.favoriteAppRowKeys,
             toggle: (app: StApp) => this.toggleAppFavorite(app),
           },
+          render: () => '',
+          widthHint: '3rem',
+        },
+        {
+          header: '', key: 'actions',
+          kind: 'actions',
+          actions: this.buildAppActions,
           render: () => '',
           widthHint: '3rem',
         },

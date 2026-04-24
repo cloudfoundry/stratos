@@ -1,4 +1,4 @@
-import { Component, Input, Signal, WritableSignal, ChangeDetectionStrategy, ElementRef, ViewChild, signal, DestroyRef, inject, AfterViewInit } from '@angular/core';
+import { Component, HostListener, Input, Signal, WritableSignal, ChangeDetectionStrategy, ElementRef, ViewChild, signal, DestroyRef, inject, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
@@ -23,6 +23,21 @@ export interface SignalListFavoriteBinding<T> {
   readonly toggle: (row: T) => void;
 }
 
+// One entry in a `kind: 'actions'` kebab menu. Callers return the set
+// relevant to each row — items that don't apply (e.g. Stop on a stopped
+// app) can either be elided from the array or emitted with `disabled:
+// true`. Prefer eliding when the action simply has no meaning; keep
+// disabled for temporarily-unavailable actions so the menu shape stays
+// stable. `danger` applies destructive styling (red), useful for delete-
+// style entries that should stand apart visually.
+export interface SignalListRowAction<T> {
+  readonly label: string;
+  readonly icon?: string;
+  readonly disabled?: boolean;
+  readonly danger?: boolean;
+  readonly invoke: (row: T) => void | Promise<void>;
+}
+
 export interface SignalListColumn<T> {
   header: string;
   render: (row: T) => string;
@@ -33,7 +48,7 @@ export interface SignalListColumn<T> {
   // when the column is sortable. Defaults to the header text.
   key?: string;
   // Presentation hint. Default is 'text'.
-  kind?: 'text' | 'link' | 'pill' | 'dot' | 'compound' | 'favorite';
+  kind?: 'text' | 'link' | 'pill' | 'dot' | 'compound' | 'favorite' | 'actions';
   // Required when kind === 'link'. Returns the router-link target array,
   // or null to render as plain text.
   link?: (row: T) => readonly (string | number)[] | null;
@@ -52,6 +67,13 @@ export interface SignalListColumn<T> {
   // view the star attaches to the Name line so the card doesn't grow
   // an extra row just for the favorite icon.
   favorite?: SignalListFavoriteBinding<T>;
+  // Required when kind === 'actions'. Returns the kebab-menu entries
+  // for this row. The cell renders a `more_vert` button; clicking
+  // opens a popover menu with the returned entries. At most one row's
+  // menu is open at any time; clicking outside (or on another kebab)
+  // dismisses. Card mode treats the kebab identically to the favorite
+  // star and lifts it onto the Name row.
+  actions?: (row: T) => readonly SignalListRowAction<T>[];
   // Optional CSS width value (e.g. '12rem', '20%'). When set, applied via a
   // <col> in the table's <colgroup>. Unset columns share remaining width
   // equally under the fixed table layout.
@@ -345,6 +367,42 @@ export class SignalListComponent<T> implements AfterViewInit {
   // favorite column doesn't render as a label:value detail line.
   favoriteColumn(): SignalListColumn<T> | null {
     return this.config.columns.find(c => c.kind === 'favorite' && !!c.favorite) ?? null;
+  }
+
+  // Returns the first column configured as kind === 'actions'; the
+  // card-body uses this to attach the kebab to the Name row so the
+  // column doesn't render as a label:value detail line.
+  actionsColumn(): SignalListColumn<T> | null {
+    return this.config.columns.find(c => c.kind === 'actions' && !!c.actions) ?? null;
+  }
+
+  // Row key whose kebab menu is currently open. null = no menu open.
+  // Clicking a kebab sets this to the row's key; clicking it again or
+  // anywhere outside an open menu clears it.
+  readonly openActionsRowKey: WritableSignal<string | null> = signal(null);
+
+  toggleRowActions(row: T, ev: Event): void {
+    ev.stopPropagation();
+    const key = this.config.getRowKey(row);
+    this.openActionsRowKey.update(curr => (curr === key ? null : key));
+  }
+
+  invokeAction(act: SignalListRowAction<T>, row: T, ev: Event): void {
+    ev.stopPropagation();
+    if (act.disabled) return;
+    this.openActionsRowKey.set(null);
+    void act.invoke(row);
+  }
+
+  // Any click that bubbles up to the document and isn't inside an
+  // open menu or on a kebab button closes the menu. Per-menu/kebab
+  // handlers already stopPropagation so clicks on them never reach
+  // here. Cheap enough to run always — no-op when no menu is open.
+  @HostListener('document:click', ['$event'])
+  onDocumentClickForActions(_ev: MouseEvent): void {
+    if (this.openActionsRowKey() !== null) {
+      this.openActionsRowKey.set(null);
+    }
   }
 
   isFavorite(col: SignalListColumn<T>, row: T): boolean {
