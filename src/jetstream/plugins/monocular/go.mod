@@ -1,20 +1,20 @@
 module github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular
 
-go 1.24.2
+go 1.26.2
 
 require (
-	github.com/Masterminds/semver/v3 v3.3.1
-	github.com/cloudfoundry/stratos/src/jetstream v0.0.0-20250312201517-2a076063346f
+	github.com/Masterminds/semver/v3 v3.4.0
+	github.com/cloudfoundry/stratos/src/jetstream v0.0.0-00010101000000-000000000000
 	github.com/cloudfoundry/stratos/src/jetstream/api v0.0.0-20250312201517-2a076063346f
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/pressly/goose v2.7.0+incompatible
 	github.com/satori/go.uuid v1.2.0
-	github.com/sirupsen/logrus v1.9.3
+	github.com/sirupsen/logrus v1.9.4
 	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
-	filippo.io/edwards25519 v1.1.0 // indirect
+	filippo.io/edwards25519 v1.2.0 // indirect
 	github.com/cloudfoundry-community/go-cfenv v1.18.0 // indirect
 	github.com/go-sql-driver/mysql v1.9.2 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
@@ -34,10 +34,10 @@ require (
 	github.com/sclevine/spec v1.4.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
-	golang.org/x/crypto v0.38.0 // indirect
-	golang.org/x/net v0.40.0 // indirect
-	golang.org/x/sys v0.33.0 // indirect
-	golang.org/x/text v0.25.0 // indirect
+	golang.org/x/crypto v0.49.0 // indirect
+	golang.org/x/net v0.52.0 // indirect
+	golang.org/x/sys v0.42.0 // indirect
+	golang.org/x/text v0.35.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
 
