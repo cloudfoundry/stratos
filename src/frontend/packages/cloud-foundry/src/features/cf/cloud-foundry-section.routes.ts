@@ -78,7 +78,7 @@ import {
 import {
   CloudFoundryOrganizationUsersComponent,
 } from './tabs/cf-organizations/cf-organization-users/cloud-foundry-organization-users.component';
-import { CloudFoundryOrganizationsComponent } from './tabs/cf-organizations/cloud-foundry-organizations.component';
+import { CloudFoundryOrganizationsSignalComponent } from './tabs/cf-organizations/cloud-foundry-organizations-signal.component';
 import { CloudFoundryQuotasComponent } from './tabs/cf-quotas/cloud-foundry-quotas.component';
 import { CloudFoundryRoutesComponent } from './tabs/cf-routes/cloud-foundry-routes.component';
 import { CloudFoundrySecurityGroupsComponent } from './tabs/cf-security-groups/cloud-foundry-security-groups.component';
@@ -203,7 +203,7 @@ export const CLOUD_FOUNDRY_SECTION_ROUTES: Routes = [{
             },
             {
               path: 'organizations',
-              component: CloudFoundryOrganizationsComponent,
+              component: CloudFoundryOrganizationsSignalComponent,
             },
             {
               path: 'users',
