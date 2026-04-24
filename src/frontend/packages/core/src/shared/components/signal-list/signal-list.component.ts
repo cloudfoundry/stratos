@@ -69,6 +69,16 @@ export interface SignalListConfig<T> {
   readonly emptyFilterMessage?: string;
   readonly loadingMessage?: string;
   readonly nameFilter?: WritableSignal<string>;
+  // Column keys (see SignalListColumn.key / header fallback) eligible for
+  // the text-filter. When 2+ entries are provided AND filterField is
+  // supplied, the toolbar renders a dropdown left of the text input that
+  // picks WHICH column the filter compares against. 0-1 entries = no
+  // selector (text filter keeps its current target — typically name).
+  readonly filterColumns?: readonly string[];
+  // When filterColumns has 2+ entries, this signal tracks the active
+  // filter field key. Writes trigger re-filtering via whatever predicate
+  // the caller has registered on the data source.
+  readonly filterField?: WritableSignal<string>;
   readonly filterDropdowns?: SignalListDropdown[];
   readonly onRefresh?: () => void | Promise<void>;
   // Optional — when provided, the toolbar renders a "Clear" button that
@@ -275,6 +285,42 @@ export class SignalListComponent<T> implements AfterViewInit {
 
   sortableColumns(): SignalListColumn<T>[] {
     return this.config.columns.filter(c => c.sortField != null);
+  }
+
+  // Columns eligible for the text-filter dropdown. Returns columns whose
+  // key (or header fallback) appears in config.filterColumns, preserving
+  // the order the caller specified. Empty iff the caller didn't opt in or
+  // listed keys that don't match any configured column.
+  filterableColumns(): SignalListColumn<T>[] {
+    const keys = this.config.filterColumns;
+    if (!keys || keys.length === 0) return [];
+    const byKey = new Map<string, SignalListColumn<T>>();
+    for (const col of this.config.columns) byKey.set(this.columnKey(col), col);
+    const out: SignalListColumn<T>[] = [];
+    for (const k of keys) {
+      const col = byKey.get(k);
+      if (col) out.push(col);
+    }
+    return out;
+  }
+
+  showFilterFieldSelector(): boolean {
+    return !!this.config.filterField && this.filterableColumns().length >= 2;
+  }
+
+  onFilterFieldChange(field: string): void {
+    this.config.filterField?.set(field);
+    this.config.pageIndex.set(0);
+  }
+
+  // Placeholder text for the text-filter input; tracks the active field
+  // when the selector is shown so users see e.g. "Filter by CF/Org/Space".
+  // Falls back to "Filter by Name" for the single-field case.
+  filterPlaceholder(): string {
+    if (!this.showFilterFieldSelector()) return 'Filter by Name';
+    const key = this.config.filterField!();
+    const col = this.config.columns.find(c => this.columnKey(c) === key);
+    return `Filter by ${col?.header ?? 'Name'}`;
   }
 
   onSortFieldChange(field: string): void {

@@ -22,9 +22,20 @@
     <div class="flex-1"></div>
 
     @if (config.nameFilter) {
+      @if (showFilterFieldSelector()) {
+        <select
+          data-test="filter-field"
+          (change)="onFilterFieldChange($any($event.target).value)"
+          title="Filter by"
+          class="px-2 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text">
+          @for (col of filterableColumns(); track col.header) {
+            <option [value]="columnKey(col)" [selected]="config.filterField!() === columnKey(col)">{{ col.header }}</option>
+          }
+        </select>
+      }
       <input
         type="text"
-        placeholder="Filter by Name"
+        [placeholder]="filterPlaceholder()"
         [value]="config.nameFilter()"
         (input)="config.nameFilter!.set($any($event.target).value)"
         class="px-3 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text" />

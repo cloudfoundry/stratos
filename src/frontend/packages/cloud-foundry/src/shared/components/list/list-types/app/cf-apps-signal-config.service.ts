@@ -35,6 +35,16 @@ export class CfAppsSignalConfigService {
   readonly selectedOrg:   WritableSignal<string | null> = signal(null);
   readonly selectedSpace: WritableSignal<string | null> = signal(null);
   readonly nameFilter:    WritableSignal<string>        = signal('');
+  // Which column the text filter compares against. Starts on 'name' —
+  // matches the pre-selector behavior. The app wall registers extractors
+  // for each filterable column and populates filterColumns in its
+  // SignalListConfig so the UI renders a selector.
+  readonly filterField:   WritableSignal<string>        = signal('name');
+  // Map of filter-field key → string extractor. Mirrors the sort
+  // extractor pattern: the app wall populates this after the column
+  // config is built. Missing keys fall back to the app's `name` field
+  // so the filter still does SOMETHING sensible if the caller mis-wires.
+  private readonly _filterExtractors: WritableSignal<Map<string, (row: StApp) => string>> = signal(new Map());
 
   // View mode (table / card). Default mirrors the legacy Stratos app wall.
   readonly viewMode: WritableSignal<SignalListViewMode> = signal('table');
@@ -199,11 +209,17 @@ export class CfAppsSignalConfigService {
       const org = this.selectedOrg();
       const space = this.selectedSpace();
       const q = this.nameFilter().trim().toLowerCase();
+      const field = this.filterField();
+      const extractors = this._filterExtractors();
+      const extractor = extractors.get(field);
       this.filter.set((app: StApp) => {
         if (cnsi && app.cnsiGuid !== cnsi) return false;
         if (org && app.orgGuid !== org) return false;
         if (space && app.spaceGuid !== space) return false;
-        if (q && !(app.name || '').toLowerCase().includes(q)) return false;
+        if (q) {
+          const hay = (extractor ? extractor(app) : (app.name ?? '')).toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
         return true;
       });
     });
@@ -269,6 +285,7 @@ export class CfAppsSignalConfigService {
     this.selectedOrg.set(null);
     this.selectedSpace.set(null);
     this.nameFilter.set('');
+    this.filterField.set('name');
     this.sort.set({ field: 'name', direction: 'asc' });
     this.pageIndex.set(0);
   }
@@ -287,6 +304,19 @@ export class CfAppsSignalConfigService {
   // config; ViewPipeline re-reads extractors on every sort change.
   registerSortExtractor(fieldKey: string, extractor: (row: StApp) => unknown): void {
     this._sortExtractors.update(curr => {
+      const next = new Map(curr);
+      next.set(fieldKey, extractor);
+      return next;
+    });
+  }
+
+  // Register a string extractor for a text-filter field. Used when the
+  // user selects a filter column other than 'name': the effect that
+  // derives the filter predicate reads from this map and calls the
+  // extractor to get the haystack string for each row. Re-registering
+  // the same key replaces the previous extractor.
+  registerFilterExtractor(fieldKey: string, extractor: (row: StApp) => string): void {
+    this._filterExtractors.update(curr => {
       const next = new Map(curr);
       next.set(fieldKey, extractor);
       return next;

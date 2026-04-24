@@ -218,6 +218,8 @@ export class ApplicationWallComponent implements OnInit {
         card: [6, 12, 24, 48, 96],
       },
       nameFilter: this.appsConfig.nameFilter,
+      filterColumns: ['name', 'state', 'cfOrgSpace'],
+      filterField: this.appsConfig.filterField,
       filterDropdowns: dropdowns,
       onRefresh: () => this.appsConfig.refresh(),
       onClear: () => this.appsConfig.clearFilters(),
@@ -228,6 +230,13 @@ export class ApplicationWallComponent implements OnInit {
     // Register sort extractors for columns whose sort key is composed from
     // multiple entity fields (rather than a direct property on StApp).
     this.appsConfig.registerSortExtractor('cfOrgSpace', renderCfOrgSpace);
+    // Register text-filter extractors for each column eligible for the
+    // filter-field dropdown. 'name' uses the raw field; 'state' uses the
+    // user-facing label (so typing "crashed" matches STATE=CRASHED); and
+    // 'cfOrgSpace' flattens the composite column to its rendered string.
+    this.appsConfig.registerFilterExtractor('name', (app: StApp) => app.name ?? '');
+    this.appsConfig.registerFilterExtractor('state', stateLabel);
+    this.appsConfig.registerFilterExtractor('cfOrgSpace', renderCfOrgSpace);
     if (cnsiGuids.length > 0) {
       void this.appsConfig.loadAll();
     }
