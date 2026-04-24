@@ -19,22 +19,23 @@ import {
   UserFavoriteManager,
 } from '@stratosui/store';
 
-import { CfRoutesSignalConfigService } from '../../../../../../../shared/components/list/list-types/route/cf-routes-signal-config.service';
-import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
-import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
-import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
-import type { StApp, StRoute } from '../../../../../../../services/endpoint-data/stratos-types';
+import { CfRoutesSignalConfigService } from '../../../../shared/components/list/list-types/route/cf-routes-signal-config.service';
+import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
+import type { StApp, StRoute } from '../../../../services/endpoint-data/stratos-types';
 
-// Signal-native replacement for CloudFoundrySpaceRoutesComponent.
-// Scoped to one space under one org under one CF endpoint (all three guids
-// supplied by the route-level services). Its CfRoutesSignalConfigService
-// owns its own fetch against /pp/v1/cf/routes/:cnsi (home-page cache
-// carries counts only, not the full list), then filters client-side to
-// this.spaceGuid.
+// Signal-native replacement for CloudFoundryRoutesComponent at
+// /cloud-foundry/:cnsi/routes. CNSI-wide — shows every route the CF
+// returns, with a Space / Org column resolving the route's spaceGuid
+// and orgGuid via the same EndpointDataService signals the home-page
+// parallelization cache populates.
+//
+// Reuses CfRoutesSignalConfigService; the service honours an empty
+// spaceGuid as "no filter" so the same fetch-and-view machinery serves
+// both the per-space and the CF-level pages.
 @Component({
-  selector: 'app-cloud-foundry-space-routes-signal',
-  templateUrl: './cloud-foundry-space-routes-signal.component.html',
-  styleUrls: ['./cloud-foundry-space-routes-signal.component.scss'],
+  selector: 'app-cloud-foundry-routes-signal',
+  templateUrl: './cloud-foundry-routes-signal.component.html',
+  styleUrls: ['./cloud-foundry-routes-signal.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
@@ -43,18 +44,13 @@ import type { StApp, StRoute } from '../../../../../../../services/endpoint-data
     SignalListComponent,
   ],
 })
-export class CloudFoundrySpaceRoutesSignalComponent {
+export class CloudFoundryRoutesSignalComponent {
   cfEndpointService = inject(CloudFoundryEndpointService);
-  cfOrgService = inject(CloudFoundryOrganizationService);
-  cfSpaceService = inject(CloudFoundrySpaceService);
   private routesConfig = inject(CfRoutesSignalConfigService);
   private userFavoriteManager = inject(UserFavoriteManager);
   private confirmDialog = inject(ConfirmationDialogService);
   private snackBar = inject(TailwindSnackBarService);
 
-  // Favorite keys in rowKey format (${cnsi}:${routeGuid}). Reads route
-  // favorites from the manager and projects to the row-key set the
-  // SignalListColumn.favorite binding expects.
   private readonly favoriteRouteRowKeys: Signal<ReadonlySet<string>> = toSignal(
     this.userFavoriteManager.getAllFavorites().pipe(
       map(([groups, entities]) => {
@@ -76,9 +72,6 @@ export class CloudFoundrySpaceRoutesSignalComponent {
     { initialValue: new Set<string>() },
   );
 
-  // Map of appGuid -> appName, derived from the endpoint-data service's
-  // apps() signal. Keeps the Route cell's per-app segments display names
-  // only (never raw GUIDs in user-facing cells).
   private readonly appNameByGuid: Signal<Map<string, string>> = computed(() => {
     const all: StApp[] = this.routesConfig.endpointData?.apps() ?? [];
     const m = new Map<string, string>();
@@ -90,13 +83,10 @@ export class CloudFoundrySpaceRoutesSignalComponent {
 
   constructor() {
     const cfGuid = this.cfEndpointService.cfGuid;
-    const orgGuid = this.cfOrgService.orgGuid;
-    const spaceGuid = this.cfSpaceService.spaceGuid;
-    this.routesConfig.initialize(cfGuid, spaceGuid);
+    // No spaceGuid — service shows every route in the CNSI.
+    this.routesConfig.initialize(cfGuid);
 
     const displayUrl = (r: StRoute): string => {
-      // Prefer the backend-rendered full URL; fall back to host + path for
-      // the (unusual) case where CAPI omitted the rendered URL.
       if (r.url && r.url.length > 0) return r.url;
       const host = r.host ?? '';
       const path = r.path ?? '';
@@ -104,17 +94,12 @@ export class CloudFoundrySpaceRoutesSignalComponent {
     };
 
     const renderApps = (r: StRoute): string => {
-      // Used for sort/filter string shape only; the visual cell renders via
-      // the compound function below.
       const guids = r.appGuids ?? [];
       if (guids.length === 0) return '';
       return guids.map(g => this.appNameByGuid().get(g) ?? '—').join(', ');
     };
 
     const compoundApps = (r: StRoute): SignalListCompoundSegment[] => {
-      // Each bound app becomes its own line with a link to the app-detail
-      // page. Apps whose name hasn't resolved yet render as '—' plain text
-      // — never surface raw GUIDs in user-facing cells.
       const out: SignalListCompoundSegment[] = [];
       for (const appGuid of r.appGuids ?? []) {
         const name = this.appNameByGuid().get(appGuid);
@@ -127,9 +112,33 @@ export class CloudFoundrySpaceRoutesSignalComponent {
       return out;
     };
 
-    // TCP vs HTTP indicator. CF V3 distinguishes TCP routes by carrying a
-    // port number in the route resource (HTTP routes have no port). Using a
-    // pill instead of a dot so the 3-letter label reads clearly.
+    const renderSpace = (r: StRoute): string => {
+      const spaceName = this.routesConfig.spaceNameByGuid().get(r.spaceGuid) ?? '—';
+      const orgGuid = this.routesConfig.orgGuidBySpaceGuid().get(r.spaceGuid);
+      const orgName = orgGuid ? (this.routesConfig.orgNameByGuid().get(orgGuid) ?? '—') : '—';
+      return `${orgName} / ${spaceName}`;
+    };
+
+    const compoundSpace = (r: StRoute): SignalListCompoundSegment[] => {
+      // Stack org name above space name, each linked to its detail page
+      // when the name has resolved (never raw GUIDs in user-facing cells).
+      const spaceName = this.routesConfig.spaceNameByGuid().get(r.spaceGuid);
+      const orgGuid = this.routesConfig.orgGuidBySpaceGuid().get(r.spaceGuid);
+      const orgName = orgGuid ? this.routesConfig.orgNameByGuid().get(orgGuid) : undefined;
+      const out: SignalListCompoundSegment[] = [];
+      if (orgName && orgGuid) {
+        out.push({ text: orgName, link: ['/cloud-foundry', r.cnsiGuid, 'organizations', orgGuid] });
+      } else {
+        out.push({ text: '—' });
+      }
+      if (spaceName && orgGuid) {
+        out.push({ text: spaceName, link: ['/cloud-foundry', r.cnsiGuid, 'organizations', orgGuid, 'spaces', r.spaceGuid] });
+      } else {
+        out.push({ text: '—' });
+      }
+      return out;
+    };
+
     const typeLabel = (r: StRoute): string => (r.port != null ? 'TCP' : 'HTTP');
     const typeColor = (r: StRoute): SignalListPillColor =>
       r.port != null ? 'warning' : 'neutral';
@@ -147,14 +156,14 @@ export class CloudFoundrySpaceRoutesSignalComponent {
           header: 'Route', key: 'url', sortField: 'url',
           kind: 'text',
           render: displayUrl,
-          widthHint: '24rem',
+          widthHint: '22rem',
         },
         {
           header: 'Attached Applications', key: 'apps', sortField: renderApps,
           kind: 'compound',
           compound: compoundApps,
           render: renderApps,
-          widthHint: '18rem',
+          widthHint: '16rem',
         },
         {
           header: 'Type', key: 'type', sortField: typeLabel,
@@ -164,8 +173,15 @@ export class CloudFoundrySpaceRoutesSignalComponent {
           widthHint: '6rem',
         },
         {
+          header: 'Org / Space', key: 'orgSpace', sortField: renderSpace,
+          kind: 'compound',
+          compound: compoundSpace,
+          render: renderSpace,
+          widthHint: '16rem',
+        },
+        {
           header: 'Created', key: 'createdAt', sortField: 'createdAt',
-          render: (r: StRoute) => CloudFoundrySpaceRoutesSignalComponent.formatDate(r.createdAt),
+          render: (r: StRoute) => CloudFoundryRoutesSignalComponent.formatDate(r.createdAt),
           widthHint: '12rem',
         },
         {
@@ -187,7 +203,7 @@ export class CloudFoundrySpaceRoutesSignalComponent {
         },
       ],
       getRowKey: (r: StRoute) => `${r.cnsiGuid}:${r.guid}`,
-      emptyMessage: 'There are no routes in this space',
+      emptyMessage: 'There are no routes in this Cloud Foundry',
       emptyFilterMessage: 'No routes match the current filters',
       loadingMessage: 'Loading routes…',
       pageSizeOptions: {
@@ -201,9 +217,10 @@ export class CloudFoundrySpaceRoutesSignalComponent {
       sort: this.routesConfig.sort,
     });
 
-    // URL-based sort reads the rendered URL so host+path fallback sorts in
-    // the same order the user sees.
     this.routesConfig.registerSortExtractor('url', displayUrl);
+    this.routesConfig.registerSortExtractor('apps', renderApps);
+    this.routesConfig.registerSortExtractor('type', typeLabel);
+    this.routesConfig.registerSortExtractor('orgSpace', renderSpace);
   }
 
   private toggleRouteFavorite(route: StRoute): void {

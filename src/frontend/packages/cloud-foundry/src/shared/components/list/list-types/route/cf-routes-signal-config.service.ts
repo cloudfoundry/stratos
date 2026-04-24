@@ -27,11 +27,18 @@ export class CfRoutesSignalConfigService {
 
   private endpointDataService?: EndpointDataService;
   private cnsiGuid = '';
+  // Empty string = show all routes for the CNSI (the CF-level Routes tab).
+  // Non-empty = narrow to that space only (the per-space Routes tab).
   private spaceGuid = '';
 
   readonly filter: WritableSignal<(route: StRoute) => boolean> = signal(() => true);
   readonly sort: WritableSignal<SortSpec<StRoute>> = signal({ field: 'url', direction: 'asc' });
-  readonly pageSize: WritableSignal<number> = signal(25);
+  // Default to 6 (card mode's first option). Stays in sync with viewMode's
+  // 'card' default — a 25 pageSize would fall outside the card options
+  // [6,12,24,48,96] and the picker would render blank on first load.
+  // setViewMode's snap logic handles toggle transitions; initial mount has
+  // to be consistent by itself.
+  readonly pageSize: WritableSignal<number> = signal(6);
   readonly pageIndex: WritableSignal<number> = signal(0);
   readonly nameFilter: WritableSignal<string> = signal('');
   readonly viewMode: WritableSignal<'table' | 'card'> = signal('card');
@@ -43,7 +50,10 @@ export class CfRoutesSignalConfigService {
   private readonly _allRoutes: WritableSignal<StRoute[]> = signal([]);
 
   readonly routes: Signal<StRoute[]> = computed(() => {
-    return this._allRoutes().filter(r => r.spaceGuid === this.spaceGuid);
+    const all = this._allRoutes();
+    // CF-level page passes no space — show every route in the CNSI.
+    if (!this.spaceGuid) return all;
+    return all.filter(r => r.spaceGuid === this.spaceGuid);
   });
 
   view!: ViewPipeline<StRoute>;
@@ -53,9 +63,9 @@ export class CfRoutesSignalConfigService {
   private readonly _hasLoadedOnce = signal(false);
   readonly hasLoadedOnce: Signal<boolean> = this._hasLoadedOnce.asReadonly();
 
-  initialize(cnsiGuid: string, spaceGuid: string): void {
+  initialize(cnsiGuid: string, spaceGuid?: string): void {
     this.cnsiGuid = cnsiGuid;
-    this.spaceGuid = spaceGuid;
+    this.spaceGuid = spaceGuid ?? '';
     // Acquire the endpoint-data service so its apps() signal is live —
     // the Route cell's per-app-guid segments lean on apps() to resolve
     // app names.
@@ -94,6 +104,44 @@ export class CfRoutesSignalConfigService {
   get endpointData(): EndpointDataService | undefined {
     return this.endpointDataService;
   }
+
+  // spaceGuid → space-name lookup, used by the CF-level routes page to
+  // show which space each route lives in without the per-row having to
+  // repeat the lookup. Built from EndpointDataService.spaces() so the
+  // mapping updates as the home-page parallelization work populates
+  // the per-CNSI spaces list.
+  readonly spaceNameByGuid: Signal<Map<string, string>> = computed(() => {
+    const map = new Map<string, string>();
+    const spaces = this.endpointDataService?.spaces() ?? [];
+    for (const s of spaces) {
+      map.set(s.guid, s.name);
+    }
+    return map;
+  });
+
+  // orgGuid → orgName, keyed off the same spaces signal (each space
+  // knows its org and the endpoint-data service tracks the org list
+  // independently). The CF-level routes page can render CF/Space/Org
+  // context per row via this + spaceNameByGuid.
+  readonly orgNameByGuid: Signal<Map<string, string>> = computed(() => {
+    const map = new Map<string, string>();
+    const orgs = this.endpointDataService?.orgs() ?? [];
+    for (const o of orgs) {
+      map.set(o.guid, o.name);
+    }
+    return map;
+  });
+
+  // spaceGuid → orgGuid, for composing the space → org link without a
+  // second Map lookup at the row level.
+  readonly orgGuidBySpaceGuid: Signal<Map<string, string>> = computed(() => {
+    const map = new Map<string, string>();
+    const spaces = this.endpointDataService?.spaces() ?? [];
+    for (const s of spaces) {
+      map.set(s.guid, s.orgGuid);
+    }
+    return map;
+  });
 
   private async fetchRoutes(): Promise<void> {
     try {
