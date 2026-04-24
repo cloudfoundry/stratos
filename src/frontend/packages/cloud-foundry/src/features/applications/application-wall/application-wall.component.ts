@@ -9,6 +9,7 @@ import { filter, map, take } from 'rxjs/operators';
 import {
   PageHeaderComponent,
   SignalListComponent,
+  SignalListCompoundSegment,
   SignalListConfig,
   SignalListDropdown,
   SignalListPillColor,
@@ -149,16 +150,41 @@ export class ApplicationWallComponent implements OnInit {
       if (s === 'FAILED') return 'Failed';
       return app.state ?? '';
     };
-    const renderCfOrgSpace = (app: StApp): string => {
+    const resolveCfOrgSpace = (app: StApp): { cfName: string; orgName: string; spaceName: string } => {
       // Show name when resolved; '—' placeholder when still loading or the
       // name-lookup 504'd. Never surface raw GUIDs in this column —
       // user-facing cells read names, and briefly flashing GUIDs before the
       // name map lands (or leaving them there when /pp/v1/cf/spaces times
       // out) is worse UX than an em-dash. GUIDs remain in the URL + tooltip.
-      const cf = this.appsConfig.endpointNames().get(app.cnsiGuid) ?? '—';
+      const cfName = this.appsConfig.endpointNames().get(app.cnsiGuid) ?? '—';
       const orgName = app.orgGuid ? (this.appsConfig.orgNames().get(app.orgGuid) ?? '—') : '—';
       const spaceName = app.spaceGuid ? (this.appsConfig.spaceNames().get(app.spaceGuid) ?? '—') : '—';
-      return `${cf} / ${orgName} / ${spaceName}`;
+      return { cfName, orgName, spaceName };
+    };
+    const renderCfOrgSpace = (app: StApp): string => {
+      const { cfName, orgName, spaceName } = resolveCfOrgSpace(app);
+      return `${cfName} / ${orgName} / ${spaceName}`;
+    };
+    const compoundCfOrgSpace = (app: StApp): SignalListCompoundSegment[] => {
+      const { cfName, orgName, spaceName } = resolveCfOrgSpace(app);
+      // Link to the detail page only once the guid + name are both known.
+      // When the lookup is still pending (name = '—') the segment renders
+      // as plain text, matching the em-dash visual and avoiding dead
+      // anchors that would navigate into an unloaded detail page.
+      const cfLink = app.cnsiGuid && cfName !== '—'
+        ? ['/cloud-foundry', app.cnsiGuid]
+        : undefined;
+      const orgLink = app.orgGuid && orgName !== '—'
+        ? ['/cloud-foundry', app.cnsiGuid, 'organizations', app.orgGuid]
+        : undefined;
+      const spaceLink = app.orgGuid && app.spaceGuid && spaceName !== '—'
+        ? ['/cloud-foundry', app.cnsiGuid, 'organizations', app.orgGuid, 'spaces', app.spaceGuid]
+        : undefined;
+      return [
+        { text: cfName, link: cfLink },
+        { text: orgName, link: orgLink },
+        { text: spaceName, link: spaceLink },
+      ];
     };
     this.listConfig.set({
       pagedItems: this.appsConfig.view.pagedItems,
@@ -200,6 +226,8 @@ export class ApplicationWallComponent implements OnInit {
         },
         {
           header: 'CF/Org/Space', key: 'cfOrgSpace', sortField: renderCfOrgSpace,
+          kind: 'compound',
+          compound: compoundCfOrgSpace,
           render: renderCfOrgSpace,
           widthHint: '18rem',
         },

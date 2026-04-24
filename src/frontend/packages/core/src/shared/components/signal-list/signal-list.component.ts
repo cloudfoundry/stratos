@@ -4,6 +4,15 @@ import { RouterModule } from '@angular/router';
 
 export type SignalListPillColor = 'success' | 'warning' | 'danger' | 'neutral';
 
+// One line of a `kind: 'compound'` cell. `link` is optional — segments
+// without a link render as plain text, so callers can safely emit
+// placeholder strings ('—') while lookups resolve without making them
+// click as dead anchors.
+export interface SignalListCompoundSegment {
+  readonly text: string;
+  readonly link?: readonly (string | number)[];
+}
+
 export interface SignalListColumn<T> {
   header: string;
   render: (row: T) => string;
@@ -14,12 +23,20 @@ export interface SignalListColumn<T> {
   // when the column is sortable. Defaults to the header text.
   key?: string;
   // Presentation hint. Default is 'text'.
-  kind?: 'text' | 'link' | 'pill' | 'dot';
+  kind?: 'text' | 'link' | 'pill' | 'dot' | 'compound';
   // Required when kind === 'link'. Returns the router-link target array,
   // or null to render as plain text.
   link?: (row: T) => readonly (string | number)[] | null;
   // Optional for kind === 'pill' or 'dot'. Returns a color family. Default: neutral.
   pillColor?: (row: T) => SignalListPillColor;
+  // Required when kind === 'compound'. Returns an ordered list of segments;
+  // each segment renders on its own line within the cell. Segments with
+  // `link` render as cyan router links, those without render as plain
+  // text (useful when a referenced entity is still loading or lookup
+  // failed). `render(row)` is still used for the filter/sort string — the
+  // service's filter/sort extractors can delegate to it for parity with
+  // the visual.
+  compound?: (row: T) => readonly SignalListCompoundSegment[];
   // Optional CSS width value (e.g. '12rem', '20%'). When set, applied via a
   // <col> in the table's <colgroup>. Unset columns share remaining width
   // equally under the fixed table layout.

@@ -152,6 +152,19 @@
                       {{ col.render(row) }}
                     }
                   </div>
+                } @else if (col.kind === 'compound' && col.compound) {
+                  <div class="flex items-start justify-between gap-2 text-sm py-0.5">
+                    <span class="text-content-muted shrink-0">{{ col.header }}</span>
+                    <div class="flex flex-col items-end leading-tight text-right min-w-0">
+                      @for (seg of col.compound(row); track $index) {
+                        @if (seg.link) {
+                          <a [routerLink]="seg.link" class="text-accent hover:underline truncate max-w-full" [attr.title]="seg.text">{{ seg.text }}</a>
+                        } @else {
+                          <span class="truncate max-w-full" [attr.title]="seg.text">{{ seg.text }}</span>
+                        }
+                      }
+                    </div>
+                  </div>
                 } @else {
                   <div class="flex justify-between items-center gap-2 text-sm py-0.5">
                     <span class="text-content-muted">{{ col.header }}</span>
@@ -226,6 +239,16 @@
                       <span [class]="dotClasses(colorFor(col, row))"></span>
                       <span class="truncate">{{ col.render(row) }}</span>
                     </span>
+                  } @else if (col.kind === 'compound' && col.compound) {
+                    <div class="flex flex-col leading-tight">
+                      @for (seg of col.compound(row); track $index) {
+                        @if (seg.link) {
+                          <a [routerLink]="seg.link" class="text-accent hover:underline truncate" [attr.title]="seg.text">{{ seg.text }}</a>
+                        } @else {
+                          <span class="truncate" [attr.title]="seg.text">{{ seg.text }}</span>
+                        }
+                      }
+                    </div>
                   } @else {
                     {{ col.render(row) }}
                   }
