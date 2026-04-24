@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { combineLatest, Observable, Subscription } from 'rxjs';
-import { take, map, switchMap } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 
 import {
   AppInputDirective,
@@ -16,8 +16,8 @@ import {
   TailwindSnackBarService
 } from '@stratosui/core';
 import { StratosStatus } from '@stratosui/store';
-import { AppMetadataTypes } from '../../../../actions/app-metadata.actions';
 import { ApplicationService } from '../../../../features/applications/application.service';
+import { CfAppsSignalConfigService } from '../../list/list-types/app/cf-apps-signal-config.service';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { RunningInstancesComponent } from '../../running-instances/running-instances.component';
 
@@ -42,6 +42,7 @@ const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig('Set Ins
 })
 export class CardAppInstancesComponent implements OnInit, OnDestroy {
   appService = inject(ApplicationService);
+  private apps = inject(CfAppsSignalConfigService);
   private renderer = inject(Renderer2);
   private confirmDialog = inject(ConfirmationDialogService);
   private snackBar = inject(TailwindSnackBarService);
@@ -87,14 +88,12 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
   // Observable on the running instances count for the application
   public runningInstances$!: Observable<number>;
 
-  private app: any;
   private snackBarRef!: TailwindSnackBarRef<any>;
 
   ngOnInit() {
     this.sub = this.appService.application$.subscribe(app => {
       if (app.app.entity) {
         this.currentCount = app.app.entity.instances;
-        this.app = app.app.entity;
       }
     });
   }
@@ -131,17 +130,17 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
 
   // Set instance count. Ask for confirmation if setting count to 0
   private setInstanceCount(value: number) {
-    const doUpdate = () => this.appService.updateApplication({ instances: value }, [AppMetadataTypes.STATS], this.app);
+    const doUpdate = async () => {
+      try {
+        await this.apps.scaleApp(this.appService.cfGuid, this.appService.appGuid, { instances: value });
+      } catch (err: any) {
+        this.snackBarRef = this.snackBar.open(`Failed to update instance count: ${err?.message ?? err}`, 'Dismiss');
+      }
+    };
     if (value === 0) {
       this.confirmDialog.open(appInstanceScaleToZeroConfirmation, doUpdate);
     } else {
-      doUpdate().pipe(
-        take(1),
-      ).subscribe(actionState => {
-        if (actionState.error) {
-          this.snackBarRef = this.snackBar.open(`Failed to update instance count: ${actionState.message}`, 'Dismiss');
-        }
-      });
+      doUpdate();
     }
   }
 }

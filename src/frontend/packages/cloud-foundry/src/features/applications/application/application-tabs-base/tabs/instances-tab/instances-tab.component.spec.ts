@@ -9,7 +9,7 @@ import { Store } from '@ngrx/store';
 
 import { PaginationMonitorFactory } from '@stratosui/store';
 import { ApplicationServiceMock } from '@test-framework/cf';
-import { ApplicationService } from '@stratosui/cloud-foundry';
+import { ApplicationService, CloudFoundryService } from '@stratosui/cloud-foundry';
 import { ListConfig } from '@stratosui/core';
 import { InstancesTabComponent } from './instances-tab.component';
 
@@ -59,6 +59,7 @@ describe('InstancesTabComponent', () => {
         { provide: Store, useValue: mockStore },
         { provide: PaginationMonitorFactory, useValue: mockPmf },
         { provide: ApplicationService, useClass: ApplicationServiceMock },
+        { provide: CloudFoundryService, useValue: { cFEndpoints$: of([]), connectedCFEndpoints$: of([]) } },
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA]
     })
