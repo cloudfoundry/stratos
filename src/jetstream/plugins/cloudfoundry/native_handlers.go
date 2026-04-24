@@ -27,6 +27,7 @@ type nativeCFProxy interface {
 	GetCNSITokenRecord(cnsiGUID string, userGUID string) (api.TokenRecord, bool)
 	GetSessionStringValue(ctx echo.Context, key string) (string, error)
 	RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (api.TokenRecord, error)
+	DoProxySingleRequestWithToken(cnsiGUID string, token *api.TokenRecord, method, requestURL string, headers http.Header, body []byte) (*api.CNSIRequest, error)
 }
 
 // getUserGUID extracts the logged-in user GUID from the session.

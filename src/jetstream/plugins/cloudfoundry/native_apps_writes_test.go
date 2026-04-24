@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -95,13 +96,16 @@ func TestDeleteNativeApp_PropagatesCapiError(t *testing.T) {
 	assert.Contains(t, rec.Body.String(), "ResourceNotFound")
 }
 
-// TestAppAction_ForwardsLifecycleVerbs parameterizes all four lifecycle
-// verbs (start/stop/restart/restage) that map 1:1 to POST
-// /v3/apps/{guid}/actions/{v}. Each CF response is 202 + Location →
-// /v3/jobs/{jobGuid}; the fork's AppsClient extracts the job GUID and
-// returns it to the handler. With no asyncTracker wired, the handler
-// falls back to bare 202 (the pre-contract behavior), which is what
-// this test pins.
+// TestAppAction_ForwardsLifecycleVerbs parameterizes the three v3 lifecycle
+// verbs (start/stop/restart) that map 1:1 to POST /v3/apps/{guid}/actions/{v}.
+// Each CF response is 202 + Location → /v3/jobs/{jobGuid}; the fork's
+// AppsClient extracts the job GUID and returns it to the handler. With no
+// asyncTracker wired, the handler falls back to bare 202 (the pre-contract
+// behavior), which is what this test pins.
+//
+// Restage is NOT in this set — CF v3 has no /actions/restage endpoint. The
+// restage verb is dispatched to restageApp (v2 passthrough); see the
+// TestRestageApp_* suite for its coverage.
 func TestAppAction_ForwardsLifecycleVerbs(t *testing.T) {
 	cases := []struct {
 		action       string
@@ -110,7 +114,6 @@ func TestAppAction_ForwardsLifecycleVerbs(t *testing.T) {
 		{"start", "/v3/apps/app-1/actions/start"},
 		{"stop", "/v3/apps/app-1/actions/stop"},
 		{"restart", "/v3/apps/app-1/actions/restart"},
-		{"restage", "/v3/apps/app-1/actions/restage"},
 	}
 
 	for _, tc := range cases {
@@ -151,6 +154,78 @@ func TestAppAction_ForwardsLifecycleVerbs(t *testing.T) {
 			assert.Equal(t, 1, capiCalls)
 		})
 	}
+}
+
+// TestRestageApp_ProxiesToV2 pins the v2 passthrough: when the frontend
+// POSTs to /pp/v1/cf/apps/{cnsi}/{app}/actions/restage, the handler must
+// call /v2/apps/{guid}/restage on the target CF using the CNSI's stored
+// token and return a sync-complete envelope on 2xx. See the long-form
+// note on restageApp for why v2 instead of a v3 composition.
+func TestRestageApp_ProxiesToV2(t *testing.T) {
+	var capturedURL string
+	var capturedMethod string
+	proxy := &mockNativeCFProxy{
+		userID:      "user-1",
+		cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL("https://cf.example.com")},
+		tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		proxyRequest: func(cnsiGUID string, token *api.TokenRecord, method, requestURL string, headers http.Header, body []byte) (*api.CNSIRequest, error) {
+			capturedURL = requestURL
+			capturedMethod = method
+			return &api.CNSIRequest{StatusCode: http.StatusCreated, Response: []byte(`{"metadata":{"guid":"app-1"}}`)}, nil
+		},
+	}
+	plugin := &CloudFoundrySpecification{testProxy: proxy}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/pp/v1/cf/apps/cnsi-1/app-1/actions/restage", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/actions/:action")
+	c.SetParamNames("cnsiGuid", "appGuid", "action")
+	c.SetParamValues("cnsi-1", "app-1", "restage")
+
+	require.NoError(t, plugin.appAction(c))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, http.MethodPost, capturedMethod)
+	assert.Equal(t, "https://cf.example.com/v2/apps/app-1/restage", capturedURL)
+
+	var body map[string]interface{}
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &body))
+	assert.Equal(t, string(stratosjobs.JobStateComplete), body["state"])
+}
+
+// TestRestageApp_SurfacesV2Failure pins the error envelope shape. When CF v2
+// replies non-2xx, restageApp returns 502 with {state:"failed", errors:[body]}
+// so the frontend snackbar logic can surface the upstream error text.
+func TestRestageApp_SurfacesV2Failure(t *testing.T) {
+	proxy := &mockNativeCFProxy{
+		userID:      "user-1",
+		cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL("https://cf.example.com")},
+		tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		proxyRequest: func(_ string, _ *api.TokenRecord, _, _ string, _ http.Header, _ []byte) (*api.CNSIRequest, error) {
+			return &api.CNSIRequest{StatusCode: http.StatusNotFound, Response: []byte(`{"error_code":"CF-AppNotFound"}`)}, nil
+		},
+	}
+	plugin := &CloudFoundrySpecification{testProxy: proxy}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/pp/v1/cf/apps/cnsi-1/missing/actions/restage", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/actions/:action")
+	c.SetParamNames("cnsiGuid", "appGuid", "action")
+	c.SetParamValues("cnsi-1", "missing", "restage")
+
+	require.NoError(t, plugin.appAction(c))
+	assert.Equal(t, http.StatusBadGateway, rec.Code)
+
+	var body map[string]interface{}
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &body))
+	assert.Equal(t, string(stratosjobs.JobStateFailed), body["state"])
+	errs, ok := body["errors"].([]interface{})
+	require.True(t, ok, "errors should be an array")
+	require.Len(t, errs, 1)
+	assert.Contains(t, errs[0].(string), "CF-AppNotFound")
 }
 
 // TestAppAction_RejectsUnknownVerb confirms that a verb outside the allowlist

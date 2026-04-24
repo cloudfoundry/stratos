@@ -17,10 +17,16 @@ import (
 // mockNativeCFProxy implements nativeCFProxy for handler unit tests.
 // Tests spin up an httptest.Server and put its URL into cnsiRecord.APIEndpoint
 // so the capi client calls the test server instead of a real CF instance.
+//
+// proxyRequest, if set, is invoked for DoProxySingleRequestWithToken so
+// restageApp's v2 passthrough can be unit-tested without a real CF. If
+// nil, DoProxySingleRequestWithToken returns a zero CNSIRequest so the
+// tests that don't exercise the v2 path don't need to stub it.
 type mockNativeCFProxy struct {
-	userID      string
-	cnsiRecord  api.CNSIRecord
-	tokenRecord api.TokenRecord
+	userID       string
+	cnsiRecord   api.CNSIRecord
+	tokenRecord  api.TokenRecord
+	proxyRequest func(cnsiGUID string, token *api.TokenRecord, method, requestURL string, headers http.Header, body []byte) (*api.CNSIRequest, error)
 }
 
 func (m *mockNativeCFProxy) GetCNSIRecord(_ string) (api.CNSIRecord, error) {
@@ -40,6 +46,13 @@ func (m *mockNativeCFProxy) GetSessionStringValue(_ echo.Context, key string) (s
 
 func (m *mockNativeCFProxy) RefreshOAuthToken(_ bool, _, _, _, _, _ string) (api.TokenRecord, error) {
 	return m.tokenRecord, nil
+}
+
+func (m *mockNativeCFProxy) DoProxySingleRequestWithToken(cnsiGUID string, token *api.TokenRecord, method, requestURL string, headers http.Header, body []byte) (*api.CNSIRequest, error) {
+	if m.proxyRequest != nil {
+		return m.proxyRequest(cnsiGUID, token, method, requestURL, headers, body)
+	}
+	return &api.CNSIRequest{}, nil
 }
 
 // mustParseURL parses a URL and panics on error — for test setup only.

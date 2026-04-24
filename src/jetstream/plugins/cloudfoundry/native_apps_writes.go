@@ -112,6 +112,15 @@ func (c *CloudFoundrySpecification) appAction(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid params (action=%q)", action))
 	}
 
+	// Restage has no v3 endpoint (CF replaced /v2/apps/{guid}/restage with
+	// the builds resource; /v3/apps/{guid}/actions/restage never existed).
+	// We route restage to the v2 endpoint directly, which is atomic and
+	// supported on every CF with v2 still alive (RFC-0032 sunsets v2 end
+	// of 2026). See restageApp for the long-form note.
+	if action == "restage" {
+		return c.restageApp(ctx, cnsiGUID, appGUID)
+	}
+
 	userGUID, err := c.getUserGUID(ctx)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
@@ -132,8 +141,6 @@ func (c *CloudFoundrySpecification) appAction(ctx echo.Context) error {
 		job, actionErr = cfClient.Apps().Stop(reqCtx, appGUID)
 	case "restart":
 		job, actionErr = cfClient.Apps().Restart(reqCtx, appGUID)
-	case "restage":
-		job, actionErr = cfClient.Apps().Restage(reqCtx, appGUID)
 	}
 	if actionErr != nil {
 		return handleCapiError(ctx, actionErr)
@@ -176,6 +183,68 @@ func (c *CloudFoundrySpecification) appAction(ctx echo.Context) error {
 		})
 	}
 	return ctx.JSON(http.StatusAccepted, res.HandoffJob)
+}
+
+// restageApp handles POST /pp/v1/cf/apps/{cnsiGuid}/{appGuid}/actions/restage
+// by proxying to the CF v2 endpoint /v2/apps/{guid}/restage.
+//
+// Why v2?
+//   CF v3 has no restage endpoint. The atomic /v2/apps/{guid}/restage was
+//   replaced by the builds resource (v3.216 docs: "finer-grained control
+//   and increased flexibility... V3 API avoids making assumptions about
+//   what users want to happen"). The v3 equivalent is a composition:
+//
+//     1. GET /v3/packages?app_guids=<a>&states=READY
+//           &order_by=-created_at&per_page=1          (newest READY pkg)
+//     2. POST /v3/builds {"package":{"guid":"<p>"}}   (kick build)
+//     3. GET  /v3/builds/<build_guid>  (poll until state != STAGING)
+//     4. POST /v3/apps/<a>/actions/stop               (if running)
+//     5. PATCH /v3/apps/<a>/relationships/current_droplet
+//           {"data":{"guid":"<droplet>"}}
+//     6. POST /v3/apps/<a>/actions/start
+//
+//   That's what cf-cli v8 shared.AppStager does. For Stratos it's the
+//   future implementation; the ticket is Phase 2 of FWT-restage-v3 in
+//   the Stratos V3 migration track. v2 restage remains live on every
+//   CF we target until RFC-0032's 2026-end sunset, so we ship the v2
+//   passthrough now and revisit when the deadline forces us.
+//
+// Response: sync-complete envelope {"state":"COMPLETE"} on 2xx from CF,
+// matching the shape returned by Stop/Start/Scale lifecycle handlers.
+// Error envelope {"state":"FAILED","errors":[...]} with the CF body on
+// non-2xx, so the frontend snackbar logic can surface failures uniformly.
+func (c *CloudFoundrySpecification) restageApp(ctx echo.Context, cnsiGUID, appGUID string) error {
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cnsi, err := c.nativeProxy().GetCNSIRecord(cnsiGUID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("unknown cnsi %s", cnsiGUID))
+	}
+
+	token, ok := c.nativeProxy().GetCNSITokenRecord(cnsiGUID, userGUID)
+	if !ok {
+		return echo.NewHTTPError(http.StatusUnauthorized, "no token for CNSI")
+	}
+
+	restageURL := fmt.Sprintf("%s/v2/apps/%s/restage", cnsi.APIEndpoint.String(), appGUID)
+	res, err := c.nativeProxy().DoProxySingleRequestWithToken(cnsiGUID, &token, http.MethodPost, restageURL, nil, nil)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadGateway, fmt.Sprintf("restage: %v", err))
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+	if res.StatusCode < 200 || res.StatusCode >= 300 {
+		return ctx.JSON(http.StatusBadGateway, map[string]interface{}{
+			"state":  stratosjobs.JobStateFailed,
+			"errors": []string{string(res.Response)},
+		})
+	}
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
+		"state": stratosjobs.JobStateComplete,
+	})
 }
 
 // scaleApp handles POST /pp/v1/cf/apps/{cnsiGuid}/{appGuid}/scale — a
