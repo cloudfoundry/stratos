@@ -183,9 +183,15 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
       }),
       // Refresh the local app entity cache once all writes complete so the
       // summary card reflects the new memory/disk/instances/ssh values.
+      // Also refresh per-instance stats — the legacy updateApplication path
+      // used AppMetadataTypes.STATS to do this implicitly; scaleApp bypasses
+      // ngrx, so without an explicit getMultiple here the Instances tab's
+      // table freezes at whatever state the last poll saw (typically
+      // "STARTING" for the newly-created container).
       tap(res => {
         if (res.success && hasScale) {
           cfEntityCatalog.application.api.get(appGuid, cfGuid, {});
+          cfEntityCatalog.appStats.actions.getMultiple(appGuid, cfGuid);
         }
       }),
       map(res => ({ ...res, redirect: res.success })),

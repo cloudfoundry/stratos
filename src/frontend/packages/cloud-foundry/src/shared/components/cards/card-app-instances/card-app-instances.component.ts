@@ -16,6 +16,7 @@ import {
   TailwindSnackBarService
 } from '@stratosui/core';
 import { StratosStatus } from '@stratosui/store';
+import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ApplicationService } from '../../../../features/applications/application.service';
 import { CfAppsSignalConfigService } from '../../list/list-types/app/cf-apps-signal-config.service';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
@@ -133,6 +134,13 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
     const doUpdate = async () => {
       try {
         await this.apps.scaleApp(this.appService.cfGuid, this.appService.appGuid, { instances: value });
+        // Legacy updateApplication([STATS]) also triggered appStats.getMultiple
+        // so the Instances tab's per-instance table would reflect the new
+        // container count. The signal-native scaleApp path skips ngrx
+        // entirely, so we need to dispatch the stats refresh explicitly —
+        // otherwise the newly-created (or torn-down) instances stay frozen
+        // at whatever state the last fetch saw.
+        cfEntityCatalog.appStats.actions.getMultiple(this.appService.appGuid, this.appService.cfGuid);
       } catch (err: any) {
         this.snackBarRef = this.snackBar.open(`Failed to update instance count: ${err?.message ?? err}`, 'Dismiss');
       }
