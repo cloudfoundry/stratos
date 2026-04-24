@@ -95,28 +95,33 @@ export class CloudFoundrySpaceRoutesSignalComponent {
     this.routesConfig.initialize(cfGuid, spaceGuid);
 
     const displayUrl = (r: StRoute): string => {
-      // Prefer the backend-rendered full URL; fall back to host + path for
-      // the (unusual) case where CAPI omitted the rendered URL.
-      if (r.url && r.url.length > 0) return r.url;
-      const host = r.host ?? '';
-      const path = r.path ?? '';
-      return host + path;
+      // Match legacy UI: full URL with scheme. TCP routes render as
+      // host:port (no scheme); HTTP routes get an http:// prefix.
+      const base = r.url && r.url.length > 0
+        ? r.url
+        : ((r.host ?? '') + (r.path ?? ''));
+      if (r.port != null) return `${base}:${r.port}`;
+      if (/^https?:\/\//i.test(base)) return base;
+      return `http://${base}`;
     };
 
     const renderApps = (r: StRoute): string => {
-      // Used for sort/filter string shape only; the visual cell renders via
-      // the compound function below.
+      // Used for sort/filter string shape; the visual cell renders via
+      // the compound function below. 'None' matches legacy behaviour.
       const guids = r.appGuids ?? [];
-      if (guids.length === 0) return '';
+      if (guids.length === 0) return 'None';
       return guids.map(g => this.appNameByGuid().get(g) ?? '—').join(', ');
     };
 
     const compoundApps = (r: StRoute): SignalListCompoundSegment[] => {
       // Each bound app becomes its own line with a link to the app-detail
       // page. Apps whose name hasn't resolved yet render as '—' plain text
-      // — never surface raw GUIDs in user-facing cells.
+      // — never surface raw GUIDs in user-facing cells. Unmapped routes
+      // render 'None' to match legacy explicit empty-state text.
+      const guids = r.appGuids ?? [];
+      if (guids.length === 0) return [{ text: 'None' }];
       const out: SignalListCompoundSegment[] = [];
-      for (const appGuid of r.appGuids ?? []) {
+      for (const appGuid of guids) {
         const name = this.appNameByGuid().get(appGuid);
         if (name) {
           out.push({ text: name, link: ['/applications', r.cnsiGuid, appGuid] });

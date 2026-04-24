@@ -1,6 +1,7 @@
 import { DestroyRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import type { SignalListDropdownOption } from '@stratosui/core';
 import { EndpointDataRegistry } from '../../../../../services/endpoint-data/endpoint-data.registry';
 import type { EndpointDataService } from '../../../../../services/endpoint-data/endpoint-data.service';
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
@@ -41,6 +42,10 @@ export class CfRoutesSignalConfigService {
   readonly pageSize: WritableSignal<number> = signal(6);
   readonly pageIndex: WritableSignal<number> = signal(0);
   readonly nameFilter: WritableSignal<string> = signal('');
+  // Org filter — used by the CF-level routes page where routes across
+  // every org show up; empty = no org constraint. The per-space page
+  // doesn't populate this (it's already scoped).
+  readonly selectedOrg: WritableSignal<string | null> = signal(null);
   readonly viewMode: WritableSignal<'table' | 'card'> = signal('card');
 
   // Raw route list as returned by the backend for this CNSI. We keep the
@@ -88,9 +93,15 @@ export class CfRoutesSignalConfigService {
     runInInjectionContext(this.injector, () => {
       effect(() => {
         const q = this.nameFilter().trim().toLowerCase();
+        const org = this.selectedOrg();
+        // orgGuidBySpaceGuid is a computed reading spaces(); accessing it
+        // inside the effect re-registers the dependency so the filter
+        // re-derives when spaces load or the user switches orgs.
+        const orgGuidBySpaceGuid = this.orgGuidBySpaceGuid();
         this.filter.set((r: StRoute) => {
-          if (!q) return true;
-          return (r.url ?? '').toLowerCase().includes(q);
+          if (org && orgGuidBySpaceGuid.get(r.spaceGuid) !== org) return false;
+          if (q && !((r.url ?? '').toLowerCase().includes(q))) return false;
+          return true;
         });
       });
     });
@@ -143,6 +154,19 @@ export class CfRoutesSignalConfigService {
     return map;
   });
 
+  // Org options for the CF-level page's Organization filter dropdown.
+  // "All" is prepended as the null-value option. Sorted by name so the
+  // picker reads naturally regardless of CAPI's emission order.
+  readonly orgOptions: Signal<SignalListDropdownOption[]> = computed(() => {
+    const orgs = this.endpointDataService?.orgs() ?? [];
+    const opts: SignalListDropdownOption[] = [{ label: 'All', value: null }];
+    const sorted = [...orgs].sort((a, b) => a.name.localeCompare(b.name));
+    for (const o of sorted) {
+      opts.push({ label: o.name, value: o.guid });
+    }
+    return opts;
+  });
+
   private async fetchRoutes(): Promise<void> {
     try {
       const resp = await firstValueFrom(
@@ -160,6 +184,7 @@ export class CfRoutesSignalConfigService {
 
   clearFilters(): void {
     this.nameFilter.set('');
+    this.selectedOrg.set(null);
     this.sort.set({ field: 'url', direction: 'asc' });
     this.pageIndex.set(0);
   }

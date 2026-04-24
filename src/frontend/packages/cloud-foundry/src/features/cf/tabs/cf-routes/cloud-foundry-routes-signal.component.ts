@@ -10,6 +10,7 @@ import {
   SignalListCompoundSegment,
   SignalListComponent,
   SignalListConfig,
+  SignalListDropdown,
   SignalListPillColor,
   SignalListRowAction,
   TailwindSnackBarService,
@@ -87,21 +88,30 @@ export class CloudFoundryRoutesSignalComponent {
     this.routesConfig.initialize(cfGuid);
 
     const displayUrl = (r: StRoute): string => {
-      if (r.url && r.url.length > 0) return r.url;
-      const host = r.host ?? '';
-      const path = r.path ?? '';
-      return host + path;
+      // Prefix with http:// for HTTP routes to match the legacy UI's
+      // Route column, which always rendered the full URL with scheme.
+      // TCP routes aren't HTTP so they render as host:port without scheme.
+      const base = r.url && r.url.length > 0
+        ? r.url
+        : ((r.host ?? '') + (r.path ?? ''));
+      if (r.port != null) return `${base}:${r.port}`;
+      // Avoid double-prepending if CF has already rendered scheme into url
+      // (shouldn't today, but future-proof).
+      if (/^https?:\/\//i.test(base)) return base;
+      return `http://${base}`;
     };
 
     const renderApps = (r: StRoute): string => {
       const guids = r.appGuids ?? [];
-      if (guids.length === 0) return '';
+      if (guids.length === 0) return 'None';
       return guids.map(g => this.appNameByGuid().get(g) ?? '—').join(', ');
     };
 
     const compoundApps = (r: StRoute): SignalListCompoundSegment[] => {
+      const guids = r.appGuids ?? [];
+      if (guids.length === 0) return [{ text: 'None' }];
       const out: SignalListCompoundSegment[] = [];
-      for (const appGuid of r.appGuids ?? []) {
+      for (const appGuid of guids) {
         const name = this.appNameByGuid().get(appGuid);
         if (name) {
           out.push({ text: name, link: ['/applications', r.cnsiGuid, appGuid] });
@@ -142,6 +152,14 @@ export class CloudFoundryRoutesSignalComponent {
     const typeLabel = (r: StRoute): string => (r.port != null ? 'TCP' : 'HTTP');
     const typeColor = (r: StRoute): SignalListPillColor =>
       r.port != null ? 'warning' : 'neutral';
+
+    const dropdowns: SignalListDropdown[] = [
+      {
+        label: 'Organization',
+        options: this.routesConfig.orgOptions,
+        selected: this.routesConfig.selectedOrg,
+      },
+    ];
 
     this.listConfig.set({
       pagedItems: this.routesConfig.view.pagedItems,
@@ -211,6 +229,7 @@ export class CloudFoundryRoutesSignalComponent {
         card: [6, 12, 24, 48, 96],
       },
       nameFilter: this.routesConfig.nameFilter,
+      filterDropdowns: dropdowns,
       onRefresh: () => this.routesConfig.refresh(),
       onClear: () => this.routesConfig.clearFilters(),
       viewMode: this.routesConfig.viewMode,
