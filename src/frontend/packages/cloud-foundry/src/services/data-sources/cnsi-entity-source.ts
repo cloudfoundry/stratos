@@ -1,4 +1,4 @@
-import { Signal, signal } from '@angular/core';
+import { Signal, computed, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
@@ -36,6 +36,7 @@ export abstract class CnsiEntitySource<T> {
   readonly totalResults: Signal<number> = this._totalResults.asReadonly();
 
   private _inFlight: Promise<void> | null = null;
+  private _inFlightOne: Map<string, Promise<void>> = new Map();
 
   constructor(
     readonly cnsiGuid: string,
@@ -46,6 +47,8 @@ export abstract class CnsiEntitySource<T> {
   protected urlFor(page: number): string {
     return `/pp/v1/cf/${this.entityName}/${this.cnsiGuid}?return=summary&per_page=${this.pageSize}&page=${page}`;
   }
+
+  protected urlForOne?(guid: string): string;
 
   async load(): Promise<void> {
     if (this._inFlight) return this._inFlight;
@@ -91,6 +94,42 @@ export abstract class CnsiEntitySource<T> {
 
   async refresh(): Promise<void> {
     await this.load();
+  }
+
+  byGuid(guid: string): Signal<T | undefined> {
+    return computed(() => this._items().find(i => (i as { guid?: string }).guid === guid));
+  }
+
+  async loadOne(guid: string): Promise<void> {
+    if (this._items().some(i => (i as { guid?: string }).guid === guid)) return;
+    if (this._inFlight) {
+      await this._inFlight;
+      return;
+    }
+    const existing = this._inFlightOne.get(guid);
+    if (existing) return existing;
+    const p = this._doLoadOne(guid).finally(() => this._inFlightOne.delete(guid));
+    this._inFlightOne.set(guid, p);
+    return p;
+  }
+
+  protected async _doLoadOne(guid: string): Promise<void> {
+    if (!this.urlForOne) {
+      await this.load();
+      return;
+    }
+    const url = this.urlForOne(guid);
+    const item = await firstValueFrom(this.http.get<T>(url));
+    const stamped = { ...item, cnsiGuid: this.cnsiGuid } as unknown as T;
+    this._items.update(curr => {
+      const idx = curr.findIndex(i => (i as { guid?: string }).guid === guid);
+      if (idx >= 0) {
+        const next = [...curr];
+        next[idx] = stamped;
+        return next;
+      }
+      return [...curr, stamped];
+    });
   }
 
   protected patchItems(fn: (items: T[]) => T[]): void {
