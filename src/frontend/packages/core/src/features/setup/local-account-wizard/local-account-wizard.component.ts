@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, signal, inject, Injector, runInInjectionContext, ChangeDetectionStrategy } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormControl, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import {
@@ -10,11 +11,11 @@ import {
   VerifySession,
   SetupSaveConfig,
 } from '@stratosui/store';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { delay, filter, map, take } from 'rxjs/operators';
 
 import { APP_TITLE } from '../../../core/core.types';
-import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
+import { SignalStepHandle } from '../../../shared/components/stepper/step/step.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { ShowPageHeaderComponent } from '../../../shared/components/page-header/show-page-header/show-page-header.component';
 import { SteppersComponent } from '../../../shared/components/stepper/steppers/steppers.component';
@@ -50,11 +51,13 @@ selector: 'app-local-account-wizard',
 export class LocalAccountWizardComponent implements OnInit {
 
   private store = inject(Store<Pick<InternalAppState, 'uaaSetup' | 'auth'>>);
+  private injector = inject(Injector);
   public title = inject(APP_TITLE);
 
   passwordForm!: FormGroup;
   validateLocalAuthForm!: Observable<boolean>;
   applyingSetup = signal<boolean>(false);
+  signalHandle!: SignalStepHandle;
 
   showPassword: boolean[] = [];
 
@@ -67,6 +70,23 @@ export class LocalAccountWizardComponent implements OnInit {
     this.validateLocalAuthForm = this.passwordForm.statusChanges.pipe(
       map(() => this.passwordForm.valid)
     );
+
+    // toSignal requires an injection context; ngOnInit runs outside one,
+    // so wrap with runInInjectionContext using the injected Injector.
+    const validSignal = runInInjectionContext(this.injector, () =>
+      toSignal(this.validateLocalAuthForm, { initialValue: this.passwordForm.valid })
+    );
+    this.signalHandle = {
+      valid: validSignal,
+      submit: async () => {
+        const result = await firstValueFrom(this.next() as Observable<{ success: boolean; message?: string }>);
+        if (!result.success) {
+          throw new Error(result.message || 'Failed to apply local account setup');
+        }
+        // Success path triggers a hard window reload inside `next()`; no
+        // router navigation needed here.
+      },
+    };
   }
 
   passwordMatchValidator(): ValidatorFn {
@@ -86,7 +106,7 @@ export class LocalAccountWizardComponent implements OnInit {
     };
   }
 
-  next: StepOnNextFunction = () => {
+  next = () => {
     const data: LocalAdminSetupData = {
       local_admin_password: this.passwordForm.get('adminPassword').value,
     };

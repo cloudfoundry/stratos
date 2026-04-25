@@ -3,7 +3,7 @@
 </app-page-header>
 
 <app-steppers cancel="/endpoints" [basePreviousRedirect]="{ path: '/endpoints/backup-restore' }">
-  <app-step title="File" [valid]="service.validFileContent$ | async">
+  <app-step title="File" [signalHandle]="fileStepHandle">
     <div class="space-y-6">
       <div>
         <p class="text-content-text mb-4">Provide the backup file to restore from.</p>
@@ -55,7 +55,7 @@
       }
     </div>
   </app-step>
-  <app-step title="Password" finishButtonText="Restore" [onNext]="restore" [valid]="passwordValid$ | async">
+  <app-step title="Password" finishButtonText="Restore" [signalHandle]="passwordStepHandle">
     <div class="space-y-4">
       <p class="text-content-text">Provide the password that was given at the time the backup was created</p>
       <form [formGroup]="passwordForm" class="space-y-4">

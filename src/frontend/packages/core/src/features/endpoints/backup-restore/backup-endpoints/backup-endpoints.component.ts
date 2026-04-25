@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnDestroy, Injector, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { ReactiveFormsModule, Validators, FormControl, FormGroup, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { format } from 'date-fns';
 import { httpErrorResponseToSafeString, entityCatalog, stratosEntityCatalog, EndpointModel } from '@stratosui/store';
-import { Observable, of, Subject, Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { take, defaultIfEmpty, filter, map } from 'rxjs/operators';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
@@ -14,8 +15,7 @@ import { ITableListDataSource } from '../../../../shared/components/list/data-so
 import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
 import { TableComponent } from '../../../../shared/components/list/list-table/table.component';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
-import { StepComponent } from '../../../../shared/components/stepper/step/step.component';
-import { StepOnNextFunction, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
+import { StepComponent, SignalStepHandle } from '../../../../shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../../shared/components/stepper/steppers/steppers.component';
 import { ShowHideButtonComponent } from '../../../../core/show-hide-button/show-hide-button.component';
 import { BackupCheckboxCellComponent } from '../backup-checkbox-cell/backup-checkbox-cell.component';
@@ -52,9 +52,14 @@ export class BackupEndpointsComponent implements OnDestroy {
   service = inject(BackupEndpointsService);
   private confirmDialog = inject(ConfirmationDialogService);
   private injector = inject(Injector);
+  private router = inject(Router);
 
 
   sub!: Subscription;
+
+  // Signal-handles for the two stepper steps (FWT-957)
+  selectStepHandle!: SignalStepHandle;
+  passwordStepHandle!: SignalStepHandle;
 
   // Step 1
   columns: ITableColumn<EndpointModel>[] = [
@@ -134,6 +139,10 @@ export class BackupEndpointsComponent implements OnDestroy {
     );
 
     this.selectValid$ = toObservable(this.service.hasChanges, { injector: this.injector });
+
+    this.selectStepHandle = {
+      valid: this.service.hasChanges,
+    };
   }
 
   setupPasswordStep() {
@@ -156,59 +165,61 @@ export class BackupEndpointsComponent implements OnDestroy {
         return this.passwordForm.valid;
       })
     );
+
+    const passwordValidSignal = toSignal(this.passwordValid$, { initialValue: this.passwordForm.valid });
+    this.passwordStepHandle = {
+      valid: passwordValidSignal,
+      submit: () => this.runBackup(),
+    };
   }
 
-  onNext: StepOnNextFunction = () => {
+  private runBackup(): Promise<void> {
     const confirmation = new ConfirmationDialogConfig(
       'Backup',
       'The backup that is about to be created may contain credentials, tokens and other sensitive information. Although it is encrypted, you should take the appropriate steps to secure it. ',
       'Continue',
       true
     );
-    const result = new Subject<StepOnNextResult>();
 
-    const userCancelledDialog = () => {
-      result.next({
-        success: false
-      });
-    };
+    return new Promise<void>((resolve, reject) => {
+      const userCancelledDialog = () => {
+        // Match legacy behavior: cancel returned `success: false` with no
+        // message, leaving the user on the password step. Reject with an
+        // empty message so the stepper snackbar stays quiet.
+        reject(new Error(''));
+      };
 
-    const backupSuccess = (data: Blob) => {
-      const downloadURL = window.URL.createObjectURL(data);
-      const link = document.createElement('a');
-      link.href = downloadURL;
-      // Time of client, not server
-      const dateTime = format(new Date(), 'yyyyMMdd-HHmmss');
-      link.download = `stratos_backup_${dateTime}.bk`;
-      link.click();
+      const backupSuccess = (data: Blob) => {
+        const downloadURL = window.URL.createObjectURL(data);
+        const link = document.createElement('a');
+        link.href = downloadURL;
+        // Time of client, not server
+        const dateTime = format(new Date(), 'yyyyMMdd-HHmmss');
+        link.download = `stratos_backup_${dateTime}.bk`;
+        link.click();
 
-      result.next({
-        success: true,
-        redirect: true });
-    };
+        // Replace legacy `redirect: true` with explicit navigation back to
+        // the endpoints page (matches the stepper cancel target).
+        this.router.navigate(['/endpoints']).then(() => resolve());
+      };
 
-    const backupFailure = (err: any) => {
-      const errorMessage = httpErrorResponseToSafeString(err);
-      result.next({
-        success: false,
-        message: `Failed to create backup` + (errorMessage ? `: ${errorMessage}` : '')
-      });
-      return of(false);
-    };
+      const backupFailure = (err: any) => {
+        const errorMessage = httpErrorResponseToSafeString(err);
+        reject(new Error(`Failed to create backup` + (errorMessage ? `: ${errorMessage}` : '')));
+      };
 
-    const createBackup = () => this.service.createBackup().pipe(take(1), defaultIfEmpty(null)).subscribe(
-      res => res !== null ? backupSuccess(res) : backupFailure('Backup service returned no response'),
-      backupFailure
-    );
+      const createBackup = () => this.service.createBackup().pipe(take(1), defaultIfEmpty(null)).subscribe(
+        res => res !== null ? backupSuccess(res) : backupFailure('Backup service returned no response'),
+        backupFailure
+      );
 
-    if (this.service.hasConnectionDetails()) {
-      this.confirmDialog.openWithCancel(confirmation, createBackup, userCancelledDialog);
-    } else {
-      createBackup();
-    }
-
-    return result.asObservable();
-  };
+      if (this.service.hasConnectionDetails()) {
+        this.confirmDialog.openWithCancel(confirmation, createBackup, userCancelledDialog);
+      } else {
+        createBackup();
+      }
+    });
+  }
 
 
   private getEndpointTypeString(endpoint: EndpointModel): string {

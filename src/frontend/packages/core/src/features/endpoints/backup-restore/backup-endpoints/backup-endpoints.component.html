@@ -5,7 +5,7 @@
 <app-steppers cancel="/endpoints" [basePreviousRedirect]="{
   path: '/endpoints/backup-restore'
   }">
-  <app-step title="Select" [valid]="selectValid$ | async">
+  <app-step title="Select" [signalHandle]="selectStepHandle">
     @if (service.canBackup()) {
       <div class="select-step">
         <p>Select the endpoints and connection details that you would like to backup</p>
@@ -23,7 +23,7 @@
       <p>There are no endpoints to backup</p>
     }
   </app-step>
-  <app-step title="Password" finishButtonText="Download" [onNext]="onNext" [valid]="passwordValid$ | async">
+  <app-step title="Password" finishButtonText="Download" [signalHandle]="passwordStepHandle">
     <div class="password-step">
       <p>Protect the backup by providing a password. You will need this password when restoring from this backup</p>
       <form [formGroup]="passwordForm" class="stepper-form">
