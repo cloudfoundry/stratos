@@ -1,13 +1,18 @@
 /* ============================================================================
    Custom Form Field Component - Tailwind-based Material Replacement
 
-   Most styling is in the template as Tailwind utilities. This file keeps
-   only the rules that can't be expressed purely in template classes:
-   - Parent-state-driven styling of the wrapper divs (prefix/suffix/
-     underline/ripple) that have to react to focused/valid/invalid
-     classes on the host .custom-form-field element
-   - Appearance variants (fill, outline, legacy)
-   - Responsive / print / reduced-motion / high-contrast overrides
+   FWT-956 Tailwind-finish pass (2026-04-25):
+   - Prefix/suffix/underline/ripple/error/hint state-driven coloring is now
+     handled by template-bound getters on CustomFormFieldComponent
+     (`prefixSuffixColorClasses`, `underlineColorClasses`,
+     `rippleColorClasses`) instead of SCSS descendant combinators.
+   - Static color rules (.error-icon, .success-icon, .form-field-error,
+     .form-field-hint) moved inline to the template as Tailwind utilities.
+   - This file now only retains rules that can't be expressed in template
+     Tailwind: appearance variants (fill / outline / legacy use color-mix
+     and CSS-var-driven backgrounds that Tailwind utilities don't cover),
+     compact float-label-never variant, and media-query rules (responsive,
+     print, reduced-motion, high-contrast).
 
    Dead rules that targeted projected <input>/<textarea>/<select> content
    have been removed — Angular ViewEncapsulation rewrites them with
@@ -26,119 +31,6 @@
 
   &.disabled {
     @apply opacity-60 cursor-not-allowed pointer-events-none;
-  }
-}
-
-/* ============================================================================
-   Prefix and Suffix
-   ============================================================================ */
-
-.form-field-prefix {
-  color: var(--text-muted);
-
-  .custom-form-field.focused & {
-    color: var(--input-focus-border);
-  }
-
-  .custom-form-field.invalid & {
-    color: var(--color-danger);
-  }
-
-  .custom-form-field.valid & {
-    color: var(--color-success);
-  }
-
-  .dark-theme & {
-    color: var(--content-muted);
-  }
-}
-
-.form-field-suffix {
-  color: var(--text-muted);
-
-  .custom-form-field.focused & {
-    color: var(--input-focus-border);
-  }
-
-  .custom-form-field.invalid & {
-    color: var(--color-danger);
-  }
-
-  .custom-form-field.valid & {
-    color: var(--color-success);
-  }
-
-  .dark-theme & {
-    color: var(--content-muted);
-  }
-}
-
-/* ============================================================================
-   State Icons (Error and Success)
-   ============================================================================ */
-
-.error-icon {
-  color: var(--color-danger);
-}
-
-.success-icon {
-  color: var(--color-success);
-}
-
-/* ============================================================================
-   Underline and Ripple (Standard & Legacy Appearance)
-   ============================================================================ */
-
-.form-field-underline {
-  background-color: var(--input-border);
-
-  .custom-form-field.focused & {
-    @apply bg-transparent;
-  }
-
-  .custom-form-field.invalid & {
-    background-color: var(--color-danger);
-  }
-
-  .custom-form-field.valid & {
-    background-color: var(--color-success);
-  }
-}
-
-.form-field-ripple {
-  background-color: var(--input-focus-border);
-
-  .custom-form-field.focused & {
-    @apply scale-x-100;
-  }
-
-  .custom-form-field.color-accent & {
-    background-color: var(--color-accent);
-  }
-
-  .custom-form-field.color-warn &,
-  .custom-form-field.invalid & {
-    background-color: var(--color-danger);
-  }
-
-  .custom-form-field.valid & {
-    background-color: var(--color-success);
-  }
-}
-
-/* ============================================================================
-   Error and Hint Messages
-   ============================================================================ */
-
-.form-field-error {
-  color: var(--color-danger);
-}
-
-.form-field-hint {
-  color: var(--text-muted);
-
-  .dark-theme & {
-    color: var(--content-muted);
   }
 }
 

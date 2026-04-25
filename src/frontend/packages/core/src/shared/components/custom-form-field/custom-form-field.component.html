@@ -23,7 +23,7 @@
       <!-- Prefix (optional) -->
       @if (hasPrefix) {
         <div class="form-field-prefix flex items-center pr-2 transition-colors duration-200"
-          >
+             [class]="prefixSuffixColorClasses">
           <ng-content select="[matPrefix], span[matPrefix]"></ng-content>
         </div>
       }
@@ -50,13 +50,14 @@
       </div>
 
       <!-- Suffix -->
-      <div class="form-field-suffix flex items-center pl-2 gap-1 transition-colors duration-200">
+      <div class="form-field-suffix flex items-center pl-2 gap-1 transition-colors duration-200"
+           [class]="prefixSuffixColorClasses">
         <ng-content select="[matSuffix], span[matSuffix]"></ng-content>
 
         <!-- Error icon indicator -->
         @if (isInvalid) {
           <svg
-            class="error-icon w-5 h-5 flex-shrink-0 transition-opacity duration-200"
+            class="error-icon w-5 h-5 flex-shrink-0 transition-opacity duration-200 text-danger"
             viewBox="0 0 20 20"
             fill="currentColor"
             xmlns="http://www.w3.org/2000/svg"
@@ -70,7 +71,7 @@
         <!-- Success icon indicator — only when there's an actual value -->
         @if (isValid && hasValue) {
           <svg
-            class="success-icon w-5 h-5 flex-shrink-0 transition-opacity duration-200"
+            class="success-icon w-5 h-5 flex-shrink-0 transition-opacity duration-200 text-success"
             viewBox="0 0 20 20"
             fill="currentColor"
             xmlns="http://www.w3.org/2000/svg"
@@ -85,9 +86,11 @@
 
     <!-- Underline (for standard and legacy appearances) -->
     @if (appearance === 'standard' || appearance === 'legacy') {
-      <div class="form-field-underline relative w-full h-px transition-colors duration-200">
+      <div class="form-field-underline relative w-full h-px transition-colors duration-200"
+           [class]="underlineColorClasses">
       <span class="form-field-ripple absolute bottom-0 left-0 w-full h-0.5
-                   transform scale-x-0 origin-center transition-transform duration-300 ease-out"></span>
+                   transform origin-center transition-transform duration-300 ease-out"
+            [class]="rippleColorClasses"></span>
       </div>
     }
 
@@ -96,7 +99,7 @@
 
       <!-- Error Messages -->
       @if (isInvalid && errorMessage) {
-        <div class="form-field-error-wrapper flex items-start gap-1 animate-slideDown"
+        <div class="form-field-error-wrapper flex items-start gap-1 animate-slideDown text-danger"
           role="alert"
           aria-live="polite">
           <svg class="w-4 h-4 flex-shrink-0 mt-0.5"
@@ -118,8 +121,7 @@
 
       <!-- Hint Text (only shown when no errors) -->
       @if (!isInvalid && hintLabel) {
-        <div class="form-field-hint-wrapper flex justify-between gap-2"
-          >
+        <div class="form-field-hint-wrapper flex justify-between gap-2 text-content-muted">
           <div class="form-field-hint flex-1 text-xs leading-tight"
             [id]="inputId + '-hint'">
             {{ hintLabel }}
