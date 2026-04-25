@@ -141,3 +141,43 @@ type StServiceOfferingsResponse struct {
 	Resources    []StServiceOffering `json:"resources"`
 	TotalResults int                 `json:"totalResults"`
 }
+
+// StServiceInstance is the Stratos-shaped DTO for an instantiated CF service —
+// either a managed instance broker-provisioned from a /v3/service_plans
+// catalog entry or a user-provided instance representing an external service
+// the platform doesn't manage. Drives the /services list page.
+//
+// Type carries the CF v3 discriminator ("managed" or "user-provided"). For
+// managed instances the handler runs a two-step join (service_plan ->
+// service_offering) to populate ServiceOfferingName so the UI can render
+// the offering name (e.g. "redis") instead of a plan GUID. User-provided
+// instances have neither plan nor offering — those fields stay empty and
+// the UI labels the row "User Provided" instead.
+//
+// LastOp* mirrors CF's last_operation block; the UI surfaces State as a
+// pill (succeeded / in progress / failed). Tags is normalised to a non-nil
+// slice so the JSON payload always emits `[]` rather than `null` and the
+// frontend can `.join(',')` without a guard.
+type StServiceInstance struct {
+	GUID                string   `json:"guid"`
+	Name                string   `json:"name"`
+	Type                string   `json:"type"`
+	CnsiGUID            string   `json:"cnsiGuid"`
+	SpaceGUID           string   `json:"spaceGuid,omitempty"`
+	ServicePlanGUID     string   `json:"servicePlanGuid,omitempty"`
+	ServiceOfferingGUID string   `json:"serviceOfferingGuid,omitempty"`
+	ServiceOfferingName string   `json:"serviceOfferingName,omitempty"`
+	Tags                []string `json:"tags"`
+	DashboardURL        string   `json:"dashboardUrl,omitempty"`
+	LastOpType          string   `json:"lastOpType,omitempty"`
+	LastOpState         string   `json:"lastOpState,omitempty"`
+	LastOpDescription   string   `json:"lastOpDescription,omitempty"`
+	LastOpUpdatedAt     string   `json:"lastOpUpdatedAt,omitempty"`
+	CreatedAt           string   `json:"createdAt"`
+	UpdatedAt           string   `json:"updatedAt,omitempty"`
+}
+
+type StServiceInstancesResponse struct {
+	Resources    []StServiceInstance `json:"resources"`
+	TotalResults int                 `json:"totalResults"`
+}

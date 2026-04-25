@@ -171,3 +171,39 @@ export interface StServiceOfferingsResponse {
   resources: StServiceOffering[];
   totalResults: number;
 }
+
+// Mirror of the backend StServiceInstance DTO
+// (native_service_instances_reads.go). One row per CF service instance —
+// `type` discriminates managed vs user-provided. Drives the /services
+// list page.
+//
+// `serviceOfferingName` is populated by a two-step join (service_plan ->
+// service_offering) on the backend for managed instances. User-provided
+// instances have neither plan nor offering and the name stays empty —
+// the UI labels the row "User Provided" instead. `lastOpState` mirrors
+// CF's last_operation.state (e.g. "succeeded", "in progress", "failed");
+// `tags` is normalised to a non-null array on the backend so consumers
+// can `.join(',')` without a guard.
+export interface StServiceInstance {
+  guid: string;
+  name: string;
+  type: string; // "managed" | "user-provided"
+  cnsiGuid: string;
+  spaceGuid?: string;
+  servicePlanGuid?: string;
+  serviceOfferingGuid?: string;
+  serviceOfferingName?: string;
+  tags: string[];
+  dashboardUrl?: string;
+  lastOpType?: string;
+  lastOpState?: string;
+  lastOpDescription?: string;
+  lastOpUpdatedAt?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface StServiceInstancesResponse {
+  resources: StServiceInstance[];
+  totalResults: number;
+}
