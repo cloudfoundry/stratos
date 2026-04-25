@@ -138,13 +138,14 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       const step = this.steps[this.currentIndex];
       step.busy = true;
 
-      // Defensive: step.onNext may throw synchronously (runtime error before
-      // it returns an observable). Without a try/catch, the throw escapes
-      // goNext, step.busy stays true, and the Next/Finish button is stuck
-      // as a spinner forever. Catch, surface via snackbar, reset busy.
+      // Defensive: step.invokeNext may throw synchronously (runtime error
+      // before it returns an observable, or signal-handle.submit() throwing
+      // sync). Without a try/catch, the throw escapes goNext, step.busy
+      // stays true, and the Next/Finish button is stuck as a spinner
+      // forever. Catch, surface via snackbar, reset busy.
       let obs$: Observable<StepOnNextResult> | unknown;
       try {
-        obs$ = step.onNext(this.currentIndex, step);
+        obs$ = step.invokeNext(this.currentIndex);
       } catch (err) {
         console.error('Stepper onNext threw synchronously:', err);
         step.busy = false;

@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, Signal, TemplateRef, ViewChild } from '@angular/core';
 import { IRouterNavPayload } from '@stratosui/store';
-import { Observable, of as observableOf } from 'rxjs';
+import { from, Observable, of as observableOf } from 'rxjs';
 
 export interface IStepperStep {
   validate: Observable<boolean>;
@@ -21,6 +21,34 @@ export interface StepOnNextResult {
 }
 
 export type StepOnNextFunction = (index: number, step: StepComponent) => Observable<StepOnNextResult>;
+
+/**
+ * Signal-native step contract — additive shape introduced in FWT-956 so new
+ * stepper consumers can express validity / submission / skip behavior as
+ * signals + Promises instead of the legacy `valid: boolean` + `onNext:
+ * StepOnNextFunction` Observable pattern. When a step sets `signalHandle`,
+ * the legacy `valid` / `skip` / `onNext` inputs are bypassed and the
+ * StepComponent prefers the signal-handle reads. See FWT-957 for the wider
+ * consumer-migration sweep that ultimately retires the legacy shape.
+ */
+export interface SignalStepHandle {
+  /** Step is allowed to advance when this returns true. */
+  readonly valid: Signal<boolean>;
+  /**
+   * Optional submission action invoked when the user clicks Next/Finish.
+   * Resolves on success; rejects with an Error to surface a snackbar via
+   * the existing stepper plumbing. When omitted the step auto-succeeds —
+   * useful for confirmation screens that don't have side-effects to run.
+   */
+  readonly submit?: () => Promise<void>;
+  /**
+   * Optional conditional-skip predicate. When true the stepper treats the
+   * step as if its legacy `skip` input were true — included in the visible
+   * list but bypassed during navigation. Useful for branching wizards where
+   * a step only applies given upstream state.
+   */
+  readonly skipIf?: Signal<boolean>;
+}
 
 @Component({
   selector: 'app-step',
@@ -61,8 +89,12 @@ export class StepComponent {
       this.onValidChange.emit(value);
     }
   }
+  // When `signalHandle` is set, the stepper reads validity from
+  // `signalHandle.valid()` — the legacy `_valid` storage is ignored.
+  // Signal reads are tracked by Angular's CD so this is reactive without
+  // the manual `onValidChange` emitter pattern.
   get valid(): boolean {
-    return this._valid;
+    return this.signalHandle ? this.signalHandle.valid() : this._valid;
   }
   private _valid = true;
 
@@ -124,7 +156,16 @@ export class StepComponent {
   content!: TemplateRef<any>;
 
   @Input()
-  skip = false;
+  set skip(v: boolean) {
+    this._skip = v;
+  }
+  // When `signalHandle.skipIf` is set, prefer the signal read so admin-only
+  // / conditional steps flip without consumers needing to wire boolean
+  // bindings. Falls back to legacy `_skip` storage for non-signal steps.
+  get skip(): boolean {
+    return this.signalHandle?.skipIf ? this.signalHandle.skipIf() : this._skip;
+  }
+  private _skip = false;
 
   @Input()
   showBusy = false;
@@ -137,6 +178,41 @@ export class StepComponent {
 
   @Input()
   onLeave: (isNext?: boolean) => void = () => { }
+
+  /**
+   * New (FWT-956) signal-native step contract — additive alongside the
+   * legacy `valid` / `skip` / `onNext` inputs. When set, the StepComponent's
+   * effective validity / skip / submission delegate to this handle. Wider
+   * consumer migration to this shape tracked at FWT-957.
+   */
+  @Input()
+  signalHandle?: SignalStepHandle;
+
+  /**
+   * Dispatch the step's submission. Signal-handle path wraps `submit()` as
+   * an Observable<StepOnNextResult> so SteppersComponent.goNext can consume
+   * both shapes uniformly. When `signalHandle` is set without `submit`, the
+   * step auto-succeeds (confirmation-screen pattern). Legacy path delegates
+   * to the existing `onNext(index, this)` contract.
+   */
+  invokeNext(index: number): Observable<StepOnNextResult> {
+    const submit = this.signalHandle?.submit;
+    if (submit) {
+      return from(
+        submit().then(
+          () => ({ success: true } as StepOnNextResult),
+          (err: unknown) => ({
+            success: false,
+            message: err instanceof Error ? err.message : String(err),
+          } as StepOnNextResult),
+        ),
+      );
+    }
+    if (this.signalHandle) {
+      return observableOf({ success: true } as StepOnNextResult);
+    }
+    return this.onNext(index, this);
+  }
 
   constructor() {
     this.pOnEnter = (data?: any) => {
