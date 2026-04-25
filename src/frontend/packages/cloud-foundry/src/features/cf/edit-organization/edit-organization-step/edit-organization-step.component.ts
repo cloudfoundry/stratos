@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, signal, Input } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
+import { firstValueFrom, Observable, Subscription } from 'rxjs';
 import { filter, map, pairwise, take, tap } from 'rxjs/operators';
 
-import { AppInputDirective, CustomFormFieldComponent, safeUnsubscribe, FocusDirective, StepOnNextFunction, CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
+import { AppInputDirective, CustomFormFieldComponent, safeUnsubscribe, FocusDirective, SignalStepHandle, StepOnNextFunction, CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { endpointEntityType, PaginationMonitorFactory, ActionState, getPaginationObservables, APIResource } from '@stratosui/store';
 import { IOrganization, IOrgQuotaDefinition } from '../../../../cf-api.types';
 import { CFAppState } from '../../../../cf-app-state';
@@ -57,10 +58,40 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
   private paginationMonitorFactory = inject(PaginationMonitorFactory);
   private cfOrgService = inject(CloudFoundryOrganizationService);
   private fb = inject(FormBuilder);
+  private router = inject(Router);
 
   /** See QuotaDefinitionFormComponent for rationale. */
   private validSignal = signal(false);
   private formStatusSub?: Subscription;
+
+  /** FWT-957: post-success navigation target supplied by parent. */
+  @Input() redirectUrl!: string;
+
+  /**
+   * FWT-957: signal-native step handle. Reads validity from validSignal and
+   * dispatches the org update via cfEntityCatalog.org.api.update, navigating
+   * to the parent-supplied redirectUrl on success. Replaces legacy onNext.
+   */
+  signalHandle: SignalStepHandle = {
+    valid: this.validSignal.asReadonly(),
+    submit: async () => {
+      const finalState = await firstValueFrom(
+        cfEntityCatalog.org.api.update<ActionState>(this.orgGuid, this.cfGuid, {
+          name: this.orgName.value,
+          quota_definition_guid: this.quotaDefinition.value,
+          status: this.status ? OrgStatus.ACTIVE : OrgStatus.SUSPENDED
+        }).pipe(
+          pairwise(),
+          filter(([oldS, newS]) => oldS.busy && !newS.busy),
+          map(([, newS]) => newS),
+        )
+      );
+      if (finalState.error) {
+        throw new Error(`Failed to update organization: ${finalState.message}`);
+      }
+      await this.router.navigateByUrl(this.redirectUrl);
+    },
+  };
 
   fetchOrgsSub!: Subscription;
   allOrgsInEndpoint: string[];

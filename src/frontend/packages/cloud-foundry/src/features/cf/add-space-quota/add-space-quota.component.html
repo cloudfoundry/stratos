@@ -3,8 +3,8 @@
     Create Space Quota
   </app-page-header>
   <app-steppers [cancel]="cfSpaceQuotasUrl">
-    <app-step title="Create Space Quota" [onNext]="step1.submit" [valid]="step1.validate()" cancelButtonText="Cancel" finishButtonText="Create">
-      <app-create-space-quota-step #step1></app-create-space-quota-step>
+    <app-step title="Create Space Quota" [signalHandle]="step1.signalHandle" cancelButtonText="Cancel" finishButtonText="Create">
+      <app-create-space-quota-step #step1 [redirectUrl]="cfSpaceQuotasUrl"></app-create-space-quota-step>
     </app-step>
   </app-steppers>
 </div>

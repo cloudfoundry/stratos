@@ -3,9 +3,9 @@
     Create Space
   </app-page-header>
   <app-steppers [cancel]="ogrSpacesUrl">
-    <app-step title="Create Space" [onNext]="step1.submit" [valid]="step1.validate()" cancelButtonText="Cancel"
+    <app-step title="Create Space" [signalHandle]="step1.signalHandle" cancelButtonText="Cancel"
       finishButtonText="Create">
-      <app-create-space-step #step1></app-create-space-step>
+      <app-create-space-step #step1 [redirectUrl]="ogrSpacesUrl"></app-create-space-step>
     </app-step>
   </app-steppers>
 </div>

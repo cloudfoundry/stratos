@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, signal, Input } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
+import { firstValueFrom, Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
-import { AppInputDirective, CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, FocusDirective, StepOnNextFunction } from '@stratosui/core';
+import { AppInputDirective, CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, FocusDirective, SignalStepHandle, StepOnNextFunction } from '@stratosui/core';
 import {
   APIResource,
   endpointEntityType,
@@ -49,12 +49,46 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
   private store = inject<Store<CFAppState>>(Store);
   private paginationMonitorFactory = inject(PaginationMonitorFactory);
   private fb = inject(FormBuilder);
+  private router = inject(Router);
 
   /** See QuotaDefinitionFormComponent — mirror form validity into a signal
    *  so the parent AddOrganizationComponent (OnPush, off the ngTemplateOutlet
    *  chain) re-evaluates [valid]="step1.validate()" automatically. */
   private validSignal = signal(false);
   private formStatusSub?: Subscription;
+
+  /**
+   * FWT-957: post-success navigation target. Parent supplies the same URL
+   * it passes to <app-steppers cancel> so the new SignalStepHandle.submit
+   * Promise resolves with explicit Router.navigate instead of the legacy
+   * `redirect: true` previous-route lookup.
+   */
+  @Input() redirectUrl!: string;
+
+  /**
+   * FWT-957: signal-native step handle. Exposes form validity via a Signal
+   * and dispatches CreateOrganization, awaiting the request-info store
+   * slice for completion before navigating to the orgs list. Replaces the
+   * legacy [valid]/[onNext] inputs on the parent <app-step>.
+   */
+  signalHandle: SignalStepHandle = {
+    valid: this.validSignal.asReadonly(),
+    submit: async () => {
+      this.store.dispatch(new CreateOrganization(this.cfGuid, {
+        name: this.orgName.value,
+        quota_definition_guid: this.quotaDefinition.value ?? undefined
+      }));
+      const requestInfo = await firstValueFrom(
+        this.store.select(selectCfRequestInfo(organizationEntityType, this.orgName.value)).pipe(
+          filter(r => !!r && !r.creating)
+        )
+      );
+      if (requestInfo.error) {
+        throw new Error(`Failed to create organization: ${requestInfo.message}`);
+      }
+      await this.router.navigateByUrl(this.redirectUrl);
+    },
+  };
 
   orgSubscription!: Subscription;
   submitSubscription!: Subscription;

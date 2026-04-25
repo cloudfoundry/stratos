@@ -3,8 +3,8 @@
     Create Organization
   </app-page-header>
   <app-steppers [cancel]="cfUrl">
-    <app-step title="Create Organization" [onNext]="step1.submit" [valid]="step1.validate()" cancelButtonText="Cancel" finishButtonText="Create">
-      <app-create-organization-step #step1></app-create-organization-step>
+    <app-step title="Create Organization" [signalHandle]="step1.signalHandle" cancelButtonText="Cancel" finishButtonText="Create">
+      <app-create-organization-step #step1 [redirectUrl]="cfUrl"></app-create-organization-step>
     </app-step>
   </app-steppers>
 </div>

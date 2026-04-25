@@ -3,8 +3,8 @@
     Create Quota
   </app-page-header>
   <app-steppers [cancel]="cfQuotasUrl">
-    <app-step title="Create Quota" [onNext]="step1.submit" [valid]="step1.validate()" cancelButtonText="Cancel" finishButtonText="Create">
-      <app-create-quota-step #step1></app-create-quota-step>
+    <app-step title="Create Quota" [signalHandle]="step1.signalHandle" cancelButtonText="Cancel" finishButtonText="Create">
+      <app-create-quota-step #step1 [redirectUrl]="cfQuotasUrl"></app-create-quota-step>
     </app-step>
   </app-steppers>
 </div>
