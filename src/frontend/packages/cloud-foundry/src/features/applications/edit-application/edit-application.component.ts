@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, computed } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { CustomFormFieldComponent } from '@stratosui/core';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { Store } from '@ngrx/store';
-import { defer, from, Observable, of as observableOf, Subscription } from 'rxjs';
-import { filter, map, switchMap, take, tap } from 'rxjs/operators';
+import { defer, firstValueFrom, from, Observable, of as observableOf, Subscription } from 'rxjs';
+import { filter, map, startWith, switchMap, take, tap } from 'rxjs/operators';
 import { CustomSlideToggleComponent } from '../../../../../core/src/shared/components/custom-slide-toggle/custom-slide-toggle.component';
 
 import { AppMetadataTypes } from '../../../../../cloud-foundry/src/actions/app-metadata.actions';
@@ -18,7 +19,7 @@ import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { StatefulIconComponent } from '../../../../../core/src/core/stateful-icon/stateful-icon.component';
 import { FocusDirective } from '../../../../../core/src/shared/components/focus.directive';
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
-import { StepComponent } from '../../../../../core/src/shared/components/stepper/step/step.component';
+import { StepComponent, SignalStepHandle } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
 import {
@@ -63,9 +64,16 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
   private apps = inject(CfAppsSignalConfigService);
+  private router = inject(Router);
 
 
   editAppForm: FormGroup<EditApplicationForm>;
+
+  // FWT-957: signal-native step handle. Single-step edit form; submit() runs
+  // updateApp() and on success navigates back to the app detail page (the
+  // legacy { redirect: true } behavior, made explicit). Validity is the
+  // form's valid+dirty status, computed reactively from statusChanges.
+  signalHandle!: SignalStepHandle;
 
   uniqueNameValidator: AppNameUniqueDirective;
 
@@ -93,6 +101,46 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
       }),
       enable_ssh: new FormControl(false, { nonNullable: true })
     });
+
+    // Track form valid+dirty as a signal so signalHandle.valid is reactive
+    // without the legacy onValidChange emitter chain. Combine statusChanges
+    // and valueChanges so we react to BOTH validator transitions and dirty-
+    // flag flips (markAsDirty fires on valueChanges, not statusChanges).
+    const formChanges$ = this.editAppForm.statusChanges.pipe(
+      startWith(this.editAppForm.status),
+      map(() => this.editAppForm.valid && this.editAppForm.dirty),
+    );
+    const valueChanges$ = this.editAppForm.valueChanges.pipe(
+      map(() => this.editAppForm.valid && this.editAppForm.dirty),
+    );
+    // toSignal each stream as a "version tick" — the actual valid && dirty
+    // truth is read fresh inside the computed. ORing the ticks ensures the
+    // signal graph re-runs when either stream emits.
+    const statusTick = toSignal(formChanges$, {
+      initialValue: this.editAppForm.valid && this.editAppForm.dirty,
+    });
+    const valueTick = toSignal(valueChanges$, { initialValue: false });
+    this.signalHandle = {
+      valid: computed(() => {
+        // Touch both ticks so the computed depends on both streams; then
+        // read the live form state for the actual answer.
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+        statusTick(); valueTick();
+        return this.editAppForm.valid && this.editAppForm.dirty;
+      }),
+      submit: async () => {
+        const result = await firstValueFrom(this.updateApp(0, undefined as any));
+        if (!result.success) {
+          throw new Error(result.message || 'Failed to update application');
+        }
+        // Legacy path returned { redirect: true } so the stepper popped back
+        // to the previous router state. Make that navigation explicit so we
+        // don't rely on the deprecated stepper redirect plumbing.
+        await this.router.navigate(
+          ['/applications', this.applicationService.cfGuid, this.applicationService.appGuid],
+        );
+      },
+    };
   }
 
   private app: any = {

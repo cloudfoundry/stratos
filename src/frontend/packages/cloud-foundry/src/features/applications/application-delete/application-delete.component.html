@@ -8,7 +8,7 @@
          and doesn't listen for dynamic additions). We toggle [hidden]
          on each step — the stepper subscribes to onHidden changes and
          re-filters its visible step list reactively. -->
-    <app-step title="Routes" [hidden]="!routesLoaded() || appRoutes().length === 0">
+    <app-step title="Routes" [hidden]="!routesLoaded() || appRoutes().length === 0" [signalHandle]="routesStepHandle">
       <div class="app-delete__monitors">
         <p>Please select any attached application routes you would like to delete.</p>
         <div class="mt-3 rounded border border-content-border p-4">
@@ -22,7 +22,7 @@
         </div>
       </div>
     </app-step>
-    <app-step title="Service Instances" [hidden]="!bindingsLoaded() || appBindings().length === 0">
+    <app-step title="Service Instances" [hidden]="!bindingsLoaded() || appBindings().length === 0" [signalHandle]="bindingsStepHandle">
       <div class="app-delete__monitors">
         <p>Please select any attached application service instances you would like to unbind.</p>
         <div class="mt-3 rounded border border-content-border p-4">
@@ -37,7 +37,7 @@
       </div>
     </app-step>
     <app-step title="Confirm" class="app-delete__monitors" [canClose]="!deleteStarted"
-      [disablePrevious]="deleteStarted" [destructiveStep]="!deleteStarted" [onNext]="startDelete"
+      [disablePrevious]="deleteStarted" [destructiveStep]="!deleteStarted" [signalHandle]="confirmStepHandle"
       [finishButtonText]="deleteStarted ? 'Close' : 'Delete'">
       <div class="app-delete__monitors">
         <p>Please confirm that you would like to delete the following application@if ((selectedRoutes && selectedRoutes.length) || (selectedServiceBindings && selectedServiceBindings.length)) {

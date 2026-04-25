@@ -1,7 +1,7 @@
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { Component, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
@@ -15,6 +15,7 @@ import {
   AppMonitorComponentTypes,
   ITableColumn,
   PageHeaderComponent,
+  SignalStepHandle,
   StepComponent,
   SteppersComponent,
 } from '@stratosui/core';
@@ -45,6 +46,7 @@ export class DetachServiceInstanceComponent {
   private store = inject<Store<CFAppState>>(Store);
   private datePipe = inject(DatePipe);
   private serviceActionHelperService = inject(ServiceActionHelperService);
+  private router = inject(Router);
 
 
   title$!: Observable<string>;
@@ -77,6 +79,32 @@ export class DetachServiceInstanceComponent {
   private _selectedBindings = signal<APIResource<IServiceBinding>[]>([]);
   // Convert signal to Observable for component expecting Observable input
   public selectedBindings$ = toObservable(this._selectedBindings);
+
+  // FWT-957: signal-native confirm-step handle. Always valid (the user
+  // already picked at least one binding upstream); submit fires the same
+  // detachServiceBinding side-effects as the legacy startDelete path then
+  // navigates to /services. The "Close" re-click after deleteStarted is
+  // handled by submit being idempotent.
+  confirmStepHandle: SignalStepHandle = {
+    valid: signal(true).asReadonly(),
+    submit: async () => {
+      if (this.deleteStarted) {
+        await this.router.navigate(['/services']);
+        return;
+      }
+      this.deleteStarted = true;
+      if (this.selectedBindings && this.selectedBindings.length) {
+        this.selectedBindings.forEach(binding => {
+          this.serviceActionHelperService.detachServiceBinding(
+            [binding], binding.entity.service_instance_guid, this.cfGuid, true,
+          );
+        });
+      }
+      // Mirror the legacy { success: true } (no redirect) — the action-monitor
+      // child shows progress in-place; the user closes via the Close button
+      // that the template flips to once deleteStarted is true.
+    },
+  };
 
   constructor() {
     const activatedRoute = inject(ActivatedRoute);

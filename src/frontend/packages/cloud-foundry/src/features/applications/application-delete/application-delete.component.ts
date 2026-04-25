@@ -7,6 +7,7 @@ import { catchError, filter, map, pairwise, shareReplay, startWith, take, tap } 
 import {
   LoadingPageComponent,
   PageHeaderComponent,
+  SignalStepHandle,
   StepComponent,
   SteppersComponent } from '@stratosui/core';
 import {
@@ -69,6 +70,47 @@ export class ApplicationDeleteComponent {
   public appMonitor!: EntityMonitor<APIResource<IApp>>;
 
   public cancelUrl: string;
+
+  // FWT-957: signal-native step handles. Routes and Service Instances are
+  // confirmation-only sub-pickers (no submit; selection state is captured
+  // via setSelected* outputs). Confirm step's submit drives the same
+  // delete-app + cascading-delete flow as the legacy startDelete path,
+  // and on success the existing redirectToAppWall() handles navigation —
+  // submit just needs to mirror that behavior in Promise form so the
+  // stepper can await it.
+  routesStepHandle: SignalStepHandle = { valid: signal(true).asReadonly() };
+  bindingsStepHandle: SignalStepHandle = { valid: signal(true).asReadonly() };
+  confirmStepHandle: SignalStepHandle = {
+    valid: signal(true).asReadonly(),
+    submit: async () => {
+      if (this.deleteStarted) {
+        this.redirectToAppWall();
+        return;
+      }
+      this.deleteStarted = true;
+      const { appGuid, cfGuid } = this.applicationService;
+      try {
+        await this.apps.deleteApp(cfGuid, appGuid);
+      } catch (err) {
+        throw err instanceof Error ? err : new Error(String(err));
+      }
+      // Route deletion + binding unbinding both go through the async-job
+      // contract. Fire-and-forget — the app is already deleted; related-
+      // entity failures don't block navigation.
+      if (this.selectedRoutes && this.selectedRoutes.length) {
+        this.selectedRoutes.forEach(route => {
+          void this.apps.deleteRoute(cfGuid, route.guid).catch((): void => undefined);
+        });
+      }
+      if (this.selectedServiceBindings && this.selectedServiceBindings.length) {
+        this.selectedServiceBindings.forEach(binding => {
+          void this.apps.deleteServiceBinding(cfGuid, binding.guid).catch((): void => undefined);
+        });
+      }
+      void this.apps.refresh().catch((): void => undefined);
+      this.redirectToAppWall();
+    },
+  };
 
   constructor() {
     const applicationService = this.applicationService;

@@ -1,15 +1,15 @@
-import { Component, OnDestroy, OnInit, signal, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal, ChangeDetectionStrategy, inject, computed } from '@angular/core';
 import { Validators, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf, Subscription } from 'rxjs';
-import { filter, map, mergeMap, pairwise, switchMap, tap } from 'rxjs/operators';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { firstValueFrom, Observable, of as observableOf, Subscription } from 'rxjs';
+import { filter, map, mergeMap, pairwise, startWith, switchMap, tap } from 'rxjs/operators';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 
 import { CFAppState } from '../../../../cf-app-state';
 import { domainEntityType, spaceEntityType } from '../../../../cf-entity-types';
 import { createEntityRelationKey } from '../../../../entity-relations/entity-relations.types';
 import { Route, RouteMode } from '../../../../store/types/route.types';
-import { StepOnNextFunction, StepOnNextResult } from '@stratosui/core';
+import { SignalStepHandle, StepOnNextFunction, StepOnNextResult } from '@stratosui/core';
 import { RouterNav, ActionState, RequestInfoState, APIResource } from '@stratosui/store';
 import { IDomain } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
@@ -84,8 +84,17 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     { id: 'create', label: 'Create and map new route', submitLabel: 'Create' },
     { id: 'map', label: 'Map existing route', submitLabel: 'Map' }
   ];
-  addRouteMode: RouteMode;
+  // Backed by a signal so SignalStepHandle.valid recomputes when the user
+  // toggles between create / map modes via the radio buttons.
+  private _addRouteMode = signal<RouteMode | null>(null);
+  get addRouteMode(): RouteMode { return this._addRouteMode()!; }
+  set addRouteMode(v: RouteMode) { this._addRouteMode.set(v); }
   useRandomPort = false;
+
+  // FWT-957: signal-native step handle exposed so the parent stepper template
+  // can bind [signalHandle]="step1.signalHandle" instead of the legacy
+  // [valid]="step1.validate()" + [onNext]="step1.submit" pair.
+  signalHandle!: SignalStepHandle;
   constructor() {
     const applicationService = this.applicationService;
 
@@ -121,6 +130,36 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       }),
       useRandomPort: new FormControl(false, { nonNullable: true })
     });
+
+    // Track each form's status as a signal so signalHandle.valid recomputes
+    // reactively. Domain status feeds isTCPRouteCreation() (which is read
+    // off plain form state) — folding the domain valueChanges into the
+    // signal graph too.
+    const httpStatus = toSignal(this.addHTTPRoute.statusChanges.pipe(startWith(this.addHTTPRoute.status)),
+      { initialValue: this.addHTTPRoute.status });
+    const tcpStatus = toSignal(this.addTCPRoute.statusChanges.pipe(startWith(this.addTCPRoute.status)),
+      { initialValue: this.addTCPRoute.status });
+    const domainStatus = toSignal(this.domainFormGroup.statusChanges.pipe(startWith(this.domainFormGroup.status)),
+      { initialValue: this.domainFormGroup.status });
+    this.signalHandle = {
+      valid: computed(() => {
+        // Touch all reactive sources so the signal graph re-runs on any
+        // input/form transition. Then defer to the existing validate()
+        // method which already encodes the create-vs-map branching.
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+        httpStatus(); tcpStatus(); domainStatus();
+        this._addRouteMode(); this.isRouteSelected();
+        return this.validate();
+      }),
+      submit: async () => {
+        const result = await firstValueFrom(this.submit(0, undefined as any));
+        if (!result.success) {
+          throw new Error(result.message || 'Failed to add route');
+        }
+        // Existing submit path already dispatches RouterNav back to the
+        // app routes tab on success — no extra navigation needed here.
+      },
+    };
   }
 
   appService = this.applicationService;

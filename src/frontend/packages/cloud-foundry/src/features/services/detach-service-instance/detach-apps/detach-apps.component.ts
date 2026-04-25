@@ -1,9 +1,10 @@
 
 import { Component, EventEmitter, OnDestroy, Output, inject, ChangeDetectionStrategy } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, startWith } from 'rxjs/operators';
 
-import { ListComponent, ListConfig } from '@stratosui/core';
+import { ListComponent, ListConfig, SignalStepHandle } from '@stratosui/core';
 import { APIResource } from '@stratosui/store';
 import { IServiceBinding } from '../../../../cf-api-svc.types';
 import {
@@ -34,6 +35,11 @@ export class DetachAppsComponent implements OnDestroy {
   public selectedApps = new EventEmitter<APIResource<IServiceBinding>[]>();
   selectedSub: Subscription;
 
+  // FWT-957: signal-native step handle. Validity is "at least one app
+  // selected"; no submit (the parent's confirm step handles the actual
+  // detach), so the step auto-succeeds on Next.
+  signalHandle: SignalStepHandle;
+
   constructor() {
     this.selectedSub = this.config.getDataSource().selectedRows$.subscribe(
       (selectedApps) => {
@@ -44,6 +50,9 @@ export class DetachAppsComponent implements OnDestroy {
     this.validate$ = this.config.getDataSource().selectedRows$.pipe(
       map(rows => Array.from(rows.values()).length > 0)
     );
+
+    const validSignal = toSignal(this.validate$.pipe(startWith(false)), { initialValue: false });
+    this.signalHandle = { valid: validSignal };
   }
 
   ngOnDestroy() {

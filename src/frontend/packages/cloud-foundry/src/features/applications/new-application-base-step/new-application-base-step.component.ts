@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { CFAppState } from '@stratosui/cloud-foundry';
-import { PageHeaderComponent, StepComponent, SteppersComponent, BASE_REDIRECT_QUERY, ITileConfig, ITileData, TileSelectorComponent } from '@stratosui/core';
+import { PageHeaderComponent, StepComponent, SteppersComponent, BASE_REDIRECT_QUERY, ITileConfig, ITileData, TileSelectorComponent, SignalStepHandle } from '@stratosui/core';
 import { RouterNav } from '@stratosui/store';
 import {
   ApplicationDeploySourceTypes,
@@ -47,6 +47,11 @@ export class NewApplicationBaseStepComponent {
 
   public serviceType!: string;
   public tileSelectorConfig$: Observable<ITileConfig<IAppTileData>[]>;
+
+  // FWT-957: signal-native step handle. Tile-selector confirmation step
+  // (no submission, Next hidden); navigation happens via the tile
+  // selectionChange handler dispatching RouterNav.
+  signalHandle: SignalStepHandle = { valid: signal(true).asReadonly() };
 
   set selectedTile(tile: ITileConfig<IAppTileData>) {
     if (tile) {

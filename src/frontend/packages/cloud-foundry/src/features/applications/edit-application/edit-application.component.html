@@ -7,7 +7,7 @@
   </div>
 </app-page-header>
 <app-steppers cancel="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}">
-  <app-step [title]="'Edit Application'" [valid]="editAppForm.valid && editAppForm.dirty" [onNext]="updateApp">
+  <app-step [title]="'Edit Application'" [signalHandle]="signalHandle">
     <form [formGroup]="editAppForm" validate class="flex flex-col gap-6 p-6">
       <app-form-field class="relative">
         <input appInput placeholder="Application Name" formControlName="name" autocomplete="off" [appFocus]="true">
