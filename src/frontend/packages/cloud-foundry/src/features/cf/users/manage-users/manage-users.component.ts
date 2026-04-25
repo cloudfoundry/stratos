@@ -19,6 +19,11 @@ import { UsersRolesModifyComponent } from './manage-users-modify/manage-users-mo
 import { ManageUsersSetUsernamesComponent } from './manage-users-set-usernames/manage-users-set-usernames.component';
 
 
+// FWT-957 DEFERRED (Shape 3 multi-step): three-step flow with conditional
+// `setUsernames` first step + cross-step `onLeave`/`onEnter` coordination
+// + `applyStarted` toggle in confirm step + `ignoreSuccess` semantic.
+// Migrating requires per-stepper signal-state coordination across step
+// boundaries — escalated for a unified service-driven approach.
 @Component({
   selector: 'app-manage-users',
   templateUrl: './manage-users.component.html',

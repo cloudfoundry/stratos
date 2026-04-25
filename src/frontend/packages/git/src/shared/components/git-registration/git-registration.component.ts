@@ -61,6 +61,14 @@ interface GitRegistrationForm {
   createSystemEndpointField: FormControl<boolean>;
 }
 
+// FWT-957 DEFERRED (Shape 3 multi-step): two-step flow (Register +
+// optional Connect) where the second step delegates to a child
+// CreateEndpointConnectComponent (`connect.doConnect`, `connect.valid`,
+// `connect.onNext`, `connect.onEnter`) and the first step's `validate`
+// observable spans both endpoint-type selection and form-field validity.
+// Migrating requires per-stepper signal-state coordination across child
+// boundaries — escalated for a unified service-driven approach (same
+// pattern as create-endpoint).
 @Component({
   selector: 'app-git-registration',
   templateUrl: './git-registration.component.html',

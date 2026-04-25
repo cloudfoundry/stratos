@@ -1,3 +1,9 @@
+// FWT-957 DEFERRED: multi-step migration needs per-stepper signal service.
+// KubeConfigRegistration is 2 steps with cross-step state via the importer's
+// `applyStarted` flag, the selector→importer cluster list passed through
+// the legacy `onNext` data return, and dynamic per-step button/label state
+// (canClose, destructiveStep, finishButtonText). Shape 3 migration requires
+// surfacing all of that through signal-shaped state on the children.
 import { ChangeDetectionStrategy, Component} from '@angular/core';
 import { CommonModule } from '@angular/common';
 

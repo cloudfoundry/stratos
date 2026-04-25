@@ -1,3 +1,10 @@
+// FWT-957 DEFERRED: multi-step migration needs per-stepper signal service.
+// 3 steps with cross-step state (CF/org/space selection in step1 → app
+// definition in step2 → service binding in step3) sharing ngrx-backed
+// SetCFDetails / SetNewAppName / pagination state. Migrating piecewise
+// would break the wizard's blocked/skip plumbing. Parent (FWT-957)
+// should introduce a CreateApplicationStepperService that exposes the
+// shared state as signals before this consumer can adopt SignalStepHandle.
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';

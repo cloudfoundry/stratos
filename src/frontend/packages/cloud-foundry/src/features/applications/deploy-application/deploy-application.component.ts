@@ -1,3 +1,9 @@
+// FWT-957 DEFERRED: multi-step migration needs per-stepper signal service.
+// Multi-step wizard (source-select → source-upload → options → step2 → step2-1
+// → step3) with cross-step state in deploy-application.actions / selectors
+// + GitHub branch/commit selection + manifest parsing. Parent (FWT-957)
+// should introduce a DeployApplicationStepperService that exposes the
+// shared state as signals before this consumer can adopt SignalStepHandle.
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';

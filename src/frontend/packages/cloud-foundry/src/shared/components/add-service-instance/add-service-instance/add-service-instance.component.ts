@@ -1,3 +1,12 @@
+// FWT-957 DEFERRED: multi-step migration needs per-stepper signal service.
+// Up to 5 steps (Cloud Foundry → Select Service → Select Plan → Bind Apps →
+// Service Instance) with cross-step state via CsiGuidsService +
+// SetCreateServiceInstance* ngrx actions + marketplace-mode branching.
+// Children (select-service, select-plan-step, bind-apps-step,
+// specify-details-step, specify-user-provided-details, create-application-
+// step1) all participate in the same wizard and must migrate together.
+// Parent (FWT-957) should introduce an AddServiceInstanceStepperService
+// before any of these consumers adopt SignalStepHandle.
 import { AsyncPipe, CommonModule, TitleCasePipe } from '@angular/common';
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';

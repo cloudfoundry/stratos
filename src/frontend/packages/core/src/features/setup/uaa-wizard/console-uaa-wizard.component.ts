@@ -34,6 +34,10 @@ import { ProductNameComponent } from '../../../shared/components/product-name.cc
 import { ShowHideButtonComponent } from '../../../core/show-hide-button/show-hide-button.component';
 import { LoadingPageComponent } from '../../../shared/components/loading-page/loading-page.component';
 
+// FWT-957 DEFERRED (Shape 3 multi-step): two-step UAA setup wizard where
+// step 1 (`uaaFormNext`) populates `uaaScopes` / `selectedScope` consumed
+// by step 2's form. Cross-step state derivation needs a per-stepper
+// signal-state service — escalated to parent.
 @Component({
   selector: 'app-console-uaa-wizard',
   templateUrl: './console-uaa-wizard.component.html',

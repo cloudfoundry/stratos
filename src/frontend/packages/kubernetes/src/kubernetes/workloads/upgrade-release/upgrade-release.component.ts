@@ -1,3 +1,8 @@
+// FWT-957 DEFERRED: multi-step migration needs per-stepper signal service.
+// UpgradeRelease is 2 steps: pick a chart Version (list selection) then
+// edit Overrides; the second step's doUpgrade depends on the version
+// selected in step 1. Shape 3 migration requires per-step signalHandle
+// wiring with shared state or a dedicated upgrade-flow signal service.
 import { AsyncPipe } from '@angular/common';
 import {Component, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';

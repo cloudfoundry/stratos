@@ -1,3 +1,9 @@
+// FWT-957 DEFERRED: multi-step migration needs per-stepper signal service.
+// CreateRelease (Install Chart) is 2 steps: a Kubernetes/name/namespace
+// form step and an Overrides editor step whose submit triggers the install
+// — the second step depends on values selected in the first. Shape 3
+// migration requires either per-step signalHandle wiring with shared state
+// or a dedicated install-flow signal service.
 import { CommonModule } from '@angular/common';
 import {Component, ElementRef, OnDestroy, OnInit, ViewChild, signal, WritableSignal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';

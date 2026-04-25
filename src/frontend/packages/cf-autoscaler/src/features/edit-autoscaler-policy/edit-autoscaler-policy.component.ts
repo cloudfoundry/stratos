@@ -1,3 +1,9 @@
+// FWT-957 DEFERRED: multi-step migration needs per-stepper signal service.
+// EditAutoscalerPolicy is 4 steps + a base-step with cross-step state held
+// in EditAutoscalerPolicyService (form values flow step1→step2→step3→step4
+// before the final updatePolicy submission). Shape 3 migration requires
+// either signal-shaped service state or per-step signalHandle wiring with
+// a shared submit on the last step.
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';

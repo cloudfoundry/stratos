@@ -10,6 +10,13 @@ import { SteppersComponent } from '../../../shared/components/stepper/steppers/s
 import { CreateEndpointCfStep1Component } from './create-endpoint-cf-step-1/create-endpoint-cf-step-1.component';
 import { CreateEndpointConnectComponent } from './create-endpoint-connect/create-endpoint-connect.component';
 
+// FWT-957 DEFERRED (Shape 3 multi-step): two-step flow (Register +
+// optional Connect) where each step's logic lives in a child component
+// (CreateEndpointCfStep1Component, CreateEndpointConnectComponent) and
+// the parent template wires `step1.onNext` / `connect.onNext` /
+// `connect.onEnter` / `connect.doConnect` across the boundary. Migrating
+// requires per-stepper signal-state coordination across child boundaries
+// — escalated to parent for a unified service-driven approach.
 @Component({
   selector: 'app-create-endpoint',
   templateUrl: './create-endpoint.component.html',

@@ -26,6 +26,10 @@ import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { CfRolesService } from '../manage-users/cf-roles.service';
 import { UsersRolesConfirmComponent } from '../manage-users/manage-users-confirm/manage-users-confirm.component';
 
+// FWT-957 DEFERRED (Shape 3 multi-step): single-step but uses
+// `applyStarted` two-click pattern with `ignoreSuccess: true` on first
+// click — no clean per-step SignalStepHandle mapping. Migrating requires
+// the cross-step coordinator primitive being introduced in FWT-959.
 @Component({
 selector: 'app-remove-user',
   templateUrl: './remove-user.component.html',
