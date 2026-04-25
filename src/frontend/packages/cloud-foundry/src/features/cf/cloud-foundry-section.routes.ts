@@ -61,14 +61,14 @@ import {
   CloudFoundrySpaceRoutesSignalComponent,
 } from './tabs/cf-organizations/cf-organization-spaces/tabs/cloud-foundry-space-routes/cloud-foundry-space-routes-signal.component';
 import {
-  CloudFoundrySpaceServiceInstancesComponent,
-} from './tabs/cf-organizations/cf-organization-spaces/tabs/cloud-foundry-space-service-instances/cloud-foundry-space-service-instances.component';
+  CloudFoundrySpaceServiceInstancesSignalComponent,
+} from './tabs/cf-organizations/cf-organization-spaces/tabs/cloud-foundry-space-service-instances/cloud-foundry-space-service-instances-signal.component';
 import {
   CloudFoundrySpaceSummaryComponent,
 } from './tabs/cf-organizations/cf-organization-spaces/tabs/cloud-foundry-space-summary/cloud-foundry-space-summary.component';
 import {
-  CloudFoundrySpaceUserServiceInstancesComponent,
-} from './tabs/cf-organizations/cf-organization-spaces/tabs/cloud-foundry-space-user-service-instances/cloud-foundry-space-user-service-instances.component';
+  CloudFoundrySpaceUserServiceInstancesSignalComponent,
+} from './tabs/cf-organizations/cf-organization-spaces/tabs/cloud-foundry-space-user-service-instances/cloud-foundry-space-user-service-instances-signal.component';
 import {
   CloudFoundrySpaceUsersComponent,
 } from './tabs/cf-organizations/cf-organization-spaces/tabs/cloud-foundry-space-users/cloud-foundry-space-users.component';
@@ -366,11 +366,11 @@ export const CLOUD_FOUNDRY_SECTION_ROUTES: Routes = [{
                 },
                 {
                   path: 'service-instances',
-                  component: CloudFoundrySpaceServiceInstancesComponent
+                  component: CloudFoundrySpaceServiceInstancesSignalComponent
                 },
                 {
                   path: 'user-service-instances',
-                  component: CloudFoundrySpaceUserServiceInstancesComponent
+                  component: CloudFoundrySpaceUserServiceInstancesSignalComponent
                 },
                 {
                   path: 'routes',

@@ -10,13 +10,24 @@ import { CloudFoundryService } from '../../../../data-services/cloud-foundry.ser
 import { writeWithJob } from '../../../../../services/async-jobs/write-with-job';
 import type { SignalListDropdownOption, SignalListViewMode } from '@stratosui/core';
 
-// Services-wall list config — multi-CNSI service instances. Mirrors
-// CfServiceOfferingsSignalConfigService's MergeOrchestrator + ViewPipeline
-// pattern: instances from every connected CF rendered together, with a CF
-// dropdown to narrow.
+// Service instances list config — multi-CNSI by default (services-wall),
+// with optional space + type narrowing for the per-space tabs.
 //
-// No Org/Space dropdown at this level — single-CNSI / per-space variants
-// of this page would add those filters; the wall stays foundation-wide.
+// Mirrors CfServiceOfferingsSignalConfigService's MergeOrchestrator +
+// ViewPipeline pattern: instances from every connected CF rendered
+// together, with a CF dropdown to narrow.
+//
+// Scope filters:
+// - `cnsiGuids` (initialize): which CFs to drain. The wall passes every
+//   connected CF; per-space callers pass a single guid via
+//   `initializeForSpace`.
+// - `spaceGuid`: empty = no space constraint (wall behaviour); non-empty =
+//   client-side filter to that space only. Mirrors the routes signal
+//   config's per-space narrowing.
+// - `typeFilter`: undefined = both managed and user-provided (wall);
+//   'managed' or 'user-provided' = the per-space tabs that are already
+//   pre-filtered to one kind.
+//
 // nameFilter searches across Name and ServiceOfferingName so users can
 // find "the redis I named primary-cache" by typing either.
 //
@@ -26,6 +37,15 @@ import type { SignalListDropdownOption, SignalListViewMode } from '@stratosui/co
 export class CfServiceInstancesSignalConfigService {
   orchestrator!: MergeOrchestrator<StServiceInstance>;
   view!: ViewPipeline<StServiceInstance>;
+
+  // Empty string = wall behaviour (no space constraint). Non-empty =
+  // narrow to that space only. Set via initializeForSpace. Stored as a
+  // signal so the filter effect re-runs when a per-space caller switches
+  // scope mid-session.
+  private readonly _spaceGuid: WritableSignal<string> = signal('');
+  // undefined = no type constraint (wall). 'managed' / 'user-provided' =
+  // per-space tab pre-filter.
+  private readonly _typeFilter: WritableSignal<'managed' | 'user-provided' | undefined> = signal(undefined);
 
   readonly filter: WritableSignal<(si: StServiceInstance) => boolean> = signal(() => true);
   readonly sort: WritableSignal<SortSpec<StServiceInstance>> = signal({ field: 'name', direction: 'asc' });
@@ -105,14 +125,25 @@ export class CfServiceInstancesSignalConfigService {
 
     // Re-derive the filter predicate whenever a toolbar input changes. The
     // CF filter is a direct guid match; the text filter falls back to the
-    // current row's name when the registered extractor is missing.
+    // current row's name when the registered extractor is missing. The
+    // scope filters (spaceGuid, typeFilter) come from initializeForSpace
+    // and are read here so per-space tabs narrow without touching the
+    // toolbar shape.
     effect(() => {
       const cnsi = this.selectedCnsi();
       const q = this.nameFilter().trim().toLowerCase();
       const field = this.filterField();
       const extractor = this._filterExtractors().get(field);
+      const spaceGuid = this._spaceGuid();
+      const typeFilter = this._typeFilter();
       this.filter.set((si: StServiceInstance) => {
         if (cnsi && si.cnsiGuid !== cnsi) return false;
+        if (spaceGuid && si.spaceGuid !== spaceGuid) return false;
+        if (typeFilter) {
+          const isUps = si.type === 'user-provided';
+          if (typeFilter === 'user-provided' && !isUps) return false;
+          if (typeFilter === 'managed' && isUps) return false;
+        }
         if (q) {
           const hay = (extractor ? extractor(si) : (si.name ?? '')).toLowerCase();
           if (!hay.includes(q)) return false;
@@ -124,7 +155,33 @@ export class CfServiceInstancesSignalConfigService {
 
   initialize(cnsiGuids: readonly string[]): void {
     this._hasLoadedOnce.set(false);
+    // Resetting on every initialize keeps the wall caller's behaviour
+    // intact regardless of whether a per-space caller previously narrowed
+    // the singleton in this session.
+    this._spaceGuid.set('');
+    this._typeFilter.set(undefined);
     const sources = cnsiGuids.map(guid => new CnsiServiceInstancesSource(guid, this.http));
+    this.orchestrator = new MergeOrchestrator<StServiceInstance>(sources);
+    this.view = new ViewPipeline<StServiceInstance>(
+      this.orchestrator.allItems,
+      this.filter,
+      this.sort,
+      this.pageSize,
+      this.pageIndex,
+      this._sortExtractors.asReadonly(),
+    );
+  }
+
+  // Per-space variant — single CNSI, narrowed to one space and (usually)
+  // one instance type. The toolbar still has the same shape but the CF
+  // dropdown is pointless in this context (the per-space components elect
+  // not to render it). The filter effect re-runs whenever _spaceGuid or
+  // _typeFilter changes so no extra wiring is needed at the call site.
+  initializeForSpace(cnsiGuid: string, spaceGuid: string, typeFilter?: 'managed' | 'user-provided'): void {
+    this._hasLoadedOnce.set(false);
+    this._spaceGuid.set(spaceGuid);
+    this._typeFilter.set(typeFilter);
+    const sources = [new CnsiServiceInstancesSource(cnsiGuid, this.http)];
     this.orchestrator = new MergeOrchestrator<StServiceInstance>(sources);
     this.view = new ViewPipeline<StServiceInstance>(
       this.orchestrator.allItems,
