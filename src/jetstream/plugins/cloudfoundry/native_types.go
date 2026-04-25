@@ -181,3 +181,55 @@ type StServiceInstancesResponse struct {
 	Resources    []StServiceInstance `json:"resources"`
 	TotalResults int                 `json:"totalResults"`
 }
+
+// StUserOrgRole bundles every org-scoped role grant (organization_manager,
+// organization_auditor, organization_user, organization_billing_manager) a
+// user holds in a given org. Buckets per-org so the UI can render
+// "<orgName>: org_manager, org_auditor" without scanning the role list per
+// row. Roles strip the "organization_" prefix before bucketing — easier to
+// read in cells than the raw V3 enum.
+type StUserOrgRole struct {
+	OrgGuid string   `json:"orgGuid"`
+	Roles   []string `json:"roles"`
+}
+
+// StUserSpaceRole is the space-scoped sibling of StUserOrgRole. Carries
+// OrgGuid as well as SpaceGuid so a per-space filter (per-space users tab)
+// can scope without resolving space → org each row, and a CF-level cell can
+// render "<orgName>/<spaceName>: <roles>" off a single struct. Roles strip
+// the "space_" prefix.
+type StUserSpaceRole struct {
+	OrgGuid   string   `json:"orgGuid"`
+	SpaceGuid string   `json:"spaceGuid"`
+	Roles     []string `json:"roles"`
+}
+
+// StUser is the Stratos-shaped DTO for a CF user — the joined view of
+// /v3/users (identity) and /v3/roles (role grants). One row per user;
+// org and space role grants are bucketed onto the row so the UI doesn't
+// need a second pass through the role list per render.
+//
+// Drives the CF-level users page and the per-space users tab. The per-space
+// tab filters client-side on `spaceRoles[].spaceGuid == lockedSpaceGuid`.
+//
+// Manage Roles + Remove User flows stay legacy in this round — write-side
+// scope is intentionally absent. CnsiGuid is stamped server-side so multi-
+// CNSI rows + favorites/links can be keyed by (cnsi, user) consistently with
+// every other St* DTO. PresentationName + Origin are V3-only fields not
+// surfaced in the V2 user shape; the UI treats them as optional cells.
+type StUser struct {
+	Guid             string            `json:"guid"`
+	Username         string            `json:"username"`
+	PresentationName string            `json:"presentationName,omitempty"`
+	Origin           string            `json:"origin,omitempty"`
+	CnsiGuid         string            `json:"cnsiGuid"`
+	OrgRoles         []StUserOrgRole   `json:"orgRoles"`
+	SpaceRoles       []StUserSpaceRole `json:"spaceRoles"`
+	CreatedAt        string            `json:"createdAt,omitempty"`
+	UpdatedAt        string            `json:"updatedAt,omitempty"`
+}
+
+type StUsersResponse struct {
+	Resources    []StUser `json:"resources"`
+	TotalResults int      `json:"totalResults"`
+}

@@ -1,24 +1,60 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { provideRouter } from '@angular/router';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
+import { TabNavService } from '@stratosui/core';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
+import { generateCfBaseTestModulesNoShared } from '@test-framework/cloud-foundry-endpoint-service.helper';
 
-import { CfUserService } from '../../../../shared/data-services/cf-user.service';
-import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
+import { CloudFoundryUsersComponent } from './cloud-foundry-users.component';
+import { CfUsersSignalConfigService } from '../../../../shared/components/list/list-types/user/cf-users-signal-config.service';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
-import { UserInviteService } from '../../user-invites/user-invite.service';
-import { CloudFoundryUsersComponent } from "./cloud-foundry-users.component";
+import type { StUser } from '../../../../services/endpoint-data/stratos-types';
+
+function makeStubSignalConfigService(opts?: {
+  orgNames?: Map<string, string>;
+  spaceNames?: Map<string, string>;
+}) {
+  const pageIndex = signal(0);
+  const pageSize = signal(25);
+  const filterSig = signal(() => true);
+  const sortSig = signal({ field: 'username' as const, direction: 'asc' as const });
+  const view = {
+    pagedItems: signal<StUser[]>([]).asReadonly(),
+    totalFilteredResults: signal(0).asReadonly(),
+    totalPages: signal(1).asReadonly(),
+  };
+  return {
+    initialize: vi.fn(),
+    initializeForSpace: vi.fn(),
+    refresh: vi.fn().mockResolvedValue(undefined),
+    clearFilters: vi.fn(),
+    registerSortExtractor: vi.fn(),
+    filter: filterSig,
+    sort: sortSig,
+    pageSize,
+    pageIndex,
+    view,
+    nameFilter: signal(''),
+    viewMode: signal<'card' | 'table'>('table'),
+    orgNameByGuid: signal(opts?.orgNames ?? new Map<string, string>()).asReadonly(),
+    spaceNameByGuid: signal(opts?.spaceNames ?? new Map<string, string>()).asReadonly(),
+  };
+}
 
 describe('CloudFoundryUsersComponent', () => {
   let component: CloudFoundryUsersComponent;
   let fixture: ComponentFixture<CloudFoundryUsersComponent>;
+  let stubSignalConfig: ReturnType<typeof makeStubSignalConfigService>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    stubSignalConfig = makeStubSignalConfigService({
+      orgNames: new Map([['org-1', 'engineering'], ['org-2', 'platform']]),
+      spaceNames: new Map([['space-1', 'dev'], ['space-2', 'prod']]),
+    });
+    await TestBed.configureTestingModule({
       imports: [
         CloudFoundryUsersComponent,
       ],
@@ -28,22 +64,63 @@ describe('CloudFoundryUsersComponent', () => {
         provideHttpClient(),
         ...STORE_TEST_PROVIDERS,
         importProvidersFrom(generateCfBaseTestModulesNoShared()),
-        ActiveRouteCfOrgSpace,
-        UserInviteService,
-        CloudFoundryEndpointService,
-        CfUserService,
-      ]
-    })
-      .compileComponents();
-  });
+        TabNavService,
+        { provide: CfUsersSignalConfigService, useValue: stubSignalConfig },
+        { provide: CloudFoundryEndpointService, useValue: { cfGuid: 'cnsi-1' } },
+      ],
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryUsersComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('initializes the signal config for the CNSI', () => {
+    expect(stubSignalConfig.initialize).toHaveBeenCalledWith('cnsi-1');
+  });
+
+  it('builds a SignalListConfig with the CF-level users columns', () => {
+    const cfg = component.listConfig();
+    expect(cfg).toBeDefined();
+    expect(cfg!.columns.map(c => c.header)).toEqual([
+      'Username', 'Origin', 'Org Roles', 'Space Roles', 'Created',
+    ]);
+    expect(cfg!.getRowKey({
+      cnsiGuid: 'cnsi-1', guid: 'user-1', username: 'alice',
+      orgRoles: [], spaceRoles: [],
+    } as any)).toBe('cnsi-1:user-1');
+  });
+
+  it('Org Roles column resolves org name + joins prefix-stripped roles', () => {
+    const cfg = component.listConfig();
+    const orgCol = cfg!.columns.find(c => c.key === 'orgRoles');
+    expect(orgCol).toBeDefined();
+    const orgUser: any = {
+      cnsiGuid: 'cnsi-1', guid: 'user-1', username: 'alice',
+      orgRoles: [{ orgGuid: 'org-1', roles: ['manager', 'auditor'] }],
+      spaceRoles: [],
+    };
+    expect(orgCol!.render!(orgUser)).toContain('engineering');
+    expect(orgCol!.render!(orgUser)).toContain('manager, auditor');
+    // Empty bucket → em-dash placeholder.
+    const noRoleUser: any = {
+      cnsiGuid: 'cnsi-1', guid: 'user-2', username: 'bob',
+      orgRoles: [], spaceRoles: [],
+    };
+    expect(orgCol!.render!(noRoleUser)).toBe('—');
+  });
+
+  it('Space Roles column composes "<org>/<space>: roles" via lookup signals', () => {
+    const cfg = component.listConfig();
+    const spaceCol = cfg!.columns.find(c => c.key === 'spaceRoles');
+    expect(spaceCol).toBeDefined();
+    const spaceUser: any = {
+      cnsiGuid: 'cnsi-1', guid: 'user-3', username: 'carol',
+      orgRoles: [],
+      spaceRoles: [{ orgGuid: 'org-1', spaceGuid: 'space-1', roles: ['developer'] }],
+    };
+    const text = spaceCol!.render!(spaceUser);
+    expect(text).toContain('engineering / dev');
+    expect(text).toContain('developer');
   });
 });

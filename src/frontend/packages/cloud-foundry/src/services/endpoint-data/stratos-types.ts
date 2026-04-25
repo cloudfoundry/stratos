@@ -207,3 +207,50 @@ export interface StServiceInstancesResponse {
   resources: StServiceInstance[];
   totalResults: number;
 }
+
+// Mirror of the backend StUserOrgRole DTO (native_types.go). One bucket
+// per (user, org) — each carries the prefix-stripped role names the user
+// holds in that org (e.g. ["manager", "auditor"]).
+export interface StUserOrgRole {
+  orgGuid: string;
+  roles: string[];
+}
+
+// Mirror of the backend StUserSpaceRole DTO. One bucket per (user, space)
+// — each carries the prefix-stripped space-scoped role names. orgGuid is
+// included so the per-row cell can compose "<org>/<space>: <roles>"
+// without a second lookup.
+export interface StUserSpaceRole {
+  orgGuid: string;
+  spaceGuid: string;
+  roles: string[];
+}
+
+// Mirror of the backend StUser DTO (native_types.go). One row per CF user;
+// org and space role grants are bucketed per-scope so the UI doesn't pay a
+// second pass through the role list per render.
+//
+// Drives the CF-level users page and the per-space users tab — the
+// per-space variant filters client-side on
+// `spaceRoles.some(sr => sr.spaceGuid === lockedSpaceGuid)`.
+//
+// PresentationName + Origin are V3-only fields; the UI treats them as
+// optional cells (em-dash placeholder when empty). orgRoles + spaceRoles
+// are normalised to non-null arrays on the backend so consumers can `.length`
+// without a guard.
+export interface StUser {
+  guid: string;
+  username: string;
+  presentationName?: string;
+  origin?: string;
+  cnsiGuid: string;
+  orgRoles: StUserOrgRole[];
+  spaceRoles: StUserSpaceRole[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface StUsersResponse {
+  resources: StUser[];
+  totalResults: number;
+}
