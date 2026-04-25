@@ -114,4 +114,15 @@ describe('CloudFoundrySpaceUsersComponent', () => {
     };
     expect(col!.render!(notInThisSpace)).toBe('—');
   });
+
+  it('exposes placeholder Manage Roles + Invite User header actions', () => {
+    const cfg = component.listConfig();
+    expect(cfg!.headerActions).toBeDefined();
+    expect(cfg!.headerActions!.length).toBe(2);
+    expect(cfg!.headerActions!.map(a => a.label)).toEqual(['Manage Roles', 'Invite User']);
+    // Stub clicks fire the snackbar — must not throw.
+    for (const act of cfg!.headerActions!) {
+      expect(() => act.invoke()).not.toThrow();
+    }
+  });
 });

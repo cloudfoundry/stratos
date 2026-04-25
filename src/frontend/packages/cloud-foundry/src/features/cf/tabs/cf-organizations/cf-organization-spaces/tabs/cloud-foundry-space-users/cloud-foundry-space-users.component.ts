@@ -5,6 +5,8 @@ import { RouterModule } from '@angular/router';
 import {
   SignalListComponent,
   SignalListConfig,
+  SignalListHeaderAction,
+  TailwindSnackBarService,
 } from '@stratosui/core';
 
 import { CfUsersSignalConfigService } from '../../../../../../../shared/components/list/list-types/user/cf-users-signal-config.service';
@@ -48,6 +50,7 @@ export class CloudFoundrySpaceUsersComponent {
   cfOrgService = inject(CloudFoundryOrganizationService);
   cfSpaceService = inject(CloudFoundrySpaceService);
   private usersConfig = inject(CfUsersSignalConfigService);
+  private snackBar = inject(TailwindSnackBarService);
 
   public listConfig: WritableSignal<SignalListConfig<StUser> | undefined> = signal(undefined);
 
@@ -75,6 +78,40 @@ export class CloudFoundrySpaceUsersComponent {
 
     const renderCreated = (u: StUser): string =>
       CloudFoundrySpaceUsersComponent.formatDate(u.createdAt);
+
+    // PLACEHOLDER header actions — proves the SignalListConfig.headerActions
+    // slot wires through correctly. Manage Roles + Invite User flows stay
+    // on the legacy stepper paths under /users/manage and /users/invite for
+    // this round (matches the CF-level page commit). When those flows
+    // migrate signal-native, swap each invoke() to navigate to the real
+    // route. The stub click intentionally surfaces the slot in the live UI
+    // without claiming a half-shipped flow.
+    const headerActions: readonly SignalListHeaderAction[] = [
+      {
+        label: 'Manage Roles',
+        icon: 'people',
+        tooltip: 'Manage user roles for this space (legacy flow — not yet migrated)',
+        invoke: () => {
+          this.snackBar.open(
+            'Manage Roles flow not yet migrated — open via legacy users page',
+            'Dismiss',
+            { duration: 5000 },
+          );
+        },
+      },
+      {
+        label: 'Invite User',
+        icon: 'person_add',
+        tooltip: 'Invite a user (legacy flow — not yet migrated)',
+        invoke: () => {
+          this.snackBar.open(
+            'Invite User flow not yet migrated — open via legacy users page',
+            'Dismiss',
+            { duration: 5000 },
+          );
+        },
+      },
+    ];
 
     this.listConfig.set({
       pagedItems: this.usersConfig.view.pagedItems,
@@ -122,6 +159,7 @@ export class CloudFoundrySpaceUsersComponent {
       onClear: () => this.usersConfig.clearFilters(),
       viewMode: this.usersConfig.viewMode,
       sort: this.usersConfig.sort,
+      headerActions,
     });
 
     this.usersConfig.registerSortExtractor('origin', renderOrigin);

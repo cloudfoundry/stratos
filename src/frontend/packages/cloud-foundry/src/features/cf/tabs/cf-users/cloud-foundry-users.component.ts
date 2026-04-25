@@ -6,6 +6,8 @@ import {
   SignalListCompoundSegment,
   SignalListComponent,
   SignalListConfig,
+  SignalListHeaderAction,
+  TailwindSnackBarService,
 } from '@stratosui/core';
 
 import { CfUsersSignalConfigService } from '../../../../shared/components/list/list-types/user/cf-users-signal-config.service';
@@ -36,6 +38,7 @@ import type { StUser, StUserOrgRole, StUserSpaceRole } from '../../../../service
 export class CloudFoundryUsersComponent {
   cfEndpointService = inject(CloudFoundryEndpointService);
   private usersConfig = inject(CfUsersSignalConfigService);
+  private snackBar = inject(TailwindSnackBarService);
 
   public listConfig: WritableSignal<SignalListConfig<StUser> | undefined> = signal(undefined);
 
@@ -111,6 +114,28 @@ export class CloudFoundryUsersComponent {
     const renderCreated = (u: StUser): string =>
       CloudFoundryUsersComponent.formatDate(u.createdAt);
 
+    // PLACEHOLDER header actions — proves the SignalListConfig.headerActions
+    // slot wires through correctly. The Manage Users / Invite User flows
+    // remain on the legacy stepper paths under /users/manage and
+    // /users/invite. When those flows migrate signal-native, swap each
+    // invoke() to navigate to the real route. The stub click is
+    // intentional: it surfaces the slot in the live UI without lying about
+    // a half-shipped flow.
+    const headerActions: readonly SignalListHeaderAction[] = [
+      {
+        label: 'Invite User',
+        icon: 'person_add',
+        tooltip: 'Invite a user (legacy flow — not yet migrated)',
+        invoke: () => {
+          this.snackBar.open(
+            'Invite User flow not yet migrated — open via legacy users page',
+            'Dismiss',
+            { duration: 5000 },
+          );
+        },
+      },
+    ];
+
     this.listConfig.set({
       pagedItems: this.usersConfig.view.pagedItems,
       totalFilteredResults: this.usersConfig.view.totalFilteredResults,
@@ -138,6 +163,12 @@ export class CloudFoundryUsersComponent {
           compound: compoundOrgRoles,
           render: renderOrgRoles,
           widthHint: '20rem',
+          // Cap visible org-role segments. A handful of orgs is the
+          // common case; the cap protects the row height from operators
+          // that hold roles in dozens of orgs (admin accounts on busy
+          // CFs). Click "…and N more orgs" to expand.
+          maxVisible: 5,
+          collapsedLabel: (n: number) => `…and ${n} more orgs`,
         },
         {
           header: 'Space Roles', key: 'spaceRoles', sortField: renderSpaceRoles,
@@ -145,6 +176,14 @@ export class CloudFoundryUsersComponent {
           compound: compoundSpaceRoles,
           render: renderSpaceRoles,
           widthHint: '22rem',
+          // Cap visible space-role segments. The motivating case: admin
+          // user with 2507 space role grants overflowed the row visually
+          // and pushed the Username out of viewport (see
+          // project_signallist_row_overflow.md). 5 keeps typical operator
+          // rows compact and gives a clear "…and N more spaces" link to
+          // see the rest.
+          maxVisible: 5,
+          collapsedLabel: (n: number) => `…and ${n} more spaces`,
         },
         {
           header: 'Created', key: 'createdAt', sortField: 'createdAt',
@@ -165,6 +204,7 @@ export class CloudFoundryUsersComponent {
       onClear: () => this.usersConfig.clearFilters(),
       viewMode: this.usersConfig.viewMode,
       sort: this.usersConfig.sort,
+      headerActions,
     });
 
     this.usersConfig.registerSortExtractor('origin', renderOrigin);

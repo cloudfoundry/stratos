@@ -2,6 +2,8 @@ import { Component, HostListener, Input, Signal, WritableSignal, ChangeDetection
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
+import { TailwindSnackBarService } from '../../services/tailwind-snackbar.service';
+
 export type SignalListPillColor = 'success' | 'warning' | 'danger' | 'neutral';
 
 // One line of a `kind: 'compound'` cell. `link` is optional — segments
@@ -38,6 +40,25 @@ export interface SignalListRowAction<T> {
   readonly invoke: (row: T) => void | Promise<void>;
 }
 
+// Page-level action button rendered in the toolbar's leading group, ABOVE
+// any row-level controls. Used to host the page-level actions that the
+// legacy `<app-page-sub-nav>` exposed (Create Org, Invite User, Manage
+// Roles, etc.) so signal-native pages don't have to drop these on
+// migration. Visibility/disabled are signals so callers can gate them on
+// permission/feature-flag observables without re-rebuilding the config.
+// `invoke` may return a promise — async errors are caught and surfaced
+// via TailwindSnackBarService so callers don't have to wire their own
+// try/catch (mirrors the row-actions kebab pattern).
+export interface SignalListHeaderAction {
+  readonly label: string;
+  readonly icon?: string;                    // material icon name
+  readonly disabled?: Signal<boolean>;       // reactive disabled state
+  readonly visible?: Signal<boolean>;        // optional visibility gate (omitted = always visible)
+  readonly primary?: boolean;                // emphasis style (filled vs outlined button)
+  readonly tooltip?: string;
+  readonly invoke: () => void | Promise<void>;
+}
+
 export interface SignalListColumn<T> {
   header: string;
   render: (row: T) => string;
@@ -62,6 +83,22 @@ export interface SignalListColumn<T> {
   // service's filter/sort extractors can delegate to it for parity with
   // the visual.
   compound?: (row: T) => readonly SignalListCompoundSegment[];
+  // Optional for kind === 'compound'. When set and the segment count for
+  // a row exceeds this value, only the first `maxVisible` segments render
+  // and a clickable "…and N more" affordance appears below them. Click
+  // expands the cell to show all segments (with a "…show fewer" indicator
+  // at the bottom to collapse). Each (row, column) pair tracks its own
+  // expanded state so unrelated compound columns on the same row can be
+  // expanded independently. Unset = unlimited (current behavior;
+  // high-cardinality cells like an admin user with thousands of role
+  // grants will overflow and break visual row alignment — see
+  // project_signallist_row_overflow.md).
+  maxVisible?: number;
+  // Optional for kind === 'compound'. Caller-supplied label for the
+  // collapsed-state link, given the count of hidden segments. Defaults to
+  // `…and N more`. Useful for domain-specific phrasing such as
+  // `(n) => '…and ' + n + ' more spaces'`.
+  collapsedLabel?: (hidden: number) => string;
   // Required when kind === 'favorite'. See SignalListFavoriteBinding.
   // In table view the column renders as its own narrow cell; in card
   // view the star attaches to the Name line so the card doesn't grow
@@ -153,6 +190,11 @@ export interface SignalListConfig<T> {
   // card-mode sort dropdown are wired to this signal. Columns are
   // sortable iff they declare a sortField.
   readonly sort?: WritableSignal<SignalListSort>;
+  // Optional — page-level action buttons rendered as a leading group in
+  // the toolbar (left of filter dropdowns). Each entry becomes a button;
+  // omit, set to undefined, or pass an empty array to render nothing
+  // (zero visual change for existing pages). See SignalListHeaderAction.
+  readonly headerActions?: readonly SignalListHeaderAction[];
 }
 
 @Component({
@@ -180,6 +222,8 @@ export class SignalListComponent<T> implements AfterViewInit {
   private resizeObserver?: ResizeObserver;
   private mutationObserver?: MutationObserver;
   private onScroll = () => this.measureOverflow();
+
+  private snackBar = inject(TailwindSnackBarService);
 
   constructor() {
     const destroyRef = inject(DestroyRef);
@@ -414,6 +458,79 @@ export class SignalListComponent<T> implements AfterViewInit {
     col.favorite?.toggle(row);
   }
 
+  // Compound-cell overflow ---------------------------------------------
+
+  // Set of `${rowKey}::${columnKey}` entries currently in the expanded
+  // state. Keyed per (row, column) so two compound columns on the same
+  // row (e.g. Org Roles + Space Roles on the cf users page) expand and
+  // collapse independently — keying by row alone would surprise users
+  // who clicked "…and N more spaces" and saw orgs expand too. Survives
+  // re-renders because the signal lives on the component instance, but
+  // resets when the user navigates away (component teardown).
+  readonly expandedCompoundCells: WritableSignal<ReadonlySet<string>> = signal(new Set<string>());
+
+  // Internal — composes the (row, column) key used by expandedCompoundCells.
+  private compoundCellKey(col: SignalListColumn<T>, row: T): string {
+    return `${this.config.getRowKey(row)}::${this.columnKey(col)}`;
+  }
+
+  // True when the compound cell for (row, col) should render every segment
+  // — either because the user expanded it OR because the segment count
+  // doesn't exceed the column's maxVisible cap (no overflow to hide).
+  // Always true when col.maxVisible is unset.
+  isCompoundExpanded(col: SignalListColumn<T>, row: T): boolean {
+    return this.expandedCompoundCells().has(this.compoundCellKey(col, row));
+  }
+
+  // Click handler for "…and N more" / "…show fewer" indicators. Toggles
+  // the (row, column) entry in the expanded set. stopPropagation so the
+  // click doesn't bubble to row-level selection (and doesn't close any
+  // open kebab menus, which is the document:click handler's job).
+  toggleCompoundExpanded(col: SignalListColumn<T>, row: T, ev: Event): void {
+    ev.stopPropagation();
+    const key = this.compoundCellKey(col, row);
+    this.expandedCompoundCells.update(curr => {
+      const next = new Set(curr);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
+
+  // Returns the segments to render for the cell, respecting maxVisible
+  // and the per-cell expanded state. When the cap applies and the cell
+  // is collapsed, returns a slice of the first `maxVisible`; otherwise
+  // returns the full list. Centralises the slicing so the template
+  // doesn't have to call .compound(row) twice (filter then count).
+  visibleCompoundSegments(col: SignalListColumn<T>, row: T): readonly SignalListCompoundSegment[] {
+    const all = col.compound!(row);
+    const cap = col.maxVisible;
+    if (cap == null || all.length <= cap || this.isCompoundExpanded(col, row)) {
+      return all;
+    }
+    return all.slice(0, cap);
+  }
+
+  // Number of segments hidden by the maxVisible cap when the cell is
+  // collapsed. Returns 0 when the cell renders fully (either no cap, no
+  // overflow, or expanded) — the template uses this as a guard to skip
+  // the "…and N more" affordance when there's nothing to hide.
+  hiddenCompoundCount(col: SignalListColumn<T>, row: T): number {
+    const cap = col.maxVisible;
+    if (cap == null) return 0;
+    if (this.isCompoundExpanded(col, row)) return 0;
+    const total = col.compound!(row).length;
+    return total > cap ? total - cap : 0;
+  }
+
+  // Caller-supplied or default phrasing for the "…and N more" affordance.
+  // Default uses the ellipsis-prefixed form so it reads as a continuation
+  // of the visible segments rather than a standalone label.
+  collapsedLabelFor(col: SignalListColumn<T>, hidden: number): string {
+    if (col.collapsedLabel) return col.collapsedLabel(hidden);
+    return `…and ${hidden} more`;
+  }
+
   onFilterFieldChange(field: string): void {
     this.config.filterField?.set(field);
     this.config.pageIndex.set(0);
@@ -461,5 +578,55 @@ export class SignalListComponent<T> implements AfterViewInit {
     dropdown.selected.set(value === '' ? null : value);
     // Reset to first page so filtered results don't land on an empty page.
     this.config.pageIndex.set(0);
+  }
+
+  // Header actions ------------------------------------------------------
+
+  // Visible header actions in declaration order. Filters out entries
+  // whose `visible` signal returns false; entries without `visible` are
+  // always shown. The template iterates this list rather than the raw
+  // config array so the visibility predicate runs once per change-
+  // detection pass instead of per render check.
+  visibleHeaderActions(): readonly SignalListHeaderAction[] {
+    const all = this.config.headerActions;
+    if (!all || all.length === 0) return [];
+    return all.filter(a => (a.visible ? a.visible() : true));
+  }
+
+  isHeaderActionDisabled(act: SignalListHeaderAction): boolean {
+    return act.disabled ? act.disabled() : false;
+  }
+
+  // Click handler for a header action. Mirrors the row-actions kebab
+  // contract: short-circuit if disabled, fire-and-forget the invoke, and
+  // surface async errors via TailwindSnackBarService so callers don't
+  // need their own try/catch around every page-level action.
+  invokeHeaderAction(act: SignalListHeaderAction, ev: Event): void {
+    ev.stopPropagation();
+    if (this.isHeaderActionDisabled(act)) return;
+    try {
+      const result = act.invoke();
+      if (result && typeof (result as Promise<void>).then === 'function') {
+        (result as Promise<void>).catch((err: unknown) => {
+          const msg = err instanceof Error ? err.message : String(err);
+          this.snackBar.open(`${act.label} failed: ${msg}`, 'Dismiss');
+        });
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.snackBar.open(`${act.label} failed: ${msg}`, 'Dismiss');
+    }
+  }
+
+  // Tailwind classes for a header-action button. Primary = filled accent,
+  // secondary (default) = outlined ghost button. Matches the legacy
+  // `<app-page-sub-nav>` button styling: subtle by default, filled only
+  // when the action is the page's primary affordance.
+  headerActionClasses(act: SignalListHeaderAction): string {
+    const base = 'inline-flex items-center gap-1.5 px-3 py-1 text-sm rounded border transition-colors disabled:opacity-40 disabled:cursor-not-allowed';
+    if (act.primary) {
+      return `${base} bg-accent border-accent text-white hover:bg-accent/90`;
+    }
+    return `${base} bg-content-bg border-content-border text-content-text hover:bg-gray-100 dark:hover:bg-gray-700`;
   }
 }

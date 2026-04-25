@@ -3,6 +3,29 @@
   <!-- Toolbar -->
   <div class="flex items-center gap-3 px-4 py-2 border-b border-content-border flex-wrap">
 
+    <!-- Page-level action buttons (Create / Invite / Manage Roles / etc.).
+         Rendered as a leading group so they sit left of the filter dropdowns,
+         visually matching the legacy `<app-page-sub-nav>` placement. Hidden
+         entirely when no actions configured. -->
+    @if (visibleHeaderActions().length > 0) {
+      <div data-test="header-actions" class="flex items-center gap-2">
+        @for (act of visibleHeaderActions(); track act.label) {
+          <button
+            data-test="header-action"
+            type="button"
+            [disabled]="isHeaderActionDisabled(act)"
+            [title]="act.tooltip ?? act.label"
+            (click)="invokeHeaderAction(act, $event)"
+            [class]="headerActionClasses(act)">
+            @if (act.icon) {
+              <span class="material-icons text-base leading-5">{{ act.icon }}</span>
+            }
+            <span>{{ act.label }}</span>
+          </button>
+        }
+      </div>
+    }
+
     @if (config.filterDropdowns) {
       @for (dd of config.filterDropdowns; track dd.label) {
         <label class="flex items-center gap-2 text-sm text-content-muted" [attr.data-test]="'dropdown-' + dd.label">
@@ -207,12 +230,29 @@
                   <div class="flex items-start justify-between gap-2 text-sm py-0.5">
                     <span class="text-content-muted shrink-0">{{ col.header }}</span>
                     <div class="flex flex-col items-end leading-tight text-right min-w-0">
-                      @for (seg of col.compound(row); track $index) {
+                      @for (seg of visibleCompoundSegments(col, row); track $index) {
                         @if (seg.link) {
                           <a [routerLink]="seg.link" class="text-accent hover:underline truncate max-w-full" [attr.title]="seg.text">{{ seg.text }}</a>
                         } @else {
                           <span class="truncate max-w-full" [attr.title]="seg.text">{{ seg.text }}</span>
                         }
+                      }
+                      @if (hiddenCompoundCount(col, row) > 0) {
+                        <button
+                          data-test="compound-expand"
+                          type="button"
+                          (click)="toggleCompoundExpanded(col, row, $event)"
+                          class="text-xs text-content-muted hover:text-accent hover:underline cursor-pointer mt-0.5">
+                          {{ collapsedLabelFor(col, hiddenCompoundCount(col, row)) }}
+                        </button>
+                      } @else if (col.maxVisible !== undefined && isCompoundExpanded(col, row) && col.compound(row).length > col.maxVisible) {
+                        <button
+                          data-test="compound-collapse"
+                          type="button"
+                          (click)="toggleCompoundExpanded(col, row, $event)"
+                          class="text-xs text-content-muted hover:text-accent hover:underline cursor-pointer mt-0.5">
+                          …show fewer
+                        </button>
                       }
                     </div>
                   </div>
@@ -292,12 +332,29 @@
                     </span>
                   } @else if (col.kind === 'compound' && col.compound) {
                     <div class="flex flex-col leading-tight">
-                      @for (seg of col.compound(row); track $index) {
+                      @for (seg of visibleCompoundSegments(col, row); track $index) {
                         @if (seg.link) {
                           <a [routerLink]="seg.link" class="text-accent hover:underline truncate" [attr.title]="seg.text">{{ seg.text }}</a>
                         } @else {
                           <span class="truncate" [attr.title]="seg.text">{{ seg.text }}</span>
                         }
+                      }
+                      @if (hiddenCompoundCount(col, row) > 0) {
+                        <button
+                          data-test="compound-expand"
+                          type="button"
+                          (click)="toggleCompoundExpanded(col, row, $event)"
+                          class="text-xs text-content-muted hover:text-accent hover:underline cursor-pointer self-start mt-0.5">
+                          {{ collapsedLabelFor(col, hiddenCompoundCount(col, row)) }}
+                        </button>
+                      } @else if (col.maxVisible !== undefined && isCompoundExpanded(col, row) && col.compound(row).length > col.maxVisible) {
+                        <button
+                          data-test="compound-collapse"
+                          type="button"
+                          (click)="toggleCompoundExpanded(col, row, $event)"
+                          class="text-xs text-content-muted hover:text-accent hover:underline cursor-pointer self-start mt-0.5">
+                          …show fewer
+                        </button>
                       }
                     </div>
                   } @else if (col.kind === 'favorite' && col.favorite) {
