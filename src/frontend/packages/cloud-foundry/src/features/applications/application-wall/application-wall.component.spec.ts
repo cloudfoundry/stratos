@@ -31,6 +31,8 @@ function makeStubSignalConfigService() {
   const allOption = { label: 'All', value: null };
   return {
     initialize: vi.fn(),
+    initializeForSpace: vi.fn(),
+    clearLockedSpace: vi.fn(),
     loadAll: vi.fn().mockResolvedValue(undefined),
     refresh: vi.fn().mockResolvedValue(undefined),
     deleteApp: vi.fn().mockResolvedValue(undefined),

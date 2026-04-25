@@ -98,6 +98,14 @@ export class CfAppsSignalConfigService {
   // and don't yet reflect "this selection is gone".
   private readonly _hasLoadedOnce: WritableSignal<boolean> = signal(false);
 
+  // Locked space scope for the per-space apps tab. Empty = no narrowing
+  // (the multi-CNSI app wall path); non-empty = filter to apps whose
+  // spaceGuid matches. Set via initializeForSpace() and re-applied on
+  // every initialize() call. Distinct from `selectedSpace` (the user's
+  // toolbar selection) so the per-space tab can pin scope without the
+  // dropdown — and so clearFilters() doesn't drop scope.
+  private _lockedSpaceGuid = '';
+
   constructor(private readonly http: HttpClient) {
     const cfService = inject(CloudFoundryService, { optional: true });
     this.connectedEndpoints = cfService
@@ -228,7 +236,12 @@ export class CfAppsSignalConfigService {
       const field = this.filterField();
       const extractors = this._filterExtractors();
       const extractor = extractors.get(field);
+      const lockedSpace = this._lockedSpaceGuid;
       this.filter.set((app: StApp) => {
+        // Locked-space scope (per-space tab) takes precedence over the
+        // toolbar selectedSpace dropdown, which the per-space page doesn't
+        // expose at all.
+        if (lockedSpace && app.spaceGuid !== lockedSpace) return false;
         if (cnsi && app.cnsiGuid !== cnsi) return false;
         if (org && app.orgGuid !== org) return false;
         if (space && app.spaceGuid !== space) return false;
@@ -259,12 +272,34 @@ export class CfAppsSignalConfigService {
       this.pageIndex,
       this._sortExtractors.asReadonly(),
     );
+    // Re-derive the filter predicate so any change to _lockedSpaceGuid (set
+    // immediately before this call by initializeForSpace) takes effect even
+    // when no other filter signal moved. The constructor effect only re-fires
+    // when one of its tracked signals changes, and lockedSpaceGuid isn't a
+    // signal — so we nudge a benign one (filterField → its current value).
+    this.filterField.set(this.filterField());
     // Fire-and-forget org/space name resolution. Populates the lookup maps
     // that orgOptions/spaceOptions read for their labels. Failures per CF
     // are swallowed — if an endpoint is unreachable the dropdown falls back
     // to guid for that CF's items, which is preferable to blocking the
     // whole app-wall on a slow or broken CF.
     void this.loadNames(cnsiGuids);
+  }
+
+  // Per-space tab variant. Pins the scope to one CF + one space; the
+  // existing initialize() multi-CNSI plumbing does the rest. The toolbar
+  // dropdowns (CF/Org/Space) are intentionally NOT exposed by the per-space
+  // page — there's exactly one of each in scope.
+  initializeForSpace(cnsiGuid: string, spaceGuid: string): void {
+    this._lockedSpaceGuid = spaceGuid;
+    this.initialize([cnsiGuid]);
+  }
+
+  // Clear the per-space scope. Call from the app-wall path before the
+  // first initialize() so a stale lock from a previously-mounted space
+  // page doesn't bleed into wall results.
+  clearLockedSpace(): void {
+    this._lockedSpaceGuid = '';
   }
 
   private async loadNames(cnsiGuids: readonly string[]): Promise<void> {

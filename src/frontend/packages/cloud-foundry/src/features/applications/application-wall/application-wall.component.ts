@@ -222,6 +222,10 @@ export class ApplicationWallComponent implements OnInit {
       ),
     );
     const cnsiGuids = (connected ?? []).map(ep => ep.guid);
+    // The signal config service is a root singleton shared with the
+    // per-space apps tab; clear any locked space scope from a prior visit
+    // so the wall's filter predicate covers every connected CF.
+    this.appsConfig.clearLockedSpace();
     this.appsConfig.initialize(cnsiGuids);
     const dropdowns: SignalListDropdown[] = [
       {
