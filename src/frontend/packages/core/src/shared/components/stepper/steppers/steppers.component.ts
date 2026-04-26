@@ -262,7 +262,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
     // 1) Leave the previous step (with an indication if this is a Next or Previous transition)
     const isNextDirection = index > this.currentIndex;
-    this.steps[this.currentIndex].onLeave(isNextDirection);
+    this.steps[this.currentIndex].invokeLeave(isNextDirection);
 
     // 2) Determine if the required step is ok (and if not find the next/previous valid step)
     index = this.findValidStep(index, isNextDirection);

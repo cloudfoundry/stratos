@@ -126,5 +126,141 @@ describe('StepComponent', () => {
       expect(result.success).toBe(false);
       expect(result.message).toBe('plain string fail');
     });
+
+    it('signal-handle submit() resolving with {ignoreSuccess:true} threads it through', async () => {
+      component.signalHandle = {
+        valid: signal(true).asReadonly(),
+        submit: () => Promise.resolve({ ignoreSuccess: true }),
+      };
+      const result = await firstValueFrom(component.invokeNext(0));
+      expect(result.success).toBe(true);
+      expect(result.ignoreSuccess).toBe(true);
+    });
+
+    it('signal-handle submit() resolving with {} (no ignoreSuccess) reports plain success', async () => {
+      component.signalHandle = {
+        valid: signal(true).asReadonly(),
+        submit: () => Promise.resolve(),
+      };
+      const result = await firstValueFrom(component.invokeNext(0));
+      expect(result.success).toBe(true);
+      expect(result.ignoreSuccess).toBeUndefined();
+    });
+  });
+
+  describe('FWT-959 signal-handle UI fields', () => {
+    const baseHandle = () => ({ valid: signal(true).asReadonly() });
+
+    it('blocked: signal-handle wins over legacy storage', () => {
+      component.blocked = false;
+      component.signalHandle = { ...baseHandle(), blocked: signal(true).asReadonly() };
+      expect(component.blocked).toBe(true);
+    });
+
+    it('blocked: falls back to legacy when handle has no blocked', () => {
+      component.blocked = true;
+      component.signalHandle = baseHandle();
+      expect(component.blocked).toBe(true);
+    });
+
+    it('hidden: signal-handle wins over legacy storage', () => {
+      component.hidden = false;
+      component.signalHandle = { ...baseHandle(), hidden: signal(true).asReadonly() };
+      expect(component.hidden).toBe(true);
+    });
+
+    it('canClose: signal-handle wins over legacy storage', () => {
+      component.canClose = true;
+      component.signalHandle = { ...baseHandle(), canClose: signal(false).asReadonly() };
+      expect(component.canClose).toBe(false);
+    });
+
+    it('disablePrevious: signal-handle wins over legacy storage', () => {
+      component.disablePrevious = false;
+      component.signalHandle = { ...baseHandle(), disablePrevious: signal(true).asReadonly() };
+      expect(component.disablePrevious).toBe(true);
+    });
+
+    it('destructiveStep: signal-handle wins over legacy storage', () => {
+      component.destructiveStep = false;
+      component.signalHandle = { ...baseHandle(), destructiveStep: signal(true).asReadonly() };
+      expect(component.destructiveStep).toBe(true);
+    });
+
+    it('hideCloseButton: signal-handle wins over legacy storage', () => {
+      component.hideCloseButton = false;
+      component.signalHandle = { ...baseHandle(), hideCloseButton: signal(true).asReadonly() };
+      expect(component.hideCloseButton).toBe(true);
+    });
+
+    it('showBusy: signal-handle wins over legacy storage', () => {
+      component.showBusy = false;
+      component.signalHandle = { ...baseHandle(), showBusy: signal(true).asReadonly() };
+      expect(component.showBusy).toBe(true);
+    });
+
+    it('nextButtonText: signal-handle wins over legacy storage', () => {
+      component.nextButtonText = 'Next';
+      component.signalHandle = { ...baseHandle(), nextButtonText: signal('Apply').asReadonly() };
+      expect(component.nextButtonText).toBe('Apply');
+    });
+
+    it('finishButtonText: signal-handle wins, supports state-driven toggling', () => {
+      const txt = signal('Apply');
+      component.signalHandle = { ...baseHandle(), finishButtonText: txt.asReadonly() };
+      expect(component.finishButtonText).toBe('Apply');
+      txt.set('Close');
+      expect(component.finishButtonText).toBe('Close');
+    });
+
+    it('cancelButtonText: signal-handle wins over legacy storage', () => {
+      component.cancelButtonText = 'Cancel';
+      component.signalHandle = { ...baseHandle(), cancelButtonText: signal('Skip').asReadonly() };
+      expect(component.cancelButtonText).toBe('Skip');
+    });
+  });
+
+  describe('FWT-959 onEnter / onLeave delegation', () => {
+    it('pOnEnter prefers signalHandle.onEnter over legacy onEnter', () => {
+      const handleEnter = vi.fn();
+      const legacyEnter = vi.fn();
+      component.onEnter = legacyEnter;
+      component.signalHandle = {
+        valid: signal(true).asReadonly(),
+        onEnter: handleEnter,
+      };
+      component.pOnEnter({ payload: 'x' });
+      expect(handleEnter).toHaveBeenCalledWith({ payload: 'x' });
+      expect(legacyEnter).not.toHaveBeenCalled();
+    });
+
+    it('pOnEnter falls back to legacy onEnter when handle has none', () => {
+      const legacyEnter = vi.fn();
+      component.onEnter = legacyEnter;
+      component.signalHandle = { valid: signal(true).asReadonly() };
+      component.pOnEnter('payload');
+      expect(legacyEnter).toHaveBeenCalledWith('payload');
+    });
+
+    it('invokeLeave prefers signalHandle.onLeave over legacy onLeave', () => {
+      const handleLeave = vi.fn();
+      const legacyLeave = vi.fn();
+      component.onLeave = legacyLeave;
+      component.signalHandle = {
+        valid: signal(true).asReadonly(),
+        onLeave: handleLeave,
+      };
+      component.invokeLeave(true);
+      expect(handleLeave).toHaveBeenCalledWith(true);
+      expect(legacyLeave).not.toHaveBeenCalled();
+    });
+
+    it('invokeLeave falls back to legacy onLeave when handle has none', () => {
+      const legacyLeave = vi.fn();
+      component.onLeave = legacyLeave;
+      component.signalHandle = { valid: signal(true).asReadonly() };
+      component.invokeLeave(false);
+      expect(legacyLeave).toHaveBeenCalledWith(false);
+    });
   });
 });
