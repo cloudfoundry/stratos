@@ -276,7 +276,11 @@ export class StepComponent {
         submit().then(
           (resolved) => ({
             success: true,
-            ignoreSuccess: resolved?.ignoreSuccess,
+            // resolved is `void | { ignoreSuccess?: boolean }`; the void
+            // case (Promise.resolve()) isn't an object so guard before read.
+            ignoreSuccess: typeof resolved === 'object' && resolved !== null
+              ? resolved.ignoreSuccess
+              : undefined,
           } as StepOnNextResult),
           (err: unknown) => ({
             success: false,
