@@ -5,7 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { format } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
-import { of as observableOf } from 'rxjs';
+import { BehaviorSubject, of as observableOf } from 'rxjs';
 import { take, filter, map, pairwise } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 
@@ -70,7 +70,13 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
 
   private updateAppAutoscalerPolicyService!: EntityService;
   public declare currentPolicy: AppAutoscalerPolicyLocal;
-  private editIndex = -1;
+  // FWT-959 Part 2: editIndex backed by a BehaviorSubject so the parent
+  // orchestrator can bridge editIndex changes into a signal for its
+  // signal-step handle (valid / disablePrevious). Templates still read
+  // `editIndex` (now via getter), call-sites still write `this.editIndex = N`.
+  readonly editIndex$ = new BehaviorSubject<number>(-1);
+  get editIndex(): number { return this.editIndex$.value; }
+  set editIndex(v: number) { this.editIndex$.next(v); }
   private editMutualValidation = {
     limit: true,
     datetime: true

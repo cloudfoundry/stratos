@@ -69,7 +69,13 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
 
   public declare currentPolicy: AppAutoscalerPolicyLocal;
   public testing = false;
-  private editIndex = -1;
+  // FWT-959 Part 2: editIndex backed by a BehaviorSubject so the parent
+  // orchestrator can bridge editIndex changes into a signal for its
+  // signal-step handle (valid / disablePrevious). Templates still read
+  // `editIndex` (now via getter), call-sites still write `this.editIndex = N`.
+  readonly editIndex$ = new BehaviorSubject<number>(-1);
+  get editIndex(): number { return this.editIndex$.value; }
+  set editIndex(v: number) { this.editIndex$.next(v); }
   private editMetricType = '';
   private editScaleType = 'upper';
   private editAdjustmentType = 'value';

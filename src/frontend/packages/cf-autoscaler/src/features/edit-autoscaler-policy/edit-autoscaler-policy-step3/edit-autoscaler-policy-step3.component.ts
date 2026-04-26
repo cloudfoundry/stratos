@@ -3,6 +3,7 @@ import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModu
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { addDays, format } from 'date-fns';
+import { BehaviorSubject } from 'rxjs';
 
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher, TileGridComponent, TileGroupComponent, TileComponent, MetadataItemComponent } from '@stratosui/core';
 import { ApplicationService } from '@stratosui/cloud-foundry';
@@ -65,7 +66,13 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
   editRecurringScheduleForm: FormGroup<EditRecurringScheduleForm>;
 
   public declare currentPolicy: AppAutoscalerPolicyLocal;
-  private editIndex = -1;
+  // FWT-959 Part 2: editIndex backed by a BehaviorSubject so the parent
+  // orchestrator can bridge editIndex changes into a signal for its
+  // signal-step handle (valid / disablePrevious). Templates still read
+  // `editIndex` (now via getter), call-sites still write `this.editIndex = N`.
+  readonly editIndex$ = new BehaviorSubject<number>(-1);
+  get editIndex(): number { return this.editIndex$.value; }
+  set editIndex(v: number) { this.editIndex$.next(v); }
   private editEffectiveType = 'always';
   private editRepeatType = 'week';
   private editMutualValidation = {
