@@ -112,8 +112,6 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   skipApps$!: Observable<boolean>;
   marketPlaceMode!: boolean;
   cSIHelperService!: CreateServiceInstanceHelper;
-  displaySelectServiceStep!: boolean;
-  displaySelectCfStep!: boolean;
   // Use signal for imperative title updates without change detection errors
   private _title = signal<string>('');
   title$ = toObservable(this._title);
