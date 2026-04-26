@@ -119,7 +119,15 @@ export class KubeConfigImportComponent implements OnDestroy {
   ];
 
   subs: Subscription[] = [];
-  applyStarted!: boolean;
+  // FWT-959 Part 2: applyStarted promoted from a plain boolean to a signal
+  // wrapper so the parent can wire it into a SignalStepHandle's
+  // canClose/destructiveStep/finishButtonText computed bindings. The
+  // wrapper preserves the legacy boolean read/write API used inside this
+  // component (e.g. `if (this.applyStarted)`) via a getter/setter pair so
+  // the existing imperative call-sites don't need to learn signal syntax.
+  applyStartedSignal = signal<boolean>(false);
+  get applyStarted(): boolean { return this.applyStartedSignal(); }
+  set applyStarted(v: boolean) { this.applyStartedSignal.set(v); }
   private iteration = 0;
 
   private connectService: ConnectEndpointService;
