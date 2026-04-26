@@ -73,8 +73,12 @@ export class EndpointsSignalListComponent {
           const g = groups[epFavGuid];
           if (!g || g.ethereal) continue;
           const ep = g.endpoint;
-          if (ep && ep.entityType === 'endpoint' && ep.endpointId && ep.entityId) {
-            out.add(`${ep.endpointId}:${ep.entityId}`);
+          // Endpoint favorites have entityId omitted on the way in (see
+          // `toggleEndpointFavorite`), so we synthesize the row key from
+          // endpointId twice to match the table's getRowKey shape
+          // (`${ep.guid}:${ep.guid}`).
+          if (ep && ep.entityType === 'endpoint' && ep.endpointId) {
+            out.add(`${ep.endpointId}:${ep.endpointId}`);
           }
         }
         return out;
@@ -211,11 +215,15 @@ export class EndpointsSignalListComponent {
   }
 
   private toggleEndpointFavorite(ep: EndpointModel): void {
-    // Endpoints are top-level — no parent CNSI guid. UserFavorite's first arg
-    // (endpointId) and last (entityId) are both the endpoint's own guid;
-    // entityType is 'endpoint' so the favorites store knows it's the endpoint
-    // record itself (not a child like an app or org).
-    const fav = new UserFavorite(ep.guid, ep.cnsi_type, 'endpoint', ep.guid);
+    // Endpoints are top-level. The favorites-groups reducer determines
+    // "this favorite IS the endpoint itself" via `!favorite.entityId`
+    // (`user-favorites-groups.reducer.ts:135`) — so we MUST omit entityId
+    // here. Passing the endpoint's guid as entityId steers the reducer
+    // into the child-entity branch, which leaves `fg.endpoint` null and
+    // `fg.ethereal` true; the keys signal then skips the group, the
+    // star icon never updates, and the endpoint never shows up in the
+    // home-page favorites tile.
+    const fav = new UserFavorite(ep.guid, ep.cnsi_type, 'endpoint');
     this.userFavoriteManager.toggleFavorite(fav);
   }
 
