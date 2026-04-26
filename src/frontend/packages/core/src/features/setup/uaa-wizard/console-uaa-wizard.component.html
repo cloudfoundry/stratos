@@ -5,7 +5,7 @@
   <app-show-page-header></app-show-page-header>
   <div class="p-6">
     <app-steppers>
-      <app-step title="UAA Endpoint" [valid]="validateUAAForm | async" [onNext]="uaaFormNext">
+      <app-step title="UAA Endpoint" [signalHandle]="uaaFormStepHandle">
         <div class="space-y-6">
           <p class="text-content-text">Please enter the following information to allow <app-product-name></app-product-name> to authenticate
           with
@@ -86,7 +86,7 @@
       </form>
     </div>
   </app-step>
-  <app-step title="Admin Scope" [onNext]="uaaScopeNext">
+  <app-step title="Admin Scope" [signalHandle]="uaaScopeStepHandle">
     <app-loading-page [isLoading]="applyingSetup()" alert="Saving configuration"
       text="Please wait - this will take a few moments">
       <div class="space-y-4">
