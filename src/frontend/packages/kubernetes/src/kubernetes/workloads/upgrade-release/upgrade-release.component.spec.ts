@@ -99,4 +99,17 @@ describe('UpgradeReleaseComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  // Regression guard for the FWT-959 Part 2 OnDestroy fix. validateSub
+  // is subscribed inside helper.hasUpgrade()'s callback to mirror
+  // validate$ into the version-step handle's signal; without ngOnDestroy
+  // teardown the hot listConfig.versionsDataSource.selectedRows$ stream
+  // would keep emitting after component destruction.
+  it('unsubscribes validateSub on destroy', () => {
+    const sub = { unsubscribe: vi.fn() };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (component as any).validateSub = sub;
+    component.ngOnDestroy();
+    expect(sub.unsubscribe).toHaveBeenCalled();
+  });
 });
