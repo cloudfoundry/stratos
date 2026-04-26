@@ -9,7 +9,7 @@ import { EndpointDataShim } from './endpoint-data.shim';
 
 const ORGS_URL = '/pp/v1/cf/orgs/test-cnsi-guid?return=counts';
 const APPS_URL = '/pp/v1/cf/apps/test-cnsi-guid?return=recent';
-const ROUTES_URL = '/pp/v1/cf/routes/test-cnsi-guid';
+const ROUTES_URL = '/pp/v1/cf/routes/test-cnsi-guid?return=counts';
 const ORGS_FULL_URL = '/pp/v1/cf/orgs/test-cnsi-guid';
 const APPS_FULL_URL = '/pp/v1/cf/apps/test-cnsi-guid';
 const SPACES_FULL_URL = '/pp/v1/cf/spaces/test-cnsi-guid';
