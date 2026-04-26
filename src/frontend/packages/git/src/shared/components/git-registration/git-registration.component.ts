@@ -15,7 +15,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { gitRepositoryUrlValidator } from '../../../../../core/src/shared/validators';
 import {
   CreateEndpointHelperComponent } from '@stratosui/core';
-import { firstValueFrom, Observable, Subscription } from 'rxjs';
+import { combineLatest, firstValueFrom, Observable, Subscription } from 'rxjs';
 import { take, filter, map, pairwise } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
@@ -256,10 +256,30 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
       }
     };
 
-    // Check the endpoints and turn off any options for endpoints that are already registered
-    this.endpointsService.endpoints$.pipe(take(1)).subscribe(eps => {
+    // Greys out a radio option only when there are no remaining scopes for
+    // the current user to register that URL into. Per PR #4876 (2021)
+    // admins can hold a system endpoint AND a personal endpoint at the
+    // same URL — so admins get two slots. Non-admins (or when user
+    // endpoints are disabled) get one slot. The original code iterated
+    // `endpoints$` unscoped, which contradicted the URL input's scoped
+    // `appUnique` validator and the backend's per-scope uniqueness.
+    combineLatest([
+      this.endpointsService.endpoints$,
+      this.existingSystemEndpoints,
+      this.existingPersonalEndpoints,
+      this.userEndpointsAndIsAdmin,
+    ]).pipe(take(1)).subscribe(([eps, systemEps, personalEps, isAdminWithUserEndpoints]) => {
       Object.values(this.gitTypes[this.epSubType].types).forEach(type => {
-        type.exists = !type.url ? false : !!Object.values(eps).find(ep => type.url === getFullEndpointApiUrl(ep));
+        if (!type.url) {
+          type.exists = false;
+          return;
+        }
+        if (isAdminWithUserEndpoints) {
+          // Admin has two slots: system + personal. Grey only when both filled.
+          type.exists = systemEps.urls.includes(type.url) && personalEps.urls.includes(type.url);
+        } else {
+          type.exists = !!Object.values(eps).find(ep => type.url === getFullEndpointApiUrl(ep));
+        }
       });
       this.init();
     });
