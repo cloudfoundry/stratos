@@ -4,7 +4,8 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter, ActivatedRoute } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { of } from 'rxjs';
 
 import {
   PaginationMonitorFactory,
@@ -84,5 +85,25 @@ describe('DeployApplicationComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  // Regression guard for the FWT-959 Part 2 file-upload deploy fix.
+  // step2's onNext returns the FileScannerInfo as result.data; the
+  // signal-handle submit() contract has no data channel, so the parent
+  // captures into pendingFsFileInfo and forwards via the step2_2
+  // ViewChild setter. Without this, deployer.fsFileInfo stays unset
+  // and the file-upload deploy throws at deployer.fsFileInfo.root.
+  it('forwards FileScannerInfo from step2 submit to step2_2.onEnter', async () => {
+    const fakeFileInfo = { root: 'mock-root', total: 100 };
+    const mockStep2 = { onNext: vi.fn().mockReturnValue(of({ success: true, data: fakeFileInfo })) };
+    const mockStep2_2 = { onEnter: vi.fn(), valid$: of(true) };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (component as any)._step2 = mockStep2;
+    await component.step2Handle.submit!();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (component as any).step2_2Ref = mockStep2_2;
+
+    expect(mockStep2_2.onEnter).toHaveBeenCalledWith(fakeFileInfo);
   });
 });
