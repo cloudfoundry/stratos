@@ -4,9 +4,7 @@
   }
 </app-page-header>
 <app-steppers cancel="{{defaultCancelUrl}}" [nextButtonProgress]="false">
-  <app-step title="Confirm" [onEnter]="confirm.onEnter" [canClose]="!applyStarted" [disablePrevious]="applyStarted"
-    [blocked]="isBlocked$ | async" [destructiveStep]="!applyStarted" [onNext]="startApply"
-    [finishButtonText]="applyStarted ? 'Close' : 'Apply'">
+  <app-step title="Confirm" [signalHandle]="confirmStepHandle">
     <app-manage-users-confirm #confirm></app-manage-users-confirm>
   </app-step>
 </app-steppers>
