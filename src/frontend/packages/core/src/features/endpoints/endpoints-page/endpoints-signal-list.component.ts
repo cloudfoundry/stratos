@@ -236,17 +236,18 @@ export class EndpointsSignalListComponent {
 
     const out: SignalListRowAction<EndpointModel>[] = [];
 
-    out.push({
-      label: 'Connect', icon: 'link',
-      disabled: !(isDisconnected && connectable),
-      invoke: () => this.openConnectDialog(ep),
-    });
-
-    out.push({
-      label: 'Disconnect', icon: 'link_off',
-      disabled: !isConnected,
-      invoke: () => this.openDisconnectConfirm(ep),
-    });
+    if (isConnected) {
+      out.push({
+        label: 'Disconnect', icon: 'link_off',
+        invoke: () => this.openDisconnectConfirm(ep),
+      });
+    } else if (connectable) {
+      out.push({
+        label: 'Connect', icon: 'link',
+        disabled: !isDisconnected,
+        invoke: () => this.openConnectDialog(ep),
+      });
+    }
 
     out.push({
       label: 'Edit', icon: 'edit',
