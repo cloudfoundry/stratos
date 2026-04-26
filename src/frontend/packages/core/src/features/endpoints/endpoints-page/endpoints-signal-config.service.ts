@@ -1,10 +1,13 @@
 import { DestroyRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
+import { firstValueFrom } from 'rxjs';
+import { filter, map, pairwise } from 'rxjs/operators';
 import {
   ActionState,
   AppState,
   EndpointModel,
+  EndpointType,
   endpointEntitiesSelector,
   stratosEntityCatalog,
 } from '@stratosui/store';
@@ -19,6 +22,26 @@ export interface SortSpec<T = unknown> {
   field: string;
   direction: 'asc' | 'desc';
   _phantom?: T;
+}
+
+// Options bag for EndpointsSignalConfigService.register(). Mirrors the
+// legacy `RegisterEndpoint` action's constructor argument shape (see
+// store/src/actions/endpoint.actions.ts) but exposes it as named keys so
+// callers don't have to remember the positional ordering of three booleans
+// and three adjacent string credentials. Defaults applied inside register():
+// `clientID = ''`, `clientSecret = ''`, `ssoAllowed = false`,
+// `createSystemEndpoint = true`, `caCert = ''`.
+export interface RegisterEndpointOptions {
+  endpointType: EndpointType;
+  endpointSubType: string | null;
+  name: string;
+  endpoint: string;
+  skipSslValidation: boolean;
+  clientID?: string;
+  clientSecret?: string;
+  ssoAllowed?: boolean;
+  createSystemEndpoint?: boolean;
+  caCert?: string;
 }
 
 export class ViewPipeline<T> {
@@ -166,5 +189,82 @@ export class EndpointsSignalConfigService {
   // and returns an ActionState observable.
   unregisterEndpoint(guid: string, type: string) {
     return stratosEntityCatalog.endpoint.api.unregister<ActionState>(guid, type);
+  }
+
+  // Promise-returning register wrapper used by the signal-native registration
+  // wizards (git, create-endpoint, helm-hub, kube-config-import). Wraps the
+  // ActionState observable in the same pairwise+filter-on-busy-edge pattern
+  // the legacy callsites used so the caller sees a single resolved
+  // ActionState (with .error / .message) rather than driving the lifecycle
+  // itself. On success, ActionState.message holds the new endpoint guid.
+  //
+  // Takes a single options object rather than positional args: the legacy
+  // RegisterEndpoint action has 10 parameters, several of them booleans
+  // (`skipSslValidation`, `ssoAllowed`, `createSystemEndpoint`) and several
+  // of them adjacent strings (`clientID`, `clientSecret`, `caCert`) — a
+  // shape begging for silent transposition errors at call sites that pass
+  // real UAA credentials. Named-key destructuring at every wrapper kills
+  // that whole class of bug, and keeps wrapper-vs-action-builder defaults
+  // honest (drift here is invisible until production).
+  //
+  // Fields:
+  //   endpointType         — entity-catalog endpoint type id (e.g. 'cf', 'git')
+  //   endpointSubType      — sub-type discriminator, or null if N/A
+  //   name                 — user-supplied display name
+  //   endpoint             — endpoint URL
+  //   skipSslValidation    — disable TLS verification on Jetstream→endpoint calls
+  //   clientID             — optional OAuth client id (UAA / GitHub apps); '' when unused
+  //   clientSecret         — optional OAuth client secret; '' when unused
+  //   ssoAllowed           — opt this endpoint into SSO redirect flows
+  //   createSystemEndpoint — admin: register as system-wide vs per-user endpoint
+  //   caCert               — optional PEM-encoded CA cert override
+  async register(opts: RegisterEndpointOptions): Promise<ActionState> {
+    const {
+      endpointType,
+      endpointSubType,
+      name,
+      endpoint,
+      skipSslValidation,
+      clientID = '',
+      clientSecret = '',
+      ssoAllowed = false,
+      createSystemEndpoint = true,
+      caCert = '',
+    } = opts;
+    return firstValueFrom(
+      stratosEntityCatalog.endpoint.api
+        .register<ActionState>(
+          endpointType,
+          endpointSubType,
+          name,
+          endpoint,
+          skipSslValidation,
+          clientID,
+          clientSecret,
+          ssoAllowed,
+          createSystemEndpoint,
+          caCert,
+        )
+        .pipe(
+          pairwise(),
+          filter(([oldVal, newVal]) => oldVal.busy && !newVal.busy),
+          map(([, newVal]) => newVal),
+        ),
+    );
+  }
+
+  // Promise-returning unregister wrapper. Same pairwise+filter shape as
+  // register: resolves once the ngrx action transitions from busy to
+  // idle, surfacing the final ActionState (with .error / .message).
+  async unregister(guid: string, type: EndpointType): Promise<ActionState> {
+    return firstValueFrom(
+      stratosEntityCatalog.endpoint.api
+        .unregister<ActionState>(guid, type)
+        .pipe(
+          pairwise(),
+          filter(([oldVal, newVal]) => oldVal.busy && !newVal.busy),
+          map(([, newVal]) => newVal),
+        ),
+    );
   }
 }

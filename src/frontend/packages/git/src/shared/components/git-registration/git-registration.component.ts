@@ -16,12 +16,13 @@ import { gitRepositoryUrlValidator } from '../../../../../core/src/shared/valida
 import {
   CreateEndpointHelperComponent } from '@stratosui/core';
 import { combineLatest, firstValueFrom, Observable, Subscription } from 'rxjs';
-import { take, filter, map, pairwise } from 'rxjs/operators';
+import { take, map } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
 import { ConnectEndpointConfig } from '../../../../../core/src/features/endpoints/connect.service';
 import { CreateEndpointConnectComponent } from '../../../../../core/src/features/endpoints/create-endpoint/create-endpoint-connect/create-endpoint-connect.component';
+import { EndpointsSignalConfigService } from '../../../../../core/src/features/endpoints/endpoints-page/endpoints-signal-config.service';
 import { SignalStepHandle, StepComponent } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
 import { UniqueDirective } from '../../../../../core/src/shared/components/unique.directive';
@@ -31,8 +32,6 @@ import { UserProfileService } from '../../../../../core/src/core/user-profile.se
 import { SnackBarService } from '../../../../../core/src/shared/services/snackbar.service';
 import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
 import { entityCatalog } from '../../../../../store/src/public-api';
-import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
-import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE } from '../../../store/git-entity-factory';
 import { GitSCMService } from '../../scm/scm.service';
 
@@ -92,6 +91,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
   private endpointsService = inject(EndpointsService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+  private endpointsSignalConfig = inject(EndpointsSignalConfigService);
   sessionService: SessionService;
   currentUserPermissionsService: CurrentUserPermissionsService;
   userProfileService: UserProfileService;
@@ -132,7 +132,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     valid: this.registerValid.asReadonly(),
     nextButtonText: signal('Register').asReadonly(),
     submit: async () => {
-      const result = await firstValueFrom(this.runRegistration());
+      const result = await this.runRegistration();
       if (!result.success) {
         throw new Error(result.message || 'Failed to register endpoint');
       }
@@ -168,13 +168,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
       // clean step 1.
       const guid = this.registeredGuid;
       this.registeredGuid = null;
-      await firstValueFrom(
-        stratosEntityCatalog.endpoint.api.unregister<ActionState>(guid, GIT_ENDPOINT_TYPE).pipe(
-          pairwise(),
-          filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
-          map(([, newVal]) => newVal),
-        )
-      );
+      await this.endpointsSignalConfig.unregister(guid, GIT_ENDPOINT_TYPE);
     },
     submit: async () => {
       const result = await firstValueFrom(this.connect!.onNext());
@@ -359,10 +353,12 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     this.validateSub?.unsubscribe();
   }
 
-  // Perform the endpoint registration. Returns the existing
-  // Observable<StepOnNextResult> shape so the step handle's submit can
-  // adapt it to a Promise.
-  private runRegistration(): Observable<{ success: boolean; redirect: boolean; message: string; data: ConnectEndpointConfig }> {
+  // Perform the endpoint registration via the signal-config service. Returns
+  // a step-shaped result the step handle's submit can act on directly. The
+  // service wraps the legacy ngrx ActionState observable in a Promise that
+  // resolves once the busy edge transitions, so we no longer need pairwise/
+  // filter/map gymnastics here.
+  private async runRegistration(): Promise<{ success: boolean; redirect: boolean; message: string; data: ConnectEndpointConfig }> {
     const typ = this.registerForm.value.selectedType ?? '';
     const defn = this.gitTypes[this.epSubType].types[typ];
     const name = defn.name ?? this.registerForm.controls.nameField.value ?? '';
@@ -373,33 +369,32 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
       false;
     const createSystemEndpoint = this.registerForm.controls.createSystemEndpointField.value;
 
-    return stratosEntityCatalog.endpoint.api.register<ActionState>(GIT_ENDPOINT_TYPE,
-      this.epSubType, name, url, skipSSL, '', '', false, createSystemEndpoint)
-      .pipe(
-        pairwise(),
-        filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
-        map(([, newVal]) => newVal),
-        map(result => {
-          const data: ConnectEndpointConfig = {
-            guid: result.message,
-            name,
-            type: GIT_ENDPOINT_TYPE,
-            subType: this.epSubType,
-            ssoAllowed: false
-          };
-          if (!result.error) {
-            this.registeredGuid = data.guid;
-            this.snackBarService.show(`Successfully registered '${name}'`);
-          }
-          const success = !result.error;
-          return {
-            success,
-            redirect: false,
-            message: success ? '' : result.message,
-            data
-          };
-        })
-      );
+    const result = await this.endpointsSignalConfig.register({
+      endpointType: GIT_ENDPOINT_TYPE,
+      endpointSubType: this.epSubType,
+      name,
+      endpoint: url,
+      skipSslValidation: skipSSL,
+      createSystemEndpoint,
+    });
+    const data: ConnectEndpointConfig = {
+      guid: result.message,
+      name,
+      type: GIT_ENDPOINT_TYPE,
+      subType: this.epSubType,
+      ssoAllowed: false
+    };
+    if (!result.error) {
+      this.registeredGuid = data.guid;
+      this.snackBarService.show(`Successfully registered '${name}'`);
+    }
+    const success = !result.error;
+    return {
+      success,
+      redirect: false,
+      message: success ? '' : result.message,
+      data
+    };
   }
 
   private updateUrlWithSuffix(url: string, defn: GithubType): string {
