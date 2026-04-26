@@ -2,7 +2,7 @@
   Install Chart
 </app-page-header>
 <app-steppers [cancel]="cancelUrl">
-  <app-step [title]="'Kubernetes'" [valid]="validate$ | async">
+  <app-step [title]="'Kubernetes'" [signalHandle]="detailsStepHandle">
     <form [formGroup]="details" class="stepper-form flex-1">
       <b>Select the Kubernetes cluster to install to</b>
       <div class="form-group">
@@ -60,7 +60,7 @@
 
       </form>
     </app-step>
-    <app-step [title]="'Overrides'" [onNext]="submit" [finishButtonText]="'Install'" [onEnter]="onEnterOverrides">
+    <app-step [title]="'Overrides'" [signalHandle]="overridesStepHandle">
       <app-chart-values-editor #editor [config]="config"></app-chart-values-editor>
     </app-step>
   </app-steppers>
