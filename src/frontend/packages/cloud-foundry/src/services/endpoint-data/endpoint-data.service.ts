@@ -78,7 +78,10 @@ export class EndpointDataService {
         }),
         catchError(err => { this.addError('apps', err); return EMPTY; }),
       ),
-      this.http.get<{ totalResults: number }>(`/pp/v1/cf/routes/${this.guid}`).pipe(
+      // ?return=counts hits the backend per_page=1 fast path — without it
+      // we fall through to the full route list + ListDestinations path,
+      // which delays the home-card route count behind the apps fetch.
+      this.http.get<{ totalResults: number }>(`/pp/v1/cf/routes/${this.guid}?return=counts`).pipe(
         tap(resp => this._routeCount.set(resp.totalResults)),
         catchError(err => { this.addError('routes', err); return EMPTY; }),
       ),
