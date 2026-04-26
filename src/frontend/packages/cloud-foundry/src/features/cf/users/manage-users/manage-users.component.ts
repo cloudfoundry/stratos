@@ -113,7 +113,7 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
     submit: async () => {
       const result = await firstValueFrom(this.modify.onNext());
       if (!result.success) {
-        throw new Error(result.message || 'Failed to update roles');
+        throw new Error('Failed to update roles');
       }
     },
   };

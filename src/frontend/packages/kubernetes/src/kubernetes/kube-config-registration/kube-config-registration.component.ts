@@ -89,7 +89,7 @@ export class KubeConfigRegistrationComponent implements AfterViewInit, OnDestroy
       // ignoreSuccess, second-click returns redirect). We delegate to it
       // to preserve the side-effects (busy flag, processAction kickoff)
       // and translate its result into the signal-handle Promise contract.
-      const result = await firstValueFrom(this.importer.onNext());
+      const result = await firstValueFrom(this.importer.onNext(0, null as any));
       if (!result.success) {
         throw new Error(result.message || 'Failed to import kube config');
       }

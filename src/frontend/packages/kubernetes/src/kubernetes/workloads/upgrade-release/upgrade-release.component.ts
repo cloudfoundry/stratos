@@ -181,7 +181,7 @@ export class UpgradeReleaseComponent {
           releaseValues: release.config
         };
       }),
-      map(() => undefined)
+      map((): void => undefined)
     );
   }
 
