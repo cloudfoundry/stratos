@@ -160,10 +160,10 @@
            style="grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));">
         @for (row of config.pagedItems(); track trackByRow($index, row)) {
           <div data-test="card"
-               class="border border-content-border rounded bg-content-bg hover:shadow-md transition-shadow overflow-hidden">
+               class="border border-content-border rounded bg-content-bg hover:shadow-md transition-shadow relative">
             @if (config.cardAccentColor) {
               <div data-test="card-accent"
-                   [class]="'h-1.5 ' + accentBarClass(cardAccentFor(row))"></div>
+                   [class]="'h-1.5 rounded-t ' + accentBarClass(cardAccentFor(row))"></div>
             }
             <div class="p-3">
               @for (col of config.columns; track col.header; let first = $first) {
@@ -203,7 +203,7 @@
                             <div
                               data-test="row-actions-menu"
                               (click)="$event.stopPropagation()"
-                              class="absolute right-0 top-full mt-1 z-20 min-w-[12rem] bg-content-bg border border-content-border rounded shadow-lg py-1">
+                              class="absolute right-0 top-full mt-1 z-20 min-w-[12rem] bg-content-bg border border-content-border rounded shadow-lg py-2">
                               @for (act of ac.actions!(row); track act.label) {
                                 <button
                                   type="button"
@@ -316,7 +316,10 @@
           @for (row of config.pagedItems(); track trackByRow($index, row)) {
             <tr data-test="row" class="border-b border-content-border hover:bg-gray-50 dark:hover:bg-gray-900">
               @for (col of config.columns; track col.header) {
-                <td class="px-3 py-2 text-sm text-content-text truncate" [attr.title]="col.render(row)">
+                <td class="px-3 py-2 text-sm text-content-text"
+                    [class.truncate]="col.kind !== 'actions' && col.kind !== 'favorite'"
+                    [class.overflow-visible]="col.kind === 'actions' || col.kind === 'favorite'"
+                    [attr.title]="col.kind === 'actions' || col.kind === 'favorite' ? null : col.render(row)">
                   @if (col.kind === 'link' && col.link) {
                     @if (col.link(row); as target) {
                       <a [routerLink]="target" class="text-accent hover:underline">{{ col.render(row) }}</a>
@@ -382,7 +385,7 @@
                         <div
                           data-test="row-actions-menu"
                           (click)="$event.stopPropagation()"
-                          class="absolute right-0 top-full mt-1 z-20 min-w-[12rem] bg-content-bg border border-content-border rounded shadow-lg py-1">
+                          class="absolute right-0 top-full mt-1 z-20 min-w-[12rem] bg-content-bg border border-content-border rounded shadow-lg py-2">
                           @for (act of col.actions(row); track act.label) {
                             <button
                               type="button"
