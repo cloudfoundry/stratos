@@ -99,11 +99,11 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   //
   // Step 1 (Cloud Foundry) is conditionally rendered via @if (!appGuid)
   // — a true template guard — so its handle never wires up when the
-  // user is redeploying. Steps 2_1 and 2_2 use legacy [hidden] /
-  // [skip] bindings that we leave intact: [hidden] is on <app-step>
-  // itself (still served by the legacy @Input), and step2_2.skip$ does
-  // not exist on the source-upload child today, so the binding silently
-  // passes undefined and we faithfully preserve that.
+  // user is redeploying. Steps 2_1 and 2_2 use legacy [hidden] bindings
+  // (still served by the @Input fall-through) for source-type-driven
+  // visibility; the legacy [skip]="step2_2.skip$ | async" binding on
+  // step2_2 was a no-op (the child has no skip$ field) and has been
+  // removed in the migration.
   private _step1?: CreateApplicationStep1Component;
   private _step2?: DeployApplicationStep2Component;
   private _step2_1?: DeployApplicationStep21Component;
