@@ -245,13 +245,15 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     if (!this.canGoto(index)) {
       if (index === 0) {
         if (this.allSteps && this.allSteps.length > 0) {
-          // Execute `onEnter` for the first step as soon as step is unblocked
+          // Execute `onEnter` for the first step as soon as step is unblocked.
+          // Route through pOnEnter so signal-handle consumers (FWT-959 Shape 3
+          // wizards) receive the enter callback — the legacy onEnter @Input
+          // defaults to a no-op so a raw step.onEnter call swallows
+          // signalHandle.onEnter.
           const timer = setInterval(() => {
             if (this.allSteps[index].blocked === false) {
               this.allSteps[index].active = true;
-              if (this.allSteps[index].onEnter) {
-                this.allSteps[index].onEnter(this.enterData);
-              }
+              this.allSteps[index].pOnEnter(this.enterData);
               clearInterval(timer);
             }
           }, 5);
@@ -276,9 +278,9 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       s.active = i === index;
     });
     this.currentIndex = index;
-    if (this.steps[this.currentIndex].onEnter) {
-      this.steps[this.currentIndex].onEnter(this.enterData);
-    }
+    // Route through pOnEnter so signal-handle consumers (FWT-959 Shape 3
+    // wizards) receive the enter callback — see comment above for rationale.
+    this.steps[this.currentIndex].pOnEnter(this.enterData);
     this.enterData = undefined;
 
     // Trigger change detection for OnPush strategy
