@@ -122,6 +122,12 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
   @ViewChild('connect', { static: false }) connect?: CreateEndpointConnectComponent;
   private registerValid = signal<boolean>(false);
 
+  // Tracks the endpoint guid created by step 1's runRegistration. Used by
+  // the connect-step's onLeave(isNext=false) handler to unregister on
+  // Previous — "Prev = start over" UX. Cleared after unregister so the
+  // form can re-register cleanly.
+  private registeredGuid: string | null = null;
+
   registerStepHandle: SignalStepHandle = {
     valid: this.registerValid.asReadonly(),
     nextButtonText: signal('Register').asReadonly(),
@@ -144,7 +150,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
       if (!c) return true;
       return c.doConnectSignal() ? c.validSignal() : true;
     }),
-    disablePrevious: signal(true).asReadonly(),
+    disablePrevious: signal(false).asReadonly(),
     hideCloseButton: signal(true).asReadonly(),
     finishButtonText: computed(() => {
       const c = this.connect;
@@ -152,6 +158,23 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     }),
     onEnter: () => {
       // Data already handed off in registerStepHandle.submit — no-op.
+    },
+    onLeave: async (isNext) => {
+      if (isNext || !this.registeredGuid) {
+        return;
+      }
+      // Previous from connect step ⇒ "start over": unregister the endpoint
+      // we just created so the user can pick a different type/URL on a
+      // clean step 1.
+      const guid = this.registeredGuid;
+      this.registeredGuid = null;
+      await firstValueFrom(
+        stratosEntityCatalog.endpoint.api.unregister<ActionState>(guid, GIT_ENDPOINT_TYPE).pipe(
+          pairwise(),
+          filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
+          map(([, newVal]) => newVal),
+        )
+      );
     },
     submit: async () => {
       const result = await firstValueFrom(this.connect!.onNext());
@@ -345,6 +368,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
             ssoAllowed: false
           };
           if (!result.error) {
+            this.registeredGuid = data.guid;
             this.snackBarService.show(`Successfully registered '${name}'`);
           }
           const success = !result.error;
