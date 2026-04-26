@@ -2,6 +2,11 @@
   <app-step title="Register" [signalHandle]="registerStepHandle">
     <div class="p-6">
       <h3 class="text-xl font-semibold mb-4">Select the type of {{gitTypes[epSubType].label}} to register</h3>
+      @if (autoSelectNote) {
+        <div class="mb-4 px-3 py-2 text-sm rounded border border-content-border bg-content-secondary text-content-muted">
+          {{ autoSelectNote }}
+        </div>
+      }
       @if (registerForm) {
         <form class="space-y-4" [formGroup]="registerForm">
           <div class="space-y-3">

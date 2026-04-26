@@ -108,6 +108,12 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
 
   public showEndpointFields = false;
 
+  // Surfaces a one-line note above the radios when an option was auto-
+  // skipped due to existing registration ("github.com is already
+  // registered. Defaulted to GitHub Enterprise."). null when nothing
+  // was skipped.
+  public autoSelectNote: string | null = null;
+
   validate: Observable<boolean>;
 
   urlValidation: string;
@@ -280,11 +286,24 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
   }
 
   private init() {
+    const typeEntries = Object.entries(this.gitTypes[this.epSubType].types);
     // Find first type that is enabled
-    const defaultSelection = Object.keys(this.gitTypes[this.epSubType].types).find(key => {
-      const item = this.gitTypes[this.epSubType].types[key];
-      return !item.exists;
-    });
+    const defaultSelection = typeEntries.find(([, item]) => !item.exists)?.[0];
+
+    // Build a note for the user when one of the registration options had
+    // to be skipped because its URL is already registered — preserves the
+    // information that the auto-defaulted radio is a fallback, not a
+    // first choice. Phrased around the URL because the radio-grey check
+    // matches by endpoint URL, not radio label: an Enterprise-path
+    // registration that happened to use api.github.com still triggers
+    // the github.com radio to grey.
+    const skippedUrls = typeEntries
+      .filter(([, item]) => item.exists && !!item.url)
+      .map(([, item]) => item.url);
+    const defaulted = defaultSelection ? this.gitTypes[this.epSubType].types[defaultSelection].label : '';
+    this.autoSelectNote = (skippedUrls.length > 0 && defaulted)
+      ? `An endpoint at ${skippedUrls.join(', ')} is already registered — defaulted to ${defaulted}.`
+      : null;
 
     this.registerForm = this.fb.group<GitRegistrationForm>({
       selectedType: new FormControl(defaultSelection || '', { nonNullable: true, validators: [] }),
