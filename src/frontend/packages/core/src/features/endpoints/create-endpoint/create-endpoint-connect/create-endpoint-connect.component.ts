@@ -1,5 +1,5 @@
 
-import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { Observable, of } from 'rxjs';
@@ -34,11 +34,20 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
 
 
   public validate!: Observable<boolean>;
-  public valid = false;
   public helpDocumentUrl!: string;
   public connectService!: ConnectEndpointService;
 
-  public doConnect = false;
+  // FWT-959 Part 2: signal-backed mirrors of `valid` and `doConnect` so
+  // parent steppers can wire them into a SignalStepHandle without polling
+  // plain fields. Existing field-shaped reads still work via getter/setter
+  // pairs — this is purely additive so neither create-endpoint nor
+  // git-registration consumers break.
+  public validSignal = signal<boolean>(false);
+  public doConnectSignal = signal<boolean>(false);
+  get valid(): boolean { return this.validSignal(); }
+  set valid(v: boolean) { this.validSignal.set(v); }
+  get doConnect(): boolean { return this.doConnectSignal(); }
+  set doConnect(v: boolean) { this.doConnectSignal.set(v); }
 
   showHelp() {
     this.sidePanelService.showModal(MarkdownPreviewComponent, { documentUrl: this.helpDocumentUrl });
