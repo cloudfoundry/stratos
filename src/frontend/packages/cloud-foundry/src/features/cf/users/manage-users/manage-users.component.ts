@@ -72,11 +72,13 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
   title$!: Observable<string>;
 
   // FWT-959 Part 2: SignalStepHandle wiring for the 3-step manage-users
-  // flow. The first step (`Usernames`) is rendered conditionally — we
-  // surface it as a `hidden` field on the handle so the stepper hides it
-  // when `setUsernames === false`. The `setUsers` / `modify` / `confirm`
-  // children own most of the per-step state (validity, blocked, onEnter,
-  // onLeave, onNext) so each handle is mostly a thin delegating shell.
+  // flow. The first step (`Usernames`) is rendered conditionally via the
+  // `@if (setUsernames)` template guard (setUsernames is set in the
+  // constructor and never flips, so a static template gate suffices —
+  // no signal-handle `hidden` field needed). The `setUsers` / `modify` /
+  // `confirm` children own most of the per-step state (validity, blocked,
+  // onEnter, onLeave, onNext) so each handle is mostly a thin delegating
+  // shell.
   //
   // Cross-step state survives via the existing ngrx pipeline
   // (UsersRolesSetUsers / UsersRolesExecuteChanges / etc.) — no parent-
