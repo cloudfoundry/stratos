@@ -1,4 +1,4 @@
-<app-steppers cancel="/endpoints">
+<app-steppers [cancel]="cancelUrl">
   <app-step title="Select Config File" [signalHandle]="selectionStepHandle">
     <app-kube-config-selection #selector [applyStarted]="importer.applyStarted"></app-kube-config-selection>
   </app-step>

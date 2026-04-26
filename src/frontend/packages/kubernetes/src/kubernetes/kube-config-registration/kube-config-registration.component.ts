@@ -55,6 +55,10 @@ export class KubeConfigRegistrationComponent implements AfterViewInit, OnDestroy
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
 
+  // Cancel target shared between the stepper's cancel attr and the
+  // submit() Router.navigate call so the two stay in sync.
+  readonly cancelUrl = '/endpoints';
+
   private selectionValid = signal<boolean>(false);
   private importerBusy = signal<boolean>(false);
   private bridgeSubs: Subscription[] = [];
@@ -95,8 +99,9 @@ export class KubeConfigRegistrationComponent implements AfterViewInit, OnDestroy
       }
       if (result.redirect) {
         // Legacy `redirect: true` (no payload) meant "navigate to the
-        // stepper's cancel URL" — for this stepper that is /endpoints.
-        await this.router.navigate(['/endpoints']);
+        // stepper's cancel URL". cancelUrl is the single source of truth
+        // shared with the <app-steppers [cancel]> binding.
+        await this.router.navigateByUrl(this.cancelUrl);
         return;
       }
       if (result.ignoreSuccess) {
