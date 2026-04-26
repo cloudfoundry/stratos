@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   inject,
+  OnDestroy,
   signal,
   ViewChild,
 } from '@angular/core';
@@ -54,7 +55,7 @@ import { ReleaseUpgradeVersionsListConfig } from './release-version-list-config'
     ...createMonocularProviders()
   ]
 })
-export class UpgradeReleaseComponent {
+export class UpgradeReleaseComponent implements OnDestroy {
 
   @ViewChild('editor', { static: true }) editor: ChartValuesEditorComponent;
 
@@ -219,5 +220,9 @@ export class UpgradeReleaseComponent {
           message: result.error ? result.message : undefined,
         }))
       );
+  }
+
+  ngOnDestroy(): void {
+    this.validateSub?.unsubscribe();
   }
 }
