@@ -2,12 +2,12 @@
   Upgrade Workload
 </app-page-header>
 <app-steppers [cancel]="cancelUrl">
-  <app-step title="Version" [valid]="validate$ | async" [onNext]="onNext">
+  <app-step title="Version" [signalHandle]="versionStepHandle">
     @if (listConfig) {
       <app-list class="w-full" [listConfig]="listConfig"></app-list>
     }
   </app-step>
-  <app-step title="Overrides" [onNext]="doUpgrade" finishButtonText="Upgrade" [onEnter]="onEnterOverrides">
+  <app-step title="Overrides" [signalHandle]="overridesStepHandle">
     <app-chart-values-editor #editor [config]="config"></app-chart-values-editor>
   </app-step>
 
