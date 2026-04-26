@@ -1,18 +1,19 @@
-// FWT-957 DEFERRED: multi-step migration needs per-stepper signal service.
-// Up to 5 steps (Cloud Foundry → Select Service → Select Plan → Bind Apps →
-// Service Instance) with cross-step state via CsiGuidsService +
-// SetCreateServiceInstance* ngrx actions + marketplace-mode branching.
-// Children (select-service, select-plan-step, bind-apps-step,
-// specify-details-step, specify-user-provided-details, create-application-
-// step1) all participate in the same wizard and must migrate together.
-// Parent (FWT-957) should introduce an AddServiceInstanceStepperService
-// before any of these consumers adopt SignalStepHandle.
 import { AsyncPipe, CommonModule, TitleCasePipe } from '@angular/common';
-import { ChangeDetectorRef, Component, OnDestroy, OnInit, signal, ChangeDetectionStrategy, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { defer, Observable, of as observableOf, Subject } from 'rxjs';
+import { defer, Observable, of as observableOf, Subject, Subscription, firstValueFrom } from 'rxjs';
 import {
   catchError,
   delay,
@@ -52,7 +53,7 @@ import {
 } from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
 import { getIdFromRoute } from '../../../../../../core/src/core/utils.service';
 import { PageHeaderComponent } from '../../../../../../core/src/shared/components/page-header/page-header.component';
-import { StepComponent } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import { SignalStepHandle, StepComponent } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../../../../core/src/shared/components/stepper/steppers/steppers.component';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IApp, ISpace } from '../../../../cf-api.types';
@@ -101,7 +102,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   private cSIHelperServiceFactory = inject(CreateServiceInstanceHelperServiceFactory);
   private activatedRoute = inject(ActivatedRoute);
   private store = inject<Store<CFAppState>>(Store);
-  private cfOrgSpaceService = inject(CfOrgSpaceDataService);
+  cfOrgSpaceService = inject(CfOrgSpaceDataService);
   private csiGuidsService = inject(CsiGuidsService);
   modeService = inject(CsiModeService);
   private cdr = inject(ChangeDetectorRef);
@@ -143,6 +144,251 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     takeUntil(this.destroyed$)
   );
   public errorMessage: string | null = null;
+
+  // FWT-959 Part 2 (Partition B): SignalStepHandle wiring for the
+  // add-service-instance flow (up to 5 steps across two service-type
+  // branches: managed service vs user-provided service). Cross-step
+  // state continues to live in CsiGuidsService + CsiModeService +
+  // ngrx (SetCreateServiceInstance*) — children read/write through
+  // those existing services.
+  //
+  // The steppers component renders only the active step's content
+  // template at any given time (steppers.component.html line 71:
+  // `<span *ngTemplateOutlet="steps[currentIndex].content">`), so child
+  // components are instantiated lazily on activation. We use ViewChild
+  // *setters* so the bridge subscription is wired the moment the child
+  // becomes available — and torn down when the user navigates away.
+  // This is the only pattern that consistently works for lazily-
+  // instantiated step children under OnPush + zoneless change
+  // detection (signal-handle onEnter is not yet routed by the
+  // SteppersComponent).
+  //
+  // Mode branching (showSelectCf, showSelectService, showBindApp) is
+  // already gated by @if blocks in the template so the per-step
+  // handles only need to express validity / blocked / submit — no
+  // skipIf is needed.
+  private _selectCF?: CreateApplicationStep1Component;
+  private _selectService?: SelectServiceComponent;
+  private _selectPlan?: SelectPlanStepComponent;
+  private _bindApp?: BindAppsStepComponent;
+  private _specifyDetails?: SpecifyDetailsStepComponent;
+  private _supd?: SpecifyUserProvidedDetailsComponent;
+
+  private selectCFValid = signal<boolean>(false);
+  private selectServiceFetching = signal<boolean>(false);
+  private selectPlanFetching = signal<boolean>(false);
+  private specifyDetailsValid = signal<boolean>(false);
+  private specifyDetailsInit = signal<boolean>(true);
+
+  private selectCFSub?: Subscription;
+  private selectServiceFetchSub?: Subscription;
+  private specifyDetailsValidSub?: Subscription;
+  private specifyDetailsInitSub?: Subscription;
+
+  private isLoadingSignal = toSignal(this.cfOrgSpaceService.isLoading$, { initialValue: false });
+  private skipAppsSignal = signal<boolean>(false);
+  private skipAppsSub?: Subscription;
+
+  // The selected plan flows from select-plan-step's onNext result to
+  // bind-apps-step.onEnter and specify-details-step.onEnter. The legacy
+  // stepper relayed this via `enterData` → next step.onEnter(enterData);
+  // signal-handle submit() drops the `data` channel, so we capture the
+  // plan here and forward it on activation of each downstream step.
+  private selectedPlan?: unknown;
+  // Pending onEnter targets — set in upstream step submit()s, consumed
+  // by downstream ViewChild setters. Mirrors the legacy framework call:
+  // "after upstream onNext succeeds, call downstream.onEnter(data)" —
+  // signal-handle submit() drops that wiring so we replicate it here.
+  // Without this, ViewChild setters firing on first construction would
+  // call downstream onEnter() with stale/missing context (e.g. before
+  // the user has actually selected a plan).
+  private pendingSelectPlanEnter = false;
+  private pendingBindAppEnter = false;
+  private pendingSpecifyDetailsEnter = false;
+
+  @ViewChild('selectCF', { static: false })
+  set selectCFRef(v: CreateApplicationStep1Component | undefined) {
+    this._selectCF = v;
+    this.selectCFSub?.unsubscribe();
+    this.selectCFSub = undefined;
+    if (v) {
+      // Replicate the legacy [onEnter]="resetStoreData" — clears stale
+      // service-instance state when the user re-enters the CF step.
+      this.resetStoreData();
+      this.selectCFSub = v.validate.subscribe(valid => {
+        this.selectCFValid.set(!!valid);
+        this.cdr.markForCheck();
+      });
+    } else {
+      this.selectCFValid.set(false);
+    }
+  }
+
+  @ViewChild('selectService', { static: false })
+  set selectServiceRef(v: SelectServiceComponent | undefined) {
+    this._selectService = v;
+    this.selectServiceFetchSub?.unsubscribe();
+    this.selectServiceFetchSub = undefined;
+    if (v) {
+      // SelectService.validate is already a Signal — handle reads it
+      // directly. We only bridge isFetching$ for the blocked predicate.
+      this.selectServiceFetchSub = v.isFetching$.subscribe(b => {
+        this.selectServiceFetching.set(!!b);
+        this.cdr.markForCheck();
+      });
+    } else {
+      this.selectServiceFetching.set(false);
+    }
+  }
+
+  @ViewChild('selectPlan', { static: false })
+  set selectPlanRef(v: SelectPlanStepComponent | undefined) {
+    this._selectPlan = v;
+    if (v && this.pendingSelectPlanEnter) {
+      this.pendingSelectPlanEnter = false;
+      // Replicate the legacy [onEnter]="selectPlan.onEnter" — the child
+      // re-fetches the plan list keyed off the selected service.
+      v.onEnter();
+    }
+  }
+
+  @ViewChild('bindApp', { static: false })
+  set bindAppRef(v: BindAppsStepComponent | undefined) {
+    this._bindApp = v;
+    if (v && this.pendingBindAppEnter) {
+      this.pendingBindAppEnter = false;
+      // Replicate the legacy [onEnter]="bindApp.onEnter" — the child
+      // initialises bindings using the plan selected upstream.
+      v.onEnter(this.selectedPlan as any);
+    }
+  }
+
+  @ViewChild('specifyDetails', { static: false })
+  set specifyDetailsRef(v: SpecifyDetailsStepComponent | undefined) {
+    this._specifyDetails = v;
+    this.specifyDetailsValidSub?.unsubscribe();
+    this.specifyDetailsInitSub?.unsubscribe();
+    this.specifyDetailsValidSub = undefined;
+    this.specifyDetailsInitSub = undefined;
+    if (v) {
+      if (this.pendingSpecifyDetailsEnter) {
+        this.pendingSpecifyDetailsEnter = false;
+        // Replicate the legacy [onEnter]="specifyDetails.onEnter" — the
+        // child seeds form values from the selected plan.
+        v.onEnter(this.selectedPlan as any);
+      }
+      this.specifyDetailsValidSub = v.validate.subscribe(valid => {
+        this.specifyDetailsValid.set(!!valid);
+        this.cdr.markForCheck();
+      });
+      this.specifyDetailsInitSub = v.serviceInstancesInit$.subscribe(init => {
+        this.specifyDetailsInit.set(!!init);
+        this.cdr.markForCheck();
+      });
+    } else {
+      this.specifyDetailsValid.set(false);
+      this.specifyDetailsInit.set(true);
+    }
+  }
+
+  @ViewChild('supd', { static: false })
+  set supdRef(v: SpecifyUserProvidedDetailsComponent | undefined) {
+    this._supd = v;
+    // supd.validate is already a signal — no bridge needed beyond the
+    // ViewChild capture for submit().
+  }
+
+  selectCFHandle: SignalStepHandle = {
+    valid: this.selectCFValid.asReadonly(),
+    blocked: computed(() => !!this.isLoadingSignal()),
+    submit: async () => {
+      const result = await firstValueFrom(this.onNext());
+      if (!result.success) {
+        throw new Error(this.errorMessage || 'Failed to save Cloud Foundry details');
+      }
+      // For the user-provided service flow Cloud Foundry → Bind App is
+      // the next transition; for the managed service flow it is Cloud
+      // Foundry → Select Service. Queue both possible downstream
+      // onEnters — only the one whose ViewChild fires next will trigger.
+      this.pendingSelectPlanEnter = true;
+      this.pendingBindAppEnter = true;
+    },
+  };
+
+  selectServiceHandle: SignalStepHandle = {
+    // SelectService exposes validate as a signal directly. Re-route
+    // through a computed wrapper so the handle's valid Signal stays
+    // stable even before the child mounts (the child reference is
+    // optional until ViewChild fires).
+    valid: computed(() => !!this._selectService?.validate()),
+    blocked: this.selectServiceFetching.asReadonly(),
+    submit: async () => {
+      const result = await firstValueFrom(this._selectService!.onNext());
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to select service');
+      }
+      this.pendingSelectPlanEnter = true;
+    },
+  };
+
+  // Mirror initialisedService$ to a signal so selectPlanHandle.blocked
+  // can express the legacy `[blocked]="!inited"` semantic without an
+  // async pipe leaking into the template.
+  private initialisedSignal = signal<boolean>(false);
+  private initialisedSub?: Subscription;
+
+  selectPlanHandle: SignalStepHandle = {
+    valid: computed(() => !!this._selectPlan?.validate()),
+    blocked: computed(() => !this.initialisedSignal()),
+    cancelButtonText: signal('Cancel').asReadonly(),
+    submit: async () => {
+      const result = await firstValueFrom(this._selectPlan!.onNext());
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to select plan');
+      }
+      // Capture the selected plan for downstream step onEnters and
+      // queue the bind-app + specify-details onEnter calls — the
+      // ViewChild setters fire those when their refs become available.
+      this.selectedPlan = result.data;
+      this.pendingBindAppEnter = true;
+      this.pendingSpecifyDetailsEnter = true;
+    },
+  };
+
+  bindAppHandle: SignalStepHandle = {
+    valid: computed(() => !!this._bindApp?.validate()),
+    skipIf: this.skipAppsSignal.asReadonly(),
+    cancelButtonText: signal('Cancel').asReadonly(),
+    submit: async () => {
+      const result = await firstValueFrom(this._bindApp!.submit());
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to bind app');
+      }
+    },
+  };
+
+  specifyDetailsHandle: SignalStepHandle = {
+    valid: this.specifyDetailsValid.asReadonly(),
+    blocked: this.specifyDetailsInit.asReadonly(),
+    cancelButtonText: signal('Cancel ').asReadonly(),
+    nextButtonText: signal('Create ').asReadonly(),
+    submit: async () => {
+      const result = await firstValueFrom(this._specifyDetails!.onNext());
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to create service instance');
+      }
+    },
+  };
+
+  supdHandle: SignalStepHandle = {
+    valid: computed(() => !!this._supd?.validate()),
+    submit: async () => {
+      const result = await firstValueFrom(this._supd!.onNext());
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to create user-provided service instance');
+      }
+    },
+  };
 
   constructor() {
     const route = inject(ActivatedRoute);
@@ -233,6 +479,17 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
       shareReplay({ bufferSize: 1, refCount: true }),
       takeUntil(this.destroyed$)
     );
+    // Mirror skipApps$ into a signal so bindAppHandle.skipIf stays
+    // reactive without leaking an async pipe into the template.
+    this.skipAppsSub = this.skipApps$.subscribe(skip => {
+      this.skipAppsSignal.set(!!skip);
+      this.cdr.markForCheck();
+    });
+    // Mirror initialisedService$ to a signal for selectPlanHandle.blocked.
+    this.initialisedSub = this.initialisedService$.subscribe(inited => {
+      this.initialisedSignal.set(!!inited);
+      this.cdr.markForCheck();
+    });
   }
 
   onNext = () => {
@@ -477,6 +734,12 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroyed$.next();
     this.destroyed$.complete();
+    this.selectCFSub?.unsubscribe();
+    this.selectServiceFetchSub?.unsubscribe();
+    this.specifyDetailsValidSub?.unsubscribe();
+    this.specifyDetailsInitSub?.unsubscribe();
+    this.skipAppsSub?.unsubscribe();
+    this.initialisedSub?.unsubscribe();
     try {
       this.store.dispatch(new ResetCreateServiceInstanceState());
     } catch (error) {
