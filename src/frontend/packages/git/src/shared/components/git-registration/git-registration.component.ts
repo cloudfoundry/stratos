@@ -1,18 +1,28 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  OnDestroy,
+  ViewChild,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { gitRepositoryUrlValidator } from '../../../../../core/src/shared/validators';
 import {
   CreateEndpointHelperComponent } from '@stratosui/core';
-import { Observable, Subscription } from 'rxjs';
+import { firstValueFrom, Observable, Subscription } from 'rxjs';
 import { take, filter, map, pairwise } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
 import { ConnectEndpointConfig } from '../../../../../core/src/features/endpoints/connect.service';
 import { CreateEndpointConnectComponent } from '../../../../../core/src/features/endpoints/create-endpoint/create-endpoint-connect/create-endpoint-connect.component';
-import { StepComponent, StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
+import { SignalStepHandle, StepComponent } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
 import { UniqueDirective } from '../../../../../core/src/shared/components/unique.directive';
 import { SessionService } from '../../../../../core/src/shared/services/session.service';
@@ -61,14 +71,6 @@ interface GitRegistrationForm {
   createSystemEndpointField: FormControl<boolean>;
 }
 
-// FWT-957 DEFERRED (Shape 3 multi-step): two-step flow (Register +
-// optional Connect) where the second step delegates to a child
-// CreateEndpointConnectComponent (`connect.doConnect`, `connect.valid`,
-// `connect.onNext`, `connect.onEnter`) and the first step's `validate`
-// observable spans both endpoint-type selection and form-field validity.
-// Migrating requires per-stepper signal-state coordination across child
-// boundaries — escalated for a unified service-driven approach (same
-// pattern as create-endpoint).
 @Component({
   selector: 'app-git-registration',
   templateUrl: './git-registration.component.html',
@@ -84,10 +86,12 @@ interface GitRegistrationForm {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class GitRegistrationComponent extends CreateEndpointHelperComponent implements OnDestroy {
+export class GitRegistrationComponent extends CreateEndpointHelperComponent implements AfterViewInit, OnDestroy {
   private fb = inject(FormBuilder);
   private snackBarService = inject(SnackBarService);
   private endpointsService = inject(EndpointsService);
+  private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
   sessionService: SessionService;
   currentUserPermissionsService: CurrentUserPermissionsService;
   userProfileService: UserProfileService;
@@ -100,12 +104,67 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
   registerForm: FormGroup<GitRegistrationForm>;
 
   private sub: Subscription;
+  private validateSub?: Subscription;
 
   public showEndpointFields = false;
 
   validate: Observable<boolean>;
 
   urlValidation: string;
+
+  // FWT-959 Part 2 (Partition A) — SignalStepHandle wiring.
+  //
+  // 2-step wizard mirroring create-endpoint's shape: step 1 is the
+  // endpoint-type selection + form (this component), step 2 delegates to
+  // the shared CreateEndpointConnectComponent. The connect child exposes
+  // signal-backed `validSignal` / `doConnectSignal` so this parent can
+  // drive its second-step handle without polling plain fields.
+  @ViewChild('connect', { static: false }) connect?: CreateEndpointConnectComponent;
+  private registerValid = signal<boolean>(false);
+
+  registerStepHandle: SignalStepHandle = {
+    valid: this.registerValid.asReadonly(),
+    nextButtonText: signal('Register').asReadonly(),
+    submit: async () => {
+      const result = await firstValueFrom(this.runRegistration());
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to register endpoint');
+      }
+      // Hand the registration result to the connect child before advance —
+      // replaces the legacy stepper's `onEnter`-via-data path.
+      if (this.connect && result.data) {
+        this.connect.onEnter(result.data);
+      }
+    },
+  };
+
+  connectStepHandle: SignalStepHandle = {
+    valid: computed(() => {
+      const c = this.connect;
+      if (!c) return true;
+      return c.doConnectSignal() ? c.validSignal() : true;
+    }),
+    disablePrevious: signal(true).asReadonly(),
+    hideCloseButton: signal(true).asReadonly(),
+    finishButtonText: computed(() => {
+      const c = this.connect;
+      return c?.doConnectSignal() ? 'Connect' : 'Finish';
+    }),
+    onEnter: () => {
+      // Data already handed off in registerStepHandle.submit — no-op.
+    },
+    submit: async () => {
+      const result = await firstValueFrom(this.connect!.onNext());
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to connect endpoint');
+      }
+      // Connect's legacy onNext returns redirect:true on success →
+      // navigate back to /endpoints (the stepper's cancel URL).
+      if (result.redirect) {
+        await this.router.navigate(['/endpoints']);
+      }
+    },
+  };
 
   constructor() {
     const gitSCMService = inject(GitSCMService);
@@ -221,8 +280,24 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
       return !!defn.url || this.registerForm.valid;
     }));
 
+    // Mirror form validity into the signal that drives the step handle.
+    // Initial value reflects whether a default URL'd type is selected.
+    const initialTyp = this.registerForm.value.selectedType ?? '';
+    const initialDefn = this.gitTypes[this.epSubType].types[initialTyp];
+    this.registerValid.set(!!initialDefn?.url || this.registerForm.valid);
+    this.validateSub = this.validate.subscribe(v => {
+      this.registerValid.set(!!v);
+      this.cdr.markForCheck();
+    });
+
     // Ensure the form validity is updates once the dust settles
     setTimeout(() => this.registerForm.updateValueAndValidity(), 0);
+  }
+
+  ngAfterViewInit() {
+    // No-op; reserved for future child-bridge wiring. The connect child's
+    // signal-backed fields are read directly from computeds, so no
+    // subscription is required here.
   }
 
   private updateType(value?: string) {
@@ -238,10 +313,13 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     if (this.sub) {
       this.sub.unsubscribe();
     }
+    this.validateSub?.unsubscribe();
   }
 
-  // Perform the endpoint registration
-  onNext: StepOnNextFunction = () => {
+  // Perform the endpoint registration. Returns the existing
+  // Observable<StepOnNextResult> shape so the step handle's submit can
+  // adapt it to a Promise.
+  private runRegistration(): Observable<{ success: boolean; redirect: boolean; message: string; data: ConnectEndpointConfig }> {
     const typ = this.registerForm.value.selectedType ?? '';
     const defn = this.gitTypes[this.epSubType].types[typ];
     const name = defn.name ?? this.registerForm.controls.nameField.value ?? '';
@@ -278,7 +356,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
           };
         })
       );
-  };
+  }
 
   private updateUrlWithSuffix(url: string, defn: GithubType): string {
     const urlTrimmed = url.trim();

@@ -1,5 +1,5 @@
 <app-steppers [cancel]="'/endpoints'">
-  <app-step title="Register" [onNext]="onNext" nextButtonText="Register" [valid]="validate | async">
+  <app-step title="Register" [signalHandle]="registerStepHandle">
     <div class="p-6">
       <h3 class="text-xl font-semibold mb-4">Select the type of {{gitTypes[epSubType].label}} to register</h3>
       @if (registerForm) {
@@ -88,9 +88,7 @@
       }
     </div>
   </app-step>
-  <app-step title="Connect (Optional)" [valid]="connect.doConnect ? connect.valid : true" [onNext]="connect.onNext"
-    [onEnter]="connect.onEnter" [disablePrevious]="true" [hideCloseButton]="true"
-    [finishButtonText]="connect.doConnect ? 'Connect' : 'Finish'">
+  <app-step title="Connect (Optional)" [signalHandle]="connectStepHandle">
     <app-create-endpoint-connect #connect></app-create-endpoint-connect>
   </app-step>
 </app-steppers>
