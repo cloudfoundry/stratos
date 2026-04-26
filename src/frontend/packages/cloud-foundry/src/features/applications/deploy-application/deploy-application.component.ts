@@ -136,6 +136,12 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   // captures it explicitly here. step2_2's submit stores the deployer,
   // step3's ViewChild setter forwards it to step3.onEnter on activation.
   private pendingDeployer?: unknown;
+  // FileScannerInfo from step2's source-select onNext, consumed by
+  // step2_2's onEnter to prime deployer.fsFileInfo. Without this, the
+  // file-upload deploy path throws at deployer.fsFileInfo.root because
+  // the field never gets set (the legacy stepper relayed step2's
+  // onNext.data into step2_2.onEnter via enterData).
+  private pendingFsFileInfo?: unknown;
 
   private isLoadingSignal = toSignal(this.cfOrgSpaceService.isLoading$, { initialValue: false });
 
@@ -193,15 +199,12 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     this.step2_2Sub?.unsubscribe();
     this.step2_2Sub = undefined;
     if (v) {
-      // The legacy [onEnter]="step2_2.onEnter" passes the FileScannerInfo
-      // emitted by step 2's onNext data result. The steppers component
-      // routes that as enterData → step.onEnter, but signal-handle onEnter
-      // isn't routed today; the source-upload child only needs to begin
-      // a deployer.open(), and the deployer state at this point already
-      // reflects the previous step's selection. Calling onEnter here
-      // (with no data — same as the framework would have) starts the
-      // upload promptly without forcing a child API change.
-      v.onEnter(undefined as any);
+      // The legacy [onEnter]="step2_2.onEnter" received the FileScannerInfo
+      // emitted by step 2's onNext data result. Forward the captured
+      // pendingFsFileInfo so deployer.fsFileInfo gets primed — the
+      // file-upload deploy path reads .root and .total off it later.
+      v.onEnter(this.pendingFsFileInfo as any);
+      this.pendingFsFileInfo = undefined;
       this.step2_2Sub = v.valid$.subscribe(valid => {
         this.step2_2Valid.set(!!valid);
         this.cdr.markForCheck();
@@ -289,6 +292,10 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
       if (!result.success) {
         throw new Error(result.message || 'Failed to save source type');
       }
+      // Capture the FileScannerInfo for step2_2 to consume on activation
+      // (file-upload path only — git-url/docker source paths leave data
+      // undefined and step2_2 isn't navigated to).
+      this.pendingFsFileInfo = result.data;
     },
   };
 
