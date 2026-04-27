@@ -4,7 +4,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { UntypedFormBuilder } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
-import { distinctUntilChanged, filter, map, pairwise, startWith, take, withLatestFrom } from 'rxjs/operators';
+import { filter, map, startWith, take } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
@@ -13,6 +13,7 @@ import {
   ConnectEndpointData,
   ConnectEndpointService,
 } from '../../../../../core/src/features/endpoints/connect.service';
+import { EndpointsSignalConfigService } from '../../../../../core/src/features/endpoints/endpoints-page/endpoints-signal-config.service';
 import {
   IActionMonitorComponentState,
 } from '../../../../../core/src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
@@ -24,11 +25,9 @@ import { TableComponent } from '../../../../../core/src/shared/components/list/l
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
 import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { AppState } from '../../../../../store/src/public-api';
-import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
-import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes-entity-factory';
 import { KubeConfigAuthHelper } from '../kube-config-auth.helper';
-import { KubeConfigFileCluster, KubeConfigImportAction, KubeImportState } from '../kube-config.types';
+import { KubeConfigFileCluster, KubeConfigImportAction } from '../kube-config.types';
 import {
   KubeConfigTableImportStatusComponent,
 } from './kube-config-table-import-status/kube-config-table-import-status.component';
@@ -136,6 +135,7 @@ export class KubeConfigImportComponent implements OnDestroy {
   private injector = inject(Injector);
   private fb = inject(UntypedFormBuilder);
   private endpointsService = inject(EndpointsService);
+  private endpointsSignalConfig = inject(EndpointsSignalConfigService);
 
   // Process the next action in the list
   private processAction(actions: KubeConfigImportAction[]) {
@@ -159,18 +159,8 @@ export class KubeConfigImportComponent implements OnDestroy {
   }
 
   private doRegister(reg: KubeConfigImportAction, next: KubeConfigImportAction[]) {
-    const obs$ = this.registerEndpoint(
-      reg.cluster.name,
-      reg.cluster.cluster.server,
-      reg.cluster.cluster['insecure-skip-tls-verify'],
-      reg.cluster._subType
-    );
-    const mainObs$ = this.getUpdatingState(obs$).pipe(
-      startWith({ busy: true, error: false, completed: false, message: '' })
-    );
-
-    this.subs.push(mainObs$.subscribe(value => reg.actionState.next(value)));
-
+    // Subscribe before kicking off registration so the row monitor sees the
+    // initial busy emit and the completion emit through reg.actionState.
     const sub = reg.actionState.asObservable().subscribe((progress: IActionMonitorComponentState) => {
       // Not sure what the status is used for?
       reg.status = progress;
@@ -196,6 +186,33 @@ export class KubeConfigImportComponent implements OnDestroy {
       }
     });
     this.subs.push(sub);
+
+    // Drive the row's actionState through busy → completed via the
+    // Promise-returning signal-config register wrapper. The wrapper hides
+    // the legacy ngrx pairwise/busy-edge dance, so we just emit the
+    // initial busy state and the final settled state directly.
+    reg.actionState.next({ busy: true, error: false, completed: false, message: '' });
+    this.endpointsSignalConfig.register({
+      endpointType: KUBERNETES_ENDPOINT_TYPE,
+      endpointSubType: reg.cluster._subType,
+      name: reg.cluster.name,
+      endpoint: reg.cluster.cluster.server,
+      skipSslValidation: reg.cluster.cluster['insecure-skip-tls-verify'],
+    }).then(result => {
+      reg.actionState.next({
+        busy: false,
+        error: result.error,
+        completed: true,
+        message: result.message,
+      });
+    }).catch(err => {
+      reg.actionState.next({
+        busy: false,
+        error: true,
+        completed: true,
+        message: err?.message ?? 'Failed to register endpoint',
+      });
+    });
   }
 
   private doConnect(connect: KubeConfigImportAction, next: KubeConfigImportAction[]) {
@@ -231,22 +248,6 @@ export class KubeConfigImportComponent implements OnDestroy {
     if (this.connectService) {
       this.connectService.destroy();
     }
-  }
-
-  // Register the endpoint
-  private registerEndpoint(name: string, url: string, skipSslValidation: boolean, subType: string) {
-    return stratosEntityCatalog.endpoint.api.register<ActionState>(
-      KUBERNETES_ENDPOINT_TYPE,
-      subType,
-      name,
-      url,
-      skipSslValidation,
-      '',
-      '',
-      false
-    ).pipe(
-      filter(update => !!update)
-    );
   }
 
   // Connect to an endpoint
@@ -339,31 +340,5 @@ export class KubeConfigImportComponent implements OnDestroy {
       return observableOf({ success: true, ignoreSuccess: true });
     }
   };
-
-  // These two should be somewhere else
-  private getUpdatingState(actionState$: Observable<ActionState>): Observable<KubeImportState> {
-    const completed$ = this.getHasCompletedObservable(actionState$.pipe(map(requestState => requestState.busy)));
-    return actionState$.pipe(
-      pairwise(),
-      withLatestFrom(completed$),
-      map(([[, requestState], completed]) => {
-        return {
-          busy: requestState.busy,
-          error: requestState.error,
-          completed,
-          message: requestState.message,
-        };
-      })
-    );
-  }
-
-  private getHasCompletedObservable(busy$: Observable<boolean>) {
-    return busy$.pipe(
-      distinctUntilChanged(),
-      pairwise(),
-      map(([oldBusy, newBusy]) => oldBusy && !newBusy),
-      startWith(false),
-    );
-  }
 
 }
