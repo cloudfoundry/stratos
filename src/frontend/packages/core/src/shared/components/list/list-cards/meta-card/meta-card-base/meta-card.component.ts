@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ContentChild, ContentChildren, Input, OnDestroy, QueryList, HostListener, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ContentChild, ContentChildren, Input, OnDestroy, OnInit, QueryList, HostListener, inject } from '@angular/core';
 import { combineLatest, Observable, of as observableOf, of, Subscription } from 'rxjs';
 import { take, map, tap } from 'rxjs/operators';
 
@@ -47,7 +47,7 @@ export function createMetaCardMenuItemSeparator(): MenuItem {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MetaCardComponent implements OnDestroy {
+export class MetaCardComponent implements OnInit, OnDestroy {
   private entityMonitorFactory = inject(EntityMonitorFactory);
   private userFavoriteManager = inject(UserFavoriteManager);
 
@@ -63,8 +63,21 @@ export class MetaCardComponent implements OnDestroy {
   @Input()
   status$!: Observable<StratosStatus>;
 
+  // Tracks whether the parent bound [favorite] at all. Distinct from the value
+  // being null/undefined: the parent's value can transition (e.g. set in
+  // ngOnInit), but if the binding exists the setter fires at least once.
+  // We use this in ngOnInit to skip the entity-monitor fallback so it never
+  // poisons a parent-supplied favorite via the cross-endpoint stamped cfGuid.
+  private favoriteBound = false;
+  private pFavorite: UserFavorite<IFavoriteMetadata>;
   @Input()
-  public favorite: UserFavorite<IFavoriteMetadata>;
+  set favorite(fav: UserFavorite<IFavoriteMetadata>) {
+    this.favoriteBound = true;
+    this.pFavorite = fav;
+  }
+  get favorite(): UserFavorite<IFavoriteMetadata> {
+    return this.pFavorite;
+  }
 
   @Input()
   public confirmFavoriteRemoval = false;
@@ -87,6 +100,7 @@ export class MetaCardComponent implements OnDestroy {
   @Input()
   clickAction: () => void = null;
 
+  private pEntityConfig: ComponentEntityMonitorConfig;
   @Input()
   set entityConfig(entityConfig: ComponentEntityMonitorConfig) {
     if (entityConfig) {
@@ -95,18 +109,11 @@ export class MetaCardComponent implements OnDestroy {
         entityConfig.schema
       );
       this.isDeleting$ = entityMonitor.isDeletingEntity$;
-      if (!this.favorite) {
-        this.entityMonitorSub = entityMonitor.entity$.pipe(
-          take(1),
-          tap(entity => this.favorite = this.userFavoriteManager.getFavorite(
-            entity,
-            entityConfig.schema.entityType,
-            entityConfig.schema.endpointType
-          ))
-        ).subscribe();
-      }
+      this.pEntityConfig = entityConfig;
+      this.pEntityMonitor = entityMonitor;
     }
   }
+  private pEntityMonitor: { entity$: Observable<any> } | null = null;
 
   @Input()
   set actionMenu(actionMenu: MenuItem[]) {
@@ -139,6 +146,29 @@ export class MetaCardComponent implements OnDestroy {
   public showMenu$!: Observable<boolean>;
   public isDeleting$: Observable<boolean> = observableOf(false);
   private pActionMenu!: MenuItem[];
+
+  ngOnInit() {
+    // Run the fallback favorite lookup only when the parent did NOT bind
+    // [favorite]. By ngOnInit, all @Input setters have fired (including
+    // [favorite]) so favoriteBound reflects whether the parent supplies its
+    // own. Consumers like cf-org-card / cf-space-card / card-app build the
+    // favorite with the page's endpoint id and pass it explicitly, avoiding
+    // the cross-endpoint star leak that came from reading the entity-stamped
+    // cfGuid (ngrx dedupes entity rows across Stratos endpoints sharing one
+    // CAPI). Cards that don't bind [favorite] keep the legacy fallback.
+    if (this.pEntityMonitor && !this.favoriteBound) {
+      this.entityMonitorSub = this.pEntityMonitor.entity$.pipe(
+        take(1),
+        tap(entity => {
+          this.pFavorite = this.userFavoriteManager.getFavorite(
+            entity,
+            this.pEntityConfig.schema.entityType,
+            this.pEntityConfig.schema.endpointType
+          );
+        })
+      ).subscribe();
+    }
+  }
 
   ngOnDestroy() {
     safeUnsubscribe(this.entityMonitorSub);
