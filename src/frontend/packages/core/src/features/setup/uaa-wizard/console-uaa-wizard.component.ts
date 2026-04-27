@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewEncapsulation, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewEncapsulation, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
@@ -56,6 +56,7 @@ import { LoadingPageComponent } from '../../../shared/components/loading-page/lo
 })
 export class ConsoleUaaWizardComponent implements OnInit, OnDestroy {
   private store = inject<Store<Pick<InternalAppState, 'uaaSetup' | 'auth'>>>(Store);
+  private cdr = inject(ChangeDetectorRef);
   title = inject(APP_TITLE);
 
 
@@ -118,6 +119,11 @@ export class ConsoleUaaWizardComponent implements OnInit, OnDestroy {
       } else if (this.uaaScopes.find(scope => scope === 'cloud_controller.admin')) {
         this.selectedScope = 'cloud_controller.admin';
       }
+      // OnPush: uaaScopes / selectedScope are plain fields read by step 2's
+      // template. The setter assignments above don't trigger CD on their
+      // own, so step 2 may render with an empty scope dropdown until
+      // something else marks the view dirty. Force a tick.
+      this.cdr.markForCheck();
     },
   };
 
