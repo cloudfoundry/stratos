@@ -150,6 +150,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
         console.error('Stepper onNext threw synchronously:', err);
         step.busy = false;
         this.showNextButtonProgress = false;
+        this.cdr.markForCheck();
         this.snackBarRef = this.snackBar.open(
           `An error occurred: ${(err as Error)?.message || err || 'Unknown error'}`,
           'Dismiss',
@@ -167,6 +168,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       // at true even though navigation was effectively complete/no-op.
       if (!(obs$ instanceof Observable)) {
         step.busy = false;
+        this.cdr.markForCheck();
         return;
       }
 
@@ -189,6 +191,11 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
           this.showNextButtonProgress = false;
           step.error = !success;
           step.busy = false;
+          // OnPush + zoneless: bare assignments don't mark the stepper view
+          // dirty, so the Connect/Next button stays in its spinner state and
+          // remains disabled after a failed submit. Without this the user
+          // can't retry — bad creds path leaves the dialog frozen.
+          this.cdr.markForCheck();
           this.enterData = data;
           if (success && !ignoreSuccess) {
             if (redirect) {
@@ -215,6 +222,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
         finalize(() => {
           step.busy = false;
           this.showNextButtonProgress = false;
+          this.cdr.markForCheck();
         })
       ).subscribe();
     }
