@@ -51,7 +51,7 @@
           (change)="onFilterFieldChange($any($event.target).value)"
           title="Filter by"
           class="px-2 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text">
-          @for (col of filterableColumns(); track col.header) {
+          @for (col of filterableColumns(); track col.key) {
             <option [value]="columnKey(col)" [selected]="config.filterField!() === columnKey(col)">{{ col.header }}</option>
           }
         </select>
@@ -82,7 +82,7 @@
         <select
           (change)="onSortFieldChange($any($event.target).value)"
           class="px-2 py-1 border border-content-border rounded bg-content-bg text-content-text">
-          @for (col of sortableColumns(); track col.header) {
+          @for (col of sortableColumns(); track col.key) {
             <option [value]="columnKey(col)" [selected]="config.sort!().field === columnKey(col)">{{ col.header }}</option>
           }
         </select>
@@ -166,7 +166,7 @@
                    [class]="'h-1.5 rounded-t ' + accentBarClass(cardAccentFor(row))"></div>
             }
             <div class="p-3">
-              @for (col of config.columns; track col.header; let first = $first) {
+              @for (col of config.columns; track col.key; let first = $first) {
                 @if (first) {
                   <div class="font-semibold text-base text-content-text mb-2 flex items-center justify-between gap-2">
                     <span class="truncate min-w-0" [attr.title]="col.render(row)">
@@ -283,13 +283,13 @@
     } @else {
       <table class="min-w-full border-collapse" style="table-layout: fixed;">
         <colgroup>
-          @for (col of config.columns; track col.header) {
+          @for (col of config.columns; track col.key) {
             <col [style.width]="col.widthHint ?? null">
           }
         </colgroup>
         <thead class="sticky top-0 bg-gray-100 dark:bg-gray-800 z-10 border-b border-content-border">
           <tr>
-            @for (col of config.columns; track col.header) {
+            @for (col of config.columns; track col.key) {
               <th class="text-left px-3 py-2 font-semibold text-sm text-content-text whitespace-nowrap">
                 @if (isSortable(col)) {
                   <button
@@ -315,7 +315,7 @@
         <tbody>
           @for (row of config.pagedItems(); track trackByRow($index, row)) {
             <tr data-test="row" class="border-b border-content-border hover:bg-gray-50 dark:hover:bg-gray-900">
-              @for (col of config.columns; track col.header) {
+              @for (col of config.columns; track col.key) {
                 <td class="px-3 py-2 text-sm text-content-text"
                     [class.truncate]="col.kind !== 'actions' && col.kind !== 'favorite'"
                     [class.overflow-visible]="col.kind === 'actions' || col.kind === 'favorite'"
