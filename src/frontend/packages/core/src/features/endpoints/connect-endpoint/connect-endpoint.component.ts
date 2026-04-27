@@ -119,14 +119,18 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     // Template container reference is not available at construction
     this.createComponent(this.autoSelected);
 
-    this.subs.push(this.endpointForm.valueChanges.pipe().subscribe(res => {
-      const authType = this.authTypesForEndpoint.find(ep => ep.value === res.authType);
-      if (authType.component === this.authFormComponentRef.componentType) {
-        this.setData();
-      }
-      // Always emit actual form validity, regardless of component state
+    this.subs.push(this.endpointForm.valueChanges.pipe().subscribe(() => {
+      // Always push current form data into the service. The previous gate
+      // (auth.component === authFormComponentRef.componentType) could leave
+      // pData undefined if the subscription saw a value before the dynamic
+      // auth-form component finished swapping, causing submit() to throw
+      // on destructuring authType from undefined pData.
+      this.setData();
       this.valid.next(this.endpointForm.valid);
     }));
+
+    // Seed pData up-front so submit() works even if valueChanges hasn't fired.
+    this.setData();
 
     // Set initial valid status
     this.endpointForm.updateValueAndValidity();
@@ -184,10 +188,12 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     let authVal = authValues;
 
     // Allow the auth form to supply body content if it needs to
-    const endpointFormInstance = this.authFormComponentRef.instance as IEndpointAuthComponent;
-    if (endpointFormInstance.getBody && endpointFormInstance.getValues) {
-      this.bodyContent = endpointFormInstance.getBody();
-      authVal = endpointFormInstance.getValues(authValues);
+    if (this.authFormComponentRef) {
+      const endpointFormInstance = this.authFormComponentRef.instance as IEndpointAuthComponent;
+      if (endpointFormInstance.getBody && endpointFormInstance.getValues) {
+        this.bodyContent = endpointFormInstance.getBody();
+        authVal = endpointFormInstance.getValues(authValues);
+      }
     }
 
     return {
