@@ -86,13 +86,23 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
 
   private init(config: ConnectEndpointConfig) {
     const endpoint = entityCatalog.getEndpoint(config.type, config.subType);
-    // Populate the valid auth types for the endpoint that we want to connect to
+    // Populate the valid auth types for the endpoint that we want to connect to.
+    // Some entity definitions live in the @stratosui/store package, which by
+    // design cannot import from @stratosui/core where BaseEndpointAuth is
+    // defined — so they declare `authTypes: []` and rely on this fallback.
+    // Without it the dynamic auth-form lookup throws, leaving the wizard
+    // stuck with no Connect step rendered (regression from PR #4517 which
+    // cleaned the store->core dependency without replacing the lost configs).
+    const declaredAuthTypes = endpoint?.definition?.authTypes ?? [];
+    const baseAuthTypes = declaredAuthTypes.length > 0
+      ? declaredAuthTypes
+      : [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.None];
 
     // Remove SSO if not allowed on this endpoint
     if (config.ssoAllowed) {
-      this.authTypesForEndpoint = endpoint.definition.authTypes;
+      this.authTypesForEndpoint = baseAuthTypes;
     } else {
-      this.authTypesForEndpoint = endpoint.definition.authTypes.filter(authType => authType.value !== BaseEndpointAuth.SSO.value);
+      this.authTypesForEndpoint = baseAuthTypes.filter(authType => authType.value !== BaseEndpointAuth.SSO.value);
     }
 
     // Not all endpoint types might allow token sharing - typically types like metrics do
@@ -149,6 +159,12 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
 
   authChanged() {
     const authType = this.authTypesForEndpoint.find(ep => ep.value === this.endpointForm.value.authType);
+    if (!authType) {
+      // Form value got out of sync with the populated auth types (can happen
+      // if the endpoint definition has no authTypes and the form was seeded
+      // with an empty value). Bail rather than crashing on `authType.form`.
+      return;
+    }
     const authTypeFormFields = Object.keys(authType.form);
     if (!this.sameAuthTypeFormFields(this.cachedAuthTypeFormFields, authTypeFormFields)) {
       // Don't remove and re-add the same control, this helps with form validation
