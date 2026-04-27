@@ -92,7 +92,6 @@ func TestDeleteNativeRoute_PropagatesCapiError(t *testing.T) {
 	assert.Contains(t, rec.Body.String(), "ResourceNotFound")
 }
 
-
 // TestUnmapRouteFromApp_FindsDestinationAndDeletes verifies the handler
 // issues a GET to /v3/routes/{routeGuid}/destinations, finds the destination
 // whose app.guid matches the appGuid path parameter, and then issues a

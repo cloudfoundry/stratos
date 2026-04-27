@@ -15,7 +15,9 @@ import (
 // to let the user opt into deleting route mappings alongside the app.
 //
 // Implementation: CF v3's "routes for app" is served by
-//   GET /v3/routes?app_guids={appGuid}
+//
+//	GET /v3/routes?app_guids={appGuid}
+//
 // which returns routes that have a destination binding the requested app.
 // Paged upstream; we drain every page so the picker shows a complete set
 // even for apps with more than one page of routes (unusual but possible

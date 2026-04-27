@@ -189,25 +189,26 @@ func (c *CloudFoundrySpecification) appAction(ctx echo.Context) error {
 // by proxying to the CF v2 endpoint /v2/apps/{guid}/restage.
 //
 // Why v2?
-//   CF v3 has no restage endpoint. The atomic /v2/apps/{guid}/restage was
-//   replaced by the builds resource (v3.216 docs: "finer-grained control
-//   and increased flexibility... V3 API avoids making assumptions about
-//   what users want to happen"). The v3 equivalent is a composition:
 //
-//     1. GET /v3/packages?app_guids=<a>&states=READY
-//           &order_by=-created_at&per_page=1          (newest READY pkg)
-//     2. POST /v3/builds {"package":{"guid":"<p>"}}   (kick build)
-//     3. GET  /v3/builds/<build_guid>  (poll until state != STAGING)
-//     4. POST /v3/apps/<a>/actions/stop               (if running)
-//     5. PATCH /v3/apps/<a>/relationships/current_droplet
-//           {"data":{"guid":"<droplet>"}}
-//     6. POST /v3/apps/<a>/actions/start
+//	CF v3 has no restage endpoint. The atomic /v2/apps/{guid}/restage was
+//	replaced by the builds resource (v3.216 docs: "finer-grained control
+//	and increased flexibility... V3 API avoids making assumptions about
+//	what users want to happen"). The v3 equivalent is a composition:
 //
-//   That's what cf-cli v8 shared.AppStager does. For Stratos it's the
-//   future implementation; the ticket is Phase 2 of FWT-restage-v3 in
-//   the Stratos V3 migration track. v2 restage remains live on every
-//   CF we target until RFC-0032's 2026-end sunset, so we ship the v2
-//   passthrough now and revisit when the deadline forces us.
+//	  1. GET /v3/packages?app_guids=<a>&states=READY
+//	        &order_by=-created_at&per_page=1          (newest READY pkg)
+//	  2. POST /v3/builds {"package":{"guid":"<p>"}}   (kick build)
+//	  3. GET  /v3/builds/<build_guid>  (poll until state != STAGING)
+//	  4. POST /v3/apps/<a>/actions/stop               (if running)
+//	  5. PATCH /v3/apps/<a>/relationships/current_droplet
+//	        {"data":{"guid":"<droplet>"}}
+//	  6. POST /v3/apps/<a>/actions/start
+//
+//	That's what cf-cli v8 shared.AppStager does. For Stratos it's the
+//	future implementation; the ticket is Phase 2 of FWT-restage-v3 in
+//	the Stratos V3 migration track. v2 restage remains live on every
+//	CF we target until RFC-0032's 2026-end sunset, so we ship the v2
+//	passthrough now and revisit when the deadline forces us.
 //
 // Response: sync-complete envelope {"state":"COMPLETE"} on 2xx from CF,
 // matching the shape returned by Stop/Start/Scale lifecycle handlers.

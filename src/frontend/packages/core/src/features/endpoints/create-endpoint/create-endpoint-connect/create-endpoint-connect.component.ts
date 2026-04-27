@@ -1,5 +1,5 @@
 
-import { ChangeDetectionStrategy, Component, OnDestroy, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { Observable, of } from 'rxjs';
@@ -31,6 +31,7 @@ import { CustomIconComponent } from '../../../../shared/components/custom-materi
 export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
   private endpointsService = inject(EndpointsService);
   private sidePanelService = inject(SidePanelService);
+  private cdr = inject(ChangeDetectorRef);
 
 
   public validate!: Observable<boolean>;
@@ -55,6 +56,10 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
 
   onEnter = (data: ConnectEndpointConfig) => {
     this.connectService = new ConnectEndpointService(this.endpointsService, data);
+    // OnPush change detection: setting a non-signal field doesn't notify
+    // the template, so the success message renders without the endpoint
+    // name until something else triggers a check. Force a tick.
+    this.cdr.markForCheck();
   };
 
   onNext = (): Observable<StepOnNextResult> => this.doConnect ? this.connectService.submit().pipe(

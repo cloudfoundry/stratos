@@ -21,6 +21,14 @@
         @if (registerForm.controls.urlField.errors?.invalidUrl) {
           <app-error>Invalid API URL. Enter a valid hostname or URL (e.g., api.example.com or https://api.example.com)</app-error>
         }
+        @if (registerForm.value.urlField && (
+               (registerForm.value.createSystemEndpointField && (customEndpoints | async)?.urls?.includes(registerForm.value.urlField))
+               || (!registerForm.value.createSystemEndpointField && (existingPersonalEndpoints | async)?.urls?.includes(registerForm.value.urlField))
+             )) {
+          <div class="text-yellow-600 dark:text-yellow-400 text-sm mt-1" role="status">
+            An endpoint at this URL is already registered. Registration may still succeed in another scope.
+          </div>
+        }
       </app-form-field>
       @if (userEndpointsAndIsAdmin | async) {
         <app-checkbox appInput name="createSystemEndpoint"

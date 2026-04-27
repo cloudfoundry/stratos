@@ -10,11 +10,11 @@ import (
 // matching the State. When Resolved is false the caller should return
 // 202 + HandoffJob to the client and expect the frontend to poll.
 type FastPathResult struct {
-	Resolved   bool          // true if backend reached terminal within window
-	State      JobState      // terminal state, valid when Resolved
-	Result     interface{}   // backend result, valid when State == COMPLETE
+	Resolved   bool           // true if backend reached terminal within window
+	State      JobState       // terminal state, valid when Resolved
+	Result     interface{}    // backend result, valid when State == COMPLETE
 	Errors     []StratosError // backend errors, valid when State == FAILED
-	HandoffJob *StratosJob   // the tracked job to surface as 202 body when !Resolved
+	HandoffJob *StratosJob    // the tracked job to surface as 202 body when !Resolved
 }
 
 // FastPathOptions tunes the bounded poll loop. Zero values pick defaults

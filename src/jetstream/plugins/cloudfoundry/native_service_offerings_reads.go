@@ -26,11 +26,11 @@ import (
 //     for future direct callers that don't need pagination meta.
 //
 // Two-step join, mirroring native_service_bindings_reads.go:
-//   1. /v3/service_offerings — drain all pages.
-//   2. /v3/service_brokers?guids={…collected unique broker GUIDs…} — one
-//      batched fetch. CF v3 ListResponse doesn't model the `included`
-//      response field, so include= won't help; the explicit follow-up
-//      gives the same result with one extra round-trip.
+//  1. /v3/service_offerings — drain all pages.
+//  2. /v3/service_brokers?guids={…collected unique broker GUIDs…} — one
+//     batched fetch. CF v3 ListResponse doesn't model the `included`
+//     response field, so include= won't help; the explicit follow-up
+//     gives the same result with one extra round-trip.
 //
 // If the broker fetch fails the handler still returns 200 with offering-level
 // fields intact — BrokerName falls back to empty string and the UI renders

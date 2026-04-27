@@ -22,6 +22,7 @@ import { getIdFromRoute } from '../../../core/utils.service';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { SignalStepHandle, StepComponent } from '../../../shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../shared/components/stepper/steppers/steppers.component';
+import { EndpointsSignalConfigService } from '../endpoints-page/endpoints-signal-config.service';
 import { CreateEndpointCfStep1Component } from './create-endpoint-cf-step-1/create-endpoint-cf-step-1.component';
 import { CreateEndpointConnectComponent } from './create-endpoint-connect/create-endpoint-connect.component';
 
@@ -66,11 +67,19 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
 
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+  private endpointsSignalConfig = inject(EndpointsSignalConfigService);
 
   // step1.validate is an Observable — we mirror it into a signal once the
   // view initialises (it's constructed lazily in ngAfterContentInit).
   private step1Valid = signal<boolean>(false);
   private step1ValidateSub?: Subscription;
+
+  // Tracks the endpoint guid created by step 1's submit — used by the
+  // connect-step's onLeave(isNext=false) handler to unregister on
+  // Previous ("Prev = start over"). Cleared after unregister so the form
+  // can re-register cleanly. Mirrors git-registration's pattern.
+  private registeredGuid: string | null = null;
+  private registeredType: string | null = null;
 
   step1StepHandle: SignalStepHandle = {
     valid: this.step1Valid.asReadonly(),
@@ -81,6 +90,11 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
       const result = await firstValueFrom(this.step1!.onNext(0, {} as any));
       if (!result.success) {
         throw new Error(result.message || 'Failed to register endpoint');
+      }
+      // Capture the guid+type so Previous from step 2 can unregister.
+      if (result.data) {
+        this.registeredGuid = result.data.guid;
+        this.registeredType = result.data.type;
       }
       // Hand the registration result to the connect step before advance —
       // the legacy `onEnter`-via-data path that the stepper used to drive.
@@ -104,7 +118,7 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
       if (!c) return true;
       return c.doConnectSignal() ? c.validSignal() : true;
     }),
-    disablePrevious: signal(true).asReadonly(),
+    disablePrevious: signal(false).asReadonly(),
     hideCloseButton: signal(true).asReadonly(),
     finishButtonText: computed(() => {
       const c = this.connect;
@@ -114,6 +128,19 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
       // The data is set by step1's submit before advance — nothing more
       // to do here. Kept as a no-op so the handle's onEnter contract is
       // explicit (vs falling through to legacy storage).
+    },
+    onLeave: async (isNext) => {
+      if (isNext || !this.registeredGuid || !this.registeredType) {
+        return;
+      }
+      // Previous from connect step ⇒ "start over": unregister the endpoint
+      // we just created so the user can re-fill or pick a different type
+      // on a clean step 1.
+      const guid = this.registeredGuid;
+      const type = this.registeredType;
+      this.registeredGuid = null;
+      this.registeredType = null;
+      await this.endpointsSignalConfig.unregister(guid, type);
     },
     submit: async () => {
       const result = await firstValueFrom(this.connect!.onNext());

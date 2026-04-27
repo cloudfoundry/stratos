@@ -112,7 +112,23 @@ export class EndpointsSignalConfigService {
   readonly pageSize: WritableSignal<number> = signal(25);
   readonly pageIndex: WritableSignal<number> = signal(0);
   readonly nameFilter: WritableSignal<string> = signal('');
-  readonly viewMode: WritableSignal<'table' | 'card'> = signal('table');
+  // viewMode persists across reloads via localStorage. Initial value reads
+  // the saved preference (falling back to 'table' for first-time users —
+  // endpoint metadata density favours the table layout). An effect inside
+  // initialize() writes back on change.
+  readonly viewMode: WritableSignal<'table' | 'card'> = signal(this.readSavedViewMode());
+
+  private static readonly VIEW_MODE_STORAGE_KEY = 'stratos.endpoints.viewMode';
+  private readSavedViewMode(): 'table' | 'card' {
+    try {
+      const v = typeof localStorage !== 'undefined'
+        ? localStorage.getItem(EndpointsSignalConfigService.VIEW_MODE_STORAGE_KEY)
+        : null;
+      return v === 'card' ? 'card' : 'table';
+    } catch {
+      return 'table';
+    }
+  }
 
   // Endpoint store holds Record<guid, EndpointModel>. Project to an array via
   // Object.values() in a computed so re-renders fire only when the underlying
@@ -145,6 +161,17 @@ export class EndpointsSignalConfigService {
           if (!q) return true;
           return (ep.name ?? '').toLowerCase().includes(q);
         });
+      });
+      // Persist viewMode choice across reloads.
+      effect(() => {
+        const mode = this.viewMode();
+        try {
+          if (typeof localStorage !== 'undefined') {
+            localStorage.setItem(EndpointsSignalConfigService.VIEW_MODE_STORAGE_KEY, mode);
+          }
+        } catch {
+          // localStorage may throw in sandboxed iframes / private mode.
+        }
       });
     });
     // No registry release pattern here — endpointEntitiesSelector is a pure
