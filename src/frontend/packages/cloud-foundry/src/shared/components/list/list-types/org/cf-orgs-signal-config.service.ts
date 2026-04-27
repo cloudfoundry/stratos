@@ -19,14 +19,25 @@ export class CfOrgsSignalConfigService {
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
 
-  private endpointDataService?: EndpointDataService;
+  // Wrapped in a signal so the `orgs` / `spaces` computeds re-run when the
+  // active CNSI swaps. With a plain field the computeds tracked only the
+  // *first* endpoint's `orgs()` signal as a dependency, so navigating from
+  // claudesim → cf left the orgs list (and the row keys derived from
+  // `o.cnsiGuid`) pointing at the previous endpoint — making favorite-star
+  // matching fall through with the wrong page-context guid.
+  private endpointDataService: WritableSignal<EndpointDataService | undefined> = signal(undefined);
   private cnsiGuid = '';
 
   // Filter / sort / paging state, mirroring the app-wall service. Sort
   // defaults to name ascending; filter starts empty (shows everything).
   readonly filter: WritableSignal<(org: StOrg) => boolean> = signal(() => true);
   readonly sort: WritableSignal<SortSpec<StOrg>> = signal({ field: 'name', direction: 'asc' });
-  readonly pageSize: WritableSignal<number> = signal(25);
+  // Default pageSize must be a member of pageSizeOptions for the *active*
+  // viewMode below — picking a value outside the option list leaves the
+  // selector showing the first option (e.g. 6) while the list actually
+  // renders 25 rows. Card mode is the default viewMode, so we default to
+  // 24 (the card option closest to the table-default of 25).
+  readonly pageSize: WritableSignal<number> = signal(24);
   readonly pageIndex: WritableSignal<number> = signal(0);
   readonly nameFilter: WritableSignal<string> = signal('');
   readonly viewMode: WritableSignal<'table' | 'card'> = signal('card');
@@ -34,7 +45,7 @@ export class CfOrgsSignalConfigService {
   // Lazy per-CNSI space list; used to count spaces per org for the Spaces column.
   // The endpoint-data service loads spaces in the background; before that
   // finishes we show an em-dash placeholder to avoid an inaccurate "0".
-  readonly spaces: Signal<StSpace[]> = computed(() => this.endpointDataService?.spaces() ?? []);
+  readonly spaces: Signal<StSpace[]> = computed(() => this.endpointDataService()?.spaces() ?? []);
   readonly spaceCountByOrgGuid: Signal<Map<string, number>> = computed(() => {
     const map = new Map<string, number>();
     for (const s of this.spaces()) {
@@ -46,7 +57,7 @@ export class CfOrgsSignalConfigService {
   // Raw org list driving the view pipeline. Empty when initialize() hasn't
   // been called yet or the endpoint-data service hasn't finished the
   // counts + details cascade.
-  readonly orgs: Signal<StOrg[]> = computed(() => this.endpointDataService?.orgs() ?? []);
+  readonly orgs: Signal<StOrg[]> = computed(() => this.endpointDataService()?.orgs() ?? []);
 
   // Default view pipeline. Populated by initialize(); before that the
   // signal-list config reads this.view directly, so it must exist even
@@ -67,7 +78,8 @@ export class CfOrgsSignalConfigService {
 
   initialize(cnsiGuid: string): void {
     this.cnsiGuid = cnsiGuid;
-    this.endpointDataService = this.registry.acquire(cnsiGuid);
+    const ds = this.registry.acquire(cnsiGuid);
+    this.endpointDataService.set(ds);
     // Build the view pipeline over the orgs signal; re-filter on filter
     // / sort changes, re-paginate on page changes. ViewPipeline already
     // handles the memoization layers.
@@ -81,7 +93,7 @@ export class CfOrgsSignalConfigService {
     );
     // Kick off the detail load if it hasn't happened yet. The service
     // guards against duplicate requests internally.
-    void firstValueFrom(this.endpointDataService.loadDetails()).catch(() => {
+    void firstValueFrom(ds.loadDetails()).catch(() => {
       // Errors surface through the StError stream; the list falls back
       // to whatever counts the card-fast path already populated.
     });
@@ -97,9 +109,9 @@ export class CfOrgsSignalConfigService {
         });
       });
       effect(() => {
-        const ds = this.endpointDataService;
-        if (!ds) return;
-        if (ds.orgs().length > 0) this._hasLoadedOnce.set(true);
+        const cur = this.endpointDataService();
+        if (!cur) return;
+        if (cur.orgs().length > 0) this._hasLoadedOnce.set(true);
       });
     });
     this.destroyRef.onDestroy(() => {
@@ -114,9 +126,10 @@ export class CfOrgsSignalConfigService {
   }
 
   async refresh(): Promise<void> {
-    if (!this.endpointDataService) return;
+    const ds = this.endpointDataService();
+    if (!ds) return;
     try {
-      await firstValueFrom(this.endpointDataService.loadDetails());
+      await firstValueFrom(ds.loadDetails());
     } catch {
       // loadDetails() surfaces errors via its own StError stream; swallowing
       // here keeps the Refresh button's promise from rejecting the caller.

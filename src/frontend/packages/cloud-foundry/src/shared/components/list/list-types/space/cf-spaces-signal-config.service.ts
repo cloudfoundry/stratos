@@ -19,7 +19,11 @@ export class CfSpacesSignalConfigService {
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
 
-  private endpointDataService?: EndpointDataService;
+  // Wrapped in a signal so the spaces / appCountBySpaceGuid computeds re-run
+  // when the active CNSI changes — see cf-orgs-signal-config.service.ts for
+  // the full leak explanation (cross-endpoint stale orgs/spaces showing on
+  // the wrong page).
+  private endpointDataService: WritableSignal<EndpointDataService | undefined> = signal(undefined);
   private cnsiGuid = '';
   private orgGuid = '';
 
@@ -34,14 +38,14 @@ export class CfSpacesSignalConfigService {
   // automatically when the endpoint-data service's spaces() signal
   // refreshes (after a loadDetails() pass or a delete-then-refresh).
   readonly spaces: Signal<StSpace[]> = computed(() => {
-    const all = this.endpointDataService?.spaces() ?? [];
+    const all = this.endpointDataService()?.spaces() ?? [];
     return all.filter(s => s.orgGuid === this.orgGuid);
   });
 
   // App count per space (for the Apps column). Reuses the EndpointDataService's
   // apps signal — the same bridge that the app-wall leans on.
   readonly appCountBySpaceGuid: Signal<Map<string, number>> = computed(() => {
-    const all: StApp[] = this.endpointDataService?.apps() ?? [];
+    const all: StApp[] = this.endpointDataService()?.apps() ?? [];
     const map = new Map<string, number>();
     for (const a of all) {
       if (!a.spaceGuid) continue;
@@ -60,7 +64,8 @@ export class CfSpacesSignalConfigService {
   initialize(cnsiGuid: string, orgGuid: string): void {
     this.cnsiGuid = cnsiGuid;
     this.orgGuid = orgGuid;
-    this.endpointDataService = this.registry.acquire(cnsiGuid);
+    const ds = this.registry.acquire(cnsiGuid);
+    this.endpointDataService.set(ds);
     this.view = new ViewPipeline<StSpace>(
       this.spaces,
       this.filter,
@@ -69,7 +74,7 @@ export class CfSpacesSignalConfigService {
       this.pageIndex,
       this._sortExtractors.asReadonly(),
     );
-    void firstValueFrom(this.endpointDataService.loadDetails()).catch((): void => undefined);
+    void firstValueFrom(ds.loadDetails()).catch((): void => undefined);
     runInInjectionContext(this.injector, () => {
       effect(() => {
         const q = this.nameFilter().trim().toLowerCase();
@@ -79,9 +84,9 @@ export class CfSpacesSignalConfigService {
         });
       });
       effect(() => {
-        const ds = this.endpointDataService;
-        if (!ds) return;
-        if (ds.spaces().length > 0) this._hasLoadedOnce.set(true);
+        const cur = this.endpointDataService();
+        if (!cur) return;
+        if (cur.spaces().length > 0) this._hasLoadedOnce.set(true);
       });
     });
     this.destroyRef.onDestroy(() => {
@@ -96,9 +101,10 @@ export class CfSpacesSignalConfigService {
   }
 
   async refresh(): Promise<void> {
-    if (!this.endpointDataService) return;
+    const ds = this.endpointDataService();
+    if (!ds) return;
     try {
-      await firstValueFrom(this.endpointDataService.loadDetails());
+      await firstValueFrom(ds.loadDetails());
     } catch {
       // Errors surface via StError; swallow to keep the Refresh button's
       // promise clean.
