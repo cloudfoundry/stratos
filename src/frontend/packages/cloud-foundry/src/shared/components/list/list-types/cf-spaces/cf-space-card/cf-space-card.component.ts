@@ -104,7 +104,14 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
     this.spaceGuid = this.row.metadata.guid;
     this.entityConfig = new ComponentEntityMonitorConfig(this.spaceGuid, cfEntityFactory(spaceEntityType));
     this.orgGuid = this.cfOrgService.orgGuid;
-    this.favorite = this.userFavoriteManager.getFavorite(this.row, spaceEntityType, CF_ENDPOINT_TYPE);
+    // Use the page's CF guid, not the entity row's stamped cfGuid — see
+    // cf-org-card for the cross-endpoint dedup leak this avoids.
+    this.favorite = this.userFavoriteManager.getFavoriteFromEntity(
+      spaceEntityType,
+      CF_ENDPOINT_TYPE,
+      this.cfEndpointService.cfGuid,
+      this.row
+    );
     this.cardMenu = [
       {
         label: 'Edit',

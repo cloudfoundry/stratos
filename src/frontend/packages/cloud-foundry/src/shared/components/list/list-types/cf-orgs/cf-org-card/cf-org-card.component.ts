@@ -125,7 +125,17 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
       refCount()
     );
 
-    this.favorite = this.userFavoriteManager.getFavorite(this.row, organizationEntityType, CF_ENDPOINT_TYPE);
+    // Use the page's CF guid, not the entity row's stamped cfGuid — when
+    // multiple Stratos endpoints point at the same CAPI, ngrx dedupes org
+    // rows across endpoints and the row's cfGuid stamp belongs to whichever
+    // endpoint fetched it last, which would leak favorites visually onto
+    // sibling endpoint pages.
+    this.favorite = this.userFavoriteManager.getFavoriteFromEntity(
+      organizationEntityType,
+      CF_ENDPOINT_TYPE,
+      this.cfEndpointService.cfGuid,
+      this.row
+    );
 
     const allApps$: Observable<APIResource<IApp>[]> = this.cfEndpointService.appsPagObs.hasEntities$.pipe(
       switchMap(hasAll => hasAll ? this.cfEndpointService.getAppsInOrgViaAllApps(this.row) : observableOf(null))
