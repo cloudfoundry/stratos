@@ -328,3 +328,25 @@ export interface StSecurityGroupsResponse {
   resources: StSecurityGroup[];
   totalResults: number;
 }
+
+// StFeatureFlag is the Stratos-shaped DTO for a CF feature flag.
+// Feature flags govern user-visible affordances (e.g. user_org_creation,
+// app_bits_upload) — global on/off switches with optional custom error
+// messages. Drives the CF-level Feature Flags tab. Unlike most St*
+// DTOs there is no GUID — name is the identity — and no createdAt;
+// CF tracks only the last update timestamp. cnsiGuid is stamped
+// server-side so multi-CNSI rendering keys off (cnsi, name).
+// customErrorMessage and updatedAt come through as nullable on v3;
+// both coerced to '' on the backend to keep the wire shape flat.
+export interface StFeatureFlag {
+  name: string;
+  enabled: boolean;
+  customErrorMessage: string;
+  cnsiGuid: string;
+  updatedAt: string;
+}
+
+export interface StFeatureFlagsResponse {
+  resources: StFeatureFlag[];
+  totalResults: number;
+}

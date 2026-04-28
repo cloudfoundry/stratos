@@ -1,13 +1,21 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideRouter } from '@angular/router';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { CoreModule } from '@stratosui/core';
-import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
-import { createEmptyStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { generateCFEntities } from '../../../../cf-entity-generator';
+
+import {
+  appReducers,
+  TEST_CATALOGUE_ENTITIES,
+  generateStratosEntities,
+  EntityCatalogTestModule,
+  EntityCatalogHelper,
+  EntityCatalogHelpers
+} from '@stratosui/store';
+import { STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
+import { generateCFEntities, generateTestCfEndpointServiceProvider } from '@test-framework/cf';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundryFeatureFlagsComponent } from './cloud-foundry-feature-flags.component';
 
@@ -15,23 +23,23 @@ describe('CloudFoundryFeatureFlagsComponent', () => {
   let component: CloudFoundryFeatureFlagsComponent;
   let fixture: ComponentFixture<CloudFoundryFeatureFlagsComponent>;
 
-  const mockActiveRoute = {
-    cfGuid: 'cf-guid',
-    orgGuid: 'org-guid',
-    spaceGuid: 'space-guid'
-  };
-
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
-        createEmptyStoreModule(),
-        EntityCatalogTestModule,
-        CoreModule,
-        NoopAnimationsModule,
         CloudFoundryFeatureFlagsComponent,
       ],
       providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideNoopAnimations(),
         ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          StoreModule.forRoot(appReducers, {
+            runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
+          }),
+          EntityCatalogTestModule
+        ),
         {
           provide: TEST_CATALOGUE_ENTITIES,
           useValue: [
@@ -39,17 +47,22 @@ describe('CloudFoundryFeatureFlagsComponent', () => {
             ...generateCFEntities()
           ]
         },
-        EntityCatalogHelper,
-        provideZonelessChangeDetection(),
-        provideRouter([]),
-        provideHttpClient(),
-        { provide: ActiveRouteCfOrgSpace, useValue: mockActiveRoute },
+        ...generateTestCfEndpointServiceProvider(testSCFEndpointGuid),
+        {
+          provide: ActiveRouteCfOrgSpace,
+          useValue: {
+            cfGuid: testSCFEndpointGuid,
+            orgGuid: testSCFEndpointGuid,
+            spaceGuid: testSCFEndpointGuid
+          }
+        },
       ]
     }).compileComponents();
 
-    // Set EntityCatalogHelper after TestBed is configured
-    const helper = TestBed.inject(EntityCatalogHelper);
-    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+    const entityCatalogHelper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(entityCatalogHelper);
+
+    populateStoreWithTestEndpoint();
   });
 
   beforeEach(() => {
