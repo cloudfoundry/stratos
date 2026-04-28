@@ -1,28 +1,25 @@
 import { Component, Input, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Observable } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { Observable, of as observableOf } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 import {
-  getServicePlanAccessibilityCardStatus,
+  getPlanAccessibilityV3,
 } from '../../../../../cloud-foundry/src/features/service-catalog/services-helper';
-import { ServicesService } from '../../../../../cloud-foundry/src/features/service-catalog/services.service';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { StratosStatus } from '../../../../../store/src/types/shared.types';
-import { IServiceBroker, IServicePlan } from '../../../cf-api-svc.types';
-import { cfEntityCatalog } from '../../../cf-entity-catalog';
+import { IServicePlan } from '../../../cf-api-svc.types';
+import { ServiceCatalogDataService } from '../../../services/endpoint-data/service-catalog-data.service';
 
 @Component({
   selector: 'app-service-plan-public',
   templateUrl: './service-plan-public.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    CommonModule
-  ]
+  imports: [CommonModule],
 })
 export class ServicePlanPublicComponent {
-  private servicesService = inject(ServicesService);
+  private serviceCatalog = inject(ServiceCatalogDataService);
 
   planAccessibility$: Observable<StratosStatus>;
   planAccessibilityMessage$: Observable<string>;
@@ -38,10 +35,16 @@ export class ServicePlanPublicComponent {
     if (!servicePlan || !servicePlan.entity) {
       return;
     }
-    this.planAccessibility$ = getServicePlanAccessibilityCardStatus(
-      servicePlan,
-      this.servicesService.servicePlanVisibilities$,
-      this.getServiceBroker(servicePlan.entity.service_guid, servicePlan.entity.cfGuid)
+    const cfGuid = servicePlan.entity.cfGuid;
+    const planGuid = servicePlan.metadata.guid;
+    const isPublicPlan = !!servicePlan.entity.public;
+
+    this.planAccessibility$ = this.serviceCatalog.planVisibility(cfGuid, planGuid).pipe(
+      // Visibility lookup may legitimately 4xx for plans the caller can't
+      // see (e.g. admin-only) — fall through to "no visibility" rather than
+      // breaking the page. The helper treats null as the admin/error case.
+      catchError(() => observableOf(null)),
+      map(visibility => getPlanAccessibilityV3(isPublicPlan, visibility)),
     );
     this.planAccessibilityMessage$ = this.planAccessibility$.pipe(
       map(o => {
@@ -50,23 +53,8 @@ export class ServicePlanPublicComponent {
         } else if (o === StratosStatus.ERROR) {
           return 'Service Plan has no visibility';
         }
+        return '';
       })
-    );
-  }
-
-  private getServiceBroker(serviceGuid: string, cfGuid: string): Observable<APIResource<IServiceBroker>> {
-    if (!serviceGuid || !cfGuid) {
-      return null;
-    }
-    return cfEntityCatalog.service.store.getEntityService(serviceGuid, cfGuid, {}).waitForEntity$.pipe(
-      map(service => {
-        if (!service || !service.entity || !service.entity.entity || !service.entity.entity.service_broker_guid) {
-          return null;
-        }
-        return cfEntityCatalog.serviceBroker.store.getEntityService(service.entity.entity.service_broker_guid, cfGuid, {});
-      }),
-      switchMap(serviceService => serviceService ? serviceService.waitForEntity$ : null),
-      map(entity => entity ? entity.entity : null)
     );
   }
 }
