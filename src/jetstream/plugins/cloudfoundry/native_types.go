@@ -319,3 +319,28 @@ type StSecurityGroupsResponse struct {
 	Resources    []StSecurityGroup `json:"resources"`
 	TotalResults int               `json:"totalResults"`
 }
+
+// StFeatureFlag is the Stratos-shaped DTO for a CF feature flag.
+// Feature flags govern user-visible affordances (e.g. user_org_creation,
+// app_bits_upload) — global on/off switches with optional custom error
+// messages shown when a request hits a disabled flag. Drives the
+// CF-level Feature Flags tab. Read-only at this tier; toggling a flag
+// is a platform-admin operation not surfaced.
+//
+// Unlike most St* DTOs there is no GUID — name is the identity. There
+// is also no created_at; CF tracks only the last update. CnsiGUID is
+// stamped server-side so multi-CNSI rendering keys off (cnsi, name).
+// CustomErrorMessage and UpdatedAt come through as nullable on the v3
+// wire; both are coerced to "" so the wire shape stays flat strings.
+type StFeatureFlag struct {
+	Name               string `json:"name"`
+	Enabled            bool   `json:"enabled"`
+	CustomErrorMessage string `json:"customErrorMessage"`
+	CnsiGUID           string `json:"cnsiGuid"`
+	UpdatedAt          string `json:"updatedAt"`
+}
+
+type StFeatureFlagsResponse struct {
+	Resources    []StFeatureFlag `json:"resources"`
+	TotalResults int             `json:"totalResults"`
+}
