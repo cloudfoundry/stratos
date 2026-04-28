@@ -23,7 +23,7 @@ import { StatefulIconComponent, safeUnsubscribe, urlValidationExpression, enviro
 import { AppNameUniqueDirective } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
 import { Store } from '@ngrx/store';
 import { combineLatest as obsCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
-import { take, combineLatest, filter, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
+import { take, filter, map, publishReplay, refCount, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 import { APIResource } from '@stratosui/store';
 
 import { IUserProvidedServiceInstanceData } from '../../../../actions/user-provided-service.actions';
@@ -269,19 +269,19 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       guid,
       data as IUserProvidedServiceInstanceData,
     ).pipe(
-      combineLatest(this.store.select(selectCreateServiceInstance)),
-      switchMap(([request, state]) => {
-        const success = !request.error;
-        const redirect = !request.error;
-        if (!!state.bindAppGuid && success) {
-          const newGuid = request.response.result[0];
-          return this.createApplicationServiceBinding(newGuid, state);
+      withLatestFrom(this.store.select(selectCreateServiceInstance)),
+      switchMap(([result, state]) => {
+        if (!result.success) {
+          return observableOf({
+            success: false,
+            redirect: false,
+            message: 'Failed to create User Provided Service Instance. Reason: "' + (result.message ?? '') + '"',
+          });
         }
-        return observableOf({
-          success,
-          redirect,
-          message: success ? '' : 'Failed to create User Provided Service Instance. Reason: "' + request.message + '"'
-        });
+        if (state.bindAppGuid && result.guid) {
+          return this.createApplicationServiceBinding(result.guid, state);
+        }
+        return observableOf({ success: true, redirect: true });
       })
     );
   }
@@ -314,21 +314,18 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       this.serviceInstanceId,
       updateData
     ).pipe(
-      map(er => {
-        if (!er.error) {
-          // Update the application binding list
+      map(result => {
+        if (result.success) {
           const appId = this.appId || this.route.snapshot.queryParamMap.get('appId');
           if (appId) {
             this.store.dispatch(AppServiceBindingDataSource.createGetAllServiceBindings(appId, this.cfGuid));
           }
-          return {
-            success: true,
-            redirect: true };
+          return { success: true, redirect: true };
         }
         return {
           success: false,
           redirect: false,
-          message: `Failed to update service instance: ${er.message}`
+          message: `Failed to update service instance: ${result.message ?? ''}`,
         };
       })
     );

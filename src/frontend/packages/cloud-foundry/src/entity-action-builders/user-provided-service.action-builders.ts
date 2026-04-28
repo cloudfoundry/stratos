@@ -1,12 +1,9 @@
 import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
 import {
-  CreateUserProvidedServiceInstance,
   DeleteUserProvidedInstance,
   GetAllUserProvidedServices,
   GetUserProvidedService,
-  IUserProvidedServiceInstanceData,
-  UpdateUserProvidedServiceInstance,
 } from '../actions/user-provided-service.actions';
 import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
@@ -17,22 +14,11 @@ export interface UserProvidedServiceActionBuilder extends OrchestratedActionBuil
     endpointGuid: string,
     { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
   ) => GetUserProvidedService;
-  create: (
-    endpointGuid: string,
-    guid: string,
-    data: IUserProvidedServiceInstanceData,
-    proxyPaginationEntityConfig?: EntityCatalogEntityConfig) => CreateUserProvidedServiceInstance;
   remove: (
     guid: string,
     endpointGuid: string,
     proxyPaginationEntityConfig?: EntityCatalogEntityConfig
   ) => DeleteUserProvidedInstance;
-  update: (
-    guid: string,
-    endpointGuid: string,
-    existingUserProvidedServiceInstance?: Partial<IUserProvidedServiceInstanceData>,
-    proxyPaginationEntityConfig?: EntityCatalogEntityConfig
-  ) => UpdateUserProvidedServiceInstance;
   getMultiple: (
     paginationKey?: string,
     endpointGuid?: string,
@@ -58,23 +44,6 @@ export const userProvidedServiceActionBuilder: UserProvidedServiceActionBuilder 
     endpointGuid: string,
     proxyPaginationEntityConfig?: EntityCatalogEntityConfig
   ) => new DeleteUserProvidedInstance(endpointGuid, guid, proxyPaginationEntityConfig),
-  create: (
-    endpointGuid: string,
-    guid: string,
-    data: IUserProvidedServiceInstanceData,
-    proxyPaginationEntityConfig?: EntityCatalogEntityConfig) =>
-    new CreateUserProvidedServiceInstance(endpointGuid, guid, data, proxyPaginationEntityConfig),
-  update: (
-    guid: string,
-    endpointGuid: string,
-    existingUserProvidedServiceInstance?: Partial<IUserProvidedServiceInstanceData>,
-    proxyPaginationEntityConfig?: EntityCatalogEntityConfig
-  ) => new UpdateUserProvidedServiceInstance(
-    endpointGuid,
-    guid,
-    existingUserProvidedServiceInstance,
-    proxyPaginationEntityConfig
-  ),
   getMultiple: (
     paginationKey: string,
     endpointGuid: string,

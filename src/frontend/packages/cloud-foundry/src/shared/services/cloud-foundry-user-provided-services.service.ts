@@ -1,14 +1,13 @@
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable } from 'rxjs';
-import { take, filter, map, pairwise, tap } from 'rxjs/operators';
+import { combineLatest, Observable, of } from 'rxjs';
+import { take, filter, map, catchError, tap } from 'rxjs/operators';
 
 import {
   ClearPaginationOfType,
   EntityCatalogEntityConfig,
   PaginationMonitorFactory,
-  ActionState,
-  RequestInfoState,
   APIResource
 } from '@stratosui/store';
 import {
@@ -22,6 +21,17 @@ import { createEntityRelationPaginationKey } from '../../entity-relations/entity
 import { fetchTotalResults } from '../../features/cf/cf.helpers';
 import { QParam, QParamJoiners } from '../q-param';
 
+export interface UpsCreateResult {
+  success: boolean;
+  guid?: string;
+  message?: string;
+}
+
+export interface UpsUpdateResult {
+  success: boolean;
+  message?: string;
+}
+
 
 @Injectable({
   providedIn: 'root'
@@ -29,6 +39,7 @@ import { QParam, QParamJoiners } from '../q-param';
 export class CloudFoundryUserProvidedServicesService {
   private store = inject<Store<CFAppState>>(Store);
   private paginationMonitorFactory = inject(PaginationMonitorFactory);
+  private http = inject(HttpClient);
 
 
   public getUserProvidedServices(cfGuid: string, spaceGuid?: string, relations = getUserProvidedServiceInstanceRelations)
@@ -74,26 +85,19 @@ export class CloudFoundryUserProvidedServicesService {
 
   public createUserProvidedService(
     cfGuid: string,
-    guid: string,
+    _guid: string,
     data: IUserProvidedServiceInstanceData
-  ): Observable<RequestInfoState> {
-    return cfEntityCatalog.userProvidedService.api.create<RequestInfoState>(
-      cfGuid,
-      guid,
-      data,
+  ): Observable<UpsCreateResult> {
+    return this.http.post<{ guid: string }>(
+      `/pp/v1/cf/user_provided_service_instances/${cfGuid}`,
+      this.toV3RequestBody(data),
     ).pipe(
-      pairwise(),
-      filter(([oldV, newV]) => oldV.creating && !newV.creating),
-      map(([, newV]) => newV),
-      take(1),
-      tap(v => {
-        if (!v.error) {
-          // Problem - Lists with multiple actions aren't updated following the creation of an entity based on secondary action
-          // Here the service instance list (1st action SI, 2nd action UPSI) isn't updated so manually do so
-          const serviceEntityConfig: EntityCatalogEntityConfig = cfEntityCatalog.serviceInstance.actions.getMultiple('', '', {});
-          this.store.dispatch(new ClearPaginationOfType(serviceEntityConfig));
-        }
-      })
+      tap(() => this.clearServiceInstancePagination()),
+      map(res => ({ success: true, guid: res.guid } as UpsCreateResult)),
+      catchError((err: HttpErrorResponse) => of<UpsCreateResult>({
+        success: false,
+        message: this.extractErrorMessage(err),
+      })),
     );
   }
 
@@ -101,11 +105,58 @@ export class CloudFoundryUserProvidedServicesService {
     cfGuid: string,
     guid: string,
     data: Partial<IUserProvidedServiceInstanceData>,
-  ): Observable<ActionState> {
-    return cfEntityCatalog.userProvidedService.api.update<ActionState>(guid, cfGuid, data).pipe(
-      pairwise(),
-      filter(([oldV, newV]) => oldV.busy && !newV.busy),
-      map(([, newV]) => newV),
+  ): Observable<UpsUpdateResult> {
+    return this.http.patch<{ guid: string }>(
+      `/pp/v1/cf/user_provided_service_instances/${cfGuid}/${guid}`,
+      this.toV3RequestBody(data),
+    ).pipe(
+      map(() => ({ success: true } as UpsUpdateResult)),
+      catchError((err: HttpErrorResponse) => of<UpsUpdateResult>({
+        success: false,
+        message: this.extractErrorMessage(err),
+      })),
     );
+  }
+
+  private toV3RequestBody(data: Partial<IUserProvidedServiceInstanceData>): Record<string, unknown> {
+    const body: Record<string, unknown> = {};
+    if (data.name !== undefined) {
+      body.name = data.name;
+    }
+    if (data.spaceGuid !== undefined) {
+      body.spaceGuid = data.spaceGuid;
+    }
+    if (data.tags !== undefined) {
+      body.tags = data.tags;
+    }
+    if (data.credentials !== undefined) {
+      body.credentials = data.credentials;
+    }
+    if (data.syslog_drain_url !== undefined) {
+      body.syslogDrainUrl = data.syslog_drain_url;
+    }
+    if (data.route_service_url !== undefined) {
+      body.routeServiceUrl = data.route_service_url;
+    }
+    return body;
+  }
+
+  private clearServiceInstancePagination(): void {
+    // Service-instance list mixes managed + UPS rows; flush so the new
+    // row shows up on the next subscription. The legacy entity-catalog
+    // wiring is the source of truth for this dispatch — guard it so the
+    // method survives test environments that don't bootstrap the catalog.
+    const cfg = cfEntityCatalog.serviceInstance?.actions?.getMultiple('', '', {});
+    if (cfg) {
+      this.store.dispatch(new ClearPaginationOfType(cfg as EntityCatalogEntityConfig));
+    }
+  }
+
+  private extractErrorMessage(err: HttpErrorResponse): string {
+    const body = err.error;
+    if (body && typeof body === 'object' && typeof body.message === 'string') {
+      return body.message;
+    }
+    return err.message || `HTTP ${err.status}`;
   }
 }
