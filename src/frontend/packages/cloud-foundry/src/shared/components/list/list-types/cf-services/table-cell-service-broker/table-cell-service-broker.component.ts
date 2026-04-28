@@ -1,13 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
 
 import { TableCellCustom } from '@stratosui/core';
 import { APIResource } from '@stratosui/store';
-import { IServiceBroker, IService } from '../../../../../../cf-api-svc.types';
+import { IService } from '../../../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
+import { ServiceCatalogDataService } from '../../../../../../services/endpoint-data/service-catalog-data.service';
+import { StServiceBroker } from '../../../../../../services/endpoint-data/stratos-types';
 
 export enum TableCellServiceBrokerComponentMode {
   NAME = 'NAME',
@@ -33,22 +35,24 @@ export class TableCellServiceBrokerComponent extends
   TableCellCustom<APIResource<IService>,
   TableCellServiceBrokerComponentConfig> {
 
+  private serviceCatalog = inject(ServiceCatalogDataService);
+
   @Input()
   set row(row: APIResource<IService>) {
     super.row = row;
     if (row && !this.spaceLink$) {
-      this.broker$ = cfEntityCatalog.serviceBroker.store.getEntityService(
-        this.row.entity.service_broker_guid,
+      this.broker$ = this.serviceCatalog.serviceBroker(
         this.row.entity.cfGuid,
-        {}
-      ).waitForEntity$.pipe(
-        map(e => e.entity)
+        this.row.entity.service_broker_guid,
       );
+      // Space lookup remains on the legacy ngrx surface — out of scope
+      // for this V2-cutover step. Drops the broker.entity.* wrapper for
+      // the V3-flat StServiceBroker.spaceGuid / cnsiGuid shape.
       this.spaceLink$ = this.broker$.pipe(
-        filter(broker => !!broker.entity.space_guid),
+        filter((broker): broker is StServiceBroker => !!broker && !!broker.spaceGuid),
         switchMap(broker => cfEntityCatalog.space.store.getWithOrganization.getEntityService(
-          broker.entity.space_guid,
-          broker.entity.cfGuid
+          broker.spaceGuid!,
+          broker.cnsiGuid,
         ).waitForEntity$
         ),
         map(e => e.entity),
@@ -62,8 +66,7 @@ export class TableCellServiceBrokerComponent extends
             space.metadata.guid,
             'summary'
           ]
-        })
-        )
+        }))
       );
     }
   }
@@ -75,6 +78,6 @@ export class TableCellServiceBrokerComponent extends
     name: string,
     link: string[],
   }>;
-  public broker$: Observable<APIResource<IServiceBroker>>;
+  public broker$: Observable<StServiceBroker | null>;
 
 }
