@@ -444,3 +444,76 @@ export interface StAuditEventsResponse {
   resources: StAuditEvent[];
   totalResults: number;
 }
+
+// Mirror of the backend StServicePlan DTO (native_service_plans_reads.go).
+// Service plan = catalog entry advertised by an offering. `visibilityType`
+// is one of `public`/`admin`/`organization`/`space` and is managed via the
+// /pp/v1/cf/service_plans/:cnsi/:planGuid/visibility endpoints (separate
+// vertical). `spaceGuid` is set only for plans with `visibilityType=space`.
+export interface StServicePlan {
+  guid: string;
+  name: string;
+  description: string;
+  available: boolean;
+  free: boolean;
+  visibilityType: string;
+  serviceOfferingGuid: string;
+  spaceGuid?: string;
+  costs: StServicePlanCost[];
+  labels: { [k: string]: string };
+  annotations: { [k: string]: string };
+  cnsiGuid: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StServicePlanCost {
+  amount: number;
+  currency: string;
+  unit: string;
+}
+
+export interface StServicePlansResponse {
+  resources: StServicePlan[];
+  totalResults: number;
+}
+
+// Mirror of the backend StServicePlanVisibility DTO. CRUD-shape for one
+// plan's visibility scope. Type is one of `public`/`admin`/`organization`/
+// `space`; `organizations` is set for type=organization, `space` for
+// type=space, both empty otherwise.
+export interface StServicePlanVisibility {
+  type: string;
+  organizations?: StServicePlanVisibilityOrg[];
+  space?: StServicePlanVisibilitySpace;
+}
+
+export interface StServicePlanVisibilityOrg {
+  guid: string;
+  name?: string;
+}
+
+export interface StServicePlanVisibilitySpace {
+  guid: string;
+  name?: string;
+}
+
+// Mirror of the backend StServiceBroker DTO (native_service_brokers_reads.go).
+// `url` is the broker endpoint Cloud Controller talks to (NOT a Stratos URL).
+// `spaceGuid` is set only for space-scoped brokers; empty for global ones.
+export interface StServiceBroker {
+  guid: string;
+  name: string;
+  url: string;
+  spaceGuid?: string;
+  labels: { [k: string]: string };
+  annotations: { [k: string]: string };
+  cnsiGuid: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StServiceBrokersResponse {
+  resources: StServiceBroker[];
+  totalResults: number;
+}
