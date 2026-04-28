@@ -121,6 +121,69 @@ func TestGetNativeOrgs(t *testing.T) {
 	assert.Equal(t, "prod", resp.Resources[0].Labels["env"])
 }
 
+func TestGetNativeOrgs_PerPagePassthrough(t *testing.T) {
+	// ?per_page=N&page=M should issue a SINGLE bounded /v3/organizations
+	// call (no internal multi-page drain) and return a Stratos-shape paged
+	// response so the frontend's loadNames doesn't hit the gorouter ceiling
+	// on slow CFs with many orgs.
+	var orgsListCalls int
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			w.Write([]byte(`{"links":{}}`))
+		case "/v3/organizations":
+			orgsListCalls++
+			perPage := r.URL.Query().Get("per_page")
+			require.Equal(t, "2", perPage, "handler must pass through per_page to CAPI")
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{
+					"total_results": 5,
+					"total_pages":   3,
+					"first":         map[string]interface{}{"href": "https://api.test/v3/organizations?page=1&per_page=2"},
+					"next":          map[string]interface{}{"href": "https://api.test/v3/organizations?page=2&per_page=2"},
+					"last":          map[string]interface{}{"href": "https://api.test/v3/organizations?page=3&per_page=2"},
+				},
+				"resources": []map[string]interface{}{
+					{"guid": "org-1", "name": "First", "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z"},
+					{"guid": "org-2", "name": "Second", "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z"},
+				},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer ts.Close()
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/orgs/test-cnsi?per_page=2&page=1", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid")
+	ctx.SetParamValues("test-cnsi")
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID: "user-1",
+			cnsiRecord: api.CNSIRecord{
+				GUID:        "test-cnsi",
+				APIEndpoint: mustParseURL(ts.URL),
+			},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	require.NoError(t, plugin.getNativeOrgs(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, 1, orgsListCalls, "per_page path must issue a single CAPI call")
+
+	var resp StratosPagedResponse[StOrg]
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+	assert.Len(t, resp.Resources, 2)
+	assert.Equal(t, 5, resp.Pagination.TotalResults)
+	assert.Equal(t, "org-1", resp.Resources[0].GUID)
+}
+
 func TestGetNativeApps(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")

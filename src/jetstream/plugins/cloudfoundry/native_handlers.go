@@ -402,7 +402,8 @@ func toStSpace(r capi.Space) StSpace {
 
 // getNativeOrgs dispatches on ?return=
 //   - counts: per_page=1, totalResults only
-//   - (none): full list, paginated
+//   - ?per_page=N&page=M: single bounded CAPI page, Stratos paged envelope
+//   - (none): full list, internally drained (legacy)
 func (c *CloudFoundrySpecification) getNativeOrgs(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	userGUID, err := c.getUserGUID(ctx)
@@ -428,6 +429,37 @@ func (c *CloudFoundrySpecification) getNativeOrgs(ctx echo.Context) error {
 			orgs = append(orgs, toStOrg(r))
 		}
 		return ctx.JSON(http.StatusOK, StOrgsResponse{Resources: orgs, TotalResults: raw.Pagination.TotalResults})
+	}
+
+	// Bounded pagination: when ?per_page is supplied, treat as a
+	// single-page passthrough — one CAPI call, Stratos paged envelope.
+	// Lets the frontend's loadNames / dropdown init avoid the full-drain
+	// path that hits gorouter's 30s ceiling on slow CFs with many orgs.
+	if rawPP := ctx.QueryParam("per_page"); rawPP != "" {
+		page := 1
+		if rp := ctx.QueryParam("page"); rp != "" {
+			if v, perr := strconv.Atoi(rp); perr == nil && v > 0 {
+				page = v
+			}
+		}
+		perPage, perr := strconv.Atoi(rawPP)
+		if perr != nil || perPage <= 0 {
+			return echo.NewHTTPError(http.StatusBadRequest, "per_page must be a positive integer")
+		}
+		params := capi.NewQueryParams().WithPerPage(perPage)
+		params.Page = page
+		raw, lerr := cfClient.Organizations().List(ctx.Request().Context(), params)
+		if lerr != nil {
+			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+		}
+		orgs := make([]StOrg, 0, len(raw.Resources))
+		for _, r := range raw.Resources {
+			orgs = append(orgs, toStOrg(r))
+		}
+		return ctx.JSON(http.StatusOK, StratosPagedResponse[StOrg]{
+			Resources:  orgs,
+			Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
+		})
 	}
 
 	resources, totalResults, err := listAllOrgs(ctx.Request().Context(), cfClient)
@@ -564,25 +596,13 @@ func (c *CloudFoundrySpecification) getNativeSpaces(ctx echo.Context) (err error
 			return err
 		}
 
-		// Keep the cold-cache org-filter shape on every page request — the
-		// per-call cost (one orgs probe + the filtered spaces page) is
-		// bounded compared with an uncached unbounded /v3/spaces page.
-		oStart := time.Now()
-		orgs, _, ferr := listAllOrgs(ctx.Request().Context(), cfClient)
-		_ = oStart // listAllOrgs logs its own timing
-		if ferr != nil {
-			err = echo.NewHTTPError(http.StatusBadGateway, ferr.Error())
-			return err
-		}
-		orgGUIDs := make([]string, 0, len(orgs))
-		for _, o := range orgs {
-			orgGUIDs = append(orgGUIDs, o.GUID)
-		}
-
+		// Bounded passthrough: one CAPI page directly. The earlier
+		// "cold-cache org-filter" preface (drain orgs, narrow spaces by
+		// org_guids) was a pessimization on slow CFs — listAllOrgs alone
+		// can take 30+ s on adepttech, defeating the bounded path's whole
+		// purpose. CAPI itself filters by user visibility, so the
+		// org-filter wasn't load-bearing for security.
 		params := capi.NewQueryParams().WithPerPage(perPage)
-		if len(orgGUIDs) > 0 {
-			params = params.WithFilter("organization_guids", orgGUIDs...)
-		}
 		params.Page = page
 
 		pStart := time.Now()
@@ -592,7 +612,7 @@ func (c *CloudFoundrySpecification) getNativeSpaces(ctx echo.Context) (err error
 			pRows = len(raw.Resources)
 			pTotal = raw.Pagination.TotalResults
 		}
-		logCapiTiming("getNativeSpaces.page", page, perPage, len(orgGUIDs), pStart, lerr, pRows, pTotal)
+		logCapiTiming("getNativeSpaces.page", page, perPage, 0, pStart, lerr, pRows, pTotal)
 		if lerr != nil {
 			err = echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
 			return err

@@ -307,12 +307,24 @@ export class CfAppsSignalConfigService {
   }
 
   private async loadNames(cnsiGuids: readonly string[]): Promise<void> {
+    // Use the bounded ?per_page passthrough so each CF's name fetch is one
+    // CAPI page (not a full drain). Slow CFs would otherwise hit gorouter's
+    // 30 s ceiling on the unbounded /v3/orgs and /v3/spaces drains, surfacing
+    // as 504s when the user navigates away mid-fetch. 500 covers most CFs in
+    // a single page; if a CF has more rows the dropdown shows the first 500
+    // — accepted trade-off pending a guid-batch lookup pattern keyed on
+    // currently-visible app rows.
+    const namePerPage = 500;
     const fetchOrgs = (guid: string) =>
-      firstValueFrom(this.http.get<StOrgsResponse>(`/pp/v1/cf/orgs/${guid}`))
+      firstValueFrom(this.http.get<StOrgsResponse>(
+        `/pp/v1/cf/orgs/${guid}?per_page=${namePerPage}&page=1`,
+      ))
         .then(r => ({ guid, orgs: r.resources as StOrg[] }))
         .catch(() => ({ guid, orgs: [] as StOrg[] }));
     const fetchSpaces = (guid: string) =>
-      firstValueFrom(this.http.get<StSpacesResponse>(`/pp/v1/cf/spaces/${guid}`))
+      firstValueFrom(this.http.get<StSpacesResponse>(
+        `/pp/v1/cf/spaces/${guid}?per_page=${namePerPage}&page=1`,
+      ))
         .then(r => ({ guid, spaces: r.resources as StSpace[] }))
         .catch(() => ({ guid, spaces: [] as StSpace[] }));
 

@@ -162,7 +162,10 @@ describe('CfAppsSignalConfigService', () => {
     // exists in the CF — the resulting empty app list is the visual cue.
     const httpMock = {
       get: vi.fn((url: string) => {
-        if (url === '/pp/v1/cf/orgs/cnsi-1') {
+        // Match by path prefix so the `?per_page=…&page=1` bounded-paging
+        // suffix (added to avoid the unbounded-drain 504s) doesn't break
+        // these regression mocks.
+        if (url.startsWith('/pp/v1/cf/orgs/cnsi-1')) {
           return of({
             resources: [
               { guid: 'org-1', name: 'system', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '', cnsiGuid: 'cnsi-1' },
@@ -170,7 +173,7 @@ describe('CfAppsSignalConfigService', () => {
             ],
           });
         }
-        if (url === '/pp/v1/cf/spaces/cnsi-1') {
+        if (url.startsWith('/pp/v1/cf/spaces/cnsi-1')) {
           return of({
             resources: [
               { guid: 'space-e2e', name: 'e2e', orgGuid: 'org-e2e', createdAt: '', updatedAt: '', cnsiGuid: 'cnsi-1' },
