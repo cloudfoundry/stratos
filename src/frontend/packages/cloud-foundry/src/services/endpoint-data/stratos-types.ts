@@ -508,16 +508,22 @@ export interface StServicePlanVisibilitySpace {
 // Mirror of the backend StServiceBroker DTO (native_service_brokers_reads.go).
 // `url` is the broker endpoint Cloud Controller talks to (NOT a Stratos URL).
 // `spaceGuid` is set only for space-scoped brokers; empty for global ones.
+// `authUsername` is tristate-bearing: V3 read responses do not expose it
+// (write-only by CAPI design), V2 returns it. Until the broker handler grows
+// a V2 fallback, this field is always listed in `_meta.unavailable` — see
+// the synthesis in ServiceCatalogDataService.serviceBroker().
 export interface StServiceBroker {
   guid: string;
   name: string;
   url: string;
   spaceGuid?: string;
+  authUsername?: string;
   labels: { [k: string]: string };
   annotations: { [k: string]: string };
   cnsiGuid: string;
   createdAt: string;
   updatedAt: string;
+  _meta?: StratosMeta;
 }
 
 export interface StServiceBrokersResponse {

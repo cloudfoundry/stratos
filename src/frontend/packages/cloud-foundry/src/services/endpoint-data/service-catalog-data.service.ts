@@ -43,13 +43,37 @@ export class ServiceCatalogDataService {
   serviceBroker(cnsiGuid: string, brokerGuid: string): Observable<StServiceBroker | null> {
     return this.http.get<StServiceBroker>(
       `/pp/v1/cf/service_brokers/${cnsiGuid}/${brokerGuid}`,
-    ).pipe(this.catchAs404Null());
+    ).pipe(
+      // TODO(v2-v3-tristate): remove this synthesis once the Jetstream
+      // V3-native broker handler grows a V2 fallback or starts emitting
+      // `_meta.unavailable` itself. The DTO contract (StServiceBroker._meta)
+      // is the stable surface — only the source of truth moves.
+      map(resp => this.markBrokerUnavailable(resp)),
+      this.catchAs404Null(),
+    );
   }
 
   planVisibility(cnsiGuid: string, planGuid: string): Observable<StServicePlanVisibility> {
     return this.http.get<StServicePlanVisibility>(
       `/pp/v1/cf/service_plans/${cnsiGuid}/${planGuid}/visibility`,
     );
+  }
+
+  private markBrokerUnavailable(resp: StServiceBroker): StServiceBroker {
+    if (!resp) {
+      return resp;
+    }
+    const existing = resp._meta?.unavailable ?? [];
+    if (existing.includes('authUsername')) {
+      return resp;
+    }
+    return {
+      ...resp,
+      _meta: {
+        ...resp._meta,
+        unavailable: [...existing, 'authUsername'],
+      },
+    };
   }
 
   private catchAs404Null<T>() {

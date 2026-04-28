@@ -68,7 +68,7 @@ describe('ServiceCatalogDataService', () => {
     expect(plans[0].guid).toBe('plan-1');
   });
 
-  it('serviceBroker hits /cf/service_brokers/:cnsi/:brokerGuid', async () => {
+  it('serviceBroker hits /cf/service_brokers/:cnsi/:brokerGuid and synthesizes authUsername unavailable', async () => {
     const promise = new Promise<any>(resolve => service.serviceBroker('cnsi-1', 'broker-7').subscribe(resolve));
 
     const req = httpMock.expectOne('/pp/v1/cf/service_brokers/cnsi-1/broker-7');
@@ -77,6 +77,21 @@ describe('ServiceCatalogDataService', () => {
 
     const broker = await promise;
     expect(broker.guid).toBe('broker-7');
+    expect(broker._meta?.unavailable).toContain('authUsername');
+  });
+
+  it('serviceBroker preserves backend-emitted _meta.unavailable without duplicating', async () => {
+    const promise = new Promise<any>(resolve => service.serviceBroker('cnsi-1', 'broker-7').subscribe(resolve));
+
+    const req = httpMock.expectOne('/pp/v1/cf/service_brokers/cnsi-1/broker-7');
+    req.flush({
+      guid: 'broker-7', name: 'global', url: 'https://b.example', spaceGuid: '',
+      labels: {}, annotations: {}, cnsiGuid: 'cnsi-1', createdAt: '', updatedAt: '',
+      _meta: { unavailable: ['authUsername'] },
+    });
+
+    const broker = await promise;
+    expect(broker._meta?.unavailable).toEqual(['authUsername']);
   });
 
   it('serviceBroker returns null on 404', async () => {
