@@ -1,24 +1,19 @@
 import { CommonModule } from '@angular/common';
 import { ScrollDispatcher } from '@angular/cdk/scrolling';
-import { ChangeDetectionStrategy, AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren, signal, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
+import { ChangeDetectionStrategy, AfterViewInit, Component, computed, ElementRef, HostListener, Injector, OnDestroy, OnInit, QueryList, Signal, ViewChild, ViewChildren, effect, signal, inject } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
 import {
   IUserFavoritesGroups,
   EndpointModel,
   entityCatalog,
-  AuthState,
-  RouterNav,
-  AppState,
-  UserFavoriteManager,
-  selectDashboardState,
-  SetHomeCardLayoutAction,
-  SetDashboardStateValueAction,
-  stratosEntityCatalog } from '@stratosui/store';
-import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { take, debounceTime, defaultIfEmpty, filter, map, startWith, switchMap } from 'rxjs/operators';
+  UserFavoriteManager } from '@stratosui/store';
+import { combineLatest, Observable, Subscription } from 'rxjs';
+import { take, debounceTime, filter, map, startWith, switchMap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../core/endpoints.service';
+import { SessionService } from '../../../core/session.service';
+import { DashboardPreferencesService } from '../../../core/dashboard-preferences.service';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { NoContentMessageComponent } from '../../../shared/components/no-content-message/no-content-message.component';
 import { EndpointsMissingComponent } from '../../../shared/components/endpoints-missing/endpoints-missing.component';
@@ -58,32 +53,63 @@ const noFavoritesMsg = (endpointCount: number, favoriteCount: number) => ({
 })
 export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   endpointsService = inject(EndpointsService);
-  private store = inject<Store<AppState>>(Store);
+  private router = inject(Router);
+  private sessionService = inject(SessionService);
+  private prefs = inject(DashboardPreferencesService);
   userFavoriteManager = inject(UserFavoriteManager);
   private scrollDispatcher = inject(ScrollDispatcher);
   private registry = inject(EndpointDataRegistry);
+  private injector = inject(Injector);
 
   public allEndpointIds$: Observable<string[]>;
-  public haveRegistered$: Observable<boolean>;
+  public haveRegistered: Signal<boolean> = toSignal(this.endpointsService.haveRegistered$, { initialValue: false });
 
-  public endpoints$: Observable<any>;
+  private connectedEndpointsRaw: Signal<EndpointModel[]> = toSignal(this.endpointsService.connectedEndpoints$, { initialValue: [] as EndpointModel[] });
+  private disablePersistenceFeatures: Signal<boolean | null> = toSignal(this.endpointsService.disablePersistenceFeatures$, { initialValue: null });
+  private allFavorites = toSignal(this.userFavoriteManager.getAllFavorites());
 
-  public layouts$: Observable<HomePageCardLayout[]>;
+  private connectedEndpoints: Signal<EndpointModel[]> = computed(() =>
+    this.haveRegistered() ? this.connectedEndpointsRaw() : []
+  );
+
+  private sessionDefaultShowMode: Signal<boolean | null> = computed(() => {
+    const c = this.sessionService.config();
+    return c ? !c.homeViewShowFavoritesOnly : null;
+  });
+
+  private resolvedShowMode: Signal<boolean> = computed(() => {
+    const a = this._showMode();
+    const b = this.prefs.homeShowAllEndpoints();
+    const c = this.sessionDefaultShowMode();
+    return (a !== null) ? a : (b !== null) ? b : (c ?? false);
+  });
+
+  public endpoints: Signal<EndpointModel[]> = computed(() => {
+    const showMode = this.resolvedShowMode();
+    const endpoints = this.connectedEndpoints();
+    const fav = this.allFavorites();
+    const favGroups: IUserFavoritesGroups = fav ? fav[0] : ({} as IUserFavoritesGroups);
+    const ordered = this.orderEndpoints(endpoints, favGroups, showMode);
+    return ordered.filter(ep => {
+      const defn = entityCatalog.getEndpoint(ep.cnsi_type, ep.sub_type);
+      const connected = defn.definition.unConnectable || ep.connectionStatus === 'connected';
+      return connected;
+    });
+  });
+
+  public haveThingsToShow: Signal<boolean> = computed(() => this.endpoints().length > 0);
 
   private _layout = signal<HomePageCardLayout>(null);
   public layout = this._layout.asReadonly();
-  public layout$: Observable<HomePageCardLayout>;
 
   private _showMode = signal<boolean>(null);
   public showAllEndpoints = false;
-
-  public haveThingsToShow$: Observable<boolean>;
 
   public columns = 1;
 
   public layoutID = 0;
 
-  private layouts: HomePageCardLayout[] = [
+  public layouts: HomePageCardLayout[] = [
     new HomePageCardLayout(0, 0, 'Automatic'),
     new HomePageCardLayout(1, 1, 'Single Column'),
     new HomePageCardLayout(1, 2, 'Compact Single Column'),
@@ -113,118 +139,76 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     debounceTime(100) // Debounce the check signal itself
   );
 
+  private redirectChecked = false;
+  private layoutInitialized = false;
+
   constructor() {
-    const endpointsService = this.endpointsService;
-    const store = this.store;
-    const userFavoriteManager = this.userFavoriteManager;
-
-    // Ensure endpoints are loaded from the backend
-    // This is necessary because the home page relies on endpoint data being present in the store
-    // Without this, the CF home cards will timeout trying to fetch data
-    this.store.dispatch(stratosEntityCatalog.endpoint.actions.getAll(false));
-
-    // Redirect to /applications if not enabled
-    endpointsService.disablePersistenceFeatures$.pipe(
-      map(off => {
-        if (off) {
-          store.dispatch(new RouterNav({
-            path: ['applications'],
-            extras: {
-              replaceUrl: true
-            }
-          }));
-        }
-      }),
-      take(1),
-      defaultIfEmpty(undefined)
-    ).subscribe();
-
-    this.layouts$ = of(this.layouts);
-    this.layout$ = toObservable(this._layout);
-
     // Wait for endpoints to be loaded before creating the endpoint IDs list
-    // This ensures CF data fetches have the endpoint context they need
+    // (PageHeaderComponent currently consumes this as an Observable input)
     this.allEndpointIds$ = this.endpointsService.haveRegistered$.pipe(
       filter(haveRegistered => haveRegistered),
       take(1),
       switchMap(() => this.endpointsService.connectedEndpoints$),
       map(endpoints => Object.values(endpoints).map(endpoint => endpoint.guid))
     );
-    this.haveRegistered$ = this.endpointsService.haveRegistered$;
 
-    // ZONELESS FIX: Don't block the observable chain when no endpoints are registered
-    // The filter was preventing any emissions, which blocked combineLatest from ever firing
-    // Now we emit an empty array when no endpoints are registered, allowing the template to render
-    const connected$ = this.endpointsService.haveRegistered$.pipe(
-      switchMap((haveRegistered) =>
-        haveRegistered ? this.endpointsService.connectedEndpoints$ : of([])
-      )
-    );
-
-    const showMode$ = toObservable(this._showMode);
-
-    // Default value from backend
-    const sessionData$ = this.store.select(s => s.auth).pipe(
-      filter(auth => !!auth?.sessionData?.config),
-      map((auth: AuthState) => auth.sessionData.config.homeViewShowFavoritesOnly),
-      map(onlyFavorites => !onlyFavorites)
-    );
-    // Stored value in local storage
-    const showPersistedSetting$ = this.store.select(selectDashboardState).pipe(
-      map(dashboardState => dashboardState.homeShowAllEndpoints),
-      take(1)
-    );
-
-    // Show Value - current setting then user setting then default from backend
-    const combinedShowMode$ = combineLatest([showMode$, showPersistedSetting$, sessionData$]).pipe(
-      map(([a, b, c]) => (a !== null) ? a : (b !== null) ? b : c
-    ));
-
-    // Only show endpoints that have Home Card metadata
-    this.endpoints$ = combineLatest([combinedShowMode$, connected$, userFavoriteManager.getAllFavorites()]).pipe(
-      map(([showMode, endpoints, [favGroups, _favs]]) => {
-        if (this.showAllEndpoints !== showMode) {
-          this.showAllEndpoints = showMode;
-          // Persist the state
-          this.store.dispatch(new SetDashboardStateValueAction('homeShowAllEndpoints', this.showAllEndpoints));
-        }
-        const ordered = this.orderEndpoints(endpoints, favGroups, showMode);
-        const favoriteCount = showMode ? 0 : ordered.length;
-        this.noneAvailableMsg = showMode ? noConnectedMsg : noFavoritesMsg(endpoints.length, favoriteCount);
-        return ordered.filter(ep => {
-          const defn = entityCatalog.getEndpoint(ep.cnsi_type, ep.sub_type);
-          const connected = defn.definition.unConnectable || ep.connectionStatus === 'connected';
-          return connected;
-        });
-      })
-    );
-
-    this.haveThingsToShow$ = this.endpoints$.pipe(map(eps => eps.length > 0), startWith(true));
-
-    // Set an initial layout
-    this._layout.set(this.getLayout(1, 1));
-
-    this.store.select(selectDashboardState).pipe(
-      map(dashboardState => dashboardState.homeLayout || 0),
-      take(1),
-      defaultIfEmpty(0)
-    ).subscribe(id => {
-      const selected = this.layouts.find(hpcl => hpcl && hpcl.id === id) || this.layouts[0];
-      this.onChangeLayout(selected);
-    });
-  }
-
-  ngOnInit() {
-    // Wire EndpointDataRegistry concurrency from backend config
-    this.store.select(s => (s as any).auth).pipe(
-      filter(auth => !!auth?.sessionData?.config),
-      map(auth => auth.sessionData.config),
-      take(1),
-    ).subscribe(config => {
-      if (config.endpointCardConcurrency > 0) {
-        this.registry.configure(config.endpointCardConcurrency);
+    // Redirect to /applications when persistence features are disabled
+    effect(() => {
+      const off = this.disablePersistenceFeatures();
+      if (off === null || this.redirectChecked) {
+        return;
+      }
+      this.redirectChecked = true;
+      if (off) {
+        this.router.navigate(['applications'], { replaceUrl: true });
       }
     });
+
+    // Apply persisted layout once it has hydrated from localStorage
+    effect(() => {
+      const layoutId = this.prefs.homeLayout();
+      if (this.layoutInitialized) {
+        return;
+      }
+      this.layoutInitialized = true;
+      const selected = this.layouts.find(l => l && l.id === layoutId) || this.layouts[0];
+      this.onChangeLayout(selected);
+    });
+
+    // Persist resolved show-mode and refresh the noneAvailable message
+    // whenever it or the endpoint list changes
+    effect(() => {
+      const showMode = this.resolvedShowMode();
+      const endpoints = this.connectedEndpoints();
+      const ordered = this.endpoints();
+
+      if (this.showAllEndpoints !== showMode) {
+        this.showAllEndpoints = showMode;
+        this.prefs.setHomeShowAllEndpoints(this.showAllEndpoints);
+      }
+      const favoriteCount = showMode ? 0 : ordered.length;
+      this.noneAvailableMsg = showMode ? noConnectedMsg : noFavoritesMsg(endpoints.length, favoriteCount);
+    });
+
+    // Set an initial layout (the layout-init effect above will replace this once prefs hydrate)
+    this._layout.set(this.getLayout(1, 1));
+  }
+
+  private concurrencyConfigured = false;
+
+  ngOnInit() {
+    // Wire EndpointDataRegistry concurrency from backend session config (one-shot)
+    effect(() => {
+      const config = this.sessionService.config();
+      if (!config || this.concurrencyConfigured) {
+        return;
+      }
+      const concurrency = (config as { endpointCardConcurrency?: number }).endpointCardConcurrency ?? 0;
+      if (concurrency > 0) {
+        this.registry.configure(concurrency);
+      }
+      this.concurrencyConfigured = true;
+    }, { injector: this.injector });
 
     const scroll$ = this.scrollDispatcher.scrolled().pipe(
       map((e: any) => {
@@ -361,21 +345,17 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   public onChangeLayout(layout: HomePageCardLayout) {
     this.layoutID = layout.id;
 
-    // If the layout is automatic, then adjust based on number of things to show
-    const lay$ = layout.id === 0 ? this.automaticLayout() : of(layout);
-    lay$.pipe(take(1)).subscribe(lo => {
-      this._layout.set(lo);
+    // If the layout is automatic, derive from the current endpoint set
+    const lo = layout.id === 0 ? this.automaticLayout() : layout;
+    this._layout.set(lo);
+    this.columns = lo.x;
 
-      // Update the grid columns based on the layout
-      this.columns = lo.x;
+    // Persist the state
+    this.prefs.setHomeLayout(this.layoutID);
 
-      // Persist the state
-      this.store.dispatch(new SetHomeCardLayoutAction(this.layoutID));
-
-      // Ensure we check again if any cards are now visible
-      // Schedule the check so it happens afer the cards have been laid out
-      setTimeout(() => this.checkCardsInView(), 1);
-    });
+    // Ensure we check again if any cards are now visible
+    // Schedule the check so it happens after the cards have been laid out
+    setTimeout(() => this.checkCardsInView(), 1);
   }
 
   // Order the endpoint cards:
@@ -434,35 +414,29 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   // Automatic layout - select the best layout based on the available endpoints
-  private automaticLayout(): Observable<HomePageCardLayout> {
-    return this.endpointsService.connectedEndpoints$.pipe(
-      map(eps => eps.filter(ep => {
-        const defn = entityCatalog.getEndpoint(ep.cnsi_type, ep.sub_type);
-        return !!defn.definition.homeCard;
-      })),
-      map(eps => {
-        // Count how many endpoints need wide cards (columnSpan > 1)
-        const wideCount = eps.filter(ep => {
-          const defn = entityCatalog.getEndpoint(ep.cnsi_type, ep.sub_type);
-          return (defn.definition.homeCard?.columnSpan || 1) > 1;
-        }).length;
+  private automaticLayout(): HomePageCardLayout {
+    const eps = this.connectedEndpoints().filter(ep => {
+      const defn = entityCatalog.getEndpoint(ep.cnsi_type, ep.sub_type);
+      return !!defn.definition.homeCard;
+    });
 
-        // If most cards are wide, cap at 2 columns to avoid empty gaps
-        const mostlyWide = wideCount > eps.length / 2;
+    const wideCount = eps.filter(ep => {
+      const defn = entityCatalog.getEndpoint(ep.cnsi_type, ep.sub_type);
+      return (defn.definition.homeCard?.columnSpan || 1) > 1;
+    }).length;
+    const mostlyWide = wideCount > eps.length / 2;
 
-        switch (eps.length) {
-          case 1:
-            return this.getLayout(1, 1);
-          case 2:
-            return this.getLayout(1, 2);
-          case 3:
-          case 4:
-            return this.getLayout(2, 2);
-          default:
-            return this.getLayout(mostlyWide ? 2 : 3, 2);
-        }
-      })
-    );
+    switch (eps.length) {
+      case 1:
+        return this.getLayout(1, 1);
+      case 2:
+        return this.getLayout(1, 2);
+      case 3:
+      case 4:
+        return this.getLayout(2, 2);
+      default:
+        return this.getLayout(mostlyWide ? 2 : 3, 2);
+    }
   }
 
   private getLayout(x: number, y: number): HomePageCardLayout {
