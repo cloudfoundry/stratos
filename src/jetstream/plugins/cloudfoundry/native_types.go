@@ -233,3 +233,28 @@ type StUsersResponse struct {
 	Resources    []StUser `json:"resources"`
 	TotalResults int      `json:"totalResults"`
 }
+
+// StStack is the Stratos-shaped DTO for a CF stack. Stacks are the rootfs
+// image flavor a Diego cell uses to run apps (e.g. cflinuxfs4). Drives the
+// CF-level Stacks tab. Read-only at this tier; writes (create/update/delete)
+// stay legacy until a use case warrants them.
+//
+// CnsiGUID is stamped server-side so multi-CNSI rows render keyed by
+// (cnsi, stack) — same convention as StApp/StOrg/StRoute. Default flags
+// the stack used when an app deploys without an explicit `--stack` choice.
+type StStack struct {
+	GUID             string `json:"guid"`
+	Name             string `json:"name"`
+	Description      string `json:"description"`
+	BuildRootfsImage string `json:"buildRootfsImage,omitempty"`
+	RunRootfsImage   string `json:"runRootfsImage,omitempty"`
+	Default          bool   `json:"default"`
+	CnsiGUID         string `json:"cnsiGuid"`
+	CreatedAt        string `json:"createdAt"`
+	UpdatedAt        string `json:"updatedAt"`
+}
+
+type StStacksResponse struct {
+	Resources    []StStack `json:"resources"`
+	TotalResults int       `json:"totalResults"`
+}
