@@ -227,7 +227,7 @@ export {
   getCurrentUserStratosHasScope,
   getCurrentUserStratosRole,
 } from './selectors/current-user-role.selectors';
-export type { SessionData } from './types/auth.types';
+export type { SessionData, SessionDataConfig } from './types/auth.types';
 export { APIKeysEnabled, UserEndpointsEnabled } from './types/auth.types';
 export type { RouterRedirect } from './reducers/routing.reducer';
 export type { LocalAdminSetupData, UAASetupState } from './types/uaa-setup.types';
