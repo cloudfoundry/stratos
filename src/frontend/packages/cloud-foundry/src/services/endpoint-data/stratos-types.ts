@@ -254,3 +254,24 @@ export interface StUsersResponse {
   resources: StUser[];
   totalResults: number;
 }
+
+// StStack is the Stratos-shaped DTO for a CF stack — the rootfs image flavor
+// a Diego cell uses to run apps (e.g. cflinuxfs4). Drives the CF-level
+// Stacks tab. cnsiGuid is stamped server-side so multi-CNSI rendering keys
+// off (cnsi, stack) — same convention as StApp/StOrg/StRoute.
+export interface StStack {
+  guid: string;
+  name: string;
+  description: string;
+  buildRootfsImage?: string;
+  runRootfsImage?: string;
+  default: boolean;
+  cnsiGuid: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StStacksResponse {
+  resources: StStack[];
+  totalResults: number;
+}
