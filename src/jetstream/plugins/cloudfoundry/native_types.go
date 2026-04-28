@@ -289,3 +289,33 @@ type StBuildpacksResponse struct {
 	Resources    []StBuildpack `json:"resources"`
 	TotalResults int           `json:"totalResults"`
 }
+
+// StSecurityGroup is the Stratos-shaped DTO for a CF security group.
+// Security groups govern egress traffic from app containers; each is a
+// named bundle of rules (protocol/destination/ports) that can be flagged
+// globally enabled for the running and/or staging lifecycle, and can be
+// bound to specific spaces. Drives the CF-level Security Groups tab.
+// Read-only at this tier — create/update/delete and space bindings stay
+// legacy until a use case warrants them.
+//
+// CnsiGUID is stamped server-side so multi-CNSI rows render keyed by
+// (cnsi, security group). The list view doesn't render full rules; we
+// surface aggregate RuleCount + space bind counts so the row stays flat
+// and the detail screen (future) owns the rule table.
+type StSecurityGroup struct {
+	GUID                   string `json:"guid"`
+	Name                   string `json:"name"`
+	GloballyEnabledRunning bool   `json:"globallyEnabledRunning"`
+	GloballyEnabledStaging bool   `json:"globallyEnabledStaging"`
+	RuleCount              int    `json:"ruleCount"`
+	RunningSpaceCount      int    `json:"runningSpaceCount"`
+	StagingSpaceCount      int    `json:"stagingSpaceCount"`
+	CnsiGUID               string `json:"cnsiGuid"`
+	CreatedAt              string `json:"createdAt"`
+	UpdatedAt              string `json:"updatedAt"`
+}
+
+type StSecurityGroupsResponse struct {
+	Resources    []StSecurityGroup `json:"resources"`
+	TotalResults int               `json:"totalResults"`
+}
