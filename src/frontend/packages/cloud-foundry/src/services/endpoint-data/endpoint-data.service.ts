@@ -110,22 +110,35 @@ export class EndpointDataService {
     }
     this._isLoadingDetails.set(true);
 
+    // Use the bounded ?per_page passthrough so each list call is one CAPI
+    // page rather than a full-drain. On slow CFs the unbounded path could
+    // hit gorouter's 30 s ceiling; even where it doesn't, a single bounded
+    // page of 500 typically completes in well under 12 s. 500 covers most
+    // CFs in one page; if a CF has more rows the home card shows the first
+    // 500, accepted trade-off pending a guid-batch consolidation pattern.
+    const detailPerPage = 500;
     return merge(
-      this.http.get<{ resources: StOrg[]; totalResults: number }>(`/pp/v1/cf/orgs/${this.guid}`).pipe(
+      this.http.get<{ resources: StOrg[]; totalResults: number }>(
+        `/pp/v1/cf/orgs/${this.guid}?per_page=${detailPerPage}&page=1`,
+      ).pipe(
         tap(resp => {
           this._orgs.set(resp.resources.map(org => ({ ...org, cnsiGuid: this.guid })));
           this._orgCount.set(resp.totalResults);
         }),
         catchError(err => { this.addError('orgs-full', err); return EMPTY; }),
       ),
-      this.http.get<{ resources: StApp[]; totalResults: number }>(`/pp/v1/cf/apps/${this.guid}`).pipe(
+      this.http.get<{ resources: StApp[]; totalResults: number }>(
+        `/pp/v1/cf/apps/${this.guid}?per_page=${detailPerPage}&page=1`,
+      ).pipe(
         tap(resp => {
           this._apps.set(resp.resources.map(app => ({ ...app, cnsiGuid: this.guid })));
           this._appCount.set(resp.totalResults);
         }),
         catchError(err => { this.addError('apps-full', err); return EMPTY; }),
       ),
-      this.http.get<{ resources: StSpace[]; totalResults: number }>(`/pp/v1/cf/spaces/${this.guid}`).pipe(
+      this.http.get<{ resources: StSpace[]; totalResults: number }>(
+        `/pp/v1/cf/spaces/${this.guid}?per_page=${detailPerPage}&page=1`,
+      ).pipe(
         tap(resp => this._spaces.set(resp.resources.map(space => ({ ...space, cnsiGuid: this.guid })))),
         catchError(err => { this.addError('spaces-full', err); return EMPTY; }),
       ),

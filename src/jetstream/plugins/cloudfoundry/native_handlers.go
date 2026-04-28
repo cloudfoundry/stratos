@@ -522,6 +522,36 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 		return c.getNativeAppsSummary(ctx, cfClient)
 	}
 
+	// Bounded pagination passthrough: when ?per_page is supplied, treat as
+	// a single CAPI page rather than the full-drain branch below. Lets
+	// home-card and detail loaders avoid the gorouter ceiling on slow CFs.
+	if rawPP := ctx.QueryParam("per_page"); rawPP != "" {
+		page := 1
+		if rp := ctx.QueryParam("page"); rp != "" {
+			if v, perr := strconv.Atoi(rp); perr == nil && v > 0 {
+				page = v
+			}
+		}
+		perPage, perr := strconv.Atoi(rawPP)
+		if perr != nil || perPage <= 0 {
+			return echo.NewHTTPError(http.StatusBadRequest, "per_page must be a positive integer")
+		}
+		params := capi.NewQueryParams().WithPerPage(perPage)
+		params.Page = page
+		raw, lerr := cfClient.Apps().List(ctx.Request().Context(), params)
+		if lerr != nil {
+			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+		}
+		apps := make([]StApp, 0, len(raw.Resources))
+		for _, r := range raw.Resources {
+			apps = append(apps, toStApp(r))
+		}
+		return ctx.JSON(http.StatusOK, StratosPagedResponse[StApp]{
+			Resources:  apps,
+			Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
+		})
+	}
+
 	resources, totalResults, err := listAllApps(ctx.Request().Context(), cfClient)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadGateway, err.Error())

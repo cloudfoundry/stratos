@@ -242,6 +242,69 @@ func TestGetNativeApps(t *testing.T) {
 	assert.Equal(t, "space-1", resp.Resources[0].SpaceGUID)
 }
 
+func TestGetNativeApps_PerPagePassthrough(t *testing.T) {
+	// ?per_page=N&page=M without ?return= should issue a SINGLE bounded
+	// /v3/apps call (no internal multi-page drain) and return a
+	// Stratos-shape paged response — used by EndpointDataService.loadDetails
+	// for the home card on slow CFs.
+	var appsListCalls int
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			w.Write([]byte(`{"links":{}}`))
+		case "/v3/apps":
+			appsListCalls++
+			perPage := r.URL.Query().Get("per_page")
+			require.Equal(t, "3", perPage, "handler must pass through per_page to CAPI")
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{
+					"total_results": 9,
+					"total_pages":   3,
+					"first":         map[string]interface{}{"href": "https://api.test/v3/apps?page=1&per_page=3"},
+					"next":          map[string]interface{}{"href": "https://api.test/v3/apps?page=2&per_page=3"},
+					"last":          map[string]interface{}{"href": "https://api.test/v3/apps?page=3&per_page=3"},
+				},
+				"resources": []map[string]interface{}{
+					{"guid": "app-1", "name": "First", "state": "STARTED", "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z"},
+					{"guid": "app-2", "name": "Second", "state": "STOPPED", "created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z"},
+				},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer ts.Close()
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/test-cnsi?per_page=3&page=1", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid")
+	ctx.SetParamValues("test-cnsi")
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID: "user-1",
+			cnsiRecord: api.CNSIRecord{
+				GUID:        "test-cnsi",
+				APIEndpoint: mustParseURL(ts.URL),
+			},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	require.NoError(t, plugin.getNativeApps(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, 1, appsListCalls, "per_page path must issue a single CAPI call")
+
+	var resp StratosPagedResponse[StApp]
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+	assert.Len(t, resp.Resources, 2)
+	assert.Equal(t, 9, resp.Pagination.TotalResults)
+	assert.Equal(t, "app-1", resp.Resources[0].GUID)
+}
+
 func TestGetNativeRouteCount(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
