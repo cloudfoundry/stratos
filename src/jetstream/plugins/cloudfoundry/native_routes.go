@@ -38,4 +38,10 @@ func (c *CloudFoundrySpecification) addNativeRoutes(echoGroup *echo.Group) {
 	echoGroup.GET("/cf/organization_quotas/:cnsiGuid", c.getNativeOrgQuotas)
 	echoGroup.GET("/cf/space_quotas/:cnsiGuid", c.getNativeSpaceQuotas)
 	echoGroup.GET("/cf/audit_events/:cnsiGuid", c.getNativeAuditEvents)
+	echoGroup.GET("/cf/service_plans/:cnsiGuid", c.getNativeServicePlans)
+	echoGroup.GET("/cf/service_plans/:cnsiGuid/:planGuid", c.getNativeServicePlanDetail)
+	echoGroup.GET("/cf/service_plans/:cnsiGuid/:planGuid/visibility", c.getNativeServicePlanVisibility)
+	echoGroup.POST("/cf/service_plans/:cnsiGuid/:planGuid/visibility", c.applyNativeServicePlanVisibility)
+	echoGroup.PATCH("/cf/service_plans/:cnsiGuid/:planGuid/visibility", c.applyNativeServicePlanVisibility)
+	echoGroup.DELETE("/cf/service_plans/:cnsiGuid/:planGuid/visibility/:orgGuid", c.removeOrgFromNativeServicePlanVisibility)
 }

@@ -142,6 +142,86 @@ type StServiceOfferingsResponse struct {
 	TotalResults int                 `json:"totalResults"`
 }
 
+// StServicePlan is the Stratos-shaped DTO for a CF service plan — a
+// catalog entry advertised by a service offering, NOT an instantiated
+// service. Drives the marketplace plan list and admin views that need
+// to surface plan-level visibility / cost / availability.
+//
+// VisibilityType mirrors CF v3's plan visibility discriminator: one of
+// `public`, `admin`, `organization`, or `space` — managed via the
+// /v3/service_plans/{guid}/visibility endpoint, surfaced as a separate
+// vertical. Free is the broker-declared cost flag; Costs carries the
+// optional structured cost list. ServiceOfferingGUID is the parent
+// offering relation (always present); SpaceGUID is the space the plan
+// is scoped to (only set for plans with `visibility_type=space`).
+type StServicePlan struct {
+	GUID                string             `json:"guid"`
+	Name                string             `json:"name"`
+	Description         string             `json:"description"`
+	Available           bool               `json:"available"`
+	Free                bool               `json:"free"`
+	VisibilityType      string             `json:"visibilityType"`
+	ServiceOfferingGUID string             `json:"serviceOfferingGuid"`
+	SpaceGUID           string             `json:"spaceGuid,omitempty"`
+	Costs               []StServicePlanCost `json:"costs"`
+	Labels              map[string]string  `json:"labels"`
+	Annotations         map[string]string  `json:"annotations"`
+	CnsiGUID            string             `json:"cnsiGuid"`
+	CreatedAt           string             `json:"createdAt"`
+	UpdatedAt           string             `json:"updatedAt"`
+}
+
+// StServicePlanCost mirrors CAPI's plan cost row verbatim — amount per
+// currency per unit. Kept as a flat struct rather than nested under a
+// container so the wire shape matches the UI's expectations directly.
+type StServicePlanCost struct {
+	Amount   float64 `json:"amount"`
+	Currency string  `json:"currency"`
+	Unit     string  `json:"unit"`
+}
+
+// StServicePlansResponse is the legacy flat envelope kept for the
+// `?return=counts` fast path. New paginated responses use
+// StratosPagedResponse[StServicePlan] instead.
+type StServicePlansResponse struct {
+	Resources    []StServicePlan `json:"resources"`
+	TotalResults int             `json:"totalResults"`
+}
+
+// StServicePlanVisibility is the Stratos-shape DTO for a CF v3
+// service-plan visibility record. Mirrors CAPI's shape closely
+// because the visibility surface is fundamentally CRUD on this exact
+// structure — there's nothing to flatten or join.
+//
+// Type is one of `public`, `admin`, `organization`, `space`. When
+// type=organization the Organizations slice carries the allowed orgs
+// (each with guid + name). When type=space the Space pointer carries
+// the allowed space. Other types leave both empty.
+type StServicePlanVisibility struct {
+	Type          string                       `json:"type"`
+	Organizations []StServicePlanVisibilityOrg `json:"organizations,omitempty"`
+	Space         *StServicePlanVisibilitySpace `json:"space,omitempty"`
+}
+
+type StServicePlanVisibilityOrg struct {
+	GUID string `json:"guid"`
+	Name string `json:"name,omitempty"`
+}
+
+type StServicePlanVisibilitySpace struct {
+	GUID string `json:"guid"`
+	Name string `json:"name,omitempty"`
+}
+
+// StServicePlanVisibilityRequest is the inbound write shape used by both
+// POST (replace) and PATCH (apply/merge) endpoints. Mirrors CAPI's
+// request body — `type` plus an optional org-guid list. A space-typed
+// visibility uses the same request body but with type=space.
+type StServicePlanVisibilityRequest struct {
+	Type          string   `json:"type"`
+	Organizations []string `json:"organizations,omitempty"`
+}
+
 // StServiceInstance is the Stratos-shaped DTO for an instantiated CF service —
 // either a managed instance broker-provisioned from a /v3/service_plans
 // catalog entry or a user-provided instance representing an external service
