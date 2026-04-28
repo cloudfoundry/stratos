@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { HttpClient, HttpResponse } from '@angular/common/http';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 import { CfAppsSignalConfigService } from './cf-apps-signal-config.service';
 import { CloudFoundryService } from '../../../../data-services/cloud-foundry.service';
@@ -318,6 +318,32 @@ describe('CfAppsSignalConfigService', () => {
     const svc = makeSvc(httpMock);
     const routes = await svc.fetchAppRoutes('cnsi-1', 'app-1');
     expect(routes).toEqual([]);
+  });
+
+  it('refreshStatsForKeys dedupes in-flight requests per key', () => {
+    // Regression: burst signal updates during initial render fired
+    // app-stats 4× per (cnsi,app). On slow CFs this multiplied the
+    // load proportional to row count. The fix tracks in-flight keys
+    // and skips duplicates until the request completes.
+    const subject = new Subject<{ instances: Array<{ state?: string }> }>();
+    const httpMock = {
+      get: vi.fn(() => subject.asObservable()),
+    } as unknown as HttpClient;
+    const svc = makeSvc(httpMock);
+    const keys = ['cnsi-1:app-1'];
+
+    // Three rapid calls for the same key while the first is in flight.
+    (svc as any).refreshStatsForKeys(keys);
+    (svc as any).refreshStatsForKeys(keys);
+    (svc as any).refreshStatsForKeys(keys);
+
+    expect(httpMock.get).toHaveBeenCalledTimes(1);
+
+    // After the first completes, a fresh refresh CAN issue another call.
+    subject.next({ instances: [] });
+    subject.complete();
+    (svc as any).refreshStatsForKeys(keys);
+    expect(httpMock.get).toHaveBeenCalledTimes(2);
   });
 
   it('cnsiOptions picks up connected CF endpoints from CloudFoundryService', () => {

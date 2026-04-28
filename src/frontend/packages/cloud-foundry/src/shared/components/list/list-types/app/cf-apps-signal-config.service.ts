@@ -59,6 +59,10 @@ export class CfAppsSignalConfigService {
   readonly appStats: Signal<Map<string, { running: number; total: number }>> =
     computed(() => this._appStats());
   private statsTimer?: ReturnType<typeof setInterval>;
+  // Tracks `${cnsiGuid}:${appGuid}` keys with an in-flight stats request so
+  // burst signal updates during initial render don't issue 4× duplicate
+  // calls per app — the original symptom on multi-CNSI walls with slow CFs.
+  private readonly statsInFlight = new Set<string>();
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
 
@@ -383,10 +387,12 @@ export class CfAppsSignalConfigService {
   private refreshStatsForKeys(rowKeys: readonly string[]): void {
     if (!rowKeys.length) return;
     for (const key of rowKeys) {
+      if (this.statsInFlight.has(key)) continue;
       const sep = key.indexOf(':');
       if (sep <= 0) continue;
       const cnsiGuid = key.slice(0, sep);
       const appGuid = key.slice(sep + 1);
+      this.statsInFlight.add(key);
       this.http
         .get<{ instances?: Array<{ state?: string }> }>(
           `/pp/v1/cf/app-stats/${cnsiGuid}/${appGuid}`,
@@ -401,12 +407,14 @@ export class CfAppsSignalConfigService {
               next.set(key, { running, total });
               return next;
             });
+            this.statsInFlight.delete(key);
           },
           error: () => {
             // Leave any previously cached value in place — a transient
             // 502/504 shouldn't clear the number the user was just looking
             // at. If we've never seen this key, it stays absent and the
             // column falls back to the "—" placeholder.
+            this.statsInFlight.delete(key);
           },
         });
     }
