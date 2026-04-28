@@ -275,3 +275,30 @@ export interface StStacksResponse {
   resources: StStack[];
   totalResults: number;
 }
+
+// StBuildpack is the Stratos-shaped DTO for a CF buildpack. Buildpacks
+// govern how source bundles get staged before running on a Diego cell;
+// each is pinned to one rootfs (Stack) and ordered by Position. Drives
+// the CF-level Buildpacks tab. cnsiGuid is stamped server-side so
+// multi-CNSI rows render keyed by (cnsi, buildpack) — same convention as
+// StApp/StOrg/StStack. v3-only fields (state, lifecycle) flow through as
+// plain strings; null filename/stack are coerced to '' on the backend.
+export interface StBuildpack {
+  guid: string;
+  name: string;
+  state: string;
+  filename: string;
+  stack: string;
+  position: number;
+  lifecycle: string;
+  enabled: boolean;
+  locked: boolean;
+  cnsiGuid: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StBuildpacksResponse {
+  resources: StBuildpack[];
+  totalResults: number;
+}

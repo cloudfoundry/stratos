@@ -1,3 +1,5 @@
-<div class="buildpacks flex flex-1 flex-col min-h-0 overflow-hidden">
-  <app-list></app-list>
+<div class="buildpacks">
+  @if (listConfig(); as cfg) {
+    <app-signal-list [config]="cfg" />
+  }
 </div>
