@@ -413,3 +413,40 @@ type StSpaceQuotasResponse struct {
 	Resources    []StSpaceQuota `json:"resources"`
 	TotalResults int            `json:"totalResults"`
 }
+
+// StAuditEvent is the Stratos-shaped DTO for a CF audit event. Audit
+// events are CF's foundation-wide activity log: every successful API
+// call leaves a record with actor, target, type, optional space/org
+// context, and arbitrary `data`. Drives the CF-level Events tab as
+// well as the org / space / app event tabs (which apply per-page
+// filters via the signal-config service's basePredicate). Read-only
+// — there are no writes to surface.
+//
+// Two flat columns per nested struct (actor / target / space / org)
+// keeps the wire shape friendly to the SignalListComponent table.
+// Data is serialized as a JSON string — its shape varies wildly per
+// event type and the list view only needs it for "show details"
+// expansion; the future detail screen can deserialize as needed.
+type StAuditEvent struct {
+	GUID             string `json:"guid"`
+	Type             string `json:"type"`
+	ActorGUID        string `json:"actorGuid"`
+	ActorType        string `json:"actorType"`
+	ActorName        string `json:"actorName"`
+	TargetGUID       string `json:"targetGuid"`
+	TargetType       string `json:"targetType"`
+	TargetName       string `json:"targetName"`
+	SpaceGUID        string `json:"spaceGuid"`
+	SpaceName        string `json:"spaceName"`
+	OrganizationGUID string `json:"organizationGuid"`
+	OrganizationName string `json:"organizationName"`
+	Data             string `json:"data"`
+	CnsiGUID         string `json:"cnsiGuid"`
+	CreatedAt        string `json:"createdAt"`
+	UpdatedAt        string `json:"updatedAt"`
+}
+
+type StAuditEventsResponse struct {
+	Resources    []StAuditEvent `json:"resources"`
+	TotalResults int            `json:"totalResults"`
+}
