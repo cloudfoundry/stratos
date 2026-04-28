@@ -222,6 +222,33 @@ type StServicePlanVisibilityRequest struct {
 	Organizations []string `json:"organizations,omitempty"`
 }
 
+// StServiceBroker is the Stratos-shape DTO for a CF v3 service broker —
+// the broker process that registers offerings/plans into the
+// marketplace. URL is the broker endpoint Cloud Controller talks to
+// (NOT the Stratos-facing URL). SpaceGUID is set only for
+// space-scoped brokers (visible inside one space rather than to the
+// whole platform); empty for global brokers. Auth credentials are not
+// surfaced — those live behind the broker write surface.
+type StServiceBroker struct {
+	GUID        string            `json:"guid"`
+	Name        string            `json:"name"`
+	URL         string            `json:"url"`
+	SpaceGUID   string            `json:"spaceGuid,omitempty"`
+	Labels      map[string]string `json:"labels"`
+	Annotations map[string]string `json:"annotations"`
+	CnsiGUID    string            `json:"cnsiGuid"`
+	CreatedAt   string            `json:"createdAt"`
+	UpdatedAt   string            `json:"updatedAt"`
+}
+
+// StServiceBrokersResponse is the legacy flat envelope kept for the
+// `?return=counts` fast path. Paginated responses use
+// StratosPagedResponse[StServiceBroker] instead.
+type StServiceBrokersResponse struct {
+	Resources    []StServiceBroker `json:"resources"`
+	TotalResults int               `json:"totalResults"`
+}
+
 // StServiceInstance is the Stratos-shaped DTO for an instantiated CF service —
 // either a managed instance broker-provisioned from a /v3/service_plans
 // catalog entry or a user-provided instance representing an external service
