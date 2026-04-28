@@ -302,3 +302,29 @@ export interface StBuildpacksResponse {
   resources: StBuildpack[];
   totalResults: number;
 }
+
+// StSecurityGroup is the Stratos-shaped DTO for a CF security group.
+// Security groups govern egress traffic from app containers; each is a
+// named bundle of rules (protocol/destination/ports) flagged globally
+// enabled for running and/or staging lifecycles. Drives the CF-level
+// Security Groups tab. Rule arrays + bound space arrays are reduced to
+// counts on the list shape; a future detail screen will own the rule
+// table. cnsiGuid is stamped server-side so multi-CNSI rendering keys
+// off (cnsi, security group) — same convention as StApp/StOrg/StStack.
+export interface StSecurityGroup {
+  guid: string;
+  name: string;
+  globallyEnabledRunning: boolean;
+  globallyEnabledStaging: boolean;
+  ruleCount: number;
+  runningSpaceCount: number;
+  stagingSpaceCount: number;
+  cnsiGuid: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StSecurityGroupsResponse {
+  resources: StSecurityGroup[];
+  totalResults: number;
+}

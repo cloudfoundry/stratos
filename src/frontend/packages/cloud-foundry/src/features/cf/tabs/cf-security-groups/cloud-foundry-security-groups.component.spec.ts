@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
@@ -8,24 +7,17 @@ import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import {
-  
-  ConfirmationDialogService
-} from '@stratosui/core';
-import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
-import {
   appReducers,
   TEST_CATALOGUE_ENTITIES,
   generateStratosEntities,
   EntityCatalogTestModule,
-  EntityServiceFactory,
   EntityCatalogHelper,
   EntityCatalogHelpers
 } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
-import { generateCFEntities, generateTestCfEndpointServiceProvider, ActiveRouteCfOrgSpace } from '@test-framework/cf';
-import { CfUserService } from '../../../../shared/data-services/cf-user.service';
-import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
-import { CloudFoundrySecurityGroupsComponent } from "./cloud-foundry-security-groups.component";
+import { generateCFEntities, generateTestCfEndpointServiceProvider } from '@test-framework/cf';
+import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
+import { CloudFoundrySecurityGroupsComponent } from './cloud-foundry-security-groups.component';
 
 describe('CloudFoundrySecurityGroupsComponent', () => {
   let component: CloudFoundrySecurityGroupsComponent;
@@ -55,8 +47,6 @@ describe('CloudFoundrySecurityGroupsComponent', () => {
             ...generateCFEntities()
           ]
         },
-        EntityServiceFactory,
-        ...cfCurrentUserPermissionsService,
         ...generateTestCfEndpointServiceProvider(testSCFEndpointGuid),
         {
           provide: ActiveRouteCfOrgSpace,
@@ -66,14 +56,9 @@ describe('CloudFoundrySecurityGroupsComponent', () => {
             spaceGuid: testSCFEndpointGuid
           }
         },
-        DatePipe,
-        CfUserService,
-        CfOrgSpaceDataService,
-        ConfirmationDialogService,
       ]
     }).compileComponents();
 
-    // Initialize EntityCatalogHelper
     const entityCatalogHelper = TestBed.inject(EntityCatalogHelper);
     EntityCatalogHelpers.SetEntityCatalogHelper(entityCatalogHelper);
 
