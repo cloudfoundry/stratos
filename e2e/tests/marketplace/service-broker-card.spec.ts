@@ -1,3 +1,4 @@
+import { Page } from '@playwright/test';
 import { test, expect } from '../../fixtures/test-base';
 import { MarketplaceSummaryPage } from '../../pages/marketplace/marketplace-summary.page';
 
@@ -9,20 +10,29 @@ import { MarketplaceSummaryPage } from '../../pages/marketplace/marketplace-summ
 //     Service synthesizes _meta.unavailable: ['authUsername'].
 //   - hovering the unavailable cell surfaces the "Not exposed by V3 API"
 //     tooltip (display contract for the V2/V3 tristate-on-read pattern).
+//
+// Skip path is *loud*: when the test profile's CF can't return service
+// offerings (status, body) the skip annotation surfaces those — silent
+// skips hide regressions.
+
+async function fetchOfferingsOrSkip(page: Page, cfGuid: string): Promise<Array<{ guid: string }>> {
+  const url = `/pp/v1/proxy/v3/cf/${cfGuid}/service_offerings`;
+  const resp = await page.request.get(url);
+  const status = resp.status();
+  const body = await resp.json().catch(() => ({}));
+  const services = body?.resources;
+  if (!services || services.length === 0) {
+    test.skip(true, `No service offerings available — GET ${url} → ${status}, body=${JSON.stringify(body).slice(0, 200)}`);
+  }
+  return services;
+}
 
 test.describe('Service Broker Card (V3 native)', () => {
 
   test('uses the V3-native broker endpoint and renders Not Available for authUsername', async ({ connectedEndpointsAdminPage }) => {
     const { page, cfGuid } = connectedEndpointsAdminPage;
 
-    const servicesResponse = await connectedEndpointsAdminPage.request.get(
-      `/pp/v1/proxy/v3/cf/${cfGuid}/service_offerings`
-    );
-    const services = servicesResponse?.resources;
-
-    if (!services || services.length === 0) {
-      test.skip(true, 'No service offerings available — skipping broker card tristate test');
-    }
+    const services = await fetchOfferingsOrSkip(page, cfGuid);
 
     const v3BrokerCalls: { url: string; status: number }[] = [];
     page.on('response', resp => {
@@ -40,14 +50,11 @@ test.describe('Service Broker Card (V3 native)', () => {
     const card = summaryPage.getServiceBrokerCard();
     await expect(card).toBeVisible({ timeout: 10000 });
 
-    // Backend handler gets exercised — at least one call to the V3 native
-    // single-resource endpoint, all returning 200 (no 4xx/5xx fallout).
     expect(v3BrokerCalls.length).toBeGreaterThan(0);
     for (const call of v3BrokerCalls) {
       expect(call.status, `unexpected status for ${call.url}`).toBe(200);
     }
 
-    // Tristate primitive renders the unavailable branch for authUsername.
     const tristate = summaryPage.getAuthUsernameTristate();
     await expect(tristate).toBeVisible();
     await expect(tristate).toHaveClass(/tristate-value--unavailable/);
@@ -57,14 +64,7 @@ test.describe('Service Broker Card (V3 native)', () => {
   test('hovering the unavailable authUsername surfaces the V3 tooltip', async ({ connectedEndpointsAdminPage }) => {
     const { page, cfGuid } = connectedEndpointsAdminPage;
 
-    const servicesResponse = await connectedEndpointsAdminPage.request.get(
-      `/pp/v1/proxy/v3/cf/${cfGuid}/service_offerings`
-    );
-    const services = servicesResponse?.resources;
-
-    if (!services || services.length === 0) {
-      test.skip(true, 'No service offerings available — skipping broker card tooltip test');
-    }
+    const services = await fetchOfferingsOrSkip(page, cfGuid);
 
     const serviceGuid = services[0].guid;
     const summaryPage = new MarketplaceSummaryPage(page, cfGuid, serviceGuid);
