@@ -48,4 +48,6 @@ func (c *CloudFoundrySpecification) addNativeRoutes(echoGroup *echo.Group) {
 	echoGroup.GET("/cf/service_brokers/:cnsiGuid/:brokerGuid", c.getNativeServiceBrokerDetail)
 	echoGroup.GET("/cf/domains/:cnsiGuid", c.getNativeDomains)
 	echoGroup.GET("/cf/domains/:cnsiGuid/:domainGuid", c.getNativeDomainDetail)
+	echoGroup.POST("/cf/user_provided_service_instances/:cnsiGuid", c.createUserProvidedServiceInstance)
+	echoGroup.PATCH("/cf/user_provided_service_instances/:cnsiGuid/:siGuid", c.updateUserProvidedServiceInstance)
 }

@@ -307,12 +307,30 @@ type StServiceInstance struct {
 	ServiceOfferingName string   `json:"serviceOfferingName,omitempty"`
 	Tags                []string `json:"tags"`
 	DashboardURL        string   `json:"dashboardUrl,omitempty"`
+	SyslogDrainURL      string   `json:"syslogDrainUrl,omitempty"`
+	RouteServiceURL     string   `json:"routeServiceUrl,omitempty"`
 	LastOpType          string   `json:"lastOpType,omitempty"`
 	LastOpState         string   `json:"lastOpState,omitempty"`
 	LastOpDescription   string   `json:"lastOpDescription,omitempty"`
 	LastOpUpdatedAt     string   `json:"lastOpUpdatedAt,omitempty"`
 	CreatedAt           string   `json:"createdAt"`
 	UpdatedAt           string   `json:"updatedAt,omitempty"`
+}
+
+// StUserProvidedServiceRequest is the inbound write shape for both
+// POST (create) and PATCH (update) on user-provided service instances.
+// `name` is required for create and optional for update; `spaceGuid`
+// is required for create and ignored for update (v3 forbids changing
+// the parent space). `credentials`, `syslogDrainUrl`, `routeServiceUrl`,
+// and `tags` are UPS-specific config — credentials never appear on a
+// read response, only on writes.
+type StUserProvidedServiceRequest struct {
+	Name            string                 `json:"name,omitempty"`
+	SpaceGUID       string                 `json:"spaceGuid,omitempty"`
+	Credentials     map[string]interface{} `json:"credentials,omitempty"`
+	SyslogDrainURL  string                 `json:"syslogDrainUrl,omitempty"`
+	RouteServiceURL string                 `json:"routeServiceUrl,omitempty"`
+	Tags            []string               `json:"tags,omitempty"`
 }
 
 type StServiceInstancesResponse struct {

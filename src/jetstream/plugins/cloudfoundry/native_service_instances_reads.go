@@ -207,6 +207,15 @@ func toStServiceInstance(
 		dashboardURL = *si.DashboardURL
 	}
 
+	syslogDrainURL := ""
+	if si.SyslogDrainURL != nil {
+		syslogDrainURL = *si.SyslogDrainURL
+	}
+	routeServiceURL := ""
+	if si.RouteServiceURL != nil {
+		routeServiceURL = *si.RouteServiceURL
+	}
+
 	lastOpType := ""
 	lastOpState := ""
 	lastOpDescription := ""
@@ -236,6 +245,8 @@ func toStServiceInstance(
 		ServiceOfferingName: offeringName,
 		Tags:                tags,
 		DashboardURL:        dashboardURL,
+		SyslogDrainURL:      syslogDrainURL,
+		RouteServiceURL:     routeServiceURL,
 		LastOpType:          lastOpType,
 		LastOpState:         lastOpState,
 		LastOpDescription:   lastOpDescription,
