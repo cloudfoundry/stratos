@@ -129,6 +129,63 @@ var fullPagePerRequest = envIntWithDefault("STRATOS_CF_PER_PAGE", 500)
 // requests.
 var maxParallelPages = envIntWithDefault("STRATOS_CF_MAX_PARALLEL_PAGES", 5)
 
+// logCapiTiming emits a structured log line for one CAPI list call. Used at
+// every cfClient.X.List() call site in the drain helpers so a future 504
+// can be attributed to a specific page or filter shape (vs guessed at).
+//
+// Format is greppable key=value: `[trace capi] op=<name> page=<n>
+// per_page=<n> filter_orgs=<n> duration=<ms>ms err=<...> rows=<n> total=<n>`.
+//
+// Pass filterOrgs=-1 when the filter doesn't apply to the call. Pass
+// rows/total=-1 when the call errored and no response is available.
+func logCapiTiming(op string, page, perPage, filterOrgs int, start time.Time, err error, rows, total int) {
+	dur := time.Since(start)
+	fields := log.Fields{
+		"op":       op,
+		"page":     page,
+		"per_page": perPage,
+		"duration": dur.String(),
+	}
+	if filterOrgs >= 0 {
+		fields["filter_orgs"] = filterOrgs
+	}
+	if rows >= 0 {
+		fields["rows"] = rows
+	}
+	if total >= 0 {
+		fields["total"] = total
+	}
+	if err != nil {
+		fields["err"] = err.Error()
+		log.WithFields(fields).Warn("[trace capi]")
+		return
+	}
+	log.WithFields(fields).Info("[trace capi]")
+}
+
+// logHandlerTiming emits a structured log line for one handler invocation.
+// Use it via `defer logHandlerTiming("getNativeX", time.Now(), &err, &rows)`
+// at the top of a handler — the deferred call captures total wall-time and
+// completion status. If the handler is cut off mid-flight (e.g., gorouter
+// timeout) this line will not appear, which itself is the diagnostic signal.
+func logHandlerTiming(op, cnsiGUID string, start time.Time, errPtr *error, rowsPtr *int) {
+	dur := time.Since(start)
+	fields := log.Fields{
+		"op":             op,
+		"cnsi":           cnsiGUID,
+		"total_duration": dur.String(),
+	}
+	if rowsPtr != nil {
+		fields["rows"] = *rowsPtr
+	}
+	if errPtr != nil && *errPtr != nil {
+		fields["err"] = (*errPtr).Error()
+		log.WithFields(fields).Warn("[trace handler]")
+		return
+	}
+	log.WithFields(fields).Info("[trace handler]")
+}
+
 // envIntWithDefault reads a positive integer from the named env var, falling
 // back to the supplied default on unset, non-numeric, or non-positive values.
 // Logs the resolved value at info level so operators can confirm what's in
@@ -154,7 +211,14 @@ func envIntWithDefault(name string, def int) int {
 func listAllOrgs(ctx context.Context, cfClient capi.Client) ([]capi.Organization, int, error) {
 	firstParams := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
 	firstParams.Page = 1
+	start := time.Now()
 	first, err := cfClient.Organizations().List(ctx, firstParams)
+	rows, total := -1, -1
+	if first != nil {
+		rows = len(first.Resources)
+		total = first.Pagination.TotalResults
+	}
+	logCapiTiming("listAllOrgs", 1, fullPagePerRequest, -1, start, err, rows, total)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -174,7 +238,14 @@ func listAllOrgs(ctx context.Context, cfClient capi.Client) ([]capi.Organization
 		g.Go(func() error {
 			params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
 			params.Page = p
+			pStart := time.Now()
 			raw, err := cfClient.Organizations().List(gctx, params)
+			pRows, pTotal := -1, -1
+			if raw != nil {
+				pRows = len(raw.Resources)
+				pTotal = raw.Pagination.TotalResults
+			}
+			logCapiTiming("listAllOrgs", p, fullPagePerRequest, -1, pStart, err, pRows, pTotal)
 			if err != nil {
 				return err
 			}
@@ -242,7 +313,14 @@ func listAllSpaces(ctx context.Context, cfClient capi.Client, orgGUIDFilter []st
 		firstParams = firstParams.WithFilter("organization_guids", orgGUIDFilter...)
 	}
 	firstParams.Page = 1
+	start := time.Now()
 	first, err := cfClient.Spaces().List(ctx, firstParams)
+	rows, total := -1, -1
+	if first != nil {
+		rows = len(first.Resources)
+		total = first.Pagination.TotalResults
+	}
+	logCapiTiming("listAllSpaces", 1, fullPagePerRequest, len(orgGUIDFilter), start, err, rows, total)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -265,7 +343,14 @@ func listAllSpaces(ctx context.Context, cfClient capi.Client, orgGUIDFilter []st
 				params = params.WithFilter("organization_guids", orgGUIDFilter...)
 			}
 			params.Page = p
+			pStart := time.Now()
 			raw, err := cfClient.Spaces().List(gctx, params)
+			pRows, pTotal := -1, -1
+			if raw != nil {
+				pRows = len(raw.Resources)
+				pTotal = raw.Pagination.TotalResults
+			}
+			logCapiTiming("listAllSpaces", p, fullPagePerRequest, len(orgGUIDFilter), pStart, err, pRows, pTotal)
 			if err != nil {
 				return err
 			}
@@ -419,15 +504,21 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 // getNativeSpaces dispatches on ?return=
 //   - counts: per_page=1, totalResults only (fast path — no list drain)
 //   - (none): full list, paginated
-func (c *CloudFoundrySpecification) getNativeSpaces(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeSpaces(ctx echo.Context) (err error) {
 	cnsiGUID := ctx.Param("cnsiGuid")
-	userGUID, err := c.getUserGUID(ctx)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	rows := 0
+	start := time.Now()
+	defer logHandlerTiming("getNativeSpaces", cnsiGUID, start, &err, &rows)
+
+	userGUID, uerr := c.getUserGUID(ctx)
+	if uerr != nil {
+		err = echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+		return err
 	}
 
-	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
-	if err != nil {
+	cfClient, cerr := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if cerr != nil {
+		err = cerr
 		return err
 	}
 
@@ -435,15 +526,88 @@ func (c *CloudFoundrySpecification) getNativeSpaces(ctx echo.Context) error {
 
 	if ctx.QueryParam("return") == "counts" {
 		params := capi.NewQueryParams().WithPerPage(1)
-		raw, err := cfClient.Spaces().List(ctx.Request().Context(), params)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadGateway, err.Error())
+		cStart := time.Now()
+		raw, lerr := cfClient.Spaces().List(ctx.Request().Context(), params)
+		cRows, cTotal := -1, -1
+		if raw != nil {
+			cRows = len(raw.Resources)
+			cTotal = raw.Pagination.TotalResults
+		}
+		logCapiTiming("getNativeSpaces.counts", 1, 1, -1, cStart, lerr, cRows, cTotal)
+		if lerr != nil {
+			err = echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+			return err
 		}
 		spaces := make([]StSpace, 0, len(raw.Resources))
 		for _, r := range raw.Resources {
 			spaces = append(spaces, toStSpace(r))
 		}
+		rows = len(spaces)
 		return ctx.JSON(http.StatusOK, StSpacesResponse{Resources: spaces, TotalResults: raw.Pagination.TotalResults})
+	}
+
+	// Paginated path: when the caller supplies ?per_page, treat the request
+	// as a single-page passthrough — one CAPI call, return a Stratos-shape
+	// paged envelope with next/prev hrefs so the frontend's CnsiEntitySource
+	// can follow the chain. Legacy callers without ?per_page fall through to
+	// the full-drain branch below to preserve the existing wire shape.
+	if rawPP := ctx.QueryParam("per_page"); rawPP != "" {
+		page := 1
+		if rp := ctx.QueryParam("page"); rp != "" {
+			if v, perr := strconv.Atoi(rp); perr == nil && v > 0 {
+				page = v
+			}
+		}
+		perPage, perr := strconv.Atoi(rawPP)
+		if perr != nil || perPage <= 0 {
+			err = echo.NewHTTPError(http.StatusBadRequest, "per_page must be a positive integer")
+			return err
+		}
+
+		// Keep the cold-cache org-filter shape on every page request — the
+		// per-call cost (one orgs probe + the filtered spaces page) is
+		// bounded compared with an uncached unbounded /v3/spaces page.
+		oStart := time.Now()
+		orgs, _, ferr := listAllOrgs(ctx.Request().Context(), cfClient)
+		_ = oStart // listAllOrgs logs its own timing
+		if ferr != nil {
+			err = echo.NewHTTPError(http.StatusBadGateway, ferr.Error())
+			return err
+		}
+		orgGUIDs := make([]string, 0, len(orgs))
+		for _, o := range orgs {
+			orgGUIDs = append(orgGUIDs, o.GUID)
+		}
+
+		params := capi.NewQueryParams().WithPerPage(perPage)
+		if len(orgGUIDs) > 0 {
+			params = params.WithFilter("organization_guids", orgGUIDs...)
+		}
+		params.Page = page
+
+		pStart := time.Now()
+		raw, lerr := cfClient.Spaces().List(ctx.Request().Context(), params)
+		pRows, pTotal := -1, -1
+		if raw != nil {
+			pRows = len(raw.Resources)
+			pTotal = raw.Pagination.TotalResults
+		}
+		logCapiTiming("getNativeSpaces.page", page, perPage, len(orgGUIDs), pStart, lerr, pRows, pTotal)
+		if lerr != nil {
+			err = echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+			return err
+		}
+
+		spaces := make([]StSpace, 0, len(raw.Resources))
+		for _, r := range raw.Resources {
+			spaces = append(spaces, toStSpace(r))
+		}
+		rows = len(spaces)
+
+		return ctx.JSON(http.StatusOK, StratosPagedResponse[StSpace]{
+			Resources:  spaces,
+			Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
+		})
 	}
 
 	// Fetch the org guid set first, then use it as a filter on the spaces
@@ -451,24 +615,27 @@ func (c *CloudFoundrySpecification) getNativeSpaces(ctx echo.Context) error {
 	// ~5s consistently across cold and warm CAPI cache states, while the
 	// unfiltered variant spikes to ~27s on cold cache. The filter makes the
 	// worst-case predictable without hurting warm-case performance.
-	orgs, _, err := listAllOrgs(ctx.Request().Context(), cfClient)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
+	orgs, _, oerr := listAllOrgs(ctx.Request().Context(), cfClient)
+	if oerr != nil {
+		err = echo.NewHTTPError(http.StatusBadGateway, oerr.Error())
+		return err
 	}
 	orgGUIDs := make([]string, 0, len(orgs))
 	for _, o := range orgs {
 		orgGUIDs = append(orgGUIDs, o.GUID)
 	}
 
-	resources, totalResults, err := listAllSpaces(ctx.Request().Context(), cfClient, orgGUIDs)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
+	resources, totalResults, serr := listAllSpaces(ctx.Request().Context(), cfClient, orgGUIDs)
+	if serr != nil {
+		err = echo.NewHTTPError(http.StatusBadGateway, serr.Error())
+		return err
 	}
 	spaces := make([]StSpace, 0, len(resources))
 	for _, r := range resources {
 		spaces = append(spaces, toStSpace(r))
 	}
 
+	rows = len(spaces)
 	return ctx.JSON(http.StatusOK, StSpacesResponse{Resources: spaces, TotalResults: totalResults})
 }
 
