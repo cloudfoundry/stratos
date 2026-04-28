@@ -116,27 +116,34 @@ export class EndpointDataService {
     // page of 500 typically completes in well under 12 s. 500 covers most
     // CFs in one page; if a CF has more rows the home card shows the first
     // 500, accepted trade-off pending a guid-batch consolidation pattern.
+    //
+    // The bounded backend wraps results in StratosPagedResponse with totals
+    // under `pagination.totalResults`. Tap reads either shape so a future
+    // tightening of the backend wire contract doesn't silently zero out the
+    // count signals.
     const detailPerPage = 500;
+    type Paged<T> = { resources: T[]; totalResults?: number; pagination?: { totalResults?: number } };
+    const totalOf = <T>(r: Paged<T>): number => r.pagination?.totalResults ?? r.totalResults ?? r.resources.length;
     return merge(
-      this.http.get<{ resources: StOrg[]; totalResults: number }>(
+      this.http.get<Paged<StOrg>>(
         `/pp/v1/cf/orgs/${this.guid}?per_page=${detailPerPage}&page=1`,
       ).pipe(
         tap(resp => {
           this._orgs.set(resp.resources.map(org => ({ ...org, cnsiGuid: this.guid })));
-          this._orgCount.set(resp.totalResults);
+          this._orgCount.set(totalOf(resp));
         }),
         catchError(err => { this.addError('orgs-full', err); return EMPTY; }),
       ),
-      this.http.get<{ resources: StApp[]; totalResults: number }>(
+      this.http.get<Paged<StApp>>(
         `/pp/v1/cf/apps/${this.guid}?per_page=${detailPerPage}&page=1`,
       ).pipe(
         tap(resp => {
           this._apps.set(resp.resources.map(app => ({ ...app, cnsiGuid: this.guid })));
-          this._appCount.set(resp.totalResults);
+          this._appCount.set(totalOf(resp));
         }),
         catchError(err => { this.addError('apps-full', err); return EMPTY; }),
       ),
-      this.http.get<{ resources: StSpace[]; totalResults: number }>(
+      this.http.get<Paged<StSpace>>(
         `/pp/v1/cf/spaces/${this.guid}?per_page=${detailPerPage}&page=1`,
       ).pipe(
         tap(resp => this._spaces.set(resp.resources.map(space => ({ ...space, cnsiGuid: this.guid })))),

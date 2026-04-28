@@ -161,6 +161,24 @@ describe('EndpointDataService', () => {
     );
   });
 
+  it('loadDetails() reads totalResults from the StratosPagedResponse pagination envelope', async () => {
+    // Regression: the bounded ?per_page passthrough wraps responses in
+    // StratosPagedResponse — totals live under pagination.totalResults rather
+    // than at the top level. dev.38 briefly broke the home card by reading
+    // resp.totalResults (undefined) and zeroing the count signal after the
+    // counts fast-path had already populated it. The tap reads either shape.
+    const mockOrgs = [{ guid: 'org-1', name: 'Org One', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '' }];
+    const mockApps = [{ guid: 'app-1', name: 'App One', state: 'STARTED', orgGuid: '', spaceGuid: '', instances: 1, createdAt: '', updatedAt: '' }];
+    const mockSpaces = [{ guid: 'sp-1', name: 'Space One', orgGuid: 'org-1', createdAt: '', updatedAt: '' }];
+    service.loadDetails().subscribe();
+    httpMock.expectOne(ORGS_FULL_URL).flush({ resources: mockOrgs, pagination: { totalResults: 7 } });
+    httpMock.expectOne(APPS_FULL_URL).flush({ resources: mockApps, pagination: { totalResults: 4 } });
+    httpMock.expectOne(SPACES_FULL_URL).flush({ resources: mockSpaces, pagination: { totalResults: 12 } });
+    await Promise.resolve();
+    expect(service.orgCount()).toBe(7);
+    expect(service.appCount()).toBe(4);
+  });
+
   it('emits service-call-count + cache-miss on first load, cache-hit on warm second load', async () => {
     // First load — cold, should be cache-miss
     service.load().subscribe();
