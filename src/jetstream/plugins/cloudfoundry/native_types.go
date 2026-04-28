@@ -344,3 +344,72 @@ type StFeatureFlagsResponse struct {
 	Resources    []StFeatureFlag `json:"resources"`
 	TotalResults int             `json:"totalResults"`
 }
+
+// StOrgQuota is the Stratos-shaped DTO for a CF organization quota.
+// Org quotas cap the apps / services / routes / domains an organization
+// can hold across all its spaces. Drives the CF-level Org Quotas tab.
+// Read-only at this tier — create/update/delete and apply-to-org stay
+// legacy until a use case warrants them.
+//
+// All limit fields use -1 to signal "unlimited" — the v3 wire shape
+// nulls a missing limit, which we coerce to -1 server-side so the
+// frontend can render "Unlimited" without null-guarding every cell.
+// OrganizationCount is a server-side aggregate of how many orgs this
+// quota is currently applied to; the full org list is a future detail-
+// screen concern.
+type StOrgQuota struct {
+	GUID                    string `json:"guid"`
+	Name                    string `json:"name"`
+	TotalMemoryInMB         int    `json:"totalMemoryInMB"`
+	TotalInstanceMemoryInMB int    `json:"totalInstanceMemoryInMB"`
+	TotalInstances          int    `json:"totalInstances"`
+	TotalAppTasks           int    `json:"totalAppTasks"`
+	PaidServicesAllowed     bool   `json:"paidServicesAllowed"`
+	TotalServiceInstances   int    `json:"totalServiceInstances"`
+	TotalServiceKeys        int    `json:"totalServiceKeys"`
+	TotalRoutes             int    `json:"totalRoutes"`
+	TotalReservedPorts      int    `json:"totalReservedPorts"`
+	TotalDomains            int    `json:"totalDomains"`
+	OrganizationCount       int    `json:"organizationCount"`
+	CnsiGUID                string `json:"cnsiGuid"`
+	CreatedAt               string `json:"createdAt"`
+	UpdatedAt               string `json:"updatedAt"`
+}
+
+type StOrgQuotasResponse struct {
+	Resources    []StOrgQuota `json:"resources"`
+	TotalResults int          `json:"totalResults"`
+}
+
+// StSpaceQuota is the Stratos-shaped DTO for a CF space quota. Space
+// quotas cap apps / services / routes within a single org, optionally
+// applied to specific spaces. Drives the CF-level Space Quotas tab.
+// Read-only at this tier — create/update/delete and apply-to-spaces
+// stay legacy until a use case warrants them.
+//
+// Mirrors StOrgQuota minus the Domains gate (space quotas don't gate
+// domains) plus an OrganizationGUID identifying the parent org.
+// Same -1 = "unlimited" convention as StOrgQuota.
+type StSpaceQuota struct {
+	GUID                    string `json:"guid"`
+	Name                    string `json:"name"`
+	TotalMemoryInMB         int    `json:"totalMemoryInMB"`
+	TotalInstanceMemoryInMB int    `json:"totalInstanceMemoryInMB"`
+	TotalInstances          int    `json:"totalInstances"`
+	TotalAppTasks           int    `json:"totalAppTasks"`
+	PaidServicesAllowed     bool   `json:"paidServicesAllowed"`
+	TotalServiceInstances   int    `json:"totalServiceInstances"`
+	TotalServiceKeys        int    `json:"totalServiceKeys"`
+	TotalRoutes             int    `json:"totalRoutes"`
+	TotalReservedPorts      int    `json:"totalReservedPorts"`
+	OrganizationGUID        string `json:"organizationGuid"`
+	SpaceCount              int    `json:"spaceCount"`
+	CnsiGUID                string `json:"cnsiGuid"`
+	CreatedAt               string `json:"createdAt"`
+	UpdatedAt               string `json:"updatedAt"`
+}
+
+type StSpaceQuotasResponse struct {
+	Resources    []StSpaceQuota `json:"resources"`
+	TotalResults int            `json:"totalResults"`
+}

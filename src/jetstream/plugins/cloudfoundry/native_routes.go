@@ -35,4 +35,6 @@ func (c *CloudFoundrySpecification) addNativeRoutes(echoGroup *echo.Group) {
 	echoGroup.GET("/cf/buildpacks/:cnsiGuid", c.getNativeBuildpacks)
 	echoGroup.GET("/cf/security_groups/:cnsiGuid", c.getNativeSecurityGroups)
 	echoGroup.GET("/cf/feature_flags/:cnsiGuid", c.getNativeFeatureFlags)
+	echoGroup.GET("/cf/organization_quotas/:cnsiGuid", c.getNativeOrgQuotas)
+	echoGroup.GET("/cf/space_quotas/:cnsiGuid", c.getNativeSpaceQuotas)
 }
