@@ -249,6 +249,37 @@ type StServiceBrokersResponse struct {
 	TotalResults int               `json:"totalResults"`
 }
 
+// StDomain is the Stratos-shape DTO for a CF v3 domain — the DNS
+// suffix routes attach to. OwningOrgGUID is set for private domains
+// (visible/usable only inside one org); empty for shared domains
+// (visible to the whole platform). SharedOrgGUIDs lists orgs a shared
+// domain is explicitly shared with — empty when the domain is shared
+// platform-wide. Internal flags container-to-container-only domains
+// (no public ingress). RouterGroupGUID associates TCP domains with a
+// router group; empty for HTTP domains.
+type StDomain struct {
+	GUID               string            `json:"guid"`
+	Name               string            `json:"name"`
+	Internal           bool              `json:"internal"`
+	RouterGroupGUID    string            `json:"routerGroupGuid,omitempty"`
+	SupportedProtocols []string          `json:"supportedProtocols"`
+	OwningOrgGUID      string            `json:"owningOrgGuid,omitempty"`
+	SharedOrgGUIDs     []string          `json:"sharedOrgGuids"`
+	Labels             map[string]string `json:"labels"`
+	Annotations        map[string]string `json:"annotations"`
+	CnsiGUID           string            `json:"cnsiGuid"`
+	CreatedAt          string            `json:"createdAt"`
+	UpdatedAt          string            `json:"updatedAt"`
+}
+
+// StDomainsResponse is the legacy flat envelope kept for the
+// `?return=counts` fast path. Paginated responses use
+// StratosPagedResponse[StDomain] instead.
+type StDomainsResponse struct {
+	Resources    []StDomain `json:"resources"`
+	TotalResults int        `json:"totalResults"`
+}
+
 // StServiceInstance is the Stratos-shaped DTO for an instantiated CF service —
 // either a managed instance broker-provisioned from a /v3/service_plans
 // catalog entry or a user-provided instance representing an external service
