@@ -1,50 +1,77 @@
-import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideMockStore } from '@ngrx/store/testing';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { ListConfig } from '@stratosui/core';
-import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import {
+  appReducers,
+  TEST_CATALOGUE_ENTITIES,
+  generateStratosEntities,
+  EntityCatalogTestModule,
+  EntityCatalogHelper,
+  EntityCatalogHelpers
+} from '@stratosui/store';
+import { STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
+import { generateCFEntities, generateTestCfEndpointServiceProvider } from '@test-framework/cf';
 import { ActiveRouteCfOrgSpace } from '../../../features/cf/cf-page.types';
-import { CloudFoundryEndpointService } from '../../../features/cf/services/cloud-foundry-endpoint.service';
-import { CfUserService } from '../../data-services/cf-user.service';
-import { CfAllEventsConfigService } from '../list/list-types/cf-events/types/cf-all-events-config.service';
 import { CloudFoundryEventsListComponent } from './cloud-foundry-events-list.component';
 
 describe('CloudFoundryEventsListComponent', () => {
   let component: CloudFoundryEventsListComponent;
   let fixture: ComponentFixture<CloudFoundryEventsListComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         CloudFoundryEventsListComponent,
       ],
       providers: [
-        provideMockStore(),
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideNoopAnimations(),
         ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          StoreModule.forRoot(appReducers, {
+            runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
+          }),
+          EntityCatalogTestModule
+        ),
         {
-          provide: ListConfig,
-          useClass: CfAllEventsConfigService,
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities()
+          ]
         },
+        ...generateTestCfEndpointServiceProvider(testSCFEndpointGuid),
         {
           provide: ActiveRouteCfOrgSpace,
           useValue: {
-            cfGuid: 'cfGuid',
-            orgGuid: 'orgGuid',
-            spaceGuid: 'spaceGuid'
+            cfGuid: testSCFEndpointGuid,
+            orgGuid: testSCFEndpointGuid,
+            spaceGuid: testSCFEndpointGuid
           }
         },
-        CloudFoundryEndpointService,
-        CfUserService,
-        provideZonelessChangeDetection(),
-      ],
-    });
+      ]
+    }).compileComponents();
+
+    const entityCatalogHelper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(entityCatalogHelper);
+
+    populateStoreWithTestEndpoint();
   });
 
-  // TODO: Fix EntityCatalogHelper initialization to enable component creation test
-  // The component requires EntityCatalogHelper to be initialized, which needs proper entity catalog setup
-  it('should be defined', () => {
-    expect(CloudFoundryEventsListComponent).toBeDefined();
+  beforeEach(() => {
+    fixture = TestBed.createComponent(CloudFoundryEventsListComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
   });
 });

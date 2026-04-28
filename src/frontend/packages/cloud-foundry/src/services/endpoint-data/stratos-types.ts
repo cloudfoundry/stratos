@@ -409,3 +409,38 @@ export interface StSpaceQuotasResponse {
   resources: StSpaceQuota[];
   totalResults: number;
 }
+
+// StAuditEvent is the Stratos-shaped DTO for a CF audit event. CF v3
+// emits an event for every successful API mutation with actor, target,
+// type, optional space/org context, and an arbitrary `data` payload.
+// Drives the CF-level Events tab plus the org / space / app event tabs
+// (which apply per-page filters via the signal-config service's
+// basePredicate). cnsiGuid is stamped server-side for multi-CNSI keying.
+//
+// `data` is delivered as a JSON-encoded string — the v3 shape varies
+// wildly per event type. The list view only shows whether data exists
+// (and renders it expanded on demand); a future detail screen can
+// JSON.parse() it.
+export interface StAuditEvent {
+  guid: string;
+  type: string;
+  actorGuid: string;
+  actorType: string;
+  actorName: string;
+  targetGuid: string;
+  targetType: string;
+  targetName: string;
+  spaceGuid: string;
+  spaceName: string;
+  organizationGuid: string;
+  organizationName: string;
+  data: string;
+  cnsiGuid: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StAuditEventsResponse {
+  resources: StAuditEvent[];
+  totalResults: number;
+}

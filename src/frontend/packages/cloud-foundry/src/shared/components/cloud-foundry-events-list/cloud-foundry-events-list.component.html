@@ -1,24 +1,5 @@
-<ng-template #customFilters>
-  <form [formGroup]="filtersFormGroup" class="flex flex-row gap-2 items-start">
-    <app-form-field [floatLabel]="'never'">
-      <!-- <app-label>Event Type</app-label> -->
-      <app-select multiple name="type" formControlName="type" placeholder="Type">
-        @for (pType of typeValues; track pType) {
-          <app-option [value]="pType">{{pType}}</app-option>
-        }
-      </app-select>
-    </app-form-field>
-    @if (showActee) {
-      <app-form-field [floatLabel]="'never'">
-        <input type="text" appInput name="actee" formControlName="actee" placeholder="Actee's GUID">
-        @if (hasActeeFilter) {
-          <button class="btn btn-icon" matSuffix aria-label="Clear" (click)="clearActeeFilter()">
-            <span class="material-icons">close</span>
-          </button>
-        }
-      </app-form-field>
-    }
-  </form>
-</ng-template>
-
-<app-list [customFilters]="customFilters"></app-list>
+<div class="events-list">
+  @if (listConfig(); as cfg) {
+    <app-signal-list [config]="cfg" />
+  }
+</div>

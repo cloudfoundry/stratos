@@ -6,7 +6,14 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Store, StoreModule } from '@ngrx/store';
 
-import { appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule } from '@stratosui/store';
+import {
+  appReducers,
+  TEST_CATALOGUE_ENTITIES,
+  generateStratosEntities,
+  EntityCatalogTestModule,
+  EntityCatalogHelper,
+  EntityCatalogHelpers,
+} from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { ApplicationService, generateCFEntities } from '@stratosui/cloud-foundry';
 import { ApplicationServiceMock, generateActiveRouteCfOrgSpaceMock, ApplicationStateService, ApplicationEnvVarsHelper } from '@test-framework/cf';
@@ -25,21 +32,17 @@ describe('EventsTabComponent', () => {
           appReducers,
           { runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false } }
         ),
-        {
-          ngModule: EntityCatalogTestModule,
-          providers: [
-            {
-              provide: TEST_CATALOGUE_ENTITIES,
-              useValue: [
-                ...generateStratosEntities(),
-                ...generateCFEntities()
-              ]
-            }
-          ]
-        },
+        EntityCatalogTestModule,
       ],
       providers: [
         ...STORE_TEST_PROVIDERS,
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities()
+          ]
+        },
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         generateActiveRouteCfOrgSpaceMock(),
         ApplicationStateService,
@@ -51,10 +54,11 @@ describe('EventsTabComponent', () => {
       ]
     }).compileComponents();
 
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+
     fixture = TestBed.createComponent(EventsTabComponent);
     component = fixture.componentInstance;
-    // Don't call detectChanges() as the component may subscribe to observables
-    // that require more complex test data setup
   });
 
   it('should be created', () => {
