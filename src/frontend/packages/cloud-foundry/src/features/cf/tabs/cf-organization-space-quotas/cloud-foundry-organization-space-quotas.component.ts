@@ -1,49 +1,151 @@
-import { CommonModule, DatePipe } from '@angular/common';
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy, WritableSignal, inject, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 
+import { SignalListComponent, SignalListConfig } from '@stratosui/core';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ListComponent } from '../../../../../../core/src/shared/components/list/list.component';
-import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
 import { PageSubNavComponent } from '../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
-import {
-  CfSpaceQuotasListConfigService,
-} from '../../../../shared/components/list/list-types/cf-space-quotas/cf-space-quotas-list-config.service';
+
+import { CfSpaceQuotasSignalConfigService } from '../../../../shared/components/list/list-types/cf-space-quotas/cf-space-quotas-signal-config.service';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
+import type { StSpaceQuota } from '../../../../services/endpoint-data/stratos-types';
 
+// Signal-native CF Space Quotas tab (rendered inside the org page —
+// /cloud-foundry/:cnsi/organizations/:org/space-quota-definitions).
+// Read-only list of space-level quota definitions. Replaces the legacy
+// ListConfig + CfSpaceQuotasListConfigService path with a
+// CfSpaceQuotasSignalConfigService. The Create button still routes to
+// the legacy add-space-quota wizard; that flow is a future write-side
+// concern.
+//
+// The backend handler returns space quotas across the foundation; we
+// rely on the UI-level filter (the user is on a single org page) to
+// constrain — future enhancement could add a server-side
+// `?organization_guids=<guid>` query param if needed.
 @Component({
   selector: 'app-cloud-foundry-organization-space-quotas',
   templateUrl: './cloud-foundry-organization-space-quotas.component.html',
-  styleUrls: ['./cloud-foundry-organization-space-quotas.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     RouterModule,
     PageSubNavComponent,
-    ListComponent
+    SignalListComponent,
   ],
-  providers: [
-    DatePipe,
-    {
-      provide: ListConfig,
-      useClass: CfSpaceQuotasListConfigService
-    }
-  ]
 })
 export class CloudFoundryOrganizationSpaceQuotasComponent {
   cfEndpointService = inject(CloudFoundryEndpointService);
   activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+  private quotasConfig = inject(CfSpaceQuotasSignalConfigService);
 
   public canAddQuota$: Observable<boolean>;
+  public listConfig: WritableSignal<SignalListConfig<StSpaceQuota> | undefined> = signal(undefined);
 
   constructor() {
     const currentUserPermissionsService = inject(CurrentUserPermissionsService);
 
     const { cfGuid, orgGuid } = this.activeRouteCfOrgSpace;
-    this.canAddQuota$ = currentUserPermissionsService.can(CfCurrentUserPermissions.SPACE_QUOTA_CREATE, cfGuid, orgGuid);
+    this.canAddQuota$ = currentUserPermissionsService.can(
+      CfCurrentUserPermissions.SPACE_QUOTA_CREATE,
+      cfGuid,
+      orgGuid,
+    );
+
+    // Set basePredicate before initialize so the auto-filter effect picks
+    // it up on first run.
+    this.quotasConfig.basePredicate.set((q: StSpaceQuota) => q.organizationGuid === orgGuid);
+    this.quotasConfig.initialize(cfGuid);
+    void this.quotasConfig.loadAll();
+
+    this.listConfig.set({
+      pagedItems: this.quotasConfig.view.pagedItems,
+      totalFilteredResults: this.quotasConfig.view.totalFilteredResults,
+      totalPages: this.quotasConfig.view.totalPages,
+      pageIndex: this.quotasConfig.pageIndex,
+      pageSize: this.quotasConfig.pageSize,
+      isAnyLoading: signal(false),
+      errorsByCnsi: signal(new Map()),
+      columns: [
+        {
+          header: 'Name', key: 'name', sortField: 'name',
+          kind: 'text',
+          render: (q: StSpaceQuota) => q.name,
+          widthHint: '14rem',
+        },
+        {
+          header: 'Memory', key: 'totalMemoryInMB', sortField: 'totalMemoryInMB',
+          kind: 'text',
+          render: (q: StSpaceQuota) => CloudFoundryOrganizationSpaceQuotasComponent.formatLimit(q.totalMemoryInMB, 'MB'),
+          widthHint: '8rem',
+        },
+        {
+          header: 'Instances', key: 'totalInstances', sortField: 'totalInstances',
+          kind: 'text',
+          render: (q: StSpaceQuota) => CloudFoundryOrganizationSpaceQuotasComponent.formatLimit(q.totalInstances),
+          widthHint: '8rem',
+        },
+        {
+          header: 'Service Instances', key: 'totalServiceInstances', sortField: 'totalServiceInstances',
+          kind: 'text',
+          render: (q: StSpaceQuota) => CloudFoundryOrganizationSpaceQuotasComponent.formatLimit(q.totalServiceInstances),
+          widthHint: '10rem',
+        },
+        {
+          header: 'Routes', key: 'totalRoutes', sortField: 'totalRoutes',
+          kind: 'text',
+          render: (q: StSpaceQuota) => CloudFoundryOrganizationSpaceQuotasComponent.formatLimit(q.totalRoutes),
+          widthHint: '8rem',
+        },
+        {
+          header: 'Paid Services', key: 'paidServicesAllowed', sortField: 'paidServicesAllowed',
+          kind: 'text',
+          render: (q: StSpaceQuota) => (q.paidServicesAllowed ? 'Yes' : 'No'),
+          widthHint: '6rem',
+        },
+        {
+          header: 'Spaces', key: 'spaceCount', sortField: 'spaceCount',
+          kind: 'text',
+          render: (q: StSpaceQuota) => String(q.spaceCount),
+          widthHint: '6rem',
+        },
+        {
+          header: 'Created', key: 'createdAt', sortField: 'createdAt',
+          render: (q: StSpaceQuota) => CloudFoundryOrganizationSpaceQuotasComponent.formatDate(q.createdAt),
+          widthHint: '12rem',
+        },
+      ],
+      getRowKey: (q: StSpaceQuota) => `${q.cnsiGuid}:${q.guid}`,
+      emptyMessage: 'There are no space quotas in this organization',
+      emptyFilterMessage: 'No space quotas match the current filters',
+      loadingMessage: 'Loading space quotas…',
+      pageSizeOptions: {
+        table: [10, 25, 50, 100],
+        card: [6, 12, 24, 48, 96],
+      },
+      nameFilter: this.quotasConfig.nameFilter,
+      onRefresh: () => this.quotasConfig.refresh(),
+      onClear: () => this.quotasConfig.clearFilters(),
+      viewMode: this.quotasConfig.viewMode,
+      sort: this.quotasConfig.sort,
+    });
+  }
+
+  static formatLimit(value: number, unit?: string): string {
+    if (value === -1) return 'Unlimited';
+    return unit ? `${value.toLocaleString()} ${unit}` : value.toLocaleString();
+  }
+
+  static formatDate(iso: string | null | undefined): string {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso;
+    return d.toLocaleString(undefined, {
+      year: 'numeric', month: 'short', day: 'numeric',
+      hour: 'numeric', minute: '2-digit',
+    });
   }
 }

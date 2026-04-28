@@ -350,3 +350,62 @@ export interface StFeatureFlagsResponse {
   resources: StFeatureFlag[];
   totalResults: number;
 }
+
+// StOrgQuota is the Stratos-shaped DTO for a CF organization quota.
+// Org quotas cap the apps / services / routes / domains an organization
+// can hold across all its spaces. All limit fields use -1 to signal
+// "Unlimited" — the v3 wire shape nulls a missing limit, which the
+// backend coerces to -1 so the frontend renders "Unlimited" without
+// null-guarding every cell.
+export interface StOrgQuota {
+  guid: string;
+  name: string;
+  totalMemoryInMB: number;
+  totalInstanceMemoryInMB: number;
+  totalInstances: number;
+  totalAppTasks: number;
+  paidServicesAllowed: boolean;
+  totalServiceInstances: number;
+  totalServiceKeys: number;
+  totalRoutes: number;
+  totalReservedPorts: number;
+  totalDomains: number;
+  organizationCount: number;
+  cnsiGuid: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StOrgQuotasResponse {
+  resources: StOrgQuota[];
+  totalResults: number;
+}
+
+// StSpaceQuota is the Stratos-shaped DTO for a CF space quota. Space
+// quotas cap apps / services / routes within a single org, optionally
+// applied to specific spaces. Mirrors StOrgQuota minus the Domains gate
+// plus an organizationGuid pointing at the parent org. Same -1 =
+// "Unlimited" convention as StOrgQuota.
+export interface StSpaceQuota {
+  guid: string;
+  name: string;
+  totalMemoryInMB: number;
+  totalInstanceMemoryInMB: number;
+  totalInstances: number;
+  totalAppTasks: number;
+  paidServicesAllowed: boolean;
+  totalServiceInstances: number;
+  totalServiceKeys: number;
+  totalRoutes: number;
+  totalReservedPorts: number;
+  organizationGuid: string;
+  spaceCount: number;
+  cnsiGuid: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StSpaceQuotasResponse {
+  resources: StSpaceQuota[];
+  totalResults: number;
+}
