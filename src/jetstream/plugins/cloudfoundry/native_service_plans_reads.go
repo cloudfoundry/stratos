@@ -81,6 +81,16 @@ func (c *CloudFoundrySpecification) getNativeServicePlans(ctx echo.Context) erro
 		}
 	}
 
+	// `?service_offering=guid[,guid…]` is the catalog-detail entry — load
+	// the plans advertised by one (or a few) offerings without paying the
+	// full plan list. Maps to v3's `service_offering_guids` filter.
+	if rawOfferings := ctx.QueryParam("service_offering"); rawOfferings != "" {
+		offerings := splitNonEmpty(rawOfferings, ",")
+		if len(offerings) > 0 {
+			params = params.WithFilter("service_offering_guids", offerings...)
+		}
+	}
+
 	raw, lerr := cfClient.ServicePlans().List(ctx.Request().Context(), params)
 	if lerr != nil {
 		return handleCapiError(ctx, lerr)

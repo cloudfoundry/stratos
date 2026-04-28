@@ -26,7 +26,21 @@ func servicePlansTestServer(t *testing.T) *httptest.Server {
 		case "/v3/service_plans":
 			perPage := r.URL.Query().Get("per_page")
 			guids := r.URL.Query().Get("guids")
+			offeringGuids := r.URL.Query().Get("service_offering_guids")
 			page := r.URL.Query().Get("page")
+
+			if offeringGuids != "" {
+				wanted := strings.Split(offeringGuids, ",")
+				resources := []map[string]interface{}{}
+				for _, og := range wanted {
+					resources = append(resources, planResource("plan-of-"+og, "from-"+og, og))
+				}
+				_ = json.NewEncoder(w).Encode(map[string]interface{}{
+					"pagination": map[string]interface{}{"total_results": len(wanted), "total_pages": 1},
+					"resources":  resources,
+				})
+				return
+			}
 
 			if perPage == "1" {
 				// counts fast-path probe
@@ -178,6 +192,25 @@ func TestGetNativeServicePlans_CountsFastPath(t *testing.T) {
 
 	assert.Equal(t, 7, resp.TotalResults)
 	assert.Empty(t, resp.Resources, "counts fast-path skips the resource body")
+}
+
+func TestGetNativeServicePlans_ServiceOfferingFilter(t *testing.T) {
+	ts := servicePlansTestServer(t)
+	defer ts.Close()
+
+	e := echo.New()
+	ctx, rec := newServicePlansContext(e, "/pp/v1/cf/service_plans/test-cnsi?service_offering=offering-7")
+	plugin := newServicePlansPlugin(ts.URL)
+
+	require.NoError(t, plugin.getNativeServicePlans(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	var resp StratosPagedResponse[StServicePlan]
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+
+	require.Len(t, resp.Resources, 1, "service_offering filter narrows to plans for the requested offering")
+	assert.Equal(t, "plan-of-offering-7", resp.Resources[0].GUID)
+	assert.Equal(t, "offering-7", resp.Resources[0].ServiceOfferingGUID)
 }
 
 func TestGetNativeServicePlanDetail(t *testing.T) {

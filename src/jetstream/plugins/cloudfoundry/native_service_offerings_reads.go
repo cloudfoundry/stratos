@@ -111,6 +111,50 @@ func (c *CloudFoundrySpecification) getNativeServiceOfferings(ctx echo.Context) 
 	})
 }
 
+// getNativeServiceOfferingDetail handles
+//
+//	GET /pp/v1/cf/service_offerings/{cnsiGuid}/{offeringGuid}.
+//
+// Single-resource sibling for the catalog detail page. Joins the broker
+// name like the list does so the detail view doesn't need a second
+// frontend fetch. Broker join is soft — failure leaves BrokerName empty
+// rather than failing the whole detail load.
+func (c *CloudFoundrySpecification) getNativeServiceOfferingDetail(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	offeringGUID := ctx.Param("offeringGuid")
+	if cnsiGUID == "" || offeringGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid and offeringGuid are required")
+	}
+
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	offering, gerr := cfClient.ServiceOfferings().Get(ctx.Request().Context(), offeringGUID)
+	if gerr != nil {
+		return handleCapiError(ctx, gerr)
+	}
+
+	brokerByGUID := make(map[string]capi.ServiceBroker, 1)
+	if brokerGUID := relationshipGUID(offering.Relationships.ServiceBroker); brokerGUID != "" {
+		brokerParams := capi.NewQueryParams().WithPerPage(1).WithFilter("guids", brokerGUID)
+		if raw, listErr := cfClient.ServiceBrokers().List(ctx.Request().Context(), brokerParams); listErr == nil {
+			for _, b := range raw.Resources {
+				brokerByGUID[b.GUID] = b
+			}
+		}
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+	return ctx.JSON(http.StatusOK, toStServiceOffering(*offering, cnsiGUID, brokerByGUID))
+}
+
 // listAllServiceOfferings drains /v3/service_offerings and returns the full
 // set. Unlike apps/orgs/spaces/routes the marketplace catalog is small enough
 // that we don't bother with parallel page fetches — sequential pagination
