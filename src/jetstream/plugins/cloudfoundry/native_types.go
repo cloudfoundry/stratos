@@ -258,3 +258,34 @@ type StStacksResponse struct {
 	Resources    []StStack `json:"resources"`
 	TotalResults int       `json:"totalResults"`
 }
+
+// StBuildpack is the Stratos-shaped DTO for a CF buildpack. Buildpacks
+// govern how source bundles get staged before running on a Diego cell;
+// each is pinned to one rootfs (Stack) and ordered by Position. Drives
+// the CF-level Buildpacks tab. Read-only at this tier — uploads, reorder,
+// enable/disable, and lock toggles stay legacy until a use case warrants
+// them.
+//
+// CnsiGUID is stamped server-side so multi-CNSI rows render keyed by
+// (cnsi, buildpack) — same convention as StApp/StOrg/StStack. v3-only
+// fields (State, Lifecycle) flow through as plain strings; the legacy v2
+// shape lacked them.
+type StBuildpack struct {
+	GUID      string `json:"guid"`
+	Name      string `json:"name"`
+	State     string `json:"state"`
+	Filename  string `json:"filename"`
+	Stack     string `json:"stack"`
+	Position  int    `json:"position"`
+	Lifecycle string `json:"lifecycle"`
+	Enabled   bool   `json:"enabled"`
+	Locked    bool   `json:"locked"`
+	CnsiGUID  string `json:"cnsiGuid"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
+}
+
+type StBuildpacksResponse struct {
+	Resources    []StBuildpack `json:"resources"`
+	TotalResults int           `json:"totalResults"`
+}
