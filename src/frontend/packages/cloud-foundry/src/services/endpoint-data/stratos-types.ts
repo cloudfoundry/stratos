@@ -160,8 +160,15 @@ export interface StServiceOffering {
   name: string;
   description: string;
   brokerName: string;
+  serviceBrokerGuid?: string;
   tags: string[];
   public: boolean;
+  documentationUrl?: string;
+  // brokerCatalogMetadata mirrors v3's broker_catalog.metadata — broker-
+  // populated extras like longDescription, providerDisplayName, supportUrl.
+  // Replaces the legacy v2 `extra` JSON blob (already pre-parsed on the
+  // backend).
+  brokerCatalogMetadata?: { [k: string]: unknown };
   cnsiGuid: string;
   createdAt: string;
   updatedAt: string;

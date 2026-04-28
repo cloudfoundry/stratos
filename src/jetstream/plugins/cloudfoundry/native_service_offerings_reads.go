@@ -195,15 +195,22 @@ func toStServiceOffering(o capi.ServiceOffering, cnsiGUID string, brokerByGUID m
 	if tags == nil {
 		tags = []string{}
 	}
+	documentationURL := ""
+	if o.DocumentationURL != nil {
+		documentationURL = *o.DocumentationURL
+	}
 	return StServiceOffering{
-		GUID:        o.GUID,
-		Name:        o.Name,
-		Description: o.Description,
-		BrokerName:  brokerName,
-		Tags:        tags,
-		Public:      o.Available,
-		CnsiGUID:    cnsiGUID,
-		CreatedAt:   o.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:   o.UpdatedAt.Format(time.RFC3339),
+		GUID:                  o.GUID,
+		Name:                  o.Name,
+		Description:           o.Description,
+		BrokerName:            brokerName,
+		ServiceBrokerGUID:     brokerGUID,
+		Tags:                  tags,
+		Public:                o.Available,
+		DocumentationURL:      documentationURL,
+		BrokerCatalogMetadata: o.BrokerCatalog.Metadata,
+		CnsiGUID:              cnsiGUID,
+		CreatedAt:             o.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:             o.UpdatedAt.Format(time.RFC3339),
 	}
 }

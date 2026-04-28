@@ -22,13 +22,23 @@ func serviceOfferingDetailTestServer(t *testing.T) *httptest.Server {
 			_, _ = w.Write([]byte(`{"links":{}}`))
 		case "/v3/service_offerings/offering-99":
 			_ = json.NewEncoder(w).Encode(map[string]interface{}{
-				"guid":        "offering-99",
-				"name":        "premium-db",
-				"description": "Premium database offering",
-				"available":   true,
-				"tags":        []string{"db", "sql"},
-				"created_at":  "2024-01-01T00:00:00Z",
-				"updated_at":  "2024-01-02T00:00:00Z",
+				"guid":              "offering-99",
+				"name":              "premium-db",
+				"description":       "Premium database offering",
+				"available":         true,
+				"tags":              []string{"db", "sql"},
+				"documentation_url": "https://docs.example/premium-db",
+				"created_at":        "2024-01-01T00:00:00Z",
+				"updated_at":        "2024-01-02T00:00:00Z",
+				"broker_catalog": map[string]interface{}{
+					"id": "broker-catalog-id-123",
+					"metadata": map[string]interface{}{
+						"longDescription":      "Premium database with SLA guarantees",
+						"providerDisplayName":  "Premium Co",
+						"supportUrl":           "https://support.example",
+					},
+					"features": map[string]interface{}{},
+				},
 				"relationships": map[string]interface{}{
 					"service_broker": map[string]interface{}{
 						"data": map[string]interface{}{"guid": "broker-7"},
@@ -88,6 +98,12 @@ func TestGetNativeServiceOfferingDetail(t *testing.T) {
 	assert.Equal(t, "premium-db", resp.Name)
 	assert.Equal(t, "Premium database offering", resp.Description)
 	assert.Equal(t, "premium-broker", resp.BrokerName, "detail endpoint should join the broker name like the list does")
+	assert.Equal(t, "broker-7", resp.ServiceBrokerGUID, "broker guid surfaced for navigation/extra lookups")
+	assert.Equal(t, "https://docs.example/premium-db", resp.DocumentationURL)
+	require.NotNil(t, resp.BrokerCatalogMetadata)
+	assert.Equal(t, "Premium database with SLA guarantees", resp.BrokerCatalogMetadata["longDescription"])
+	assert.Equal(t, "Premium Co", resp.BrokerCatalogMetadata["providerDisplayName"])
+	assert.Equal(t, "https://support.example", resp.BrokerCatalogMetadata["supportUrl"])
 	assert.Equal(t, "test-cnsi", resp.CnsiGUID)
 	assert.True(t, resp.Public)
 }

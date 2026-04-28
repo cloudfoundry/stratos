@@ -126,15 +126,23 @@ type StSpacesResponse struct {
 // service-bindings join). Tags retain the broker-provided list verbatim;
 // the UI joins them as comma-separated text.
 type StServiceOffering struct {
-	GUID        string   `json:"guid"`
-	Name        string   `json:"name"`
-	Description string   `json:"description"`
-	BrokerName  string   `json:"brokerName"`
-	Tags        []string `json:"tags"`
-	Public      bool     `json:"public"`
-	CnsiGUID    string   `json:"cnsiGuid"`
-	CreatedAt   string   `json:"createdAt"`
-	UpdatedAt   string   `json:"updatedAt"`
+	GUID              string                 `json:"guid"`
+	Name              string                 `json:"name"`
+	Description       string                 `json:"description"`
+	BrokerName        string                 `json:"brokerName"`
+	ServiceBrokerGUID string                 `json:"serviceBrokerGuid,omitempty"`
+	Tags              []string               `json:"tags"`
+	Public            bool                   `json:"public"`
+	DocumentationURL  string                 `json:"documentationUrl,omitempty"`
+	// BrokerCatalogMetadata mirrors v3's broker_catalog.metadata — a
+	// flexible map populated by each broker. Stratos's legacy `extra` JSON
+	// blob carried the same data (longDescription, providerDisplayName,
+	// supportUrl, displayName, etc.); surface it as a parsed map so the
+	// frontend doesn't redo JSON.parse on the wire payload.
+	BrokerCatalogMetadata map[string]interface{} `json:"brokerCatalogMetadata,omitempty"`
+	CnsiGUID              string                 `json:"cnsiGuid"`
+	CreatedAt             string                 `json:"createdAt"`
+	UpdatedAt             string                 `json:"updatedAt"`
 }
 
 type StServiceOfferingsResponse struct {
