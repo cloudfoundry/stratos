@@ -2,9 +2,11 @@
 package cloudfoundry
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
+	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/labstack/echo/v4"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
@@ -131,4 +133,46 @@ func (cf *CloudFoundrySpecification) deleteNativeRoute(c echo.Context) error {
 		})
 	}
 	return c.JSON(http.StatusAccepted, res.HandoffJob)
+}
+
+// createNativeRoute handles POST /pp/v1/cf/routes/{cnsiGuid} —
+// Stratos-shape wrapper around CF V3 POST /v3/routes.
+//
+// Sync write: V3 returns 201 with the created route. Body shape is
+// capi.RouteCreateRequest (V3 wire shape: {host?, path?, port?,
+// relationships:{space:{...}, domain:{...}}}).
+func (cf *CloudFoundrySpecification) createNativeRoute(c echo.Context) error {
+	cnsiGUID := c.Param("cnsiGuid")
+	if cnsiGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")
+	}
+
+	var req capi.RouteCreateRequest
+	if err := json.NewDecoder(c.Request().Body).Decode(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid body: %v", err))
+	}
+	if req.Relationships.Space.Data == nil || req.Relationships.Space.Data.GUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "relationships.space.data.guid is required")
+	}
+	if req.Relationships.Domain.Data == nil || req.Relationships.Domain.Data.GUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "relationships.domain.data.guid is required")
+	}
+
+	userGUID, err := cf.getUserGUID(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(c.Request().Context(), cf.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	route, createErr := cfClient.Routes().Create(c.Request().Context(), &req)
+	if createErr != nil {
+		return handleCapiError(c, createErr)
+	}
+
+	c.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+	return c.JSON(http.StatusCreated, toStRoute(*route, cnsiGUID))
 }

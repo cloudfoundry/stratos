@@ -605,6 +605,48 @@ func lookupWebProcessGUID(ctx context.Context, cfClient capi.Client, appGUID str
 	return list.Resources[0].GUID, nil
 }
 
+// createNativeApp handles POST /pp/v1/cf/apps/{cnsiGuid} —
+// Stratos-shape wrapper around CF V3 POST /v3/apps.
+//
+// Sync write: V3 returns 201 with the created app. Body shape is
+// capi.AppCreateRequest = {name, relationships:{space:{data:{guid}}},
+// lifecycle?, environment_variables?, metadata?}.
+func (cf *CloudFoundrySpecification) createNativeApp(c echo.Context) error {
+	cnsiGUID := c.Param("cnsiGuid")
+	if cnsiGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")
+	}
+
+	var req capi.AppCreateRequest
+	if err := json.NewDecoder(c.Request().Body).Decode(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid body: %v", err))
+	}
+	if req.Name == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "name is required")
+	}
+	if req.Relationships.Space.Data == nil || req.Relationships.Space.Data.GUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "relationships.space.data.guid is required")
+	}
+
+	userGUID, err := cf.getUserGUID(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(c.Request().Context(), cf.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	app, createErr := cfClient.Apps().Create(c.Request().Context(), &req)
+	if createErr != nil {
+		return handleCapiError(c, createErr)
+	}
+
+	c.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+	return c.JSON(http.StatusCreated, toStApp(*app))
+}
+
 // statusFromCapiError maps a capi sentinel error to an HTTP status code.
 // CAPI's MapHTTPError always unwraps to one of these sentinels.
 func statusFromCapiError(err error) int {

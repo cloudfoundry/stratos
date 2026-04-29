@@ -2,9 +2,12 @@
 package cloudfoundry
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
+	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/labstack/echo/v4"
 )
 
@@ -67,4 +70,42 @@ func (c *CloudFoundrySpecification) deleteNativeOrg(ctx echo.Context) error {
 		})
 	}
 	return ctx.JSON(http.StatusAccepted, res.HandoffJob)
+}
+
+// updateNativeOrg handles PATCH /pp/v1/cf/orgs/{cnsiGuid}/{orgGuid} —
+// Stratos-shape write wrapper around CF V3 PATCH /v3/organizations/{guid}.
+//
+// Sync write: V3 returns 200 with the updated organization. The handler
+// decodes the request body into capi.OrganizationUpdateRequest (which
+// matches the V3 wire shape one-for-one), forwards it, and returns the
+// mapped Stratos-shape StOrg.
+func (c *CloudFoundrySpecification) updateNativeOrg(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	orgGUID := ctx.Param("orgGuid")
+	if cnsiGUID == "" || orgGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid and orgGuid are required")
+	}
+
+	var req capi.OrganizationUpdateRequest
+	if err := json.NewDecoder(ctx.Request().Body).Decode(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid body: %v", err))
+	}
+
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	org, updErr := cfClient.Organizations().Update(ctx.Request().Context(), orgGUID, &req)
+	if updErr != nil {
+		return handleCapiError(ctx, updErr)
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+	return ctx.JSON(http.StatusOK, toStOrg(*org))
 }

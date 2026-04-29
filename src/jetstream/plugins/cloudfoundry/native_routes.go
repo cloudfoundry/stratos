@@ -53,4 +53,19 @@ func (c *CloudFoundrySpecification) addNativeRoutes(echoGroup *echo.Group) {
 	echoGroup.GET("/cf/domains/:cnsiGuid/:domainGuid", c.getNativeDomainDetail)
 	echoGroup.POST("/cf/user_provided_service_instances/:cnsiGuid", c.createUserProvidedServiceInstance)
 	echoGroup.PATCH("/cf/user_provided_service_instances/:cnsiGuid/:siGuid", c.updateUserProvidedServiceInstance)
+
+	// Phase 1C write-side completion
+	echoGroup.PATCH("/cf/orgs/:cnsiGuid/:orgGuid", c.updateNativeOrg)
+	echoGroup.POST("/cf/spaces/:cnsiGuid", c.createNativeSpace)
+	echoGroup.PATCH("/cf/spaces/:cnsiGuid/:spaceGuid", c.updateNativeSpace)
+	echoGroup.POST("/cf/routes/:cnsiGuid", c.createNativeRoute)
+	echoGroup.POST("/cf/apps/:cnsiGuid", c.createNativeApp)
+	echoGroup.POST("/cf/organization_quotas/:cnsiGuid", c.createNativeOrgQuota)
+	echoGroup.PATCH("/cf/organization_quotas/:cnsiGuid/:quotaGuid", c.updateNativeOrgQuota)
+	echoGroup.POST("/cf/space_quotas/:cnsiGuid", c.createNativeSpaceQuota)
+	echoGroup.PATCH("/cf/space_quotas/:cnsiGuid/:quotaGuid", c.updateNativeSpaceQuota)
+	echoGroup.POST("/cf/service_instances/:cnsiGuid", c.createManagedServiceInstance)
+	echoGroup.PATCH("/cf/service_instances/:cnsiGuid/:siGuid", c.updateManagedServiceInstance)
+	echoGroup.POST("/cf/roles/:cnsiGuid", c.createNativeRole)
+	echoGroup.DELETE("/cf/roles/:cnsiGuid/:roleGuid", c.deleteNativeRole)
 }

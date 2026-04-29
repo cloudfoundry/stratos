@@ -2,9 +2,12 @@
 package cloudfoundry
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
+	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/labstack/echo/v4"
 )
 
@@ -66,4 +69,82 @@ func (c *CloudFoundrySpecification) deleteNativeSpace(ctx echo.Context) error {
 		})
 	}
 	return ctx.JSON(http.StatusAccepted, res.HandoffJob)
+}
+
+// createNativeSpace handles POST /pp/v1/cf/spaces/{cnsiGuid} —
+// Stratos-shape wrapper around CF V3 POST /v3/spaces.
+//
+// Sync write: V3 returns 201 with the created space. Body is forwarded
+// as capi.SpaceCreateRequest (V3 wire shape: {name, relationships:{
+// organization:{data:{guid}}}}).
+func (c *CloudFoundrySpecification) createNativeSpace(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	if cnsiGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")
+	}
+
+	var req capi.SpaceCreateRequest
+	if err := json.NewDecoder(ctx.Request().Body).Decode(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid body: %v", err))
+	}
+	if req.Name == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "name is required")
+	}
+	if req.Relationships.Organization.Data == nil || req.Relationships.Organization.Data.GUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "relationships.organization.data.guid is required")
+	}
+
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	space, createErr := cfClient.Spaces().Create(ctx.Request().Context(), &req)
+	if createErr != nil {
+		return handleCapiError(ctx, createErr)
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+	return ctx.JSON(http.StatusCreated, toStSpace(*space))
+}
+
+// updateNativeSpace handles PATCH /pp/v1/cf/spaces/{cnsiGuid}/{spaceGuid} —
+// Stratos-shape wrapper around CF V3 PATCH /v3/spaces/{guid}.
+//
+// Sync write: V3 returns 200 with the updated space. Body shape is
+// capi.SpaceUpdateRequest = {name?, metadata?}.
+func (c *CloudFoundrySpecification) updateNativeSpace(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	spaceGUID := ctx.Param("spaceGuid")
+	if cnsiGUID == "" || spaceGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid and spaceGuid are required")
+	}
+
+	var req capi.SpaceUpdateRequest
+	if err := json.NewDecoder(ctx.Request().Body).Decode(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid body: %v", err))
+	}
+
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	space, updErr := cfClient.Spaces().Update(ctx.Request().Context(), spaceGUID, &req)
+	if updErr != nil {
+		return handleCapiError(ctx, updErr)
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+	return ctx.JSON(http.StatusOK, toStSpace(*space))
 }
