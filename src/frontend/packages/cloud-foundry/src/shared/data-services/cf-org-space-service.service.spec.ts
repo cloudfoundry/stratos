@@ -711,3 +711,155 @@ describe('V3-native space sourcing', () => {
     httpMock.verify();
   });
 });
+
+/**
+ * V3-native auto-selectors.
+ *
+ * `enableAutoSelectors()` is opt-in (create-application calls it; the wizard
+ * does not). When enabled, a singleton org or space — count exactly 1 and
+ * nothing currently selected — is auto-picked off the V3 fetch result. This
+ * replaces the v2 ngrx pagination-based `setupAutoSelectors` machinery that
+ * was entangled with the duplicate-URL collision path.
+ *
+ * Default (no enableAutoSelectors call) must do no auto-pick: the wizard
+ * relies on this so the user always picks org/space explicitly.
+ */
+describe('V3-native auto-selectors', () => {
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [
+        createBasicStoreModule(),
+        EntityCatalogTestModule,
+      ],
+      providers: [
+        CfOrgSpaceDataService,
+        ...STORE_TEST_PROVIDERS,
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities(),
+          ],
+        },
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    });
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+  });
+
+  it('auto-picks the single org when enableAutoSelectors is called and one org is fetched', async () => {
+    const service = TestBed.inject(CfOrgSpaceDataService);
+    const httpMock = TestBed.inject(HttpTestingController);
+
+    service.enableAutoSelectors();
+    service.cf.select.next('cf-A');
+    TestBed.tick();
+    httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/orgs/cf-A')).flush({
+      resources: [{ guid: 'only-org', name: 'solo' }],
+      totalResults: 1,
+    });
+    await Promise.resolve();
+    TestBed.tick();
+
+    expect(service.org.select.getValue()).toBe('only-org');
+    httpMock.match(() => true).forEach(req => req.flush({ resources: [], totalResults: 0 }));
+    httpMock.verify();
+  });
+
+  it('does NOT auto-pick when more than one org is fetched', async () => {
+    const service = TestBed.inject(CfOrgSpaceDataService);
+    const httpMock = TestBed.inject(HttpTestingController);
+
+    service.enableAutoSelectors();
+    service.cf.select.next('cf-A');
+    TestBed.tick();
+    httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/orgs/cf-A')).flush({
+      resources: [
+        { guid: 'org-1', name: 'a' },
+        { guid: 'org-2', name: 'b' },
+      ],
+      totalResults: 2,
+    });
+    await Promise.resolve();
+    TestBed.tick();
+
+    expect(service.org.select.getValue()).toBeFalsy();
+    httpMock.verify();
+  });
+
+  it('does NOT auto-pick when enableAutoSelectors was never called (default)', async () => {
+    const service = TestBed.inject(CfOrgSpaceDataService);
+    const httpMock = TestBed.inject(HttpTestingController);
+
+    // Note: no service.enableAutoSelectors() call.
+    service.cf.select.next('cf-A');
+    TestBed.tick();
+    httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/orgs/cf-A')).flush({
+      resources: [{ guid: 'only-org', name: 'solo' }],
+      totalResults: 1,
+    });
+    await Promise.resolve();
+    TestBed.tick();
+
+    expect(service.org.select.getValue()).toBeFalsy();
+    httpMock.verify();
+  });
+
+  it('auto-picks the single space when enableAutoSelectors and the org has one space', async () => {
+    const service = TestBed.inject(CfOrgSpaceDataService);
+    const httpMock = TestBed.inject(HttpTestingController);
+
+    service.enableAutoSelectors();
+    service.cf.select.next('cf-A');
+    TestBed.tick();
+    httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/orgs/cf-A')).flush({
+      resources: [{ guid: 'only-org', name: 'solo' }],
+      totalResults: 1,
+    });
+    await Promise.resolve();
+    TestBed.tick();
+
+    // Org auto-picked → spaces fetch fires
+    httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/org/cf-A/only-org/spaces')).flush({
+      resources: [{ guid: 'only-space', name: 'dev' }],
+      totalResults: 1,
+    });
+    await Promise.resolve();
+    TestBed.tick();
+
+    expect(service.space.select.getValue()).toBe('only-space');
+    httpMock.verify();
+  });
+
+  it('does NOT auto-pick space when org has multiple spaces', async () => {
+    const service = TestBed.inject(CfOrgSpaceDataService);
+    const httpMock = TestBed.inject(HttpTestingController);
+
+    service.enableAutoSelectors();
+    service.cf.select.next('cf-A');
+    TestBed.tick();
+    httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/orgs/cf-A')).flush({
+      resources: [{ guid: 'only-org', name: 'solo' }],
+      totalResults: 1,
+    });
+    await Promise.resolve();
+    TestBed.tick();
+
+    httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/org/cf-A/only-org/spaces')).flush({
+      resources: [
+        { guid: 'sp-1', name: 'dev' },
+        { guid: 'sp-2', name: 'prod' },
+      ],
+      totalResults: 2,
+    });
+    await Promise.resolve();
+    TestBed.tick();
+
+    expect(service.space.select.getValue()).toBeFalsy();
+    httpMock.verify();
+  });
+});
