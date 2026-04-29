@@ -1,9 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { filter, map, publishReplay, refCount } from 'rxjs/operators';
 
-import { endpointEntityType, APIResource } from '@stratosui/store';
-import { IService } from '../../../cf-api-svc.types';
 import { serviceEntityType } from '../../../cf-entity-types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { createEntityRelationPaginationKey } from '../../../entity-relations/entity-relations.types';
@@ -12,24 +8,6 @@ import { createEntityRelationPaginationKey } from '../../../entity-relations/ent
   providedIn: 'root'
 })
 export class ServicesWallService {
-  services$: Observable<APIResource<IService>[]>;
-
-  constructor() {
-    this.services$ = this.initServicesObservable();
-  }
-
-  initServicesObservable = () => {
-    const paginationKey = createEntityRelationPaginationKey(endpointEntityType);
-    return cfEntityCatalog.service.store.getPaginationService(null, paginationKey, {}).entities$;
-  };
-
-  getServicesInCf = (cfGuid: string) => this.services$.pipe(
-    filter(p => !!p && p.length > 0),
-    map(services => services.filter(s => s.entity.cfGuid === cfGuid)),
-    filter(p => !!p),
-    publishReplay(1),
-    refCount()
-  );
 
   getSpaceServicePagKey(cfGuid: string, spaceGuid: string) {
     return createEntityRelationPaginationKey(serviceEntityType, `${cfGuid}-${spaceGuid}`);
