@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { BehaviorSubject } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
@@ -404,5 +404,310 @@ describe('FWT-917 auto-selector loading gate', () => {
       pagination$.next({ currentPage: 1, pageRequests: { 1: { busy: false } } });
       expect(results).toHaveLength(1);
     });
+  });
+});
+
+/**
+ * V3-native data sourcing.
+ *
+ * Org/space data must come from per-cnsi V3 native handlers
+ * (`/pp/v1/cf/orgs/{cnsiGuid}`, etc.), not from a cross-endpoint
+ * v2 ngrx pagination action. The cross-endpoint path collapses
+ * entities sharing duplicate URL endpoints and stamps them with one
+ * winner cfGuid, dropping the rest from the downstream filter.
+ */
+describe('V3-native org sourcing', () => {
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [
+        createBasicStoreModule(),
+        EntityCatalogTestModule,
+      ],
+      providers: [
+        CfOrgSpaceDataService,
+        ...STORE_TEST_PROVIDERS,
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities(),
+          ],
+        },
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    });
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+  });
+
+  it('fetches orgs from /pp/v1/cf/orgs/{cnsiGuid} when cf is selected', () => {
+    const service = TestBed.inject(CfOrgSpaceDataService);
+    const httpMock = TestBed.inject(HttpTestingController);
+
+    service.cf.select.next('cf-A');
+    TestBed.tick();
+
+    const req = httpMock.expectOne(
+      r => r.url.startsWith('/pp/v1/cf/orgs/cf-A'),
+      'V3 native orgs handler should be called for the selected cnsi',
+    );
+    expect(req.request.method).toBe('GET');
+    req.flush({ resources: [], totalResults: 0 });
+
+    httpMock.verify();
+  });
+
+  it('populates the orgList signal from the V3 response', async () => {
+    const service = TestBed.inject(CfOrgSpaceDataService);
+    const httpMock = TestBed.inject(HttpTestingController);
+
+    service.cf.select.next('cf-A');
+    TestBed.tick();
+
+    httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/orgs/cf-A')).flush({
+      resources: [
+        { guid: 'org-1', name: 'alpha' },
+        { guid: 'org-2', name: 'bravo' },
+      ],
+      totalResults: 2,
+    });
+
+    await Promise.resolve();
+    TestBed.tick();
+
+    const orgs = service.orgList();
+    expect(orgs.map(o => o.guid)).toEqual(['org-1', 'org-2']);
+    httpMock.verify();
+  });
+
+  /**
+   * Regression guard: duplicate-URL endpoint collision.
+   *
+   * Three CF endpoints share the same api_url. The old v2 ngrx
+   * cross-endpoint pagination collapsed entities by GUID across the
+   * three responses and stamped all of them with one winner cfGuid,
+   * causing the downstream filter (entity.cfGuid === selectedCF) to
+   * drop most orgs. The V3 native path is per-cnsi by URL —
+   * `/pp/v1/cf/orgs/{cnsiGuid}` — so each endpoint's orgs are
+   * independently sourced and never collapsed.
+   *
+   * The orgs in this test even share GUIDs across endpoints (the
+   * worst case in the duplicate-URL scenario, where the same CF is
+   * registered three times). orgList must scope to the selected cnsi
+   * regardless of GUID overlap.
+   */
+  it('scopes orgList to the selected cnsi even with duplicate-URL endpoints', async () => {
+    const service = TestBed.inject(CfOrgSpaceDataService);
+    const httpMock = TestBed.inject(HttpTestingController);
+
+    service.cf.select.next('cf-A');
+    TestBed.tick();
+    httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/orgs/cf-A')).flush({
+      resources: [{ guid: 'shared-org-1', name: 'org-on-A' }],
+      totalResults: 1,
+    });
+    await Promise.resolve();
+    TestBed.tick();
+    expect(service.orgList().map(o => o.name)).toEqual(['org-on-A']);
+
+    service.cf.select.next('cf-B');
+    TestBed.tick();
+    httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/orgs/cf-B')).flush({
+      resources: [{ guid: 'shared-org-1', name: 'org-on-B' }],
+      totalResults: 1,
+    });
+    await Promise.resolve();
+    TestBed.tick();
+    expect(service.orgList().map(o => o.name)).toEqual(['org-on-B']);
+
+    httpMock.verify();
+  });
+
+  it('cascade-clears orgSelected and spaceSelected when cfSelected changes', () => {
+    const service = TestBed.inject(CfOrgSpaceDataService);
+    const httpMock = TestBed.inject(HttpTestingController);
+
+    service.cf.select.next('cf-A');
+    service.org.select.next('org-1');
+    service.space.select.next('space-1');
+    TestBed.tick();
+
+    // Drain any in-flight requests so verify() is clean.
+    httpMock.match(() => true).forEach(req => req.flush({ resources: [], totalResults: 0 }));
+
+    service.cf.select.next('cf-B');
+    TestBed.tick();
+
+    expect(service.org.select.getValue()).toBeFalsy();
+    expect(service.space.select.getValue()).toBeFalsy();
+
+    httpMock.match(() => true).forEach(req => req.flush({ resources: [], totalResults: 0 }));
+    httpMock.verify();
+  });
+
+  it('exposes orgList contents through the legacy org.list$ observable', async () => {
+    const service = TestBed.inject(CfOrgSpaceDataService);
+    const httpMock = TestBed.inject(HttpTestingController);
+
+    const emissions: { guid: string }[][] = [];
+    const sub = service.org.list$.subscribe(list => emissions.push(list as any));
+
+    service.cf.select.next('cf-A');
+    TestBed.tick();
+    httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/orgs/cf-A')).flush({
+      resources: [{ guid: 'org-1', name: 'alpha' }],
+      totalResults: 1,
+    });
+    await Promise.resolve();
+    TestBed.tick();
+
+    const last = emissions[emissions.length - 1];
+    expect(last.map(o => o.guid)).toEqual(['org-1']);
+
+    sub.unsubscribe();
+    httpMock.verify();
+  });
+});
+
+/**
+ * V3-native space sourcing.
+ *
+ * Spaces narrowed to a single org come from `/pp/v1/cf/org/{cnsiGuid}/{orgGuid}/spaces`
+ * — per-cnsi, per-org. Same structural cure as orgs: no cross-endpoint
+ * fan-out, no duplicate-URL collision.
+ */
+describe('V3-native space sourcing', () => {
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [
+        createBasicStoreModule(),
+        EntityCatalogTestModule,
+      ],
+      providers: [
+        CfOrgSpaceDataService,
+        ...STORE_TEST_PROVIDERS,
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities(),
+          ],
+        },
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    });
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+  });
+
+  it('fetches spaces from /pp/v1/cf/org/{cnsi}/{org}/spaces when an org is selected', () => {
+    const service = TestBed.inject(CfOrgSpaceDataService);
+    const httpMock = TestBed.inject(HttpTestingController);
+
+    service.cf.select.next('cf-A');
+    TestBed.tick();
+    httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/orgs/cf-A')).flush({
+      resources: [{ guid: 'org-1', name: 'alpha' }],
+      totalResults: 1,
+    });
+
+    service.org.select.next('org-1');
+    TestBed.tick();
+
+    const req = httpMock.expectOne(
+      r => r.url.startsWith('/pp/v1/cf/org/cf-A/org-1/spaces'),
+      'V3 native per-org spaces handler should be called',
+    );
+    expect(req.request.method).toBe('GET');
+    req.flush({ resources: [], totalResults: 0 });
+
+    httpMock.verify();
+  });
+
+  it('populates the spaceList signal from the V3 per-org response', async () => {
+    const service = TestBed.inject(CfOrgSpaceDataService);
+    const httpMock = TestBed.inject(HttpTestingController);
+
+    service.cf.select.next('cf-A');
+    TestBed.tick();
+    httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/orgs/cf-A')).flush({
+      resources: [{ guid: 'org-1', name: 'alpha' }],
+      totalResults: 1,
+    });
+
+    service.org.select.next('org-1');
+    TestBed.tick();
+    httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/org/cf-A/org-1/spaces')).flush({
+      resources: [
+        { guid: 'space-a', name: 'development' },
+        { guid: 'space-b', name: 'production' },
+      ],
+      totalResults: 2,
+    });
+
+    await Promise.resolve();
+    TestBed.tick();
+
+    const spaces = service.spaceList();
+    expect(spaces.map(s => s.guid)).toEqual(['space-a', 'space-b']);
+    httpMock.verify();
+  });
+
+  it('cascade-clears spaceSelected when org changes', async () => {
+    const service = TestBed.inject(CfOrgSpaceDataService);
+    const httpMock = TestBed.inject(HttpTestingController);
+
+    service.cf.select.next('cf-A');
+    TestBed.tick();
+    httpMock.match(() => true).forEach(req => req.flush({ resources: [], totalResults: 0 }));
+
+    service.org.select.next('org-1');
+    service.space.select.next('space-1');
+    TestBed.tick();
+    httpMock.match(() => true).forEach(req => req.flush({ resources: [], totalResults: 0 }));
+
+    service.org.select.next('org-2');
+    TestBed.tick();
+    expect(service.space.select.getValue()).toBeFalsy();
+
+    httpMock.match(() => true).forEach(req => req.flush({ resources: [], totalResults: 0 }));
+    httpMock.verify();
+  });
+
+  it('exposes spaceList contents through the legacy space.list$ observable', async () => {
+    const service = TestBed.inject(CfOrgSpaceDataService);
+    const httpMock = TestBed.inject(HttpTestingController);
+
+    const emissions: { guid: string }[][] = [];
+    const sub = service.space.list$.subscribe(list => emissions.push(list as any));
+
+    service.cf.select.next('cf-A');
+    TestBed.tick();
+    httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/orgs/cf-A')).flush({
+      resources: [{ guid: 'org-1', name: 'alpha' }],
+      totalResults: 1,
+    });
+
+    service.org.select.next('org-1');
+    TestBed.tick();
+    httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/org/cf-A/org-1/spaces')).flush({
+      resources: [{ guid: 'space-a', name: 'development' }],
+      totalResults: 1,
+    });
+
+    await Promise.resolve();
+    TestBed.tick();
+
+    const last = emissions[emissions.length - 1];
+    expect(last.map(s => s.guid)).toEqual(['space-a']);
+
+    sub.unsubscribe();
+    httpMock.verify();
   });
 });

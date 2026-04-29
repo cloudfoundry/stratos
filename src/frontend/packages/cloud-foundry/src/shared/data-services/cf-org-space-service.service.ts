@@ -1,7 +1,10 @@
-import { Injectable, OnDestroy, signal, inject } from '@angular/core';
+import { Injectable, OnDestroy, Signal, computed, inject, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, defer, Observable, of, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, defer, EMPTY, Observable, of, Subscription } from 'rxjs';
 import { take,
+  catchError,
   distinctUntilChanged,
   filter,
   map,
@@ -167,6 +170,31 @@ export class CfOrgSpaceDataService implements OnDestroy {
   private selectMode = CfOrgSpaceSelectMode.FIRST_ONLY;
   private subs: Subscription[] = [];
 
+  // V3-native per-cnsi org store. Keyed by cnsi guid, populated by
+  // `GET /pp/v1/cf/orgs/{cnsiGuid}` on cf select. Replaces the v2 ngrx
+  // cross-endpoint pagination path that collapsed entities for endpoints
+  // sharing api_url and dropped most orgs from the downstream filter.
+  private http = inject(HttpClient);
+  private _orgsByCnsi = signal<Record<string, { guid: string; name: string }[]>>({});
+  private _spacesByOrg = signal<Record<string, { guid: string; name: string }[]>>({});
+  private fetchedCnsis = new Set<string>();
+  private fetchedOrgKeys = new Set<string>();
+
+  /** Orgs for the currently-selected cnsi. Empty until fetch resolves. */
+  public orgList: Signal<{ guid: string; name: string }[]> = computed(() => {
+    const cnsi = this.cfSelectSignal();
+    if (!cnsi) { return []; }
+    return this._orgsByCnsi()[cnsi] ?? [];
+  });
+
+  /** Spaces for the currently-selected (cnsi, org). Empty until fetch resolves. */
+  public spaceList: Signal<{ guid: string; name: string }[]> = computed(() => {
+    const cnsi = this.cfSelectSignal();
+    const org = this.orgSelectSignal();
+    if (!cnsi || !org) { return []; }
+    return this._spacesByOrg()[`${cnsi}:${org}`] ?? [];
+  });
+
   /*
    * Observable that provides initial values for drop downs, output will be parsed through initialValuesMap before emitted on first
    */
@@ -190,6 +218,61 @@ export class CfOrgSpaceDataService implements OnDestroy {
       map(([cfLoading, orgLoading, spaceLoading]) => cfLoading || orgLoading || spaceLoading)
     );
 
+    // V3-native org fetch on cf change. Each cnsi is fetched once;
+    // re-selection of an already-fetched cnsi reads the cached signal.
+    this.subs.push(this.cf.select.subscribe(cnsi => {
+      if (!cnsi || this.fetchedCnsis.has(cnsi)) { return; }
+      this.fetchedCnsis.add(cnsi);
+      this.http.get<{ resources: { guid: string; name: string }[] }>(
+        `/pp/v1/cf/orgs/${cnsi}?per_page=500&page=1`,
+      ).pipe(
+        catchError(() => EMPTY),
+      ).subscribe(resp => {
+        this._orgsByCnsi.update(map => ({ ...map, [cnsi]: resp.resources ?? [] }));
+      });
+    }));
+
+    // V3-native per-org spaces fetch on org change. Each (cnsi,org) is
+    // fetched once.
+    this.subs.push(this.org.select.subscribe(orgGuid => {
+      const cnsi = this.cf.select.getValue();
+      if (!cnsi || !orgGuid) { return; }
+      const key = `${cnsi}:${orgGuid}`;
+      if (this.fetchedOrgKeys.has(key)) { return; }
+      this.fetchedOrgKeys.add(key);
+      this.http.get<{ resources: { guid: string; name: string }[] }>(
+        `/pp/v1/cf/org/${cnsi}/${orgGuid}/spaces?per_page=500&page=1`,
+      ).pipe(
+        catchError(() => EMPTY),
+      ).subscribe(resp => {
+        this._spacesByOrg.update(map => ({ ...map, [key]: resp.resources ?? [] }));
+      });
+    }));
+
+    // Cascade-clear: cf change resets org & space selections.
+    let prevCf = this.cf.select.getValue();
+    this.subs.push(this.cf.select.subscribe(cnsi => {
+      if (cnsi !== prevCf) {
+        prevCf = cnsi;
+        this.org.select.next(undefined as any);
+        this.space.select.next(undefined as any);
+      }
+    }));
+
+    // Cascade-clear: org change resets space selection.
+    let prevOrg = this.org.select.getValue();
+    this.subs.push(this.org.select.subscribe(orgGuid => {
+      if (orgGuid !== prevOrg) {
+        prevOrg = orgGuid;
+        this.space.select.next(undefined as any);
+      }
+    }));
+
+    // Bridge orgList/spaceList signals -> legacy org.list$/space.list$
+    // observables. Consumer files reading via `| async` see the V3-sourced
+    // data; the old ngrx-pagination-derived list$ chains are replaced.
+    this.org.list$ = toObservable(this.orgList) as Observable<IOrganization[]>;
+    this.space.list$ = toObservable(this.spaceList) as Observable<ISpace[]>;
   }
 
   private getAllOrgsObservable() {
