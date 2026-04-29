@@ -2,7 +2,6 @@
 package cloudfoundry
 
 import (
-	"context"
 	"net/http"
 	"time"
 
@@ -12,31 +11,14 @@ import (
 
 // getNativeServiceOfferings handles GET /pp/v1/cf/service_offerings/{cnsiGuid}.
 //
-// Returns every service offering visible to the user — the catalog of service
-// types advertised by every connected service broker — joined with the broker
-// name. Drives the Stratos marketplace list page.
+// Single-page passthrough over /v3/service_offerings. Caller's per_page/page
+// forward verbatim to one CAPI call; absent, V3 server defaults apply.
+// Returns flat offering rows wrapped in a Stratos paged envelope.
 //
-// Two response shapes, dispatched on ?return=
-//   - summary: Stratos-shape paged response (StratosPagedResponse[StServiceOffering]).
-//     Used by CnsiServiceOfferingsSource via the CnsiEntitySource base class,
-//     which expects a `pagination` envelope to determine when to stop paging.
-//     Catalogs are small enough that we drain CAPI server-side and synthesise a
-//     single-page response — no genuine summary-tier paging is implemented.
-//   - (none): flat StServiceOfferingsResponse with totalResults only. Reserved
-//     for future direct callers that don't need pagination meta.
-//
-// Two-step join, mirroring native_service_bindings_reads.go:
-//  1. /v3/service_offerings — drain all pages.
-//  2. /v3/service_brokers?guids={…collected unique broker GUIDs…} — one
-//     batched fetch. CF v3 ListResponse doesn't model the `included`
-//     response field, so include= won't help; the explicit follow-up
-//     gives the same result with one extra round-trip.
-//
-// If the broker fetch fails the handler still returns 200 with offering-level
-// fields intact — BrokerName falls back to empty string and the UI renders
-// the cell blank rather than a hard error. CF's catalog includes a free
-// service-broker reference per offering, so a transient broker-list 502
-// shouldn't block the marketplace.
+// Per-page broker join: the unique broker GUIDs referenced by THIS page's
+// offerings are resolved with one batched /v3/service_brokers?guids=… call
+// (bounded by the page's broker-set size). Soft-fail: a broker-list error
+// leaves BrokerName empty rather than 502'ing the whole marketplace.
 func (c *CloudFoundrySpecification) getNativeServiceOfferings(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
@@ -53,12 +35,29 @@ func (c *CloudFoundrySpecification) getNativeServiceOfferings(ctx echo.Context) 
 		return err
 	}
 
-	offerings, err := listAllServiceOfferings(ctx.Request().Context(), cfClient)
-	if err != nil {
-		return handleCapiError(ctx, err)
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+
+	if ctx.QueryParam("return") == "counts" {
+		params := capi.NewQueryParams().WithPerPage(1)
+		raw, lerr := cfClient.ServiceOfferings().List(ctx.Request().Context(), params)
+		if lerr != nil {
+			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+		}
+		return ctx.JSON(http.StatusOK, StServiceOfferingsResponse{
+			Resources:    []StServiceOffering{},
+			TotalResults: raw.Pagination.TotalResults,
+		})
 	}
 
-	// Collect the unique broker GUIDs referenced by these offerings.
+	perPage, page, present := parsePerPageAndPage(ctx)
+	listParams := applyPagingParams(capi.NewQueryParams(), perPage, page, present)
+	rawOfferings, listErr := cfClient.ServiceOfferings().List(ctx.Request().Context(), listParams)
+	if listErr != nil {
+		return handleCapiError(ctx, listErr)
+	}
+	offerings := rawOfferings.Resources
+
+	// Collect the unique broker GUIDs referenced by this page's offerings.
 	brokerGUIDSet := make(map[string]struct{}, len(offerings))
 	for _, o := range offerings {
 		if guid := relationshipGUID(o.Relationships.ServiceBroker); guid != "" {
@@ -70,15 +69,13 @@ func (c *CloudFoundrySpecification) getNativeServiceOfferings(ctx echo.Context) 
 		brokerGUIDs = append(brokerGUIDs, g)
 	}
 
-	// Batch-fetch brokers so the picker can display names. Failure here is
-	// soft — the cell falls back to an empty broker name rather than 502'ing
-	// the whole marketplace on a transient broker-list error.
+	// Batch-fetch brokers so the picker can display names. Soft-fail.
 	brokerByGUID := make(map[string]capi.ServiceBroker, len(brokerGUIDs))
 	if len(brokerGUIDs) > 0 {
 		brokerParams := capi.NewQueryParams().
-			WithPerPage(fullPagePerRequest).
+			WithPerPage(len(brokerGUIDs)).
 			WithFilter("guids", brokerGUIDs...)
-		if raw, listErr := cfClient.ServiceBrokers().List(ctx.Request().Context(), brokerParams); listErr == nil {
+		if raw, berr := cfClient.ServiceBrokers().List(ctx.Request().Context(), brokerParams); berr == nil {
 			for _, b := range raw.Resources {
 				brokerByGUID[b.GUID] = b
 			}
@@ -90,24 +87,9 @@ func (c *CloudFoundrySpecification) getNativeServiceOfferings(ctx echo.Context) 
 		out = append(out, toStServiceOffering(o, cnsiGUID, brokerByGUID))
 	}
 
-	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
-
-	if ctx.QueryParam("return") == "summary" {
-		// Synthesise a single-page Stratos paged response. The CnsiEntitySource
-		// base class drives pagination by walking until pagination.next is null
-		// — we drain CAPI server-side and emit one fully-populated page so the
-		// frontend's first iteration completes the load. No-second-page = nil
-		// next link = source flips done=true.
-		response := StratosPagedResponse[StServiceOffering]{
-			Resources:  out,
-			Pagination: BuildPaginationMeta(ctx, 1, len(out), len(out)),
-		}
-		return ctx.JSON(http.StatusOK, response)
-	}
-
-	return ctx.JSON(http.StatusOK, StServiceOfferingsResponse{
-		Resources:    out,
-		TotalResults: len(out),
+	return ctx.JSON(http.StatusOK, StratosPagedResponse[StServiceOffering]{
+		Resources:  out,
+		Pagination: BuildPaginationMeta(ctx, page, perPage, rawOfferings.Pagination.TotalResults),
 	})
 }
 
@@ -153,29 +135,6 @@ func (c *CloudFoundrySpecification) getNativeServiceOfferingDetail(ctx echo.Cont
 
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
 	return ctx.JSON(http.StatusOK, toStServiceOffering(*offering, cnsiGUID, brokerByGUID))
-}
-
-// listAllServiceOfferings drains /v3/service_offerings and returns the full
-// set. Unlike apps/orgs/spaces/routes the marketplace catalog is small enough
-// that we don't bother with parallel page fetches — sequential pagination
-// keeps the code simple and CAPI happy. Mirrors the bindings drain shape.
-func listAllServiceOfferings(ctx context.Context, cfClient capi.Client) ([]capi.ServiceOffering, error) {
-	all := make([]capi.ServiceOffering, 0)
-	page := 1
-	for {
-		params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
-		params.Page = page
-		raw, err := cfClient.ServiceOfferings().List(ctx, params)
-		if err != nil {
-			return nil, err
-		}
-		all = append(all, raw.Resources...)
-		if raw.Pagination.Next == nil || raw.Pagination.Next.Href == "" {
-			break
-		}
-		page++
-	}
-	return all, nil
 }
 
 // toStServiceOffering maps a capi.ServiceOffering onto the Stratos-shape DTO.

@@ -35,31 +35,37 @@ func (c *CloudFoundrySpecification) getNativeStacks(ctx echo.Context) error {
 		return err
 	}
 
-	resources := make([]capi.Stack, 0)
-	page := 1
-	for {
-		params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
-		params.Page = page
-		raw, listErr := cfClient.Stacks().List(ctx.Request().Context(), params)
-		if listErr != nil {
-			return handleCapiError(ctx, listErr)
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+
+	if ctx.QueryParam("return") == "counts" {
+		params := capi.NewQueryParams().WithPerPage(1)
+		raw, lerr := cfClient.Stacks().List(ctx.Request().Context(), params)
+		if lerr != nil {
+			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
 		}
-		resources = append(resources, raw.Resources...)
-		if raw.Pagination.Next == nil || raw.Pagination.Next.Href == "" {
-			break
-		}
-		page++
+		return ctx.JSON(http.StatusOK, StStacksResponse{
+			Resources:    []StStack{},
+			TotalResults: raw.Pagination.TotalResults,
+		})
 	}
 
-	out := make([]StStack, 0, len(resources))
-	for _, s := range resources {
+	// Wire-contract passthrough: forward client per_page+page to upstream V3
+	// CAPI verbatim, return one CAPI page wrapped in a Stratos paged envelope.
+	perPage, page, present := parsePerPageAndPage(ctx)
+	params := applyPagingParams(capi.NewQueryParams(), perPage, page, present)
+	raw, listErr := cfClient.Stacks().List(ctx.Request().Context(), params)
+	if listErr != nil {
+		return handleCapiError(ctx, listErr)
+	}
+
+	out := make([]StStack, 0, len(raw.Resources))
+	for _, s := range raw.Resources {
 		out = append(out, toStStack(s, cnsiGUID))
 	}
 
-	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
-	return ctx.JSON(http.StatusOK, StStacksResponse{
-		Resources:    out,
-		TotalResults: len(out),
+	return ctx.JSON(http.StatusOK, StratosPagedResponse[StStack]{
+		Resources:  out,
+		Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
 	})
 }
 

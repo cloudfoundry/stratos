@@ -9,25 +9,21 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// maxAuditEventPages caps the pagination drain so a busy foundation
-// doesn't lock up Jetstream for an unbounded period — at 500 events
-// per page that's 25,000 events. The Events tab is approximated as
-// "recent activity"; deep historical retrieval is a future detail-
-// screen / search concern.
-const maxAuditEventPages = 50
-
 // getNativeAuditEvents handles GET /pp/v1/cf/audit_events/{cnsiGuid}.
 //
-// Returns recent audit events on the foundation as flat StAuditEvent
+// Returns one page of audit events on the foundation as flat StAuditEvent
 // DTOs. Drives the CF-level Events tab and the org / space / app event
 // tabs (which apply per-page filtering via the signal-config service's
 // basePredicate). Read-only — there are no writes to surface.
 //
-// Implementation: CF v3's audit events resource is served by GET
-// /v3/audit_events. We page through results — capped at
-// maxAuditEventPages so the drain stays bounded — mapping
-// capi.AuditEvent → StAuditEvent along the way and stamping cnsiGuid
-// on each row.
+// Wire-contract passthrough: ?per_page and ?page forward verbatim to a
+// single /v3/audit_events CAPI call (V3 defaults applied when absent).
+// Audit-event tables can carry tens of thousands of rows on busy
+// foundations — the previous full-drain (capped at 25k) breached the
+// gorouter ceiling. The frontend now drives paging via pagination links.
+//
+// ?return=counts fast path: per_page=1, returns just the totalResults so
+// badges/summaries don't have to fetch a full page.
 func (c *CloudFoundrySpecification) getNativeAuditEvents(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
@@ -44,31 +40,35 @@ func (c *CloudFoundrySpecification) getNativeAuditEvents(ctx echo.Context) error
 		return err
 	}
 
-	resources := make([]capi.AuditEvent, 0)
-	page := 1
-	for page <= maxAuditEventPages {
-		params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
-		params.Page = page
-		raw, listErr := cfClient.AuditEvents().List(ctx.Request().Context(), params)
-		if listErr != nil {
-			return handleCapiError(ctx, listErr)
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+
+	if ctx.QueryParam("return") == "counts" {
+		params := capi.NewQueryParams().WithPerPage(1)
+		raw, lerr := cfClient.AuditEvents().List(ctx.Request().Context(), params)
+		if lerr != nil {
+			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
 		}
-		resources = append(resources, raw.Resources...)
-		if raw.Pagination.Next == nil || raw.Pagination.Next.Href == "" {
-			break
-		}
-		page++
+		return ctx.JSON(http.StatusOK, StAuditEventsResponse{
+			Resources:    []StAuditEvent{},
+			TotalResults: raw.Pagination.TotalResults,
+		})
 	}
 
-	out := make([]StAuditEvent, 0, len(resources))
-	for _, ev := range resources {
+	perPage, page, present := parsePerPageAndPage(ctx)
+	params := applyPagingParams(capi.NewQueryParams(), perPage, page, present)
+	raw, listErr := cfClient.AuditEvents().List(ctx.Request().Context(), params)
+	if listErr != nil {
+		return handleCapiError(ctx, listErr)
+	}
+
+	out := make([]StAuditEvent, 0, len(raw.Resources))
+	for _, ev := range raw.Resources {
 		out = append(out, toStAuditEvent(ev, cnsiGUID))
 	}
 
-	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
-	return ctx.JSON(http.StatusOK, StAuditEventsResponse{
-		Resources:    out,
-		TotalResults: len(out),
+	return ctx.JSON(http.StatusOK, StratosPagedResponse[StAuditEvent]{
+		Resources:  out,
+		Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
 	})
 }
 

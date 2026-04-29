@@ -38,31 +38,36 @@ func (c *CloudFoundrySpecification) getNativeSecurityGroups(ctx echo.Context) er
 		return err
 	}
 
-	resources := make([]capi.SecurityGroup, 0)
-	page := 1
-	for {
-		params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
-		params.Page = page
-		raw, listErr := cfClient.SecurityGroups().List(ctx.Request().Context(), params)
-		if listErr != nil {
-			return handleCapiError(ctx, listErr)
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+
+	if ctx.QueryParam("return") == "counts" {
+		params := capi.NewQueryParams().WithPerPage(1)
+		raw, lerr := cfClient.SecurityGroups().List(ctx.Request().Context(), params)
+		if lerr != nil {
+			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
 		}
-		resources = append(resources, raw.Resources...)
-		if raw.Pagination.Next == nil || raw.Pagination.Next.Href == "" {
-			break
-		}
-		page++
+		return ctx.JSON(http.StatusOK, StSecurityGroupsResponse{
+			Resources:    []StSecurityGroup{},
+			TotalResults: raw.Pagination.TotalResults,
+		})
 	}
 
-	out := make([]StSecurityGroup, 0, len(resources))
-	for _, sg := range resources {
+	// Wire-contract passthrough.
+	perPage, page, present := parsePerPageAndPage(ctx)
+	params := applyPagingParams(capi.NewQueryParams(), perPage, page, present)
+	raw, listErr := cfClient.SecurityGroups().List(ctx.Request().Context(), params)
+	if listErr != nil {
+		return handleCapiError(ctx, listErr)
+	}
+
+	out := make([]StSecurityGroup, 0, len(raw.Resources))
+	for _, sg := range raw.Resources {
 		out = append(out, toStSecurityGroup(sg, cnsiGUID))
 	}
 
-	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
-	return ctx.JSON(http.StatusOK, StSecurityGroupsResponse{
-		Resources:    out,
-		TotalResults: len(out),
+	return ctx.JSON(http.StatusOK, StratosPagedResponse[StSecurityGroup]{
+		Resources:  out,
+		Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
 	})
 }
 

@@ -42,27 +42,43 @@ func (c *CloudFoundrySpecification) getAppServiceBindings(ctx echo.Context) erro
 		return err
 	}
 
-	reqCtx := ctx.Request().Context()
-	bindings := make([]capi.ServiceCredentialBinding, 0)
-	page := 1
-	for {
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+
+	if ctx.QueryParam("return") == "counts" {
 		params := capi.NewQueryParams().
-			WithPerPage(fullPagePerRequest).
+			WithPerPage(1).
 			WithFilter("app_guids", appGUID).
 			WithFilter("type", "app")
-		params.Page = page
-		raw, listErr := cfClient.ServiceCredentialBindings().List(reqCtx, params)
-		if listErr != nil {
-			return handleCapiError(ctx, listErr)
+		raw, lerr := cfClient.ServiceCredentialBindings().List(ctx.Request().Context(), params)
+		if lerr != nil {
+			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
 		}
-		bindings = append(bindings, raw.Resources...)
-		if raw.Pagination.Next == nil || raw.Pagination.Next.Href == "" {
-			break
-		}
-		page++
+		return ctx.JSON(http.StatusOK, StAppServiceBindingsResponse{
+			Resources:    []StServiceBinding{},
+			TotalResults: raw.Pagination.TotalResults,
+		})
 	}
 
-	// Collect the unique service-instance GUIDs referenced by these bindings.
+	reqCtx := ctx.Request().Context()
+
+	// Wire-contract passthrough on the primary fetch: forward client
+	// per_page+page to a single /v3/service_credential_bindings call. When
+	// the caller omits per_page, V3 server defaults apply.
+	perPage, page, present := parsePerPageAndPage(ctx)
+	primaryParams := applyPagingParams(
+		capi.NewQueryParams().
+			WithFilter("app_guids", appGUID).
+			WithFilter("type", "app"),
+		perPage, page, present,
+	)
+	rawBindings, listErr := cfClient.ServiceCredentialBindings().List(reqCtx, primaryParams)
+	if listErr != nil {
+		return handleCapiError(ctx, listErr)
+	}
+	bindings := rawBindings.Resources
+
+	// Collect the unique service-instance GUIDs referenced by this page of
+	// bindings. The follow-up SI fetch is naturally bounded by perPage.
 	siGUIDSet := make(map[string]struct{}, len(bindings))
 	for _, b := range bindings {
 		if guid := relationshipGUID(b.Relationships.ServiceInstance); guid != "" {
@@ -79,9 +95,9 @@ func (c *CloudFoundrySpecification) getAppServiceBindings(ctx echo.Context) erro
 	siByGUID := make(map[string]capi.ServiceInstance, len(siGUIDs))
 	if len(siGUIDs) > 0 {
 		siParams := capi.NewQueryParams().
-			WithPerPage(fullPagePerRequest).
+			WithPerPage(len(siGUIDs)).
 			WithFilter("guids", siGUIDs...)
-		if raw, listErr := cfClient.ServiceInstances().List(reqCtx, siParams); listErr == nil {
+		if raw, sListErr := cfClient.ServiceInstances().List(reqCtx, siParams); sListErr == nil {
 			for _, si := range raw.Resources {
 				siByGUID[si.GUID] = si
 			}
@@ -93,10 +109,9 @@ func (c *CloudFoundrySpecification) getAppServiceBindings(ctx echo.Context) erro
 		out = append(out, toStServiceBinding(b, siByGUID))
 	}
 
-	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
-	return ctx.JSON(http.StatusOK, StAppServiceBindingsResponse{
-		Resources:    out,
-		TotalResults: len(out),
+	return ctx.JSON(http.StatusOK, StratosPagedResponse[StServiceBinding]{
+		Resources:  out,
+		Pagination: BuildPaginationMeta(ctx, page, perPage, rawBindings.Pagination.TotalResults),
 	})
 }
 

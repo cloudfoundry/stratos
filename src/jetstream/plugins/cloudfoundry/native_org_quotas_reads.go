@@ -37,31 +37,36 @@ func (c *CloudFoundrySpecification) getNativeOrgQuotas(ctx echo.Context) error {
 		return err
 	}
 
-	resources := make([]capi.OrganizationQuota, 0)
-	page := 1
-	for {
-		params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
-		params.Page = page
-		raw, listErr := cfClient.OrganizationQuotas().List(ctx.Request().Context(), params)
-		if listErr != nil {
-			return handleCapiError(ctx, listErr)
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+
+	if ctx.QueryParam("return") == "counts" {
+		params := capi.NewQueryParams().WithPerPage(1)
+		raw, lerr := cfClient.OrganizationQuotas().List(ctx.Request().Context(), params)
+		if lerr != nil {
+			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
 		}
-		resources = append(resources, raw.Resources...)
-		if raw.Pagination.Next == nil || raw.Pagination.Next.Href == "" {
-			break
-		}
-		page++
+		return ctx.JSON(http.StatusOK, StOrgQuotasResponse{
+			Resources:    []StOrgQuota{},
+			TotalResults: raw.Pagination.TotalResults,
+		})
 	}
 
-	out := make([]StOrgQuota, 0, len(resources))
-	for _, q := range resources {
+	// Wire-contract passthrough.
+	perPage, page, present := parsePerPageAndPage(ctx)
+	params := applyPagingParams(capi.NewQueryParams(), perPage, page, present)
+	raw, listErr := cfClient.OrganizationQuotas().List(ctx.Request().Context(), params)
+	if listErr != nil {
+		return handleCapiError(ctx, listErr)
+	}
+
+	out := make([]StOrgQuota, 0, len(raw.Resources))
+	for _, q := range raw.Resources {
 		out = append(out, toStOrgQuota(q, cnsiGUID))
 	}
 
-	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
-	return ctx.JSON(http.StatusOK, StOrgQuotasResponse{
-		Resources:    out,
-		TotalResults: len(out),
+	return ctx.JSON(http.StatusOK, StratosPagedResponse[StOrgQuota]{
+		Resources:  out,
+		Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
 	})
 }
 

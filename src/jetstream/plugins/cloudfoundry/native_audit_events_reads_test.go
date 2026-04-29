@@ -87,10 +87,10 @@ func TestGetNativeAuditEvents_ReturnsMappedEvents(t *testing.T) {
 	assert.Equal(t, http.StatusOK, rec.Code)
 	assert.Equal(t, 1, hits)
 
-	var resp StAuditEventsResponse
+	var resp StratosPagedResponse[StAuditEvent]
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
 	require.Len(t, resp.Resources, 2)
-	assert.Equal(t, 2, resp.TotalResults)
+	assert.Equal(t, 2, resp.Pagination.TotalResults)
 
 	e0 := resp.Resources[0]
 	assert.Equal(t, "event-1", e0.GUID)
@@ -154,13 +154,13 @@ func TestGetNativeAuditEvents_EmptyResult(t *testing.T) {
 	assert.Contains(t, rec.Body.String(), `"resources":[]`)
 }
 
-// TestGetNativeAuditEvents_DrainsAllPages confirms pagination drain.
-// Audit events accumulate fast on busy foundations — the handler caps
-// the drain at maxAuditEventPages to avoid unbounded reads. This test
-// only exercises a 2-page case; the cap behavior is exercised in a
-// separate test if needed.
-func TestGetNativeAuditEvents_DrainsAllPages(t *testing.T) {
+// TestGetNativeAuditEvents_PerPagePassthrough verifies the handler is a
+// single-page passthrough: caller's per_page+page forward verbatim to the
+// upstream /v3/audit_events call, the response carries a V3-shape
+// pagination envelope, and the handler issues exactly one CAPI request.
+func TestGetNativeAuditEvents_PerPagePassthrough(t *testing.T) {
 	hits := 0
+	var lastPerPage, lastPage string
 	capiServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case r.URL.Path == "/v3":
@@ -168,22 +168,127 @@ func TestGetNativeAuditEvents_DrainsAllPages(t *testing.T) {
 			w.Write([]byte(`{"links":{}}`))
 		case r.URL.Path == "/v3/audit_events" && r.Method == http.MethodGet:
 			hits++
+			lastPerPage = r.URL.Query().Get("per_page")
+			lastPage = r.URL.Query().Get("page")
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
-			if r.URL.Query().Get("page") == "2" {
-				w.Write([]byte(`{
-					"pagination": {"total_results": 3, "total_pages": 2, "next": null},
-					"resources": [{"guid":"event-3","type":"x","actor":{"guid":"u","type":"user","name":"u"},"target":{"guid":"t","type":"app","name":"t"},"data":{}}]
-				}`))
-				return
-			}
 			w.Write([]byte(`{
-				"pagination": {"total_results": 3, "total_pages": 2, "next": {"href": "/v3/audit_events?page=2"}},
+				"pagination": {
+					"total_results": 100,
+					"total_pages": 4,
+					"first": {"href":"/v3/audit_events?page=1&per_page=25"},
+					"last":  {"href":"/v3/audit_events?page=4&per_page=25"},
+					"next":  {"href":"/v3/audit_events?page=3&per_page=25"},
+					"previous": {"href":"/v3/audit_events?page=1&per_page=25"}
+				},
 				"resources": [
-					{"guid":"event-1","type":"x","actor":{"guid":"u","type":"user","name":"u"},"target":{"guid":"t","type":"app","name":"t"},"data":{}},
-					{"guid":"event-2","type":"x","actor":{"guid":"u","type":"user","name":"u"},"target":{"guid":"t","type":"app","name":"t"},"data":{}}
+					{"guid":"event-1","type":"x","actor":{"guid":"u","type":"user","name":"u"},"target":{"guid":"t","type":"app","name":"t"},"data":{}}
 				]
 			}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer capiServer.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(capiServer.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/audit_events/cnsi-1?per_page=25&page=2", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/audit_events/:cnsiGuid")
+	c.SetParamNames("cnsiGuid")
+	c.SetParamValues("cnsi-1")
+
+	require.NoError(t, plugin.getNativeAuditEvents(c))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, 1, hits, "single-page passthrough must issue exactly one CAPI call")
+	assert.Equal(t, "25", lastPerPage, "per_page must forward verbatim")
+	assert.Equal(t, "2", lastPage, "page must forward verbatim")
+
+	var resp StratosPagedResponse[StAuditEvent]
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	require.Len(t, resp.Resources, 1)
+	assert.Equal(t, 100, resp.Pagination.TotalResults)
+	assert.Equal(t, 4, resp.Pagination.TotalPages)
+	assert.NotNil(t, resp.Pagination.First)
+	assert.NotNil(t, resp.Pagination.Last)
+	assert.NotNil(t, resp.Pagination.Next)
+	assert.NotNil(t, resp.Pagination.Previous)
+}
+
+// TestGetNativeAuditEvents_CountsFastPath verifies ?return=counts:
+// upstream is called with per_page=1, the handler returns a flat
+// {totalResults} response (no resources fetched), and the response
+// shape mirrors the other count-shape endpoints.
+func TestGetNativeAuditEvents_CountsFastPath(t *testing.T) {
+	var sawPerPage string
+	capiServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/v3":
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{"links":{}}`))
+		case r.URL.Path == "/v3/audit_events" && r.Method == http.MethodGet:
+			sawPerPage = r.URL.Query().Get("per_page")
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{"pagination": {"total_results": 1234, "total_pages": 1234, "next": null},"resources":[]}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer capiServer.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(capiServer.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/audit_events/cnsi-1?return=counts", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/audit_events/:cnsiGuid")
+	c.SetParamNames("cnsiGuid")
+	c.SetParamValues("cnsi-1")
+
+	require.NoError(t, plugin.getNativeAuditEvents(c))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, "1", sawPerPage, "counts branch must request per_page=1")
+
+	var resp StAuditEventsResponse
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	assert.Equal(t, 1234, resp.TotalResults)
+	assert.Empty(t, resp.Resources)
+}
+
+// TestGetNativeAuditEvents_OmitsPagingWhenAbsent verifies V3-default
+// behaviour: when the caller doesn't pass per_page or page, the handler
+// MUST NOT inject any per_page/page on the upstream call so V3 applies
+// its server defaults.
+func TestGetNativeAuditEvents_OmitsPagingWhenAbsent(t *testing.T) {
+	var sawPerPage, sawPage bool
+	capiServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/v3":
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{"links":{}}`))
+		case r.URL.Path == "/v3/audit_events" && r.Method == http.MethodGet:
+			_, sawPerPage = r.URL.Query()["per_page"]
+			_, sawPage = r.URL.Query()["page"]
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{"pagination": {"total_results": 0, "total_pages": 0, "next": null},"resources":[]}`))
 		default:
 			http.NotFound(w, r)
 		}
@@ -208,9 +313,6 @@ func TestGetNativeAuditEvents_DrainsAllPages(t *testing.T) {
 
 	require.NoError(t, plugin.getNativeAuditEvents(c))
 	assert.Equal(t, http.StatusOK, rec.Code)
-	assert.Equal(t, 2, hits, "should drain both pages")
-
-	var resp StAuditEventsResponse
-	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
-	require.Len(t, resp.Resources, 3)
+	assert.False(t, sawPerPage, "per_page must be absent on upstream when caller omits it")
+	assert.False(t, sawPage, "page must be absent on upstream when caller omits it")
 }

@@ -36,31 +36,39 @@ func (c *CloudFoundrySpecification) getNativeBuildpacks(ctx echo.Context) error 
 		return err
 	}
 
-	resources := make([]capi.Buildpack, 0)
-	page := 1
-	for {
-		params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
-		params.Page = page
-		raw, listErr := cfClient.Buildpacks().List(ctx.Request().Context(), params)
-		if listErr != nil {
-			return handleCapiError(ctx, listErr)
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+
+	if ctx.QueryParam("return") == "counts" {
+		params := capi.NewQueryParams().WithPerPage(1)
+		raw, lerr := cfClient.Buildpacks().List(ctx.Request().Context(), params)
+		if lerr != nil {
+			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
 		}
-		resources = append(resources, raw.Resources...)
-		if raw.Pagination.Next == nil || raw.Pagination.Next.Href == "" {
-			break
-		}
-		page++
+		return ctx.JSON(http.StatusOK, StBuildpacksResponse{
+			Resources:    []StBuildpack{},
+			TotalResults: raw.Pagination.TotalResults,
+		})
 	}
 
-	out := make([]StBuildpack, 0, len(resources))
-	for _, b := range resources {
+	// Wire-contract passthrough: forward client per_page+page to upstream V3
+	// CAPI verbatim, return one CAPI page wrapped in a Stratos paged envelope.
+	// When the caller omits per_page, the upstream call carries no per_page
+	// either and V3 applies its server defaults (per_page=50, page=1).
+	perPage, page, present := parsePerPageAndPage(ctx)
+	params := applyPagingParams(capi.NewQueryParams(), perPage, page, present)
+	raw, listErr := cfClient.Buildpacks().List(ctx.Request().Context(), params)
+	if listErr != nil {
+		return handleCapiError(ctx, listErr)
+	}
+
+	out := make([]StBuildpack, 0, len(raw.Resources))
+	for _, b := range raw.Resources {
 		out = append(out, toStBuildpack(b, cnsiGUID))
 	}
 
-	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
-	return ctx.JSON(http.StatusOK, StBuildpacksResponse{
-		Resources:    out,
-		TotalResults: len(out),
+	return ctx.JSON(http.StatusOK, StratosPagedResponse[StBuildpack]{
+		Resources:  out,
+		Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
 	})
 }
 

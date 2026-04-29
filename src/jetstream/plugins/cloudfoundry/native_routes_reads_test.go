@@ -91,10 +91,10 @@ func TestGetAppRoutes_ReturnsMappedRoutes(t *testing.T) {
 	assert.Equal(t, 1, hits, "should make exactly one list call when single page")
 	assert.Contains(t, capturedQuery, "app_guids=app-1", "must filter by app_guids")
 
-	var resp StAppRoutesResponse
+	var resp StratosPagedResponse[StRoute]
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
 	require.Len(t, resp.Resources, 2)
-	assert.Equal(t, 2, resp.TotalResults)
+	assert.Equal(t, 2, resp.Pagination.TotalResults)
 
 	r0 := resp.Resources[0]
 	assert.Equal(t, "route-1", r0.GUID)
@@ -193,4 +193,130 @@ func TestGetAppRoutes_PropagatesError(t *testing.T) {
 	require.NoError(t, plugin.getAppRoutes(c))
 	assert.Equal(t, http.StatusForbidden, rec.Code)
 	assert.Contains(t, rec.Body.String(), "CF-NotAuthorized")
+}
+
+// TestGetAppRoutes_PerPagePassthrough verifies single-page passthrough:
+// caller's per_page+page forward verbatim to the upstream /v3/routes
+// call (still scoped to the appGuid filter).
+func TestGetAppRoutes_PerPagePassthrough(t *testing.T) {
+	var hits int
+	var lastPerPage, lastPage, lastFilter string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case "/v3/routes":
+			hits++
+			lastPerPage = r.URL.Query().Get("per_page")
+			lastPage = r.URL.Query().Get("page")
+			lastFilter = r.URL.RawQuery
+			_, _ = w.Write([]byte(`{
+				"pagination":{"total_results":42,"total_pages":2,"first":{"href":"/v3/routes?page=1"},"last":{"href":"/v3/routes?page=2"},"next":{"href":"/v3/routes?page=2"}},
+				"resources":[{"guid":"r-1","host":"a","url":"a.example","relationships":{"domain":{"data":{"guid":"d"}},"space":{"data":{"guid":"s"}}}}]
+			}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(srv.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/cnsi-1/app-1/routes?per_page=25&page=2", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/routes")
+	c.SetParamNames("cnsiGuid", "appGuid")
+	c.SetParamValues("cnsi-1", "app-1")
+
+	require.NoError(t, plugin.getAppRoutes(c))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, 1, hits)
+	assert.Equal(t, "25", lastPerPage)
+	assert.Equal(t, "2", lastPage)
+	assert.Contains(t, lastFilter, "app_guids=app-1")
+
+	var resp StratosPagedResponse[StRoute]
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	assert.Equal(t, 42, resp.Pagination.TotalResults)
+}
+
+// TestGetAppRoutes_OmitsPagingWhenAbsent — V3-default contract.
+func TestGetAppRoutes_OmitsPagingWhenAbsent(t *testing.T) {
+	var sawPerPage, sawPage bool
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case "/v3/routes":
+			_, sawPerPage = r.URL.Query()["per_page"]
+			_, sawPage = r.URL.Query()["page"]
+			_, _ = w.Write([]byte(`{"pagination":{"total_results":0,"total_pages":0,"next":null},"resources":[]}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(srv.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/cnsi-1/app-1/routes", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/routes")
+	c.SetParamNames("cnsiGuid", "appGuid")
+	c.SetParamValues("cnsi-1", "app-1")
+
+	require.NoError(t, plugin.getAppRoutes(c))
+	assert.False(t, sawPerPage)
+	assert.False(t, sawPage)
+}
+
+// TestGetAppRoutes_CountsFastPath verifies ?return=counts forwards
+// per_page=1 plus the app_guids filter.
+func TestGetAppRoutes_CountsFastPath(t *testing.T) {
+	srv, q := newCountsCapiServer(t, "/v3/routes", 7, "app_guids")
+	defer srv.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(srv.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/cnsi-1/app-1/routes?return=counts", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/routes")
+	c.SetParamNames("cnsiGuid", "appGuid")
+	c.SetParamValues("cnsi-1", "app-1")
+
+	require.NoError(t, plugin.getAppRoutes(c))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, "1", q.PerPage)
+	assert.Equal(t, "app-1", q.Filters["app_guids"])
+
+	var resp StAppRoutesResponse
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	assert.Equal(t, 7, resp.TotalResults)
+	assert.Empty(t, resp.Resources)
 }

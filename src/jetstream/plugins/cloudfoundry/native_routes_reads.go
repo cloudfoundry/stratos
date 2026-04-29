@@ -42,33 +42,43 @@ func (c *CloudFoundrySpecification) getAppRoutes(ctx echo.Context) error {
 		return err
 	}
 
-	// Drain every page. Apps rarely have many routes, but path-based routing
-	// and multiple domains can push the count past one page.
-	resources := make([]capi.Route, 0)
-	page := 1
-	for {
-		params := capi.NewQueryParams().WithPerPage(fullPagePerRequest).WithFilter("app_guids", appGUID)
-		params.Page = page
-		raw, listErr := cfClient.Routes().List(ctx.Request().Context(), params)
-		if listErr != nil {
-			return handleCapiError(ctx, listErr)
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+
+	if ctx.QueryParam("return") == "counts" {
+		params := capi.NewQueryParams().
+			WithPerPage(1).
+			WithFilter("app_guids", appGUID)
+		raw, lerr := cfClient.Routes().List(ctx.Request().Context(), params)
+		if lerr != nil {
+			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
 		}
-		resources = append(resources, raw.Resources...)
-		if raw.Pagination.Next == nil || raw.Pagination.Next.Href == "" {
-			break
-		}
-		page++
+		return ctx.JSON(http.StatusOK, StAppRoutesResponse{
+			Resources:    []StRoute{},
+			TotalResults: raw.Pagination.TotalResults,
+		})
 	}
 
-	out := make([]StRoute, 0, len(resources))
-	for _, r := range resources {
+	// Wire-contract passthrough: forward client per_page+page to a single
+	// upstream /v3/routes?app_guids={appGuid} call. When the caller omits
+	// per_page, V3 server defaults apply.
+	perPage, page, present := parsePerPageAndPage(ctx)
+	params := applyPagingParams(
+		capi.NewQueryParams().WithFilter("app_guids", appGUID),
+		perPage, page, present,
+	)
+	raw, listErr := cfClient.Routes().List(ctx.Request().Context(), params)
+	if listErr != nil {
+		return handleCapiError(ctx, listErr)
+	}
+
+	out := make([]StRoute, 0, len(raw.Resources))
+	for _, r := range raw.Resources {
 		out = append(out, toStRoute(r, cnsiGUID))
 	}
 
-	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
-	return ctx.JSON(http.StatusOK, StAppRoutesResponse{
-		Resources:    out,
-		TotalResults: len(out),
+	return ctx.JSON(http.StatusOK, StratosPagedResponse[StRoute]{
+		Resources:  out,
+		Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
 	})
 }
 

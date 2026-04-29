@@ -209,3 +209,49 @@ func TestGetNativeDomainDetail(t *testing.T) {
 	assert.Equal(t, "single.example.com", resp.Name)
 	assert.Equal(t, "test-cnsi", resp.CnsiGUID)
 }
+
+// TestGetNativeDomains_PerPagePassthrough verifies single-page passthrough.
+func TestGetNativeDomains_PerPagePassthrough(t *testing.T) {
+	body := []byte(`{
+		"pagination": {
+			"total_results": 60, "total_pages": 3,
+			"first":{"href":"/v3/domains?page=1"},
+			"last":{"href":"/v3/domains?page=3"},
+			"next":{"href":"/v3/domains?page=3"},
+			"previous":{"href":"/v3/domains?page=1"}
+		},
+		"resources": [{"guid":"dom-1","name":"x.example.com","internal":false}]
+	}`)
+	srv, q := newPagingCapiServer(t, "/v3/domains", body)
+	defer srv.Close()
+
+	e := echo.New()
+	ctx, rec := newDomainsContext(e, "/pp/v1/cf/domains/test-cnsi?per_page=25&page=2")
+	plugin := newDomainsPlugin(srv.URL)
+
+	require.NoError(t, plugin.getNativeDomains(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, 1, q.Hits)
+	assert.Equal(t, "25", q.PerPage)
+	assert.Equal(t, "2", q.Page)
+
+	var resp StratosPagedResponse[StDomain]
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	assert.Equal(t, 60, resp.Pagination.TotalResults)
+}
+
+// TestGetNativeDomains_OmitsPagingWhenAbsent — V3-default contract.
+func TestGetNativeDomains_OmitsPagingWhenAbsent(t *testing.T) {
+	body := []byte(`{"pagination":{"total_results":0,"total_pages":0,"next":null},"resources":[]}`)
+	srv, q := newPagingCapiServer(t, "/v3/domains", body)
+	defer srv.Close()
+
+	e := echo.New()
+	ctx, rec := newDomainsContext(e, "/pp/v1/cf/domains/test-cnsi")
+	plugin := newDomainsPlugin(srv.URL)
+
+	require.NoError(t, plugin.getNativeDomains(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.False(t, q.PerPagePresent)
+	assert.False(t, q.PagePresent)
+}

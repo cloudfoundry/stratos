@@ -120,10 +120,10 @@ func TestGetAppServiceBindings_JoinsNamesFromServiceInstances(t *testing.T) {
 	assert.NotContains(t, bindingsQuery, "types=app")
 	assert.Contains(t, instancesQuery, "guids=")
 
-	var resp StAppServiceBindingsResponse
+	var resp StratosPagedResponse[StServiceBinding]
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
 	require.Len(t, resp.Resources, 2)
-	assert.Equal(t, 2, resp.TotalResults)
+	assert.Equal(t, 2, resp.Pagination.TotalResults)
 
 	byBindingGUID := map[string]StServiceBinding{}
 	for _, b := range resp.Resources {
@@ -240,10 +240,132 @@ func TestGetAppServiceBindings_SoftFallbackWhenInstanceFetchFails(t *testing.T) 
 	require.NoError(t, plugin.getAppServiceBindings(c))
 	assert.Equal(t, http.StatusOK, rec.Code)
 
-	var resp StAppServiceBindingsResponse
+	var resp StratosPagedResponse[StServiceBinding]
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
 	require.Len(t, resp.Resources, 1)
 	// Fallback uses the binding's own Name when SI fetch fails.
 	assert.Equal(t, "db-binding", resp.Resources[0].ServiceInstanceName)
 	assert.Equal(t, "", resp.Resources[0].ServiceInstanceType)
+}
+
+// TestGetAppServiceBindings_PerPagePassthrough verifies the primary
+// fetch is a single-page passthrough: caller's per_page+page forward
+// verbatim to /v3/service_credential_bindings.
+func TestGetAppServiceBindings_PerPagePassthrough(t *testing.T) {
+	var hits int
+	var lastPerPage, lastPage string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case "/v3/service_credential_bindings":
+			hits++
+			lastPerPage = r.URL.Query().Get("per_page")
+			lastPage = r.URL.Query().Get("page")
+			_, _ = w.Write([]byte(`{"pagination":{"total_results":7,"total_pages":1},"resources":[]}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(srv.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/cnsi-1/app-1/service_bindings?per_page=25&page=2", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/service_bindings")
+	c.SetParamNames("cnsiGuid", "appGuid")
+	c.SetParamValues("cnsi-1", "app-1")
+
+	require.NoError(t, plugin.getAppServiceBindings(c))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, 1, hits)
+	assert.Equal(t, "25", lastPerPage)
+	assert.Equal(t, "2", lastPage)
+
+	var resp StratosPagedResponse[StServiceBinding]
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	assert.Equal(t, 7, resp.Pagination.TotalResults)
+}
+
+// TestGetAppServiceBindings_OmitsPagingWhenAbsent — V3-default contract.
+func TestGetAppServiceBindings_OmitsPagingWhenAbsent(t *testing.T) {
+	var sawPerPage, sawPage bool
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case "/v3/service_credential_bindings":
+			_, sawPerPage = r.URL.Query()["per_page"]
+			_, sawPage = r.URL.Query()["page"]
+			_, _ = w.Write([]byte(`{"pagination":{"total_results":0,"total_pages":0,"next":null},"resources":[]}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(srv.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/cnsi-1/app-1/service_bindings", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/service_bindings")
+	c.SetParamNames("cnsiGuid", "appGuid")
+	c.SetParamValues("cnsi-1", "app-1")
+
+	require.NoError(t, plugin.getAppServiceBindings(c))
+	assert.False(t, sawPerPage)
+	assert.False(t, sawPage)
+}
+
+// TestGetAppServiceBindings_CountsFastPath verifies ?return=counts:
+// per_page=1 plus the app_guids+type=app filters.
+func TestGetAppServiceBindings_CountsFastPath(t *testing.T) {
+	srv, q := newCountsCapiServer(t, "/v3/service_credential_bindings", 4, "app_guids", "type")
+	defer srv.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(srv.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/cnsi-1/app-1/service_bindings?return=counts", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/service_bindings")
+	c.SetParamNames("cnsiGuid", "appGuid")
+	c.SetParamValues("cnsi-1", "app-1")
+
+	require.NoError(t, plugin.getAppServiceBindings(c))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, "1", q.PerPage)
+	assert.Equal(t, "app-1", q.Filters["app_guids"])
+	assert.Equal(t, "app", q.Filters["type"])
+
+	var resp StAppServiceBindingsResponse
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	assert.Equal(t, 4, resp.TotalResults)
+	assert.Empty(t, resp.Resources)
 }

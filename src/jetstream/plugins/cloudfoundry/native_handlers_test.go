@@ -111,9 +111,9 @@ func TestGetNativeOrgs(t *testing.T) {
 	assert.Equal(t, http.StatusOK, rec.Code)
 	assert.Equal(t, "1", rec.Header().Get("X-Stratos-Schema-Version"))
 
-	var resp StOrgsResponse
+	var resp StratosPagedResponse[StOrg]
 	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
-	assert.Equal(t, 1, resp.TotalResults)
+	assert.Equal(t, 1, resp.Pagination.TotalResults)
 	assert.Len(t, resp.Resources, 1)
 	assert.Equal(t, "org-guid-1", resp.Resources[0].GUID)
 	assert.Equal(t, "My Org", resp.Resources[0].Name)
@@ -234,9 +234,9 @@ func TestGetNativeApps(t *testing.T) {
 	require.NoError(t, plugin.getNativeApps(ctx))
 	assert.Equal(t, http.StatusOK, rec.Code)
 
-	var resp StAppsResponse
+	var resp StratosPagedResponse[StApp]
 	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
-	assert.Equal(t, 2, resp.TotalResults)
+	assert.Equal(t, 2, resp.Pagination.TotalResults)
 	assert.Equal(t, "app-1", resp.Resources[0].GUID)
 	assert.Equal(t, "STARTED", resp.Resources[0].State)
 	assert.Equal(t, "space-1", resp.Resources[0].SpaceGUID)
@@ -441,10 +441,196 @@ func TestGetNativeOrgSpaces(t *testing.T) {
 	require.NoError(t, plugin.getNativeOrgSpaces(ctx))
 	assert.Equal(t, http.StatusOK, rec.Code)
 
-	var resp StSpacesResponse
+	var resp StratosPagedResponse[StSpace]
 	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
-	assert.Equal(t, 2, resp.TotalResults)
+	assert.Equal(t, 2, resp.Pagination.TotalResults)
 	assert.Equal(t, "sp-1", resp.Resources[0].GUID)
 	assert.Equal(t, "dev", resp.Resources[0].Name)
 	assert.Equal(t, "org-1", resp.Resources[0].OrgGUID)
+}
+
+// TestGetNativeOrgs_OmitsPagingWhenAbsent verifies the V3-default
+// passthrough: with no caller-supplied per_page/page, the upstream URL
+// has neither key.
+func TestGetNativeOrgs_OmitsPagingWhenAbsent(t *testing.T) {
+	var sawPerPage, sawPage bool
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case "/v3/organizations":
+			_, sawPerPage = r.URL.Query()["per_page"]
+			_, sawPage = r.URL.Query()["page"]
+			_, _ = w.Write([]byte(`{"pagination":{"total_results":0,"total_pages":0,"next":null},"resources":[]}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(srv.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/orgs/cnsi-1", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid")
+	ctx.SetParamValues("cnsi-1")
+
+	require.NoError(t, plugin.getNativeOrgs(ctx))
+	assert.False(t, sawPerPage, "per_page must be absent on upstream when caller omits it")
+	assert.False(t, sawPage, "page must be absent on upstream when caller omits it")
+}
+
+// TestGetNativeApps_OmitsPagingWhenAbsent verifies the apps handler is a
+// V3-default passthrough when the caller omits per_page/page.
+func TestGetNativeApps_OmitsPagingWhenAbsent(t *testing.T) {
+	var sawPerPage, sawPage bool
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case "/v3/apps":
+			_, sawPerPage = r.URL.Query()["per_page"]
+			_, sawPage = r.URL.Query()["page"]
+			_, _ = w.Write([]byte(`{"pagination":{"total_results":0,"total_pages":0,"next":null},"resources":[]}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(srv.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/cnsi-1", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid")
+	ctx.SetParamValues("cnsi-1")
+
+	require.NoError(t, plugin.getNativeApps(ctx))
+	assert.False(t, sawPerPage)
+	assert.False(t, sawPage)
+}
+
+// TestGetNativeSpaces_OmitsPagingWhenAbsent verifies the spaces handler
+// is a V3-default passthrough when the caller omits per_page/page.
+func TestGetNativeSpaces_OmitsPagingWhenAbsent(t *testing.T) {
+	var sawPerPage, sawPage bool
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case "/v3/spaces":
+			_, sawPerPage = r.URL.Query()["per_page"]
+			_, sawPage = r.URL.Query()["page"]
+			_, _ = w.Write([]byte(`{"pagination":{"total_results":0,"total_pages":0,"next":null},"resources":[]}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(srv.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/spaces/cnsi-1", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid")
+	ctx.SetParamValues("cnsi-1")
+
+	require.NoError(t, plugin.getNativeSpaces(ctx))
+	assert.False(t, sawPerPage)
+	assert.False(t, sawPage)
+}
+
+// TestGetNativeOrgSpaces_OmitsPagingWhenAbsent — same contract for the
+// per-org spaces endpoint.
+func TestGetNativeOrgSpaces_OmitsPagingWhenAbsent(t *testing.T) {
+	var sawPerPage, sawPage bool
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case "/v3/spaces":
+			_, sawPerPage = r.URL.Query()["per_page"]
+			_, sawPage = r.URL.Query()["page"]
+			_, _ = w.Write([]byte(`{"pagination":{"total_results":0,"total_pages":0,"next":null},"resources":[]}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(srv.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/org/cnsi-1/org-1/spaces", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid", "orgGuid")
+	ctx.SetParamValues("cnsi-1", "org-1")
+
+	require.NoError(t, plugin.getNativeOrgSpaces(ctx))
+	assert.False(t, sawPerPage)
+	assert.False(t, sawPage)
+}
+
+// TestGetNativeOrgSpaces_CountsFastPath verifies ?return=counts forwards
+// per_page=1 plus the organization_guids filter and returns the flat
+// count-shape envelope.
+func TestGetNativeOrgSpaces_CountsFastPath(t *testing.T) {
+	srv, q := newCountsCapiServer(t, "/v3/spaces", 23, "organization_guids")
+	defer srv.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(srv.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/org/cnsi-1/org-1/spaces?return=counts", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid", "orgGuid")
+	ctx.SetParamValues("cnsi-1", "org-1")
+
+	require.NoError(t, plugin.getNativeOrgSpaces(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, "1", q.PerPage)
+	assert.Equal(t, "org-1", q.Filters["organization_guids"])
+
+	var resp StSpacesResponse
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	assert.Equal(t, 23, resp.TotalResults)
+	assert.Empty(t, resp.Resources)
 }

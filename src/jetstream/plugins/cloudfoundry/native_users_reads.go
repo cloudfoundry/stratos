@@ -13,42 +13,32 @@ import (
 
 // getNativeUsers handles GET /pp/v1/cf/users/{cnsiGuid}.
 //
-// Returns every user visible to the caller — joined with their org and
-// space role grants — across the foundation. Drives the Stratos CF-level
-// users page and the per-space users tab (which filters client-side on
-// the user's spaceRoles[].spaceGuid).
+// Single-page passthrough over /v3/users joined with bounded role
+// grants for just the identities on that page. Caller's per_page/page
+// forward verbatim to /v3/users; absent, V3 server defaults apply.
 //
 // CF v3 splits user identity from role grants:
-//   - /v3/users — bare user identity (guid, username, presentation_name, origin).
-//   - /v3/roles — role grants, each carrying a relationship to the user and
-//     to either the organization or the space the role is scoped against.
+//   - /v3/users — bare identity (guid, username, presentation_name, origin).
+//   - /v3/roles — role grants, related to a user and to either an org
+//     or a space.
 //
-// Strategy: drain both endpoints once, bucket roles by user.guid, and emit
-// one StUser per identity with org/space role buckets attached. Two-step
-// join — same shape the service-instance handler uses for plan→offering —
-// keeps the per-row cost flat.
+// Role-join strategy (bounded, post-retrofit):
+//   - Fetch roles only for the user GUIDs on the current /v3/users page
+//     via /v3/roles?user_guids=<csv>. Page size ~50 users → ~5 roles
+//     per user → ~250 roles, typically a single CAPI page; we paginate
+//     defensively if not.
+//   - For space roles whose organization relationship arrives unset
+//     (rare but defensive), resolve space→org via /v3/spaces?guids=<csv>
+//     scoped to just those space GUIDs.
+//   - Soft-fail on the role drain: if /v3/roles errors, every user on
+//     the page renders with empty role buckets rather than 502'ing the
+//     whole page.
 //
-// Two response shapes, dispatched on ?return=
-//   - summary: Stratos-shape paged response (StratosPagedResponse[StUser]).
-//     Used by CnsiUsersSource via the CnsiEntitySource base class, which
-//     pages until pagination.next is nil — we drain CAPI server-side and
-//     synthesise a single fully-populated page. Same shape as the
-//     service-offerings / service-instances handlers.
-//   - (none): flat StUsersResponse with totalResults only. Reserved for
-//     direct callers that don't need pagination meta.
-//
-// Soft-fail policy on the role drain: if /v3/roles errors, the handler
-// still returns 200 with users carrying empty org/space role buckets
-// rather than 502'ing the whole page. The role list is the larger of the
-// two requests at scale; a transient CAPI hiccup shouldn't block the
-// users page.
-//
-// V3 role-relationship contract: every space_* role carries both a space
-// and an organization relationship (since spaces nest under orgs). The
-// bucketing logic below trusts the role's organization relationship when
-// present and falls back to looking up the space's parent org via the
-// /v3/spaces drain — for callers that want to render "<org>/<space>:
-// roles" without a second join.
+// V3 role-relationship contract: every space_* role carries both a
+// space and an organization relationship (since spaces nest under
+// orgs). The bucketing trusts the role's organization relationship
+// when present and falls back to the bounded /v3/spaces lookup when
+// it isn't.
 func (c *CloudFoundrySpecification) getNativeUsers(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
@@ -65,167 +55,168 @@ func (c *CloudFoundrySpecification) getNativeUsers(ctx echo.Context) error {
 		return err
 	}
 
-	users, err := listAllUsers(ctx.Request().Context(), cfClient)
-	if err != nil {
-		return handleCapiError(ctx, err)
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+
+	// ?return=counts fast path: per_page=1, totalResults only. No role
+	// join — the count is just /v3/users totalResults.
+	if ctx.QueryParam("return") == "counts" {
+		params := capi.NewQueryParams().WithPerPage(1)
+		raw, lerr := cfClient.Users().List(ctx.Request().Context(), params)
+		if lerr != nil {
+			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+		}
+		return ctx.JSON(http.StatusOK, StUsersResponse{
+			Resources:    []StUser{},
+			TotalResults: raw.Pagination.TotalResults,
+		})
 	}
 
-	// Bucket roles by user. Soft-fail: if the role drain errors, every
-	// user renders with empty role buckets rather than the page failing.
-	orgRolesByUser := make(map[string][]StUserOrgRole)
-	spaceRolesByUser := make(map[string][]StUserSpaceRole)
-	if roles, rolesErr := listAllRoles(ctx.Request().Context(), cfClient); rolesErr == nil {
-		// Pre-bucket per-user/per-scope so multiple grants on the same
-		// (user, org) or (user, space) collapse to a single bucket entry
-		// with all role names joined into the Roles slice.
-		orgScopeAcc := make(map[string]map[string][]string)   // userGUID → orgGUID → []role
-		spaceScopeAcc := make(map[string]map[string][]string) // userGUID → spaceGUID → []role
-		// Keep the role's space → org mapping when carried directly on
-		// the role; only fall back to the space drain if the relationship
-		// is missing (shouldn't happen on V3 but treat defensively).
-		spaceOrgFromRole := make(map[string]string) // spaceGUID → orgGUID
-
-		for _, r := range roles {
-			userGUID := relationshipGUID(r.Relationships.User)
-			if userGUID == "" {
-				continue
-			}
-			orgGUID := ""
-			if r.Relationships.Organization != nil {
-				orgGUID = relationshipGUID(*r.Relationships.Organization)
-			}
-			spaceGUID := ""
-			if r.Relationships.Space != nil {
-				spaceGUID = relationshipGUID(*r.Relationships.Space)
-			}
-
-			switch {
-			case spaceGUID != "":
-				if orgGUID != "" {
-					spaceOrgFromRole[spaceGUID] = orgGUID
-				}
-				if spaceScopeAcc[userGUID] == nil {
-					spaceScopeAcc[userGUID] = make(map[string][]string)
-				}
-				spaceScopeAcc[userGUID][spaceGUID] = append(
-					spaceScopeAcc[userGUID][spaceGUID],
-					stripRolePrefix(r.Type),
-				)
-			case orgGUID != "":
-				if orgScopeAcc[userGUID] == nil {
-					orgScopeAcc[userGUID] = make(map[string][]string)
-				}
-				orgScopeAcc[userGUID][orgGUID] = append(
-					orgScopeAcc[userGUID][orgGUID],
-					stripRolePrefix(r.Type),
-				)
-			}
-		}
-
-		// Fall back to a /v3/spaces drain for any space role that didn't
-		// come back with an organization relationship attached. Cheap at
-		// CF scale and only fires when the role list is missing data.
-		spaceOrgFallback := make(map[string]string)
-		needFallback := false
-		for _, byUser := range spaceScopeAcc {
-			for spaceGUID := range byUser {
-				if _, ok := spaceOrgFromRole[spaceGUID]; !ok {
-					needFallback = true
-					break
-				}
-			}
-			if needFallback {
-				break
-			}
-		}
-		if needFallback {
-			if spaces, sErr := listAllSpacesForUsers(ctx.Request().Context(), cfClient); sErr == nil {
-				for _, s := range spaces {
-					spaceOrgFallback[s.GUID] = relationshipGUID(s.Relationships.Organization)
-				}
-			}
-		}
-
-		// Materialise the buckets.
-		for userGUID, byOrg := range orgScopeAcc {
-			for orgGUID, rolesList := range byOrg {
-				orgRolesByUser[userGUID] = append(orgRolesByUser[userGUID], StUserOrgRole{
-					OrgGuid: orgGUID,
-					Roles:   rolesList,
-				})
-			}
-		}
-		for userGUID, bySpace := range spaceScopeAcc {
-			for spaceGUID, rolesList := range bySpace {
-				orgGUID := spaceOrgFromRole[spaceGUID]
-				if orgGUID == "" {
-					orgGUID = spaceOrgFallback[spaceGUID]
-				}
-				spaceRolesByUser[userGUID] = append(spaceRolesByUser[userGUID], StUserSpaceRole{
-					OrgGuid:   orgGUID,
-					SpaceGuid: spaceGUID,
-					Roles:     rolesList,
-				})
-			}
-		}
+	perPage, page, present := parsePerPageAndPage(ctx)
+	params := applyPagingParams(capi.NewQueryParams(), perPage, page, present)
+	raw, listErr := cfClient.Users().List(ctx.Request().Context(), params)
+	if listErr != nil {
+		return handleCapiError(ctx, listErr)
 	}
 
-	out := make([]StUser, 0, len(users))
-	for _, u := range users {
+	pageUserGUIDs := make([]string, 0, len(raw.Resources))
+	for _, u := range raw.Resources {
+		pageUserGUIDs = append(pageUserGUIDs, u.GUID)
+	}
+
+	orgRolesByUser, spaceRolesByUser := buildUserRoleBuckets(ctx.Request().Context(), cfClient, pageUserGUIDs)
+
+	out := make([]StUser, 0, len(raw.Resources))
+	for _, u := range raw.Resources {
 		out = append(out, toStUser(u, cnsiGUID, orgRolesByUser[u.GUID], spaceRolesByUser[u.GUID]))
 	}
 
-	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
-
-	if ctx.QueryParam("return") == "summary" {
-		// Single-page Stratos paged response. CnsiEntitySource pages until
-		// pagination.next is nil; emitting one fully-drained page = one
-		// frontend iteration = done.
-		response := StratosPagedResponse[StUser]{
-			Resources:  out,
-			Pagination: BuildPaginationMeta(ctx, 1, len(out), len(out)),
-		}
-		return ctx.JSON(http.StatusOK, response)
-	}
-
-	return ctx.JSON(http.StatusOK, StUsersResponse{
-		Resources:    out,
-		TotalResults: len(out),
+	return ctx.JSON(http.StatusOK, StratosPagedResponse[StUser]{
+		Resources:  out,
+		Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
 	})
 }
 
-// listAllUsers drains /v3/users and returns every identity. Sequential
-// pagination — user lists are small enough at CF scale that parallel
-// fetches aren't worth the complexity. Mirrors the service-offerings drain.
-func listAllUsers(ctx context.Context, cfClient capi.Client) ([]capi.User, error) {
-	all := make([]capi.User, 0)
-	page := 1
-	for {
-		params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
-		params.Page = page
-		raw, err := cfClient.Users().List(ctx, params)
-		if err != nil {
-			return nil, err
-		}
-		all = append(all, raw.Resources...)
-		if raw.Pagination.Next == nil || raw.Pagination.Next.Href == "" {
-			break
-		}
-		page++
+// buildUserRoleBuckets fetches roles for the supplied user GUIDs and
+// returns per-user org/space role buckets. Soft-fails on /v3/roles
+// errors — returns empty maps so the caller emits empty role arrays
+// rather than failing the page.
+func buildUserRoleBuckets(
+	ctx context.Context,
+	cfClient capi.Client,
+	userGUIDs []string,
+) (map[string][]StUserOrgRole, map[string][]StUserSpaceRole) {
+	orgRolesByUser := make(map[string][]StUserOrgRole)
+	spaceRolesByUser := make(map[string][]StUserSpaceRole)
+
+	if len(userGUIDs) == 0 {
+		return orgRolesByUser, spaceRolesByUser
 	}
-	return all, nil
+
+	roles, rolesErr := listRolesForUsers(ctx, cfClient, userGUIDs)
+	if rolesErr != nil {
+		return orgRolesByUser, spaceRolesByUser
+	}
+
+	// userGUID → orgGUID → []role-name; collapse multiple grants on the
+	// same (user, org) into one bucket entry with role names joined.
+	orgScopeAcc := make(map[string]map[string][]string)
+	spaceScopeAcc := make(map[string]map[string][]string)
+	spaceOrgFromRole := make(map[string]string) // spaceGUID → orgGUID, when role carries it
+
+	for _, r := range roles {
+		uGUID := relationshipGUID(r.Relationships.User)
+		if uGUID == "" {
+			continue
+		}
+		orgGUID := ""
+		if r.Relationships.Organization != nil {
+			orgGUID = relationshipGUID(*r.Relationships.Organization)
+		}
+		spaceGUID := ""
+		if r.Relationships.Space != nil {
+			spaceGUID = relationshipGUID(*r.Relationships.Space)
+		}
+
+		switch {
+		case spaceGUID != "":
+			if orgGUID != "" {
+				spaceOrgFromRole[spaceGUID] = orgGUID
+			}
+			if spaceScopeAcc[uGUID] == nil {
+				spaceScopeAcc[uGUID] = make(map[string][]string)
+			}
+			spaceScopeAcc[uGUID][spaceGUID] = append(
+				spaceScopeAcc[uGUID][spaceGUID],
+				stripRolePrefix(r.Type),
+			)
+		case orgGUID != "":
+			if orgScopeAcc[uGUID] == nil {
+				orgScopeAcc[uGUID] = make(map[string][]string)
+			}
+			orgScopeAcc[uGUID][orgGUID] = append(
+				orgScopeAcc[uGUID][orgGUID],
+				stripRolePrefix(r.Type),
+			)
+		}
+	}
+
+	// Fall back to a bounded /v3/spaces lookup for any space role that
+	// arrived without an organization relationship attached. Bounded by
+	// the actual unresolved space GUIDs — never a foundation-wide drain.
+	missingSpaces := make([]string, 0)
+	for _, byUser := range spaceScopeAcc {
+		for spaceGUID := range byUser {
+			if _, ok := spaceOrgFromRole[spaceGUID]; !ok {
+				missingSpaces = append(missingSpaces, spaceGUID)
+			}
+		}
+	}
+	spaceOrgFallback := make(map[string]string)
+	if len(missingSpaces) > 0 {
+		if spaces, sErr := listSpacesByGUIDs(ctx, cfClient, missingSpaces); sErr == nil {
+			for _, s := range spaces {
+				spaceOrgFallback[s.GUID] = relationshipGUID(s.Relationships.Organization)
+			}
+		}
+	}
+
+	for uGUID, byOrg := range orgScopeAcc {
+		for orgGUID, rolesList := range byOrg {
+			orgRolesByUser[uGUID] = append(orgRolesByUser[uGUID], StUserOrgRole{
+				OrgGuid: orgGUID,
+				Roles:   rolesList,
+			})
+		}
+	}
+	for uGUID, bySpace := range spaceScopeAcc {
+		for spaceGUID, rolesList := range bySpace {
+			orgGUID := spaceOrgFromRole[spaceGUID]
+			if orgGUID == "" {
+				orgGUID = spaceOrgFallback[spaceGUID]
+			}
+			spaceRolesByUser[uGUID] = append(spaceRolesByUser[uGUID], StUserSpaceRole{
+				OrgGuid:   orgGUID,
+				SpaceGuid: spaceGUID,
+				Roles:     rolesList,
+			})
+		}
+	}
+
+	return orgRolesByUser, spaceRolesByUser
 }
 
-// listAllRoles drains /v3/roles and returns every role grant. Larger
-// drain than users — typically ~5x the row count since a single user
-// holds multiple roles — but still small at typical CF scale. Sequential
-// pagination keeps the code simple.
-func listAllRoles(ctx context.Context, cfClient capi.Client) ([]capi.Role, error) {
+// listRolesForUsers fetches /v3/roles?user_guids=<csv> for the given
+// user GUIDs. Bounded by the input set: at typical page size (~50 users
+// × ~5 roles each = ~250 roles) this is a single CAPI page; we still
+// paginate defensively for the long-tail user with many grants.
+func listRolesForUsers(ctx context.Context, cfClient capi.Client, userGUIDs []string) ([]capi.Role, error) {
 	all := make([]capi.Role, 0)
-	page := 1
+	pageNum := 1
 	for {
-		params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
-		params.Page = page
+		params := capi.NewQueryParams().
+			WithFilter("user_guids", strings.Join(userGUIDs, ",")).
+			WithPerPage(500)
+		params.Page = pageNum
 		raw, err := cfClient.Roles().List(ctx, params)
 		if err != nil {
 			return nil, err
@@ -234,20 +225,22 @@ func listAllRoles(ctx context.Context, cfClient capi.Client) ([]capi.Role, error
 		if raw.Pagination.Next == nil || raw.Pagination.Next.Href == "" {
 			break
 		}
-		page++
+		pageNum++
 	}
 	return all, nil
 }
 
-// listAllSpacesForUsers is the fallback for resolving space → org when
-// the role's own organization relationship is missing. Named distinctly
-// so it doesn't collide with the spaces handler's own drain. Sequential.
-func listAllSpacesForUsers(ctx context.Context, cfClient capi.Client) ([]capi.Space, error) {
+// listSpacesByGUIDs fetches /v3/spaces?guids=<csv>. Bounded fallback for
+// resolving space → org when a role's own organization relationship is
+// missing — never a foundation-wide drain.
+func listSpacesByGUIDs(ctx context.Context, cfClient capi.Client, spaceGUIDs []string) ([]capi.Space, error) {
 	all := make([]capi.Space, 0)
-	page := 1
+	pageNum := 1
 	for {
-		params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
-		params.Page = page
+		params := capi.NewQueryParams().
+			WithFilter("guids", strings.Join(spaceGUIDs, ",")).
+			WithPerPage(500)
+		params.Page = pageNum
 		raw, err := cfClient.Spaces().List(ctx, params)
 		if err != nil {
 			return nil, err
@@ -256,9 +249,22 @@ func listAllSpacesForUsers(ctx context.Context, cfClient capi.Client) ([]capi.Sp
 		if raw.Pagination.Next == nil || raw.Pagination.Next.Href == "" {
 			break
 		}
-		page++
+		pageNum++
 	}
 	return all, nil
+}
+
+// stripRolePrefix converts V3 role types (organization_manager,
+// space_developer, etc.) to the short names the StUser DTO emits.
+func stripRolePrefix(roleType string) string {
+	switch {
+	case strings.HasPrefix(roleType, "organization_"):
+		return strings.TrimPrefix(roleType, "organization_")
+	case strings.HasPrefix(roleType, "space_"):
+		return strings.TrimPrefix(roleType, "space_")
+	default:
+		return roleType
+	}
 }
 
 // toStUser maps a capi.User onto the Stratos-shape DTO. cnsiGUID is
@@ -300,25 +306,5 @@ func toStUser(
 		SpaceRoles:       spaceRoles,
 		CreatedAt:        createdAt,
 		UpdatedAt:        updatedAt,
-	}
-}
-
-// stripRolePrefix turns CF V3 role enums into compact UI-friendly tokens.
-// "organization_manager" → "manager"; "space_developer" → "developer";
-// "organization_billing_manager" → "billing_manager"; "space_supporter" →
-// "supporter". The bucketing structure already disambiguates org-vs-space
-// scope, so the prefix is redundant in cell text — and "manager, auditor"
-// reads more naturally than "organization_manager, organization_auditor".
-//
-// Falls through unchanged for any role enum we haven't seen — defensive
-// against new V3 role types showing up in the wild.
-func stripRolePrefix(roleType string) string {
-	switch {
-	case strings.HasPrefix(roleType, "organization_"):
-		return strings.TrimPrefix(roleType, "organization_")
-	case strings.HasPrefix(roleType, "space_"):
-		return strings.TrimPrefix(roleType, "space_")
-	default:
-		return roleType
 	}
 }

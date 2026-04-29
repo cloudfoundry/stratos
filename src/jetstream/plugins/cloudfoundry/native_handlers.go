@@ -205,167 +205,11 @@ func envIntWithDefault(name string, def int) int {
 	return n
 }
 
-// listAllOrgs drains /v3/organizations and returns the full set plus the total
-// count. Fetches page 1 synchronously (to learn totalPages) then pages 2..N
-// in parallel with bounded concurrency.
-func listAllOrgs(ctx context.Context, cfClient capi.Client) ([]capi.Organization, int, error) {
-	firstParams := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
-	firstParams.Page = 1
-	start := time.Now()
-	first, err := cfClient.Organizations().List(ctx, firstParams)
-	rows, total := -1, -1
-	if first != nil {
-		rows = len(first.Resources)
-		total = first.Pagination.TotalResults
-	}
-	logCapiTiming("listAllOrgs", 1, fullPagePerRequest, -1, start, err, rows, total)
-	if err != nil {
-		return nil, 0, err
-	}
-	totalResults := first.Pagination.TotalResults
-	totalPages := first.Pagination.TotalPages
-	all := make([]capi.Organization, 0, totalResults)
-	all = append(all, first.Resources...)
-	if totalPages <= 1 {
-		return all, totalResults, nil
-	}
-
-	pageResources := make([][]capi.Organization, totalPages+1)
-	g, gctx := errgroup.WithContext(ctx)
-	g.SetLimit(maxParallelPages)
-	for page := 2; page <= totalPages; page++ {
-		p := page
-		g.Go(func() error {
-			params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
-			params.Page = p
-			pStart := time.Now()
-			raw, err := cfClient.Organizations().List(gctx, params)
-			pRows, pTotal := -1, -1
-			if raw != nil {
-				pRows = len(raw.Resources)
-				pTotal = raw.Pagination.TotalResults
-			}
-			logCapiTiming("listAllOrgs", p, fullPagePerRequest, -1, pStart, err, pRows, pTotal)
-			if err != nil {
-				return err
-			}
-			pageResources[p] = raw.Resources
-			return nil
-		})
-	}
-	if err := g.Wait(); err != nil {
-		return nil, 0, err
-	}
-	for p := 2; p <= totalPages; p++ {
-		all = append(all, pageResources[p]...)
-	}
-	return all, totalResults, nil
-}
-
-// listAllApps drains /v3/apps and returns the full set plus the total count.
-// Page 1 synchronous; pages 2..N parallel with bounded concurrency.
-func listAllApps(ctx context.Context, cfClient capi.Client) ([]capi.App, int, error) {
-	firstParams := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
-	firstParams.Page = 1
-	first, err := cfClient.Apps().List(ctx, firstParams)
-	if err != nil {
-		return nil, 0, err
-	}
-	totalResults := first.Pagination.TotalResults
-	totalPages := first.Pagination.TotalPages
-	all := make([]capi.App, 0, totalResults)
-	all = append(all, first.Resources...)
-	if totalPages <= 1 {
-		return all, totalResults, nil
-	}
-
-	pageResources := make([][]capi.App, totalPages+1)
-	g, gctx := errgroup.WithContext(ctx)
-	g.SetLimit(maxParallelPages)
-	for page := 2; page <= totalPages; page++ {
-		p := page
-		g.Go(func() error {
-			params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
-			params.Page = p
-			raw, err := cfClient.Apps().List(gctx, params)
-			if err != nil {
-				return err
-			}
-			pageResources[p] = raw.Resources
-			return nil
-		})
-	}
-	if err := g.Wait(); err != nil {
-		return nil, 0, err
-	}
-	for p := 2; p <= totalPages; p++ {
-		all = append(all, pageResources[p]...)
-	}
-	return all, totalResults, nil
-}
-
-// listAllSpaces drains /v3/spaces and returns the full set plus the total
-// count. Optional orgGUIDFilter narrows to spaces in the given orgs. Page 1
-// synchronous; pages 2..N parallel with bounded concurrency.
-func listAllSpaces(ctx context.Context, cfClient capi.Client, orgGUIDFilter []string) ([]capi.Space, int, error) {
-	firstParams := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
-	if len(orgGUIDFilter) > 0 {
-		firstParams = firstParams.WithFilter("organization_guids", orgGUIDFilter...)
-	}
-	firstParams.Page = 1
-	start := time.Now()
-	first, err := cfClient.Spaces().List(ctx, firstParams)
-	rows, total := -1, -1
-	if first != nil {
-		rows = len(first.Resources)
-		total = first.Pagination.TotalResults
-	}
-	logCapiTiming("listAllSpaces", 1, fullPagePerRequest, len(orgGUIDFilter), start, err, rows, total)
-	if err != nil {
-		return nil, 0, err
-	}
-	totalResults := first.Pagination.TotalResults
-	totalPages := first.Pagination.TotalPages
-	all := make([]capi.Space, 0, totalResults)
-	all = append(all, first.Resources...)
-	if totalPages <= 1 {
-		return all, totalResults, nil
-	}
-
-	pageResources := make([][]capi.Space, totalPages+1)
-	g, gctx := errgroup.WithContext(ctx)
-	g.SetLimit(maxParallelPages)
-	for page := 2; page <= totalPages; page++ {
-		p := page
-		g.Go(func() error {
-			params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
-			if len(orgGUIDFilter) > 0 {
-				params = params.WithFilter("organization_guids", orgGUIDFilter...)
-			}
-			params.Page = p
-			pStart := time.Now()
-			raw, err := cfClient.Spaces().List(gctx, params)
-			pRows, pTotal := -1, -1
-			if raw != nil {
-				pRows = len(raw.Resources)
-				pTotal = raw.Pagination.TotalResults
-			}
-			logCapiTiming("listAllSpaces", p, fullPagePerRequest, len(orgGUIDFilter), pStart, err, pRows, pTotal)
-			if err != nil {
-				return err
-			}
-			pageResources[p] = raw.Resources
-			return nil
-		})
-	}
-	if err := g.Wait(); err != nil {
-		return nil, 0, err
-	}
-	for p := 2; p <= totalPages; p++ {
-		all = append(all, pageResources[p]...)
-	}
-	return all, totalResults, nil
-}
+// (drain helpers listAllOrgs / listAllApps / listAllSpaces removed in the
+// paging-only sweep — every list handler now forwards the caller's per_page
+// directly to a single CAPI page. listAllRoutes is retained because the
+// non-counts branch of getNativeRouteCount still needs the full route set
+// to populate destinations.)
 
 func toStOrg(r capi.Organization) StOrg {
 	return StOrg{
@@ -402,8 +246,9 @@ func toStSpace(r capi.Space) StSpace {
 
 // getNativeOrgs dispatches on ?return=
 //   - counts: per_page=1, totalResults only
-//   - ?per_page=N&page=M: single bounded CAPI page, Stratos paged envelope
-//   - (none): full list, internally drained (legacy)
+//   - (default): single CAPI page passthrough, Stratos paged envelope.
+//     Caller's per_page/page forward verbatim to /v3/organizations; absent,
+//     V3 server defaults apply.
 func (c *CloudFoundrySpecification) getNativeOrgs(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	userGUID, err := c.getUserGUID(ctx)
@@ -431,46 +276,20 @@ func (c *CloudFoundrySpecification) getNativeOrgs(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, StOrgsResponse{Resources: orgs, TotalResults: raw.Pagination.TotalResults})
 	}
 
-	// Bounded pagination: when ?per_page is supplied, treat as a
-	// single-page passthrough — one CAPI call, Stratos paged envelope.
-	// Lets the frontend's loadNames / dropdown init avoid the full-drain
-	// path that hits gorouter's 30s ceiling on slow CFs with many orgs.
-	if rawPP := ctx.QueryParam("per_page"); rawPP != "" {
-		page := 1
-		if rp := ctx.QueryParam("page"); rp != "" {
-			if v, perr := strconv.Atoi(rp); perr == nil && v > 0 {
-				page = v
-			}
-		}
-		perPage, perr := strconv.Atoi(rawPP)
-		if perr != nil || perPage <= 0 {
-			return echo.NewHTTPError(http.StatusBadRequest, "per_page must be a positive integer")
-		}
-		params := capi.NewQueryParams().WithPerPage(perPage)
-		params.Page = page
-		raw, lerr := cfClient.Organizations().List(ctx.Request().Context(), params)
-		if lerr != nil {
-			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
-		}
-		orgs := make([]StOrg, 0, len(raw.Resources))
-		for _, r := range raw.Resources {
-			orgs = append(orgs, toStOrg(r))
-		}
-		return ctx.JSON(http.StatusOK, StratosPagedResponse[StOrg]{
-			Resources:  orgs,
-			Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
-		})
+	perPage, page, present := parsePerPageAndPage(ctx)
+	params := applyPagingParams(capi.NewQueryParams(), perPage, page, present)
+	raw, lerr := cfClient.Organizations().List(ctx.Request().Context(), params)
+	if lerr != nil {
+		return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
 	}
-
-	resources, totalResults, err := listAllOrgs(ctx.Request().Context(), cfClient)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
-	}
-	orgs := make([]StOrg, 0, len(resources))
-	for _, r := range resources {
+	orgs := make([]StOrg, 0, len(raw.Resources))
+	for _, r := range raw.Resources {
 		orgs = append(orgs, toStOrg(r))
 	}
-	return ctx.JSON(http.StatusOK, StOrgsResponse{Resources: orgs, TotalResults: totalResults})
+	return ctx.JSON(http.StatusOK, StratosPagedResponse[StOrg]{
+		Resources:  orgs,
+		Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
+	})
 }
 
 // getNativeApps dispatches on ?return=
@@ -478,7 +297,7 @@ func (c *CloudFoundrySpecification) getNativeOrgs(ctx echo.Context) error {
 //   - recent: per_page=10, order_by=-updated_at (top 10 most recently pushed)
 //   - summary: Stratos-shape paged response with paging/sort/filter params
 //     (WU 3 — see native_apps_summary.go for handler)
-//   - (none): full list, paginated
+//   - (default): single CAPI page passthrough, Stratos paged envelope.
 func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	userGUID, err := c.getUserGUID(ctx)
@@ -522,50 +341,27 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 		return c.getNativeAppsSummary(ctx, cfClient)
 	}
 
-	// Bounded pagination passthrough: when ?per_page is supplied, treat as
-	// a single CAPI page rather than the full-drain branch below. Lets
-	// home-card and detail loaders avoid the gorouter ceiling on slow CFs.
-	if rawPP := ctx.QueryParam("per_page"); rawPP != "" {
-		page := 1
-		if rp := ctx.QueryParam("page"); rp != "" {
-			if v, perr := strconv.Atoi(rp); perr == nil && v > 0 {
-				page = v
-			}
-		}
-		perPage, perr := strconv.Atoi(rawPP)
-		if perr != nil || perPage <= 0 {
-			return echo.NewHTTPError(http.StatusBadRequest, "per_page must be a positive integer")
-		}
-		params := capi.NewQueryParams().WithPerPage(perPage)
-		params.Page = page
-		raw, lerr := cfClient.Apps().List(ctx.Request().Context(), params)
-		if lerr != nil {
-			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
-		}
-		apps := make([]StApp, 0, len(raw.Resources))
-		for _, r := range raw.Resources {
-			apps = append(apps, toStApp(r))
-		}
-		return ctx.JSON(http.StatusOK, StratosPagedResponse[StApp]{
-			Resources:  apps,
-			Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
-		})
+	perPage, page, present := parsePerPageAndPage(ctx)
+	params := applyPagingParams(capi.NewQueryParams(), perPage, page, present)
+	raw, lerr := cfClient.Apps().List(ctx.Request().Context(), params)
+	if lerr != nil {
+		return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
 	}
-
-	resources, totalResults, err := listAllApps(ctx.Request().Context(), cfClient)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
-	}
-	apps := make([]StApp, 0, len(resources))
-	for _, r := range resources {
+	apps := make([]StApp, 0, len(raw.Resources))
+	for _, r := range raw.Resources {
 		apps = append(apps, toStApp(r))
 	}
-	return ctx.JSON(http.StatusOK, StAppsResponse{Resources: apps, TotalResults: totalResults})
+	return ctx.JSON(http.StatusOK, StratosPagedResponse[StApp]{
+		Resources:  apps,
+		Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
+	})
 }
 
 // getNativeSpaces dispatches on ?return=
 //   - counts: per_page=1, totalResults only (fast path — no list drain)
-//   - (none): full list, paginated
+//   - (default): single CAPI page passthrough, Stratos paged envelope.
+//     Caller's per_page/page forward verbatim to /v3/spaces; absent, V3
+//     server defaults apply.
 func (c *CloudFoundrySpecification) getNativeSpaces(ctx echo.Context) (err error) {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	rows := 0
@@ -608,85 +404,32 @@ func (c *CloudFoundrySpecification) getNativeSpaces(ctx echo.Context) (err error
 		return ctx.JSON(http.StatusOK, StSpacesResponse{Resources: spaces, TotalResults: raw.Pagination.TotalResults})
 	}
 
-	// Paginated path: when the caller supplies ?per_page, treat the request
-	// as a single-page passthrough — one CAPI call, return a Stratos-shape
-	// paged envelope with next/prev hrefs so the frontend's CnsiEntitySource
-	// can follow the chain. Legacy callers without ?per_page fall through to
-	// the full-drain branch below to preserve the existing wire shape.
-	if rawPP := ctx.QueryParam("per_page"); rawPP != "" {
-		page := 1
-		if rp := ctx.QueryParam("page"); rp != "" {
-			if v, perr := strconv.Atoi(rp); perr == nil && v > 0 {
-				page = v
-			}
-		}
-		perPage, perr := strconv.Atoi(rawPP)
-		if perr != nil || perPage <= 0 {
-			err = echo.NewHTTPError(http.StatusBadRequest, "per_page must be a positive integer")
-			return err
-		}
+	perPage, page, present := parsePerPageAndPage(ctx)
+	params := applyPagingParams(capi.NewQueryParams(), perPage, page, present)
 
-		// Bounded passthrough: one CAPI page directly. The earlier
-		// "cold-cache org-filter" preface (drain orgs, narrow spaces by
-		// org_guids) was a pessimization on slow CFs — listAllOrgs alone
-		// can take 30+ s on adepttech, defeating the bounded path's whole
-		// purpose. CAPI itself filters by user visibility, so the
-		// org-filter wasn't load-bearing for security.
-		params := capi.NewQueryParams().WithPerPage(perPage)
-		params.Page = page
-
-		pStart := time.Now()
-		raw, lerr := cfClient.Spaces().List(ctx.Request().Context(), params)
-		pRows, pTotal := -1, -1
-		if raw != nil {
-			pRows = len(raw.Resources)
-			pTotal = raw.Pagination.TotalResults
-		}
-		logCapiTiming("getNativeSpaces.page", page, perPage, 0, pStart, lerr, pRows, pTotal)
-		if lerr != nil {
-			err = echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
-			return err
-		}
-
-		spaces := make([]StSpace, 0, len(raw.Resources))
-		for _, r := range raw.Resources {
-			spaces = append(spaces, toStSpace(r))
-		}
-		rows = len(spaces)
-
-		return ctx.JSON(http.StatusOK, StratosPagedResponse[StSpace]{
-			Resources:  spaces,
-			Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
-		})
+	pStart := time.Now()
+	raw, lerr := cfClient.Spaces().List(ctx.Request().Context(), params)
+	pRows, pTotal := -1, -1
+	if raw != nil {
+		pRows = len(raw.Resources)
+		pTotal = raw.Pagination.TotalResults
 	}
-
-	// Fetch the org guid set first, then use it as a filter on the spaces
-	// drain. Empirically on adepttech, org-filtered /v3/spaces responds in
-	// ~5s consistently across cold and warm CAPI cache states, while the
-	// unfiltered variant spikes to ~27s on cold cache. The filter makes the
-	// worst-case predictable without hurting warm-case performance.
-	orgs, _, oerr := listAllOrgs(ctx.Request().Context(), cfClient)
-	if oerr != nil {
-		err = echo.NewHTTPError(http.StatusBadGateway, oerr.Error())
+	logCapiTiming("getNativeSpaces.page", page, perPage, 0, pStart, lerr, pRows, pTotal)
+	if lerr != nil {
+		err = echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
 		return err
 	}
-	orgGUIDs := make([]string, 0, len(orgs))
-	for _, o := range orgs {
-		orgGUIDs = append(orgGUIDs, o.GUID)
-	}
 
-	resources, totalResults, serr := listAllSpaces(ctx.Request().Context(), cfClient, orgGUIDs)
-	if serr != nil {
-		err = echo.NewHTTPError(http.StatusBadGateway, serr.Error())
-		return err
-	}
-	spaces := make([]StSpace, 0, len(resources))
-	for _, r := range resources {
+	spaces := make([]StSpace, 0, len(raw.Resources))
+	for _, r := range raw.Resources {
 		spaces = append(spaces, toStSpace(r))
 	}
-
 	rows = len(spaces)
-	return ctx.JSON(http.StatusOK, StSpacesResponse{Resources: spaces, TotalResults: totalResults})
+
+	return ctx.JSON(http.StatusOK, StratosPagedResponse[StSpace]{
+		Resources:  spaces,
+		Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
+	})
 }
 
 // listAllRoutes drains /v3/routes and returns the full set plus the total
@@ -864,6 +607,11 @@ func (c *CloudFoundrySpecification) getNativeOrgDetail(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, detail)
 }
 
+// getNativeOrgSpaces handles GET /pp/v1/cf/org/{cnsiGuid}/{orgGuid}/spaces.
+//
+// Returns spaces for one org as a single CAPI page passthrough. Caller's
+// per_page/page forward verbatim to /v3/spaces?organization_guids={orgGuid};
+// absent, V3 server defaults apply.
 func (c *CloudFoundrySpecification) getNativeOrgSpaces(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	orgGUID := ctx.Param("orgGuid")
@@ -877,15 +625,37 @@ func (c *CloudFoundrySpecification) getNativeOrgSpaces(ctx echo.Context) error {
 		return err
 	}
 
-	resources, totalResults, err := listAllSpaces(ctx.Request().Context(), cfClient, []string{orgGUID})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
-	}
-	spaces := make([]StSpace, 0, len(resources))
-	for _, r := range resources {
-		spaces = append(spaces, toStSpace(r))
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+
+	if ctx.QueryParam("return") == "counts" {
+		params := capi.NewQueryParams().
+			WithPerPage(1).
+			WithFilter("organization_guids", orgGUID)
+		raw, lerr := cfClient.Spaces().List(ctx.Request().Context(), params)
+		if lerr != nil {
+			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+		}
+		return ctx.JSON(http.StatusOK, StSpacesResponse{
+			Resources:    []StSpace{},
+			TotalResults: raw.Pagination.TotalResults,
+		})
 	}
 
-	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
-	return ctx.JSON(http.StatusOK, StSpacesResponse{Resources: spaces, TotalResults: totalResults})
+	perPage, page, present := parsePerPageAndPage(ctx)
+	params := applyPagingParams(
+		capi.NewQueryParams().WithFilter("organization_guids", orgGUID),
+		perPage, page, present,
+	)
+	raw, lerr := cfClient.Spaces().List(ctx.Request().Context(), params)
+	if lerr != nil {
+		return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+	}
+	spaces := make([]StSpace, 0, len(raw.Resources))
+	for _, r := range raw.Resources {
+		spaces = append(spaces, toStSpace(r))
+	}
+	return ctx.JSON(http.StatusOK, StratosPagedResponse[StSpace]{
+		Resources:  spaces,
+		Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
+	})
 }

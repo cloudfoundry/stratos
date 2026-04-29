@@ -3,7 +3,6 @@ package cloudfoundry
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/labstack/echo/v4"
@@ -42,23 +41,8 @@ func (c *CloudFoundrySpecification) getNativeDomains(ctx echo.Context) error {
 		})
 	}
 
-	page := 1
-	if rp := ctx.QueryParam("page"); rp != "" {
-		if v, perr := strconv.Atoi(rp); perr == nil && v > 0 {
-			page = v
-		}
-	}
-	perPage := 50
-	if rpp := ctx.QueryParam("per_page"); rpp != "" {
-		v, perr := strconv.Atoi(rpp)
-		if perr != nil || v <= 0 {
-			return echo.NewHTTPError(http.StatusBadRequest, "per_page must be a positive integer")
-		}
-		perPage = v
-	}
-
-	params := capi.NewQueryParams().WithPerPage(perPage)
-	params.Page = page
+	perPage, page, present := parsePerPageAndPage(ctx)
+	params := applyPagingParams(capi.NewQueryParams(), perPage, page, present)
 
 	if rawGuids := ctx.QueryParam("guids"); rawGuids != "" {
 		guids := splitNonEmpty(rawGuids, ",")
