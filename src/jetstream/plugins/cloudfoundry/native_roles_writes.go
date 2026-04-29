@@ -71,18 +71,15 @@ func (cf *CloudFoundrySpecification) createNativeRole(c echo.Context) error {
 }
 
 // deleteNativeRole handles DELETE /pp/v1/cf/roles/{cnsiGuid}/{roleGuid} —
-// Stratos-shape wrapper around CF V3 DELETE /v3/roles/{guid}.
+// Stratos-shape write wrapper around CF V3 DELETE /v3/roles/{guid}.
 //
-// CF V3 spec: DELETE /v3/roles/{guid} returns 202 + Location → /v3/jobs/{guid}.
-//
-// **Caveat (non-mechanical):** the upstream capi client's
-// `RolesClient.Delete(ctx, guid) error` discards the Job entirely, so
-// we cannot recover the upstream job GUID through the typed client.
-// Until the fork exposes `(*Job, error)` for this method, we surface a
-// synthetic terminal-complete envelope on success — same shape as the
-// user-provided service binding sync path. The frontend's writeWithJob
-// resolves immediately. Track follow-up to upgrade the capi shape;
-// the fix is mechanical (mirror Apps().Delete).
+// CF v3 returns 202 Accepted with a Location header pointing at
+// /v3/jobs/{guid}. We hand that job to the stratosjobs fast-path wrapper:
+// if the job resolves inside the fast-path window we return 200 with a
+// terminal StratosJob body; otherwise we register the job in the tracker
+// and return 202 with {id, state, startedAt} so the frontend can poll
+// /pp/v1/stratos/jobs/{id}. Same pattern as deleteNativeOrg /
+// deleteNativeApp.
 func (cf *CloudFoundrySpecification) deleteNativeRole(c echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	roleGUID := c.Param("roleGuid")
@@ -95,18 +92,43 @@ func (cf *CloudFoundrySpecification) deleteNativeRole(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
 	}
 
-	cfClient, err := newCapiClient(c.Request().Context(), cf.nativeProxy(), cnsiGUID, userGUID)
+	reqCtx := c.Request().Context()
+	cfClient, err := newCapiClient(reqCtx, cf.nativeProxy(), cnsiGUID, userGUID)
 	if err != nil {
 		return err
 	}
 
-	if delErr := cfClient.Roles().Delete(c.Request().Context(), roleGUID); delErr != nil {
+	job, delErr := cfClient.Roles().Delete(reqCtx, roleGUID)
+	if delErr != nil {
 		return handleCapiError(c, delErr)
 	}
+	if job == nil || job.GUID == "" {
+		return echo.NewHTTPError(http.StatusBadGateway, "role delete: no job id returned from CF")
+	}
+
+	if cf.asyncTracker == nil || cf.asyncTranslator == nil {
+		c.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+		c.Response().WriteHeader(http.StatusAccepted)
+		return nil
+	}
+
+	ref := CFJobRef{CnsiGUID: cnsiGUID, UserGUID: userGUID, JobGUID: job.GUID}
+	res := stratosjobs.RunFastPath(reqCtx, cf.asyncTracker, cf.asyncTranslator, ref, stratosjobs.FastPathOptions{
+		Kind: "cf.role.delete",
+	})
 
 	c.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"state":  stratosjobs.JobStateComplete,
-		"result": map[string]string{"operation": "role.delete"},
-	})
+	if res.Resolved {
+		if res.State == stratosjobs.JobStateFailed {
+			return c.JSON(http.StatusBadGateway, map[string]interface{}{
+				"state":  res.State,
+				"errors": res.Errors,
+			})
+		}
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"state":  res.State,
+			"result": res.Result,
+		})
+	}
+	return c.JSON(http.StatusAccepted, res.HandoffJob)
 }

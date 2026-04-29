@@ -526,13 +526,16 @@ func TestCreateNativeRole_RequiresExactlyOneScope(t *testing.T) {
 	}
 }
 
-func TestDeleteNativeRole_SyntheticTerminalEnvelope(t *testing.T) {
+// TestDeleteNativeRole_AsyncJob verifies the role-delete handler honors
+// CF v3's 202 + Location-header async contract. The fork's
+// RolesClient.Delete now returns (*Job, error) (mirrors Apps().Delete),
+// so the handler extracts the job GUID and — with no asyncTracker
+// wired in this test plugin — falls back to bare 202 like deleteNativeApp.
+// When a tracker is wired in production, the same path runs the
+// stratosjobs fast-path wrapper.
+func TestDeleteNativeRole_AsyncJob(t *testing.T) {
 	ts := newCaptureServer(map[string]capiHandler{
 		"DELETE /v3/roles/role-1": func(w http.ResponseWriter, _ *http.Request) {
-			// CF V3 returns 202 + Location in real life, but the capi
-			// RolesClient.Delete signature drops the Job — the handler
-			// falls back to a synthetic-complete envelope. Test pins
-			// that contract until the fork is upgraded.
 			w.Header().Set("Location", "/v3/jobs/job-1")
 			w.WriteHeader(http.StatusAccepted)
 		},
@@ -545,13 +548,9 @@ func TestDeleteNativeRole_SyntheticTerminalEnvelope(t *testing.T) {
 	ctx.SetParamValues("cnsi-1", "role-1")
 
 	require.NoError(t, newPhase1CPlugin(ts.URL).deleteNativeRole(ctx))
-	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, http.StatusAccepted, rec.Code)
 	assert.Equal(t, "/v3/roles/role-1", ts.lastPath)
 	assert.Equal(t, http.MethodDelete, ts.lastMethod)
-
-	var env map[string]interface{}
-	require.NoError(t, json.NewDecoder(rec.Body).Decode(&env))
-	assert.Equal(t, "COMPLETE", env["state"])
 }
 
 // ---------------------------------------------------------------------------
