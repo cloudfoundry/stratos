@@ -165,12 +165,20 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   // already gated by @if blocks in the template so the per-step
   // handles only need to express validity / blocked / submit — no
   // skipIf is needed.
+  // The four child refs that drive a `valid: computed(() => !!this._ref?.validate())`
+  // handle predicate live in WritableSignals, not plain fields. Plain fields
+  // don't notify the computed when reassigned, so the steppers component's
+  // initial valid() read (before the lazy ViewChild for the next step has
+  // fired) memoizes the computed with zero signal dependencies — and never
+  // re-runs even after the child's validate flips. _selectCF and
+  // _specifyDetails stay plain because their handles use a bridged signal
+  // pattern (subscribe-to-validate inside the setter), not a computed wrap.
   private _selectCF?: CreateApplicationStep1Component;
-  private _selectService?: SelectServiceComponent;
-  private _selectPlan?: SelectPlanStepComponent;
-  private _bindApp?: BindAppsStepComponent;
+  private _selectService = signal<SelectServiceComponent | undefined>(undefined);
+  private _selectPlan = signal<SelectPlanStepComponent | undefined>(undefined);
+  private _bindApp = signal<BindAppsStepComponent | undefined>(undefined);
   private _specifyDetails?: SpecifyDetailsStepComponent;
-  private _supd?: SpecifyUserProvidedDetailsComponent;
+  private _supd = signal<SpecifyUserProvidedDetailsComponent | undefined>(undefined);
 
   private selectCFValid = signal<boolean>(false);
   private selectServiceFetching = signal<boolean>(false);
@@ -224,7 +232,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
 
   @ViewChild('selectService', { static: false })
   set selectServiceRef(v: SelectServiceComponent | undefined) {
-    this._selectService = v;
+    this._selectService.set(v);
     this.selectServiceFetchSub?.unsubscribe();
     this.selectServiceFetchSub = undefined;
     if (v) {
@@ -241,7 +249,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
 
   @ViewChild('selectPlan', { static: false })
   set selectPlanRef(v: SelectPlanStepComponent | undefined) {
-    this._selectPlan = v;
+    this._selectPlan.set(v);
     if (v && this.pendingSelectPlanEnter) {
       this.pendingSelectPlanEnter = false;
       // Replicate the legacy [onEnter]="selectPlan.onEnter" — the child
@@ -252,7 +260,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
 
   @ViewChild('bindApp', { static: false })
   set bindAppRef(v: BindAppsStepComponent | undefined) {
-    this._bindApp = v;
+    this._bindApp.set(v);
     if (v && this.pendingBindAppEnter) {
       this.pendingBindAppEnter = false;
       // Replicate the legacy [onEnter]="bindApp.onEnter" — the child
@@ -291,7 +299,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
 
   @ViewChild('supd', { static: false })
   set supdRef(v: SpecifyUserProvidedDetailsComponent | undefined) {
-    this._supd = v;
+    this._supd.set(v);
     // supd.validate is already a signal — no bridge needed beyond the
     // ViewChild capture for submit().
   }
@@ -314,14 +322,13 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   };
 
   selectServiceHandle: SignalStepHandle = {
-    // SelectService exposes validate as a signal directly. Re-route
-    // through a computed wrapper so the handle's valid Signal stays
-    // stable even before the child mounts (the child reference is
-    // optional until ViewChild fires).
-    valid: computed(() => !!this._selectService?.validate()),
+    // SelectService exposes validate as a signal directly. The wrapping
+    // computed reads `this._selectService()` (signal call) so reassigning
+    // the ref via the ViewChild setter triggers re-evaluation.
+    valid: computed(() => !!this._selectService()?.validate()),
     blocked: this.selectServiceFetching.asReadonly(),
     submit: async () => {
-      const result = await firstValueFrom(this._selectService!.onNext());
+      const result = await firstValueFrom(this._selectService()!.onNext());
       if (!result.success) {
         throw new Error(result.message || 'Failed to select service');
       }
@@ -336,11 +343,11 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   private initialisedSub?: Subscription;
 
   selectPlanHandle: SignalStepHandle = {
-    valid: computed(() => !!this._selectPlan?.validate()),
+    valid: computed(() => !!this._selectPlan()?.validate()),
     blocked: computed(() => !this.initialisedSignal()),
     cancelButtonText: signal('Cancel').asReadonly(),
     submit: async () => {
-      const result = await firstValueFrom(this._selectPlan!.onNext());
+      const result = await firstValueFrom(this._selectPlan()!.onNext());
       if (!result.success) {
         throw new Error(result.message || 'Failed to select plan');
       }
@@ -354,11 +361,11 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   };
 
   bindAppHandle: SignalStepHandle = {
-    valid: computed(() => !!this._bindApp?.validate()),
+    valid: computed(() => !!this._bindApp()?.validate()),
     skipIf: this.skipAppsSignal.asReadonly(),
     cancelButtonText: signal('Cancel').asReadonly(),
     submit: async () => {
-      const result = await firstValueFrom(this._bindApp!.submit());
+      const result = await firstValueFrom(this._bindApp()!.submit());
       if (!result.success) {
         throw new Error(result.message || 'Failed to bind app');
       }
@@ -379,9 +386,9 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   };
 
   supdHandle: SignalStepHandle = {
-    valid: computed(() => !!this._supd?.validate()),
+    valid: computed(() => !!this._supd()?.validate()),
     submit: async () => {
-      const result = await firstValueFrom(this._supd!.onNext());
+      const result = await firstValueFrom(this._supd()!.onNext());
       if (!result.success) {
         throw new Error(result.message || 'Failed to create user-provided service instance');
       }
