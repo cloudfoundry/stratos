@@ -99,6 +99,15 @@ export class SelectPlanStepComponent implements OnDestroy {
       servicePlans: new FormControl<string>('', { validators: Validators.required, nonNullable: true }),
     });
 
+    // Keep `validate` synced with the form's actual validity. The parent
+    // wizard's selectPlanHandle.valid reads this signal; if we only
+    // updated it inside the one-shot servicePlans$ subscription in
+    // onEnter, manual plan picks after that point would never re-flip
+    // validate to true and the Next button would stay disabled.
+    this.stepperForm.statusChanges.subscribe(() => {
+      this.validate.set(this.stepperForm.valid);
+    });
+
     this.servicePlans$ = this.store.select(selectCreateServiceInstance).pipe(
       filter(p => !!p.orgGuid && !!p.spaceGuid && !!p.serviceGuid),
       distinctUntilChanged((x, y) => {
