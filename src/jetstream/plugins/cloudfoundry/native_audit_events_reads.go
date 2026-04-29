@@ -72,6 +72,138 @@ func (c *CloudFoundrySpecification) getNativeAuditEvents(ctx echo.Context) error
 	})
 }
 
+// getNativeOrgAuditEvents handles
+// GET /pp/v1/cf/org/{cnsiGuid}/{orgGuid}/events.
+//
+// Org-scoped variant of getNativeAuditEvents — same passthrough +
+// ?return=counts contract, with an additional organization_guids filter
+// applied upstream so V3 returns only events scoped to the requested org.
+// Sort is fixed to -created_at (newest first) since org-event consumers
+// always show the most recent activity at the top.
+func (c *CloudFoundrySpecification) getNativeOrgAuditEvents(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	orgGUID := ctx.Param("orgGuid")
+	if cnsiGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")
+	}
+	if orgGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "orgGuid is required")
+	}
+
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+
+	if ctx.QueryParam("return") == "counts" {
+		params := capi.NewQueryParams().
+			WithPerPage(1).
+			WithFilter("organization_guids", orgGUID)
+		raw, lerr := cfClient.AuditEvents().List(ctx.Request().Context(), params)
+		if lerr != nil {
+			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+		}
+		return ctx.JSON(http.StatusOK, StAuditEventsResponse{
+			Resources:    []StAuditEvent{},
+			TotalResults: raw.Pagination.TotalResults,
+		})
+	}
+
+	perPage, page, present := parsePerPageAndPage(ctx)
+	params := applyPagingParams(
+		capi.NewQueryParams().
+			WithFilter("organization_guids", orgGUID).
+			WithOrderBy("-created_at"),
+		perPage, page, present,
+	)
+	raw, listErr := cfClient.AuditEvents().List(ctx.Request().Context(), params)
+	if listErr != nil {
+		return handleCapiError(ctx, listErr)
+	}
+
+	out := make([]StAuditEvent, 0, len(raw.Resources))
+	for _, ev := range raw.Resources {
+		out = append(out, toStAuditEvent(ev, cnsiGUID))
+	}
+
+	return ctx.JSON(http.StatusOK, StratosPagedResponse[StAuditEvent]{
+		Resources:  out,
+		Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
+	})
+}
+
+// getNativeSpaceAuditEvents handles
+// GET /pp/v1/cf/space/{cnsiGuid}/{spaceGuid}/events.
+//
+// Space-scoped variant — symmetric to getNativeOrgAuditEvents, filters
+// upstream by space_guids instead. Same passthrough + ?return=counts
+// contract.
+func (c *CloudFoundrySpecification) getNativeSpaceAuditEvents(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	spaceGUID := ctx.Param("spaceGuid")
+	if cnsiGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")
+	}
+	if spaceGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "spaceGuid is required")
+	}
+
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+
+	if ctx.QueryParam("return") == "counts" {
+		params := capi.NewQueryParams().
+			WithPerPage(1).
+			WithFilter("space_guids", spaceGUID)
+		raw, lerr := cfClient.AuditEvents().List(ctx.Request().Context(), params)
+		if lerr != nil {
+			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+		}
+		return ctx.JSON(http.StatusOK, StAuditEventsResponse{
+			Resources:    []StAuditEvent{},
+			TotalResults: raw.Pagination.TotalResults,
+		})
+	}
+
+	perPage, page, present := parsePerPageAndPage(ctx)
+	params := applyPagingParams(
+		capi.NewQueryParams().
+			WithFilter("space_guids", spaceGUID).
+			WithOrderBy("-created_at"),
+		perPage, page, present,
+	)
+	raw, listErr := cfClient.AuditEvents().List(ctx.Request().Context(), params)
+	if listErr != nil {
+		return handleCapiError(ctx, listErr)
+	}
+
+	out := make([]StAuditEvent, 0, len(raw.Resources))
+	for _, ev := range raw.Resources {
+		out = append(out, toStAuditEvent(ev, cnsiGUID))
+	}
+
+	return ctx.JSON(http.StatusOK, StratosPagedResponse[StAuditEvent]{
+		Resources:  out,
+		Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
+	})
+}
+
 // toStAuditEvent maps a capi.AuditEvent onto a Stratos-shape
 // StAuditEvent. Space/Organization are *T (nullable when the event
 // isn't scoped to one — e.g. user.login); we coerce nil → "" for

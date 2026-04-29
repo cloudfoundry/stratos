@@ -272,6 +272,218 @@ func TestGetNativeAuditEvents_CountsFastPath(t *testing.T) {
 	assert.Empty(t, resp.Resources)
 }
 
+// TestGetNativeOrgAuditEvents_PerPagePassthrough verifies the org-scoped
+// variant: caller's per_page+page forward verbatim, the upstream URL
+// carries the organization_guids filter, and exactly one CAPI call is
+// issued.
+func TestGetNativeOrgAuditEvents_PerPagePassthrough(t *testing.T) {
+	hits := 0
+	var lastPerPage, lastPage, lastOrgFilter, lastOrderBy string
+	capiServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/v3":
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{"links":{}}`))
+		case r.URL.Path == "/v3/audit_events" && r.Method == http.MethodGet:
+			hits++
+			lastPerPage = r.URL.Query().Get("per_page")
+			lastPage = r.URL.Query().Get("page")
+			lastOrgFilter = r.URL.Query().Get("organization_guids")
+			lastOrderBy = r.URL.Query().Get("order_by")
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{
+				"pagination": {"total_results": 8, "total_pages": 1, "next": null},
+				"resources": [
+					{"guid":"event-1","type":"audit.app.create","actor":{"guid":"u","type":"user","name":"u"},"target":{"guid":"t","type":"app","name":"t"},"data":{},"organization":{"guid":"org-1","name":"engineering"}}
+				]
+			}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer capiServer.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(capiServer.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/org/cnsi-1/org-1/events?per_page=25&page=2", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/org/:cnsiGuid/:orgGuid/events")
+	c.SetParamNames("cnsiGuid", "orgGuid")
+	c.SetParamValues("cnsi-1", "org-1")
+
+	require.NoError(t, plugin.getNativeOrgAuditEvents(c))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, 1, hits)
+	assert.Equal(t, "25", lastPerPage)
+	assert.Equal(t, "2", lastPage)
+	assert.Equal(t, "org-1", lastOrgFilter, "organization_guids filter must be forwarded")
+	assert.Equal(t, "-created_at", lastOrderBy, "order_by=-created_at must be forwarded")
+
+	var resp StratosPagedResponse[StAuditEvent]
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	require.Len(t, resp.Resources, 1)
+	assert.Equal(t, 8, resp.Pagination.TotalResults)
+}
+
+// TestGetNativeOrgAuditEvents_CountsFastPath verifies the counts branch
+// requests per_page=1 with the organization_guids filter and returns
+// only totalResults.
+func TestGetNativeOrgAuditEvents_CountsFastPath(t *testing.T) {
+	var sawPerPage, sawOrgFilter string
+	capiServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/v3":
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{"links":{}}`))
+		case r.URL.Path == "/v3/audit_events" && r.Method == http.MethodGet:
+			sawPerPage = r.URL.Query().Get("per_page")
+			sawOrgFilter = r.URL.Query().Get("organization_guids")
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{"pagination": {"total_results": 42, "total_pages": 42, "next": null},"resources":[]}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer capiServer.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(capiServer.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/org/cnsi-1/org-1/events?return=counts", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/org/:cnsiGuid/:orgGuid/events")
+	c.SetParamNames("cnsiGuid", "orgGuid")
+	c.SetParamValues("cnsi-1", "org-1")
+
+	require.NoError(t, plugin.getNativeOrgAuditEvents(c))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, "1", sawPerPage)
+	assert.Equal(t, "org-1", sawOrgFilter)
+
+	var resp StAuditEventsResponse
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	assert.Equal(t, 42, resp.TotalResults)
+	assert.Empty(t, resp.Resources)
+}
+
+// TestGetNativeSpaceAuditEvents_PerPagePassthrough mirrors the org variant
+// for the space-scoped endpoint.
+func TestGetNativeSpaceAuditEvents_PerPagePassthrough(t *testing.T) {
+	hits := 0
+	var lastPerPage, lastPage, lastSpaceFilter string
+	capiServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/v3":
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{"links":{}}`))
+		case r.URL.Path == "/v3/audit_events" && r.Method == http.MethodGet:
+			hits++
+			lastPerPage = r.URL.Query().Get("per_page")
+			lastPage = r.URL.Query().Get("page")
+			lastSpaceFilter = r.URL.Query().Get("space_guids")
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{
+				"pagination": {"total_results": 3, "total_pages": 1, "next": null},
+				"resources": [
+					{"guid":"event-1","type":"audit.app.create","actor":{"guid":"u","type":"user","name":"u"},"target":{"guid":"t","type":"app","name":"t"},"data":{},"space":{"guid":"space-1","name":"dev"}}
+				]
+			}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer capiServer.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(capiServer.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/space/cnsi-1/space-1/events?per_page=10&page=3", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/space/:cnsiGuid/:spaceGuid/events")
+	c.SetParamNames("cnsiGuid", "spaceGuid")
+	c.SetParamValues("cnsi-1", "space-1")
+
+	require.NoError(t, plugin.getNativeSpaceAuditEvents(c))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, 1, hits)
+	assert.Equal(t, "10", lastPerPage)
+	assert.Equal(t, "3", lastPage)
+	assert.Equal(t, "space-1", lastSpaceFilter, "space_guids filter must be forwarded")
+}
+
+// TestGetNativeSpaceAuditEvents_CountsFastPath verifies the counts
+// branch on the space-scoped endpoint.
+func TestGetNativeSpaceAuditEvents_CountsFastPath(t *testing.T) {
+	var sawPerPage, sawSpaceFilter string
+	capiServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/v3":
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{"links":{}}`))
+		case r.URL.Path == "/v3/audit_events" && r.Method == http.MethodGet:
+			sawPerPage = r.URL.Query().Get("per_page")
+			sawSpaceFilter = r.URL.Query().Get("space_guids")
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{"pagination": {"total_results": 7, "total_pages": 7, "next": null},"resources":[]}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer capiServer.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(capiServer.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/space/cnsi-1/space-1/events?return=counts", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/space/:cnsiGuid/:spaceGuid/events")
+	c.SetParamNames("cnsiGuid", "spaceGuid")
+	c.SetParamValues("cnsi-1", "space-1")
+
+	require.NoError(t, plugin.getNativeSpaceAuditEvents(c))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, "1", sawPerPage)
+	assert.Equal(t, "space-1", sawSpaceFilter)
+
+	var resp StAuditEventsResponse
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	assert.Equal(t, 7, resp.TotalResults)
+	assert.Empty(t, resp.Resources)
+}
+
 // TestGetNativeAuditEvents_OmitsPagingWhenAbsent verifies V3-default
 // behaviour: when the caller doesn't pass per_page or page, the handler
 // MUST NOT inject any per_page/page on the upstream call so V3 applies
