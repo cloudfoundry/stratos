@@ -442,6 +442,25 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
   ];
 }
 
+// Map V3 Stratos-shape (camelCase StOrgQuota / StSpaceQuota) flat fields onto
+// the V2 IOrgQuotaDefinition / ISpaceQuotaDefinition snake_case keys read by
+// legacy consumers — Summary header, org/space Quota tab, edit-quota form,
+// card-cf-org-user-details, card-cf-space-details. The shared mapper spreads
+// the original record and adds these alias keys, so the V3-shape CF Quotas
+// list (which reads camelCase directly) keeps working.
+const quotaV3ToV2Renames: Record<string, string> = {
+  paidServicesAllowed: 'non_basic_services_allowed',
+  totalMemoryInMB: 'memory_limit',
+  totalInstanceMemoryInMB: 'instance_memory_limit',
+  totalInstances: 'app_instance_limit',
+  totalAppTasks: 'app_task_limit',
+  totalServiceInstances: 'total_services',
+  totalServiceKeys: 'total_service_keys',
+  totalRoutes: 'total_routes',
+  totalReservedPorts: 'total_reserved_route_ports',
+  totalDomains: 'total_private_domains',
+};
+
 function generateCFQuotaDefinitionEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition: IStratosEntityDefinition = {
     type: quotaDefinitionEntityType,
@@ -454,9 +473,14 @@ function generateCFQuotaDefinitionEntity(endpointDefinition: StratosEndpointExte
       getTotalPages: v3PaginationConfig.getTotalPages,
       getTotalEntities: v3PaginationConfig.getTotalEntities,
       getPaginationParameters: v3PaginationConfig.getPaginationParameters,
-      getEntitiesFromResponse: v3EntitiesFromResponse<StOrgQuota>(),
+      // V3 wire shape is camelCase StOrgQuota; legacy V2 consumers (Summary
+      // tile, quota-definition tab, edit-quota form) read snake_case
+      // IOrgQuotaDefinition. The mapper spreads the original record and adds
+      // the renamed keys, so both shapes coexist without breaking the V3
+      // CF-level Quotas list which reads camelCase directly.
+      getEntitiesFromResponse: v3EntitiesFromResponse<StOrgQuota>(quotaV3ToV2Renames),
     },
-    successfulRequestDataMapper: v3SingleResourceMapper<StOrgQuota>(),
+    successfulRequestDataMapper: v3SingleResourceMapper<StOrgQuota>(quotaV3ToV2Renames),
   };
   cfEntityCatalog.quotaDefinition = new StratosCatalogEntity<
     IFavoriteMetadata,
@@ -558,10 +582,12 @@ function generateCFSpaceQuotaEntity(endpointDefinition: StratosEndpointExtension
       getTotalEntities: v3PaginationConfig.getTotalEntities,
       getPaginationParameters: v3PaginationConfig.getPaginationParameters,
       getEntitiesFromResponse: v3EntitiesFromResponse<StSpaceQuota>({
+        ...quotaV3ToV2Renames,
         organizationGuid: 'organization_guid',
       }),
     },
     successfulRequestDataMapper: v3SingleResourceMapper<StSpaceQuota>({
+      ...quotaV3ToV2Renames,
       organizationGuid: 'organization_guid',
     }),
   };

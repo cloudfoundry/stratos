@@ -200,11 +200,23 @@ export class CloudFoundryOrganizationService {
   private initialiseOrgObservables() {
     this.spaces$ = this.org$.pipe(map(o => o.entity.entity.spaces), filter(o => !!o));
     this.privateDomains$ = this.org$.pipe(map(o => o.entity.entity.private_domains));
-    this.quotaDefinition$ = this.org$.pipe(map(o => o.entity.entity.quota_definition && o.entity.entity.quota_definition.entity));
-    this.quotaLink$ = this.org$.pipe(map(o => {
-      const quotaDefinition = o.entity.entity.quota_definition;
 
-      return quotaDefinition && [
+    // V3-native: org no longer carries inline quota_definition. The
+    // quota_definition_guid field (mapped from V3 relationships.quota.data.guid
+    // by v3-native rename) drives a separate cfEntityCatalog fetch — same
+    // pattern as features/cf/quota-definition/quota-definition.component.ts.
+    this.quotaDefinition$ = this.org$.pipe(
+      map(o => o.entity.entity.quota_definition_guid),
+      filter(quotaGuid => !!quotaGuid),
+      switchMap(quotaGuid =>
+        cfEntityCatalog.quotaDefinition.store.getEntityService(quotaGuid, this.cfGuid, {}).waitForEntity$
+      ),
+      map(qe => qe.entity.entity)
+    );
+
+    this.quotaLink$ = this.org$.pipe(map(o => {
+      const quotaDefinitionGuid = o.entity.entity.quota_definition_guid;
+      return quotaDefinitionGuid && [
         '/cloud-foundry',
         this.cfGuid,
         'organizations',

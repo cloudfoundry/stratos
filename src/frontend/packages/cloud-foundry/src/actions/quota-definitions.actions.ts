@@ -119,7 +119,7 @@ export class GetQuotaDefinition extends CFStartAction implements ICFAction, Enti
     super();
     this.options = new HttpRequest(
       'GET',
-      `quota_definitions/${guid}`
+      `/pp/v1/cf/organization_quotas/${endpointGuid}/${guid}`
     );
   }
   actions = [

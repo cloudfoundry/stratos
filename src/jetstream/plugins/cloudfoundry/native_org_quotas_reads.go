@@ -70,6 +70,38 @@ func (c *CloudFoundrySpecification) getNativeOrgQuotas(ctx echo.Context) error {
 	})
 }
 
+// getNativeOrgQuotaDetail handles GET /pp/v1/cf/organization_quotas/{cnsiGuid}/{quotaGuid}.
+//
+// Returns a single org quota by GUID as a flat StOrgQuota. Drives the
+// "Quota Definition" link in the org Summary header and any other
+// single-quota lookup that previously hit V2's quota_definitions/{guid}.
+func (c *CloudFoundrySpecification) getNativeOrgQuotaDetail(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	quotaGUID := ctx.Param("quotaGuid")
+	if cnsiGUID == "" || quotaGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid and quotaGuid are required")
+	}
+
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+
+	q, getErr := cfClient.OrganizationQuotas().Get(ctx.Request().Context(), quotaGUID)
+	if getErr != nil {
+		return handleCapiError(ctx, getErr)
+	}
+
+	return ctx.JSON(http.StatusOK, toStOrgQuota(*q, cnsiGUID))
+}
+
 // nilIntToUnlimited coerces a nullable int limit (capi convention: nil =
 // "no limit") to the wire value -1 so the frontend can render "Unlimited"
 // uniformly across every limit cell.
