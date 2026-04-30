@@ -34,9 +34,9 @@ func TestGetNativeUsers_PerPagePassthrough(t *testing.T) {
 			_ = json.NewEncoder(w).Encode(map[string]interface{}{
 				"pagination": map[string]interface{}{
 					"total_results": 90, "total_pages": 4,
-					"first": map[string]interface{}{"href": "/v3/users?page=1&per_page=25"},
-					"last":  map[string]interface{}{"href": "/v3/users?page=4&per_page=25"},
-					"next":  map[string]interface{}{"href": "/v3/users?page=3&per_page=25"},
+					"first":    map[string]interface{}{"href": "/v3/users?page=1&per_page=25"},
+					"last":     map[string]interface{}{"href": "/v3/users?page=4&per_page=25"},
+					"next":     map[string]interface{}{"href": "/v3/users?page=3&per_page=25"},
 					"previous": map[string]interface{}{"href": "/v3/users?page=1&per_page=25"},
 				},
 				"resources": []map[string]interface{}{
