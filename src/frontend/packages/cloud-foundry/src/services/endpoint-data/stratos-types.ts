@@ -4,6 +4,10 @@ export interface StOrg {
   guid: string;
   name: string;
   status: string;
+  // Mirrors v3's relationships.quota.data.guid stamped server-side. Empty
+  // when the org has no quota linked. The legacy ngrx consumer reads this
+  // as `org.entity.quota_definition_guid` via the V3-native adapter rename.
+  quotaGuid: string;
   labels: Record<string, string>;
   annotations: Record<string, string>;
   createdAt: string;

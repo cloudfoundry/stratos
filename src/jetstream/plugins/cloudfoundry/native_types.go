@@ -9,6 +9,10 @@ type StOrg struct {
 	GUID        string            `json:"guid"`
 	Name        string            `json:"name"`
 	Status      string            `json:"status"`
+	// QuotaGUID mirrors v3's relationships.quota.data.guid — the org's
+	// associated quota_definition. Empty when the org has no quota linked
+	// or when the source response omitted the relationship envelope.
+	QuotaGUID   string            `json:"quotaGuid"`
 	Labels      map[string]string `json:"labels"`
 	Annotations map[string]string `json:"annotations"`
 	CreatedAt   string            `json:"createdAt"`

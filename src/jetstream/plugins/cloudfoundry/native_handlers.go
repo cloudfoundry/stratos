@@ -212,10 +212,15 @@ func envIntWithDefault(name string, def int) int {
 // to populate destinations.)
 
 func toStOrg(r capi.Organization) StOrg {
+	quotaGUID := ""
+	if r.Relationships != nil {
+		quotaGUID = relationshipGUID(r.Relationships.Quota)
+	}
 	return StOrg{
 		GUID:        r.GUID,
 		Name:        r.Name,
 		Status:      "active",
+		QuotaGUID:   quotaGUID,
 		Labels:      metaLabels(r.Metadata),
 		Annotations: metaAnnotations(r.Metadata),
 		CreatedAt:   r.CreatedAt.Format(time.RFC3339),
@@ -591,15 +596,7 @@ func (c *CloudFoundrySpecification) getNativeOrgDetail(ctx echo.Context) error {
 	}
 
 	detail := StOrgDetail{
-		StOrg: StOrg{
-			GUID:        r.GUID,
-			Name:        r.Name,
-			Status:      "active",
-			Labels:      metaLabels(r.Metadata),
-			Annotations: metaAnnotations(r.Metadata),
-			CreatedAt:   r.CreatedAt.Format(time.RFC3339),
-			UpdatedAt:   r.UpdatedAt.Format(time.RFC3339),
-		},
+		StOrg:  toStOrg(*r),
 		Spaces: []StSpace{},
 	}
 

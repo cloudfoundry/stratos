@@ -1221,9 +1221,13 @@ function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinit
       getTotalPages: v3PaginationConfig.getTotalPages,
       getTotalEntities: v3PaginationConfig.getTotalEntities,
       getPaginationParameters: v3PaginationConfig.getPaginationParameters,
-      getEntitiesFromResponse: v3EntitiesFromResponse<StOrg>(),
+      getEntitiesFromResponse: v3EntitiesFromResponse<StOrg>({
+        quotaGuid: 'quota_definition_guid',
+      }),
     },
-    successfulRequestDataMapper: v3SingleResourceMapper<StOrg>(),
+    successfulRequestDataMapper: v3SingleResourceMapper<StOrg>({
+      quotaGuid: 'quota_definition_guid',
+    }),
   };
   cfEntityCatalog.org = new StratosCatalogEntity<
     IFavoriteMetadata,
