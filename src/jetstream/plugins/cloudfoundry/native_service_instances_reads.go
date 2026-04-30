@@ -153,8 +153,10 @@ func toStServiceInstance(
 
 	offeringGUID := ""
 	offeringName := ""
+	planName := ""
 	if planGUID != "" {
 		if plan, ok := planByGUID[planGUID]; ok {
+			planName = plan.Name
 			offeringGUID = relationshipGUID(plan.Relationships.ServiceOffering)
 			if offering, ok := offeringByGUID[offeringGUID]; ok {
 				offeringName = offering.Name
@@ -206,6 +208,7 @@ func toStServiceInstance(
 		CnsiGUID:            cnsiGUID,
 		SpaceGUID:           spaceGUID,
 		ServicePlanGUID:     planGUID,
+		ServicePlanName:     planName,
 		ServiceOfferingGUID: offeringGUID,
 		ServiceOfferingName: offeringName,
 		Tags:                tags,

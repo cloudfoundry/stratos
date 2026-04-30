@@ -24,6 +24,7 @@ type StApp struct {
 	Name      string       `json:"name"`
 	State     string       `json:"state"`
 	SpaceGUID string       `json:"spaceGuid"`
+	SpaceName string       `json:"spaceName,omitempty"`
 	OrgGUID   *string      `json:"orgGuid,omitempty"`
 	Instances int          `json:"instances"`
 	Memory    *int         `json:"memory,omitempty"`
@@ -315,6 +316,7 @@ type StServiceInstance struct {
 	CnsiGUID            string   `json:"cnsiGuid"`
 	SpaceGUID           string   `json:"spaceGuid,omitempty"`
 	ServicePlanGUID     string   `json:"servicePlanGuid,omitempty"`
+	ServicePlanName     string   `json:"servicePlanName,omitempty"`
 	ServiceOfferingGUID string   `json:"serviceOfferingGuid,omitempty"`
 	ServiceOfferingName string   `json:"serviceOfferingName,omitempty"`
 	Tags                []string `json:"tags"`

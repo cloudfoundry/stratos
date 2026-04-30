@@ -353,17 +353,27 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
 	}
 
-	// Enrich each app with its web-process memory / diskQuota / instances.
-	// V3 moves these fields off the app onto the process; without this
-	// stitch, downstream consumers like the CF endpoint Memory Usage tile
-	// (totalMem$ in CloudFoundryEndpointService) see undefined fields and
-	// render blank. Process fetch failure is non-fatal — rows render
-	// without memory/disk and the total degrades gracefully.
+	// Enrich each app with its web-process memory / diskQuota / instances
+	// and its parent space's name. V3 moves the process fields off the app
+	// onto the web process, and the space name was always carried via a
+	// separate /v3/spaces fetch on the client. Stitching both server-side
+	// gives downstream consumers (Memory Usage tile, app-wall Space cell)
+	// rich rows from a single payload.
 	appGUIDs := make([]string, 0, len(raw.Resources))
+	spaceGUIDsSeen := make(map[string]struct{}, len(raw.Resources))
+	spaceGUIDs := make([]string, 0)
 	for _, r := range raw.Resources {
 		appGUIDs = append(appGUIDs, r.GUID)
+		spaceGUID := relationshipGUID(r.Relationships.Space)
+		if spaceGUID != "" {
+			if _, seen := spaceGUIDsSeen[spaceGUID]; !seen {
+				spaceGUIDsSeen[spaceGUID] = struct{}{}
+				spaceGUIDs = append(spaceGUIDs, spaceGUID)
+			}
+		}
 	}
 	processes, _ := fetchWebProcessesForApps(ctx, cfClient, appGUIDs)
+	spaces, _ := fetchSpacesByGUIDs(ctx, cfClient, spaceGUIDs)
 
 	apps := make([]StApp, 0, len(raw.Resources))
 	for _, r := range raw.Resources {
@@ -374,6 +384,9 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 			s.Memory = &mem
 			s.DiskQuota = &disk
 			s.Instances = proc.Instances
+		}
+		if space, ok := spaces[s.SpaceGUID]; ok {
+			s.SpaceName = space.Name
 		}
 		apps = append(apps, s)
 	}

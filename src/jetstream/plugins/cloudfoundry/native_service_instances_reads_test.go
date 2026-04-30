@@ -102,6 +102,7 @@ func TestGetNativeServiceInstances_PerPagePassthrough(t *testing.T) {
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
 	require.Len(t, resp.Resources, 1)
 	assert.Equal(t, "redis", resp.Resources[0].ServiceOfferingName)
+	assert.Equal(t, "small", resp.Resources[0].ServicePlanName)
 	assert.Equal(t, 17, resp.Pagination.TotalResults)
 }
 

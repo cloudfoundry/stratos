@@ -107,9 +107,11 @@ func parseSummaryQueryParams(ctx echo.Context) *capi.QueryParams {
 // surfaced as unavailable together when the processes fetch fails.
 var processDerivedFields = []string{"memory", "diskQuota", "instances"}
 
-// spaceDerivedFields are the StApp fields sourced from a space→org resolution
-// — surfaced as unavailable together when the spaces fetch fails.
-var spaceDerivedFields = []string{"orgGuid"}
+// spaceDerivedFields are the StApp fields sourced from a space resolution —
+// surfaced as unavailable together when the spaces fetch fails. spaceName
+// resolves directly from the Space DTO; orgGuid is one additional hop via
+// space.Relationships.Organization.
+var spaceDerivedFields = []string{"spaceName", "orgGuid"}
 
 // fetchWebProcessesForApps issues one /v3/processes call filtered to the
 // given app GUIDs and type=web, collecting results across all pages. Returns
@@ -193,6 +195,7 @@ func composeStAppSummary(app capi.App, process *capi.Process, space *capi.Space)
 	}
 
 	if space != nil {
+		s.SpaceName = space.Name
 		orgGuid := relationshipGUID(space.Relationships.Organization)
 		if orgGuid != "" {
 			s.OrgGUID = &orgGuid

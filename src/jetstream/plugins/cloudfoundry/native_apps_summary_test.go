@@ -676,17 +676,18 @@ func TestGetNativeAppsSummary_SpacesFetchFailureSurfacesOrgGuidTristate(t *testi
 	assert.Equal(t, "app-1", resp.Resources[0].GUID)
 	require.NotNil(t, resp.Resources[0].Memory, "Memory still set (processes succeeded)")
 	assert.Equal(t, 256, *resp.Resources[0].Memory)
-	// orgGuid absent because spaces fetch failed
+	// spaceName + orgGuid absent because spaces fetch failed
+	assert.Empty(t, resp.Resources[0].SpaceName)
 	assert.Nil(t, resp.Resources[0].OrgGUID)
 	require.NotNil(t, resp.Resources[0].Meta)
-	assert.ElementsMatch(t, []string{"orgGuid"}, resp.Resources[0].Meta.Unavailable)
+	assert.ElementsMatch(t, []string{"spaceName", "orgGuid"}, resp.Resources[0].Meta.Unavailable)
 
 	// Envelope has the SPACES_FETCH_FAILED error
 	require.NotNil(t, resp.Meta)
 	require.Len(t, resp.Meta.Errors, 1)
 	assert.Equal(t, "SPACES_FETCH_FAILED", resp.Meta.Errors[0].Code)
 	assert.Equal(t, "envelope", resp.Meta.Errors[0].Scope)
-	assert.ElementsMatch(t, []string{"orgGuid"}, resp.Meta.Errors[0].Affected)
+	assert.ElementsMatch(t, []string{"spaceName", "orgGuid"}, resp.Meta.Errors[0].Affected)
 }
 
 func TestGetNativeAppsSummary_BothCompositionFetchesFailMultiError(t *testing.T) {
@@ -745,7 +746,7 @@ func TestGetNativeAppsSummary_BothCompositionFetchesFailMultiError(t *testing.T)
 	assert.Nil(t, resp.Resources[0].Memory)
 	assert.Nil(t, resp.Resources[0].OrgGUID)
 	require.NotNil(t, resp.Resources[0].Meta)
-	assert.ElementsMatch(t, []string{"memory", "diskQuota", "instances", "orgGuid"}, resp.Resources[0].Meta.Unavailable)
+	assert.ElementsMatch(t, []string{"memory", "diskQuota", "instances", "spaceName", "orgGuid"}, resp.Resources[0].Meta.Unavailable)
 
 	// Envelope has two distinct errors — multi-error by design
 	require.NotNil(t, resp.Meta)
