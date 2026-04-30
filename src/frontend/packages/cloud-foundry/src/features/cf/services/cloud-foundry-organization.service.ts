@@ -8,9 +8,9 @@ import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagi
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
 import {
   IApp,
+  IDomain,
   IOrganization,
   IOrgQuotaDefinition,
-  IPrivateDomain,
   ISpace,
   ISpaceQuotaDefinition,
 } from '../../../cf-api.types';
@@ -81,7 +81,10 @@ export class CloudFoundryOrganizationService {
   userOrgRole$!: Observable<string>;
   quotaDefinition$!: Observable<IOrgQuotaDefinition>;
   totalMem$!: Observable<number>;
-  privateDomains$!: Observable<APIResource<IPrivateDomain>[]>;
+  // V3-native: domain entity returns IDomain shape (V3 unified model)
+  // rather than V2's IPrivateDomain. Template only reads .length, so the
+  // shape difference is invisible to consumers.
+  privateDomains$!: Observable<APIResource<IDomain>[]>;
   routes$!: Observable<APIResource<Route>[]>;
   serviceInstancesCount$!: Observable<number>;
   userProvidedServiceInstancesCount$!: Observable<number>;
@@ -221,7 +224,12 @@ export class CloudFoundryOrganizationService {
     ).entities$.pipe(
       filter(spaces => !!spaces),
     );
-    this.privateDomains$ = this.org$.pipe(map(o => o.entity.entity.private_domains));
+    // V3-native: org no longer carries inline private_domains. Fetch via
+    // /pp/v1/cf/org/:cnsi/:orgGuid/private_domains (handler filters
+    // /v3/domains?organization_guids=:guid down to the private subset).
+    this.privateDomains$ = cfEntityCatalog.domain.store.getOrganizationDomains.getPaginationService(
+      this.orgGuid, this.cfGuid,
+    ).entities$.pipe(filter(domains => !!domains));
 
     // V3-native: org no longer carries inline quota_definition. The
     // quota_definition_guid field (mapped from V3 relationships.quota.data.guid

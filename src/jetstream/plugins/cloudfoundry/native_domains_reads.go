@@ -67,6 +67,54 @@ func (c *CloudFoundrySpecification) getNativeDomains(ctx echo.Context) error {
 	})
 }
 
+// getNativeOrgDomains handles GET /pp/v1/cf/org/{cnsiGuid}/{orgGuid}/private_domains.
+// Returns only private domains (owned by the org) — V3 collapses
+// `/v2/organizations/:guid/private_domains` into `/v3/domains?organization_guids=:guid`,
+// which mixes owned + shared. Server-side filter to OwningOrgGUID==orgGuid.
+func (c *CloudFoundrySpecification) getNativeOrgDomains(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	orgGUID := ctx.Param("orgGuid")
+	if cnsiGUID == "" || orgGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid and orgGuid are required")
+	}
+
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+
+	perPage, page, present := parsePerPageAndPage(ctx)
+	params := applyPagingParams(
+		capi.NewQueryParams().WithFilter("organization_guids", orgGUID),
+		perPage, page, present,
+	)
+
+	raw, lerr := cfClient.Domains().List(ctx.Request().Context(), params)
+	if lerr != nil {
+		return handleCapiError(ctx, lerr)
+	}
+
+	resources := make([]StDomain, 0, len(raw.Resources))
+	for _, d := range raw.Resources {
+		st := toStDomain(d, cnsiGUID)
+		if st.OwningOrgGUID == orgGUID {
+			resources = append(resources, st)
+		}
+	}
+
+	return ctx.JSON(http.StatusOK, StratosPagedResponse[StDomain]{
+		Resources:  resources,
+		Pagination: BuildPaginationMeta(ctx, page, perPage, len(resources)),
+	})
+}
+
 // getNativeDomainDetail handles GET /pp/v1/cf/domains/{cnsiGuid}/{domainGuid}.
 // Single-resource sibling for detail views.
 func (c *CloudFoundrySpecification) getNativeDomainDetail(ctx echo.Context) error {

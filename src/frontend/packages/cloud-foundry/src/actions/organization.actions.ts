@@ -117,7 +117,7 @@ export class GetAllOrganizationDomains extends CFStartAction implements Paginate
     }
     this.options = new HttpRequest(
       'GET',
-      `organizations/${orgGuid}/domains`
+      `/pp/v1/cf/org/${endpointGuid}/${orgGuid}/private_domains`
     );
     this.parentGuid = orgGuid;
   }
