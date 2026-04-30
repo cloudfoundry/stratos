@@ -77,7 +77,7 @@ export class GetAllSpaces extends CFStartAction implements PaginatedAction, Enti
     super();
     this.options = new HttpRequest(
       'GET',
-      'space'
+      `/pp/v1/cf/spaces/${endpointGuid}`
     );
   }
   actions = [GET_SPACES, GET_SPACES_SUCCESS, GET_SPACES_FAILED];
@@ -177,7 +177,7 @@ export class DeleteSpace extends BaseSpaceAction {
     super(guid, orgGuid, endpointGuid);
     this.options = new HttpRequest(
       'DELETE',
-      `spaces/${guid}`,
+      `/pp/v1/cf/spaces/${endpointGuid}/${guid}`,
       {
         params: new HttpParams({
           fromObject: {
@@ -193,6 +193,11 @@ export class DeleteSpace extends BaseSpaceAction {
 }
 
 export class CreateSpace extends BaseSpaceAction {
+  // FLAG (A6): URL not swapped to /pp/v1/cf/spaces/${endpointGuid} because
+  // backend createNativeSpace expects v3 capi.SpaceCreateRequest body
+  // ({name, relationships:{organization:{data:{guid}}}}); current body is
+  // legacy V2 IUpdateSpace ({name, organization_guid, ...}). Body-shape
+  // transform required before swap.
   constructor(public endpointGuid: string, orgGuid: string, createSpace: IUpdateSpace, key = `${orgGuid}-${createSpace.name}`) {
     super(key, orgGuid, endpointGuid);
     this.options = new HttpRequest(
@@ -206,6 +211,11 @@ export class CreateSpace extends BaseSpaceAction {
 export class UpdateSpace extends CFStartAction implements ICFAction {
 
   public static UpdateExistingSpace = 'Updating-Existing-Space';
+  // FLAG (A6): URL/method not swapped to PATCH /pp/v1/cf/spaces/${endpointGuid}/${guid}
+  // because backend updateNativeSpace expects v3 capi.SpaceUpdateRequest body
+  // ({name?, metadata?}); current body is V2 IUpdateSpace
+  // (name, organization_guid, *_guids, allow_ssh, ...). Body-shape transform
+  // and PUT→PATCH switch required before swap.
   constructor(public guid: string, public endpointGuid: string, updateSpace: IUpdateSpace) {
     super();
     this.options = new HttpRequest(

@@ -362,6 +362,32 @@ export interface StFeatureFlagsResponse {
   totalResults: number;
 }
 
+// StDomain is the Stratos-shaped DTO for a CF v3 domain — the DNS
+// suffix routes attach to. owningOrgGuid is set for private domains
+// (visible/usable only inside one org); empty for shared domains.
+// sharedOrgGuids lists orgs a shared domain is explicitly shared with.
+// internal flags container-to-container-only domains (no public
+// ingress). routerGroupGuid associates TCP domains with a router
+// group; empty for HTTP domains. cnsiGuid is stamped server-side so
+// multi-CNSI rendering keys off (cnsi, domain).
+export interface StDomain {
+  guid: string;
+  name: string;
+  internal: boolean;
+  routerGroupGuid?: string;
+  supportedProtocols: string[];
+  owningOrgGuid?: string;
+  sharedOrgGuids: string[];
+  cnsiGuid: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StDomainsResponse {
+  resources: StDomain[];
+  totalResults: number;
+}
+
 // StOrgQuota is the Stratos-shaped DTO for a CF organization quota.
 // Org quotas cap the apps / services / routes / domains an organization
 // can hold across all its spaces. All limit fields use -1 to signal
