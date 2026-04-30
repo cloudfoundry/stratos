@@ -24,7 +24,10 @@ import {
   spaceEntityType,
 } from '../../../cf-entity-types';
 import { getEntityFlattenedList, getStartedAppInstanceCount } from '../../../cf.helpers';
-import { createEntityRelationKey } from '../../../entity-relations/entity-relations.types';
+import {
+  createEntityRelationKey,
+  createEntityRelationPaginationKey,
+} from '../../../entity-relations/entity-relations.types';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import {
   CloudFoundryUserProvidedServicesService,
@@ -198,7 +201,17 @@ export class CloudFoundryOrganizationService {
 
 
   private initialiseOrgObservables() {
-    this.spaces$ = this.org$.pipe(map(o => o.entity.entity.spaces), filter(o => !!o));
+    // V3-native: org no longer carries inline spaces. Use the entity-catalog
+    // pagination helper (same path add-edit-space-step-base + Spaces tab share)
+    // — proven to dispatch the action and surface entities reliably.
+    this.spaces$ = cfEntityCatalog.space.store.getAllInOrganization.getPaginationService(
+      this.orgGuid,
+      this.cfGuid,
+      createEntityRelationPaginationKey(organizationEntityType, this.orgGuid),
+      { flatten: true },
+    ).entities$.pipe(
+      filter(spaces => !!spaces),
+    );
     this.privateDomains$ = this.org$.pipe(map(o => o.entity.entity.private_domains));
 
     // V3-native: org no longer carries inline quota_definition. The
