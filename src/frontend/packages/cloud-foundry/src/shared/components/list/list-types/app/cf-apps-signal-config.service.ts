@@ -9,18 +9,26 @@ import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/vie
 import type { StApp, StAppRoutesResponse, StAppServiceBindingsResponse, StOrg, StOrgsResponse, StRoute, StServiceBinding, StSpace, StSpacesResponse } from '../../../../../services/endpoint-data/stratos-types';
 import { CloudFoundryService } from '../../../../data-services/cloud-foundry.service';
 import { writeWithJob } from '../../../../../services/async-jobs/write-with-job';
-import type { SignalListDropdownOption, SignalListViewMode } from '@stratosui/core';
+import type { SignalListDropdownOption } from '@stratosui/core';
+import { ListStateStore } from '@stratosui/core';
 
 @Injectable({ providedIn: 'root' })
 export class CfAppsSignalConfigService {
   orchestrator!: MergeOrchestrator<StApp>;
   view!: ViewPipeline<StApp>;
 
+  private readonly state = inject(ListStateStore).bind('cf-apps', {
+    viewMode: 'table',
+    pageSize: [24, 25],
+    pageIndex: [0, 0],
+    sort: [{ field: 'name', direction: 'asc' }, { field: 'name', direction: 'asc' }],
+  });
+
   // User-controlled filter / sort / pagination state.
   readonly filter: WritableSignal<(app: StApp) => boolean> = signal(() => true);
-  readonly sort: WritableSignal<SortSpec<StApp>> = signal({ field: 'name', direction: 'asc' });
-  readonly pageSize: WritableSignal<number> = signal(25);
-  readonly pageIndex: WritableSignal<number> = signal(0);
+  readonly sort = this.state.sort as WritableSignal<SortSpec<StApp>>;
+  readonly pageSize = this.state.pageSize;
+  readonly pageIndex = this.state.pageIndex;
   // Map of sort-field key → value-extractor function, for columns whose
   // sort value is derived from multiple entity properties (e.g., the
   // CF/Org/Space column that renders cnsi + org + space together). The
@@ -67,7 +75,7 @@ export class CfAppsSignalConfigService {
   private readonly injector = inject(Injector);
 
   // View mode (table / card). Default mirrors the legacy Stratos app wall.
-  readonly viewMode: WritableSignal<SignalListViewMode> = signal('table');
+  readonly viewMode = this.state.viewMode;
 
   // Bridge connected-CF endpoints (an rxjs Observable) into a signal so
   // computed() can read it. CloudFoundryService is optional purely because

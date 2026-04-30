@@ -1,6 +1,8 @@
 import { Injectable, Injector, Signal, WritableSignal, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
+import { ListStateStore } from '@stratosui/core';
+
 import { CnsiBuildpacksSource } from '../../../../../services/data-sources/cnsi-buildpacks-source';
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
 import type { StBuildpack } from '../../../../../services/endpoint-data/stratos-types';
@@ -20,12 +22,19 @@ export class CfBuildpacksSignalConfigService {
   private cnsiGuid = '';
   private source?: CnsiBuildpacksSource;
 
+  private readonly state = inject(ListStateStore).bind('cf-buildpacks', {
+    viewMode: 'card',
+    pageSize: [24, 25],
+    pageIndex: [0, 0],
+    sort: [{ field: 'position', direction: 'asc' }, { field: 'position', direction: 'asc' }],
+  });
+
   readonly filter: WritableSignal<(b: StBuildpack) => boolean> = signal(() => true);
-  readonly sort: WritableSignal<SortSpec<StBuildpack>> = signal({ field: 'position', direction: 'asc' });
-  readonly pageSize: WritableSignal<number> = signal(24);
-  readonly pageIndex: WritableSignal<number> = signal(0);
+  readonly sort = this.state.sort as WritableSignal<SortSpec<StBuildpack>>;
+  readonly pageSize = this.state.pageSize;
+  readonly pageIndex = this.state.pageIndex;
   readonly nameFilter: WritableSignal<string> = signal('');
-  readonly viewMode: WritableSignal<'table' | 'card'> = signal('card');
+  readonly viewMode = this.state.viewMode;
 
   private readonly _buildpacks: WritableSignal<StBuildpack[]> = signal([]);
   readonly buildpacks: Signal<StBuildpack[]> = this._buildpacks.asReadonly();

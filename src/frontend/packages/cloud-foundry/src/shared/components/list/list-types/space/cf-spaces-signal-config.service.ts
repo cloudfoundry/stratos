@@ -1,6 +1,9 @@
 import { DestroyRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+
+import { ListStateStore } from '@stratosui/core';
+
 import { EndpointDataRegistry } from '../../../../../services/endpoint-data/endpoint-data.registry';
 import type { EndpointDataService } from '../../../../../services/endpoint-data/endpoint-data.service';
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
@@ -27,12 +30,19 @@ export class CfSpacesSignalConfigService {
   private cnsiGuid = '';
   private orgGuid = '';
 
+  private readonly state = inject(ListStateStore).bind('cf-spaces', {
+    viewMode: 'card',
+    pageSize: [24, 25],
+    pageIndex: [0, 0],
+    sort: [{ field: 'name', direction: 'asc' }, { field: 'name', direction: 'asc' }],
+  });
+
   readonly filter: WritableSignal<(space: StSpace) => boolean> = signal(() => true);
-  readonly sort: WritableSignal<SortSpec<StSpace>> = signal({ field: 'name', direction: 'asc' });
-  readonly pageSize: WritableSignal<number> = signal(25);
-  readonly pageIndex: WritableSignal<number> = signal(0);
+  readonly sort = this.state.sort as WritableSignal<SortSpec<StSpace>>;
+  readonly pageSize = this.state.pageSize;
+  readonly pageIndex = this.state.pageIndex;
   readonly nameFilter: WritableSignal<string> = signal('');
-  readonly viewMode: WritableSignal<'table' | 'card'> = signal('card');
+  readonly viewMode = this.state.viewMode;
 
   // Narrow the per-CNSI spaces list to this org. Computed so it re-runs
   // automatically when the endpoint-data service's spaces() signal

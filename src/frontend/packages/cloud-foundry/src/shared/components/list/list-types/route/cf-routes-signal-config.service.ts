@@ -2,6 +2,7 @@ import { DestroyRef, Injectable, Injector, Signal, WritableSignal, computed, eff
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import type { SignalListDropdownOption } from '@stratosui/core';
+import { ListStateStore } from '@stratosui/core';
 import { EndpointDataRegistry } from '../../../../../services/endpoint-data/endpoint-data.registry';
 import type { EndpointDataService } from '../../../../../services/endpoint-data/endpoint-data.service';
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
@@ -32,21 +33,23 @@ export class CfRoutesSignalConfigService {
   // Non-empty = narrow to that space only (the per-space Routes tab).
   private spaceGuid = '';
 
+  private readonly state = inject(ListStateStore).bind('cf-routes', {
+    viewMode: 'card',
+    pageSize: [6, 25],
+    pageIndex: [0, 0],
+    sort: [{ field: 'url', direction: 'asc' }, { field: 'url', direction: 'asc' }],
+  });
+
   readonly filter: WritableSignal<(route: StRoute) => boolean> = signal(() => true);
-  readonly sort: WritableSignal<SortSpec<StRoute>> = signal({ field: 'url', direction: 'asc' });
-  // Default to 6 (card mode's first option). Stays in sync with viewMode's
-  // 'card' default — a 25 pageSize would fall outside the card options
-  // [6,12,24,48,96] and the picker would render blank on first load.
-  // setViewMode's snap logic handles toggle transitions; initial mount has
-  // to be consistent by itself.
-  readonly pageSize: WritableSignal<number> = signal(6);
-  readonly pageIndex: WritableSignal<number> = signal(0);
+  readonly sort = this.state.sort as WritableSignal<SortSpec<StRoute>>;
+  readonly pageSize = this.state.pageSize;
+  readonly pageIndex = this.state.pageIndex;
   readonly nameFilter: WritableSignal<string> = signal('');
   // Org filter — used by the CF-level routes page where routes across
   // every org show up; empty = no org constraint. The per-space page
   // doesn't populate this (it's already scoped).
   readonly selectedOrg: WritableSignal<string | null> = signal(null);
-  readonly viewMode: WritableSignal<'table' | 'card'> = signal('card');
+  readonly viewMode = this.state.viewMode;
 
   // Raw route list as returned by the backend for this CNSI. We keep the
   // unfiltered list in the writable signal and project the space-filtered

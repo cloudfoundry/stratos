@@ -1,6 +1,8 @@
 import { Injectable, Injector, Signal, WritableSignal, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
+import { ListStateStore } from '@stratosui/core';
+
 import { CnsiOrgQuotasSource } from '../../../../../services/data-sources/cnsi-org-quotas-source';
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
 import type { StOrgQuota } from '../../../../../services/endpoint-data/stratos-types';
@@ -19,12 +21,19 @@ export class CfOrgQuotasSignalConfigService {
   private cnsiGuid = '';
   private source?: CnsiOrgQuotasSource;
 
+  private readonly state = inject(ListStateStore).bind('cf-org-quotas', {
+    viewMode: 'card',
+    pageSize: [24, 25],
+    pageIndex: [0, 0],
+    sort: [{ field: 'name', direction: 'asc' }, { field: 'name', direction: 'asc' }],
+  });
+
   readonly filter: WritableSignal<(q: StOrgQuota) => boolean> = signal(() => true);
-  readonly sort: WritableSignal<SortSpec<StOrgQuota>> = signal({ field: 'name', direction: 'asc' });
-  readonly pageSize: WritableSignal<number> = signal(24);
-  readonly pageIndex: WritableSignal<number> = signal(0);
+  readonly sort = this.state.sort as WritableSignal<SortSpec<StOrgQuota>>;
+  readonly pageSize = this.state.pageSize;
+  readonly pageIndex = this.state.pageIndex;
   readonly nameFilter: WritableSignal<string> = signal('');
-  readonly viewMode: WritableSignal<'table' | 'card'> = signal('card');
+  readonly viewMode = this.state.viewMode;
 
   private readonly _orgQuotas: WritableSignal<StOrgQuota[]> = signal([]);
   readonly orgQuotas: Signal<StOrgQuota[]> = this._orgQuotas.asReadonly();

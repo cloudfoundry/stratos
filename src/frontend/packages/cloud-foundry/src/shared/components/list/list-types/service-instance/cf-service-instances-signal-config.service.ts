@@ -8,7 +8,8 @@ import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/vie
 import type { StServiceInstance } from '../../../../../services/endpoint-data/stratos-types';
 import { CloudFoundryService } from '../../../../data-services/cloud-foundry.service';
 import { writeWithJob } from '../../../../../services/async-jobs/write-with-job';
-import type { SignalListDropdownOption, SignalListViewMode } from '@stratosui/core';
+import type { SignalListDropdownOption } from '@stratosui/core';
+import { ListStateStore } from '@stratosui/core';
 
 // Service instances list config — multi-CNSI by default (services-wall),
 // with optional space + type narrowing for the per-space tabs.
@@ -47,13 +48,17 @@ export class CfServiceInstancesSignalConfigService {
   // per-space tab pre-filter.
   private readonly _typeFilter: WritableSignal<'managed' | 'user-provided' | undefined> = signal(undefined);
 
+  private readonly state = inject(ListStateStore).bind('cf-service-instances', {
+    viewMode: 'card',
+    pageSize: [6, 25],
+    pageIndex: [0, 0],
+    sort: [{ field: 'name', direction: 'asc' }, { field: 'name', direction: 'asc' }],
+  });
+
   readonly filter: WritableSignal<(si: StServiceInstance) => boolean> = signal(() => true);
-  readonly sort: WritableSignal<SortSpec<StServiceInstance>> = signal({ field: 'name', direction: 'asc' });
-  // Default to 6 (the first card-mode option). Stays in sync with
-  // viewMode='card' below — a 25 pageSize would fall outside the card
-  // options [6,12,24,48,96] and the picker would render blank on first load.
-  readonly pageSize: WritableSignal<number> = signal(6);
-  readonly pageIndex: WritableSignal<number> = signal(0);
+  readonly sort = this.state.sort as WritableSignal<SortSpec<StServiceInstance>>;
+  readonly pageSize = this.state.pageSize;
+  readonly pageIndex = this.state.pageIndex;
 
   // Toolbar filter inputs. `null` for the dropdown = "All" (no constraint);
   // empty string for nameFilter = no name constraint.
@@ -70,7 +75,7 @@ export class CfServiceInstancesSignalConfigService {
   private readonly _sortExtractors: WritableSignal<Map<string, (row: StServiceInstance) => unknown>> = signal(new Map());
   private readonly _filterExtractors: WritableSignal<Map<string, (row: StServiceInstance) => string>> = signal(new Map());
 
-  readonly viewMode: WritableSignal<SignalListViewMode> = signal('card');
+  readonly viewMode = this.state.viewMode;
 
   // Bridge connected-CF endpoints into a signal so computed() can read it.
   // CloudFoundryService is optional purely so unit tests don't need to

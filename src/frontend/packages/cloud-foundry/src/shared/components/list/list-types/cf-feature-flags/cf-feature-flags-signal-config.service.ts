@@ -1,6 +1,8 @@
 import { Injectable, Injector, Signal, WritableSignal, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
+import { ListStateStore } from '@stratosui/core';
+
 import { CnsiFeatureFlagsSource } from '../../../../../services/data-sources/cnsi-feature-flags-source';
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
 import type { StFeatureFlag } from '../../../../../services/endpoint-data/stratos-types';
@@ -18,12 +20,19 @@ export class CfFeatureFlagsSignalConfigService {
   private cnsiGuid = '';
   private source?: CnsiFeatureFlagsSource;
 
+  private readonly state = inject(ListStateStore).bind('cf-feature-flags', {
+    viewMode: 'card',
+    pageSize: [24, 25],
+    pageIndex: [0, 0],
+    sort: [{ field: 'name', direction: 'asc' }, { field: 'name', direction: 'asc' }],
+  });
+
   readonly filter: WritableSignal<(f: StFeatureFlag) => boolean> = signal(() => true);
-  readonly sort: WritableSignal<SortSpec<StFeatureFlag>> = signal({ field: 'name', direction: 'asc' });
-  readonly pageSize: WritableSignal<number> = signal(24);
-  readonly pageIndex: WritableSignal<number> = signal(0);
+  readonly sort = this.state.sort as WritableSignal<SortSpec<StFeatureFlag>>;
+  readonly pageSize = this.state.pageSize;
+  readonly pageIndex = this.state.pageIndex;
   readonly nameFilter: WritableSignal<string> = signal('');
-  readonly viewMode: WritableSignal<'table' | 'card'> = signal('card');
+  readonly viewMode = this.state.viewMode;
 
   private readonly _featureFlags: WritableSignal<StFeatureFlag[]> = signal([]);
   readonly featureFlags: Signal<StFeatureFlag[]> = this._featureFlags.asReadonly();

@@ -1,6 +1,8 @@
 import { Injectable, Injector, Signal, WritableSignal, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
+import { ListStateStore } from '@stratosui/core';
+
 import { CnsiAuditEventsSource } from '../../../../../services/data-sources/cnsi-audit-events-source';
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
 import type { StAuditEvent } from '../../../../../services/endpoint-data/stratos-types';
@@ -19,12 +21,19 @@ export class CfAuditEventsSignalConfigService {
   private cnsiGuid = '';
   private source?: CnsiAuditEventsSource;
 
+  private readonly state = inject(ListStateStore).bind('cf-audit-events', {
+    viewMode: 'table',
+    pageSize: [24, 25],
+    pageIndex: [0, 0],
+    sort: [{ field: 'createdAt', direction: 'desc' }, { field: 'createdAt', direction: 'desc' }],
+  });
+
   readonly filter: WritableSignal<(e: StAuditEvent) => boolean> = signal(() => true);
-  readonly sort: WritableSignal<SortSpec<StAuditEvent>> = signal({ field: 'createdAt', direction: 'desc' });
-  readonly pageSize: WritableSignal<number> = signal(24);
-  readonly pageIndex: WritableSignal<number> = signal(0);
+  readonly sort = this.state.sort as WritableSignal<SortSpec<StAuditEvent>>;
+  readonly pageSize = this.state.pageSize;
+  readonly pageIndex = this.state.pageIndex;
   readonly nameFilter: WritableSignal<string> = signal('');
-  readonly viewMode: WritableSignal<'table' | 'card'> = signal('table');
+  readonly viewMode = this.state.viewMode;
   // basePredicate is ANDed with the text filter inside the predicate
   // built by initialize(). The org / space / app pages set this to
   // restrict the foundation-wide event stream to their entity.

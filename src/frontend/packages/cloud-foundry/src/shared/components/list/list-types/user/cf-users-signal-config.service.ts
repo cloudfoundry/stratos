@@ -1,6 +1,7 @@
 import { DestroyRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { ListStateStore } from '@stratosui/core';
 import { EndpointDataRegistry } from '../../../../../services/endpoint-data/endpoint-data.registry';
 import type { EndpointDataService } from '../../../../../services/endpoint-data/endpoint-data.service';
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
@@ -37,15 +38,22 @@ export class CfUsersSignalConfigService {
   // re-derives the predicate when the lock changes mid-session.
   private readonly _lockedSpaceGuid: WritableSignal<string> = signal('');
 
+  private readonly state = inject(ListStateStore).bind('cf-users', {
+    viewMode: 'table',
+    pageSize: [24, 25],
+    pageIndex: [0, 0],
+    sort: [{ field: 'username', direction: 'asc' }, { field: 'username', direction: 'asc' }],
+  });
+
   readonly filter: WritableSignal<(user: StUser) => boolean> = signal(() => true);
-  readonly sort: WritableSignal<SortSpec<StUser>> = signal({ field: 'username', direction: 'asc' });
+  readonly sort = this.state.sort as WritableSignal<SortSpec<StUser>>;
   // Users are denser-table-friendly (long usernames + multi-segment role
   // cells), so default to the table mode's first page-size option (25).
   // Matches the legacy ViewType.TABLE_ONLY behaviour.
-  readonly pageSize: WritableSignal<number> = signal(25);
-  readonly pageIndex: WritableSignal<number> = signal(0);
+  readonly pageSize = this.state.pageSize;
+  readonly pageIndex = this.state.pageIndex;
   readonly nameFilter: WritableSignal<string> = signal('');
-  readonly viewMode: WritableSignal<'table' | 'card'> = signal('table');
+  readonly viewMode = this.state.viewMode;
 
   // Raw user list as returned by the backend for this CNSI. We keep the
   // unfiltered list in the writable signal and project the space-filtered

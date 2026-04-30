@@ -7,7 +7,8 @@ import { MergeOrchestrator } from '../../../../../services/data-sources/merge-or
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
 import type { StServiceOffering } from '../../../../../services/endpoint-data/stratos-types';
 import { CloudFoundryService } from '../../../../data-services/cloud-foundry.service';
-import type { SignalListDropdownOption, SignalListViewMode } from '@stratosui/core';
+import { ListStateStore } from '@stratosui/core';
+import type { SignalListDropdownOption } from '@stratosui/core';
 
 // Marketplace list config — multi-CNSI service offerings catalog. Mirrors
 // CfAppsSignalConfigService's MergeOrchestrator + ViewPipeline pattern, but
@@ -25,13 +26,17 @@ export class CfServiceOfferingsSignalConfigService {
   orchestrator!: MergeOrchestrator<StServiceOffering>;
   view!: ViewPipeline<StServiceOffering>;
 
+  private readonly state = inject(ListStateStore).bind('cf-service-offerings', {
+    viewMode: 'card',
+    pageSize: [6, 25],
+    pageIndex: [0, 0],
+    sort: [{ field: 'name', direction: 'asc' }, { field: 'name', direction: 'asc' }],
+  });
+
   readonly filter: WritableSignal<(o: StServiceOffering) => boolean> = signal(() => true);
-  readonly sort: WritableSignal<SortSpec<StServiceOffering>> = signal({ field: 'name', direction: 'asc' });
-  // Default to 6 (the first card-mode option). Stays in sync with
-  // viewMode='card' below — a 25 pageSize would fall outside the card
-  // options [6,12,24,48,96] and the picker would render blank on first load.
-  readonly pageSize: WritableSignal<number> = signal(6);
-  readonly pageIndex: WritableSignal<number> = signal(0);
+  readonly sort = this.state.sort as WritableSignal<SortSpec<StServiceOffering>>;
+  readonly pageSize = this.state.pageSize;
+  readonly pageIndex = this.state.pageIndex;
 
   // Toolbar filter inputs. `null` for the dropdown = "All" (no constraint);
   // empty string for nameFilter = no name constraint.
@@ -47,7 +52,7 @@ export class CfServiceOfferingsSignalConfigService {
   private readonly _sortExtractors: WritableSignal<Map<string, (row: StServiceOffering) => unknown>> = signal(new Map());
   private readonly _filterExtractors: WritableSignal<Map<string, (row: StServiceOffering) => string>> = signal(new Map());
 
-  readonly viewMode: WritableSignal<SignalListViewMode> = signal('card');
+  readonly viewMode = this.state.viewMode;
 
   // Bridge connected-CF endpoints into a signal so computed() can read it.
   // CloudFoundryService is optional purely so unit tests don't need to

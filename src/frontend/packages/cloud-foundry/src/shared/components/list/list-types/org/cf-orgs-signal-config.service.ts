@@ -1,6 +1,7 @@
 import { DestroyRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { ListStateStore } from '@stratosui/core';
 import { EndpointDataRegistry } from '../../../../../services/endpoint-data/endpoint-data.registry';
 import type { EndpointDataService } from '../../../../../services/endpoint-data/endpoint-data.service';
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
@@ -28,19 +29,21 @@ export class CfOrgsSignalConfigService {
   private endpointDataService: WritableSignal<EndpointDataService | undefined> = signal(undefined);
   private cnsiGuid = '';
 
+  private readonly state = inject(ListStateStore).bind('cf-orgs', {
+    viewMode: 'card',
+    pageSize: [24, 25],
+    pageIndex: [0, 0],
+    sort: [{ field: 'name', direction: 'asc' }, { field: 'name', direction: 'asc' }],
+  });
+
   // Filter / sort / paging state, mirroring the app-wall service. Sort
   // defaults to name ascending; filter starts empty (shows everything).
   readonly filter: WritableSignal<(org: StOrg) => boolean> = signal(() => true);
-  readonly sort: WritableSignal<SortSpec<StOrg>> = signal({ field: 'name', direction: 'asc' });
-  // Default pageSize must be a member of pageSizeOptions for the *active*
-  // viewMode below — picking a value outside the option list leaves the
-  // selector showing the first option (e.g. 6) while the list actually
-  // renders 25 rows. Card mode is the default viewMode, so we default to
-  // 24 (the card option closest to the table-default of 25).
-  readonly pageSize: WritableSignal<number> = signal(24);
-  readonly pageIndex: WritableSignal<number> = signal(0);
+  readonly sort = this.state.sort as WritableSignal<SortSpec<StOrg>>;
+  readonly pageSize = this.state.pageSize;
+  readonly pageIndex = this.state.pageIndex;
   readonly nameFilter: WritableSignal<string> = signal('');
-  readonly viewMode: WritableSignal<'table' | 'card'> = signal('card');
+  readonly viewMode = this.state.viewMode;
 
   // Lazy per-CNSI space list; used to count spaces per org for the Spaces column.
   // The endpoint-data service loads spaces in the background; before that

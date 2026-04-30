@@ -12,6 +12,8 @@ import {
   stratosEntityCatalog,
 } from '@stratosui/store';
 
+import { ListStateStore } from '../../../shared/components/signal-list/list-state-store.service';
+
 // ViewPipeline lives in the cloud-foundry package today (used by the
 // app/orgs/spaces/routes signal-list configs). Endpoints sits under @stratosui/core
 // and core can't depend on cloud-foundry, so we re-implement the same shape locally.
@@ -107,28 +109,21 @@ export class EndpointsSignalConfigService {
   // table by default (legacy ListConfig defaultView = 'cards' but the practical
   // information density on endpoints favours the table layout — short rows, lots
   // of metadata columns), and the spec calls for table-primary, pageSize 25.
-  readonly filter: WritableSignal<(ep: EndpointModel) => boolean> = signal(() => true);
-  readonly sort: WritableSignal<SortSpec<EndpointModel>> = signal({ field: 'name', direction: 'asc' });
-  readonly pageSize: WritableSignal<number> = signal(25);
-  readonly pageIndex: WritableSignal<number> = signal(0);
-  readonly nameFilter: WritableSignal<string> = signal('');
-  // viewMode persists across reloads via localStorage. Initial value reads
-  // the saved preference (falling back to 'table' for first-time users —
-  // endpoint metadata density favours the table layout). An effect inside
-  // initialize() writes back on change.
-  readonly viewMode: WritableSignal<'table' | 'card'> = signal(this.readSavedViewMode());
+  // pageSize/pageIndex/sort/viewMode persistence is delegated to ListStateStore
+  // (keyed `stratos.list-state.v1.endpoints`).
+  private readonly state = inject(ListStateStore).bind('endpoints', {
+    viewMode: 'table',
+    pageSize: [24, 25],
+    pageIndex: [0, 0],
+    sort: [{ field: 'name', direction: 'asc' }, { field: 'name', direction: 'asc' }],
+  });
 
-  private static readonly VIEW_MODE_STORAGE_KEY = 'stratos.endpoints.viewMode';
-  private readSavedViewMode(): 'table' | 'card' {
-    try {
-      const v = typeof localStorage !== 'undefined'
-        ? localStorage.getItem(EndpointsSignalConfigService.VIEW_MODE_STORAGE_KEY)
-        : null;
-      return v === 'card' ? 'card' : 'table';
-    } catch {
-      return 'table';
-    }
-  }
+  readonly filter: WritableSignal<(ep: EndpointModel) => boolean> = signal(() => true);
+  readonly sort = this.state.sort as WritableSignal<SortSpec<EndpointModel>>;
+  readonly pageSize = this.state.pageSize;
+  readonly pageIndex = this.state.pageIndex;
+  readonly nameFilter: WritableSignal<string> = signal('');
+  readonly viewMode = this.state.viewMode;
 
   // Endpoint store holds Record<guid, EndpointModel>. Project to an array via
   // Object.values() in a computed so re-renders fire only when the underlying
@@ -161,17 +156,6 @@ export class EndpointsSignalConfigService {
           if (!q) return true;
           return (ep.name ?? '').toLowerCase().includes(q);
         });
-      });
-      // Persist viewMode choice across reloads.
-      effect(() => {
-        const mode = this.viewMode();
-        try {
-          if (typeof localStorage !== 'undefined') {
-            localStorage.setItem(EndpointsSignalConfigService.VIEW_MODE_STORAGE_KEY, mode);
-          }
-        } catch {
-          // localStorage may throw in sandboxed iframes / private mode.
-        }
       });
     });
     // No registry release pattern here — endpointEntitiesSelector is a pure
