@@ -1,5 +1,5 @@
-<div class="feature-flags">
+<div class="feature-flags h-full flex flex-col">
   @if (listConfig(); as cfg) {
-    <app-signal-list [config]="cfg" />
+    <app-signal-list [config]="cfg" class="flex-1 min-h-0" />
   }
 </div>
