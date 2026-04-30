@@ -6,9 +6,9 @@ package cloudfoundry
 // Version communicated via X-Stratos-Schema-Version response header.
 
 type StOrg struct {
-	GUID        string            `json:"guid"`
-	Name        string            `json:"name"`
-	Status      string            `json:"status"`
+	GUID   string `json:"guid"`
+	Name   string `json:"name"`
+	Status string `json:"status"`
 	// QuotaGUID mirrors v3's relationships.quota.data.guid — the org's
 	// associated quota_definition. Empty when the org has no quota linked
 	// or when the source response omitted the relationship envelope.
@@ -130,14 +130,14 @@ type StSpacesResponse struct {
 // service-bindings join). Tags retain the broker-provided list verbatim;
 // the UI joins them as comma-separated text.
 type StServiceOffering struct {
-	GUID              string                 `json:"guid"`
-	Name              string                 `json:"name"`
-	Description       string                 `json:"description"`
-	BrokerName        string                 `json:"brokerName"`
-	ServiceBrokerGUID string                 `json:"serviceBrokerGuid,omitempty"`
-	Tags              []string               `json:"tags"`
-	Public            bool                   `json:"public"`
-	DocumentationURL  string                 `json:"documentationUrl,omitempty"`
+	GUID              string   `json:"guid"`
+	Name              string   `json:"name"`
+	Description       string   `json:"description"`
+	BrokerName        string   `json:"brokerName"`
+	ServiceBrokerGUID string   `json:"serviceBrokerGuid,omitempty"`
+	Tags              []string `json:"tags"`
+	Public            bool     `json:"public"`
+	DocumentationURL  string   `json:"documentationUrl,omitempty"`
 	// BrokerCatalogMetadata mirrors v3's broker_catalog.metadata — a
 	// flexible map populated by each broker. Stratos's legacy `extra` JSON
 	// blob carried the same data (longDescription, providerDisplayName,
@@ -167,20 +167,20 @@ type StServiceOfferingsResponse struct {
 // offering relation (always present); SpaceGUID is the space the plan
 // is scoped to (only set for plans with `visibility_type=space`).
 type StServicePlan struct {
-	GUID                string             `json:"guid"`
-	Name                string             `json:"name"`
-	Description         string             `json:"description"`
-	Available           bool               `json:"available"`
-	Free                bool               `json:"free"`
-	VisibilityType      string             `json:"visibilityType"`
-	ServiceOfferingGUID string             `json:"serviceOfferingGuid"`
-	SpaceGUID           string             `json:"spaceGuid,omitempty"`
+	GUID                string              `json:"guid"`
+	Name                string              `json:"name"`
+	Description         string              `json:"description"`
+	Available           bool                `json:"available"`
+	Free                bool                `json:"free"`
+	VisibilityType      string              `json:"visibilityType"`
+	ServiceOfferingGUID string              `json:"serviceOfferingGuid"`
+	SpaceGUID           string              `json:"spaceGuid,omitempty"`
 	Costs               []StServicePlanCost `json:"costs"`
-	Labels              map[string]string  `json:"labels"`
-	Annotations         map[string]string  `json:"annotations"`
-	CnsiGUID            string             `json:"cnsiGuid"`
-	CreatedAt           string             `json:"createdAt"`
-	UpdatedAt           string             `json:"updatedAt"`
+	Labels              map[string]string   `json:"labels"`
+	Annotations         map[string]string   `json:"annotations"`
+	CnsiGUID            string              `json:"cnsiGuid"`
+	CreatedAt           string              `json:"createdAt"`
+	UpdatedAt           string              `json:"updatedAt"`
 }
 
 // StServicePlanCost mirrors CAPI's plan cost row verbatim — amount per
@@ -210,8 +210,8 @@ type StServicePlansResponse struct {
 // (each with guid + name). When type=space the Space pointer carries
 // the allowed space. Other types leave both empty.
 type StServicePlanVisibility struct {
-	Type          string                       `json:"type"`
-	Organizations []StServicePlanVisibilityOrg `json:"organizations,omitempty"`
+	Type          string                        `json:"type"`
+	Organizations []StServicePlanVisibilityOrg  `json:"organizations,omitempty"`
 	Space         *StServicePlanVisibilitySpace `json:"space,omitempty"`
 }
 

@@ -27,11 +27,11 @@ import (
 // handler issued. Tests inspect Hits to ensure exactly one CAPI call was
 // made (no drain), and PerPage/Page/Present to verify forwarding rules.
 type capturedPagingQuery struct {
-	Hits         int
-	PerPage      string
-	Page         string
+	Hits           int
+	PerPage        string
+	Page           string
 	PerPagePresent bool
-	PagePresent  bool
+	PagePresent    bool
 }
 
 // newPagingCapiServer spins up a single-endpoint httptest CAPI server.

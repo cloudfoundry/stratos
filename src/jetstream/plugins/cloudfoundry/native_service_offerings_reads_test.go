@@ -33,9 +33,9 @@ func serviceOfferingDetailTestServer(t *testing.T) *httptest.Server {
 				"broker_catalog": map[string]interface{}{
 					"id": "broker-catalog-id-123",
 					"metadata": map[string]interface{}{
-						"longDescription":      "Premium database with SLA guarantees",
-						"providerDisplayName":  "Premium Co",
-						"supportUrl":           "https://support.example",
+						"longDescription":     "Premium database with SLA guarantees",
+						"providerDisplayName": "Premium Co",
+						"supportUrl":          "https://support.example",
 					},
 					"features": map[string]interface{}{},
 				},
