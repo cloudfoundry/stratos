@@ -352,9 +352,30 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 	if lerr != nil {
 		return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
 	}
+
+	// Enrich each app with its web-process memory / diskQuota / instances.
+	// V3 moves these fields off the app onto the process; without this
+	// stitch, downstream consumers like the CF endpoint Memory Usage tile
+	// (totalMem$ in CloudFoundryEndpointService) see undefined fields and
+	// render blank. Process fetch failure is non-fatal — rows render
+	// without memory/disk and the total degrades gracefully.
+	appGUIDs := make([]string, 0, len(raw.Resources))
+	for _, r := range raw.Resources {
+		appGUIDs = append(appGUIDs, r.GUID)
+	}
+	processes, _ := fetchWebProcessesForApps(ctx, cfClient, appGUIDs)
+
 	apps := make([]StApp, 0, len(raw.Resources))
 	for _, r := range raw.Resources {
-		apps = append(apps, toStApp(r))
+		s := toStApp(r)
+		if proc, ok := processes[r.GUID]; ok {
+			mem := proc.MemoryInMB
+			disk := proc.DiskInMB
+			s.Memory = &mem
+			s.DiskQuota = &disk
+			s.Instances = proc.Instances
+		}
+		apps = append(apps, s)
 	}
 	return ctx.JSON(http.StatusOK, StratosPagedResponse[StApp]{
 		Resources:  apps,
