@@ -54,7 +54,7 @@ export class GetOrganization extends CFStartAction implements ICFAction, EntityI
     super();
     this.options = new HttpRequest(
       'GET',
-      `organizations/${guid}`
+      `/pp/v1/cf/organizations/${endpointGuid}/${guid}`
     );
   }
   actions = [
@@ -79,7 +79,7 @@ export class GetAllOrganizationSpaces extends CFStartAction implements Paginated
     super();
     this.options = new HttpRequest(
       'GET',
-      `organizations/${orgGuid}/spaces`
+      `/pp/v1/cf/organizations/${endpointGuid}/${orgGuid}/spaces`
     );
     this.parentGuid = orgGuid;
   }

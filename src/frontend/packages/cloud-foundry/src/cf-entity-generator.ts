@@ -30,6 +30,9 @@ import {
   StratosEndpointExtensionDefinition
 } from '@stratosui/store';
 import { CfValidateEntitiesStart } from './actions/relations-actions';
+import { cfMaxedStateHandlers } from './cf-pagination-maxed-state';
+import { StOrg } from './services/endpoint-data/stratos-types';
+import { v3PaginationConfig, V3PagedResponse, v3ToStratosShape } from './v3-native';
 import {
   IService,
   IServiceBinding,
@@ -1157,7 +1160,15 @@ function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinit
     labelPlural: 'Organizations',
     endpoint: endpointDefinition,
     icon: 'organization',
-    iconFont: 'stratos-icons'
+    iconFont: 'stratos-icons',
+    paginationConfig: {
+      ...cfMaxedStateHandlers,
+      getTotalPages: v3PaginationConfig.getTotalPages,
+      getTotalEntities: v3PaginationConfig.getTotalEntities,
+      getPaginationParameters: v3PaginationConfig.getPaginationParameters,
+      getEntitiesFromResponse: (resp: V3PagedResponse<StOrg>) =>
+        resp.resources.map(v3ToStratosShape<StOrg>({})),
+    },
   };
   cfEntityCatalog.org = new StratosCatalogEntity<
     IFavoriteMetadata,
