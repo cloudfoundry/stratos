@@ -1,7 +1,10 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, Injector, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { take, filter, map, publishReplay, refCount } from 'rxjs/operators';
+
+import { CnsiUsersSnapshotService } from '../../../services/endpoint-data/cnsi-users-snapshot.service';
 
 import {
   EntityService,
@@ -58,6 +61,8 @@ export class CloudFoundryEndpointService {
   private store = inject<Store<CFAppState>>(Store);
   private cfUserService = inject(CfUserService);
   private pmf = inject(PaginationMonitorFactory);
+  private cnsiUsers = inject(CnsiUsersSnapshotService);
+  private injector = inject(Injector);
 
 
   hasSSHAccess$!: Observable<boolean>;
@@ -176,7 +181,12 @@ export class CloudFoundryEndpointService {
 
     this.info$ = this.cfInfoEntityService.waitForEntity$;
 
-    this.usersCount$ = this.cfUserService.fetchTotalUsers(this.cfGuid);
+    // V3-native: lazy snapshot of /pp/v1/cf/users/:cnsi. Counts every user
+    // visible to the connected principal — admin sees the whole CNSI; non-
+    // admin sees the role-restricted subset that getNativeUsers returns.
+    this.usersCount$ = toObservable(this.cnsiUsers.users(this.cfGuid), { injector: this.injector }).pipe(
+      map(users => users === null ? null : users.length),
+    );
 
     this.constructAppObs();
   }

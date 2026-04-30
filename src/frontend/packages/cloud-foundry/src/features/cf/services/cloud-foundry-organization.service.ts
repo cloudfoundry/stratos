@@ -1,8 +1,12 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, Injector, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Route } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
+
+import { CnsiUsersSnapshotService } from '../../../services/endpoint-data/cnsi-users-snapshot.service';
+import { createUserRoleInOrg } from '../../../store/types/cf-user.types';
 
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
@@ -74,6 +78,8 @@ export class CloudFoundryOrganizationService {
   private paginationMonitorFactory = inject(PaginationMonitorFactory);
   private cfEndpointService = inject(CloudFoundryEndpointService);
   private cfUserProvidedServicesService = inject(CloudFoundryUserProvidedServicesService);
+  private cnsiUsers = inject(CnsiUsersSnapshotService);
+  private injector = inject(Injector);
 
   orgGuid: string;
   cfGuid: string;
@@ -146,9 +152,32 @@ export class CloudFoundryOrganizationService {
 
     this.initialiseSpaceObservables();
 
-    this.userOrgRole$ = this.cfEndpointService.currentUser$.pipe(
-      switchMap(u => this.cfUserService.getUserRoleInOrg(u.guid, this.orgGuid, this.cfGuid)),
-      map(u => getOrgRolesString(u))
+    // V3-native: read role buckets from the StUser snapshot instead of the
+    // V2-shape cfUserService helpers (which inspect user.managed_organizations
+    // etc. — fields the V3 wire no longer carries). Snapshot is lazy so the
+    // home-page cache is unaffected; only the Summary tile triggers the
+    // /pp/v1/cf/users/:cnsi fetch.
+    const users$ = toObservable(this.cnsiUsers.users(this.cfGuid), { injector: this.injector });
+    this.userOrgRole$ = combineLatest([this.cfEndpointService.currentUser$, users$]).pipe(
+      map(([currentUser, users]) => {
+        if (!users) return 'None';
+        const me = users.find(u => u.guid === currentUser.guid);
+        const roles = me?.orgRoles.find(r => r.orgGuid === this.orgGuid)?.roles ?? [];
+        return getOrgRolesString(createUserRoleInOrg(
+          roles.includes('manager'),
+          roles.includes('billing_manager'),
+          roles.includes('auditor'),
+          roles.includes('user'),
+        ));
+      }),
+    );
+    // null = snapshot not yet loaded → render "-" placeholder, otherwise
+    // count users with at least one org-role bucket for this org.
+    this.usersCount$ = users$.pipe(
+      map(users => {
+        if (!users) return null;
+        return users.filter(u => u.orgRoles.some(r => r.orgGuid === this.orgGuid)).length;
+      }),
     );
 
     this.serviceInstancesCount$ = fetchServiceInstancesCount(this.cfGuid, this.orgGuid, null, this.store, this.paginationMonitorFactory);
@@ -192,8 +221,6 @@ export class CloudFoundryOrganizationService {
     );
 
     this.loadingApps$ = this.cfEndpointService.appsPagObs.fetchingEntities$;
-
-    this.usersCount$ = this.cfUserService.fetchTotalUsers(this.cfGuid, this.orgGuid);
   }
 
   private countExistingApps(): Observable<number> {
