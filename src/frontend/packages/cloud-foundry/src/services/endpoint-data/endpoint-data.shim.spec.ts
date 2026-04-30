@@ -25,6 +25,7 @@ const app: StApp = {
   orgGuid: 'org-1',
   spaceGuid: 'space-1',
   instances: 2,
+  routes: [],
   createdAt: '2026-04-01T00:00:00Z',
   updatedAt: '2026-04-01T00:00:00Z',
   cnsiGuid: 'cnsi-1',

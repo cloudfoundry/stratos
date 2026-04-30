@@ -78,7 +78,7 @@ func (c *CloudFoundrySpecification) createUserProvidedServiceInstance(ctx echo.C
 	}
 
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
-	return ctx.JSON(http.StatusCreated, toStServiceInstance(*si, cnsiGUID, nil, nil))
+	return ctx.JSON(http.StatusCreated, toStServiceInstance(*si, cnsiGUID, nil, nil, nil))
 }
 
 // updateUserProvidedServiceInstance handles
@@ -141,5 +141,5 @@ func (c *CloudFoundrySpecification) updateUserProvidedServiceInstance(ctx echo.C
 	}
 
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
-	return ctx.JSON(http.StatusOK, toStServiceInstance(*si, cnsiGUID, nil, nil))
+	return ctx.JSON(http.StatusOK, toStServiceInstance(*si, cnsiGUID, nil, nil, nil))
 }

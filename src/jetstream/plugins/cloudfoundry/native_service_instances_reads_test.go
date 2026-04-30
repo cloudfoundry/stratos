@@ -20,13 +20,27 @@ import (
 // instances on the current page (one bounded plans + one bounded
 // offerings call).
 func TestGetNativeServiceInstances_PerPagePassthrough(t *testing.T) {
-	var siHits, planHits, offHits int
+	var siHits, planHits, offHits, bindingHits int
 	var lastPerPage, lastPage string
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		switch r.URL.Path {
 		case "/v3":
 			_, _ = w.Write([]byte(`{"links":{}}`))
+		case "/v3/service_credential_bindings":
+			bindingHits++
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 1, "total_pages": 1, "next": nil},
+				"resources": []map[string]interface{}{
+					{
+						"guid": "scb-1", "type": "app", "name": "binding-1",
+						"relationships": map[string]interface{}{
+							"service_instance": map[string]interface{}{"data": map[string]interface{}{"guid": "si-1"}},
+							"app":              map[string]interface{}{"data": map[string]interface{}{"guid": "app-1"}},
+						},
+					},
+				},
+			})
 		case "/v3/service_instances":
 			siHits++
 			lastPerPage = r.URL.Query().Get("per_page")
@@ -97,12 +111,14 @@ func TestGetNativeServiceInstances_PerPagePassthrough(t *testing.T) {
 	assert.Equal(t, "2", lastPage)
 	assert.Equal(t, 1, planHits, "per-page plan join expected")
 	assert.Equal(t, 1, offHits, "per-page offering join expected")
+	assert.Equal(t, 1, bindingHits, "per-page bound-app-count fetch expected")
 
 	var resp StratosPagedResponse[StServiceInstance]
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
 	require.Len(t, resp.Resources, 1)
 	assert.Equal(t, "redis", resp.Resources[0].ServiceOfferingName)
 	assert.Equal(t, "small", resp.Resources[0].ServicePlanName)
+	assert.Equal(t, 1, resp.Resources[0].BoundAppCount)
 	assert.Equal(t, 17, resp.Pagination.TotalResults)
 }
 

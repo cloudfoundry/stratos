@@ -113,6 +113,10 @@ var processDerivedFields = []string{"memory", "diskQuota", "instances"}
 // space.Relationships.Organization.
 var spaceDerivedFields = []string{"spaceName", "orgGuid"}
 
+// routesDerivedFields are the StApp fields sourced from /v3/routes —
+// surfaced as unavailable together when the routes fetch fails.
+var routesDerivedFields = []string{"routes"}
+
 // fetchWebProcessesForApps issues one /v3/processes call filtered to the
 // given app GUIDs and type=web, collecting results across all pages. Returns
 // a map keyed by app GUID so per-app composition is a cheap lookup. Returns
@@ -175,11 +179,64 @@ func fetchSpacesByGUIDs(ctx echo.Context, cfClient capi.Client, spaceGUIDs []str
 	return spaces, nil
 }
 
+// fetchRoutesForApps issues /v3/routes calls filtered to the given app
+// GUIDs and walks each route's destinations to bucket routes back to the
+// app(s) they map to. Returns a map keyed by app GUID → []StAppRoute.
+//
+// Returns an error on any CAPI failure; the caller converts this into an
+// envelope-level _meta.errors entry rather than failing the whole
+// response. Each app's bucket is allocated lazily — apps with no routes
+// stay absent from the map (callers default to []).
+func fetchRoutesForApps(ctx echo.Context, cfClient capi.Client, appGUIDs []string) (map[string][]StAppRoute, error) {
+	if len(appGUIDs) == 0 {
+		return map[string][]StAppRoute{}, nil
+	}
+	// Build a set so we only bucket destinations whose app belongs to
+	// the requested page — a shared route mapped to N apps could carry
+	// destinations for unrelated apps too (filter is per-route, not
+	// per-destination).
+	wanted := make(map[string]struct{}, len(appGUIDs))
+	for _, g := range appGUIDs {
+		wanted[g] = struct{}{}
+	}
+
+	out := make(map[string][]StAppRoute, len(appGUIDs))
+	for page := 1; ; page++ {
+		params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
+		params.Page = page
+		params.Filters["app_guids"] = appGUIDs
+
+		raw, err := cfClient.Routes().List(ctx.Request().Context(), params)
+		if err != nil {
+			return nil, err
+		}
+		for _, r := range raw.Resources {
+			ar := StAppRoute{GUID: r.GUID, URL: r.URL}
+			for _, d := range r.Destinations {
+				appGUID := d.App.GUID
+				if appGUID == "" {
+					continue
+				}
+				if _, ok := wanted[appGUID]; !ok {
+					continue
+				}
+				out[appGUID] = append(out[appGUID], ar)
+			}
+		}
+		if raw.Pagination.Next == nil || page >= raw.Pagination.TotalPages {
+			break
+		}
+	}
+	return out, nil
+}
+
 // composeStAppSummary builds a summary-tier StApp from its source app, its
-// web Process (may be nil), and its Space (may be nil for unresolved).
-// Missing sub-resources surface as row-level _meta.unavailable entries
-// listing the specific fields those sources would have populated.
-func composeStAppSummary(app capi.App, process *capi.Process, space *capi.Space) StApp {
+// web Process (may be nil), its Space (may be nil for unresolved), and its
+// route bucket (nil signals routes-fetch failure; an empty slice signals a
+// successful fetch with no routes mapped). Missing sub-resources surface
+// as row-level _meta.unavailable entries listing the specific fields those
+// sources would have populated.
+func composeStAppSummary(app capi.App, process *capi.Process, space *capi.Space, routes []StAppRoute) StApp {
 	s := toStApp(app)
 
 	var unavailable []string
@@ -206,6 +263,14 @@ func composeStAppSummary(app capi.App, process *capi.Process, space *capi.Space)
 		unavailable = append(unavailable, spaceDerivedFields...)
 	}
 
+	if routes != nil {
+		s.Routes = routes
+	} else {
+		// keep s.Routes as the [] toStApp seeded so the wire shape stays
+		// stable even on failure; tristate flag lives on _meta.unavailable.
+		unavailable = append(unavailable, routesDerivedFields...)
+	}
+
 	if len(unavailable) > 0 {
 		s.Meta = &StratosMeta{Unavailable: unavailable}
 	}
@@ -213,11 +278,12 @@ func composeStAppSummary(app capi.App, process *capi.Process, space *capi.Space)
 }
 
 // toStAppSummary is retained as a two-argument convenience for the tests +
-// the subset of callers that don't need org resolution. Delegates to
-// composeStAppSummary with space=nil so orgGuid is always unavailable in
-// this path.
+// the subset of callers that don't need org / route resolution. Delegates
+// to composeStAppSummary with space=nil and routes=[] so orgGuid is
+// always unavailable in this path; routes default to empty so the absence
+// is treated as "no routes" rather than "routes fetch failed".
 func toStAppSummary(app capi.App, process *capi.Process) StApp {
-	return composeStAppSummary(app, process, nil)
+	return composeStAppSummary(app, process, nil, []StAppRoute{})
 }
 
 // envelopeMetaForCompositionErrors builds the envelope-level _meta.errors
@@ -225,7 +291,7 @@ func toStAppSummary(app capi.App, process *capi.Process) StApp {
 // envelope's _meta stays absent) when no errors occurred. Supports
 // additively stacking errors — each failed sub-fetch gets its own envelope
 // error with its own Affected + AffectedGuids lists.
-func envelopeMetaForCompositionErrors(procErr, spaceErr error, affectedGUIDs []string) *StratosMeta {
+func envelopeMetaForCompositionErrors(procErr, spaceErr, routesErr error, affectedGUIDs []string) *StratosMeta {
 	var errors []StratosError
 	if procErr != nil {
 		errors = append(errors, StratosError{
@@ -244,6 +310,16 @@ func envelopeMetaForCompositionErrors(procErr, spaceErr error, affectedGUIDs []s
 			Title:         "Spaces fetch failed",
 			Detail:        spaceErr.Error(),
 			Affected:      append([]string(nil), spaceDerivedFields...),
+			AffectedGuids: append([]string(nil), affectedGUIDs...),
+		})
+	}
+	if routesErr != nil {
+		errors = append(errors, StratosError{
+			Scope:         "envelope",
+			Code:          "ROUTES_FETCH_FAILED",
+			Title:         "Routes fetch failed",
+			Detail:        routesErr.Error(),
+			Affected:      append([]string(nil), routesDerivedFields...),
 			AffectedGuids: append([]string(nil), affectedGUIDs...),
 		})
 	}
@@ -291,6 +367,7 @@ func (c *CloudFoundrySpecification) getNativeAppsSummary(ctx echo.Context, cfCli
 
 	processes, procErr := fetchWebProcessesForApps(ctx, cfClient, appGUIDs)
 	spaces, spaceErr := fetchSpacesByGUIDs(ctx, cfClient, spaceGUIDs)
+	routesByApp, routesErr := fetchRoutesForApps(ctx, cfClient, appGUIDs)
 
 	resources := make([]StApp, 0, len(raw.Resources))
 	for _, r := range raw.Resources {
@@ -306,13 +383,23 @@ func (c *CloudFoundrySpecification) getNativeAppsSummary(ctx echo.Context, cfCli
 				s = &sp
 			}
 		}
-		resources = append(resources, composeStAppSummary(r, p, s))
+		var rts []StAppRoute
+		if routesErr == nil {
+			// Use [] for "no routes" so wire stays predictable; nil-only
+			// signals fetch failure to composeStAppSummary.
+			if found, ok := routesByApp[r.GUID]; ok {
+				rts = found
+			} else {
+				rts = []StAppRoute{}
+			}
+		}
+		resources = append(resources, composeStAppSummary(r, p, s, rts))
 	}
 
 	response := StratosPagedResponse[StApp]{
 		Resources:  resources,
 		Pagination: BuildPaginationMeta(ctx, params.Page, params.PerPage, raw.Pagination.TotalResults),
-		Meta:       envelopeMetaForCompositionErrors(procErr, spaceErr, appGUIDs),
+		Meta:       envelopeMetaForCompositionErrors(procErr, spaceErr, routesErr, appGUIDs),
 	}
 
 	return ctx.JSON(http.StatusOK, response)
@@ -357,6 +444,7 @@ func (c *CloudFoundrySpecification) getNativeAppsSummaryDerivedSort(
 
 	processes, procErr := fetchWebProcessesForApps(ctx, cfClient, appGUIDs)
 	spaces, spaceErr := fetchSpacesByGUIDs(ctx, cfClient, spaceGUIDs)
+	routesByApp, routesErr := fetchRoutesForApps(ctx, cfClient, appGUIDs)
 
 	composed := make([]StApp, 0, len(allApps))
 	for _, r := range allApps {
@@ -372,7 +460,15 @@ func (c *CloudFoundrySpecification) getNativeAppsSummaryDerivedSort(
 				s = &sp
 			}
 		}
-		composed = append(composed, composeStAppSummary(r, p, s))
+		var rts []StAppRoute
+		if routesErr == nil {
+			if found, ok := routesByApp[r.GUID]; ok {
+				rts = found
+			} else {
+				rts = []StAppRoute{}
+			}
+		}
+		composed = append(composed, composeStAppSummary(r, p, s, rts))
 	}
 
 	sortStAppsByDerivedField(composed, sortField, desc)
@@ -391,7 +487,7 @@ func (c *CloudFoundrySpecification) getNativeAppsSummaryDerivedSort(
 	response := StratosPagedResponse[StApp]{
 		Resources:  pageSlice,
 		Pagination: BuildPaginationMeta(ctx, requestedPage, requestedPerPage, totalResults),
-		Meta:       envelopeMetaForCompositionErrors(procErr, spaceErr, appGUIDs),
+		Meta:       envelopeMetaForCompositionErrors(procErr, spaceErr, routesErr, appGUIDs),
 	}
 
 	return ctx.JSON(http.StatusOK, response)

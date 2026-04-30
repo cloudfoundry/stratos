@@ -19,20 +19,35 @@ export interface StApp {
   guid: string;
   name: string;
   state: string;
-  // orgGuid, spaceName, memory, diskQuota are tristate-bearing: optional
-  // reflects the "value does not exist" state (absent when handler couldn't
-  // compose them, listed in _meta.unavailable). See Track 2 page 1 plan
-  // Groups 3/4.
+  // orgGuid, spaceName, memory, diskQuota, stackName, routes are tristate-
+  // bearing: optional reflects the "value does not exist" state (absent
+  // when handler couldn't compose them, listed in _meta.unavailable).
+  // stackName is sourced inline from app.lifecycle.data.stack (V3
+  // buildpack lifecycle); empty for non-buildpack lifecycles. routes is
+  // populated by a server-side /v3/routes?app_guids=... batch fetch and
+  // always-emits an array (defaults to []) so consumers can iterate
+  // without a null guard.
   orgGuid?: string;
   spaceGuid: string;
   spaceName?: string;
+  stackName?: string;
   instances: number;
   memory?: number;
   diskQuota?: number;
+  routes: StAppRoute[];
   createdAt: string;
   updatedAt: string;
   cnsiGuid: string;
   _meta?: StratosMeta;
+}
+
+// Mirror of the backend StAppRoute DTO (native_types.go). Inline
+// collection on StApp.routes — minimal compared to StRoute (just enough
+// to render route URLs in an apps-list cell). Full route data lives at
+// /pp/v1/cf/apps/{cnsi}/{app}/routes.
+export interface StAppRoute {
+  guid: string;
+  url: string;
 }
 
 export interface StratosMeta {
@@ -57,6 +72,11 @@ export interface StSpace {
   createdAt: string;
   updatedAt: string;
   cnsiGuid: string;
+  // Server-side aggregates (V3 deep-relations) — drive the spaces-list
+  // "Apps" / "Routes" columns from a single payload. Always-emit, default 0
+  // when the backend enrichment fetch fails.
+  appCount: number;
+  routeCount: number;
 }
 
 export interface StOrgDetail extends StOrg {
@@ -207,6 +227,10 @@ export interface StServiceInstance {
   servicePlanName?: string;
   serviceOfferingGuid?: string;
   serviceOfferingName?: string;
+  // Server-side count of `type=app` service credential bindings on this
+  // instance. Always present; defaults to 0 when no bindings exist or the
+  // bindings fetch failed.
+  boundAppCount: number;
   tags: string[];
   dashboardUrl?: string;
   lastOpType?: string;

@@ -59,8 +59,8 @@ describe('CfAppsSignalConfigService', () => {
   it('selectedCnsi excludes apps from other CFs via the filter signal', () => {
     const http = makeHttp();
     const svc = makeSvc(http);
-    const a: StApp = { guid: 'a', name: 'a-app', state: 'STARTED', cnsiGuid: 'cf-1', spaceGuid: 'sp-1', instances: 1, createdAt: '', updatedAt: '' };
-    const b: StApp = { guid: 'b', name: 'b-app', state: 'STARTED', cnsiGuid: 'cf-2', spaceGuid: 'sp-2', instances: 1, createdAt: '', updatedAt: '' };
+    const a: StApp = { guid: 'a', name: 'a-app', state: 'STARTED', cnsiGuid: 'cf-1', spaceGuid: 'sp-1', instances: 1, routes: [], createdAt: '', updatedAt: '' };
+    const b: StApp = { guid: 'b', name: 'b-app', state: 'STARTED', cnsiGuid: 'cf-2', spaceGuid: 'sp-2', instances: 1, routes: [], createdAt: '', updatedAt: '' };
     // Flush the initial effect so the filter predicate is installed.
     TestBed.tick();
     const pred = svc.filter();
@@ -76,8 +76,8 @@ describe('CfAppsSignalConfigService', () => {
   it('nameFilter is applied as a case-insensitive substring match', () => {
     const http = makeHttp();
     const svc = makeSvc(http);
-    const foo: StApp = { guid: 'a', name: 'FooBar', state: 'STARTED', cnsiGuid: 'cf-1', spaceGuid: 'sp-1', instances: 1, createdAt: '', updatedAt: '' };
-    const baz: StApp = { guid: 'b', name: 'Baz', state: 'STARTED', cnsiGuid: 'cf-1', spaceGuid: 'sp-1', instances: 1, createdAt: '', updatedAt: '' };
+    const foo: StApp = { guid: 'a', name: 'FooBar', state: 'STARTED', cnsiGuid: 'cf-1', spaceGuid: 'sp-1', instances: 1, routes: [], createdAt: '', updatedAt: '' };
+    const baz: StApp = { guid: 'b', name: 'Baz', state: 'STARTED', cnsiGuid: 'cf-1', spaceGuid: 'sp-1', instances: 1, routes: [], createdAt: '', updatedAt: '' };
     svc.nameFilter.set('foo');
     TestBed.tick();
     const pred = svc.filter();

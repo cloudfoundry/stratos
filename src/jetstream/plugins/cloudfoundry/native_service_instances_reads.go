@@ -120,15 +120,59 @@ func (c *CloudFoundrySpecification) getNativeServiceInstances(ctx echo.Context) 
 		}
 	}
 
+	// Per-page bound-app-count fetch. Drains
+	// /v3/service_credential_bindings?service_instance_guids=<csv>&types=app
+	// across pages and groups by service_instance.guid. Soft-fail: counts
+	// default to 0 if the bindings list errors — symmetrical to the plan +
+	// offering fetches above.
+	siGUIDs := make([]string, 0, len(instances))
+	for _, si := range instances {
+		siGUIDs = append(siGUIDs, si.GUID)
+	}
+	boundCounts, _ := fetchBoundAppCountsForInstances(ctx, cfClient, siGUIDs)
+
 	out := make([]StServiceInstance, 0, len(instances))
 	for _, si := range instances {
-		out = append(out, toStServiceInstance(si, cnsiGUID, planByGUID, offeringByGUID))
+		out = append(out, toStServiceInstance(si, cnsiGUID, planByGUID, offeringByGUID, boundCounts))
 	}
 
 	return ctx.JSON(http.StatusOK, StratosPagedResponse[StServiceInstance]{
 		Resources:  out,
 		Pagination: BuildPaginationMeta(ctx, page, perPage, rawSIs.Pagination.TotalResults),
 	})
+}
+
+// fetchBoundAppCountsForInstances drains
+// /v3/service_credential_bindings?service_instance_guids=<csv>&types=app
+// across all pages and returns a map service_instance_guid → count. Only
+// type=app bindings are counted — that's the "this instance has N bound
+// apps" UI semantic. Service-key bindings are a separate concept and are
+// not surfaced as a count here.
+func fetchBoundAppCountsForInstances(ctx echo.Context, cfClient capi.Client, instanceGUIDs []string) (map[string]int, error) {
+	if len(instanceGUIDs) == 0 {
+		return map[string]int{}, nil
+	}
+	counts := make(map[string]int, len(instanceGUIDs))
+	for page := 1; ; page++ {
+		params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
+		params.Page = page
+		params.Filters["service_instance_guids"] = instanceGUIDs
+		params.Filters["type"] = []string{"app"}
+
+		raw, err := cfClient.ServiceCredentialBindings().List(ctx.Request().Context(), params)
+		if err != nil {
+			return nil, err
+		}
+		for _, b := range raw.Resources {
+			if guid := relationshipGUID(b.Relationships.ServiceInstance); guid != "" {
+				counts[guid]++
+			}
+		}
+		if raw.Pagination.Next == nil || page >= raw.Pagination.TotalPages {
+			break
+		}
+	}
+	return counts, nil
 }
 
 // toStServiceInstance maps a capi.ServiceInstance onto the Stratos-shape DTO,
@@ -144,6 +188,7 @@ func toStServiceInstance(
 	cnsiGUID string,
 	planByGUID map[string]capi.ServicePlan,
 	offeringByGUID map[string]capi.ServiceOffering,
+	boundCounts map[string]int,
 ) StServiceInstance {
 	spaceGUID := relationshipGUID(si.Relationships.Space)
 	planGUID := ""
@@ -211,6 +256,7 @@ func toStServiceInstance(
 		ServicePlanName:     planName,
 		ServiceOfferingGUID: offeringGUID,
 		ServiceOfferingName: offeringName,
+		BoundAppCount:       boundCounts[si.GUID],
 		Tags:                tags,
 		DashboardURL:        dashboardURL,
 		SyslogDrainURL:      syslogDrainURL,

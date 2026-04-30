@@ -20,18 +20,37 @@ type StOrg struct {
 }
 
 type StApp struct {
-	GUID      string       `json:"guid"`
-	Name      string       `json:"name"`
-	State     string       `json:"state"`
-	SpaceGUID string       `json:"spaceGuid"`
-	SpaceName string       `json:"spaceName,omitempty"`
-	OrgGUID   *string      `json:"orgGuid,omitempty"`
-	Instances int          `json:"instances"`
-	Memory    *int         `json:"memory,omitempty"`
-	DiskQuota *int         `json:"diskQuota,omitempty"`
+	GUID      string  `json:"guid"`
+	Name      string  `json:"name"`
+	State     string  `json:"state"`
+	SpaceGUID string  `json:"spaceGuid"`
+	SpaceName string  `json:"spaceName,omitempty"`
+	OrgGUID   *string `json:"orgGuid,omitempty"`
+	// StackName is sourced inline from CF v3's app.lifecycle.data.stack
+	// (buildpack lifecycle) — V3 has no stack GUID, the name IS the
+	// identity. No extra HTTP call: it ships on every /v3/apps row.
+	StackName string `json:"stackName,omitempty"`
+	Instances int    `json:"instances"`
+	Memory    *int   `json:"memory,omitempty"`
+	DiskQuota *int   `json:"diskQuota,omitempty"`
+	// Routes is the set of routes mapped to this app, populated by a
+	// batched /v3/routes?app_guids=... fetch on the apps list paths.
+	// Always-emit (default []) so frontend renderers can iterate without
+	// a null guard. On routes-fetch failure the field stays empty and
+	// "routes" surfaces in _meta.unavailable for tristate handling.
+	Routes    []StAppRoute `json:"routes"`
 	CreatedAt string       `json:"createdAt"`
 	UpdatedAt string       `json:"updatedAt"`
 	Meta      *StratosMeta `json:"_meta,omitempty"`
+}
+
+// StAppRoute is the inline-collection shape carried on StApp.Routes.
+// Minimal compared to the standalone StRoute — the apps list only needs
+// enough to render route URLs in a cell; the dedicated routes endpoints
+// keep the full DTO.
+type StAppRoute struct {
+	GUID string `json:"guid"`
+	URL  string `json:"url"`
 }
 
 type StSpace struct {
@@ -40,6 +59,14 @@ type StSpace struct {
 	OrgGUID   string `json:"orgGuid"`
 	CreatedAt string `json:"createdAt"`
 	UpdatedAt string `json:"updatedAt"`
+	// AppCount and RouteCount are server-side aggregates from /v3/apps and
+	// /v3/routes filtered by space_guids — drives the spaces-list "Apps"
+	// and "Routes" columns from a single payload. Always-emit (default 0)
+	// so the wire shape stays predictable; on enrichment failure the
+	// default-path handler degrades silently (mirrors the StApp-Space
+	// pattern's lazy-non-fatal default branch).
+	AppCount   int `json:"appCount"`
+	RouteCount int `json:"routeCount"`
 }
 
 type StOrgDetail struct {
@@ -319,6 +346,11 @@ type StServiceInstance struct {
 	ServicePlanName     string   `json:"servicePlanName,omitempty"`
 	ServiceOfferingGUID string   `json:"serviceOfferingGuid,omitempty"`
 	ServiceOfferingName string   `json:"serviceOfferingName,omitempty"`
+	// BoundAppCount is the number of `type=app` service credential bindings
+	// attached to this instance. Always emitted (default 0) so the UI can
+	// render "Bound Apps: 0" without null-guarding. Service-key bindings are
+	// a separate concept and not folded in here.
+	BoundAppCount       int      `json:"boundAppCount"`
 	Tags                []string `json:"tags"`
 	DashboardURL        string   `json:"dashboardUrl,omitempty"`
 	SyslogDrainURL      string   `json:"syslogDrainUrl,omitempty"`

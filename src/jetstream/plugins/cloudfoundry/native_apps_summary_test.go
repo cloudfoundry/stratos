@@ -152,6 +152,11 @@ func TestGetNativeAppsSummary_ReturnsStratosPagedEnvelope(t *testing.T) {
 					},
 				},
 			})
+		case "/v3/routes":
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 0, "total_pages": 0},
+				"resources":  []map[string]interface{}{},
+			})
 		default:
 			http.NotFound(w, r)
 		}
@@ -348,6 +353,26 @@ func TestGetNativeAppsSummary_PopulatesMemoryDiskInstancesFromProcesses(t *testi
 					},
 				},
 			})
+		case "/v3/routes":
+			// Two routes: route-1 mapped to app-1, route-2 mapped to app-2.
+			// Verifies the destinations-walk bucketing.
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 2, "total_pages": 1},
+				"resources": []map[string]interface{}{
+					{
+						"guid": "route-1", "url": "app-one.example.com",
+						"destinations": []map[string]interface{}{
+							{"guid": "dest-1", "app": map[string]interface{}{"guid": "app-1"}},
+						},
+					},
+					{
+						"guid": "route-2", "url": "app-two.example.com",
+						"destinations": []map[string]interface{}{
+							{"guid": "dest-2", "app": map[string]interface{}{"guid": "app-2"}},
+						},
+					},
+				},
+			})
 		default:
 			http.NotFound(w, r)
 		}
@@ -375,7 +400,8 @@ func TestGetNativeAppsSummary_PopulatesMemoryDiskInstancesFromProcesses(t *testi
 	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
 	require.Len(t, resp.Resources, 2)
 
-	// app-1: memory 512, disk 1024, instances 3, orgGuid from space-1 → org-1
+	// app-1: memory 512, disk 1024, instances 3, orgGuid from space-1 → org-1,
+	// routes from /v3/routes (route-1 destination → app-1)
 	assert.Equal(t, "app-1", resp.Resources[0].GUID)
 	require.NotNil(t, resp.Resources[0].Memory, "Memory should be populated")
 	assert.Equal(t, 512, *resp.Resources[0].Memory)
@@ -384,6 +410,9 @@ func TestGetNativeAppsSummary_PopulatesMemoryDiskInstancesFromProcesses(t *testi
 	assert.Equal(t, 3, resp.Resources[0].Instances)
 	require.NotNil(t, resp.Resources[0].OrgGUID, "OrgGUID should be populated via space→org")
 	assert.Equal(t, "org-1", *resp.Resources[0].OrgGUID)
+	require.Len(t, resp.Resources[0].Routes, 1, "route-1 mapped to app-1")
+	assert.Equal(t, "route-1", resp.Resources[0].Routes[0].GUID)
+	assert.Equal(t, "app-one.example.com", resp.Resources[0].Routes[0].URL)
 	assert.Nil(t, resp.Resources[0].Meta, "no _meta on success")
 
 	// app-2: memory 256, disk 512, instances 1, orgGuid from space-2 → org-2
@@ -393,6 +422,8 @@ func TestGetNativeAppsSummary_PopulatesMemoryDiskInstancesFromProcesses(t *testi
 	assert.Equal(t, 1, resp.Resources[1].Instances)
 	require.NotNil(t, resp.Resources[1].OrgGUID)
 	assert.Equal(t, "org-2", *resp.Resources[1].OrgGUID)
+	require.Len(t, resp.Resources[1].Routes, 1, "route-2 mapped to app-2")
+	assert.Equal(t, "route-2", resp.Resources[1].Routes[0].GUID)
 
 	// Envelope has no error meta when everything succeeds
 	assert.Nil(t, resp.Meta)
@@ -571,6 +602,11 @@ func TestGetNativeAppsSummary_DerivedSortFetchesAllAndPaginatesInMemory(t *testi
 					},
 				},
 			})
+		case "/v3/routes":
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 0, "total_pages": 0},
+				"resources":  []map[string]interface{}{},
+			})
 		default:
 			http.NotFound(w, r)
 		}
@@ -644,6 +680,12 @@ func TestGetNativeAppsSummary_SpacesFetchFailureSurfacesOrgGuidTristate(t *testi
 			})
 		case "/v3/spaces":
 			http.Error(w, `{"errors":[{"title":"Unavailable"}]}`, http.StatusServiceUnavailable)
+		case "/v3/routes":
+			// Routes succeeds so the test isolates the spaces failure
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 0, "total_pages": 0},
+				"resources":  []map[string]interface{}{},
+			})
 		default:
 			http.NotFound(w, r)
 		}
@@ -713,6 +755,8 @@ func TestGetNativeAppsSummary_BothCompositionFetchesFailMultiError(t *testing.T)
 			http.Error(w, `{"errors":[{"title":"Unavailable"}]}`, http.StatusServiceUnavailable)
 		case "/v3/spaces":
 			http.Error(w, `{"errors":[{"title":"Unavailable"}]}`, http.StatusServiceUnavailable)
+		case "/v3/routes":
+			http.Error(w, `{"errors":[{"title":"Unavailable"}]}`, http.StatusServiceUnavailable)
 		default:
 			http.NotFound(w, r)
 		}
@@ -741,18 +785,18 @@ func TestGetNativeAppsSummary_BothCompositionFetchesFailMultiError(t *testing.T)
 	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
 	require.Len(t, resp.Resources, 1)
 
-	// Row has neither process-derived nor org-derived fields; app-level survives
+	// Row has none of the composition-derived fields; app-level survives
 	assert.Equal(t, "app-1", resp.Resources[0].GUID)
 	assert.Nil(t, resp.Resources[0].Memory)
 	assert.Nil(t, resp.Resources[0].OrgGUID)
 	require.NotNil(t, resp.Resources[0].Meta)
-	assert.ElementsMatch(t, []string{"memory", "diskQuota", "instances", "spaceName", "orgGuid"}, resp.Resources[0].Meta.Unavailable)
+	assert.ElementsMatch(t, []string{"memory", "diskQuota", "instances", "spaceName", "orgGuid", "routes"}, resp.Resources[0].Meta.Unavailable)
 
-	// Envelope has two distinct errors — multi-error by design
+	// Envelope has three distinct errors — multi-error by design
 	require.NotNil(t, resp.Meta)
-	require.Len(t, resp.Meta.Errors, 2)
-	codes := []string{resp.Meta.Errors[0].Code, resp.Meta.Errors[1].Code}
-	assert.ElementsMatch(t, []string{"PROCESSES_FETCH_FAILED", "SPACES_FETCH_FAILED"}, codes)
+	require.Len(t, resp.Meta.Errors, 3)
+	codes := []string{resp.Meta.Errors[0].Code, resp.Meta.Errors[1].Code, resp.Meta.Errors[2].Code}
+	assert.ElementsMatch(t, []string{"PROCESSES_FETCH_FAILED", "SPACES_FETCH_FAILED", "ROUTES_FETCH_FAILED"}, codes)
 }
 
 func TestGetNativeAppsSummary_ProcessesFetchFailureSurfacesTristate(t *testing.T) {
@@ -790,6 +834,12 @@ func TestGetNativeAppsSummary_ProcessesFetchFailureSurfacesTristate(t *testing.T
 						"created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z",
 					},
 				},
+			})
+		case "/v3/routes":
+			// Routes succeeds so the test isolates the processes failure
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 0, "total_pages": 0},
+				"resources":  []map[string]interface{}{},
 			})
 		default:
 			http.NotFound(w, r)

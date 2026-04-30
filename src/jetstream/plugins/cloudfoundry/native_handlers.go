@@ -229,11 +229,18 @@ func toStOrg(r capi.Organization) StOrg {
 }
 
 func toStApp(r capi.App) StApp {
+	// V3's lifecycle.data is a free-form map; for buildpack lifecycle
+	// (the common case) it carries `stack` as a string. Other lifecycles
+	// (docker) leave it absent — StackName stays empty and is omitted
+	// from the wire payload via the omitempty tag.
+	stackName, _ := r.Lifecycle.Data["stack"].(string)
 	return StApp{
 		GUID:      r.GUID,
 		Name:      r.Name,
 		State:     r.State,
 		SpaceGUID: relationshipGUID(r.Relationships.Space),
+		StackName: stackName,
+		Routes:    []StAppRoute{},
 		CreatedAt: r.CreatedAt.Format(time.RFC3339),
 		UpdatedAt: r.UpdatedAt.Format(time.RFC3339),
 	}
@@ -374,6 +381,12 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 	}
 	processes, _ := fetchWebProcessesForApps(ctx, cfClient, appGUIDs)
 	spaces, _ := fetchSpacesByGUIDs(ctx, cfClient, spaceGUIDs)
+	// Routes are fetched lazily-non-fatal on the default path — same
+	// pattern as processes/spaces. On error, each row's Routes stays as
+	// the empty slice toStApp seeded; tristate signalling on this path
+	// is intentionally minimal (the summary path carries the full
+	// _meta.unavailable / _meta.errors envelope).
+	routesByApp, _ := fetchRoutesForApps(ctx, cfClient, appGUIDs)
 
 	apps := make([]StApp, 0, len(raw.Resources))
 	for _, r := range raw.Resources {
@@ -387,6 +400,9 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 		}
 		if space, ok := spaces[s.SpaceGUID]; ok {
 			s.SpaceName = space.Name
+		}
+		if rts, ok := routesByApp[r.GUID]; ok {
+			s.Routes = rts
 		}
 		apps = append(apps, s)
 	}
@@ -459,9 +475,25 @@ func (c *CloudFoundrySpecification) getNativeSpaces(ctx echo.Context) (err error
 		return err
 	}
 
+	// Enrich each space with per-space app + route counts via two filtered
+	// /v3/apps and /v3/routes calls (one each, batched on space_guids).
+	// Lazy-non-fatal: enrichment failures degrade silently to count=0 —
+	// same default-path policy as getNativeApps' process / space joins.
+	spaceGUIDs := make([]string, 0, len(raw.Resources))
+	for _, r := range raw.Resources {
+		if r.GUID != "" {
+			spaceGUIDs = append(spaceGUIDs, r.GUID)
+		}
+	}
+	appCounts, _ := fetchAppCountsForSpaces(ctx, cfClient, spaceGUIDs)
+	routeCounts, _ := fetchRouteCountsForSpaces(ctx, cfClient, spaceGUIDs)
+
 	spaces := make([]StSpace, 0, len(raw.Resources))
 	for _, r := range raw.Resources {
-		spaces = append(spaces, toStSpace(r))
+		s := toStSpace(r)
+		s.AppCount = appCounts[r.GUID]
+		s.RouteCount = routeCounts[r.GUID]
+		spaces = append(spaces, s)
 	}
 	rows = len(spaces)
 
@@ -681,9 +713,23 @@ func (c *CloudFoundrySpecification) getNativeOrgSpaces(ctx echo.Context) error {
 	if lerr != nil {
 		return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
 	}
+
+	// Enrich with per-space app + route counts (mirror getNativeSpaces).
+	spaceGUIDs := make([]string, 0, len(raw.Resources))
+	for _, r := range raw.Resources {
+		if r.GUID != "" {
+			spaceGUIDs = append(spaceGUIDs, r.GUID)
+		}
+	}
+	appCounts, _ := fetchAppCountsForSpaces(ctx, cfClient, spaceGUIDs)
+	routeCounts, _ := fetchRouteCountsForSpaces(ctx, cfClient, spaceGUIDs)
+
 	spaces := make([]StSpace, 0, len(raw.Resources))
 	for _, r := range raw.Resources {
-		spaces = append(spaces, toStSpace(r))
+		s := toStSpace(r)
+		s.AppCount = appCounts[r.GUID]
+		s.RouteCount = routeCounts[r.GUID]
+		spaces = append(spaces, s)
 	}
 	return ctx.JSON(http.StatusOK, StratosPagedResponse[StSpace]{
 		Resources:  spaces,
