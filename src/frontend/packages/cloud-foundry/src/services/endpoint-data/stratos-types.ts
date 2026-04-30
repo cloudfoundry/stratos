@@ -266,6 +266,34 @@ export interface StUsersResponse {
   totalResults: number;
 }
 
+// StDomain is the Stratos-shape DTO for a CF v3 domain — the DNS suffix
+// routes attach to. owningOrgGuid is set for private domains (visible/usable
+// only inside one org); empty for shared domains (visible to the whole
+// platform). sharedOrgGuids lists orgs a shared domain is explicitly shared
+// with — empty when the domain is shared platform-wide. internal flags
+// container-to-container-only domains. routerGroupGuid associates TCP
+// domains with a router group; empty for HTTP domains. cnsiGuid is stamped
+// server-side so multi-CNSI rendering keys off (cnsi, domain).
+export interface StDomain {
+  guid: string;
+  name: string;
+  internal: boolean;
+  routerGroupGuid?: string;
+  supportedProtocols: string[];
+  owningOrgGuid?: string;
+  sharedOrgGuids: string[];
+  labels: Record<string, string>;
+  annotations: Record<string, string>;
+  cnsiGuid: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StDomainsResponse {
+  resources: StDomain[];
+  totalResults: number;
+}
+
 // StStack is the Stratos-shaped DTO for a CF stack — the rootfs image flavor
 // a Diego cell uses to run apps (e.g. cflinuxfs4). Drives the CF-level
 // Stacks tab. cnsiGuid is stamped server-side so multi-CNSI rendering keys

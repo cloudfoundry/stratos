@@ -77,7 +77,7 @@ export class GetAllSpaces extends CFStartAction implements PaginatedAction, Enti
     super();
     this.options = new HttpRequest(
       'GET',
-      'space'
+      `/pp/v1/cf/spaces/${endpointGuid}`
     );
   }
   actions = [GET_SPACES, GET_SPACES_SUCCESS, GET_SPACES_FAILED];
@@ -86,7 +86,7 @@ export class GetAllSpaces extends CFStartAction implements PaginatedAction, Enti
   entityType = spaceEntityType;
   options: HttpRequest<any>;
   initialParams = {
-    'results-per-page': 100,
+    per_page: 100,
     'order-direction': 'asc',
     'order-direction-field': 'name',
     'order-by': 'name'
@@ -177,7 +177,7 @@ export class DeleteSpace extends BaseSpaceAction {
     super(guid, orgGuid, endpointGuid);
     this.options = new HttpRequest(
       'DELETE',
-      `spaces/${guid}`,
+      `/pp/v1/cf/spaces/${endpointGuid}/${guid}`,
       {
         params: new HttpParams({
           fromObject: {
@@ -197,7 +197,7 @@ export class CreateSpace extends BaseSpaceAction {
     super(key, orgGuid, endpointGuid);
     this.options = new HttpRequest(
       'POST',
-      'spaces',
+      `/pp/v1/cf/spaces/${endpointGuid}`,
       createSpace
     );
   }
@@ -209,8 +209,8 @@ export class UpdateSpace extends CFStartAction implements ICFAction {
   constructor(public guid: string, public endpointGuid: string, updateSpace: IUpdateSpace) {
     super();
     this.options = new HttpRequest(
-      'PUT',
-      `spaces/${guid}`,
+      'PATCH',
+      `/pp/v1/cf/spaces/${endpointGuid}/${guid}`,
       updateSpace
     );
   }

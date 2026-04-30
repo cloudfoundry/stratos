@@ -11,7 +11,7 @@ export class FetchAllBuildpacks extends CFStartAction implements PaginatedAction
     super();
     this.options = new HttpRequest(
       'GET',
-      'buildpacks'
+      `/pp/v1/cf/buildpacks/${endpointGuid}`
     );
   }
   actions = getActions('Buildpacks', 'List all');
@@ -20,7 +20,7 @@ export class FetchAllBuildpacks extends CFStartAction implements PaginatedAction
   options: HttpRequest<any>;
   initialParams = {
     page: 1,
-    'results-per-page': 100,
+    per_page: 100,
     'order-direction': 'desc',
     'order-direction-field': 'position',
   };

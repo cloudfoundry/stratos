@@ -46,9 +46,14 @@ export class GetServiceInstances
     public populateMissing = true
   ) {
     super();
+    // V3-native: drives /pp/v1/cf/service_instances/{cnsi} (handler in
+    // native_service_instances_reads.go). Field renames in the entity
+    // generator alias servicePlanGuid→service_plan_guid,
+    // serviceOfferingGuid→service_guid, spaceGuid→space_guid,
+    // dashboardUrl→dashboard_url so V2 consumers continue to work.
     this.options = new HttpRequest(
       'GET',
-      'service_instances'
+      `/pp/v1/cf/service_instances/${endpointGuid}`
     );
   }
   actions = getActions('Service Instances', 'Get all');

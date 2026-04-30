@@ -137,9 +137,13 @@ export class GetAllRoutes extends CFStartAction implements PaginatedAction, Enti
     public populateMissing = true
   ) {
     super();
+    // V3-native: drives the absolute /pp/v1/cf/routes/{cnsi} handler in
+    // native_routes.go, bypassing the v2 proxy. Field renames in the entity
+    // generator (domainGuid → domain_guid, spaceGuid → space_guid) preserve
+    // V2 consumer reads.
     this.options = new HttpRequest(
       'GET',
-      'routes'
+      `/pp/v1/cf/routes/${endpointGuid}`
     );
     this.paginationKey = pKey || createEntityRelationPaginationKey('cf', this.endpointGuid);
   }

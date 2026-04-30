@@ -32,11 +32,21 @@ import {
 import { CfValidateEntitiesStart } from './actions/relations-actions';
 import { cfMaxedStateHandlers } from './cf-pagination-maxed-state';
 import {
+  StApp,
   StAuditEvent,
+  StBuildpack,
+  StDomain,
+  StFeatureFlag,
   StOrg,
   StOrgQuota,
+  StRoute,
+  StSecurityGroup,
+  StServiceBroker,
+  StServiceInstance,
+  StServicePlan,
   StSpace,
   StSpaceQuota,
+  StStack,
   StUser,
 } from './services/endpoint-data/stratos-types';
 import { v3EntitiesFromResponse, v3PaginationConfig, v3SingleResourceMapper } from './v3-native';
@@ -727,7 +737,19 @@ function generateCFBuildPackEntity(endpointDefinition: StratosEndpointExtensionD
   const definition: IStratosEntityDefinition = {
     type: buildpackEntityType,
     schema: cfEntityFactory(buildpackEntityType),
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    paginationConfig: {
+      ...cfMaxedStateHandlers,
+      getTotalPages: v3PaginationConfig.getTotalPages,
+      getTotalEntities: v3PaginationConfig.getTotalEntities,
+      getPaginationParameters: v3PaginationConfig.getPaginationParameters,
+      // StBuildpack already exposes flat camelCase fields; the V2 IBuildpack
+      // shape (name/position/enabled/locked/filename) overlaps directly so
+      // no field renames are needed — the mapper just wraps each resource
+      // into APIResource shape for legacy consumers.
+      getEntitiesFromResponse: v3EntitiesFromResponse<StBuildpack>(),
+    },
+    successfulRequestDataMapper: v3SingleResourceMapper<StBuildpack>(),
   };
   cfEntityCatalog.buildPack = new StratosCatalogEntity<IFavoriteMetadata, APIResource<IBuildpack>, BuildpackActionBuilders>(definition, {
     dataReducers: [
@@ -738,11 +760,29 @@ function generateCFBuildPackEntity(endpointDefinition: StratosEndpointExtensionD
   return cfEntityCatalog.buildPack;
 }
 
+// V3 StServiceBroker → V2 IServiceBroker key aliases. Template consumers
+// read `broker_url`/`auth_username`/`space_guid`. authUsername is V3
+// write-only on read responses (see KS v2-v3 tristate doc) — `_meta` will
+// flag it; broker_url comes from V3's `url`.
+const serviceBrokerV3ToV2Renames: Record<string, string> = {
+  url: 'broker_url',
+  spaceGuid: 'space_guid',
+  authUsername: 'auth_username',
+};
+
 function generateCFServiceBrokerEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition: IStratosEntityDefinition = {
     type: serviceBrokerEntityType,
     schema: cfEntityFactory(serviceBrokerEntityType),
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    paginationConfig: {
+      ...cfMaxedStateHandlers,
+      getTotalPages: v3PaginationConfig.getTotalPages,
+      getTotalEntities: v3PaginationConfig.getTotalEntities,
+      getPaginationParameters: v3PaginationConfig.getPaginationParameters,
+      getEntitiesFromResponse: v3EntitiesFromResponse<StServiceBroker>(serviceBrokerV3ToV2Renames),
+    },
+    successfulRequestDataMapper: v3SingleResourceMapper<StServiceBroker>(serviceBrokerV3ToV2Renames),
   };
   cfEntityCatalog.serviceBroker = new StratosCatalogEntity<
     IFavoriteMetadata,
@@ -775,13 +815,32 @@ function generateCFServicePlanVisibilityEntity(endpointDefinition: StratosEndpoi
   return cfEntityCatalog.servicePlanVisibility;
 }
 
+// V3 StSecurityGroup uses camelCase (`globallyEnabledRunning` /
+// `globallyEnabledStaging`); legacy ISecurityGroup consumers read snake_case
+// (`running_default` / `staging_default`). The shared mapper spreads the
+// original camelCase record and adds aliased keys, so V3-shape consumers
+// (signal-config) keep reading camelCase and any legacy V2 reads still
+// work.
+const securityGroupV3ToV2Renames: Record<string, string> = {
+  globallyEnabledRunning: 'running_default',
+  globallyEnabledStaging: 'staging_default',
+};
+
 function generateCFSecurityGroupEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition: IStratosEntityDefinition = {
     type: securityGroupEntityType,
     schema: cfEntityFactory(securityGroupEntityType),
     label: 'Security Group',
     labelPlural: 'Security Groups',
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    paginationConfig: {
+      ...cfMaxedStateHandlers,
+      getTotalPages: v3PaginationConfig.getTotalPages,
+      getTotalEntities: v3PaginationConfig.getTotalEntities,
+      getPaginationParameters: v3PaginationConfig.getPaginationParameters,
+      getEntitiesFromResponse: v3EntitiesFromResponse<StSecurityGroup>(securityGroupV3ToV2Renames),
+    },
+    successfulRequestDataMapper: v3SingleResourceMapper<StSecurityGroup>(securityGroupV3ToV2Renames),
   };
   cfEntityCatalog.securityGroup = new StratosCatalogEntity<
     IFavoriteMetadata,
@@ -858,13 +917,29 @@ function generateCFServiceEntity(endpointDefinition: StratosEndpointExtensionDef
   return cfEntityCatalog.service;
 }
 
+// V3 StServicePlan → V2 IServicePlan key aliases. V2 consumers read
+// `service_guid` (parent service offering). V3 surfaces the parent as
+// `serviceOfferingGuid`; alias as `service_guid` so the legacy filter
+// logic in services-helper.ts and services.service.ts keeps matching.
+const servicePlanV3ToV2Renames: Record<string, string> = {
+  serviceOfferingGuid: 'service_guid',
+};
+
 function generateCFServicePlanEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition: IStratosEntityDefinition = {
     type: servicePlanEntityType,
     schema: cfEntityFactory(servicePlanEntityType),
     label: 'Service Plan',
     labelPlural: 'Service Plans',
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    paginationConfig: {
+      ...cfMaxedStateHandlers,
+      getTotalPages: v3PaginationConfig.getTotalPages,
+      getTotalEntities: v3PaginationConfig.getTotalEntities,
+      getPaginationParameters: v3PaginationConfig.getPaginationParameters,
+      getEntitiesFromResponse: v3EntitiesFromResponse<StServicePlan>(servicePlanV3ToV2Renames),
+    },
+    successfulRequestDataMapper: v3SingleResourceMapper<StServicePlan>(servicePlanV3ToV2Renames),
   };
   cfEntityCatalog.servicePlan = new StratosCatalogEntity<
     IFavoriteMetadata,
@@ -888,6 +963,22 @@ function generateCFServicePlanEntity(endpointDefinition: StratosEndpointExtensio
   return cfEntityCatalog.servicePlan;
 }
 
+// V3 StServiceInstance → V2 IServiceInstance key aliases. V2 consumers
+// read `service_plan_guid`, `service_guid`, `space_guid`, `dashboard_url`
+// across services-helper.ts, services.service.ts, services-wall cards,
+// and add-service-instance flows. V3's StServiceInstance surfaces these
+// as camelCase plus `serviceOfferingGuid` (V3's parent-of-plan). The
+// legacy "service" relation (depth-2: SI → plan → service) is read via
+// `service_guid` on the SI row in V2 — alias `serviceOfferingGuid`
+// straight to `service_guid` so list-filter logic keeps working without
+// the depth-2 relation walk. See A6 for native depth-2 handling.
+const serviceInstanceV3ToV2Renames: Record<string, string> = {
+  servicePlanGuid: 'service_plan_guid',
+  serviceOfferingGuid: 'service_guid',
+  spaceGuid: 'space_guid',
+  dashboardUrl: 'dashboard_url',
+};
+
 function generateCFServiceInstanceEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition: IStratosEntityDefinition = {
     type: serviceInstancesEntityType,
@@ -899,6 +990,14 @@ function generateCFServiceInstanceEntity(endpointDefinition: StratosEndpointExte
     label: 'Marketplace Service',
     labelPlural: 'Marketplace Services',
     endpoint: endpointDefinition,
+    paginationConfig: {
+      ...cfMaxedStateHandlers,
+      getTotalPages: v3PaginationConfig.getTotalPages,
+      getTotalEntities: v3PaginationConfig.getTotalEntities,
+      getPaginationParameters: v3PaginationConfig.getPaginationParameters,
+      getEntitiesFromResponse: v3EntitiesFromResponse<StServiceInstance>(serviceInstanceV3ToV2Renames),
+    },
+    successfulRequestDataMapper: v3SingleResourceMapper<StServiceInstance>(serviceInstanceV3ToV2Renames),
   };
   cfEntityCatalog.serviceInstance = new StratosCatalogEntity<
     IFavoriteMetadata,
@@ -956,12 +1055,27 @@ function generateCFUserEntity(endpointDefinition: StratosEndpointExtensionDefini
 }
 
 function generateCFDomainEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
+  // StDomain is the V3 wire shape; legacy V2 IDomain consumers read
+  // snake_case keys (router_group_guid, owning_organization_guid). The
+  // mapper spreads the original record and aliases just those two keys.
+  const domainV3ToV2Renames: Record<string, string> = {
+    routerGroupGuid: 'router_group_guid',
+    owningOrgGuid: 'owning_organization_guid',
+  };
   const definition: IStratosEntityDefinition = {
     type: domainEntityType,
     schema: cfEntityFactory(domainEntityType),
     label: 'Domain',
     labelPlural: 'Domains',
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    paginationConfig: {
+      ...cfMaxedStateHandlers,
+      getTotalPages: v3PaginationConfig.getTotalPages,
+      getTotalEntities: v3PaginationConfig.getTotalEntities,
+      getPaginationParameters: v3PaginationConfig.getPaginationParameters,
+      getEntitiesFromResponse: v3EntitiesFromResponse<StDomain>(domainV3ToV2Renames),
+    },
+    successfulRequestDataMapper: v3SingleResourceMapper<StDomain>(domainV3ToV2Renames),
   };
   cfEntityCatalog.domain = new StratosCatalogEntity<
     IFavoriteMetadata,
@@ -1026,13 +1140,42 @@ function generateEventEntity(endpointDefinition: StratosEndpointExtensionDefinit
   return cfEntityCatalog.event;
 }
 
+// V3 StRoute → V2 IRoute key aliases. Templates and *.ts consumers read
+// `domain_guid`, `space_guid`, `domain_url`. The mapper spreads the V3
+// camelCase StRoute and adds these snake_case aliases so existing
+// consumers keep working without per-template rewrites.
+const routeV3ToV2Renames: Record<string, string> = {
+  domainGuid: 'domain_guid',
+  spaceGuid: 'space_guid',
+  url: 'domain_url',
+};
+
 function generateRouteEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition: IStratosEntityDefinition = {
     type: routeEntityType,
     schema: cfEntityFactory(routeEntityType),
     label: 'Application Route',
     labelPlural: 'Application Routes',
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    // The native /pp/v1/cf/routes/{cnsi} handler returns the legacy flat
+    // StRoutesResponse envelope (resources + totalResults — no `pagination`
+    // sub-block) because routes are server-side-drained. Use a per-entity
+    // wiring that reads totalResults off the flat envelope and stamps a
+    // single page; mirrors the v3 mapper used by orgs/spaces/quotas for
+    // resource shape transform.
+    paginationConfig: {
+      ...cfMaxedStateHandlers,
+      getTotalPages: (responses: JetstreamResponse) =>
+        Object.values(responses).length > 0 ? 1 : 0,
+      getTotalEntities: (responses: JetstreamResponse) =>
+        Object.values(responses).reduce((sum: number, r: any) => {
+          const resp = Array.isArray(r) ? r[0] : r;
+          return sum + (resp?.totalResults ?? resp?.total_results ?? 0);
+        }, 0),
+      getPaginationParameters: (page: number) => ({ page: page + '' }),
+      getEntitiesFromResponse: v3EntitiesFromResponse<StRoute>(routeV3ToV2Renames),
+    },
+    successfulRequestDataMapper: v3SingleResourceMapper<StRoute>(routeV3ToV2Renames),
   };
   cfEntityCatalog.route = new StratosCatalogEntity<
     IFavoriteMetadata,
@@ -1059,12 +1202,27 @@ function generateRouteEntity(endpointDefinition: StratosEndpointExtensionDefinit
 }
 
 function generateStackEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
+  // StStack camelCase -> V2 IStack snake_case. IStack itself only has
+  // name/description (already direct), but app deploy/stack-detail surfaces
+  // build/run rootfs images by snake_case key in some templates.
+  const stackV3ToV2Renames: Record<string, string> = {
+    buildRootfsImage: 'build_rootfs_image',
+    runRootfsImage: 'run_rootfs_image',
+  };
   const definition: IStratosEntityDefinition = {
     type: stackEntityType,
     schema: cfEntityFactory(stackEntityType),
     label: 'Stack',
     labelPlural: 'Stacks',
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    paginationConfig: {
+      ...cfMaxedStateHandlers,
+      getTotalPages: v3PaginationConfig.getTotalPages,
+      getTotalEntities: v3PaginationConfig.getTotalEntities,
+      getPaginationParameters: v3PaginationConfig.getPaginationParameters,
+      getEntitiesFromResponse: v3EntitiesFromResponse<StStack>(stackV3ToV2Renames),
+    },
+    successfulRequestDataMapper: v3SingleResourceMapper<StStack>(stackV3ToV2Renames),
   };
   cfEntityCatalog.stack = new StratosCatalogEntity<
     IFavoriteMetadata,
@@ -1089,6 +1247,12 @@ function generateStackEntity(endpointDefinition: StratosEndpointExtensionDefinit
 }
 
 function generateFeatureFlagEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
+  // Feature flags have no GUID on the wire — name is the identity. We
+  // synthesize `${cnsi}-${name}` as the catalog key so cross-CNSI rendering
+  // can dedupe. Wire shape is StratosPagedResponse[StFeatureFlag], so we
+  // adapt from {resources, pagination} but bypass v3*Mapper helpers (those
+  // require a real guid). customErrorMessage -> error_message aliases the
+  // V2 IFeatureFlag key so legacy templates still read it.
   const featureFlagDefinition: IStratosEntityDefinition = {
     type: featureFlagEntityType,
     schema: cfEntityFactory(featureFlagEntityType),
@@ -1099,20 +1263,29 @@ function generateFeatureFlagEntity(endpointDefinition: StratosEndpointExtensionD
       response,
       endpointGuid
     ) => {
+      const r = response as StFeatureFlag & { guid?: string; error_message?: string };
       return {
-        ...response,
-        guid: `${endpointGuid}-${response.name}`
+        ...r,
+        error_message: r.customErrorMessage,
+        guid: r.guid || `${endpointGuid}-${r.name}`,
       };
     },
     paginationConfig: {
+      ...cfMaxedStateHandlers,
+      getTotalPages: v3PaginationConfig.getTotalPages,
+      getTotalEntities: v3PaginationConfig.getTotalEntities,
+      getPaginationParameters: v3PaginationConfig.getPaginationParameters,
       getEntitiesFromResponse: (response) => {
-        return response;
+        const r = response as { resources?: StFeatureFlag[] };
+        if (!r || !Array.isArray(r.resources)) {
+          return [];
+        }
+        return r.resources.map(ff => ({
+          ...ff,
+          error_message: ff.customErrorMessage,
+          guid: `${ff.cnsiGuid}-${ff.name}`,
+        }));
       },
-      getTotalPages: (_responses: JetstreamResponse) => 1,
-      getTotalEntities: (responses: JetstreamResponse) => responses.length,
-      getPaginationParameters: (page: number) => ({ page: page + '' }),
-      canIgnoreMaxedState: () => of(false),
-      maxedStateStartAt: () => of(null),
     }
   };
   cfEntityCatalog.featureFlag = new StratosCatalogEntity<
@@ -1152,6 +1325,26 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
     labelPlural: 'Applications',
     endpoint: endpointDefinition,
     icon: 'apps',
+    paginationConfig: {
+      ...cfMaxedStateHandlers,
+      getTotalPages: v3PaginationConfig.getTotalPages,
+      getTotalEntities: v3PaginationConfig.getTotalEntities,
+      getPaginationParameters: v3PaginationConfig.getPaginationParameters,
+      // V3 wire shape is camelCase StApp; legacy V2 consumers (app cards, app
+      // tables, summary, build/variables tabs) read snake_case keys. The
+      // mapper spreads the original record and emits aliased keys, so V3-
+      // shape and V2-shape consumers both work.
+      getEntitiesFromResponse: v3EntitiesFromResponse<StApp>({
+        spaceGuid: 'space_guid',
+        orgGuid: 'organization_guid',
+        diskQuota: 'disk_quota',
+      }),
+    },
+    successfulRequestDataMapper: v3SingleResourceMapper<StApp>({
+      spaceGuid: 'space_guid',
+      orgGuid: 'organization_guid',
+      diskQuota: 'disk_quota',
+    }),
     tableConfig: {
       rowBuilders: [
         ['Name', (entity) => entity.entity.name],

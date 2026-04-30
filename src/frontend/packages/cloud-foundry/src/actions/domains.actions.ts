@@ -21,7 +21,7 @@ export class FetchDomain extends CFStartAction implements ICFAction {
     super();
     this.options = new HttpRequest(
       'GET',
-      `domains/${guid}`
+      `/pp/v1/cf/domains/${endpointGuid}/${guid}`
     );
   }
   actions = [GET_DOMAIN, GET_DOMAIN_SUCCESS, GET_DOMAIN_FAILED];
@@ -34,7 +34,7 @@ export class FetchAllDomains extends CFStartAction implements PaginatedAction {
     super();
     this.options = new HttpRequest(
       'GET',
-      'domains',
+      `/pp/v1/cf/domains/${endpointGuid}`,
     );
     this.paginationKey = this.paginationKey || createEntityRelationPaginationKey(endpointEntityType, endpointGuid);
   }
@@ -43,6 +43,6 @@ export class FetchAllDomains extends CFStartAction implements PaginatedAction {
   entityType = domainEntityType;
   options: HttpRequest<any>;
   initialParams = {
-    'results-per-page': 100,
+    per_page: 100,
   };
 }

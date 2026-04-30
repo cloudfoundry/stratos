@@ -49,7 +49,7 @@ export class GetAllApplications extends CFStartAction implements PaginatedAction
     super();
     this.options = new HttpRequest(
       'GET',
-      'apps'
+      `/pp/v1/cf/apps/${endpointGuid}`
     );
     this.paginationKey = this.paginationKey || createEntityRelationPaginationKey('cf', endpointGuid);
   }
@@ -62,7 +62,7 @@ export class GetAllApplications extends CFStartAction implements PaginatedAction
     'order-direction': 'asc',
     'order-direction-field': GetAllApplications.sortField,
     page: 1,
-    'results-per-page': 100,
+    per_page: 100,
   };
   flattenPagination = true;
   flattenPaginationMax = true;
@@ -91,7 +91,7 @@ export class CreateNewApplication extends CFStartAction implements ICFAction {
     super();
     this.options = new HttpRequest(
       'POST',
-      'apps',
+      `/pp/v1/cf/apps/${endpointGuid}`,
       {
         name: application.name,
         space_guid: application.space_guid
@@ -161,7 +161,7 @@ export class DeleteApplication extends CFStartAction implements ICFAction {
     super();
     this.options = new HttpRequest(
       'DELETE',
-      `apps/${guid}`,
+      `/pp/v1/cf/apps/${endpointGuid}/${guid}`,
       null,
       {
         params: new HttpParams({
@@ -188,7 +188,7 @@ export class DeleteApplicationInstance extends CFStartAction
     super();
     this.options = new HttpRequest(
       'DELETE',
-      `apps/${appGuid}/instances/${index}`,
+      `/pp/v1/cf/apps/${endpointGuid}/${appGuid}/instances/${index}`,
       null
     );
     this.guid = `${appGuid}-${index}`;

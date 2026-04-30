@@ -54,7 +54,7 @@ export class GetAllCfUsersAsAdmin extends CFStartAction implements PaginatedActi
     this.paginationKey = paginationKey || createEntityRelationPaginationKey(endpointEntityType, endpointGuid);
     this.options = new HttpRequest(
       'GET',
-      'users'
+      `/pp/v1/cf/users/${endpointGuid}`
     );
   }
   actions = [GET_ALL_CF_USERS, GET_ALL_CF_USERS_SUCCESS, GET_ALL_CF_USERS_FAILED];
