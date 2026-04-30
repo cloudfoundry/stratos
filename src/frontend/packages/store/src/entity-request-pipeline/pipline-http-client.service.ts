@@ -9,6 +9,7 @@ import { StratosCatalogEndpointEntity } from '../entity-catalog/entity-catalog-e
 import { IStratosEndpointDefinition } from '../entity-catalog/entity-catalog.types';
 import { cfAPIVersion, proxyAPIVersion } from '../jetstream';
 import { connectedEndpointsOfTypesSelector, endpointOfTypeSelector } from '../selectors/endpoint.selectors';
+import { resolvePipelineUrl } from './resolve-pipeline-url';
 
 @Injectable({
   providedIn: 'root'
@@ -35,7 +36,10 @@ export class PipelineHttpClient {
     hr: HttpRequest<any>,
     endpointConfig: IStratosEndpointDefinition,
     endpointGuids: string | string[]) {
-    const url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${hr.url}`;
+    const { url, isAbsolute } = resolvePipelineUrl(hr.url, proxyAPIVersion, cfAPIVersion);
+    if (isAbsolute) {
+      return this.httpClient.request<R>(hr.clone({ url }));
+    }
     if (endpointGuids && endpointGuids.length) {
       const headers = hr.headers.set(PipelineHttpClient.EndpointHeader, endpointGuids);
       return this.httpClient.request<R>(hr.clone({ headers, url }));
