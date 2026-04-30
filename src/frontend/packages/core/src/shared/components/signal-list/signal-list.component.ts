@@ -1,4 +1,4 @@
-import { Component, HostListener, Input, Signal, WritableSignal, ChangeDetectionStrategy, ElementRef, ViewChild, signal, DestroyRef, inject, AfterViewInit, OnInit } from '@angular/core';
+import { Component, HostListener, Input, Signal, WritableSignal, ChangeDetectionStrategy, ElementRef, ViewChild, signal, DestroyRef, inject, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
@@ -205,7 +205,7 @@ export interface SignalListConfig<T> {
   templateUrl: './signal-list.component.html',
   host: { class: 'block h-full min-h-0' },
 })
-export class SignalListComponent<T> implements OnInit, AfterViewInit {
+export class SignalListComponent<T> implements AfterViewInit {
   @Input({ required: true }) config!: SignalListConfig<T>;
 
   @ViewChild('scrollBody', { static: false }) scrollBody?: ElementRef<HTMLElement>;
@@ -232,23 +232,6 @@ export class SignalListComponent<T> implements OnInit, AfterViewInit {
       this.mutationObserver?.disconnect();
       this.scrollBody?.nativeElement.removeEventListener('scroll', this.onScroll);
     });
-  }
-
-  ngOnInit(): void {
-    // The pageSize signal can carry a value left over from a previous
-    // viewMode (e.g. user persisted table-mode 25, then this list mounts
-    // in card-mode whose options are [6,12,24,48,96]). Without snapping,
-    // the dropdown displays its first option while the request still asks
-    // for the stale size. Mirrors setViewMode's snap, but runs once on init.
-    const opts = this.config.pageSizeOptions;
-    if (opts && 'table' in opts && 'card' in opts && this.config.viewMode) {
-      const mode = this.config.viewMode();
-      const next = mode === 'card' ? opts.card : opts.table;
-      if (next.length && !next.includes(this.config.pageSize())) {
-        this.config.pageSize.set(next[0]);
-        this.config.pageIndex.set(0);
-      }
-    }
   }
 
   ngAfterViewInit(): void {
