@@ -12,8 +12,8 @@ export function getActionEndpoint(action: ActionWithEndpoint): string {
 }
 
 export interface V3Pagination {
-  total_pages: number;
-  total_results: number;
+  totalPages: number;
+  totalResults: number;
 }
 
 export interface V3PagedResponse<T> {
@@ -32,13 +32,14 @@ export const v3PaginationConfig = {
   getTotalPages: <T>(jetstreamResponse: JetstreamShaped<T>): number =>
     Object.values(jetstreamResponse).reduce((max, value) => {
       const resp = firstResponse(value);
-      return resp.pagination.total_pages > max ? resp.pagination.total_pages : max;
+      const pages = resp?.pagination?.totalPages ?? 0;
+      return pages > max ? pages : max;
     }, 0),
 
   getTotalEntities: <T>(jetstreamResponse: JetstreamShaped<T>): number =>
     Object.values(jetstreamResponse).reduce((sum, value) => {
       const resp = firstResponse(value);
-      return sum + resp.pagination.total_results;
+      return sum + (resp?.pagination?.totalResults ?? 0);
     }, 0),
 
   getPaginationParameters: (page: number): Record<string, string> => ({
@@ -92,5 +93,30 @@ export function v3ToStratosShape<TFlat extends { guid: string }>(
       },
       entity: { ...resource, ...renamed } as TFlat & Record<string, unknown>,
     };
+  };
+}
+
+/**
+ * Idempotent single-resource mapper: wraps a flat Stratos-shape resource
+ * (e.g. {guid, name, ...}) into the legacy Stratos APIResource shape
+ * ({metadata, entity}) that V2 consumers expect. Pass through if already
+ * wrapped.
+ */
+export function v3SingleResourceMapper<TFlat extends { guid: string }>(
+  fieldRenames: Record<string, string> = {}
+): (data: unknown) => unknown {
+  const adapter = v3ToStratosShape<TFlat>(fieldRenames);
+  return (data) => {
+    if (!data || typeof data !== 'object') {
+      return data;
+    }
+    const d = data as Record<string, unknown>;
+    if (d.metadata && d.entity) {
+      return data;
+    }
+    if (typeof d.guid === 'string') {
+      return adapter(data as TFlat);
+    }
+    return data;
   };
 }

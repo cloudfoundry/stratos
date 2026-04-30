@@ -93,8 +93,8 @@ describe('v3ToStratosShape', () => {
 });
 
 describe('v3PaginationConfig', () => {
-  const buildPage = (total_pages: number, total_results: number, resources: { guid: string }[]): V3PagedResponse<{ guid: string }> => ({
-    pagination: { total_pages, total_results },
+  const buildPage = (totalPages: number, totalResults: number, resources: { guid: string }[]): V3PagedResponse<{ guid: string }> => ({
+    pagination: { totalPages, totalResults },
     resources,
   });
 
@@ -103,7 +103,7 @@ describe('v3PaginationConfig', () => {
     expect(v3PaginationConfig.getEntitiesFromResponse(resp)).toEqual([{ guid: 'a' }, { guid: 'b' }]);
   });
 
-  it('reads total_pages from pagination.* across endpoints, taking the max', () => {
+  it('reads totalPages from pagination.* across endpoints, taking the max', () => {
     const jetstreamResponse = {
       'cnsi-1': buildPage(5, 234, []),
       'cnsi-2': buildPage(8, 412, []),
@@ -118,7 +118,7 @@ describe('v3PaginationConfig', () => {
     expect(v3PaginationConfig.getTotalPages(jetstreamResponse)).toBe(3);
   });
 
-  it('reads total_results from pagination.* and sums across endpoints', () => {
+  it('reads totalResults from pagination.* and sums across endpoints', () => {
     const jetstreamResponse = {
       'cnsi-1': buildPage(5, 234, []),
       'cnsi-2': buildPage(8, 412, []),
@@ -141,7 +141,7 @@ describe('v3PaginationConfig composed with v3ToStratosShape', () => {
     }
     const adapter = v3ToStratosShape<FlatOrg>({});
     const v3Response: V3PagedResponse<FlatOrg> = {
-      pagination: { total_pages: 1, total_results: 2 },
+      pagination: { totalPages: 1, totalResults: 2 },
       resources: [
         { guid: 'org-1', name: 'first', created_at: '2026-04-29T00:00:00Z', updated_at: '2026-04-29T00:00:00Z' },
         { guid: 'org-2', name: 'second', created_at: '2026-04-29T00:00:00Z', updated_at: '2026-04-29T00:00:00Z' },
