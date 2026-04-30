@@ -39,7 +39,7 @@ import {
   StSpaceQuota,
   StUser,
 } from './services/endpoint-data/stratos-types';
-import { v3PaginationConfig, V3PagedResponse, v3SingleResourceMapper, v3ToStratosShape } from './v3-native';
+import { v3EntitiesFromResponse, v3PaginationConfig, v3SingleResourceMapper } from './v3-native';
 import {
   IService,
   IServiceBinding,
@@ -454,8 +454,7 @@ function generateCFQuotaDefinitionEntity(endpointDefinition: StratosEndpointExte
       getTotalPages: v3PaginationConfig.getTotalPages,
       getTotalEntities: v3PaginationConfig.getTotalEntities,
       getPaginationParameters: v3PaginationConfig.getPaginationParameters,
-      getEntitiesFromResponse: (resp: V3PagedResponse<StOrgQuota>) =>
-        resp.resources.map(v3ToStratosShape<StOrgQuota>({})),
+      getEntitiesFromResponse: v3EntitiesFromResponse<StOrgQuota>(),
     },
     successfulRequestDataMapper: v3SingleResourceMapper<StOrgQuota>(),
   };
@@ -558,10 +557,9 @@ function generateCFSpaceQuotaEntity(endpointDefinition: StratosEndpointExtension
       getTotalPages: v3PaginationConfig.getTotalPages,
       getTotalEntities: v3PaginationConfig.getTotalEntities,
       getPaginationParameters: v3PaginationConfig.getPaginationParameters,
-      getEntitiesFromResponse: (resp: V3PagedResponse<StSpaceQuota>) =>
-        resp.resources.map(v3ToStratosShape<StSpaceQuota>({
-          organizationGuid: 'organization_guid',
-        })),
+      getEntitiesFromResponse: v3EntitiesFromResponse<StSpaceQuota>({
+        organizationGuid: 'organization_guid',
+      }),
     },
     successfulRequestDataMapper: v3SingleResourceMapper<StSpaceQuota>({
       organizationGuid: 'organization_guid',
@@ -911,8 +909,7 @@ function generateCFUserEntity(endpointDefinition: StratosEndpointExtensionDefini
       getTotalPages: v3PaginationConfig.getTotalPages,
       getTotalEntities: v3PaginationConfig.getTotalEntities,
       getPaginationParameters: v3PaginationConfig.getPaginationParameters,
-      getEntitiesFromResponse: (resp: V3PagedResponse<StUser>) =>
-        resp.resources.map(v3ToStratosShape<StUser>({})),
+      getEntitiesFromResponse: v3EntitiesFromResponse<StUser>(),
     },
     successfulRequestDataMapper: v3SingleResourceMapper<StUser>(),
   };
@@ -976,8 +973,7 @@ function generateEventEntity(endpointDefinition: StratosEndpointExtensionDefinit
       getTotalPages: v3PaginationConfig.getTotalPages,
       getTotalEntities: v3PaginationConfig.getTotalEntities,
       getPaginationParameters: v3PaginationConfig.getPaginationParameters,
-      getEntitiesFromResponse: (resp: V3PagedResponse<StAuditEvent>) =>
-        resp.resources.map(v3ToStratosShape<StAuditEvent>({})),
+      getEntitiesFromResponse: v3EntitiesFromResponse<StAuditEvent>(),
     },
     successfulRequestDataMapper: v3SingleResourceMapper<StAuditEvent>(),
   };
@@ -1180,10 +1176,9 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
       getTotalPages: v3PaginationConfig.getTotalPages,
       getTotalEntities: v3PaginationConfig.getTotalEntities,
       getPaginationParameters: v3PaginationConfig.getPaginationParameters,
-      getEntitiesFromResponse: (resp: V3PagedResponse<StSpace>) =>
-        resp.resources.map(v3ToStratosShape<StSpace>({
-          orgGuid: 'organization_guid',
-        })),
+      getEntitiesFromResponse: v3EntitiesFromResponse<StSpace>({
+        orgGuid: 'organization_guid',
+      }),
     },
     successfulRequestDataMapper: v3SingleResourceMapper<StSpace>({
       orgGuid: 'organization_guid',
@@ -1226,8 +1221,7 @@ function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinit
       getTotalPages: v3PaginationConfig.getTotalPages,
       getTotalEntities: v3PaginationConfig.getTotalEntities,
       getPaginationParameters: v3PaginationConfig.getPaginationParameters,
-      getEntitiesFromResponse: (resp: V3PagedResponse<StOrg>) =>
-        resp.resources.map(v3ToStratosShape<StOrg>({})),
+      getEntitiesFromResponse: v3EntitiesFromResponse<StOrg>(),
     },
     successfulRequestDataMapper: v3SingleResourceMapper<StOrg>(),
   };

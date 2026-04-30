@@ -120,3 +120,33 @@ export function v3SingleResourceMapper<TFlat extends { guid: string }>(
     return data;
   };
 }
+
+/**
+ * Tolerant entity extractor for `paginationConfig.getEntitiesFromResponse`.
+ * The pipeline calls this for both list and single-resource fetches:
+ *   - Paged response `{resources: [...]}` → applies adapter to each.
+ *   - Already Stratos-shaped single `{metadata, entity}` → returns `[resp]`.
+ *   - Raw single `{guid, ...}` → applies adapter, returns one-element array.
+ * Returns `[]` for any other shape so the schema normaliser doesn't blow up.
+ */
+export function v3EntitiesFromResponse<TFlat extends { guid: string }>(
+  fieldRenames: Record<string, string> = {}
+): (resp: unknown) => unknown[] {
+  const adapter = v3ToStratosShape<TFlat>(fieldRenames);
+  return (resp) => {
+    if (!resp || typeof resp !== 'object') {
+      return [];
+    }
+    const r = resp as Record<string, unknown>;
+    if (Array.isArray(r.resources)) {
+      return (r.resources as TFlat[]).map(adapter);
+    }
+    if (r.metadata && r.entity) {
+      return [resp];
+    }
+    if (typeof r.guid === 'string') {
+      return [adapter(resp as TFlat)];
+    }
+    return [];
+  };
+}
