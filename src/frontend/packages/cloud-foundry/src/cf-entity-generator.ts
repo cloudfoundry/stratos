@@ -31,8 +31,15 @@ import {
 } from '@stratosui/store';
 import { CfValidateEntitiesStart } from './actions/relations-actions';
 import { cfMaxedStateHandlers } from './cf-pagination-maxed-state';
-import { StOrg } from './services/endpoint-data/stratos-types';
-import { v3PaginationConfig, V3PagedResponse, v3ToStratosShape } from './v3-native';
+import {
+  StAuditEvent,
+  StOrg,
+  StOrgQuota,
+  StSpace,
+  StSpaceQuota,
+  StUser,
+} from './services/endpoint-data/stratos-types';
+import { v3PaginationConfig, V3PagedResponse, v3SingleResourceMapper, v3ToStratosShape } from './v3-native';
 import {
   IService,
   IServiceBinding,
@@ -442,6 +449,15 @@ function generateCFQuotaDefinitionEntity(endpointDefinition: StratosEndpointExte
     endpoint: endpointDefinition,
     label: 'Organization Quota',
     labelPlural: 'Organization Quotas',
+    paginationConfig: {
+      ...cfMaxedStateHandlers,
+      getTotalPages: v3PaginationConfig.getTotalPages,
+      getTotalEntities: v3PaginationConfig.getTotalEntities,
+      getPaginationParameters: v3PaginationConfig.getPaginationParameters,
+      getEntitiesFromResponse: (resp: V3PagedResponse<StOrgQuota>) =>
+        resp.resources.map(v3ToStratosShape<StOrgQuota>({})),
+    },
+    successfulRequestDataMapper: v3SingleResourceMapper<StOrgQuota>(),
   };
   cfEntityCatalog.quotaDefinition = new StratosCatalogEntity<
     IFavoriteMetadata,
@@ -537,6 +553,19 @@ function generateCFSpaceQuotaEntity(endpointDefinition: StratosEndpointExtension
     endpoint: endpointDefinition,
     label: 'Space Quota',
     labelPlural: 'Space Quotas',
+    paginationConfig: {
+      ...cfMaxedStateHandlers,
+      getTotalPages: v3PaginationConfig.getTotalPages,
+      getTotalEntities: v3PaginationConfig.getTotalEntities,
+      getPaginationParameters: v3PaginationConfig.getPaginationParameters,
+      getEntitiesFromResponse: (resp: V3PagedResponse<StSpaceQuota>) =>
+        resp.resources.map(v3ToStratosShape<StSpaceQuota>({
+          organizationGuid: 'organization_guid',
+        })),
+    },
+    successfulRequestDataMapper: v3SingleResourceMapper<StSpaceQuota>({
+      organizationGuid: 'organization_guid',
+    }),
   };
   cfEntityCatalog.spaceQuota = new StratosCatalogEntity<
     IFavoriteMetadata,
@@ -877,6 +906,15 @@ function generateCFUserEntity(endpointDefinition: StratosEndpointExtensionDefini
     label: 'User',
     labelPlural: 'Users',
     endpoint: endpointDefinition,
+    paginationConfig: {
+      ...cfMaxedStateHandlers,
+      getTotalPages: v3PaginationConfig.getTotalPages,
+      getTotalEntities: v3PaginationConfig.getTotalEntities,
+      getPaginationParameters: v3PaginationConfig.getPaginationParameters,
+      getEntitiesFromResponse: (resp: V3PagedResponse<StUser>) =>
+        resp.resources.map(v3ToStratosShape<StUser>({})),
+    },
+    successfulRequestDataMapper: v3SingleResourceMapper<StUser>(),
   };
   cfEntityCatalog.user = new StratosCatalogEntity<IFavoriteMetadata, APIResource<CfUser>, UserActionBuilders>(
     definition,
@@ -932,7 +970,16 @@ function generateEventEntity(endpointDefinition: StratosEndpointExtensionDefinit
     schema: cfEntityFactory(cfEventEntityType),
     label: 'Event',
     labelPlural: 'Events',
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    paginationConfig: {
+      ...cfMaxedStateHandlers,
+      getTotalPages: v3PaginationConfig.getTotalPages,
+      getTotalEntities: v3PaginationConfig.getTotalEntities,
+      getPaginationParameters: v3PaginationConfig.getPaginationParameters,
+      getEntitiesFromResponse: (resp: V3PagedResponse<StAuditEvent>) =>
+        resp.resources.map(v3ToStratosShape<StAuditEvent>({})),
+    },
+    successfulRequestDataMapper: v3SingleResourceMapper<StAuditEvent>(),
   };
   cfEntityCatalog.event = new StratosCatalogEntity<
     IFavoriteMetadata,
@@ -1127,7 +1174,20 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
     labelPlural: 'Spaces',
     endpoint: endpointDefinition,
     icon: 'virtual_space',
-    iconFont: 'stratos-icons'
+    iconFont: 'stratos-icons',
+    paginationConfig: {
+      ...cfMaxedStateHandlers,
+      getTotalPages: v3PaginationConfig.getTotalPages,
+      getTotalEntities: v3PaginationConfig.getTotalEntities,
+      getPaginationParameters: v3PaginationConfig.getPaginationParameters,
+      getEntitiesFromResponse: (resp: V3PagedResponse<StSpace>) =>
+        resp.resources.map(v3ToStratosShape<StSpace>({
+          orgGuid: 'organization_guid',
+        })),
+    },
+    successfulRequestDataMapper: v3SingleResourceMapper<StSpace>({
+      orgGuid: 'organization_guid',
+    }),
   };
   cfEntityCatalog.space = new StratosCatalogEntity<ISpaceFavMetadata, APIResource<ISpace>, SpaceActionBuilders>(
     spaceDefinition,
@@ -1169,6 +1229,7 @@ function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinit
       getEntitiesFromResponse: (resp: V3PagedResponse<StOrg>) =>
         resp.resources.map(v3ToStratosShape<StOrg>({})),
     },
+    successfulRequestDataMapper: v3SingleResourceMapper<StOrg>(),
   };
   cfEntityCatalog.org = new StratosCatalogEntity<
     IFavoriteMetadata,
