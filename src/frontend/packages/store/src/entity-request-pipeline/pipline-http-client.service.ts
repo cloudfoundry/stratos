@@ -11,6 +11,17 @@ import { cfAPIVersion, proxyAPIVersion } from '../jetstream';
 import { connectedEndpointsOfTypesSelector, endpointOfTypeSelector } from '../selectors/endpoint.selectors';
 import { resolvePipelineUrl } from './resolve-pipeline-url';
 
+/**
+ * V3-native pipeline URLs use the convention
+ *   /pp/v1/cf/<resource>/<cnsiGuid>/<...>
+ * so the cnsiGuid is the segment immediately after the resource name. Returns
+ * null if the URL doesn't match the expected shape.
+ */
+function extractCnsiFromAbsoluteUrl(url: string): string | null {
+  const match = url.match(/\/pp\/v1\/cf\/[^/?]+\/([^/?]+)/);
+  return match ? match[1] : null;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -38,7 +49,21 @@ export class PipelineHttpClient {
     endpointGuids: string | string[]) {
     const { url, isAbsolute } = resolvePipelineUrl(hr.url, proxyAPIVersion, cfAPIVersion);
     if (isAbsolute) {
-      return this.httpClient.request<R>(hr.clone({ url }));
+      // V3-native single-endpoint paths (`/pp/v1/cf/<resource>/<cnsiGuid>/...`)
+      // bypass the multi-endpoint x-cap-cnsi-list header and return raw data
+      // instead of the `{[cnsiGuid]: data}` envelope the legacy proxy uses.
+      // Wrap the response so the rest of the pipeline (singleRequestToPaged,
+      // mapJetstreamResponses) sees the expected per-endpoint shape.
+      const cnsiGuid = extractCnsiFromAbsoluteUrl(url);
+      return this.httpClient.request<R>(hr.clone({ url })).pipe(
+        map(event => {
+          if (event instanceof HttpResponse && cnsiGuid) {
+            const wrapped = { [cnsiGuid]: event.body } as unknown as R;
+            return event.clone({ body: wrapped });
+          }
+          return event;
+        })
+      );
     }
     if (endpointGuids && endpointGuids.length) {
       const headers = hr.headers.set(PipelineHttpClient.EndpointHeader, endpointGuids);
