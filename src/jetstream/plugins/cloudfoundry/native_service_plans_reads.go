@@ -17,9 +17,9 @@ import (
 //
 //   - ?return=counts                — per_page=1, total only.
 //   - ?guids=<comma-list>           — single CAPI call with v3 `guids`
-//     filter; returns just those plans.
+//                                     filter; returns just those plans.
 //   - ?per_page=N&page=M (default)  — single CAPI page; per_page defaults
-//     to 50 and page to 1 when absent.
+//                                     to 50 and page to 1 when absent.
 //
 // The response envelope is StratosPagedResponse[StServicePlan] for the
 // paginated branches (so the frontend's CnsiEntitySource can follow

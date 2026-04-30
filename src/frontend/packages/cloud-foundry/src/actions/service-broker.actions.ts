@@ -15,14 +15,9 @@ export class GetServiceBrokers extends CFStartAction implements PaginatedAction 
     public populateMissing = true
   ) {
     super();
-    // V3-native: drives /pp/v1/cf/service_brokers/{cnsi} (handler in
-    // native_service_brokers_reads.go). Field renames in the entity
-    // generator alias `url → broker_url`, `spaceGuid → space_guid`,
-    // `authUsername → auth_username` so V2 consumers continue to read
-    // snake_case fields.
     this.options = new HttpRequest(
       'GET',
-      `/pp/v1/cf/service_brokers/${endpointGuid}`
+      'service_brokers'
     );
   }
   actions = getActions('Service Brokers', 'Get all');
@@ -45,10 +40,9 @@ export class GetServiceBroker extends CFStartAction implements EntityRequestActi
     public populateMissing = true
   ) {
     super();
-    // V3-native single-resource: drives /pp/v1/cf/service_brokers/{cnsi}/{guid}.
     this.options = new HttpRequest(
       'GET',
-      `/pp/v1/cf/service_brokers/${endpointGuid}/${guid}`
+      `service_brokers/${guid}`
     );
   }
   actions = getActions('Service Brokers', 'Get specific by ID');

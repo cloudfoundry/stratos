@@ -19,7 +19,7 @@ export class GetAllSecurityGroups extends CFStartAction implements PaginatedActi
     super();
     this.options = new HttpRequest(
       'GET',
-      `/pp/v1/cf/security_groups/${endpointGuid}`
+      `security_groups`
     );
   }
   actions = getActions('Security Groups', 'Fetch all');

@@ -19,7 +19,7 @@ export class GetStack extends CFStartAction implements ICFAction {
     super();
     this.options = new HttpRequest(
       'GET',
-      `/pp/v1/cf/stacks/${endpointGuid}/${guid}`
+      `stacks/${guid}`
     );
   }
   actions = [
@@ -36,7 +36,7 @@ export class GetAllStacks extends CFStartAction implements PaginatedAction {
     super();
     this.options = new HttpRequest(
       'GET',
-      `/pp/v1/cf/stacks/${endpointGuid}`
+      'stacks'
     );
     this.paginationKey = createEntityRelationKey(endpointEntityType, endpointGuid);
   }
@@ -47,7 +47,7 @@ export class GetAllStacks extends CFStartAction implements PaginatedAction {
   options: HttpRequest<any>;
   initialParams = {
     page: 1,
-    per_page: 100,
+    'results-per-page': 100,
     'order-direction': 'desc',
     'order-direction-field': 'name',
   };

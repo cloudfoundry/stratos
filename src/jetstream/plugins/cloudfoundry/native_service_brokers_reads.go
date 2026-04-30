@@ -16,9 +16,9 @@ import (
 //
 //   - ?return=counts                — per_page=1, total only.
 //   - ?guids=<comma-list>           — single CAPI call with v3 `guids`
-//     filter; returns just those brokers.
+//                                     filter; returns just those brokers.
 //   - ?per_page=N&page=M (default)  — single CAPI page; per_page defaults
-//     to 50 and page to 1 when absent.
+//                                     to 50 and page to 1 when absent.
 func (c *CloudFoundrySpecification) getNativeServiceBrokers(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
