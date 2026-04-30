@@ -95,7 +95,7 @@ export class GetQuotaDefinitions extends CFStartAction implements PaginatedActio
     super();
     this.options = new HttpRequest(
       'GET',
-      'quota_definitions'
+      `/pp/v1/cf/organization_quotas/${endpointGuid}`
     );
   }
   actions = [
@@ -163,7 +163,7 @@ export class GetOrganizationSpaceQuotaDefinitions extends CFStartAction implemen
     super();
     this.options = new HttpRequest(
       'GET',
-      `organizations/${orgGuid}/space_quota_definitions`
+      `/pp/v1/cf/space_quotas/${endpointGuid}`
     );
     this.parentGuid = this.orgGuid;
   }

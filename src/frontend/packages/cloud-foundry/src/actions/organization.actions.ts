@@ -54,7 +54,7 @@ export class GetOrganization extends CFStartAction implements ICFAction, EntityI
     super();
     this.options = new HttpRequest(
       'GET',
-      `/pp/v1/cf/organizations/${endpointGuid}/${guid}`
+      `/pp/v1/cf/org/${endpointGuid}/${guid}`
     );
   }
   actions = [
@@ -79,7 +79,7 @@ export class GetAllOrganizationSpaces extends CFStartAction implements Paginated
     super();
     this.options = new HttpRequest(
       'GET',
-      `/pp/v1/cf/organizations/${endpointGuid}/${orgGuid}/spaces`
+      `/pp/v1/cf/org/${endpointGuid}/${orgGuid}/spaces`
     );
     this.parentGuid = orgGuid;
   }
@@ -235,7 +235,7 @@ export class GetAllOrgUsers extends CFStartAction implements PaginatedAction, En
     super();
     this.options = new HttpRequest(
       'GET',
-      `organizations/${guid}/users`
+      `/pp/v1/cf/users/${endpointGuid}`
     );
     // Only admin's can use the url supplied by cf to fetch missing params. These are used by validation and fail for non-admins
     this.skipValidation = !isAdmin;
