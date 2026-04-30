@@ -17,26 +17,34 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
 
-// CFError is the error info returned from the CF API
+// CFError is the user-facing error info, populated from a CF v3 error envelope.
 type CFError struct {
 	Description string `json:"description"`
 	ErrorCode   string `json:"error_code"`
 	Code        int    `json:"code"`
 }
 
-// RetrieveOrgRolesResponse is the response from the CF GET Org Roles API
-type RetrieveOrgRolesResponse struct {
-	TotalResults int                `json:"total_results"`
-	Resources    []OrgRolesResponse `json:"resources"`
+// v3ErrorDetail mirrors the per-error entry in a CF v3 error envelope.
+type v3ErrorDetail struct {
+	Detail string `json:"detail"`
+	Title  string `json:"title"`
+	Code   int    `json:"code"`
 }
 
-type OrgRolesResponse struct {
-	Metadata struct {
-		GUID string `json:"guid"`
-	} `json:"metadata"`
-	Entity struct {
-		OrgRoles []string `json:"organization_roles"`
-	} `json:"entity"`
+// v3ErrorEnvelope is the top-level CF v3 error shape: {errors: [...]}.
+type v3ErrorEnvelope struct {
+	Errors []v3ErrorDetail `json:"errors"`
+}
+
+// v3RoleResource is the minimal role shape needed for the org-manager check.
+type v3RoleResource struct {
+	GUID string `json:"guid"`
+	Type string `json:"type"`
+}
+
+// v3RolesResponse is the paged list response from GET /v3/roles.
+type v3RolesResponse struct {
+	Resources []v3RoleResource `json:"resources"`
 }
 
 // UserInviteReq is the payload that is POSTed to request user invites to be generated
@@ -72,7 +80,16 @@ type UserInviteResponse struct {
 	FailedInvites []UserInviteUser `json:"failed_invites"`
 }
 
-const orgManagerRoleName = "org_manager"
+// orgManagerRoleName is the CF v3 role type for an Org Manager.
+const orgManagerRoleName = "organization_manager"
+
+// v2ToV3SpaceRole maps the legacy v2 space-role plural names accepted by
+// AssociateSpaceRoleForUser callers to v3 role types.
+var v2ToV3SpaceRole = map[string]string{
+	"auditors":   "space_auditor",
+	"managers":   "space_manager",
+	"developers": "space_developer",
+}
 
 // Send an invite
 func (invite *UserInvite) invite(c echo.Context) error {
@@ -171,7 +188,7 @@ func (invite *UserInvite) processUserInvite(cfGUID, userGUID string, userInviteR
 
 	// User created - add the user to org
 	cfError, err := invite.AssociateUserWithOrg(cfGUID, userGUID, user.UserID, userInviteRequest.Org)
-	if cfError, err := invite.AssociateUserWithOrg(cfGUID, userGUID, user.UserID, userInviteRequest.Org); err != nil {
+	if err != nil {
 		return updateUserInviteRecordForError(user, "Failed to associate user with Org", cfError), true
 	}
 
@@ -275,43 +292,52 @@ func (invite *UserInvite) UAAUserInvite(c echo.Context, endpoint api.CNSIRecord,
 	return inviteResponse, nil
 }
 
-// CreateCloudFoundryUser will make the CF API call to create the user in CF
+// CreateCloudFoundryUser creates a CF user via POST /v3/users. A 422 response
+// whose error envelope indicates the user already exists is treated as success
+// (idempotent re-invite).
 func (invite *UserInvite) CreateCloudFoundryUser(cnsiGUID, userID, newUserGUID string) (*CFError, error) {
-	body := fmt.Sprintf("{\"guid\": \"%s\"}", newUserGUID)
+	body := fmt.Sprintf(`{"guid": "%s"}`, newUserGUID)
 	headers := make(http.Header, 0)
 	headers.Set("Content-Type", "application/json")
 
 	// Need to make the request as the privileged user, not the requesting user - cloud_controller.admin scope required
-	res, err := invite.portalProxy.DoProxySingleRequest(cnsiGUID, UserInviteUserID, "POST", "/v2/users", headers, []byte(body))
+	res, err := invite.proxy().DoProxySingleRequest(cnsiGUID, UserInviteUserID, "POST", "/v3/users", headers, []byte(body))
 	if err != nil {
 		return nil, err
 	}
 
-	if res.StatusCode != http.StatusCreated {
-		cfError := parseCFError(res.Response)
-		if cfError != nil && cfError.ErrorCode == "CF-UaaIdTaken" {
-			log.Debug("CF User already created")
-			return nil, nil
-		}
-		return parseCFError(res.Response), errors.New("Failed to create user in Cloud Foundry")
+	if res.StatusCode == http.StatusCreated {
+		return nil, nil
 	}
 
-	return nil, nil
+	cfError := parseCFError(res.Response)
+	if res.StatusCode == http.StatusUnprocessableEntity && isAlreadyExistsError(cfError) {
+		log.Debug("CF User already created")
+		return nil, nil
+	}
+	return cfError, errors.New("Failed to create user in Cloud Foundry")
 }
 
-// AssociateUserWithOrg will make the CF API call to associate the given user with the given org
+// AssociateUserWithOrg assigns the organization_user role via POST /v3/roles.
+// A 422 response whose error envelope indicates the role already exists is
+// treated as success.
 func (invite *UserInvite) AssociateUserWithOrg(cnsiGUID, userID, newUserGUID, orgGUID string) (*CFError, error) {
-	url := fmt.Sprintf("/v2/organizations/%s/users/%s", orgGUID, newUserGUID)
-	res, err := invite.portalProxy.DoProxySingleRequest(cnsiGUID, userID, "PUT", url, nil, nil)
+	body := buildOrgRoleBody("organization_user", newUserGUID, orgGUID)
+	res, err := invite.proxy().DoProxySingleRequest(cnsiGUID, userID, "POST", "/v3/roles", jsonHeaders(), body)
 	if err != nil {
 		return nil, err
 	}
 
-	if res.StatusCode != http.StatusCreated {
-		return parseCFError(res.Response), errors.New("Failed to associate user with Org")
+	if res.StatusCode == http.StatusCreated {
+		return nil, nil
 	}
 
-	return nil, nil
+	cfError := parseCFError(res.Response)
+	if res.StatusCode == http.StatusUnprocessableEntity && isAlreadyExistsError(cfError) {
+		log.Debug("CF user already in org")
+		return nil, nil
+	}
+	return cfError, errors.New("Failed to associate user with Org")
 }
 
 // AssociateSpaceRoles will make the CF API call to associate the correct space roles for the user
@@ -337,27 +363,92 @@ func (invite *UserInvite) AssociateSpaceRoles(cnsiGUID, userID, newUserGUID stri
 	return nil, nil
 }
 
-// AssociateSpaceRoleForUser associates a user in the space with the given role
+// AssociateSpaceRoleForUser assigns a v3 space_<role> via POST /v3/roles. The
+// roleName argument accepts the legacy v2 plural form ("auditors",
+// "managers", "developers") and is mapped to the v3 role type. A 422 response
+// whose error envelope indicates the role already exists is treated as success.
 func (invite *UserInvite) AssociateSpaceRoleForUser(cnsiGUID, userID, newUserGUID, spaceGUID, roleName string) (*CFError, error) {
-	url := fmt.Sprintf("/v2/spaces/%s/%s/%s", spaceGUID, roleName, newUserGUID)
-	res, err := invite.portalProxy.DoProxySingleRequest(cnsiGUID, userID, "PUT", url, nil, nil)
+	v3Role, ok := v2ToV3SpaceRole[roleName]
+	if !ok {
+		return nil, fmt.Errorf("Unknown space role: %s", roleName)
+	}
+	body := buildSpaceRoleBody(v3Role, newUserGUID, spaceGUID)
+	res, err := invite.proxy().DoProxySingleRequest(cnsiGUID, userID, "POST", "/v3/roles", jsonHeaders(), body)
 	if err != nil {
 		return nil, err
 	}
 
-	if res.StatusCode != http.StatusCreated {
-		return parseCFError(res.Response), fmt.Errorf("Failed to associate user with Space Role (%s)", roleName)
+	if res.StatusCode == http.StatusCreated {
+		return nil, nil
 	}
 
-	return nil, nil
+	cfError := parseCFError(res.Response)
+	if res.StatusCode == http.StatusUnprocessableEntity && isAlreadyExistsError(cfError) {
+		log.Debugf("CF user already has space role %s", v3Role)
+		return nil, nil
+	}
+	return cfError, fmt.Errorf("Failed to associate user with Space Role (%s)", roleName)
 }
 
+func jsonHeaders() http.Header {
+	h := make(http.Header, 1)
+	h.Set("Content-Type", "application/json")
+	return h
+}
+
+// buildOrgRoleBody builds the v3 POST /v3/roles body for an organization role.
+func buildOrgRoleBody(roleType, userGUID, orgGUID string) []byte {
+	return []byte(fmt.Sprintf(
+		`{"type":"%s","relationships":{"user":{"data":{"guid":"%s"}},"organization":{"data":{"guid":"%s"}}}}`,
+		roleType, userGUID, orgGUID,
+	))
+}
+
+// buildSpaceRoleBody builds the v3 POST /v3/roles body for a space role.
+func buildSpaceRoleBody(roleType, userGUID, spaceGUID string) []byte {
+	return []byte(fmt.Sprintf(
+		`{"type":"%s","relationships":{"user":{"data":{"guid":"%s"}},"space":{"data":{"guid":"%s"}}}}`,
+		roleType, userGUID, spaceGUID,
+	))
+}
+
+// parseCFError unmarshals a CF v3 error envelope and projects the first
+// detail into the user-facing CFError shape consumed by the invite UI.
 func parseCFError(response []byte) *CFError {
-	cfError := &CFError{}
-	if err := json.Unmarshal(response, cfError); err != nil {
+	env := &v3ErrorEnvelope{}
+	if err := json.Unmarshal(response, env); err != nil || len(env.Errors) == 0 {
 		return nil
 	}
-	return cfError
+	first := env.Errors[0]
+	return &CFError{
+		Description: first.Detail,
+		ErrorCode:   first.Title,
+		Code:        first.Code,
+	}
+}
+
+// isAlreadyExistsError reports whether a CF v3 error indicates the resource
+// (user or role) already exists. Treat as a success signal for idempotent
+// re-invites. Matches by v3 numeric code where known and falls back to a
+// substring scan on title/detail for forward-compatibility.
+func isAlreadyExistsError(cfError *CFError) bool {
+	if cfError == nil {
+		return false
+	}
+	// Known v3 codes: 10016 = UniquenessError (e.g. user GUID already taken,
+	// duplicate role assignment).
+	if cfError.Code == 10016 {
+		return true
+	}
+	title := strings.ToLower(cfError.ErrorCode)
+	desc := strings.ToLower(cfError.Description)
+	if strings.Contains(title, "uniqueness") || strings.Contains(title, "uaaidtaken") {
+		return true
+	}
+	if strings.Contains(desc, "already exists") || strings.Contains(desc, "already has") {
+		return true
+	}
+	return false
 }
 
 func updateUserInviteRecordForError(user UserInviteUser, msg string, cfError *CFError) UserInviteUser {
@@ -389,7 +480,7 @@ func (invite *UserInvite) checkPermissions(c echo.Context, endpoint api.CNSIReco
 	userGUID := c.Get("user_id").(string)
 
 	// Get the User information for the endpoint connection
-	cfUser, ok := invite.portalProxy.GetCNSIUser(cfGUID, userGUID)
+	cfUser, ok := invite.proxy().GetCNSIUser(cfGUID, userGUID)
 	if !ok {
 		return errors.New("Can not find endpoint user")
 	}
@@ -399,28 +490,30 @@ func (invite *UserInvite) checkPermissions(c echo.Context, endpoint api.CNSIReco
 		return nil
 	}
 
-	// User needs to be an admin or an Org Manager
-	// Get the org name - if the user does not have access to the org, this API call won't succeed
-	url := fmt.Sprintf("/v2/organizations/%s/user_roles?q=user_guid:%s", userInviteRequest.Org, cfUser.GUID)
-	res, err := invite.portalProxy.DoProxySingleRequest(cfGUID, userGUID, "GET", url, nil, nil)
+	return invite.requireOrgManager(cfGUID, userGUID, userInviteRequest.Org, cfUser.GUID)
+}
+
+// requireOrgManager returns nil iff cfUserGUID has the organization_manager
+// role in orgGUID. Filters by org+user GUID server-side via GET /v3/roles.
+func (invite *UserInvite) requireOrgManager(cnsiGUID, requestingUserGUID, orgGUID, cfUserGUID string) error {
+	url := fmt.Sprintf("/v3/roles?organization_guids=%s&user_guids=%s", orgGUID, cfUserGUID)
+	res, err := invite.proxy().DoProxySingleRequest(cnsiGUID, requestingUserGUID, "GET", url, nil, nil)
 	if err != nil {
 		return errors.New("Could not get user's roles in org")
 	}
+	if res.StatusCode != http.StatusOK {
+		return errors.New("Could not get user's roles in org")
+	}
 
-	orgResponse := RetrieveOrgRolesResponse{}
-	if err = json.Unmarshal(res.Response, &orgResponse); err != nil {
+	roles := v3RolesResponse{}
+	if err = json.Unmarshal(res.Response, &roles); err != nil {
 		return errors.New("Could not decode response while trying to determine user's org roles")
 	}
 
-	if orgResponse.TotalResults != 1 {
-		return errors.New("Too many results returned while trying to determine org roles for the user")
+	for _, r := range roles.Resources {
+		if r.Type == orgManagerRoleName {
+			return nil
+		}
 	}
-
-	orgRoles := orgResponse.Resources[0]
-	isOrgManager := arrayContainsString(orgRoles.Entity.OrgRoles, orgManagerRoleName)
-	if !isOrgManager {
-		return errors.New("User is not an org manager")
-	}
-
-	return nil
+	return errors.New("User is not an org manager")
 }
