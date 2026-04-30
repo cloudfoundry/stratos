@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Route } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
@@ -165,8 +165,17 @@ export class CloudFoundryOrganizationService {
   }
 
   private initialiseAppObservables() {
-    this.apps$ = this.org$.pipe(
-      switchMap(org => this.cfEndpointService.getAppsInOrgViaAllApps(org.entity))
+    // V3-native: org no longer carries inline spaces, so getAppsInOrgViaAllApps
+    // (which reads org.entity.spaces) returns empty. Filter the foundation-wide
+    // apps stream against the org's spaces$ list instead — same intent, V3-shape
+    // org compatible. apps$ remains V2-shaped for now since /pp/v1/proxy/v2/apps
+    // is the data source.
+    this.apps$ = combineLatest([this.cfEndpointService.appsPagObs.entities$, this.spaces$]).pipe(
+      filter(([apps, spaces]) => !!apps && !!spaces),
+      map(([allApps, spaces]) => {
+        const spaceGuids = new Set(spaces.map(s => s.metadata.guid));
+        return allApps.filter(a => spaceGuids.has(a.entity.space_guid));
+      }),
     );
     this.appInstances$ = this.apps$.pipe(
       filter($apps => !!$apps),
