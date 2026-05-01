@@ -167,6 +167,21 @@ func createBuildForPackage(ctx context.Context, client capi.Client, packageGUID 
 	return build.GUID, nil
 }
 
+// setCurrentDroplet sets the active droplet for an app via v3 relationship
+// update. Step 4 of the v3 restage sequence: cf-cli's
+// `actor.SetApplicationDroplet`. Also the entry point for v3 rollback —
+// callers pass an existing droplet GUID for a previous revision.
+//
+// Maps to: PATCH /v3/apps/<a>/relationships/current_droplet
+//          {"data":{"guid":"<droplet>"}}
+//
+// CF responds 200 OK with the updated relationship; the returned
+// Relationship.Data.GUID matches the requested droplet on success.
+func setCurrentDroplet(ctx context.Context, client capi.Client, appGUID, dropletGUID string) error {
+	_, err := client.Apps().SetCurrentDroplet(ctx, appGUID, dropletGUID)
+	return err
+}
+
 // pollBuildUntilTerminal polls a v3 build until it reaches a terminal
 // state. Step 3 of the v3 restage sequence: cf-cli's actor build poll
 // loop inside `StagePackage`.

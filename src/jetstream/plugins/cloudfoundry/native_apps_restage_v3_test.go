@@ -255,6 +255,66 @@ func TestPollBuildUntilTerminal_FailedReturnsErrBuildFailed(t *testing.T) {
 	assert.Contains(t, *build.Error, "NoAppDetectedError")
 }
 
+// TestSetCurrentDroplet_PatchesRelationship verifies the helper PATCHes
+// /v3/apps/<a>/relationships/current_droplet with a v3 relationship body.
+func TestSetCurrentDroplet_PatchesRelationship(t *testing.T) {
+	var capturedMethod string
+	var capturedPath string
+	var capturedBody map[string]interface{}
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case "/v3/apps/app-1/relationships/current_droplet":
+			capturedMethod = r.Method
+			capturedPath = r.URL.Path
+			_ = json.NewDecoder(r.Body).Decode(&capturedBody)
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"data": map[string]interface{}{"guid": "droplet-target"},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	ctx := context.Background()
+	client, err := cfclient.NewWithToken(ctx, srv.URL, "test-token")
+	require.NoError(t, err)
+
+	require.NoError(t, setCurrentDroplet(ctx, client, "app-1", "droplet-target"))
+	assert.Equal(t, http.MethodPatch, capturedMethod)
+	assert.Equal(t, "/v3/apps/app-1/relationships/current_droplet", capturedPath)
+
+	data, ok := capturedBody["data"].(map[string]interface{})
+	require.True(t, ok, "request body must include a data object: %v", capturedBody)
+	assert.Equal(t, "droplet-target", data["guid"])
+}
+
+// TestSetCurrentDroplet_PropagatesError verifies upstream failures
+// surface unmodified — relevant for rollback when the supplied droplet
+// GUID belongs to a different app or no longer exists.
+func TestSetCurrentDroplet_PropagatesError(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if r.URL.Path == "/v3" {
+			_, _ = w.Write([]byte(`{"links":{}}`))
+			return
+		}
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		_, _ = w.Write([]byte(`{"errors":[{"code":10008,"title":"CF-UnprocessableEntity","detail":"Droplet must belong to the requested app"}]}`))
+	}))
+	defer srv.Close()
+
+	ctx := context.Background()
+	client, err := cfclient.NewWithToken(ctx, srv.URL, "test-token")
+	require.NoError(t, err)
+
+	err = setCurrentDroplet(ctx, client, "app-1", "droplet-from-other-app")
+	require.Error(t, err)
+}
+
 // TestPollBuildUntilTerminal_HonorsContextCancellation verifies that a
 // context timeout interrupts the poll loop. Models the
 // CF_STAGING_TIMEOUT contract — caller imposes a deadline; the helper
