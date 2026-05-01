@@ -43,6 +43,7 @@ import { AppApplicationActionsService } from '../../services/application-actions
     CfUserPermissionDirective,
     ApplicationPollComponent,
   ],
+  providers: [AppApplicationActionsService],
 })
 export class AppApplicationActionBarComponent implements OnInit {
   applicationService = inject(ApplicationService);

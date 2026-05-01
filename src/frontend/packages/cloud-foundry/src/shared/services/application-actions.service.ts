@@ -39,8 +39,15 @@ const appRestageConfirmation = new ConfirmationDialogConfig(
  * delete-redirect for an application detail page. Extracted from
  * BuildTabComponent so the action bar can be hosted at the application-tabs-base
  * level and appear on every detail tab.
+ *
+ * Component-scoped (NOT providedIn:'root'): ApplicationService is component-
+ * scoped at ApplicationBaseComponent (depends on CF_GUID / APP_GUID tokens
+ * that only exist in that component's injector). A root-scoped service
+ * cannot inject ApplicationService — Angular would try to instantiate it
+ * in the root injector, where CF_GUID has no provider, and throw NG0201.
+ * Provide on the action bar component instead.
  */
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class AppApplicationActionsService {
   private applicationService = inject(ApplicationService);
   private confirmDialog = inject(ConfirmationDialogService);
