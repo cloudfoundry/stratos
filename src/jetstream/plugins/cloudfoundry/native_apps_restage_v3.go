@@ -123,6 +123,19 @@ var errNoReadyPackage = errors.New("no READY package available for app")
 // build.Error string as the cause.
 var errBuildFailed = errors.New("v3 build failed during staging")
 
+// errAllInstancesCrashed is returned when an instance-poll observes
+// every running instance in CRASHED state simultaneously. cf-cli's
+// AllInstancesCrashedError corresponds; surfaced as a terminal failure
+// so the user sees "App failed to start" rather than waiting for the
+// startup timeout.
+var errAllInstancesCrashed = errors.New("all app instances crashed during start")
+
+// errNoWebProcess is returned when an app has no web process. Shouldn't
+// normally happen post-restage (the build creates a web process), but
+// kept distinct so the orchestrator can surface a clear failure rather
+// than a generic empty-list confusion.
+var errNoWebProcess = errors.New("app has no web process")
+
 // getNewestReadyPackage resolves the GUID of the most recently created
 // package in state READY for the given app. This is step 1 of the v3
 // restage sequence: cf-cli's `actor.GetNewestReadyPackageForApplication`.
@@ -194,6 +207,110 @@ func setCurrentDroplet(ctx context.Context, client capi.Client, appGUID, droplet
 // client.Jobs().PollUntilComplete(ctx, job.GUID) before proceeding.
 func stopApp(ctx context.Context, client capi.Client, appGUID string) (*capi.Job, error) {
 	return client.Apps().Stop(ctx, appGUID)
+}
+
+// getWebProcessGUID resolves the GUID of the web-type process for an
+// app. Step 7a of the v3 restage sequence: cf-cli polls process stats
+// after start; we need the process GUID to query
+// /v3/processes/<guid>/stats.
+//
+// Maps to: GET /v3/processes?app_guids=<a>&types=web&per_page=1
+//
+// Returns errNoWebProcess if the app has no web process. This shouldn't
+// normally occur for a freshly-staged droplet but the orchestrator
+// surfaces it as a clear error rather than a generic missing-resource.
+func getWebProcessGUID(ctx context.Context, client capi.Client, appGUID string) (string, error) {
+	params := capi.NewQueryParams()
+	params.PerPage = 1
+	params.Filters["app_guids"] = []string{appGUID}
+	params.Filters["types"] = []string{"web"}
+
+	resp, err := client.Processes().List(ctx, params)
+	if err != nil {
+		return "", err
+	}
+	if len(resp.Resources) == 0 {
+		return "", errNoWebProcess
+	}
+	return resp.Resources[0].GUID, nil
+}
+
+// pollInstancesUntilRunning polls a process's instance stats until the
+// startup criterion is met. Step 7b of the v3 restage sequence:
+// cf-cli's `actor.PollStart`.
+//
+// Maps to: GET /v3/processes/<process_guid>/stats
+//
+// Termination criteria:
+//   - All instances RUNNING → success.
+//   - noWait==true and ≥1 instance RUNNING → success (matches cf-cli's
+//     --no-wait short-circuit).
+//   - All non-DOWN instances are CRASHED → errAllInstancesCrashed (fail
+//     fast rather than waiting for CF_STARTUP_TIMEOUT).
+//   - ctx cancellation → ctx.Err() (typically CF_STARTUP_TIMEOUT, default
+//     5min, set by the caller).
+//
+// pollInterval is parameterized so tests run with millisecond cadence
+// while production uses cf-cli's 5s default.
+func pollInstancesUntilRunning(
+	ctx context.Context,
+	client capi.Client,
+	processGUID string,
+	noWait bool,
+	pollInterval time.Duration,
+) error {
+	for {
+		stats, err := client.Processes().GetStats(ctx, processGUID)
+		if err != nil {
+			return err
+		}
+		state := summarizeInstanceStates(stats.Resources)
+		if state.allRunning && len(stats.Resources) > 0 {
+			return nil
+		}
+		if noWait && state.someRunning {
+			return nil
+		}
+		if state.allCrashed {
+			return errAllInstancesCrashed
+		}
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(pollInterval):
+		}
+	}
+}
+
+// instanceStateSummary captures the aggregated outcomes the
+// pollInstancesUntilRunning loop branches on.
+type instanceStateSummary struct {
+	allRunning  bool
+	someRunning bool
+	allCrashed  bool // true iff at least one instance exists AND every non-DOWN instance is CRASHED
+}
+
+func summarizeInstanceStates(instances []capi.ProcessStatsDetail) instanceStateSummary {
+	if len(instances) == 0 {
+		return instanceStateSummary{}
+	}
+	var runningCount, crashedCount, nonDownCount int
+	for _, inst := range instances {
+		if inst.State != "DOWN" {
+			nonDownCount++
+		}
+		switch inst.State {
+		case "RUNNING":
+			runningCount++
+		case "CRASHED":
+			crashedCount++
+		}
+	}
+	return instanceStateSummary{
+		allRunning:  runningCount == len(instances),
+		someRunning: runningCount > 0,
+		allCrashed:  nonDownCount > 0 && crashedCount == nonDownCount,
+	}
 }
 
 // startApp kicks a v3 start on an app. Step 6 of the v3 restage
